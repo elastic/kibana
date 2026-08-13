@@ -8,7 +8,6 @@
  */
 
 import type { ScoutPage } from '..';
-import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 interface FilterCreationOptions {
@@ -47,6 +46,10 @@ export class FilterBar {
 
   async addFilter(options: FilterCreationOptions) {
     const previousCount = await this.getFilterCount();
+    // Dismiss toasts before opening the popover. EuiPopover `ownFocus` treats a
+    // later toast-close click as an outside click, which opens "Unsaved changes"
+    // and blocks Save (`close-filter-editor-confirm-modal`).
+    await this.page.components.toast().closeAll();
     await this.page.testSubj.click('addFilter');
     await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
     // Prefer EUI comboBox helpers over typeWithDelay: under load the operator combo can be
@@ -54,22 +57,28 @@ export class FilterBar {
     await this.page.components
       .comboBox('filterFieldSuggestionList')
       .setSelectedOptions([options.field]);
-    await expect(this.page.testSubj.locator('filterOperatorList')).not.toHaveClass(
-      /euiComboBox-isDisabled/
+    const operatorCombo = this.page.testSubj.locator('filterOperatorList');
+    await operatorCombo.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(
+      () =>
+        !document
+          .querySelector('[data-test-subj="filterOperatorList"]')
+          ?.className.includes('euiComboBox-isDisabled')
     );
     await this.page.components
       .comboBox('filterOperatorList')
       .setSelectedOptions([options.operator]);
     await this.fillFilterValue(options.value);
-    await this.page.testSubj.click('saveFilter');
-    await expect(
-      this.page.testSubj.locator('addFilterPopover'),
-      'Filter popover should close after saving'
-    ).toBeHidden();
-
-    await expect
-      .poll(() => this.getFilterCount(), { message: 'New filter badge should be displayed' })
-      .toBeGreaterThan(previousCount);
+    const popover = this.page.testSubj.locator('addFilterPopover');
+    const saveButton = popover.getByTestId('saveFilter');
+    await saveButton.waitFor({ state: 'visible' });
+    // EuiPopover `ownFocus` overlay intercepts Playwright actionability on Save.
+    await saveButton.dispatchEvent('click');
+    await popover.waitFor({ state: 'hidden', timeout: 15_000 });
+    await this.page.waitForFunction(
+      (prev) => document.querySelectorAll('[data-test-subj^="filter-badge"]').length > prev,
+      previousCount
+    );
   }
 
   async addDslFilter(value: string) {
@@ -96,8 +105,11 @@ export class FilterBar {
     }
 
     const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
-    await expect(filterParamsInput).not.toHaveAttribute('disabled');
-    await expect(filterParamsInput).toBeEditable();
+    await filterParamsInput.waitFor({ state: 'visible' });
+    await this.page.waitForFunction(() => {
+      const el = document.querySelector('[data-test-subj="filterParams"] input');
+      return el instanceof HTMLInputElement && !el.disabled;
+    });
 
     for (const item of Array.isArray(value) ? value : [value]) {
       await filterParamsInput.fill(item);

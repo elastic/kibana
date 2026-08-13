@@ -136,14 +136,29 @@ export class LensLayers {
    *
    * Annotation layers open a second menu to pick between a new annotation group and one
    * saved in the annotation library; pass `annotationFromLibraryTitle` for the latter.
+   *
+   * Data layers on an XY chart open a further "compatible visualization types" sub-menu
+   * (`lnsXY_seriesType-*`) to pick the new layer's series type — the layer is not added
+   * until one is clicked, so this always picks one (`seriesType`, default `bar`).
    */
   async createLayer(
     layerType: 'data' | 'referenceLine' | 'annotations',
-    annotationFromLibraryTitle?: string
+    annotationFromLibraryTitle?: string,
+    seriesType: 'bar' | 'area' | 'line' = 'bar'
   ) {
     const tabsBefore = await this.getLayerCount();
-    await this.page.testSubj.click('lnsLayerAddButton');
-    await this.page.testSubj.click(`lnsLayerAddButton-${layerType}`);
+    const addButton = this.page.testSubj.locator('lnsLayerAddButton');
+    await addButton.waitFor({ state: 'visible' });
+    await addButton.dispatchEvent('click');
+    const typeButton = this.page.testSubj.locator(`lnsLayerAddButton-${layerType}`);
+    await typeButton.waitFor({ state: 'visible' });
+    // Context-menu items remount while the popover positions.
+    await typeButton.dispatchEvent('click');
+    if (layerType === 'data') {
+      const seriesButton = this.page.testSubj.locator(`lnsXY_seriesType-${seriesType}`);
+      await seriesButton.waitFor({ state: 'visible' });
+      await seriesButton.dispatchEvent('click');
+    }
     if (layerType === 'annotations') {
       if (annotationFromLibraryTitle) {
         await this.page.testSubj.click('lnsAnnotationLayer_addFromLibrary');
@@ -151,7 +166,9 @@ export class LensLayers {
           `savedObjectTitle${annotationFromLibraryTitle.split(' ').join('-')}`
         );
       } else {
-        await this.page.testSubj.click('lnsAnnotationLayer_new');
+        const newAnnotation = this.page.testSubj.locator('lnsAnnotationLayer_new');
+        await newAnnotation.waitFor({ state: 'visible' });
+        await newAnnotation.dispatchEvent('click');
       }
     }
     await this.page.waitForFunction(
@@ -163,6 +180,7 @@ export class LensLayers {
       tabsBefore,
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
+    await this.page.testSubj.locator(`lns-layerPanel-${tabsBefore}`).waitFor({ state: 'visible' });
   }
 
   /**

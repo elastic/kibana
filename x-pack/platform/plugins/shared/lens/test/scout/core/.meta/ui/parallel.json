@@ -1,5 +1,5 @@
 {
-  "sha1": "cbb860e983c4a6f42d4721ae11ff0ace225d1ed9",
+  "sha1": "35dc3a0673cbc19f3bc13395891adc4a49835d84",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -183,6 +183,188 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
         "line": 71,
         "column": 15
+      }
+    },
+    {
+      "id": "d2815d5da13fdd6-60b241ddf218024",
+      "title": "Lens chart data across visualization types renders the same terms + average config across chart types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_data.spec.ts",
+        "line": 57,
+        "column": 16
+      }
+    },
+    {
+      "id": "73957bc35d3ac9c-006a6e583b50dc2",
+      "title": "Lens dashboard by-value charts and drilldowns re-entering a by-value Lens panel's editor and its shared URL both retain the saved title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/by_value_and_drilldown.spec.ts",
+        "line": 29,
+        "column": 24
+      }
+    },
+    {
+      "id": "73957bc35d3ac9c-a7da1acd5f92818",
+      "title": "Lens dashboard by-value charts and drilldowns adds a Discover drilldown to a Lens panel that survives save and reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/by_value_and_drilldown.spec.ts",
+        "line": 53,
+        "column": 11
+      }
+    },
+    {
+      "id": "1a0d60ebf9094ad-2bbab80941d8376",
+      "title": "Lens dashboard chart filters adds filters and a time range by clicking a bar in an XY chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/chart_filters.spec.ts",
+        "line": 27,
+        "column": 22
+      }
+    },
+    {
+      "id": "1a0d60ebf9094ad-2f94b43a64d91af",
+      "title": "Lens dashboard chart filters adds a filter by right-clicking a bar in an XY chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/chart_filters.spec.ts",
+        "line": 41,
+        "column": 57
+      }
+    },
+    {
+      "id": "1a0d60ebf9094ad-d87a5ee2fadbff9",
+      "title": "Lens dashboard chart filters adds a filter by clicking a slice in a pie chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/chart_filters.spec.ts",
+        "line": 72,
+        "column": 63
+      }
+    },
+    {
+      "id": "1a0d60ebf9094ad-6bf9fff775b62e2",
+      "title": "Lens dashboard chart filters carries pinned dashboard filters into a new Lens panel, but not unpinned ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/chart_filters.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "610859ca27653ce-7999a9b7d826f91",
+      "title": "Lens dashboard inspector and validation shows all data from all layers in the inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/inspector_and_validation.spec.ts",
+        "line": 23,
+        "column": 24
+      }
+    },
+    {
+      "id": "610859ca27653ce-da2f545848515fc",
+      "title": "Lens dashboard inspector and validation disables save-and-return when a validation error appears",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/inspector_and_validation.spec.ts",
+        "line": 52,
+        "column": 20
+      }
+    },
+    {
+      "id": "610859ca27653ce-a6eb0f956d2ca8b",
+      "title": "Lens dashboard inspector and validation recovers a Lens panel from an error state when fixing the search query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/inspector_and_validation.spec.ts",
+        "line": 76,
+        "column": 20
+      }
+    },
+    {
+      "id": "ac4d3301ed2a43b-3156ba4cff457d3",
+      "title": "Lens dashboard panel actions metric should be embeddable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/panel_actions.spec.ts",
+        "line": 20,
+        "column": 22
+      }
+    },
+    {
+      "id": "ac4d3301ed2a43b-de6906d6fb76389",
+      "title": "Lens dashboard panel actions hides the old \"explore underlying data\" action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/panel_actions.spec.ts",
+        "line": 26,
+        "column": 22
+      }
+    },
+    {
+      "id": "ac4d3301ed2a43b-36967624ba757b5",
+      "title": "Lens dashboard panel actions CSV export action exists in panel context menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/panel_actions.spec.ts",
+        "line": 36,
+        "column": 26
+      }
+    },
+    {
+      "id": "ac4d3301ed2a43b-1f83b57ec42d441",
+      "title": "Lens dashboard panel actions unlinks then re-saves a panel to the embeddable library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/panel_actions.spec.ts",
+        "line": 41,
+        "column": 13
       }
     },
     {
@@ -883,8 +1065,47 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/multiple_data_views.spec.ts",
-        "line": 54,
+        "line": 53,
         "column": 42
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-004fc5174a88a75",
+      "title": "Lens palette and color mapping picks a legacy palette on an XY split dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-2f7704d5e1102fd",
+      "title": "Lens palette and color mapping picks a color-mapping palette and carries it across pie and bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 44,
+        "column": 38
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-cbc552dbee08aee",
+      "title": "Lens palette and color mapping renders legend colors from color mapping and categorical overrides",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 82,
+        "column": 31
       }
     },
     {
@@ -901,6 +1122,149 @@
       }
     },
     {
+      "id": "baf8a89526bac91-5065d73fcf0283a",
+      "title": "Lens share and CSV export enables share/export for a valid config and preserves filters in the shared URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/share.spec.ts",
+        "line": 22,
+        "column": 13
+      }
+    },
+    {
+      "id": "f21e96259feb823-752c09f73fc7efb",
+      "title": "Lens show underlying data from dashboard brings both dashboard context and visualization context to Discover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_dashboard.spec.ts",
+        "line": 32,
+        "column": 24
+      }
+    },
+    {
+      "id": "f21e96259feb823-04455c67dff9813",
+      "title": "Lens show underlying data from dashboard brings visualization context to Discover for Lens ES|QL panels",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_dashboard.spec.ts",
+        "line": 119,
+        "column": 27
+      }
+    },
+    {
+      "id": "8975852a9cebdaf-895d44da30d2cd3",
+      "title": "Lens show underlying data — layer types shows the open button for a compatible saved visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
+        "line": 32,
+        "column": 79
+      }
+    },
+    {
+      "id": "8975852a9cebdaf-1fb6c973f06037d",
+      "title": "Lens show underlying data — layer types shows the open button with an annotation layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
+        "line": 41,
+        "column": 37
+      }
+    },
+    {
+      "id": "8975852a9cebdaf-ea44d5c31aefa44",
+      "title": "Lens show underlying data — layer types shows the open button with a reference line layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
+        "line": 53,
+        "column": 51
+      }
+    },
+    {
+      "id": "8975852a9cebdaf-95fc80f9880d636",
+      "title": "Lens show underlying data — layer types hides the open button with multiple data layers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
+        "line": 66,
+        "column": 11
+      }
+    },
+    {
+      "id": "a7715b7434eec07-48fc80dde79b49b",
+      "title": "Lens show underlying data — Discover context ignores the split column when Other is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
+        "line": 30,
+        "column": 48
+      }
+    },
+    {
+      "id": "a7715b7434eec07-d411e2b2a6a1761",
+      "title": "Lens show underlying data — Discover context merges a lucene dimension filter into the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
+        "line": 39,
+        "column": 37
+      }
+    },
+    {
+      "id": "a7715b7434eec07-49218148f0a71e2",
+      "title": "Lens show underlying data — Discover context extracts all filters and columns from a formula",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
+        "line": 59,
+        "column": 37
+      }
+    },
+    {
+      "id": "a7715b7434eec07-925bca06a5a19f6",
+      "title": "Lens show underlying data — Discover context extracts a filter from a formula global filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
+        "line": 93,
+        "column": 20
+      }
+    },
+    {
       "id": "b40d2b710de93c1-6951abc44e2fa95",
       "title": "Lens tag cloud filter renders tags, filters from a tag click, and narrows the cloud",
       "expectedStatus": "passed",
@@ -910,6 +1274,19 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/tagcloud_filter.spec.ts",
         "line": 14,
+        "column": 13
+      }
+    },
+    {
+      "id": "d6d882085a838db-0726e0abd3eb5c7",
+      "title": "Lens time shift configures time-shifted metrics and applies terms fix actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/time_shift.spec.ts",
+        "line": 18,
         "column": 13
       }
     }

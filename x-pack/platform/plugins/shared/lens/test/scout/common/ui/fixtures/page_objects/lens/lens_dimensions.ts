@@ -18,6 +18,7 @@ const TIME_SHIFT_TEST_SUBJ = 'indexPattern-dimension-time-shift';
 interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;
   closeDimensionEditor: () => Promise<void>;
+  setEuiSwitch: (testSubj: string, checked: boolean) => Promise<void>;
 }
 
 /**
@@ -212,6 +213,47 @@ export class LensDimensions {
       value,
       { timeout: 15_000 }
     );
+  }
+
+  /**
+   * Sets the terms "Group remaining values as Other" switch. Opens the advanced
+   * accordion first. `checked: true` is required for Open-in-Discover to omit the
+   * split-field filter; callers that need Other off must pass `false` explicitly
+   * (do not toggle — the product default can already be on).
+   */
+  async setTermsOtherBucket(checked: boolean) {
+    await this.page.testSubj.click('indexPattern-terms-advanced');
+    await this.deps.setEuiSwitch('indexPattern-terms-other-bucket', checked);
+  }
+
+  /**
+   * Configures the nested reference (sub-function + field) inside a reference-based
+   * dimension editor (e.g. `moving_average`'s underlying `sum`). Caller must already
+   * have the dimension editor open with the reference-based operation selected.
+   *
+   * `operation` is the operation type (e.g. `sum`), not its display label, so this
+   * clicks the option's `lns-indexPatternDimension-${operation}` test-subj directly
+   * rather than going through the combo-box label-matching helper (whose display
+   * labels are capitalized, e.g. "Sum"). The options list is virtualized, so the
+   * search input is filled first to filter it down — otherwise the target option
+   * may not be rendered (and thus not found) if it is scrolled out of view.
+   */
+  async configureReference(opts: { operation?: string; field?: string }) {
+    if (opts.operation) {
+      const referenceFunctionCombo = this.page.testSubj.locator('indexPattern-reference-function');
+      const searchInput = referenceFunctionCombo.getByTestId('comboBoxSearchInput');
+      await searchInput.click();
+      await searchInput.fill(opts.operation);
+      await this.page
+        .locator('[data-test-subj~="indexPattern-reference-function-optionsList"]')
+        .getByTestId(`lns-indexPatternDimension-${opts.operation}`)
+        .click();
+    }
+    if (opts.field) {
+      await this.page.components
+        .comboBox('indexPattern-dimension-field')
+        .setSelectedOptions([opts.field], { timeout: 10_000 });
+    }
   }
 
   /** Returns whether the open dimension editor has top-level aggregation enabled. */

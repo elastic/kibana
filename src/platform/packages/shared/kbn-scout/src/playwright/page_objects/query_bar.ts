@@ -31,4 +31,31 @@ export class QueryBar {
   async clearQuery(): Promise<void> {
     await this.page.testSubj.clearInput('queryInput');
   }
+
+  /** Submits the current query via the "Update"/"Refresh" button. */
+  async submitQuery(): Promise<void> {
+    await this.page.testSubj.click('querySubmitButton');
+  }
+
+  /**
+   * Switches the query language via the query bar's "..." options menu (`showQueryBarMenu`).
+   * Unlike the standalone language switcher (e.g. Lens dimension "filter by" inputs), the
+   * top-level query bar renders the switcher inline inside that menu's `selectLanguage` panel
+   * rather than behind its own popover button, so the menu must be opened first and the
+   * `switchQueryLanguageButton` item navigates to the panel rather than toggling a popover.
+   * `EuiSelectable`'s `onChange` only reports the selection — it does not close the menu —
+   * so a second click of the menu toggle is required to dismiss it.
+   */
+  async switchQueryLanguage(language: 'kql' | 'lucene'): Promise<void> {
+    const menuToggle = this.page.testSubj.locator('showQueryBarMenu');
+    const menuPanel = this.page.testSubj.locator('queryBarMenuPanel');
+    await menuToggle.click();
+    await menuPanel.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('switchQueryLanguageButton');
+    const languageItem = this.page.testSubj.locator(`${language}LanguageMenuItem`);
+    await languageItem.waitFor({ state: 'visible' });
+    await languageItem.click();
+    await menuToggle.click();
+    await menuPanel.waitFor({ state: 'hidden' });
+  }
 }

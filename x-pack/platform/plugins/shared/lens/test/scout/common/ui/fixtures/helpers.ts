@@ -20,7 +20,9 @@ import {
   DATA_VIEW_ID,
   FORMULA_ESCAPED_RUNTIME_FIELD,
   KBN_ARCHIVE_PATHS,
+  LENS_BASIC_TITLES,
   LOGSTASH_IN_RANGE_DATES,
+  XY_CHART,
 } from './constants';
 
 type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
@@ -43,20 +45,6 @@ export async function createAdHocDataViewFromLens(page: ScoutPage, name: string)
   await flyout.waitFor({ state: 'hidden' });
   // Wait until the switcher reflects the new DV name
   await expect(page.testSubj.locator('lns-dataView-switch-link')).toContainText(name);
-}
-
-/**
- * Adds a new data layer to the current XY chart.
- * Equivalent to FTR `lens.createLayer('data')` for XY visualizations that show the layer-type picker.
- */
-export async function addDataLayer(
-  page: ScoutPage,
-  seriesType: 'bar' | 'line' = 'line'
-): Promise<void> {
-  await page.testSubj.click('lnsLayerAddButton');
-  await page.testSubj.click('lnsLayerAddButton-data');
-  await page.testSubj.click(`lnsXY_seriesType-${seriesType}`);
-  await page.testSubj.locator('lns-layerPanel-1').waitFor({ state: 'visible' });
 }
 
 /**
@@ -196,6 +184,90 @@ export async function openSharedLensUrl(options: {
   return { page: sharedPage, queryBar: new QueryBar(sharedPage) };
 }
 
+/** `ScoutPage.context()`'s return type, avoided as a direct `playwright`/`@playwright/test` import. */
+type BrowserContext = ReturnType<ScoutPage['context']>;
+
+/**
+ * Clicks/triggers a UI action that opens a new browser tab (e.g. a dashboard panel's
+ * "Open in Discover" action), waits for that tab, and returns it wrapped as a `ScoutPage`
+ * so page objects like `DiscoverApp`/`FilterBar`/`QueryBar` work on it directly instead of
+ * raw Playwright locators. Caller must close the returned page (use `try`/`finally`).
+ */
+export async function openInNewTabAsScoutPage(
+  context: BrowserContext,
+  kbnUrl: KibanaUrl,
+  trigger: () => Promise<void>
+): Promise<ScoutPage> {
+  const newPagePromise = context.waitForEvent('page');
+  await trigger();
+  const rawPage = await newPagePromise;
+  return extendPlaywrightPage({ page: rawPage, kbnUrl });
+}
+
+/**
+ * Opens the saved `lnsXYvis` and repoints its existing split dimension to `extension.raw`
+ * (it ships split by `ip`). Shared baseline for Open-in-Discover journeys.
+ */
+export async function openXyVisWithTermsSplit(
+  pageObjects: Pick<LensPageObjects, 'visualize' | 'lens'>
+) {
+  const { visualize, lens } = pageObjects;
+  await visualize.goto();
+  await visualize.openSavedVisualization(LENS_BASIC_TITLES.XY_VIS, { waitFor: 'lens' });
+  await lens.waitForVisualization(XY_CHART);
+
+  // Saved `lnsXYvis` ships split by `ip`. Reconfigure the existing terms dimension
+  // (FTR group4) rather than remove-and-readd, which can leave the split slot empty.
+  await lens.configureDimension({
+    dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+    operation: 'terms',
+    field: 'extension.raw',
+    keepOpen: true,
+  });
+  await expect
+    .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'), {
+      timeout: 30_000,
+    })
+    .toContain('extension.raw');
+  // Product default size can be 5; Discover context assertions expect the classic top-3 set.
+  await lens.dimensions.setTermsNumberOfValues(3);
+  await lens.closeDimensionEditor();
+  await lens.waitForVisualization(XY_CHART);
+  // Confirm the field persisted after close — under load the open editor can show
+  // `extension.raw` while the saved split is still `ip`.
+  await expect
+    .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'), {
+      timeout: 30_000,
+    })
+    .toContain('extension.raw');
+}
+
+/**
+ * Clicks the "Open in Discover" button, waits for the resulting tab, and runs `check`
+ * against it wrapped as a `ScoutPage`. Always closes the tab, including when `check` throws.
+ */
+export async function openInDiscoverAndCheck(
+  { context, kbnUrl }: { context: BrowserContext; kbnUrl: KibanaUrl },
+  lens: LensPageObjects['lens'],
+  check: (discoverPage: ScoutPage) => Promise<void>
+) {
+  const discoverPage = await openInNewTabAsScoutPage(context, kbnUrl, async () => {
+    await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
+    await lens.workspace.openInDiscoverButton.click();
+  });
+  try {
+    await discoverPage.waitForLoadState('domcontentloaded');
+    // Discover chrome (query bar) is the ready signal — `domcontentloaded` alone
+    // races the new tab still bootstrapping, which then times out on `queryInput`.
+    await discoverPage.testSubj
+      .locator('queryInput')
+      .waitFor({ state: 'visible', timeout: 20_000 });
+    await check(discoverPage);
+  } finally {
+    await discoverPage.close();
+  }
+}
+
 // Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is
 // typed against the Lens plugin's rich page object, not the shared `@kbn/scout` `PageObjects`.
 type DashboardAndLens = Pick<LensPageObjects, 'dashboard' | 'lens'>;
@@ -278,6 +350,39 @@ export async function enableElasticChartDebug(context: ElasticChartDebugContext)
   });
 }
 
+/** Survives Playwright per-file module remounts within a worker process. */
+function lensBasicLoadBySpace(): Map<string, Promise<void>> {
+  const g = globalThis as typeof globalThis & {
+    __lensScoutBasicLoadBySpace?: Map<string, Promise<void>>;
+  };
+  if (!g.__lensScoutBasicLoadBySpace) {
+    g.__lensScoutBasicLoadBySpace = new Map();
+  }
+  return g.__lensScoutBasicLoadBySpace;
+}
+
+async function ensureLensBasicLoaded(scoutSpace: {
+  id: string;
+  savedObjects: { load: (path: string) => Promise<unknown> };
+}): Promise<void> {
+  const loads = lensBasicLoadBySpace();
+  const existing = loads.get(scoutSpace.id);
+  if (existing) {
+    await existing;
+    return;
+  }
+  const loadPromise = scoutSpace.savedObjects
+    .load(KBN_ARCHIVE_PATHS.LENS_BASIC)
+    .then(() => undefined);
+  loads.set(scoutSpace.id, loadPromise);
+  try {
+    await loadPromise;
+  } catch (err) {
+    loads.delete(scoutSpace.id);
+    throw err;
+  }
+}
+
 /**
  * Creates a space-scoped Logstash data view + common uiSettings so Visualize/Lens
  * do not redirect to the "no data views" empty state.
@@ -292,6 +397,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
    * When true, loads FTR `lens_basic` archive into the space
    * (needed to open saved `lnsXYvis` for formula transition coverage).
    * Does not load `default.json` — that only adds `lnsTableVis` / a duplicate index-pattern.
+   * Loaded at most once per worker space so parallel describes do not create duplicate titles.
    */
   loadLensArchives?: boolean;
   /** When true, adds the escaped-name runtime field used by formula KQL field escaping. */
@@ -311,7 +417,7 @@ export function createLogstashLensEditorSuiteSetup(options?: {
 
   const beforeAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
     if (loadLensArchives) {
-      await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC);
+      await ensureLensBasicLoaded(scoutSpace);
     }
 
     // Name matches title so Lens data-view switcher rows resolve as `dataView-logstash-*`.
@@ -365,7 +471,10 @@ export function createLogstashLensEditorSuiteSetup(options?: {
       await apiServices.dataViews.delete(storedDataViewId, scoutSpace.id);
     }
     await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await scoutSpace.savedObjects.cleanStandardList();
+    // Do not call `cleanStandardList()` here. Parallel `spaceTest` describes share one
+    // worker space; wiping saved objects when the first suite finishes races other
+    // suites still loading `lens_basic` (empty library finder / missing visualizations).
+    // The scoutSpace fixture deletes the whole space at worker teardown.
   };
 
   return { beforeAll, beforeEach, afterAll, openEmptyLensEditor };

@@ -47,8 +47,11 @@ export class LensWorkspace {
   private readonly suggestionPanelToggle;
   readonly shareButton;
   readonly exportButton;
+  readonly openInDiscoverButton;
   private readonly shareModal;
   private readonly copyShareUrlButton;
+  private readonly chartSwitchPopover;
+  private readonly chartSwitchList;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
@@ -71,8 +74,11 @@ export class LensWorkspace {
     this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
     this.shareButton = this.page.testSubj.locator('lnsApp_shareButton');
     this.exportButton = this.page.testSubj.locator('lnsApp_exportButton');
+    this.openInDiscoverButton = this.page.testSubj.locator('lnsApp_openInDiscover');
     this.shareModal = this.page.testSubj.locator('shareContextModal');
     this.copyShareUrlButton = this.page.testSubj.locator('copyShareUrlButton');
+    this.chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
+    this.chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
   }
 
   async openFullEditor() {
@@ -139,9 +145,35 @@ export class LensWorkspace {
   }
 
   async setFilterBy(queryString: string) {
-    await this.page.testSubj
-      .locator('indexPattern-filters-queryStringInput')
-      .pressSequentially(queryString, { delay: 20 });
+    const input = this.page.testSubj.locator('indexPattern-filters-queryStringInput');
+    await input.pressSequentially(queryString, { delay: 20 });
+    // Confirm the typed value has actually committed to the input before dismissing the
+    // popover — closing immediately after typing can otherwise race the value's own
+    // commit, silently discarding it (mirrors the FTR helper's `retry.try` around this).
+    // Renders as an `EuiTextArea` (`QueryStringInput`), not an `<input>`.
+    // Readiness wait, not an assertion (assertions stay in specs) — waitForFunction has no
+    // Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      ({ subj, expected }) => {
+        const el = document.querySelector(`[data-test-subj="${subj}"]`);
+        return el instanceof HTMLTextAreaElement && el.value === expected;
+      },
+      { subj: 'indexPattern-filters-queryStringInput', expected: queryString },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+    // QueryInput debounces onChange (~256ms). The trigger label mirrors the parent
+    // `inputFilter` prop — wait for it before closing so closePopover cannot reset
+    // the local textarea back to the previous (empty) value.
+    await this.page.waitForFunction(
+      (expected) => {
+        const el = document.querySelector(
+          '[data-test-subj="indexPattern-filters-existingFilterTrigger"]'
+        );
+        return Boolean(el?.textContent?.includes(expected));
+      },
+      queryString,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
     await this.page.testSubj.click('indexPattern-filters-existingFilterTrigger');
   }
 
@@ -207,6 +239,58 @@ export class LensWorkspace {
         { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
       );
     }
+  }
+
+  /**
+   * Removes a single dimension by its dimension-trigger test-subj. Unlike
+   * `removeAllDimensions`, this targets one dimension inside a multi-dimension panel
+   * (e.g. an annotation or reference-line layer added alongside the main data layer).
+   */
+  async removeDimension(dimensionTestSubj: string) {
+    const removeButton = this.page.testSubj.locator(
+      `${dimensionTestSubj} > indexPattern-dimension-remove`
+    );
+    await removeButton.hover();
+    await removeButton.click();
+    await removeButton.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Switches the language of the "filter by" query input inside an open dimension editor's
+   * advanced accordion (distinct from the global `QueryBar`, which targets the top-level
+   * query bar). Caller must have already opened the filter row via `enableFilter`.
+   * `EuiSelectable`'s `onChange` only reports the selection — it does not close the popover —
+   * so a second click of the toggle button is required to dismiss it.
+   */
+  async setDimensionFilterLanguage(language: 'kql' | 'lucene') {
+    const switcherButton = this.page.testSubj.locator(
+      'indexPattern-filter-by-input > switchQueryLanguageButton'
+    );
+    await switcherButton.click();
+    await this.page.testSubj.click(`${language}LanguageMenuItem`);
+    await switcherButton.click();
+  }
+
+  /**
+   * Opens the chart-switcher popover, optionally filters by `searchTerm`, and reports
+   * whether the candidate visualization type shows a "may lose data" warning icon.
+   * Closes the popover afterwards so a following `switchToVisualization` call reopens
+   * it cleanly (this popover, unlike FTR's, is not idempotent to open).
+   */
+  async hasChartSwitchWarning(subVisualizationId: string, searchTerm?: string): Promise<boolean> {
+    await this.chartSwitchPopover.click();
+    await this.chartSwitchList.waitFor({ state: 'visible' });
+    if (searchTerm) {
+      await this.page.testSubj.locator('lnsChartSwitchSearch').fill(searchTerm);
+    }
+    const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${subVisualizationId}`);
+    await option.waitFor({ state: 'visible' });
+    const hasWarning =
+      (await option.getByTestId(`lnsChartSwitchPopoverAlert_${subVisualizationId}`).count()) > 0;
+
+    await this.chartSwitchPopover.click();
+    await this.chartSwitchList.waitFor({ state: 'hidden' });
+    return hasWarning;
   }
 
   /**
@@ -323,7 +407,7 @@ export class LensWorkspace {
    */
   async getSharedUrl(): Promise<string> {
     await this.openShareModal();
-    await this.copyShareUrlButton.click();
+    await this.copyShareUrlButton.click({ force: true }); // Remove force?
     await this.page.waitForFunction(() => {
       const url = document
         .querySelector('[data-test-subj="copyShareUrlButton"]')

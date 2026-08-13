@@ -7,13 +7,7 @@
 
 import type { DebugState } from '@elastic/charts';
 import { expect } from '@kbn/scout/ui';
-import {
-  addDataLayer,
-  enableElasticChartDebug,
-  openEmptyLensEditor,
-  spaceTest,
-  testData,
-} from '../fixtures';
+import { enableElasticChartDebug, openEmptyLensEditor, spaceTest, testData } from '../fixtures';
 
 const VIS_TITLE = 'xyChart with multiple data views';
 
@@ -87,7 +81,7 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
         // Flights layer — switch data panel first so the new layer inherits flights,
         // then add a line layer and toggle DistanceKilometers (matches FTR order).
         await lens.dragDrop.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.FLIGHTS);
-        await addDataLayer(page, 'line');
+        await lens.layers.createLayer('data', undefined, 'line');
         await lens.layers.activateLayerTab(1);
         await page.testSubj.locator('fieldToggle-DistanceKilometers').waitFor({ state: 'visible' });
         await page.testSubj.click('fieldToggle-DistanceKilometers');

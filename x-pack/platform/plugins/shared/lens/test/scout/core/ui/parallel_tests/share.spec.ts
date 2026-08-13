@@ -7,7 +7,6 @@
 
 import { expect } from '@kbn/scout/ui';
 import {
-  addDataLayer,
   completeLensCsvExport,
   createLogstashLensEditorSuiteSetup,
   openSharedLensUrl,
@@ -72,7 +71,7 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         await expect(page.testSubj.locator('~filter')).toHaveText(['bytes: 1']);
 
         await queryBar.setQuery('host.keyword www.elastic.co');
-        await page.testSubj.click('querySubmitButton');
+        await queryBar.submitQuery();
         // Save while the filtered request is in flight — share can stay disabled on empty results.
         // getSharedUrl → openShareModal waits until share is enabled (default waitForFunction timeout).
         await lens.save(`lens-share-${Date.now()}`, { addToDashboard: 'none' });
@@ -118,7 +117,7 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         });
         await lens.waitForVisualization('xyVisChart');
 
-        await addDataLayer(page, 'bar');
+        await lens.layers.createLayer('data', undefined, 'bar');
         await lens.layers.ensureLayerTabIsActive(1);
         await expect(
           page.testSubj.locator('lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension')

@@ -78,6 +78,10 @@ export class DashboardApp {
   private readonly customizePanelCancelButton;
   private readonly customizePanelTimeRangeQuickMenuButton;
 
+  // Chart / panel error
+  readonly embeddableError;
+  private readonly applyFiltersButton;
+
   constructor(private readonly page: ScoutPage) {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
@@ -138,6 +142,9 @@ export class DashboardApp {
     this.customizePanelTimeRangeQuickMenuButton = this.page.testSubj.locator(
       'customizePanelTimeRangeDatePicker > superDatePickerToggleQuickMenuButton'
     );
+
+    this.embeddableError = this.page.testSubj.locator('embeddableError');
+    this.applyFiltersButton = this.page.testSubj.locator('applyFiltersPopoverButton');
   }
 
   async goto() {
@@ -157,7 +164,13 @@ export class DashboardApp {
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
+    await this.page.waitForURL(/#\/create/);
+    // Wait until the create route has finished painting. Clicking Add while the
+    // hash navigation is still settling detaches the Library tab mid-click.
     await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
+    await expect(this.page.getByRole('heading', { name: /This dashboard is empty/i })).toBeVisible({
+      timeout: options?.timeout ?? 20_000,
+    });
   }
 
   async openTryEsqlDashboard() {
@@ -240,7 +253,7 @@ export class DashboardApp {
   async clickCancelOutOfEditMode() {
     await expect(this.viewOnlyModeButton).toBeVisible();
     await this.viewOnlyModeButton.click();
-    await expect(this.editModeButton).toBeHidden();
+    await expect(this.editModeButton).toBeVisible();
   }
 
   async ensureViewMode() {
@@ -264,9 +277,10 @@ export class DashboardApp {
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
   async openAddPanelFlyout(options?: TimeoutOptions) {
-    await this.addTopNavButton.waitFor({ state: 'visible', timeout: options?.timeout ?? 10_000 });
+    await this.toasts.dismissAll();
+    await this.addTopNavButton.waitFor({ state: 'visible', timeout: options?.timeout ?? 20_000 });
     await this.addTopNavButton.click();
-    await expect(this.panelSelectionFlyout).toBeVisible({ timeout: options?.timeout ?? 10_000 });
+    await expect(this.panelSelectionFlyout).toBeVisible({ timeout: options?.timeout ?? 20_000 });
   }
 
   async saveDashboard(name: string, options?: TimeoutOptions) {
@@ -276,6 +290,9 @@ export class DashboardApp {
   }
 
   async confirmSaveModal(options?: TimeoutOptions) {
+    // Save toasts from prior panels can sit over the confirm button and make it
+    // report as "not stable" / detach mid-click.
+    await this.toasts.dismissAll();
     await this.confirmSaveButton.click();
     await expect(this.saveModal).toBeHidden({
       timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
@@ -298,28 +315,32 @@ export class DashboardApp {
   async addPanelFromLibrary(...names: string[]) {
     await this.openLibraryFlyout();
     for (let i = 0; i < names.length; i++) {
+      const name = names[i];
       await this.savedObjectFinderSearchInput.clear();
-      await this.savedObjectFinderSearchInput.type(names[i], { delay: 50 });
+      await this.savedObjectFinderSearchInput.pressSequentially(name);
       await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
         timeout: DEFAULT_LIBRARY_TIMEOUT,
       });
 
       const titleButton = this.page.testSubj.locator(
-        `savedObjectTitle${names[i].replace(/ /g, '-')}`
+        `savedObjectTitle${name.split(' ').join('-')}`
       );
+      // justified: saved-object finder search can be slow after archive load
       await expect(titleButton).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
       await titleButton.click();
 
+      // Matches `presentation_panel_header.tsx`'s `panelTitle.replace(/\s/g, '')` — only
+      // whitespace is stripped, so a title containing a literal `-` (e.g. "Foo - copy") must
+      // keep it here too.
       await expect(
-        this.page.testSubj.locator(`embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`)
+        this.page.testSubj.locator(`embeddablePanelHeading-${name.replace(/\s/g, '')}`)
       ).toBeVisible({ timeout: DEFAULT_LIBRARY_TIMEOUT });
     }
-    await this.closeLibraryFlyout();
+    await this.closeLibraryFlyoutIfOpen();
   }
 
   async clickQuickSave() {
-    await expect(this.page.testSubj.locator('dashboardQuickSaveMenuItem')).toBeVisible();
-    await this.page.testSubj.click('dashboardQuickSaveMenuItem');
+    await this.clickAppMenuItem('dashboardQuickSaveMenuItem');
   }
 
   async clearUnsavedChanges() {
@@ -339,24 +360,48 @@ export class DashboardApp {
    * Opens the "Add from library" flyout.
    */
   async openLibraryFlyout(options?: TimeoutOptions) {
+    await this.toasts.dismissAll();
+    await expect(this.addTopNavButton).toBeVisible({
+      timeout: options?.timeout ?? 20_000,
+    });
     await this.addTopNavButton.click();
-    await this.page.testSubj.click('addToDashboardTab-library');
-    await expect(this.savedObjectsFinderTable).toBeVisible();
+    const libraryTab = this.page.testSubj.locator('addToDashboardTab-library');
+    // justified: create-route remounts can detach the tab; give the flyout time to settle
+    await expect(libraryTab).toBeVisible({ timeout: options?.timeout ?? 20_000 });
+    // Panel-add success toasts can appear over the tab after Add opens the flyout.
+    await this.toasts.dismissAll();
+    // justified: toast/portal overlap can leave the Library tab "stable" but not actionable
+    await libraryTab.click({ timeout: options?.timeout ?? 20_000 });
+    await expect(this.savedObjectsFinderTable).toBeVisible({
+      timeout: options?.timeout ?? 20_000,
+    });
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
       timeout: options?.timeout ?? 30_000,
     });
   }
 
   /**
-   * Closes the library flyout.
+   * Closes the library flyout. Caller must have the finder open.
    */
   async closeLibraryFlyout() {
-    await expect(this.savedObjectsFinderTable).toBeVisible();
+    // A lingering toast can sit over the flyout close button.
+    await this.toasts.dismissAll();
     await this.page
       .locator('.euiFlyout', { has: this.savedObjectsFinderTable })
       .locator('[data-test-subj="euiFlyoutCloseButton"]')
       .click();
-    await expect(this.savedObjectsFinderTable).toBeHidden();
+    await this.savedObjectsFinderTable.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * After adding a panel the finder may already have closed; only click close when it is still open.
+   */
+  private async closeLibraryFlyoutIfOpen() {
+    await this.toasts.dismissAll();
+    if (await this.savedObjectsFinderTable.isVisible()) {
+      await this.closeLibraryFlyout();
+    }
+    await this.savedObjectsFinderTable.waitFor({ state: 'hidden' });
   }
 
   /**
@@ -841,6 +886,116 @@ export class DashboardApp {
   }
 
   // ============================================================
+  // Chart Interaction
+  // ============================================================
+
+  /**
+   * Locates the elastic-charts canvas inside a panel (`:last-of-type` because
+   * elastic-charts layers a base render canvas plus interaction/annotation
+   * canvases on top — the topmost one is what receives clicks).
+   * Scope to a panel by title when the dashboard has more than one chart.
+   */
+  getPanelChartCanvas(title?: string) {
+    return this.getPanelHoverActionsLocator(title).locator('.echChart canvas:last-of-type');
+  }
+
+  /**
+   * Waits until the panel chart has finished its elastic-charts render pass.
+   * When chart debug is enabled, also waits until debug state reports geometry
+   * (bars or partitions) so hit-targets exist before a click.
+   */
+  async waitForPanelChartReady(title?: string) {
+    const panel = this.getPanelHoverActionsLocator(title);
+    await this.getPanelChartCanvas(title).waitFor({ state: 'visible' });
+    await panel.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+      state: 'attached',
+    });
+    const debugJson = await panel.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+    if (!debugJson) {
+      return;
+    }
+    await expect
+      .poll(async () => {
+        const raw = await panel.locator('.echChartStatus').getAttribute('data-ech-debug-state');
+        if (!raw) {
+          return false;
+        }
+        try {
+          const state = JSON.parse(raw) as { bars?: unknown[]; partition?: unknown[] };
+          return (state.bars?.length ?? 0) > 0 || (state.partition?.length ?? 0) > 0;
+        } catch {
+          return false;
+        }
+      })
+      .toBe(true);
+  }
+
+  /**
+   * Clicks (or right-clicks) inside a panel's chart canvas, offset from its center.
+   * Coordinates depend on chart layout and data, so this is inherently brittle —
+   * same trade-off as the FTR helper it replaces. Right-clicking opens the
+   * elastic-charts tooltip actions menu (see `getChartTooltipAction`).
+   */
+  async clickInPanelChart(
+    offset: { x: number; y: number },
+    options: { title?: string; button?: 'left' | 'right' } = {}
+  ) {
+    await this.waitForPanelChartReady(options.title);
+    const canvas = this.getPanelChartCanvas(options.title);
+    const box = await canvas.boundingBox();
+    if (!box) {
+      throw new Error('Chart canvas has no layout, so it cannot be clicked');
+    }
+    await canvas.click({
+      position: { x: box.width / 2 + offset.x, y: box.height / 2 + offset.y },
+      button: options.button ?? 'left',
+    });
+  }
+
+  /**
+   * Locator for a single action shown in an elastic-charts tooltip after a right-click
+   * (e.g. "Filter by time"). Elastic-charts renders these via a portal with no
+   * `data-test-subj`, so the CSS class is centralized here rather than in specs.
+   */
+  getChartTooltipAction(name: string | RegExp) {
+    return this.page.locator('.echTooltipActions').getByRole('button', { name });
+  }
+
+  /**
+   * Confirms the "Select filters to apply" modal that follows a chart click when more
+   * than one candidate filter (e.g. time range + field value) is available.
+   */
+  async applyChartFilters() {
+    await this.applyFiltersButton.waitFor({ state: 'visible' });
+    await this.applyFiltersButton.click();
+    await this.applyFiltersButton.waitFor({ state: 'hidden' });
+  }
+
+  /**
+   * Labels of the pending filter checkboxes in the "Select filters to apply" modal.
+   * Individual rows have no stable `data-test-subj` (EUI checkbox ids are index-based),
+   * so this reads each checkbox's accessible name scoped to that dialog.
+   */
+  async getPendingChartFilterLabels(): Promise<string[]> {
+    await this.applyFiltersButton.waitFor({ state: 'visible' });
+    const dialog = this.page.getByRole('dialog').filter({ has: this.applyFiltersButton });
+    return dialog.getByRole('checkbox').evaluateAll((els) =>
+      els.map((el) => {
+        const id = el.getAttribute('id');
+        if (id) {
+          return document.querySelector(`label[for="${id}"]`)?.textContent?.trim() ?? '';
+        }
+        return el.getAttribute('aria-label') ?? '';
+      })
+    );
+  }
+
+  /** Locator for a Discover drilldown action on a dashboard panel. */
+  getDiscoverDrilldownAction() {
+    return this.page.locator('[data-test-subj^="embeddablePanelAction-discover_drilldown"]');
+  }
+
+  // ============================================================
   // Panel Action Methods
   // ============================================================
 
@@ -915,6 +1070,8 @@ export class DashboardApp {
    * not just globally visible. This prevents clicking wrong panel's actions.
    */
   async clickPanelAction(actionTestSubj: string, title?: string) {
+    // Toasts from save/add-panel can cover hover actions / context menu items.
+    await this.toasts.dismissAll();
     const panelWrapper = this.getPanelHoverActionsLocator(title);
     await panelWrapper.scrollIntoViewIfNeeded();
     await panelWrapper.hover();
@@ -971,11 +1128,9 @@ export class DashboardApp {
 
     // Fill in the new title
     await this.savedObjectTitleInput.fill(newTitle);
+    await this.toasts.dismissAll();
     await this.confirmSaveButton.click();
-
-    // Wait for success
-    await expect(this.page.testSubj.locator('addPanelToLibrarySuccess')).toBeVisible();
-    // Verify the panel is now linked
+    // Success toasts auto-dismiss; the linked-library badge is the durable signal.
     await this.expectLinkedToLibrary(newTitle);
   }
 
@@ -1031,6 +1186,20 @@ export class DashboardApp {
         `Expected panel action "${actionTestSubj}" to exist for panel "${
           title || 'first panel'
         }". Available actions: [${actionNames.join(', ')}]`
+      );
+    }
+  }
+
+  /**
+   * Asserts that a panel action does NOT exist (throws if found).
+   */
+  async expectMissingPanelAction(actionTestSubj: string, title?: string) {
+    const exists = await this.panelHasAction(actionTestSubj, title);
+    if (exists) {
+      throw new Error(
+        `Expected panel action "${actionTestSubj}" to be missing for panel "${
+          title || 'first panel'
+        }", but it exists.`
       );
     }
   }
@@ -1232,6 +1401,26 @@ export class DashboardApp {
     await this.page.keyboard.type(url);
 
     await this.selectDrilldownTriggerAndSubmit(trigger);
+  }
+
+  // ============================================================
+  // Discover Drilldown
+  // ============================================================
+
+  /**
+   * Creates a Discover drilldown from the currently open "Create drilldown" flyout.
+   * Unlike `createUrlDrilldown`, this factory has no name input or trigger picker
+   * (it only supports the click-value trigger) — selecting it and submitting is
+   * the whole flow. No explicit enabled-wait before the click: Playwright's click
+   * actionability checks already wait for the button to become enabled.
+   * A lingering "added to library"/panel toast sits over the flyout's bottom submit
+   * button, so dismiss toasts first (same pattern as other flyout submits that toasts
+   * can cover).
+   */
+  async createDiscoverDrilldown() {
+    await this.toasts.dismissAll();
+    await this.page.testSubj.click('drilldownFactoryItem-discover_drilldown');
+    await this.drilldownWizardSubmit.click();
   }
 
   // ============================================================

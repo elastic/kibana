@@ -76,7 +76,10 @@ export class VisualizeApp {
   }
 
   async clickSavedVisualization(title: string) {
-    await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
+    const link = this.page.testSubj.locator(`visListingTitleLink-${title.split(' ').join('-')}`);
+    // justified: listing rows can lag archive import / space bootstrap
+    await link.waitFor({ state: 'visible', timeout: 30_000 });
+    await link.click();
   }
 
   async openSavedVisualization(title: string, options?: { waitFor?: 'agg' | 'lens' }) {

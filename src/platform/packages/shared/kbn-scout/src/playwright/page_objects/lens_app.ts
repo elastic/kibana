@@ -108,10 +108,15 @@ export class LensApp {
   /**
    * Opens the Lens save modal, fills in the title, optionally selects
    * a dashboard target, and confirms. Waits for the modal to close.
+   *
+   * `saveAsNew` must be `true` when saving a copy of an already-saved visualization
+   * (i.e. it was opened via `openSavedVisualization`) and `addToDashboard` is set —
+   * the dashboard-target radios are otherwise disabled, since plain re-saves of an
+   * existing object cannot also relocate it into a (new or different) dashboard.
    */
   async save(
     title: string,
-    options?:
+    options?: (
       | {
           addToDashboard: 'existing';
           dashboardTitle: string;
@@ -122,10 +127,15 @@ export class LensApp {
       | {
           addToDashboard: 'none';
         }
+    ) & { saveAsNew?: boolean }
   ) {
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
+
+    if (options?.saveAsNew) {
+      await this.setEuiSwitch('saveAsNewCheckbox', true);
+    }
 
     // Prefer checking the radio input — label clicks race save-modal remounts.
     if (options?.addToDashboard === 'existing') {
@@ -137,9 +147,12 @@ export class LensApp {
     } else if (options?.addToDashboard === 'new') {
       await this.page.locator('#new-dashboard-option').check();
     } else if (options?.addToDashboard === 'none') {
-      await this.page.locator('#add-to-library-option').check();
+      const libraryOption = this.page.locator('#add-to-library-option');
+      await libraryOption.waitFor({ state: 'attached' });
+      await libraryOption.check({ force: true });
     }
 
+    await this.page.components.toast().closeAll();
     await this.confirmSaveButton.click();
     await this.saveModal.waitFor({ state: 'hidden' });
   }
@@ -226,6 +239,7 @@ export class LensApp {
 
   async switchToFormula() {
     await this.page.testSubj.click('lens-dimensionTabs-formula');
+    await this.formulaEditorTextarea.waitFor({ state: 'attached' });
   }
 
   async selectOperation(operation: string, isPreviousIncompatible = false) {
@@ -234,6 +248,9 @@ export class LensApp {
       : `lns-indexPatternDimension-${operation}`;
     const operationButton = this.page.testSubj.locator(operationSelector);
     await operationButton.waitFor({ state: 'visible' });
+    if ((await operationButton.getAttribute('aria-pressed')) === 'true') {
+      return;
+    }
     await operationButton.scrollIntoViewIfNeeded();
     await operationButton.click();
     await this.page.waitForFunction(
@@ -246,7 +263,19 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
+    const comboRoot = this.page.testSubj.locator('indexPattern-dimension-field');
+    await comboRoot.waitFor({ state: 'visible' });
+    const searchInput = comboRoot.getByTestId('comboBoxSearchInput');
+    const clearButton = comboRoot.getByTestId('comboBoxClearButton');
+    if (await clearButton.isVisible()) {
+      await clearButton.click();
+    }
+    await searchInput.click();
+    await searchInput.fill(field);
+    await this.page
+      .locator('[data-test-subj~="indexPattern-dimension-field-optionsList"]')
+      .waitFor({ state: 'visible', timeout: 10_000 });
+    await searchInput.press('Enter');
   }
 
   /**
@@ -303,7 +332,8 @@ export class LensApp {
     // re-reads aria-checked and fails before Lens commits the update. Click when needed,
     // then wait for the attribute (no expect() in the page object).
     if ((await switchLocator.getAttribute('aria-checked')) !== want) {
-      await switchLocator.click();
+      // Dimension-editor overlay intercepts Playwright actionability (scroll/click hang).
+      await switchLocator.dispatchEvent('click');
     }
     await this.page.waitForFunction(
       ([subj, expected]) =>
@@ -320,7 +350,9 @@ export class LensApp {
    */
   async closeDimensionEditor() {
     // Suggested-value panels can remount and exceed the 10s actionTimeout.
-    await this.closeDimensionEditorButton.click({ timeout: 15_000 });
+    // Save toasts can sit over the close control and make Playwright time out after scroll.
+    await this.page.components.toast().closeAll();
+    await this.closeDimensionEditorButton.click({ timeout: 15_000, force: true });
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 

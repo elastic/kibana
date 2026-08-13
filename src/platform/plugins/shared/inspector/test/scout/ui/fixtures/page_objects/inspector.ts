@@ -91,6 +91,12 @@ export class Inspector {
     await this.openInspectorView('Requests');
   }
 
+  /** Names of every request available in the requests-view combo box. */
+  async getRequestNames(): Promise<string[]> {
+    await this.openInspectorRequestsView();
+    return this.page.components.comboBox('inspectorRequestChooser').getAllVisibleOptions();
+  }
+
   async openRequestsStatisticsTab() {
     await this.requests.statisticsTab.click();
   }
