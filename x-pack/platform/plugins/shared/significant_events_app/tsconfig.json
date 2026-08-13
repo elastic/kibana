@@ -23,7 +23,6 @@
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-browser",
     "@kbn/cps",
-    "@kbn/cps-utils",
     "@kbn/data-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-management",
