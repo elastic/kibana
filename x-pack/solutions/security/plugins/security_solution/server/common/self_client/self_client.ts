@@ -70,15 +70,14 @@ export const createSelfClient = ({
   ): Promise<SelfClientResponse<T>> => {
     try {
       const [coreStart] = await core.getStartServices();
-      const response = await coreStart.http.selfClient.asScoped(request).fetch<T, TRequestBody>(
-        path,
-        {
+      const response = await coreStart.http.selfClient
+        .asScoped(request)
+        .fetch<T, TRequestBody>(path, {
           ...options,
           access: options.access ?? 'internal',
           version: options.version ?? '1',
           asResponse: true,
-        }
-      );
+        });
       return { ok: true, status: response.response.status, body: response.body as T };
     } catch (error) {
       const status = isHttpSelfFetchError(error) && error.response ? error.response.status : 500;

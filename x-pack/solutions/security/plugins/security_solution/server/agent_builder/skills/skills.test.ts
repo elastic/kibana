@@ -176,7 +176,9 @@ describe('Security Skills', () => {
     });
 
     it('content includes the name-never-id resolution policy', () => {
-      expect(automaticMigrationRulesGetAllStatsSkill.content).toContain('Name, Never Ask for an ID');
+      expect(automaticMigrationRulesGetAllStatsSkill.content).toContain(
+        'Name, Never Ask for an ID'
+      );
     });
 
     it('uses user-facing "Automatic Migration" naming, not "SIEM migration"', () => {
@@ -187,7 +189,9 @@ describe('Security Skills', () => {
 
   describe('automatic-migration-rules-start-migration skill', () => {
     it('validates successfully via validateSkillDefinition', async () => {
-      await expect(validateSkillDefinition(automaticMigrationRulesStartMigrationSkill)).resolves.toBeDefined();
+      await expect(
+        validateSkillDefinition(automaticMigrationRulesStartMigrationSkill)
+      ).resolves.toBeDefined();
     });
 
     it('has non-empty content', () => {
@@ -195,7 +199,9 @@ describe('Security Skills', () => {
     });
 
     it('has description under 1024 characters', () => {
-      expect(automaticMigrationRulesStartMigrationSkill.description.length).toBeLessThanOrEqual(1024);
+      expect(automaticMigrationRulesStartMigrationSkill.description.length).toBeLessThanOrEqual(
+        1024
+      );
     });
 
     it('returns 7 registry tools (under 25 limit)', () => {
@@ -219,7 +225,9 @@ describe('Security Skills', () => {
     });
 
     it('content includes the START vs REPROCESS vs RESUME decision matrix', () => {
-      expect(automaticMigrationRulesStartMigrationSkill.content).toContain('START vs REPROCESS vs RESUME');
+      expect(automaticMigrationRulesStartMigrationSkill.content).toContain(
+        'START vs REPROCESS vs RESUME'
+      );
       expect(automaticMigrationRulesStartMigrationSkill.content).toContain('RESUME');
     });
 
@@ -229,8 +237,12 @@ describe('Security Skills', () => {
     });
 
     it('uses user-facing "Automatic Rule Migration" naming, not "SIEM migration"', () => {
-      expect(automaticMigrationRulesStartMigrationSkill.description).toContain('Automatic Rule Migration');
-      expect(automaticMigrationRulesStartMigrationSkill.description).not.toContain('SIEM migration');
+      expect(automaticMigrationRulesStartMigrationSkill.description).toContain(
+        'Automatic Rule Migration'
+      );
+      expect(automaticMigrationRulesStartMigrationSkill.description).not.toContain(
+        'SIEM migration'
+      );
     });
   });
 

@@ -55,10 +55,7 @@ Use this to inspect the state of an Automatic Migration (rules) before starting,
       );
 
       if (!response.ok) {
-        return createToolErrorResult(
-          response,
-          `Failed to get rule migration "${migrationId}"`
-        );
+        return createToolErrorResult(response, `Failed to get rule migration "${migrationId}"`);
       }
 
       return {

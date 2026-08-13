@@ -13,10 +13,7 @@ import {
   SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
 } from '../../tools/siem_migrations';
-import {
-  AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
-  NAME_NEVER_ID_BLOCK,
-} from './shared/content';
+import { AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK, NAME_NEVER_ID_BLOCK } from './shared/content';
 
 export const automaticMigrationRulesGetAllStatsSkill = defineSkillType({
   id: 'automatic-migration-rules-get-all-stats',

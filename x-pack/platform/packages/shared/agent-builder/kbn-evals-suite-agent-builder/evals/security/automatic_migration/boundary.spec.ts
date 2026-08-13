@@ -92,8 +92,7 @@ evaluate.describe(
               },
               {
                 input: {
-                  question:
-                    'Show me the translation progress for my Splunk dashboard migration.',
+                  question: 'Show me the translation progress for my Splunk dashboard migration.',
                 },
                 output: {
                   expected:
@@ -152,8 +151,7 @@ evaluate.describe(
             examples: [
               {
                 input: {
-                  question:
-                    'Install the translated rules from my Splunk Q1 rule migration.',
+                  question: 'Install the translated rules from my Splunk Q1 rule migration.',
                 },
                 output: {
                   expected:

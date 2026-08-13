@@ -46,8 +46,7 @@ evaluate.describe(
               },
               {
                 input: {
-                  question:
-                    'Reprocess the failed rules in my Splunk Q1 rule migration.',
+                  question: 'Reprocess the failed rules in my Splunk Q1 rule migration.',
                 },
                 output: {
                   expected:

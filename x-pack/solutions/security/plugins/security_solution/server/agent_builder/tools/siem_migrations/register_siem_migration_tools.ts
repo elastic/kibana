@@ -27,5 +27,7 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register(getAllRuleMigrationStatsTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(getMigrationRulesTool(core, logger, productFeaturesService));
   agentBuilder.tools.register(getRuleMigrationStatsTool(core, logger, productFeaturesService));
-  agentBuilder.tools.register(getRuleMigrationTranslationStatsTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(
+    getRuleMigrationTranslationStatsTool(core, logger, productFeaturesService)
+  );
 };

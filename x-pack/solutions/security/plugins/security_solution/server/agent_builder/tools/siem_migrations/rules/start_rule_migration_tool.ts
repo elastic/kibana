@@ -92,10 +92,7 @@ See the automatic-migration-rules-start-migration skill for the START vs REPROCE
       });
 
       if (!response.ok) {
-        return createToolErrorResult(
-          response,
-          `Failed to start rule migration "${migrationId}"`
-        );
+        return createToolErrorResult(response, `Failed to start rule migration "${migrationId}"`);
       }
 
       return {

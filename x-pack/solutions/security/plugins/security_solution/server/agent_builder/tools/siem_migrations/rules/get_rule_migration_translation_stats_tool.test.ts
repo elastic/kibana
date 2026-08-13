@@ -21,7 +21,11 @@ const mockProductFeaturesService = {
 
 describe('getRuleMigrationTranslationStatsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getRuleMigrationTranslationStatsTool(mockCore, mockLogger, mockProductFeaturesService);
+  const tool = getRuleMigrationTranslationStatsTool(
+    mockCore,
+    mockLogger,
+    mockProductFeaturesService
+  );
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
