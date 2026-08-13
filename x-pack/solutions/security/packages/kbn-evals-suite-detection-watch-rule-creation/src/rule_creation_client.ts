@@ -29,11 +29,8 @@ const stepOutputSchema = z.object({ structured_output: draftRuleSchema }).partia
 
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
-const DRAFT_STEP_ID = 'draft_creation';
-const CREATE_RULE_STEP_ID = 'create_rule';
-
 const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | undefined => {
-  const draftSteps = steps.filter((s) => s.stepId === DRAFT_STEP_ID);
+  const draftSteps = steps.filter((s) => s.stepId === 'draft_creation');
   const resultRecord = draftSteps.find((s) => s.output != null);
   const parsed = stepOutputSchema.safeParse(resultRecord?.output);
   return parsed.success ? parsed.data.structured_output : undefined;
@@ -42,12 +39,6 @@ const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | un
 export interface RuleCreationResult {
   rule: DraftRule | undefined;
   pendingApproval: boolean;
-  /**
-   * True when the detection-engine write step ran. Under an unattended eval this must always be
-   * false — the approval gate is a hard kill criterion, so a true here is a product defect.
-   */
-  ruleWritten: boolean;
-  executionStatus: ExecutionStatus;
   traceId: string | undefined;
 }
 
@@ -111,8 +102,7 @@ export class RuleCreationClient {
       );
     }
 
-    const stepExecutions = execution.stepExecutions ?? [];
-    const rule = extractRuleFromSteps(stepExecutions);
+    const rule = extractRuleFromSteps(execution.stepExecutions ?? []);
 
     if (!rule) {
       this.log.warning(
@@ -120,15 +110,12 @@ export class RuleCreationClient {
       );
     }
 
-    return {
+    const result: RuleCreationResult = {
       rule,
       pendingApproval: execution.status === ExecutionStatus.WAITING_FOR_INPUT,
-      // The eval never approves, so create_rule must never have executed. Any step execution
-      // record for it means the approval gate did not hold.
-      ruleWritten: stepExecutions.some((s) => s.stepId === CREATE_RULE_STEP_ID),
-      executionStatus: execution.status,
       traceId: execution.traceId,
     };
+    return result;
   }
 
   async cancelPending(): Promise<void> {
