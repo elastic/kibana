@@ -45,8 +45,7 @@ export interface PromptFactoryParams {
   relevantSkills?: RelevantSkillSelection;
   /**
    * Current persistent-sub-agent roster (name → child conversation id) from
-   * the parent conversation's state. Used as a compaction-resilient fallback
-   * for the `<active_subagents>` notice in `convertPreviousRounds`.
+   * the parent conversation's state.
    */
   subagentRosterFallback?: Record<string, string>;
 }

@@ -118,10 +118,11 @@ export const convertPreviousRounds = async ({
     messages.push(createAIMessage(summaryText));
   }
 
-  // Compaction-resilient fallback: inject a synthesized <active_subagents>
-  // notice up front when we know the roster (from conversation state). If any
-  // surviving round emits a real SubagentRosterUpdatedStep later, the LLM's
-  // "latest wins" reading naturally lets that step supersede this notice.
+  // Compaction-resilient fallback: inject a synthesized "Active persistent
+  // sub-agents" notice up front when we know the roster (from conversation
+  // state). If any surviving round emits a real SubagentRosterUpdatedStep
+  // later, the LLM's "latest wins" reading naturally lets that step supersede
+  // this notice.
   if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
     const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
       name,

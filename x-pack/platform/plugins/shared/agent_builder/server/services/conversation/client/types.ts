@@ -36,10 +36,8 @@ export type ConversationCreateRequest = Omit<
 > & {
   id?: string;
   /**
-   * Optional user override. When creating a child conversation for a persistent
-   * sub-agent whose parent already exists, this is set to the parent's user
-   * (snapshotted) so ownership matches even for shared parents. Falls back to
-   * the current request user when omitted.
+   * Optional user override.
+   * Used to set the parent conversation's user when creating a child conversation for a subagent
    */
   user?: Conversation['user'];
   access_control?: Pick<ConversationAccessControl, 'access_mode'>;

@@ -88,11 +88,8 @@ export const registerInternalTools = async ({
     todoStateManager,
   } = context;
 
-  // Recursion guard (#3): sub-agent creation is only available for non-standalone
-  // executions. Deliberately loose — persistent sub-agents (which run in
-  // conversation mode) can therefore spawn further sub-agents. Revisit later.
+  // sub-agent creation is only available for non-standalone executions
   const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone;
-  // Interactivity gate (#4): ask_user_question requires a live user in the loop.
   const interactive = interactivity.enabled;
 
   const tools: Array<BuiltinToolDefinition<any>> = [];
@@ -109,8 +106,7 @@ export const registerInternalTools = async ({
     tools.push(createTodoTool({ todoStateManager }));
   }
 
-  // Sub-agent + send_message + sleep — experimental, and not available when
-  // the caller is itself a sub-agent (recursion guard).
+  // run_subagent + send_message + sleep — experimental, and not available to sub-agents
   if (experimentalFeatures.subagents && canSpawnSubagents) {
     tools.push(
       createSubagentTool({

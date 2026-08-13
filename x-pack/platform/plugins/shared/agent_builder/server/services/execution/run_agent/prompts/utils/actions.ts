@@ -382,21 +382,14 @@ export const formatSystemNotice = (execution: BackgroundExecutionState): string 
 };
 
 /**
- * Render the active persistent sub-agent roster as an XML notice for injection
- * into the parent's message history. Emitted append-only after any round in
- * which `run_subagent` created a new persistent sub-agent (both in-round and,
- * on replay, from persisted SubagentRosterUpdatedStep entries).
+ * Render the active persistent sub-agent roster as a system notice.
  */
 export const formatSubagentRosterNotice = (roster: SubagentRosterEntry[]): string => {
-  return generateXmlTree({
-    tagName: 'active_subagents',
-    children: roster.map((entry) => ({
-      tagName: 'subagent',
-      attributes: {
-        name: entry.name,
-        ...(entry.purpose ? { purpose: entry.purpose } : {}),
-      },
-      children: [],
-    })),
-  });
+  const lines = roster.map((entry) =>
+    entry.purpose ? `- ${entry.name}: ${entry.purpose}` : `- ${entry.name}`
+  );
+  return `<system-notice>
+Active persistent sub-agents (interact via send_message):
+${lines.join('\n')}
+</system-notice>`;
 };

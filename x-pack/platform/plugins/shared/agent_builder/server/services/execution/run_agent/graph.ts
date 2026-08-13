@@ -221,8 +221,8 @@ export const createAgentGraph = ({
 
     // If any tool call created a persistent sub-agent this batch, append a
     // SubagentRosterUpdatedAction so the parent LLM sees the fresh roster
-    // inline (as a <active_subagents> user notice, mirroring how background
-    // completions are surfaced).
+    // inline (as an "Active persistent sub-agents" system-notice user message,
+    // mirroring how background completions are surfaced).
     if (subagentTracker && batchHasPersistentCreation(actions)) {
       const roster = subagentTracker.activeRoster(priorPurposes());
       actions.push(subagentRosterUpdatedAction(roster));

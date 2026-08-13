@@ -50,8 +50,8 @@ the sub-agent's conversation is started for each call; the sub-agent sees the fu
 history of your prior exchanges with it.
 
 - The recipient must resolve to a persistent sub-agent in the current conversation's
-  active roster (see \`<active_subagents>\` notices in the message history). Sending
-  to an unknown name fails with a clear error.
+  active roster (see "Active persistent sub-agents" system notices in the message
+  history). Sending to an unknown name fails with a clear error.
 - To create a fresh sub-agent, use \`run_subagent\`. \`send_message\` never creates.
 `;
 
