@@ -92,9 +92,7 @@ describe('createRuleManagementSkill', () => {
     expect(skill.content).not.toContain('./references/rule-schema.md');
     expect(skill.content).toContain('## When to Load References');
     expect(skill.content).not.toContain('## State Transition');
-    expect(skill.content).toContain(
-      'State transition is only allowed on `kind: alert` rules.'
-    );
+    expect(skill.content).toContain('State transition is only allowed on `kind: alert` rules.');
     expect(skill.content).not.toContain('`recovery_strategy` is a **top-level rule field**');
     expect(skill.content).not.toContain('`no_data_strategy` is a **top-level rule field**');
 
