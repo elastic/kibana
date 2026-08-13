@@ -230,7 +230,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCreateMlAlerts).toBe(false);
       expect(capabilities.canViewMlNodes).toBe(false);
       expect(capabilities.canCreateTrainedModels).toBe(false);
-      expect(capabilities.canTestTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(false);
       expect(capabilities.canCreateInferenceEndpoint).toBe(false);
       expect(capabilities.canDeleteTrainedModels).toBe(false);
       expect(capabilities.canStartStopTrainedModels).toBe(false);
