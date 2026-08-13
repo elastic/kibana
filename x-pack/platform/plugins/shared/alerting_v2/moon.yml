@@ -141,6 +141,7 @@ dependsOn:
   - '@kbn/security-authorization-core'
   - '@kbn/security-plugin-types-server'
   - '@kbn/core-test-helpers-model-versions'
+  - '@kbn/content-list-common'
 tags:
   - plugin
   - prod
