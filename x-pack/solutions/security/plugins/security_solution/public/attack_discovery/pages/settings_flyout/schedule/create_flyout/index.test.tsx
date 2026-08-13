@@ -15,11 +15,52 @@ import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock/test_providers';
-import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import { useScheduleApi } from '../logic/use_schedule_api';
+import { useConnectors } from '../../../../../common/hooks/use_connectors';
+import { useListWorkflows } from '../../workflow_configuration/hooks/use_list_workflows';
+import { useGenerateWorkflow } from '../../workflow_configuration/hooks/use_generate_workflow';
 
 jest.mock('@kbn/inference-connectors');
-jest.mock('../logic/use_create_schedule');
+jest.mock('../logic/use_schedule_api');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/hooks/use_connectors');
+jest.mock('../../workflow_configuration/hooks/use_list_workflows');
+jest.mock('../../workflow_configuration/hooks/use_generate_workflow');
+jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn().mockReturnValue({
+    dataView: undefined,
+    status: 'ready',
+  }),
+}));
+// Stub the heavy RuleActionsField subtree. It renders the triggers_actions_ui
+// `ActionForm` via `React.lazy`/`Suspense` (`getActionFormLazy`), whose first
+// mount pays a large one-time lazy-import cost and whose connector/action-type
+// loads never settle under jsdom. That subtree — not `AlertSelection` — is the
+// dominant cost and the source of the "not wrapped in act(...)" churn that
+// tripped Jest's 5s per-test timeout in CI.
+jest.mock('../../../../../common/components/rule_actions_field', () => ({
+  RuleActionsField: () => <div data-test-subj="mockRuleActionsField" />,
+}));
+// Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
+// alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
+// stub keeps the `alertSelection` marker and an `alertsRange` control wired to
+// `onSettingsChanged` so the unsaved-changes assertions still exercise it.
+jest.mock('../../alert_selection', () => ({
+  AlertSelection: ({
+    settings,
+    onSettingsChanged,
+  }: {
+    settings: Record<string, unknown>;
+    onSettingsChanged?: (settings: Record<string, unknown>) => void;
+  }) => (
+    <div data-test-subj="alertSelection">
+      <input
+        data-test-subj="alertsRange"
+        onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+      />
+    </div>
+  ),
+}));
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({
@@ -40,10 +81,19 @@ const mockConnectors: unknown[] = [
 ];
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+const mockUseScheduleApi = useScheduleApi as jest.MockedFunction<typeof useScheduleApi>;
+
+const setMockCreateSchedule = ({ mutateAsync }: { mutateAsync: jest.Mock }) => {
+  mockUseScheduleApi.mockReturnValue({
+    isWorkflowsEnabled: false,
+    useCreateSchedule: () =>
+      ({ isLoading: false, mutateAsync } as unknown as ReturnType<
+        ReturnType<typeof useScheduleApi>['useCreateSchedule']
+      >),
+  } as unknown as ReturnType<typeof useScheduleApi>);
+};
 
 const defaultProps = {
-  connectorId: undefined,
-  onConnectorIdSelected: jest.fn(),
   onClose: jest.fn(),
 };
 
@@ -57,13 +107,15 @@ const renderComponent = async () => {
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/220116
-describe.skip('CreateFlyout', () => {
+describe('CreateFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: jest.fn().mockResolvedValue(false),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
@@ -85,10 +137,27 @@ describe.skip('CreateFlyout', () => {
       isLoading: false,
       data: mockConnectors,
     });
-    (useCreateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
-      isLoading: false,
-      mutateAsync: jest.fn(),
+
+    (useConnectors as jest.Mock).mockReturnValue({
+      connectors: mockConnectors,
+      setCurrentConnector: jest.fn(),
     });
+
+    (useListWorkflows as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isSuccess: true,
+      status: 'success' as const,
+    });
+
+    (useGenerateWorkflow as jest.Mock).mockReturnValue({
+      cancelGeneration: jest.fn(),
+      generatedWorkflow: null,
+      isGenerating: false,
+      startGeneration: jest.fn(),
+    });
+
+    setMockCreateSchedule({ mutateAsync: jest.fn() });
   });
 
   it('should render the flyout title', async () => {
@@ -165,10 +234,7 @@ describe.skip('CreateFlyout', () => {
       data: [],
     });
     const mutateAsync = jest.fn();
-    (useCreateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
-      isLoading: false,
-      mutateAsync,
-    });
+    setMockCreateSchedule({ mutateAsync });
     await act(async () => {
       render(
         <TestProviders>
@@ -228,7 +294,7 @@ describe.skip('CreateFlyout', () => {
       await renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText('Select a connector type')).toBeInTheDocument();
+        expect(screen.getByTestId('mockRuleActionsField')).toBeInTheDocument();
       });
     });
 

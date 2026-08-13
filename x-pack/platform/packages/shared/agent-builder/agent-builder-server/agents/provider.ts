@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
   ConversationRound,
+  ConversationRoundAuthor,
   ConverseInput,
   ChatAgentEvent,
   AgentCapabilities,
@@ -21,7 +22,7 @@ import type {
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
@@ -42,6 +43,7 @@ import type {
   IBashService,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
+import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
@@ -100,6 +102,8 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether context-aware skill filtering is enabled */
+  relevantSkills: boolean;
   /** Whether the sub-agent execution feature is enabled */
   subagents: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
@@ -110,6 +114,8 @@ export interface ExperimentalFeatures {
   askUserQuestion: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
+  /** Whether the HTTP API introspection tools (discover/describe/execute) are enabled */
+  apiTools: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -132,9 +138,13 @@ export interface AgentHandlerContext {
    */
   esClient: IScopedClusterClient;
   /**
+   * Client for calling Kibana's own HTTP APIs on behalf of the current user.
+   */
+  selfClient: HttpSelfService;
+  /**
    * Saved objects client scoped to the current user.
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
   /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.
@@ -267,6 +277,15 @@ export interface AgentParams {
    * The input triggering this round.
    */
   nextInput: ConverseInput;
+  /**
+   * External origin that initiated this execution, when it originated outside Kibana.
+   */
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external system author, or the Kibana user for
+   * public conversations). Stamped onto the completed round.
+   */
+  author?: ConversationRoundAuthor;
   /**
    * Agent capabilities to enable.
    */

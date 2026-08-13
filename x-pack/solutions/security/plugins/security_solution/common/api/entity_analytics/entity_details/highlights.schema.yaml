@@ -59,6 +59,7 @@ paths:
                     properties:
                       assetCriticality:
                         type: array
+                        description: Assigned asset criticality only. Empty when unassigned.
                         items:
                           type: object
                           additionalProperties: true
@@ -78,6 +79,8 @@ paths:
                           type: number
                       anomalies:
                         type: array
+                        nullable: true
+                        description: ML anomaly findings. Null when there are none.
                         items:
                           type: object
                           additionalProperties: true

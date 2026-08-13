@@ -18,13 +18,16 @@ import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
+interface ConnectionTarget {
+  client_id: string;
+  connection_id: string;
+}
+
 describe('Bulk revoke OAuth connections route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
-    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     const coreContext = coreMock.createRequestHandlerContext();
-    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
@@ -40,6 +43,18 @@ describe('Bulk revoke OAuth connections route', () => {
     revoked: true,
     ...overrides,
   });
+
+  const createRequest = (
+    connections: ConnectionTarget[],
+    {
+      reason,
+      authorization = 'Bearer essu_token',
+    }: { reason?: string; authorization?: string } = {}
+  ) =>
+    httpServerMock.createKibanaRequest({
+      headers: { authorization },
+      body: { connections, ...(reason === undefined ? {} : { reason }) },
+    });
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
@@ -66,15 +81,13 @@ describe('Bulk revoke OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-2', connection_id: 'conn-2' },
-          ],
-          reason: 'bulk revoked by user',
-        },
-      }),
+      createRequest(
+        [
+          { client_id: 'client-1', connection_id: 'conn-1' },
+          { client_id: 'client-2', connection_id: 'conn-2' },
+        ],
+        { reason: 'bulk revoked by user' }
+      ),
       kibanaResponseFactory
     );
 
@@ -112,14 +125,10 @@ describe('Bulk revoke OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-1', connection_id: 'conn-2' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 
@@ -148,15 +157,11 @@ describe('Bulk revoke OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-a', connection_id: 'conn-a' },
-            { client_id: 'client-b', connection_id: 'conn-b' },
-            { client_id: 'client-c', connection_id: 'conn-c' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-a', connection_id: 'conn-a' },
+        { client_id: 'client-b', connection_id: 'conn-b' },
+        { client_id: 'client-c', connection_id: 'conn-c' },
+      ]),
       kibanaResponseFactory
     );
 
@@ -170,34 +175,94 @@ describe('Bulk revoke OAuth connections route', () => {
     });
   });
 
+  it('collapses duplicate targets into a single revoke and a single result', async () => {
+    oauthMock.revokeConnection.mockImplementation(async (_request, clientId, connectionId) =>
+      buildConnection({ id: connectionId, client_id: clientId })
+    );
+
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+        { client_id: 'client-1', connection_id: 'conn-1' },
+      ]),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
+        { client_id: 'client-1', connection_id: 'conn-2', status: 'revoked' },
+      ],
+    });
+    expect(oauthMock.revokeConnection).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats the same connection id under different clients as distinct targets', async () => {
+    oauthMock.revokeConnection.mockImplementation(async (_request, clientId, connectionId) =>
+      buildConnection({ id: connectionId, client_id: clientId })
+    );
+
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-2', connection_id: 'conn-1' },
+      ]),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      results: [
+        { client_id: 'client-1', connection_id: 'conn-1', status: 'revoked' },
+        { client_id: 'client-2', connection_id: 'conn-1', status: 'revoked' },
+      ],
+    });
+    expect(oauthMock.revokeConnection).toHaveBeenCalledTimes(2);
+  });
+
   it('returns 404 when OAuth is not available', async () => {
     authc.oauth = null;
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [{ client_id: 'client-1', connection_id: 'conn-1' }],
-        },
-      }),
+      createRequest([{ client_id: 'client-1', connection_id: 'conn-1' }]),
       kibanaResponseFactory
     );
 
     expect(response.status).toBe(404);
   });
 
-  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
+  it('returns 401 for the whole request when the authorization header is missing', async () => {
     const response = await routeHandler(
-      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
+      getMockContext(),
       httpServerMock.createKibanaRequest({
-        body: {
-          connections: [{ client_id: 'client-1', connection_id: 'conn-1' }],
-        },
+        body: { connections: [{ client_id: 'client-1', connection_id: 'conn-1' }] },
       }),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(401);
+    expect(oauthMock.revokeConnection).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for the whole request when the credential is not compatible with UIAM', async () => {
+    const response = await routeHandler(
+      getMockContext(),
+      createRequest(
+        [
+          { client_id: 'client-1', connection_id: 'conn-1' },
+          { client_id: 'client-1', connection_id: 'conn-2' },
+        ],
+        { authorization: 'Bearer not-a-uiam-token' }
+      ),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(400);
     expect(oauthMock.revokeConnection).not.toHaveBeenCalled();
   });
 
@@ -206,14 +271,10 @@ describe('Bulk revoke OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-1', connection_id: 'conn-2' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 
@@ -230,14 +291,10 @@ describe('Bulk revoke OAuth connections route', () => {
 
     const response = await routeHandler(
       getMockContext(),
-      httpServerMock.createKibanaRequest({
-        body: {
-          connections: [
-            { client_id: 'client-1', connection_id: 'conn-1' },
-            { client_id: 'client-1', connection_id: 'conn-2' },
-          ],
-        },
-      }),
+      createRequest([
+        { client_id: 'client-1', connection_id: 'conn-1' },
+        { client_id: 'client-1', connection_id: 'conn-2' },
+      ]),
       kibanaResponseFactory
     );
 

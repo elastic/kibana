@@ -347,7 +347,13 @@ export const RuleActionsNotifyWhen = ({
           {showCustomThrottleOpts && (
             <>
               <EuiSpacer size="s" />
-              <EuiFormRow fullWidth>
+              <EuiFormRow
+                fullWidth
+                aria-label={i18n.translate(
+                  'responseOpsRuleForm.ruleActionsNotifyWhen.frequencyFormRowAriaLabel',
+                  { defaultMessage: 'Run every' }
+                )}
+              >
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={2}>
                     <EuiFieldNumber

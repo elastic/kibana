@@ -1,5 +1,9 @@
 {
-  "sha1": "018921d96ff1ddeb0936c80ef5f93f953744c4e0",
+  "sha1": "6747718280ac50c7ca9c2d11541590c5d95dca00",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "a9aac16ca7b74c5-fdc7ad74ecc4681",
@@ -8,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 10,
-        "column": 19
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -19,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 11,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -29,18 +33,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/error_handling.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 23,
+        "column": 23
       }
     },
     {
@@ -59,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
-        "line": 67,
-        "column": 14
+        "line": 62,
+        "column": 15
       }
     },
     {
@@ -79,8 +77,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
-        "line": 85,
-        "column": 14
+        "line": 73,
+        "column": 9
       }
     },
     {
@@ -97,8 +95,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_non_time_based.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 32,
+        "column": 7
       }
     },
     {
@@ -108,12 +106,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -123,8 +115,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 31,
+        "column": 7
       }
     },
     {
@@ -134,12 +126,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -149,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
-        "line": 52,
-        "column": 14
+        "line": 35,
+        "column": 77
       }
     },
     {
@@ -160,12 +146,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -177,8 +157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 30,
+        "column": 7
       }
     },
     {
@@ -188,12 +168,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -205,8 +179,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 43,
-        "column": 14
+        "line": 34,
+        "column": 24
       }
     },
     {
@@ -216,12 +190,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -233,8 +201,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
-        "line": 56,
-        "column": 14
+        "line": 39,
+        "column": 31
       }
     }
   ]

@@ -81,6 +81,7 @@ export interface AppDependencies {
     enableSemanticText: boolean;
     enforceAdaptiveAllocations: boolean;
     enableFailureStoreRetentionDisabling: boolean;
+    enableIndexMode: boolean;
     isServerless: boolean;
   };
   history: ScopedHistory;

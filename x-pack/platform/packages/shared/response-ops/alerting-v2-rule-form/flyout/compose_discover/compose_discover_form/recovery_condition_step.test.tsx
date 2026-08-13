@@ -18,11 +18,6 @@ import type { FormValues, RuleQuery } from '../../../form/types';
 import { RecoveryConditionStep } from './recovery_condition_step';
 import { EsqlRecoveryContent } from './esql_recovery_content';
 
-jest.mock('@kbn/code-editor', () => ({
-  ...jest.requireActual('@kbn/code-editor'),
-  CodeEditor: ({ value }: { value: string }) => <pre data-test-subj="codeEditorMock">{value}</pre>,
-}));
-
 const BASE_QUERY = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
 const ALERT_SEGMENT = 'WHERE count > 100';
 const RECOVERY_SEGMENT = 'WHERE count < 100';
@@ -89,7 +84,7 @@ const renderRecoveryStep = (
   const onRecoveryTypeChange = jest.fn();
   const services = createMockServices();
 
-  render(
+  const view = render(
     <RecoveryConditionStep
       state={state}
       dispatch={dispatch}
@@ -99,7 +94,7 @@ const renderRecoveryStep = (
     { wrapper: createComposeFormWrapper(queryOverride, services) }
   );
 
-  return { dispatch, state, onRecoveryTypeChange };
+  return { dispatch, state, onRecoveryTypeChange, view, services };
 };
 
 describe('RecoveryConditionStep', () => {
@@ -111,6 +106,14 @@ describe('RecoveryConditionStep', () => {
 
   it('does not render query summaries or edit button in default mode', () => {
     renderRecoveryStep({ recoveryType: 'default' });
+
+    expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+    expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverEditRecovery')).not.toBeInTheDocument();
+  });
+
+  it('does not render custom recovery content when recovery type is none', () => {
+    renderRecoveryStep({ recoveryType: 'none' });
 
     expect(screen.queryByText('Base query')).not.toBeInTheDocument();
     expect(screen.queryByText('Recovery condition')).not.toBeInTheDocument();
@@ -144,5 +147,28 @@ describe('RecoveryConditionStep', () => {
       step: state.step,
       isAlert: true,
     });
+  });
+
+  it('toggles custom recovery content without a hooks-order warning', () => {
+    // React reports a mismatched hook count as a console.error, not a thrown
+    // exception — assert on the former; `.not.toThrow()` would pass either way.
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { view, dispatch, onRecoveryTypeChange } = renderRecoveryStep(
+      { recoveryType: 'default' },
+      CUSTOM_RECOVERY_QUERY
+    );
+
+    view.rerender(
+      <RecoveryConditionStep
+        state={createState({ queryCommitted: true, recoveryType: 'custom' })}
+        dispatch={dispatch}
+        onRecoveryTypeChange={onRecoveryTypeChange}
+        renderCustomRecovery={EsqlRecoveryContent}
+      />
+    );
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId('composeDiscoverEditRecovery')).toBeInTheDocument();
+    consoleErrorSpy.mockRestore();
   });
 });

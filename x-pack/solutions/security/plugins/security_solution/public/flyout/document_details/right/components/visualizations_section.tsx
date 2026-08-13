@@ -19,10 +19,8 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToAnalyzer } from '../../shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
-import {
-  VISUALIZATION_SECTION_TEST_ID,
-  VISUALIZATION_SECTION_TITLE,
-} from '../../../../flyout_v2/document/main/components/visualizations_section';
+import { VISUALIZATION_SECTION_TEST_ID } from '../../../../flyout_v2/document/main/components/visualizations_section';
+import { VISUALIZATION_SECTION_TITLE } from '../../../../flyout_v2/shared/constants/flyout_titles';
 
 const KEY = 'visualizations';
 

@@ -11,7 +11,8 @@ import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../common/constants/client_defaults';
-import { getSyntheticsCcsIndex } from '../../../common/get_synthetics_indices';
+import { getHeartbeatLocationFilter } from '../../../common/lib';
+import { getSyntheticsScopedIndex } from '../../../common/get_synthetics_indices';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 
 export interface MonitorSummaryStats {
@@ -46,7 +47,7 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
     };
 
     const { body: result } = await syntheticsEsClient.search({
-      index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
+      index: getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices),
       size: 0,
       query: {
         bool: {
@@ -54,7 +55,7 @@ export const getMonitorSummaryStatsRoute: SyntheticsRestApiRouteFactory<
             FINAL_SUMMARY_FILTER,
             EXCLUDE_RUN_ONCE_FILTER,
             { term: { 'monitor.id': monitorId } },
-            { term: { 'observer.geo.name': locationLabel } },
+            ...getHeartbeatLocationFilter({ field: 'observer.geo.name', value: locationLabel }),
             { range: { '@timestamp': { gte: from, lte: to } } },
           ],
         },

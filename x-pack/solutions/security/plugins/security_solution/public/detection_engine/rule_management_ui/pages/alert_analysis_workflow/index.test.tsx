@@ -10,6 +10,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { focusManager } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -25,22 +26,59 @@ jest.mock('../../../../common/containers/use_full_screen', () => ({
 
 jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('@kbn/inference-connectors');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
+const useLoadConnectorsMock = useLoadConnectors as jest.MockedFunction<typeof useLoadConnectors>;
+
+const builtInInferenceEndpoint = {
+  id: '.anthropic-claude-sonnet-chat_completion',
+  name: 'Built-in Claude Sonnet',
+  actionTypeId: '.inference',
+  config: {
+    inferenceId: '.anthropic-claude-sonnet-chat_completion',
+    taskType: 'chat_completion',
+    service: 'elastic',
+  },
+  secrets: {},
+  isPreconfigured: true,
+  isSystemAction: false,
+  isDeprecated: false,
+  isConnectorTypeDeprecated: false,
+  isMissingSecrets: false,
+  isEis: true,
+} as AIConnector;
+
+const externalInferenceEndpoint = {
+  id: 'external-openai-chat',
+  name: 'External OpenAI endpoint',
+  actionTypeId: '.inference',
+  config: {
+    inferenceId: 'external-openai-chat',
+    taskType: 'chat_completion',
+    service: 'openai',
+  },
+  secrets: {},
+  isPreconfigured: false,
+  isSystemAction: false,
+  isDeprecated: false,
+  isConnectorTypeDeprecated: false,
+  isMissingSecrets: false,
+} as AIConnector;
 
 describe('AlertAnalysisWorkflowPage', () => {
   const coreStart = coreMock.createStart();
 
   const listAgentsMock = jest.fn();
 
-  const settingsGetResponse = (
-    settings: Record<string, unknown> = {
-      autoCloseEnabled: true,
-      autoCloseConfidenceScoreMinThreshold: 0.85,
-      autoCloseConfidenceScoreMaxThreshold: 1,
-      tagPrefix: 'alert-analysis',
-    }
-  ) => ({
+  const defaultSettings = {
+    autoCloseEnabled: true,
+    autoCloseConfidenceScoreMinThreshold: 0.85,
+    autoCloseConfidenceScoreMaxThreshold: 1,
+    tagPrefix: 'alert-analysis',
+  };
+
+  const settingsGetResponse = (settings: Record<string, unknown> = defaultSettings) => ({
     settings,
     workflowId: 'system-security-alert-analysis-default',
   });
@@ -96,11 +134,57 @@ describe('AlertAnalysisWorkflowPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useLoadConnectorsMock.mockReturnValue({
+      data: [builtInInferenceEndpoint, externalInferenceEndpoint],
+      isLoading: false,
+    } as ReturnType<typeof useLoadConnectors>);
     listAgentsMock.mockResolvedValue([
       { id: 'elastic-ai-agent', name: 'Elastic AI Agent', readonly: false },
       { id: 'my-custom-agent', name: 'My Custom Agent', readonly: false },
       { id: 'platform.builtin', name: 'Built-in Agent', readonly: true },
     ]);
+  });
+
+  it('loads Agent Builder models and lists built-in and external inference endpoints', async () => {
+    renderComponent();
+
+    const connectorSelector = await screen.findByTestId('connector-selector');
+
+    expect(useLoadConnectorsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        http: coreStart.http,
+        toasts: coreStart.notifications.toasts,
+        featureId: 'agent_builder',
+      })
+    );
+
+    fireEvent.click(connectorSelector);
+
+    expect(
+      screen.getByTestId(`connector-option-${builtInInferenceEndpoint.name}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`connector-option-${externalInferenceEndpoint.name}`)
+    ).toBeInTheDocument();
+  });
+
+  it('serializes an external inference endpoint ID as connectorId', async () => {
+    renderComponent();
+
+    fireEvent.click(await screen.findByTestId('connector-selector'));
+    fireEvent.click(screen.getByTestId(`connector-option-${externalInferenceEndpoint.name}`));
+    fireEvent.click(screen.getByTestId('alertAnalysisWorkflowSaveButton'));
+
+    await waitFor(() => {
+      expect(coreStart.http.fetch).toHaveBeenCalledWith(ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE, {
+        method: 'PUT',
+        version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
+        body: JSON.stringify({
+          ...defaultSettings,
+          connectorId: externalInferenceEndpoint.id,
+        }),
+      });
+    });
   });
 
   it('lists the user selectable agents excluding platform built-ins', async () => {
@@ -219,5 +303,40 @@ describe('AlertAnalysisWorkflowPage', () => {
       ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE,
       expect.objectContaining({ method: 'PUT' })
     );
+  });
+
+  it('disables the confidence score inputs when auto-close is turned off', async () => {
+    renderComponent();
+
+    const autoCloseSwitch = await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled');
+    await waitFor(() => expect(autoCloseSwitch).toBeChecked());
+
+    const minThresholdField = await screen.findByTestId('alertAnalysisWorkflowMinThreshold');
+    const maxThresholdField = await screen.findByTestId('alertAnalysisWorkflowMaxThreshold');
+    expect(minThresholdField).not.toBeDisabled();
+    expect(maxThresholdField).not.toBeDisabled();
+
+    fireEvent.click(autoCloseSwitch);
+
+    expect(minThresholdField).toBeDisabled();
+    expect(maxThresholdField).toBeDisabled();
+  });
+
+  it('does not block saving on an out-of-range threshold pair when auto-close is off', async () => {
+    renderComponent();
+
+    // Make min (0.85) >= max (0.5): the range is invalid while auto-close is still on.
+    const maxThresholdField = await screen.findByTestId('alertAnalysisWorkflowMaxThreshold');
+    fireEvent.change(maxThresholdField, { target: { value: '0.5' } });
+
+    const saveButton = await screen.findByTestId('alertAnalysisWorkflowSaveButton');
+    expect(saveButton).toBeDisabled();
+
+    // Turning auto-close off makes the thresholds irrelevant, so the invalid range no longer blocks
+    // saving.
+    const autoCloseSwitch = await screen.findByTestId('alertAnalysisWorkflowAutoCloseEnabled');
+    fireEvent.click(autoCloseSwitch);
+
+    expect(saveButton).not.toBeDisabled();
   });
 });

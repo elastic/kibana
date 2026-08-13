@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/273427
+issues:
+- https://github.com/elastic/kibana/issues/219954
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-22
+- product: kibana
+areas:
+- Alerting and reporting
+- Dashboards and visualizations
+title: Add `Export JSON` panel action

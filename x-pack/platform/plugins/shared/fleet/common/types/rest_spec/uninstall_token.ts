@@ -29,3 +29,13 @@ export interface GetUninstallTokenRequest {
 export interface GetUninstallTokenResponse {
   item: UninstallToken;
 }
+
+export interface RotateUninstallTokenRequest {
+  params: {
+    agentPolicyId: string;
+  };
+}
+
+export interface RotateUninstallTokenResponse {
+  message: string;
+}

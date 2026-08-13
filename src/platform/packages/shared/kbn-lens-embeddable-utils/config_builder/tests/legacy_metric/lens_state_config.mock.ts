@@ -295,7 +295,7 @@ export const customColorByValueAttributes: LensAttributes = {
           rangeMin: 0,
           rangeMax: null,
           rangeType: 'number',
-          stops: [
+          colorStops: [
             {
               color: '#24c292',
               stop: 0,
@@ -307,6 +307,20 @@ export const customColorByValueAttributes: LensAttributes = {
             {
               color: '#f6726a',
               stop: 4696,
+            },
+          ],
+          stops: [
+            {
+              color: '#24c292',
+              stop: 3130.66,
+            },
+            {
+              color: '#fcd883',
+              stop: 4696,
+            },
+            {
+              color: '#f6726a',
+              stop: 6261,
             },
           ],
           continuity: 'above',

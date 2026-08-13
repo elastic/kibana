@@ -53,6 +53,14 @@ export const createScenarioCriteriaLlmEvaluator = <
     const resolvedCriteria =
       criteria ?? (expected as Record<string, unknown> | null)?.criteria ?? [];
 
+    if (!Array.isArray(resolvedCriteria) || resolvedCriteria.length === 0) {
+      return {
+        score: null,
+        label: 'unavailable',
+        explanation: 'No scenario criteria specified — skipping scenario criteria check',
+      };
+    }
+
     return criteriaFn(resolvedCriteria as EvaluationCriterion[]).evaluate({
       input,
       expected,

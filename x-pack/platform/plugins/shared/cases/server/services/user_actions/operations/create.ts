@@ -6,8 +6,10 @@
  */
 
 import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { get, isEmpty, pickBy } from 'lodash';
 import type {
+  CaseAssignee,
   CaseAssignees,
   CaseCustomField,
   CaseCustomFields,
@@ -47,6 +49,7 @@ import type {
 import {
   isAssigneesArray,
   isCaseSettings,
+  isCaseTemplate,
   isCustomFieldsArray,
   isStringArray,
   isExtendedFields,
@@ -68,7 +71,11 @@ export class UserActionPersister {
     this.auditLogger = new UserActionAuditLogger(this.context.auditLogger);
   }
 
-  public buildUserActions({ updatedCases, user }: BuildUserActionsDictParams): UserActionsDict {
+  public buildUserActions({
+    updatedCases,
+    user,
+    templateNamesByKey,
+  }: BuildUserActionsDictParams): UserActionsDict {
     return updatedCases.cases.reduce<UserActionsDict>((acc, updatedCase) => {
       const originalCase = updatedCase.originalCase;
 
@@ -81,9 +88,22 @@ export class UserActionPersister {
 
       const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.updatedAttributes);
+      // Templates v2 mirrors a customFields edit into extended_fields in the same patch (see
+      // replace_custom_field.ts / bulk_update.ts), so both keys land in `updatedAttributes`
+      // together. Surfacing two activity-log entries for what the user experiences as one edit is
+      // redundant — extended_fields is what templates v2 renders and what the mirror already
+      // captures the customFields value into, so it wins and the customFields entry is dropped.
+      // customFields-only updates (templates disabled, or a field with no migrated counterpart)
+      // are unaffected since extended_fields won't be present in that case.
+      const suppressCustomFieldsUserAction =
+        updatedFields.includes(UserActionTypes.customFields) &&
+        updatedFields.includes(UserActionTypes.extended_fields);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
+        .filter(
+          (field) => !(suppressCustomFieldsUserAction && field === UserActionTypes.customFields)
+        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
           // Persist the closeReason to the status userAction
@@ -110,6 +130,12 @@ export class UserActionPersister {
 
           const originalValue = get(originalCase, ['attributes', field]);
           const newValue = get(updatedCase, ['updatedAttributes', field]);
+          // For a newly-applied template, resolve its name so the user action records it. Keyed by
+          // "id@version" so the name matches the exact version applied, not the current latest.
+          const templateName =
+            field === UserActionTypes.template && isCaseTemplate(newValue)
+              ? templateNamesByKey?.get(`${newValue.id}@${newValue.version}`)
+              : undefined;
           userActions.push(
             ...this.getUserActionItemByDifference({
               field,
@@ -118,6 +144,7 @@ export class UserActionPersister {
               user,
               owner,
               caseId,
+              templateName,
             })
           );
         });
@@ -209,6 +236,22 @@ export class UserActionPersister {
       });
     } else if (field === UserActionTypes.extended_fields && isExtendedFields(newValue)) {
       return this.buildExtendedFieldsUserActions(params);
+    } else if (field === UserActionTypes.template && newValue !== undefined) {
+      // Enrich the applied-template payload with the resolved name (a point-in-time snapshot) so the
+      // activity log can render "applied <name> template" without a lookup.
+      const templateValue = newValue as { id: string; version: number } | null;
+      const payloadTemplate =
+        templateValue != null
+          ? { ...templateValue, ...(params.templateName ? { name: params.templateName } : {}) }
+          : null;
+      const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.template);
+      const fieldUserAction = userActionBuilder?.build({
+        caseId,
+        owner,
+        user,
+        payload: { template: payloadTemplate },
+      });
+      return fieldUserAction ? [fieldUserAction] : [];
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -247,13 +290,26 @@ export class UserActionPersister {
     return fieldUserAction ? [fieldUserAction] : [];
   }
 
-  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
+  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseAssignee>) {
     const createPayload: CreatePayloadFunction<
       CaseUserProfile,
       typeof UserActionTypes.assignees
     > = (items: CaseAssignees) => ({ assignees: items });
 
-    return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.assignees);
+    // assigneeIdentity persists username/full_name/email on the SO; client PATCHes uid-only.
+    // Diff by uid so retained assignees are not recorded as delete+add.
+    const toUidOnly = (assignees: CaseAssignee[]): CaseUserProfile[] =>
+      assignees.map(({ uid }) => ({ uid }));
+
+    return this.buildAddDeleteUserActions(
+      {
+        ...params,
+        originalValue: toUidOnly(params.originalValue),
+        newValue: toUidOnly(params.newValue),
+      },
+      createPayload,
+      UserActionTypes.assignees
+    );
   }
 
   private buildTagsUserActions(params: TypedUserActionDiffedItems<string>) {
@@ -511,7 +567,7 @@ export class UserActionPersister {
       // a doc that wasn't actually persisted.
       const successes: Array<SavedObject<UserActionPersistedAttributes>> = [];
       for (const so of response.saved_objects) {
-        if (so.error == null) successes.push(so);
+        if (!isSavedObjectErrorResult(so)) successes.push(so);
       }
       if (successes.length > 0) {
         this.context.analyticsV2ActivityWriter.bulkUpsertActions(successes);

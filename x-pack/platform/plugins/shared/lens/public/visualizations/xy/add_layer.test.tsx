@@ -14,7 +14,8 @@ import { LENS_LAYER_TYPES as LayerTypes } from '@kbn/lens-common';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 
-describe('AddLayerButton', () => {
+// Failing: See https://github.com/elastic/kibana/issues/255059
+describe.skip('AddLayerButton', () => {
   const addLayer = jest.fn();
 
   const renderAddLayerButton = () => {

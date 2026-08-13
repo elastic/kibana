@@ -1195,10 +1195,6 @@ steps:
       mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
         created: [createWorkflowDto({ id: 'wf-b1' }), createWorkflowDto({ id: 'wf-b2' })],
         failed: [],
-        historyActionsById: {
-          'wf-b1': 'create',
-          'wf-b2': 'create',
-        },
       });
 
       await api.bulkCreateWorkflows(
@@ -1216,14 +1212,10 @@ steps:
       );
     });
 
-    it('uses per-item create/update actions in bulkCreateWorkflows when overwrite is true', async () => {
+    it('notifies SML with "create" for bulkCreateWorkflows when overwrite is true', async () => {
       mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
         created: [createWorkflowDto({ id: 'wf-new' }), createWorkflowDto({ id: 'wf-existing' })],
         failed: [],
-        historyActionsById: {
-          'wf-new': 'create',
-          'wf-existing': 'update',
-        },
       });
 
       await api.bulkCreateWorkflows(
@@ -1239,7 +1231,7 @@ steps:
         expect.objectContaining({ originId: 'wf-new', action: 'create' })
       );
       expect(mockSmlIndex).toHaveBeenCalledWith(
-        expect.objectContaining({ originId: 'wf-existing', action: 'update' })
+        expect.objectContaining({ originId: 'wf-existing', action: 'create' })
       );
     });
 

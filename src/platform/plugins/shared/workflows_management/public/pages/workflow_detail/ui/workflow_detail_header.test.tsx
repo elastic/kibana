@@ -9,6 +9,8 @@
 
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { of } from 'rxjs';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
@@ -41,10 +43,11 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => mockUseParams(),
 }));
-// Force the app menu to render at the xl breakpoint so all menu items
-// (run, executions) are displayed inline instead of collapsed into an overflow popover.
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
+  // Keep app menu breakpoint checks on xl so its items render inline in tests.
   useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
 }));
 jest.mock('@kbn/workflows-ui', () => ({
@@ -155,7 +158,25 @@ describe('WorkflowDetailHeader', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: {
+            management: {
+              insightsAndAlerting: {
+                triggersActionsConnectors: true,
+              },
+            },
+          },
           navigateToApp: mockNavigateToApp,
+          getUrlForApp: jest.fn(
+            (appId: string, options?: { deepLinkId?: string; path?: string }) => {
+              const deepLinkPath = options?.deepLinkId
+                ? `/insightsAndAlerting/${options.deepLinkId}`
+                : '';
+              return `/app/${appId}${deepLinkPath}${options?.path ?? ''}`;
+            }
+          ),
+          applications$: of(
+            new Map([['context_engine', { id: 'context_engine', title: 'Context Engine' }]])
+          ),
         },
         settings: {
           client: {
@@ -188,7 +209,12 @@ describe('WorkflowDetailHeader', () => {
   beforeAll(async () => {
     mockUseKibana.mockReturnValue({
       services: {
-        application: { navigateToApp: jest.fn() },
+        application: {
+          capabilities: {},
+          navigateToApp: jest.fn(),
+          getUrlForApp: jest.fn(),
+          applications$: of(new Map()),
+        },
         settings: { client: { get: () => '' } },
       },
     });
@@ -213,6 +239,18 @@ describe('WorkflowDetailHeader', () => {
     expect(getAllByText('Test Workflow').length).toBeGreaterThan(0);
   });
 
+  it('links to connector management from the overflow menu', async () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+    await openAppMenuOverflow();
+
+    expect(await result.findByTestId('workflowAddConnectorsLink')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+    );
+    expect(result.queryByText('Add integrations')).not.toBeInTheDocument();
+  });
+
   it('navigates back to the workflows list with the stored list search params', () => {
     const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
       routerHistory: [
@@ -228,6 +266,43 @@ describe('WorkflowDetailHeader', () => {
     expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
       path: '?tags=prod&enabled=true',
     });
+  });
+
+  it('navigates back to the originating app when returnApp/returnPath query params are present', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      routerHistory: [
+        {
+          pathname: '/test-123',
+          search: '?returnApp=context_engine&returnPath=%2Fai_index%2F1',
+        },
+      ],
+    });
+
+    expect(result.getByTestId('appHeaderBack')).toHaveAttribute(
+      'aria-label',
+      'Back to Context Engine'
+    );
+
+    fireEvent.click(result.getByTestId('appHeaderBack'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('context_engine', {
+      path: '/ai_index/1',
+    });
+  });
+
+  it('falls back to the workflows list when returnApp is not a known app', () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />, {
+      routerHistory: [
+        {
+          pathname: '/test-123',
+          search: '?returnApp=unknown_app&returnPath=%2Fsomewhere',
+        },
+      ],
+    });
+
+    fireEvent.click(result.getByTestId('appHeaderBack'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, undefined);
   });
 
   it('shows saved status when no changes', () => {
@@ -536,7 +611,7 @@ describe('WorkflowDetailHeader', () => {
     });
   });
 
-  it('exposes the change history entry point on the workflow tab when a workflow id is present', () => {
+  it('exposes the change history entry point on the workflow tab when a workflow id is present', async () => {
     const changeHistoryModal = {
       isOpen: false,
       openModal: jest.fn(),
@@ -548,8 +623,9 @@ describe('WorkflowDetailHeader', () => {
       </ChangeHistoryModalContext.Provider>
     );
 
-    // The History action lives in the app menu's overflow popover; open it and confirm.
-    fireEvent.click(getByTestId('app-menu-overflow-button'));
+    // History lives in the overflow ("More") menu, so open it before locating the entry point.
+    await openAppMenuOverflow();
+
     const historyItem = getByTestId('workflowDetailHistoryButton');
     expect(historyItem).toBeInTheDocument();
 
@@ -573,7 +649,7 @@ describe('WorkflowDetailHeader', () => {
       openModal: jest.fn(),
       closeModal: jest.fn(),
     };
-    const { queryByTestId, getByTestId } = render(
+    const { queryByTestId } = render(
       <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
         <WorkflowDetailHeader {...defaultProps} />
       </ChangeHistoryModalContext.Provider>,
@@ -582,9 +658,6 @@ describe('WorkflowDetailHeader', () => {
       }
     );
 
-    // The overflow trigger still exists for the standard header entries (docs, etc.),
-    // but History should not be inside it on the executions tab.
-    fireEvent.click(getByTestId('app-menu-overflow-button'));
     expect(queryByTestId('workflowDetailHistoryButton')).not.toBeInTheDocument();
   });
 });

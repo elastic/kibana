@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 
 /**
  * A domain event published on the in-process bus.
@@ -91,6 +91,6 @@ export interface EventBusSubscriber<TEvent extends DomainEvent = DomainEvent, TC
  * registers itself under this token. `bind_on_setup` retrieves the full
  * list and attaches each one.
  */
-export const EventBusSubscriberToken = Symbol.for(
+export const EventBusSubscriberToken = createToken<EventBusSubscriber>(
   'alerting_v2.EventBusSubscriber'
-) as ServiceIdentifier<EventBusSubscriber>;
+);

@@ -62,7 +62,7 @@ export const CUSTOM_UNIT_ARIA_LABEL = i18n.translate(
 );
 export const PAST_DATETIME_ERROR = i18n.translate(
   'responseOpsAlertSnooze.quickSnoozePanel.pastDateTimeError',
-  { defaultMessage: 'Cannot snooze an alert for a past date or time.' }
+  { defaultMessage: 'Cannot snooze using a past date and time.' }
 );
 export const INVALID_DURATION_ERROR = i18n.translate(
   'responseOpsAlertSnooze.quickSnoozePanel.invalidDurationError',
@@ -164,9 +164,9 @@ export const CONDITION_VALUE_PLACEHOLDER = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValuePlaceholder',
   { defaultMessage: 'Value' }
 );
-export const FIELD_NAME_PLACEHOLDER = i18n.translate(
-  'responseOpsAlertSnooze.conditionalSnoozePanel.fieldNamePlaceholder',
-  { defaultMessage: 'Field name' }
+export const SELECT_FIELD_PLACEHOLDER = i18n.translate(
+  'responseOpsAlertSnooze.conditionalSnoozePanel.selectFieldPlaceholder',
+  { defaultMessage: 'Select a field' }
 );
 export const CONDITION_VALUE_ARIA_LABEL = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.conditionValueAriaLabel',

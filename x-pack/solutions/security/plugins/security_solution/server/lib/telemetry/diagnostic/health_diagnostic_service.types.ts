@@ -13,6 +13,7 @@ import type {
 import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { CircuitBreakerResult } from './health_diagnostic_circuit_breakers.types';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
+export { NotAllowedError } from './health_diagnostic_errors';
 
 /**
  * Enum defining the types of actions that can be applied to data,
@@ -85,18 +86,24 @@ export interface HealthDiagnosticQueryConfig {
 }
 
 /**
- * Fields shared across all known query descriptor versions.
+ * Narrow base shared by all query descriptor versions (no type/query/size/tiers).
  */
-export interface HealthDiagnosticQueryBase {
+export interface HealthDiagnosticQueryCommonBase {
   id: string;
   name: string;
-  type: QueryType;
-  query: string;
   scheduleCron: string;
   filterlist: Record<string, Action>;
   enabled: boolean;
-  size?: number;
   encryptionKeyId?: string;
+}
+
+/**
+ * Fields shared across all known query descriptor versions.
+ */
+export interface HealthDiagnosticQueryBase extends HealthDiagnosticQueryCommonBase {
+  type: QueryType;
+  query: string;
+  size?: number;
   tiers?: string[];
 }
 
@@ -133,9 +140,24 @@ export interface ParseFailureQuery {
   _raw: unknown;
 }
 
+/**
+ * v3 query descriptor — targets a Kibana/ES HTTP API endpoint directly.
+ */
+export interface HealthDiagnosticQueryV3 extends HealthDiagnosticQueryCommonBase {
+  version: 3;
+  type: 'API';
+  api: string;
+  pathParams?: Record<string, string>;
+  queryParams?: Record<string, string | number>;
+  responsePath?: string;
+  responsePathKey?: string;
+  integrations?: string[];
+}
+
 export type HealthDiagnosticQuery =
   | HealthDiagnosticQueryV1
   | HealthDiagnosticQueryV2
+  | HealthDiagnosticQueryV3
   | ParseFailureQuery;
 
 /**
@@ -169,7 +191,14 @@ export interface SkippedQuery {
   reason: SkipReason;
 }
 
-export type ResolvedQuery = ExecutableQuery | SkippedQuery;
+/**
+ * A resolved API query ready for HTTP execution.
+ */
+export type ApiExecutableQuery =
+  | { kind: 'executable_api'; query: HealthDiagnosticQueryV3 }
+  | { kind: 'executable_api'; query: HealthDiagnosticQueryV3; resolution: IntegrationResolution };
+
+export type ResolvedQuery = ExecutableQuery | ApiExecutableQuery | SkippedQuery;
 
 export interface HealthDiagnosticQueryResult {
   name: string;

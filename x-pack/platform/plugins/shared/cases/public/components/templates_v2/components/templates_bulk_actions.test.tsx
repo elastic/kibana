@@ -152,7 +152,9 @@ describe('TemplatesBulkActions', () => {
 
     expect(await screen.findByText('Delete 2 templates?')).toBeInTheDocument();
     expect(
-      screen.getByText('This action will permanently delete these 2 templates.')
+      screen.getByText(
+        'These 2 templates will no longer apply to new cases. Cases already using them keep their values. Export first if you want to keep a copy.'
+      )
     ).toBeInTheDocument();
   });
 
@@ -164,7 +166,9 @@ describe('TemplatesBulkActions', () => {
 
     expect(await screen.findByText('Delete 1 template?')).toBeInTheDocument();
     expect(
-      screen.getByText('This action will permanently delete this template.')
+      screen.getByText(
+        'This template will no longer apply to new cases. Cases already using it keep their values. Export first if you want to keep a copy.'
+      )
     ).toBeInTheDocument();
   });
 

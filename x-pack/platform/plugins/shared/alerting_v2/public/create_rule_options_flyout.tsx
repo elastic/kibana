@@ -231,6 +231,9 @@ const CreateRuleOptionsFlyoutInner = ({
         size="s"
         ownFocus
         onClose={onClose}
+        aria-label={i18n.translate('xpack.alertingV2.createAlertFlyout.loadingFlyoutAriaLabel', {
+          defaultMessage: 'Create rule',
+        })}
         data-test-subj="createAlertFlyoutLoading"
       >
         <EuiFlyoutBody>
@@ -303,7 +306,7 @@ const CreateRuleOptionsFlyoutInner = ({
       onCreateWithAgent={navigateToAgentBuilder}
       createWithAgentDisabled={createWithAgentDisabled}
       createWithAgentTooltipText={createWithAgentTooltipText}
-      onCreateThresholdAlert={() => setStep({ type: 'threshold' })}
+      onCreateThresholdRule={() => setStep({ type: 'threshold' })}
       legacyRuleTypes={legacyPanelItems}
     />
   );

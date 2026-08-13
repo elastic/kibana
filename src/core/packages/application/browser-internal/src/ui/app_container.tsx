@@ -38,6 +38,7 @@ interface Props {
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
+  setAppNotFoundState: (active: boolean) => void;
   showPlainSpinner?: boolean;
 }
 
@@ -50,6 +51,7 @@ export const AppContainer: FC<Props> = ({
   createScopedHistory,
   appStatus,
   setIsMounting,
+  setAppNotFoundState,
   theme$,
   showPlainSpinner,
 }: Props) => {
@@ -67,9 +69,17 @@ export const AppContainer: FC<Props> = ({
       }
     };
 
-    if (!mounter || appStatus !== AppStatus.accessible) {
-      return setAppNotFound(true);
+    const isAppNotFound = !mounter || appStatus !== AppStatus.accessible;
+
+    if (isAppNotFound) {
+      setAppNotFoundState(true);
+      setAppNotFound(true);
+      return () => {
+        setAppNotFoundState(false);
+      };
     }
+
+    setAppNotFoundState(false);
     setAppNotFound(false);
 
     setIsMounting(true);
@@ -103,7 +113,10 @@ export const AppContainer: FC<Props> = ({
 
     mount();
 
-    return unmount;
+    return () => {
+      setAppNotFoundState(false);
+      unmount();
+    };
   }, [
     appId,
     appStatus,
@@ -113,6 +126,7 @@ export const AppContainer: FC<Props> = ({
     setAppActionMenu,
     appPath,
     setIsMounting,
+    setAppNotFoundState,
     theme$,
   ]);
 

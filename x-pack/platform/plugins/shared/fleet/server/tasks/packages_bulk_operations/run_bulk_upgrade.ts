@@ -43,13 +43,13 @@ interface BulkUpgradeTaskState {
 }
 
 export async function _runBulkUpgradeTask({
-  abortController,
+  signal,
   taskParams,
   logger,
   request,
 }: {
   taskParams: BulkUpgradeTaskParams;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   request: KibanaRequest;
 }) {
@@ -67,7 +67,7 @@ export async function _runBulkUpgradeTask({
 
   for (const pkg of packages) {
     // Throw between package install if task is aborted
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {
@@ -126,6 +126,9 @@ async function bulkUpgradePackagePolicies({
   });
 
   if (policyIdsToUpgrade.items.length) {
+    // Agentless is intentionally NOT filtered out under disableAgentlessLegacyAPI: the flag targets
+    // the public legacy policy APIs, not this system path. Same engine the agentless API uses, and
+    // the periodic deployment-sync task reconciles the workload by revision.
     const upgradePackagePoliciesResults = await packagePolicyService.bulkUpgrade(
       savedObjectsClient,
       esClient,

@@ -10,7 +10,8 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { render, screen } from '@testing-library/react';
-import { DiscoverRouter } from './discover_router';
+import type { Capabilities } from '@kbn/core/public';
+import { DiscoverRouter, getReadOnlyBadge } from './discover_router';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import type { HistoryLocationState } from '../build_services';
@@ -84,5 +85,24 @@ describe('DiscoverRouter', () => {
     const history = renderWithRouter('/context/test-dataview/test-id');
     expect(screen.getByTestId('context-app-route')).toBeInTheDocument();
     expect(history.location.pathname).toBe('/context/test-dataview/test-id');
+  });
+});
+
+describe('getReadOnlyBadge', () => {
+  const capabilitiesWithSave = (save: boolean) =>
+    ({ discover_v2: { save } } as unknown as Capabilities);
+
+  it('returns undefined when the user has save privileges', () => {
+    expect(getReadOnlyBadge({ capabilities: capabilitiesWithSave(true) })).toBeUndefined();
+  });
+
+  it('returns a "Read only" badge when the user lacks save privileges', () => {
+    const badge = getReadOnlyBadge({ capabilities: capabilitiesWithSave(false) });
+
+    expect(badge).not.toBeUndefined();
+    expect(badge!.badgeText).toBe('Read only');
+
+    render(<>{badge!.renderCustomBadge?.({ badgeText: badge!.badgeText })}</>);
+    expect(screen.getByTestId('discover-readonly-badge')).toBeInTheDocument();
   });
 });

@@ -44,17 +44,27 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   ECH_AGENTLESS_OUTPUT_ID,
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
   SERVERLESS_AGENTLESS_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
 } from '../../constants';
+import {
+  canUseManagedBulk,
+  type AgentPolicyForOutputEligibility,
+} from '../../../common/services/output_helpers';
 
 import { appContextService } from '../app_context';
 
 import { listEnrollmentApiKeys } from '../api_keys';
 import { fleetServerHostService } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
-import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
+import {
+  prependAgentlessApiBasePathToEndpoint,
+  isAgentlessEnabled,
+  isManagedBulkEnabled,
+} from '../utils/agentless';
 import {
   AGENTLESS_API_ERROR_CODES,
   MAXIMUM_RETRIES,
@@ -86,24 +96,42 @@ export interface AgentlessAgentService {
 }
 
 class AgentlessAgentServiceImpl implements AgentlessAgentService {
-  public getDefaultSettings() {
+  /** Fleet server host is chosen purely by cloud environment, independent of the policy. */
+  public getDefaultFleetServerId() {
     const cloudSetup = appContextService.getCloud();
     const isCloud = cloudSetup?.isCloudEnabled;
     const isServerless = cloudSetup?.isServerlessEnabled;
-    const outputId = isServerless
-      ? SERVERLESS_AGENTLESS_OUTPUT_ID
-      : isCloud
-      ? ECH_AGENTLESS_OUTPUT_ID
-      : undefined;
-    const fleetServerId = isServerless
+    return isServerless
       ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
       : isCloud
       ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
       : undefined;
+  }
 
+  /** Data output depends on the policy: connector and OTel policies stay on direct ES. */
+  public getDefaultOutputId(agentPolicy: AgentPolicyForOutputEligibility) {
+    const cloudSetup = appContextService.getCloud();
+    const isCloud = cloudSetup?.isCloudEnabled;
+    const isServerless = cloudSetup?.isServerlessEnabled;
+    // TODO(cursor-state): https://github.com/elastic/ingest-dev/issues/8636 — the managed bulk
+    // output has no usable direct-ES URL for the agentless state store; cursor state routing is
+    // unresolved and not wired up here.
+    const useManagedBulk = isManagedBulkEnabled() && canUseManagedBulk(agentPolicy);
+    return isServerless
+      ? useManagedBulk
+        ? SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID
+        : SERVERLESS_AGENTLESS_OUTPUT_ID
+      : isCloud
+      ? useManagedBulk
+        ? ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID
+        : ECH_AGENTLESS_OUTPUT_ID
+      : undefined;
+  }
+
+  public getDefaultSettings(agentPolicy: AgentPolicyForOutputEligibility) {
     return {
-      outputId,
-      fleetServerId,
+      outputId: this.getDefaultOutputId(agentPolicy),
+      fleetServerId: this.getDefaultFleetServerId(),
     };
   }
 
@@ -634,7 +662,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
 
       throw this.getAgentlessAgentError(
         action,
-        `the Agentless API could not ${action} the agentless agent`,
+        `Could not ${action} the managed integration. Please try again, or contact your administrator.`,
         traceId
       );
     }
@@ -730,161 +758,161 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       400: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 400, bad request for agentless policy.',
-          message: `The Agentless API could not create the agentless agent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not create the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a status 400, bad request for agentless policy.',
-          message: `The Agentless API could not delete the agentless deployment. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not delete the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a status 400, bad request for agentless policy.',
-          message: `The Agentless API could not upgrade the agentless agent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not upgrade the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a status 400, bad request.',
-          message: `The Agentless API could not list the agentless deployments. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       401: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 401 unauthorized for agentless policy.',
-          message: `The Agentless API could not create the agentless agent because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not create the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a status 401 unauthorized for agentless policy.',
-          message: `The Agentless API could not delete the agentless deployment because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not delete the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a status 401 unauthorized for agentless policy.',
-          message: `The Agentless API could not upgrade the agentless agent because an unauthorized request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not upgrade the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a status 401 unauthorized.',
-          message: `The Agentless API could not list the agentless deployments because an unauthorized request was sent. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       403: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 403 forbidden for agentless policy.',
-          message: `The Agentless API could not create the agentless agent because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not create the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a status 403 forbidden for agentless policy.',
-          message: `The Agentless API could not delete the agentless deployment because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not delete the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a status 403 forbidden for agentless policy.',
-          message: `The Agentless API could not upgrade the agentless agent because a forbidden request was sent. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not upgrade the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a status 403 forbidden.',
-          message: `The Agentless API could not list the agentless deployments because a forbidden request was sent. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       404: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 404 not found.',
-          message: `The Agentless API could not create the agentless agent because it returned a 404 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not create the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a status 404 not found.',
-          message: `The Agentless API could not delete the agentless deployment because it could not be found. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not delete the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a status 404 not found.',
-          message: `The Agentless API could not upgrade the agentless agent because it returned a 404 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not upgrade the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a status 404 not found.',
-          message: `The Agentless API could not list the agentless deployments because it could not be found. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       408: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 408, the request timed out.',
-          message: `The Agentless API request timed out. Please wait a few minutes for the agent to enroll with Fleet. If the agent fails to enroll, delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The request timed out. Please wait a few minutes for the managed integration to finish setting up. If it does not, delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a status 408, the request timed out.',
-          message: `The Agentless API request timed out. Please wait a few minutes for the deployment to be removed. If it persists, delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `The request timed out. Please wait a few minutes for the managed integration to be removed. If it persists, delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a status 408, the request timed out.',
-          message: `The Agentless API request timed out during the upgrade process. Please try again later or contact your administrator.`,
+          message: `The request timed out during the upgrade. Please try again later, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a status 408 request timed out.',
-          message: `The Agentless API could not list the agentless deployments because the request timed out. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       429: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 429, agentless agent limit reached.',
           message:
-            'You have reached the limit for agentless provisioning. Please remove some or switch to agent-based integration.',
+            'You have reached the limit for managed integrations. Please remove some or switch to agent-based integrations.',
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a status 429, agentless agent limit reached.',
           message:
-            'You have reached the limit for agentless provisioning. Please remove some or switch to agent-based integration.',
+            'You have reached the limit for managed integrations. Please remove some or switch to agent-based integrations.',
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a status 429, agentless agent limit reached.',
-          message: `The Agentless API could not list the agentless deployments because the request timed out. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       500: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a status 500 internal service error.',
-          message: `The Agentless API could not create the agentless agent because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not create the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a status 500 internal service error.',
-          message: `The Agentless API could not delete the agentless deployment because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not delete the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a status 500 internal service error.',
-          message: `The Agentless API could not upgrade the agentless agent because it returned a 500 error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not upgrade the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a status 500 internal service error.',
-          message: `The Agentless API could not list the agentless deployments because it returned a 500 error. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       unhandled_response: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with an unhandled response.',
-          message: `The Agentless API could not create the agentless agent due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not create the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with an unhandled response.',
-          message: `The Agentless API could not delete the agentless deployment due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not delete the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with an unhandled response.',
-          message: `The Agentless API could not upgrade the agentless agent due to an unexpected error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not upgrade the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with an unhandled response.',
-          message: `The Agentless API could not list the agentless deployments due to an unexpected error. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
       request_error: {
         create: {
           log: '[Agentless API] Creating the agentless agent failed with a request error.',
-          message: `The Agentless API could not create the agentless agent due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not create the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         delete: {
           log: '[Agentless API] Deleting the agentless deployment failed with a request error.',
-          message: `The Agentless API could not delete the agentless deployment due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not delete the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         upgrade: {
           log: '[Agentless API] Upgrading the agentless agent failed with a request error.',
-          message: `The Agentless API could not upgrade the agentless agent due to a request error. Please delete the agentless policy ${agentlessPolicyId} and try again or contact your administrator.`,
+          message: `Could not upgrade the managed integration. Please delete the managed integration ${agentlessPolicyId} and try again, or contact your administrator.`,
         },
         list: {
           log: '[Agentless API] Listing agentless deployments failed with a request error.',
-          message: `The Agentless API could not list the agentless deployments due to a request error. Please try again or contact your administrator.`,
+          message: `Could not list managed integrations. Please try again, or contact your administrator.`,
         },
       },
     };

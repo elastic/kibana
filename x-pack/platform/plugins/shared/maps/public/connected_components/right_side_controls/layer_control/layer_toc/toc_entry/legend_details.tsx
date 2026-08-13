@@ -7,8 +7,9 @@
 
 import React from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useErrorTextStyle } from '@kbn/react-hooks';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { ILayer } from '../../../../../classes/layers/layer';
 
 interface Props {
@@ -25,9 +26,9 @@ export function LegendDetails({ inspectorAdapters, layer }: Props) {
       <>
         {errors.map(({ title, body }, index) => (
           <div key={index}>
-            <EuiCallOut announceOnMount color="danger" size="s" title={title} css={errorTextStyle}>
+            <KbnDangerCallout announceOnMount size="s" title={title} css={errorTextStyle}>
               {body}
-            </EuiCallOut>
+            </KbnDangerCallout>
             <EuiSpacer size="m" />
           </div>
         ))}
@@ -40,9 +41,9 @@ export function LegendDetails({ inspectorAdapters, layer }: Props) {
     <>
       {warnings.map(({ title, body }, index) => (
         <div key={index}>
-          <EuiCallOut announceOnMount color="warning" size="s" css={errorTextStyle}>
+          <KbnWarningCallout announceOnMount size="s" title={title} css={errorTextStyle}>
             {body}
-          </EuiCallOut>
+          </KbnWarningCallout>
           <EuiSpacer size="m" />
         </div>
       ))}

@@ -23,6 +23,7 @@ import type {
   McpClientOptions,
 } from './types';
 import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
+import { ZodJsonSchemaValidator } from './json_schema_validator';
 
 /**
  * Produces a human-readable error message from a connection error,
@@ -82,10 +83,15 @@ export class McpClient {
     this.name = clientDetails.name;
     this.version = clientDetails.version;
 
-    this.client = new Client({
-      name: clientDetails.name,
-      version: clientDetails.version,
-    });
+    this.client = new Client(
+      {
+        name: clientDetails.name,
+        version: clientDetails.version,
+      },
+      {
+        jsonSchemaValidator: new ZodJsonSchemaValidator(this.logger),
+      }
+    );
   }
 
   /**

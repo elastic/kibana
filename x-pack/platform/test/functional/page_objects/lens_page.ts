@@ -247,6 +247,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
+        if (opts.isPreviousIncompatible) {
+          // Incomplete → field must commit before close, or close discards the transition.
+          await retry.waitFor('incompatible field transition to complete', async () => {
+            const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+            return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+          });
+        }
       }
 
       if (opts.formula) {
@@ -823,12 +830,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
     },
 
     /**
@@ -1395,9 +1397,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
-      const label = coloringType.charAt(0).toUpperCase() + coloringType.slice(1);
-      await this.selectOptionFromComboBox('lnsDatatable_dynamicColoring_groups', label);
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge' | 'progress') {
+      // The "Cell decoration" combo box label diverges from the stored value
+      // (the `cell` value is surfaced as "Background"), so map explicitly rather
+      // than title-casing the stored value.
+      const labelByColoringType: Record<typeof coloringType, string> = {
+        none: 'None',
+        cell: 'Background',
+        text: 'Text',
+        badge: 'Badge',
+        progress: 'Progress bar',
+      };
+      await this.selectOptionFromComboBox(
+        'lnsDatatable_dynamicColoring_groups',
+        labelByColoringType[coloringType]
+      );
     },
 
     async openPalettePanel() {

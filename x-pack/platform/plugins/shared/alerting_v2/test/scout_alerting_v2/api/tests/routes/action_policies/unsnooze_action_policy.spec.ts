@@ -109,6 +109,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ACTION_POLICY_NOT_FOUND');
   });
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
@@ -120,6 +121,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
     );
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
