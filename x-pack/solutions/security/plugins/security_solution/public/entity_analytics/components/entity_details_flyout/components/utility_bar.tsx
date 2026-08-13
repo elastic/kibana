@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
@@ -52,6 +53,12 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ risk
         />
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-label={i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.actionsAriaLabel',
+              {
+                defaultMessage: 'Risk contribution actions',
+              }
+            )}
             isOpen={isPopoverOpen}
             closePopover={closePopover}
             panelPaddingSize="none"

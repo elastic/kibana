@@ -33,6 +33,7 @@ import {
 import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
@@ -144,6 +145,17 @@ async function runTask({
 
   if (!namespace) {
     throw new Error('Namespace is required for status report task');
+  }
+
+  const [coreStart] = await core.getStartServices();
+  if (
+    await shouldDeleteOrphanedEntityStoreTask({
+      coreStart,
+      namespace,
+      logger,
+    })
+  ) {
+    return { state: { namespace }, shouldDeleteTask: true };
   }
 
   if (!fakeRequest) {

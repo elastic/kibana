@@ -13,7 +13,6 @@ import {
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
-  OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
 } from '@kbn/management-settings-ids';
 import {
@@ -21,7 +20,6 @@ import {
   DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
   DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
-  DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE,
   DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
 } from '@kbn/significant-events-plugin/common';
 import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
@@ -32,7 +30,6 @@ export interface ScheduledDiscoveryState {
   targetCoverageMinutes: number;
   reviewIntervalMinutes: number;
   discoveryBatchSize: number;
-  triageBatchSize: number;
   maxReviewPasses: number;
 }
 
@@ -56,10 +53,6 @@ const readSettingsFromClient = (client: IUiSettingsClient): ScheduledDiscoverySt
   discoveryBatchSize: client.get<number>(
     OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
     DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE
-  ),
-  triageBatchSize: client.get<number>(
-    OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
-    DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE
   ),
   maxReviewPasses: client.get<number>(
     OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,
@@ -95,7 +88,6 @@ export const useScheduledDiscoverySettings = ({
       draft.targetCoverageMinutes !== saved.targetCoverageMinutes ||
       draft.reviewIntervalMinutes !== saved.reviewIntervalMinutes ||
       draft.discoveryBatchSize !== saved.discoveryBatchSize ||
-      draft.triageBatchSize !== saved.triageBatchSize ||
       draft.maxReviewPasses !== saved.maxReviewPasses,
     [draft, saved]
   );
@@ -129,10 +121,6 @@ export const useScheduledDiscoverySettings = ({
       client.set(
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE,
         draft.discoveryBatchSize
-      ),
-      client.set(
-        OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE,
-        draft.triageBatchSize
       ),
       client.set(
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES,

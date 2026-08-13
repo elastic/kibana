@@ -285,7 +285,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
             <EuiFlexItem grow>{label}</EuiFlexItem>
             <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
               <EuiIcon
-                type="arrowRight"
+                type="chevronSingleRight"
                 color="subdued"
                 aria-hidden={true}
                 data-test-subj={`solutionSideNavItemPanelHint-${id}`}

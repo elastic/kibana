@@ -10,7 +10,6 @@ import {
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
-  EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +27,6 @@ import { useConversationId } from '../../../context/conversation/use_conversatio
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../utils/app_paths';
-import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
@@ -77,7 +75,6 @@ interface MoreActionsButtonProps {
 
 export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSidebar }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const agentId = useAgentId();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
@@ -183,7 +180,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     ? [
         <EuiContextMenuItem
           key="addConversationToDataset"
-          icon="beaker"
+          icon="flask"
           data-test-subj="agentBuilderAddConversationToDataset"
           onClick={onAddConversationToDataset}
           {...getEbtProps({
@@ -291,7 +288,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const buttonProps = {
     iconType: 'boxesVertical' as const,
     color: 'text' as const,
-    size: 'm' as const,
+    size: 's' as const,
     'aria-label': fullscreenLabels.actionsAriaLabel,
     onClick: togglePopover,
     'data-test-subj': 'agentBuilderMoreActionsButton',
@@ -308,17 +305,12 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         button={<EuiButtonIcon {...buttonProps} />}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
-        panelPaddingSize="xs"
-        anchorPosition="downCenter"
+        panelPaddingSize="none"
+        anchorPosition="downRight"
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
         <EuiContextMenuPanel items={menuItems} />
-        <EuiSpacer size="s" />
       </EuiPopover>
-      <DeleteConversationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-      />
     </>
   );
 };
