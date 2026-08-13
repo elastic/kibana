@@ -85,11 +85,14 @@ export function DashboardRenderer({
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
-  const [dashboard, setDashboard] = useState<{
-    api: DashboardApi,
-    internalApi: DashboardInternalApi,
-    showControlGroup: boolean,
-  } | undefined>();
+  const [dashboard, setDashboard] = useState<
+    | {
+        api: DashboardApi;
+        internalApi: DashboardInternalApi;
+        showControlGroup: boolean;
+      }
+    | undefined
+  >();
   const [error, setError] = useState<Error | undefined>();
 
   const euiPaddingS = useEuiPaddingSize('s');
@@ -119,11 +122,12 @@ export function DashboardRenderer({
 
   useEffect(() => {
     if (
-      dashboard && dashboard?.internalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+      dashboard &&
+      dashboard?.internalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
     ) {
       dashboard.internalApi.setDashboardContainerRef(dashboardContainerRef.current);
     }
-  }, [dashboard?.internalApi]);
+  }, [dashboard]);
 
   useEffect(() => {
     if (error) setError(undefined);
@@ -143,8 +147,8 @@ export function DashboardRenderer({
         setDashboard({
           api: results.api,
           internalApi: results.internalApi,
-          showControlGroup: results.useControlsIntegration
-        })
+          showControlGroup: results.useControlsIntegration,
+        });
         onApiAvailable?.(results.api, results.internalApi);
       })
       .catch((err) => {
