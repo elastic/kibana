@@ -30,6 +30,7 @@ const rulesRunSchema = schema.object({
   alerts: schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
+  timeout: schema.maybe(schema.string({ validate: validateDuration })),
 });
 
 const rulesSchema = schema.object({

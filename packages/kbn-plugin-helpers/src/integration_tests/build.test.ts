@@ -123,7 +123,7 @@ describe('scripts/generate_plugin', () => {
       "optionalPlugins": Array [],
       "owner": Object {
         "githubTeam": "",
-        "name": "",
+        "name": "Plugin Author",
       },
       "requiredPlugins": Array [],
       "server": true,

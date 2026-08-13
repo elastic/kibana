@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import {
   formValuesToYamlObject,
   parseYamlToFormValues,
@@ -38,7 +38,7 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name', 'service.name'],
         },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'immediate',
       };
@@ -65,7 +65,7 @@ describe('yaml_form_utils', () => {
         grouping: {
           fields: ['host.name', 'service.name'],
         },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
       });
     });
 
@@ -154,6 +154,18 @@ describe('yaml_form_utils', () => {
       expect(result).not.toHaveProperty('state_transition');
     });
 
+    it('excludes state_transition for signal even when form state still holds it', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        kind: 'signal',
+        stateTransition: { pendingCount: 3, recoveringCount: 1 },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result).not.toHaveProperty('state_transition');
+    });
+
     it('excludes empty grouping fields array', () => {
       const formValues: FormValues = {
         ...defaultTestFormValues,
@@ -196,23 +208,11 @@ describe('yaml_form_utils', () => {
 
       expect(result).not.toHaveProperty('no_data_strategy');
     });
-
-    it('excludes no_data_strategy for signal rules even when set', () => {
-      const formValues: FormValues = {
-        ...defaultTestFormValues,
-        kind: 'signal',
-        noDataStrategy: 'recover',
-      };
-
-      const result = formValuesToYamlObject(formValues);
-
-      expect(result).not.toHaveProperty('no_data_strategy');
-    });
   });
 
   describe('parseYamlToFormValues', () => {
     it('parses valid YAML with standalone query to FormValues', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: {
           name: 'Test Rule',
@@ -232,8 +232,8 @@ describe('yaml_form_utils', () => {
           fields: ['host.name'],
         },
         artifacts: [
-          { id: 'artifact-1', type: 'host', value: 'host-a' },
-          { id: 'artifact-2', type: 'service', value: 'service-a' },
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          { id: 'artifact-2', type: 'service', data: { value: 'service-a' } },
         ],
       });
 
@@ -264,8 +264,8 @@ describe('yaml_form_utils', () => {
             fields: ['host.name'],
           },
           artifacts: [
-            { id: 'artifact-1', type: 'host', value: 'host-a' },
-            { id: 'artifact-2', type: 'service', value: 'service-a' },
+            { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+            { id: 'artifact-2', type: 'service', data: { value: 'service-a' } },
           ],
           stateTransitionAlertDelayMode: 'immediate',
           stateTransitionRecoveryDelayMode: 'immediate',
@@ -274,7 +274,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('parses composed query YAML to FormValues', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'Composed Rule' },
         query: {
@@ -297,7 +297,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('accepts bare string breach/recovery for standalone backward compatibility', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Bare string' },
         query: {
           format: 'standalone',
@@ -317,7 +317,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('parses no_data_strategy from YAML', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'No data rule' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -331,7 +331,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('defaults invalid no_data_strategy to none for alert rules', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'Invalid strategy' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -345,7 +345,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('defaults noDataStrategy to none for alert rules when absent from YAML', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'No strategy' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -358,7 +358,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('defaults noDataStrategy to undefined for signal rules when absent from YAML', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'signal',
         metadata: { name: 'Signal rule' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -371,17 +371,21 @@ describe('yaml_form_utils', () => {
     });
 
     it('ignores invalid artifacts entries', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with mixed artifacts' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }, { id: 1 }, 'bad'],
+        artifacts: [
+          { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
+          { id: 1 },
+          'bad',
+        ],
       });
 
       const result = parseYamlToFormValues(yaml);
 
       expect(result.error).toBeNull();
       expect(result.values?.artifacts).toEqual([
-        { id: 'artifact-1', type: 'host', value: 'host-a' },
+        { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
       ]);
     });
 
@@ -404,7 +408,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns error for invalid kind value', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'invalid',
         metadata: { name: 'Test' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -417,7 +421,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns values with empty name when metadata.name is missing', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: {},
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -430,7 +434,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns values with trimmed empty name when name is whitespace', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: '   ' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -443,7 +447,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns values with empty query when query is missing', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'Test' },
       });
@@ -455,7 +459,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns values for ES|QL query without validation', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'Test' },
         query: { format: 'standalone', breach: { query: 'INVALID query' } },
@@ -470,7 +474,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('uses default values for missing optional fields', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Minimal Rule' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       });
@@ -489,7 +493,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('defaults enabled to true when not specified', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Test' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       });
@@ -500,7 +504,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('respects enabled: false', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Test', enabled: false },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       });
@@ -511,7 +515,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('trims whitespace from name', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: '  Test Rule  ' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       });
@@ -522,7 +526,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('derives breaches alert delay mode from state_transition with pending_count', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with breaches' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         state_transition: { pending_count: 3 },
@@ -542,7 +546,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('derives duration alert delay mode from state_transition with pending_timeframe', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with duration' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         state_transition: { pending_timeframe: '10m' },
@@ -556,7 +560,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('derives both delay modes from state_transition with pending and recovering fields', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with both' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
         state_transition: {
@@ -579,7 +583,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('defaults both modes to immediate when no state_transition is present', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'No delay' },
         query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
       });
