@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { GetAllStatsRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
-import { createSiemMigrationClient, type SiemMigrationClient } from '../common/self_client';
+import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({}).describe('No parameters. Lists stats for every rule migration.');
@@ -30,7 +30,7 @@ export const getAllRuleMigrationStatsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
 ): BuiltinToolDefinition<typeof schema> => {
-  const callSiemMigration: SiemMigrationClient = createSiemMigrationClient({ core, logger });
+  const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
@@ -52,7 +52,7 @@ export const getAllRuleMigrationStatsTool = (
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (_input, { request }) => {
-      const response = await callSiemMigration<GetAllStatsRuleMigrationResponse>(
+      const response = await callSelfClient<GetAllStatsRuleMigrationResponse>(
         request,
         SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
         { method: 'GET' }

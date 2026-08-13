@@ -19,7 +19,7 @@ import {
 import { RuleMigrationRetryFilter } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
-import { createSiemMigrationClient, type SiemMigrationClient } from '../common/self_client';
+import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { assertMigrationPrivilege } from '../common/privileges';
 import { SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
@@ -53,7 +53,7 @@ export const startRuleMigrationTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
 ): BuiltinToolDefinition<typeof schema> => {
-  const callSiemMigration: SiemMigrationClient = createSiemMigrationClient({ core, logger });
+  const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
@@ -91,7 +91,7 @@ export const startRuleMigrationTool = (
         '{migration_id}',
         encodeURIComponent(migrationId)
       );
-      const response = await callSiemMigration<StartRuleMigrationResponse>(request, path, {
+      const response = await callSelfClient<StartRuleMigrationResponse>(request, path, {
         method: 'POST',
         body,
       });

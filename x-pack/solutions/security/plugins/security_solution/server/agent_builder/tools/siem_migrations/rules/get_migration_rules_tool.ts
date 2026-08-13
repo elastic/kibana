@@ -15,7 +15,7 @@ import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../common/siem_migra
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { GetRuleMigrationRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
-import { createSiemMigrationClient, type SiemMigrationClient } from '../common/self_client';
+import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
 
 // Reuse the endpoint's request shapes, bounding the unbounded query inputs (repo rule: prevent
@@ -77,7 +77,7 @@ export const getMigrationRulesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
 ): BuiltinToolDefinition<typeof schema> => {
-  const callSiemMigration: SiemMigrationClient = createSiemMigrationClient({ core, logger });
+  const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
@@ -92,7 +92,7 @@ export const getMigrationRulesTool = (
     handler: async (input, { request }) => {
       const { migration_id: migrationId, ...query } = input;
       // Default sort: translated title asc (deterministic pagination of translated rules).
-      const response = await callSiemMigration<GetRuleMigrationRulesResponse>(
+      const response = await callSelfClient<GetRuleMigrationRulesResponse>(
         request,
         buildPath(migrationId),
         {

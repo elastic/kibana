@@ -14,7 +14,7 @@ import { SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH } from '../../../../../commo
 import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
-import { createSiemMigrationClient, type SiemMigrationClient } from '../common/self_client';
+import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -52,7 +52,7 @@ export const getRuleMigrationTranslationStatsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger
 ): BuiltinToolDefinition<typeof schema> => {
-  const callSiemMigration: SiemMigrationClient = createSiemMigrationClient({ core, logger });
+  const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
@@ -78,7 +78,7 @@ export const getRuleMigrationTranslationStatsTool = (
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
-      const response = await callSiemMigration<GetRuleMigrationTranslationStatsResponse>(
+      const response = await callSelfClient<GetRuleMigrationTranslationStatsResponse>(
         request,
         buildPath(migrationId),
         { method: 'GET' }
