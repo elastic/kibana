@@ -246,7 +246,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed endpoint')).toBeInTheDocument();
+      expect(screen.getByText('removed endpoint attachment')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting a unified value attachment', async () => {
@@ -857,7 +857,7 @@ describe('createCommentUserActionBuilder', () => {
         await waitFor(() => {
           expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
             'persistable-state-comment-id',
-            'Deleted attachment'
+            'Deleted Lens attachment'
           );
         });
       });

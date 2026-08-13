@@ -83,7 +83,7 @@ const getDeleteLabelFromRegistry = ({
 
   return attachmentLabel != null
     ? attachmentLabel
-    : `${i18n.REMOVED_FIELD} ${attachmentType.displayName.toLowerCase()}`;
+    : `${i18n.REMOVED_FIELD} ${attachmentType.displayName.toLowerCase()} ${i18n.ATTACHMENT.toLowerCase()}`;
 };
 
 const getDeleteCommentUserAction = ({
