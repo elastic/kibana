@@ -252,22 +252,10 @@ export const FigmaConnector: ConnectorSpec = {
       defaultMessage: 'Verifies Figma API connectivity by fetching current user information',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
-        return {
-          ok: true,
-          message: `Successfully connected to Figma as ${
-            response.data.handle || response.data.email || 'user'
-          }`,
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect to Figma API: ${errorMessage}`,
-        };
-      }
+      await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
+      return {};
     },
+    enabled: true,
   },
 };
 
