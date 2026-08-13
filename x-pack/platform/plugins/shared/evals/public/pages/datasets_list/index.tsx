@@ -57,6 +57,7 @@ import {
   useDatasetSharing,
 } from '../../components/dataset_spaces';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
+import { getErrorMessage } from '../../utils/get_error_message';
 import * as i18n from './translations';
 
 type SortableField = Extract<
@@ -302,7 +303,7 @@ export const DatasetsListPage: React.FC = () => {
 
       history.push(`/datasets/${datasetId}`);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : String(err));
+      setCreateError(getErrorMessage(err));
     }
   };
 

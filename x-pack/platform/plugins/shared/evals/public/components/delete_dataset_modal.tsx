@@ -20,6 +20,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { DeleteEvaluationDatasetRequestQuery } from '@kbn/evals-common';
 import { useDeleteDataset, useEvaluationExperiments } from '../hooks/use_evals_api';
+import { getErrorMessage } from '../utils/get_error_message';
 import { useDatasetSharing } from './dataset_spaces';
 
 /** Which delete the dialog is describing, and asks the server to hold it to. */
@@ -133,7 +134,7 @@ export const DeleteDatasetModal: React.FC<DeleteDatasetModalProps> = ({
         return;
       }
 
-      setError(err instanceof Error ? err.message : String(err));
+      setError(getErrorMessage(err));
     }
   };
 

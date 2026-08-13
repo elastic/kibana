@@ -38,6 +38,7 @@ import {
 } from '@kbn/evals-common';
 import type { CoreStart } from '@kbn/core/public';
 import type { AddToDatasetFlyoutOpenOptions } from '../../types';
+import { getErrorMessage } from '../../utils/get_error_message';
 import { getSharedNoticeCopy, isSharedAssignment } from '../dataset_spaces';
 
 const DEFAULT_TITLE = i18n.translate('xpack.evals.addToDatasetFlyout.title', {
@@ -274,7 +275,7 @@ export function AddToDatasetFlyout({
         }
       } catch (error) {
         if (!didCancel) {
-          setFormError(`${LOAD_DATASETS_ERROR}: ${String(error)}`);
+          setFormError(`${LOAD_DATASETS_ERROR}: ${getErrorMessage(error)}`);
           setDatasets([]);
         }
       } finally {
@@ -502,7 +503,7 @@ export function AddToDatasetFlyout({
       addSuccessToast(createdId, examples.length);
       onClose();
     } catch (error) {
-      setFormError(`${SUBMIT_ERROR}: ${String(error)}`);
+      setFormError(`${SUBMIT_ERROR}: ${getErrorMessage(error)}`);
     } finally {
       setIsSubmitting(false);
     }

@@ -157,6 +157,26 @@ describe('DeleteDatasetModal', () => {
     expect(mutateAsync).toHaveBeenLastCalledWith({ datasetId: 'dataset-1', intent: 'unshare' });
   });
 
+  it('reports why the server refused, not the status text', async () => {
+    mutateAsync.mockRejectedValueOnce(
+      Object.assign(new Error('Forbidden'), {
+        request: {},
+        response: { status: 403 } as Response,
+        body: {
+          statusCode: 403,
+          message: 'Insufficient privileges in 1 space you do not have access to',
+        },
+      })
+    );
+
+    renderModal(['default', 'marketing']);
+    await userEvent.click(screen.getByRole('button', { name: 'Remove from this space' }));
+
+    expect(
+      screen.getByText('Insufficient privileges in 1 space you do not have access to')
+    ).toBeInTheDocument();
+  });
+
   it.each([
     [1, 'Its 1 example stays available'],
     [3, 'Its 3 examples stay available'],

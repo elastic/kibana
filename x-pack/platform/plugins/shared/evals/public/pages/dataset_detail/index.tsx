@@ -78,6 +78,7 @@ import {
   getRemovedSpaceIds,
   useDatasetSharing,
 } from '../../components/dataset_spaces';
+import { getErrorMessage } from '../../utils/get_error_message';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -264,7 +265,7 @@ export const DatasetDetailPage: React.FC = () => {
       setIsMetadataModalOpen(false);
     } catch (error) {
       setPendingSharedChange(null);
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
     }
   };
 
@@ -312,7 +313,7 @@ export const DatasetDetailPage: React.FC = () => {
       setSelectedExample(null);
     } catch (error) {
       setPendingSharedChange(null);
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
     }
   };
 
@@ -323,7 +324,7 @@ export const DatasetDetailPage: React.FC = () => {
     try {
       parseExampleEdits();
     } catch (error) {
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
       return;
     }
 
@@ -348,7 +349,7 @@ export const DatasetDetailPage: React.FC = () => {
       });
       setIsCreateExampleOpen(false);
     } catch (error) {
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
     }
   };
 
@@ -366,7 +367,7 @@ export const DatasetDetailPage: React.FC = () => {
       }
       setDeletingExample(null);
     } catch (error) {
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
     }
   };
 
