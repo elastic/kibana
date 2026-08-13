@@ -185,7 +185,7 @@ export class TemplatesMigrationTaskManager {
     // ── Phase 1: field definitions + templates (fast, bounded per space) ─────────────────────────
     await pMap(
       configures,
-      async (so) => {
+      async (so, index) => {
         const fieldsAndTemplatesDone =
           so.attributes.legacyTemplatesMigrated && so.attributes.legacyCustomFieldsMigrated;
 
@@ -207,11 +207,20 @@ export class TemplatesMigrationTaskManager {
           totals.fieldDefsReused += counts.fieldDefsReused;
           totals.templatesCreated += counts.templatesCreated;
           totals.templatesReused += counts.templatesReused;
-          // Reflect this run's phase-1 result on the in-memory snapshot so Phase 2 (below), which
-          // reads from this same `configures` array, sees a freshly-migrated space as eligible
-          // immediately instead of waiting a full extra run for the next findAllConfigurations read.
-          so.attributes.legacyCustomFieldsMigrated = counts.legacyCustomFieldsMigrated;
-          so.attributes.legacyTemplatesMigrated = counts.legacyTemplatesMigrated;
+          // Replace (never mutate) this run's in-memory snapshot so Phase 2 (below), which reads
+          // from this same `configures` array, sees a freshly-migrated space as eligible
+          // immediately instead of waiting a full extra run for the next findAllConfigurations
+          // read. Replacing the array slot — rather than assigning `so.attributes.x = ...` — also
+          // avoids a spurious require-atomic-updates flag, since `so` itself is never reassigned
+          // after the `await` above.
+          configures[index] = {
+            ...so,
+            attributes: {
+              ...so.attributes,
+              legacyCustomFieldsMigrated: counts.legacyCustomFieldsMigrated,
+              legacyTemplatesMigrated: counts.legacyTemplatesMigrated,
+            },
+          };
           this.migrationUsageCounter?.incrementCounter({
             counterName: 'configureMigrationSuccess',
             incrementBy: 1,

@@ -347,14 +347,8 @@ export const buildExtendedFieldsBackfill = (
 
   for (const cf of customFields ?? []) {
     const hasValue = cf.value !== null && cf.value !== undefined;
-    if (!hasValue) {
-      continue;
-    }
-    const storageKey = resolveStorageKey(cf);
-    if (storageKey === undefined) {
-      continue;
-    }
-    if (isEmptyExtendedFieldValue(existing[storageKey])) {
+    const storageKey = hasValue ? resolveStorageKey(cf) : undefined;
+    if (storageKey !== undefined && isEmptyExtendedFieldValue(existing[storageKey])) {
       additions[storageKey] = String(cf.value);
     }
   }
