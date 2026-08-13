@@ -13,9 +13,15 @@ export const stateSchemaByVersion = {
     // Migrates the pre-versioned `{ previousStartedAt }` state. The value is a
     // wall-clock run start, not a data position; Phase 3 changes what is written
     // but the carried-over value is a safe starting point either way.
+    // Prefer an existing eventWatermark: Task Manager re-runs every `up` from
+    // `stateVersion` through latest, so v1.up must be idempotent on v1 state.
     up: (state: Record<string, unknown>) => ({
       eventWatermark:
-        typeof state.previousStartedAt === 'string' ? state.previousStartedAt : undefined,
+        typeof state.eventWatermark === 'string'
+          ? state.eventWatermark
+          : typeof state.previousStartedAt === 'string'
+            ? state.previousStartedAt
+            : undefined,
     }),
     schema: schema.object({
       eventWatermark: schema.maybe(schema.string({ maxLength: 64 })),

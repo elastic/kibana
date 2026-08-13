@@ -31,8 +31,15 @@ describe('stateSchemaByVersion[1]', () => {
 
     it('passes through an existing eventWatermark when state already has it', () => {
       const result = up({ eventWatermark: '2026-01-22T07:30:00.000Z' });
-      // up() reads previousStartedAt, not eventWatermark; result is undefined here
-      expect(result).toEqual({ eventWatermark: undefined });
+      expect(result).toEqual({ eventWatermark: '2026-01-22T07:30:00.000Z' });
+    });
+
+    it('prefers eventWatermark over previousStartedAt when both are present', () => {
+      const result = up({
+        eventWatermark: '2026-01-22T07:45:00.000Z',
+        previousStartedAt: '2026-01-22T07:30:00.000Z',
+      });
+      expect(result).toEqual({ eventWatermark: '2026-01-22T07:45:00.000Z' });
     });
   });
 
@@ -131,6 +138,15 @@ describe('stateSchemaByVersion[2]', () => {
     it('validates after up() from a previousStartedAt state (v1 → v2)', () => {
       const v1Migrated = v1.up({ previousStartedAt: '2026-01-22T07:30:00.000Z' });
       const v2Migrated = up(v1Migrated);
+      const result = schema.validate(v2Migrated);
+      expect(result.eventWatermark).toBe('2026-01-22T07:30:00.000Z');
+      expect(result.stuckTicks).toBe(0);
+    });
+
+    it('preserves eventWatermark when Task Manager re-runs v1.up on v1 state (v1 → v2)', () => {
+      const v1State = { eventWatermark: '2026-01-22T07:30:00.000Z' };
+      const v1Reapplied = v1.up(v1State);
+      const v2Migrated = up(v1Reapplied);
       const result = schema.validate(v2Migrated);
       expect(result.eventWatermark).toBe('2026-01-22T07:30:00.000Z');
       expect(result.stuckTicks).toBe(0);
