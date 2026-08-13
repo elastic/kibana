@@ -6,11 +6,7 @@
  */
 
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import {
-  mapClassicAlertToEpisode,
-  mapClassicAlertToHistogramRow,
-  mapClassicStatusToEpisodeStatus,
-} from './map_alert';
+import { mapClassicAlertToEpisode, mapClassicStatusToEpisodeStatus } from './map_alert';
 
 describe('mapClassicStatusToEpisodeStatus', () => {
   it('maps "active" to the active episode status', () => {
@@ -122,61 +118,5 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode).not.toHaveProperty('last_ack_action');
     expect(episode).not.toHaveProperty('last_snooze_action');
     expect(episode).not.toHaveProperty('snooze_expiry');
-  });
-});
-
-describe('mapClassicAlertToHistogramRow', () => {
-  const source = {
-    'kibana.alert.uuid': 'uuid-1',
-    'kibana.alert.start': '2024-01-01T00:00:00.000Z',
-    'kibana.alert.end': '2024-01-01T01:00:00.000Z',
-    '@timestamp': '2024-01-01T01:00:00.000Z',
-    'kibana.alert.status': 'active',
-    'kibana.alert.rule.uuid': 'rule-1',
-  };
-
-  it('maps timestamps and status', () => {
-    const row = mapClassicAlertToHistogramRow(source);
-
-    expect(row.first_timestamp).toBe('2024-01-01T00:00:00.000Z');
-    expect(row.last_timestamp).toBe('2024-01-01T01:00:00.000Z');
-    expect(row['episode.status']).toBe(ALERT_EPISODE_STATUS.ACTIVE);
-  });
-
-  it('resolves breakdown field for rule.id', () => {
-    const row = mapClassicAlertToHistogramRow(source, 'rule.id');
-    expect(row['rule.id']).toBe('rule-1');
-  });
-
-  it('resolves breakdown field for episode.status', () => {
-    const row = mapClassicAlertToHistogramRow(source, 'episode.status');
-    expect(row['episode.status']).toBe(ALERT_EPISODE_STATUS.ACTIVE);
-  });
-
-  it('resolves breakdown to "ack" when workflow_status is acknowledged', () => {
-    const acked = { ...source, 'kibana.alert.workflow_status': 'acknowledged' };
-    const row = mapClassicAlertToHistogramRow(acked, 'last_ack_action');
-    expect(row.last_ack_action).toBe('ack');
-  });
-
-  it('resolves breakdown to "unack" when workflow_status is open', () => {
-    const open = { ...source, 'kibana.alert.workflow_status': 'open' };
-    const row = mapClassicAlertToHistogramRow(open, 'last_ack_action');
-    expect(row.last_ack_action).toBe('unack');
-  });
-
-  it('resolves breakdown to "unack" when workflow_status is absent', () => {
-    const row = mapClassicAlertToHistogramRow(source, 'last_ack_action');
-    expect(row.last_ack_action).toBe('unack');
-  });
-
-  it('returns null for unsupported breakdown fields', () => {
-    const row = mapClassicAlertToHistogramRow(source, 'last_assignee_uid');
-    expect(row.last_assignee_uid).toBeNull();
-  });
-
-  it('omits breakdown when not provided', () => {
-    const row = mapClassicAlertToHistogramRow(source);
-    expect(Object.keys(row)).toEqual(['first_timestamp', 'last_timestamp', 'episode.status']);
   });
 });

@@ -85,8 +85,17 @@ export const queryKeys = {
     spaceId: string | undefined,
     filterState: EpisodesFilterState,
     timeRange: TimeRange | undefined,
-    breakdownField: string | undefined
-  ) => [...queryKeys.histogramAll(), spaceId, filterState, timeRange, breakdownField] as const,
+    breakdownField: string | undefined,
+    bucketInterval: string
+  ) =>
+    [
+      ...queryKeys.histogramAll(),
+      spaceId,
+      filterState,
+      timeRange,
+      breakdownField,
+      bucketInterval,
+    ] as const,
   currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
   kpisAll: () => [...queryKeys.all, 'kpis'] as const,
   kpis: (

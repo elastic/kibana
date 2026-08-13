@@ -13,10 +13,8 @@ import {
   fetchV1AlertsTags,
   fetchV1AlertById,
 } from './classic_alerts_api';
-import {
-  CLASSIC_ALERT_EPISODE_SOURCE_FIELDS,
-  CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
-} from '../classic_alerts/map_alert';
+import { CLASSIC_ALERT_EPISODE_SOURCE_FIELDS } from '../classic_alerts/map_alert';
+import type { TimeBucket } from '../utils/histogram_utils';
 
 const mockHttp = httpServiceMock.createStartContract();
 
@@ -109,28 +107,65 @@ describe('classic_alerts_api', () => {
   });
 
   describe('fetchV1AlertsHistogram', () => {
-    it('maps hits to histogram rows', async () => {
+    const buckets: TimeBucket[] = [
+      {
+        start: new Date('2024-01-01T00:00:00.000Z').getTime(),
+        end: new Date('2024-01-01T01:00:00.000Z').getTime(),
+      },
+      {
+        start: new Date('2024-01-01T01:00:00.000Z').getTime(),
+        end: new Date('2024-01-01T02:00:00.000Z').getTime(),
+      },
+    ];
+
+    it('uses server-side filter aggregations and returns pre-computed bucket counts', async () => {
       mockHttp.post.mockResolvedValue({
-        hits: {
-          hits: [
-            makeHit({
-              'kibana.alert.start': '2024-01-01T00:00:00.000Z',
-              'kibana.alert.end': '2024-01-01T01:00:00.000Z',
-              '@timestamp': '2024-01-01T01:00:00.000Z',
-              'kibana.alert.status': 'active',
-            }),
-          ],
+        hits: { hits: [] },
+        aggregations: {
+          bucket_0: { doc_count: 3 },
+          bucket_1: { doc_count: 1 },
         },
       });
 
-      const rows = await fetchV1AlertsHistogram({ services: { http: mockHttp } });
+      const counts = await fetchV1AlertsHistogram({ services: { http: mockHttp }, buckets });
 
       const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
       const body = JSON.parse(callOptions.body);
-      expect(body._source).toEqual([...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS]);
-      expect(rows).toHaveLength(1);
-      expect(rows[0].first_timestamp).toBe('2024-01-01T00:00:00.000Z');
-      expect(rows[0].last_timestamp).toBe('2024-01-01T01:00:00.000Z');
+      expect(body.size).toBe(0);
+      expect(body._source).toBe(false);
+      expect(body.aggs).toHaveProperty('bucket_0');
+      expect(body.aggs).toHaveProperty('bucket_1');
+      expect(counts).toEqual([
+        { bucketStart: buckets[0].start, count: 3 },
+        { bucketStart: buckets[1].start, count: 1 },
+      ]);
+    });
+
+    it('returns pre-computed breakdown counts when breakdownField is provided', async () => {
+      mockHttp.post.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          bucket_0: {
+            doc_count: 2,
+            breakdown: { buckets: [{ key: 'critical', doc_count: 2 }] },
+          },
+          bucket_1: { doc_count: 0, breakdown: { buckets: [] } },
+        },
+      });
+
+      const counts = await fetchV1AlertsHistogram({
+        services: { http: mockHttp },
+        buckets,
+        breakdownField: 'kibana.alert.severity',
+      });
+
+      expect(counts).toEqual([{ bucketStart: buckets[0].start, count: 2, breakdown: 'critical' }]);
+    });
+
+    it('returns empty array when no buckets are provided', async () => {
+      const counts = await fetchV1AlertsHistogram({ services: { http: mockHttp }, buckets: [] });
+      expect(counts).toEqual([]);
+      expect(mockHttp.post).not.toHaveBeenCalled();
     });
   });
 

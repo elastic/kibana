@@ -15,8 +15,9 @@ import type {
   EpisodesFilterState,
   EpisodesSortState,
 } from '../queries/episodes_query';
-import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { HistogramBucketCount, TimeBucket } from '../utils/histogram_utils';
 import {
+  buildClassicAlertsHistogramAggs,
   buildClassicAlertsKpiAggs,
   buildClassicAlertsQuery,
   buildClassicAlertsSort,
@@ -26,12 +27,9 @@ import {
 import {
   type ClassicAlertSource,
   mapClassicAlertToEpisode,
-  mapClassicAlertToHistogramRow,
   CLASSIC_ALERT_EPISODE_SOURCE_FIELDS,
-  CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
 } from '../classic_alerts/map_alert';
 import {
-  CLASSIC_ALERTS_HISTOGRAM_LIMIT,
   CLASSIC_ALERTS_INDEX,
   CLASSIC_ALERTS_LIST_PAGE_SIZE,
   CLASSIC_ALERTS_TAGS_LIMIT,
@@ -195,40 +193,53 @@ export interface FetchV1AlertsHistogramOptions {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   breakdownField?: string;
+  buckets: TimeBucket[];
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
 
-/** Returns classic (v1) alert histogram rows (RBAC enforced by the RAC alerts API). */
+interface ClassicHistogramBucketAgg {
+  doc_count: number;
+  breakdown?: { buckets: Array<{ key: string | number; doc_count: number }> };
+}
+
 export const fetchV1AlertsHistogram = async ({
   timeRange,
   filterState,
   breakdownField,
+  buckets,
   abortSignal,
   services: { http },
-}: FetchV1AlertsHistogramOptions): Promise<HistogramEpisodeRow[]> => {
-  const response = await findClassicAlerts(
+}: FetchV1AlertsHistogramOptions): Promise<HistogramBucketCount[]> => {
+  if (buckets.length === 0) return [];
+
+  const response = await findClassicAlerts<Record<string, ClassicHistogramBucketAgg>>(
     http,
     {
       index: CLASSIC_ALERTS_INDEX,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
-      size: CLASSIC_ALERTS_HISTOGRAM_LIMIT,
+      aggs: buildClassicAlertsHistogramAggs(buckets, breakdownField),
+      size: 0,
       track_total_hits: false,
-      _source: [...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS],
+      _source: false,
     },
     abortSignal
   );
 
-  return response.hits.hits.flatMap((hit) =>
-    hit._source
-      ? [
-          mapClassicAlertToHistogramRow(
-            hit._source as unknown as ClassicAlertSource,
-            breakdownField
-          ),
-        ]
-      : []
-  );
+  return buckets.flatMap(({ start }, i) => {
+    const agg = response.aggregations?.[`bucket_${i}`];
+    if (!agg) return [];
+
+    if (!breakdownField) {
+      return [{ bucketStart: start, count: agg.doc_count }];
+    }
+
+    return (agg.breakdown?.buckets ?? []).map((b) => ({
+      bucketStart: start,
+      count: b.doc_count,
+      breakdown: String(b.key),
+    }));
+  });
 };
 
 export interface FetchV1AlertsTagsOptions {

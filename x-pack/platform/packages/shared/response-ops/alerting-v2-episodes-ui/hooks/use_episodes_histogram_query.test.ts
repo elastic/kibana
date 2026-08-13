@@ -16,7 +16,7 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { fetchV1AlertsHistogram } from '../apis/classic_alerts_api';
 import { useSpaceId } from './use_space_id';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
-import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { HistogramBucketCount, HistogramEpisodeRow } from '../utils/histogram_utils';
 
 jest.mock('../utils/execute_esql_query');
 jest.mock('../apis/classic_alerts_api');
@@ -26,9 +26,9 @@ const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 const mockFetchV1AlertsHistogram = jest.mocked(fetchV1AlertsHistogram);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
-// Classic (v1) histogram rows are a best-effort overlay; default to none so the
+// Classic (v1) histogram counts are a best-effort overlay; default to none so the
 // existing v2-only expectations are preserved.
-mockFetchV1AlertsHistogram.mockResolvedValue([] as HistogramEpisodeRow[]);
+mockFetchV1AlertsHistogram.mockResolvedValue([] as HistogramBucketCount[]);
 
 const mockServices = {
   expressions: {} as ExpressionsStart,
@@ -52,7 +52,7 @@ const wrapper = () => {
 afterEach(() => {
   jest.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default'); // restore after clearAllMocks
-  mockFetchV1AlertsHistogram.mockResolvedValue([] as HistogramEpisodeRow[]);
+  mockFetchV1AlertsHistogram.mockResolvedValue([] as HistogramBucketCount[]);
 });
 
 describe('useEpisodesHistogramQuery', () => {
@@ -208,19 +208,19 @@ describe('useEpisodesHistogramQuery', () => {
     expect(inputArg.timeRange).toEqual(mockTimeRange);
   });
 
-  it('concatenates classic (v1) histogram rows with v2 rows', async () => {
+  it('concatenates classic (v1) histogram counts with v2 counts', async () => {
     const v2Row: HistogramEpisodeRow = {
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T00:30:00.000Z',
       'episode.status': 'inactive',
     };
-    const v1Row: HistogramEpisodeRow = {
-      first_timestamp: '2024-01-01T01:00:00.000Z',
-      last_timestamp: '2024-01-01T01:30:00.000Z',
-      'episode.status': 'active',
+    // v1 returns pre-computed HistogramBucketCount entries (server-side aggs)
+    const v1Count: HistogramBucketCount = {
+      bucketStart: new Date('2024-01-01T01:00:00.000Z').getTime(),
+      count: 1,
     };
     mockExecuteEsqlQuery.mockResolvedValue([v2Row]);
-    mockFetchV1AlertsHistogram.mockResolvedValue([v1Row]);
+    mockFetchV1AlertsHistogram.mockResolvedValue([v1Count]);
 
     const { result } = renderHook(
       () =>
@@ -240,21 +240,21 @@ describe('useEpisodesHistogramQuery', () => {
     expect(rows.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('does not set isCapHit when combined rows exceed limit but neither source does individually', async () => {
+  it('does not set isCapHit when only v2 rows exceed limit (v1 uses server-side aggs with no cap)', async () => {
     const half = Math.floor(HISTOGRAM_EPISODE_LIMIT / 2);
     const v2Rows = Array.from({ length: half }, () => ({
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T01:00:00.000Z',
       'episode.status': 'inactive' as const,
     }));
-    const v1Rows = Array.from({ length: half + 1 }, () => ({
-      first_timestamp: '2024-01-01T00:00:00.000Z',
-      last_timestamp: '2024-01-01T01:00:00.000Z',
-      'episode.status': 'active' as const,
+    // v1 returns many pre-computed counts — no cap applies to v1 any more
+    const v1Counts: HistogramBucketCount[] = Array.from({ length: half + 1 }, () => ({
+      bucketStart: new Date('2024-01-01T00:00:00.000Z').getTime(),
+      count: 1,
     }));
 
     mockExecuteEsqlQuery.mockResolvedValue(v2Rows);
-    mockFetchV1AlertsHistogram.mockResolvedValue(v1Rows);
+    mockFetchV1AlertsHistogram.mockResolvedValue(v1Counts);
 
     const { result } = renderHook(
       () =>

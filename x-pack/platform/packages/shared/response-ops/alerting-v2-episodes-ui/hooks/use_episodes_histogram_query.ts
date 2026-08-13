@@ -23,13 +23,15 @@ import {
   generateTimeBuckets,
   computeOverlapCounts,
   formatHistogramDatatable,
+  type HistogramBucketCount,
   type HistogramEpisodeRow,
+  type TimeBucket,
 } from '../utils/histogram_utils';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
-import { CLASSIC_ALERTS_HISTOGRAM_LIMIT } from '../classic_alerts/constants';
 
 interface HistogramQueryData {
-  rows: HistogramEpisodeRow[];
+  counts: HistogramBucketCount[];
+  buckets: TimeBucket[];
   isCapHit: boolean;
 }
 
@@ -68,13 +70,15 @@ export const useEpisodesHistogramQuery = ({
     error,
     refetch,
   } = useQuery<HistogramQueryData, Error>({
-    // bucketInterval is used for client-side bucketing only — omitted from queryKey intentionally
-    queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField),
+    queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField, bucketInterval),
     queryFn: async ({ signal }) => {
-      // Fetch v2 and classic (v1) histogram rows in parallel and concatenate them
-      // so the histogram reflects both. The v1 read (RBAC enforced server-side) is
-      // best-effort.
-      const [v2Rows, v1Rows] = await Promise.all([
+      const startMs =
+        dateMath.parse(timeRange?.from ?? 'now-24h')?.valueOf() ?? Date.now() - 86_400_000;
+      const endMs =
+        dateMath.parse(timeRange?.to ?? 'now', { roundUp: true })?.valueOf() ?? Date.now();
+      const buckets = generateTimeBuckets(startMs, endMs, bucketInterval);
+
+      const [v2Rows, v1Counts] = await Promise.all([
         executeEsqlQuery<HistogramEpisodeRow>({
           expressions: services.expressions,
           query: buildEpisodesHistogramQuery(spaceId, filterState, breakdownField).print('basic'),
@@ -90,30 +94,26 @@ export const useEpisodesHistogramQuery = ({
           filterState,
           timeRange,
           breakdownField,
+          buckets,
           abortSignal: signal,
-        }).catch(() => [] as HistogramEpisodeRow[]),
+        }).catch(() => [] as HistogramBucketCount[]),
       ]);
 
+      const v2Counts = computeOverlapCounts(v2Rows, buckets, breakdownField);
+
       return {
-        rows: [...v2Rows, ...v1Rows],
-        isCapHit:
-          v2Rows.length >= HISTOGRAM_EPISODE_LIMIT ||
-          v1Rows.length >= CLASSIC_ALERTS_HISTOGRAM_LIMIT,
+        counts: [...v2Counts, ...v1Counts],
+        buckets,
+        isCapHit: v2Rows.length >= HISTOGRAM_EPISODE_LIMIT,
       };
     },
   });
 
-  const rawEpisodes = queryResult?.rows;
   const isCapHit = queryResult?.isCapHit ?? false;
 
   const table = useMemo<Datatable | undefined>(() => {
-    if (!rawEpisodes) return undefined;
-    const startMs =
-      dateMath.parse(timeRange?.from ?? 'now-24h')?.valueOf() ?? Date.now() - 86_400_000;
-    const endMs =
-      dateMath.parse(timeRange?.to ?? 'now', { roundUp: true })?.valueOf() ?? Date.now();
-    const buckets = generateTimeBuckets(startMs, endMs, bucketInterval);
-    const counts = computeOverlapCounts(rawEpisodes, buckets, breakdownField);
+    if (!queryResult) return undefined;
+    const { counts, buckets } = queryResult;
 
     // When a breakdown is active, future buckets (no overlapping episodes) produce no rows.
     // Fill those gaps with zero-count entries for each category that appears in other buckets
@@ -131,7 +131,7 @@ export const useEpisodesHistogramQuery = ({
     }
 
     return formatHistogramDatatable(counts, breakdownField);
-  }, [rawEpisodes, timeRange, bucketInterval, breakdownField]);
+  }, [queryResult, breakdownField]);
 
   return {
     table,

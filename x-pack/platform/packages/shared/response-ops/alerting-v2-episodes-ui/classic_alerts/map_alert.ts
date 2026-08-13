@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -17,7 +18,6 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
-  ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
@@ -39,23 +39,8 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_SEVERITY,
 ] as const;
 
-/**
- * Minimum `_source` projection for `mapClassicAlertToHistogramRow`.
- * Includes all possible breakdown fields so a single static list covers every breakdown.
- */
-export const CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS = [
-  TIMESTAMP,
-  ALERT_START,
-  ALERT_END,
-  ALERT_STATUS,
-  ALERT_RULE_UUID,
-  ALERT_RULE_TYPE_ID,
-  ALERT_RULE_CONSUMER,
-  ALERT_WORKFLOW_STATUS,
-] as const;
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
-import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
 export interface ClassicAlertSource {
   [TIMESTAMP]: string;
@@ -122,52 +107,4 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
     supports_actions: false,
     supports_timeline: false,
   };
-};
-
-/**
- * Maps a v2 episode breakdown field name onto the classic alert value for that
- * dimension, so the histogram can break down v1 rows by the same field. Fields
- * without a v1 equivalent (assignee) resolve to `null`.
- */
-const resolveBreakdownValue = (
-  source: ClassicAlertSource,
-  episode: HistogramEpisodeRow,
-  breakdownField: string
-): unknown => {
-  switch (breakdownField) {
-    case 'episode.status':
-      return episode['episode.status'];
-    case 'rule.id':
-      return source[ALERT_RULE_UUID] ?? null;
-    case 'last_ack_action':
-      return source[ALERT_WORKFLOW_STATUS] === 'acknowledged' ? 'ack' : 'unack';
-    default:
-      // assignee and any other v2-only breakdowns have no v1 equivalent.
-      return null;
-  }
-};
-
-/**
- * Reshapes a classic (v1) alert `_source` document into the lightweight histogram
- * row shape used for client-side overlap counting.
- */
-export const mapClassicAlertToHistogramRow = (
-  source: ClassicAlertSource,
-  breakdownField?: string
-): HistogramEpisodeRow => {
-  const { [TIMESTAMP]: timestamp } = source;
-  const start = source[ALERT_START];
-  const end = source[ALERT_END];
-
-  const row: HistogramEpisodeRow = {
-    first_timestamp: start ?? timestamp,
-    last_timestamp: end ?? timestamp,
-    'episode.status': mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
-  };
-
-  if (breakdownField && breakdownField !== 'episode.status') {
-    row[breakdownField] = resolveBreakdownValue(source, row, breakdownField);
-  }
-
-  return row;
 };

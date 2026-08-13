@@ -24,7 +24,6 @@ export {
   ALERT_SNOOZED as CLASSIC_ALERT_SNOOZED_FIELD,
 } from '@kbn/rule-data-utils';
 
-/** Max classic alerts returned per list/histogram request. Mirrors the v2 list/histogram limits. */
+/** Max classic alerts returned per list request. Mirrors the v2 list limit. */
 export const CLASSIC_ALERTS_LIST_PAGE_SIZE = 1000;
-export const CLASSIC_ALERTS_HISTOGRAM_LIMIT = 10_000;
 export const CLASSIC_ALERTS_TAGS_LIMIT = 500;
