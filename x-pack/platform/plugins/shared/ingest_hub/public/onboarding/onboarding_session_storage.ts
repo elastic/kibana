@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const SESSION_KEY_SUFFIXES = [
+export const SESSION_KEY_SUFFIXES = [
   'deploySettingsStep',
   'servicesStep',
   'deployAndDetectStep',
@@ -13,7 +13,7 @@ const SESSION_KEY_SUFFIXES = [
   'stepState',
 ] as const;
 
-type SessionKeySuffix = (typeof SESSION_KEY_SUFFIXES)[number];
+export type SessionKeySuffix = (typeof SESSION_KEY_SUFFIXES)[number];
 
 export function getOnboardingSessionKey(integrationId: string, suffix: SessionKeySuffix): string {
   return `onboarding.${integrationId}.${suffix}`;

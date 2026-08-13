@@ -40,16 +40,20 @@ export function renderOnboardingApp(
   // useSessionStorage (react-use) writes its default on first mount and re-serializes
   // every render, so clearing from inside the tree is too late — the hooks' React state
   // already holds the old values and immediately rewrites them.
-  const { pathname, search, state } = params.history.location;
+  const { pathname, search, hash, state } = params.history.location;
   const integrationId = pathname.split('/').filter(Boolean)[0];
   const isNewSession = (state as { newSession?: boolean } | undefined)?.newSession === true;
+  // When ?deploymentId=<id> is present the intent is to resume a saved session by hydrating
+  // from the SO (elastic/ingest-dev#8099). Clearing here is deferred to that hydration path
+  // so it can clear-then-hydrate atomically. For now the flag simply prevents a premature clear.
   const hasDeploymentId = new URLSearchParams(search).has('deploymentId');
 
   if (integrationId && isNewSession && !hasDeploymentId) {
     clearOnboardingSession(integrationId);
     // Consume the flag so a reload does not trigger another clear and wipe an in-progress flow.
     // window.history.state survives a reload, so leaving it in place would re-clear every time.
-    params.history.replace({ pathname, search }, undefined);
+    // Preserve pathname, search, and hash so no navigation side-effects occur.
+    params.history.replace({ pathname, search, hash }, undefined);
   }
 
   const queryClient = new QueryClient();

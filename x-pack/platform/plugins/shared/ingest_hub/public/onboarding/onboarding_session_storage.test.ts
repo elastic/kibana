@@ -6,18 +6,11 @@
  */
 
 import {
+  SESSION_KEY_SUFFIXES,
   getOnboardingSessionKey,
   getOnboardingSessionKeys,
   clearOnboardingSession,
 } from './onboarding_session_storage';
-
-const ALL_SUFFIXES = [
-  'deploySettingsStep',
-  'servicesStep',
-  'deployAndDetectStep',
-  'serviceSettingsStep',
-  'stepState',
-] as const;
 
 describe('getOnboardingSessionKey', () => {
   it('builds the expected key string', () => {
@@ -26,10 +19,10 @@ describe('getOnboardingSessionKey', () => {
 });
 
 describe('getOnboardingSessionKeys', () => {
-  it('returns all five keys for the given integration', () => {
+  it('returns all keys for the given integration', () => {
     const keys = getOnboardingSessionKeys('aws');
-    expect(keys).toHaveLength(5);
-    for (const suffix of ALL_SUFFIXES) {
+    expect(keys).toHaveLength(SESSION_KEY_SUFFIXES.length);
+    for (const suffix of SESSION_KEY_SUFFIXES) {
       expect(keys).toContain(`onboarding.aws.${suffix}`);
     }
   });
@@ -37,12 +30,13 @@ describe('getOnboardingSessionKeys', () => {
 
 describe('clearOnboardingSession', () => {
   let storage: Record<string, string>;
-  let originalSessionStorage: Storage;
+  let originalDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
     storage = {};
-    originalSessionStorage = window.sessionStorage;
+    originalDescriptor = Object.getOwnPropertyDescriptor(window, 'sessionStorage');
     Object.defineProperty(window, 'sessionStorage', {
+      configurable: true,
       value: {
         getItem: (key: string) => storage[key] ?? null,
         setItem: (key: string, value: string) => {
@@ -59,25 +53,26 @@ describe('clearOnboardingSession', () => {
         },
         key: (index: number) => Object.keys(storage)[index] ?? null,
       },
-      writable: true,
     });
   });
 
   afterEach(() => {
-    Object.defineProperty(window, 'sessionStorage', {
-      value: originalSessionStorage,
-      writable: true,
-    });
+    if (originalDescriptor) {
+      Object.defineProperty(window, 'sessionStorage', {
+        configurable: true,
+        ...originalDescriptor,
+      });
+    }
   });
 
-  it('removes all five onboarding session keys', () => {
-    for (const suffix of ALL_SUFFIXES) {
+  it('removes all onboarding session keys', () => {
+    for (const suffix of SESSION_KEY_SUFFIXES) {
       storage[`onboarding.aws.${suffix}`] = 'some-value';
     }
 
     clearOnboardingSession('aws');
 
-    for (const suffix of ALL_SUFFIXES) {
+    for (const suffix of SESSION_KEY_SUFFIXES) {
       expect(storage[`onboarding.aws.${suffix}`]).toBeUndefined();
     }
   });
@@ -94,10 +89,10 @@ describe('clearOnboardingSession', () => {
 
   it('does not throw when sessionStorage access fails', () => {
     Object.defineProperty(window, 'sessionStorage', {
+      configurable: true,
       get: () => {
         throw new DOMException('SecurityError');
       },
-      configurable: true,
     });
 
     expect(() => clearOnboardingSession('aws')).not.toThrow();
