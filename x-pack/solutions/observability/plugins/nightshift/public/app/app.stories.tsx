@@ -43,8 +43,10 @@ const NightshiftLandingStory = ({
     <MockAppHeaderProvider>
       <EuiPageTemplate restrictWidth={false}>
         <NightshiftAppHeader
-          onSettingsClick={noop}
-          settingsHref="/app/significant_events/settings"
+          onSignificantEventsClick={noop}
+          significantEventsHref="/app/significant_events/knowledge_indicators"
+          onMemoryClick={noop}
+          memoryHref="/app/nightshift/memory"
         />
         <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
           <NightshiftApp />

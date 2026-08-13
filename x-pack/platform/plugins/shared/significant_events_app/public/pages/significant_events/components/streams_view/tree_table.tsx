@@ -65,6 +65,7 @@ export function StreamsTreeTable({
   streamOnboardingResultMap,
   searchQuery,
   selection,
+  compact = false,
   blocksActivity = false,
   activityBlockTooltip,
   onOnboardStreamActionClick,
@@ -75,6 +76,8 @@ export function StreamsTreeTable({
   loading?: boolean;
   searchQuery: Query;
   selection: EuiTableSelectionType<TableRow>;
+  /** Narrow columns for constrained layouts such as the Streams status flyout. */
+  compact?: boolean;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
   /** Explains why onboard actions are disabled (loading / error / paused). */
@@ -100,7 +103,7 @@ export function StreamsTreeTable({
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [pagination, setPagination] = useState<{ pageIndex: number; pageSize: number }>({
     pageIndex: 0,
-    pageSize: 25,
+    pageSize: compact ? 10 : 25,
   });
 
   const filteredStreams = useMemo(() => {
@@ -212,228 +215,282 @@ export function StreamsTreeTable({
     </EuiFlexGroup>
   );
 
+  const columns = useMemo(() => {
+    const nameColumn = {
+      field: 'nameSortKey',
+      name: nameColumnHeader,
+      sortable: (row: TableRow) => row.rootNameSortKey,
+      dataType: 'string' as const,
+      render: (_: unknown, item: TableRow) => {
+        const children = item.children ?? EMPTY_CHILDREN;
+        const hasChildren = children.length > 0;
+        const isCollapsed = collapsed.has(item.stream.name);
+        const isQueryStream = Streams.QueryStream.Definition.is(item.stream);
+
+        return (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            className={css`
+              margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
+              min-width: 0;
+            `}
+          >
+            {hasChildren ? (
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
+                  color="text"
+                  size="m"
+                  data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${item.stream.name}`}
+                  aria-label={i18n.translate(
+                    isCollapsed
+                      ? 'xpack.significantEventsApp.streamsTreeTable.collapsedNodeAriaLabel'
+                      : 'xpack.significantEventsApp.streamsTreeTable.expandedNodeAriaLabel',
+                    {
+                      defaultMessage: isCollapsed
+                        ? 'Collapsed node with {childCount} children'
+                        : 'Expanded node with {childCount} children',
+                      values: { childCount: children.length },
+                    }
+                  )}
+                  onClick={() => {
+                    handleToggleCollapse(item.stream.name);
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleToggleCollapse(item.stream.name);
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
+              </EuiFlexItem>
+            )}
+            {isQueryStream && (
+              <EuiFlexItem grow={false}>
+                <QueryStreamBadge />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem
+              grow
+              className={css`
+                min-width: 0;
+              `}
+            >
+              <EuiLink
+                data-test-subj={`streamsNameLink-${item.stream.name}`}
+                href={streamsLocator?.getRedirectUrl({
+                  name: item.stream.name,
+                  managementTab: 'overview',
+                })}
+                className={css`
+                  display: block;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
+              </EuiLink>
+            </EuiFlexItem>
+            {isQueryStream && (
+              <EuiFlexItem grow={false}>
+                <TechnicalPreviewBadge />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
+    };
+
+    const statusColumn = {
+      name: ONBOARDING_STATUS_COLUMN_HEADER,
+      width: compact ? '64px' : '120px',
+      align: 'left' as const,
+      render: (item: TableRow) => {
+        const onboardingResult = streamOnboardingResultMap[item.stream.name];
+
+        if (onboardingResult === undefined) {
+          return '-';
+        }
+
+        switch (onboardingResult.status) {
+          case SignificantEventsWorkflowStatus.InProgress:
+          case SignificantEventsWorkflowStatus.BeingCanceled:
+            return <EuiLoadingSpinner size="m" />;
+          case SignificantEventsWorkflowStatus.NotStarted:
+          case SignificantEventsWorkflowStatus.Canceled:
+            return '-';
+          case SignificantEventsWorkflowStatus.Completed:
+            return (
+              <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
+            );
+          case SignificantEventsWorkflowStatus.Failed:
+            return (
+              <EuiIconTip
+                size="m"
+                type="crossCircle"
+                color="danger"
+                content={onboardingResult.error}
+              />
+            );
+        }
+      },
+    };
+
+    const knowledgeIndicatorsColumn = {
+      name: compact
+        ? i18n.translate('xpack.significantEventsApp.streamsTree.featuresColumnNameShort', {
+            defaultMessage: 'Features',
+          })
+        : KNOWLEDGE_INDICATORS_COLUMN_HEADER,
+      width: compact ? '72px' : '120px',
+      align: 'left' as const,
+      render: (item: TableRow) => (
+        <KnowledgeIndicatorsColumn
+          stream={item.stream}
+          streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
+        />
+      ),
+    };
+
+    const queriesColumn = {
+      name: compact
+        ? i18n.translate('xpack.significantEventsApp.streamsTree.queriesColumnNameShort', {
+            defaultMessage: 'Queries',
+          })
+        : QUERIES_COLUMN_HEADER,
+      width: compact ? '72px' : '120px',
+      align: 'left' as const,
+      render: (item: TableRow) => (
+        <QueriesColumn
+          streamName={item.stream.name}
+          streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
+        />
+      ),
+    };
+
+    const eventsColumn = {
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexItem grow={false}>{SIGNIFICANT_EVENTS_COLUMN_HEADER}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={SIGNIFICANT_EVENTS_COLUMN_TOOLTIP}
+              size="s"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      width: '210px',
+      align: 'left' as const,
+      render: (item: TableRow) => <SignificantEventsColumn streamName={item.stream.name} />,
+    };
+
+    const actionsColumn = {
+      field: 'definition',
+      name: ACTIONS_COLUMN_HEADER,
+      width: compact ? '48px' : '60px',
+      align: 'left' as const,
+      sortable: false,
+      dataType: 'string' as const,
+      render: (_: unknown, item: TableRow) => {
+        const onboardingResult = streamOnboardingResultMap[item.stream.name];
+
+        if (KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
+          return (
+            <EuiToolTip
+              position="top"
+              content={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
+              display="block"
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="stop"
+                aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
+                disabled={
+                  onboardingResult.status === SignificantEventsWorkflowStatus.BeingCanceled
+                }
+                onClick={() => onStopOnboardingActionClick(item.stream.name)}
+              />
+            </EuiToolTip>
+          );
+        }
+
+        return (
+          <EuiToolTip
+            position="top"
+            content={activityBlockTooltip ?? RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+            display="block"
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="radar"
+              aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+              disabled={blocksActivity}
+              onClick={() => onOnboardStreamActionClick(item.stream.name)}
+            />
+          </EuiToolTip>
+        );
+      },
+    };
+
+    return compact
+      ? [nameColumn, statusColumn, knowledgeIndicatorsColumn, queriesColumn, actionsColumn]
+      : [
+          nameColumn,
+          statusColumn,
+          knowledgeIndicatorsColumn,
+          queriesColumn,
+          eventsColumn,
+          actionsColumn,
+        ];
+  }, [
+    activityBlockTooltip,
+    allExpandableNodeNames.length,
+    allExpanded,
+    blocksActivity,
+    collapsed,
+    compact,
+    euiTheme.size.xl,
+    expandCollapseLabel,
+    hasExpandable,
+    nameColumnHeader,
+    onOnboardStreamActionClick,
+    onStopOnboardingActionClick,
+    searchQuery.text,
+    streamOnboardingResultMap,
+    streamsLocator,
+  ]);
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
         <EuiInMemoryTable<TableRow>
           selection={selection}
           loading={loading}
+          compressed={compact}
           data-test-subj="streamsTable"
-          columns={[
-            {
-              field: 'nameSortKey',
-              name: nameColumnHeader,
-              sortable: (row: TableRow) => row.rootNameSortKey,
-              dataType: 'string',
-              render: (_: unknown, item: TableRow) => {
-                const children = item.children ?? EMPTY_CHILDREN;
-                const hasChildren = children.length > 0;
-                const isCollapsed = collapsed.has(item.stream.name);
-                const isQueryStream = Streams.QueryStream.Definition.is(item.stream);
-
-                return (
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                    responsive={false}
-                    className={css`
-                      margin-left: ${item.level * parseInt(euiTheme.size.xl, 10)}px;
-                    `}
-                  >
-                    {hasChildren ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon
-                          type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
-                          color="text"
-                          size="m"
-                          data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
-                            item.stream.name
-                          }`}
-                          aria-label={i18n.translate(
-                            isCollapsed
-                              ? 'xpack.significantEventsApp.streamsTreeTable.collapsedNodeAriaLabel'
-                              : 'xpack.significantEventsApp.streamsTreeTable.expandedNodeAriaLabel',
-                            {
-                              defaultMessage: isCollapsed
-                                ? 'Collapsed node with {childCount} children'
-                                : 'Expanded node with {childCount} children',
-                              values: { childCount: children.length },
-                            }
-                          )}
-                          onClick={() => {
-                            handleToggleCollapse(item.stream.name);
-                          }}
-                          tabIndex={0}
-                          role="button"
-                          onKeyDown={(e: React.KeyboardEvent) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              handleToggleCollapse(item.stream.name);
-                            }
-                          }}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </EuiFlexItem>
-                    ) : (
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="empty" color="text" size="m" aria-hidden="true" />
-                      </EuiFlexItem>
-                    )}
-                    {isQueryStream && (
-                      <EuiFlexItem grow={false}>
-                        <QueryStreamBadge />
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>
-                      <EuiLink
-                        data-test-subj={`streamsNameLink-${item.stream.name}`}
-                        href={streamsLocator?.getRedirectUrl({
-                          name: item.stream.name,
-                          managementTab: 'overview',
-                        })}
-                      >
-                        <EuiHighlight search={searchQuery.text}>{item.stream.name}</EuiHighlight>
-                      </EuiLink>
-                    </EuiFlexItem>
-                    {isQueryStream && (
-                      <EuiFlexItem grow={false}>
-                        <TechnicalPreviewBadge />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                );
-              },
-            },
-            {
-              name: ONBOARDING_STATUS_COLUMN_HEADER,
-              width: '120px',
-              align: 'left',
-              render: (item: TableRow) => {
-                const onboardingResult = streamOnboardingResultMap[item.stream.name];
-
-                if (onboardingResult === undefined) {
-                  return '-';
-                }
-
-                switch (onboardingResult.status) {
-                  case SignificantEventsWorkflowStatus.InProgress:
-                  case SignificantEventsWorkflowStatus.BeingCanceled:
-                    return <EuiLoadingSpinner size="m" />;
-                  case SignificantEventsWorkflowStatus.NotStarted:
-                  case SignificantEventsWorkflowStatus.Canceled:
-                    return '-';
-                  case SignificantEventsWorkflowStatus.Completed:
-                    return (
-                      <EuiIcon type="checkCircleFill" color="success" size="m" aria-hidden={true} />
-                    );
-                  case SignificantEventsWorkflowStatus.Failed:
-                    return (
-                      <EuiIconTip
-                        size="m"
-                        type="crossCircle"
-                        color="danger"
-                        content={onboardingResult.error}
-                      />
-                    );
-                }
-              },
-            },
-            {
-              name: KNOWLEDGE_INDICATORS_COLUMN_HEADER,
-              width: '120px',
-              align: 'left',
-              render: (item: TableRow) => (
-                <KnowledgeIndicatorsColumn
-                  stream={item.stream}
-                  streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
-                />
-              ),
-            },
-            {
-              name: QUERIES_COLUMN_HEADER,
-              width: '120px',
-              align: 'left',
-              render: (item: TableRow) => (
-                <QueriesColumn
-                  streamName={item.stream.name}
-                  streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
-                />
-              ),
-            },
-            {
-              name: (
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                  <EuiFlexItem grow={false}>{SIGNIFICANT_EVENTS_COLUMN_HEADER}</EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      type="info"
-                      color="subdued"
-                      content={SIGNIFICANT_EVENTS_COLUMN_TOOLTIP}
-                      size="s"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ),
-              width: '210px',
-              align: 'left',
-              render: (item: TableRow) => <SignificantEventsColumn streamName={item.stream.name} />,
-            },
-            {
-              field: 'definition',
-              name: ACTIONS_COLUMN_HEADER,
-              width: '60px',
-              align: 'left',
-              sortable: false,
-              dataType: 'string',
-              render: (_: unknown, item: TableRow) => {
-                const onboardingResult = streamOnboardingResultMap[item.stream.name];
-
-                if (KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
-                  return (
-                    <EuiToolTip
-                      position="top"
-                      content={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                      display="block"
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType="stop"
-                        aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                        disabled={
-                          onboardingResult.status === SignificantEventsWorkflowStatus.BeingCanceled
-                        }
-                        onClick={() => onStopOnboardingActionClick(item.stream.name)}
-                      />
-                    </EuiToolTip>
-                  );
-                }
-
-                return (
-                  <EuiToolTip
-                    position="top"
-                    content={activityBlockTooltip ?? RUN_STREAM_ONBOARDING_BUTTON_LABEL}
-                    display="block"
-                    disableScreenReaderOutput
-                  >
-                    <EuiButtonIcon
-                      iconType="radar"
-                      aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
-                      disabled={blocksActivity}
-                      onClick={() => onOnboardStreamActionClick(item.stream.name)}
-                    />
-                  </EuiToolTip>
-                );
-              },
-            },
-          ]}
+          columns={columns}
+          tableLayout={compact ? 'fixed' : 'auto'}
           itemId="nameSortKey"
           items={items}
           sorting={sorting}
           noItemsMessage={NO_STREAMS_MESSAGE}
           onTableChange={handleTableChange}
           pagination={{
-            initialPageSize: 25,
-            pageSizeOptions: [25, 50, 100],
+            initialPageSize: compact ? 10 : 25,
+            pageSizeOptions: compact ? [10, 25, 50] : [25, 50, 100],
             pageIndex: pagination.pageIndex,
             pageSize: pagination.pageSize,
           }}

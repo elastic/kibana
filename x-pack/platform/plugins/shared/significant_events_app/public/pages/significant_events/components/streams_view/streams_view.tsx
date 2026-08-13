@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/significant-events-schema';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -22,7 +22,7 @@ import { FindSignificantEventsButton } from './find_significant_events_button';
 import { STREAMS_TABLE_SEARCH_ARIA_LABEL } from './translations';
 import { StreamsTreeTable } from './tree_table';
 
-export function StreamsView() {
+export function StreamsView({ compact = false }: { compact?: boolean }) {
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
@@ -102,6 +102,99 @@ export function StreamsView() {
     setSearchText(String(queryPayload.query?.query ?? ''));
   };
 
+  const generateButton = (
+    <GenerateSplitButton
+      size="s"
+      config={onboardingConfig}
+      allConnectors={allConnectors}
+      connectorError={connectorError}
+      featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
+      queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
+      onConfigChange={setOnboardingConfig}
+      onRun={onBulkOnboardStreamsClick}
+      onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
+      onRunQueriesOnly={onBulkOnboardQueriesOnly}
+      isRunDisabled={
+        blocksActivity ||
+        selectedStreams.length === 0 ||
+        isConnectorCatalogUnavailable ||
+        featuresConnectors.loading ||
+        queriesConnectors.loading ||
+        isScheduling
+      }
+      runDisabledTooltip={activityBlockTooltip}
+      isConfigDisabled={selectedStreams.length === 0}
+      isLoading={isScheduling}
+    />
+  );
+
+  const findButton = (
+    <FindSignificantEventsButton
+      onRun={handleRun}
+      onCancel={handleCancel}
+      isRunning={isRunning}
+      isCanceling={isCanceling}
+      isDisabled={isRunning || blocksActivity}
+      disabledTooltip={activityBlockTooltip}
+    />
+  );
+
+  const streamsCount = (
+    <EuiText size="s" color="subdued">
+      {i18n.translate('xpack.significantEventsApp.streamsTree.streamsCountLabel', {
+        defaultMessage: '{count} streams',
+        values: { count: filteredStreams?.length ?? 0 },
+      })}
+    </EuiText>
+  );
+
+  const table = (
+    <StreamsTreeTable
+      streams={filteredStreams}
+      streamOnboardingResultMap={streamStatusMap}
+      loading={isStreamsLoading}
+      searchQuery={searchQuery}
+      compact={compact}
+      blocksActivity={blocksActivity}
+      activityBlockTooltip={activityBlockTooltip}
+      selection={{
+        selected: selectedStreams,
+        onSelectionChange: setSelectedStreams,
+        selectable: (row) => isStreamActionable(row.stream.name),
+      }}
+      onOnboardStreamActionClick={onOnboardStreamActionClick}
+      onStopOnboardingActionClick={onStopOnboardingActionClick}
+    />
+  );
+
+  // Flyout layout: simple search field + generate action (matches KI toolbar / cases patterns).
+  // Avoid the full unified search bar with date picker — it does not fit constrained flyouts.
+  if (compact) {
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow>
+              <EuiFieldSearch
+                incremental
+                fullWidth
+                compressed
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+                placeholder={STREAMS_TABLE_SEARCH_ARIA_LABEL}
+                aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
+                data-test-subj="streamsStatusFlyoutSearch"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{generateButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{streamsCount}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{table}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
@@ -122,70 +215,14 @@ export function StreamsView() {
               isClearable
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <GenerateSplitButton
-              size="s"
-              config={onboardingConfig}
-              allConnectors={allConnectors}
-              connectorError={connectorError}
-              featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
-              queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
-              onConfigChange={setOnboardingConfig}
-              onRun={onBulkOnboardStreamsClick}
-              onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
-              onRunQueriesOnly={onBulkOnboardQueriesOnly}
-              isRunDisabled={
-                blocksActivity ||
-                selectedStreams.length === 0 ||
-                isConnectorCatalogUnavailable ||
-                featuresConnectors.loading ||
-                queriesConnectors.loading ||
-                isScheduling
-              }
-              runDisabledTooltip={activityBlockTooltip}
-              isConfigDisabled={selectedStreams.length === 0}
-              isLoading={isScheduling}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <FindSignificantEventsButton
-              onRun={handleRun}
-              onCancel={handleCancel}
-              isRunning={isRunning}
-              isCanceling={isCanceling}
-              isDisabled={isRunning || blocksActivity}
-              disabledTooltip={activityBlockTooltip}
-            />
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{generateButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{findButton}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          {i18n.translate('xpack.significantEventsApp.streamsTree.streamsCountLabel', {
-            defaultMessage: '{count} streams',
-            values: { count: filteredStreams?.length ?? 0 },
-          })}
-        </EuiText>
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{streamsCount}</EuiFlexItem>
 
-      <EuiFlexItem>
-        <StreamsTreeTable
-          streams={filteredStreams}
-          streamOnboardingResultMap={streamStatusMap}
-          loading={isStreamsLoading}
-          searchQuery={searchQuery}
-          blocksActivity={blocksActivity}
-          activityBlockTooltip={activityBlockTooltip}
-          selection={{
-            selected: selectedStreams,
-            onSelectionChange: setSelectedStreams,
-            selectable: (row) => isStreamActionable(row.stream.name),
-          }}
-          onOnboardStreamActionClick={onOnboardStreamActionClick}
-          onStopOnboardingActionClick={onStopOnboardingActionClick}
-        />
-      </EuiFlexItem>
+      <EuiFlexItem>{table}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }

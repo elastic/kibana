@@ -19,6 +19,8 @@ import type React from 'react';
 
 export type KnowledgeIndicatorsPanelComponent = React.ComponentType<{ streamName: string }>;
 
+export type MemoryPageComponent = React.ComponentType;
+
 export interface SignificantEventsAppSetupDependencies {
   share: SharePluginSetup;
 }
@@ -46,4 +48,9 @@ export interface SignificantEventsAppPublicStart {
    * its own QueryClient and KibanaContext so no extra wrapping is needed.
    */
   getKnowledgeIndicatorsPanel: () => KnowledgeIndicatorsPanelComponent;
+  /**
+   * Factory for the Memory page embedded under Nightshift (`/app/nightshift/memory`).
+   * Call once per render tree; the returned component carries its own providers.
+   */
+  getMemoryPage: () => MemoryPageComponent;
 }

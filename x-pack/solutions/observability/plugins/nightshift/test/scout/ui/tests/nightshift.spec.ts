@@ -7,7 +7,8 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { test } from '../fixtures';
 
@@ -52,25 +53,35 @@ test.describe(
       });
     });
 
-    test('navigates between Significant Events, Nightshift, and settings', async ({ page }) => {
-      await page.gotoApp('significant_events/streams');
-
-      const nightshiftButton = page.testSubj.locator(getAppMenuItemTestSubj('nightshift'));
-      await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
-      await nightshiftButton.click();
+    test('navigates between Nightshift, Significant Events, Memory, and Settings', async ({
+      page,
+    }) => {
+      await page.gotoApp('nightshift');
 
       await expect(page).toHaveURL(/\/app\/nightshift/, { timeout: 60_000 });
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
-
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
 
-      // Single settings action stays inline at Scout's default viewport — click it directly
-      // (no overflow branch; expect() auto-waits for mount).
-      const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
-      await expect(settingsLink).toBeVisible();
-      await settingsLink.click();
+      await page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton).click();
+      await page.testSubj.locator('nightshiftSignificantEventsLink').click();
+      await expect(page).toHaveURL(/\/app\/significant_events\/knowledge_indicators/);
+
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText(
+        'Significant Events'
+      );
+      await expect(page.testSubj.locator('significantEventsSettingsButton')).toBeVisible();
+      await expect(page.testSubj.locator('significantEventsStreamsStatusButton')).toBeVisible();
+
+      await page.testSubj.locator('significantEventsSettingsButton').click();
       await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+
+      await page.gotoApp('nightshift');
+      await page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton).click();
+      await page.testSubj.locator('nightshiftMemoryLink').click();
+      await expect(page).toHaveURL(/\/app\/nightshift\/memory/);
+      await expect(page.testSubj.locator('nightshiftMemoryPage')).toBeVisible();
+      await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Memory');
     });
   }
 );

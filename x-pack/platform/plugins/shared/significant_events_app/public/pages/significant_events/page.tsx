@@ -9,7 +9,7 @@ import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eu
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
@@ -29,25 +29,44 @@ import {
 import { SignificantEventsPageProvider } from './context/significant_events_page_context';
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
-import { StreamsView } from './components/streams_view/streams_view';
+import { StreamsStatusFlyout } from './components/streams_view/streams_status_flyout';
 import { SettingsTab } from './components/settings/tab';
-import { MemoryTab } from './components/memory/tab';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 
+/** Tabs shown in the page header. Settings remains a route opened from the header. */
 const significantEventsTabs = [
-  'streams',
   'knowledge_indicators',
   'queries',
   'detections',
   'significant_events',
-  'memory',
-  'settings',
 ] as const;
-type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
-function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
-  return significantEventsTabs.includes(value as SignificantEventsTabId);
+/** Routes that still render page content but are not primary tabs. */
+const significantEventsHiddenRoutes = ['settings', 'streams', 'memory'] as const;
+
+type SignificantEventsTabId = (typeof significantEventsTabs)[number];
+type SignificantEventsRouteId =
+  | SignificantEventsTabId
+  | (typeof significantEventsHiddenRoutes)[number];
+
+function isValidSignificantEventsRoute(value: string): value is SignificantEventsRouteId {
+  return (
+    significantEventsTabs.includes(value as SignificantEventsTabId) ||
+    significantEventsHiddenRoutes.includes(value as (typeof significantEventsHiddenRoutes)[number])
+  );
+}
+
+function RedirectToNightshiftMemory({
+  navigateToApp,
+}: {
+  navigateToApp: (appId: string, options?: { path?: string }) => Promise<void>;
+}): React.ReactElement {
+  useEffect(() => {
+    void navigateToApp(NIGHTSHIFT_APP_ID, { path: '/memory' });
+  }, [navigateToApp]);
+
+  return <EuiLoadingElastic size="xxl" />;
 }
 
 export function SignificantEventsPage() {
@@ -59,8 +78,9 @@ export function SignificantEventsPage() {
   const {
     core: {
       application: {
-        getUrlForApp,
         capabilities: { streams },
+        getUrlForApp,
+        navigateToApp,
       },
       chrome,
       notifications: { toasts },
@@ -71,6 +91,8 @@ export function SignificantEventsPage() {
   } = useKibana();
 
   const canManageStreams = streams?.manage === true;
+  const [isStreamsStatusFlyoutOpen, setIsStreamsStatusFlyoutOpen] = useState(false);
+  const nightshiftHref = getUrlForApp(NIGHTSHIFT_APP_ID);
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -94,16 +116,20 @@ export function SignificantEventsPage() {
     defaultMessage: 'Significant Events',
   });
 
-  const nightshiftLabel = i18n.translate('xpack.significantEventsApp.nightshiftButtonLabel', {
-    defaultMessage: 'Nightshift',
+  const streamsStatusLabel = i18n.translate('xpack.significantEventsApp.streamsStatusButtonLabel', {
+    defaultMessage: 'Streams status',
   });
 
-  const systemOnboardingLabel = i18n.translate(
-    'xpack.significantEventsApp.systemOnboardingButton',
-    { defaultMessage: 'Tell us about your system' }
+  const settingsLabel = i18n.translate('xpack.significantEventsApp.settingsButtonLabel', {
+    defaultMessage: 'Settings',
+  });
+
+  const agenticOnboardingLabel = i18n.translate(
+    'xpack.significantEventsApp.agenticOnboardingButton',
+    { defaultMessage: 'Agentic Onboarding' }
   );
 
-  const handleOpenSystemOnboarding = useCallback(() => {
+  const handleOpenAgenticOnboarding = useCallback(() => {
     agentBuilder?.openChat({
       newConversation: true,
       initialMessage: i18n.translate('xpack.significantEventsApp.onboardingInitialMessage', {
@@ -114,35 +140,52 @@ export function SignificantEventsPage() {
     });
   }, [agentBuilder]);
 
+  const settingsHref = router.link('/{tab}', { path: { tab: 'settings' } });
+
   const menu = useMemo<AppHeaderMenu>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [
       {
-        id: 'nightshift',
+        id: 'significantEventsStreamsStatus',
         order: 1,
-        label: nightshiftLabel,
-        iconType: 'moon',
-        href: getUrlForApp(NIGHTSHIFT_APP_ID),
+        label: streamsStatusLabel,
+        iconType: 'checkCircle',
+        run: () => setIsStreamsStatusFlyoutOpen(true),
+        isSelected: isStreamsStatusFlyoutOpen,
+        testId: 'significantEventsStreamsStatusButton',
+      },
+      {
+        id: 'significantEventsSettings',
+        order: 2,
+        label: settingsLabel,
+        iconType: 'gear',
+        href: settingsHref,
+        isSelected: tab === 'settings',
+        testId: 'significantEventsSettingsButton',
       },
     ];
 
     if (agentBuilder) {
       items.push({
-        id: 'significantEventsSystemOnboarding',
-        order: 2,
-        label: systemOnboardingLabel,
+        id: 'significantEventsAgenticOnboarding',
+        order: 3,
+        label: agenticOnboardingLabel,
         iconType: 'sparkles',
-        run: handleOpenSystemOnboarding,
-        testId: 'significantEventsSystemOnboardingButton',
+        overflow: true,
+        run: handleOpenAgenticOnboarding,
+        testId: 'significantEventsAgenticOnboardingButton',
       });
     }
 
     return { items };
   }, [
     agentBuilder,
-    getUrlForApp,
-    handleOpenSystemOnboarding,
-    nightshiftLabel,
-    systemOnboardingLabel,
+    agenticOnboardingLabel,
+    handleOpenAgenticOnboarding,
+    isStreamsStatusFlyoutOpen,
+    settingsHref,
+    settingsLabel,
+    streamsStatusLabel,
+    tab,
   ]);
 
   useEffect(() => {
@@ -157,14 +200,6 @@ export function SignificantEventsPage() {
 
   const tabs = useMemo(
     () => [
-      {
-        id: 'streams',
-        label: i18n.translate('xpack.significantEventsApp.streamsTab', {
-          defaultMessage: 'Streams',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'streams' } }),
-        isSelected: tab === 'streams',
-      },
       {
         id: 'knowledge_indicators',
         label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
@@ -181,7 +216,6 @@ export function SignificantEventsPage() {
         href: router.link('/{tab}', { path: { tab: 'queries' } }),
         isSelected: tab === 'queries',
       },
-
       {
         id: 'detections',
         label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
@@ -197,22 +231,6 @@ export function SignificantEventsPage() {
         }),
         href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
         isSelected: tab === 'significant_events',
-      },
-      {
-        id: 'memory',
-        label: i18n.translate('xpack.significantEventsApp.memoryTab', {
-          defaultMessage: 'Memory',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'memory' } }),
-        isSelected: tab === 'memory',
-      },
-      {
-        id: 'settings',
-        label: i18n.translate('xpack.significantEventsApp.settingsTab', {
-          defaultMessage: 'Settings',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'settings' } }),
-        isSelected: tab === 'settings',
       },
     ],
     [tab, router]
@@ -237,13 +255,33 @@ export function SignificantEventsPage() {
     return <RedirectTo path="/{tab}" params={{ path: { tab: 'significant_events' } }} />;
   }
 
-  if (!isValidSignificantEventsTab(tab)) {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />;
+  // Streams moved into a header flyout; keep bookmarks working via redirect.
+  if (tab === 'streams') {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: 'knowledge_indicators' } }} />;
+  }
+
+  // Memory lives under Nightshift; keep old Significant Events bookmarks working.
+  if (tab === 'memory') {
+    return <RedirectToNightshiftMemory navigateToApp={navigateToApp} />;
+  }
+
+  if (!isValidSignificantEventsRoute(tab)) {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: 'knowledge_indicators' } }} />;
   }
 
   return (
     <>
-      <SignificantEventsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
+      <SignificantEventsAppHeader
+        title={pageTitle}
+        menu={menu}
+        tabs={tabs}
+        back={{
+          href: nightshiftHref,
+          label: i18n.translate('xpack.significantEventsApp.backToNightshiftLabel', {
+            defaultMessage: 'Nightshift',
+          }),
+        }}
+      />
       <KiGenerationProvider onFailed={onOnboardingFailed}>
         <SignificantEventsPageProvider>
           <SignificantEventsAppPageTemplate.Body grow>
@@ -287,7 +325,7 @@ export function SignificantEventsPage() {
                   </p>
                   {canManageStreams && (
                     <EuiButton
-                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                      href={settingsHref}
                       color="danger"
                       size="s"
                       data-test-subj="significantEventsStatusErrorBannerSettingsLink"
@@ -334,7 +372,7 @@ export function SignificantEventsPage() {
                   )}
                   {canManageStreams && (
                     <EuiButton
-                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                      href={settingsHref}
                       color="warning"
                       size="s"
                       data-test-subj="significantEventsPausedBannerSettingsLink"
@@ -348,13 +386,14 @@ export function SignificantEventsPage() {
                 <EuiSpacer />
               </>
             )}
-            {tab === 'streams' && <StreamsView />}
             {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
             {tab === 'queries' && <QueriesTable />}
             {tab === 'detections' && <DetectionsTab />}
             {tab === 'significant_events' && <SignificantEventsTab />}
-            {tab === 'memory' && <MemoryTab />}
             {tab === 'settings' && <SettingsTab />}
+            {isStreamsStatusFlyoutOpen && (
+              <StreamsStatusFlyout onClose={() => setIsStreamsStatusFlyoutOpen(false)} />
+            )}
           </SignificantEventsAppPageTemplate.Body>
         </SignificantEventsPageProvider>
       </KiGenerationProvider>

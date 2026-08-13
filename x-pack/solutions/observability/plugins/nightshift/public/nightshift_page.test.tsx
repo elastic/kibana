@@ -12,6 +12,7 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
+import { MemoryRouter } from 'react-router-dom';
 import { NightshiftPage } from './nightshift_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
@@ -25,20 +26,29 @@ jest.mock('./hooks/use_significant_events_availability');
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
-/** Mirrors the registered `appRoute` for significantEvents (`/app/significant_events`). */
-const getUrlForApp = jest.fn((appId: string, { path }: { path: string }) => {
-  const base = appId === 'significantEvents' ? '/app/significant_events' : `/app/${appId}`;
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+/** Mirrors registered appRoutes for significantEvents and nightshift. */
+const getUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
+  const base =
+    appId === 'significantEvents'
+      ? '/app/significant_events'
+      : appId === 'nightshift'
+      ? '/app/nightshift'
+      : `/app/${appId}`;
+  const path = options?.path ?? '';
+  return `${base}${path.startsWith('/') || path === '' ? path : `/${path}`}`;
 });
 const navigateToUrl = jest.fn();
 const navigateToApp = jest.fn();
+const getMemoryPage = jest.fn(() => () => <div data-test-subj="nightshiftMemoryStub" />);
 
-function renderPage() {
+function renderPage(initialEntry = '/') {
   return render(
     <I18nProvider>
-      <MockAppHeaderProvider>
-        <NightshiftPage />
-      </MockAppHeaderProvider>
+      <MemoryRouter initialEntries={[initialEntry]}>
+        <MockAppHeaderProvider>
+          <NightshiftPage />
+        </MockAppHeaderProvider>
+      </MemoryRouter>
     </I18nProvider>
   );
 }
@@ -47,6 +57,7 @@ describe('NightshiftPage', () => {
   beforeEach(() => {
     navigateToApp.mockClear();
     navigateToUrl.mockClear();
+    getMemoryPage.mockClear();
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseKibana.mockReturnValue({
       services: {
@@ -58,6 +69,7 @@ describe('NightshiftPage', () => {
             PageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
           },
         },
+        significantEventsApp: { getMemoryPage },
       },
     });
   });
@@ -85,12 +97,18 @@ describe('NightshiftPage', () => {
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
-  it('links to Streams settings with EBT tracking', async () => {
+  it('links to Significant Events and Memory from the More menu with EBT tracking', async () => {
     renderPage();
     await openAppMenuOverflow();
 
-    const settingsLink = await screen.findByTestId('nightshiftSettingsLink');
-    expect(settingsLink).toHaveAttribute('href', '/app/significant_events/settings');
+    const significantEventsLink = await screen.findByTestId('nightshiftSignificantEventsLink');
+    expect(significantEventsLink).toHaveAttribute(
+      'href',
+      '/app/significant_events/knowledge_indicators'
+    );
+
+    const memoryLink = await screen.findByTestId('nightshiftMemoryLink');
+    expect(memoryLink).toHaveAttribute('href', '/app/nightshift/memory');
 
     let trackedClick: { action: string | null; element: string | null } | undefined;
     const captureTrackedClick = (event: MouseEvent) => {
@@ -104,15 +122,24 @@ describe('NightshiftPage', () => {
         : undefined;
     };
     document.addEventListener('click', captureTrackedClick);
-    await act(async () => fireEvent.click(settingsLink));
+    await act(async () => fireEvent.click(significantEventsLink));
     document.removeEventListener('click', captureTrackedClick);
 
     await waitFor(() =>
       expect(trackedClick).toEqual({
-        action: 'viewSettings',
+        action: 'viewSignificantEvents',
         element: 'nightshiftPageHeader',
       })
     );
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/settings');
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/significant_events/knowledge_indicators');
+  });
+
+  it('renders the Memory page at /memory', async () => {
+    renderPage('/memory');
+    await waitFor(() =>
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Memory')
+    );
+    expect(screen.getByTestId('nightshiftMemoryStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 });

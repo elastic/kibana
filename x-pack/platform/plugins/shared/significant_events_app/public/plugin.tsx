@@ -23,13 +23,14 @@ import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
 import { FocusedSignificantEventService } from './services/focused_significant_event_service';
 import type {
+  KnowledgeIndicatorsPanelComponent,
+  MemoryPageComponent,
   SignificantEventsAppPublicSetup,
   SignificantEventsAppPublicStart,
   SignificantEventsAppSetupDependencies,
   SignificantEventsAppStartDependencies,
 } from './types';
 import type { SignificantEventsAppServices } from './services/types';
-import type { KnowledgeIndicatorsPanelComponent } from './types';
 
 export class SignificantEventsAppPlugin
   implements
@@ -46,6 +47,7 @@ export class SignificantEventsAppPlugin
   private cleanupSignificantEventAttachment?: () => void;
   private stopped = false;
   private knowledgeIndicatorsPanel?: KnowledgeIndicatorsPanelComponent;
+  private memoryPage?: MemoryPageComponent;
 
   setup(
     coreSetup: CoreSetup<SignificantEventsAppStartDependencies>,
@@ -203,6 +205,20 @@ export class SignificantEventsAppPlugin
           );
         }
         return this.knowledgeIndicatorsPanel;
+      },
+      getMemoryPage: () => {
+        if (!this.memoryPage) {
+          this.memoryPage = dynamic(() =>
+            import('./components/memory/create_memory_page').then(({ createMemoryPage }) => ({
+              default: createMemoryPage({
+                coreStart,
+                pluginsStart,
+                services,
+              }),
+            }))
+          );
+        }
+        return this.memoryPage;
       },
     };
   }

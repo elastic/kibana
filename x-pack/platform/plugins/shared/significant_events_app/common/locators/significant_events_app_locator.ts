@@ -47,7 +47,7 @@ export class SignificantEventsAppLocatorDefinition
   public readonly id = SIGNIFICANT_EVENTS_APP_LOCATOR_ID;
 
   public readonly getLocation = async ({
-    tab = 'streams',
+    tab = 'knowledge_indicators',
     ...query
   }: SignificantEventsAppLocatorParams) => {
     const searchParams = new URLSearchParams();

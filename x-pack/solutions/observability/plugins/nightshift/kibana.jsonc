@@ -17,6 +17,7 @@
       "observabilityShared",
       "share",
       "significantEvents",
+      "significantEventsApp",
       "unifiedSearch"
     ],
     "optionalPlugins": ["agentBuilder", "serverless", "spaces"],
