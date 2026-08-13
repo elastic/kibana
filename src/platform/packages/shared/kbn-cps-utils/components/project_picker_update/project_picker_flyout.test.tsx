@@ -292,7 +292,7 @@ describe('ProjectPickerFlyoutContent', () => {
       ).toHaveAttribute('aria-checked', 'false');
     });
 
-    await user.click(screen.getByTestId('projectPickerHeaderActionsButton'));
+    await user.click(screen.getByTestId('projectPickerGlobalActionsButton'));
     await user.click(screen.getByText('Revert to space defaults'));
 
     await waitFor(() => {
