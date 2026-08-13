@@ -50,9 +50,12 @@ export const getRuleMigrationStatsTool = (
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `Get task-progress stats for a single SIEM rule migration.
+    description: `Get task-progress stats for a single Automatic Rule Migration.
 
-Returns status (ready/running/stopped/interrupted/finished) and per-state rule counts (pending/processing/completed/failed).
+Returns { id, name, status, items: { total, pending, processing, completed, failed }, created_at, last_updated_at, vendor?, last_execution? }.
+
+\`status\` is one of ready|running|stopped|interrupted|finished.
+\`last_execution\`, when present, has started_at, finished_at?, total_execution_time_ms, connector_id, error?, is_stopped, and skip_prebuilt_rules_matching.
 
 Use this to inspect one migration's progress. Read-only.`,
     schema,

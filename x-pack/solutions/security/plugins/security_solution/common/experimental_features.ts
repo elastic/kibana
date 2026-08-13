@@ -158,14 +158,6 @@ export const allowedExperimentalValues = Object.freeze({
   siemMigrationsDisabled: false,
 
   /**
-   * Enables the SIEM Migration (Automatic Migration of rules) Agent Builder tools.
-   * Gates tool registration so the feature can ship dark and be enabled per environment
-   * via `xpack.securitySolution.enableExperimental`. Independent of `siemMigrationsDisabled`
-   * (the UI feature flag): both must be on for the tools to register.
-   */
-  siemMigrationsAgentBuilderEnabled: false,
-
-  /**
    * Enables the Defend Insights Policy Response Failure feature
    */
   defendInsightsPolicyResponseFailure: true,
@@ -348,6 +340,11 @@ export const allowedExperimentalValues = Object.freeze({
    * from the locally stored kibana mappings after a MITRE version bump.
    */
   mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

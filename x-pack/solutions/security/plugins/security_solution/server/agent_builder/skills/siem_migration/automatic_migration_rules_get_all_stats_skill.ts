@@ -40,8 +40,8 @@ ${NAME_NEVER_ID_BLOCK}
 - \`security.siem_migration.get_all_rule_migration_stats\` — list task-progress stats for every
   migration available to the user (id, name, vendor, status, pending/processing/completed/failed
   counts). Start here when the user has no specific migration in mind.
-- \`security.siem_migration.get_rule_migration\` — fetch a single migration by id: name, index
-  pattern, connector, task status. Also the pasted-id fallback (see Name→ID block).
+- \`security.siem_migration.get_rule_migration\` — fetch a single migration by id: name, created_by,
+  created_at, last_execution. Also the pasted-id fallback (see Name→ID block).
 - \`security.siem_migration.get_rule_migration_stats\` — task-progress stats for ONE migration
   (status + per-state rule counts). Returns an empty zero-shape when the migration has no items.
 - \`security.siem_migration.get_rule_migration_translation_stats\` — translation stats for ONE
@@ -64,9 +64,10 @@ ${NAME_NEVER_ID_BLOCK}
 
 - **Overview**: a compact table — name, vendor, status, and a progress summary
   (completed/total). Sort by last-updated descending unless the user asks otherwise.
-- **Single migration**: open with one sentence naming the migration. Show name, vendor, index
-  pattern, connector (name + id), task status, and a counts breakdown
-  (pending / processing / completed / failed; full / partial / untranslatable / installable).
+- **Single migration**: open with one sentence naming the migration. Show name, vendor, task status,
+  and a counts breakdown (pending / processing / completed / failed; full / partial /
+  untranslatable / installable). If \`last_execution\` is present (from \`get_rule_migration_stats\`),
+  show connector id, started_at, and any error.
 - **Rules**: a table of original title, translated title (or "—"), translation result, status.
   State the page number and that more pages exist when \`total\` exceeds the rows shown.
 

@@ -46,8 +46,8 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 ## Available Tools
 
 - \`security.siem_migration.get_all_rule_migration_stats\` — resolve a migration name to its id.
-- \`security.siem_migration.get_rule_migration\` — inspect a migration's config (connector, index
-  pattern, task status) and verify a pasted id.
+- \`security.siem_migration.get_rule_migration\` — fetch a single migration by id (name, created_by,
+  created_at, last_execution) and verify a pasted id.
 - \`security.siem_migration.get_rule_migration_stats\` — task status (ready / running / stopped /
   interrupted / finished) and per-state item counts. Returns an empty zero-shape for no items.
 - \`security.siem_migration.get_rule_migration_translation_stats\` — translation counts (full /
@@ -92,14 +92,15 @@ between them.
 - Ask user for both which connector they want to use and whether they want to skip prebuilt rules matching. No retry, no selection.
 
 #### REPROCESS ( Also called retry)
-- Connector ID and skip_prebuilt_rules_matching must be asked from the user for REPROCESS.
-- re-runs a subset of rules. Pass \`retry: "failed"\` ONLY to retry only failed rules, or
-  \`retry: "not_fully_translated"\` to retry partially Translated rules. Both settings must be confirmed with user. No selection.
+- Re-runs a subset of rules. By default, reuse the connector and skip_prebuilt_rules_matching
+  values from the last execution (available in \`last_execution\` from \`get_rule_migration_stats\`).
+  Only ask the user if they explicitly want to change them.
+- Pass \`retry: "failed"\` ONLY to retry only failed rules, or
+  \`retry: "not_fully_translated"\` to retry partially translated rules. No selection.
 - **REPROCESS a specific subset**: if the user names specific rules to re-run, resolve their
   **titles** to **rule item ids** via \`get_migration_rules\` and pass \`selection: { ids }\`. A
   \`selection\` WITHOUT \`retry: "selected"\` is a no-op — always pair \`selection\` with
-  \`retry: "selected"\`. Do not set \`connector_id\` on a reprocess unless the user explicitly asks
-  to change it.
+  \`retry: "selected"\`.
 
 #### RESUME
 - **RESUME** continues a stopped/interrupted run that still has pending items. It uses the SAME

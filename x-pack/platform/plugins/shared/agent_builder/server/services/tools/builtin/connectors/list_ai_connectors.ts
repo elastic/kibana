@@ -29,10 +29,12 @@ export const createListAiConnectorsTool = ({
 }: ConnectorToolsOptions): BuiltinToolDefinition<typeof schema> => ({
   id: platformCoreTools.listAiConnectors,
   type: ToolType.builtin,
-  description:
-    'List available AI/model connectors (id, name, type) so the agent can resolve a model name the user mentioned to its connector id. Never guess connector ids or default to the first one — always ask the user to pick from this list.',
+  description: `
+    List AI/model connectors (id, name, type) available via Inference Service so the agent can resolve a model name.
+    Never guess connector ids or default to the first one — always ask the user to pick from this list.
+`,
   schema,
-  tags: ['connector', 'ai'],
+  tags: ['connector', 'ai', 'inference'],
   availability: {
     // Connectors are space-scoped, so cache the result per space.
     cacheMode: 'space',

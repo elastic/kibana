@@ -99,7 +99,7 @@ export const registerSkills = async ({
   // dedicated agent-builder experimental flag, so skills ship in lockstep with their tools.
   if (
     !experimentalFeatures.siemMigrationsDisabled &&
-    experimentalFeatures.siemMigrationsAgentBuilderEnabled
+    experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
   ) {
     await agentBuilder.skills.register(automaticMigrationRulesGetAllStatsSkill);
     await agentBuilder.skills.register(automaticMigrationRulesStartMigrationSkill);

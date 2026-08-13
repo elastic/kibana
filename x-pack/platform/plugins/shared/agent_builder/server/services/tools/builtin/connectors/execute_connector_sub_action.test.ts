@@ -46,8 +46,6 @@ const getActions: ConnectorToolsOptions['getActions'] = jest.fn(() =>
   })
 ) as unknown as ConnectorToolsOptions['getActions'];
 
-// list_ai_connectors uses getInference; execute_connector_sub_action does not, but
-// ConnectorToolsOptions now requires it, so provide a stub for these tests.
 const getInference: ConnectorToolsOptions['getInference'] = jest.fn(() =>
   Promise.resolve({} as unknown as ReturnType<ConnectorToolsOptions['getInference']>)
 );

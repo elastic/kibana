@@ -82,12 +82,12 @@ export const getMigrationRulesTool = (
     id: SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `List the rules in a SIEM rule migration with their translation result and status.
+    description: `List the rules in an Automatic Rule Migration with their translation result and status.
 
 Supports filtering by translation result, installed/prebuilt, search term, or explicit ids.
 Pagination is zero-based.
 
-Returns projected fields only (id, titles, prebuilt rule id, translation result, status) — not full rule bodies.
+Returns projected fields only (id, original title, vendor, translated title, prebuilt rule id, integration ids, translation result, status) — not full rule bodies.
 
 Read-only.`,
     schema,

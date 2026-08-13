@@ -20,7 +20,7 @@ export const servers: ScoutServerConfig = {
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'dexAiSkillRecommendPrebuiltRules',
         'dexAiSkillFindRules',
-        'siemMigrationsAgentBuilderEnabled',
+        'siemRuleMigrationsAgentBuilderEnabled',
       ])}`,
       '--xpack.alerting_v2.enabled=true',
     ],

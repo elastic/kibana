@@ -38,11 +38,11 @@ export const getRuleMigrationTool = (
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    description: `Retrieve a single SIEM rule migration by id.
+    description: `Retrieve a single Automatic rule migration by id.
 
-Returns its name, index pattern, connector, and task status.
+Returns its name, creation time, last_execution details
 
-Use this to inspect the state of an Automatic Migration (rules) before starting, stopping, or installing translated rules.`,
+Use this to inspect name or last execution details of an Automatic Migration (rules) before starting, stopping, or installing translated rules.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {

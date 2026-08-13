@@ -116,7 +116,7 @@ export const registerTools = (
   // follow-up skills (#18761+) ship in lockstep — no skill registered without its tools.
   if (
     !experimentalFeatures.siemMigrationsDisabled &&
-    experimentalFeatures.siemMigrationsAgentBuilderEnabled
+    experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
   ) {
     registerSiemMigrationTools(agentBuilder, core, productFeaturesService, logger);
   }
