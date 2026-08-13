@@ -577,6 +577,20 @@ describe('RulesListTable', () => {
       expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     });
 
+    it('still shows View change history (a read action) without write actions', async () => {
+      const onViewChangeHistory = jest.fn();
+      renderTable({ canWrite: false, onViewChangeHistory });
+
+      // No quick edit shortcut for read-only, but the actions menu is available.
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewChangeHistoryRule-rule-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
+    });
+
     it('does not show the bulk action toolbar even when selectedCount > 0', () => {
       renderTable({ canWrite: false, selectedCount: 1 });
 
