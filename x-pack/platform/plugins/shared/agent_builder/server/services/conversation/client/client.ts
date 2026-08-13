@@ -379,6 +379,8 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<TimelineEvent[]> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
+    // TODO (timeline pagination): slice `after_event_id`/`limit` on the ES side (runtime field
+    // / painless) so a large timeline is not transported whole to Kibana just to be sliced here.
     let events: TimelineEvent[] = document._source!.events ?? [];
 
     if (options.afterEventId) {

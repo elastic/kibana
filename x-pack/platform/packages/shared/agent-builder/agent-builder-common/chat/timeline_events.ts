@@ -42,17 +42,28 @@ export enum EventActorType {
 export interface EventActor {
   /** The kind of participant. */
   type: EventActorType;
-  /** Stable participant identifier (Kibana user id, agent id, or external system id). */
+  /**
+   * Stable participant identifier. For an `external` actor this is the external system's own
+   * user id, stored raw (e.g. the Slack user id, not prefixed); `origin.type` says which system
+   * it belongs to. The external thread/conversation id lives on the conversation, at
+   * `conversation.origin.external_conversation_id`, not here.
+   */
   id: string;
   /** Optional username / handle. */
   username?: string;
   /** Optional display name. */
   full_name?: string;
-  /** For external actors, the origin the event came from. */
+  /** For external actors, the origin the event came from (which system). */
   origin?: ConversationRoundOrigin;
 }
 
-/** What caused an agent run to start. */
+/**
+ * What caused an agent run to start.
+ *
+ * At MVP only `userMessage` and `promptResponse` are produced (today's `direct` behaviour).
+ * `schedule`, `external`, and `agentMention` are declared but not yet wired; they start being
+ * emitted when custom triggers land.
+ */
 export enum TimelineTriggerType {
   /** A user message. */
   userMessage = 'user_message',
