@@ -148,7 +148,9 @@ describe('saveAutomationHandler', () => {
   const logger = loggingSystemMock.createLogger();
   const getCoreStart = jest.fn();
   const getSecurityStart = jest.fn().mockResolvedValue(undefined);
-  let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'assertCanAcceptAutomation'>>;
+  let aiIndexService: jest.Mocked<
+    Pick<AiIndexService, 'addAutomation' | 'assertCanAcceptAutomation'>
+  >;
   let workflowsManagement: {
     getWorkflow: jest.Mock;
     createWorkflow: jest.Mock;

@@ -273,7 +273,6 @@ const assertWorkflowUpdateAccess = async ({
   }
 };
 
-
 const persistWorkflowFromAttachment = async ({
   yaml,
   proposedWorkflowId,
