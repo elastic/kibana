@@ -8,7 +8,10 @@
 import type { IconType } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common/src/constants';
+// Import the provider map module directly so the package barrel (forms / esUiShared)
+// is not pulled into the significantEventsApp bundle for icon lookups alone.
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider';
 import { GeminiLogo } from '@kbn/stack-connectors-plugin/public/common';
 
 const getProviderIcon = (key: ServiceProviderKeys) => SERVICE_PROVIDERS[key].icon;

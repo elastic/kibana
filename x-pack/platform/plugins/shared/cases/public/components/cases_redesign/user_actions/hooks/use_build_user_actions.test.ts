@@ -13,8 +13,6 @@ import { builderMap } from '../../../user_actions/builder';
 import { basicCase, getUserAction } from '../../../../containers/mock';
 import { casesConfigurationsMock } from '../../../../containers/configure/mock';
 import { getCaseConnectorsMockResponse } from '../../../../common/mock/connectors';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../../../client/attachment_framework/persistable_state_registry';
 import { UnifiedAttachmentTypeRegistry } from '../../../../client/attachment_framework/unified_attachment_registry';
 import { UserActionTypes } from '../../../../../common/types/domain';
 
@@ -31,8 +29,6 @@ const defaultArgs = {
   userProfiles: new Map(),
   currentUserProfile: undefined,
   appId: 'securitySolution',
-  externalReferenceAttachmentTypeRegistry: new ExternalReferenceAttachmentTypeRegistry(),
-  persistableStateAttachmentTypeRegistry: new PersistableStateAttachmentTypeRegistry(),
   unifiedAttachmentTypeRegistry: new UnifiedAttachmentTypeRegistry(),
   manageMarkdownEditIds: [],
   selectedOutlineCommentId: '',

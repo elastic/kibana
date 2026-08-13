@@ -9,9 +9,15 @@ import React from 'react';
 import type { EuiPageSectionProps } from '@elastic/eui';
 import { EuiPageTemplate } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
+import type { AppHeaderProps } from '@kbn/app-header';
+import { AppHeader } from '@kbn/app-header';
 
 const templateClassName = css`
   height: 0;
+`;
+
+const noPaddingClassName = css`
+  padding: 0;
 `;
 
 const bodyClassName = css`
@@ -24,9 +30,7 @@ const bodyContentClassName = css`
   height: 100%;
 `;
 
-const noPaddingClassName = css`
-  padding: 0;
-`;
+export const SignificantEventsAppHeader = (props: AppHeaderProps) => <AppHeader {...props} />;
 
 export function SignificantEventsAppPageTemplate({ children }: { children: React.ReactNode }) {
   return (
