@@ -78,6 +78,17 @@ export class ApplicationConnectionsApp {
       .waitFor({ state: 'detached' });
   }
 
+  async deleteConnection(connectionId: string) {
+    await this.page.testSubj.click(`deleteConnection-${connectionId}`);
+    await this.page.testSubj
+      .locator('applicationConnectionsDeleteModal')
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('applicationConnectionsDeleteConfirmButton');
+    await this.page.testSubj
+      .locator('applicationConnectionsDeleteModal')
+      .waitFor({ state: 'detached' });
+  }
+
   async selectListConnectionRow(connectionId: string) {
     await this.page.testSubj.click(`checkboxSelectRow-${connectionId}`);
   }
@@ -90,6 +101,17 @@ export class ApplicationConnectionsApp {
     await this.page.testSubj.click('applicationConnectionsRevokeConfirmButton');
     await this.page.testSubj
       .locator('applicationConnectionsRevokeModal')
+      .waitFor({ state: 'detached' });
+  }
+
+  async bulkDeleteSelected() {
+    await this.page.testSubj.click('applicationConnectionsBulkDeleteButton');
+    await this.page.testSubj
+      .locator('applicationConnectionsDeleteModal')
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('applicationConnectionsDeleteConfirmButton');
+    await this.page.testSubj
+      .locator('applicationConnectionsDeleteModal')
       .waitFor({ state: 'detached' });
   }
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "505fd4efb3098742baaaf744a4d3ebcada66b455",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/api/tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/transform/test/scout_cps_local/api/tests/transforms_create_project_routing.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 43,
+        "column": 13
       }
     }
   ]
