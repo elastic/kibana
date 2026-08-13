@@ -26,6 +26,7 @@ import {
   closePointInTime,
   getAgentsByKuery,
   getAgentTags,
+  filterAgentIdsByNamespace,
   openPointInTime,
   updateAgent,
   _joinFilters,
@@ -175,6 +176,85 @@ describe('Agents CRUD test', () => {
         toElasticsearchQuery(
           _joinFilters(['fleet-agents.policy_id: 123', 'NOT status:unenrolled'])!
         )
+      );
+    });
+
+    it('should apply namespace filter when spaceId is provided and space awareness is enabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(true);
+      searchMock.mockResolvedValueOnce({
+        aggregations: { tags: { buckets: [{ key: 'finance-tag' }] } },
+      });
+
+      await getAgentTags(soClientMock, esClientMock, {
+        showInactive: false,
+        spaceId: 'finance',
+      });
+
+      const calledQuery = searchMock.mock.calls.at(-1)[0].query;
+      expect(JSON.stringify(calledQuery)).toContain('finance');
+    });
+
+    it('should not apply namespace filter when space awareness is disabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(false);
+      searchMock.mockResolvedValueOnce({
+        aggregations: { tags: { buckets: [{ key: 'tag1' }] } },
+      });
+
+      await getAgentTags(soClientMock, esClientMock, {
+        showInactive: false,
+        spaceId: 'finance',
+      });
+
+      const calledQuery = searchMock.mock.calls.at(-1)[0].query;
+      expect(JSON.stringify(calledQuery)).not.toContain('finance');
+    });
+  });
+
+  describe('filterAgentIdsByNamespace', () => {
+    it('should return all ids unchanged when space awareness is disabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(false);
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('default');
+
+      const result = await filterAgentIdsByNamespace(esClientMock, soClientMock, [
+        'agent1',
+        'agent2',
+      ]);
+
+      expect(result).toEqual(['agent1', 'agent2']);
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('should return empty array when input is empty', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(true);
+
+      const result = await filterAgentIdsByNamespace(esClientMock, soClientMock, []);
+
+      expect(result).toEqual([]);
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
+    it('should filter ids by namespace when space awareness is enabled', async () => {
+      isSpaceAwarenessEnabledMock.mockResolvedValue(true);
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('finance');
+      searchMock.mockResolvedValueOnce({
+        hits: { hits: [{ _id: 'agent1' }] },
+      });
+
+      const result = await filterAgentIdsByNamespace(esClientMock, soClientMock, [
+        'agent1',
+        'agent2',
+      ]);
+
+      expect(result).toEqual(['agent1']);
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENTS_INDEX,
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([{ terms: { _id: ['agent1', 'agent2'] } }]),
+            }),
+          }),
+        })
       );
     });
   });
