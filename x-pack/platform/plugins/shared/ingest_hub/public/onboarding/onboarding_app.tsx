@@ -17,6 +17,7 @@ import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
 import { OnboardingFlowProvider } from './onboarding_flow_context';
+import { clearOnboardingSession } from './onboarding_session_storage';
 
 const DEFAULT_RETURN_APP = 'integrations';
 
@@ -35,6 +36,22 @@ export function renderOnboardingApp(
   params: AppMountParameters,
   deps: IngestHubStartDependencies = {}
 ) {
+  // Clear session storage before any hooks initialize.
+  // useSessionStorage (react-use) writes its default on first mount and re-serializes
+  // every render, so clearing from inside the tree is too late — the hooks' React state
+  // already holds the old values and immediately rewrites them.
+  const { pathname, search, state } = params.history.location;
+  const integrationId = pathname.split('/').filter(Boolean)[0];
+  const isNewSession = (state as { newSession?: boolean } | undefined)?.newSession === true;
+  const hasDeploymentId = new URLSearchParams(search).has('deploymentId');
+
+  if (integrationId && isNewSession && !hasDeploymentId) {
+    clearOnboardingSession(integrationId);
+    // Consume the flag so a reload does not trigger another clear and wipe an in-progress flow.
+    // window.history.state survives a reload, so leaving it in place would re-clear every time.
+    params.history.replace({ pathname, search }, undefined);
+  }
+
   const queryClient = new QueryClient();
   const root = createRoot(params.element);
   root.render(
