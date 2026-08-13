@@ -182,7 +182,7 @@ export const createAdUpdateJobConfigTool = (
   description:
     'Update ML job config: memory limit, datafeed query_delay, delayed data check config, or create a calendar event. For create_calendar_event: ensures the calendar exists (PUT), posts only missing events, then associates all job_ids with the calendar. Pass every job that should share the calendar in one call.',
   annotations: {
-    title: 'Update AD Job Config',
+    title: 'Update Anomaly Detection Job Config',
     readOnlyHint: false,
     destructiveHint: false,
     idempotentHint: false,

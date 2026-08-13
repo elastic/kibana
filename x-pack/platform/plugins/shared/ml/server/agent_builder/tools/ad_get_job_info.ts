@@ -83,7 +83,7 @@ export const createAdGetJobInfoTool = (
   description:
     'Read ML job and datafeed state, config, messages, snapshots, calendar events, and available metadata. Run with operation=validate_permissions first if results look empty.',
   annotations: {
-    title: 'Get AD Job Info',
+    title: 'Get Anomaly Detection Job Info',
     readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,

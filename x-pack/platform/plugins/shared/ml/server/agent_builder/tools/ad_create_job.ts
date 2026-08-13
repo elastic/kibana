@@ -42,7 +42,7 @@ export const createAdCreateJobTool = (
   description:
     'Create an ML anomaly detection job and its datafeed. Also validates a job spec or estimates memory requirement before creation.',
   annotations: {
-    title: 'Create AD Job',
+    title: 'Create Anomaly Detection Job',
     readOnlyHint: false,
     destructiveHint: false,
     idempotentHint: false,
