@@ -7,4 +7,4 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Fix associated users and hosts metrics excluding entity attachments
+title: Fix Associated Users and Hosts metrics excluding entity attachments in case details

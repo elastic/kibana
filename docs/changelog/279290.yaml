@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-12
 - product: kibana
-title: Enable cancel response action
+title: Enable cancel response action for Elastic Defend Endpoint

@@ -7,5 +7,5 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: Add workflow preview button
+title: Add workflow preview button on Context Engine automation rows
 description: Added a workflow YAML preview on Context Engine automation rows.

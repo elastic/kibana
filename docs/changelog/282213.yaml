@@ -10,4 +10,4 @@ products:
 areas:
 - Search and data
 title: Fix Fleet secrets stored inline during package policy bulk create
-description: Fixed Fleet package policy bulk creation so that secrets are stored in the secrets index (respecting the secrets storage setting) instead of inline on the package policy saved object.
+description: Fixes Fleet package policy bulk creation so that secrets are stored in the secrets index (respecting the secrets storage setting) instead of inline on the package policy saved object.

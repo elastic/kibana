@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-12
 - product: kibana
-title: Fix maintenance window name references in monitors
+title: Fix maintenance window name references in Synthetics monitors
