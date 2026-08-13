@@ -51,10 +51,6 @@ import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
- *
- * Extension policy: only expose methods legitimately needed by handlers.
- * Methods here are structurally satisfied by the plugin's internal
- * `ConversationClient`, so adding more is backward-compatible.
  */
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */

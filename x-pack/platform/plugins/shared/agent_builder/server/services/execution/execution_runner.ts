@@ -116,7 +116,6 @@ export const handleAgentExecution = async ({
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
-  /** Canonical interactivity for this execution. When omitted, defaults from `execution.executionMode`. */
   interactivity?: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const resolvedInteractivity: InteractivityConfig =
@@ -236,8 +235,7 @@ const handleConversationExecution = async ({
 
   // Generate title (for CREATE) or use existing title (for UPDATE).
   // shareReplay so persistence and the span attribute share one emission.
-  // Persistent sub-agent creations already carry a seeded title (the subagent
-  // name); skip LLM title generation for those.
+  // Persistent sub-agent creations already carry a title - skip LLM title generation for those.
   const shouldGenerateTitle = conversation.operation === 'CREATE' && !subagentCreation;
   const title$ = (
     shouldGenerateTitle

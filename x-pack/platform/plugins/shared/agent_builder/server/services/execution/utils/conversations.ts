@@ -44,17 +44,11 @@ export const createConversation$ = ({
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
-      // Persistent sub-agent creations: link to the parent and snapshot the
-      // parent's user when it was resolved (see `getConversation` Case 3a).
-      //
-      // Guard: `placeholderConversation` always sets `user` to the
-      // `PLACEHOLDER_USER` sentinel; forwarding that as a user override would
-      // persist the child with `user_id: 'unknown'` and lock the driver out on
-      // subsequent access. Only forward `user` when it's been intentionally
-      // set to a real value (i.e. NOT the sentinel).
+      // Persistent sub-agent creations: link to the parent and snapshot the parent's user
       const isPersistentSubagentCreate = Boolean(conversation.parent_conversation_id);
       const hasResolvedParentUser =
         Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
+
       return conversationClient.create({
         id: conversation.id,
         title,
@@ -164,11 +158,6 @@ export const getConversation = async ({
   conversationClient: ConversationClient;
   accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
-  /**
-   * When creating a fresh conversation for a persistent sub-agent, carries the
-   * parent's linkage + a pre-selected title. The parent's user + access_control
-   * are looked up here and snapshotted onto the new placeholder.
-   */
   subagentCreation?: {
     parentConversationId: string;
     subagentName: string;
@@ -210,17 +199,6 @@ export const getConversation = async ({
   }
 
   // Case 3a: Creating a child conversation for a persistent sub-agent.
-  //
-  // Ownership: for a SHARED parent (owner A, driver B), the child must be
-  // owned by A — not by B (the current driver). Snapshot the parent's `user`
-  // + `access_control` when the parent already exists in ES.
-  //
-  // First-round nuance: when a user starts a fresh chat AND spawns a
-  // persistent sub-agent in the same round, the parent conversation is still
-  // an in-memory placeholder and isn't in ES yet — `get()` would throw. In
-  // that case we fall through to `currentUser` via `createRequestToEs`, which
-  // IS the about-to-be owner (they're creating the conversation), so
-  // ownership matches by construction.
   if (subagentCreation) {
     const parentExists = await conversationClient.exists(subagentCreation.parentConversationId);
     if (parentExists) {
@@ -260,12 +238,7 @@ export const getConversation = async ({
 };
 
 /**
- * Sentinel user attached to a placeholder conversation. Callers that persist
- * the placeholder are expected to replace this with the current request user
- * (see `createRequestToEs`). Persistent sub-agent creations that want to keep
- * the placeholder's user (e.g. because they couldn't resolve a real owner from
- * the parent) MUST NOT forward this sentinel as an explicit user override —
- * `createConversation$` guards against that.
+ * Sentinel user attached to a placeholder conversation.
  */
 export const PLACEHOLDER_USER: Conversation['user'] = {
   id: 'unknown',

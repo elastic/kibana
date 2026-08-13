@@ -293,13 +293,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Reassign to the (possibly compacted) conversation for prompt construction
   processedConversation = compactionResult.processedConversation;
-
-  // Roster fallback is only meaningful after compaction — before it, the
-  // per-round SubagentRosterUpdatedSteps in the surviving history already
-  // surface the current roster to the LLM.
-  if (compactionResult.summary) {
-    processedConversation.subagentRosterFallback = subagentTracker.snapshot();
-  }
+  processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
   let relevantSkillsSelection: RelevantSkillSelection | undefined;
   if (relevantSkillsEnabled) {
