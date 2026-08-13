@@ -10,10 +10,10 @@ Inject `LoggerServiceToken`, never a raw `@kbn/logging` `Logger`.
 ## API
 
 ```ts
-logger.debug({ message, labels });
-logger.info({ message, labels });
-logger.warn({ message, code, labels, error });
-logger.error({ message, error, code, labels });
+logger.debug({ message, labels? });
+logger.info({ message, labels? });
+logger.warn({ message, code, labels?, error? });
+logger.error({ message?, error, code, labels? });
 logger.forSubsystem(name); // → LoggerServiceContract
 logger.withLabels(labels); // → LoggerServiceContract
 ```
