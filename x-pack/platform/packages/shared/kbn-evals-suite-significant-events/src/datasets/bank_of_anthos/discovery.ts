@@ -304,7 +304,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: {
@@ -342,7 +342,7 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,

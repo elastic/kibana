@@ -76,7 +76,6 @@ Rule-match request:
   "from": "now-7d",
   "to": "now",
   "per_page": 50,
-  "exclude_unconfirmed_signals": true,
   "stream_names": ["..."],
   "rule_uuids": ["..."]
 }
@@ -90,7 +89,6 @@ Topology-fallback request:
   "from": "now-7d",
   "to": "now",
   "per_page": 50,
-  "exclude_unconfirmed_signals": true,
   "topology_feature_ids": ["..."]
 }
 ```
@@ -101,10 +99,8 @@ Response:
   "view": "compact",
   "page": 1,
   "per_page": 50,
-  "returned": 1,
   "total": 3,
   "has_more": true,
-  "next_page": 2,
   "events": [
     {
       "event_id": "...",
@@ -184,7 +180,7 @@ Evaluate detections pairwise — one current detection against another current d
 2. Assign each side an **Alert symptom** and mechanism — the user-visible failure or degradation this rule monitors for (e.g. "connection refused", "database error", "high latency"), or **positive/health** if the rule measures success or healthy operation. Recovery is the original failure symptom returning, not a separate symptom.
 3. Read both sides' **Current evidence** descriptions as **Found** (observed signature and target) plus **Impact** (blocked, degraded, or unaffected operation).
 
-**Reject the pair when any pre-check applies**
+**Pre-check — split immediately if any of the following hold**
 1. Either side's **Current evidence** verdict is `off_topic`.
 2. Either side has no matched query KI, or its **Current evidence** has verdict `inconclusive`/`not_checked` without an explicit observed-error or recovery rule.
 3. The comparison is **Positive/health vs. any failure symptom**.
@@ -268,14 +264,10 @@ For events returned by `platform_sig_events_event_search`, derive:
 - **Onset timing** — use a stored timestamp only when it represents incident onset; otherwise treat timing as unknown.
 
 Maintain `matched_rule_uuids`, initially empty. Add a detection's `rule_uuid` immediately on acceptance. Never assign the same `rule_uuid` twice.
-Before accepting any continuation, identify the specific confirmed open-event signal that passes `<incident_matching>`, or apply the Recovery reconciliation exception to close that same episode. A rule in `unresolved_rule_uuids` prevents closure but is not acceptance evidence by itself; a stored signal for a rule absent from that list has a non-confirming verdict and may be used only for the Recovery reconciliation exception. A returned event, shared topology, or a previously unconfirmed copy of the current rule is not acceptance evidence for an active continuation. If neither a confirmed pairwise match nor the Recovery reconciliation exception applies, the detection starts a new event and omits `event_id`. Under Recovery reconciliation, reuse that episode's `event_id` only to close it.
+Before accepting any continuation, identify the specific confirmed open-event signal that passes `<incident_matching>`, or apply the Recovery reconciliation exception to close that same episode. A rule in `unresolved_rule_uuids` prevents closure but is not acceptance evidence by itself; a stored signal for a rule absent from that list has a non-confirming verdict and may be used only for the Recovery reconciliation exception. A returned event, shared topology, or a previously unconfirmed copy of the current rule is not acceptance evidence for an active continuation.
+If neither a confirmed pairwise match nor the Recovery reconciliation exception applies, the detection starts a new event and omits `event_id`. Under Recovery reconciliation, reuse that episode's `event_id` only to close it.
 
-Run routing in order: complete 3.1, including pagination, for all detections, then run 3.2, including pagination, for the remaining detections. Do not interleave phases; a rule with no match enters 3.2.
-
-Example:
-- Phase 3.1 checks open-event candidates by rule.
-- Unmatched detections continue to Phase 3.2 for **Topology** search and `<incident_matching>`.
-- If neither phase accepts a continuation, remaining detections enter Step 4; accepted pairwise matches form components and each rule receives one owner.
+Run 3.1 then 3.2 for each detection.
 
 #### 3.1. Rule Match
 
@@ -287,7 +279,7 @@ Example:
   - The **Current evidence**'s query rows show a substantively different active failure mechanism or error signature from the open event's `summary`, `symptom_hypothesis` or topology — title wording alone never qualifies.
   A different title or `symptom_hypothesis` wording for the same `rule_uuid` is never, by itself, sufficient to reject — evaluate the underlying target and mechanism, not how the symptom is phrased.
   Add accepted rules to `matched_rule_uuids`.
-4. When `has_more` is true and some rules remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant. When `has_more` is false, finish Phase 1 and proceed to 3.2 for all unmatched detections.
+4. When `has_more` is true and some rules remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant. When `has_more` is false, proceed to 3.2 for any unmatched rules.
 
 #### 3.2. Topology Match
 
@@ -297,11 +289,13 @@ This search runs on its own topology inputs; a zero-event or zero-match 3.1 resu
   - `causal_features[].feature_id` and `blast_radius[].feature_id` from the signal output;
   - exact-query KI `features[].id` from the matched query KI.
 2. Build `topology_feature_ids` as the distinct union. If empty, the detection opens a new discovery.
-3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`. **Always run this call when topology_feature_ids is non-empty — do not skip it or emit a new event first.**
-4. Apply `<incident_matching>` to each returned candidate using the current detection's grounded evidence and the event's returned `causal_features` and `blast_radius`; a shared topology ID alone is not acceptance evidence. Add accepted rules to `matched_rule_uuids`.
-5. When `has_more` is true and some detections remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant. When this phase is complete, route detections without an accepted event to unmatched-detection grouping and assemble the event payload.
+3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`. **Always run this call when topology_feature_ids is non-empty — do not skip it  .**
+4. Accept an event continuation only when the current detection passes `<incident_matching>` against the compact event's stored summary and topology; `signal_rule_uuids`, `unresolved_rule_uuids`, or shared topology alone are not acceptance evidence.
+   - For a topology-connected pair of confirmed failures, shared `causal_features[].feature_id` is sufficient acceptance evidence. Reuse the open event's `event_id`; different error signatures or layers do not justify a split.
+   - Reject that continuation only when current evidence identifies a distinct resource or dependency path that the stored event topology does not connect.
+5. When `has_more` is true and some detections remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant.
 
-Assign each matched detection to at most one accepted event continuation. The continuation reuses the matched event's `event_id` and locks in this detection's topology from grounding. If multiple events match a single detection, prefer greatest rule coverage, then evidence similarity. **Retain the matched open event's full `signals[]` from `event_search` for status and severity reasoning only — do not carry them into the write payload; `platform_sig_events_events_write` merges them server-side.** Matched detections skip grouping.
+Assign each matched detection to at most one accepted event continuation. The continuation reuses the matched event's `event_id` and locks in this detection's topology from grounding. If multiple events match a single detection, prefer greatest rule coverage, then evidence similarity. **Compact `platform_sig_events_event_search` results do not include prior `signals[]` prose. Use `signal_rule_uuids`, `unresolved_rule_uuids`, `signal_counts`, stored narratives, and topology for routing; use current-cycle grounded signals for status and severity reasoning. Do not carry prior signals into the write payload; `platform_sig_events_events_write` merges them server-side.** Matched detections skip grouping.
 
 ### Step 4: Group remaining detections into new events
 
