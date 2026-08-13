@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import {
   AgentAccessControlMode,
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   type Conversation,
@@ -1016,11 +1017,14 @@ apiTest.describe(
         await apiTest.step('more entries than the maximum are rejected', async () => {
           const response = await setAccessControlAs(apiClient, alice, conversationId, {
             access_mode: ConversationAccessControlMode.Private,
-            entries: Array.from({ length: 101 }, (_, index) => ({
-              type: 'user' as const,
-              id: `member-${index}`,
-              role: ConversationAccessControlRole.Member,
-            })),
+            entries: Array.from(
+              { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 },
+              (_, index) => ({
+                type: 'user' as const,
+                id: `member-${index}`,
+                role: ConversationAccessControlRole.Member,
+              })
+            ),
           });
           expect(response).toHaveStatusCode(400);
         });

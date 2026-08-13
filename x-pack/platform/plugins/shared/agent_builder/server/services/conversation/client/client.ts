@@ -13,6 +13,11 @@ import {
   type UserIdAndName,
   type Conversation,
   type ConversationAccessControl,
+  type ConversationAccessControlEntry,
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  ConversationAccessControlMode,
+  isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
   createConversationNotFoundError,
@@ -37,7 +42,6 @@ import {
   hasConversationOwnerAccess,
   hasConversationRenameAccess,
   hasConversationUpdateAccessControlAccess,
-  normalizeAccessControlUpdate,
   type ConversationAccess,
 } from '../access_control';
 import type {
@@ -369,8 +373,8 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   /**
-   * Builds the replacement access control, carrying `added_at` over for members that are
-   * already listed so re-sharing does not reset when they were added.
+   * Validates the request and builds the replacement access control, carrying `added_at` over
+   * for members that are already listed so re-sharing does not reset when they were added.
    */
   private buildAccessControlUpdate({
     current,
@@ -379,17 +383,19 @@ class ConversationClientImpl implements ConversationClient {
     current: Conversation;
     update: UpdateConversationAccessControlRequestBody;
   }): ConversationAccessControl {
-    const normalized = normalizeAccessControlUpdate({
-      accessMode: update.access_mode,
-      entries: update.entries,
-      ownerId: current.user.id,
-    });
+    const { access_mode: accessMode, entries } = update;
+    const ownerId = current.user.id;
 
-    if (normalized.error !== undefined) {
-      throw createBadRequestError(normalized.error);
+    if (accessMode === ConversationAccessControlMode.Public && entries.length > 0) {
+      throw createBadRequestError('ACL entries are not supported when access_mode is "public"');
     }
 
-    const now = new Date().toISOString();
+    if (entries.length > CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES) {
+      throw createBadRequestError(
+        `ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`
+      );
+    }
+
     const addedAtById = new Map(
       normalizeConversationAccessControl(current.access_control).entries.map((entry) => [
         `${entry.type}:${entry.id}`,
@@ -398,12 +404,70 @@ class ConversationClientImpl implements ConversationClient {
     );
 
     return {
-      access_mode: update.access_mode,
-      entries: normalized.entries.map((entry) => ({
-        ...entry,
-        added_at: addedAtById.get(`${entry.type}:${entry.id}`) ?? now,
-      })),
+      access_mode: accessMode,
+      entries: this.validateAccessControlEntries({ entries, ownerId, addedAtById }),
     };
+  }
+
+  /**
+   * Validates each requested entry and stamps `added_at`, carrying it over for members already
+   * listed in `addedAtById` so re-sharing does not reset when they were added. An entry naming
+   * the owner is dropped, since owner access is keyed off document ownership, not entries.
+   */
+  private validateAccessControlEntries({
+    entries,
+    ownerId,
+    addedAtById,
+  }: {
+    entries: UpdateConversationAccessControlRequestBody['entries'];
+    ownerId: string | undefined;
+    addedAtById: Map<string, string>;
+  }): ConversationAccessControlEntry[] {
+    const now = new Date().toISOString();
+    const seen = new Set<string>();
+    const normalizedEntries: ConversationAccessControlEntry[] = [];
+
+    for (const entry of entries) {
+      if (!entry || entry.type !== 'user') {
+        throw createBadRequestError('Each ACL entry requires a type of "user"');
+      }
+
+      if (typeof entry.id !== 'string' || entry.id.length === 0) {
+        throw createBadRequestError('Each ACL entry requires a non-empty id');
+      }
+
+      if (entry.id.length > CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
+        throw createBadRequestError(
+          `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
+        );
+      }
+
+      if (!isConversationAccessControlRole(entry.role)) {
+        throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
+      }
+
+      // Owner access is keyed off document ownership, so an owner entry would be inert.
+      if (ownerId !== undefined && entry.id === ownerId) {
+        continue;
+      }
+
+      const key = `${entry.type}:${entry.id}`;
+
+      if (seen.has(key)) {
+        throw createBadRequestError(`Duplicate ACL entry for ${entry.type} "${entry.id}"`);
+      }
+
+      seen.add(key);
+
+      normalizedEntries.push({
+        type: entry.type,
+        id: entry.id,
+        role: entry.role,
+        added_at: addedAtById.get(key) ?? now,
+      });
+    }
+
+    return normalizedEntries;
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {

@@ -13,6 +13,8 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
 import {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
@@ -1360,6 +1362,83 @@ describe('ConversationClient', () => {
           entries: [{ ...newMember, role: 'manager' as ConversationAccessControlRole }],
         })
       ).rejects.toThrow('Unknown ACL role: manager');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects more entries than the maximum', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const entries = Array.from(
+        { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 },
+        (_, index) => ({ ...newMember, id: `user-${index}` })
+      );
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries,
+        })
+      ).rejects.toThrow(`ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-user principal type', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            { ...newMember, type: 'role' } as unknown as Omit<
+              ConversationAccessControlEntry,
+              'added_at'
+            >,
+          ],
+        })
+      ).rejects.toThrow('Each ACL entry requires a type of "user"');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [{ ...newMember, id: '' }],
+        })
+      ).rejects.toThrow('Each ACL entry requires a non-empty id');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects an id longer than the maximum', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            {
+              ...newMember,
+              id: 'a'.repeat(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1),
+            },
+          ],
+        })
+      ).rejects.toThrow(
+        `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
+      );
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
