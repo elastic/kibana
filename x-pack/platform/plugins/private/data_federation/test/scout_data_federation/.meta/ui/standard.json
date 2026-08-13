@@ -1,5 +1,5 @@
 {
-  "sha1": "a7f2afd57b575dab28fd3fd678a798521d4fe38a",
+  "sha1": "99edb42f7c2cf250ce7c837993a57b084eacd7f0",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/ui/tests/data_federation_management.spec.ts",
-        "line": 13,
-        "column": 7
+        "line": 12,
+        "column": 14
       }
     }
   ]

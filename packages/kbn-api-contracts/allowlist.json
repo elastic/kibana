@@ -179,25 +179,22 @@
     {
       "path": "/api/security/entity_store/entities/{entityType}",
       "method": "post",
-      "reason": "False-positive: the request body is an anyOf of four inline, untitled entity subschemas (user/host/service/generic). oasdiff matches anyOf members structurally, so adding the optional entity.created_by property to all four makes it report the whole list as deleted and re-added. The OAS diff is purely additive and no subschema was removed.",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
       "approvedBy": "@elastic/security-entity-analytics",
-      "prUrl": "https://github.com/elastic/kibana/pull/283250",
       "oasdiffId": "request-body-any-of-removed"
     },
     {
       "path": "/api/security/entity_store/entities/{entityType}",
       "method": "put",
-      "reason": "False-positive: the request body is an anyOf of four inline, untitled entity subschemas (user/host/service/generic). oasdiff matches anyOf members structurally, so adding the optional entity.created_by property to all four makes it report the whole list as deleted and re-added. The OAS diff is purely additive and no subschema was removed.",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
       "approvedBy": "@elastic/security-entity-analytics",
-      "prUrl": "https://github.com/elastic/kibana/pull/283250",
       "oasdiffId": "request-body-any-of-removed"
     },
     {
       "path": "/api/security/entity_store/entities/bulk",
       "method": "put",
-      "reason": "False-positive: the entities/items/doc request property is an anyOf of four inline, untitled entity subschemas (user/host/service/generic). oasdiff matches anyOf members structurally, so adding the optional entity.created_by property to all four makes it report the whole list as deleted and re-added. The OAS diff is purely additive and no subschema was removed.",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
       "approvedBy": "@elastic/security-entity-analytics",
-      "prUrl": "https://github.com/elastic/kibana/pull/283250",
       "oasdiffId": "request-property-any-of-removed"
     }
   ]

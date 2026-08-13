@@ -51,14 +51,8 @@ export const detectDataPresence = async ({
   });
 
   logger.debug({
-    message: () =>
-      `[detect_data_presence] Executing data-presence query for rule ${
-        input.ruleId
-      } - ${stableStringify({
-        query: noDataQuery,
-        filter: queryPayload.filter,
-        params: queryPayload.params,
-      })}`,
+    message: 'Executing data-presence query',
+    labels: { rule_id: input.ruleId },
   });
 
   try {
