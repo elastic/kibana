@@ -76,6 +76,40 @@ describe('QuickSnoozePanel', () => {
         moment(MOCKED_NOW).add(8, 'h').toISOString()
       );
     });
+
+    it('renders overridden copy for the question and the unsnooze preview', () => {
+      render(
+        <QuickSnoozePanel
+          onScheduleChange={onScheduleChangeMock}
+          messages={{
+            durationQuestion: 'How long should notifications be snoozed?',
+            getUnsnoozeOnDateMessage: (date) => `Notifications will resume on ${date}`,
+          }}
+        />,
+        { wrapper }
+      );
+
+      expect(screen.getByText('How long should notifications be snoozed?')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('1h'));
+
+      const expectedDate = moment(MOCKED_NOW).add(1, 'h').format(SNOOZE_DATE_DISPLAY_FORMAT);
+      expect(screen.getByTestId('quickSnoozeUnsnoozeTime')).toHaveTextContent(
+        `Notifications will resume on ${expectedDate}`
+      );
+    });
+
+    it('hides the Indefinitely option and defaults to 1h when hideIndefinite is set', () => {
+      render(<QuickSnoozePanel onScheduleChange={onScheduleChangeMock} hideIndefinite />, {
+        wrapper,
+      });
+
+      expect(screen.queryByText('Indefinitely')).not.toBeInTheDocument();
+      expect(onScheduleChangeMock).toHaveBeenCalledWith(
+        moment(MOCKED_NOW).add(1, 'h').toISOString()
+      );
+      expect(onScheduleChangeMock).not.toHaveBeenCalledWith(null);
+    });
   });
 
   describe('custom duration mode', () => {

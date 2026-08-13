@@ -16,6 +16,7 @@ import {
   hasReadAccess,
   hasWriteAccess,
   getAgentPermissions,
+  normalizeAccessControl,
   redactAccessControlForCaller,
   validateAccessControlUpdateAccess,
 } from './document_access';
@@ -34,6 +35,20 @@ const baseSource: AgentProperties = {
 const ownerUser = { id: 'user-1', username: 'owner' };
 const nonOwnerUser = { id: 'user-2', username: 'other' };
 const ownerByUsernameOnly = { username: 'owner' };
+
+describe('normalizeAccessControl', () => {
+  it('falls back to public for legacy documents without access control, unlike new agents', () => {
+    expect(normalizeAccessControl(baseSource)).toEqual({
+      access_mode: AgentAccessControlMode.Public,
+      entries: [],
+    });
+  });
+
+  it('prefers legacy visibility over the public fallback', () => {
+    const source = { ...baseSource, visibility: AgentAccessControlMode.Private };
+    expect(normalizeAccessControl(source).access_mode).toBe(AgentAccessControlMode.Private);
+  });
+});
 
 describe('hasReadAccess', () => {
   it('returns true for admins regardless of access-control mode', () => {
