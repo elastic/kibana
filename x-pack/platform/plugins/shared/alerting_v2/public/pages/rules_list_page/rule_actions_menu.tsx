@@ -155,9 +155,12 @@ export const RuleActionsMenu = ({
                   toolTipContent={
                     rule.enabled
                       ? undefined
-                      : i18n.translate('xpack.alertingV2.rulesList.action.updateApiKeyDisabledTooltip', {
-                          defaultMessage: 'Enable the rule to update its API key',
-                        })
+                      : i18n.translate(
+                          'xpack.alertingV2.rulesList.action.updateApiKeyDisabledTooltip',
+                          {
+                            defaultMessage: 'Enable the rule to update its API key',
+                          }
+                        )
                   }
                   onClick={() => {
                     setIsOpen(false);

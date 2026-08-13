@@ -64,6 +64,7 @@ const RuleDetailChangeHistoryShell = ({
         onClone: action('cloneRule'),
         onDelete: action('deleteRule'),
         onRun: action('runRule'),
+        onUpdateApiKey: action('updateApiKey'),
         onViewChangeHistory,
       }),
     [onViewChangeHistory, rule]

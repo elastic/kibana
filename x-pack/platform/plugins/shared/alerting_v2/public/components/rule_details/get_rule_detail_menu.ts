@@ -40,18 +40,18 @@ export const getRuleDetailMenu = ({
 }: GetRuleDetailMenuParams): AppHeaderMenu => {
   const viewChangeHistoryItems: RuleDetailMenuItem[] = onViewChangeHistory
     ? [
-      {
-        id: 'viewChangeHistory',
-        label: i18n.translate('xpack.alertingV2.ruleDetails.viewChangeHistoryButtonLabel', {
-          defaultMessage: 'View change history',
-        }),
-        iconType: 'clockCounter',
-        order: 2,
-        run: onViewChangeHistory,
-        testId: 'ruleDetailsViewChangeHistoryButton',
-        overflow: true,
-      },
-    ]
+        {
+          id: 'viewChangeHistory',
+          label: i18n.translate('xpack.alertingV2.ruleDetails.viewChangeHistoryButtonLabel', {
+            defaultMessage: 'View change history',
+          }),
+          iconType: 'clockCounter',
+          order: 2,
+          run: onViewChangeHistory,
+          testId: 'ruleDetailsViewChangeHistoryButton',
+          overflow: true,
+        },
+      ]
     : [];
 
   // Read-only users only get read actions; no write affordances.
@@ -73,11 +73,11 @@ export const getRuleDetailMenu = ({
       id: 'ruleEnabled',
       label: rule.enabled
         ? i18n.translate('xpack.alertingV2.ruleDetails.enabled', {
-          defaultMessage: 'Enabled',
-        })
+            defaultMessage: 'Enabled',
+          })
         : i18n.translate('xpack.alertingV2.ruleDetails.disabled', {
-          defaultMessage: 'Disabled',
-        }),
+            defaultMessage: 'Disabled',
+          }),
       labelProps: undefined,
       checked: rule.enabled,
       onChange: onToggleEnabled,
@@ -99,8 +99,8 @@ export const getRuleDetailMenu = ({
         tooltipContent: rule.enabled
           ? undefined
           : i18n.translate('xpack.alertingV2.ruleDetails.runRuleDisabledTooltip', {
-            defaultMessage: 'Enable the rule to run it',
-          }),
+              defaultMessage: 'Enable the rule to run it',
+            }),
       },
       {
         id: 'cloneRule',
@@ -127,8 +127,8 @@ export const getRuleDetailMenu = ({
         tooltipContent: rule.enabled
           ? undefined
           : i18n.translate('xpack.alertingV2.ruleDetails.updateApiKeyDisabledTooltip', {
-            defaultMessage: 'Enable the rule to update its API key',
-          }),
+              defaultMessage: 'Enable the rule to update its API key',
+            }),
       },
       ...viewChangeHistoryItems,
       {

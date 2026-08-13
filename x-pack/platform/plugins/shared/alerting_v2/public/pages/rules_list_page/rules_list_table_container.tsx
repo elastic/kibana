@@ -298,10 +298,10 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
       ) : null}
       {showBulkUpdateApiKeyConfirm ? (
         <UpdateApiKeyConfirmationModal
-        ruleCount={selectedCount}
-        onCancel={() => setShowBulkUpdateApiKeyConfirm(false)}
-        onConfirm={onBulkUpdateApiKeyConfirm}
-        isLoading={updateApiKeyMutation.isLoading}
+          ruleCount={selectedCount}
+          onCancel={() => setShowBulkUpdateApiKeyConfirm(false)}
+          onConfirm={onBulkUpdateApiKeyConfirm}
+          isLoading={updateApiKeyMutation.isLoading}
         />
       ) : null}
       {changeHistoryModal}

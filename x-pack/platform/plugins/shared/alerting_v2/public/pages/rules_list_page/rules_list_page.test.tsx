@@ -900,7 +900,7 @@ describe('RulesListPage', () => {
 
       expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();      
+      expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
     });
 
     it('hides the enabled switch and shows a read-only status badge instead', async () => {
