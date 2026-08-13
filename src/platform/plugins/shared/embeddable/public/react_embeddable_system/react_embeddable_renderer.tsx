@@ -38,7 +38,10 @@ export const EmbeddableRenderer = <
   maybeId?: string;
   getParentApi: () => ParentApi;
   onApiAvailable?: (api: Api) => void;
-  panelProps?: Omit<PresentationPanelProps<Api>, 'Component' | 'componentApi'>;
+  panelProps?: Omit<
+    PresentationPanelProps<Api>,
+    'Component' | 'componentApi' | 'componentInternalApi'
+  >;
   hidePanelChrome?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -53,7 +56,7 @@ export const EmbeddableRenderer = <
 
     const phaseTracker = new PhaseTracker(startTime);
 
-    const { Component, componentApi } = await buildEmbeddable<SerializedState, Api>({
+    const { Component, componentApi, internalApi } = await buildEmbeddable<SerializedState, Api>({
       factory,
       maybeId,
       parentApi: getParentApi(),
@@ -67,6 +70,7 @@ export const EmbeddableRenderer = <
     return {
       Component,
       componentApi,
+      internalApi,
       Panel: PresentationPanel,
       phaseTracker,
     };
@@ -100,6 +104,7 @@ export const EmbeddableRenderer = <
     <value.Panel<Api, {}>
       Component={value.Component}
       componentApi={value.componentApi}
+      componentInternalApi={value.internalApi}
       hidePanelChrome={hidePanelChrome}
       {...panelProps}
     />

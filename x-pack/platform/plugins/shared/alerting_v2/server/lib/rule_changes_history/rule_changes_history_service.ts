@@ -18,7 +18,7 @@ import {
   RULE_CHANGES_HISTORY_MODULE,
   RULE_CHANGES_HISTORY_OBJECT_TYPE,
 } from './constants';
-import { RuleChangesHistoryClientToken } from './tokens';
+import { ChangeHistoryClientToken } from './tokens';
 import type { LogRuleChangesParams, RuleChangesHistoryScope } from './types';
 
 function buildLogChangeHistoryData({
@@ -42,7 +42,7 @@ export class RuleChangesHistoryService implements RuleChangesHistoryServiceContr
 
   constructor(
     @inject(Logger) logger: KibanaLogger,
-    @inject(RuleChangesHistoryClientToken) private readonly client: ChangeHistoryClient
+    @inject(ChangeHistoryClientToken) private readonly client: ChangeHistoryClient
   ) {
     this.scope = {
       module: RULE_CHANGES_HISTORY_MODULE,

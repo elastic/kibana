@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ml-is-populated-object'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/ml-ui'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ml-is-populated-object'
   description: Moon project for @kbn/ml-is-populated-object
   channel: ''
-  owner: '@elastic/ml-ui'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/private/ml/is_populated_object
 tags:
   - shared-common
