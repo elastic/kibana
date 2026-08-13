@@ -52,7 +52,7 @@ const makeStaticIndexSearchTool = (
   type: ToolType.index_search,
   description: 'A custom index search tool',
   tags: [],
-  configuration: { index: 'logs-*' },
+  configuration: { pattern: 'logs-*' },
   ...overrides,
 });
 
@@ -63,7 +63,7 @@ const makeStaticWorkflowTool = (
   type: ToolType.workflow,
   description: 'A custom workflow tool',
   tags: [],
-  configuration: { workflowId: 'wf-1' },
+  configuration: { workflow_id: 'wf-1' },
   ...overrides,
 });
 
