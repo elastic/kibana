@@ -78,7 +78,7 @@ export const integrationKnowledgeTool = (
     type: ToolType.builtin,
     description: `Search and retrieve knowledge from Fleet-installed integrations. This includes information on how to configure and use integrations for data ingestion into Elasticsearch.`,
     annotations: {
-      title: 'Search Integration Knowledge',
+      title: 'Search Fleet Integration Knowledge',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,

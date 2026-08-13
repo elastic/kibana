@@ -74,7 +74,7 @@ Note:
  know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
     annotations: {
-      title: 'Search Documents',
+      title: 'Search for Elasticsearch Documents',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,

@@ -130,7 +130,7 @@ Ground first: make sure the target index exists and every field you reference is
     schema: createVisualizationSchema,
     tags: [],
     annotations: {
-      title: 'Create Visualization',
+      title: 'Create Kibana Visualization',
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,

@@ -54,7 +54,7 @@ export const resumeWorkflowExecutionTool = ({
     annotations: {
       title: 'Resume Workflow Execution',
       readOnlyHint: false,
-      destructiveHint: false,
+      destructiveHint: true,
       idempotentHint: false,
       openWorldHint: false,
     },

@@ -71,7 +71,7 @@ export const productDocumentationTool = (
     type: ToolType.builtin,
     description: `Search and retrieve documentation about Elastic products (Kibana, Elasticsearch, Elastic Security, Elastic Observability).`,
     annotations: {
-      title: 'Search Product Documentation',
+      title: 'Search Elastic Product Documentation',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,

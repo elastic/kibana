@@ -36,7 +36,7 @@ e.g. if the user provided one. Otherwise, do not try to invent or guess a patter
 Datasets are external sources (e.g. CSV files on object storage) that can only be queried with
 ES|QL ("FROM <dataset_name>"); they do not support _search.`,
     annotations: {
-      title: 'List Indices',
+      title: 'List Indices, aliases, datastreams, and ES|QL Data Sources',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
