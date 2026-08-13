@@ -223,6 +223,7 @@ export const Content = ({
         entityRecord={entityRecord}
         scopeId={scopeId}
         queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
+        hideAnomalies={loadAnomalies}
       />
     </>
   );

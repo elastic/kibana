@@ -6,6 +6,7 @@
  */
 
 import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '@kbn/streams-plugin/server';
+import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
 
 const getStatusCode = (err: unknown): number | undefined => {
   if (typeof err === 'object' && err !== null) {
@@ -48,6 +49,14 @@ export const classifyError = (err: unknown): string => {
   }
   if (message.includes('No connector available')) {
     return 'No inference connector configured. Configure an LLM connector in Kibana Stack Management to enable natural language querying.';
+  }
+  // Pause is also a 409; classify before the generic lock branch so Agent Builder
+  // points operators at Settings Resume instead of "try again in a moment".
+  if (
+    err instanceof SignificantEventsPausedError ||
+    message.includes('Significant Events activity is paused')
+  ) {
+    return 'Significant Events activity is paused. Resume it in Settings before starting new activity.';
   }
   if (statusCode === 409 || message.includes('Could not acquire lock')) {
     return 'Another stream operation is in progress. Try again in a moment.';

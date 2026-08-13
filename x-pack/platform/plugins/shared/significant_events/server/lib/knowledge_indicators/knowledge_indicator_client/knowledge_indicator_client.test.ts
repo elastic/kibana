@@ -30,6 +30,8 @@ jest.mock('../../significant_events/latest_source_query', () => {
   };
 });
 
+jest.mock('../../significant_events/run_esql_query');
+
 jest.mock('./bulk_with_inference_fallback', () => {
   const actual = jest.requireActual('./bulk_with_inference_fallback');
   return {
@@ -41,6 +43,8 @@ jest.mock('./bulk_with_inference_fallback', () => {
 });
 
 import { executeAndDecodeSource, queryEsql } from '../../significant_events/latest_source_query';
+import { runEsqlQuery } from '../../significant_events/run_esql_query';
+import { REVISION_SIZE_LIMIT } from './revision_reader';
 
 const STREAM = 'logs-app';
 
@@ -90,6 +94,7 @@ function createAlertingContext(
   return {
     alertsReader: ALERTS_READER_V2,
     rulesClient: rulesManagementClient,
+    alertingV2RulesClient: {} as SignificantEventsAlertingContext['alertingV2RulesClient'],
   };
 }
 
@@ -98,6 +103,7 @@ function makeClient(): {
   create: jest.Mock;
   runEsql: jest.Mock;
   logger: Logger;
+  findStreamNamesWithOwnedRules: jest.Mock;
 } {
   const create = jest.fn().mockResolvedValue({ errors: false, items: [] });
   const dataStreamClient = {
@@ -110,23 +116,32 @@ function makeClient(): {
     soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
     logger,
   };
+  const findStreamNamesWithOwnedRules = jest.fn().mockResolvedValue([]);
   const rulesManagementClient = {
     createRule: jest.fn().mockResolvedValue(undefined),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
     findOwnedRuleIds: jest.fn().mockResolvedValue([]),
+    findStreamNamesWithOwnedRules,
   };
   const client = new KnowledgeIndicatorClient(
     deps,
     true,
     createAlertingContext(rulesManagementClient)
   );
-  return { client, create, runEsql: executeAndDecodeSource as jest.Mock, logger };
+  return {
+    client,
+    create,
+    runEsql: executeAndDecodeSource as jest.Mock,
+    logger,
+    findStreamNamesWithOwnedRules,
+  };
 }
 
 beforeEach(() => {
   (executeAndDecodeSource as jest.Mock).mockReset();
   (queryEsql as jest.Mock).mockReset();
+  (runEsqlQuery as jest.Mock).mockReset();
 });
 
 describe('KnowledgeIndicatorClient.bulk', () => {
@@ -301,32 +316,72 @@ describe('KnowledgeIndicatorClient.deleteIndicators', () => {
 });
 
 describe('KnowledgeIndicatorClient.getStreamNamesWithKnowledgeIndicators', () => {
-  it('returns distinct sorted stream names from active feature and query revisions', async () => {
-    const { client, runEsql } = makeClient();
-    runEsql.mockResolvedValueOnce({
-      hits: [
-        createFeatureDoc({ 'stream.name': 'logs.nginx' }),
-        createFeatureDoc({ slug: 'feat-2', 'stream.name': 'logs.apache' }),
-        {
-          '@timestamp': '2026-01-01T00:00:00.000Z',
-          id: 'query-1',
-          type: KI_TYPE_QUERY,
-          'stream.name': 'logs.nginx',
-          title: 'High error rate',
-          query: {
-            esql: 'FROM logs | STATS c = COUNT(*)',
-            query_type: 'match',
-            severity_score: 80,
-            rule_backed: false,
-          },
-        },
-      ],
-    });
+  const runEsql = runEsqlQuery as jest.Mock;
+
+  // ES|QL is columnar; the enumeration projects a single `streamName` column.
+  const streamNameResponse = (names: unknown[]) => ({
+    columns: [{ name: 'streamName', type: 'keyword' }],
+    values: names.map((name) => [name]),
+  });
+
+  it('returns distinct stream names in the order ES|QL yields them', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(streamNameResponse(['logs.nginx', 'logs.apache']));
 
     await expect(client.getStreamNamesWithKnowledgeIndicators()).resolves.toEqual([
-      'logs.apache',
       'logs.nginx',
+      'logs.apache',
     ]);
+  });
+
+  it('aggregates by stream.name so the cap bounds distinct streams, not KIs', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(streamNameResponse(['logs.nginx']));
+
+    await client.getStreamNamesWithKnowledgeIndicators();
+
+    const printed = runEsql.mock.calls[0][1] as string;
+    expect(printed).toContain('STATS');
+    expect(printed).toContain('stream.name');
+    expect(printed).toContain(`LIMIT ${REVISION_SIZE_LIMIT}`);
+  });
+
+  it('returns [] when the data stream does not exist yet', async () => {
+    const { client } = makeClient();
+    runEsql.mockResolvedValueOnce(undefined);
+
+    await expect(client.getStreamNamesWithKnowledgeIndicators()).resolves.toEqual([]);
+  });
+
+  it('warns when the result hits the cap so partial coverage is observable', async () => {
+    const { client, logger } = makeClient();
+    const names = Array.from({ length: REVISION_SIZE_LIMIT }, (_, i) => `logs.stream-${i}`);
+    runEsql.mockResolvedValueOnce(streamNameResponse(names));
+
+    await client.getStreamNamesWithKnowledgeIndicators();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`REVISION_SIZE_LIMIT (${REVISION_SIZE_LIMIT})`)
+    );
+  });
+});
+
+describe('KnowledgeIndicatorClient.getStreamNamesToReconcile', () => {
+  const runEsql = runEsqlQuery as jest.Mock;
+
+  it('unions KI-bearing streams with owned-rule streams, deduped', async () => {
+    const { client, findStreamNamesWithOwnedRules } = makeClient();
+    runEsql.mockResolvedValueOnce({
+      columns: [{ name: 'streamName', type: 'keyword' }],
+      values: [['logs.nginx'], ['logs.apache']],
+    });
+    // logs.apache overlaps; logs.orphan has a rule but no active KI.
+    findStreamNamesWithOwnedRules.mockResolvedValueOnce(['logs.apache', 'logs.orphan']);
+
+    const result = await client.getStreamNamesToReconcile();
+
+    expect(new Set(result)).toEqual(new Set(['logs.nginx', 'logs.apache', 'logs.orphan']));
+    expect(result).toHaveLength(3);
   });
 });
 
@@ -596,6 +651,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       updateRule: jest.fn().mockResolvedValue(undefined),
       bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
       findOwnedRuleIds: jest.fn().mockResolvedValue([]),
+      findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
     };
     const client = new KnowledgeIndicatorClient(
       deps,
@@ -648,8 +704,8 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).not.toContain('query.esql');
     expect(query).not.toContain('query.features.id');
     expect(query).toContain('EVAL _score = CASE');
-    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3, 0.0)');
-    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2.0, 0.0)');
   });
 
   it('uses only query fields when type is [query]', async () => {
@@ -686,9 +742,24 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     const { query } = rankRequest(rankEsql);
     // Substring form: join the multivalue then apply the shared `*<query>*` pattern.
     expect(query).toContain('MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*"');
-    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1, 0.0)');
+    expect(query).toContain('CASE(MV_CONCAT(TO_LOWER(tags), " ") LIKE "*client*", 1.0, 0.0)');
     // The exact-element form must be gone.
     expect(query).not.toContain('MV_CONTAINS');
+  });
+
+  it('uses double keyword scores in hybrid search', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    runEsql.mockResolvedValueOnce({ hits: [createFeatureDoc()] });
+
+    await client.findIndicators(STREAM, 'checkout service', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'hybrid',
+    });
+
+    const { query } = rankRequest(rankEsql);
+    expect(query).toContain('FUSE RRF');
+    expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout service*", 3.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout service*", 2.0, 0.0)');
   });
 
   it('normalizes and thresholds semantic scores in ES|QL', async () => {

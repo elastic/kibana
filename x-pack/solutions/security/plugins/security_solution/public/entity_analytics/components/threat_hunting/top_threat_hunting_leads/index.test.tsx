@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { TopThreatHuntingLeads } from '.';
 import type { HuntingLead, Observation } from './types';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -19,12 +22,24 @@ jest.mock('../../../../common/lib/kibana', () => ({
       },
     },
   }),
+  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+  useTimeZone: jest.fn(() => 'UTC'),
 }));
 
 const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({
     openFlyout: mockOpenFlyout,
+  }),
+}));
+
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
   }),
 }));
 

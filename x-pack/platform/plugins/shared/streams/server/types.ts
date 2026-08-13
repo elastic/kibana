@@ -7,7 +7,10 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  PluginStartContract as ActionsPluginStart,
+  RelayClientContract,
+} from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
@@ -27,10 +30,6 @@ import type {
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
   FieldsMetadataServerSetup,
@@ -48,7 +47,6 @@ import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from '@kbn/search-inference-endpoints/server';
-import type { RelayClientContract } from '@kbn/significant-events-schema';
 import type { StreamsConfig } from '../common/config';
 
 export interface StreamsServer {
@@ -61,7 +59,6 @@ export interface StreamsServer {
   inference: InferenceServerStart;
   licensing: LicensingPluginStart;
   isServerless: boolean;
-  taskManager: TaskManagerStartContract;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -70,14 +67,12 @@ export interface StreamsServer {
   cloud?: CloudSetup;
   /**
    * The running Kibana's version, e.g. `9.2.0`. Populated by the
-   * significant_events plugin, which needs it to identify the connecting
+   * significantEvents plugin, which needs it to identify the connecting
    * deployment to the Relay service.
    */
   kibanaVersion: string;
   /**
-   * Singleton client for the Relay service. Built and populated by the
-   * significant_events plugin (see `RelayClientContract`'s doc); `streams` only
-   * holds the type-only reference so the shared server context compiles.
+   * Singleton client for the Relay service, owned by the Actions plugin.
    */
   relayClient?: RelayClientContract;
 }
@@ -90,7 +85,6 @@ export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-  taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
@@ -108,7 +102,6 @@ export interface StreamsPluginStartDependencies {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
-  taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
   alertingVTwo?: AlertingV2ServerStart;
   inference: InferenceServerStart;

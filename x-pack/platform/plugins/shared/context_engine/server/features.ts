@@ -8,7 +8,12 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { CONTEXT_ENGINE_FEATURE_ID, apiPrivileges } from '../common/features';
+import {
+  CONTEXT_ENGINE_APP_ID,
+  CONTEXT_ENGINE_FEATURE_ID,
+  apiPrivileges,
+  uiPrivileges,
+} from '../common/features';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
@@ -19,28 +24,28 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     minimumLicense: 'enterprise',
     order: 1002,
     category: DEFAULT_APP_CATEGORIES.kibana,
-    app: [],
+    app: [CONTEXT_ENGINE_APP_ID],
     catalogue: [],
     privileges: {
       all: {
-        app: [],
+        app: [CONTEXT_ENGINE_APP_ID],
         api: [apiPrivileges.readContextEngine, apiPrivileges.writeContextEngine],
         catalogue: [],
         savedObject: {
           all: [],
           read: [],
         },
-        ui: [],
+        ui: [uiPrivileges.show],
       },
       read: {
-        app: [],
+        app: [CONTEXT_ENGINE_APP_ID],
         api: [apiPrivileges.readContextEngine],
         catalogue: [],
         savedObject: {
           all: [],
           read: [],
         },
-        ui: [],
+        ui: [uiPrivileges.show],
       },
     },
   });

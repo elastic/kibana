@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { FieldPath } from 'react-hook-form';
+import { BOUNDARY_VALIDATION_ERROR } from '@kbn/data-lifecycle-phases';
 import { PRESERVED_TIME_UNITS } from '../../shared';
 import type { IlmPhasesFlyoutFormInternal } from './types';
 import { DOWNSAMPLE_PHASES, type DownsamplePhase } from './types';
@@ -168,28 +169,6 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
         delete: { ms: getMinAgeMs('delete'), es: getMinAgeEsFormat('delete') },
       };
 
-      const warmMinAgeError = i18n.translate(
-        'xpack.streams.editIlmPhasesFlyout.minAgeSmallerThanWarmPhaseError',
-        {
-          defaultMessage: 'Must be greater or equal than the warm phase value ({value})',
-          values: { value: minAgeValues.warm.es },
-        }
-      );
-      const coldMinAgeError = i18n.translate(
-        'xpack.streams.editIlmPhasesFlyout.minAgeSmallerThanColdPhaseError',
-        {
-          defaultMessage: 'Must be greater or equal than the cold phase value ({value})',
-          values: { value: minAgeValues.cold.es },
-        }
-      );
-      const frozenMinAgeError = i18n.translate(
-        'xpack.streams.editIlmPhasesFlyout.minAgeSmallerThanFrozenPhaseError',
-        {
-          defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
-          values: { value: minAgeValues.frozen.es },
-        }
-      );
-
       if (meta.cold.enabled) {
         if (
           minAgeValues.warm.ms >= 0 &&
@@ -199,7 +178,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'cold', 'minAgeValue'],
-            message: warmMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -213,7 +192,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'frozen', 'minAgeValue'],
-            message: coldMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         } else if (
           minAgeValues.warm.ms >= 0 &&
@@ -223,7 +202,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'frozen', 'minAgeValue'],
-            message: warmMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -237,7 +216,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
-            message: frozenMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         } else if (
           minAgeValues.cold.ms >= 0 &&
@@ -247,7 +226,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
-            message: coldMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         } else if (
           minAgeValues.warm.ms >= 0 &&
@@ -257,7 +236,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'delete', 'minAgeValue'],
-            message: warmMinAgeError,
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -343,14 +322,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
           ctx.addIssue({
             code: 'custom',
             path: ['_meta', 'warm', 'downsample', 'fixedIntervalValue'],
-            message: i18n.translate(
-              'xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalWarmPhaseError',
-              {
-                defaultMessage:
-                  'Must be greater than and a multiple of the hot phase value ({value})',
-                values: { value: downsampleValues.hot.es },
-              }
-            ),
+            message: BOUNDARY_VALIDATION_ERROR,
           });
         }
       }
@@ -361,14 +333,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
             ctx.addIssue({
               code: 'custom',
               path: ['_meta', 'cold', 'downsample', 'fixedIntervalValue'],
-              message: i18n.translate(
-                'xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalColdPhaseWarmError',
-                {
-                  defaultMessage:
-                    'Must be greater than and a multiple of the warm phase value ({value})',
-                  values: { value: downsampleValues.warm.es },
-                }
-              ),
+              message: BOUNDARY_VALIDATION_ERROR,
             });
           }
         } else if (downsampleValues.hot) {
@@ -376,14 +341,7 @@ export const getIlmPhasesFlyoutFormSchema = (): z.ZodType<IlmPhasesFlyoutFormInt
             ctx.addIssue({
               code: 'custom',
               path: ['_meta', 'cold', 'downsample', 'fixedIntervalValue'],
-              message: i18n.translate(
-                'xpack.streams.editIlmPhasesFlyout.downsamplePreviousIntervalColdPhaseHotError',
-                {
-                  defaultMessage:
-                    'Must be greater than and a multiple of the hot phase value ({value})',
-                  values: { value: downsampleValues.hot.es },
-                }
-              ),
+              message: BOUNDARY_VALIDATION_ERROR,
             });
           }
         }

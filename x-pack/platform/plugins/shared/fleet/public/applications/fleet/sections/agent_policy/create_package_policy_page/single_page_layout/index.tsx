@@ -80,6 +80,7 @@ import {
 
 import {
   computeDefaultVarGroupSelections,
+  getHiddenVarGroupOptionsForPolicyTemplate,
   type VarGroupSelection,
 } from '../services/var_group_helpers';
 import { applyNamespaceCustomizationChange } from '../services/apply_namespace_customization';
@@ -269,12 +270,23 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { enableVarGroups } = ExperimentalFeaturesService.get();
   const varGroups =
     enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  // Options unsupported by the policy template the page is scoped to (e.g. opened
+  // from the integrations browse page) are hidden from selectors and defaults
+  const hiddenVarGroupOptions = useMemo(
+    () =>
+      getHiddenVarGroupOptionsForPolicyTemplate(
+        packageInfo,
+        integrationToEnable,
+        isAgentlessSelected
+      ),
+    [packageInfo, integrationToEnable, isAgentlessSelected]
+  );
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected);
-  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected]);
+    return computeDefaultVarGroupSelections(varGroups, isAgentlessSelected, hiddenVarGroupOptions);
+  }, [packagePolicy.var_group_selections, varGroups, isAgentlessSelected, hiddenVarGroupOptions]);
 
   const updateNewAgentPolicy = useCallback(
     (updatedFields: Partial<NewAgentPolicy>) => {
@@ -630,10 +642,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onIlmPolicyChange={(ilmPolicy) => {
               ilmPolicyRef.current = ilmPolicy;
             }}
+            deploymentSelector={
+              !useCheckableCardsForSetupTechnologySelector ? setupTechnologySelector : undefined
+            }
+            hideInVarGroupOptions={hiddenVarGroupOptions}
           />
-
-          {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
-          {!useCheckableCardsForSetupTechnologySelector && setupTechnologySelector}
 
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!extensionView && (
@@ -685,6 +698,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isAgentlessSelected,
       handleExtensionViewOnChange,
       varGroupSelections,
+      hiddenVarGroupOptions,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
       createDatasetTemplates,
@@ -695,6 +709,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const steps: EuiStepProps[] = [
     ...(addIntegrationFlyoutProps?.selectIntegrationStep
       ? [addIntegrationFlyoutProps?.selectIntegrationStep]
+      : []),
+    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
+      ? [
+          {
+            title: i18n.translate(
+              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
+              {
+                defaultMessage: 'Deployment',
+              }
+            ),
+            children: setupTechnologySelector,
+            headingElement: 'h2',
+          },
+        ]
       : []),
     {
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
@@ -717,20 +745,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
-    ...(useCheckableCardsForSetupTechnologySelector && setupTechnologySelector
-      ? [
-          {
-            title: i18n.translate(
-              'xpack.fleet.createPackagePolicy.stepSelectSetupTechnologyTitle',
-              {
-                defaultMessage: 'Deployment',
-              }
-            ),
-            children: setupTechnologySelector,
-            headingElement: 'h2',
-          },
-        ]
-      : []),
     ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [
           {

@@ -58,6 +58,6 @@ When your plugin migrates to v2, remove its entry from the override list in `.es
 ## Migrating your plugin
 
 1. Update imports from aliased names (e.g. `redux-toolkit-v1`) to the default packages (e.g. `@reduxjs/toolkit`).
-2. Address any breaking API changes per the [RTK v2 migration guide](https://redux-toolkit.js.org/migrations/migrating-2.0).
+2. Address any breaking API changes per the [RTK v2 migration guide](https://redux-toolkit.js.org/usage/migrating-rtk-2).
 3. Update Jest mocks that reference `react-redux-v7` back to `react-redux`.
 4. Test thoroughly — v2 changes include stricter type checking and removed APIs like `enableES5()` from immer.

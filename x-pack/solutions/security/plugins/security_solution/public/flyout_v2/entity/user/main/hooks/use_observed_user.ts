@@ -102,8 +102,12 @@ export const useObservedUser = (
   return useMemo((): ObservedUserResult => {
     if (useEntityStoreObservedData && entityFromStore) {
       return {
-        // merge with entity store record
-        details: deepmerge(userDetails, entityFromStore.entityRecord ?? {}),
+        // merge with entity store record; deduplicate arrays because both sources
+        // derive from the same events and would otherwise duplicate scalar fields
+        // like user.id and user.email.
+        details: deepmerge(userDetails, entityFromStore.entityRecord ?? {}, {
+          arrayMerge: (target, source) => [...new Set([...target, ...source])],
+        }),
         isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
           date: entityFromStore.firstSeen ?? undefined,

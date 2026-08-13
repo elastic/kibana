@@ -135,6 +135,7 @@ const externals = {
    */
   tslib: '__kbnSharedDeps__.TsLib',
   uuid: '__kbnSharedDeps__.Uuid',
+  inversify: '__kbnSharedDeps__.Inversify',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
   '@kbn/crypto-browser': '__kbnSharedDeps__.KbnCryptoBrowser',
   '@kbn/es-query': '__kbnSharedDeps__.KbnEsQuery',

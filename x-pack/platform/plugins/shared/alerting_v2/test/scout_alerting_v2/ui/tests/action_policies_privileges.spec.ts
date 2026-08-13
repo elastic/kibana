@@ -26,6 +26,7 @@ import {
  */
 test.describe('Action Policies - read/write privileges', { tag: '@local-stateful-classic' }, () => {
   let policyId: string;
+  let policyName: string;
 
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -33,6 +34,7 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
       buildCreateActionPolicyData({ name: 'scout-action-policy-privileges' })
     );
     policyId = policy.id;
+    policyName = policy.name;
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -43,7 +45,7 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
     await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_ALL_ROLE);
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
-    await expect(actionPoliciesList.detailsLink(policyId)).toBeVisible();
+    await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
     await test.step('create button and row view-details are visible', async () => {
       await expect(actionPoliciesList.createButton).toBeVisible();
@@ -62,7 +64,7 @@ test.describe('Action Policies - read/write privileges', { tag: '@local-stateful
     await browserAuth.loginWithCustomRole(ALERTING_V2_ACTION_POLICIES_READ_ROLE);
     const { actionPoliciesList } = pageObjects;
     await actionPoliciesList.goto();
-    await expect(actionPoliciesList.detailsLink(policyId)).toBeVisible();
+    await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
 
     await test.step('create button is hidden but view-details remains', async () => {
       await expect(actionPoliciesList.createButton).toHaveCount(0);

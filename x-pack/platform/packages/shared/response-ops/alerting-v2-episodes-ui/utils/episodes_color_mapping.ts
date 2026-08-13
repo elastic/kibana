@@ -7,8 +7,7 @@
 
 import type { ColorMapping } from '@kbn/coloring';
 import type { TypedLensByValueInput, XYVisualizationState } from '@kbn/lens-plugin/public';
-import type { EpisodesFilterState } from '../queries/episodes_query';
-
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 export interface EpisodeStatusColors {
   danger: string;
   success: string;

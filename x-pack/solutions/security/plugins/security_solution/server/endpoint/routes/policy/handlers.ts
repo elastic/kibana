@@ -29,10 +29,18 @@ export const getHostPolicyResponseHandler = function (
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const fleetServices = endpointAppContextServices.getInternalFleetServices(spaceId);
     const ccsEnabled = await endpointAppContextServices.isCcsEnabled();
+    const scoped = endpointAppContextServices.asScoped(request);
 
     try {
       const agentId = request.query.agentId;
-      const doc = await getPolicyResponseByAgentId(agentId, esClient, fleetServices, ccsEnabled);
+      const doc = await getPolicyResponseByAgentId({
+        agentID: agentId,
+        esClient,
+        endpointService: endpointAppContextServices,
+        fleetServices,
+        ccsEnabled,
+        scoped,
+      });
 
       if (doc) {
         return response.ok({ body: doc });

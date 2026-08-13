@@ -22,7 +22,7 @@ import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
 import { ensureAttachmentsIndex } from './ensure_indices/attachments';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
-import { registerResetTask } from './reconciliation/reset_task';
+import { registerResetTask, scheduleResetTask, RESET_TASK_ID } from './reconciliation/reset_task';
 import { registerCasesAnalyticsV2Routes } from './routes';
 import {
   CasesAnalyticsV2Writer,
@@ -451,6 +451,79 @@ export class CasesAnalyticsV2Service {
       logger: this.logger,
       intervalMinutes: this.reconciliationIntervalMinutes,
     });
+  }
+
+  /**
+   * Schedules a one-time full reset (backfill) of the analytics indices. Invoked once by the cases
+   * templates migration when it finishes backfilling existing cases' `extended_fields`.
+   *
+   * Why it's needed: that backfill writes `extended_fields` via a raw saved-objects `bulkUpdate`,
+   * which stamps only the SO-framework `updated_at` — NOT the case-domain `attributes.updated_at`
+   * that incremental reconciliation filters on (`runReconciliation`). So incremental ticks would
+   * never re-emit the backfilled cases on their own, and their `extended_fields` would be
+   * permanently missing from `.cases`. A single full walk after the backfill mirrors them reliably.
+   *
+   * Routes through the dedicated `cases.analyticsV2.fullReset` task (the same one the `/reset` route
+   * schedules) rather than clearing the periodic reconciliation cursor. The reset task is
+   * purpose-built for full walks: it throttles inter-page writes (`resetPageDelayMs`), runs under a
+   * configurable, larger timeout (`resetTaskTimeoutMinutes`), reports live progress, and — critically
+   * for large tenants — seeds the periodic cursors on completion so reconciliation returns to cheap
+   * incremental mode. Clearing the periodic cursor instead would force the periodic task (no throttle,
+   * default timeout) to do the full walk, and on a tenant large enough to exceed that timeout it would
+   * re-walk from scratch every tick and never settle back into incremental mode.
+   *
+   * Also clears the per-space data-view bootstrap cache. The migration creates the v2 templates and
+   * field-definitions via raw `repo.create`, which bypasses the templates-service lifecycle hook that
+   * normally calls `refreshDataViewForSpace` — so a space's data view keeps the runtime-field map it
+   * had before the migration and never projects the newly-migrated `case.<snake>` fields. Re-indexing
+   * `.cases` (above) fills the values, but without a matching runtime field they stay invisible in
+   * Lens / Discover. `ensureForSpace` would eventually self-heal once `BOOTSTRAP_CACHE_TTL_MS` lapses,
+   * but its outer cache guard short-circuits inside that window, so a space's data view can stay stale
+   * for the whole TTL after the backfill. Clearing the cache forces the next cases request per space
+   * to recompute the runtime-field map and update the data view SO in place immediately — the same
+   * step `/reset` performs (`clearDataViewBootstrapCache`). Recreation stays lazy (deferred to the
+   * next request) because the migration task has no `KibanaRequest` to drive a proactive refresh.
+   *
+   * Safe and bounded:
+   *  - No-op when v2 is disabled, or before `start()` has captured the Task Manager contract.
+   *  - `scheduleResetTask` removes any in-flight reset first (singleton id), so this can't stack
+   *    concurrent walks; bulk writes are idempotent on `_id`.
+   *  - `clearBootstrapCache` only drops in-memory entries; it never deletes data view SOs, so a
+   *    concurrent request at worst recomputes an unchanged map and no-ops the diff.
+   *  - Never throws: `scheduleResetTask` throws only on a Task Manager scheduling failure, which is
+   *    caught here so it can't surface into the migration task that calls it. The success log fires
+   *    only after scheduling actually succeeds.
+   */
+  public async triggerBackfillReconciliation(): Promise<void> {
+    if (!this.enabled) {
+      this.logger.debug('cases-analyticsV2: triggerBackfillReconciliation skipped — v2 disabled');
+      return;
+    }
+    if (this.taskManager == null) {
+      this.logger.debug(
+        'cases-analyticsV2: triggerBackfillReconciliation skipped — service has not started yet'
+      );
+      return;
+    }
+    // Drop the in-memory bootstrap cache so the next cases request per space recomputes the
+    // runtime-field map against the freshly-migrated templates and field definitions, updating the
+    // per-space data view SO in place. Without this, migrated fields wouldn't project until the
+    // cache TTL lapsed on a live request. Synchronous and no-op when the data view service hasn't
+    // started; kept outside the try below since it can't throw.
+    this.dataViewService?.clearBootstrapCache();
+    try {
+      await scheduleResetTask({ taskManager: this.taskManager, logger: this.logger });
+      this.logger.info(
+        `cases-analyticsV2: scheduled full reset (${RESET_TASK_ID}) to backfill extended_fields into .cases and cleared the data-view bootstrap cache following cases templates migration completion`
+      );
+    } catch (err) {
+      this.logger.warn(
+        `cases-analyticsV2: failed to schedule full reset after templates migration: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        { error: err instanceof Error ? err : undefined }
+      );
+    }
   }
 
   /** Plugin stop hook. Fast-return when disabled. */

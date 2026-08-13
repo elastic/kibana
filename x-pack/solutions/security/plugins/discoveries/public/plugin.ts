@@ -51,7 +51,7 @@ export class DiscoveriesPublicPlugin
         const [coreStart] = await core.getStartServices();
         const enabled = await coreStart.featureFlags.getBooleanValue(
           ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
-          false
+          true
         );
         return enabled ? definition : undefined;
       };

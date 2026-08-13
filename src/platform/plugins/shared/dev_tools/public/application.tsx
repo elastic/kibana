@@ -100,6 +100,7 @@ function DevToolsWrapper({
 }: DevToolsWrapperProps) {
   const styles = useStyles();
   const { docTitleService, breadcrumbService } = appServices;
+  const { docLinks } = startServices;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
   const chromeStyle = useObservable(chrome.getChromeStyle$(), chrome.getChromeStyle());
 
@@ -198,6 +199,7 @@ function DevToolsWrapper({
           })}
           tabs={headerTabs}
           badges={badges}
+          docLink={docLinks.links.console.guide}
         />
       )}
       <div

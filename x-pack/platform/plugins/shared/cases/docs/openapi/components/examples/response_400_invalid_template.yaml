@@ -1,0 +1,7 @@
+summary: The request is invalid.
+value:
+  {
+    "error": "Bad Request",
+    "message": "Template [invalid-template-id] not found for owner [cases]",
+    "statusCode": 400
+  }

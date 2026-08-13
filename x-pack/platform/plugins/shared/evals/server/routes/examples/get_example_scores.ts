@@ -16,6 +16,7 @@ import {
   type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
@@ -25,7 +26,11 @@ const EXAMPLE_SCORES_SORT_ORDER = [
   ...SCORES_SORT_ORDER,
 ];
 
-export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExampleScoresRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EXAMPLE_SCORES_URL,
@@ -48,9 +53,10 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
         try {
           const { exampleId } = request.params;
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildExampleScoresQuery(exampleId),
+            query: buildExampleScoresQuery(exampleId, { spaceId }),
             sort: EXAMPLE_SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
           });

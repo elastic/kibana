@@ -194,7 +194,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   );
 
   const { dataView, status } = useDataView(PageScope.explore);
-  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = dataView.hasMatchedIndices();
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
@@ -407,6 +407,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     contextID={PageScope.explore}
                     scopeId={PageScope.explore}
                     queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
+                    hideAnomalies={false}
                   />
                   <EuiHorizontalRule />
                   <EuiSpacer />

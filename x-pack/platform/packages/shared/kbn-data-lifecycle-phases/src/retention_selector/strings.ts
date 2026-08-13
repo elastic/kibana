@@ -17,4 +17,10 @@ export const retentionSelectorStrings = {
   listAriaLabel: i18n.translate('xpack.dataLifecyclePhases.retentionSelector.listAriaLabel', {
     defaultMessage: 'Options list',
   }),
+  managedFilterToggleLabel: i18n.translate(
+    'xpack.dataLifecyclePhases.retentionSelector.managedFilterToggleLabel',
+    {
+      defaultMessage: 'Managed',
+    }
+  ),
 };

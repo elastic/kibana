@@ -48,13 +48,6 @@ describe('alerts', () => {
               uniqueAlertCommentsCount: {
                 value: 4,
               },
-              references: {
-                cases: {
-                  max: {
-                    value: 2,
-                  },
-                },
-              },
             },
             {
               key: 'securitySolution',
@@ -77,13 +70,6 @@ describe('alerts', () => {
               },
               uniqueAlertCommentsCount: {
                 value: 4,
-              },
-              references: {
-                cases: {
-                  max: {
-                    value: 1,
-                  },
-                },
               },
             },
             {
@@ -128,6 +114,19 @@ describe('alerts', () => {
       savedObjectsClient.find
         .mockResolvedValueOnce(legacyResponse)
         .mockResolvedValueOnce(emptyUnifiedResponse);
+      // `maxOnACase` is sourced from a `search` on the case `total_alerts` counter.
+      savedObjectsClient.search.mockResolvedValue({
+        aggregations: {
+          maxCounter: { value: 2 },
+          byOwner: {
+            buckets: [
+              { key: 'cases', maxCounter: { value: 2 } },
+              { key: 'securitySolution', maxCounter: { value: 1 } },
+              { key: 'observability', maxCounter: { value: 0 } },
+            ],
+          },
+        },
+      } as unknown as Awaited<ReturnType<typeof savedObjectsClient.search>>);
     });
 
     it('it returns the correct res', async () => {
@@ -168,6 +167,54 @@ describe('alerts', () => {
       });
     });
 
+    it('clamps the -1 total_alerts sentinel to 0 for maxOnACase', async () => {
+      savedObjectsClient.search.mockResolvedValueOnce({
+        aggregations: {
+          maxCounter: { value: -1 },
+          byOwner: {
+            buckets: [
+              { key: 'cases', maxCounter: { value: -1 } },
+              { key: 'securitySolution', maxCounter: { value: -1 } },
+              { key: 'observability', maxCounter: { value: -1 } },
+            ],
+          },
+        },
+      } as unknown as Awaited<ReturnType<typeof savedObjectsClient.search>>);
+
+      const res = await getAlertsTelemetryData({
+        savedObjectsClient: telemetrySavedObjectsClient,
+        logger,
+      });
+
+      expect(res.all.maxOnACase).toBe(0);
+      expect(res.sec.maxOnACase).toBe(0);
+      expect(res.obs.maxOnACase).toBe(0);
+      expect(res.main.maxOnACase).toBe(0);
+    });
+
+    it('sources maxOnACase from the case total_alerts counter', async () => {
+      await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
+
+      expect(savedObjectsClient.search).toBeCalledWith({
+        type: ['cases'],
+        namespaces: ['*'],
+        size: 0,
+        aggs: {
+          maxCounter: { max: { field: 'cases.total_alerts' } },
+          byOwner: {
+            terms: {
+              field: 'cases.owner',
+              size: 3,
+              include: ['cases', 'observability', 'securitySolution'],
+            },
+            aggs: {
+              maxCounter: { max: { field: 'cases.total_alerts' } },
+            },
+          },
+        },
+      });
+    });
+
     it('should call find with correct arguments', async () => {
       await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
       expect(savedObjectsClient.find).toBeCalledWith({
@@ -201,44 +248,6 @@ describe('alerts', () => {
                   },
                 },
               },
-              references: {
-                aggregations: {
-                  cases: {
-                    aggregations: {
-                      ids: {
-                        terms: {
-                          field: 'cases-comments.references.id',
-                        },
-                        aggregations: {
-                          reverse: {
-                            reverse_nested: {},
-                            aggregations: {
-                              topAlerts: {
-                                cardinality: {
-                                  field: 'cases-comments.attributes.alertId',
-                                },
-                              },
-                            },
-                          },
-                        },
-                      },
-                      max: {
-                        max_bucket: {
-                          buckets_path: 'ids>reverse.topAlerts',
-                        },
-                      },
-                    },
-                    filter: {
-                      term: {
-                        'cases-comments.references.type': 'cases',
-                      },
-                    },
-                  },
-                },
-                nested: {
-                  path: 'cases-comments.references',
-                },
-              },
               uniqueAlertCommentsCount: {
                 cardinality: {
                   field: 'cases-comments.attributes.alertId',
@@ -247,7 +256,7 @@ describe('alerts', () => {
             },
             terms: {
               field: 'cases-comments.attributes.owner',
-              include: ['securitySolution', 'observability', 'cases'],
+              include: ['cases', 'observability', 'securitySolution'],
               size: 3,
             },
           },

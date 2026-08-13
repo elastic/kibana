@@ -9,6 +9,7 @@ import { esql, type ComposerQuery, type ComposerSortShorthand } from '@elastic/e
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import dateMath from '@kbn/datemath';
 import { getSourceColumnIndex, toEsqlRequest } from '../streams/esql';
 import {
   type CommonSearchOptions,
@@ -55,11 +56,18 @@ export const esqlToObjects = <T extends Record<string, unknown>>(
       }, {}) as T
   );
 
-const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
+const parseSourceResponse = <T>(
+  response: ESQLSearchResponse,
+  fields: readonly string[] = []
+): T[] => {
   const sourceIdx = getSourceColumnIndex(response);
   if (sourceIdx === -1) {
     return [];
   }
+
+  const fieldIndexes = fields.map(
+    (field) => [field, response.columns.findIndex((column) => column.name === field)] as const
+  );
 
   return response.values.map((row) => {
     const rawSource = row[sourceIdx];
@@ -69,19 +77,24 @@ const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
     // `kibana.space_ids` is added by IDataStreamClient on write; strip the
     // whole `kibana` object so consumers only see the typed payload.
     const { kibana: _kibana, ...rest } = rawSource;
-    return rest as T;
+    return fieldIndexes.reduce<Record<string, unknown>>(
+      (result, [field, index]) => (index === -1 ? result : { ...result, [field]: row[index] }),
+      rest
+    ) as T;
   });
 };
 
 export const executeEsqlQuery = async <T>({
   esClient,
   query,
+  fields,
 }: {
   esClient: ElasticsearchClient;
   query: ComposerQuery;
+  fields?: readonly string[];
 }): Promise<T[]> => {
   try {
-    return parseSourceResponse<T>(await queryEsql({ esClient, query }));
+    return parseSourceResponse<T>(await queryEsql({ esClient, query }), fields);
   } catch (error) {
     if (isIndexNotFoundError(error)) {
       return [];
@@ -148,6 +161,20 @@ export const fromIndexForSpace = ({
   )} IS NULL`;
 };
 
+/**
+ * Resolve a time bound to ISO. Only date-math expressions (`now-7d`, `2026-07-01||/d`) go through
+ * `dateMath.parse` — plain ISO/date strings pass through verbatim so Elasticsearch parses them as
+ * UTC; routing them through moment would reinterpret date-only values in server-local time.
+ */
+export const resolveTimeBound = (expr: string, { roundUp = false } = {}): string => {
+  if (!expr.includes('now') && !expr.includes('||')) return expr;
+  const parsed = dateMath.parse(expr, { roundUp });
+  if (parsed === undefined || !parsed.isValid()) {
+    throw new Error(`Invalid date-math expression: "${expr}"`);
+  }
+  return parsed.toISOString();
+};
+
 export const applyTimeRange = ({
   query,
   from,
@@ -157,16 +184,16 @@ export const applyTimeRange = ({
   from?: string;
   to?: string;
 }): ComposerQuery => {
-  let q = query;
+  let timeRangeQuery = query;
   if (from !== undefined) {
-    const fromIso = from;
-    q = q.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
+    const fromIso = resolveTimeBound(from);
+    timeRangeQuery = timeRangeQuery.where`@timestamp >= TO_DATETIME(${{ fromIso }})`;
   }
   if (to !== undefined) {
-    const toIso = to;
-    q = q.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
+    const toIso = resolveTimeBound(to, { roundUp: true });
+    timeRangeQuery = timeRangeQuery.where`@timestamp <= TO_DATETIME(${{ toIso }})`;
   }
-  return q;
+  return timeRangeQuery;
 };
 
 interface BuildLatestSourceBaseQueryArgs {
@@ -363,64 +390,6 @@ export type LatestSourceGroupBy = string | [string, string] | [string, string, s
 
 export type LatestSourceWhereCondition = ESQLAstExpression;
 
-interface RunGetProcessedIdsArgs {
-  esClient: ElasticsearchClient;
-  space: string;
-  index: string;
-  idField: string;
-  idValues: string[];
-  stateKinds: string[];
-  handledKind: string;
-  chunkSize?: number;
-}
-
-/**
- * Returns the set of IDs where a handled stamp (kind == handledKind) is at least
- * as recent as the latest state doc (kind in stateKinds). Used by both DetectionClient
- * and DiscoveryClient to determine which events are fully processed.
- */
-export const runGetProcessedIds = async ({
-  esClient,
-  space,
-  index,
-  idField,
-  idValues,
-  stateKinds,
-  handledKind,
-  chunkSize = 250,
-}: RunGetProcessedIdsArgs): Promise<Set<string>> => {
-  if (!idValues.length) return new Set();
-
-  const processed = new Set<string>();
-  const idCol = esql.col(idField);
-  const kindCol = esql.col('kind');
-  const allKinds = [...stateKinds, handledKind].map((k) => esql.str(k));
-  const kindStateLiterals = stateKinds.map((k) => esql.str(k));
-
-  for (let i = 0; i < idValues.length; i += chunkSize) {
-    const batch = idValues.slice(i, i + chunkSize);
-    const idLiterals = batch.map((id) => esql.str(id));
-
-    const query = esql`FROM ${index}
-      | WHERE kibana.space_ids == ${esql.str(space)} OR kibana.space_ids IS NULL
-      | WHERE ${kindCol} IN (${allKinds})
-      | WHERE ${idCol} IN (${idLiterals})
-      | STATS max_state_ts = MAX(CASE(${kindCol} IN (${kindStateLiterals}), @timestamp, null)),
-              max_handled_ts = MAX(CASE(${kindCol} == ${esql.str(handledKind)}, @timestamp, null))
-        BY ${idCol}
-      | WHERE max_handled_ts >= max_state_ts OR max_state_ts IS NULL
-      | KEEP ${idCol}`;
-
-    const response = await queryEsql({ esClient, query });
-    const rows = esqlToObjects<Record<string, string>>(response);
-    for (const row of rows) {
-      const id = row[idField];
-      if (id) processed.add(id);
-    }
-  }
-  return processed;
-};
-
 interface RunGetProcessedMarkerIdsArgs {
   esClient: ElasticsearchClient;
   space: string;
@@ -434,8 +403,7 @@ interface RunGetProcessedMarkerIdsArgs {
  * Returns the set of ids that have a processed marker in the data stream. A marker
  * is any document carrying `processed_by` (detections carry `change_point_type` instead).
  * Because `detection_id` is unique-per-detection, membership is a plain semijoin: a detection
- * is processed iff a marker references its exact id — no timestamp comparison needed
- * (unlike the shared `runGetProcessedIds`, which the discovery pipeline still uses).
+ * is processed iff a marker references its exact id — no timestamp comparison needed.
  */
 export const runGetProcessedMarkerIds = async ({
   esClient,

@@ -7,7 +7,9 @@
   "plugin": {
     "id": "contextEngine",
     "server": true,
-    "browser": false,
-    "requiredPlugins": ["features"]
+    "browser": true,
+    "requiredPlugins": ["actions", "data", "features", "share", "esql", "triggersActionsUi", "taskManager"],
+    "optionalPlugins": ["console", "spaces", "workflowsManagement"],
+    "requiredBundles": ["kibanaReact", "actions"]
   }
 }

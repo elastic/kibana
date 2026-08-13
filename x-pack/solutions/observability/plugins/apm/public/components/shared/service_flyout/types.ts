@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { ServiceFlyoutSource } from './constants';
+import type { AgentName } from '@kbn/elastic-agent-utils';
+
+export interface ServiceFlyoutService {
+  name: string;
+  agentName?: AgentName;
+}
 
 export interface ServiceFlyoutOptions {
-  initialTransactionType?: string;
+  transactionType?: string;
   rangeFrom?: string;
   rangeTo?: string;
-  kuery?: string;
-  source?: ServiceFlyoutSource;
 }

@@ -47,20 +47,24 @@ export const getCommandContext = async (
         policies: policiesMap,
       };
       break;
-    case 'from':
-      const editorExtensions = (await callbacks?.getEditorExtensions?.(queryString)) ?? {
-        recommendedQueries: [],
-        recommendedFields: [],
-      };
-      const views = await callbacks?.getViews?.();
-      const datasets = await callbacks?.getDatasets?.();
+    case 'from': {
+      const [editorExtensionsResult, views, datasets, sources] = await Promise.all([
+        callbacks?.getEditorExtensions?.(queryString),
+        callbacks?.getViews?.(),
+        callbacks?.getDatasets?.(),
+        getSources(),
+      ]);
       context = {
-        sources: await getSources(),
-        editorExtensions,
+        sources,
+        editorExtensions: editorExtensionsResult ?? {
+          recommendedQueries: [],
+          recommendedFields: [],
+        },
         views: views?.views ?? [],
         datasets: datasets?.datasets ?? [],
       };
       break;
+    }
     case 'join':
       const joinSources = await callbacks?.getJoinIndices?.();
       context = {
@@ -83,28 +87,39 @@ export const getCommandContext = async (
         variables: callbacks?.getVariables?.(),
       };
       break;
-    case 'fork':
-      const enrichPolicies = await helpers.getPolicies();
+    case 'fork': {
+      const [enrichPolicies, preferencesResult, forkJoinIndices, inferenceEndpointsResult] =
+        await Promise.all([
+          helpers.getPolicies(),
+          callbacks?.getPreferences?.(),
+          callbacks?.getJoinIndices?.(),
+          callbacks?.getInferenceEndpoints?.('completion'),
+        ]);
       context = {
-        histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
-        joinSources: (await callbacks?.getJoinIndices?.())?.indices || [],
+        histogramBarTarget: preferencesResult?.histogramBarTarget || 50,
+        joinSources: forkJoinIndices?.indices || [],
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
         policies: new Map(enrichPolicies.map((policy) => [policy.name, policy])),
-        inferenceEndpoints:
-          (await callbacks?.getInferenceEndpoints?.('completion'))?.inferenceEndpoints || [],
+        inferenceEndpoints: inferenceEndpointsResult?.inferenceEndpoints || [],
       };
       break;
-    case 'ts':
-      const timeseriesSources = await callbacks?.getTimeseriesIndices?.();
+    }
+    case 'ts': {
+      const [timeseriesSources, sources, editorExtensionsResult] = await Promise.all([
+        callbacks?.getTimeseriesIndices?.(),
+        getSources(),
+        callbacks?.getEditorExtensions?.(queryString),
+      ]);
       context = {
         timeSeriesSources: timeseriesSources?.indices || [],
-        sources: await getSources(),
-        editorExtensions: (await callbacks?.getEditorExtensions?.(queryString)) ?? {
+        sources,
+        editorExtensions: editorExtensionsResult ?? {
           recommendedQueries: [],
           recommendedFields: [],
         },
       };
       break;
+    }
     case 'promql':
       const promqlTimeseriesSources = await callbacks?.getTimeseriesIndices?.();
       context = {

@@ -260,7 +260,9 @@ interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
   indexMode?: never;
 }
 
-type DiscoverBadgeButtonProps = DiscoverBadgeButtonIngestProps | DiscoverBadgeButtonQueryProps;
+export type DiscoverBadgeButtonProps =
+  | DiscoverBadgeButtonIngestProps
+  | DiscoverBadgeButtonQueryProps;
 
 /**
  * Resolves the "Open in Discover" URL for a stream, or `undefined` when Discover is unavailable

@@ -18,6 +18,7 @@ import { registerWorkflowRoutes } from '.';
 import { ManagedWorkflowReadForbiddenError } from '../../managed_workflow_read_error';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
+import { WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY } from '../utils/route_security';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 jest.mock('../utils/route_error_handlers', () => ({
@@ -60,6 +61,7 @@ const createLicensingContext = () => ({
 
 describe('Workflow routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
+  let routeSecurity: Record<string, unknown>;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -75,6 +77,7 @@ describe('Workflow routes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     routeHandlers = {};
+    routeSecurity = {};
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default-space') };
     mockLogger = loggingSystemMock.createLogger();
 
@@ -83,6 +86,7 @@ describe('Workflow routes', () => {
       getWorkflow: jest.fn(),
       getWorkflowsByIds: jest.fn(),
       getWorkflowsSourceByIds: jest.fn(),
+      findExistingWorkflowIds: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
       deleteWorkflows: jest.fn(),
@@ -111,26 +115,22 @@ describe('Workflow routes', () => {
 
     const mockRouter = {
       versioned: {
-        get: jest
-          .fn()
-          .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('GET', config.path)
-          ),
-        post: jest
-          .fn()
-          .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('POST', config.path)
-          ),
-        put: jest
-          .fn()
-          .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('PUT', config.path)
-          ),
-        delete: jest
-          .fn()
-          .mockImplementation((config: { path: string }) =>
-            createVersionedRoute('DELETE', config.path)
-          ),
+        get: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+          routeSecurity[`GET:${config.path}`] = config.security;
+          return createVersionedRoute('GET', config.path);
+        }),
+        post: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+          routeSecurity[`POST:${config.path}`] = config.security;
+          return createVersionedRoute('POST', config.path);
+        }),
+        put: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+          routeSecurity[`PUT:${config.path}`] = config.security;
+          return createVersionedRoute('PUT', config.path);
+        }),
+        delete: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
+          routeSecurity[`DELETE:${config.path}`] = config.security;
+          return createVersionedRoute('DELETE', config.path);
+        }),
       },
     } as unknown as jest.Mocked<IRouter>;
 
@@ -284,16 +284,8 @@ describe('Workflow routes', () => {
       );
     });
 
-    it('should return forbidden when user lacks read privilege', async () => {
-      const request = httpServerMock.createKibanaRequest({ query: {} });
-      (request as any).authzResult = { [WorkflowsManagementApiActions.readExecution]: true };
-      const response = mockResponse();
-      const context = createLicensingContext() as any;
-
-      await routeHandlers[key].handler(context, request, response);
-
-      expect(response.forbidden).toHaveBeenCalled();
-      expect(mockApi.getWorkflows).not.toHaveBeenCalled();
+    it('should require read via route security (platform authz), not a handler re-check', () => {
+      expect(routeSecurity[key]).toEqual(WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY);
     });
 
     it('should reject managed workflow filters without managed workflow read privilege', async () => {
@@ -548,6 +540,78 @@ describe('Workflow routes', () => {
       await routeHandlers[key].handler(context, request, response);
 
       expect(handleRouteError).toHaveBeenCalledWith(response, err);
+    });
+
+    it('dryRun=true returns existingIds without writing', async () => {
+      mockApi.findExistingWorkflowIds.mockResolvedValue(['a']);
+      const workflows = [
+        { id: 'a', yaml: 'name: A' },
+        { id: 'b', yaml: 'name: B' },
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: true },
+        body: { workflows },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.create]: true,
+        [WorkflowsManagementApiActions.update]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      // Must call findExistingWorkflowIds with only the IDs derived from the body
+      expect(mockApi.findExistingWorkflowIds).toHaveBeenCalledWith(['a', 'b']);
+      // Must NOT attempt a real write
+      expect(mockApi.bulkCreateWorkflows).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { existingIds: ['a'] } });
+    });
+
+    it('dryRun=true ignores workflows without an id', async () => {
+      mockApi.findExistingWorkflowIds.mockResolvedValue([]);
+      const workflows = [
+        { yaml: 'name: NoId' }, // no id field — server would generate one on real import
+        { id: 'has-id', yaml: 'name: HasId' },
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: true },
+        body: { workflows },
+      });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.create]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      // Only the workflow with an explicit id is checked — auto-IDs cannot conflict
+      expect(mockApi.findExistingWorkflowIds).toHaveBeenCalledWith(['has-id']);
+      expect(response.ok).toHaveBeenCalledWith({ body: { existingIds: [] } });
+    });
+
+    it('dryRun=false still performs a real bulkCreate', async () => {
+      const result = { created: [{ id: 'a' }], failed: [] };
+      mockApi.bulkCreateWorkflows.mockResolvedValue(result);
+      const workflows = [{ id: 'a', yaml: 'name: A' }];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: false },
+        body: { workflows },
+      });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.create]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.bulkCreateWorkflows).toHaveBeenCalledTimes(1);
+      expect(mockApi.findExistingWorkflowIds).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: result });
     });
   });
 
@@ -865,16 +929,8 @@ describe('Workflow routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: stats });
     });
 
-    it('should return forbidden when user lacks read privilege', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      (request as any).authzResult = { [WorkflowsManagementApiActions.readExecution]: true };
-      const response = mockResponse();
-      const context = createLicensingContext() as any;
-
-      await routeHandlers[key].handler(context, request, response);
-
-      expect(response.forbidden).toHaveBeenCalled();
-      expect(mockApi.getWorkflowStats).not.toHaveBeenCalled();
+    it('should require read via route security (platform authz), not a handler re-check', () => {
+      expect(routeSecurity[key]).toEqual(WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY);
     });
 
     it('should include execution stats when user has readExecution privilege', async () => {

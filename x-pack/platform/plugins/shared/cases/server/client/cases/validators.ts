@@ -35,6 +35,20 @@ interface CustomFieldValidationParams {
   customFieldsConfiguration?: CustomFieldsConfiguration;
 }
 
+/**
+ * Drops template fields whose storage key already belongs to a global field.
+ * On a storage-key collision the global definition is authoritative (see
+ * resolveApplicableFields) — shared by write-time and close-time validation so a
+ * template `$ref` to a global library field is not validated twice.
+ */
+export const excludeTemplateFieldsCollidingWithGlobal = (
+  templateFields: readonly InlineField[],
+  globalFields: readonly InlineField[]
+): InlineField[] => {
+  const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
+  return templateFields.filter((f) => !globalKeySet.has(getFieldSnakeKey(f.name, f.type)));
+};
+
 export const validateCustomFields = (params: CustomFieldValidationParams) => {
   validateDuplicatedKeysInRequest({
     requestFields: params.requestCustomFields,
@@ -212,6 +226,7 @@ export const validateCaseExtendedFields = async ({
   fieldDefinitionsService,
   owner,
   partial = false,
+  preResolvedTemplateFields,
 }: {
   extendedFields: Record<string, string>;
   templateId: string | null | undefined;
@@ -221,6 +236,12 @@ export const validateCaseExtendedFields = async ({
   owner: string;
   /** Pass `true` for update paths where only a subset of fields may be present. */
   partial?: boolean;
+  /**
+   * The template's already-resolved inline fields, when the caller fetched and parsed the
+   * template earlier in the same request (e.g. server-side template expansion on create) —
+   * skips a duplicate SO fetch + parse.
+   */
+  preResolvedTemplateFields?: InlineField[];
 }): Promise<void> => {
   const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
@@ -242,47 +263,60 @@ export const validateCaseExtendedFields = async ({
     return;
   }
 
-  const templateSO = await templatesService.getTemplate(templateId, undefined, {
-    includeDeleted: true,
-  });
-  if (!templateSO) {
-    throw Boom.badRequest(`Template ${templateId} not found`);
-  }
-  let parsedTemplate;
-  try {
-    parsedTemplate = parseTemplate(templateSO.attributes);
-  } catch (err) {
-    throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
+  let resolvedTemplateFields = preResolvedTemplateFields;
+
+  if (resolvedTemplateFields === undefined) {
+    const templateSO = await templatesService.getTemplate(templateId, undefined, {
+      includeDeleted: true,
+    });
+    if (!templateSO) {
+      throw Boom.badRequest(`Template ${templateId} not found`);
+    }
+    let parsedTemplate;
+    try {
+      parsedTemplate = parseTemplate(templateSO.attributes);
+    } catch (err) {
+      throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
+    }
+
+    // Resolve $ref entries in the template definition against the field library so
+    // that keys from library-referenced fields are recognised during validation.
+    const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
+    resolvedTemplateFields = resolveTemplateFields(
+      parsedTemplate.definition.fields,
+      fieldDefinitions
+    );
   }
 
-  // Resolve $ref entries in the template definition against the field library so
-  // that keys from library-referenced fields are recognised during validation.
-  const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner);
-  const resolvedTemplateFields = resolveTemplateFields(
-    parsedTemplate.definition.fields,
-    fieldDefinitions
-  );
-
-  // Validate template-specific keys against the resolved template fields.
+  // Validate template-specific keys against the resolved template fields. On a storage-key
+  // collision the global definition is authoritative (see resolveApplicableFields), so fields
+  // the template `$ref`s from the global library are excluded here — their values live under
+  // global keys and are validated in the global pass below. Without this exclusion a required
+  // global field referenced by the template is checked against an always-absent value and
+  // wrongly fails as "required".
   const templateOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => !globalKeySet.has(k))
   );
-  const templateErrors = validateExtendedFields(templateOnlyFields, resolvedTemplateFields, {
+  const templateNonGlobalFields = excludeTemplateFieldsCollidingWithGlobal(
+    resolvedTemplateFields,
+    globalFields
+  );
+  const templateErrors = validateExtendedFields(templateOnlyFields, templateNonGlobalFields, {
     partial,
   });
   if (templateErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${templateErrors.join('; ')}`);
   }
 
-  // Also validate global-key VALUES against their own definitions.
+  // Also validate global-key VALUES against their own definitions. Runs even when the request
+  // carries no global keys so that non-partial (create) requests still enforce required global
+  // fields — the template pass above no longer covers the ones the template `$ref`s.
   const globalOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => globalKeySet.has(k))
   );
-  if (Object.keys(globalOnlyFields).length > 0) {
-    const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, { partial });
-    if (globalErrors.length) {
-      throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
-    }
+  const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, { partial });
+  if (globalErrors.length) {
+    throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
   }
 };
 
@@ -403,7 +437,12 @@ export const validateExtendedFieldsOnClose = ({
     ...(updateReq.extended_fields ?? {}),
   };
 
-  const allFields = [...globalFields, ...templateFields];
+  // Same global-wins exclusion as write-time validation — template `$ref`s to global fields
+  // must not be checked a second time (duplicate "Field X is required" on close).
+  const allFields = [
+    ...globalFields,
+    ...excludeTemplateFieldsCollidingWithGlobal(templateFields, globalFields),
+  ];
 
   // Build helper maps for condition evaluation (show_when).
   const fieldValues: Record<string, string | undefined> = {};

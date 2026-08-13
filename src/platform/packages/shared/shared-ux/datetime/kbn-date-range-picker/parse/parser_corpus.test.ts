@@ -436,20 +436,31 @@ describe('parser corpus: textToTimeRange (English)', () => {
       {
         input: 'last 7 minutes',
         options: { roundRelativeTime: true },
-        note: 'true infers rounding from the offset unit (m → /m)',
-        expected: { start: 'now-7m/m', end: 'now', startOffset: offset(-7, 'm', 'm') },
+        note: 'true infers rounding one unit finer than the offset unit (m → /s)',
+        expected: { start: 'now-7m/s', end: 'now', startOffset: offset(-7, 'm', 's') },
       },
       {
         input: 'last 7 days',
         options: { roundRelativeTime: true },
-        note: 'day-and-above rounds to /d',
-        expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
+        note: 'days round to /h; week-and-above rounds to /d',
+        expected: { start: 'now-7d/h', end: 'now', startOffset: offset(-7, 'd', 'h') },
+      },
+      {
+        input: 'now-7d/d to now-1d/d',
+        options: { roundRelativeTime: true },
+        note: 'true rounds both bounds, each by its own offset unit (existing rounding kept)',
+        expected: {
+          start: 'now-7d/d',
+          end: 'now-1d/d',
+          startOffset: offset(-7, 'd', 'd'),
+          endOffset: offset(-1, 'd', 'd'),
+        },
       },
       {
         input: 'now-7d/d',
         options: { roundRelativeTime: false },
-        note: 'false strips an existing rounding suffix from the start bound',
-        expected: { start: 'now-7d', end: 'now', startOffset: offset(-7, 'd') },
+        note: 'false preserves an existing rounding suffix',
+        expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
       },
     ]);
   });
@@ -533,8 +544,8 @@ describe('parser corpus: prettifyValue (English)', () => {
     runPrettify([
       {
         input: 'now-7d/d to now',
-        note: 'past range ending at now → start shorthand, rounding stripped from start',
-        expected: '-7d',
+        note: 'past range ending at now → start shorthand, rounding preserved',
+        expected: '-7d/d',
       },
       {
         input: 'now to now+1d',
@@ -543,8 +554,8 @@ describe('parser corpus: prettifyValue (English)', () => {
       },
       {
         input: 'now-30d/d to now-7d/d',
-        note: 'two offsets → start strips rounding, end keeps it',
-        expected: '-30d to -7d/d',
+        note: 'two offsets → both keep their rounding',
+        expected: '-30d/d to -7d/d',
       },
       {
         input: 'now-7d',
@@ -1435,6 +1446,786 @@ describe('parser corpus: part-level parser (locales)', () => {
           'an English part stepped while German is active stays English — the active locale ' +
           'never silently translates text the user already typed',
         expected: 'next 7 days',
+      },
+    ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// CJK locales (zh-CN / ja-JP) — the spaceless-language engine deltas on top of
+// PR #2's LocaleGrammar: digit normalization (full-width → ASCII),
+// optional-whitespace delimiters ("到"/"〜" glued with no spaces, unlike German
+// "bis"/French "à" which always need them), substring vocabulary matching for
+// the failed-phrase guard (glued CJK never splits into standalone words), and
+// guard-only date words ("月"/"日") so date-like fragments fail
+// deterministically instead of parsing as durations. Circumfix ("から…まで")
+// is NOT implemented — Japanese uses the wave dash "〜" as a plain infix,
+// reusing the same optional-whitespace mechanism as Chinese "到".
+// ---------------------------------------------------------------------------
+
+describe('parser corpus: textToTimeRange (zh-CN)', () => {
+  const locale = 'zh-CN';
+
+  describe('named ranges', () => {
+    runCorpus([
+      {
+        input: '今天',
+        options: { locale },
+        note: 'Chinese named range "today"',
+        expected: {
+          start: 'now/d',
+          end: 'now/d',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+          isNaturalLanguage: true,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '下周',
+        options: { locale },
+        note: 'Chinese named range "next week"',
+        expected: { start: 'now+1w/w', end: 'now+1w/w', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '这个月',
+        options: { locale },
+        note: 'colloquial synonym for "this month" (alongside 本月)',
+        expected: { start: 'now/M', end: 'now/M', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '上月',
+        options: { locale },
+        note: 'short synonym for "last month" (alongside 上个月)',
+        expected: { start: 'now-1M/M', end: 'now-1M/M', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '下月',
+        options: { locale },
+        note: 'short synonym for "next month" (alongside 下个月) — native review symmetry with 上月',
+        expected: { start: 'now+1M/M', end: 'now+1M/M', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '前天',
+        options: { locale },
+        note: 'named range "the day before yesterday"',
+        expected: { start: 'now-2d/d', end: 'now-2d/d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '后天',
+        options: { locale },
+        note: 'named range "the day after tomorrow"',
+        expected: { start: 'now+2d/d', end: 'now+2d/d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '明年',
+        options: { locale },
+        note: 'Chinese named range "next year"',
+        expected: { start: 'now+1y/y', end: 'now+1y/y', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+
+  describe('durations and instants — spaced AND glued forms', () => {
+    runCorpus([
+      {
+        input: '最近7天',
+        options: { locale },
+        note: 'Chinese duration (past), glued — "last 7 days"',
+        expected: {
+          start: 'now-7d',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          isNaturalLanguage: true,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '最近 7 天',
+        options: { locale },
+        note: 'the same duration SPACED — moment zh-CN\'s own "%d 天" convention (the generated form)',
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '过去30分钟',
+        options: { locale },
+        note: 'duration with the 过去 direction synonym and a multi-char unit word',
+        expected: { start: 'now-30m', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '未来3天',
+        options: { locale },
+        note: 'Chinese duration (future), glued — "next 3 days"',
+        expected: {
+          start: 'now',
+          end: 'now+3d',
+          type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+          isNaturalLanguage: true,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '接下来 2 周',
+        options: { locale },
+        note: 'future duration with the 接下来 direction synonym, spaced',
+        expected: { start: 'now', end: 'now+2w', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '7天前',
+        options: { locale },
+        note: 'Chinese instant (past), suffix "前" — "7 days ago"',
+        expected: {
+          start: 'now-7d',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          isNaturalLanguage: false,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '7 天前',
+        options: { locale },
+        note: "the same instant SPACED between count and unit (moment zh-CN's generated form)",
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: false, isInvalid: false },
+      },
+      {
+        input: '3天后',
+        options: { locale },
+        note: 'Chinese instant (future), suffix "后" — "in 3 days"',
+        expected: {
+          start: 'now',
+          end: 'now+3d',
+          type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+          isNaturalLanguage: false,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '1个月前',
+        options: { locale },
+        note: 'month counts use 个月 (bare 月 means a calendar month name — see invalid rows)',
+        expected: { start: 'now-1M', end: 'now', isNaturalLanguage: false, isInvalid: false },
+      },
+      {
+        input: '最近 7天',
+        options: { locale },
+        note: 'MIXED spacing parses — IMEs make it common and it carries no meaning (native report)',
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '最近7 天',
+        options: { locale },
+        note: 'the opposite spacing mix parses too',
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '1个小时前',
+        options: { locale },
+        note: 'the measure word 个 is idiomatic before 小时 (native suggestion)',
+        expected: { start: 'now-1h', end: 'now', isNaturalLanguage: false, isInvalid: false },
+      },
+      {
+        input: '最近 3 个星期',
+        options: { locale },
+        note: 'the measure word 个 is idiomatic before 星期 too',
+        expected: { start: 'now-3w', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '30分钟',
+        options: { locale },
+        note: 'bare count+unit shorthand works glued (consistent with English "30m")',
+        expected: { start: 'now-30m', end: 'now', isInvalid: false },
+      },
+      {
+        input: '22天',
+        options: { locale },
+        note: 'bare 天 duration stays valid — 天 is a pure counter, unlike calendar-date 日/年',
+        expected: { start: 'now-22d', end: 'now', isInvalid: false },
+      },
+    ]);
+  });
+
+  describe('delimiters — 到 / 至 / tildes, whitespace optional', () => {
+    runCorpus([
+      {
+        input: '7天前到现在',
+        options: { locale },
+        note: 'delimiter "到" glued with NO surrounding whitespace at all',
+        expected: {
+          start: 'now-7d',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          isInvalid: false,
+        },
+      },
+      {
+        input: '3天前 到 现在',
+        options: { locale },
+        note: 'the optional-whitespace delimiter also accepts surrounding spaces',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '7天前至现在',
+        options: { locale },
+        note: 'the formal-register delimiter "至" splits too',
+        expected: { start: 'now-7d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '7天前～现在',
+        options: { locale },
+        note: 'full-width tilde (U+FF5E, Windows IMEs) as a range delimiter',
+        expected: { start: 'now-7d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '2024-01-01到2024-02-01',
+        options: { locale },
+        note: 'ISO dates glued around "到" — the delimiter splits without spaces, sides stay ISO',
+        expected: {
+          start: new Date(2024, 0, 1).toISOString(),
+          end: new Date(2024, 1, 1).toISOString(),
+          type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
+          isInvalid: false,
+        },
+      },
+    ]);
+  });
+
+  describe('full-width digits (IME full-width mode)', () => {
+    runCorpus([
+      {
+        input: '最近７天',
+        options: { locale },
+        note: 'full-width digit "７" (U+FF17) normalized to ASCII before matching',
+        expected: { start: 'now-7d', end: 'now', isInvalid: false },
+      },
+    ]);
+  });
+
+  describe('date-like fragments fail deterministically (absolute CJK dates are deferred)', () => {
+    runCorpus([
+      {
+        input: '1月',
+        options: { locale },
+        note: '"1月" means January, NOT "1 month" — guard word 月 rejects it instead of misparsing',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '1月到3月',
+        options: { locale },
+        note: 'a month-name range (Jan–Mar) fails whole rather than parsing as an inverted duration range',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '22日',
+        options: { locale },
+        note: '"22日" means the 22nd, NOT "22 days" — 日 is a guard word in Chinese (天 covers day counts)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '2025年',
+        options: { locale },
+        note:
+          'bare "2025年" means the calendar year, not "2025 years" — rejects rather than ' +
+          'misparse (年 stays an alias so 3年前/最近 3 年 keep working)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '3日前',
+        options: { locale },
+        note:
+          'known casualty of guarding 日: the literary "3日前" is rejected — use 3天前 ' +
+          '(confirmed acceptable by native review: 天 is the natural counter here)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '2024年1月22日',
+        options: { locale },
+        note: 'CJK absolute date format is deferred — fails deterministically, never moment-guessed',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '最近7天啊',
+        options: { locale },
+        note:
+          'a failed GLUED phrase contains vocabulary as substrings (no standalone words to ' +
+          'split) — the substring guard keeps it away from the forgiving absolute fallback',
+        expected: { isInvalid: true },
+      },
+    ]);
+  });
+
+  describe('merge requirement: English still parses with zh-CN active', () => {
+    runCorpus([
+      {
+        input: 'last 7 days',
+        options: { locale },
+        note: 'English duration phrase recognized while Chinese is the active locale',
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+});
+
+describe('parser corpus: textToTimeRange (ja-JP)', () => {
+  const locale = 'ja-JP';
+
+  describe('named ranges', () => {
+    runCorpus([
+      {
+        input: '今日',
+        options: { locale },
+        note: 'Japanese named range "today"',
+        expected: {
+          start: 'now/d',
+          end: 'now/d',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_RELATIVE],
+          isNaturalLanguage: true,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '来週',
+        options: { locale },
+        note: 'Japanese named range "next week"',
+        expected: { start: 'now+1w/w', end: 'now+1w/w', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '来年',
+        options: { locale },
+        note: 'Japanese named range "next year"',
+        expected: { start: 'now+1y/y', end: 'now+1y/y', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+
+  describe('durations and instants — glued AND spaced forms', () => {
+    runCorpus([
+      {
+        input: '過去7日',
+        options: { locale },
+        note: 'Japanese duration (past), glued — "last 7 days"',
+        expected: {
+          start: 'now-7d',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          isNaturalLanguage: true,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '過去 7 日間',
+        options: { locale },
+        note: 'spaced variant with the 日間 day-counter alias also parses',
+        expected: { start: 'now-7d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '今後3日',
+        options: { locale },
+        note: 'Japanese duration (future), glued — "next 3 days"',
+        expected: {
+          start: 'now',
+          end: 'now+3d',
+          type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+          isNaturalLanguage: true,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '7日前',
+        options: { locale },
+        note: 'Japanese instant (past), suffix "前" — "7 days ago"',
+        expected: {
+          start: 'now-7d',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          isNaturalLanguage: false,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '3日後',
+        options: { locale },
+        note: 'Japanese instant (future), suffix "後" — "in 3 days"',
+        expected: {
+          start: 'now',
+          end: 'now+3d',
+          type: [DATE_TYPE_NOW, DATE_TYPE_RELATIVE],
+          isNaturalLanguage: false,
+          isInvalid: false,
+        },
+      },
+      {
+        input: '1ヶ月前',
+        options: { locale },
+        note: 'month counts use ヶ月/カ月 (bare 月 means a calendar month name — see invalid rows)',
+        expected: { start: 'now-1M', end: 'now', isNaturalLanguage: false, isInvalid: false },
+      },
+      {
+        input: '1ヵ月前',
+        options: { locale },
+        note: 'small-ヵ spelling variant of ヶ月 (native review: all conventional spellings parse)',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '1か月前',
+        options: { locale },
+        note: 'hiragana-か spelling variant of ヶ月',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '1ケ月前',
+        options: { locale },
+        note: 'full-size-ケ spelling variant of ヶ月',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '1箇月前',
+        options: { locale },
+        note: 'full-kanji 箇 spelling variant of ヶ月 (formal writing)',
+        expected: { start: 'now-1M', end: 'now', isInvalid: false },
+      },
+      {
+        input: '過去 2日',
+        options: { locale },
+        note: 'MIXED spacing parses — whitespace between CJK tokens carries no meaning',
+        expected: { start: 'now-2d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '過去15分間',
+        options: { locale },
+        note: '分間 duration counter (native preference; also the generated display form)',
+        expected: { start: 'now-15m', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '過去3年間',
+        options: { locale },
+        note: '年間 duration counter — the unambiguous bare-duration form of 年',
+        expected: { start: 'now-3y', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: 'ここ2日',
+        options: { locale },
+        note: 'ここ recognized alongside 過去 for past durations (native suggestion)',
+        expected: { start: 'now-2d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '直近2日',
+        options: { locale },
+        note: '直近 recognized alongside 過去 for past durations (native suggestion)',
+        expected: { start: 'now-2d', end: 'now', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '未来3日',
+        options: { locale },
+        note: '未来 recognized alongside 今後 for future durations (native suggestion)',
+        expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '22日間',
+        options: { locale },
+        note: 'bare 日間 duration stays valid — the counter form is unambiguous (cf. bare 22日)',
+        expected: { start: 'now-22d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '-22日',
+        options: { locale },
+        note: 'sign-prefixed shorthand stays valid — the prefix disambiguates it from the 22nd',
+        expected: { start: 'now-22d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '昨年',
+        options: { locale },
+        note: 'business-formal "last year" recognized alongside everyday 去年',
+        expected: { start: 'now-1y/y', end: 'now-1y/y', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '一昨日',
+        options: { locale },
+        note: 'named range "the day before yesterday"',
+        expected: { start: 'now-2d/d', end: 'now-2d/d', isNaturalLanguage: true, isInvalid: false },
+      },
+      {
+        input: '明後日',
+        options: { locale },
+        note: 'named range "the day after tomorrow"',
+        expected: { start: 'now+2d/d', end: 'now+2d/d', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+
+  describe('delimiters — both tilde codepoints, whitespace optional', () => {
+    runCorpus([
+      {
+        input: '3日前〜今',
+        options: { locale },
+        note:
+          'wave dash "〜" (U+301C, macOS IMEs) glued with NO surrounding whitespace — the ' +
+          'infix mechanism used INSTEAD OF a "から…まで" circumfix construction',
+        expected: {
+          start: 'now-3d',
+          end: 'now',
+          type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
+          isInvalid: false,
+        },
+      },
+      {
+        input: '3日前～今',
+        options: { locale },
+        note: 'full-width tilde "～" (U+FF5E, Windows IMEs) — same range, different codepoint',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '3日前から今',
+        options: { locale },
+        note: 'から ("from") as a delimiter, without a closing まで (native review: natural on its own)',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '3日前から今まで',
+        options: { locale },
+        note: 'the full から…まで circumfix — まで is stripped from the end side before parsing',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '昨日から明日まで',
+        options: { locale },
+        note: 'named ranges as range sides stay unsupported — fails whole, like English "yesterday to now"',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '3日前～現在',
+        options: { locale },
+        note: '現在 recognized as a synonym of 今 (native suggestion); generated text keeps 今',
+        expected: { start: 'now-3d', end: 'now', isInvalid: false },
+      },
+      {
+        input: '現在',
+        options: { locale },
+        note: 'bare 現在 resolves to now, like bare 今',
+        expected: { start: 'now', end: 'now', isInvalid: false },
+      },
+    ]);
+  });
+
+  describe('date-like fragments fail deterministically (absolute CJK dates are deferred)', () => {
+    runCorpus([
+      {
+        input: '1月',
+        options: { locale },
+        note: '"1月" means January, NOT "1 month" — guard word 月 rejects it (ヶ月 covers month counts)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '22日',
+        options: { locale },
+        note:
+          'NATIVE-REVIEW VERDICT: bare "22日" means the 22nd, not "22 days" — it rejects ' +
+          'rather than misparse (日 stays an alias so 2日前/過去2日/22日間 keep working)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '2025年',
+        options: { locale },
+        note: 'bare "2025年" means the calendar year, not "2025 years" — rejects rather than misparse',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '3時',
+        options: { locale },
+        note: '"3時" is 3 o\'clock, not a duration — guard word 時 rejects it (時間 covers hour counts)',
+        expected: { isInvalid: true },
+      },
+      {
+        input: '2024年1月22日',
+        options: { locale },
+        note: 'CJK absolute date format is deferred — fails deterministically, never moment-guessed',
+        expected: { isInvalid: true },
+      },
+    ]);
+  });
+
+  describe('merge requirement: English still parses with ja-JP active', () => {
+    runCorpus([
+      {
+        input: 'next 3 days',
+        options: { locale },
+        note: 'English duration phrase recognized while Japanese is the active locale',
+        expected: { start: 'now', end: 'now+3d', isNaturalLanguage: true, isInvalid: false },
+      },
+    ]);
+  });
+});
+
+describe('parser corpus: prettifyValue (CJK locales)', () => {
+  runPrettify([
+    {
+      input: 'now-7m到now',
+      options: { locale: 'zh-CN' },
+      note: 'the glued "到" delimiter is recognized for splitting and collapsing to shorthand',
+      expected: '-7m',
+    },
+    {
+      input: 'now-7m 到 now',
+      options: { locale: 'zh-CN' },
+      note: 'the same delimiter with surrounding whitespace collapses too',
+      expected: '-7m',
+    },
+    {
+      input: 'now-7m〜now',
+      options: { locale: 'ja-JP' },
+      note: 'the glued wave-dash delimiter collapses to shorthand',
+      expected: '-7m',
+    },
+    {
+      input: 'now-15m to now',
+      options: {
+        presets: [{ label: '最近 15 分钟', start: 'now-15m', end: 'now' }],
+        locale: 'zh-CN',
+      },
+      note:
+        'a SPACED Chinese preset label passes the natural-language gate under the active ' +
+        'grammar and renders — the reason spaced template variants exist',
+      expected: '最近 15 分钟',
+    },
+  ]);
+});
+
+describe('parser corpus: part-level parser (CJK locales)', () => {
+  describe('parseInputParts — Chinese', () => {
+    runInputParts([
+      {
+        input: '最近7天',
+        locale: 'zh-CN',
+        note: 'glued Chinese duration → direction / value / unit, no separating spaces',
+        expected: [
+          { text: '最近', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: '天', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+      {
+        input: '7天前到现在',
+        locale: 'zh-CN',
+        note: 'fully glued range decomposes: instant parts / "到" separator / now-keyword literal',
+        expected: [
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: '天', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+          { text: '前', kind: 'literal', navigable: false, rangeIndex: 0 },
+          { text: '到', kind: 'separator', navigable: false, rangeIndex: null },
+          { text: '现在', kind: 'literal', navigable: false, rangeIndex: 1 },
+        ],
+      },
+      {
+        input: '最近７天',
+        locale: 'zh-CN',
+        note:
+          'full-width "７" normalizes to ASCII "7" with IDENTICAL offsets (1:1 in code ' +
+          'units), so the emitted value part is the normalized digit',
+        expected: [
+          { text: '最近', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: '天', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+    ]);
+  });
+
+  describe('parseInputParts — Japanese', () => {
+    runInputParts([
+      {
+        input: '過去7日間',
+        locale: 'ja-JP',
+        note: 'glued Japanese duration → direction / value / unit (multi-char 日間 counter)',
+        expected: [
+          { text: '過去', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '7', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: '日間', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+      {
+        input: '3日前〜今',
+        locale: 'ja-JP',
+        note: 'glued range decomposes: instant parts / wave-dash separator / now-keyword literal',
+        expected: [
+          { text: '3', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: '日', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+          { text: '前', kind: 'literal', navigable: false, rangeIndex: 0 },
+          { text: '〜', kind: 'separator', navigable: false, rangeIndex: null },
+          { text: '今', kind: 'literal', navigable: false, rangeIndex: 1 },
+        ],
+      },
+    ]);
+  });
+
+  describe('parseDisplayParts — generated compact labels round-trip', () => {
+    runDisplayParts([
+      {
+        display: '最近 1 周',
+        locale: 'zh-CN',
+        note: 'spaced Chinese compact label (as generated by formatCompactRelativeTime) still parses',
+        expected: [
+          { text: '最近', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '1', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: '周', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+      {
+        display: '過去1週間',
+        locale: 'ja-JP',
+        note: 'glued Japanese compact label (as generated by formatCompactRelativeTime) still parses',
+        expected: [
+          { text: '過去', kind: 'relative-direction', navigable: true, rangeIndex: 0 },
+          { text: '1', kind: 'relative-value', navigable: true, rangeIndex: 0 },
+          { text: '週間', kind: 'relative-unit', navigable: true, rangeIndex: 0 },
+        ],
+      },
+    ]);
+  });
+
+  describe('applyPartModification — CJK stepping', () => {
+    runModify([
+      {
+        text: '最近7天',
+        kind: 'relative-unit',
+        action: MODIFICATION_INCREASE,
+        locale: 'zh-CN',
+        note: 'Chinese unit cycles up within Chinese (天 → 周)',
+        expected: '最近7周',
+      },
+      {
+        text: '最近 7 天',
+        kind: 'relative-direction',
+        action: MODIFICATION_INCREASE,
+        locale: 'zh-CN',
+        note: 'Chinese direction flips within Chinese (最近 → 未来)',
+        expected: '未来 7 天',
+      },
+      {
+        text: '過去7日',
+        kind: 'relative-direction',
+        action: MODIFICATION_INCREASE,
+        locale: 'ja-JP',
+        note:
+          'GLUED-template direction flip (過去 → 今後) — the leading word is extracted by ' +
+          'splitting at the placeholder, not at whitespace',
+        expected: '今後7日',
+      },
+      {
+        text: '3日前',
+        kind: 'relative-unit',
+        action: MODIFICATION_INCREASE,
+        locale: 'ja-JP',
+        note: 'Japanese instant unit cycles up within Japanese (日 → 週間)',
+        expected: '3週間前',
+      },
+      {
+        text: '最近７天',
+        kind: 'relative-value',
+        action: MODIFICATION_INCREASE,
+        locale: 'zh-CN',
+        note:
+          'stepping a full-width count rewrites it in ASCII (７ → 8) — accepted behavior, ' +
+          'the committed value is semantically identical',
+        expected: '最近8天',
       },
     ]);
   });

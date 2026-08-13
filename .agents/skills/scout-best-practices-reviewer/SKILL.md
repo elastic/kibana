@@ -1,6 +1,6 @@
 ---
 name: scout-best-practices-reviewer
-description: Review Scout UI/API tests (including Scout test migrations) for best practices, reuse, and parity.
+description: Review Scout UI/API tests (including Scout test migrations) for best practices, reuse, parity, and server config hygiene.
 ---
 
 # Scout Best Practices Reviewer
@@ -32,6 +32,17 @@ Important: Do not post GitHub comments unless explicitly stated.
 
    **Rule of thumb:** always read the general best practices, then open **only** the UI-specific file for UI reviews or the API-specific file for API reviews. If a PR mixes UI and API specs, open both.
 
+## Critical checks (do these first, one by one)
+
+Work through these numbered checks **in order, one at a time**, before the general checklist — don't batch or skip. They're the highest-priority findings: a genuine hit almost always means the PR must change before merge. Each row links to the canonical public guidance — **read the linked section before flagging**, and cite it in the comment.
+
+| # | Critical check | Fires when the PR… | Flag / ask → see |
+|---|---|---|---|
+| 1 | **Custom server config earns its keep** | adds or updates a config set (files under `.../kbn-scout/.../config_sets/<name>/**`, a new `test/scout_<name>/` dir, or new `--serverConfigSet`) | Setting is runtime-toggleable → move it to `apiServices.core.settings(...)`. Duplicates an existing set's purpose/args → reuse that set, or ask its owners to extend it. → `docs/extend/testing/feature-flags.md`, `docs/extend/testing/scout-best-practices.md#prefer-runtime-feature-flags` |
+| 2 | **Spec lives where selective testing runs it** | adds or moves a spec that drives another plugin's app/UI (`page.gotoApp('<other>')`, another solution's `data-test-subj`, tags, or nav) | Host package doesn't own or `kbn_references`-depend on the code under test → relocate the spec to the owning plugin so PR CI actually runs it. → `docs/extend/testing/scout-best-practices.md#keep-tests-close-to-source-code` |
+| 3 | **Right test type, 100% justified** | adds or migrates a UI or API spec, or an FTR/Cypress→Scout migration | UI asserts data/logic only, or drives a pure local UI toggle already covered by a Jest unit/RTL test → move down the pyramid or remove. "It works / it's easier / that's how the FTR did it" isn't justification. → `docs/extend/testing/scout-best-practices.md#pick-the-right-test-type`, `docs/extend/testing/migrate-tests.md#dont-migrate-blindly` |
+| 4 | **Migration parity — no major coverage loss** | removes or replaces FTR/Cypress tests alongside new or changed Scout specs | Flag **only major** changes or drops: removed scenarios, dropped roles/error paths or classic/serverless coverage, weakened assertions or lost side-effect checks. Skip benign deltas — don't post an FYI parity map. Depth in **Migration parity analysis** below. → `docs/extend/testing/migrate-tests.md#dont-migrate-blindly` |
+
 ## Scope (be comprehensive)
 
 - Don’t limit the review to the diff. Look for duplication and missed reuse by scanning:
@@ -51,9 +62,10 @@ Open only the docs relevant to the test type(s) under review.
 
 - **[general]** **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them in the right scope (plugin vs solution vs `@kbn/scout`) and register via fixtures.
 - **[general]** **No unused constants**: flag constants that are unused or used in only one place — prefer inlining them.
+- **[general]** **Don't circumvent the linter**: flag attempts to silence a lint rule instead of fixing the root cause (`eslint-disable`, or swapping a flagged pattern for a hack that hides it). Sanctioned escape hatches (e.g. `dispatchEvent('click')` for a documented app bug) are fine only with an explicit documented justification. Don't re-flag plain lint violations — CI already gates those.
 - **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
 - **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
-- **[ui]** **UI scope**: UI tests should focus on user interactions and rendering; avoid “data correctness” assertions (for example exact API response shapes or exact table cell values) unless the UI behavior depends on them. Prefer Scout API tests (or unit/integration) for data correctness coverage.
+- **[ui]** **UI scope**: keep UI specs focused on user interactions and rendering; for data-correctness assertions and choosing the right layer, see **Critical check 3 (right test type)**.
 - **[ui]** **Page objects**: Encapsulate multi-step interactions and reused sequences in page objects — specs should primarily hold assertions (`expect`), test flow (`test.step`), and page-object method calls. Short inline locator calls for simple one-off assertions (e.g. a single label or nav-link check) are acceptable. Flag raw locators when the interaction is complex enough to benefit from abstraction or is duplicated across specs. Extract all locators as `readonly` properties in the constructor; no inline locator creation inside methods.
 - **[general]** **Isolation**: parallel-safe data; resilient cleanup in `afterAll`/`afterEach`; defensive cleanup in `beforeAll` for failed-run leftovers; `scoutSpace.savedObjects.cleanStandardList()` as catch-all after domain-specific cleanup; no reliance on file ordering or shared mutable state.
 - **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
@@ -79,7 +91,9 @@ Use these definitions when assigning severity:
 
 When in doubt, prefer a lower severity. Optimization suggestions (efficiency improvements) should be `minor` or `nit`, not `major`.
 
-### Migration parity analysis (required when migration is detected)
+### Migration parity analysis (Critical check 4 depth)
+
+Flag **only major** changes or drops — coverage that genuinely weakens. Skip benign deltas.
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
 - **If migration is detected**:
@@ -107,6 +121,7 @@ These EUI/Kibana component behaviours are non-obvious and cannot be inferred fro
 - **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
 - **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
 - **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
+- **EUI Component Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` (via `page.components.*`) over raw selectors or the old `EuiXxxWrapper`s; flag self-extension (local subclasses / one-off helper methods) — missing capabilities belong in the published helper via DevEx. See the `scout-ui-testing` skill for details.
 
 ## Output
 

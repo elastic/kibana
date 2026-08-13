@@ -17,7 +17,7 @@ import type {
   ConversationAccessControl,
   ConversationRoundOrigin,
   ConversationOrigin,
-  ConversationOriginAuthor,
+  ConversationRoundAuthor,
   ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
@@ -59,12 +59,12 @@ export interface BaseExecutionParams {
 /**
  * External origin that initiated a conversation execution, for example a Slack thread.
  * Each attribute is persisted on its parent model: `external_conversation_id` on the
- * conversation, `type` on the round, and `author` on the round input.
+ * conversation, `type` on the round, and `author` on the round.
  */
 export type ExecutionConversationOrigin = ConversationOrigin &
   ConversationRoundOrigin & {
-    /** Author attribution from the external origin. */
-    author?: ConversationOriginAuthor;
+    /** Author attribution for the round input. */
+    author?: ConversationRoundAuthor;
   };
 
 /**
@@ -78,7 +78,7 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   /** Create conversation with specified ID if not found. */
   autoCreateConversationWithId?: boolean;
   /** Access mode to apply when creating a new conversation. Ignored for existing conversations. */
-  accessControl?: ConversationAccessControl;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
   /** Callback delivery configuration for this execution. */

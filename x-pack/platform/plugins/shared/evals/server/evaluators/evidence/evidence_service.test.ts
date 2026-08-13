@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createTraceAccessor } from '../trace_accessor';
-import { normalizeEvidence } from './evidence_service';
+import { hasRootSpan, normalizeEvidence } from './evidence_service';
 import { getInstrumentationProfile } from './resolve_instrumentation';
 
 describe('normalizeEvidence', () => {
@@ -685,5 +685,38 @@ describe('normalizeEvidence', () => {
         },
       ],
     });
+  });
+});
+
+describe('hasRootSpan', () => {
+  const traceId = '0af7651916cd43dd8448eb211c80319c';
+
+  const createEsClient = () => {
+    const searchMock = jest.fn();
+    const esClient = {
+      search: searchMock,
+    } as unknown as ElasticsearchClient;
+    return { esClient, searchMock };
+  };
+
+  it('queries traces for a parent-less span scoped to the trace', async () => {
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+    searchMock.mockResolvedValue({ hits: { hits: [{ _source: { '@timestamp': 'now' } }] } });
+
+    await expect(hasRootSpan(traceAccessor)).resolves.toBe(true);
+
+    const request = searchMock.mock.calls[0][0];
+    const bool = (request.query as { bool?: { filter?: unknown[]; must_not?: unknown[] } }).bool;
+    expect(bool?.filter).toEqual(expect.arrayContaining([{ term: { 'trace.id': traceId } }]));
+    expect(bool?.must_not).toEqual([{ exists: { field: 'parent_span_id' } }]);
+  });
+
+  it('returns false when no parent-less span is indexed yet', async () => {
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+    searchMock.mockResolvedValue({ hits: { hits: [] } });
+
+    await expect(hasRootSpan(traceAccessor)).resolves.toBe(false);
   });
 });

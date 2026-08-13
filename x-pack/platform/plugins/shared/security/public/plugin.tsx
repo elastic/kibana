@@ -155,7 +155,6 @@ export class SecurityPlugin
         management,
         authc: this.authc,
         fatalErrors: core.fatalErrors,
-        uiSettings: core.uiSettings,
         getStartServices: core.getStartServices,
         buildFlavor: this.buildFlavor,
       });

@@ -13,6 +13,7 @@ import type { ScopedHistory } from '@kbn/core/public';
 
 import { AppHeader } from '@kbn/app-header';
 import { allowAutoCreateRadioIds, STANDARD_INDEX_MODE } from '../../../../common/constants';
+import { useAppContext } from '../../app_context';
 import type { TemplateDeserialized } from '../../../../common';
 import { serializers, Forms, GlobalFlyout } from '../../../shared_imports';
 import type { CommonWizardSteps } from '../shared';
@@ -102,6 +103,9 @@ export const TemplateForm = ({
   history,
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
+  const {
+    config: { enableIndexMode },
+  } = useAppContext();
   const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
   const simulateTemplateFilters = useRef<SimulateTemplateFilters>({
     mappings: true,
@@ -114,7 +118,7 @@ export const TemplateForm = ({
     name: '',
     indexPatterns: [],
     dataStream: {},
-    indexMode: STANDARD_INDEX_MODE,
+    indexMode: enableIndexMode ? STANDARD_INDEX_MODE : undefined,
     template: {},
     _kbnMeta: {
       type: 'default',

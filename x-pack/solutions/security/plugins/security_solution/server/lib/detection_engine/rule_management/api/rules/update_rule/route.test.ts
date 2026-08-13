@@ -305,7 +305,7 @@ describe('Update rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'command: Invalid input: expected "isolate", command: Invalid option: expected one of "kill-process"|"suspend-process", config: Invalid input: expected object, received undefined, command: Invalid input: expected "runscript"'
+        'command: Invalid input: expected "isolate", command: Invalid discriminator value. Expected \'kill-process\' | \'suspend-process\', command: Invalid input: expected "runscript"'
       );
     });
     test('fails when provided with payload missing data', async () => {

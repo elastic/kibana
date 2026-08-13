@@ -8,17 +8,17 @@
 import { buildDiscoveryInput } from './build_agent_input';
 
 describe('buildDiscoveryInput', () => {
-  it('emits only the Active batch heading with compact JSON', () => {
+  it('emits the production Detection batch heading with compact JSON', () => {
     const input = buildDiscoveryInput({
       detections: [{ rule_uuid: 'r1' }],
     });
 
-    expect(input).toBe('## Active batch\n[{"rule_uuid":"r1"}]');
+    expect(input).toBe('## Detection batch\n[{"rule_uuid":"r1"}]');
     expect(input).not.toContain('\n  '); // not pretty-printed
   });
 
   it('renders an empty batch correctly', () => {
     const input = buildDiscoveryInput({ detections: [] });
-    expect(input).toBe('## Active batch\n[]');
+    expect(input).toBe('## Detection batch\n[]');
   });
 });
