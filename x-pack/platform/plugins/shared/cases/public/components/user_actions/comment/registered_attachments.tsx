@@ -31,7 +31,6 @@ import type { SnakeToCamelCase } from '../../../../common/types';
 import {
   ATTACHMENT_NOT_REGISTERED_ERROR,
   DEFAULT_EVENT_ATTACHMENT_TITLE,
-  DELETE_REGISTERED_ATTACHMENT,
   getDeleteRegisteredAttachmentTitle,
 } from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
