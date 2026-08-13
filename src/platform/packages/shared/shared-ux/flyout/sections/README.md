@@ -52,7 +52,7 @@ import { FlyoutAccordion } from '@kbn/flyout-sections';
 | `icon` | `EuiIconProps['type']` | — | Icon beside the title. |
 | `tooltip` | `ReactNode` | — | Tooltip shown from the icon. |
 | `action` | `FlyoutSectionAction` | — | Link aligned to the right of the title row. |
-| `initialIsOpen` | `boolean` | `false` | Open on first render. |
+| `initialIsOpen` | `boolean` | `false` | Opens after the initial render. |
 | `hasBorder` | `boolean` | `true` | Wraps content in an outlined `EuiPanel`. |
 | `data-test-subj` | `string` | — | Test subject on the `EuiAccordion` element. |
 | `children` | `ReactNode` | — | Accordion body. |
