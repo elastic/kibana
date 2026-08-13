@@ -96,7 +96,7 @@ const renderTable = (
 
 const clickRowAction = () => {
   // The row action is an icon-only button rendered with the `expand` EuiIcon.
-  const expandIcon = document.querySelector('[data-euiicon-type="expand"]');
+  const expandIcon = document.querySelector('[data-euiicon-type="maximize"]');
   fireEvent.click(expandIcon?.closest('button') as HTMLElement);
 };
 

@@ -126,7 +126,7 @@ export function ActionsMenu({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowRight" size="s" color="primary" aria-hidden={true} />
+            <EuiIcon type="chevronSingleRight" size="s" color="primary" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );

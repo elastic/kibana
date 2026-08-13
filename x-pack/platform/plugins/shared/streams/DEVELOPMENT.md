@@ -384,7 +384,7 @@ redirect shim) via two optional plugins:
 - `significant_events` — `significantEventsRepositoryClient.fetch('GET /internal/significant_events/availability')`
 
 When either is absent, or the availability probe returns unavailable, SE UI stays hidden.
-Streams does not subscribe to SEA `availability$`.
+Streams gates on that server probe directly; SEA does not expose an availability observable.
 
 ### UI Routes
 
@@ -496,20 +496,24 @@ yarn test:jest x-pack/platform/plugins/shared/streams/server/lib/streams/
 
 ### Integration Tests (Scout)
 
-Scout tests for the streams_app use Playwright:
+Scout tests for the streams_app use Playwright. They are split into one
+namespace per feature area, each with its own config at
+`test/scout/<namespace>/ui/playwright.config.ts` — see
+[the suite README](../streams_app/test/scout/README.md) for the namespace list
+and how to pick one. The examples below use `routing`:
 
 ```bash
 # Start server (ESS)
 node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run UI tests
-node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts --project=local --grep stateful-classic
 ```
 
 For serverless:
 ```bash
 node scripts/scout.js start-server --arch serverless --domain observability_complete
-node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability
+node scripts/playwright test --config x-pack/platform/plugins/shared/streams_app/test/scout/routing/ui/playwright.config.ts --project=local --grep serverless-observability
 ```
 
 Streamlang integration tests:

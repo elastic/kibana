@@ -17,11 +17,11 @@ describe('parseSearchQuery', () => {
     expect(parseSearchQuery('logs').text).toBe('logs');
   });
 
-  it('parses field clauses such as dataQuality', () => {
-    const query = parseSearchQuery('dataQuality:degraded');
+  it('parses field clauses', () => {
+    const query = parseSearchQuery('status:open');
 
-    expect(query.ast.getFieldClauses('dataQuality')).toEqual([
-      expect.objectContaining({ field: 'dataQuality', value: 'degraded' }),
+    expect(query.ast.getFieldClauses('status')).toEqual([
+      expect.objectContaining({ field: 'status', value: 'open' }),
     ]);
   });
 

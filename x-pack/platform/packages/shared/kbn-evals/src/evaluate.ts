@@ -320,6 +320,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           await evalsClient.upsertDataset({
             name: dataset.name,
             description: dataset.description,
+            tags: dataset.tags,
+            maturity: dataset.maturity,
             examples: dataset.examples.map(toDatasetRouteExample),
           });
         },
