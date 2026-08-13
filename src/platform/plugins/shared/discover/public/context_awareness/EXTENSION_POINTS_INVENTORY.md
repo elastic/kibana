@@ -105,6 +105,8 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Use when:** Make key fields readable/actionable at a glance.
 
+**Params:** `{ dataView, density, rowHeight, sourceDisplayMode }` (`sourceDisplayMode` is `'summary' | 'json'`)
+
 **Returns:** `CustomCellRenderer` mapping (field name -> renderer)
 
 **Screenshot:**
@@ -253,6 +255,8 @@ A concise, non-technical map of the Discover Profile extension points (what they
 **Changes:** Header labels, icons, and metadata for columns.
 
 **Use when:** Rename headers, add icons, improve tooltips.
+
+**Params:** Each column callback receives `{ column, headerRowHeight, sourceDisplayMode }` (`sourceDisplayMode` is `'summary' | 'json'`)
 
 **Returns:** `CustomGridColumnsConfiguration`
 

@@ -259,7 +259,12 @@ Subscribes to `chrome.getActiveSolutionNavId$()`. On each emission, calls `profi
 
 ```ts
 const getCellRenderers = useProfileAccessor('getCellRenderers');
-const cellRenderers = getCellRenderers(() => ({}))({ dataView, density, rowHeight });
+const cellRenderers = getCellRenderers(() => ({}))({
+  dataView,
+  density,
+  rowHeight,
+  sourceDisplayMode,
+});
 ```
 
 For document-level extension points, pass `{ record }` in options to include the document profile:
