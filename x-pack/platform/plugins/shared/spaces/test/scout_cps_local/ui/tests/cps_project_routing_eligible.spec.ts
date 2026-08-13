@@ -62,10 +62,7 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
     await pageObjects.spaces.gotoCreateSpace();
     await pageObjects.spaces.setSpaceName(spaceName);
     await pageObjects.spaces.waitForProjectRoutingPicker();
-    await expect(pageObjects.spaces.allProjectsRoutingButtonLocator()).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
+    await expect(pageObjects.spaces.includeAllVisibleButtonLocator()).toBeDisabled();
     await pageObjects.spaces.saveSpace();
 
     await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
@@ -123,10 +120,8 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
     await test.step('reload edit page and confirm origin-only is selected', async () => {
       await pageObjects.spaces.gotoEditSpace(spaceId);
       await pageObjects.spaces.waitForProjectRoutingPicker();
-      await expect(pageObjects.spaces.originProjectRoutingButtonLocator()).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      );
+      await expect(pageObjects.spaces.originProjectSwitchLocator()).toBeChecked();
+      await expect(pageObjects.spaces.includeAllVisibleButtonLocator()).toBeEnabled();
     });
 
     await test.step('reset to all-projects routing and save', async () => {

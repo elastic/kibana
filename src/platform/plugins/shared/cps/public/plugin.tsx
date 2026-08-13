@@ -54,6 +54,7 @@ export const getCustomHeaderContextMenuItems = (
       label: i18n.translate('cps.projectPicker.header.adjustSpaceDefaultsLinkText', {
         defaultMessage: 'Adjust space defaults',
       }),
+      testSubj: 'projectPickerAdjustSpaceDefaultsMenuItem',
       href: core.application.getUrlForApp('management', {
         path: `kibana/spaces/edit/${core.http.spaceId}`,
       }),
@@ -67,6 +68,7 @@ export const getCustomHeaderContextMenuItems = (
       label: i18n.translate('cps.projectPicker.header.manageCrossProjectSearchLinkText', {
         defaultMessage: 'Manage cross-project search',
       }),
+      testSubj: 'projectPickerManageCrossProjectSearchMenuItem',
       href: manageCrossProjectSearchUrl,
       external: true,
     });
