@@ -281,7 +281,10 @@ class ConversationClientImpl implements ConversationClient {
           return [
             key,
             def
-              ? serializeMetadataValue(value as string | string[] | number | boolean, def.input_type)
+              ? serializeMetadataValue(
+                  value as string | string[] | number | boolean,
+                  def.input_type
+                )
               : value,
           ];
         })
