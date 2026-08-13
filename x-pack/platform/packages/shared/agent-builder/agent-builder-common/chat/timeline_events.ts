@@ -59,10 +59,6 @@ export interface EventActor {
 
 /**
  * What caused an agent run to start.
- *
- * At MVP only `userMessage` and `promptResponse` are produced (today's `direct` behaviour).
- * `schedule`, `external`, and `agentMention` are declared but not yet wired; they start being
- * emitted when custom triggers land.
  */
 export enum TimelineTriggerType {
   /** A user message. */
