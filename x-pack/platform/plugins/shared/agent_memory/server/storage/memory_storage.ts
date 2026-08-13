@@ -17,6 +17,9 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
  * ES built-in roles grant read + view_index_metadata on all non-dot indices,
  * so no role changes are needed.
  *
+ * Plugin operations must use `asCurrentUser`. `kibana_system` has no privileges
+ * on non-dot user-data indices (see Kibana system-user security guidelines).
+ *
  * The schema is KI-envelope-shaped (type = 'memory') so a Phase-2 reindex is
  * a schema migration, not a redesign. All D5/D6/D11 fields are mapped from
  * day one because `dynamic: 'strict'` (hardcoded in the adapter) rejects any
