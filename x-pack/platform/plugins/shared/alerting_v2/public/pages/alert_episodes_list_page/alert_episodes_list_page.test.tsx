@@ -65,8 +65,6 @@ jest.mock('@kbn/unified-data-table', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
-// Classic (v1) alerts are a best-effort overlay read via the server route; default
-// to none so the page tests exercise the v2 path only.
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api');
 
 // useAlertingEpisodesDataView uses react-use/useAsync internally with getEsqlDataView,

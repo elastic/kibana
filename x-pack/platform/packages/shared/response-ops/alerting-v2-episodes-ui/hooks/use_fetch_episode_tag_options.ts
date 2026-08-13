@@ -29,8 +29,6 @@ export const useFetchEpisodeTagOptions = ({
   return useQuery({
     queryKey: queryKeys.tagOptions(spaceId, timeRange ?? undefined),
     queryFn: async ({ signal }) => {
-      // Combine v2 tag actions with classic (v1) alert rule tags (RBAC enforced
-      // server-side) so both appear in the filter. The v1 read is best-effort.
       const [v2Tags, v1Tags] = await Promise.all([
         fetchEpisodeTagOptions({ spaceId, services, timeRange, abortSignal: signal }),
         fetchV1AlertsTags({ services, timeRange, abortSignal: signal }).catch(() => [] as string[]),

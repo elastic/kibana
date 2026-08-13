@@ -184,9 +184,6 @@ export const fetchV1AlertsKpis = async ({
     alerts_count: getTotalHits(response.hits.total),
     firing_rules: aggs?.firing_rules.rules.value ?? 0,
     acknowledged: aggs?.acknowledged.doc_count ?? 0,
-    // The find route's `filter` aggregation only accepts a single `term` (no
-    // `bool`), so "snoozed OR muted" is summed from two term counts. This can
-    // slightly overcount alerts that are both muted and snoozed (rare).
     snoozed: (aggs?.muted.doc_count ?? 0) + (aggs?.snoozed.doc_count ?? 0),
   };
 };

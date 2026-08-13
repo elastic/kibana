@@ -26,8 +26,6 @@ const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 const mockFetchV1AlertsKpis = jest.mocked(fetchV1AlertsKpis);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
-// Classic (v1) KPIs are a best-effort overlay; default to "no v1 counts" so the
-// existing v2-only expectations are preserved.
 mockFetchV1AlertsKpis.mockResolvedValue(undefined as unknown as V1AlertsKpisRow);
 
 const mockUserProfile = userProfileServiceMock.createStart();

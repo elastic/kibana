@@ -77,8 +77,6 @@ export const useEpisodesKpisQuery = ({
   } = useQuery<EpisodesKpisRow[], Error, EpisodesKpisData | undefined>({
     queryKey: queryKeys.kpis(spaceId, filterState, timeRange, currentUserUid),
     queryFn: async ({ signal }) => {
-      // Compute v2 and classic (v1) KPI counts in parallel and merge them. The
-      // v1 read (RBAC enforced server-side) is best-effort so it never breaks KPIs.
       const [v2Rows, v1] = await Promise.all([
         executeEsqlQuery<EpisodesKpisRow>({
           expressions: services.expressions,
@@ -100,8 +98,6 @@ export const useEpisodesKpisQuery = ({
 
       const v2 = v2Rows[0];
 
-      // Preserve the "no rows -> undefined data" contract when neither source
-      // returned counts.
       if (!v2 && !v1) {
         return [];
       }
@@ -109,13 +105,10 @@ export const useEpisodesKpisQuery = ({
       const v1AlertsCount = v1?.alerts_count ?? 0;
 
       const merged: EpisodesKpisRow = {
-        // v1 rule ids are disjoint from v2, so distinct firing-rule counts sum.
         alerts_count: (v2?.alerts_count ?? 0) + v1AlertsCount,
         firing_rules: (v2?.firing_rules ?? 0) + (v1?.firing_rules ?? 0),
-        // Classic alerts have no assignee, so all v1 alerts count as unassigned.
         assigned_to_me: v2?.assigned_to_me ?? 0,
         unassigned: (v2?.unassigned ?? 0) + v1AlertsCount,
-        // v1 alerts map ack via workflow_status and snooze via muted/snoozed.
         acknowledged: (v2?.acknowledged ?? 0) + (v1?.acknowledged ?? 0),
         snoozed: (v2?.snoozed ?? 0) + (v1?.snoozed ?? 0),
       };

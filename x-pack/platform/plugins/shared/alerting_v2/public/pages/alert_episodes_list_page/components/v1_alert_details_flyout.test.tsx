@@ -68,22 +68,15 @@ describe('V1AlertDetailsFlyout', () => {
       expect(screen.getByTestId('alertEpisodeV1DetailsTabs')).toBeInTheDocument();
     });
 
-    // Title uses the fetched rule name.
     expect(screen.getByRole('heading', { name: 'CPU usage' })).toBeInTheDocument();
-    // Overview values.
     expect(screen.getByText('active')).toBeInTheDocument();
     expect(screen.getByText('critical')).toBeInTheDocument();
     expect(screen.getByText('CPU is high')).toBeInTheDocument();
-    // Duration is humanized from microseconds (120_000_000 us = 2 min).
     expect(screen.getByText('2 min')).toBeInTheDocument();
-    // Tags joined.
     expect(screen.getByText('prod, cpu')).toBeInTheDocument();
 
-    // Fields tab is available.
     expect(screen.getByTestId('alertEpisodeV1FieldsTab')).toBeInTheDocument();
 
-    // The "View details" button links to the alert's own details page,
-    // base-path prefixed.
     const detailsButton = screen.getByTestId('alertEpisodeV1DetailsViewDetailsButton');
     expect(detailsButton).toHaveAttribute('href', '/base/app/observability/alerts/alert-1');
     expect(detailsButton).toHaveTextContent('View details');

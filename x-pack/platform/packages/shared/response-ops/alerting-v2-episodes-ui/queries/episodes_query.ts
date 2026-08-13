@@ -15,7 +15,6 @@ import {
 import type { AlertEpisode as BaseAlertEpisode } from '@kbn/alerting-v2-schemas';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 
-// Re-export for consumers that still import these types from this module.
 export type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 
 /**

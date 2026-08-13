@@ -26,8 +26,6 @@ const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 const mockFetchV1AlertsHistogram = jest.mocked(fetchV1AlertsHistogram);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
-// Classic (v1) histogram rows are a best-effort overlay; default to none so the
-// existing v2-only expectations are preserved.
 mockFetchV1AlertsHistogram.mockResolvedValue([] as HistogramEpisodeRow[]);
 
 const mockServices = {

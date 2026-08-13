@@ -71,9 +71,6 @@ export const useEpisodesHistogramQuery = ({
     // bucketInterval is used for client-side bucketing only — omitted from queryKey intentionally
     queryKey: queryKeys.histogram(spaceId, filterState, timeRange, breakdownField),
     queryFn: async ({ signal }) => {
-      // Fetch v2 and classic (v1) histogram rows in parallel and concatenate them
-      // so the histogram reflects both. The v1 read (RBAC enforced server-side) is
-      // best-effort.
       const [v2Rows, v1Rows] = await Promise.all([
         executeEsqlQuery<HistogramEpisodeRow>({
           expressions: services.expressions,

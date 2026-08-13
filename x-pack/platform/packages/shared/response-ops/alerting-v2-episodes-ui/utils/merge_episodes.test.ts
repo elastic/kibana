@@ -97,7 +97,6 @@ describe('mergeEpisodes', () => {
   });
 
   it('sorts chronologically when v2 timestamps are epoch ms and v1 are ISO strings', () => {
-    // ES|QL often returns dates as epoch millis; classic RAC rows map to ISO strings.
     const v2Newer = makeEpisode({
       'episode.id': 'v2-newer',
       '@timestamp': Date.parse('2024-07-03T10:03:20.000Z') as unknown as string,

@@ -133,7 +133,6 @@ export const buildClassicAlertsQuery = (
     filters.push({ term: { [ALERT_RULE_UUID]: filterState.ruleId } });
   }
 
-  // `group_hash` maps to the alert uuid for classic alerts.
   if (filterState?.groupHash) {
     filters.push({ term: { [ALERT_UUID]: filterState.groupHash } });
   }
@@ -147,7 +146,6 @@ export const buildClassicAlertsQuery = (
     filters.push(buildSeverityFilter(filterState.severity));
   }
 
-  // Classic alerts have no assignee, so filtering by one yields no rows.
   if (filterState?.assigneeUid) {
     filters.push(MATCH_NONE);
   }

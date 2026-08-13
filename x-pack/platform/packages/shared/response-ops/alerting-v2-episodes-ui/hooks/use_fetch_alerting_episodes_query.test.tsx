@@ -22,8 +22,6 @@ jest.mock('../apis/fetch_alerting_episodes');
 jest.mock('../apis/classic_alerts_api');
 
 const fetchAlertingEpisodesMock = jest.mocked(fetchAlertingEpisodes);
-// Classic (v1) alerts are a best-effort overlay; default to none so the existing
-// v2-only expectations are preserved.
 const fetchV1AlertsAsEpisodesMock = jest.mocked(fetchV1AlertsAsEpisodes);
 fetchV1AlertsAsEpisodesMock.mockResolvedValue([]);
 
