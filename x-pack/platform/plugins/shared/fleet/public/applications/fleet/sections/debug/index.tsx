@@ -48,7 +48,7 @@ export const DebugPage: React.FunctionComponent<{
   isInitialized: boolean;
   setupError: RequestError | null;
 }> = ({ isInitialized, setupError }) => {
-  const { chrome } = useStartServices();
+  const { chrome, docLinks } = useStartServices();
   const { getHref } = useLink();
   const { enableCloudOnboardingDeployments } = ExperimentalFeaturesService.get();
 
@@ -229,7 +229,7 @@ export const DebugPage: React.FunctionComponent<{
                   label: i18n.translate('xpack.fleet.debug.usefulLinks.troubleshootingGuide', {
                     defaultMessage: 'Troubleshooting Guide',
                   }),
-                  href: 'https://www.elastic.co/guide/en/fleet/current/fleet-troubleshooting.html',
+                  href: docLinks.links.fleet.troubleshooting,
                   iconType: 'external',
                   target: '_blank',
                 },
