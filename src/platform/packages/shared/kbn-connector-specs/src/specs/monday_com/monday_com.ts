@@ -441,14 +441,12 @@ export const MondayCom: ConnectorSpec = {
         'Verifies connection to the Monday.com MCP server by listing available tools.',
     }),
     handler: async (ctx) => {
-      return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Monday.com MCP server. ${tools.length} tools available.`,
-        };
+      await withMcpClient(ctx, async (mcp) => {
+        await mcp.listTools();
       });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [
