@@ -1094,11 +1094,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (registerIngestCallback) {
       registerIngestCallback(
         'packagePolicyCreate',
-        async (packagePolicy, _soClient, _esClient, context) => {
+        async (packagePolicy, _soClient, esClient, context) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
             packagePolicy,
             this.logger,
-            context
+            context,
+            esClient
           );
           return packagePolicy;
         }
@@ -1106,11 +1107,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       registerIngestCallback(
         'packagePolicyUpdate',
-        async (packagePolicy, _soClient, _esClient, context) => {
+        async (packagePolicy, _soClient, esClient, context) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
             packagePolicy,
             this.logger,
-            context
+            context,
+            esClient
           );
           return packagePolicy;
         }

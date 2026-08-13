@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-security';
-import { apiTest as baseApiTest } from '@kbn/scout-security';
-
-export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
-
+export { apiTest, tags } from '@kbn/scout-security';
 export * as testData from './constants';

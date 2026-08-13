@@ -20,6 +20,8 @@ import {
 import { buildPipelineRequest } from '../../lib/security_integrations/cribl/util/pipeline_builder';
 import { SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE } from '../../../common/constants';
 
+type ApiPassThroughError = Error & { apiPassThrough: boolean; statusCode?: number };
+
 export const putCriblRoutingPipeline = async (
   esClient: ElasticsearchClient,
   policy: NewPackagePolicy,
@@ -35,7 +37,8 @@ export const validateRouteEntries = (mappings: RouteEntry[]): void => {
   for (const mapping of mappings) {
     if (!isValidDataId(mapping.dataId)) {
       throw createApiPassThroughError(
-        `Invalid Cribl dataId "${mapping.dataId}". Only letters, numbers, '.', '_', and '-' are allowed (max ${DATA_ID_MAX_LENGTH} characters).`
+        `Invalid Cribl dataId "${mapping.dataId}". Only letters, numbers, '.', '_', and '-' are allowed (max ${DATA_ID_MAX_LENGTH} characters).`,
+        400
       );
     }
 
@@ -45,16 +48,20 @@ export const validateRouteEntries = (mappings: RouteEntry[]): void => {
         throw createApiPassThroughError(
           `Invalid Cribl namespace "${mapping.namespace}": ${
             namespaceValidation.error ?? 'contains invalid characters'
-          }`
+          }`,
+          400
         );
       }
     }
   }
 };
 
-const createApiPassThroughError = (message: string): Error & { apiPassThrough: boolean } => {
-  const error = new Error(message) as Error & { apiPassThrough: boolean };
+const createApiPassThroughError = (message: string, statusCode?: number): ApiPassThroughError => {
+  const error = new Error(message) as ApiPassThroughError;
   error.apiPassThrough = true;
+  if (statusCode !== undefined) {
+    error.statusCode = statusCode;
+  }
   return error;
 };
 
@@ -72,9 +79,9 @@ const createOrUpdatePipeline = async (
   } catch (e) {
     const error = transformError(e);
     logger.error(`Failed to put Cribl integration routing pipeline. error: ${error.message}`);
-    const passThroughError = createApiPassThroughError(
-      `Failed to put Cribl integration routing pipeline: ${error.message}`
+    throw createApiPassThroughError(
+      `Failed to put Cribl integration routing pipeline: ${error.message}`,
+      error.statusCode
     );
-    throw passThroughError;
   }
 };

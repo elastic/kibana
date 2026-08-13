@@ -29,6 +29,7 @@ const createLogger = (): Logger =>
 describe('getCriblPackagePolicyPostCreateOrUpdateCallback', () => {
   const logger = createLogger();
   const asCurrentUser = { id: 'current-user-client' } as unknown as ElasticsearchClient;
+  const fallbackEsClient = { id: 'fallback-client' } as unknown as ElasticsearchClient;
 
   const createContext = (): RequestHandlerContext =>
     ({
@@ -40,6 +41,16 @@ describe('getCriblPackagePolicyPostCreateOrUpdateCallback', () => {
         },
       }),
     } as unknown as RequestHandlerContext);
+
+  const criblPolicyWithRoutes = {
+    package: { name: 'cribl' },
+    vars: {
+      route_entries: {
+        value: '[{"dataId":"criblSource1","datastream":"logs-destination1.cloud"}]',
+        type: 'textarea',
+      },
+    },
+  } as unknown as NewPackagePolicy;
 
   beforeEach(() => {
     putCriblRoutingPipelineMock.mockReset();
@@ -57,7 +68,7 @@ describe('getCriblPackagePolicyPostCreateOrUpdateCallback', () => {
     expect(putCriblRoutingPipelineMock).not.toHaveBeenCalled();
   });
 
-  it('is a no-op when cribl policy has no route entries', async () => {
+  it('still writes the pipeline when cribl policy has no route entries', async () => {
     const policy = {
       package: { name: 'cribl' },
       vars: {},
@@ -65,38 +76,42 @@ describe('getCriblPackagePolicyPostCreateOrUpdateCallback', () => {
 
     await getCriblPackagePolicyPostCreateOrUpdateCallback(policy, logger, createContext());
 
-    expect(putCriblRoutingPipelineMock).not.toHaveBeenCalled();
-  });
-
-  it('uses asCurrentUser when context is provided', async () => {
-    const policy = {
-      package: { name: 'cribl' },
-      vars: {
-        route_entries: {
-          value: '[{"dataId":"criblSource1","datastream":"logs-destination1.cloud"}]',
-          type: 'textarea',
-        },
-      },
-    } as unknown as NewPackagePolicy;
-
-    await getCriblPackagePolicyPostCreateOrUpdateCallback(policy, logger, createContext());
-
     expect(putCriblRoutingPipelineMock).toHaveBeenCalledWith(asCurrentUser, policy, logger);
   });
 
-  it('fails closed when context is missing and mappings are present', async () => {
-    const policy = {
-      package: { name: 'cribl' },
-      vars: {
-        route_entries: {
-          value: '[{"dataId":"criblSource1","datastream":"logs-destination1.cloud"}]',
-          type: 'textarea',
-        },
-      },
-    } as unknown as NewPackagePolicy;
+  it('uses asCurrentUser when context is provided', async () => {
+    await getCriblPackagePolicyPostCreateOrUpdateCallback(
+      criblPolicyWithRoutes,
+      logger,
+      createContext(),
+      fallbackEsClient
+    );
 
+    expect(putCriblRoutingPipelineMock).toHaveBeenCalledWith(
+      asCurrentUser,
+      criblPolicyWithRoutes,
+      logger
+    );
+  });
+
+  it('falls back to the provided Elasticsearch client when context is missing', async () => {
+    await getCriblPackagePolicyPostCreateOrUpdateCallback(
+      criblPolicyWithRoutes,
+      logger,
+      undefined,
+      fallbackEsClient
+    );
+
+    expect(putCriblRoutingPipelineMock).toHaveBeenCalledWith(
+      fallbackEsClient,
+      criblPolicyWithRoutes,
+      logger
+    );
+  });
+
+  it('fails closed when context and fallback client are both missing', async () => {
     await expect(
-      getCriblPackagePolicyPostCreateOrUpdateCallback(policy, logger, undefined)
+      getCriblPackagePolicyPostCreateOrUpdateCallback(criblPolicyWithRoutes, logger, undefined)
     ).rejects.toMatchObject({
       message: expect.stringContaining('request context is required'),
       apiPassThrough: true,

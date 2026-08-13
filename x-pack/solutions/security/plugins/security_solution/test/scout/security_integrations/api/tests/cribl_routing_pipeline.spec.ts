@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout-security';
+import type { Client } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest, tags } from '../fixtures';
 import {
   COMMON_HEADERS,
   CRIBL_ROUTING_PIPELINE,
@@ -27,31 +28,21 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
   let criblPackageVersion = '';
   let agentPolicyId = '';
   let packagePolicyId = '';
+  let packagePolicyName = '';
 
   const deletePipelineIfExists = async (
-    esClient: {
-      transport: { request: (opts: Record<string, unknown>) => Promise<unknown> };
-    },
+    esClient: Client,
     log: { debug: (msg: string) => void }
   ) => {
     try {
-      await esClient.transport.request({
-        method: 'DELETE',
-        path: `_ingest/pipeline/${CRIBL_ROUTING_PIPELINE}`,
-      });
+      await esClient.ingest.deletePipeline({ id: CRIBL_ROUTING_PIPELINE });
     } catch (error) {
       log.debug(`Pipeline cleanup skipped: ${(error as Error).message}`);
     }
   };
 
-  const getPipeline = async (esClient: {
-    transport: { request: (opts: Record<string, unknown>) => Promise<unknown> };
-  }) => {
-    return esClient.transport.request({
-      method: 'GET',
-      path: `_ingest/pipeline/${CRIBL_ROUTING_PIPELINE}`,
-    }) as Promise<Record<string, { processors?: Array<{ reroute?: { if?: string } }> }>>;
-  };
+  const getPipeline = (esClient: Client) =>
+    esClient.ingest.getPipeline({ id: CRIBL_ROUTING_PIPELINE });
 
   const createCriblPackagePolicyBody = (params: {
     name: string;
@@ -63,12 +54,10 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     name: params.name,
     description: '',
     namespace: 'default',
+    // Simplified package-policy API: inputs is an object map and vars are plain values.
     inputs: {},
     vars: {
-      route_entries: {
-        type: 'textarea',
-        value: buildRouteEntries(params.dataId),
-      },
+      route_entries: buildRouteEntries(params.dataId),
     },
   });
 
@@ -113,6 +102,21 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     expect(agentPolicyRes).toHaveStatusCode(200);
     agentPolicyId = agentPolicyRes.body?.item?.id;
     expect(agentPolicyId).toBeTruthy();
+
+    packagePolicyName = `cribl-scout-${Date.now()}`;
+    const createRes = await apiClient.post('/api/fleet/package_policies?force=true', {
+      headers: adminHeaders,
+      responseType: 'json',
+      body: createCriblPackagePolicyBody({
+        name: packagePolicyName,
+        agentPolicyId,
+        dataId: VALID_DATA_ID,
+      }),
+    });
+    expect(createRes).toHaveStatusCode(200);
+    packagePolicyId = createRes.body?.item?.id;
+    expect(packagePolicyId).toBeTruthy();
+    expect(createRes.body?.item?.vars?.route_entries?.value).toBe(buildRouteEntries(VALID_DATA_ID));
   });
 
   apiTest.afterAll(async ({ apiClient, esClient, log }) => {
@@ -139,36 +143,17 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     await deletePipelineIfExists(esClient, log);
   });
 
-  apiTest(
-    'creates the routing pipeline with an exact dataId condition',
-    async ({ apiClient, esClient }) => {
-      const createRes = await apiClient.post('/api/fleet/package_policies', {
-        headers: adminHeaders,
-        responseType: 'json',
-        body: createCriblPackagePolicyBody({
-          name: `cribl-scout-${Date.now()}`,
-          agentPolicyId,
-          dataId: VALID_DATA_ID,
-        }),
-      });
-
-      expect(createRes.statusCode).toBeLessThan(300);
-      packagePolicyId = createRes.body?.item?.id;
-      expect(packagePolicyId).toBeTruthy();
-
-      const pipeline = await getPipeline(esClient);
-      const processors = pipeline[CRIBL_ROUTING_PIPELINE]?.processors ?? [];
-      expect(processors.some((p) => p.reroute?.if === `ctx['_dataId'] == '${VALID_DATA_ID}'`)).toBe(
-        true
-      );
-    }
-  );
+  apiTest('creates the routing pipeline with an exact dataId condition', async ({ esClient }) => {
+    const pipeline = await getPipeline(esClient);
+    const processors = pipeline[CRIBL_ROUTING_PIPELINE]?.processors ?? [];
+    expect(processors.some((p) => p.reroute?.if === `ctx['_dataId'] == '${VALID_DATA_ID}'`)).toBe(
+      true
+    );
+  });
 
   apiTest(
     'updates the routing pipeline when route entries change',
     async ({ apiClient, esClient }) => {
-      expect(packagePolicyId).toBeTruthy();
-
       const currentRes = await apiClient.get(`/api/fleet/package_policies/${packagePolicyId}`, {
         headers: adminHeaders,
         responseType: 'json',
@@ -197,7 +182,10 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
         },
       });
 
-      expect(updateRes.statusCode).toBeLessThan(300);
+      expect(updateRes).toHaveStatusCode(200);
+      expect(updateRes.body?.item?.vars?.route_entries?.value).toBe(
+        buildRouteEntries(UPDATED_DATA_ID)
+      );
 
       const pipeline = await getPipeline(esClient);
       const processors = pipeline[CRIBL_ROUTING_PIPELINE]?.processors ?? [];
@@ -213,7 +201,6 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
   apiTest(
     'rejects invalid dataId values and leaves the pipeline unchanged',
     async ({ apiClient, esClient }) => {
-      expect(packagePolicyId).toBeTruthy();
       const before = await getPipeline(esClient);
 
       const currentRes = await apiClient.get(`/api/fleet/package_policies/${packagePolicyId}`, {
@@ -244,7 +231,8 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
         },
       });
 
-      expect(updateRes.statusCode).toBeGreaterThanOrEqual(400);
+      expect(updateRes).toHaveStatusCode(400);
+      expect(updateRes.body?.message).toMatch(/Invalid Cribl dataId/);
 
       const after = await getPipeline(esClient);
       expect(after[CRIBL_ROUTING_PIPELINE]).toStrictEqual(before[CRIBL_ROUTING_PIPELINE]);
@@ -256,7 +244,7 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     async ({ apiClient, esClient, log }) => {
       await deletePipelineIfExists(esClient, log);
 
-      const createRes = await apiClient.post('/api/fleet/package_policies', {
+      const createRes = await apiClient.post('/api/fleet/package_policies?force=true', {
         headers: fleetNoPipelineHeaders,
         responseType: 'json',
         body: createCriblPackagePolicyBody({
@@ -266,9 +254,12 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
         }),
       });
 
-      expect(createRes.statusCode).toBeGreaterThanOrEqual(400);
+      expect(createRes).toHaveStatusCode(403);
+      expect(createRes.body?.message).toMatch(/Failed to put Cribl integration routing pipeline/);
 
-      await expect(getPipeline(esClient)).rejects.toBeTruthy();
+      await expect(getPipeline(esClient)).rejects.toMatchObject({
+        meta: { statusCode: 404 },
+      });
     }
   );
 });

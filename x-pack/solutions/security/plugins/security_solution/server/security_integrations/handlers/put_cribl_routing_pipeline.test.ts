@@ -76,9 +76,11 @@ describe('putCriblRoutingPipeline', () => {
       `[{"dataId":"x' || true || 'y","datastream":"logs-destination1.cloud"}]`
     );
 
-    await expect(putCriblRoutingPipeline(esClient, policy, logger)).rejects.toThrow(
-      /Invalid Cribl dataId/
-    );
+    await expect(putCriblRoutingPipeline(esClient, policy, logger)).rejects.toMatchObject({
+      message: expect.stringMatching(/Invalid Cribl dataId/),
+      statusCode: 400,
+      apiPassThrough: true,
+    });
     expect(esClient.transport.request).not.toHaveBeenCalled();
   });
 
@@ -87,9 +89,11 @@ describe('putCriblRoutingPipeline', () => {
       '[{"dataId":"criblSource1","datastream":"logs-destination1.cloud","namespace":"bad space"}]'
     );
 
-    await expect(putCriblRoutingPipeline(esClient, policy, logger)).rejects.toThrow(
-      /Invalid Cribl namespace/
-    );
+    await expect(putCriblRoutingPipeline(esClient, policy, logger)).rejects.toMatchObject({
+      message: expect.stringMatching(/Invalid Cribl namespace/),
+      statusCode: 400,
+      apiPassThrough: true,
+    });
     expect(esClient.transport.request).not.toHaveBeenCalled();
   });
 
@@ -124,6 +128,7 @@ describe('putCriblRoutingPipeline', () => {
     await expect(putCriblRoutingPipeline(esClient, policy, logger)).rejects.toMatchObject({
       message: expect.stringContaining('Failed to put Cribl integration routing pipeline'),
       apiPassThrough: true,
+      statusCode: 403,
     });
   });
 });

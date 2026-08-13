@@ -8,7 +8,6 @@
 import type { Logger, ElasticsearchClient, RequestHandlerContext } from '@kbn/core/server';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { putCriblRoutingPipeline } from './handlers/put_cribl_routing_pipeline';
-import { getRouteEntriesFromPolicyConfig } from '../../common/security_integrations/cribl/translator';
 
 const isCriblPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -16,32 +15,43 @@ const isCriblPackagePolicy = <T extends { package?: { name: string } }>(
   return packagePolicy.package?.name === 'cribl';
 };
 
-const createApiPassThroughError = (message: string): Error & { apiPassThrough: boolean } => {
-  const error = new Error(message) as Error & { apiPassThrough: boolean };
+const createApiPassThroughError = (
+  message: string,
+  statusCode?: number
+): Error & { apiPassThrough: boolean; statusCode?: number } => {
+  const error = new Error(message) as Error & { apiPassThrough: boolean; statusCode?: number };
   error.apiPassThrough = true;
+  if (statusCode !== undefined) {
+    error.statusCode = statusCode;
+  }
   return error;
 };
 
+/**
+ * Writes the Cribl routing ingest pipeline for Cribl package policies.
+ * Prefers the request-scoped Elasticsearch client when `context` is available;
+ * falls back to `fallbackEsClient` for bulk/upgrade flows that do not provide context.
+ */
 export const getCriblPackagePolicyPostCreateOrUpdateCallback = async (
   packagePolicy: NewPackagePolicy,
   logger: Logger,
-  context?: RequestHandlerContext
+  context?: RequestHandlerContext,
+  fallbackEsClient?: ElasticsearchClient
 ): Promise<void> => {
   if (!isCriblPackagePolicy(packagePolicy)) {
     return;
   }
 
-  const mappings = getRouteEntriesFromPolicyConfig(packagePolicy.vars);
-  if (mappings.length === 0) {
-    return;
-  }
+  const esClient = context
+    ? (await context.core).elasticsearch.client.asCurrentUser
+    : fallbackEsClient;
 
-  if (!context) {
+  if (!esClient) {
     throw createApiPassThroughError(
-      'Unable to update Cribl routing pipeline: request context is required'
+      'Unable to update Cribl routing pipeline: request context is required',
+      500
     );
   }
 
-  const esClient: ElasticsearchClient = (await context.core).elasticsearch.client.asCurrentUser;
   return putCriblRoutingPipeline(esClient, packagePolicy, logger);
 };
