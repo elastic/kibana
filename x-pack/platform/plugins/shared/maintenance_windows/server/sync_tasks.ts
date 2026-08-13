@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import pRetry from 'p-retry';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
+
+const RUN_SOON_RETRIES = 3;
 
 /**
  * Consumers register Task Manager task instance IDs. On maintenance window
@@ -14,7 +18,9 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
  * callbacks, so work stays inside the consumer's own task runner.
  */
 export class MaintenanceWindowSyncTasks {
-  private readonly taskIds = new Set<string>();
+  // Counts registrations per task ID so two registrations of the same ID
+  // aren't both cleared by the first call to unregister.
+  private readonly taskIdCounts = new Map<string, number>();
   private taskManager?: TaskManagerStartContract;
 
   constructor(private readonly logger: Logger) {}
@@ -24,27 +30,64 @@ export class MaintenanceWindowSyncTasks {
   }
 
   public register = (taskId: string): (() => void) => {
-    this.taskIds.add(taskId);
+    this.taskIdCounts.set(taskId, (this.taskIdCounts.get(taskId) ?? 0) + 1);
+
+    let unregistered = false;
     return () => {
-      this.taskIds.delete(taskId);
+      if (unregistered) {
+        return;
+      }
+      unregistered = true;
+
+      const count = this.taskIdCounts.get(taskId) ?? 0;
+      if (count <= 1) {
+        this.taskIdCounts.delete(taskId);
+      } else {
+        this.taskIdCounts.set(taskId, count - 1);
+      }
     };
   };
 
   public runSoon = (): void => {
     const taskManager = this.taskManager;
-    if (!taskManager || this.taskIds.size === 0) {
+    if (!taskManager || this.taskIdCounts.size === 0) {
       return;
     }
 
-    for (const taskId of this.taskIds) {
-      void taskManager.runSoon(taskId).catch((error) => {
-        this.logger.error(
-          `Failed to schedule registered sync task "${taskId}" after maintenance window change: ${
-            (error as Error).message
-          }`,
-          { error }
-        );
-      });
+    for (const taskId of this.taskIdCounts.keys()) {
+      void this.runSoonWithRetry(taskManager, taskId);
+    }
+  };
+
+  private runSoonWithRetry = async (
+    taskManager: TaskManagerStartContract,
+    taskId: string
+  ): Promise<void> => {
+    try {
+      await pRetry(
+        async () => {
+          try {
+            await taskManager.runSoon(taskId);
+          } catch (error) {
+            if (!(error instanceof TaskAlreadyRunningError)) {
+              // Not the expected claiming/running race — fail fast, no retries.
+              throw new pRetry.AbortError(error as Error);
+            }
+            this.logger.debug(
+              `Sync task "${taskId}" is already running; retrying runSoon shortly.`
+            );
+            throw error;
+          }
+        },
+        { retries: RUN_SOON_RETRIES }
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to schedule registered sync task "${taskId}" after maintenance window change: ${
+          (error as Error).message
+        }`,
+        { error }
+      );
     }
   };
 }

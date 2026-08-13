@@ -8,7 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 jest.mock('../application/methods/create/create_maintenance_window', () => ({
-  createMaintenanceWindow: jest.fn(),
+  createMaintenanceWindow: jest.fn().mockResolvedValue({ id: 'mw-1' }),
 }));
 jest.mock('../application/methods/get/get_maintenance_window', () => ({
   getMaintenanceWindow: jest.fn(),
@@ -38,30 +38,7 @@ jest.mock('../application/methods/bulk_get/bulk_get_maintenance_windows', () => 
 import { MaintenanceWindowClient } from './maintenance_window_client';
 
 describe('MaintenanceWindowClient notifyChange', () => {
-  it('notifies after update, delete, archive, and finish', async () => {
-    const notifyChange = jest.fn();
-    const client = new MaintenanceWindowClient({
-      logger: loggingSystemMock.createLogger(),
-      savedObjectsClient: savedObjectsClientMock.create(),
-      uiSettings: {} as any,
-      getUserName: async () => null,
-      notifyChange,
-    });
-
-    await client.update({ id: 'mw-1', data: {} as any });
-    await client.delete({ id: 'mw-1' });
-    await client.archive({ id: 'mw-1', archive: true });
-    await client.finish({ id: 'mw-1' });
-
-    expect(notifyChange).toHaveBeenCalledTimes(4);
-  });
-
-  it('does not notify on create', async () => {
-    const { createMaintenanceWindow } = jest.requireMock(
-      '../application/methods/create/create_maintenance_window'
-    );
-    createMaintenanceWindow.mockResolvedValue({ id: 'mw-1' });
-
+  it('notifies after create, update, delete, archive, and finish', async () => {
     const notifyChange = jest.fn();
     const client = new MaintenanceWindowClient({
       logger: loggingSystemMock.createLogger(),
@@ -72,6 +49,30 @@ describe('MaintenanceWindowClient notifyChange', () => {
     });
 
     await client.create({ data: {} as any });
+    await client.update({ id: 'mw-1', data: {} as any });
+    await client.delete({ id: 'mw-1' });
+    await client.archive({ id: 'mw-1', archive: true });
+    await client.finish({ id: 'mw-1' });
+
+    expect(notifyChange).toHaveBeenCalledTimes(5);
+  });
+
+  it('does not notify when create fails', async () => {
+    const { createMaintenanceWindow } = jest.requireMock(
+      '../application/methods/create/create_maintenance_window'
+    );
+    createMaintenanceWindow.mockRejectedValueOnce(new Error('create failed'));
+
+    const notifyChange = jest.fn();
+    const client = new MaintenanceWindowClient({
+      logger: loggingSystemMock.createLogger(),
+      savedObjectsClient: savedObjectsClientMock.create(),
+      uiSettings: {} as any,
+      getUserName: async () => null,
+      notifyChange,
+    });
+
+    await expect(client.create({ data: {} as any })).rejects.toThrow('create failed');
     expect(notifyChange).not.toHaveBeenCalled();
   });
 });

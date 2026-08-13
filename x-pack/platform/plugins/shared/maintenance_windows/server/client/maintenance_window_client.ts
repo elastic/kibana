@@ -40,7 +40,7 @@ export interface MaintenanceWindowClientConstructorOptions {
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly getUserName: () => Promise<string | null>;
-  /** Invoked after mutating ops so registered Task Manager tasks can runSoon. */
+  /** Invoked after create/update/delete/archive/finish so registered Task Manager tasks can runSoon. */
   readonly notifyChange?: () => void;
 }
 
@@ -76,8 +76,11 @@ export class MaintenanceWindowClient {
     };
   }
 
-  public create = (params: CreateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
-    createMaintenanceWindow(this.context, params);
+  public create = async (params: CreateMaintenanceWindowParams): Promise<MaintenanceWindow> => {
+    const result = await createMaintenanceWindow(this.context, params);
+    this.notifyChange?.();
+    return result;
+  };
   public get = (params: GetMaintenanceWindowParams): Promise<MaintenanceWindow> =>
     getMaintenanceWindow(this.context, params);
   public update = async (params: UpdateMaintenanceWindowParams): Promise<MaintenanceWindow> => {
