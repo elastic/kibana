@@ -15,15 +15,6 @@ keytool -importkeystore \
         -keystore $COMBINED_CA_BUNDLE_PATH \
         -storepass changeit -noprompt
 
-if [ -f /tmp/ca.crt ]; then
-  echo "*** Importing Kibana test CA certificate into JVM cacerts ***"
-  keytool -import \
-          -alias kbn-test-ca \
-          -file /tmp/ca.crt \
-          -keystore $COMBINED_CA_BUNDLE_PATH \
-          -storepass changeit -noprompt
-fi
-
 export JAVA_TOOL_OPTIONS="\
   -Djavax.net.ssl.trustStore=$COMBINED_CA_BUNDLE_PATH \
   -Djavax.net.ssl.trustStorePassword=changeit \
