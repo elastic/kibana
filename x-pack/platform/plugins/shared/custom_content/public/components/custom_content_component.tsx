@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 
@@ -21,6 +21,8 @@ interface CustomContentComponentProps {
   savedTemplate: string | undefined;
   isApproximate: boolean;
   projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
 }
@@ -49,6 +51,8 @@ export const CustomContentComponent = ({
   savedTemplate,
   isApproximate,
   projectRouting,
+  query,
+  filters,
   onTemplateChange,
   onErrorChange,
 }: CustomContentComponentProps) => {
@@ -63,6 +67,8 @@ export const CustomContentComponent = ({
     colorMode,
     isApproximate,
     projectRouting,
+    query,
+    filters,
     onTemplateChange,
   });
 

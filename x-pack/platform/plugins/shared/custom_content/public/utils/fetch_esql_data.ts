@@ -7,12 +7,21 @@
 
 import dateMath from '@kbn/datemath';
 import type { HttpStart } from '@kbn/core/public';
-import type { TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
 
 export type EsqlDataResult = ESQLSearchResponse;
+
+export interface FetchEsqlOptions {
+  isApproximate?: boolean;
+  projectRouting?: ProjectRouting;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  ignoreFilterIfFieldNotInIndex?: boolean;
+}
 
 export async function fetchEsqlData(
   search: ISearchGeneric,
@@ -20,11 +29,12 @@ export async function fetchEsqlData(
   esqlQuery: string,
   timeRange: TimeRange | undefined,
   signal: AbortSignal,
-  isApproximate?: boolean,
-  projectRouting?: ProjectRouting
+  options?: FetchEsqlOptions
 ): Promise<EsqlDataResult> {
-  let filter: unknown;
+  const { isApproximate, projectRouting, query, filters, ignoreFilterIfFieldNotInIndex } =
+    options ?? {};
 
+  let timeRangeFilter: { range: Record<string, unknown> } | undefined;
   if (timeRange) {
     let timeField: string | undefined;
     try {
@@ -36,14 +46,28 @@ export async function fetchEsqlData(
       const gte = dateMath.parse(timeRange.from)?.toISOString();
       const lt = dateMath.parse(timeRange.to, { roundUp: true })?.toISOString();
       if (gte && lt) {
-        filter = {
-          range: {
-            [timeField]: { gte, lt, format: 'strict_date_optional_time' },
-          },
+        timeRangeFilter = {
+          range: { [timeField]: { gte, lt, format: 'strict_date_optional_time' } },
         };
       }
     }
   }
+
+  const esBoolQuery = buildEsQuery(undefined, query ?? [], filters ?? [], {
+    ignoreFilterIfFieldNotInIndex: ignoreFilterIfFieldNotInIndex ?? true,
+  });
+
+  const allFilters = timeRangeFilter
+    ? [...esBoolQuery.bool.filter, timeRangeFilter]
+    : esBoolQuery.bool.filter;
+
+  const hasConstraints =
+    allFilters.length > 0 ||
+    esBoolQuery.bool.must_not.length > 0 ||
+    esBoolQuery.bool.should.length > 0 ||
+    esBoolQuery.bool.must.length > 0;
+
+  const filter = hasConstraints ? { bool: { ...esBoolQuery.bool, filter: allFilters } } : undefined;
 
   const { response } = await getESQLResults({
     esqlQuery,

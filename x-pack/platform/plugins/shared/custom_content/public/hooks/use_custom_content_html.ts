@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import type { TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
@@ -40,6 +40,8 @@ export interface UseCustomContentHtmlParams {
   colorMode: EuiThemeColorModeStandard;
   isApproximate: boolean;
   projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   onTemplateChange: (template: string) => void;
 }
 
@@ -60,6 +62,8 @@ export function useCustomContentHtml({
   colorMode,
   isApproximate,
   projectRouting,
+  query,
+  filters,
   onTemplateChange,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [html, setHtml] = useState('');
@@ -119,20 +123,21 @@ export function useCustomContentHtml({
     let acc = '';
 
     const { core, search } = getServices();
+    const fetchOptions = {
+      isApproximate,
+      projectRouting,
+      query,
+      filters,
+      ignoreFilterIfFieldNotInIndex: core.uiSettings.get<boolean>(
+        'courier:ignoreFilterIfFieldNotInIndex'
+      ),
+    };
 
     // Fast path — ES|QL panel with stored template: fetch data client-side and render, no LLM.
     if (template && esqlQuery) {
       setIsLoading(true);
       setError(undefined);
-      fetchEsqlData(
-        search,
-        core.http,
-        esqlQuery,
-        timeRange,
-        controller.signal,
-        isApproximate,
-        projectRouting
-      )
+      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal, fetchOptions)
         .then((response) => fillTemplate(template, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
@@ -205,8 +210,7 @@ export function useCustomContentHtml({
             esqlQuery,
             timeRange,
             controller.signal,
-            isApproximate,
-            projectRouting
+            fetchOptions
           );
         } catch (err) {
           if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError'))
@@ -293,6 +297,8 @@ export function useCustomContentHtml({
     savedTemplate,
     isApproximate,
     projectRouting,
+    query,
+    filters,
   ]);
 
   return { html, isLoading, error, isAiUnavailable };

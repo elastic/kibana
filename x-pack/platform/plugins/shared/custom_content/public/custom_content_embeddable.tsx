@@ -24,7 +24,7 @@ import {
   fetch$,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, distinctUntilChanged, EMPTY, map, merge, skip, switchMap } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
@@ -64,6 +64,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -129,10 +131,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       .pipe(map(Boolean), distinctUntilChanged())
       .subscribe((usesEsql) => usesEsql$.next(usesEsql));
 
-    const fetchSubscription = fetch$(api).subscribe(({ isApproximate, projectRouting }) => {
-      isApproximate$.next(isApproximate);
-      projectRouting$.next(projectRouting);
-    });
+    const fetchSubscription = fetch$(api).subscribe(
+      ({ isApproximate, projectRouting, query, filters }) => {
+        isApproximate$.next(isApproximate);
+        projectRouting$.next(projectRouting);
+        query$.next(query);
+        filters$.next(filters);
+      }
+    );
 
     return {
       api,
@@ -145,6 +151,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           panelTitle,
           isApproximate,
           projectRouting,
+          query,
+          filters,
         ] = useBatchedPublishingSubjects(
           prompt$,
           esqlQuery$,
@@ -152,7 +160,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isFlyoutOpen$,
           titleManager.api.title$,
           isApproximate$,
-          projectRouting$
+          projectRouting$,
+          query$,
+          filters$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
@@ -247,6 +257,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               savedTemplate={savedTemplate}
               isApproximate={isApproximate}
               projectRouting={projectRouting}
+              query={query}
+              filters={filters}
               onTemplateChange={onTemplateChange}
             />
             {isFlyoutOpen && (
