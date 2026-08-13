@@ -21,7 +21,7 @@ pageLoadAssetSize:
   charts: 1188
   clientApps: 1017
   cloud: 8477
-  cloudConnect: 4998
+  cloudConnect: 5575
   cloudDataMigration: 1755
   cloudDefend: 3060
   cloudExperiments: 67356
@@ -31,7 +31,7 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 1378
+  contextEngine: 1527
   controls: 4166
   core: 320
   cps: 5002

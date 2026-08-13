@@ -21,7 +21,7 @@ import {
   ConversationRoundStepType,
   ToolOrigin,
   ToolResultType,
-  getDefaultConversationAccessControl,
+  normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -63,7 +63,7 @@ const convertBaseFromEs = (document: Document) => {
     status: document._source.status,
     read: document._source.read,
     pinned: document._source.pinned,
-    access_control: document._source.access_control ?? getDefaultConversationAccessControl(),
+    access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
@@ -246,7 +246,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     status: conversation.status,
     read: conversation.read,
     pinned: conversation.pinned,
-    access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
+    access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
@@ -308,7 +308,7 @@ export const createRequestToEs = ({
     status: conversation.status,
     read: false,
     pinned: false,
-    access_control: conversation.access_control ?? getDefaultConversationAccessControl(),
+    access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     // Cast metadata to storage type — see note in toEs.

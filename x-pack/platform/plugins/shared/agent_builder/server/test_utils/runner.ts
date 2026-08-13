@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
+  httpServiceMock,
   savedObjectsServiceMock,
   securityServiceMock,
   uiSettingsServiceMock,
@@ -299,6 +300,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
+    selfClient: httpServiceMock.createStartContract().selfClient,
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
     modelProvider: createModelProviderMock(),
     toolProvider: createToolProviderMock(),
@@ -333,6 +335,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      apiTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -391,6 +394,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      apiTools: false,
     },
   };
 };
@@ -412,6 +416,7 @@ export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> =>
 export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
+    http: httpServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -442,6 +447,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      apiTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -454,6 +460,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
 export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
+    http: httpServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
