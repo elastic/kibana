@@ -35,6 +35,20 @@ interface CustomFieldValidationParams {
   customFieldsConfiguration?: CustomFieldsConfiguration;
 }
 
+/**
+ * Drops template fields whose storage key already belongs to a global field.
+ * On a storage-key collision the global definition is authoritative (see
+ * resolveApplicableFields) — shared by write-time and close-time validation so a
+ * template `$ref` to a global library field is not validated twice.
+ */
+export const excludeTemplateFieldsCollidingWithGlobal = (
+  templateFields: readonly InlineField[],
+  globalFields: readonly InlineField[]
+): InlineField[] => {
+  const globalKeySet = new Set(globalFields.map((f) => getFieldSnakeKey(f.name, f.type)));
+  return templateFields.filter((f) => !globalKeySet.has(getFieldSnakeKey(f.name, f.type)));
+};
+
 export const validateCustomFields = (params: CustomFieldValidationParams) => {
   validateDuplicatedKeysInRequest({
     requestFields: params.requestCustomFields,
@@ -283,8 +297,9 @@ export const validateCaseExtendedFields = async ({
   const templateOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => !globalKeySet.has(k))
   );
-  const templateNonGlobalFields = resolvedTemplateFields.filter(
-    (f) => !globalKeySet.has(getFieldSnakeKey(f.name, f.type))
+  const templateNonGlobalFields = excludeTemplateFieldsCollidingWithGlobal(
+    resolvedTemplateFields,
+    globalFields
   );
   const templateErrors = validateExtendedFields(templateOnlyFields, templateNonGlobalFields, {
     partial,
@@ -422,7 +437,12 @@ export const validateExtendedFieldsOnClose = ({
     ...(updateReq.extended_fields ?? {}),
   };
 
-  const allFields = [...globalFields, ...templateFields];
+  // Same global-wins exclusion as write-time validation — template `$ref`s to global fields
+  // must not be checked a second time (duplicate "Field X is required" on close).
+  const allFields = [
+    ...globalFields,
+    ...excludeTemplateFieldsCollidingWithGlobal(templateFields, globalFields),
+  ];
 
   // Build helper maps for condition evaluation (show_when).
   const fieldValues: Record<string, string | undefined> = {};
