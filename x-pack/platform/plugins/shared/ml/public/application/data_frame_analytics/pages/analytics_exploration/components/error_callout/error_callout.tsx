@@ -27,6 +27,7 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
   if (typeof error === 'string' && error.includes('index_not_found')) {
     errorCallout = (
       <KbnDangerCallout
+        announceOnMount
         title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.evaluateErrorTitle', {
           defaultMessage: 'An error occurred loading the data.',
         })}
@@ -40,6 +41,7 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
     // Job was started but no results have been written yet
     errorCallout = (
       <KbnInfoCallout
+        announceOnMount
         title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.noDataCalloutTitle', {
           defaultMessage: 'Empty index query result.',
         })}
@@ -53,6 +55,7 @@ export const ErrorCallout: FC<Props> = ({ error }) => {
     // query bar syntax is incorrect
     errorCallout = (
       <KbnInfoCallout
+        announceOnMount
         title={i18n.translate('xpack.ml.dataframe.analytics.errorCallout.queryParsingErrorTitle', {
           defaultMessage: 'Unable to parse query.',
         })}

@@ -378,6 +378,7 @@ const TextFieldWarning = () => {
   return (
     <>
       <KbnWarningCallout
+        size="s"
         title={i18n.translate(
           'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title',
           {

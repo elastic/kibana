@@ -14,6 +14,7 @@ export const TimeFieldWarning = () => {
   return (
     <>
       <KbnWarningCallout
+        size="s"
         title={i18n.translate('xpack.aiops.embeddableMenu.timeFieldWarning.title', {
           defaultMessage: 'The selected data view does not contain a time field.',
         })}

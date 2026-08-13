@@ -132,7 +132,7 @@ const CalloutInfoMessage: FC<{
 }> = ({ calloutInfoMessage, calloutPosition }) => (
   <>
     {calloutPosition === 'bottom' ? <EuiSpacer size="s" /> : null}
-    <KbnInfoCallout title={calloutInfoMessage} />
+    <KbnInfoCallout size="s" title={calloutInfoMessage} />
     {calloutPosition === 'top' ? <EuiSpacer size="s" /> : null}
   </>
 );

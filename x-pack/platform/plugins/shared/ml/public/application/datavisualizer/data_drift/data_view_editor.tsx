@@ -168,6 +168,7 @@ export function DataViewEditor({
       <EuiFlexItem css={{ paddingLeft: euiTheme.size.base, paddingRight: euiTheme.size.base }}>
         {errorMessage === mustMatchError ? (
           <KbnWarningCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.dataDrift.indexPatternsEditor.notMatchDetail"

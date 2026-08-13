@@ -19,6 +19,7 @@ export const ErrorMessageContent = ({
 }) => {
   return (
     <KbnDangerCallout
+      size="s"
       title={
         <FormattedMessage
           id="xpack.dataVisualizer.index.fieldStatisticsErrorMessage"

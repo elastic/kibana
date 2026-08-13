@@ -272,6 +272,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
         {sourceIndexMissingError && showCallOut ? (
           <EuiFlexItem>
             <KbnInfoCallout
+              size="s"
               announceOnMount
               onDismiss={() => {
                 setShowCallOut(false);

@@ -22,6 +22,7 @@ export const ExplorerChartsErrorCallOuts: FC<ExplorerChartsErrorCalloutsProps> =
   if (!errorMessagesByType || Object.keys(errorMessagesByType).length === 0) return null;
   const content = Object.keys(errorMessagesByType).map((errorType) => (
     <KbnWarningCallout
+      size="s"
       key={errorType}
       title={
         <FormattedMessage

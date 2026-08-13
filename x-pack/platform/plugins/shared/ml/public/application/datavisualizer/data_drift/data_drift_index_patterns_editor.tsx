@@ -380,7 +380,7 @@ export function DataDriftIndexPatternsEditor({
             </EuiFormRow>
           ) : null}
 
-          {dataViewMsg ? <KbnInfoCallout title={dataViewMsg} /> : null}
+          {dataViewMsg ? <KbnInfoCallout announceOnMount title={dataViewMsg} /> : null}
 
           <EuiFormRow id="analyzeDriftData">
             <EuiFlexGroup>

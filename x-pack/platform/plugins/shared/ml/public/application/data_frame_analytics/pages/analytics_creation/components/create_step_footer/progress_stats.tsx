@@ -27,6 +27,7 @@ export const ProgressStats: FC<Props> = ({ currentProgress, failedJobMessage }) 
         <>
           <KbnDangerCallout
             announceOnMount
+            size="s"
             data-test-subj="analyticsWizardProgressCallout"
             title={i18n.translate(
               'xpack.ml.dataframe.analytics.create.analyticsProgressCalloutTitle',

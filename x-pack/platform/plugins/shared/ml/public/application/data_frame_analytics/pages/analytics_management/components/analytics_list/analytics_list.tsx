@@ -199,6 +199,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   if (typeof errorMessage !== 'undefined') {
     return (
       <KbnDangerCallout
+        announceOnMount
         title={i18n.translate('xpack.ml.dataFrame.analyticsList.errorPromptTitle', {
           defaultMessage: 'An error occurred getting the data frame analytics list.',
         })}

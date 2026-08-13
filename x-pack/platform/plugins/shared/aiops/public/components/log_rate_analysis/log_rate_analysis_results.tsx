@@ -388,6 +388,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <>
           <EuiSpacer size="xs" />
           <KbnWarningCallout
+            size="s"
             announceOnMount={false}
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
               defaultMessage:
