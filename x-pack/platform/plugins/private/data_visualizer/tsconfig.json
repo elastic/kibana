@@ -92,6 +92,7 @@
     "@kbn/cps",
     "@kbn/scout",
     "@kbn/ml-anomaly-utils"
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,7 +9,7 @@ import { useLocation, useRouteMatch } from 'react-router-dom';
 import { keyBy } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
@@ -73,28 +73,27 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
         bannerId.current = overlays.banners.replace(
           bannerId.current,
           toMountPoint(
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
-              color="warning"
-              iconType="info"
               title={
                 <FormattedMessage
                   id="xpack.ml.notFoundPage.title"
                   defaultMessage="Page Not Found"
                 />
               }
+              text={
+                <p data-test-subj={'mlPageNotFoundBannerText'}>
+                  <FormattedMessage
+                    id="xpack.ml.notFoundPage.bannerText"
+                    defaultMessage="The Machine Learning application doesn't recognize this route: {route}. You've been redirected to the Overview page."
+                    values={{
+                      route: pathname,
+                    }}
+                  />
+                </p>
+              }
               data-test-subj={'mlPageNotFoundBanner'}
-            >
-              <p data-test-subj={'mlPageNotFoundBannerText'}>
-                <FormattedMessage
-                  id="xpack.ml.notFoundPage.bannerText"
-                  defaultMessage="The Machine Learning application doesn't recognize this route: {route}. You've been redirected to the Overview page."
-                  values={{
-                    route: pathname,
-                  }}
-                />
-              </p>
-            </EuiCallOut>,
+            />,
             startServices
           )
         );
