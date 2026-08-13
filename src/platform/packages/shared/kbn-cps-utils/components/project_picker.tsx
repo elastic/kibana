@@ -159,13 +159,19 @@ export const ProjectPickerSkeleton = () => (
   <EuiSkeletonRectangle width={48} height={24} borderRadius="m" />
 );
 
-export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount: number }) => {
+export const DisabledProjectPicker = ({
+  totalProjectCount,
+  customTooltipContent,
+}: {
+  totalProjectCount: number;
+  customTooltipContent?: string;
+}) => {
   const styles = useMemoCss(projectPickerStyles);
   if (totalProjectCount <= 1) {
     return null;
   }
   return (
-    <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
+    <EuiToolTip content={customTooltipContent ?? strings.getProjectPickerDisabledTooltip()}>
       <EuiButtonIcon
         css={styles.disabledButton}
         aria-label={strings.projectPickerButtonAriaLabel}

@@ -51,7 +51,7 @@ export const useCommentsList = ({
       items.push({
         username: '',
         'data-test-subj': 'cases-show-more-user-actions-wrapper',
-        timelineAvatar: 'list',
+        timelineAvatar: 'listBullet',
         timelineAvatarAriaLabel: i18n.SHOW_MORE_ACTIVITIES_ARIA,
         className: 'showMoreActivities',
         verticalAlign: 'center',
