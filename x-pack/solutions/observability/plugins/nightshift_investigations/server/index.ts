@@ -12,4 +12,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new NightshiftInvestigationsPlugin(initializerContext);
 }
 
-export type { NightshiftInvestigationsServerSetup, NightshiftInvestigationsServerStart } from './types';
+export type {
+  NightshiftInvestigationsServerSetup,
+  NightshiftInvestigationsServerStart,
+} from './types';

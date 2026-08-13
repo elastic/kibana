@@ -23,14 +23,18 @@ export const triggerInvestigationStepDefinition = (getClient: GetClient) =>
       concurrency_key: z
         .string()
         .optional()
-        .describe('Caller key for cancel-and-replace concurrency control (maps to concurrencyGroupKey)'),
+        .describe(
+          'Caller key for cancel-and-replace concurrency control (maps to concurrencyGroupKey)'
+        ),
       context: z
         .record(z.unknown())
         .optional()
         .describe('Additional context to pass to the investigation workflow'),
     }),
     outputSchema: z.object({
-      investigation_id: z.string().describe('The workflow execution ID for the started investigation'),
+      investigation_id: z
+        .string()
+        .describe('The workflow execution ID for the started investigation'),
     }),
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
