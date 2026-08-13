@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/ui-callout'
   - '@kbn/app-header'
+  - '@kbn/core-doc-links-browser'
 tags:
   - plugin
   - prod
