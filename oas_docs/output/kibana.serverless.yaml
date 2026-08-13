@@ -10349,25 +10349,24 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/action_policies/suggestions/tags:
+  /api/alerting/v2/action_policies/tags:
     get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/suggestions/tags</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/action_policies/tags</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get suggestions for action policy tags based on an optional search query.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
-      operationId: get-alerting-v2-action-policies-suggestions-tags
+        Get unique tags used across action policies.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+      operationId: get-alerting-v2-action-policies-tags
       parameters:
-        - description: Optional search string used to filter suggested action policy tags.
+        - description: Prefix to filter tags by. Returns all most-used tags when omitted.
           in: query
           name: search
           required: false
           schema:
             maxLength: 256
-            minLength: 1
             type: string
       responses:
         '200':
@@ -10375,17 +10374,25 @@ paths:
             application/json:
               examples:
                 actionPolicyTagsResponse:
-                  summary: Suggested action policy tags
+                  summary: Action policy tags
                   value:
-                    - production
-                    - critical
-                    - hosts
+                    tags:
+                      - production
+                      - critical
+                      - hosts
               schema:
-                description: The list of suggested action policy tags.
-                items:
-                  type: string
-                type: array
-          description: Returns suggested action policy tags.
+                additionalProperties: false
+                description: All unique tags across action policies.
+                type: object
+                properties:
+                  tags:
+                    description: The list of unique tags.
+                    items:
+                      type: string
+                    type: array
+                required:
+                  - tags
+          description: Returns the action policy tags.
         '400':
           content:
             application/json:
@@ -10400,9 +10407,9 @@ paths:
                         properties:
                           search:
                             errors:
-                              - 'Too small: expected string to have >=1 characters'
+                              - 'Too big: expected string to have <=256 characters'
                     error: Bad Request
-                    message: 'search: Too small: expected string to have >=1 characters'
+                    message: 'search: Too big: expected string to have <=256 characters'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -10458,189 +10465,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Get action policy tags suggestions
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/alerting/v2/alerts:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Creates an alert event directly without a backing rule. Intended for external monitoring systems pushing pre-normalized alerts.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              createAlertEventRequest:
-                summary: Create an alert event from Datadog
-                value:
-                  data:
-                    monitor_id: mon-1
-                    rule_name: CPU high
-                  fingerprint: fp-1
-                  severity: high
-                  source: datadog
-                  timestamp: '2026-07-29T12:00:00.000Z'
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                alert_status:
-                  enum:
-                    - active
-                    - inactive
-                    - pending
-                    - recovering
-                  type: string
-                data:
-                  additionalProperties: {}
-                  type: object
-                fingerprint:
-                  maxLength: 1024
-                  minLength: 1
-                  type: string
-                fingerprint_fields:
-                  items:
-                    maxLength: 256
-                    minLength: 1
-                    type: string
-                  maxItems: 10
-                  minItems: 1
-                  type: array
-                rule_id:
-                  maxLength: 150
-                  minLength: 1
-                  type: string
-                severity:
-                  enum:
-                    - info
-                    - low
-                    - medium
-                    - high
-                    - critical
-                  type: string
-                source:
-                  maxLength: 150
-                  minLength: 1
-                  type: string
-                timestamp:
-                  format: date-time
-                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-                  type: string
-              required:
-                - source
-      responses:
-        '201':
-          content:
-            application/json:
-              examples:
-                createAlertEventResponse:
-                  summary: Created alert event identifiers
-                  value:
-                    episode_id: episode-1
-                    group_hash: group-hash-1
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  episode_id:
-                    type: string
-                  group_hash:
-                    type: string
-                required:
-                  - group_hash
-                  - episode_id
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          fingerprint:
-                            errors:
-                              - one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity
-                    error: Bad Request
-                    message: 'fingerprint: one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Create an alert event
+      summary: Get action policy tags
       tags:
         - alerting-v2
       x-state: Experimental
@@ -11831,189 +11656,6 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/alerts/{source}:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/alerts/{source}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Creates an alert event directly without a backing rule. Intended for external monitoring systems pushing pre-normalized alerts.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
-      operationId: post-alerting-v2-alerts-source
-      parameters:
-        - description: A required header to protect against CSRF attacks
-          in: header
-          name: kbn-xsrf
-          required: true
-          schema:
-            example: 'true'
-            type: string
-        - description: The external source system that produced the alert event (for example, "datadog"). Cannot start with "elastic".
-          in: path
-          name: source
-          required: true
-          schema:
-            maxLength: 150
-            minLength: 1
-            type: string
-      requestBody:
-        content:
-          application/json:
-            examples:
-              createAlertEventBySourceRequest:
-                summary: Create an alert event with source in the path
-                value:
-                  data:
-                    monitor_id: mon-1
-                    rule_name: CPU high
-                  fingerprint: fp-1
-                  severity: high
-                  timestamp: '2026-07-29T12:00:00.000Z'
-            schema:
-              additionalProperties: false
-              type: object
-              properties:
-                alert_status:
-                  enum:
-                    - active
-                    - inactive
-                    - pending
-                    - recovering
-                  type: string
-                data:
-                  additionalProperties: {}
-                  type: object
-                fingerprint:
-                  maxLength: 1024
-                  minLength: 1
-                  type: string
-                fingerprint_fields:
-                  items:
-                    maxLength: 256
-                    minLength: 1
-                    type: string
-                  maxItems: 10
-                  minItems: 1
-                  type: array
-                rule_id:
-                  maxLength: 150
-                  minLength: 1
-                  type: string
-                severity:
-                  enum:
-                    - info
-                    - low
-                    - medium
-                    - high
-                    - critical
-                  type: string
-                timestamp:
-                  format: date-time
-                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-                  type: string
-      responses:
-        '201':
-          content:
-            application/json:
-              examples:
-                createAlertEventBySourceResponse:
-                  summary: Created alert event identifiers
-                  value:
-                    episode_id: episode-1
-                    group_hash: group-hash-1
-              schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  episode_id:
-                    type: string
-                  group_hash:
-                    type: string
-                required:
-                  - group_hash
-                  - episode_id
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json:
-              examples:
-                invalidRequest:
-                  summary: Indicates an invalid schema or parameters.
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        errors: []
-                        properties:
-                          fingerprint:
-                            errors:
-                              - one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity
-                    error: Bad Request
-                    message: 'fingerprint: one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity'
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an invalid schema or parameters.
-        '401':
-          content:
-            application/json:
-              examples:
-                unauthorized:
-                  summary: Request was not authenticated
-                  value:
-                    code: UNAUTHORIZED
-                    error: Unauthorized
-                    message: Authentication required to access this API.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the request was not authenticated.
-        '403':
-          content:
-            application/json:
-              examples:
-                forbidden:
-                  summary: Caller lacks required privileges
-                  value:
-                    code: FORBIDDEN
-                    error: Forbidden
-                    message: The current user does not have the required privileges for this request.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the user does not have the required privileges to perform the request.
-        '500':
-          content:
-            application/json:
-              examples:
-                internalServerError:
-                  summary: Unexpected server-side error
-                  value:
-                    code: INTERNAL_SERVER_ERROR
-                    error: Internal Server Error
-                    message: An unexpected error occurred.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates an unexpected server-side error.
-        '503':
-          content:
-            application/json:
-              examples:
-                alertingDisabled:
-                  summary: Alerting engine is disabled
-                  value:
-                    code: ALERTING_DISABLED
-                    error: Service Unavailable
-                    message: Alerting is disabled.
-              schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Create an alert event
-      tags:
-        - alerting-v2
-      x-state: Experimental
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
   /api/alerting/v2/execution_history/action_policies:
     get:
       description: |-
@@ -12108,6 +11750,8 @@ paths:
                       - action_group_count: 1
                         dispatched_at: '2026-01-15T12:05:00.000Z'
                         episode_count: 1
+                        episodes:
+                          - id: episode-1
                         outcome: dispatched
                         policy:
                           id: action-policy-1
@@ -12115,14 +11759,14 @@ paths:
                         rules:
                           - id: rule-1
                             name: Host CPU high
-                        totalRuleCount: 1
+                        total_rule_count: 1
                         workflows:
                           - id: workflow-1
                             name: Notify oncall
                     page: 1
-                    perPage: 20
-                    searchMatches: null
-                    totalEvents: 1
+                    per_page: 20
+                    search_matches: null
+                    total_events: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_policy_execution_history_response'
           description: Returns a paginated list of execution history events.
@@ -12302,7 +11946,7 @@ paths:
                   summary: One successful rule execution
                   value:
                     items:
-                      - endedAt: '2026-01-15T12:00:01.250Z'
+                      - ended_at: '2026-01-15T12:00:01.250Z'
                         error: null
                         id: execution-1
                         outcome: success
@@ -12310,13 +11954,13 @@ paths:
                         rule:
                           id: rule-1
                           version: 3
-                        spaceId: default
-                        startedAt: '2026-01-15T12:00:00.000Z'
+                        space_id: default
+                        started_at: '2026-01-15T12:00:00.000Z'
                         timings:
                           duration: 1250
-                          scheduledDelay: 40
+                          scheduled_delay: 40
                     page: 1
-                    perPage: 20
+                    per_page: 20
                     total: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_executions_response'
@@ -12332,9 +11976,9 @@ paths:
                     details:
                       errors:
                         page:
-                          - page * perPage cannot exceed 10000.
+                          - page * per_page cannot exceed 10000.
                     error: Bad Request
-                    message: page * perPage cannot exceed 10000.
+                    message: page * per_page cannot exceed 10000.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -13270,6 +12914,102 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/alerting/v2/rules/_bulk_update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_bulk_update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Rotates each rule executor task API key to one derived from the current user’s credentials.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+      operationId: post-alerting-v2-rules-bulk-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_by_ids_request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns the result of the bulk update API key operation.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Update the API key of rules in bulk by ID
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/alerting/v2/rules/_delete_by_query:
     post:
       description: |-
@@ -13636,54 +13376,42 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/alerting/v2/rules/_tags:
-    get:
+  /api/alerting/v2/rules/_update_api_key_by_query:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_tags</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/_update_api_key_by_query</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
-      operationId: get-alerting-v2-rules-tags
+        Rotates each matching rule executor task API key to one derived from the current user’s credentials.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+      operationId: post-alerting-v2-rules-update-api-key-by-query
       parameters:
-        - description: The filter to apply when aggregating rule tags.
-          in: query
-          name: filter
-          required: false
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
           schema:
-            maxLength: 1024
+            example: 'true'
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_by_query_request'
       responses:
         '200':
           content:
             application/json:
-              examples:
-                ruleTagsResponse:
-                  summary: Unique tags across matching rules
-                  value:
-                    tags:
-                      - production
-                      - infra
-                      - critical
               schema:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_tags_response'
-          description: Returns the requested rule tags.
+                anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_dry_run_response'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
+          description: Returns a dry-run preview by default, or the executed operation when `force` is true.
         '400':
           content:
             application/json:
-              examples:
-                invalidRequest:
-                  summary: Tags query filter exceeds the maximum length
-                  value:
-                    code: BAD_REQUEST
-                    details:
-                      errors:
-                        filter:
-                          - String must contain at most 1024 character(s)
-                    error: Bad Request
-                    message: 'filter: String must contain at most 1024 character(s)'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -13739,7 +13467,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Get rule tags
+      summary: Update the API key of rules matching a query (dry-run by default)
       tags:
         - alerting-v2
       x-state: Experimental
@@ -15367,6 +15095,128 @@ paths:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
       summary: Get a rule change-history event
+      tags:
+        - alerting-v2
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/alerting/v2/rules/tags:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/v2/rules/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: read_alerting-v2-rules.
+      operationId: get-alerting-v2-rules-tags
+      parameters:
+        - description: Prefix to filter tags by. Returns all most-used tags when omitted.
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+        - description: Restrict tags to rules of the given kind.
+          in: query
+          name: kind
+          required: false
+          schema:
+            enum:
+              - alert
+              - signal
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                ruleTagsResponse:
+                  summary: Unique tags across matching rules
+                  value:
+                    tags:
+                      - production
+                      - infra
+                      - critical
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_tags_response'
+          description: Returns the requested rule tags.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          search:
+                            errors:
+                              - 'Too big: expected string to have <=256 characters'
+                    error: Bad Request
+                    message: 'search: Too big: expected string to have <=256 characters'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an invalid schema or parameters.
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Request was not authenticated
+                  value:
+                    code: UNAUTHORIZED
+                    error: Unauthorized
+                    message: Authentication required to access this API.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the request was not authenticated.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Caller lacks required privileges
+                  value:
+                    code: FORBIDDEN
+                    error: Forbidden
+                    message: The current user does not have the required privileges for this request.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the user does not have the required privileges to perform the request.
+        '500':
+          content:
+            application/json:
+              examples:
+                internalServerError:
+                  summary: Unexpected server-side error
+                  value:
+                    code: INTERNAL_SERVER_ERROR
+                    error: Internal Server Error
+                    message: An unexpected error occurred.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates an unexpected server-side error.
+        '503':
+          content:
+            application/json:
+              examples:
+                alertingDisabled:
+                  summary: Alerting engine is disabled
+                  value:
+                    code: ALERTING_DISABLED
+                    error: Service Unavailable
+                    message: Alerting is disabled.
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
+      summary: Get rule tags
       tags:
         - alerting-v2
       x-state: Experimental
@@ -82035,10 +81885,9 @@ components:
           description: The ISO datetime when the action policy was created.
           type: string
         createdBy:
-          anyOf:
-            - type: string
-            - nullable: true
           description: The user ID who created the action policy.
+          nullable: true
+          type: string
         description:
           description: A description of the action policy.
           type: string
@@ -82051,70 +81900,63 @@ components:
           description: Whether the action policy is enabled.
           type: boolean
         groupBy:
-          anyOf:
-            - items:
-                type: string
-              type: array
-            - nullable: true
           description: The fields used to group alerts, or null for no grouping.
+          items:
+            type: string
+          nullable: true
+          type: array
         groupingMode:
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-            - nullable: true
           description: The grouping mode for alert notifications.
+          nullable: true
         id:
           description: The unique identifier for the action policy.
           type: string
         matcher:
-          anyOf:
-            - type: string
-            - nullable: true
           description: A KQL query to match alerts, or null to match all.
+          nullable: true
+          type: string
         name:
           description: The name of the action policy.
           type: string
         snoozedUntil:
-          anyOf:
-            - type: string
-            - nullable: true
           description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
+          nullable: true
+          type: string
         tags:
-          anyOf:
-            - items:
-                type: string
-              type: array
-            - nullable: true
           description: Tags associated with the action policy.
+          items:
+            type: string
+          nullable: true
+          type: array
         throttle:
-          anyOf:
-            - additionalProperties: false
-              type: object
-              properties:
-                interval:
-                  anyOf:
-                    - type: string
-                    - nullable: true
-                  description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
-                strategy:
-                  description: The throttle strategy.
-                  enum:
-                    - on_status_change
-                    - per_status_interval
-                    - time_interval
-                    - every_time
-                  type: string
-              required:
-                - interval
-            - nullable: true
+          additionalProperties: false
           description: The throttle configuration for notifications.
+          nullable: true
+          type: object
+          properties:
+            interval:
+              description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+              nullable: true
+              type: string
+            strategy:
+              description: The throttle strategy.
+              enum:
+                - on_status_change
+                - per_status_interval
+                - time_interval
+                - every_time
+              type: string
+          required:
+            - interval
         updatedAt:
           description: The ISO datetime when the action policy was last updated.
           type: string
         updatedBy:
-          anyOf:
-            - type: string
-            - nullable: true
           description: The user ID who last updated the action policy.
+          nullable: true
+          type: string
         version:
           description: The version, used for optimistic concurrency control.
           type: string
@@ -82140,10 +81982,9 @@ components:
       type: object
       properties:
         interval:
-          anyOf:
-            - type: string
-            - nullable: true
           description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          nullable: true
+          type: string
         strategy:
           description: The throttle strategy.
           enum:
@@ -82201,11 +82042,10 @@ components:
             - assign
           type: string
         assignee_uid:
-          anyOf:
-            - maxLength: 256
-              type: string
-            - nullable: true
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
+          maxLength: 256
+          nullable: true
+          type: string
         episode_id:
           description: The episode identifier to assign.
           maxLength: 150
@@ -82600,11 +82440,10 @@ components:
       type: object
       properties:
         assignee_uid:
-          anyOf:
-            - maxLength: 256
-              type: string
-            - nullable: true
           description: User profile UID of the assignee, or null to remove the assignee from the episode.
+          maxLength: 256
+          nullable: true
+          type: string
         episode_id:
           description: The episode identifier to assign.
           maxLength: 150
@@ -82629,6 +82468,7 @@ components:
       type: object
       properties:
         artifacts:
+          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -82663,40 +82503,39 @@ components:
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          anyOf:
-            - additionalProperties: false
-              description: Episode state transition thresholds (alert-only).
-              type: object
-              properties:
-                pending_count:
-                  description: Consecutive breaches before transitioning to active.
-                  maximum: 1000
-                  minimum: 0
-                  type: integer
-                pending_operator:
-                  description: How to combine count and timeframe for pending.
-                  enum:
-                    - AND
-                    - OR
-                  type: string
-                pending_timeframe:
-                  description: Time window for pending evaluation, e.g. 5m, 15m.
-                  type: string
-                recovering_count:
-                  description: Consecutive recoveries before transitioning to inactive.
-                  maximum: 1000
-                  minimum: 0
-                  type: integer
-                recovering_operator:
-                  description: How to combine count and timeframe for recovering.
-                  enum:
-                    - AND
-                    - OR
-                  type: string
-                recovering_timeframe:
-                  description: Time window for recovering evaluation, e.g. 5m, 15m.
-                  type: string
-            - nullable: true
+          additionalProperties: false
+          description: Episode state transition thresholds (alert-only).
+          nullable: true
+          type: object
+          properties:
+            pending_count:
+              description: Consecutive breaches before transitioning to active.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            pending_operator:
+              description: How to combine count and timeframe for pending.
+              enum:
+                - AND
+                - OR
+              type: string
+            pending_timeframe:
+              description: Time window for pending evaluation, e.g. 5m, 15m.
+              type: string
+            recovering_count:
+              description: Consecutive recoveries before transitioning to inactive.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            recovering_operator:
+              description: How to combine count and timeframe for recovering.
+              enum:
+                - AND
+                - OR
+              type: string
+            recovering_timeframe:
+              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              type: string
         time_field:
           default: '@timestamp'
           description: Time field used for the lookback window range filter.
@@ -82756,6 +82595,32 @@ components:
           type: string
         episode_count:
           type: number
+        episodes:
+          description: Episode ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `episode_count` for the true total.
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+          maxItems: 50
+          type: array
+        error:
+          additionalProperties: false
+          type: object
+          properties:
+            message:
+              type: string
+          required:
+            - message
+        failure_reason:
+          enum:
+            - missing_api_key
+            - workflow_not_found
+            - workflow_disabled
+            - schedule_error
+          type: string
         outcome:
           enum:
             - dispatched
@@ -82769,27 +82634,25 @@ components:
             id:
               type: string
             name:
-              anyOf:
-                - type: string
-                - nullable: true
+              nullable: true
+              type: string
           required:
             - id
         rules:
-          description: Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `totalRuleCount` for the full count.
+          description: Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `total_rule_count` for the full count.
           items:
             type: object
             properties:
               id:
                 type: string
               name:
-                anyOf:
-                  - type: string
-                  - nullable: true
+                nullable: true
+                type: string
             required:
               - id
           maxItems: 20
           type: array
-        totalRuleCount:
+        total_rule_count:
           description: Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.
           type: number
         workflows:
@@ -82799,9 +82662,8 @@ components:
               id:
                 type: string
               name:
-                anyOf:
-                  - type: string
-                  - nullable: true
+                nullable: true
+                type: string
             required:
               - id
           maxItems: 100
@@ -82813,7 +82675,7 @@ components:
         - episode_count
         - action_group_count
         - rules
-        - totalRuleCount
+        - total_rule_count
         - workflows
     Kibana_HTTP_APIs_alerting_policy_execution_history_response:
       additionalProperties: false
@@ -82827,44 +82689,47 @@ components:
           maximum: 9007199254740991
           minimum: 1
           type: integer
-        perPage:
+        per_page:
           maximum: 9007199254740991
           minimum: 0
           type: integer
-        searchMatches:
-          anyOf:
-            - additionalProperties: false
-              type: object
-              properties:
-                cap:
-                  description: Maximum number of policy/rule ids the server uses as a filter.
-                  type: number
-                policies:
-                  description: Total policies matching the search.
-                  type: number
-                rules:
-                  description: Total rules matching the search.
-                  type: number
-              required:
-                - policies
-                - rules
-                - cap
-            - nullable: true
+        search_matches:
+          additionalProperties: false
           description: Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.
-        totalEvents:
+          nullable: true
+          type: object
+          properties:
+            cap:
+              description: Maximum number of policy/rule ids the server uses as a filter.
+              type: number
+            policies:
+              description: Total policies matching the search.
+              type: number
+            rules:
+              description: Total rules matching the search.
+              type: number
+          required:
+            - policies
+            - rules
+            - cap
+        total_events:
           maximum: 9007199254740991
           minimum: 0
           type: integer
       required:
         - items
         - page
-        - perPage
-        - totalEvents
-        - searchMatches
+        - per_page
+        - total_events
+        - search_matches
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
       type: object
       properties:
+        data:
+          additionalProperties: {}
+          description: Structured artifact data.
+          type: object
         id:
           description: Artifact identifier.
           maxLength: 256
@@ -82875,36 +82740,29 @@ components:
           maxLength: 128
           minLength: 1
           type: string
-        value:
-          description: Artifact value.
-          maxLength: 50000
-          minLength: 1
-          type: string
       required:
         - id
         - type
-        - value
+        - data
     Kibana_HTTP_APIs_alerting_rule_execution:
       additionalProperties: false
       type: object
       properties:
-        endedAt:
+        ended_at:
           type: string
         error:
-          anyOf:
-            - additionalProperties: false
-              type: object
-              properties:
-                message:
-                  type: string
-                stackTrace:
-                  anyOf:
-                    - type: string
-                    - nullable: true
-              required:
-                - message
-                - stackTrace
-            - nullable: true
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            message:
+              type: string
+            stack_trace:
+              nullable: true
+              type: string
+          required:
+            - message
+            - stack_trace
         id:
           type: string
         outcome:
@@ -82913,9 +82771,8 @@ components:
             - failure
           type: string
         reason:
-          anyOf:
-            - type: string
-            - nullable: true
+          nullable: true
+          type: string
         rule:
           additionalProperties: false
           type: object
@@ -82923,17 +82780,16 @@ components:
             id:
               type: string
             version:
-              anyOf:
-                - maximum: 9007199254740991
-                  minimum: -9007199254740991
-                  type: integer
-                - nullable: true
+              maximum: 9007199254740991
+              minimum: -9007199254740991
+              nullable: true
+              type: integer
           required:
             - id
             - version
-        spaceId:
+        space_id:
           type: string
-        startedAt:
+        started_at:
           type: string
         timings:
           additionalProperties: false
@@ -82943,19 +82799,19 @@ components:
               maximum: 9007199254740991
               minimum: 0
               type: integer
-            scheduledDelay:
+            scheduled_delay:
               maximum: 9007199254740991
               minimum: -9007199254740991
               type: integer
           required:
             - duration
-            - scheduledDelay
+            - scheduled_delay
       required:
         - id
         - rule
-        - spaceId
-        - startedAt
-        - endedAt
+        - space_id
+        - started_at
+        - ended_at
         - timings
         - outcome
         - reason
@@ -82972,7 +82828,7 @@ components:
           maximum: 9007199254740991
           minimum: 1
           type: integer
-        perPage:
+        per_page:
           maximum: 9007199254740991
           minimum: 1
           type: integer
@@ -82984,7 +82840,7 @@ components:
         - items
         - total
         - page
-        - perPage
+        - per_page
     Kibana_HTTP_APIs_alerting_rule_grouping:
       additionalProperties: false
       description: Grouping configuration.
@@ -83072,6 +82928,7 @@ components:
       type: object
       properties:
         artifacts:
+          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -83080,10 +82937,9 @@ components:
           description: ISO timestamp when the rule was created.
           type: string
         createdBy:
-          anyOf:
-            - type: string
-            - nullable: true
           description: User who created the rule.
+          nullable: true
+          type: string
         enabled:
           description: Whether the rule is enabled.
           type: boolean
@@ -83099,43 +82955,7 @@ components:
             - signal
           type: string
         metadata:
-          additionalProperties: false
-          type: object
-          properties:
-            builder_type:
-              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
-              maxLength: 64
-              type: string
-            description:
-              description: Human-readable description of the rule.
-              maxLength: 1024
-              type: string
-            name:
-              description: Rule name (must be unique within the space).
-              maxLength: 256
-              minLength: 1
-              type: string
-            owner:
-              description: Owner of the rule.
-              maxLength: 256
-              type: string
-            tags:
-              description: Tags for categorization, e.g. ["production", "infra"].
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              type: array
-            version:
-              description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
-              maximum: 9007199254740991
-              minimum: 1
-              type: integer
-          required:
-            - name
-            - version
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
         no_data_strategy:
           description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
           enum:
@@ -83156,40 +82976,39 @@ components:
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          anyOf:
-            - additionalProperties: false
-              description: Episode state transition thresholds (alert-only).
-              type: object
-              properties:
-                pending_count:
-                  description: Consecutive breaches before transitioning to active.
-                  maximum: 1000
-                  minimum: 0
-                  type: integer
-                pending_operator:
-                  description: How to combine count and timeframe for pending.
-                  enum:
-                    - AND
-                    - OR
-                  type: string
-                pending_timeframe:
-                  description: Time window for pending evaluation, e.g. 5m, 15m.
-                  type: string
-                recovering_count:
-                  description: Consecutive recoveries before transitioning to inactive.
-                  maximum: 1000
-                  minimum: 0
-                  type: integer
-                recovering_operator:
-                  description: How to combine count and timeframe for recovering.
-                  enum:
-                    - AND
-                    - OR
-                  type: string
-                recovering_timeframe:
-                  description: Time window for recovering evaluation, e.g. 5m, 15m.
-                  type: string
-            - nullable: true
+          additionalProperties: false
+          description: Episode state transition thresholds (alert-only).
+          nullable: true
+          type: object
+          properties:
+            pending_count:
+              description: Consecutive breaches before transitioning to active.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            pending_operator:
+              description: How to combine count and timeframe for pending.
+              enum:
+                - AND
+                - OR
+              type: string
+            pending_timeframe:
+              description: Time window for pending evaluation, e.g. 5m, 15m.
+              type: string
+            recovering_count:
+              description: Consecutive recoveries before transitioning to inactive.
+              maximum: 1000
+              minimum: 0
+              type: integer
+            recovering_operator:
+              description: How to combine count and timeframe for recovering.
+              enum:
+                - AND
+                - OR
+              type: string
+            recovering_timeframe:
+              description: Time window for recovering evaluation, e.g. 5m, 15m.
+              type: string
         time_field:
           default: '@timestamp'
           description: Time field used for the lookback window range filter.
@@ -83200,10 +83019,9 @@ components:
           description: ISO timestamp when the rule was last updated.
           type: string
         updatedBy:
-          anyOf:
-            - type: string
-            - nullable: true
           description: User who last updated the rule.
+          nullable: true
+          type: string
         version:
           description: The saved object version token of the rule, used for optimistic concurrency control.
           type: string
@@ -83218,6 +83036,44 @@ components:
         - createdAt
         - updatedBy
         - updatedAt
+    Kibana_HTTP_APIs_alerting_rule_response_metadata:
+      additionalProperties: false
+      type: object
+      properties:
+        builder_type:
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          maxLength: 64
+          type: string
+        description:
+          description: Human-readable description of the rule.
+          maxLength: 1024
+          type: string
+        name:
+          description: Rule name (must be unique within the space).
+          maxLength: 256
+          minLength: 1
+          type: string
+        owner:
+          description: Owner of the rule.
+          maxLength: 256
+          type: string
+        tags:
+          description: Tags for categorization, e.g. ["production", "infra"].
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          type: array
+        version:
+          description: Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.
+          maximum: 9007199254740991
+          minimum: 1
+          type: integer
+      required:
+        - name
+        - version
     Kibana_HTTP_APIs_alerting_rule_schedule:
       additionalProperties: false
       description: Execution schedule configuration.
@@ -83237,7 +83093,7 @@ components:
       type: object
       properties:
         tags:
-          description: The list of unique rule tags.
+          description: The list of unique tags.
           items:
             type: string
           type: array
@@ -83382,46 +83238,43 @@ components:
           minItems: 1
           type: array
         groupBy:
-          anyOf:
-            - items:
-                maxLength: 256
-                minLength: 1
-                type: string
-              maxItems: 16
-              type: array
-            - nullable: true
           description: The fields used to group alerts.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          nullable: true
+          type: array
         groupingMode:
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-            - nullable: true
           description: The grouping mode for alert notifications.
+          nullable: true
         matcher:
-          anyOf:
-            - maxLength: 4096
-              type: string
-            - nullable: true
           description: A KQL query string to match alerts.
+          maxLength: 4096
+          nullable: true
+          type: string
         name:
           description: The name of the action policy.
           maxLength: 256
           minLength: 1
           type: string
         tags:
-          anyOf:
-            - items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              type: array
-            - nullable: true
           description: Tags for categorizing the action policy.
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          nullable: true
+          type: array
         throttle:
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-            - nullable: true
           description: The throttle configuration for notifications.
+          nullable: true
         version:
           description: The current version of the action policy, used for optimistic concurrency control.
           maxLength: 256
@@ -83434,25 +83287,24 @@ components:
       type: object
       properties:
         artifacts:
-          anyOf:
-            - items:
-                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
-              maxItems: 100
-              type: array
-            - nullable: true
+          description: 'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
+          maxItems: 100
+          nullable: true
+          type: array
         grouping:
-          anyOf:
+          allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
-            - nullable: true
+          nullable: true
         metadata:
           additionalProperties: false
           type: object
           properties:
             builder_type:
-              anyOf:
-                - maxLength: 64
-                  type: string
-                - nullable: true
+              maxLength: 64
+              nullable: true
+              type: string
             description:
               description: Human-readable description of the rule.
               maxLength: 1024
@@ -83476,73 +83328,69 @@ components:
               minItems: 1
               type: array
         no_data_strategy:
-          anyOf:
-            - enum:
-                - last_known_status
-                - emit
-                - recover
-                - none
-              type: string
-            - nullable: true
+          enum:
+            - last_known_status
+            - emit
+            - recover
+            - none
+          nullable: true
+          type: string
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
-          anyOf:
-            - enum:
-                - no_breach
-                - query
-                - none
-              type: string
-            - nullable: true
+          enum:
+            - no_breach
+            - query
+            - none
+          nullable: true
+          type: string
         schedule:
-          anyOf:
-            - additionalProperties: false
-              type: object
-              properties:
-                every:
-                  description: Execution interval, e.g. 1m, 5m, 1h.
-                  type: string
-                lookback:
-                  description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
-                  type: string
-            - nullable: true
+          additionalProperties: false
+          nullable: true
+          type: object
+          properties:
+            every:
+              description: Execution interval, e.g. 1m, 5m, 1h.
+              type: string
+            lookback:
+              description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+              type: string
         state_transition:
           anyOf:
-            - anyOf:
-                - additionalProperties: false
-                  description: Episode state transition thresholds (alert-only).
-                  type: object
-                  properties:
-                    pending_count:
-                      description: Consecutive breaches before transitioning to active.
-                      maximum: 1000
-                      minimum: 0
-                      type: integer
-                    pending_operator:
-                      description: How to combine count and timeframe for pending.
-                      enum:
-                        - AND
-                        - OR
-                      type: string
-                    pending_timeframe:
-                      description: Time window for pending evaluation, e.g. 5m, 15m.
-                      type: string
-                    recovering_count:
-                      description: Consecutive recoveries before transitioning to inactive.
-                      maximum: 1000
-                      minimum: 0
-                      type: integer
-                    recovering_operator:
-                      description: How to combine count and timeframe for recovering.
-                      enum:
-                        - AND
-                        - OR
-                      type: string
-                    recovering_timeframe:
-                      description: Time window for recovering evaluation, e.g. 5m, 15m.
-                      type: string
-                - nullable: true
+            - additionalProperties: false
+              description: Episode state transition thresholds (alert-only).
+              type: object
+              properties:
+                pending_count:
+                  description: Consecutive breaches before transitioning to active.
+                  maximum: 1000
+                  minimum: 0
+                  type: integer
+                pending_operator:
+                  description: How to combine count and timeframe for pending.
+                  enum:
+                    - AND
+                    - OR
+                  type: string
+                pending_timeframe:
+                  description: Time window for pending evaluation, e.g. 5m, 15m.
+                  type: string
+                recovering_count:
+                  description: Consecutive recoveries before transitioning to inactive.
+                  maximum: 1000
+                  minimum: 0
+                  type: integer
+                recovering_operator:
+                  description: How to combine count and timeframe for recovering.
+                  enum:
+                    - AND
+                    - OR
+                  type: string
+                recovering_timeframe:
+                  description: Time window for recovering evaluation, e.g. 5m, 15m.
+                  type: string
             - nullable: true
+          nullable: true
         time_field:
           maxLength: 128
           minLength: 1
