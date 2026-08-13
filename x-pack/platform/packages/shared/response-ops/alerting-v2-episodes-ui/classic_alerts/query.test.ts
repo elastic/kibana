@@ -9,8 +9,6 @@ import {
   buildClassicAlertsQuery,
   buildClassicAlertsSort,
   buildClassicAlertsKpiAggs,
-  resolveV1BreakdownField,
-  normalizeV1StatusValue,
 } from './query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 
@@ -140,40 +138,6 @@ describe('buildClassicAlertsSort', () => {
   it('falls back to @timestamp for unknown fields', () => {
     const sort = buildClassicAlertsSort({ sortField: 'unknown_field', sortDirection: 'asc' });
     expect(sort).toEqual([{ '@timestamp': { order: 'asc', unmapped_type: 'keyword' } }]);
-  });
-});
-
-describe('resolveV1BreakdownField', () => {
-  it('maps episode.status to kibana.alert.status', () => {
-    expect(resolveV1BreakdownField('episode.status')).toBe('kibana.alert.status');
-  });
-
-  it('maps rule.id to kibana.alert.rule.uuid', () => {
-    expect(resolveV1BreakdownField('rule.id')).toBe('kibana.alert.rule.uuid');
-  });
-
-  it('returns undefined for fields with no v1 equivalent', () => {
-    expect(resolveV1BreakdownField('last_ack_action')).toBeUndefined();
-    expect(resolveV1BreakdownField('last_assignee_uid')).toBeUndefined();
-    expect(resolveV1BreakdownField('unknown_field')).toBeUndefined();
-  });
-});
-
-describe('normalizeV1StatusValue', () => {
-  it('maps active to active', () => {
-    expect(normalizeV1StatusValue('active')).toBe('active');
-  });
-
-  it('maps recovered to inactive', () => {
-    expect(normalizeV1StatusValue('recovered')).toBe('inactive');
-  });
-
-  it('maps untracked to inactive', () => {
-    expect(normalizeV1StatusValue('untracked')).toBe('inactive');
-  });
-
-  it('maps unknown values to inactive', () => {
-    expect(normalizeV1StatusValue('delayed')).toBe('inactive');
   });
 });
 

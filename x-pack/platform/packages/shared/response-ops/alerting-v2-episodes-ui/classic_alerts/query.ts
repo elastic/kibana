@@ -9,11 +9,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import dateMath from '@kbn/datemath';
 import {
   ALERT_DURATION,
-  ALERT_END,
   ALERT_RULE_TAGS,
   ALERT_RULE_UUID,
   ALERT_SEVERITY,
-  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_DELAYED,
@@ -24,7 +22,6 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { TimeBucket } from '../utils/histogram_utils';
 import type { EpisodesFilterState, EpisodesSortState } from '../queries/episodes_query';
 import {
   EPISODE_SEVERITY_CHART_VALUE,
@@ -235,51 +232,3 @@ export const buildClassicAlertsTagsAggs = (
     terms: { field: ALERT_RULE_TAGS, size },
   },
 });
-
-const CLASSIC_BREAKDOWN_FIELD_MAP: Readonly<Record<string, string | undefined>> = {
-  'episode.status': ALERT_STATUS,
-  'rule.id': ALERT_RULE_UUID,
-  last_ack_action: undefined,
-  last_assignee_uid: undefined,
-};
-
-export const resolveV1BreakdownField = (v2Field: string): string | undefined =>
-  CLASSIC_BREAKDOWN_FIELD_MAP[v2Field];
-
-export const normalizeV1StatusValue = (value: string): string =>
-  value === ALERT_STATUS_ACTIVE ? ALERT_EPISODE_STATUS.ACTIVE : ALERT_EPISODE_STATUS.INACTIVE;
-
-const BREAKDOWN_TERMS_SIZE = 50;
-
-export const buildClassicAlertsHistogramAggs = (
-  buckets: TimeBucket[],
-  breakdownField?: string
-): Record<string, estypes.AggregationsAggregationContainer> =>
-  Object.fromEntries(
-    buckets.map(({ start, end }, i) => [
-      `bucket_${i}`,
-      {
-        filter: {
-          bool: {
-            filter: [
-              { range: { [ALERT_START]: { lte: new Date(end).toISOString() } } },
-              {
-                bool: {
-                  should: [
-                    { range: { [ALERT_END]: { gte: new Date(start).toISOString() } } },
-                    { bool: { must_not: [{ exists: { field: ALERT_END } }] } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-          },
-        },
-        ...(breakdownField
-          ? {
-              aggs: { breakdown: { terms: { field: breakdownField, size: BREAKDOWN_TERMS_SIZE } } },
-            }
-          : {}),
-      } as estypes.AggregationsAggregationContainer,
-    ])
-  );

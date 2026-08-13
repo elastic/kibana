@@ -15,24 +15,24 @@ import type {
   EpisodesFilterState,
   EpisodesSortState,
 } from '../queries/episodes_query';
-import type { HistogramBucketCount, TimeBucket } from '../utils/histogram_utils';
+import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 import {
-  buildClassicAlertsHistogramAggs,
   buildClassicAlertsKpiAggs,
   buildClassicAlertsQuery,
   buildClassicAlertsSort,
   buildClassicAlertsTagsAggs,
-  normalizeV1StatusValue,
-  resolveV1BreakdownField,
   type ClassicAlertsTimeRange,
 } from '../classic_alerts/query';
 import {
   type ClassicAlertSource,
   mapClassicAlertToEpisode,
+  mapClassicAlertToHistogramRow,
   CLASSIC_ALERT_EPISODE_SOURCE_FIELDS,
+  CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
 } from '../classic_alerts/map_alert';
 import {
   CLASSIC_ALERTS_INDEX,
+  CLASSIC_ALERTS_HISTOGRAM_LIMIT,
   CLASSIC_ALERTS_LIST_PAGE_SIZE,
   CLASSIC_ALERTS_TAGS_LIMIT,
 } from '../classic_alerts/constants';
@@ -195,76 +195,40 @@ export interface FetchV1AlertsHistogramOptions {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   breakdownField?: string;
-  buckets: TimeBucket[];
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
 
-interface ClassicHistogramBucketAgg {
-  doc_count: number;
-  breakdown?: { buckets: Array<{ key: string | number; doc_count: number }> };
-}
-
+/** Returns classic (v1) alert histogram rows (RBAC enforced by the RAC alerts API). */
 export const fetchV1AlertsHistogram = async ({
   timeRange,
   filterState,
   breakdownField,
-  buckets,
   abortSignal,
   services: { http },
-}: FetchV1AlertsHistogramOptions): Promise<HistogramBucketCount[]> => {
-  if (buckets.length === 0) return [];
-
-  const v1BreakdownField = breakdownField ? resolveV1BreakdownField(breakdownField) : undefined;
-  if (breakdownField && !v1BreakdownField) return [];
-  const isStatusBreakdown = breakdownField === 'episode.status';
-
-  const response = await findClassicAlerts<Record<string, ClassicHistogramBucketAgg>>(
+}: FetchV1AlertsHistogramOptions): Promise<HistogramEpisodeRow[]> => {
+  const response = await findClassicAlerts(
     http,
     {
       index: CLASSIC_ALERTS_INDEX,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
-      aggs: buildClassicAlertsHistogramAggs(buckets, v1BreakdownField),
-      size: 0,
+      size: CLASSIC_ALERTS_HISTOGRAM_LIMIT,
       track_total_hits: false,
-      _source: false,
+      _source: [...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS],
     },
     abortSignal
   );
 
-  const rawCounts: HistogramBucketCount[] = buckets.flatMap(({ start }, i) => {
-    const agg = response.aggregations?.[`bucket_${i}`];
-    if (!agg) return [];
-
-    if (!v1BreakdownField) {
-      return [{ bucketStart: start, count: agg.doc_count }];
-    }
-
-    return (agg.breakdown?.buckets ?? []).map((b) => ({
-      bucketStart: start,
-      count: b.doc_count,
-      breakdown: String(b.key),
-    }));
-  });
-
-  if (!isStatusBreakdown) {
-    return rawCounts;
-  }
-
-  const merged = new Map<string, HistogramBucketCount>();
-  for (const entry of rawCounts) {
-    const normalizedBreakdown = entry.breakdown
-      ? normalizeV1StatusValue(entry.breakdown)
-      : entry.breakdown;
-    const key = `${entry.bucketStart}::${normalizedBreakdown}`;
-    const existing = merged.get(key);
-    if (existing) {
-      existing.count += entry.count;
-    } else {
-      merged.set(key, { ...entry, breakdown: normalizedBreakdown });
-    }
-  }
-  return [...merged.values()];
+  return response.hits.hits.flatMap((hit) =>
+    hit._source
+      ? [
+          mapClassicAlertToHistogramRow(
+            hit._source as unknown as ClassicAlertSource,
+            breakdownField
+          ),
+        ]
+      : []
+  );
 };
 
 export interface FetchV1AlertsTagsOptions {

@@ -26,4 +26,6 @@ export {
 
 /** Max classic alerts returned per list request. Mirrors the v2 list limit. */
 export const CLASSIC_ALERTS_LIST_PAGE_SIZE = 1000;
+/** Max classic alerts fetched for histogram overlap counting. Mirrors the v2 histogram limit. */
+export const CLASSIC_ALERTS_HISTOGRAM_LIMIT = 10_000;
 export const CLASSIC_ALERTS_TAGS_LIMIT = 500;

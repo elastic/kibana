@@ -14,7 +14,7 @@ import {
   fetchV1AlertById,
 } from './classic_alerts_api';
 import { CLASSIC_ALERT_EPISODE_SOURCE_FIELDS } from '../classic_alerts/map_alert';
-import type { TimeBucket } from '../utils/histogram_utils';
+import { CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS } from '../classic_alerts/map_alert';
 
 const mockHttp = httpServiceMock.createStartContract();
 
@@ -107,120 +107,54 @@ describe('classic_alerts_api', () => {
   });
 
   describe('fetchV1AlertsHistogram', () => {
-    const buckets: TimeBucket[] = [
-      {
-        start: new Date('2024-01-01T00:00:00.000Z').getTime(),
-        end: new Date('2024-01-01T01:00:00.000Z').getTime(),
-      },
-      {
-        start: new Date('2024-01-01T01:00:00.000Z').getTime(),
-        end: new Date('2024-01-01T02:00:00.000Z').getTime(),
-      },
-    ];
-
-    it('uses server-side filter aggregations and returns pre-computed bucket counts', async () => {
+    it('fetches alert documents and requests the histogram source projection', async () => {
       mockHttp.post.mockResolvedValue({
-        hits: { hits: [] },
-        aggregations: {
-          bucket_0: { doc_count: 3 },
-          bucket_1: { doc_count: 1 },
+        hits: {
+          hits: [
+            makeHit({
+              'kibana.alert.uuid': 'uuid-1',
+              '@timestamp': '2024-01-01T00:00:00.000Z',
+              'kibana.alert.start': '2024-01-01T00:00:00.000Z',
+              'kibana.alert.end': '2024-01-01T01:00:00.000Z',
+              'kibana.alert.status': 'active',
+            }),
+          ],
         },
       });
 
-      const counts = await fetchV1AlertsHistogram({ services: { http: mockHttp }, buckets });
+      const rows = await fetchV1AlertsHistogram({ services: { http: mockHttp } });
 
       const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
       const body = JSON.parse(callOptions.body);
-      expect(body.size).toBe(0);
-      expect(body._source).toBe(false);
-      expect(body.aggs).toHaveProperty('bucket_0');
-      expect(body.aggs).toHaveProperty('bucket_1');
-      expect(counts).toEqual([
-        { bucketStart: buckets[0].start, count: 3 },
-        { bucketStart: buckets[1].start, count: 1 },
-      ]);
+      expect(body._source).toEqual([...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS]);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({
+        first_timestamp: '2024-01-01T00:00:00.000Z',
+        last_timestamp: '2024-01-01T01:00:00.000Z',
+        'episode.status': 'active',
+      });
     });
 
-    it('maps episode.status breakdown to kibana.alert.status and normalizes values', async () => {
+    it('passes breakdownField to the row mapper', async () => {
       mockHttp.post.mockResolvedValue({
-        hits: { hits: [] },
-        aggregations: {
-          bucket_0: {
-            doc_count: 5,
-            breakdown: {
-              buckets: [
-                { key: 'active', doc_count: 2 },
-                { key: 'recovered', doc_count: 2 },
-                { key: 'untracked', doc_count: 1 },
-              ],
-            },
-          },
-          bucket_1: { doc_count: 0, breakdown: { buckets: [] } },
+        hits: {
+          hits: [
+            makeHit({
+              'kibana.alert.uuid': 'uuid-1',
+              '@timestamp': '2024-01-01T00:00:00.000Z',
+              'kibana.alert.rule.uuid': 'rule-abc',
+              'kibana.alert.status': 'active',
+            }),
+          ],
         },
       });
 
-      const counts = await fetchV1AlertsHistogram({
+      const rows = await fetchV1AlertsHistogram({
         services: { http: mockHttp },
-        buckets,
-        breakdownField: 'episode.status',
-      });
-
-      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
-      const body = JSON.parse(callOptions.body);
-      expect(body.aggs.bucket_0.aggs.breakdown.terms.field).toBe('kibana.alert.status');
-      expect(counts).toEqual([
-        { bucketStart: buckets[0].start, count: 2, breakdown: 'active' },
-        { bucketStart: buckets[0].start, count: 3, breakdown: 'inactive' },
-      ]);
-    });
-
-    it('maps rule.id breakdown to kibana.alert.rule.uuid without value normalization', async () => {
-      mockHttp.post.mockResolvedValue({
-        hits: { hits: [] },
-        aggregations: {
-          bucket_0: {
-            doc_count: 4,
-            breakdown: {
-              buckets: [
-                { key: 'rule-aaa', doc_count: 3 },
-                { key: 'rule-bbb', doc_count: 1 },
-              ],
-            },
-          },
-          bucket_1: { doc_count: 0, breakdown: { buckets: [] } },
-        },
-      });
-
-      const counts = await fetchV1AlertsHistogram({
-        services: { http: mockHttp },
-        buckets,
         breakdownField: 'rule.id',
       });
 
-      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
-      const body = JSON.parse(callOptions.body);
-      expect(body.aggs.bucket_0.aggs.breakdown.terms.field).toBe('kibana.alert.rule.uuid');
-      expect(counts).toEqual([
-        { bucketStart: buckets[0].start, count: 3, breakdown: 'rule-aaa' },
-        { bucketStart: buckets[0].start, count: 1, breakdown: 'rule-bbb' },
-      ]);
-    });
-
-    it('returns empty array for breakdown fields with no v1 equivalent', async () => {
-      const counts = await fetchV1AlertsHistogram({
-        services: { http: mockHttp },
-        buckets,
-        breakdownField: 'last_ack_action',
-      });
-
-      expect(mockHttp.post).not.toHaveBeenCalled();
-      expect(counts).toEqual([]);
-    });
-
-    it('returns empty array when no buckets are provided', async () => {
-      const counts = await fetchV1AlertsHistogram({ services: { http: mockHttp }, buckets: [] });
-      expect(counts).toEqual([]);
-      expect(mockHttp.post).not.toHaveBeenCalled();
+      expect(rows[0]['rule.id']).toBe('rule-abc');
     });
   });
 
