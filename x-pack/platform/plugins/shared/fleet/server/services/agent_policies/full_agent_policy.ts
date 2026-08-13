@@ -42,9 +42,8 @@ import {
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
-  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
 } from '../../../common/constants';
+import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -344,6 +343,8 @@ export async function getFullAgentPolicy(
     cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
+  const isManagedBulkOutput = createManagedBulkOutputMatcher(appContextService.getConfig());
+
   // Only add permissions if output.type is "elasticsearch"
   fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
     NonNullable<FullAgentPolicy['output_permissions']>
@@ -353,10 +354,9 @@ export async function getFullAgentPolicy(
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
-      if (
-        outputId === ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID ||
-        outputId === SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID
-      ) {
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
+      if (originalOutput && isManagedBulkOutput(originalOutput)) {
         outputPermissions[outputId] = {
           _managed_bulk_apm: {
             applications: [
@@ -380,7 +380,6 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
       if (originalOutput?.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {

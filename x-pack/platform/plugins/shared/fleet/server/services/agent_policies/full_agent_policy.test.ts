@@ -1697,6 +1697,18 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should emit only the apm applications block for the ECH managed bulk output', async () => {
+    // Stub cloud so isManagedBulkEnabled() + getManagedBulkEndpoint() resolve the ECH endpoint.
+    // The persisted host has an explicit port (normalizeHostsForAgents adds :443); the matcher
+    // compares on hostname only, so 'managed-otlp.example.invalid/_es' matches ':443/_es'. ✓
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+
     const bulkOutput = {
       id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
       is_default: false,
@@ -1741,7 +1753,26 @@ describe('getFullAgentPolicy', () => {
     ).not.toHaveProperty('indices');
   });
 
-  it('should emit only the apm applications block for the serverless managed bulk output', async () => {
+  it('should emit only the apm applications block for the serverless managed bulk output, matched via the config-injected endpoint', async () => {
+    // Stub config so the serverless bulk output (injected via xpack.fleet.outputs by
+    // project-controller) appears in getPreconfiguredOutputFromConfig and its hostname is
+    // added to the matcher's set. No cloud stub needed — the serverless path is config-only.
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      outputs: [
+        {
+          id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+          name: 'Bulk output for managed integrations (serverless)',
+          type: 'elasticsearch' as const,
+          hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+          is_default: false,
+          is_default_monitoring: false,
+          is_preconfigured: true,
+        },
+      ],
+    } as any);
+
     const bulkOutput = {
       id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
       is_default: false,
