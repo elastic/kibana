@@ -101,33 +101,6 @@ Do **not** use this skill for:
 
 ---
 
-## When to Load References
-
-### Rule Kind
-When the user asks whether a rule should notify, be observation-only, or about the difference between alert and signal, consult the [rule-kind reference](./references/rule-kind.md).
-
-### Episode Lifecycle
-When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
-
-### Severity
-When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
-
-### Recovery Strategy
-When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery_strategy\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
-
-### No-Data Strategy
-When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
-
-### Rule Schema
-When composing or validating and a field is not in the operations tables (e.g. \`time_field\`, \`artifacts\`, nested query objects), consult the [rule-schema reference](./references/rule-schema.md).
-
-### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md) (includes **Notifications Require Alert Kind**). Do not compose action policies from this skill — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill after the rule is \`kind: alert\`.
-
----
-
-# Part 1: Rules
-
 ## Rule Discovery
 
 When a user asks about existing rules:
@@ -221,6 +194,31 @@ After composing a complete **alert** rule (has name, query, schedule, and \`kind
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
 If the rule's kind is \`signal\`, follow **Notifications Require Alert Kind** in the [notifications-overview reference](./references/notifications-overview.md) before proceeding.
 
-If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup (see [notifications-overview reference](./references/notifications-overview.md)). Do **not** compose action policies or notification workflows from this skill.`,
+If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup (see [notifications-overview reference](./references/notifications-overview.md)). Do **not** compose action policies or notification workflows from this skill.
+
+---
+
+## When to Load References
+
+### Rule Kind
+When the user asks whether a rule should notify, be observation-only, or about the difference between alert and signal, consult the [rule-kind reference](./references/rule-kind.md).
+
+### Episode Lifecycle
+When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+
+### Severity
+When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
+
+### Recovery Strategy
+When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery_strategy\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
+
+### No-Data Strategy
+When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
+
+### Rule Schema
+When composing or validating and a field is not in the operations tables (e.g. \`time_field\`, \`artifacts\`, nested query objects), consult the [rule-schema reference](./references/rule-schema.md).
+
+### Notifications
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md) (includes **Notifications Require Alert Kind**). Do not compose action policies from this skill — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill after the rule is \`kind: alert\`.`,
     getInlineTools: () => [manageRuleTool(deps)],
   });

@@ -218,7 +218,11 @@ function formatVariantSchemas(jsonSchema: unknown): string {
 
     const fields = jsonSchemaToFieldTable(variant);
     if (fields.length > 0) {
-      sections.push(`#### ${label}\n\n${formatFieldTable(fields)}`);
+      const description =
+        typeof variant.description === 'string' && variant.description.trim().length > 0
+          ? `${variant.description}\n\n`
+          : '';
+      sections.push(`#### ${label}\n\n${description}${formatFieldTable(fields)}`);
     }
   }
   return sections.join('\n\n');
@@ -280,9 +284,18 @@ export const generateOperationsDoc = ({
   title: string;
   schema: z.ZodType;
 }): string => {
-  const variants = formatVariantSchemas(zodToJsonSchema(schema));
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined;
+  const missing = (variants ?? []).filter(
+    (variant) => typeof variant.description !== 'string' || variant.description.trim().length === 0
+  );
+  if (missing.length > 0) {
+    throw new SchemaTranslationError(
+      `${title}: operation variant(s) missing .describe() — add one explaining the field being operated on`
+    );
+  }
 
-  return [`# ${title}`, '', variants].join('\n');
+  return [`# ${title}`, '', formatVariantSchemas(jsonSchema)].join('\n');
 };
 
 /**
@@ -463,6 +476,13 @@ export const generateStateTransitionDoc = (): string => {
   const fields = getStateTransitionFields();
   const jsonSchema = zodToJsonSchema(setStateTransitionOperationSchema) as JsonSchemaNode;
   const properties = (jsonSchema.properties ?? {}) as JsonSchemaNode;
+  const operationDescription =
+    typeof jsonSchema.description === 'string' ? jsonSchema.description.trim() : '';
+  if (!operationDescription) {
+    throw new SchemaTranslationError(
+      'setStateTransitionOperationSchema is missing a top-level .describe() — add one explaining the user goal'
+    );
+  }
 
   const bullets = fields.map((f) => {
     const prop = properties[f] as JsonSchemaNode | undefined;
@@ -478,7 +498,7 @@ export const generateStateTransitionDoc = (): string => {
   return [
     '## State Transition',
     '',
-    'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.',
+    operationDescription,
     '',
     ...bullets,
     '',

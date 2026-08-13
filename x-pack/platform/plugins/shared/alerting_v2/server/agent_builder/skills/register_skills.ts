@@ -20,8 +20,10 @@ import { SchemaTranslationError } from './schema_to_skill_docs';
 export type RegisterSkillsDeps = ManageRuleToolDeps & ManageActionPolicyToolDeps;
 
 /**
- * Registers Alerting v2 Agent Builder skills independently so a failure in one
- * does not block the other, and each error is labeled with `skill_id`.
+ * Registers Alerting v2 Agent Builder skills. Unexpected register failures are
+ * logged and skipped so one skill cannot block the other. Schema-doc generation
+ * failures ({@link SchemaTranslationError}) abort Kibana start — the generated
+ * skill content is part of the plugin contract and cannot run degraded.
  */
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -52,14 +54,14 @@ export const registerSkills = (
           labels: { skill_id: id },
           error: e,
         });
-      } else {
-        logger.error({
-          message: 'Failed to register agent builder skill',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
-          labels: { skill_id: id },
-          error: e,
-        });
+        throw e;
       }
+      logger.error({
+        message: 'Failed to register agent builder skill',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
+        labels: { skill_id: id },
+        error: e,
+      });
     }
   }
 
