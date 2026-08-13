@@ -2147,6 +2147,24 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/schemas",
+      "matchDepNames": ["@elastic/schemas"],
+      "reviewers": ["team:workchat-eng"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:agent-builder"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@cfworker/json-schema",
+      "matchDepNames": ["@cfworker/json-schema"],
+      "reviewers": ["team:workchat-eng"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:agent-builder"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "langsmith",
       "matchDepNames": ["langsmith"],
       "reviewers": ["team:security-threat-hunting"],
