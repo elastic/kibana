@@ -160,8 +160,8 @@ const lifecycleIlmPoliciesRoute = createServerRoute({
 });
 
 const ilmPhaseSchema = z.looseObject({
-  min_age: z.string().optional(),
-  actions: z.record(z.string(), z.any()).optional(),
+  min_age: z.string().max(64).optional(),
+  actions: z.record(z.string().max(1000), z.any()).optional(),
 });
 
 const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
@@ -176,7 +176,7 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      name: z.string(),
+      name: z.string().max(1000),
       phases: z.object({
         hot: ilmPhaseSchema.optional(),
         warm: ilmPhaseSchema.optional(),
@@ -184,9 +184,9 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
         frozen: ilmPhaseSchema.optional(),
         delete: ilmPhaseSchema.optional(),
       }),
-      meta: z.record(z.string(), z.any()).optional(),
+      meta: z.record(z.string().max(1000), z.any()).optional(),
       deprecated: z.boolean().optional(),
-      source_policy_name: z.string().optional(),
+      source_policy_name: z.string().max(1000).optional(),
     }),
     query: z.object({
       allow_overwrite: BooleanFromString.optional().default(false),
