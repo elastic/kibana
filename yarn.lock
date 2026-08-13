@@ -1636,7 +1636,7 @@
   resolved "https://registry.yarnpkg.com/@bufbuild/protobuf/-/protobuf-2.5.2.tgz#9b6cf005c50fdda72701da82f8db44635463d730"
   integrity sha512-foZ7qr0IsUBjzWIq+SuBLfdQCpJ1j8cTuNNT4owngTHoN5KsJb8L9t65fzz7SCeSWzescoOil/0ldqiL041ABg==
 
-"@cfworker/json-schema@^4.0.2":
+"@cfworker/json-schema@4.1.1", "@cfworker/json-schema@^4.0.2":
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/@cfworker/json-schema/-/json-schema-4.1.1.tgz#4a2a3947ee9fa7b7c24be981422831b8674c3be6"
   integrity sha512-gAmrUZSGtKc3AiBL71iNWxDsyUC5uMaKKGdvzYsBoTW/xi42JQHl7eKV2OYzCUqvc+D2RCcf7EXY2iCyFIk6og==
@@ -1930,10 +1930,10 @@
     semver "7.7.4"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.15.0":
-  version "2.15.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.15.0.tgz#421f4d652813eec7ffcd510415d863ffe28c9e15"
-  integrity sha512-Jq/RrPi/v7rphskU54PBmtvNqMXBvVNPZ4LdB+0kQ+MtRYcJtpCrxn7vnw0hJwC/ubKjmHbIYVlw7fN8KEOvZg==
+"@elastic/eslint-plugin-eui@2.16.0":
+  version "2.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.16.0.tgz#b04061d2f598511bed61a86f02a5ad8e48012a5b"
+  integrity sha512-G59/ubflm7Z+9XoFpub9JdV7tYWdmH0cEu2/yAcQjY+RO5Y+IMR9hDMz9zN3YBUsTvD2w21cPLWkzVXL2OgNbQ==
   dependencies:
     "@typescript-eslint/typescript-estree" "^8.64.0"
     "@typescript-eslint/utils" "^8.64.0"
@@ -1945,36 +1945,36 @@
   resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.17.0.tgz#f29eeee3f67524e5c91c2c5d752f78e97b54644f"
   integrity sha512-nwZk0oOz70cWezq5dXJQLCo3/ut5Da76lqB5xQwzV3pF2sEUtcUGm11UmsD5ZVipLp9IKSn+gzdU4LTZfi1sLA==
 
-"@elastic/esql-grammar@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.14.0.tgz#c31dd66f1b04f6fca161ada5bd812fd8bbc869d1"
-  integrity sha512-Aa7ynnfNEYIZSRpk8qyddwTXpwLjPpeUSYFX6YhPHNEE2i6kp+UGCdCTs97Grq7KpxmfUuPcB3F/9xP+zzSLyA==
+"@elastic/esql-grammar@^4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.18.0.tgz#fc40b39c6e45c0e53d1eabbefa6743f60fa3df0b"
+  integrity sha512-29gOd1Myoz/n4Pvihkt6fDPbaZGeWE7jruCYOF7P4Xj7kDl4eGvdCKf77ULJAosVYIxsu73+totbdxLE/GNIqw==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-promql-grammar@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.14.0.tgz#39970c11d07600575552edff4d575411dbb651e7"
-  integrity sha512-6LA2F/4HyvjQARcF9gKAzpoPmgEk6o/1dcjVmyWS2wPLOY2SCunErBuiTcmRgQ6TYP5KIceJ6MevjyLILeq/PQ==
+"@elastic/esql-promql-grammar@^4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.18.0.tgz#557b312d0bd0677e42b9f5a438366a6c27b92678"
+  integrity sha512-G33zociqUHobKO5VP7MiWeAp+iYtT51kgtdKMYeldre5JSHd1CcipQmurq25bcQlEV4LoMQHKi5VzQ6moSra7A==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-types@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.14.0.tgz#1f141c6d105bf821d96fa8a4ccda0509ed816163"
-  integrity sha512-8BftYi9RpJfJusbpDHheslYCtsvKVucl98PmGyyuWFG6+492Wmdvw/r2Ml8gwhLbVv4fhnb0aXCTpEDmor18cQ==
+"@elastic/esql-types@^4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.18.0.tgz#6e54e28dbdca2a63f0457bdb662eb8aa0f76b5c7"
+  integrity sha512-xtnB+u9CMJm+lFq/O+OR7LaQUjuz0KGm5h3cuhgMqZi65LJHAYmOjuYO095Q7ZlsUwya4Q46Djis+W7XQ9ELEg==
 
-"@elastic/esql@4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.14.0.tgz#151f1aa9b5590678939d93b276c925a8164a6ec7"
-  integrity sha512-ID777IARt/TnMncPXRNUG7+nRO/eRwac/18NJ/qweoG9aytIVgzxMo+W/Vz3bbIk55cAR8vUZoTCRtjiaRvjbA==
+"@elastic/esql@4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.18.0.tgz#6aaf0761f0fce63f2c7c8047a40ab2c569e1b976"
+  integrity sha512-zImBdNh4CLOvmDAnTMwDBSx05N0G5X7Nmw0Vs6xN2Hp6hwJl9JPky6cjRfGOUzY+awX38xQ15cr5dqAb9wKlDQ==
   dependencies:
-    "@elastic/esql-grammar" "^4.14.0"
-    "@elastic/esql-promql-grammar" "^4.14.0"
-    "@elastic/esql-types" "^4.14.0"
-    "@elastic/pretty-printer" "^4.14.0"
+    "@elastic/esql-grammar" "^4.18.0"
+    "@elastic/esql-promql-grammar" "^4.18.0"
+    "@elastic/esql-types" "^4.18.0"
+    "@elastic/pretty-printer" "^4.18.0"
     antlr4 "4.13.2"
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -1984,10 +1984,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eui-illustrations/-/eui-illustrations-1.0.1.tgz#a4bd17393daaa708cadafc1e9fa325f99c869b4a"
   integrity sha512-kEKd1o9mtAPFeJRz/H9Loa7tF9X4HFlKtyA2dC5YVyqoESPHz7d3h4P8RxYioe/RUhZpkvHY8pIAkIeSbJJ42Q==
 
-"@elastic/eui-test-helpers@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.2.0.tgz#60fb34fa36ba169a1ae639284f36b3be43d3c82a"
-  integrity sha512-1k27oE2Wkogh6yeXmUa0kp3D6bjm+8Cv4v8MniBMyLBHwKGK41YQebKAkfmGq4V2xHV5Jv+lAkuTYZf9Iyr0ww==
+"@elastic/eui-test-helpers@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.3.0.tgz#48ac9549bc8977b31346d7887733b5828eb563c7"
+  integrity sha512-HZaKdpyPN5vMXxQeerq3zBc9ZKinDs/+J8Y/6eaTPIMNVNtS5izPLsSNjLAvvfDNl/MP8kaptEMjv7VVirFcuQ==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
@@ -2006,10 +2006,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@118.0.0":
-  version "118.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-118.0.0.tgz#119d4455097baf58d4972a28d55463792bd7510b"
-  integrity sha512-JfibbY9gfIhIh5NPAaoGHkcs8oG2Y+ir7vR6CrKgItrT/Ujk4dMkqBpnGyBxvJd+c6RmCgdCDy2CTjEI+0b40g==
+"@elastic/eui@119.0.0":
+  version "119.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-119.0.0.tgz#02a51b40640f77efd3f2bb944fc1c29c910deae3"
+  integrity sha512-cjGhvfjcjfp2sQ3VjCbsu9rLjWZFkhY7W7NMt8j0ey9XxU6G+Gi1WwBZDc2zxsbJ+ko6TnFFrD3lsPVNCr2JfA==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
@@ -2169,10 +2169,10 @@
     import-in-the-middle "^3.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/pretty-printer@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.14.0.tgz#20259cac062f7965c3e9ee1c3d12ab653192bb58"
-  integrity sha512-qtevMN1Cp8X4eTgKn5adc/5Y2GODhb85UO9mg7pACwBMpszriARbxaB8w22Lm1K/RRqTiFG7EDxS0jQlK69T2w==
+"@elastic/pretty-printer@^4.18.0":
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.18.0.tgz#f9b6eb85de523a56d09e25dd291066de3201b56e"
+  integrity sha512-6MAoCboxXZH0qDcVdBTgfu/iaKxz1ohVybDQYDIa0cioEqmi1KTjdquTl1eteLHUq42HIlmXO/7W+y40xDcUQw==
   dependencies:
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -2221,6 +2221,13 @@
     "@elastic/node-crypto" "^1.2.3"
     "@types/node-jose" "1.1.10"
     node-jose "2.2.0"
+
+"@elastic/schemas@0.4.4":
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/@elastic/schemas/-/schemas-0.4.4.tgz#07335d909a1f59948b448e8bbc3e988f96eab8c5"
+  integrity sha512-Aeg/2bme133KAQlgI2zBNaxowR93ejHW0ldDbohs9VObLnL+08+U5CSve8K3YzXGsoeh8PI3NGCube6rks82Aw==
+  optionalDependencies:
+    zod "^4.4.3"
 
 "@elastic/search-ui-app-search-connector@1.24.1":
   version "1.24.1"
@@ -2612,6 +2619,14 @@
   version "0.27.2"
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.27.2.tgz#9e585ab6086bef994c6e8a5b3a0481219ada862b"
   integrity sha512-sRdU18mcKf7F+YgheI/zGf5alZatMUTKj/jNS6l744f9u3WFu4v7twcUI9vu4mknF4Y9aDlblIie0IM+5xxaqQ==
+
+"@eslint-community/eslint-plugin-eslint-comments@4.4.1":
+  version "4.4.1"
+  resolved "https://registry.yarnpkg.com/@eslint-community/eslint-plugin-eslint-comments/-/eslint-plugin-eslint-comments-4.4.1.tgz#dbfab6f2447c22be8758a0a9a9c80e56d2e2b93f"
+  integrity sha512-lb/Z/MzbTf7CaVYM9WCFNQZ4L1yi3ev2fsFPF99h31ljhSEyUoyEsKsNWiU+qD1glbYTDJdqgyaLKtyTkkqtuQ==
+  dependencies:
+    escape-string-regexp "^4.0.0"
+    ignore "^5.2.4"
 
 "@eslint-community/eslint-utils@^4.1.2", "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.5.0", "@eslint-community/eslint-utils@^4.9.1":
   version "4.10.1"
@@ -4587,10 +4602,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-transform@link:src/platform/packages/private/kbn-babel-transform":
-  version "0.0.0"
-  uid ""
-
 "@kbn/background-search@link:src/platform/packages/shared/kbn-background-search":
   version "0.0.0"
   uid ""
@@ -4824,10 +4835,6 @@
   uid ""
 
 "@kbn/content-connectors-plugin@link:x-pack/platform/plugins/shared/content_connectors":
-  version "0.0.0"
-  uid ""
-
-"@kbn/content-list-assembly@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly":
   version "0.0.0"
   uid ""
 
@@ -6111,6 +6118,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-content-common@link:x-pack/platform/packages/shared/custom-content/custom-content-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/custom-content-plugin@link:x-pack/platform/plugins/shared/custom_content":
   version "0.0.0"
   uid ""
@@ -7292,6 +7303,10 @@
   uid ""
 
 "@kbn/ingest-hub-plugin@link:x-pack/platform/plugins/shared/ingest_hub":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ingest-pipeline-json-editor@link:x-pack/platform/packages/shared/kbn-ingest-pipeline-json-editor":
   version "0.0.0"
   uid ""
 
@@ -9603,6 +9618,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ui-react-assembly@link:src/platform/kbn-ui/react-assembly":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ui-settings-plugin@link:src/platform/test/plugin_functional/plugins/ui_settings_plugin":
   version "0.0.0"
   uid ""
@@ -10828,10 +10847,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@1.11.0":
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.11.0.tgz#259574b2196c211b7eb487a47b9eadfbbd87473e"
-  integrity sha512-P0u3/ht/oZCQT89fOed+laLk0kZR529a825cS02uPDglxXbE97irWYpDAeRGGVETIzKfuy+H2g8c3Ccv/tXJNQ==
+"@openfeature/core@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.12.0.tgz#c9c2be428f9ceb1e8aff4e33709efe6005ea99b3"
+  integrity sha512-7PCPzyd1OC19begz30+CRknFB0ChtyaZUhk7YWrk+Bov1fpVw0HYkTXtoxxsvPfDZB9P9WsT7uixN+Z8f9+bcA==
 
 "@openfeature/launchdarkly-client-provider@0.3.3":
   version "0.3.3"
@@ -20619,14 +20638,6 @@ eslint-plugin-es-x@^7.8.0:
     "@eslint-community/regexpp" "^4.11.0"
     eslint-compat-utils "^0.5.1"
 
-eslint-plugin-eslint-comments@3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-comments/-/eslint-plugin-eslint-comments-3.2.0.tgz#9e1cd7b4413526abb313933071d7aba05ca12ffa"
-  integrity sha512-0jkOl0hfojIHHmEHgmNdqv4fmh7300NdpA9FFpF7zaoLvB/QeXOGNLIo86oAveJFrfB1p05kC8hpEMHM8DwWVQ==
-  dependencies:
-    escape-string-regexp "^1.0.5"
-    ignore "^5.0.5"
-
 eslint-plugin-formatjs@4.12.2:
   version "4.12.2"
   resolved "https://registry.yarnpkg.com/eslint-plugin-formatjs/-/eslint-plugin-formatjs-4.12.2.tgz#ad275d78f82bad95583c141f65ecd7e222c329ed"
@@ -23123,7 +23134,7 @@ ignore@7.0.5, ignore@^7.0.5:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-7.0.5.tgz#4cb5f6cd7d4c7ab0365738c7aea888baa6d7efd9"
   integrity sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==
 
-ignore@^5.0.5, ignore@^5.2.0, ignore@^5.2.1, ignore@^5.3.2:
+ignore@^5.2.0, ignore@^5.2.1, ignore@^5.2.4, ignore@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.2.tgz#3cd40e729f3643fd87cb04e50bf0eb722bc596f5"
   integrity sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==
@@ -33488,9 +33499,9 @@ undici@7.29.0, undici@^7.19.1:
   integrity sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==
 
 undici@^6.21.1, undici@^6.21.2:
-  version "6.27.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.27.0.tgz#41f9e48f7c5a40d27376caaead8c9a9fc7bca9c4"
-  integrity sha512-YmfV3YnEDzXRC5lZ2jWtWWHKGUm1zIt8AhesR1tens+HTNv+YZlN/dp6G727LOvMJ8xjP9Be7Y2Sdr96LDm+pg==
+  version "6.28.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.28.0.tgz#9f0e385744fef5021d6596c5bccd783f61193c1c"
+  integrity sha512-LIY910g9TI13YS95lrMFrs8Rm/u/irgHeTWoKCoteeJ04CUJ92eEfj0rVn+7VKMPBpUPiUoBKfhNyLI23EE/KA==
 
 unherit@^1.0.4:
   version "1.1.0"
@@ -35333,7 +35344,7 @@ zod-to-json-schema@^3.25.1:
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.25.1.tgz#7f24962101a439ddade2bf1aeab3c3bfec7d84ba"
   integrity sha512-pM/SU9d3YAggzi6MtR4h7ruuQlqKtad8e9S0fmxcMi+ueAK5Korys/aWcV9LIIHTVbj01NdzxcnXSN+O74ZIVA==
 
-zod@4.4.3, zod@^3.24.1, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.1.11, zod@^4.3.6:
+zod@4.4.3, zod@^3.24.1, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", zod@^4.1.11, zod@^4.3.6, zod@^4.4.3:
   version "4.4.3"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.4.3.tgz#b680f172885d18bbebf21a834ea25e55a1bbf356"
   integrity sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==
