@@ -13,11 +13,11 @@ import type { FieldDefinition } from '@kbn/content-list-provider';
 import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/react-hooks';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { ENABLED_FILTER_ID, KIND_FILTER_ID, TAG_FILTER_ID } from './rules_query_params';
 
 const TAG_SEARCH_DEBOUNCE_MS = 300;
-const MAX_TAGS_CAP = 20;
 
 const STATUS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.statusFilter.label', {
   defaultMessage: 'Status',
@@ -145,7 +145,7 @@ const TagsFilterComponent = ({
     return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
   }, [tagNames, selection]);
 
-  const showCapGuidance = tagNames.length >= MAX_TAGS_CAP;
+  const showCapGuidance = tagNames.length >= TAGS_RESPONSE_LIMIT;
 
   return (
     <SelectableFilterPopover
@@ -171,8 +171,8 @@ const TagsFilterComponent = ({
         showCapGuidance ? (
           <EuiText size="xs" color="subdued" data-test-subj="rulesListTagsFilterCapGuidance">
             {i18n.translate('xpack.alertingV2.rulesList.tagsFilter.capGuidance', {
-              defaultMessage: 'Showing first {cap} most-used — type to search',
-              values: { cap: MAX_TAGS_CAP },
+              defaultMessage: 'Showing first {cap} most-used, type to search',
+              values: { cap: TAGS_RESPONSE_LIMIT },
             })}
           </EuiText>
         ) : undefined

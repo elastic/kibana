@@ -478,7 +478,8 @@ const buildStreamEntry = async ({
     const chain = buildProcessingChain(definition, ancestors);
     entry.processing = {
       processing_chain: chain,
-      own_step_count: definition.ingest.processing.steps.length,
+      own_step_count:
+        'steps' in definition.ingest.processing ? definition.ingest.processing.steps.length : 0,
     };
   }
 

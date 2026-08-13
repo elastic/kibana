@@ -40099,8 +40099,6 @@
     "xpack.security.management.applicationConnections.connectionColumns.clientName": "Nom du client",
     "xpack.security.management.applicationConnections.connectionColumns.connectedBy": "Connecté par",
     "xpack.security.management.applicationConnections.connectionColumns.connectionName": "Nom de la connexion",
-    "xpack.security.management.applicationConnections.connectionColumns.revokedLabel": "Révoqué",
-    "xpack.security.management.applicationConnections.connectionColumns.revokedRowLabel": "Cette connexion a déjà été révoquée",
     "xpack.security.management.applicationConnections.connectionColumns.revokeLabel": "Révoquer",
     "xpack.security.management.applicationConnections.connectionColumns.selectRowLabel": "Sélectionnez la connexion \"{name}\"",
     "xpack.security.management.applicationConnections.connectionColumns.status": "Statut",
@@ -40120,7 +40118,6 @@
     "xpack.security.management.applicationConnections.revoke.connectedByColumn": "Connecté par",
     "xpack.security.management.applicationConnections.revoke.connectionNameColumn": "Nom de la connexion",
     "xpack.security.management.applicationConnections.revoke.intro": "Connexions à révoquer :",
-    "xpack.security.management.applicationConnections.revoke.reconnectionNote": "Les applications peuvent être reconnectées à tout moment.",
     "xpack.security.management.applicationConnections.revoke.tableCaption": "Connexions à révoquer",
     "xpack.security.management.applicationConnections.revoke.title": "Révoquer {count, plural, one {connection} other {connexions}} ?",
     "xpack.security.management.applicationConnections.revoke.unexpectedErrorToast": "Impossible de révoquer les connexions",
@@ -60312,6 +60309,9 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Le port webhook est requis.",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "Le nom d'utilisateur est requis.",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "Ce champ est requis.",
-    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes."
+    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes.",
+    "core.euiFlyoutMenu.history.tooltip": "Récemment visité",
+    "core.euiFlyoutMenu.pagination.first": "Premier",
+    "core.euiFlyoutMenu.pagination.last": "Dernier"
   }
 }

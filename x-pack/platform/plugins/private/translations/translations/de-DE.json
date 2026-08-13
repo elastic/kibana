@@ -40201,8 +40201,6 @@
     "xpack.security.management.applicationConnections.connectionColumns.clientName": "Client-Name",
     "xpack.security.management.applicationConnections.connectionColumns.connectedBy": "Verbunden durch",
     "xpack.security.management.applicationConnections.connectionColumns.connectionName": "Verbindungsname",
-    "xpack.security.management.applicationConnections.connectionColumns.revokedLabel": "Widerrufen",
-    "xpack.security.management.applicationConnections.connectionColumns.revokedRowLabel": "Diese Verbindung wurde bereits widerrufen",
     "xpack.security.management.applicationConnections.connectionColumns.revokeLabel": "Widerrufen",
     "xpack.security.management.applicationConnections.connectionColumns.selectRowLabel": "Verbindung „{name}“ auswählen",
     "xpack.security.management.applicationConnections.connectionColumns.status": "Status",
@@ -40224,7 +40222,6 @@
     "xpack.security.management.applicationConnections.revoke.connectionNameColumn": "Verbindungsname",
     "xpack.security.management.applicationConnections.revoke.intro": "Zu widerrufende Verbindungen:",
     "xpack.security.management.applicationConnections.revoke.partialFailedToast": "{succeeded} von {total} {total, plural, one {connection} other {Verbindungen}} widerrufen",
-    "xpack.security.management.applicationConnections.revoke.reconnectionNote": "Anwendungen können jederzeit wieder verbunden werden.",
     "xpack.security.management.applicationConnections.revoke.successToast": "{count, plural, one {# connection} other {# Verbindungen}} widerrufen",
     "xpack.security.management.applicationConnections.revoke.tableCaption": "Zu widerrufende Verbindungen",
     "xpack.security.management.applicationConnections.revoke.title": "Möchten Sie {count, plural, one {connection} other {Verbindungen}} widerrufen?",
@@ -60567,6 +60564,9 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Der Webhook-Port ist erforderlich.",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "Der Nutzername ist erforderlich.",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "Dies ist ein Pflichtfeld.",
-    "xpack.watcher.watcherDescription": "Erkennen Sie Änderungen an Ihren Daten, indem Sie Alerts erstellen, verwalten und überwachen."
+    "xpack.watcher.watcherDescription": "Erkennen Sie Änderungen an Ihren Daten, indem Sie Alerts erstellen, verwalten und überwachen.",
+    "core.euiFlyoutMenu.history.tooltip": "Kürzlich besucht",
+    "core.euiFlyoutMenu.pagination.first": "Erste",
+    "core.euiFlyoutMenu.pagination.last": "Letzte"
   }
 }

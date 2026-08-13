@@ -88,7 +88,8 @@
     "@kbn/file-upload",
     "@kbn/charts-theme",
     "@kbn/presentation-util",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
