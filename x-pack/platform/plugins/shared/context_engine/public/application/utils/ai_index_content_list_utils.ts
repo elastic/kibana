@@ -39,7 +39,7 @@ export const AI_INDEX_LIST_LABELS = {
   }),
 };
 
-// We need this because for now, we onl do client-side search and ContentList forwards EUI-parsed search text.
+// We need this because for now, we only do client-side search and ContentList forwards EUI-parsed search text.
 const normalizeSearchQuery = (searchQuery: string): string =>
   searchQuery.trim().replace(/\\-/g, '-').replace(/ -/g, '-');
 
