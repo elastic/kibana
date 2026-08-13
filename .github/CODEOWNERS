@@ -377,6 +377,7 @@ src/platform/kbn-ui/chrome-layout @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-constants @elastic/appex-sharedux
 src/platform/kbn-ui/chrome-layout-utils @elastic/appex-sharedux
 src/platform/kbn-ui/feedback @elastic/appex-sharedux
+src/platform/kbn-ui/react-assembly @elastic/appex-sharedux
 src/platform/kbn-ui/side-navigation @elastic/appex-sharedux
 src/platform/kbn-ui/storybook-config @elastic/appex-sharedux
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
@@ -475,7 +476,6 @@ src/platform/packages/shared/content-management/content_editor @elastic/appex-sh
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list @elastic/appex-sharedux
-src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-docs @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-footer @elastic/appex-sharedux
