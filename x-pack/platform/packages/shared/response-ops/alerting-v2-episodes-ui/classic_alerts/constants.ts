@@ -14,8 +14,8 @@
  * which layers the Kibana alerting authorization filter (space + authorized rule
  * types) on top of this index pattern, so unauthorized alerts are never returned.
  */
-export const CLASSIC_OBSERVABILITY_ALERTS_INDEX = '.alerts-observability.*';
-export const CLASSIC_STACK_ALERTS_INDEX = '.alerts-stack.*';
+const CLASSIC_OBSERVABILITY_ALERTS_INDEX = '.alerts-observability.*';
+const CLASSIC_STACK_ALERTS_INDEX = '.alerts-stack.*';
 
 export const CLASSIC_ALERTS_INDEX = `${CLASSIC_OBSERVABILITY_ALERTS_INDEX},${CLASSIC_STACK_ALERTS_INDEX}`;
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -52,7 +51,6 @@ export interface ClassicAlertSource {
   [ALERT_RULE_UUID]?: string;
   [ALERT_RULE_TAGS]?: string | string[];
   [ALERT_SEVERITY]?: string;
-  [ALERT_WORKFLOW_STATUS]?: string;
 }
 
 const asStringArray = (value: string | string[] | undefined): string[] => {
