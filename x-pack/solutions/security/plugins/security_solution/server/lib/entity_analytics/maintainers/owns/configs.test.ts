@@ -62,7 +62,9 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS)(
+  // Entra ID is log-based (see entityanalytics_entra_id describe below); only
+  // entity-index sources must resolve to `.entities.v2.latest.*`.
+  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.filter((c) => c.id === OKTA_ID))(
     '$id: indexPattern points to the entity index (not a log index)',
     (config) => {
       expect(config.indexPattern('myns')).toContain('.entities.v2.latest.myns');
