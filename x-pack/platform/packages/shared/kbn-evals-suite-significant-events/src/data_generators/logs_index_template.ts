@@ -6,13 +6,19 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_LOGS_INDEX } from '../constants';
 
 const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-otel-logs';
 
 /**
- * OTel Demo data requires two mapping workarounds for clean reindexing:
+ * OTel Demo data requires two mapping workarounds for clean reindexing, shared
+ * by the managed `logs` data-stream template and the isolated per-scenario
+ * replay indices so both paths map fields identically:
  *
  * 1. `subobjects: false` -- Different services emit `resource.attributes.app`
  *    as a flat string or a nested object. Flattening all fields to leaves
@@ -23,6 +29,14 @@ const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-otel-logs';
  *    which ES's date parser rejects. Ignoring malformed values lets the
  *    document index successfully while silently dropping the unparseable field.
  */
+export const LOGS_REPLAY_INDEX_SETTINGS: IndicesIndexSettings = {
+  mapping: { ignore_malformed: true },
+};
+
+export const LOGS_REPLAY_INDEX_MAPPINGS: MappingTypeMapping = {
+  subobjects: false,
+};
+
 export async function ensureLogsIndexTemplate(
   esClient: Client,
   log: ToolingLog,
@@ -39,16 +53,8 @@ export async function ensureLogsIndexTemplate(
     index_patterns: patterns,
     data_stream: {},
     template: {
-      settings: {
-        index: {
-          mapping: {
-            ignore_malformed: true,
-          },
-        },
-      },
-      mappings: {
-        subobjects: false,
-      },
+      settings: { index: LOGS_REPLAY_INDEX_SETTINGS },
+      mappings: LOGS_REPLAY_INDEX_MAPPINGS,
     },
     priority: 500,
   });
