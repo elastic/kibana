@@ -153,6 +153,16 @@ For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, 
 
 For an existing rule, pass the \`ruleAttachmentId\` and only include the operations needed for the changes requested.
 
+## Clarifying Questions (\`ask_user_question\`)
+
+When composing a new rule and required details are missing, use \`ask_user_question\` — but treat it as a **gap-fill**, not a restartable interview.
+
+1. **Reconcile first.** Before every \`ask_user_question\` call, scan this conversation for answers already given — including prior \`ask_user_question\` tool results (selected options / custom text) and free-form user messages. Those answers are authoritative user intent.
+2. **Ask only for unknowns.** Never re-ask a topic that is already answered (same question or an equivalent like "what to monitor" / "which metric" after the user already chose).
+3. **Batch remaining gaps.** Prefer one call covering what is still missing (e.g. kind, index/data source, threshold, schedule, grouping). Progressive follow-ups are allowed only for fields that could not be asked until earlier answers arrived.
+4. **Stop and compose.** As soon as you can set metadata, kind, schedule, and query, call ${ALERTING_TOOL_IDS.manageRule} with those operations (and \`validate\`). Do **not** open another clarifying round once you have enough to draft the rule.
+5. **Do not restart.** New user detail or a resumed \`ask_user_question\` answer must advance composition using what is already known — never restart from "what do you want to monitor?" or re-collect fields you already have.
+
 ## ES|QL Query Guidance
 
 - Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
@@ -259,8 +269,7 @@ When a user asks for notifications on a rule that is currently \`kind: signal\` 
 
 ## Offering Notifications After Rule Compose
 
-After composing a complete **alert** rule (has name, query, schedule, and \`kind: alert\`), proactively ask the user:
-**"Would you like to set up email notifications for this rule?"**
+After composing a complete **alert** rule (has name, query, schedule, and \`kind: alert\`) and rendering the attachment, proactively ask — once — whether to set up notifications (plain text or a single \`ask_user_question\`). Do **not** mix this offer into the rule-composition clarifying rounds above.
 
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
 If the rule's kind is \`signal\`, follow the "Notifications Require Alert Kind" guidance above before proceeding.

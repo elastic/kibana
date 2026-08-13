@@ -23,6 +23,54 @@ import { toolCallAction, executeToolAction } from '../actions';
 import type { ResearchAgentAction } from '../actions';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
+import { debugSessionLog } from './debug_session_log';
+
+/**
+ * Convert already-answered ask_user_question steps into tool-call / tool-result
+ * action pairs so they remain in the research agent's context on HITL resume.
+ *
+ * `convertPreviousRounds` intentionally skips the awaiting round (resume rebuilds
+ * it via actions). `roundToActions` only covers tool-call steps, and
+ * `pendingAskUserQuestionStepsToActions` only covers the current unanswered
+ * prompt — without this, earlier answers in the same round disappear from the
+ * model context and the agent often restarts clarifying questions.
+ */
+export const answeredAskUserQuestionStepsToActions = ({
+  round,
+}: {
+  round: ConversationRound | ProcessedConversationRound;
+}): ResearchAgentAction[] => {
+  const actions: ResearchAgentAction[] = [];
+
+  const answeredSteps = round.steps
+    .filter(isAskUserQuestionStep)
+    .filter((step): step is AskUserQuestionStep & { answers: AskUserQuestionAnswer[] } => {
+      return step.answers !== undefined;
+    });
+
+  for (const step of answeredSteps) {
+    const { toolCallId, toolName, args, content, artifact } = materializeAskUserQuestionToolCall({
+      questions: step.questions,
+      answers: step.answers,
+    });
+    actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args }] }));
+    actions.push(executeToolAction({ toolResults: [{ toolCallId, content, artifact }] }));
+  }
+
+  // #region agent log
+  debugSessionLog({
+    hypothesisId: 'F',
+    location: 'pending_ask_user_question_steps_to_actions.ts:answered',
+    message: 'previously answered ask_user_question steps restored into resume actions',
+    data: {
+      answeredAskStepCount: answeredSteps.length,
+      questions: answeredSteps.map((step) => step.questions[0]?.question ?? '(empty)'),
+    },
+  });
+  // #endregion
+
+  return actions;
+};
 
 /**
  * Convert the pending ask_user_question step + corresponding response to list of actions + emit the event to be collected
@@ -58,6 +106,21 @@ export const pendingAskUserQuestionStepsToActions = ({
       questions: step.questions,
       answers: response.answers,
     });
+    // #region agent log
+    debugSessionLog({
+      hypothesisId: 'F',
+      location: 'pending_ask_user_question_steps_to_actions.ts:resume',
+      message: 'HITL current answers materialized for resume',
+      data: {
+        promptId: step.prompt_id,
+        questionCount: step.questions.length,
+        contentPreview: content.slice(0, 500),
+        priorAnsweredAskStepsInRound: round.steps.filter(
+          (s) => isAskUserQuestionStep(s) && s.answers !== undefined
+        ).length,
+      },
+    });
+    // #endregion
     actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args }] }));
     actions.push(executeToolAction({ toolResults: [{ toolCallId, content, artifact }] }));
 

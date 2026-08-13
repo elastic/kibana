@@ -20,6 +20,7 @@ import {
   getSkillAbsolutePath,
   getSkillReferencedContentAbsolutePath,
 } from '../../runner/store/volumes/skills/utils';
+import { debugSessionLog } from '../utils/debug_session_log';
 
 const schema = z.object({
   skill: z.string().describe('The skill name or path'),
@@ -63,6 +64,20 @@ The 'skill' parameter accepts the skill name, the full path of the skill's folde
     }
 
     const skill = resolution.match;
+
+    // #region agent log
+    debugSessionLog({
+      hypothesisId: 'A,E',
+      location: 'load_skill.ts:handler',
+      message: 'skill loaded',
+      data: {
+        skillId: skill.id,
+        skillName: skill.name,
+        contentLength: skill.content?.length ?? 0,
+        referencedContentCount: skill.referencedContent?.length ?? 0,
+      },
+    });
+    // #endregion
 
     if (!skillsStore.has(skill.id)) {
       return {

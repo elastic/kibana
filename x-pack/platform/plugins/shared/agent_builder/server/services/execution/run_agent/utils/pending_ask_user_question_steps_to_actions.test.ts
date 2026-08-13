@@ -16,7 +16,10 @@ import {
   type AskUserQuestionItem,
   type PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
-import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_question_steps_to_actions';
+import {
+  pendingAskUserQuestionStepsToActions,
+  answeredAskUserQuestionStepsToActions,
+} from './pending_ask_user_question_steps_to_actions';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 import { AgentActionType } from '../actions';
 
@@ -190,5 +193,44 @@ describe('pendingAskUserQuestionStepsToActions', () => {
     const snapshot = JSON.stringify(promptState);
     pendingAskUserQuestionStepsToActions({ round, promptState, eventEmitter: jest.fn() });
     expect(JSON.stringify(promptState)).toEqual(snapshot);
+  });
+});
+
+describe('answeredAskUserQuestionStepsToActions', () => {
+  it('materializes already-answered steps without emitting events', () => {
+    const answered = createAskUserQuestionStep({
+      prompt_id: 's1',
+      questions: [sampleQuestion],
+      answers: [{ choice: [0] }],
+    });
+    const pending = createAskUserQuestionStep({
+      prompt_id: 's2',
+      questions: [sampleQuestion],
+    });
+    const round = makeRound(answered, pending);
+
+    const actions = answeredAskUserQuestionStepsToActions({ round });
+
+    expect(actions).toHaveLength(2);
+    expect(actions[0].type).toBe(AgentActionType.ToolCall);
+    expect(actions[1].type).toBe(AgentActionType.ExecuteTool);
+
+    const expected = materializeAskUserQuestionToolCall({
+      questions: answered.questions,
+      answers: answered.answers!,
+    });
+    if (actions[1].type === AgentActionType.ExecuteTool) {
+      expect(JSON.parse(actions[1].tool_results[0].content as string)).toEqual(
+        JSON.parse(expected.content)
+      );
+    }
+  });
+
+  it('returns no actions when no answered ask steps exist', () => {
+    const pending = createAskUserQuestionStep({
+      prompt_id: 's1',
+      questions: [sampleQuestion],
+    });
+    expect(answeredAskUserQuestionStepsToActions({ round: makeRound(pending) })).toEqual([]);
   });
 });

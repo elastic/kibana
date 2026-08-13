@@ -43,6 +43,7 @@ import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
+import { debugSessionLog } from './debug_session_log';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -94,6 +95,45 @@ export const convertPreviousRounds = async ({
   // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
   const lastRound = conversation.previousRounds[conversation.previousRounds.length - 1];
+  // #region agent log
+  {
+    const priorAskAnswered: Array<{ question: string; hasAnswers: boolean }> = [];
+    let largeToolResults = 0;
+    for (const round of conversation.previousRounds) {
+      for (const step of round.steps ?? []) {
+        if (isAskUserQuestionStep(step)) {
+          priorAskAnswered.push({
+            question: step.questions?.[0]?.question ?? '(empty)',
+            hasAnswers: step.answers !== undefined,
+          });
+        }
+        if (isToolCallStep(step)) {
+          const name = step.tool_id ?? '';
+          if (
+            name.includes('list_indices') ||
+            name.includes('get_index_mapping') ||
+            name.includes('load_skill')
+          ) {
+            largeToolResults += 1;
+          }
+        }
+      }
+    }
+    debugSessionLog({
+      hypothesisId: 'B,D,E',
+      location: 'to_langchain_messages.ts:convertPreviousRounds',
+      message: 'prompt context: prior ask_user_question + bulky tools',
+      data: {
+        previousRoundCount: conversation.previousRounds.length,
+        lastRoundStatus: lastRound?.status,
+        priorAskUserQuestionSteps: priorAskAnswered,
+        bulkyToolCallCount: largeToolResults,
+        hasCompactionSummary: Boolean(compactionSummary),
+        nextInputPreview: (conversation.nextInput?.message ?? '').slice(0, 200),
+      },
+    });
+  }
+  // #endregion
   if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
     rounds = rounds.slice(0, rounds.length - 1);
     input = lastRound.input;

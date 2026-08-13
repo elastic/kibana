@@ -59,8 +59,17 @@ describe('createRuleManagementSkill', () => {
 
     expect(skill.description).toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
     expect(skill.content).toContain(ACTION_POLICY_MANAGEMENT_SKILL_ID);
-    expect(skill.content).toContain('Would you like to set up email notifications for this rule?');
+    expect(skill.content).toContain('proactively ask — once — whether to set up notifications');
     expect(skill.content).not.toContain('Part 2: Action Policies');
     expect(skill.content).not.toContain('Part 3: Default Notification Setup');
+  });
+
+  it('instructs the agent to reconcile ask_user_question answers and not restart clarifying rounds', () => {
+    const skill = createRuleManagementSkill(createDeps());
+
+    expect(skill.content).toContain('Clarifying Questions (`ask_user_question`)');
+    expect(skill.content).toContain('Reconcile first');
+    expect(skill.content).toContain('Never re-ask a topic that is already answered');
+    expect(skill.content).toContain('Do not restart');
   });
 });
