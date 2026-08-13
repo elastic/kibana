@@ -373,6 +373,21 @@ config:
 `);
   });
 
+  it('does not resolve runtime Liquid policy.vars (install-time is the supported path)', () => {
+    const yaml = [
+      'consts:',
+      '  githubConnectorId: "{{ policy.vars.github_connector_id }}"',
+      '  githubConnectorIdStatic: REPLACE_WITH_GITHUB_CONNECTOR_ID',
+    ].join('\n');
+
+    const result = substituteWorkflowConnectorIds(yaml, {
+      github_connector_id: 'github-conn-1',
+    });
+
+    expect(result).toContain('githubConnectorId: "{{ policy.vars.github_connector_id }}"');
+    expect(result).toContain('githubConnectorIdStatic: github-conn-1');
+  });
+
   it('fails the non-SDLC fixture test if the convention logic is removed', () => {
     // This is a deliberate break guard: if substitution stops using the convention,
     // the second fixture package stops substituting and the test fails.

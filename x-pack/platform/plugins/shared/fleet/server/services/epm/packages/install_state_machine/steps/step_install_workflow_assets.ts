@@ -44,6 +44,11 @@ const formatManifestVarForSubstitution = (value: unknown): string | undefined =>
 const getPlaceholderForVarName = (varName: string): string =>
   `${VAR_PLACEHOLDER_PREFIX}${varName.toUpperCase()}`;
 
+/**
+ * Install-time connector/agent placeholder substitution (WF-008).
+ * Runtime Liquid `{{ policy.vars.* }}` is not a supported resolution path —
+ * see workflow_connector_resolution.md.
+ */
 export const substituteWorkflowConnectorIds = (
   yaml: string,
   vars: Record<string, unknown>,
