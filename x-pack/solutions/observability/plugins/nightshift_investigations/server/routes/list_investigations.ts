@@ -37,6 +37,5 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
       size: z.coerce.number().int().min(1).max(100).optional(),
     }),
   }),
-  handler: async ({ request, params, getClient }) =>
-    getClient(request).list(params.query),
+  handler: async ({ request, params, getClient }) => getClient(request).list(params.query),
 });

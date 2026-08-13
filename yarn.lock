@@ -7854,6 +7854,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/nightshift-investigations-plugin@link:x-pack/solutions/observability/plugins/nightshift_investigations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/nightshift-plugin@link:x-pack/solutions/observability/plugins/nightshift":
   version "0.0.0"
   uid ""
