@@ -13,7 +13,7 @@ const uxConfig = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
-export const config: PluginConfigDescriptor = {
+export const config: PluginConfigDescriptor<UXConfig> = {
   schema: uxConfig,
 };
 

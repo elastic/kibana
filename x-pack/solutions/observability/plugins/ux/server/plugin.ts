@@ -16,6 +16,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import { registerRoutes } from '@kbn/server-route-repository';
 import { getUxServerRouteRepository } from './routes';
 import type { UxRouteHandlerResources } from './routes/types';
+import { sessionReplaySettingsSavedObjectType } from './saved_objects/session_replay_settings';
 
 export class Plugin implements PluginType {
   private readonly logger: Logger;
@@ -27,6 +28,8 @@ export class Plugin implements PluginType {
   }
 
   public setup(core: CoreSetup) {
+    core.savedObjects.registerType(sessionReplaySettingsSavedObjectType);
+
     const dependencies: Omit<UxRouteHandlerResources, keyof DefaultRouteHandlerResources> = {
       core: {
         setup: core,

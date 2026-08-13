@@ -522,8 +522,27 @@ export function SessionReplayPanel() {
     setPageIndex(0);
   }, []);
 
+  const openSettings = useCallback(() => {
+    history.push({ pathname: '/session-replay/settings' });
+  }, [history]);
+
   return (
     <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="gear"
+            onClick={openSettings}
+            data-test-subj="uxSessionReplaySettingsButton"
+          >
+            {i18n.translate('xpack.ux.sessions.settingsButton', {
+              defaultMessage: 'Capture settings',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <KpiStrip stats={stats} />
       <EuiSpacer size="m" />
 

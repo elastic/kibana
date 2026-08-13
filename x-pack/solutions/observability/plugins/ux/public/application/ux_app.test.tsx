@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UX_BREADCRUMBS } from './ux_app';
+import { UX_BREADCRUMBS } from './ux_breadcrumbs';
 
 describe('UX_BREADCRUMBS', () => {
   it('links no crumb, so the Chrome Next header has no back target to derive', () => {

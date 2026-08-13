@@ -13,6 +13,10 @@ import type {
   SessionSortDirection,
   SessionSortField,
 } from '../../../common/session_replay';
+import {
+  SESSION_REPLAY_SETTINGS_API,
+  type SessionReplaySettings,
+} from '../../../common/session_replay_settings';
 
 export interface FetchSessionsParams {
   http: HttpStart;
@@ -94,4 +98,24 @@ export const fetchSessionReplayEvents = async ({
   return http.get<SessionReplayEventsResponse>(
     `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}/events`
   );
+};
+
+export const fetchSessionReplaySettings = async ({
+  http,
+}: {
+  http: HttpStart;
+}): Promise<SessionReplaySettings> => {
+  return http.get<SessionReplaySettings>(SESSION_REPLAY_SETTINGS_API);
+};
+
+export const updateSessionReplaySettings = async ({
+  http,
+  settings,
+}: {
+  http: HttpStart;
+  settings: SessionReplaySettings;
+}): Promise<SessionReplaySettings> => {
+  return http.put<SessionReplaySettings>(SESSION_REPLAY_SETTINGS_API, {
+    body: JSON.stringify(settings),
+  });
 };

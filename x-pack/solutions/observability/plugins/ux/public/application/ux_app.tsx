@@ -11,7 +11,7 @@ import { Redirect } from 'react-router-dom';
 import { RouterProvider, createRouter, RouteRenderer } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
-import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import * as t from 'io-ts';
 
@@ -33,6 +33,8 @@ import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { PluginContext } from '../context/plugin_context';
 import { SessionPlayerPage } from '../components/session_replay/session_player_page';
 import { SessionDetailPage } from '../components/session_replay/session_detail_page';
+import { SessionReplaySettingsPage } from '../components/session_replay/session_replay_settings_page';
+import { UX_BREADCRUMBS } from './ux_breadcrumbs';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -50,21 +52,6 @@ export const uxRoutes: RouteDefinition[] = [
     path: '/',
     render: () => <Redirect to="/ux" />,
     breadcrumb: DASHBOARD_LABEL,
-  },
-];
-
-// No hrefs: the dashboard is the only route, and Chrome Next turns the last linked crumb into the
-// header back button, so a link here would render a back button pointing at the current page.
-export const UX_BREADCRUMBS: ChromeBreadcrumb[] = [
-  {
-    text: i18n.translate('xpack.ux.breadcrumbs.root', {
-      defaultMessage: 'User Experience',
-    }),
-  },
-  {
-    text: i18n.translate('xpack.ux.breadcrumbs.dashboard', {
-      defaultMessage: 'Dashboard',
-    }),
   },
 ];
 
@@ -101,6 +88,9 @@ const uxRouter = createRouter({
   },
   '/session-replay': {
     element: <UxSessionReplayPage />,
+  },
+  '/session-replay/settings': {
+    element: <SessionReplaySettingsPage />,
   },
   '/session-replay/{sessionId}': {
     params: t.type({

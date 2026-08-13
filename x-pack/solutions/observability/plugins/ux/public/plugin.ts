@@ -215,5 +215,13 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       },
     });
   }
-  public start(core: CoreStart, plugins: ApmPluginStartDeps) {}
+  public start(core: CoreStart, plugins: ApmPluginStartDeps) {
+    // Session capture is toggled at runtime via a saved object (see the UX
+    // "Capture settings" page); the bootstrap reads it and no-ops when disabled.
+    import('./session_replay/start_session_replay')
+      .then(({ startSessionReplay }) => startSessionReplay(core))
+      .catch(() => {
+        // best-effort; replay must never break Kibana
+      });
+  }
 }
