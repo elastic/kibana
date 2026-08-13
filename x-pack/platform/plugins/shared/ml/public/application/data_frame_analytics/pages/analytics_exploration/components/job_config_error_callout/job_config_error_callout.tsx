@@ -44,7 +44,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
     jobCapsServiceErrorMessage.includes('locate that index-pattern') &&
     jobCapsServiceErrorMessage.includes('click here to re-create');
 
-  const message = jobConfigErrorMessage ?? jobCapsServiceErrorMessage;
+  const message = jobConfigErrorMessage ? jobConfigErrorMessage : jobCapsServiceErrorMessage;
   const newDataViewUrl = useMemo(
     () =>
       getUrlForApp('management', {

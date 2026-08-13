@@ -247,6 +247,7 @@ const ValidationMessage: FC<{
   if (validationResponse === null) {
     return (
       <KbnInfoCallout
+        announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.noDetectors.title',
           {
@@ -266,6 +267,7 @@ const ValidationMessage: FC<{
     if (validationResponse.documentsFound === true) {
       return (
         <KbnInfoCallout
+          announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.valid.title',
             {
@@ -283,6 +285,7 @@ const ValidationMessage: FC<{
     } else {
       return (
         <KbnWarningCallout
+          announceOnMount
           title={i18n.translate(
             'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.possiblyInvalid.title',
             {
@@ -302,6 +305,7 @@ const ValidationMessage: FC<{
   } else {
     return (
       <KbnDangerCallout
+        announceOnMount
         title={i18n.translate(
           'xpack.ml.newJob.wizard.datafeedStep.dataView.validation.invalid.title',
           {
