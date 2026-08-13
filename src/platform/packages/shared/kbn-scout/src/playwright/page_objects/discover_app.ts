@@ -21,6 +21,8 @@ export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
   queryMode: DiscoverQueryMode;
+  /** Open a Discover session by id (`#/view/{id}`) instead of a blank Discover page. */
+  savedSearchId?: string;
 }
 
 export interface DataViewOptions {
@@ -48,7 +50,10 @@ export class DiscoverApp {
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
 
-    await this.page.gotoApp('discover');
+    await this.page.gotoApp(
+      'discover',
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+    );
     await this.waitForDiscoverPage();
   }
 
@@ -339,7 +344,15 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  async createRuntimeField(fieldName: string, script: string) {
+  async createRuntimeField({
+    fieldName,
+    script,
+    popularity,
+  }: {
+    fieldName: string;
+    script: string;
+    popularity?: number;
+  }) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-add-field');
     const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
@@ -351,6 +364,11 @@ export class DiscoverApp {
       .getByRole('textbox', { name: /Editor content/ })
       .waitFor({ state: 'visible' });
     await this.codeEditor.setCodeEditorValue(script);
+
+    if (typeof popularity === 'number') {
+      await this.setPopularity(popularity);
+    }
+
     await fieldEditor.getByRole('button', { name: 'Save' }).click();
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
@@ -402,6 +420,13 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmModalConfirmButton');
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
+  }
+
+  async setPopularity(popularity: number) {
+    await this.page.testSubj.click('toggleAdvancedSetting');
+    const row = this.page.testSubj.locator('popularityRow');
+    await row.locator('[data-test-subj="toggle"]').click();
+    await this.page.testSubj.locator('editorFieldCount').fill(String(popularity));
   }
 
   async setCustomLabel(label: string, { enableToggle = false }: { enableToggle?: boolean } = {}) {
@@ -731,6 +756,10 @@ export class DiscoverApp {
     return Number(await fetchCounter.getAttribute('data-fetch-counter'));
   }
 
+  getErrorCalloutTitle(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutTitle');
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
@@ -890,15 +919,6 @@ export class DiscoverApp {
       this.controls.getControlFrame(controlId).getByText(value),
   };
 
-  async clickFieldSort(field: string, sortOption: string) {
-    const header = this.dataGrid.getColumnHeader(field);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
-  }
-
   getDocHeaderLabels(): Locator {
     return this.page.locator(
       '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
@@ -952,10 +972,22 @@ export class DiscoverApp {
 
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async showTable() {
+    await this.page.testSubj.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async hideTable() {
+    await this.page.testSubj.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async expectXYVisChartVisible() {
@@ -1360,8 +1392,27 @@ export class DiscoverApp {
     return this.page.testSubj.locator('data-cascade');
   }
 
+  /**
+   * Trigger for the "Group by" popover in the cascade layout toolbar. Despite
+   * the `...Switch` test subject it is a popover button, not a toggle — use
+   * {@link optOutOfCascadeLayout} to actually leave the cascade layout.
+   */
   getCascadeLayoutSwitch(): Locator {
     return this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+  }
+
+  /**
+   * Leaves the cascade ("grouped results") layout that Discover switches to for
+   * `STATS ... BY` ES|QL queries, restoring the flat doc table. Expects the
+   * cascade layout to be showing — it fails rather than silently doing nothing
+   * if the layout is absent, so callers notice when the trigger stops applying.
+   */
+  async optOutOfCascadeLayout() {
+    await this.getCascadeLayoutSwitch().click();
+    await this.page.testSubj.locator('discoverGroupBySelectionList').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('discoverCascadeLayoutOptOutButton');
+    await this.waitUntilTabIsLoaded();
+    await this.getCascadeLayout().waitFor({ state: 'hidden' });
   }
 
   async isShowingCascadeLayout(): Promise<boolean> {

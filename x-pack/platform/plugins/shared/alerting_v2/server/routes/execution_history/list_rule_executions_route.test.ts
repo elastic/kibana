@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { toListRuleExecutionsArgs } from './list_rule_executions_route';
+import type { ListRuleExecutionsResult } from '../../lib/execution_history_client';
+import {
+  toListRuleExecutionsArgs,
+  toListRuleExecutionsResponse,
+} from './list_rule_executions_route';
 
 describe('toListRuleExecutionsArgs', () => {
   it('maps the snake_case request to camelCase client args and translates the sort value', () => {
@@ -29,6 +33,63 @@ describe('toListRuleExecutionsArgs', () => {
       sortOrder: 'asc',
       page: 2,
       perPage: 25,
+    });
+  });
+});
+
+describe('toListRuleExecutionsResponse', () => {
+  const item: ListRuleExecutionsResult['items'][number] = {
+    id: 'exec-1',
+    rule: { id: 'rule-1', version: 3 },
+    spaceId: 'default',
+    startedAt: '2026-01-01T00:00:00.000Z',
+    endedAt: '2026-01-01T00:00:01.500Z',
+    timings: { duration: 1500, scheduledDelay: 250 },
+    outcome: 'success',
+    reason: null,
+    error: null,
+  };
+
+  it('maps the camelCase client result onto the snake_case response body', () => {
+    expect(toListRuleExecutionsResponse({ items: [item], total: 1, page: 2, perPage: 25 })).toEqual(
+      {
+        items: [
+          {
+            id: 'exec-1',
+            rule: { id: 'rule-1', version: 3 },
+            space_id: 'default',
+            started_at: '2026-01-01T00:00:00.000Z',
+            ended_at: '2026-01-01T00:00:01.500Z',
+            timings: { duration: 1500, scheduled_delay: 250 },
+            outcome: 'success',
+            reason: null,
+            error: null,
+          },
+        ],
+        total: 1,
+        page: 2,
+        per_page: 25,
+      }
+    );
+  });
+
+  it('maps the nested error stack trace and keeps a null error null', () => {
+    const [mapped] = toListRuleExecutionsResponse({
+      items: [{ ...item, outcome: 'failure', error: { message: 'boom', stackTrace: 'at x' } }],
+      total: 1,
+      page: 1,
+      perPage: 10,
+    }).items;
+
+    expect(mapped.error).toEqual({ message: 'boom', stack_trace: 'at x' });
+  });
+
+  it('returns an empty items array untouched', () => {
+    expect(toListRuleExecutionsResponse({ items: [], total: 0, page: 1, perPage: 10 })).toEqual({
+      items: [],
+      total: 0,
+      page: 1,
+      per_page: 10,
     });
   });
 });
