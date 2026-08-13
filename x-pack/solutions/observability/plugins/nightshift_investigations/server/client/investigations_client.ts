@@ -164,6 +164,12 @@ export class NightshiftInvestigationsClient {
       throw new Error(`Investigation "${investigationId}" not found`);
     }
 
+    const knownStatuses = new Set<string>(Object.values(ExecutionStatus));
+    if (!knownStatuses.has(execution.status)) {
+      this.logger.warn(
+        `Unknown workflow ExecutionStatus "${execution.status}" for investigation "${investigationId}", treating as running`
+      );
+    }
     const status = toInvestigationStatus(execution.status);
     const isTerminal = status === 'completed' || status === 'failed' || status === 'cancelled';
 
@@ -186,12 +192,15 @@ export class NightshiftInvestigationsClient {
       completed_at: isTerminal ? execution.finishedAt : undefined,
       conclusions:
         status === 'completed'
-          ? String(rawOutput?.conclusion ?? rawOutput?.summary ?? '')
+          ? (rawOutput?.conclusion ?? rawOutput?.summary ?? undefined)?.toString() || undefined
           : undefined,
-      error:
-        status === 'failed'
-          ? (execution.error?.message ?? 'Investigation failed')
-          : undefined,
+      error: (() => {
+        if (status !== 'failed') return undefined;
+        if (execution.error?.message) {
+          this.logger.warn(`Investigation "${investigationId}" failed: ${execution.error.message}`);
+        }
+        return 'Investigation failed';
+      })(),
     };
   }
 
