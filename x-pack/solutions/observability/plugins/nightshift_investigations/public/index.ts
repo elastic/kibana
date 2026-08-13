@@ -12,5 +12,11 @@ export async function plugin(_ctx: PluginInitializerContext) {
   return new NightshiftInvestigationsPublicPlugin();
 }
 
-export type { NightshiftInvestigationsPublicSetup, NightshiftInvestigationsPublicStart } from './plugin';
-export type { NightshiftInvestigationsRepositoryClient, NightshiftInvestigationsEndpoint } from './api';
+export type {
+  NightshiftInvestigationsPublicSetup,
+  NightshiftInvestigationsPublicStart,
+} from './plugin';
+export type {
+  NightshiftInvestigationsRepositoryClient,
+  NightshiftInvestigationsEndpoint,
+} from './api';

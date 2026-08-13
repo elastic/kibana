@@ -9,7 +9,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 
-export type GetClient = (request: KibanaRequest, spaceId?: string) => NightshiftInvestigationsClient;
+export type GetClient = (
+  request: KibanaRequest,
+  spaceId?: string
+) => NightshiftInvestigationsClient;
 
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
