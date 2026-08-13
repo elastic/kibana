@@ -1,5 +1,5 @@
 {
-  "sha1": "8a7d48e8eb5b869ac6514494bbbd38b72aefa642",
+  "sha1": "582f04b8ea7dd163c8f565745010dd4eb0a912f0",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -5298,97 +5298,6 @@
       }
     },
     {
-      "id": "4017b7518a01fcd-295c78b4211308c",
-      "title": "Create alert event API POST /alerts: creates an external alert event when source is in the body",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
-        "line": 29,
-        "column": 31
-      }
-    },
-    {
-      "id": "4017b7518a01fcd-112f740e2469c7c",
-      "title": "Create alert event API POST /alerts/:source: creates an external alert event when source is in the path",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
-        "line": 56,
-        "column": 19
-      }
-    },
-    {
-      "id": "4017b7518a01fcd-819ba9e2117495f",
-      "title": "Create alert event API schema: rejects a body missing identity fields with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
-        "line": 77,
-        "column": 25
-      }
-    },
-    {
-      "id": "4017b7518a01fcd-1600cb3180ad7db",
-      "title": "Create alert event API schema: rejects a reserved elastic.* source with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
-        "line": 88,
-        "column": 28
-      }
-    },
-    {
-      "id": "4017b7518a01fcd-8057981c18d60b1",
-      "title": "Create alert event API schema: rejects a reserved bare \"elastic\" source with 400",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
-        "line": 98,
-        "column": 16
-      }
-    },
-    {
-      "id": "4017b7518a01fcd-333ae27acab175a",
-      "title": "Create alert event API authorization: returns 403 for a user with read-only alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
-        "line": 105,
-        "column": 22
-      }
-    },
-    {
-      "id": "4017b7518a01fcd-9d7abd95f31ff90",
-      "title": "Create alert event API authorization: returns 403 for a user without alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/alert_events/create_alert_event.spec.ts",
-        "line": 115,
-        "column": 13
-      }
-    },
-    {
       "id": "4922743ba5f5535-aaee8a03285479c",
       "title": "List execution history — tolerates missing rule ids resolves names for surviving rules and falls back to id for deleted ones",
       "expectedStatus": "passed",
@@ -6127,6 +6036,149 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_enable_rules.spec.ts",
         "line": 177,
         "column": 83
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-d87f7202078fcbd",
+      "title": "Bulk update rule API key by IDs API update: rotates the API key for rules and stamps audit metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 28,
+        "column": 86
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-b8a5a5950df1a02",
+      "title": "Bulk update rule API key by IDs API state: preserves all rule attributes other than the audit metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 60,
+        "column": 29
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-e9762e41c699fbc",
+      "title": "Bulk update rule API key by IDs API update: reports unknown ids in the errors array with RULE_NOT_FOUND while rotating the valid ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 87,
+        "column": 19
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-5a1c53041242cdd",
+      "title": "Bulk update rule API key by IDs API validation: should reject an empty ids array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 111,
+        "column": 14
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-0540db98ed6dc67",
+      "title": "Bulk update rule API key by IDs API validation: should reject a body with no ids field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 119,
+        "column": 22
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-adf437ca1c87227",
+      "title": "Bulk update rule API key by IDs API validation: should reject unknown fields (strict schema)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 125,
+        "column": 5
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-b41f87cc4ae909a",
+      "title": "Bulk update rule API key by IDs API validation: should reject ids longer than ID_MAX_LENGTH",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 136,
+        "column": 96
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-b6dda7c43e7b1a5",
+      "title": "Bulk update rule API key by IDs API validation: should reject ids arrays longer than MAX_BULK_ITEMS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 145,
+        "column": 95
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-cc930ca75eb15be",
+      "title": "Bulk update rule API key by IDs API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 157,
+        "column": 30
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-f9a731cedda79b4",
+      "title": "Bulk update rule API key by IDs API authorization: should return 403 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 172,
+        "column": 69
+      }
+    },
+    {
+      "id": "c80cb1886f22dcb-56304c833a0e45c",
+      "title": "Bulk update rule API key by IDs API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/bulk_update_api_key.spec.ts",
+        "line": 188,
+        "column": 8
       }
     },
     {
@@ -7568,20 +7620,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 31
       }
     },
     {
-      "id": "b7a922248ef62f9-7fee33e4efa8965",
-      "title": "Get rule tags API tags: should return the unique union of tags across rules, sorted ascending",
+      "id": "b7a922248ef62f9-1987c3be567f4a1",
+      "title": "Get rule tags API tags: should return the unique union of tags across rules, sorted by usage",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 47,
+        "line": 48,
         "column": 11
       }
     },
@@ -7594,34 +7646,138 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 82,
+        "line": 79,
         "column": 4
       }
     },
     {
-      "id": "b7a922248ef62f9-fdaa3febd09601a",
-      "title": "Get rule tags API filter: should only return tags from rules matching the filter",
+      "id": "b7a922248ef62f9-d6d82856e30b85a",
+      "title": "Get rule tags API kind: should only return tags from alert-kind rules when kind=alert",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 105,
+        "line": 99,
         "column": 14
       }
     },
     {
-      "id": "b7a922248ef62f9-dc9caa1fe588586",
-      "title": "Get rule tags API filter: should return 400 for an invalid filter field",
+      "id": "b7a922248ef62f9-2d1c4e31b65e6b9",
+      "title": "Get rule tags API kind: should only return tags from signal-kind rules when kind=signal",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 148,
+        "line": 129,
+        "column": 4
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-151c0d80530c21d",
+      "title": "Get rule tags API search: should return only tags matching the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 160,
+        "column": 5
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-bf5355ef032b544",
+      "title": "Get rule tags API search: should escape regex special characters in the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 181,
+        "column": 23
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-a9b440a05041c55",
+      "title": "Get rule tags API search: should escape Elasticsearch-only regexp operators in the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 201,
+        "column": 23
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-c08621f5e1709cc",
+      "title": "Get rule tags API cap: should return at most 20 tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 232,
         "column": 43
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-fa7b7430e922dab",
+      "title": "Get rule tags API validation: should return 400 for an invalid kind",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 250,
+        "column": 5
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-80ac226dab55e22",
+      "title": "Get rule tags API validation: should return 400 when the removed filter param is sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 260,
+        "column": 14
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-39dd28f6f3e4b18",
+      "title": "Get rule tags API validation: should return 400 for unknown query parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 268,
+        "column": 16
+      }
+    },
+    {
+      "id": "b7a922248ef62f9-f3a857a5698600e",
+      "title": "Get rule tags API path: old /_tags path should return 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
+        "line": 276,
+        "column": 22
       }
     },
     {
@@ -7633,8 +7789,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 164,
-        "column": 25
+        "line": 285,
+        "column": 23
       }
     },
     {
@@ -7646,8 +7802,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 180,
-        "column": 23
+        "line": 300,
+        "column": 5
       }
     },
     {
@@ -7659,8 +7815,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/get_rule_tags.spec.ts",
-        "line": 195,
-        "column": 4
+        "line": 314,
+        "column": 14
       }
     },
     {
