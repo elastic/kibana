@@ -145,7 +145,7 @@ An empty matcher is a catch-all that matches all episodes in the space. To scope
 `;
 
 exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
-"## No-Data Strategy
+"# No-Data Strategy
 
 \`no_data_strategy\` is a **top-level rule field** that controls behaviour when no data is present.
 
@@ -159,12 +159,11 @@ exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed ski
 When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
 \`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }\`. For composed query format, the \`base\` query is used as the data query.
 
-Signal rules cannot set \`no_data_strategy\` ([rule-kind reference](./references/rule-kind.md)).
-Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints."
+Signal rules cannot set \`no_data_strategy\` ([rule-kind reference](./references/rule-kind.md))."
 `;
 
 exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
-"## Recovery Strategy
+"# Recovery Strategy
 
 \`recovery_strategy\` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./references/episode-lifecycle.md)). Signal rules (\`kind: signal\`) cannot set \`recovery_strategy\` ([rule-kind reference](./references/rule-kind.md)).
 
@@ -174,9 +173,7 @@ exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed s
 
 When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:
 - **Composed**: \`recovery: { segment: 'WHERE cpu < 0.5' }\`
-- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`
-
-Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints."
+- **Standalone**: \`recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }\`"
 `;
 
 exports[`schema_to_skill_docs generateRuleKindDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -301,7 +298,7 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 `;
 
 exports[`schema_to_skill_docs generateSeverityDoc matches the reviewed skill-doc snapshot 1`] = `
-"## Alert Event Severity
+"# Alert Event Severity
 
 Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named \`severity\` in the ES|QL breach query output.
 
@@ -330,7 +327,7 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 - \`recovering_count\` — Consecutive recoveries before transitioning to inactive.
 - \`recovering_timeframe\` — Time window for recovering evaluation, e.g. 5m, 15m.
 
-State transition is only allowed on \`kind: alert\` rules ([rule-kind reference](./references/rule-kind.md)). Episode statuses are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md). Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema."
+State transition is only allowed on \`kind: alert\` rules ([rule-kind reference](./references/rule-kind.md)). Episode statuses are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md)."
 `;
 
 exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `

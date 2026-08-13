@@ -69,11 +69,38 @@ describe('createRuleManagementSkill', () => {
     const refNames = (skill.referencedContent ?? []).map((entry) => entry.name);
 
     expect(refNames).toEqual(
-      expect.arrayContaining(['rule-kind', 'episode-lifecycle', 'notifications-overview'])
+      expect.arrayContaining([
+        'rule-kind',
+        'episode-lifecycle',
+        'notifications-overview',
+        'alert-event-severity',
+        'recovery-strategy',
+        'no-data-strategy',
+      ])
     );
     expect(refNames).not.toContain('concepts');
+    expect(refNames).not.toContain('rule-operations-schema');
+    expect(skill.content).toContain('# Rule Operations Schema Reference');
+    expect(skill.content).toContain('`operation: "set_metadata"`');
     expect(skill.content).toContain('./references/rule-kind.md');
     expect(skill.content).toContain('./references/episode-lifecycle.md');
     expect(skill.content).toContain('./references/notifications-overview.md');
+    expect(skill.content).toContain('./references/alert-event-severity.md');
+    expect(skill.content).toContain('./references/recovery-strategy.md');
+    expect(skill.content).toContain('./references/no-data-strategy.md');
+    expect(skill.content).toContain('./references/rule-schema.md');
+    expect(skill.content).toContain('## When to Load References');
+    expect(skill.content).not.toContain('`recovery_strategy` is a **top-level rule field**');
+    expect(skill.content).not.toContain('`no_data_strategy` is a **top-level rule field**');
+
+    const byName = Object.fromEntries(
+      (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
+    );
+    expect(byName['notifications-overview']).not.toContain('Alert Event Severity');
+    expect(byName['notifications-overview']).toContain('## Notifications Require Alert Kind');
+    expect(skill.content).not.toContain('## Notifications Require Alert Kind');
+    expect(byName['alert-event-severity']).toContain('# Alert Event Severity');
+    expect(byName['recovery-strategy']).toContain('# Recovery Strategy');
+    expect(byName['no-data-strategy']).toContain('# No-Data Strategy');
   });
 });

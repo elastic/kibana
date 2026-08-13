@@ -46,6 +46,26 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
         content: generateEpisodeLifecycleDoc(),
       },
       {
+        name: 'alert-event-severity',
+        relativePath: './references',
+        content: generateSeverityDoc(),
+      },
+      {
+        name: 'recovery-strategy',
+        relativePath: './references',
+        content: generateRecoveryStrategyDoc(),
+      },
+      {
+        name: 'no-data-strategy',
+        relativePath: './references',
+        content: generateNoDataStrategyDoc(),
+      },
+      {
+        name: 'rule-schema',
+        relativePath: './references',
+        content: generateRuleSchemaDoc(),
+      },
+      {
         name: 'notifications-overview',
         relativePath: './references',
         content: `# Notifications via Action Policies
@@ -54,25 +74,22 @@ Notifications are not configured on the rule itself. Alert episodes are matched 
 
 When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
 
----
+## Notifications Require Alert Kind
 
-${generateSeverityDoc()}`,
-      },
-      {
-        name: 'rule-schema',
-        relativePath: './references',
-        content: generateRuleSchemaDoc(),
-      },
-      {
-        name: 'rule-operations-schema',
-        relativePath: './references',
-        content: generateRuleOperationsDoc(),
+Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./references/rule-kind.md) and [episode-lifecycle reference](./references/episode-lifecycle.md).
+
+When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
+
+1. **Explain the difference**: signal rules are observation-only ("Signal") and do not trigger notifications. Alert rules ("Alert") track episode lifecycle and can dispatch to action policies.
+2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.
+3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing signal rule cannot be converted. Offer to create a new alert rule with the same query and schedule, then set up notifications on the new rule.
+4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
       },
     ],
     content: `## When to Use This Skill
 
 Use this skill when:
-- A user asks to find, list, inspect, or modify existing alerting V2 rules.
+- A user asks to find, list, inspect, or modify existing alerting rules.
 - A user asks to create a new alerting rule from natural language requirements.
 - A user asks to change a rule's query, schedule, thresholds, or metadata.
 
@@ -84,13 +101,28 @@ Do **not** use this skill for:
 
 ---
 
-## Domain Knowledge
+## When to Load References
 
-For questions about alerting concepts:
-- Rule kinds (alert vs signal) — consult the [rule-kind reference](./references/rule-kind.md).
-- Episode lifecycle — consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
-- How notifications relate to rules — consult the [notifications-overview reference](./references/notifications-overview.md).
-- Alert event severity — also covered in the [notifications-overview reference](./references/notifications-overview.md).
+### Rule Kind
+When the user asks whether a rule should notify, be observation-only, or about the difference between alert and signal, consult the [rule-kind reference](./references/rule-kind.md).
+
+### Episode Lifecycle
+When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+
+### Severity
+When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
+
+### Recovery Strategy
+When the user wants alerts to recover only when a condition is met, to never recover, or asks how recovery is detected, set \`recovery_strategy\` on \`set_query\`. Consult the [recovery-strategy reference](./references/recovery-strategy.md).
+
+### No-Data Strategy
+When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
+
+### Rule Schema
+When composing or validating and a field is not in the operations tables (e.g. \`time_field\`, \`artifacts\`, nested query objects), consult the [rule-schema reference](./references/rule-schema.md).
+
+### Notifications
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md) (includes **Notifications Require Alert Kind**). Do not compose action policies from this skill — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill after the rule is \`kind: alert\`.
 
 ---
 
@@ -120,6 +152,8 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 See the [rule-kind reference](./references/rule-kind.md) when choosing between \`alert\` and \`signal\`.
 
+${generateRuleOperationsDoc()}
+
 ## ES|QL Query Guidance
 
 - Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
@@ -140,14 +174,6 @@ See the [rule-kind reference](./references/rule-kind.md) when choosing between \
   output columns. Use fields that appear in the query results.
 
 ${generateStateTransitionDoc()}
-
-## Severity
-
-When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [notifications-overview reference](./references/notifications-overview.md) for valid values, the extraction model, and literal vs conditional patterns.
-
-${generateRecoveryStrategyDoc()}
-
-${generateNoDataStrategyDoc()}
 
 ## Final Validation
 
@@ -187,26 +213,13 @@ where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` f
 
 ---
 
-## Notifications Require Alert Kind
-
-Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./references/rule-kind.md), [episode-lifecycle reference](./references/episode-lifecycle.md), and [notifications-overview reference](./references/notifications-overview.md).
-
-When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
-
-1. **Explain the difference**: signal rules are observation-only ("Signal") and do not trigger notifications. Alert rules ("Alert") track episode lifecycle and can dispatch to action policies.
-2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.
-3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing signal rule cannot be converted. Offer to create a new alert rule with the same query and schedule, then set up notifications on the new rule.
-4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.
-
----
-
 ## Offering Notifications After Rule Compose
 
 After composing a complete **alert** rule (has name, query, schedule, and \`kind: alert\`), proactively ask the user:
 **"Would you like to set up email notifications for this rule?"**
 
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
-If the rule's kind is \`signal\`, follow the "Notifications Require Alert Kind" guidance above before proceeding.
+If the rule's kind is \`signal\`, follow **Notifications Require Alert Kind** in the [notifications-overview reference](./references/notifications-overview.md) before proceeding.
 
 If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup (see [notifications-overview reference](./references/notifications-overview.md)). Do **not** compose action policies or notification workflows from this skill.`,
     getInlineTools: () => [manageRuleTool(deps)],

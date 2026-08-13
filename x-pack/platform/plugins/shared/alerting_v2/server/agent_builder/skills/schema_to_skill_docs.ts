@@ -482,7 +482,7 @@ export const generateStateTransitionDoc = (): string => {
     '',
     ...bullets,
     '',
-    'State transition is only allowed on `kind: alert` rules ([rule-kind reference](./references/rule-kind.md)). Episode statuses are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md). Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.',
+    'State transition is only allowed on `kind: alert` rules ([rule-kind reference](./references/rule-kind.md)). Episode statuses are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md).',
   ].join('\n');
 };
 
@@ -511,12 +511,12 @@ export const generateEpisodeLifecycleDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the Alert Event Severity section with heading, valid values, and ES|QL patterns. */
+/** Generates standalone markdown for alert event severity: valid values and ES|QL patterns. */
 export const generateSeverityDoc = (): string => {
   const values = formatEnumValuesList(getSeverityValues());
 
   return [
-    '## Alert Event Severity',
+    '# Alert Event Severity',
     '',
     'Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
     '',
@@ -536,7 +536,7 @@ export const generateSeverityDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the No-Data Strategy section with heading, prose, and value table. */
+/** Generates standalone markdown for no-data strategy: values, wiring, and kind constraints. */
 export const generateNoDataStrategyDoc = (): string => {
   const table = generateEnumTable({
     header: ['Value', 'Behaviour'],
@@ -551,7 +551,7 @@ export const generateNoDataStrategyDoc = (): string => {
   });
 
   return [
-    '## No-Data Strategy',
+    '# No-Data Strategy',
     '',
     '`no_data_strategy` is a **top-level rule field** that controls behaviour when no data is present.',
     '',
@@ -561,11 +561,10 @@ export const generateNoDataStrategyDoc = (): string => {
     "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
     '',
     'Signal rules cannot set `no_data_strategy` ([rule-kind reference](./references/rule-kind.md)).',
-    'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
   ].join('\n');
 };
 
-/** Generates the Recovery Strategy section with heading, prose, and value list. */
+/** Generates standalone markdown for recovery strategy: values, wiring, and kind constraints. */
 export const generateRecoveryStrategyDoc = (): string => {
   const list = generateEnumList({
     schemaValues: getRecoveryStrategyValues(),
@@ -578,7 +577,7 @@ export const generateRecoveryStrategyDoc = (): string => {
   });
 
   return [
-    '## Recovery Strategy',
+    '# Recovery Strategy',
     '',
     '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./references/episode-lifecycle.md)). Signal rules (`kind: signal`) cannot set `recovery_strategy` ([rule-kind reference](./references/rule-kind.md)).',
     '',
@@ -589,8 +588,6 @@ export const generateRecoveryStrategyDoc = (): string => {
     }'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
     "- **Composed**: `recovery: { segment: 'WHERE cpu < 0.5' }`",
     "- **Standalone**: `recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }`",
-    '',
-    'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
   ].join('\n');
 };
 
