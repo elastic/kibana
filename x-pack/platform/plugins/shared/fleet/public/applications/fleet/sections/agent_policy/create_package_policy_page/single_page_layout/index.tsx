@@ -358,7 +358,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         selectedIlmPolicy,
         packageInfo,
         notifications,
-        packageInfo.title ?? packageInfo.name
+        packageInfo.title ?? packageInfo.name,
+        wasEnabled
       );
     })();
   }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
