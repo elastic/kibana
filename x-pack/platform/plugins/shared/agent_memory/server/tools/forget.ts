@@ -11,12 +11,13 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { DataStreamClient } from '@kbn/data-streams';
-import type { MemoryStorage } from '../storage/memory_storage';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { agentMemoryHistoryMappings } from '../storage/history_stream';
 import { resolveIdentity } from '../core/resolve_identity';
 import { tombstoneMemory } from '../core/tombstone_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { GetMemoryStorage } from '../types';
 
 const forgetSchema = z.object({
   id: z
@@ -38,10 +39,12 @@ export const createForgetTool = ({
   getStorage,
   getHistoryClient,
   getSecurityStart,
+  getCoreSecurity,
 }: {
-  getStorage: () => MemoryStorage;
+  getStorage: GetMemoryStorage;
   getHistoryClient: () => DataStreamClient<typeof agentMemoryHistoryMappings>;
   getSecurityStart: () => SecurityPluginStart;
+  getCoreSecurity: () => SecurityServiceStart;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
   id: platformMemoryTools.forget,
   type: ToolType.builtin,
@@ -89,7 +92,7 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
     }
 
     // ── Identity resolution ───────────────────────────────────────────────────
-    const identity = resolveIdentity({ request: context.request, security });
+    const identity = resolveIdentity({ request: context.request, security: getCoreSecurity() });
     if (!identity) {
       return {
         results: [
@@ -103,7 +106,7 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
 
     // ── Tombstone ─────────────────────────────────────────────────────────────
     const result = await tombstoneMemory({
-      storage: getStorage(),
+      storage: getStorage(context.esClient.asCurrentUser),
       historyClient: getHistoryClient(),
       params: {
         id,

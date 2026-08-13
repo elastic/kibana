@@ -23,6 +23,7 @@
     "@kbn/workflows-extensions",
     "@kbn/spaces-plugin",
     "@kbn/zod",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/core-security-server"
   ]
 }

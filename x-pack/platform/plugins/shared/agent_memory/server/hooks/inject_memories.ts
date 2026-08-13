@@ -8,12 +8,14 @@
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { MemoryStorage } from '../storage/memory_storage';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
+import type { GetMemoryStorage } from '../types';
 
 /** Max length of the user message used as the recall query. */
 const MAX_QUERY_LENGTH = 500;
@@ -78,6 +80,9 @@ export const renderUntrustedBlock = (
  * `read_agent_memory`, has no identity, or sends an empty message. Any recall
  * error fails open — the agent round continues without memories.
  *
+ * `getSecurity` (plugin) provides authz; `getCoreSecurity` (core) provides authc.
+ * The two are not interchangeable — see `resolveIdentity`.
+ *
  * Recalled content is injected into `nextInput.attachment_context` (prepended
  * if context already exists). It is NOT persisted in the conversation round —
  * the stored round body sees the un-augmented message (verification item 10).
@@ -88,13 +93,17 @@ export const renderUntrustedBlock = (
 export const registerMemoryHook = ({
   hooksSetup,
   getStorage,
+  getCurrentUserEsClient,
   getSecurity,
+  getCoreSecurity,
   getSpaceId,
   logger,
 }: {
   hooksSetup: HooksServiceSetup;
-  getStorage: () => MemoryStorage;
+  getStorage: GetMemoryStorage;
+  getCurrentUserEsClient: (request: KibanaRequest) => ElasticsearchClient;
   getSecurity: () => SecurityPluginStart;
+  getCoreSecurity: () => SecurityServiceStart;
   /** Returns the Kibana space ID for the given request. */
   getSpaceId: (request: KibanaRequest) => string;
   logger: Logger;
@@ -124,7 +133,7 @@ export const registerMemoryHook = ({
           }
 
           // ── Identity check — fail open if no user context ─────────────────
-          const identity = resolveIdentity({ request, security });
+          const identity = resolveIdentity({ request, security: getCoreSecurity() });
           if (!identity) return {};
 
           // ── Build query from user message (trimmed for cost) ──────────────
@@ -135,7 +144,7 @@ export const registerMemoryHook = ({
           let block: string;
           try {
             const result = await recallMemory({
-              storage: getStorage(),
+              storage: getStorage(getCurrentUserEsClient(request)),
               params: { query, limit: HOOK_RECALL_LIMIT, space_id: spaceId, identity },
               logger,
             });

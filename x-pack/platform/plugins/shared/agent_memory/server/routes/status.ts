@@ -26,8 +26,9 @@ export const registerStatusRoute = ({ router, getMemoryStorage }: AgentMemoryRou
       },
       validate: false,
     },
-    async (_context, _request, response) => {
-      const storage = getMemoryStorage();
+    async (context, _request, response) => {
+      const core = await context.core;
+      const storage = getMemoryStorage(core.elasticsearch.client.asCurrentUser);
       const exists = await storage.getClient().existsIndex();
       return response.ok({
         body: {

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { MemoryStorage } from './storage/memory_storage';
@@ -37,8 +40,15 @@ export interface AgentMemoryStartDependencies {
   spaces?: SpacesPluginStart;
 }
 
+/**
+ * Builds a request-scoped storage adapter. `agent-memory` is a user data
+ * index, so callers must pass `asCurrentUser` — `kibana_system` has no
+ * privileges on non-dot indices.
+ */
+export type GetMemoryStorage = (esClient: ElasticsearchClient) => MemoryStorage;
+
 /** Dependencies threaded into route handlers. */
 export interface AgentMemoryRouteHandlerDeps {
   router: IRouter;
-  getMemoryStorage: () => MemoryStorage;
+  getMemoryStorage: GetMemoryStorage;
 }
