@@ -114,7 +114,7 @@ export const nameColumn = ({
           trackAction?.();
           onBackgroundSearchOpened?.({ session, event });
           if (!event.defaultPrevented) {
-            // when the link was clicked on the Background management page  
+            // when the link was clicked on the Background management page
             event.preventDefault();
             core.application.navigateToUrl(href);
           }
