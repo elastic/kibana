@@ -2213,7 +2213,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        **Technical Preview; added in 9.6.0.** Get the access control for a specific conversation. Anyone who can read the conversation sees the full member list; `permissions.update_access_control` reports whether the caller can change it. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Get the access control for a specific conversation. Anyone who can read the conversation sees the full member list; `permissions.update_access_control` reports whether the caller can change it. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-conversations-conversation-id-access-control
       parameters:
         - description: The unique identifier of the conversation whose access control to retrieve.
@@ -2285,7 +2285,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/conversations/{conversation_id}/access_control
-      x-state: Added in 9.6.0
+      x-state: Technical Preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2297,7 +2297,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        **Technical Preview; added in 9.6.0.** Replace a conversation's access mode and member list. Only the conversation owner can call this endpoint; every other caller receives a not-found response. Each call replaces the entire access control — the most recent successful update wins. Members can read and continue the conversation, but still need access to the conversation's agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Replace a conversation's access mode and member list. Only the conversation owner can call this endpoint; every other caller receives a not-found response. Each call replaces the entire access control — the most recent successful update wins. Members can read and continue the conversation, but still need access to the conversation's agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: put-agent-builder-conversations-conversation-id-access-control
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2458,7 +2458,7 @@ paths:
                 { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
               ]
             }
-      x-state: Added in 9.6.0
+      x-state: Technical Preview; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
