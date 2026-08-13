@@ -19,7 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const config = getService('config');
 
-  describe('lens smokescreen tests', () => {
+  // Flaky on MKI (#kibana-serverless-test-alerts); keep local serverless coverage.
+  // Tracking: https://github.com/elastic/kibana/issues/282284
+  describe('lens smokescreen tests', function () {
+    this.tags(['skipMKI']);
+
     before(async () => {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
@@ -672,7 +676,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'last_value',
         field: 'bytes',
         isPreviousIncompatible: true,
+        keepOpen: true,
       });
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Last value of bytes'
