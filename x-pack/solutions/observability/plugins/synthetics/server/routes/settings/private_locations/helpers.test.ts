@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { allLocationsToClientContract, updatePrivateLocationMonitors } from './helpers';
+import {
+  allLocationsToClientContract,
+  toClientContract,
+  toSavedObjectContract,
+  updatePrivateLocationMonitors,
+} from './helpers';
 import type { RouteContext } from '../../types';
 
 // Mock the syncEditedMonitorBulk module
@@ -95,6 +100,32 @@ describe('toClientContract', () => {
         tags: ['a tag'],
       },
     ]);
+  });
+
+  it('surfaces agentConditionSharding from saved object attributes', () => {
+    const [scalable, classic] = allLocationsToClientContract({
+      locations: [
+        {
+          label: 'scalable',
+          agentPolicyId: 'ap-1',
+          id: 'loc-1',
+          isServiceManaged: false,
+          agentConditionSharding: true,
+        },
+        {
+          label: 'classic',
+          agentPolicyId: 'ap-2',
+          id: 'loc-2',
+          isServiceManaged: false,
+        },
+      ],
+    });
+
+    expect(scalable).toEqual(
+      expect.objectContaining({ id: 'loc-1', agentConditionSharding: true })
+    );
+    expect(classic).toEqual(expect.objectContaining({ id: 'loc-2' }));
+    expect(classic).not.toHaveProperty('agentConditionSharding');
   });
 
   it('formats SO attributes to client contract with truthy geo location', () => {
@@ -231,5 +262,36 @@ describe('updatePrivateLocationMonitors', () => {
       routeContext: ROUTE_CONTEXT,
       spaceId: SECOND_SPACE_ID,
     });
+  });
+});
+
+describe('agentConditionSharding contract mappers', () => {
+  const baseLocation = {
+    label: 'Loc',
+    id: 'loc-1',
+    agentPolicyId: 'ap-1',
+    isServiceManaged: false,
+  };
+
+  it('persists agentConditionSharding onto the saved object contract', () => {
+    expect(
+      toSavedObjectContract({
+        ...baseLocation,
+        agentConditionSharding: true,
+      })
+    ).toEqual(expect.objectContaining({ agentConditionSharding: true }));
+  });
+
+  it('omits agentConditionSharding when the location is classic', () => {
+    expect(toSavedObjectContract(baseLocation).agentConditionSharding).toBeUndefined();
+  });
+
+  it('returns agentConditionSharding on the single-location client contract', () => {
+    expect(
+      toClientContract({
+        attributes: { ...baseLocation, agentConditionSharding: true },
+        namespaces: ['default'],
+      } as any)
+    ).toEqual(expect.objectContaining({ agentConditionSharding: true }));
   });
 });
