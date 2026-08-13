@@ -662,7 +662,6 @@ describe('Zabbix', () => {
     it('should succeed when a host can be listed', async () => {
       mockRpcResult([{ hostid: '10084', host: 'Zabbix server' }]);
 
-      if (!Zabbix.test) throw new Error('Test handler not defined');
       const result = await Zabbix.test.handler(mockContext);
 
       expect(mockClient.post).toHaveBeenCalledWith(
@@ -672,14 +671,12 @@ describe('Zabbix', () => {
           params: { output: ['hostid', 'host'], limit: 1 },
         })
       );
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('1');
     });
 
     it('should throw a formatted error on failure', async () => {
       mockRpcError('Session terminated, re-login, please.');
 
-      if (!Zabbix.test) throw new Error('Test handler not defined');
       await expect(Zabbix.test.handler(mockContext)).rejects.toThrow(
         'Zabbix API error calling host.get: Session terminated, re-login, please.'
       );

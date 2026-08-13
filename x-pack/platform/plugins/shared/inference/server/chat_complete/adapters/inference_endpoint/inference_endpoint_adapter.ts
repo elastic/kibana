@@ -30,6 +30,7 @@ import {
 } from '../../simulated_function_calling';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
+import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
 import type { OpenAIRequest } from '../openai/types';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
@@ -92,8 +93,9 @@ export const inferenceEndpointAdapter = {
       })
     ).pipe(
       switchMap((stream) => eventSourceStreamIntoObservable(stream)),
-      processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request }),
+      // Elasticsearch's Anthropic stream emits valid OpenAI-compatible chunks with `object: null`.
+      processOpenAIStream({ allowNullObjectWithChoices: true }),
+      emitTokenCountEstimateIfMissing({ request, logger }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
@@ -136,7 +138,8 @@ const createEndpointRequest = ({
     };
   }
 
-  const openAiTools = toolsToOpenAI(tools);
+  const toolsForRequest = ensureToolsWhenHistoryHasToolUse({ tools, messages });
+  const openAiTools = toolsToOpenAI(toolsForRequest);
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
 
   return {

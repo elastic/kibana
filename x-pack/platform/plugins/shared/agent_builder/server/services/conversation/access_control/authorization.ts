@@ -7,21 +7,16 @@
 
 import type { UserIdAndName } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import type { ConversationPermissions } from '../../../../common/http_api/conversations';
 import type { ConversationProperties } from '../client/storage';
 
-export type ConversationAccess = 'converse' | 'owner';
+export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete';
 
-/**
- * Checks whether the current user owns the conversation.
- *
- * Username matching is limited to documents that never stored a `user_id`, so those owners are not
- * orphaned. It cannot distinguish same-username principals across authentication realms.
- */
 export const isConversationOwner = ({
   conversation,
   user,
 }: {
-  conversation: Pick<ConversationProperties, 'user_id' | 'user_name'>;
+  conversation: ConversationProperties;
   user: UserIdAndName;
 }): boolean => {
   if (conversation.user_id !== undefined && user.id !== undefined) {
@@ -38,29 +33,81 @@ export const isConversationOwner = ({
 const isPublicConversation = ({
   conversation,
 }: {
-  conversation: Pick<ConversationProperties, 'access_control'>;
+  conversation: ConversationProperties;
 }): boolean => {
   return conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
+};
+
+export const isConversationMember = ({
+  conversation,
+  user,
+}: {
+  conversation: ConversationProperties;
+  user: UserIdAndName;
+}): boolean => {
+  if (user.id === undefined || conversation.access_control?.entries === undefined) {
+    return false;
+  }
+
+  return conversation.access_control.entries.some(
+    (entry) => entry.type === 'user' && entry.id === user.id
+  );
 };
 
 export const hasConversationConverseAccess = ({
   conversation,
   user,
 }: {
-  conversation: Pick<ConversationProperties, 'user_id' | 'user_name' | 'access_control'>;
+  conversation: ConversationProperties;
   user: UserIdAndName;
 }): boolean => {
   if (isConversationOwner({ conversation, user })) {
     return true;
   }
 
-  return isPublicConversation({ conversation });
+  return isPublicConversation({ conversation }) || isConversationMember({ conversation, user });
 };
 
 export const hasConversationOwnerAccess = ({
   conversation,
   user,
 }: {
-  conversation: Pick<ConversationProperties, 'user_id' | 'user_name' | 'access_control'>;
+  conversation: ConversationProperties;
   user: UserIdAndName;
 }): boolean => isConversationOwner({ conversation, user });
+
+export const hasConversationRenameAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: ConversationProperties;
+  user: UserIdAndName;
+}): boolean => hasConversationOwnerAccess({ conversation, user });
+
+export const hasConversationDeleteAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: ConversationProperties;
+  user: UserIdAndName;
+}): boolean => hasConversationOwnerAccess({ conversation, user });
+
+export const hasConversationUpdateAccessControlAccess = ({
+  conversation,
+  user,
+}: {
+  conversation: ConversationProperties;
+  user: UserIdAndName;
+}): boolean => hasConversationOwnerAccess({ conversation, user });
+
+export const getConversationPermissions = ({
+  conversation,
+  user,
+}: {
+  conversation: ConversationProperties;
+  user: UserIdAndName;
+}): ConversationPermissions => ({
+  rename: hasConversationRenameAccess({ conversation, user }),
+  delete: hasConversationDeleteAccess({ conversation, user }),
+  update_access_control: hasConversationUpdateAccessControlAccess({ conversation, user }),
+});
