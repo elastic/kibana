@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import {
+  extendPlaywrightPage,
+  KibanaCodeEditorWrapper,
+  QueryBar,
+  ContentListWrapper,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { ContentListWrapper } from '@kbn/scout';
-import type { Locator, ScoutPage } from '@kbn/scout';
 import type { LensPageObjects } from './page_objects';
 import {
   DATA_VIEW_ID,
@@ -17,6 +23,7 @@ import {
   LOGSTASH_IN_RANGE_DATES,
 } from './constants';
 
+type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 /**
  * Creates an ad hoc (temporary) data view from the Lens data panel switcher.
  * Equivalent to FTR `dataViews.createFromSearchBar({ name, adHoc: true })` in the Lens context.
@@ -127,6 +134,66 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
   if (shouldClickMenu) {
     await csvMenuItem.click();
   }
+
+  // FTR `closeExportFlyout` — dismiss leftover export UI so the editor stays interactive.
+  await page.keyboard.press('Escape');
+  await expect(page.testSubj.locator('exportFlyoutCloseButton')).toBeHidden();
+  await expect(page.testSubj.locator('exportPopoverPanel')).toBeHidden();
+}
+
+type LensCsvContent = Record<string, { content: string; type: string }>;
+
+/** Reads `window.ELASTIC_LENS_CSV_CONTENT` when CSV download debug is enabled. */
+export async function getLensCsvContent(page: ScoutPage): Promise<LensCsvContent | undefined> {
+  return page.evaluate(
+    () =>
+      (
+        window as Window & {
+          ELASTIC_LENS_CSV_CONTENT?: LensCsvContent;
+        }
+      ).ELASTIC_LENS_CSV_CONTENT
+  );
+}
+
+/** Waits until CSV debug content has at least `minLayers` keys, then returns it. */
+export async function waitForLensCsvContent(
+  page: ScoutPage,
+  minLayers: number
+): Promise<LensCsvContent> {
+  let content: LensCsvContent | undefined;
+  await expect
+    .poll(async () => {
+      content = await getLensCsvContent(page);
+      return content && Object.keys(content).length >= minLayers;
+    })
+    .toBe(true);
+  if (!content) {
+    throw new Error(`Expected at least ${minLayers} CSV layer(s)`);
+  }
+  return content;
+}
+
+/**
+ * Opens a Lens share URL in a new tab and waits for the app + chart to mount.
+ * Caller must close the returned page (use `try`/`finally`).
+ */
+export async function openSharedLensUrl(options: {
+  context: { newPage: () => Promise<PlaywrightPage> };
+  kbnUrl: KibanaUrl;
+  url: string;
+  chartTestSubj?: string;
+}): Promise<{ page: ScoutPage; queryBar: QueryBar }> {
+  const { context, kbnUrl, url, chartTestSubj = 'xyVisChart' } = options;
+  const sharedPage = extendPlaywrightPage({
+    page: await context.newPage(),
+    kbnUrl,
+  });
+  await sharedPage.goto(url);
+  await sharedPage.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
+  await sharedPage
+    .locator(`[data-test-subj="lnsWorkspace"] [data-test-subj="${chartTestSubj}"]`)
+    .waitFor({ state: 'visible' });
+  return { page: sharedPage, queryBar: new QueryBar(sharedPage) };
 }
 
 // Uses Lens-editor-only methods (e.g. `inlineEditor`, `convertToEsqlButton`), so this is
@@ -323,7 +390,7 @@ export async function openDimensionEditorAndWaitForFlyout(
   await dimensionButton.click();
 
   // Confirm that the secondary flyout is opened
-  await expect(lens.secondaryFlyoutBackButton).toBeVisible();
+  await expect(lens.workspace.secondaryFlyoutBackButton).toBeVisible();
   await expect(page.getByTestId('text-based-languages-field-selection-row')).toBeVisible();
 }
 
@@ -332,17 +399,17 @@ export async function openInlineEditorAndWaitVisible(
   panelId: string
 ) {
   await dashboard.openInlineEditor(panelId);
-  await expect(lens.inlineEditor).toBeVisible();
+  await expect(lens.workspace.inlineEditor).toBeVisible();
 }
 
 export async function applyLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.applyFlyoutButton.click();
-  await expect(lens.inlineEditor).toBeHidden();
+  await expect(lens.workspace.inlineEditor).toBeHidden();
 }
 
 export async function cancelLensInlineEditorAndWaitClosed({ lens }: Pick<LensPageObjects, 'lens'>) {
   await lens.cancelFlyoutButton.click();
-  await expect(lens.inlineEditor).toBeHidden();
+  await expect(lens.workspace.inlineEditor).toBeHidden();
 }
 
 /**
@@ -368,15 +435,15 @@ export async function convertToEsqlViaModal({
   const { lens } = pageObjects;
 
   // Click on the "Conver to ES|QL" button in the in-line editor
-  await lens.convertToEsqlButton.click();
+  await lens.workspace.convertToEsqlButton.click();
 
   // Click on the confirmation button in the modal
-  const modal = lens.convertToEsqlModal;
-  await lens.convertToEsqlModalConfirmButton.click();
+  const modal = lens.workspace.convertToEsqlModal;
+  await lens.workspace.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 
   // Confirm that the in-line editor has been updated
-  await expect(lens.convertToEsqlButton).toBeHidden();
+  await expect(lens.workspace.convertToEsqlButton).toBeHidden();
   await expect(page.getByTestId('ESQLEditor')).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
 }
