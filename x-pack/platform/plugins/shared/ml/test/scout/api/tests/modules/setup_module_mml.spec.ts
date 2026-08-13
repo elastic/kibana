@@ -12,7 +12,6 @@ const SOURCE_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/ml/module_samp
 const MODULE_ID = 'sample_data_weblogs';
 const DATA_VIEW = { name: 'ft_module_sample_logs', timeField: '@timestamp' };
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe(
   'setup_module: estimate model memory limit',
   { tag: '@local-stateful-classic' },

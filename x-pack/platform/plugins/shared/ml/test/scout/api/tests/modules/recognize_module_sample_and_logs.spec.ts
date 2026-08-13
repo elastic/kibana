@@ -8,7 +8,6 @@
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe(
   'recognize_module: sample data and logs datasets',
   { tag: '@local-stateful-classic' },

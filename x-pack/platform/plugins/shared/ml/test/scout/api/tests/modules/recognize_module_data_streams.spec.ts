@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 import { setupFleetPackages, removeFleetPackages } from '../../fixtures/fleet_helpers';
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe(
   'recognize_module: data stream datasets (requires Fleet packages)',
   { tag: '@local-stateful-classic' },

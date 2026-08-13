@@ -38,7 +38,6 @@ const EXPECTED: SetupModuleExpected = {
   dashboards: ['ml_http_access_explorer_ecs'],
 };
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe(
   'setup_module: nginx_ecs with startDatafeed true',
   { tag: '@local-stateful-classic' },

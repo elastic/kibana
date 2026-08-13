@@ -66,7 +66,6 @@ const testDataList: SetupModuleTestData[] = [
   },
 ];
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe(
   'setup_module: metrics modules with startDatafeed true',
   { tag: '@local-stateful-classic' },

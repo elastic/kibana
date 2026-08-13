@@ -10,7 +10,6 @@ import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 
 const DATA_VIEW = { name: 'ft_module_sample_logs', timeField: '@timestamp' };
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe('setup_module: rejected requests', { tag: '@local-stateful-classic' }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.dataViews.create({

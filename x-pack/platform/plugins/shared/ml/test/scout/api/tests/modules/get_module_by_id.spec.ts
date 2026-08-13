@@ -35,7 +35,6 @@ const MODULE_IDS = [
   'uptime_heartbeat',
 ];
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe('get_module: load each module by ID', { tag: '@local-stateful-classic' }, () => {
   // Fleet packages register apache_data_stream / nginx_data_stream in the ML module registry
   apiTest.beforeAll(async ({ apiServices }) => {

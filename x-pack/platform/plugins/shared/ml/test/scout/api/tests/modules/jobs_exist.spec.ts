@@ -14,7 +14,6 @@ const MODULE_ID = 'sample_data_weblogs';
 const DATA_VIEW = { name: 'ft_module_sample_logs', timeField: '@timestamp' };
 const JOB_IDS = ['low_request_rate', 'response_code_rates', 'url_scanning'];
 
-// TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe(
   'GET ml/modules/jobs_exist: space-scoped job discovery',
   { tag: '@local-stateful-classic' },
