@@ -125,7 +125,9 @@ export async function updateScoutConfigManifests(
       `Retrying manifest generation for ${failedConfigPaths.length} configs ` +
         'that failed during the first attempt'
     );
-    failedConfigPaths.forEach((configPath: string) => generateScoutConfigManifest(configPath, log));
+    for (const configPath of failedConfigPaths) {
+      await generateScoutConfigManifest(configPath, log);
+    }
   }
 
   if (removeDangling) {
