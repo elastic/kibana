@@ -51,42 +51,7 @@ const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as jest.Mock;
 const mockGetStorage = jest.fn();
 const mockSetStorage = jest.fn();
 const setQuery: jest.Mock = jest.fn();
-const filebeatDataView = {
-  id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9',
-  title: 'filebeat-*',
-  browserFields: {},
-  fields: {},
-  loading: false,
-  patternList: ['filebeat-*'],
-  dataView: {
-    id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9',
-    fields: {},
-  },
-  runtimeMappings: {},
-  indexFields: [],
-};
-const packetbeatDataView = {
-  id: '28995490-023d-11eb-bcb6-6ba0578012a9',
-  title: 'packetbeat-*',
-  browserFields: {},
-  fields: {},
-  loading: false,
-  patternList: ['packetbeat-*'],
-  dataView: {
-    id: '28995490-023d-11eb-bcb6-6ba0578012a9',
-    fields: {},
-  },
-  runtimeMappings: {},
-  indexFields: [],
-};
-const mockState = {
-  ...mockGlobalState,
-  sourcerer: {
-    ...mockGlobalState.sourcerer,
-    kibanaDataViews: [filebeatDataView, packetbeatDataView],
-  },
-};
-const defaultMockStore = createMockStore(mockState);
+const defaultMockStore = createMockStore(mockGlobalState);
 const testProps = {
   endDate: '2019-08-28T05:50:57.877Z',
   filters: [],

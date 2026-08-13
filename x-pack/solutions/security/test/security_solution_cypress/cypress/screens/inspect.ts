@@ -77,6 +77,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         title: 'All Hosts Table',
         tab: ALL_HOSTS_TAB,
         id: ALL_HOSTS_TABLE,
+        customIndexPattern: '.entities.v2.latest.security',
       },
       {
         title: 'Uncommon processes Table',
@@ -92,7 +93,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
       {
         title: 'Host risk',
         tab: RISK_DETAILS_NAV,
-        customIndexPattern: 'risk-score.risk-score-latest-default',
+        customIndexPattern: '.entities.v2.latest.security',
         id: HOST_BY_RISK_TABLE,
       },
     ],
@@ -102,12 +103,14 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         panelSelector: HOSTS_VISUALIZATION,
         tab: ALL_HOSTS_TAB,
         embeddableId: 'hostsKpiHostsQuery-hosts-metric-embeddable',
+        customIndexPattern: '.entities.v2.latest.security',
       },
       {
         title: 'all hosts',
         panelSelector: HOSTS_VISUALIZATION,
         tab: ALL_HOSTS_TAB,
         embeddableId: 'hostsKpiHostsQuery-area-embeddable',
+        customIndexPattern: '.entities.v2.latest.security',
       },
       {
         title: 'Unique IPs',
@@ -231,12 +234,14 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         panelSelector: USERS_VISUALIZATION,
         embeddableId: 'TotalUsersKpiQuery-users-metric-embeddable',
         tab: ALL_USERS_TAB,
+        customIndexPattern: '.entities.v2.latest.security',
       },
       {
         title: 'Users',
         panelSelector: USERS_VISUALIZATION,
         embeddableId: 'TotalUsersKpiQuery-area-embeddable',
         tab: ALL_USERS_TAB,
+        customIndexPattern: '.entities.v2.latest.security',
       },
       {
         title: 'User authentications',
@@ -274,6 +279,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         title: 'Users Table',
         tab: ALL_USERS_TAB,
         id: ALL_USERS_TABLE,
+        customIndexPattern: '.entities.v2.latest.security',
       },
       {
         title: 'Destination IPs Table',
@@ -289,7 +295,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         title: 'User risk',
         tab: RISK_SCORE_TAB,
         id: RISK_SCORE_TAB_CONTENT,
-        customIndexPattern: 'risk-score.risk-score-latest-default',
+        customIndexPattern: '.entities.v2.latest.security',
       },
     ],
   },

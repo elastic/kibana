@@ -41,5 +41,8 @@ export function resolveApiKeyFactory(
       return isManagedElasticsearchBulkEndpointAvailable
         ? createManagedOtlpServiceApiKey
         : (esClient, name) => createShipperApiKey(esClient, name, true);
+    case ApiEndpointId.Supabase:
+    case ApiEndpointId.Vercel:
+      return createManagedOtlpServiceApiKey;
   }
 }

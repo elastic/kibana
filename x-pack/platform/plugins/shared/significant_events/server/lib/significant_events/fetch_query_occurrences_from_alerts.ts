@@ -391,6 +391,7 @@ export function toQueryWithOccurrences({
 }): QueryWithOccurrences {
   return {
     ...queryLink.query,
+    expires_at: queryLink.expires_at,
     rule_uuid: queryLink.rule_id,
     stream_name: queryLink.stream_name,
     occurrences: buildQueryOccurrences({ queryLink, queryOccurrences }),

@@ -58,3 +58,4 @@ export {
   transactionDataSourceSchema,
   filtersSchema,
 } from './src/default_api_types';
+export { MAX_SERVICE_NAME_LENGTH } from './src/constants';

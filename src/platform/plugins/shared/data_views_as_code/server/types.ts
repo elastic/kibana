@@ -10,6 +10,7 @@ import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface DataViewsAsCodeServerPluginSetupDependencies {
@@ -19,4 +20,5 @@ export interface DataViewsAsCodeServerPluginSetupDependencies {
 
 export interface DataViewsAsCodeServerPluginStartDependencies {
   dataViews: DataViewsServerPluginStart;
+  fieldFormats: FieldFormatsStart;
 }

@@ -44,7 +44,8 @@ Then begin working through the tasks in order.
 It's tempting, when asked to build many connectors, to build the code for all of them first (Task 1-3)
 and defer activation/live-testing (Tasks 4-11) until later. In practice this is where most real bugs
 surface — disabled test buttons, ICU parse errors, endpoints that reject partial updates, query params
-the vendor rejects, wrong auth scopes — none of which unit tests or a code-only review catch, because
+the vendor rejects, an optional modifier param silently sent to the wrong place (query string vs. body),
+wrong auth scopes — none of which unit tests or a code-only review catch, because
 they only show up when the spec is actually loaded and exercised in a running Kibana. If the user
 explicitly asks to defer live testing for a batch, still run the self-review checklist from
 `create-connector`'s Step 4 ("Self-review before handing off") on every connector before considering it
@@ -146,6 +147,12 @@ Args: $ARGUMENTS
 
 This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
 
+**If the user reports `Error: No widget found for schema type: ZodNumberFormat...`** when opening the
+connector creation form in the Kibana UI, a `z.number()` field was used in the connector's config
+`schema` — the form-generator has no numeric widget. Fix it per "There is no widget for `z.number()`
+config fields" in `create-connector/reference/connector-patterns.md` (regex-validated string + `text`
+widget, coerced to a number in the handler), then ask the user to retry.
+
 Mark task 5 as `completed`.
 
 ---
@@ -213,6 +220,21 @@ If tools failed (tool results contain `"status":"failed"`):
      identity even though the ID format, payload shape, and endpoint are all otherwise correct. Retry with
      a different, real human user's ID from the same org before treating this as a connector bug — if that
      succeeds, the code is fine and this is just a property of the test data/account, not something to fix.
+   - `Unknown type "..."` or `Cannot query field "..." on type "..."` on a GraphQL-backed connector — the
+     hardcoded query/mutation string references a type or field name that doesn't exist in the vendor's
+     real schema (a guessed/hallucinated name, not a live-data problem). Don't guess a fix from docs
+     alone — verify the real name with a GraphQL introspection query (`__schema`/`__type`) run through a
+     temporary debug action, per "Verify GraphQL Schemas via Introspection" in
+     `create-connector/reference/custom-connector-setup.md`, then fix every occurrence of the wrong name
+     (check sibling queries/mutations in the same file for the same mistake) and re-test.
+   - **No error at all, but an optional modifier param (`scope`, a filter, an `all_X` flag) appears to have
+     no effect** — e.g. a scoped mute/unmute or a filtered update behaves like an unscoped/unfiltered one.
+     This is not a flaky vendor or a bad test value; it means the handler is sending that param in the
+     query string when the vendor expects the request body (or vice versa), and the vendor is silently
+     ignoring the misplaced field instead of erroring. Check the action's real API docs for where that
+     specific param belongs, fix the handler, and check any sibling action (e.g. the corresponding
+     mute/unmute or enable/disable pair) for the same mistake — don't assume the sibling is correct just
+     because it wasn't the one that failed.
 3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 
@@ -269,6 +291,12 @@ Args: <agent-id>
 
 Use a more specific prompt this time, something like:
 > Search for recent items and give me a detailed summary of what you find.
+
+**If any action has optional modifier params** (`scope`, filters, `all_X` flags, an expiry timestamp)
+beyond its required fields, make sure this test (or an earlier one) actually causes the agent to set at
+least one of them to a non-default value, not just the required-fields-only happy path. A query-param-vs-
+body mismatch on an optional param doesn't error — the vendor silently ignores it — so a test that never
+sets the param will pass even though the feature is broken.
 
 Verify the agent successfully calls tools, gets results, and produces a useful response.
 
