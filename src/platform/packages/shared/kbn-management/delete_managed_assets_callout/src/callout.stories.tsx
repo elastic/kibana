@@ -21,5 +21,5 @@ export const DeleteManagedAssetsCallout = () => {
 };
 
 export const ErrorDeleteManagedAssetsCallout = () => {
-  return <Component assetName="ingest pipelines" />;
+  return <Component assetName="ingest pipelines" color="danger" />;
 };
