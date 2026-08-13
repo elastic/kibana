@@ -23,7 +23,6 @@ import { toolCallAction, executeToolAction } from '../actions';
 import type { ResearchAgentAction } from '../actions';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
-import { debugSessionLog } from './debug_session_log';
 
 /**
  * Convert already-answered ask_user_question steps into tool-call / tool-result
@@ -56,18 +55,6 @@ export const answeredAskUserQuestionStepsToActions = ({
     actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args }] }));
     actions.push(executeToolAction({ toolResults: [{ toolCallId, content, artifact }] }));
   }
-
-  // #region agent log
-  debugSessionLog({
-    hypothesisId: 'F',
-    location: 'pending_ask_user_question_steps_to_actions.ts:answered',
-    message: 'previously answered ask_user_question steps restored into resume actions',
-    data: {
-      answeredAskStepCount: answeredSteps.length,
-      questions: answeredSteps.map((step) => step.questions[0]?.question ?? '(empty)'),
-    },
-  });
-  // #endregion
 
   return actions;
 };
@@ -106,21 +93,6 @@ export const pendingAskUserQuestionStepsToActions = ({
       questions: step.questions,
       answers: response.answers,
     });
-    // #region agent log
-    debugSessionLog({
-      hypothesisId: 'F',
-      location: 'pending_ask_user_question_steps_to_actions.ts:resume',
-      message: 'HITL current answers materialized for resume',
-      data: {
-        promptId: step.prompt_id,
-        questionCount: step.questions.length,
-        contentPreview: content.slice(0, 500),
-        priorAnsweredAskStepsInRound: round.steps.filter(
-          (s) => isAskUserQuestionStep(s) && s.answers !== undefined
-        ).length,
-      },
-    });
-    // #endregion
     actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args }] }));
     actions.push(executeToolAction({ toolResults: [{ toolCallId, content, artifact }] }));
 

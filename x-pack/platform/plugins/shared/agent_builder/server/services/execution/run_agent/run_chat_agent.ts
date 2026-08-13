@@ -28,7 +28,6 @@ import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/ru
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 import { createResultTransformer } from './utils/create_result_transformer';
-import { debugSessionLog } from './utils/debug_session_log';
 import {
   addRoundCompleteEvent,
   extractRound,
@@ -490,20 +489,6 @@ const createInitializerCommand = ({
       (step) => isToolCallStep(step) && step.results.length === 0
     );
     startAt = hasPendingToolCall ? steps.executeTool : steps.researchAgent;
-    // #region agent log
-    debugSessionLog({
-      hypothesisId: 'E',
-      location: 'run_chat_agent.ts:createInitializerCommand',
-      message: 'HITL resume into researchAgent',
-      data: {
-        consumedPromptIds,
-        actionCount: actions.length,
-        hasPendingToolCall,
-        startAt,
-        priorCycle: lastRound.state?.agent?.current_cycle,
-      },
-    });
-    // #endregion
   }
 
   if (lastRound?.state) {

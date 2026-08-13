@@ -11,7 +11,6 @@ import { AgentExecutionMode, ToolType, internalTools } from '@kbn/agent-builder-
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import { debugSessionLog } from '../utils/debug_session_log';
 
 const optionSchema = z.object({
   label: z.string().describe('Short label for the option'),
@@ -49,11 +48,6 @@ Once the user has answered all questions, the execution will resume and the resp
 - When your current instructions (e.g. from active skills) are asking you to.
 - When the user's request is ambiguous AND the missing information cannot be inferred from the conversation or other tools.
 
-## When not to use
-
-- Do **not** re-ask a question (or an equivalent topic) the user already answered earlier in this conversation — including answers from prior \`ask_user_question\` results.
-- Do **not** restart a clarifying interview from scratch after the user has already provided answers; ask only for remaining unknowns, then proceed with the task.
-
 ## Guideline
 
 - There is no hard cap on the number of questions or options, but try to keep them to a reasonable number:
@@ -75,22 +69,6 @@ export const createAskUserQuestionTool = (): BuiltinToolDefinition<typeof schema
     schema,
     tags: ['system'],
     handler: async ({ questions }, ctx) => {
-      // #region agent log
-      debugSessionLog({
-        hypothesisId: 'A,C,E',
-        location: 'ask_user_question.ts:handler',
-        message: 'ask_user_question invoked',
-        data: {
-          questionCount: questions.length,
-          questions: questions.map((q) => ({
-            question: q.question,
-            optionLabels: q.options.map((o) => o.label),
-            multiSelect: q.multi_select,
-          })),
-          executionMode: ctx.executionMode,
-        },
-      });
-      // #endregion
       if (ctx.executionMode === AgentExecutionMode.standalone) {
         return {
           results: [
