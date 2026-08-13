@@ -33,7 +33,6 @@ import {
   buildPolicyBaseIdsWithFallbackKuery,
 } from '../../../../../../../../../common/services';
 import { removeVersionSuffixFromPolicyId } from '../../../../../../../../../common/services/version_specific_policies_utils';
-import { isAgentlessPoliciesUIEnabled } from '../../../../../../services';
 import {
   Loading,
   PackagePolicyActionsMenu,
