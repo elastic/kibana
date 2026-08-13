@@ -232,8 +232,9 @@ export async function callKibanaApi<T = unknown>(
     ...getInternalUiamCallerAttestationHeaders(coreStart, fakeRequest),
   };
 
-  // The workflow's fake request carries no space, so the space has to be encoded in the path.
-  const path = applySpacePrefix(params.path, spaceId);
+  // The workflow's fake request carries neither a space nor the server base path, so both have to
+  // be encoded in the path. Apply the space first to keep the server base path outermost.
+  const path = coreStart.http.basePath.prepend(applySpacePrefix(params.path, spaceId));
   const { response } = await coreStart.http.selfClient.asScoped(fakeRequest).fetch(path, {
     method: params.method,
     headers: outboundHeaders,

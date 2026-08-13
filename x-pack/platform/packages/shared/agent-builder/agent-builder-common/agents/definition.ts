@@ -10,7 +10,7 @@ import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
 
 /**
- * Id of the default agent type
+ * ID of the default agent type
  */
 export const chatAgentTypeId = 'chat';
 
@@ -28,15 +28,20 @@ export enum AgentType {
 export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 
 /**
+ * ID of the AI index available to every chat agent by default.
+ */
+export const agentBuilderDefaultAiIndexId = 'elastic';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {
   /**
-   * Id of the agent
+   * ID of the agent
    */
   id: string;
   /**
-   * Id of the agent type this agent derives from.
+   * ID of the agent type this agent derives from.
    * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
   type: string;
@@ -61,6 +66,18 @@ export interface AgentDefinition {
    * Agent owner metadata.
    */
   created_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was created.
+   */
+  created_at?: string;
+  /**
+   * Metadata for who last updated the agent.
+   */
+  updated_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was last updated.
+   */
+  updated_at?: string;
   /**
    * Optional labels used to organize or filter agents
    */
@@ -122,6 +139,14 @@ export interface AgentConfiguration {
    * When undefined, all connectors remain visible (backward compatibility).
    */
   connector_ids?: string[];
+
+  /**
+   * Optional list of AI indices IDs associated with this agent.
+   * When set, if Context Engine is enabled, the agent will first search through these indices
+   * to answer questions before potentially querying the raw data, in order to improve
+   * the accuracy and token efficiency.
+   * */
+  ai_indices?: string[];
 }
 
 /**
