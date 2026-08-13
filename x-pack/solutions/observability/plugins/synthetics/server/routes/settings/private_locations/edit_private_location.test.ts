@@ -86,4 +86,47 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     expect(edit).not.toHaveBeenCalled();
   });
+
+  it('returns forbidden when a monitor using the location belongs to an unauthorized space', async () => {
+    const response = httpServerMock.createResponseFactory();
+    const forbidden = { statusCode: 403 };
+    response.forbidden.mockReturnValue(forbidden as any);
+    const edit = jest.spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation');
+    jest.spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation').mockResolvedValue({
+      id: 'location-1',
+      namespaces: ['default'],
+      attributes: {
+        id: 'location-1',
+        label: 'Old label',
+        agentPolicyId: 'agent-policy-1',
+        isServiceManaged: false,
+      },
+    } as any);
+
+    const result = await editPrivateLocationRoute().handler({
+      request: { params: { locationId: 'location-1' }, body: { label: 'New label' } },
+      response,
+      savedObjectsClient: {},
+      monitorConfigRepository: {
+        findDecryptedMonitors: jest
+          .fn()
+          .mockResolvedValue([{ namespaces: ['default', 'restricted-space'] }]),
+      },
+      server: {
+        coreStart: {
+          savedObjects: { createInternalRepository: jest.fn().mockReturnValue({}) },
+        },
+        security: {
+          authz: {
+            checkSavedObjectsPrivilegesWithRequest: jest
+              .fn()
+              .mockReturnValue(jest.fn().mockResolvedValue({ hasAllRequested: false })),
+          },
+        },
+      },
+    } as any);
+
+    expect(result).toBe(forbidden);
+    expect(edit).not.toHaveBeenCalled();
+  });
 });

@@ -9,8 +9,55 @@ import { AddEditMonitorAPI } from './add_monitor_api';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
 describe('AddNewMonitorsPublicAPI', () => {
+  describe('revertMonitorIfCreated', () => {
+    const buildApi = (get: jest.Mock) =>
+      new AddEditMonitorAPI({
+        server: { logger: { error: jest.fn() } },
+        spaceId: 'default',
+        monitorConfigRepository: { get },
+      } as any);
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('does not delete policies when a conflicting existing monitor owns the id', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: false,
+      });
+
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it('deletes deterministic orphan policies when no monitor owns the id', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const api = buildApi(jest.fn().mockResolvedValue(null));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: false,
+      });
+
+      expect(bulkDelete).toHaveBeenCalledWith({
+        policyIdsToDelete: ['monitor-1-location-1'],
+        spaceId: 'default',
+      });
+    });
+  });
+
   it('should normalize schedule', async function () {
     const syntheticsService = new SyntheticsService({
       config: {

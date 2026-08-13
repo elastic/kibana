@@ -37,10 +37,21 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
+import {
+  agentIdFromCondition,
+  assignAgentById,
+  isConditionShardedLocation,
+  isEqlSafeLiteral,
+  UNASSIGNED_CONDITION,
+} from './assign_by_condition';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
   globalParams: Record<string, string>;
+}
+
+interface EnrolledAgentHosts {
+  agentIds: string[];
 }
 
 export interface FailedPolicyUpdate {
@@ -196,7 +207,9 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
-    runOnce?: boolean
+    runOnce?: boolean,
+    conditionHosts?: EnrolledAgentHosts,
+    existingCondition?: string | null
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -206,6 +219,27 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
+      if (isConditionShardedLocation(privateLocation)) {
+        const agentIds = conditionHosts?.agentIds ?? [];
+        const existingAgentId = agentIdFromCondition(existingCondition);
+
+        if (existingAgentId && agentIds.includes(existingAgentId)) {
+          // Keep a valid existing pin during edits. Health and balancing moves
+          // belong to the rebalance task, not the monitor CRUD path.
+          newPolicy.condition = existingCondition;
+        } else if (agentIds.length > 0) {
+          newPolicy.condition =
+            assignAgentById(config.id, agentIds)?.condition ?? UNASSIGNED_CONDITION;
+        } else {
+          // An absent condition runs on every agent. Explicitly disable the
+          // monitor until an enrolled agent is available to own it.
+          newPolicy.condition = UNASSIGNED_CONDITION;
+        }
+      } else {
+        // Clear a prior scalable-location pin if the location switches back to
+        // the classic execution model.
+        newPolicy.condition = null;
+      }
       if (testRunId) {
         newPolicy.name =
           config.type === 'browser' ? BROWSER_TEST_NOW_RUN : LIGHTWEIGHT_TEST_NOW_RUN;
@@ -250,6 +284,65 @@ export class SyntheticsPrivateLocation {
     }
   }
 
+  /**
+   * Resolves enrolled Fleet agents for one scalable location policy. This is
+   * deliberately paginated: a large policy must not silently ignore agents
+   * beyond Fleet's first result page.
+   */
+  private async getEnrolledAgentHosts(agentPolicyId: string): Promise<EnrolledAgentHosts> {
+    const agentIds = new Set<string>();
+    const perPage = 1000;
+    let page = 1;
+    let fetched = 0;
+    let total = Infinity;
+
+    while (fetched < total) {
+      const { agents, total: resultTotal } =
+        await this.server.fleet.agentService.asInternalUser.listAgents({
+          showInactive: false,
+          perPage,
+          page,
+          kuery: `policy_id:"${agentPolicyId}"`,
+        });
+
+      total = resultTotal ?? fetched + agents.length;
+      for (const agent of agents) {
+        if (agent.id && isEqlSafeLiteral(agent.id)) {
+          agentIds.add(agent.id);
+        }
+      }
+
+      fetched += agents.length;
+      if (agents.length === 0) {
+        break;
+      }
+      page += 1;
+    }
+
+    return { agentIds: [...agentIds] };
+  }
+
+  /** Resolves each touched scalable location at most once per monitor batch. */
+  private async getConditionHostsByLocation(
+    locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
+  ): Promise<Map<string, EnrolledAgentHosts>> {
+    const conditionLocations = [
+      ...new Map(
+        locations
+          .filter((location) => isConditionShardedLocation(location))
+          .map((location) => [location.id, location])
+      ).values(),
+    ];
+    const entries = await Promise.all(
+      conditionLocations.map(
+        async (location) =>
+          [location.id, await this.getEnrolledAgentHosts(location.agentPolicyId)] as const
+      )
+    );
+
+    return new Map(entries);
+  }
+
   async createPackagePolicies(
     configs: PrivateConfig[],
     privateLocations: SyntheticsPrivateLocations,
@@ -263,6 +356,7 @@ export class SyntheticsPrivateLocation {
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
+    const conditionHostsByLocation = await this.getConditionHostsByLocation(privateLocations);
 
     for (const { config, globalParams } of configs) {
       try {
@@ -285,7 +379,8 @@ export class SyntheticsPrivateLocation {
             globalParams,
             maintenanceWindows,
             testRunId,
-            runOnce
+            runOnce,
+            conditionHostsByLocation.get(location.id)
           );
 
           if (!newPolicy) {
@@ -404,6 +499,8 @@ export class SyntheticsPrivateLocation {
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
+    const conditionHostsByLocation = await this.getConditionHostsByLocation(allPrivateLocations);
+    const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
       const { locations } = config;
@@ -419,13 +516,22 @@ export class SyntheticsPrivateLocation {
 
         try {
           if (hasLocation) {
+            const existingCondition =
+              existingPolicyById.get(newId)?.condition ??
+              legacyPolicyIds
+                .map((id) => existingPolicyById.get(id)?.condition)
+                .find((condition) => condition != null);
             const newPolicy = await this.generateNewPolicy(
               config,
               privateLocation,
               newPolicyTemplate,
               spaceId,
               globalParams,
-              maintenanceWindows
+              maintenanceWindows,
+              undefined,
+              undefined,
+              conditionHostsByLocation.get(privateLocation.id),
+              existingCondition
             );
 
             if (!newPolicy) {

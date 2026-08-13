@@ -21,6 +21,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { agentIdCondition, assignAgentById, UNASSIGNED_CONDITION } from './assign_by_condition';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -460,6 +461,146 @@ describe('SyntheticsPrivateLocation', () => {
     await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
 
     expect(deleteMock).not.toHaveBeenCalled();
+  });
+
+  describe('generateNewPolicy condition sharding', () => {
+    const conditionLocation = {
+      id: 'condition-location',
+      label: 'Condition location',
+      agentPolicyId: 'single-agent-policy',
+      isServiceManaged: false,
+      isAgentSharding: true,
+    } as unknown as PrivateLocationAttributes;
+
+    it('keeps the single agent policy binding and assigns a new monitor to one enrolled agent', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const agentIds = ['agent-a', 'agent-b', 'agent-c'];
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds }
+      );
+
+      expect(policy?.policy_id).toBe('single-agent-policy');
+      expect(policy?.policy_ids).toEqual(['single-agent-policy']);
+      expect(policy?.condition).toBe(assignAgentById(testConfig.id, agentIds)?.condition);
+    });
+
+    it('preserves an edit pin while its assigned agent is still enrolled', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const agentIds = ['agent-a', 'agent-b', 'agent-c'];
+      const assigned = assignAgentById(testConfig.id, agentIds)?.agentId;
+      const existingAgentId = agentIds.find((agentId) => agentId !== assigned)!;
+      const existingCondition = agentIdCondition(existingAgentId);
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds },
+        existingCondition
+      );
+
+      expect(policy?.condition).toBe(existingCondition);
+    });
+
+    it('reassigns an edit when its pinned agent has left the location policy', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const agentIds = ['agent-a', 'agent-b'];
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds },
+        agentIdCondition('departed-agent')
+      );
+
+      expect(policy?.condition).toBe(assignAgentById(testConfig.id, agentIds)?.condition);
+    });
+
+    it('uses the unassigned sentinel when no agent is enrolled', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        conditionLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds: [] }
+      );
+
+      expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
+    });
+
+    it('clears an old condition for a classic location', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        mockPrivateLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        { agentIds: ['agent-a'] },
+        agentIdCondition('agent-a')
+      );
+
+      expect(policy?.condition).toBeNull();
+    });
+
+    it('resolves a scalable location once per batch and paginates its enrolled agents', async () => {
+      const listAgents = jest
+        .fn()
+        .mockResolvedValueOnce({ agents: [{ id: 'agent-a' }], total: 2 })
+        .mockResolvedValueOnce({ agents: [{ id: 'agent-b' }], total: 2 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const getConditionHostsByLocation = (
+        syntheticsPrivateLocation as unknown as {
+          getConditionHostsByLocation: (
+            locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
+          ) => Promise<Map<string, { agentIds: string[] }>>;
+        }
+      ).getConditionHostsByLocation.bind(syntheticsPrivateLocation);
+
+      const result = await getConditionHostsByLocation([
+        { id: 'condition-location', agentPolicyId: 'single-agent-policy', isAgentSharding: true },
+        { id: 'condition-location', agentPolicyId: 'single-agent-policy', isAgentSharding: true },
+      ]);
+
+      expect(listAgents).toHaveBeenCalledTimes(2);
+      expect(result.get('condition-location')?.agentIds).toEqual(['agent-a', 'agent-b']);
+    });
   });
 
   it('formats monitors stream properly', () => {
