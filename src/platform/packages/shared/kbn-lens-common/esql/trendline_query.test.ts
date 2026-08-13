@@ -191,8 +191,10 @@ describe('appendTimeBucketToEsqlQuery', () => {
 
   it('does not apply TS bucketing semantics to a later STATS command', () => {
     const query =
-      'TS metrics-* | STATS total = AVG(cpu) BY TBUCKET(100) | STATS MAX(total) BY TBUCKET(100)';
-    expect(appendTimeBucketToEsqlQuery(query, '@timestamp')).toBe(query);
+      'TS metrics-* | STATS total = AVG(cpu) BY host | STATS MAX(total) BY TBUCKET(100)';
+    expect(appendTimeBucketToEsqlQuery(query, '@timestamp')).toBe(
+      'TS metrics-* | STATS total = AVG(cpu) BY host, TBUCKET(75) | STATS MAX(total) BY TBUCKET(100)'
+    );
   });
 });
 
