@@ -160,6 +160,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
     () =>
       getRuleDetailMenu({
         rule,
+        canWrite,
         onEdit,
         onToggleEnabled: handleToggleEnabled,
         isToggleLoading: isToggling,
@@ -170,6 +171,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       }),
     [
       rule,
+      canWrite,
       onEdit,
       handleToggleEnabled,
       isToggling,
@@ -203,7 +205,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         }}
         badges={badges}
         metadata={headerMetadata}
-        menu={canWrite ? menu : undefined}
+        menu={menu}
         spacing="flush"
         sticky={false}
       />

@@ -57,6 +57,7 @@ const RuleDetailChangeHistoryShell = ({
     () =>
       getRuleDetailMenu({
         rule,
+        canWrite: true,
         onEdit: action('editRule'),
         onToggleEnabled: action('toggleEnabled'),
         isToggleLoading: false,
