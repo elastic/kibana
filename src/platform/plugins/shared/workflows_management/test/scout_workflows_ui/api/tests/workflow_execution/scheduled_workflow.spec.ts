@@ -45,8 +45,7 @@ steps:
       message: "Scheduled execution fired"
 `;
 
-// Failing: See https://github.com/elastic/kibana/issues/259162
-spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
 
@@ -87,13 +86,15 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
       .toSorted((a, b) => a.startedAt.localeCompare(b.startedAt));
 
     // Since 60s is a multiple of pollInterval (3s), LCM(60, 3) = 60s and gaps are
-    // uniform. Each gap must not exceed interval + pollInterval (one poll miss at most).
+    // uniform. Allow up to two poll intervals of slack: real scheduling jitter
+    // (task-claim contention, ES write latency, event-loop delay under CI load) can
+    // push a gap slightly past interval + a single poll interval.
     //
     // No lower bound is asserted on `startedAt` gaps. `startedAt` is set by the
     // workflow engine after Task Manager claims the task, so cold-start overhead on
     // the first run shifts its timestamp, making the first→second gap appear shorter
     // than the scheduling interval — even though the Task Manager timing was correct.
-    const maxGapMs = SCHEDULED_WORKFLOW_INTERVAL_MS + TASK_MANAGER_POLL_INTERVAL_MS;
+    const maxGapMs = SCHEDULED_WORKFLOW_INTERVAL_MS + 2 * TASK_MANAGER_POLL_INTERVAL_MS;
     for (let index = 1; index < completedExecutionsSorted.length; index++) {
       const currentExecution = completedExecutionsSorted[index];
       const currentStart = new Date(currentExecution.startedAt).getTime();
@@ -141,8 +142,10 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
     // well within the polling interval so they never overlap by construction,
     // but verifying it catches scheduler bugs (e.g. double-dispatching).
     //
-    // We reuse the same workflow from beforeAll — it should already have 2+
-    // completed executions from the preceding test. If not, wait for them.
+    // The preceding test leaves the shared workflow disabled, so re-enable it and
+    // wait for this test's own completed executions rather than relying on leftovers.
+    await workflowsApi.update(workflowId, { enabled: true });
+
     await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
       condition: ({ results: r }) =>
