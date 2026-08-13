@@ -22,6 +22,7 @@ redirects:
   'reference/osquery-exported-fields.md': 'integration-docs://reference/osquery-intro.md'
   'reference/osquery-manager-prebuilt-packs.md': 'docs-content://solutions/security/investigate/osquery.md'
   'reference/connectors-kibana/pagerduty-data-source.md': 'reference/connectors-kibana/pagerduty-mcp-action-type.md'
+  'reference/connectors-kibana/prometheus-alertmanager-action-type.md': 'reference/connectors-kibana/prometheus-action-type.md'
   'extend/add-data-tutorials.md': 'extend/tutorials/home-tutorials.md'
   'extend/scout.md': 'extend/testing/scout.md'
   'extend/scout/setup-plugin.md': 'extend/testing/setup-scout.md'

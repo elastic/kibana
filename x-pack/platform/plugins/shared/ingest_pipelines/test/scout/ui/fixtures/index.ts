@@ -12,6 +12,8 @@ import type {
   ScoutWorkerFixtures,
 } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
+
+import { EmbeddedConsole } from '@kbn/console-plugin/test/scout/ui/fixtures/page_objects';
 import * as testData from './constants';
 import { IngestPipelinesPage } from './page_objects';
 
@@ -38,6 +40,7 @@ export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   browserAuth: IngestPipelinesBrowserAuthFixture;
   pageObjects: PageObjects & {
     ingestPipelines: IngestPipelinesPage;
+    embeddedConsole: EmbeddedConsole;
   };
 }
 
@@ -73,6 +76,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     const extendedPageObjects = {
       ...pageObjects,
       ingestPipelines: createLazyPageObject(IngestPipelinesPage, page),
+      embeddedConsole: createLazyPageObject(EmbeddedConsole, page),
     };
 
     await use(extendedPageObjects);

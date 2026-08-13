@@ -7,18 +7,27 @@
 
 import type { ConverseStep, Evaluator, Example } from '@kbn/evals';
 
+/** Minimal event fields captured per continuation cycle for severity stability checks. */
+export interface ContinuationProducedEvent {
+  event_id?: string;
+  severity?: string;
+  status?: string;
+}
+
 /** One discovery agent invocation in a sequential "detections over time" run. */
 export interface ContinuationCycle {
   /** rule_name of the detection fed this cycle — for human-readable explanations only. */
   ruleName?: string;
   /** event_id(s) the agent emitted this cycle (one per produced discovery). */
   producedEventIds: string[];
+  /** Open/closed events emitted this cycle — used by continuation severity stability. */
+  producedEvents?: ContinuationProducedEvent[];
 
   /** Whether this cycle should reuse an established event ID. Defaults to true. */
   expectReuse?: boolean;
   /** Whether this cycle must perform a topology-filtered event search. */
   expectTopologyEventSearch?: boolean;
-  /** Event IDs explicitly supplied by the agent to discovery_write, before handler deduplication. */
+  /** Event IDs explicitly supplied by the agent to events_write, before handler deduplication. */
   requestedEventIds?: string[];
 
   steps?: ConverseStep[];

@@ -27,6 +27,7 @@ const createContext = (overrides: Partial<ApiEndpointContext> = {}): ApiEndpoint
   isManagedOtlpServiceAvailable: false,
   isServerless: false,
   managedOtlpPrwEndpointEnabled: false,
+  vendorEndpointsEnabled: true,
   ...overrides,
 });
 
@@ -298,7 +299,7 @@ describe('vendor endpoints', () => {
           cardTitle: 'Supabase',
           fieldLabel: 'Supabase logs endpoint',
           logo: 'supabase',
-          url: 'https://otlp.example.com:443/supabase/v1/logs',
+          url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
         },
         {
           id: ApiEndpointId.Vercel,
@@ -306,7 +307,7 @@ describe('vendor endpoints', () => {
           fieldLabel: 'Vercel endpoint',
           logo: 'vercel_black',
           darkLogo: 'vercel_white',
-          url: 'https://otlp.example.com:443/vercel',
+          url: 'https://otlp.example.com:443/inputs/vercel/_default_',
         },
       ]);
     });
@@ -338,7 +339,21 @@ describe('vendor endpoints', () => {
         })
       );
 
-      expect(endpoints[0].url).toBe('https://otlp.example.com:443/supabase/v1/logs');
+      expect(endpoints[0].url).toBe(
+        'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs'
+      );
+    });
+
+    it('returns an empty list when the vendor endpoints flag is disabled', () => {
+      expect(
+        getPopoverVendorEndpoints(
+          createContext({
+            isManagedOtlpServiceAvailable: true,
+            managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            vendorEndpointsEnabled: false,
+          })
+        )
+      ).toEqual([]);
     });
   });
 
@@ -359,6 +374,19 @@ describe('vendor endpoints', () => {
         getVendorEndpointsForTab(
           ApiEndpointId.OpenTelemetry,
           createContext({ managedOtlpServiceUrl: 'https://otlp.example.com:443' })
+        )
+      ).toEqual([]);
+    });
+
+    it('returns an empty list when the vendor endpoints flag is disabled', () => {
+      expect(
+        getVendorEndpointsForTab(
+          ApiEndpointId.OpenTelemetry,
+          createContext({
+            isManagedOtlpServiceAvailable: true,
+            managedOtlpServiceUrl: 'https://otlp.example.com:443',
+            vendorEndpointsEnabled: false,
+          })
         )
       ).toEqual([]);
     });

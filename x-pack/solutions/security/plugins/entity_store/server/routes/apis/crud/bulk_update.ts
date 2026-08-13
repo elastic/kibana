@@ -63,34 +63,36 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_bulk_update.yaml'),
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const { logger, crudClient } = entityStoreCtx;
+      wrapMiddlewares<never, z.infer<typeof querySchema>, z.infer<typeof bodySchema>>(
+        async (ctx, req, res): Promise<IKibanaResponse> => {
+          const entityStoreCtx = await ctx.entityStore;
+          const { logger, crudClient } = entityStoreCtx;
 
-        logger.debug('CRUD Bulk Update api called');
+          logger.debug('CRUD Bulk Update api called');
 
-        try {
-          const errors = await crudClient.bulkUpdateEntity({
-            objects: req.body.entities,
-            force: req.query.force,
-          });
-          return res.ok({
-            body: {
-              ok: true,
-              errors,
-            },
-          });
-        } catch (error) {
-          if (error instanceof EntityStoreNotInstalledError) {
-            return res.badRequest({ body: error });
+          try {
+            const errors = await crudClient.bulkUpdateEntity({
+              objects: req.body.entities,
+              force: req.query.force,
+            });
+            return res.ok({
+              body: {
+                ok: true,
+                errors,
+              },
+            });
+          } catch (error) {
+            if (error instanceof EntityStoreNotInstalledError) {
+              return res.badRequest({ body: error });
+            }
+            if (error instanceof BadCRUDRequestError) {
+              return res.badRequest({ body: error });
+            }
+
+            logger.error(error);
+            throw error;
           }
-          if (error instanceof BadCRUDRequestError) {
-            return res.badRequest({ body: error });
-          }
-
-          logger.error(error);
-          throw error;
         }
-      })
+      )
     );
 }

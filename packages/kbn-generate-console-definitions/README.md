@@ -15,7 +15,7 @@ The audit can also be run without regenerating definitions:
 node scripts/audit_console_definition_overrides.js
 ```
 
-The weekly definitions sync separates generation from this audit. If generation succeeds but the audit fails, it includes the audit report in one sync PR, disables auto-merge, and leaves the scheduled build failing for human review. A later weekly run does not update or duplicate that PR while it remains open; it sends the existing-PR Slack reminder instead.
+The weekly definitions sync only regenerates definitions and opens a PR with generic override-resolution instructions. Sync PRs do not auto-merge; a human reviews the generated definitions before merge. Override conflicts are enforced in PR CI by the committed-definitions test in [`audit_overrides.test.ts`](./src/audit_overrides.test.ts), which fails until the reviewed baseline is committed. A later weekly run does not update or duplicate an open sync PR; it sends the existing-PR Slack reminder instead.
 
 ## Functionality
 This script generates definitions for all endpoints defined in the ES specification at once. 

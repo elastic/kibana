@@ -8,18 +8,41 @@
 import { DEFAULT_URL } from '@kbn/connector-schemas/bedrock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { BedrockConnector } from './bedrock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+
+// Asserting on the options the connector hands to NodeHttpHandler keeps these
+// tests pinned to our own agent-selection logic rather than to @smithy's
+// internal resolved-config shape, which has changed across minor versions.
+jest.mock('@smithy/node-http-handler');
+
+const nodeHttpHandlerMock = NodeHttpHandler as jest.MockedClass<typeof NodeHttpHandler>;
 
 const logger = loggingSystemMock.createLogger();
 
 describe('Bedrock with proxy config', () => {
   const configurationUtilities = actionsConfigMock.create();
   const PROXY_HOST = 'proxy.custom.elastic.co';
-  const PROXY_URL_HTTP = `http://${PROXY_HOST}:99`;
-  const PROXY_URL_HTTPS = `https://${PROXY_HOST}:99`;
+  const PROXY_PORT = '99';
+  const PROXY_URL_HTTP = `http://${PROXY_HOST}:${PROXY_PORT}`;
+  const PROXY_URL_HTTPS = `https://${PROXY_HOST}:${PROXY_PORT}`;
 
-  let connector: BedrockConnector;
+  // Constructed for its side effect: the connector builds the NodeHttpHandler
+  // we assert on.
+  const createConnector = () =>
+    new BedrockConnector({
+      configurationUtilities,
+      connector: { id: '1', type: '.bedrock' },
+      config: {
+        apiUrl: DEFAULT_URL,
+        defaultModel: 'claude',
+      },
+      secrets: { accessKey: '123', secret: '567' },
+      logger,
+      services: actionsMock.createServices(),
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
     configurationUtilities.getProxySettings.mockReturnValue({
@@ -31,36 +54,26 @@ describe('Bedrock with proxy config', () => {
       proxyOnlyHosts: undefined,
     });
 
-    connector = new BedrockConnector({
-      configurationUtilities,
-      connector: { id: '1', type: '.bedrock' },
-      config: {
-        apiUrl: DEFAULT_URL,
-        defaultModel: 'claude',
-      },
-      secrets: { accessKey: '123', secret: '567' },
-      logger,
-      services: actionsMock.createServices(),
+    createConnector();
+  });
+
+  it('verifies that the Bedrock client is initialized with the custom proxy HTTP agent', () => {
+    expect(nodeHttpHandlerMock).toHaveBeenCalledTimes(1);
+    // Since DEFAULT_URL is https, only httpsAgent is passed, see: https://github.com/elastic/kibana/pull/224130#discussion_r2152632806
+    // This is a whole-argument (not objectContaining) match, so it also pins that
+    // no httpAgent is handed over. Keep it that way.
+    expect(nodeHttpHandlerMock).toHaveBeenLastCalledWith({
+      httpsAgent: expect.objectContaining({
+        proxy: expect.objectContaining({
+          host: `${PROXY_HOST}:${PROXY_PORT}`,
+          hostname: PROXY_HOST,
+          port: PROXY_PORT,
+        }),
+      }),
     });
   });
 
-  it('verifies that the Bedrock client is initialized with the custom proxy HTTP agent', async () => {
-    // @ts-ignore .bedrockClient is private
-    const bedrockClient = connector.bedrockClient;
-
-    // Verify the client was initialized with the custom agent configuration
-    expect(bedrockClient).toBeDefined();
-    expect(bedrockClient.config.requestHandler).toBeDefined();
-    // @ts-ignore configProvider is private, but we need it to access the agent
-    const config = await bedrockClient.config.requestHandler.configProvider;
-    // Since DEFAULT_BEDROCK_URL is https, httpsAgent will be set, see: https://github.com/elastic/kibana/pull/224130#discussion_r2152632806
-    expect(config.httpsAgent.proxy.host).toBe(`${PROXY_HOST}:99`);
-    expect(config.httpsAgent.proxy.hostname).toBe(PROXY_HOST);
-    expect(config.httpsAgent.proxy.port).toBe('99');
-    expect(config.httpAgent.proxy).toBeUndefined();
-  });
-
-  it('verifies that the Bedrock client is initialized with the custom proxy HTTPS agent', async () => {
+  it('verifies that the Bedrock client is initialized with the custom proxy HTTPS agent', () => {
     configurationUtilities.getProxySettings.mockReturnValue({
       proxyUrl: PROXY_URL_HTTPS,
       proxySSLSettings: {
@@ -69,29 +82,20 @@ describe('Bedrock with proxy config', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });
+    nodeHttpHandlerMock.mockClear();
 
-    connector = new BedrockConnector({
-      configurationUtilities,
-      connector: { id: '1', type: '.bedrock' },
-      config: {
-        apiUrl: DEFAULT_URL,
-        defaultModel: 'claude',
-      },
-      secrets: { accessKey: '123', secret: '567' },
-      logger,
-      services: actionsMock.createServices(),
+    createConnector();
+
+    // See note above: an https proxy URL still yields only an httpsAgent here.
+    expect(nodeHttpHandlerMock).toHaveBeenCalledTimes(1);
+    expect(nodeHttpHandlerMock).toHaveBeenLastCalledWith({
+      httpsAgent: expect.objectContaining({
+        proxy: expect.objectContaining({
+          host: `${PROXY_HOST}:${PROXY_PORT}`,
+          hostname: PROXY_HOST,
+          port: PROXY_PORT,
+        }),
+      }),
     });
-    // @ts-ignore .bedrockClient is private
-    const bedrockClient = connector.bedrockClient;
-
-    // Verify the client was initialized with the custom agent configuration
-    expect(bedrockClient).toBeDefined();
-    expect(bedrockClient.config.requestHandler).toBeDefined();
-    // @ts-ignore configProvider is private, but we need it to access the agent
-    const config = await bedrockClient.config.requestHandler.configProvider;
-    expect(config.httpsAgent.proxy.host).toBe(`${PROXY_HOST}:99`);
-    expect(config.httpsAgent.proxy.hostname).toBe(PROXY_HOST);
-    expect(config.httpsAgent.proxy.port).toBe('99');
-    expect(config.httpAgent.proxy).not.toBeDefined();
   });
 });

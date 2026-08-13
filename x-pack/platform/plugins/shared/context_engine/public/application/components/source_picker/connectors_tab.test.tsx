@@ -7,6 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -16,9 +17,9 @@ import { ConnectorsTab } from './connectors_tab';
 import type { DataConnector } from '../../hooks/use_data_connectors';
 
 const CONNECTORS: DataConnector[] = [
-  { id: 'connector-gdrive', name: 'Google Drive' },
-  { id: 'connector-github', name: 'GitHub' },
-  { id: 'connector-notion', name: 'Notion' },
+  { id: 'connector-gdrive', name: 'Google Drive', actionTypeId: '.google_drive' },
+  { id: 'connector-github', name: 'GitHub', actionTypeId: '.github' },
+  { id: 'connector-notion', name: 'Notion', actionTypeId: '.notion' },
 ];
 
 const CONNECTORS_DEEP_LINK_ID = 'triggersActionsConnectors';
@@ -38,7 +39,10 @@ const renderConnectorsTab = ({
   selectedConnectorIds = [],
   onToggle = jest.fn(),
 }: RenderConnectorsTabOptions = {}) => {
-  const services = coreMock.createStart();
+  const services = {
+    ...coreMock.createStart(),
+    triggersActionsUi: triggersActionsUiMock.createStart(),
+  };
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   render(

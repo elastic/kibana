@@ -22,7 +22,7 @@ const buildAttachment = (data: Record<string, unknown>) => ({
   versions: [{ version: 1, data }],
 });
 
-const buildRoundCompleteEvent = (actor: 'agent' | 'user' | 'system') => ({
+const buildRoundCompleteEvent = (actor: 'system' | 'user') => ({
   type: ChatEventType.roundComplete,
   data: {
     attachments: [buildAttachment({ panels: [] })],
@@ -65,10 +65,10 @@ describe('createAgentLiveUpdatesSubscription', () => {
     return { chatEvents$, setState, subscription };
   };
 
-  it('applies the dashboard state when an agent genuinely updated the attachment', () => {
+  it('applies the dashboard state when an attachment is updated', () => {
     const { chatEvents$, setState, subscription } = createHarness();
 
-    chatEvents$.next(buildRoundCompleteEvent('agent'));
+    chatEvents$.next(buildRoundCompleteEvent('system'));
 
     expect(setState).toHaveBeenCalledTimes(1);
     subscription.unsubscribe();
@@ -78,15 +78,6 @@ describe('createAgentLiveUpdatesSubscription', () => {
     const { chatEvents$, setState, subscription } = createHarness();
 
     chatEvents$.next(buildRoundCompleteEvent('user'));
-
-    expect(setState).not.toHaveBeenCalled();
-    subscription.unsubscribe();
-  });
-
-  it('does not apply the dashboard state for a system-actor ref', () => {
-    const { chatEvents$, setState, subscription } = createHarness();
-
-    chatEvents$.next(buildRoundCompleteEvent('system'));
 
     expect(setState).not.toHaveBeenCalled();
     subscription.unsubscribe();

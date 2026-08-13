@@ -7,8 +7,12 @@
 
 export {
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  normalizeConversationAccessControl,
   type ConversationAccessControl,
+  type ConversationAccessControlEntry,
+  type ConversationAccessControlPrincipalType,
 } from './access_control';
 export {
   ConversationRoundStatus,
@@ -58,6 +62,11 @@ export {
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
   isAskUserQuestionStep,
+  type RelevantSkill,
+  type RelevantSkillsStep,
+  type RelevantSkillsStepData,
+  createRelevantSkillsStep,
+  isRelevantSkillsStep,
 } from './conversation';
 export {
   ChatEventType,

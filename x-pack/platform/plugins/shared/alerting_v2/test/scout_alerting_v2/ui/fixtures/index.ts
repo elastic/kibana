@@ -49,12 +49,12 @@ export const test = baseTest.extend<
   },
   apiServices: [
     async (
-      { apiServices, esClient, kbnClient, log },
+      { apiServices, esClient, kbnClient, log, config },
       use: (extendedApiServices: AlertingApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices: AlertingApiServicesFixture = {
         ...apiServices,
-        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log }),
+        alertingV2: buildAlertingApiServices({ esClient, kbnClient, log, config }),
       };
       await use(extendedApiServices);
     },
