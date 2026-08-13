@@ -359,20 +359,16 @@ export const AzureBlob: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Azure Blob test handler');
-      try {
-        const baseUrl = getBaseUrl(ctx);
-        if (!baseUrl) {
-          return { ok: false, message: 'Storage account URL is required' };
-        }
-        await ctx.client.get(`${baseUrl}/`, {
-          params: { comp: 'list', maxresults: 1 },
-          responseType: 'text',
-        });
-        return { ok: true, message: 'Successfully connected to Azure Blob Storage' };
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        return { ok: false, message };
+      const baseUrl = getBaseUrl(ctx);
+      if (!baseUrl) {
+        throw new Error('Storage account URL is required');
       }
+      await ctx.client.get(`${baseUrl}/`, {
+        params: { comp: 'list', maxresults: 1 },
+        responseType: 'text',
+      });
+      return {};
     },
+    enabled: true,
   },
 };
