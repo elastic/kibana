@@ -30,7 +30,5 @@ node scripts/build "${BUILD_ARGS[@]}"
 wait $cleanup_pid || true
 
 echo "--- Archive Kibana Distribution"
-version="$(jq -r '.version' package.json)"
-linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.zst"
 mkdir -p "$KIBANA_BUILD_LOCATION"
-tar -xf "$linuxBuild" -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
+tar -xf "$KIBANA_DIR/target/$KIBANA_TEST_SNAPSHOT_ARCHIVE" -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1

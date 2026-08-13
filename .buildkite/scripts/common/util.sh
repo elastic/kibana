@@ -248,6 +248,19 @@ download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
 }
 
+# Snapshot distributable that build_kibana.sh publishes for test steps to consume
+kibana_test_snapshot_archive() {
+  local hostArch distributionArch
+  hostArch="$(command uname -m)"
+  case "$hostArch" in
+    x86_64 | amd64) distributionArch="x86_64" ;;
+    aarch64 | arm64) distributionArch="aarch64" ;;
+    *) distributionArch="$hostArch" ;;
+  esac
+
+  echo "kibana-$(jq -r .version "${KIBANA_DIR:-.}/package.json")-SNAPSHOT-linux-$distributionArch.tar.zst"
+}
+
 GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
 download_tmp_artifact() {
   local artifact_name="$1" dest_dir="$2" build_id="$3" fallback="${4:-true}"

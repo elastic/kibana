@@ -19,8 +19,6 @@ export const KIBANA_ON_MERGE_PIPELINE_SLUG = 'kibana-on-merge';
  * Keep these constants in sync with run_calibration.sh.
  */
 
-export const KIBANA_DISTRIBUTABLE_ARTIFACT_FILENAME = 'kibana-default.tar.zst';
-
 export const CALIBRATION_WORK_DIR = 'target/ci-warm-start-memory-bench';
 
 export const CALIBRATION_MANIFEST_PATH = `${CALIBRATION_WORK_DIR}/warm_start_calibration_manifest.json`;
@@ -43,7 +41,8 @@ export interface WarmStartCalibrationArtifact {
   readonly buildId: string;
   readonly commitSha: string;
   readonly artifactId: string;
-  readonly artifactPath: typeof KIBANA_DISTRIBUTABLE_ARTIFACT_FILENAME;
+  // resolved at run time by run_calibration.sh, recorded in the manifest
+  readonly artifactPath?: string;
   readonly buildUrl: string;
   readonly sha1: string;
   readonly sha256: string;
@@ -56,7 +55,6 @@ export const WARM_START_CALIBRATION_ARTIFACT_A: WarmStartCalibrationArtifact = {
   buildId: '019f94c0-d0d9-4944-84fc-27beda66beb7',
   commitSha: 'c068037b308eaa40c835e1016392587e2680e914',
   artifactId: '019f94ce-f550-455f-aab2-e12c621e6221',
-  artifactPath: KIBANA_DISTRIBUTABLE_ARTIFACT_FILENAME,
   buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/104030',
   sha1: '04668f26ee720ff5f15af88188851e7382127c76',
   sha256: 'ca34fb9db6425c81c8c25b8aac382d9d39899fe2bdd57179f7aad13e8c272779',
@@ -69,7 +67,6 @@ export const WARM_START_CALIBRATION_ARTIFACT_B: WarmStartCalibrationArtifact = {
   buildId: '019f94c0-70a2-4080-9082-0837dd577955',
   commitSha: 'f34aaebb053fee8e04cbb673551356e532819b8f',
   artifactId: '019f94cf-911f-4059-9a1c-af5a7f30a521',
-  artifactPath: KIBANA_DISTRIBUTABLE_ARTIFACT_FILENAME,
   buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/104029',
   sha1: 'ae342f24aa51285ac5d7ea94de0a15ce1c202ad5',
   sha256: '2e12f9a5fa18ebf59121ff9ee3d80cbdbd273c77d8f83ce189793f119a050ca2',

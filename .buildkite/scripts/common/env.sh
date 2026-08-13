@@ -30,6 +30,9 @@ if command -v jq >/dev/null 2>&1; then
 
   KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
   export KIBANA_PKG_VERSION
+
+  KIBANA_TEST_SNAPSHOT_ARCHIVE="$(kibana_test_snapshot_archive)"
+  export KIBANA_TEST_SNAPSHOT_ARCHIVE
 fi
 
 # Detects and exports the final target branch when using a merge queue
