@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const ONBOARDING_SEEN_STORAGE_KEY = 'serverless.onboarding.completed';
+export const ONBOARDING_SEEN_STORAGE_KEY = 'vectordb.onboarding.completed';
 
 export const ONBOARDING_API_KEY_STORAGE_KEY = 'vectordb.onboarding.apiKey';
-
-export const TUTORIAL_PROGRESS_STORAGE_KEY = 'serverless.onboarding.tutorials.completed';
-export const TUTORIAL_PROGRESS_EVENT = 'serverless-onboarding-tutorials-changed';

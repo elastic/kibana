@@ -10,6 +10,7 @@ import Semver from 'semver';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import {
   validateRuleTypeParams,
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
@@ -51,6 +52,9 @@ export const prepareRule = async <Params extends RuleParams>({
 
     const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
     const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+    await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+      request: context.request,
+    });
 
     await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
     await validateAndAuthorizeSystemActions({

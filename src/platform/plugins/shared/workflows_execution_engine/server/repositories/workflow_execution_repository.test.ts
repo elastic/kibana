@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
@@ -40,7 +41,7 @@ describe('WorkflowExecutionRepository', () => {
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    repository = new WorkflowExecutionRepository(esClient as any);
+    repository = new WorkflowExecutionRepository(esClient as any, loggerMock.create());
   });
 
   describe('createWorkflowExecution', () => {
@@ -217,8 +218,17 @@ describe('WorkflowExecutionRepository', () => {
         index: WORKFLOWS_EXECUTIONS_INDEX,
         id: '1',
         refresh: false,
+        retry_on_conflict: 3,
         doc: workflowExecution,
       });
+    });
+
+    it('retries version conflicts so a concurrent writer cannot fail the update', async () => {
+      await repository.updateWorkflowExecution({ id: '1', status: ExecutionStatus.RUNNING });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ retry_on_conflict: 3 })
+      );
     });
 
     it('should throw an error if ID is missing during update', async () => {
@@ -728,9 +738,9 @@ describe('WorkflowExecutionRepository', () => {
         refresh: true,
         index: WORKFLOWS_EXECUTIONS_INDEX,
         body: [
-          { update: { _id: 'exec-1' } },
+          { update: { _id: 'exec-1', retry_on_conflict: 3 } },
           { doc: { id: 'exec-1', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
-          { update: { _id: 'exec-2' } },
+          { update: { _id: 'exec-2', retry_on_conflict: 3 } },
           { doc: { id: 'exec-2', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
         ],
       });

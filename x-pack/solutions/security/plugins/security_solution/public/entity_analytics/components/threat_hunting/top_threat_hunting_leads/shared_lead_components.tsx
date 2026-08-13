@@ -14,6 +14,9 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { getOpenEntityFlyoutLabel, VIEW_ENTITY_DETAILS } from './translations';
 import { getEntityIcon } from './utils';
 
@@ -44,7 +47,9 @@ interface EntityBadgeProps {
  * the Agent Builder chat).
  */
 export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => {
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
 
   const badgeContent = (
@@ -86,10 +91,7 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
     );
   }
 
-  const panelKey = EntityPanelKeyByType[entity.type];
-  const panelParam = EntityPanelParamByType[entity.type];
-
-  if (!panelKey || !panelParam) {
+  if (!enableNewFlyout && !EntityPanelKeyByType[entity.type]) {
     return (
       <EuiBadge color="hollow" css={entityBadgeContainerCss}>
         {badgeContent}
@@ -104,18 +106,27 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
   // friendly name) — best-effort, but strictly better than a name-only match.
   const entityId = entity.id ?? `${entity.type}:${entity.name}`;
 
-  const openEntityFlyout = () => {
-    openFlyout({
-      right: {
-        id: panelKey,
-        params: {
-          [panelParam]: entity.name,
-          entityId,
-          contextID: scopeId,
-          scopeId,
-        },
-      },
-    });
+  const handleOpenEntityFlyout = () => {
+    const sharedParams = { entityId, contextID: scopeId, scopeId };
+
+    if (enableNewFlyout) {
+      openEntityFlyout({
+        engineType: entity.type,
+        entityName: entity.name,
+        origin: FLYOUT_ORIGIN.THREAT_HUNTING_LEADS,
+        ...sharedParams,
+      });
+      return;
+    }
+
+    const entityType = entity.type as EntityType;
+    const panelKey = EntityPanelKeyByType[entityType];
+    const paramName = EntityPanelParamByType[entityType];
+    if (panelKey && paramName) {
+      openFlyout({
+        right: { id: panelKey, params: { [paramName]: entity.name, ...sharedParams } },
+      });
+    }
   };
 
   // Rendered as a `span[role=button]` (rather than passing `onClick` to
@@ -150,13 +161,13 @@ export const EntityBadge: React.FC<EntityBadgeProps> = ({ entity, scopeId }) => 
         `}
         onClick={(e) => {
           e.stopPropagation();
-          openEntityFlyout();
+          handleOpenEntityFlyout();
         }}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             e.stopPropagation();
-            openEntityFlyout();
+            handleOpenEntityFlyout();
           }
         }}
       >

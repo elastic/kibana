@@ -11,6 +11,7 @@ import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import { getEcsResponseLog } from './get_response_log';
 
 jest.mock('./get_payload_size', () => ({
@@ -224,6 +225,24 @@ describe('getEcsResponseLog', () => {
         Object {
           "es-client-authentication": "[REDACTED]",
           "user-agent": "world",
+        }
+      `);
+    });
+
+    test('redacts the UIAM internal-caller attestation header by default', () => {
+      const req = createMockHapiRequest({
+        headers: {
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: 'ae3fda37-xxx',
+          'user-agent': 'world',
+        },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
+      expect(result.meta.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "user-agent": "world",
+          "x-kbn-uiam-internal-caller-attestation": "[REDACTED]",
         }
       `);
     });

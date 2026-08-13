@@ -13,6 +13,7 @@ export {
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   DEFAULT_ALLOWED_LOGS_BASE_PATTERNS,
   DEFAULT_COLUMNS_SETTING,
+  DEFAULT_ESQL_QUERY_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
@@ -96,6 +97,7 @@ export {
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
+  METRICS_GRID_SETTINGS_DEFAULTS,
 } from './src';
 
 export type {
@@ -106,6 +108,9 @@ export type {
   SortPair,
   ErrorCalloutProps,
   DiscoverSessionFinderAttributes,
+  HistogramPercentile,
+  MetricsGridSettings,
+  SimpleAggregation,
 } from './src';
 
 export * from './src/types';

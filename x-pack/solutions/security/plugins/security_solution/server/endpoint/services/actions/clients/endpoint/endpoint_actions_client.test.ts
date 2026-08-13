@@ -738,10 +738,11 @@ describe('EndpointActionsClient', () => {
     it.each`
       title        | params
       ${'kernel'}  | ${{ type: 'kernel' }}
+      ${'raw'}     | ${{ type: 'raw' }}
       ${'process'} | ${{ type: 'process', pid: '123' }}
     `(
       'should validate that agent supports memory dump of $title',
-      async ({ params: ResponseActionMemoryDumpParameters }) => {
+      async ({ params: memoryDumpParameters }) => {
         const generator = new EndpointMetadataGenerator('seed');
 
         applyEsClientSearchMock({
@@ -752,15 +753,105 @@ describe('EndpointActionsClient', () => {
           ]),
         });
 
+        if (memoryDumpParameters.type === 'raw') {
+          // @ts-expect-error update of readonly property is ok here
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+            true;
+        }
+
         await expect(
           endpointActionsClient.memoryDump(
-            responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+            responseActionsClientMock.createMemoryDumpActionOption({
+              ...getCommonResponseActionOptions(),
+              parameters: memoryDumpParameters,
+            })
           )
         ).rejects.toThrow(
           'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
         );
       }
     );
+
+    it('should validate that agent supports memory dump of raw', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+        true;
+
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+        ]),
+      });
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'raw' },
+          })
+        )
+      ).rejects.toThrow(
+        'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
+      );
+    });
+
+    it('should error when `raw` type is used but the feature flag is disabled', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+        false;
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'raw' },
+          })
+        )
+      ).rejects.toThrow('memory-dump `raw` type is not enabled');
+    });
+
+    it('should process `raw` memory dump when the agent supports it', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
+        true;
+
+      const generator = new EndpointMetadataGenerator('seed');
+
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: metadataCurrentIndexPattern,
+        response: generator.toEsSearchResponse([
+          generator.toEsSearchHit(
+            generator.generate({ Endpoint: { capabilities: ['memdump_raw'] } })
+          ),
+        ]),
+      });
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption({
+            ...getCommonResponseActionOptions(),
+            parameters: { type: 'raw' },
+          })
+        )
+      ).resolves.toBeDefined();
+
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            command: 'memory-dump',
+            comment: expect.anything(),
+            parameters: { type: 'raw' },
+          },
+        })
+      );
+    });
   });
 
   describe('#cancel()', () => {

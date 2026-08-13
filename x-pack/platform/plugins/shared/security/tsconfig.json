@@ -115,6 +115,9 @@
     "@kbn/core-user-profile-common",
     "@kbn/core-chrome-browser-components",
     "@kbn/core-logging-server",
+    "@kbn/projects-solutions-groups",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/ui-callout",
   ],
   "exclude": ["target/**/*"]
 }

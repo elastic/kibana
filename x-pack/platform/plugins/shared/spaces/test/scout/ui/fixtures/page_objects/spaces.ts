@@ -192,8 +192,47 @@ export class SpacesPage {
     await this.viewPageLocator().waitFor({ state: 'visible' });
   }
 
+  async gotoCreateSpace() {
+    await this.page.gotoApp('management/kibana/spaces/create');
+    await this.createPageLocator().waitFor({ state: 'visible' });
+  }
+
   async clickCreateSpace() {
     await this.page.testSubj.click('createSpace');
+  }
+
+  /** Cross-project search default scope section on create/edit space pages. */
+  cpsDefaultScopePanelLocator() {
+    return this.page.testSubj.locator('cpsDefaultScopePanel');
+  }
+
+  allProjectsRoutingButtonLocator() {
+    return this.page.testSubj.locator('cpsProjectRoutingButton-all');
+  }
+
+  originProjectRoutingButtonLocator() {
+    return this.page.testSubj.locator('cpsProjectRoutingButton-origin');
+  }
+
+  /** Waits until the CPS panel and project-routing button group have loaded. */
+  async waitForProjectRoutingPicker() {
+    await this.cpsDefaultScopePanelLocator().waitFor({ state: 'visible' });
+    await this.allProjectsRoutingButtonLocator().waitFor({ state: 'visible' });
+  }
+
+  async selectAllProjectsRouting() {
+    await this.allProjectsRoutingButtonLocator().click();
+  }
+
+  async selectOriginProjectRouting() {
+    await this.originProjectRoutingButtonLocator().click();
+  }
+
+  /**
+   * CPS chrome nav project-picker button (visible when CPS is enabled and projects are linked).
+   */
+  cpsProjectPickerButtonLocator() {
+    return this.page.testSubj.locator('project-picker-button');
   }
 
   async setSpaceName(name: string) {

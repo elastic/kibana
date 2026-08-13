@@ -5,29 +5,12 @@
  * 2.0.
  */
 
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import type { RuleDomain } from '../../types';
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 
 jest.mock('../get_schedule_frequency', () => ({
@@ -35,52 +18,23 @@ jest.mock('../get_schedule_frequency', () => ({
 }));
 
 describe('clone', () => {
-  const taskManager = taskManagerMock.createStart();
-  const ruleTypeRegistry = ruleTypeRegistryMock.create();
-  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-  const authorization = alertingAuthorizationMock.create();
-  const actionsAuthorization = actionsAuthorizationMock.create();
-  const auditLogger = auditLoggerMock.create();
-  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-  const backfillClient = backfillClientMock.create();
-
   const kibanaVersion = 'v8.2.0';
   const createAPIKeyMock = jest.fn();
   const isAuthenticationTypeApiKeyMock = jest.fn();
   const getAuthenticationApiKeyMock = jest.fn();
 
-  const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  const {
+    rulesClientParams,
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,
-    authorization: authorization as unknown as AlertingAuthorization,
-    actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-    spaceId: 'default',
-    namespace: 'default',
-    getUserName: jest.fn(),
-    createAPIKey: createAPIKeyMock,
-    cloneAPIKey: jest.fn(),
-    logger: loggingSystemMock.create().get(),
-    internalSavedObjectsRepository,
-    encryptedSavedObjectsClient: encryptedSavedObjects,
-    getActionsClient: jest.fn(),
-    getEventLogClient: jest.fn(),
+    encryptedSavedObjects,
+  } = getRulesClientMockParams({
     kibanaVersion,
-    auditLogger,
-    maxScheduledPerMinute: 10000,
-    minimumScheduleInterval: { value: '1m', enforce: false },
+    createAPIKey: createAPIKeyMock,
     isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
     getAuthenticationAPIKey: getAuthenticationApiKeyMock,
-    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-    isSystemAction: jest.fn(),
-    backfillClient,
-    getAlertIndicesAlias: jest.fn(),
-    alertsService: null,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
-    isServerless: false,
-  };
+  });
 
   let rulesClient: RulesClient;
 
