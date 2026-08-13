@@ -23,8 +23,8 @@ export const ALL_SPACES_ID = '*';
  * whenever the dataset will be visible there, so an edit made in place keeps the
  * id it already has; otherwise the first space it is being created for.
  *
- * Shared with the offline client, which uses it to pick the space to send a run
- * to.
+ * Lives beside {@link getDatasetId} because the two decide one thing between
+ * them: which space a dataset's id comes from.
  */
 export const resolveDatasetHomeSpace = (
   activeSpaceId: string,

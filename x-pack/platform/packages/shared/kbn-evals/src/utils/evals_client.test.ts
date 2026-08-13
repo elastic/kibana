@@ -841,10 +841,19 @@ describe('EvalsClient', () => {
 
     it.each([
       ['no spaces are requested', undefined],
-      ['the default space is among them', ['default', 'marketing']],
+      ['the default space is the first listed', ['default', 'marketing']],
     ])('stays in the default space when %s', async (_, spaceIds) => {
       await expect(requestFor(spaceIds)).resolves.toEqual(
         expect.objectContaining({ path: EVALS_DATASET_UPSERT_URL })
+      );
+    });
+
+    it('works from the first space listed, whichever it is', async () => {
+      // A run widening an existing dataset to the default space has to be made
+      // from the space already holding it, or it looks for a dataset by name
+      // where there isn't one and collides with itself creating a second.
+      await expect(requestFor(['marketing', 'default'])).resolves.toEqual(
+        expect.objectContaining({ path: `/s/marketing${EVALS_DATASET_UPSERT_URL}` })
       );
     });
 

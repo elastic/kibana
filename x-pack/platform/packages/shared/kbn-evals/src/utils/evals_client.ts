@@ -29,7 +29,6 @@ import {
   ResolveEvaluationDatasetResponse,
   UpsertEvaluationDatasetResponse,
   getDatasetId,
-  resolveDatasetHomeSpace,
   type DatasetMaturity,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
@@ -187,8 +186,9 @@ export class EvalsClient {
   ) {
     // Runs in the space the datasets are written to, rather than writing to it
     // from the default space, so ids resolve and privileges are checked where
-    // the data lands.
-    const homeSpaceId = resolveDatasetHomeSpace(DEFAULT_SPACE_ID, spaceIds ?? []);
+    // the data lands. The first space listed, so a run that widens an existing
+    // dataset's spaces still works from the one already holding it.
+    const homeSpaceId = spaceIds?.[0] ?? DEFAULT_SPACE_ID;
     this.homeSpaceId = homeSpaceId === DEFAULT_SPACE_ID ? undefined : homeSpaceId;
   }
 

@@ -37,4 +37,20 @@ describe('getDatasetId', () => {
     // A delimiter would let `a::b`/`c` and `a`/`b::c` land on one id.
     expect(getDatasetId('marketing', 'a-dataset')).not.toBe(getDatasetId('marketing-a', 'dataset'));
   });
+
+  it('derives a distinct id for each later generation', () => {
+    const ids = [0, 1, 2, 3].map((generation) =>
+      getDatasetId('marketing', 'dataset-1', generation)
+    );
+
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('derives the same later generation for everyone who asks', () => {
+    // Two creates racing for one name have to land on one id, so that
+    // Elasticsearch refuses the second rather than storing a duplicate name.
+    expect(getDatasetId('marketing', 'dataset-1', 1)).toBe(
+      getDatasetId('marketing', 'dataset-1', 1)
+    );
+  });
 });

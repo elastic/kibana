@@ -1171,6 +1171,35 @@ describe('dataset routes', () => {
       });
     });
 
+    it('returns 409 when a target space already holds the name', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerUpsertDatasetRoute,
+        method: 'post',
+        path: EVALS_DATASET_UPSERT_URL,
+      });
+      datasetClient.upsert.mockRejectedValueOnce(new DatasetAlreadyExistsError(dataset.name));
+
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: EVALS_DATASET_UPSERT_URL,
+        body: {
+          name: dataset.name,
+          description: dataset.description,
+          examples: [],
+          space_ids: [DEFAULT_SPACE_ID, 'marketing'],
+        },
+      });
+
+      const response = await handler(context as any, request, kibanaResponseFactory);
+
+      // Upsert is the route a run uses, so the name it collided with has to
+      // reach the log instead of an unexplained failure.
+      expect(response.status).toBe(409);
+      expect(response.payload).toEqual({
+        message: `Dataset with name "${dataset.name}" already exists`,
+      });
+    });
+
     it('returns 500 when upsert fails', async () => {
       const { handler, context, datasetClient, logger } = buildRouteSetup({
         registerRoute: registerUpsertDatasetRoute,

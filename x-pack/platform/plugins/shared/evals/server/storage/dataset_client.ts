@@ -7,7 +7,6 @@
 
 import objectHash from 'object-hash';
 import { isEmpty, omitBy } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   InternalIStorageClient,
@@ -143,6 +142,13 @@ const OLDEST_FIRST = [{ created_at: { order: 'asc' as const } }];
  * means contention no number of attempts would settle.
  */
 const DELETE_MAX_ATTEMPTS = 3;
+
+/**
+ * How many derived ids a create tries before giving up. Each one it passes over
+ * is held by a dataset of the same name that has moved out of this space, so
+ * even a couple is more history than a name is likely to have.
+ */
+const MAX_DATASET_ID_GENERATIONS = 5;
 
 export interface DatasetListOptions {
   page?: number;
@@ -304,33 +310,11 @@ export class DatasetClient {
       { tags, maturity, examples_count: 0 }
     );
 
-    const derivedDatasetId = getDatasetId(activeSpaceId, name);
-    let datasetId = derivedDatasetId;
-    try {
-      await this.datasetsStorage.index({ id: datasetId, op_type: 'create', document });
-    } catch (error) {
-      if (!isResponseError(error) || error.statusCode !== 409) {
-        throw error;
-      }
+    const datasetId = await this.indexNewDataset({ name, targetSpaceIds, document });
 
-      // The name is free here, so the id is held by a dataset of the same name
-      // that has since moved to other spaces. Its slot can't be reused, but the
-      // derivation is only there to keep default-space ids stable for older
-      // clients, so a fresh one costs nothing. Re-check first: a create that
-      // raced us is a real duplicate.
-      if (await this.hasNameConflict(name, targetSpaceIds)) {
-        throw new DatasetAlreadyExistsError(name);
-      }
-
-      datasetId = uuidv4();
-      await this.datasetsStorage.index({ id: datasetId, op_type: 'create', document });
-    }
-
-    if (datasetId === derivedDatasetId) {
-      // A dataset is deleted document-first, so one whose delete died in between
-      // could have left examples behind under an id this name derives again.
-      await this.deleteExamplesByDatasetId(datasetId);
-    }
+    // A dataset is deleted document-first, so one whose delete died in between
+    // could have left examples behind under an id this name derives again.
+    await this.deleteExamplesByDatasetId(datasetId);
 
     if (examples.length > 0) {
       await this.addExamples(datasetId, examples, { touchDataset: false });
@@ -344,6 +328,56 @@ export class DatasetClient {
     }
 
     return created;
+  }
+
+  /**
+   * Writes a new dataset under the id its space and name derive, moving on to
+   * the next derivation when one is held by a dataset that has since moved to
+   * spaces this one cannot see.
+   *
+   * Every id a name can take is derived from it, so two creates of one name
+   * compete for the same one and Elasticsearch decides between them. That is
+   * what makes the name unique here: the search above can only report what was
+   * indexed a refresh ago, and on its own would let both creates through.
+   */
+  private async indexNewDataset({
+    name,
+    targetSpaceIds,
+    document,
+  }: {
+    name: string;
+    targetSpaceIds: string[];
+    document: DatasetStorageProperties;
+  }): Promise<string> {
+    for (let generation = 0; generation < MAX_DATASET_ID_GENERATIONS; generation++) {
+      const datasetId = getDatasetId(this.spaceId, name, generation);
+
+      try {
+        await this.datasetsStorage.index({ id: datasetId, op_type: 'create', document });
+        return datasetId;
+      } catch (error) {
+        if (!isResponseError(error) || error.statusCode !== 409) {
+          throw error;
+        }
+      }
+
+      const holder = await this.getAnyMetadata(datasetId);
+
+      // Nothing to read at an id that just refused a write means the document
+      // holding it is too new to search, and only this name derives that id. A
+      // holder still going by the name where this one is headed is a duplicate
+      // too; anything else has left the name free.
+      if (
+        !holder ||
+        (holder.name === name && holder.space_ids.some((id) => targetSpaceIds.includes(id)))
+      ) {
+        throw new DatasetAlreadyExistsError(name);
+      }
+    }
+
+    throw new Error(
+      `Every id derived for dataset "${name}" is taken after ${MAX_DATASET_ID_GENERATIONS} attempts`
+    );
   }
 
   async get(datasetId: string): Promise<DatasetWithExamples | undefined> {
@@ -362,13 +396,10 @@ export class DatasetClient {
 
   /**
    * Whether a dataset already holds `name` in any space the new one would show
-   * up in. The id only encodes the space creating it, so `op_type: 'create'`
-   * catches a same-named dataset made here but not one shared in from
-   * elsewhere. Names are how the CLI and `_resolve` find a dataset, so two
-   * under one name in a space would make that a coin toss.
-   *
-   * Deliberately unscoped: the check has to cover every target space, not just
-   * the one this client reads from.
+   * up in. An id only encodes the space creating it, so the write itself catches
+   * a name taken here but not one shared in from elsewhere, and names are how
+   * the CLI and `_resolve` find a dataset. Unscoped on purpose: every target
+   * space has to be covered, not just the one this client reads from.
    */
   private async hasNameConflict(
     name: string,
@@ -1032,6 +1063,29 @@ export class DatasetClient {
       source: hit._source,
       occ: { seqNo: hit._seq_no, primaryTerm: hit._primary_term },
     };
+  }
+
+  /**
+   * The name and spaces of whatever holds an id, from any space. Only for
+   * deciding whether an id is free to write to: what a dataset outside this
+   * space contains is not this client's to read.
+   */
+  private async getAnyMetadata(
+    datasetId: string
+  ): Promise<{ name: string; space_ids: string[] } | undefined> {
+    const response = await this.datasetsStorage.search({
+      track_total_hits: false,
+      size: 1,
+      _source: ['name', 'space_ids'],
+      query: { term: { _id: datasetId } },
+    });
+
+    const source = response.hits.hits[0]?._source;
+    if (!source) {
+      return undefined;
+    }
+
+    return { name: source.name, space_ids: normalizeSpaceIds(source.space_ids) };
   }
 
   /** A dataset without its examples, for callers that only need its metadata. */

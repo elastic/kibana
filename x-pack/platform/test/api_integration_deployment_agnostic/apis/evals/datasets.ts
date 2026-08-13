@@ -480,6 +480,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(409);
       });
 
+      it('refuses an upsert into a space that already holds its name', async () => {
+        const name = `FTR Upsert Collide ${suffix}`;
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name, description: 'other space', space_ids: [spaceId] })
+          .expect(200);
+
+        createdDatasetIds.push({
+          id: (body as CreateEvaluationDatasetResponse).dataset_id,
+          path: (id) => inSpace(datasetPath(id)),
+        });
+
+        // The route a run uses has to name the collision like the others do,
+        // rather than leave a suite with an unexplained failure.
+        const { body: conflict } = await adminClient
+          .post(EVALS_DATASET_UPSERT_URL)
+          .send({ name, description: 'widening', examples: [], space_ids: ['default', spaceId] })
+          .expect(409);
+
+        expect((conflict as { message: string }).message).to.contain(name);
+      });
+
       it('refuses to drop the space the update is made from', async () => {
         const name = `FTR Self Removal ${suffix}`;
         const { body } = await adminClient

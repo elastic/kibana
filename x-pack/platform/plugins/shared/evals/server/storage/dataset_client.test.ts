@@ -494,6 +494,30 @@ const createClientsInSpaces = (spaceIds: [string, string]) => {
   ];
 };
 
+/**
+ * Leaves a document where a write can collide with it but a search cannot find
+ * it, as Elasticsearch does between indexing one and refreshing.
+ */
+const hideFromSearch = (
+  storage: ReturnType<typeof createDatasetStorageClient>,
+  datasetId: string
+) => {
+  const search = storage.client.search as jest.Mock;
+  const refreshed = search.getMockImplementation()!;
+
+  search.mockImplementation(async (params: Record<string, unknown>) => {
+    const response = await refreshed(params);
+
+    return {
+      ...response,
+      hits: {
+        ...response.hits,
+        hits: response.hits.hits.filter((hit: { _id: string }) => hit._id !== datasetId),
+      },
+    };
+  });
+};
+
 describe('DatasetClient', () => {
   const baseExampleA: DatasetExampleInput = {
     input: { question: 'What is Kibana?' },
@@ -1071,6 +1095,50 @@ describe('DatasetClient', () => {
       expect(recreated.id).not.toBe(moved.id);
       await expect(client.getByName('shared-name')).resolves.toEqual(
         expect.objectContaining({ id: recreated.id, description: 'Marketing again' })
+      );
+    });
+
+    it('refuses a name another create took while it was looking', async () => {
+      const storage = {
+        datasetsStorage: createDatasetStorageClient(),
+        examplesStorage: createExamplesStorageClient(),
+      };
+      const { client } = createClient({ spaceId: 'marketing', storage });
+
+      const winner = await client.create({ name: 'race-name', description: 'Winner' });
+      hideFromSearch(storage.datasetsStorage, winner.id);
+
+      // Both creates derive one id, so the write itself decides between them.
+      // Searching for the winner instead would find nothing this soon and leave
+      // two datasets answering to a name only one may hold here.
+      await expect(client.create({ name: 'race-name', description: 'Loser' })).rejects.toThrow(
+        DatasetAlreadyExistsError
+      );
+
+      expect(
+        Array.from(storage.datasetsStorage.docs.values())
+          .filter((document) => document.name === 'race-name')
+          .map((document) => document.description)
+      ).toEqual(['Winner']);
+    });
+
+    it('refuses a name another create took under a later derivation of its id', async () => {
+      const storage = {
+        datasetsStorage: createDatasetStorageClient(),
+        examplesStorage: createExamplesStorageClient(),
+      };
+      const { client } = createClient({ spaceId: 'marketing', storage });
+
+      // The first derivation is held by a dataset that moved away, so creates of
+      // this name fall through to the next one and race there instead.
+      const moved = await client.create({ name: 'race-name', description: 'Moved' });
+      await client.update(moved.id, { spaceIds: ['sales'] });
+
+      const winner = await client.create({ name: 'race-name', description: 'Winner' });
+      hideFromSearch(storage.datasetsStorage, winner.id);
+
+      await expect(client.create({ name: 'race-name', description: 'Loser' })).rejects.toThrow(
+        DatasetAlreadyExistsError
       );
     });
 

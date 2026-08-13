@@ -21,6 +21,7 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import { DatasetAlreadyExistsError } from '../../storage/dataset_already_exists_error';
 import { resolveTargetSpaces, withoutSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
@@ -141,6 +142,12 @@ export const registerUpsertDatasetRoute = ({
             context: 'Upsert evaluation dataset',
           });
           if (tooLarge) return tooLarge;
+
+          // A name the run's own dataset does not hold, in one of the spaces it
+          // asked for. Nothing an upsert can settle on the caller's behalf.
+          if (error instanceof DatasetAlreadyExistsError) {
+            return response.conflict({ body: { message: error.message } });
+          }
 
           const errorMessage = error instanceof Error ? error.message : String(error);
           logger.error(`Failed to upsert evaluation dataset: ${errorMessage}`);
