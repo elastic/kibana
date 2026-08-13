@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiDataGridWrapper, type ScoutPage } from '@kbn/scout';
+import type { EuiDataGridObject, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import {
@@ -16,10 +16,10 @@ import {
 } from '../constants';
 
 export class RuleDetailsPage {
-  public readonly alertsTable: EuiDataGridWrapper;
+  public readonly alertsTable: EuiDataGridObject;
 
   constructor(private readonly page: ScoutPage) {
-    this.alertsTable = new EuiDataGridWrapper(this.page, 'alertsTableIsLoaded');
+    this.alertsTable = this.page.components.dataGrid('alertsTableIsLoaded');
   }
 
   async gotoById(ruleId: string) {

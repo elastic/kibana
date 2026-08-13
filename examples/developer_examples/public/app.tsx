@@ -92,7 +92,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }:
                     </EuiLink>
                     <EuiToolTip content="Open in new tab" disableScreenReaderOutput>
                       <EuiButtonIcon
-                        iconType="popout"
+                        iconType="external"
                         aria-label="Open in new tab"
                         onClick={() =>
                           window.open(getUrlForApp(def.appId), '_blank', 'noopener, noreferrer')

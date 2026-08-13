@@ -82,7 +82,7 @@ export const buildRuleActionButtons = ({
       ? [
           {
             label: VIEW_RULE,
-            icon: 'popout' as const,
+            icon: 'external' as const,
             type: ActionButtonType.SECONDARY,
             handler: () => {
               application.navigateToApp('securitySolutionUI', {
@@ -112,7 +112,7 @@ export const buildRuleActionButtons = ({
         }
       : {
           label: CREATE_RULE,
-          icon: 'plusInCircle',
+          icon: 'plusCircle',
           type: ActionButtonType.PRIMARY,
           disabled: !isEsql,
           disabledReason,
