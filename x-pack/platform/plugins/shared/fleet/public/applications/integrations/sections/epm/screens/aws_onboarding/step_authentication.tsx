@@ -55,7 +55,7 @@ const HEADER_TINT = '#F6F9FC';
 // empty rule (no rules to lose) as long as `borders` stays at its default.
 const SLOWER_ACCORDION_TRANSITION = css`
   .euiAccordion__childWrapper {
-    transition-duration: 450ms;
+    transition-duration: 750ms;
   }
 `;
 
@@ -277,6 +277,57 @@ const ServiceDetectionCard: React.FunctionComponent<{
   </EuiPanel>
 );
 
+// Small fade/scale-in checkmark shown once a field is confirmed — subtle
+// enough to read as an acknowledgement, not a loud success state.
+const CheckIndicator: React.FunctionComponent<{ visible: boolean }> = ({ visible }) => (
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'scale(1)' : 'scale(0.6)',
+      transition: 'opacity 250ms ease, transform 250ms ease',
+    }}
+  >
+    <EuiIcon type="check" color="success" size="m" />
+  </div>
+);
+
+// A text field that confirms itself — once the user tabs/clicks away or
+// presses Enter with non-empty content, a small check fades in on the
+// right. Editing the value again clears the check until it's reconfirmed.
+const ConfirmableFieldText: React.FunctionComponent<{
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  ariaLabel: string;
+  dataTestSubj: string;
+  disabled?: boolean;
+}> = ({ value, onChange, placeholder, ariaLabel, dataTestSubj, disabled }) => {
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const confirm = () => setIsConfirmed(value.trim().length > 0);
+
+  return (
+    <EuiFieldText
+      fullWidth
+      placeholder={placeholder}
+      value={value}
+      disabled={disabled}
+      onChange={(e) => {
+        onChange(e.target.value);
+        setIsConfirmed(false);
+      }}
+      onBlur={confirm}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') confirm();
+      }}
+      append={<CheckIndicator visible={isConfirmed} />}
+      aria-label={ariaLabel}
+      data-test-subj={dataTestSubj}
+    />
+  );
+};
+
 // Elastic Cloud Forwarder widget — owns the FULL CloudFormation lifecycle:
 // launch → per-service detection animation → stack name/version capture.
 // Deploy state is lifted to the parent flow so Detect & Review can read it.
@@ -311,7 +362,8 @@ const CloudFormationWidget: React.FunctionComponent<{
   onCompleteChange,
 }) => {
   const allReceived = services.length > 0 && receivedCount >= services.length;
-  const isComplete = allReceived && stackName.trim().length > 0;
+  const isComplete =
+    allReceived && stackName.trim().length > 0 && stackVersion.trim().length > 0;
 
   useEffect(() => {
     onCompleteChange(isComplete);
@@ -420,13 +472,12 @@ const CloudFormationWidget: React.FunctionComponent<{
             style={HALF_WIDTH}
             fullWidth
           >
-            <EuiFieldText
-              fullWidth
-              placeholder="e.g.: elastic-cloud-forwarder-xxxx"
+            <ConfirmableFieldText
               value={stackName}
-              onChange={(e) => onStackNameChange(e.target.value)}
-              aria-label="Stack name"
-              data-test-subj="awsOnboardingStackName"
+              onChange={onStackNameChange}
+              placeholder="e.g.: elastic-cloud-forwarder-xxxx"
+              ariaLabel="Stack name"
+              dataTestSubj="awsOnboardingStackName"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -442,13 +493,12 @@ const CloudFormationWidget: React.FunctionComponent<{
             style={HALF_WIDTH}
             fullWidth
           >
-            <EuiFieldText
-              fullWidth
-              placeholder="e.g.: 1.0.0"
+            <ConfirmableFieldText
               value={stackVersion}
-              onChange={(e) => onStackVersionChange(e.target.value)}
-              aria-label="Stack version"
-              data-test-subj="awsOnboardingStackVersion"
+              onChange={onStackVersionChange}
+              placeholder="e.g.: 1.0.0"
+              ariaLabel="Stack version"
+              dataTestSubj="awsOnboardingStackVersion"
             />
           </EuiFormRow>
         </>
@@ -709,6 +759,7 @@ const WhereToAddCard: React.FunctionComponent<{
   // commits, so they still get a real chance to pick "Existing hosts"
   // instead before anything runs automatically.
   const [isNewHostsConfirmed, setIsNewHostsConfirmed] = useState(false);
+  const [existingPolicyId, setExistingPolicyId] = useState('');
   const [platform, setPlatform] = useState('linux');
   const enrollTimer = useRef<number | null>(null);
   const servicesCount = services.length;
@@ -771,7 +822,7 @@ const WhereToAddCard: React.FunctionComponent<{
               onClick={() => setIsNewHostsConfirmed(true)}
               data-test-subj="awsOnboardingConfirmNewHosts"
             >
-              Confirm new hosts
+              Deploy new host
             </EuiButton>
           ) : (
           <div css={NO_TRAILING_STEP_PADDING}>
@@ -930,8 +981,9 @@ const WhereToAddCard: React.FunctionComponent<{
           <EuiFormRow label="Agent policies" style={HALF_WIDTH} fullWidth>
             <EuiSelect
               fullWidth
-              hasNoInitialSelection
-              options={[]}
+              options={[{ value: '', text: 'Select an agent policy' }]}
+              value={existingPolicyId}
+              onChange={(e) => setExistingPolicyId(e.target.value)}
               aria-label="Select agent policies to add this integration to"
               data-test-subj="awsOnboardingExistingAgentPolicies"
             />
@@ -944,6 +996,13 @@ const WhereToAddCard: React.FunctionComponent<{
               </EuiLink>
             </p>
           </EuiText>
+          <EuiSpacer size="m" />
+          <EuiButton
+            isDisabled={!existingPolicyId}
+            data-test-subj="awsOnboardingDeployExistingHosts"
+          >
+            Deploy hosts
+          </EuiButton>
         </>
       )}
     </AccordionCard>
