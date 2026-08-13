@@ -23,6 +23,7 @@ import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_en
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { useRunRule } from '../../hooks/use_run_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
+import { useRuleChangeHistoryModal } from '../../components/rule/modals/change_history';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
 import type { RuleContentListItem } from './rules_data_source';
@@ -58,6 +59,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
+  const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
   const { pageIndex, pageSize, pageSizeOptions, setPageIndex, setPageSize } =
@@ -207,6 +209,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         onRun={(r) => runRuleMutation.mutate({ id: r.id })}
+        onViewChangeHistory={(r) => openChangeHistory({ id: r.id, name: r.metadata.name })}
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -251,6 +254,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           isLoading={bulkDeleteMutation.isLoading}
         />
       ) : null}
+      {changeHistoryModal}
     </>
   );
 };
