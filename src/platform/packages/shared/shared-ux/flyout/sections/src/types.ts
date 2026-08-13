@@ -10,10 +10,10 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 
-type FlyoutSectionActionBase = {
+interface FlyoutSectionActionBase {
   label: ReactNode;
   'data-test-subj'?: string;
-};
+}
 
 type FlyoutSectionLinkAction = FlyoutSectionActionBase & {
   href: string;
