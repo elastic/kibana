@@ -1939,9 +1939,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_104.0.0-amsterdam.1_9663.tgz":
+"@elastic/eui@file:./eui_104.0.0_amsterdam.1_9663.tgz":
   version "104.0.0-amsterdam.1"
-  resolved "file:./eui_104.0.0-amsterdam.1_9663.tgz#7b6e0211d46bc98e29a891ccd1693a17e527a501"
+  resolved "file:./eui_104.0.0_amsterdam.1_9663.tgz#7b6e0211d46bc98e29a891ccd1693a17e527a501"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
