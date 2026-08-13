@@ -88,7 +88,7 @@ const SECRET_PATTERNS = [
   [/\bBearer\s+[A-Za-z0-9._~+/-]+=*/gi, REDACTED],
   // JWTs (three base64url segments separated by dots)
   [/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, REDACTED],
-  // OpenAI / LiteLLM-style keys (`sk-...`, `sk-proj-...`)
+  // OpenAI-style keys (`sk-...`, `sk-proj-...`)
   [/\bsk-[A-Za-z0-9_-]{16,}/g, REDACTED],
   // AWS access key ids
   [/\bAKIA[0-9A-Z]{16}\b/g, REDACTED],
