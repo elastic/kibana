@@ -15,12 +15,10 @@
     "@kbn/core-spaces-common",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-client",
-    "@kbn/server-route-repository-utils",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
-    "@kbn/workflows-plugin",
     "@kbn/zod"
   ]
 }
