@@ -23,7 +23,9 @@ const isNotFound = (error: unknown): boolean =>
   error !== null &&
   (error as { output?: { statusCode?: number } }).output?.statusCode === 404;
 
-const readSettings = async (repo: ISavedObjectsRepository): Promise<SessionReplaySettings> => {
+export const readSessionReplaySettings = async (
+  repo: ISavedObjectsRepository
+): Promise<SessionReplaySettings> => {
   try {
     const so = await repo.get<Partial<SessionReplaySettings>>(
       SESSION_REPLAY_SETTINGS_SO_TYPE,
@@ -53,7 +55,7 @@ export const getSessionReplaySettingsRoute = createUxServerRoute({
   handler: async ({ core }): Promise<SessionReplaySettings> => {
     const coreStart = await core.start();
     const repo = coreStart.savedObjects.createInternalRepository();
-    return readSettings(repo);
+    return readSessionReplaySettings(repo);
   },
 });
 

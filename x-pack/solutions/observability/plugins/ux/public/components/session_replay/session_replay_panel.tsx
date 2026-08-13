@@ -43,6 +43,10 @@ import { useLegacyUrlParams } from '../../context/url_params_context/use_url_par
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplaySessions } from '../../services/rest/session_replay_api';
 import {
+  SessionReplayInjectButton,
+  SessionReplayInjectFlyout,
+} from './session_replay_inject_flyout';
+import {
   JourneyTrail,
   SignalBadges,
   Sparkline,
@@ -522,13 +526,19 @@ export function SessionReplayPanel() {
     setPageIndex(0);
   }, []);
 
+  const [injectOpen, setInjectOpen] = useState(false);
+
   const openSettings = useCallback(() => {
     history.push({ pathname: '/session-replay/settings' });
   }, [history]);
 
   return (
     <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
+      {injectOpen && <SessionReplayInjectFlyout http={http} onClose={() => setInjectOpen(false)} />}
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <SessionReplayInjectButton onClick={() => setInjectOpen(true)} />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="s"

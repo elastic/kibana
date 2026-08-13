@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { SESSION_REPLAY_VENDOR_BUNDLE_PATH } from '../../common/session_replay_inject';
 import { fetchSessionReplaySettings } from '../services/rest/session_replay_api';
 
 interface EdotBrowserHandle {
@@ -21,11 +22,7 @@ interface EdotWindow extends Window {
   edotBrowser?: EdotBrowserHandle;
 }
 
-// Vendored EDOT browser SDK IIFE, served as a plugin static asset. Loading it as
-// a same-origin <script src> keeps it CSP-safe (no inline eval) and out of the
-// TypeScript program / webpack graph.
-const VENDOR_BUNDLE_PATH = '/plugins/ux/assets/elastic_otel_browser_replay.min.js';
-
+// Same-origin <script src> so Kibana's script-src CSP allows the vendored IIFE.
 const loadVendorBundle = (core: CoreStart): Promise<void> =>
   new Promise((resolve, reject) => {
     if (typeof (window as EdotWindow).startBrowserSdk === 'function') {
@@ -33,7 +30,7 @@ const loadVendorBundle = (core: CoreStart): Promise<void> =>
       return;
     }
     const script = document.createElement('script');
-    script.src = core.http.basePath.prepend(VENDOR_BUNDLE_PATH);
+    script.src = core.http.basePath.prepend(SESSION_REPLAY_VENDOR_BUNDLE_PATH);
     script.async = true;
     script.onload = () => resolve();
     script.onerror = () => reject(new Error('Failed to load EDOT replay bundle'));
