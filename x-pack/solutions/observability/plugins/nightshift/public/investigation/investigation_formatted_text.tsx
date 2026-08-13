@@ -30,6 +30,8 @@ export function InvestigationFormattedText({
   return (
     <div
       css={css`
+        overflow-wrap: anywhere;
+
         ${fontSize
           ? `
               font-size: ${fontSize};

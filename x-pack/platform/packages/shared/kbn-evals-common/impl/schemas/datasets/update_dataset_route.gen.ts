@@ -20,7 +20,7 @@ import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
 
 export const UpdateEvaluationDatasetRequestParams = lazySchema(() =>
   z.object({
-    datasetId: z.string(),
+    datasetId: z.string().max(1024),
   })
 );
 export type UpdateEvaluationDatasetRequestParams = z.infer<
