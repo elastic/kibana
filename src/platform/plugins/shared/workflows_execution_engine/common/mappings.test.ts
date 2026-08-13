@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import {
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
@@ -83,6 +84,105 @@ describe('WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS', () => {
       },
     });
   });
+
+  it('contains `managed` as a boolean — security contract with KibanaWorkflowsImplicitPrivilegesProvider', () => {
+    // The DLS grant 1 uses `must_not: term managed:true` on BOTH indices. A user restricted from
+    // managed executions must also be restricted from the associated step rows (which carry
+    // hitl.respondedBy). Removing this field is a SECURITY REGRESSION.
+    const properties = WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
+    expect(properties.managed).toEqual({ type: 'boolean' });
+  });
+});
+
+// ---- Cross-repo FLS allowlist sync guard ----
+//
+// KibanaWorkflowsImplicitPrivilegesProvider (Elasticsearch repo) declares a GRANTED_FIELDS
+// constant listing every mapped field that ordinary users may read.  Object-typed fields use the
+// `.*` form because FieldPermissions builds the automaton without implicit subfield expansion and
+// FieldSubsetReader drops the whole object when the `.`-step fails.
+//
+// This test derives the expected allowlist from the TypeScript mappings and asserts it matches the
+// Java constant exactly.  A new object-typed field added without the `.*` suffix would silently
+// vanish from `_source` in production; this test catches it at review time instead.
+
+function deriveEsAllowlistEntry(name: string, prop: MappingProperty): string | null {
+  if ('enabled' in prop && prop.enabled === false) {
+    // e.g. workflowDefinition — deliberately excluded from the allowlist
+    return null;
+  }
+  if ('properties' in prop && prop.properties) {
+    return `${name}.*`;
+  }
+  if ('type' in prop && (prop.type === 'object' || prop.type === 'nested')) {
+    return `${name}.*`;
+  }
+  return name;
+}
+
+function deriveAllowlist(mappings: typeof WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS): string[] {
+  const properties = mappings.properties ?? {};
+  return Object.entries(properties)
+    .map(([name, prop]) => deriveEsAllowlistEntry(name, prop as MappingProperty))
+    .filter((entry): entry is string => entry !== null)
+    .sort();
+}
+
+describe('ES FLS allowlist cross-repo sync', () => {
+  it('derives the same allowlist from executions mappings as GRANTED_FIELDS in KibanaWorkflowsImplicitPrivilegesProvider', () => {
+    // Mirror of GRANTED_FIELDS in KibanaWorkflowsImplicitPrivilegesProvider.java.
+    // Update both when adding or removing mapped fields.
+    const javaGrantedFields = [
+      'spaceId',
+      'id',
+      'workflowId',
+      'managed',
+      'managedBy',
+      'originManagedWorkflowId',
+      'managedVersion',
+      'status',
+      'createdAt',
+      'isTestRun',
+      'stepId',
+      'createdBy',
+      'executedBy',
+      'startedAt',
+      'finishedAt',
+      'duration',
+      'triggeredBy',
+      'eventChainDepth',
+      'eventChainVisitedWorkflowIds',
+      'dispatchEventId',
+      'concurrencyGroupKey',
+      'version',
+      'usage.*',
+      'stepUsage.*',
+    ].sort();
+
+    const derived = deriveAllowlist(WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS);
+    expect(derived).toEqual(javaGrantedFields);
+  });
+
+  it('derives the same allowlist from step-executions mappings as GRANTED_FIELDS in KibanaWorkflowsImplicitPrivilegesProvider', () => {
+    const javaGrantedFields = [
+      'spaceId',
+      'id',
+      'stepId',
+      'managed',
+      'stepType',
+      'workflowRunId',
+      'workflowId',
+      'status',
+      'isTestRun',
+      'startedAt',
+      'finishedAt',
+      'duration',
+      'usage.*',
+      'hitl.*',
+    ].sort();
+
+    const derived = deriveAllowlist(WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS);
+    expect(derived).toEqual(javaGrantedFields);
+  });
 });
 
 describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
@@ -100,6 +200,14 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     expect(properties.triggeredBy).toEqual({ type: 'keyword' });
     expect(properties.workflowDefinition).toEqual({ type: 'object', enabled: false });
     expect(properties.version).toEqual({ type: 'long' });
+  });
+
+  it('contains `managed` as a boolean — security contract with KibanaWorkflowsImplicitPrivilegesProvider', () => {
+    // The DLS grant 1 uses `must_not: term managed:true`. Removing this field is a SECURITY
+    // REGRESSION: users holding only readExecution would silently see managed executions.
+    // Changing the type (e.g. to keyword) would silently break the term filter.
+    const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
+    expect(properties.managed).toEqual({ type: 'boolean' });
   });
 
   it('does not carry an `hitl` envelope — HITL audit lives on the step doc', () => {

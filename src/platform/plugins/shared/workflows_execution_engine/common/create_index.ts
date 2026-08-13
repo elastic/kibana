@@ -36,10 +36,15 @@ export const createIndexWithMappings = async ({
 
     logger?.debug(`Creating index ${indexName} with mappings`);
 
-    // Create the index with proper mappings
+    // Create the index with proper mappings.
+    // `index.hidden: true` prevents the dot-prefixed name from emitting the
+    // `index_name_starts_with_dot` deprecation warning after the ES system-index
+    // carve-out (MetadataCreateIndexService.validateDotIndex skips the warning for
+    // hidden indices), and keeps the index out of wildcard expansion by default.
     await esClient.indices.create({
       index: indexName,
       mappings,
+      settings: { index: { hidden: true } },
     });
 
     logger?.debug(`Successfully created index ${indexName}`);
@@ -75,7 +80,8 @@ export const createOrUpdateIndex = async ({
         logger,
       });
     } else {
-      // Index exists, check if we need to update mappings
+      // Index exists, update mappings and ensure the hidden setting is applied.
+      // `index.hidden` is a dynamic setting so existing indices pick it up without a reindex.
       try {
         await esClient.indices.putMapping({
           index: indexName,
@@ -85,6 +91,16 @@ export const createOrUpdateIndex = async ({
       } catch (mappingError) {
         logger?.warn(`Failed to update mappings for index ${indexName}: ${mappingError.message}`);
         // Continue - the index exists and can be used
+      }
+      try {
+        await esClient.indices.putSettings({
+          index: indexName,
+          settings: { index: { hidden: true } },
+        });
+        logger?.debug(`Applied hidden setting for existing index ${indexName}`);
+      } catch (settingsError) {
+        logger?.warn(`Failed to apply hidden setting for index ${indexName}: ${settingsError.message}`);
+        // Continue - this setting is advisory; the index remains usable without it
       }
     }
   } catch (error) {

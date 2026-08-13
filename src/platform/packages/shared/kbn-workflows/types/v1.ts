@@ -248,6 +248,18 @@ export interface EsWorkflowStepExecution {
   state?: Record<string, unknown>;
 
   /**
+   * Whether this step belongs to a managed workflow execution. Mirrors the `managed` field
+   * on the parent workflow execution doc and is stamped by `createStep` in
+   * `workflow_execution_state.ts`.
+   *
+   * Required by `KibanaWorkflowsImplicitPrivilegesProvider` (Elasticsearch repo): the DLS
+   * grant 1 uses `must_not: term managed:true` on the step-executions index. Without this
+   * field a base-read user could see step rows (including `hitl.respondedBy`) for managed
+   * executions they are not authorised to access.
+   */
+  managed?: boolean;
+
+  /**
    * Optional Human-In-The-Loop audit envelope, populated only by
    * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
    * every property inside it are optional and MUST be treated as such

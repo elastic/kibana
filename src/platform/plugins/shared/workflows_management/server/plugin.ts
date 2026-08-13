@@ -24,6 +24,7 @@ import {
   createWorkflowsClientProvider,
 } from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
+import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
@@ -55,6 +56,7 @@ export class WorkflowsPlugin
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
+  private executionDataViewsBootstrap: ExecutionDataViewsBootstrap | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -109,6 +111,38 @@ export class WorkflowsPlugin
       workflowsService,
       audit,
     });
+
+    // Register the `workflowsManagement` route-handler context. Its only purpose is to
+    // fire-and-forget the per-space data-view bootstrap when a workflows route is first
+    // called in a space. The context is accessed in `withServerlessAvailabilityCheck`
+    // to trigger the lazy getter — route handlers never read from it.
+    //
+    // `getStartServices()` bridges the setup/start boundary: `dataViews` is only available
+    // at start time but context providers are registered at setup time.
+    core.http.registerRouteHandlerContext<WorkflowsRequestHandlerContext, 'workflowsManagement'>(
+      'workflowsManagement',
+      async (_context, request) => {
+        const [coreStart, startPlugins] = await core.getStartServices();
+        if (this.executionDataViewsBootstrap === null) {
+          this.executionDataViewsBootstrap = new ExecutionDataViewsBootstrap(
+            startPlugins.dataViews,
+            this.logger.get('executionDataViewsBootstrap')
+          );
+        }
+
+        // `getSpaceId` is synchronous and available from setup-time spaces reference.
+        const spaceId = spaces?.getSpaceId(request) ?? 'default';
+
+        this.executionDataViewsBootstrap.ensureForSpaceFireAndForget(
+          spaceId,
+          coreStart.savedObjects.getScopedClient(request),
+          coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+          request
+        );
+
+        // The context value is void — callers await the getter but only to trigger the side effect.
+      }
+    );
 
     if (plugins.inbox) {
       this.logger.debug('Workflows Management: registering inbox provider');

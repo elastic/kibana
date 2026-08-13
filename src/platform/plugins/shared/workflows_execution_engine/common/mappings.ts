@@ -11,6 +11,12 @@ import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch
 export const PLUGIN_ID = 'workflowsExecutionEngine';
 export const PLUGIN_NAME = 'Workflows Execution Engine';
 
+// These two indices are deliberately NOT Elasticsearch system indices: they are carved out of the
+// `.workflows~(...)` system-index pattern so that KibanaWorkflowsImplicitPrivilegesProvider (in
+// the x-pack/plugin/kibana module of the Elasticsearch repo) can grant ordinary users DLS/FLS-
+// scoped read access to them. Changing these names, the `managed` field presence, or the set of
+// mapped (non-disabled) fields is a cross-repo security contract — update the Java provider and
+// its FLS allowlist (GRANTED_FIELDS constant) in lockstep.
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
 
@@ -131,6 +137,17 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     },
     stepId: {
       type: 'keyword',
+    },
+    // Mirrors the `managed` field on the parent execution doc.
+    // Required by KibanaWorkflowsImplicitPrivilegesProvider: the DLS grant 1 uses
+    // `must_not: term managed:true` to hide managed step-execution rows from users
+    // who hold only the base readExecution privilege.
+    // Security contract: removing this field is a SECURITY REGRESSION — a user
+    // restricted from managed workflow executions would silently regain access to
+    // the associated step rows (including hitl.respondedBy). See the cross-repo
+    // note on WORKFLOWS_STEP_EXECUTIONS_INDEX above.
+    managed: {
+      type: 'boolean',
     },
     // Indexed so callers can filter step executions by their YAML step
     // type — e.g. listing every `wait_for_input` step across a space.
