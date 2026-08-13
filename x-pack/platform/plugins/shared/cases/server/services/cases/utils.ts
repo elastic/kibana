@@ -13,6 +13,7 @@ import type {
   ResolvedFieldLabelFilter,
 } from './extended_field_search_utils';
 import {
+  buildAllExtendedFieldValuesSearchClause,
   buildExtendedFieldFilterClauses,
   buildFieldLabelExistsClauses,
   EF_ALL_VALUES_FIELD,
@@ -151,13 +152,10 @@ export const constructSearchQuery = ({
 
     if (runtimeFields?.length) {
       runtimeFields.forEach((field) => {
-        shouldClauses.push({
-          simple_query_string: {
-            query: search.toLowerCase(),
-            fields: [field],
-            default_operator: 'AND',
-          },
-        });
+        const runtimeClause = buildAllExtendedFieldValuesSearchClause(search, field);
+        if (runtimeClause != null) {
+          shouldClauses.push(runtimeClause);
+        }
       });
     }
   }
