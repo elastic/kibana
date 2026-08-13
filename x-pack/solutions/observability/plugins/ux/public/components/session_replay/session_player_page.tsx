@@ -14,6 +14,7 @@ import {
   EuiCode,
   EuiCopy,
   EuiEmptyPrompt,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiText,
@@ -429,6 +430,34 @@ export function SessionPlayerPage() {
       `,
       stageInspecting: css`
         cursor: crosshair;
+      `,
+      /* Transparent layer over the rrweb iframe so clicking the stage toggles
+         play/pause (the iframe otherwise swallows the click). Hidden while
+         inspecting, where clicks select elements instead. */
+      clickCatcher: css`
+        position: absolute;
+        inset: 0;
+        z-index: 4;
+        cursor: pointer;
+      `,
+      pausedGlyph: css`
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      `,
+      pausedGlyphInner: css`
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        color: #fff;
+        background: rgba(11, 15, 20, 0.55);
+        backdrop-filter: blur(2px);
       `,
       stageOverlay: css`
         position: absolute;
@@ -1088,6 +1117,22 @@ export function SessionPlayerPage() {
                 {loading && (
                   <div css={styles.stageOverlay}>
                     <EuiLoadingSpinner size="xl" />
+                  </div>
+                )}
+                {ready && !inspecting && !loading && (
+                  <div
+                    css={styles.clickCatcher}
+                    onClick={togglePlay}
+                    data-test-subj="uxSessionReplayStageClick"
+                    aria-hidden="true"
+                  >
+                    {!playing && (
+                      <div css={styles.pausedGlyph}>
+                        <div css={styles.pausedGlyphInner}>
+                          <EuiIcon type="play" size="l" aria-hidden={true} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

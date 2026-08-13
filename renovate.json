@@ -2025,7 +2025,7 @@
     },
     {
       "groupName": "rrweb",
-      "matchDepNames": ["rrweb", "@rrweb/types", "@rrweb/utils", "rrdom"],
+      "matchDepNames": ["rrweb"],
       "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:actionable-obs"],

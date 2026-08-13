@@ -59986,7 +59986,6 @@
     "xpack.ux.median": "Median",
     "xpack.ux.metrics": "Metriken",
     "xpack.ux.overview.beatsCard.buttonLabel": "RUM-Daten hinzufügen",
-    "xpack.ux.overview.beatsCard.description": "Aktivieren Sie RUM mit dem APM-Agenten, um Nutzerdaten zur Benutzererfahrung zu sammeln.",
     "xpack.ux.overview.beatsCard.title": "RUM-Daten hinzufügen",
     "xpack.ux.overview.heading": "Dashboard",
     "xpack.ux.percentile.50thMedian": "50. (Median)",

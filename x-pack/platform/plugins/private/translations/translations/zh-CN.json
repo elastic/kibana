@@ -60194,7 +60194,6 @@
     "xpack.ux.median": "中值",
     "xpack.ux.metrics": "指标",
     "xpack.ux.overview.beatsCard.buttonLabel": "添加 RUM 数据",
-    "xpack.ux.overview.beatsCard.description": "通过 APM 代理启用 RUM，以收集用户体验数据。",
     "xpack.ux.overview.beatsCard.title": "添加 RUM 数据",
     "xpack.ux.overview.heading": "仪表板",
     "xpack.ux.percentile.50thMedian": "第 50 个（中值）",
