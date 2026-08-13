@@ -11,8 +11,9 @@ import javaIcon from '../../assets/java.svg';
 import goIcon from '../../assets/go.svg';
 import rustIcon from '../../assets/rust.svg';
 import csharpIcon from '../../assets/csharp.svg';
+import rubyIcon from '../../assets/ruby.svg';
 
-export type Language = 'python' | 'javascript' | 'java' | 'go' | 'rust' | 'csharp';
+export type Language = 'python' | 'javascript' | 'java' | 'go' | 'rust' | 'csharp' | 'ruby';
 
 export interface LanguageDescriptor {
   id: Language;
@@ -28,6 +29,7 @@ export const LANGUAGES: readonly LanguageDescriptor[] = [
   { id: 'go', label: 'Go', syntax: 'go', icon: goIcon },
   { id: 'rust', label: 'Rust', syntax: 'rust', icon: rustIcon },
   { id: 'csharp', label: 'C#', syntax: 'csharp', icon: csharpIcon },
+  { id: 'ruby', label: 'Ruby', syntax: 'ruby', icon: rubyIcon },
 ];
 
 export const DEFAULT_LANGUAGE: Language = 'python';
