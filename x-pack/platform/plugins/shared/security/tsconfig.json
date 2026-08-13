@@ -117,6 +117,7 @@
     "@kbn/core-logging-server",
     "@kbn/projects-solutions-groups",
     "@kbn/change-history",
+    "@kbn/unsaved-changes-prompt",
   ],
   "exclude": ["target/**/*"]
 }

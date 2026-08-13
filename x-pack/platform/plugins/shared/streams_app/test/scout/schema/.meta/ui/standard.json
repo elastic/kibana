@@ -1,5 +1,5 @@
 {
-  "sha1": "9d4bb7aab45110834c66ca5da3200107e896ad12",
+  "sha1": "baac35e69ac202e6cd4ffbb1a417d14fd5c16993",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/schema/ui/tests/wired_streams_schema.spec.ts",
-        "line": 158,
+        "line": 160,
         "column": 23
       }
     }
