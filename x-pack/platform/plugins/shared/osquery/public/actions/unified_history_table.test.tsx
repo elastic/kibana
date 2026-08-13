@@ -47,6 +47,11 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => ({ search: '', pathname: '/history' }),
 }));
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  formatDate: (value: unknown) => String(value),
+}));
+
 jest.mock('./use_unified_history');
 jest.mock('./use_user_profiles');
 jest.mock('../packs/use_packs');
@@ -510,6 +515,64 @@ describe('UnifiedHistoryTable', () => {
       expect(headers).toContain('Created at');
       expect(headers).not.toContain('Tags');
       expect(headers).not.toContain('Source');
+    });
+  });
+
+  describe('Created at column', () => {
+    it('shows plannedTime for a scheduled row (not the streaming timestamp)', () => {
+      const row = createMockScheduledRow({
+        plannedTime: '2025-06-15T08:00:00.000Z',
+        timestamp: '2025-06-15T08:05:37.123Z',
+      });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('2025-06-15T08:00:00.000Z')).toBeInTheDocument();
+      expect(screen.queryByText('2025-06-15T08:05:37.123Z')).not.toBeInTheDocument();
+    });
+
+    it('shows timestamp for a live row (no plannedTime)', () => {
+      const row = createMockLiveRow({ timestamp: '2025-06-15T09:30:00.000Z' });
+      mockHistory({ data: [row] });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      expect(screen.getByText('2025-06-15T09:30:00.000Z')).toBeInTheDocument();
+    });
+
+    it('displayed Created at values follow ascending row order for a mixed page', () => {
+      const rows = [
+        createMockScheduledRow({
+          plannedTime: '2025-06-15T07:00:00.000Z',
+          timestamp: '2025-06-15T07:05:00.000Z',
+        }),
+        createMockScheduledRow({
+          plannedTime: '2025-06-15T08:00:00.000Z',
+          timestamp: '2025-06-15T08:07:00.000Z',
+        }),
+        createMockLiveRow({ timestamp: '2025-06-15T09:00:00.000Z' }),
+      ];
+      mockHistory({ data: rows });
+
+      renderWithProviders(<UnifiedHistoryTable />);
+
+      const createdAtHeader = screen
+        .getAllByRole('columnheader')
+        .find((h) => h.textContent === 'Created at');
+      expect(createdAtHeader).toBeTruthy();
+      const colIndex =
+        Array.from(createdAtHeader!.closest('tr')!.children).indexOf(createdAtHeader!) + 1;
+      const dataRows = screen.getAllByRole('row').slice(1);
+      const cellValues = dataRows.map(
+        (r) => (r.querySelectorAll('td')[colIndex - 1] as HTMLElement)?.textContent ?? ''
+      );
+
+      expect(cellValues).toEqual([
+        '2025-06-15T07:00:00.000Z',
+        '2025-06-15T08:00:00.000Z',
+        '2025-06-15T09:00:00.000Z',
+      ]);
     });
   });
 

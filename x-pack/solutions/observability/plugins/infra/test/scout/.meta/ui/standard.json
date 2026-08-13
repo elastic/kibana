@@ -1,5 +1,5 @@
 {
-  "sha1": "4cfe042af0f42707e899a01c5a171eb1750d5aef",
+  "sha1": "c380145366a8f424a703057d7177141ffb66c432",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -289,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 75,
+        "line": 78,
         "column": 21
       }
     },
@@ -305,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 79,
+        "line": 82,
         "column": 7
       }
     },
@@ -321,7 +321,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 83,
+        "line": 86,
         "column": 52
       }
     },
@@ -337,7 +337,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 100,
+        "line": 103,
         "column": 27
       }
     },
@@ -347,14 +347,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 111,
-        "column": 5
+        "line": 116,
+        "column": 27
       }
     },
     {
@@ -367,8 +365,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/metrics_source_configuration.spec.ts",
-        "line": 126,
-        "column": 71
+        "line": 129,
+        "column": 90
       }
     },
     {

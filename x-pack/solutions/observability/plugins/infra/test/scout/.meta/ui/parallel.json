@@ -1,5 +1,5 @@
 {
-  "sha1": "4cfe042af0f42707e899a01c5a171eb1750d5aef",
+  "sha1": "c380145366a8f424a703057d7177141ffb66c432",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -31,7 +31,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 26,
+        "line": 33,
         "column": 14
       }
     },
@@ -45,8 +45,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 37,
-        "column": 35
+        "line": 46,
+        "column": 33
       }
     },
     {
@@ -75,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 84,
-        "column": 31
+        "line": 143,
+        "column": 2
       }
     },
     {
@@ -89,8 +89,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 138,
-        "column": 11
+        "line": 153,
+        "column": 45
       }
     },
     {

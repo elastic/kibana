@@ -623,7 +623,7 @@ describe('CopyToSpaceFlyout', () => {
           id="xpack.spaces.management.copyToSpace.copyStatus.unresolvableErrorMessage"
         />,
         "data-test-subj": "cts-object-result-error-my-viz",
-        "type": "alert",
+        "type": "warning",
       }
     `);
 

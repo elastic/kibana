@@ -77,7 +77,7 @@ export const ConnectorsTab = ({
 
   const createConnectorButton = (
     <EuiButtonEmpty
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={() =>
         application.navigateToApp(MANAGEMENT_APP_ID, { deepLinkId: CONNECTORS_DEEP_LINK_ID })
       }

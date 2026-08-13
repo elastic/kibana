@@ -98,7 +98,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
         <EuiToolTip content={VIEW_DETAILS} disableScreenReaderOutput>
           <EuiButtonIcon
             data-test-subj="expand-event"
-            iconType="expand"
+            iconType="maximize"
             onClick={onExpandEvent}
             size="s"
             color="text"
@@ -133,7 +133,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />
