@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/monaco', () => ({
@@ -67,7 +67,7 @@ describe('TemplateActionsMenu', () => {
     });
   });
 
-  it('opens the menu with the four top-level actions', async () => {
+  it('opens the menu with the four top-level actions, search, and category headers', async () => {
     renderMenu();
     await user.click(screen.getByTestId('templateActionsMenuButton'));
 
@@ -75,6 +75,12 @@ describe('TemplateActionsMenu', () => {
     expect(screen.getByText('Field library')).toBeInTheDocument();
     expect(screen.getByText('Validation')).toBeInTheDocument();
     expect(screen.getByText('Conditional logic')).toBeInTheDocument();
+    expect(screen.getByText('Add field')).toBeInTheDocument();
+    expect(screen.getByText('Field rules')).toBeInTheDocument();
+    expect(screen.getByTestId('templateActionsMenu-search')).toBeInTheDocument();
+    expect(screen.getByTestId('templateActionsMenu-keyboardLegend')).toHaveTextContent(
+      '↑↓ navigate · ↵ add · esc close'
+    );
   });
 
   it('inserts a scaffolded field via New field → field type', async () => {
@@ -100,6 +106,8 @@ describe('TemplateActionsMenu', () => {
       'aria-disabled',
       'true'
     );
+    expect(screen.queryByTestId('templateActionsMenu-validation-chevron')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templateActionsMenu-conditional-chevron')).not.toBeInTheDocument();
   });
 
   it('exposes the disabled reason in the item text (reachable without hover) for a11y', async () => {
@@ -149,6 +157,46 @@ describe('TemplateActionsMenu', () => {
     expect(onChange.mock.calls[0][0]).toContain('$ref: root_cause');
   });
 
+  it('links to the field library table from the Field library empty state', async () => {
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
+    renderMenu();
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+    await user.click(await screen.findByTestId('templateActionsMenu-fieldLibrary'));
+
+    expect(
+      await screen.findByText(
+        'Create reusable fields in the Field library, then reference them from any template.'
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('actionsMenuPreviewOpenFieldLibrary')).toBeInTheDocument();
+    expect(await screen.findByTestId('templateActionsMenu-back')).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Field library' })).toBeInTheDocument();
+  });
+
+  it('goes back one level on Escape while drilled in, and closes at the root', async () => {
+    renderMenu();
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+    await user.click(await screen.findByText('New field'));
+
+    expect(await screen.findByTestId('templateActionsMenu-back')).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'New field' })).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByTestId('templateActionsMenuContent'), { key: 'Escape' });
+
+    expect(await screen.findByText('Field library')).toBeInTheDocument();
+    expect(screen.getByTestId('templateActionsMenu-back')).not.toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Actions menu' })).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByTestId('templateActionsMenuContent'), { key: 'Escape' });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('templateActionsMenuContent')).not.toBeInTheDocument();
+    });
+  });
+
   describe('fieldDefinition mode', () => {
     // The field-library document root IS a single inline field — no `fields:` array, no $ref.
     const FIELD_DEFINITION = `name: root_cause
@@ -177,6 +225,9 @@ type: keyword
       expect(await screen.findByText('New field')).toBeInTheDocument();
       expect(screen.queryByText('Field library')).not.toBeInTheDocument();
       expect(screen.queryByText('Conditional logic')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('fieldDefinitionActionsMenu-search')).not.toBeInTheDocument();
+      expect(screen.queryByText('Add field')).not.toBeInTheDocument();
+      expect(screen.queryByText('Field rules')).not.toBeInTheDocument();
       expect(screen.getByTestId('fieldDefinitionActionsMenu-validation')).toHaveAttribute(
         'aria-disabled',
         'true'

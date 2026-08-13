@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiButtonEmpty, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
@@ -31,16 +31,8 @@ import {
   parseTemplateDocument,
 } from '../utils/template_yaml_ast';
 import type { FieldRuleAction } from '../utils/field_action_catalog';
-import {
-  ActionsMenuPopover,
-  ConfigureAndAddModal,
-  getActionOptions,
-} from './actions_menu';
-import type {
-  ActionOptionData,
-  ConfigurableFieldAction,
-  ConfigureAndAddResult,
-} from './actions_menu';
+import { ActionsMenu, ActionsMenuPopover, getActionOptions } from './actions_menu';
+import type { ActionOptionData } from './actions_menu';
 import * as i18n from '../translations';
 
 interface TemplateActionsMenuProps {
@@ -63,7 +55,7 @@ interface TemplateActionsMenuProps {
 const COMMAND_KEY = isMac ? '⌘' : 'Ctrl';
 const SHORTCUT_HINT = isMac ? '⌘K' : 'Ctrl+K';
 
-const kbdCss = ({ euiTheme }: UseEuiTheme) =>
+const kbdCss = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) =>
   css({
     borderColor: euiTheme.colors.borderBaseSubdued,
     borderRadius: euiTheme.border.radius.small,
@@ -74,9 +66,9 @@ const kbdCss = ({ euiTheme }: UseEuiTheme) =>
 
 /**
  * The template editor's Actions menu: a bottom-right chip over the Monaco editor (also opened with
- * {@link SHORTCUT_HINT}). Drills into New field / Field library / Validation / Conditional logic
- * in a Workflows-style two-pane browser. Every action composes the existing pure YAML transforms
- * and writes the result back through `onChange`.
+ * {@link SHORTCUT_HINT}). Template mode uses the full single-column catalog (search + categories);
+ * field-definition mode uses a compact anchored popover. Every action composes the existing pure
+ * YAML transforms and writes the result back through `onChange`.
  *
  * The cursor position and the field it points at are snapshotted when the menu opens; the catalog is
  * built from that snapshot, so Validation / Conditional logic offer exactly the rules valid for the
@@ -94,7 +86,6 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [targetField, setTargetField] = useState<{ control: string; name?: string } | null>(null);
   const [bufferHasErrors, setBufferHasErrors] = useState(false);
-  const [configureAction, setConfigureAction] = useState<ConfigurableFieldAction | null>(null);
   const cursorLineRef = useRef<number | undefined>(undefined);
 
   const testSubjPrefix =
@@ -243,24 +234,50 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     [insertField, applyRule]
   );
 
-  const handleConfigureAndAdd = useCallback(
-    (action: ConfigurableFieldAction) => {
-      setIsOpen(false);
-      setConfigureAction(action);
-    },
-    []
+  const triggerButton = (
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconType="plusCircle"
+      iconSide="left"
+      onClick={() => (isOpen ? closeAndFocusEditor() : openMenu())}
+      aria-label={`${i18n.ACTIONS_MENU_ARIA} (${SHORTCUT_HINT})`}
+      data-test-subj={`${testSubjPrefix}Button`}
+      css={css({
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        borderRadius: euiTheme.border.radius.medium,
+      })}
+    >
+      <EuiText
+        size="xs"
+        css={css({
+          display: 'flex',
+          alignItems: 'center',
+          gap: euiTheme.size.s,
+        })}
+      >
+        <strong>{i18n.ACTIONS_MENU_BUTTON}</strong>
+        <EuiTextColor
+          color="subdued"
+          css={css({
+            display: 'flex',
+            gap: 2,
+            '& kbd': kbdCss({ euiTheme }),
+          })}
+        >
+          <kbd>{COMMAND_KEY}</kbd>
+          <kbd>{'K'}</kbd>
+        </EuiTextColor>
+      </EuiText>
+    </EuiButtonEmpty>
   );
 
-  const handleConfigureConfirm = useCallback(
-    (result: ConfigureAndAddResult) => {
-      setConfigureAction(null);
-      insertField(result.fieldObject, result.displayName);
-    },
-    [insertField]
-  );
+  const isCompact = mode === 'fieldDefinition';
 
-  // Rendered as an absolute chip over the bottom-right of the Monaco editor. The palette
-  // itself portals above the page.
+  // Rendered as an absolute chip over the bottom-right of the Monaco editor.
+  // Template mode portals a centered single-column menu; field-definition mode
+  // anchors a compact popover to this chip.
   return (
     <>
       <div
@@ -272,64 +289,40 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
           zIndex: 1,
         })}
       >
-        <EuiButtonEmpty
-          size="s"
-          color="text"
-          iconType="plusInCircle"
-          iconSide="left"
-          onClick={() => (isOpen ? closeAndFocusEditor() : openMenu())}
-          aria-label={`${i18n.ACTIONS_MENU_ARIA} (${SHORTCUT_HINT})`}
-          data-test-subj={`${testSubjPrefix}Button`}
-          css={css({
-            backgroundColor: euiTheme.colors.backgroundBasePlain,
-            border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-            borderRadius: euiTheme.border.radius.medium,
-          })}
-        >
-          <EuiText
-            size="xs"
-            css={css({
-              display: 'flex',
-              alignItems: 'center',
-              gap: euiTheme.size.s,
-            })}
+        {isCompact ? (
+          <EuiPopover
+            isOpen={isOpen}
+            closePopover={closeAndFocusEditor}
+            button={triggerButton}
+            panelPaddingSize="none"
+            anchorPosition="upRight"
+            ownFocus
+            repositionOnScroll
+            panelStyle={{ width: 360, maxWidth: 'calc(100vw - 32px)' }}
           >
-            <strong>{i18n.ACTIONS_MENU_BUTTON}</strong>
-            <EuiTextColor
-              color="subdued"
-              css={css({
-                display: 'flex',
-                gap: 2,
-                '& kbd': kbdCss({ euiTheme }),
-              })}
-            >
-              <kbd>{COMMAND_KEY}</kbd>
-              <kbd>K</kbd>
-            </EuiTextColor>
-          </EuiText>
-        </EuiButtonEmpty>
+            <ActionsMenu
+              options={catalog}
+              testSubjPrefix={testSubjPrefix}
+              onActionSelected={handleActionSelected}
+              onClose={closeAndFocusEditor}
+              presentation="compact"
+            />
+          </EuiPopover>
+        ) : (
+          triggerButton
+        )}
       </div>
 
-      <ActionsMenuPopover
-        isOpen={isOpen}
-        closePopover={closeAndFocusEditor}
-        options={catalog}
-        testSubjPrefix={testSubjPrefix}
-        onActionSelected={handleActionSelected}
-        onConfigureAndAdd={handleConfigureAndAdd}
-      />
-
-      {configureAction && (
-        <ConfigureAndAddModal
-          action={configureAction}
-          allowConditional={mode === 'template'}
-          onCancel={() => {
-            setConfigureAction(null);
-            editor?.focus();
-          }}
-          onConfirm={handleConfigureConfirm}
+      {!isCompact ? (
+        <ActionsMenuPopover
+          isOpen={isOpen}
+          closePopover={closeAndFocusEditor}
+          options={catalog}
+          testSubjPrefix={testSubjPrefix}
+          onActionSelected={handleActionSelected}
+          presentation="full"
         />
-      )}
+      ) : null}
     </>
   );
 };

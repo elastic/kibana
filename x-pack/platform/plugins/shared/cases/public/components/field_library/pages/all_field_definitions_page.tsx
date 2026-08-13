@@ -29,6 +29,7 @@ import { FieldSchema, isRefField } from '../../../../common/types/domain/templat
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
+import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
 import { useGetFieldDefinitions } from '../hooks/use_get_field_definitions';
 import { useCreateFieldDefinition } from '../hooks/use_create_field_definition';
 import { useUpdateFieldDefinition } from '../hooks/use_update_field_definition';
@@ -63,6 +64,7 @@ const parseInlineFieldDefinition = (definition: string): InlineField | undefined
 };
 
 export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = () => {
+  useCasesTemplatesBreadcrumbs(i18n.FIELD_LIBRARY_TITLE);
   const { owner } = useCasesContext();
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 

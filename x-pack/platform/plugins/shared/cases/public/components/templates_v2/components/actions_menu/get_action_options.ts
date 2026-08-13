@@ -152,7 +152,7 @@ export const getActionOptions = ({
     disabledReason: insertDisabledReason,
     pathIds: newFieldPath,
     testSubj: CATEGORY_IDS.newField,
-    iconType: 'plusInCircle',
+    iconType: 'plusCircle',
     iconVariant: 'platform',
     options: buildFieldTypeOptions(newFieldPath),
   };
@@ -190,7 +190,7 @@ export const getActionOptions = ({
     disabledReason: ruleDisabledReason,
     pathIds: validationPath,
     testSubj: CATEGORY_IDS.validation,
-    iconType: 'checkInCircleFilled',
+    iconType: 'checkCircleFill',
     iconVariant: 'validation',
     options: buildRuleOptions(validationPath, validationRules, 'validation'),
   });

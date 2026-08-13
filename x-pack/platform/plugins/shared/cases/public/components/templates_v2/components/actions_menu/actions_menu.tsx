@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EuiBreadcrumb, EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption, IconType, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiBreadcrumbs,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,16 +17,17 @@ import {
   EuiSelectable,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
+import { useCasesFieldLibraryNavigation } from '../../../../common/navigation';
 import { flattenOptions } from './get_action_options';
-import type { ActionOptionData, ConfigurableFieldAction, IconVariant } from './types';
+import type { ActionOptionData } from './types';
 import { getOptionAction, isActionCategory } from './types';
 import { useDisplayOptions } from './use_display_options';
 import * as i18nStrings from '../../translations';
@@ -38,12 +38,18 @@ const KEYBOARD_ACTIVE_CLASS = 'actionsMenu-keyboardActive';
 
 type PendingListFocus = 'first' | 'none' | { optionId: string };
 
+export type ActionsMenuPresentation = 'full' | 'compact';
+
 export interface ActionsMenuProps {
   options: ActionOptionData[];
   testSubjPrefix: string;
   onActionSelected: (action: ActionOptionData) => void;
-  onConfigureAndAdd?: (action: ConfigurableFieldAction) => void;
   onClose?: () => void;
+  /**
+   * `full` — template editor: search, category headers, keyboard legend.
+   * `compact` — field-library flyout: same rows and selection, no search or group labels.
+   */
+  presentation?: ActionsMenuPresentation;
 }
 
 const getActionableDisplayOptions = (options: EuiSelectableOption[]): EuiSelectableOption[] =>
@@ -82,30 +88,14 @@ const resolvePathLabels = (
   return labels;
 };
 
-function getIconOuterStyle(
-  variant: IconVariant | undefined,
-  styles: ReturnType<typeof useMemoCss<typeof componentStyles>>
-) {
-  switch (variant) {
-    case 'library':
-      return styles.iconOuterLibrary;
-    case 'validation':
-      return styles.iconOuterValidation;
-    case 'conditional':
-      return styles.iconOuterConditional;
-    case 'platform':
-    default:
-      return styles.iconOuterPlatform;
-  }
-}
-
 export function ActionsMenu({
   options: defaultOptions,
   testSubjPrefix,
   onActionSelected,
-  onConfigureAndAdd,
   onClose,
+  presentation = 'full',
 }: ActionsMenuProps) {
+  const isFull = presentation === 'full';
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,6 +103,8 @@ export function ActionsMenu({
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
   const listViewportRef = useRef<HTMLDivElement | null>(null);
   const listPaneRef = useRef<HTMLDivElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const [lockedBodyHeight, setLockedBodyHeight] = useState<number | null>(null);
   const isSlidingRef = useRef(false);
   const pendingListFocusRef = useRef<PendingListFocus | null>(null);
   const keyboardIndexRef = useRef<number | null>(null);
@@ -121,8 +113,6 @@ export function ActionsMenu({
 
   const [options, setOptions] = useState<ActionOptionData[]>(defaultOptions);
   const [currentPath, setCurrentPath] = useState<string[]>([]);
-  const [hoveredOption, setHoveredOption] = useState<ActionOptionData | null>(null);
-  const [pinnedOption, setPinnedOption] = useState<ActionOptionData | null>(null);
   const [keyboardIndex, setKeyboardIndex] = useState<number | null>(null);
   keyboardIndexRef.current = keyboardIndex;
 
@@ -130,14 +120,21 @@ export function ActionsMenu({
     searchInputRef.current?.focus({ preventScroll: true });
   }, []);
 
+  const focusMenu = useCallback(() => {
+    menuContainerRef.current?.focus({ preventScroll: true });
+  }, []);
+
   const clearKeyboardSelection = useCallback(() => {
     setKeyboardIndex(null);
-    setHoveredOption(null);
   }, []);
 
   useEffect(() => {
-    focusSearch();
-  }, [focusSearch]);
+    if (isFull) {
+      focusSearch();
+    } else {
+      focusMenu();
+    }
+  }, [focusSearch, focusMenu, isFull]);
 
   const keepSearchFocused = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -167,9 +164,10 @@ export function ActionsMenu({
   const displayOptions = useDisplayOptions({
     options,
     categoryTree: defaultOptions,
-    searchTerm,
+    searchTerm: isFull ? searchTerm : '',
     currentPath,
     testSubjPrefix,
+    showSectionLabels: isFull,
   });
 
   const actionableDisplayOptions = useMemo(
@@ -183,12 +181,6 @@ export function ActionsMenu({
 
   const setKeyboardIndexAndPreview = useCallback((index: number | null) => {
     setKeyboardIndex(index);
-    if (index == null) return;
-    const option = actionableDisplayOptionsRef.current[index];
-    const action = option ? getOptionAction(option) : undefined;
-    if (action) {
-      setHoveredOption(action);
-    }
   }, []);
 
   useEffect(() => {
@@ -213,27 +205,28 @@ export function ActionsMenu({
     active?.closest('.euiSelectableListItem')?.scrollIntoView({ block: 'nearest' });
   }, [keyboardIndex, currentPath]);
 
-  const isSearching = searchTerm.trim().length > 0;
+  const isSearching = isFull && searchTerm.trim().length > 0;
   const hasActionableItems = displayOptions.some((o) => !o.isGroupLabel);
   const showNoResults = isSearching && !hasActionableItems;
-  const previewOption = hoveredOption ?? pinnedOption;
+  const showEmptyCategory = !isSearching && currentPath.length > 0 && options.length === 0;
+  const showBack = currentPath.length > 0 && !isSearching;
+  const isFieldLibraryDrillIn = currentPath[0] === 'fieldLibrary' && !isSearching;
 
-  const handleListMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      if (keyboardIndexRef.current != null) {
-        setKeyboardIndex(null);
-      }
-      const optionTarget = (e.target as HTMLElement).closest('[data-option-id]');
-      if (!optionTarget) return;
-      const optionId = optionTarget.getAttribute('data-option-id');
-      if (!optionId) return;
-      const found = flatOptions.find((o) => o.id === optionId);
-      if (found && found.id !== hoveredOption?.id) {
-        setHoveredOption(found);
-      }
-    },
-    [flatOptions, hoveredOption]
-  );
+  useLayoutEffect(() => {
+    if (!isFull || currentPath.length > 0 || isSearching || lockedBodyHeight != null) {
+      return;
+    }
+    const height = bodyRef.current?.getBoundingClientRect().height;
+    if (height && height > 0) {
+      setLockedBodyHeight(height);
+    }
+  }, [isFull, currentPath.length, isSearching, lockedBodyHeight, displayOptions]);
+
+  const handleListMouseMove = useCallback(() => {
+    if (keyboardIndexRef.current != null) {
+      setKeyboardIndex(null);
+    }
+  }, []);
 
   const navigateToPath = useCallback(
     (nextPath: string[], pendingFocus: PendingListFocus = 'none') => {
@@ -250,8 +243,6 @@ export function ActionsMenu({
         }
         setCurrentPath(nextPath);
         setOptions(nextOptions);
-        setPinnedOption(null);
-        setHoveredOption(null);
         setKeyboardIndex(null);
       };
 
@@ -319,6 +310,13 @@ export function ActionsMenu({
     [currentPath, defaultOptions, euiTheme.colors.backgroundBasePlain]
   );
 
+  const goBack = useCallback(() => {
+    const path = currentPathRef.current;
+    if (path.length === 0) return;
+    const exitedId = path[path.length - 1];
+    navigateToPath(path.slice(0, -1), { optionId: exitedId });
+  }, [navigateToPath]);
+
   const handleStepOrGroupSelected = useCallback(
     (action: ActionOptionData) => {
       if (action.disabled) return;
@@ -327,36 +325,22 @@ export function ActionsMenu({
         setSearchTerm('');
         navigateToPath([...nextPath], 'none');
       } else {
-        setPinnedOption(null);
         onActionSelected(action);
       }
     },
     [currentPath, navigateToPath, onActionSelected]
   );
 
-  const handleAdd = useCallback(
-    (action: ActionOptionData) => {
-      if (action.disabled || isActionCategory(action)) return;
-      setPinnedOption(null);
-      onActionSelected(action);
+  const resolveRowIcon = useCallback(
+    (action: ActionOptionData): IconType => {
+      if (action.iconType) {
+        return action.iconType;
+      }
+      const parentId = action.pathIds?.[action.pathIds.length - 2];
+      const parent = parentId ? flatOptions.find((o) => o.id === parentId) : undefined;
+      return parent?.iconType ?? 'dot';
     },
-    [onActionSelected]
-  );
-
-  const handlePinPreview = useCallback((action: ActionOptionData, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPinnedOption(action);
-    setHoveredOption(action);
-  }, []);
-
-  const handleAddFromRow = useCallback(
-    (action: ActionOptionData, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      handleAdd(action);
-    },
-    [handleAdd]
+    [flatOptions]
   );
 
   const renderActionOption = (rawOption: EuiSelectableOption, searchValue: string) => {
@@ -380,8 +364,8 @@ export function ActionsMenu({
 
     const isCategory = isActionCategory(action);
     const description = action.disabledReason ?? action.description;
-    const showRootIcon = isCategory && currentPath.length === 0 && !isSearching && action.iconType;
-    const hideInfo = action.kind === 'fieldType';
+    const iconType = resolveRowIcon(action);
+    const showChevron = isCategory && !action.disabled;
 
     return (
       <div
@@ -395,21 +379,16 @@ export function ActionsMenu({
           gutterSize="none"
           responsive={false}
         >
-          {showRootIcon ? (
-            <EuiFlexItem
-              grow={false}
-              css={[styles.iconOuter, getIconOuterStyle(action.iconVariant, styles)]}
-            >
-              <span css={styles.actionIconInner}>
-                <EuiIcon
-                  type={action.iconType!}
-                  size="m"
-                  color={euiTheme.colors.textInverse}
-                  aria-hidden
-                />
-              </span>
-            </EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false} css={[styles.iconOuter, styles.iconOuterNeutral]}>
+            <span css={styles.actionIconInner}>
+              <EuiIcon
+                type={iconType}
+                size="m"
+                color={euiTheme.colors.textParagraph}
+                aria-hidden
+              />
+            </span>
+          </EuiFlexItem>
           <EuiFlexItem css={styles.actionInfo}>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
@@ -435,52 +414,19 @@ export function ActionsMenu({
               <EuiBadge color="hollow">{i18nStrings.ACTIONS_MENU_LIBRARY_GLOBAL_BADGE}</EuiBadge>
             </EuiFlexItem>
           ) : null}
-          {isCategory ? (
+          {showChevron ? (
             <EuiFlexItem grow={false} css={styles.arrowContainer}>
-              <EuiIcon type="arrowRight" size="s" css={styles.arrow} aria-hidden />
+              <EuiIcon
+                type="chevronSingleRight"
+                size="s"
+                css={styles.arrow}
+                aria-hidden
+                data-test-subj={
+                  action.testSubj ? `${testSubjPrefix}-${action.testSubj}-chevron` : undefined
+                }
+              />
             </EuiFlexItem>
-          ) : (
-            <span className="rowActions" css={styles.rowActions}>
-              {!hideInfo && (
-                <EuiButtonIcon
-                  iconType="info"
-                  size="m"
-                  iconSize="m"
-                  color="text"
-                  display="empty"
-                  css={styles.rowActionButton}
-                  aria-label={i18n.translate('xpack.cases.templates.actionsMenu.viewDetails', {
-                    defaultMessage: 'View details',
-                  })}
-                  data-test-subj="actionsMenuItemInfo"
-                  onClick={(e: React.MouseEvent) => handlePinPreview(action, e)}
-                  onMouseDown={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                />
-              )}
-              {!action.disabled && (
-                <EuiButtonIcon
-                  iconType="plusInCircle"
-                  size="m"
-                  iconSize="m"
-                  color="text"
-                  display="empty"
-                  css={styles.rowActionButton}
-                  aria-label={i18n.translate('xpack.cases.templates.actionsMenu.addItem', {
-                    defaultMessage: 'Add',
-                  })}
-                  data-test-subj="actionsMenuItemAdd"
-                  onClick={(e: React.MouseEvent) => handleAddFromRow(action, e)}
-                  onMouseDown={(e: React.MouseEvent) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                />
-              )}
-            </span>
-          )}
+          ) : null}
         </EuiFlexGroup>
       </div>
     );
@@ -511,13 +457,6 @@ export function ActionsMenu({
     navigateToPath([...nextPath], 'first');
   }, [navigateToPath]);
 
-  const leaveCategoryFromKeyboard = useCallback(() => {
-    const path = currentPathRef.current;
-    if (path.length === 0) return;
-    const exitedId = path[path.length - 1];
-    navigateToPath(path.slice(0, -1), { optionId: exitedId });
-  }, [navigateToPath]);
-
   const activateKeyboardOption = useCallback(() => {
     const index = keyboardIndexRef.current;
     if (index == null) return;
@@ -533,8 +472,6 @@ export function ActionsMenu({
 
   const handleSearchChange = (searchValue: string) => {
     setSearchTerm(searchValue);
-    setPinnedOption(null);
-    setHoveredOption(null);
     setKeyboardIndex(null);
     if (searchValue.length > 0) {
       setCurrentPath([]);
@@ -548,27 +485,33 @@ export function ActionsMenu({
   handleSearchChangeRef.current = handleSearchChange;
   const setKeyboardIndexAndPreviewRef = useRef(setKeyboardIndexAndPreview);
   setKeyboardIndexAndPreviewRef.current = setKeyboardIndexAndPreview;
+  const goBackRef = useRef(goBack);
+  goBackRef.current = goBack;
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      const input = searchInputRef.current;
-      if (!input || !document.body.contains(input)) return;
+      const menuEl = menuContainerRef.current;
+      if (!menuEl || !document.body.contains(menuEl)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
-      const menuEl = menuContainerRef.current;
-      if (menuEl && !menuEl.contains(document.activeElement) && document.activeElement !== input) {
+      const input = searchInputRef.current;
+      if (!menuEl.contains(document.activeElement) && document.activeElement !== input) {
         if (!menuEl.contains(e.target as Node)) return;
       }
 
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
+        if (currentPathRef.current.length > 0) {
+          goBackRef.current();
+          return;
+        }
         onClose?.();
         return;
       }
 
       const actionable = actionableDisplayOptionsRef.current;
-      const isSearchFocused = document.activeElement === input;
+      const isSearchFocused = Boolean(input) && document.activeElement === input;
       const keyboardIdx = keyboardIndexRef.current;
       const inListNavMode = keyboardIdx != null;
 
@@ -595,10 +538,10 @@ export function ActionsMenu({
       }
 
       if (e.key === 'ArrowLeft') {
-        if (!inListNavMode) return;
+        if (!inListNavMode && currentPathRef.current.length === 0) return;
         e.preventDefault();
         e.stopPropagation();
-        leaveCategoryFromKeyboard();
+        goBackRef.current();
         return;
       }
 
@@ -609,6 +552,7 @@ export function ActionsMenu({
         return;
       }
 
+      if (!isFull || !input) return;
       if (isSearchFocused && !inListNavMode) return;
 
       const isPrintable = e.key.length === 1;
@@ -635,7 +579,7 @@ export function ActionsMenu({
     clearKeyboardSelection,
     enterCategoryFromKeyboard,
     focusSearch,
-    leaveCategoryFromKeyboard,
+    isFull,
     onClose,
   ]);
 
@@ -644,59 +588,40 @@ export function ActionsMenu({
     [currentPath, defaultOptions]
   );
 
-  const breadcrumbs: EuiBreadcrumb[] = useMemo(() => {
-    const allActionsLabel = i18nStrings.ACTIONS_MENU_BREADCRUMB_ALL;
+  const headerTitle =
+    !isSearching && pathLabels.length > 0
+      ? pathLabels[pathLabels.length - 1].label
+      : i18nStrings.ACTIONS_MENU_ROOT_TITLE;
 
-    if (isSearching) {
-      return [
-        {
-          text: allActionsLabel,
-          onClick: (e: React.MouseEvent) => {
-            e.preventDefault();
-            setSearchTerm('');
-            navigateToPath([]);
-          },
-        },
-        { text: i18nStrings.ACTIONS_MENU_BREADCRUMB_SEARCH },
-      ];
-    }
+  const closeAriaLabel = i18n.translate('xpack.cases.templates.actionsMenu.close', {
+    defaultMessage: 'Close actions menu',
+  });
 
-    if (currentPath.length === 0) return [];
+  const backButton = (
+    <EuiToolTip content={i18nStrings.ACTIONS_MENU_BACK} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="chevronSingleLeft"
+        size="s"
+        color="text"
+        aria-label={i18nStrings.ACTIONS_MENU_BACK}
+        aria-hidden={!showBack}
+        tabIndex={showBack ? 0 : -1}
+        onClick={goBack}
+        data-test-subj={`${testSubjPrefix}-back`}
+      />
+    </EuiToolTip>
+  );
 
-    const crumbs: EuiBreadcrumb[] = [
-      {
-        text: allActionsLabel,
-        onClick: (e: React.MouseEvent) => {
-          e.preventDefault();
-          navigateToPath([]);
-        },
-      },
-    ];
-
-    pathLabels.forEach((item, index) => {
-      const isLast = index === pathLabels.length - 1;
-      const pathToHere = currentPath.slice(0, index + 1);
-      crumbs.push({
-        text: item.label,
-        ...(isLast
-          ? {}
-          : {
-              onClick: (e: React.MouseEvent) => {
-                e.preventDefault();
-                navigateToPath(pathToHere);
-              },
-            }),
-      });
-    });
-
-    return crumbs;
-  }, [isSearching, currentPath, pathLabels, navigateToPath]);
-
-  const showBreadcrumbs = breadcrumbs.length > 0;
+  // Compact: no expanding slot — animating the title sideways is awkward.
+  const backControl = isFull ? (
+    <div css={[styles.backSlot, showBack && styles.backSlotVisible]}>{backButton}</div>
+  ) : showBack ? (
+    backButton
+  ) : null;
 
   return (
     <EuiSelectable
-      aria-label={i18nStrings.ACTIONS_MENU_ROOT_TITLE}
+      aria-label={headerTitle}
       searchable
       options={displayOptions}
       onChange={handleChange}
@@ -745,98 +670,120 @@ export function ActionsMenu({
       {(list, search) => (
         <div
           ref={menuContainerRef}
-          css={styles.container}
-          onMouseDown={keepSearchFocused}
+          css={[styles.container, !isFull && styles.containerCompact]}
+          onMouseDown={isFull ? keepSearchFocused : undefined}
           data-test-subj={`${testSubjPrefix}Content`}
+          tabIndex={isFull ? undefined : -1}
         >
           <div css={styles.header}>
             <div css={styles.titleRow}>
-              <EuiTitle size="xxs">
-                <h3 css={styles.title}>{i18nStrings.ACTIONS_MENU_ROOT_TITLE}</h3>
-              </EuiTitle>
+              <div css={styles.titleCluster}>
+                {!isFull ? backControl : null}
+                <EuiTitle size="xxs">
+                  <h3 css={styles.title}>{headerTitle}</h3>
+                </EuiTitle>
+              </div>
               {onClose && (
-                <EuiButtonEmpty
-                  onClick={onClose}
-                  iconType="cross"
-                  size="xs"
-                  flush="right"
-                  color="text"
-                  aria-label={i18n.translate('xpack.cases.templates.actionsMenu.close', {
-                    defaultMessage: 'Close actions menu',
-                  })}
-                  css={styles.closeButton}
-                  data-test-subj={`${testSubjPrefix}-close`}
-                />
+                <EuiToolTip content={closeAriaLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    size="s"
+                    color="text"
+                    aria-label={closeAriaLabel}
+                    onClick={onClose}
+                    css={styles.closeButton}
+                    data-test-subj={`${testSubjPrefix}-close`}
+                  />
+                </EuiToolTip>
               )}
             </div>
-            <div css={styles.searchRow}>{search}</div>
+            {isFull ? (
+              <div css={[styles.searchRow, showBack && styles.searchRowWithBack]}>
+                {backControl}
+                <div css={styles.searchField}>{search}</div>
+              </div>
+            ) : null}
           </div>
 
-          <EuiFlexGroup gutterSize="none" css={styles.body}>
-            <EuiFlexItem css={styles.leftColumn} onMouseMove={handleListMouseMove}>
-              {showBreadcrumbs && (
-                <div css={styles.breadcrumbRow}>
-                  <EuiBreadcrumbs
-                    breadcrumbs={breadcrumbs}
-                    truncate={false}
-                    max={4}
-                    aria-label={i18nStrings.ACTIONS_MENU_BREADCRUMB_ARIA}
-                  />
-                </div>
-              )}
-              {showNoResults ? (
-                <div css={styles.noResults}>
-                  <EuiText size="s" color="subdued" textAlign="center">
-                    <FormattedMessage
-                      id="xpack.cases.templates.actionsMenu.noResults"
-                      defaultMessage="{query} doesn't match any options."
-                      values={{ query: searchTerm.trim() }}
-                    />
-                  </EuiText>
-                </div>
-              ) : (
-                <div ref={listViewportRef} css={styles.listViewport}>
-                  <div ref={listPaneRef} css={styles.listPane}>
-                    {list}
+          <div
+            ref={bodyRef}
+            css={[styles.body, isFull ? styles.bodyFull : styles.bodyCompact]}
+            style={isFull && lockedBodyHeight != null ? { height: lockedBodyHeight } : undefined}
+            onMouseMove={handleListMouseMove}
+          >
+            <div ref={listViewportRef} css={styles.listViewport}>
+              <div ref={listPaneRef} css={styles.listPane}>
+                {showNoResults ? (
+                  <div css={styles.noResults}>
+                    <EuiText size="s" color="subdued" textAlign="center">
+                      <FormattedMessage
+                        id="xpack.cases.templates.actionsMenu.noResults"
+                        defaultMessage="{query} doesn't match any options."
+                        values={{ query: searchTerm.trim() }}
+                      />
+                    </EuiText>
                   </div>
-                </div>
-              )}
-            </EuiFlexItem>
+                ) : showEmptyCategory ? (
+                  <div css={styles.noResults}>
+                    <EuiText size="s" color="subdued" textAlign="center">
+                      {isFieldLibraryDrillIn
+                        ? i18nStrings.ACTIONS_MENU_NO_LIBRARY_FIELDS
+                        : i18n.translate('xpack.cases.templates.actionsMenu.emptyCategory', {
+                            defaultMessage: 'No items in this category.',
+                          })}
+                    </EuiText>
+                    {isFieldLibraryDrillIn ? <FieldLibraryOpenLink /> : null}
+                  </div>
+                ) : (
+                  list
+                )}
+              </div>
+            </div>
+          </div>
 
-            <EuiFlexItem css={styles.rightColumn}>
-              <ActionsMenuPreviewPanel
-                hoveredOption={previewOption}
-                onSelect={handleStepOrGroupSelected}
-                onAdd={handleAdd}
-                onConfigureAndAdd={onConfigureAndAdd}
-                onPinPreview={(action, parentSection) => {
-                  if (parentSection && isActionCategory(parentSection)) {
-                    const nextPath = parentSection.pathIds ?? [...currentPath, parentSection.id];
-                    const alreadyThere =
-                      nextPath.length === currentPath.length &&
-                      nextPath.every((id, i) => id === currentPath[i]);
-                    if (!alreadyThere) {
-                      setSearchTerm('');
-                      navigateToPath([...nextPath]);
-                    }
-                  }
-                  setPinnedOption(action);
-                  setHoveredOption(action);
-                }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <div css={styles.footer} data-test-subj={`${testSubjPrefix}-keyboardLegend`}>
+            <EuiText size="xs" color="subdued">
+              {i18nStrings.ACTIONS_MENU_KEYBOARD_LEGEND}
+            </EuiText>
+          </div>
         </div>
       )}
     </EuiSelectable>
   );
 }
 
+ActionsMenu.displayName = 'ActionsMenu';
+
+function FieldLibraryOpenLink() {
+  const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
+
+  return (
+    <EuiButtonEmpty
+      size="xs"
+      href={getCasesFieldLibraryUrl()}
+      target="_blank"
+      iconType="external"
+      iconSide="right"
+      data-test-subj="actionsMenuPreviewOpenFieldLibrary"
+    >
+      <FormattedMessage
+        id="xpack.cases.templates.actionsMenu.preview.openFieldLibrary"
+        defaultMessage="Open Field library"
+      />
+    </EuiButtonEmpty>
+  );
+}
+
+FieldLibraryOpenLink.displayName = 'FieldLibraryOpenLink';
+
 const componentStyles = {
   container: css({
     display: 'flex',
     flexDirection: 'column',
-    width: '1085px',
+    width: '100%',
+  }),
+  containerCompact: css({
+    minWidth: 0,
   }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -851,6 +798,13 @@ const componentStyles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: '8px',
+  }),
+  titleCluster: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    minWidth: 0,
   }),
   closeButton: css({
     marginRight: '-4px',
@@ -861,22 +815,58 @@ const componentStyles = {
     lineHeight: '20px',
   }),
   searchRow: css({
+    display: 'grid',
+    gridTemplateColumns: '0px minmax(0, 1fr)',
+    columnGap: 0,
+    alignItems: 'center',
+    '@media (prefers-reduced-motion: no-preference)': {
+      transition: `grid-template-columns ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1), column-gap ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
+    },
+  }),
+  searchRowWithBack: css({
+    gridTemplateColumns: '32px minmax(0, 1fr)',
+    columnGap: 4,
+  }),
+  backSlot: css({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    overflow: 'hidden',
+    minWidth: 0,
+    maxWidth: 0,
+    opacity: 0,
+    transform: 'translateX(-6px)',
+    pointerEvents: 'none',
+    '@media (prefers-reduced-motion: no-preference)': {
+      transition: `max-width ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1), opacity ${LIST_SLIDE_MS}ms ease, transform ${LIST_SLIDE_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`,
+    },
+  }),
+  backSlotVisible: css({
+    maxWidth: 32,
+    opacity: 1,
+    transform: 'translateX(0)',
+    pointerEvents: 'auto',
+  }),
+  searchField: css({
+    minWidth: 0,
+    overflow: 'hidden',
     '& .euiFieldSearch': {
       width: '100%',
     },
   }),
   body: css({
-    height: '640px',
+    display: 'flex',
+    flexDirection: 'column',
     overflow: 'hidden',
+    minHeight: 0,
   }),
-  leftColumn: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: '0 0 50%',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-    }),
+  bodyFull: css({
+    maxHeight: 'min(360px, calc(100vh - 200px))',
+  }),
+  bodyCompact: css({
+    maxHeight: 'min(360px, calc(100vh - 220px))',
+  }),
   listViewport: css({
     flex: 1,
     minHeight: 0,
@@ -896,20 +886,6 @@ const componentStyles = {
         minHeight: 0,
       },
     }),
-  breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      marginTop: -1,
-      padding: `8px 16px`,
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      position: 'relative',
-      zIndex: 1,
-      fontSize: '12px',
-      '& .euiBreadcrumb, & .euiBreadcrumb__content, & .euiBreadcrumbs__list': {
-        fontSize: '12px',
-      },
-    }),
   noResults: css({
     flex: 1,
     display: 'flex',
@@ -919,11 +895,11 @@ const componentStyles = {
     gap: '16px',
     padding: '24px',
   }),
-  rightColumn: ({ euiTheme }: UseEuiTheme) =>
+  footer: ({ euiTheme }: UseEuiTheme) =>
     css({
-      flex: 1,
-      overflow: 'hidden',
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      flexShrink: 0,
+      padding: `8px ${euiTheme.size.base}`,
+      borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
   selectable: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -965,8 +941,8 @@ const componentStyles = {
         zIndex: 2,
         padding: `6px 12px 6px 16px`,
         fontSize: '12.25px',
-        fontWeight: 700,
-        color: euiTheme.colors.textParagraph,
+        fontWeight: euiTheme.font.weight.medium,
+        color: euiTheme.colors.textSubdued,
         borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
         backgroundColor: euiTheme.colors.backgroundBasePlain,
         '&::before': {
@@ -995,19 +971,15 @@ const componentStyles = {
           backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
           color: 'inherit',
         },
-      '& .euiSelectableListItem:hover, & .euiSelectableListItem:has(.actionsMenu-keyboardActive)': {
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        color: 'inherit',
-      },
-      '& .euiSelectableListItem .rowActions': {
-        opacity: 0,
-        pointerEvents: 'none',
-      },
-      '& .euiSelectableListItem:hover .rowActions, & .euiSelectableListItem:has(.actionsMenu-keyboardActive) .rowActions':
+      '& .euiSelectableListItem:hover:not([aria-disabled="true"]), & .euiSelectableListItem:has(.actionsMenu-keyboardActive):not([aria-disabled="true"])':
         {
-          opacity: 1,
-          pointerEvents: 'auto',
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          color: 'inherit',
         },
+      '& .euiSelectableListItem[aria-disabled="true"]': {
+        cursor: 'not-allowed',
+        opacity: 0.55,
+      },
     }),
   actionOptionWrapper: css({
     width: '100%',
@@ -1024,8 +996,8 @@ const componentStyles = {
     gap: '2px',
   }),
   iconOuter: css({
-    width: '40px',
-    height: '40px',
+    width: '38px',
+    height: '38px',
     flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
@@ -1033,25 +1005,10 @@ const componentStyles = {
     borderRadius: '8px',
     boxSizing: 'border-box',
   }),
-  iconOuterPlatform: ({ euiTheme }: UseEuiTheme) =>
+  iconOuterNeutral: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis2,
-      border: 'none',
-    }),
-  iconOuterLibrary: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis4,
-      border: 'none',
-    }),
-  iconOuterValidation: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis0,
-      border: 'none',
-    }),
-  iconOuterConditional: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.vis.euiColorVis8,
-      border: 'none',
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
     }),
   actionIconInner: css({
     display: 'flex',
@@ -1069,26 +1026,13 @@ const componentStyles = {
     css({
       color: euiTheme.colors.textSubdued,
     }),
-  rowActions: css({
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '4px',
-  }),
-  rowActionButton: css({
-    inlineSize: '32px',
-    blockSize: '32px',
-    width: '32px',
-    height: '32px',
-  }),
   actionTitle: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: 0,
       display: 'block',
       fontSize: '14px',
       lineHeight: '20px',
-      fontWeight: euiTheme.font.weight.medium,
+      fontWeight: euiTheme.font.weight.semiBold,
       color: euiTheme.colors.textParagraph,
     }),
   actionDescription: css({

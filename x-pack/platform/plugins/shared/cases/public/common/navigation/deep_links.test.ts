@@ -179,7 +179,7 @@ describe('getCasesDeepLinks', () => {
         {
           id: 'cases_templates',
           path: '/cases/configure/templates',
-          title: 'Templates',
+          title: 'Template library',
         },
       ],
     });

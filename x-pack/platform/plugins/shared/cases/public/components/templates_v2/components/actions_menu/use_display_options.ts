@@ -20,6 +20,8 @@ interface UseDisplayOptionsArgs {
   currentPath: string[];
   /** Prefixed onto leaf `data-test-subj` values (e.g. `templateActionsMenu`). */
   testSubjPrefix: string;
+  /** When false, root items are listed without "Add field" / "Field rules" headers. */
+  showSectionLabels?: boolean;
 }
 
 const MAX_ACTION_MATCH_RANK = 5;
@@ -44,8 +46,7 @@ const isActionSearchMatch = (option: ActionOptionData, normalizedTerm: string): 
 
 const toSelectableOption = (
   action: ActionOptionData,
-  testSubjPrefix: string,
-  extras?: Partial<MenuSelectableOption>
+  testSubjPrefix: string
 ): MenuSelectableOption => ({
   label: action.label,
   key: action.id,
@@ -54,7 +55,6 @@ const toSelectableOption = (
     ? `${testSubjPrefix}-${action.testSubj}`
     : `${testSubjPrefix}-${action.id}`,
   data: { action },
-  ...extras,
 });
 
 /**
@@ -92,17 +92,14 @@ const collectCategoryMatches = (
 const buildBrowseOptions = (
   options: ActionOptionData[],
   testSubjPrefix: string,
-  atRoot: boolean
+  atRoot: boolean,
+  showSectionLabels: boolean
 ): MenuSelectableOption[] => {
   const result: MenuSelectableOption[] = [];
 
-  if (atRoot) {
-    const fields = options.filter(
-      (o) => o.id === 'newField' || o.id === 'fieldLibrary'
-    );
-    const rules = options.filter(
-      (o) => o.id === 'validation' || o.id === 'conditional'
-    );
+  if (atRoot && showSectionLabels) {
+    const fields = options.filter((o) => o.id === 'newField' || o.id === 'fieldLibrary');
+    const rules = options.filter((o) => o.id === 'validation' || o.id === 'conditional');
 
     if (fields.length > 0) {
       result.push({
@@ -138,7 +135,7 @@ const buildSearchOptions = (
 ): MenuSelectableOption[] => {
   const term = searchTerm.trim().toLowerCase();
   if (!term) {
-    return buildBrowseOptions(categoryTree, testSubjPrefix, true);
+    return buildBrowseOptions(categoryTree, testSubjPrefix, true, true);
   }
 
   const result: MenuSelectableOption[] = [];
@@ -160,20 +157,18 @@ const buildSearchOptions = (
           .map(({ match }) => match)
       : [];
 
-    if (!categoryMatches && childMatches.length === 0) {
-      continue;
-    }
+    if (categoryMatches || childMatches.length > 0) {
+      result.push({
+        label: category.label,
+        isGroupLabel: true,
+      });
 
-    result.push({
-      label: category.label,
-      isGroupLabel: true,
-    });
-
-    if (categoryMatches) {
-      result.push(toSelectableOption(category, testSubjPrefix));
-    }
-    for (const match of childMatches) {
-      result.push(toSelectableOption(match, testSubjPrefix));
+      if (categoryMatches) {
+        result.push(toSelectableOption(category, testSubjPrefix));
+      }
+      for (const match of childMatches) {
+        result.push(toSelectableOption(match, testSubjPrefix));
+      }
     }
   }
 
@@ -186,11 +181,12 @@ export const useDisplayOptions = ({
   searchTerm,
   currentPath,
   testSubjPrefix,
+  showSectionLabels = true,
 }: UseDisplayOptionsArgs): MenuSelectableOption[] =>
   useMemo(() => {
     const trimmed = searchTerm.trim();
     if (trimmed.length > 0) {
       return buildSearchOptions(categoryTree, trimmed, testSubjPrefix);
     }
-    return buildBrowseOptions(options, testSubjPrefix, currentPath.length === 0);
-  }, [options, categoryTree, searchTerm, currentPath, testSubjPrefix]);
+    return buildBrowseOptions(options, testSubjPrefix, currentPath.length === 0, showSectionLabels);
+  }, [options, categoryTree, searchTerm, currentPath, testSubjPrefix, showSectionLabels]);

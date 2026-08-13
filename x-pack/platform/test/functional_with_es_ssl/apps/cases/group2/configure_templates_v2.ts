@@ -10,7 +10,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 /**
  * v2 templates / field-library pages.
  *
- * These dedicated pages (`configure/templates`, `configure/field_library`)
+ * These dedicated pages (`configure/templates`, `configure/templates/field_library`)
  * replace the legacy in-page custom-fields / templates sections and are only
  * reachable when `xpack.cases.templates.enabled` is ON. This suite runs under
  * `group2/config.ts` (flag pinned ON) and asserts the pages are wired,

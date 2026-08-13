@@ -25,7 +25,7 @@ const getCasesBreadcrumbTitle = (deepLinkId: ICasesDeepLinkId): string => {
       defaultMessage: 'Settings',
     }),
     [CasesDeepLinkId.casesTemplates]: i18n.translate('xpack.cases.breadcrumbs.templates', {
-      defaultMessage: 'Templates',
+      defaultMessage: 'Template library',
     }),
   };
   return titles[deepLinkId];

@@ -905,7 +905,7 @@ export const TEMPLATE_VALIDATION_ERROR = (fileName: string, index: number, issue
   });
 
 export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
-  defaultMessage: 'Templates',
+  defaultMessage: 'Template library',
 });
 
 export const CONFIRM_FIELD_EDIT = i18n.translate('xpack.cases.templates.confirmFieldEdit', {
@@ -1136,7 +1136,7 @@ export const ACTION_CONDITIONAL_TITLE = i18n.translate(
 );
 export const ACTION_CONDITIONAL_DESC = i18n.translate(
   'xpack.cases.templates.actionsMenu.conditional.desc',
-  { defaultMessage: 'Show or require the selected field based on another' }
+  { defaultMessage: 'Show or require a field based on another' }
 );
 
 export const ACTIONS_MENU_SELECT_A_FIELD = i18n.translate(
@@ -1206,7 +1206,7 @@ export const ACTIONS_MENU_INVALID_YAML = i18n.translate(
 
 export const ACTIONS_MENU_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.cases.templates.actionsMenu.searchPlaceholder',
-  { defaultMessage: 'Search field, rule, or library…' }
+  { defaultMessage: 'Search field, rule, or library' }
 );
 
 export const ACTIONS_MENU_SECTION_FIELDS = i18n.translate(
@@ -1218,6 +1218,15 @@ export const ACTIONS_MENU_SECTION_RULES = i18n.translate(
   'xpack.cases.templates.actionsMenu.section.rules',
   { defaultMessage: 'Field rules' }
 );
+
+export const ACTIONS_MENU_KEYBOARD_LEGEND = i18n.translate(
+  'xpack.cases.templates.actionsMenu.keyboardLegend',
+  { defaultMessage: '↑↓ navigate · ↵ add · esc close' }
+);
+
+export const ACTIONS_MENU_BACK = i18n.translate('xpack.cases.templates.actionsMenu.back', {
+  defaultMessage: 'Back',
+});
 
 export const ACTIONS_MENU_BREADCRUMB_ALL = i18n.translate(
   'xpack.cases.templates.actionsMenu.breadcrumb.allActions',

@@ -30,7 +30,7 @@ describe('CasesPageLayout', () => {
     ['/cases/example-id/comment-id', 'details', 'compact'],
     ['/cases/configure', 'settings', 'compact'],
     ['/cases/configure/templates', 'settings', 'compact'],
-    ['/cases/configure/field-library', 'settings', 'compact'],
+    ['/cases/configure/templates/field_library', 'settings', 'compact'],
     ['/', 'list', 'compact'],
   ] as const)(
     'maps %s to %s when casesRedesign.%s is enabled',

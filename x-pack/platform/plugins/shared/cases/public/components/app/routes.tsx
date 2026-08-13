@@ -129,6 +129,12 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({ refreshRef, timeline
           )}
 
           {isTemplatesEnabled && (
+            <Route exact path={`${getCasesConfigurePath(basePath)}/field_library`}>
+              <Redirect to={getCasesConfigureFieldLibraryPath(basePath)} />
+            </Route>
+          )}
+
+          {isTemplatesEnabled && (
             <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
               {permissions.manageTemplates ? (
                 <Suspense fallback={<EuiLoadingSpinner />}>

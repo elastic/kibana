@@ -28,7 +28,8 @@ const panelCss = css({
   left: '50%',
   transform: 'translate(-50%, -50%)',
   zIndex: 2001,
-  width: '1085px',
+  // Single-column catalog; wide enough for title + one-line description.
+  width: 'min(520px, calc(100vw - 48px))',
   overflow: 'hidden',
 });
 
@@ -36,9 +37,9 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   options,
   testSubjPrefix,
   onActionSelected,
-  onConfigureAndAdd,
   closePopover,
   isOpen,
+  presentation = 'full',
 }: ActionsMenuPopoverProps) {
   useEffect(() => {
     if (!isOpen) return;
@@ -66,10 +67,12 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
           options={options}
           testSubjPrefix={testSubjPrefix}
           onActionSelected={onActionSelected}
-          onConfigureAndAdd={onConfigureAndAdd}
           onClose={closePopover}
+          presentation={presentation}
         />
       </EuiPanel>
     </EuiPortal>
   );
 });
+
+ActionsMenuPopover.displayName = 'ActionsMenuPopover';
