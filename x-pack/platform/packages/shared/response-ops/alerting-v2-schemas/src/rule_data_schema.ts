@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
-import { durationSchema, tagsSchema } from './common';
+import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
@@ -706,15 +706,6 @@ export const ruleTagsParamsSchema = z
   .strict();
 
 export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
-
-/** Normalized wrapped tags response (shared by rule-tag and action-policy-tag routes). */
-export const tagsResponseSchema = z
-  .object({
-    tags: z.array(z.string()).describe('The list of unique tags.'),
-  })
-  .describe('Wrapped tags response.');
-
-export type TagsResponse = z.infer<typeof tagsResponseSchema>;
 
 /** Rule tags response schema. */
 export const ruleTagsResponseSchema = tagsResponseSchema.describe('All unique tags across rules.');
