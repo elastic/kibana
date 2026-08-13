@@ -6,7 +6,7 @@
  */
 
 import {
-  assertCanUpdateMonitorInAllSpaces,
+  assertCanPerformMonitorBulkActionInAllSpaces,
   privateLocationCoversAllMonitorSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
@@ -207,7 +207,7 @@ describe('validateMonitorPrivateLocationSpaces', () => {
   });
 });
 
-describe('assertCanUpdateMonitorInAllSpaces', () => {
+describe('assertCanPerformMonitorBulkActionInAllSpaces', () => {
   const createRouteContext = (hasAllRequested: boolean) => {
     const checkSavedObjectsPrivileges = jest.fn().mockResolvedValue({ hasAllRequested });
     const forbidden = jest.fn(({ body }) => ({ status: 403, body }));
@@ -234,7 +234,7 @@ describe('assertCanUpdateMonitorInAllSpaces', () => {
   it('checks bulk_update privileges by default', async () => {
     const { routeContext, checkSavedObjectsPrivileges } = createRouteContext(true);
 
-    await assertCanUpdateMonitorInAllSpaces(routeContext, ['default', 'other-space']);
+    await assertCanPerformMonitorBulkActionInAllSpaces(routeContext, ['default', 'other-space']);
 
     expect(checkSavedObjectsPrivileges).toHaveBeenCalledWith(
       'saved_object:synthetics-monitor-multi-space/bulk_update',
@@ -245,7 +245,7 @@ describe('assertCanUpdateMonitorInAllSpaces', () => {
   it('checks bulk_delete privileges and returns delete-specific copy', async () => {
     const { routeContext, checkSavedObjectsPrivileges } = createRouteContext(false);
 
-    const result = await assertCanUpdateMonitorInAllSpaces(
+    const result = await assertCanPerformMonitorBulkActionInAllSpaces(
       routeContext,
       ['default', 'other-space'],
       'synthetics-monitor',
@@ -268,7 +268,7 @@ describe('assertCanUpdateMonitorInAllSpaces', () => {
   it('does not check privileges when no spaces are provided', async () => {
     const { routeContext, checkSavedObjectsPrivileges } = createRouteContext(true);
 
-    await assertCanUpdateMonitorInAllSpaces(routeContext, []);
+    await assertCanPerformMonitorBulkActionInAllSpaces(routeContext, []);
 
     expect(checkSavedObjectsPrivileges).not.toHaveBeenCalled();
   });

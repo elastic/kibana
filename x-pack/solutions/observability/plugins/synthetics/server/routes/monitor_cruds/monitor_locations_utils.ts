@@ -117,7 +117,7 @@ export const validateMonitorPrivateLocationSpaces = (
 type MonitorSavedObjectBulkAction = 'bulk_update' | 'bulk_delete';
 
 /** Asserts that the current user has the requested privileges in all specified spaces. */
-export const assertCanUpdateMonitorInAllSpaces = async (
+export const assertCanPerformMonitorBulkActionInAllSpaces = async (
   routeContext: RouteContext,
   spaceIds: string[],
   savedObjectType: string = syntheticsMonitorSavedObjectType,

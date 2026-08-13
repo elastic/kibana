@@ -10,7 +10,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
 import { validatePermissions } from '../edit_monitor';
-import { assertCanUpdateMonitorInAllSpaces } from '../monitor_locations_utils';
+import { assertCanPerformMonitorBulkActionInAllSpaces } from '../monitor_locations_utils';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
@@ -116,7 +116,7 @@ export class DeleteMonitorAPI {
       const spaceKey = `${monitor.type}::${[...new Set(monitorSpaces)].sort().join(',')}`;
       if (!checkedSpaceKeys.has(spaceKey)) {
         checkedSpaceKeys.add(spaceKey);
-        const spaceAuthError = await assertCanUpdateMonitorInAllSpaces(
+        const spaceAuthError = await assertCanPerformMonitorBulkActionInAllSpaces(
           this.routeContext,
           monitorSpaces,
           monitor.type,

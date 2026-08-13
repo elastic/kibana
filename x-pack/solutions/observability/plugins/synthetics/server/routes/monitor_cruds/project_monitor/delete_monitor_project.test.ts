@@ -42,9 +42,9 @@ const createRouteContext = () =>
 
 const installExecuteResult = (executeResult: object) => {
   const { DeleteMonitorAPI } = jest.requireMock('../services/delete_monitor_api');
-  const executeWithMonitors = jest.fn().mockResolvedValue(executeResult);
-  DeleteMonitorAPI.mockImplementation(() => ({ executeWithMonitors }));
-  return { executeWithMonitors };
+  const execute = jest.fn().mockResolvedValue(executeResult);
+  DeleteMonitorAPI.mockImplementation(() => ({ execute }));
+  return { execute };
 };
 
 describe('deleteSyntheticsMonitorProjectRoute', () => {
@@ -55,11 +55,11 @@ describe('deleteSyntheticsMonitorProjectRoute', () => {
   });
 
   it('deletes the filtered monitors through the authorized execution path', async () => {
-    const { executeWithMonitors } = installExecuteResult({ errors: [], result: [] });
+    const { execute } = installExecuteResult({ errors: [], result: [] });
 
     const result = await route.handler(createRouteContext());
 
-    expect(executeWithMonitors).toHaveBeenCalledWith({ monitors: [monitor] });
+    expect(execute).toHaveBeenCalledWith({ monitorIds: ['config-id'] });
     expect(result).toEqual({ deleted_monitors: ['journey-id'] });
   });
 
