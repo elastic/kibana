@@ -49,14 +49,23 @@ export function buildDeployGroups(
   instances: ServiceInstance[],
   selectedServiceIds: string[]
 ): DeployGroup[] {
-  const resolved: ServiceInstance[] = instances.length
-    ? instances
-    : selectedServiceIds.map((id) => ({
-        instanceId: id,
-        serviceId: id,
-        name: AWS_SERVICES_MAP.get(id)?.name ?? id,
-        isDuplicate: false,
-      }));
+  // Reconcile persisted instances against the current selectedServiceIds — the same logic
+  // use_service_settings applies in-memory. Without this, a user who goes back to step 1 and
+  // changes their selection would deploy stale instances (deselected services deployed, newly
+  // selected services skipped) because setGlobalRegion and Continue don't re-persist instances.
+  const selectedSet = new Set(selectedServiceIds);
+  const kept = instances.filter((inst) => selectedSet.has(inst.serviceId));
+  const coveredServiceIds = new Set(kept.map((i) => i.serviceId));
+  const added: ServiceInstance[] = [];
+  for (const id of selectedServiceIds) {
+    if (!coveredServiceIds.has(id)) {
+      const service = AWS_SERVICES_MAP.get(id);
+      if (service?.showInUI) {
+        added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
+      }
+    }
+  }
+  const resolved: ServiceInstance[] = [...kept, ...added];
 
   const originals: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
   const duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];

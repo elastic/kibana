@@ -673,6 +673,67 @@ describe('useDeploy', () => {
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
+  it('deploys a newly-selected service even when persisted instances do not include it', async () => {
+    // Regression: user selects cloudtrail, configures it (persists instances = ['cloudtrail']),
+    // goes back to step 1, also selects ec2_metrics (no config required), then deploys.
+    // buildDeployGroups must reconcile the stale persisted list against selectedServiceIds so
+    // ec2_metrics is not silently dropped.
+    const instances = [
+      {
+        instanceId: 'cloudtrail',
+        serviceId: 'cloudtrail',
+        name: 'AWS CloudTrail',
+        isDuplicate: false,
+      },
+    ];
+    setupMocks({
+      selectedServiceIds: ['cloudtrail', 'ec2_metrics'],
+      instances,
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // Both services are in the same package — one bundled call covering both.
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
+    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
+    // ec2_metrics must appear in the call — it must not be silently dropped.
+    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+  });
+
+  it('does not deploy a deselected service even when it is still in persisted instances', async () => {
+    // Regression variant: user had cloudtrail selected (persisted), deselects it, selects only
+    // ec2_metrics. buildDeployGroups must drop cloudtrail from the resolved list.
+    const instances = [
+      {
+        instanceId: 'cloudtrail',
+        serviceId: 'cloudtrail',
+        name: 'AWS CloudTrail',
+        isDuplicate: false,
+      },
+    ];
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      instances,
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // One call — only ec2_metrics; cloudtrail must not appear.
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
+    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
+    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+    // cloudtrail input must not be included (if it were, it would appear as 'cloudtrail-aws-s3'
+    // or similar and would fire a separate call or appear enabled in the single call).
+    const hasCloudtrailInput = Object.keys(submittedInputs).some((k) => k.startsWith('cloudtrail'));
+    expect(hasCloudtrailInput).toBe(false);
+  });
+
   it('includes non-agentless services as gray instantiating chips without deploying them', async () => {
     // ec2_metrics is agentless; ec2_logs is cloud_forwarder (per updated service matrix)
     setupMocks({ selectedServiceIds: ['ec2_metrics', 'ec2_logs'] });
