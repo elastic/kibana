@@ -30,7 +30,7 @@ import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ApmMainTemplate } from '../apm_main_template';
 import { useAnalyzeDataMenuItem } from './use_analyze_data_menu_item';
-import { useServiceHeaderMetadata } from './service_header_badges';
+import { ServiceHeaderBadges } from './service_header_badges';
 import { useServiceIconBadges } from './use_service_icon_badges';
 import type { TabKey } from './use_tabs';
 import { useTabs } from './use_tabs';
@@ -113,14 +113,8 @@ function TemplateWithContext({
 
   const serviceInventoryHref = router.link('/services', { query });
 
-  // Chrome suggestion: logos as individual AppHeader `badges`; status → `metadata`.
-  const headerMetadata = useServiceHeaderMetadata({
-    start,
-    end,
-    onSloClick,
-    alertsTabHref,
-  });
-
+  // Option 3 (screenshot / likely keep): logos as AppHeader badges; status badges below tabs
+  // (APM-owned, above search — outside AppHeader metadata).
   const headerBadges = useServiceIconBadges({
     serviceName,
     environment,
@@ -136,6 +130,15 @@ function TemplateWithContext({
     }
     return { items: [analyzeDataMenuItem] };
   }, [analyzeDataMenuItem]);
+
+  const statusBadges = (
+    <ServiceHeaderBadges
+      start={start}
+      end={end}
+      onSloClick={onSloClick}
+      alertsTabHref={alertsTabHref}
+    />
+  );
 
   useBreadcrumb(
     () => ({
@@ -188,6 +191,7 @@ function TemplateWithContext({
       <ApmMainTemplate
         searchBar={
           <>
+            {statusBadges}
             {BottomHeaderContent && <BottomHeaderContent />}
             {customSearchBar ?? (
               <SearchBar
@@ -207,7 +211,6 @@ function TemplateWithContext({
             }),
           },
           badges: headerBadges,
-          metadata: headerMetadata,
           tabs,
           menu: pageMenu,
         }}

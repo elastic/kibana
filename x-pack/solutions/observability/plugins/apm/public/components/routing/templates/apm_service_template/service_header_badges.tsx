@@ -7,8 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { AgentName, AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -286,50 +285,7 @@ export function useServiceHeaderBadges(props: ServiceHeaderStatusProps): AppHead
   }, [data]);
 }
 
-/**
- * AppHeader `metadata` for alerts / SLO / anomaly.
- * Renders the real status badges in a single metadata slot (under the title) so padding
- * and colors match the legacy header — avoids wrapping each chip in an AppHeader
- * metadata button, which skewed height/alignment.
- */
-export function useServiceHeaderMetadata(
-  props: ServiceHeaderStatusProps
-): AppHeaderMetadataItems | undefined {
-  const badges = useServiceHeaderBadges(props);
-
-  return useMemo(() => {
-    if (badges.length === 0) {
-      return undefined;
-    }
-
-    return [
-      {
-        type: 'text',
-        label: (
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            responsive={false}
-            css={css`
-              /* Neutralize AppHeader metadata text (subdued/bold) around nested badges. */
-              font-weight: normal;
-              color: inherit;
-              line-height: 1;
-            `}
-          >
-            {badges.map((badge) => (
-              <EuiFlexItem key={badge.label} grow={false}>
-                {badge.renderCustomBadge?.({ badgeText: badge.label })}
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ) as unknown as string,
-      },
-    ] as AppHeaderMetadataItems;
-  }, [badges]);
-}
-
-/** @deprecated Prefer AppHeader badges/metadata hooks. Kept for unit tests. */
+/** Status badges row (alerts / SLO / anomaly). Used below AppHeader tabs in option 3. */
 export function ServiceHeaderBadges(props: ServiceHeaderStatusProps) {
   const { euiTheme } = useEuiTheme();
   const badges = useServiceHeaderBadges(props);

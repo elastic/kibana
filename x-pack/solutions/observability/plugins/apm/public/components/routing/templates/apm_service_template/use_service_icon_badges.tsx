@@ -45,16 +45,11 @@ function getServerlessTitle(serverlessType?: ServerlessType): string {
   }
 }
 
-/**
- * Chrome suggestion: treat service logos as AppHeader `badges` (small images next to the
- * title; details stay in popovers). May overflow into "+N" when there are more than 3.
- */
-export function useServiceIconBadges({
+function useServiceIconCandidates({
   serviceName,
-  environment,
   start,
   end,
-}: Props): AppHeaderBadge[] {
+}: Pick<Props, 'serviceName' | 'start' | 'end'>) {
   const isDarkMode = useKibanaIsDarkMode();
 
   const { data: icons, status: iconsFetchStatus } = useFetcher(
@@ -73,6 +68,67 @@ export function useServiceIconBadges({
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
 
+  const candidates = useMemo(() => {
+    return [
+      {
+        key: 'service' as const,
+        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
+        title: i18n.translate('xpack.apm.serviceIcons.service', {
+          defaultMessage: 'Service',
+        }),
+        isVisible: !!icons?.agentName,
+      },
+      {
+        key: 'opentelemetry' as const,
+        iconType: getAgentIcon('opentelemetry', isDarkMode),
+        title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
+          defaultMessage: 'OpenTelemetry',
+        }),
+        isVisible: !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
+      },
+      {
+        key: 'container' as const,
+        iconType: getContainerIcon(icons?.containerType),
+        title: icons?.containerType
+          ? String(icons.containerType)
+          : i18n.translate('xpack.apm.serviceIcons.container', {
+              defaultMessage: 'Container',
+            }),
+        isVisible: !!icons?.containerType,
+      },
+      {
+        key: 'serverless' as const,
+        iconType: getServerlessIcon(icons?.serverlessType) || 'node',
+        title: getServerlessTitle(icons?.serverlessType),
+        isVisible: !!icons?.serverlessType,
+      },
+      {
+        key: 'cloud' as const,
+        iconType: getCloudProviderIcon(icons?.cloudProvider as CloudProvider),
+        title: icons?.cloudProvider
+          ? String(icons.cloudProvider)
+          : i18n.translate('xpack.apm.serviceIcons.cloud', {
+              defaultMessage: 'Cloud',
+            }),
+        isVisible: !!icons?.cloudProvider,
+      },
+    ].filter((item) => item.isVisible && item.iconType);
+  }, [icons, isDarkMode]);
+
+  return { candidates, isLoading };
+}
+
+/**
+ * Logos as AppHeader `badges` (small images next to the title; details in popovers).
+ */
+export function useServiceIconBadges({
+  serviceName,
+  environment,
+  start,
+  end,
+}: Props): AppHeaderBadge[] {
+  const { candidates, isLoading } = useServiceIconCandidates({ serviceName, start, end });
+
   return useMemo(() => {
     if (isLoading) {
       return [
@@ -85,70 +141,22 @@ export function useServiceIconBadges({
       ];
     }
 
-    const candidates: Array<{
-      key: 'service' | 'opentelemetry' | 'container' | 'serverless' | 'cloud';
-      iconType?: string;
-      title: string;
-      isVisible: boolean;
-    }> = [
-      {
-        key: 'service',
-        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
-        title: i18n.translate('xpack.apm.serviceIcons.service', {
-          defaultMessage: 'Service',
-        }),
-        isVisible: !!icons?.agentName,
-      },
-      {
-        key: 'opentelemetry',
-        iconType: getAgentIcon('opentelemetry', isDarkMode),
-        title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {
-          defaultMessage: 'OpenTelemetry',
-        }),
-        isVisible: !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
-      },
-      {
-        key: 'container',
-        iconType: getContainerIcon(icons?.containerType),
-        title: i18n.translate('xpack.apm.serviceIcons.container', {
-          defaultMessage: 'Container',
-        }),
-        isVisible: !!icons?.containerType,
-      },
-      {
-        key: 'serverless',
-        iconType: getServerlessIcon(icons?.serverlessType) || 'node',
-        title: getServerlessTitle(icons?.serverlessType),
-        isVisible: !!icons?.serverlessType,
-      },
-      {
-        key: 'cloud',
-        iconType: getCloudProviderIcon(icons?.cloudProvider as CloudProvider),
-        title: i18n.translate('xpack.apm.serviceIcons.cloud', {
-          defaultMessage: 'Cloud',
-        }),
-        isVisible: !!icons?.cloudProvider,
-      },
-    ];
-
-    return candidates
-      .filter((item) => item.isVisible && item.iconType)
-      .map((item) => ({
-        label: item.title,
-        color: 'hollow' as const,
-        tooltip: item.title,
-        'data-test-subj': item.key,
-        renderCustomBadge: () => (
-          <ServiceIconBadge
-            iconKey={item.key}
-            iconType={item.iconType!}
-            title={item.title}
-            serviceName={serviceName}
-            environment={environment}
-            start={start}
-            end={end}
-          />
-        ),
-      }));
-  }, [end, environment, icons, isDarkMode, isLoading, serviceName, start]);
+    return candidates.map((item) => ({
+      label: item.title,
+      color: 'hollow' as const,
+      tooltip: item.title,
+      'data-test-subj': item.key,
+      renderCustomBadge: () => (
+        <ServiceIconBadge
+          iconKey={item.key}
+          iconType={item.iconType!}
+          title={item.title}
+          serviceName={serviceName}
+          environment={environment}
+          start={start}
+          end={end}
+        />
+      ),
+    }));
+  }, [candidates, end, environment, isLoading, serviceName, start]);
 }
