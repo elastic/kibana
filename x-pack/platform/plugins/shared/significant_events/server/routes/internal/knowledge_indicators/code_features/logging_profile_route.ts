@@ -13,9 +13,14 @@ import {
   writeLoggingProfile,
   type LoggingProfileGrep,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
+import {
+  validateLoggingQueriesHandler,
+  type GrepCandidateInput,
+} from '../../../../agent_builder/tools/validate_logging_queries/handler';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../../utils/assert_not_paused';
+import { StatusError } from '../../../../lib/errors/status_error';
 
 const codeIntelligenceInput = z.string().min(1).max(256);
 
@@ -121,17 +126,26 @@ const checkLoggingProfileRoute = createServerRoute({
 });
 
 /**
- * Persists the `logging_profile` produced by the workflow's `ai.agent` step. The
- * agent's structured output is the grep list; this route validates each grep
- * against INV-001 / INV-006 (via {@link writeLoggingProfile}) before writing. A
- * rejection surfaces as an error so the workflow does not silently drop greps.
+ * Persists the `logging_profile` produced by the workflow's `ai.agent` step.
+ *
+ * The agent's structured output is NOT trusted verbatim: this route re-runs every
+ * grep through {@link validateLoggingQueriesHandler} server-side, re-deriving the
+ * hit count and the over-capture ratio against the indexed commit. Only greps that
+ * PASS validation (`covers_evidence AND hit_ratio < ceiling`) are persisted, with
+ * the SERVER-DERIVED `hits` as `expect_call_sites` — never the agent's self-reported
+ * number. A grep that fails validation (zero hits, evidence missed, over-capture,
+ * invalid syntax, or a query failure) is rejected with a 400 so the workflow
+ * surfaces it (Failure Transparency) rather than silently dropping it. This
+ * closes INV-001 (non-zero, server-derived) and INV-006 (over-capture ceiling) at
+ * the only production persist path — the untrusted boundary the ceiling exists to
+ * police — instead of only in unit tests that call `writeLoggingProfile` directly.
  */
 const persistLoggingProfileRoute = createServerRoute({
   endpoint: 'POST /internal/streams/code_intelligence/_persist_logging_profile',
   options: {
     access: 'internal',
     summary:
-      'Persist a logging_profile (validated repo-specific idiom greps) for a repository + commit',
+      'Persist a logging_profile (server-validated repo-specific idiom greps) for a repository + commit',
     timeout: { idleSocket: 120_000 },
   },
   security: {
@@ -168,7 +182,7 @@ const persistLoggingProfileRoute = createServerRoute({
     maintenanceService,
   }): Promise<{ persisted: number; repository: string; commit: string }> => {
     const scopedClients = await getScopedClients({ request });
-    const { licensing } = scopedClients;
+    const { scopedClusterClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -176,12 +190,52 @@ const persistLoggingProfileRoute = createServerRoute({
     const routeLogger = logger.get('code_intelligence', 'logging_profile');
     const spaceId = await getSpaceId(request);
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const esClient = scopedClusterClient.asCurrentUser;
 
-    const greps: LoggingProfileGrep[] = params.body.greps.map((g) => ({
+    // Re-validate every grep server-side against the indexed commit. The agent's
+    // self-reported `expect_call_sites` is discarded; the server-derived `hits`
+    // and the validate tool's `pass` verdict are what get persisted.
+    const candidates: GrepCandidateInput[] = params.body.greps.map((g) => ({
       regex: g.regex,
-      expect_call_sites: g.expect_call_sites,
       evidence: { path: g.evidence.path, line: g.evidence.line },
     }));
+
+    const validation = await validateLoggingQueriesHandler({
+      esClient,
+      repository: params.body.repository,
+      gitCommit: params.body.gitSha,
+      greps: candidates,
+      logger: routeLogger,
+    });
+
+    const greps: LoggingProfileGrep[] = [];
+    const failed: string[] = [];
+    for (let i = 0; i < validation.results.length; i++) {
+      const result = validation.results[i];
+      const candidate = params.body.greps[i];
+      if (result.pass) {
+        greps.push({
+          regex: result.grep,
+          expect_call_sites: result.hits,
+          evidence: { path: candidate.evidence.path, line: candidate.evidence.line },
+        });
+      } else {
+        failed.push(
+          `${result.grep} (status=${result.status}${
+            result.error ? `, error=${result.error}` : ''
+          }, hits=${result.hits})`
+        );
+      }
+    }
+
+    if (failed.length > 0) {
+      throw new StatusError(
+        `logging_profile: refusing to persist — ${
+          failed.length
+        } grep(s) failed server-side validation (INV-001/INV-006): ${failed.join('; ')}`,
+        400
+      );
+    }
 
     await writeLoggingProfile({
       kiClient,
@@ -189,6 +243,7 @@ const persistLoggingProfileRoute = createServerRoute({
       repository: params.body.repository,
       commit: params.body.gitSha,
       greps,
+      repoTotalLines: validation.repo_total_lines,
       runId: params.body.runId ?? `workflow:${request.id}`,
       logger: routeLogger,
     });
