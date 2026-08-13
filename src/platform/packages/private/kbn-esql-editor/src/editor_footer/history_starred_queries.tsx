@@ -322,7 +322,6 @@ export function QueryList({
                   tooltipProps={{ disableScreenReaderOutput: true }}
                 >
                   {(copy) => (
-                    /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                     <EuiButtonIcon
                       iconType="copy"
                       iconSize="m"

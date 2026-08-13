@@ -18,6 +18,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/maintenance-windows-plugin/common';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { EpisodesClient } from '../lib/episodes_client';
 import { DirectorService } from '../lib/director/director';
 import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
 import { CountTimeframeStrategy } from '../lib/director/strategies/count_timeframe_strategy';
@@ -35,6 +36,8 @@ import {
 import { RulesClient } from '../lib/rules_client';
 import {
   createChangeHistoryClient,
+  ChangeHistoryClientToken,
+  RuleChangesHistoryClient,
   RuleChangesHistoryClientToken,
   RuleChangesHistoryService,
   RuleChangesHistoryServiceToken,
@@ -103,11 +106,13 @@ import {
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
   bind(AlertEventsClient).toSelf().inRequestScope();
+  bind(EpisodesClient).toSelf().inRequestScope();
   bind(RulesClient).toSelf().inRequestScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
@@ -136,7 +141,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerService).toSelf().inSingletonScope();
   bind(LoggerServiceToken).toService(LoggerService);
 
-  bind(RuleChangesHistoryClientToken)
+  bind(ChangeHistoryClientToken)
     .toDynamicValue(({ get }) => {
       const logger = get(Logger).get('rule_changes_history');
       const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
@@ -145,6 +150,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
   bind(RuleChangesHistoryService).toSelf().inSingletonScope();
   bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
+  bind(RuleChangesHistoryClient).toSelf().inRequestScope();
+  bind(RuleChangesHistoryClientToken).toService(RuleChangesHistoryClient);
 
   bind(UiSettingsClientToken)
     .toDynamicValue(({ get }) => {
@@ -330,6 +337,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inSingletonScope();
 
   bind(MatcherSuggestionsService).toSelf().inRequestScope();
+  bind(PrivilegeChecker).toSelf().inRequestScope();
 
   bind(DispatcherService).toSelf().inSingletonScope();
   bind(DispatcherServiceInternalToken).toService(DispatcherService);
