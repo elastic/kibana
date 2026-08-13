@@ -1,0 +1,28 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["../../../../../typings/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/logging",
+    "@kbn/config-schema",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-memory-common",
+    "@kbn/storage-adapter",
+    "@kbn/data-streams",
+    "@kbn/es-mappings",
+    "@kbn/features-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/security-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/spaces-plugin",
+    "@kbn/zod",
+    "@kbn/core-http-server"
+  ]
+}
