@@ -290,17 +290,14 @@ describe('McpClient', () => {
       });
     });
 
-    it('throws StreamableHTTPError with formatted message', async () => {
+    it('forwards StreamableHTTPError', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const error = new StreamableHTTPError(500, 'Connection failed');
       mockClient.connect.mockRejectedValue(error);
 
       // The SDK formats the message as "Streamable HTTP error: Connection failed"
       // Our client just passes through the message without adding a prefix
-      await expect(client.connect()).rejects.toMatchObject({
-        message: 'Streamable HTTP error: Connection failed',
-        cause: error,
-      });
+      await expect(client.connect()).rejects.toBe(error);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -309,15 +306,12 @@ describe('McpClient', () => {
       );
     });
 
-    it('throws UnauthorizedError with formatted message', async () => {
+    it('forwards UnauthorizedError', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const error = new UnauthorizedError('Unauthorized');
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toMatchObject({
-        message: 'Unauthorized error: Unauthorized',
-        cause: error,
-      });
+      await expect(client.connect()).rejects.toBe(error);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -326,15 +320,12 @@ describe('McpClient', () => {
       );
     });
 
-    it('throws generic error with formatted message', async () => {
+    it('forwards generic errors', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const error = new Error('Generic error');
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toMatchObject({
-        message: 'Error connecting to MCP server: Generic error',
-        cause: error,
-      });
+      await expect(client.connect()).rejects.toBe(error);
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -343,14 +334,15 @@ describe('McpClient', () => {
       );
     });
 
-    it('includes error cause in the message when available', async () => {
+    it('logs the error cause when available', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const cause = new Error('unable to get local issuer certificate');
       const error = new TypeError('fetch failed', { cause });
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toThrow(
-        'Error connecting to MCP server: fetch failed (cause: unable to get local issuer certificate)'
+      await expect(client.connect()).rejects.toBe(error);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error connecting to MCP server test-client, 1.0.0: fetch failed (cause: unable to get local issuer certificate)'
       );
     });
 

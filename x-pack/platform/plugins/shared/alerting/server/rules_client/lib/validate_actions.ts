@@ -25,9 +25,6 @@ export type ValidateActionsData = Pick<RawRule, 'notifyWhen' | 'throttle' | 'sch
 const isWorkflowsOnlyConnectorType = ({ supportedFeatureIds }: ConnectorType): boolean =>
   supportedFeatureIds?.length === 1 && supportedFeatureIds[0] === 'workflows';
 
-const isSupportOnlyConnectorType = ({ supportedFeatureIds }: ConnectorType): boolean =>
-  Array.isArray(supportedFeatureIds) && supportedFeatureIds.length === 0;
-
 export async function validateActions(
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,
@@ -115,21 +112,6 @@ export async function validateActions(
   if (workflowsActionTypeIds.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.workflowsConnector', {
-        defaultMessage: 'This type of connector cannot be used as alerting actions',
-      })
-    );
-  }
-
-  const supportOnlyConnectorTypeIds = new Set(
-    allConnectorTypes.filter(isSupportOnlyConnectorType).map((type) => type.id)
-  );
-  const supportOnlyActionTypeIds = actionResults
-    .map((result) => result.actionTypeId)
-    .filter((id) => supportOnlyConnectorTypeIds.has(id));
-
-  if (supportOnlyActionTypeIds.length > 0) {
-    errors.push(
-      i18n.translate('xpack.alerting.rulesClient.validateActions.supportOnlyConnector', {
         defaultMessage: 'This type of connector cannot be used as alerting actions',
       })
     );

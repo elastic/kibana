@@ -9,8 +9,7 @@ import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/core/server';
 
 export const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
-// Persistent MCP connections occupy pool slots for the idle TTL. Size this capacity (and Kibana
-// process limits) before any feature enables MCP execution; do not raise the limit ad hoc.
+// Persistent MCP sessions; do not raise without sizing.
 const MAX_ENTRIES = 1000;
 
 interface PoolEntry<TClient> {
@@ -50,14 +49,10 @@ export class LeasePool<TClient> {
 
     this.logger?.debug(`Building new pooled client for key "${key}"`);
 
-    // Deferred rather than `buildFn()` so a `build` that throws synchronously still rejects the
-    // returned promise instead of throwing out of `lease` before the entry is cached.
+    // Defer buildFn so synchronous throws reject after the entry is cached.
     const promise = Promise.resolve().then(buildFn);
-    // A failed build must not stay cached as a broken entry, so drop the key and let the next
-    // caller rebuild. `promise` itself is returned unmodified so the caller still sees the error.
-    // The guard matters because this runs a microtask after `cache.set`: by then the key may have
-    // been evicted and re-leased, and a losing build must not delete its replacement. `peek`
-    // rather than `get`, so an error path does not reset the replacement's idle timer.
+    // The `peek` identity check avoids deleting or refreshing a replacement in the rejection
+    // microtask.
     promise.catch(() => {
       if (this.cache.peek(key)?.promise === promise) {
         this.cache.delete(key);
@@ -69,12 +64,7 @@ export class LeasePool<TClient> {
     return promise;
   }
 
-  /**
-   * Removes one pooled entry when its identity still matches `promise`, then terminates that
-   * client. A late failure from a replaced client is a no-op so it cannot evict the replacement.
-   * Prefer this over {@link evict} for operation failures: connector-wide eviction would drop
-   * unrelated client types / user profiles.
-   */
+  /** Drops this entry if it is still this promise, then terminates the client. */
   async invalidate(key: string, promise: Promise<TClient>): Promise<void> {
     const entry = this.cache.peek(key);
     if (entry === undefined || entry.promise !== promise) {
@@ -86,15 +76,8 @@ export class LeasePool<TClient> {
   }
 
   /**
-   * Terminates every pooled client belonging to one connector, now, rather than waiting for the
-   * idle timer. A connector can own several entries (multiple client types, multiple user
-   * profiles, lingering older revisions), hence the prefix scan; `connectorId` is the first key
-   * component to make that possible, and is encoded so one connector's prefix cannot match
-   * another's.
-   *
-   * Awaited, because callers depend on the ordering: connector delete and OAuth disconnect must
-   * finish terminating (which may require an authenticated call to the remote service) before the
-   * credentials that termination needs are removed.
+   * Evicts all entries for a connector. Await termination so connector deletion and OAuth
+   * disconnect can remove credentials afterward.
    */
   async evict(connectorId: string): Promise<void> {
     const prefix = `${encodeURIComponent(connectorId)}:`;
@@ -115,14 +98,7 @@ export class LeasePool<TClient> {
     this.cache.clear();
   }
 
-  /**
-   * Returns a promise so `evict` can await completion, which is what gives connector delete and
-   * OAuth disconnect their ordering guarantee.
-   *
-   * Memoized: `evict` deletes the key, which fires `dispose`, which calls this, and then awaits
-   * this again on the entry it collected. Without the memo `terminate` would run twice on the same
-   * client.
-   */
+  /** Memoizes termination so `dispose` and explicit awaits do not terminate the client twice. */
   private terminateEntry(entry: PoolEntry<TClient>, key: string): Promise<void> {
     entry.terminationPromise ??= (async () => {
       let client: TClient;

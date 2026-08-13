@@ -33,8 +33,7 @@ export const McpV2Connector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    // Support-only intermediate release: register and keep existing connectors executable for
-    // rollback, but block new creation and feature attachment until a later enablement PR.
+    // Support-only; creation is blocked until enablement.
     supportedFeatureIds: [],
   },
 

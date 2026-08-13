@@ -18,10 +18,8 @@ interface ClientLeaseIdentity {
 const encodeComponent = (component: string): string => encodeURIComponent(component);
 
 /**
- * Pool key identity is connector, client type, authentication identity, and connector revision.
- * The connector remains the first encoded component so LeasePool can evict every client for a
- * connector efficiently. Persisted connector IDs are globally unique, so space membership does
- * not affect key identity.
+ * Pool key identity is connector, client type, authentication identity, and connector revision,
+ * with connector first so LeasePool can evict efficiently.
  */
 export const buildClientLeaseKey = ({
   connectorId,

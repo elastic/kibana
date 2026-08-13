@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import {
-  StreamableHTTPClientTransport,
-  StreamableHTTPError,
-} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { ServerCapabilities } from '@modelcontextprotocol/sdk/types.js';
 import type { Logger } from '@kbn/core/server';
 import type {
@@ -117,13 +113,10 @@ export class McpClient {
         this.logger.error(
           `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
-        const message =
-          error instanceof StreamableHTTPError
-            ? errorMessage
-            : error instanceof UnauthorizedError
-            ? `Unauthorized error: ${errorMessage}`
-            : `Error connecting to MCP server: ${errorMessage}`;
-        throw new Error(message, { cause: error });
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error(`Error connecting to MCP server: ${errorMessage}`);
       }
     }
     // return the full list of capabilities as a by-product of the initialization handshake

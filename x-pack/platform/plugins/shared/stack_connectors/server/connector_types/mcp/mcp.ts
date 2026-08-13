@@ -345,9 +345,15 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     // This method will likely never be called since we don't use this.request()
     // But we must implement it to satisfy the abstract method requirement
 
-    // Handle MCP-specific errors that might be wrapped
+    // Handle forwarded or wrapped MCP-specific errors
+    if (error instanceof StreamableHTTPError) {
+      return `MCP Connection Error: ${error.message}`;
+    }
     if (error.cause instanceof StreamableHTTPError) {
       return `MCP Connection Error: ${error.cause.message}`;
+    }
+    if (error instanceof UnauthorizedError) {
+      return `MCP Unauthorized Error: ${error.message}`;
     }
     if (error.cause instanceof UnauthorizedError) {
       return `MCP Unauthorized Error: ${error.cause.message}`;

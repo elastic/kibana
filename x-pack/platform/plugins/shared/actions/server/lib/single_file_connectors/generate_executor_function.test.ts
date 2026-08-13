@@ -21,7 +21,6 @@ import { createConnectorNetworkSettings } from './create_connector_network_setti
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { AllowlistDeniedError } from './connector_network_errors';
 
 describe('generateExecutorFunction', () => {
   const connectorId = 'test-connector-id';
@@ -632,43 +631,6 @@ describe('generateExecutorFunction', () => {
         getCredential: mockGetCredential,
         getClientLeasePool: () => pool,
         networkSettings: network,
-        clientTypes: { mcp: fakeClientType },
-      });
-
-      const result = await executor(
-        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
-      );
-
-      expect(result).toMatchObject({
-        status: 'error',
-        retry: false,
-        errorSource: TaskErrorSource.USER,
-      });
-    });
-
-    it('classifies an allowlist denial wrapped by client connect as a non-retryable USER error', async () => {
-      const fakeClientType = {
-        id: 'mcp',
-        build: jest.fn().mockRejectedValue(
-          new Error('Error connecting to MCP server: fetch failed', {
-            cause: new AllowlistDeniedError('target host is not allowed'),
-          })
-        ),
-        terminate: jest.fn().mockResolvedValue(undefined),
-      };
-
-      const pool = new LeasePool<unknown>();
-      const handler = jest.fn(async (ctx: ActionContext) => {
-        await (ctx.getClient as unknown as GetClient)('mcp');
-        return {};
-      });
-
-      const executor = generateExecutorFunction({
-        actions: { testAction: { isTool: true, input: {} as never, handler } },
-        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
-        getCredential: mockGetCredential,
-        getClientLeasePool: () => pool,
-        networkSettings: mockNetwork,
         clientTypes: { mcp: fakeClientType },
       });
 
