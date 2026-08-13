@@ -19,27 +19,15 @@ import { EditTransformProjectScope } from './edit_transform_project_scope';
 
 jest.mock('../../../app_dependencies');
 
-jest.mock('../../create_transform/components/wizard/project_scope_selector', () => ({
-  ProjectScopeSelector: (props: {
-    onProjectRoutingChange: (projectRouting: string) => void;
-    projectRouting?: string;
-  }) => (
-    <button
-      type="button"
-      data-test-subj="mockProjectScopeSelector"
-      onClick={() => props.onProjectRoutingChange('_id:linked-id')}
-    >
-      {props.projectRouting}
-    </button>
-  ),
-}));
-
-const renderProjectScope = () =>
+const renderProjectScope = () => {
+  const onOpenProjectScope = jest.fn();
   renderWithI18n(
     <EditTransformFlyoutProvider config={getTransformConfigMock()}>
-      <EditTransformProjectScope />
+      <EditTransformProjectScope onOpenProjectScope={onOpenProjectScope} />
     </EditTransformFlyoutProvider>
   );
+  return { onOpenProjectScope };
+};
 
 describe('EditTransformProjectScope', () => {
   beforeEach(() => {
@@ -47,6 +35,22 @@ describe('EditTransformProjectScope', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
+        fetchProjects: jest.fn().mockResolvedValue({
+          origin: {
+            _id: 'origin-id',
+            _alias: 'local_project',
+            _organisation: 'org',
+            _type: 'security',
+          },
+          linkedProjects: [
+            {
+              _id: 'linked-id',
+              _alias: 'linked_project',
+              _organisation: 'org',
+              _type: 'security',
+            },
+          ],
+        }),
         getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
       },
     } as any;
@@ -58,20 +62,20 @@ describe('EditTransformProjectScope', () => {
 
     renderProjectScope();
 
-    expect(screen.queryByTestId('mockProjectScopeSelector')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('transformEditProjectScopeButton')).not.toBeInTheDocument();
   });
 
-  it('uses origin routing for display without writing a default value', async () => {
-    renderProjectScope();
-
-    expect(screen.getByTestId('mockProjectScopeSelector')).toHaveTextContent(
-      PROJECT_ROUTING.ORIGIN
-    );
-
-    fireEvent.click(screen.getByTestId('mockProjectScopeSelector'));
+  it('uses origin routing for display and opens the project scope flyout', async () => {
+    const { onOpenProjectScope } = renderProjectScope();
 
     await waitFor(() => {
-      expect(screen.getByTestId('mockProjectScopeSelector')).toHaveTextContent('_id:linked-id');
+      expect(screen.getByTestId('transformEditProjectScopeButton')).toHaveTextContent(
+        'This project'
+      );
     });
+
+    fireEvent.click(screen.getByTestId('transformEditProjectScopeButton'));
+
+    expect(onOpenProjectScope).toHaveBeenCalledTimes(1);
   });
 });

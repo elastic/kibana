@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -30,6 +30,7 @@ import { EditTransformFlyoutProvider } from '../state_management/edit_transform_
 import { EditTransformApiErrorCallout } from './edit_transform_api_error_callout';
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
+import { EditTransformProjectScopeFlyout } from './edit_transform_project_scope_flyout';
 import { EditTransformUpdateButton } from './edit_transform_update_button';
 
 export const EditTransformFlyout: FC<EditAction> = ({
@@ -37,62 +38,75 @@ export const EditTransformFlyout: FC<EditAction> = ({
   config,
   dataViewId,
   isFlyoutVisible,
-}) =>
-  config && isFlyoutVisible ? (
+}) => {
+  const [isProjectScopeFlyoutVisible, setIsProjectScopeFlyoutVisible] = useState(false);
+
+  if (!config || !isFlyoutVisible) {
+    return null;
+  }
+
+  return (
     <EditTransformFlyoutProvider config={config} dataViewId={dataViewId}>
-      <EuiFlyout
-        onClose={closeFlyout}
-        hideCloseButton
-        aria-labelledby="transformEditFlyoutTitle"
-        data-test-subj="transformEditFlyout"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id="transformEditFlyoutTitle">
-              {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
-                defaultMessage: 'Edit {transformId}',
-                values: {
-                  transformId: config.id,
-                },
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody
-          banner={
-            <>
-              {isManagedTransform({ config }) ? (
-                <ManagedTransformsWarningCallout
-                  count={1}
-                  action={i18n.translate(
-                    'xpack.transform.transformList.editManagedTransformsDescription',
-                    {
-                      defaultMessage: 'editing',
-                    }
-                  )}
-                />
-              ) : null}
-              <EditTransformFlyoutCallout />
-            </>
-          }
+      {isProjectScopeFlyoutVisible ? (
+        <EditTransformProjectScopeFlyout onClose={() => setIsProjectScopeFlyoutVisible(false)} />
+      ) : (
+        <EuiFlyout
+          onClose={closeFlyout}
+          hideCloseButton
+          aria-labelledby="transformEditFlyoutTitle"
+          data-test-subj="transformEditFlyout"
         >
-          <EditTransformFlyoutForm />
-          <EditTransformApiErrorCallout />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-                {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
-                  defaultMessage: 'Cancel',
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="transformEditFlyoutTitle">
+                {i18n.translate('xpack.transform.transformList.editFlyoutTitle', {
+                  defaultMessage: 'Edit {transformId}',
+                  values: {
+                    transformId: config.id,
+                  },
                 })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EditTransformUpdateButton closeFlyout={closeFlyout} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody
+            banner={
+              <>
+                {isManagedTransform({ config }) ? (
+                  <ManagedTransformsWarningCallout
+                    count={1}
+                    action={i18n.translate(
+                      'xpack.transform.transformList.editManagedTransformsDescription',
+                      {
+                        defaultMessage: 'editing',
+                      }
+                    )}
+                  />
+                ) : null}
+                <EditTransformFlyoutCallout />
+              </>
+            }
+          >
+            <EditTransformFlyoutForm
+              onOpenProjectScope={() => setIsProjectScopeFlyoutVisible(true)}
+            />
+            <EditTransformApiErrorCallout />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+                  {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EditTransformUpdateButton closeFlyout={closeFlyout} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      )}
     </EditTransformFlyoutProvider>
-  ) : null;
+  );
+};

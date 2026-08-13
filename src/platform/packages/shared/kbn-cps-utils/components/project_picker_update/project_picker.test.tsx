@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { CPSProject } from '../../types';
 import { ProjectPicker } from './project_picker';
+import { ProjectPickerFlyout } from './project_picker_flyout';
 
 class MockIntersectionObserver {
   observe = jest.fn();
@@ -107,6 +108,70 @@ describe('ProjectPicker', () => {
       'true'
     );
     expect(screen.getByTestId('projectPickerListItemSwitch-non-matching')).toHaveAttribute(
+      'aria-checked',
+      'false'
+    );
+    expect(onProjectRoutingChange).not.toHaveBeenCalled();
+  });
+
+  it('renders the flyout variant and delegates actions to the consumer', async () => {
+    const onApplyChanges = jest.fn();
+    const onClose = jest.fn();
+    const onDiscardChanges = jest.fn();
+
+    render(
+      <ProjectPickerFlyout
+        availableProjects={[createProject('p1'), createProject('p2')]}
+        onApplyChanges={onApplyChanges}
+        onClose={onClose}
+        onDiscardChanges={onDiscardChanges}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole('heading', { name: 'Change project scope' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('projectPickerFlyoutBackButton'));
+    fireEvent.click(screen.getByTestId('projectPickerFlyoutDiscardButton'));
+    fireEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onDiscardChanges).toHaveBeenCalledTimes(1);
+    expect(onApplyChanges).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not reset custom flyout routing while projects are loading', async () => {
+    const onProjectRoutingChange = jest.fn();
+    const props = {
+      onApplyChanges: jest.fn(),
+      onClose: jest.fn(),
+      onDiscardChanges: jest.fn(),
+      onProjectRoutingChange,
+      projectRouting: '_id:p1',
+    };
+
+    const { rerender } = render(<ProjectPickerFlyout {...props} availableProjects={[]} />);
+
+    expect(onProjectRoutingChange).not.toHaveBeenCalled();
+
+    rerender(
+      <ProjectPickerFlyout
+        {...props}
+        availableProjects={[createProject('p1'), createProject('p2')]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toHaveAttribute(
       'aria-checked',
       'false'
     );

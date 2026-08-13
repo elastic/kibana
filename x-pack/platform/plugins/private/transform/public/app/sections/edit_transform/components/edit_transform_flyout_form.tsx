@@ -17,9 +17,15 @@ import { EditTransformRetentionPolicy } from './edit_transform_retention_policy'
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
 import { EditTransformProjectScope } from './edit_transform_project_scope';
 
-export const EditTransformFlyoutForm: FC = () => (
+interface EditTransformFlyoutFormProps {
+  onOpenProjectScope: () => void;
+}
+
+export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({
+  onOpenProjectScope,
+}) => (
   <EuiForm>
-    <EditTransformProjectScope />
+    <EditTransformProjectScope onOpenProjectScope={onOpenProjectScope} />
 
     <EditTransformFlyoutFormTextArea
       field="description"
