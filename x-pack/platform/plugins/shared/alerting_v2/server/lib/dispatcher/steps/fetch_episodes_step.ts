@@ -41,21 +41,24 @@ export class FetchEpisodesStep implements DispatcherStep {
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
     const { windowStart, windowEnd, signal } = state.input;
+    const gte = windowStart.toISOString();
+    const lte = windowEnd.toISOString();
 
     const result = await this.queryService.executeQueryRows<RawAlertEpisode>({
-      query: getDispatchableAlertEventsQuery().query,
+      query: getDispatchableAlertEventsQuery({ gte, lte }).query,
+      // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
+      // drop action docs stamped with `now` (after the settle buffer) and
+      // break `last_fired` dedup. Event rows are still capped at `lte` inside
+      // the ES|QL WHERE (type == "alert" AND @timestamp <= lte).
       filter: {
         range: {
-          '@timestamp': {
-            gte: windowStart.toISOString(),
-            lte: windowEnd.toISOString(),
-          },
+          '@timestamp': { gte },
         },
       },
       abortSignal: signal,
     });
 
-    // `lte: windowEnd` makes windowEnd a provable watermark advance target:
+    // Event-row `lte` makes windowEnd a provable watermark advance target:
     // the scan has a defined upper edge to advance to.
     const truncated = result.length === EPISODE_QUERY_LIMIT;
 

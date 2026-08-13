@@ -30,7 +30,10 @@ describe('dispatcher constants invariants', () => {
   it('EPISODE_QUERY_LIMIT matches the LIMIT literal in getDispatchableAlertEventsQuery', async () => {
     // Dynamically import to keep the assertion co-located without a cross-file import cycle.
     const { getDispatchableAlertEventsQuery } = await import('./queries');
-    const { query } = getDispatchableAlertEventsQuery();
+    const { query } = getDispatchableAlertEventsQuery({
+      gte: '2026-01-22T07:20:00.000Z',
+      lte: '2026-01-22T07:35:00.000Z',
+    });
 
     expect(query).toContain(`LIMIT ${EPISODE_QUERY_LIMIT}`);
   });

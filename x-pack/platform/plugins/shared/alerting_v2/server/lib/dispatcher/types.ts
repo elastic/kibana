@@ -159,9 +159,9 @@ export interface DispatchFailure {
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly eventWatermark: Date;
-  /** Lower bound of the ES|QL range filter. Equal to `eventWatermark − OVERLAP_WINDOW_MINUTES`. */
+  /** Lower bound of the event-row scan window. Equal to `eventWatermark − OVERLAP_WINDOW_MINUTES`. Action rows are not window-capped. */
   readonly windowStart: Date;
-  /** Upper bound of the ES|QL range filter. Equal to `min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)`. */
+  /** Upper bound of the event-row scan window. Equal to `min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)`. Action rows are not window-capped. */
   readonly windowEnd: Date;
   readonly executionUuid: string;
   readonly signal: AbortSignal;

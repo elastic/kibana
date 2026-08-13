@@ -16,121 +16,133 @@ import {
 import { createAlertEpisode } from './fixtures/test_utils';
 
 describe('getDispatchableAlertEventsQuery', () => {
+  const SCAN_WINDOW = {
+    gte: '2026-01-22T07:20:00.000Z',
+    lte: '2026-01-22T07:35:00.000Z',
+  } as const;
+
+  const queryOf = () => getDispatchableAlertEventsQuery(SCAN_WINDOW).query;
+
   it('returns a valid ES|QL request', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const req = getDispatchableAlertEventsQuery(SCAN_WINDOW);
 
     expect(req).toHaveProperty('query');
     expect(typeof req.query).toBe('string');
   });
 
   it('queries both alert events and alert actions data streams', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('.rule-events');
-    expect(req.query).toContain('.alert-actions');
+    expect(query).toContain('.rule-events');
+    expect(query).toContain('.alert-actions');
   });
 
   it('filters for alert event type', () => {
-    const req = getDispatchableAlertEventsQuery();
+    expect(queryOf()).toContain('type == "alert"');
+  });
 
-    expect(req.query).toContain('type == "alert"');
+  it('caps the scan window on event rows only so action rows after lte still feed last_fired', () => {
+    const query = queryOf();
+
+    // Action rows (`type IS NULL`) bypass the timestamp predicate. Event rows
+    // are capped at [gte, lte]. Two WHERE clauses keep that contract readable
+    // after the builder strips grouping parentheses.
+    expect(query).toContain('type IS NULL OR type == "alert"');
+    expect(query).toContain(
+      `type IS NULL OR @timestamp >= "${SCAN_WINDOW.gte}"::DATETIME AND @timestamp <= "${SCAN_WINDOW.lte}"::DATETIME`
+    );
+    expect(query.indexOf('type IS NULL OR @timestamp >=')).toBeLessThan(
+      query.indexOf('INLINE STATS')
+    );
   });
 
   it('coalesces rule_id and episode_id from both schemas', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('COALESCE(rule.id, rule_id)');
-    expect(req.query).toContain('COALESCE(episode.id, episode_id)');
+    expect(query).toContain('COALESCE(rule.id, rule_id)');
+    expect(query).toContain('COALESCE(episode.id, episode_id)');
   });
 
   it('computes last_fired via INLINE STATS for fire/suppress/unmatched actions', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('last_fired = MAX(last_series_event_timestamp)');
-    expect(req.query).toContain(
+    expect(query).toContain('last_fired = MAX(last_series_event_timestamp)');
+    expect(query).toContain(
       'action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched"'
     );
   });
 
   it('aggregates by subject, group_hash, episode_id with episode_status as LAST aggregation', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('BY subject, group_hash, episode_id');
-    expect(req.query).not.toContain('BY subject, group_hash, episode_id, episode_status');
-    expect(req.query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
+    expect(query).toContain('BY subject, group_hash, episode_id');
+    expect(query).not.toContain('BY subject, group_hash, episode_id, episode_status');
+    expect(query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
   });
 
   it('does not request _source metadata (keys-only scan)', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).not.toContain('METADATA _source');
-    expect(req.query).not.toContain('_index');
+    expect(query).not.toContain('METADATA _source');
+    expect(query).not.toContain('_index');
   });
 
   it('does not contain JSON_EXTRACT or data_json (data hydrated separately)', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).not.toContain('JSON_EXTRACT');
-    expect(req.query).not.toContain('data_json');
+    expect(query).not.toContain('JSON_EXTRACT');
+    expect(query).not.toContain('data_json');
   });
 
   it('aggregates severity using LAST by timestamp scoped to rule-event rows', () => {
-    const req = getDispatchableAlertEventsQuery();
-
-    expect(req.query).toContain('severity = LAST(severity, @timestamp) WHERE type IS NOT NULL');
+    expect(queryOf()).toContain('severity = LAST(severity, @timestamp) WHERE type IS NOT NULL');
   });
 
   it('keeps the expected output columns without data_json and renames episode_status', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain(
+    expect(query).toContain(
       'KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, severity'
     );
-    expect(req.query).not.toContain('data_json');
-    expect(req.query).toContain('RENAME last_episode_status AS episode_status');
+    expect(query).not.toContain('data_json');
+    expect(query).toContain('RENAME last_episode_status AS episode_status');
   });
 
   it('computes subject via CASE to group internal and external episodes separately', () => {
-    const req = getDispatchableAlertEventsQuery();
-
-    expect(req.query).toContain('subject = CASE(');
+    expect(queryOf()).toContain('subject = CASE(');
   });
 
   it('drops rows whose subject could not be resolved, before any aggregation', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('WHERE subject IS NOT NULL');
-    expect(req.query.indexOf('WHERE subject IS NOT NULL')).toBeLessThan(
-      req.query.indexOf('INLINE STATS')
-    );
+    expect(query).toContain('WHERE subject IS NOT NULL');
+    expect(query.indexOf('WHERE subject IS NOT NULL')).toBeLessThan(query.indexOf('INLINE STATS'));
   });
 
   it('groups INLINE STATS BY subject, group_hash (not rule_id, group_hash)', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('BY subject, group_hash');
-    expect(req.query).not.toContain('BY rule_id, group_hash');
+    expect(query).toContain('BY subject, group_hash');
+    expect(query).not.toContain('BY rule_id, group_hash');
   });
 
   it('groups STATS BY subject, group_hash, episode_id', () => {
-    const req = getDispatchableAlertEventsQuery();
-
-    expect(req.query).toContain('BY subject, group_hash, episode_id');
+    expect(queryOf()).toContain('BY subject, group_hash, episode_id');
   });
 
   it('projects source and space_id via LAST aggregation', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('source = LAST(source, @timestamp) WHERE type IS NOT NULL');
-    expect(req.query).toContain('space_id = LAST(space_id, @timestamp) WHERE type IS NOT NULL');
-    expect(req.query).toContain('KEEP last_event_timestamp, rule_id, source, space_id,');
+    expect(query).toContain('source = LAST(source, @timestamp) WHERE type IS NOT NULL');
+    expect(query).toContain('space_id = LAST(space_id, @timestamp) WHERE type IS NOT NULL');
+    expect(query).toContain('KEEP last_event_timestamp, rule_id, source, space_id,');
   });
 
   it('sorts by timestamp ascending with a limit', () => {
-    const req = getDispatchableAlertEventsQuery();
+    const query = queryOf();
 
-    expect(req.query).toContain('SORT last_event_timestamp ASC');
-    expect(req.query).toContain('LIMIT 10000');
+    expect(query).toContain('SORT last_event_timestamp ASC');
+    expect(query).toContain('LIMIT 10000');
   });
 });
 

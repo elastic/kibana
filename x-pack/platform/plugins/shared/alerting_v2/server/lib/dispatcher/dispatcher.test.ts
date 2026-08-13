@@ -270,13 +270,15 @@ describe('DispatcherService', () => {
       expect(queryEsClient.esql.query).toHaveBeenCalledTimes(4);
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
-          query: getDispatchableAlertEventsQuery().query,
+          query: getDispatchableAlertEventsQuery({
+            gte: expectedWindowStart,
+            lte: expectedWindowEnd,
+          }).query,
           drop_null_columns: true,
           filter: {
             range: {
               '@timestamp': {
                 gte: expectedWindowStart,
-                lte: expectedWindowEnd,
               },
             },
           },

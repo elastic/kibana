@@ -45,7 +45,7 @@ describe('FetchEpisodesStep', () => {
     expect(result).toEqual({ type: 'halt', reason: 'no_episodes' });
   });
 
-  it('passes windowStart as gte and windowEnd as lte in the filter', async () => {
+  it('does not cap the Lucene filter at windowEnd so actions stamped after the settle buffer still join last_fired', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchEpisodesStep(queryService);
 
@@ -63,12 +63,17 @@ describe('FetchEpisodesStep', () => {
           range: {
             '@timestamp': {
               gte: windowStart.toISOString(),
-              lte: windowEnd.toISOString(),
             },
           },
         },
       }),
       expect.any(Object)
+    );
+
+    const { query, filter } = mockEsClient.esql.query.mock.calls[0][0];
+    expect(filter.range['@timestamp']).not.toHaveProperty('lte');
+    expect(query).toContain(
+      `type IS NULL OR @timestamp >= "${windowStart.toISOString()}"::DATETIME AND @timestamp <= "${windowEnd.toISOString()}"::DATETIME`
     );
   });
 

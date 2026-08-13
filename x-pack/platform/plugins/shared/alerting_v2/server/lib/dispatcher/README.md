@@ -58,6 +58,8 @@ windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
 windowEnd   = min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)
 ```
 
+The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` stamped with `now` (after the settle buffer).
+
 `eventWatermark` is a **content-addressed** progress marker — it advances only after episodes in the window have received `.alert-actions` records, never based on wall-clock alone:
 
 | Tick outcome | `nextWatermark` |
