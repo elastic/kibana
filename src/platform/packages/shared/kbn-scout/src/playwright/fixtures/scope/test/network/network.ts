@@ -19,7 +19,7 @@ interface MatchOptions {
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
-  private matchesEndpoint(request: Request, options: MatchOptions) {
+  matchesEndpoint(request: Request, options: MatchOptions) {
     if (options.method && request.method() !== options.method) {
       return false;
     }

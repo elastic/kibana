@@ -69,9 +69,9 @@ spaceTest.describe(
         await spaceTest.step(
           'overwrite time dimension with utc_time via field search',
           async () => {
-            await lens.searchField('utc');
+            await lens.dragDrop.searchField('utc');
             await lens.dragFieldToWorkspace('utc_time', testData.XY_CHART);
-            await lens.searchField('client');
+            await lens.dragDrop.searchField('client');
             await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
             await expect(
               lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')
