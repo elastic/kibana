@@ -47,6 +47,7 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
   'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
+  'x-pack/platform/packages/shared/kbn-inference-cli/src/util/write_kibana_config.ts',
   'x-pack/platform/plugins/shared/agent_builder/server/services/plugins/utils/parsing/parse_skill_file.ts',
   'x-pack/platform/plugins/shared/inference/scripts/util/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
