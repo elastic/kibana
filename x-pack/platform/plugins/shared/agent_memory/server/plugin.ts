@@ -122,7 +122,12 @@ export class AgentMemoryPlugin
     });
 
     // ── Workflow steps ────────────────────────────────────────────────────────
-    registerMemoryWorkflowSteps(setupDeps.workflowsExtensions, getMemoryStorage);
+    registerMemoryWorkflowSteps(
+      setupDeps.workflowsExtensions,
+      getMemoryStorage,
+      getHistoryClient,
+      getSecurityStart
+    );
 
     return {};
   }
