@@ -7,10 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { AgentAccessControlMode, createBadRequestError } from '@kbn/agent-builder-common';
-import type {
-  SpaceSettingsResponse,
-  UpdateSpaceSettingsRequestBody,
-} from '../../../common/http_api/space_settings';
+import type { SpaceSettingsResponse } from '../../../common/http_api/space_settings';
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from '../route_security';
 import type { RouteDependencies } from '../types';
@@ -61,11 +58,11 @@ export function registerSpaceSettingsRoutes({
     },
     wrapHandler(async (ctx, request, response) => {
       const { spaceSettings, agents } = getInternalServices();
-      const payload = request.body as UpdateSpaceSettingsRequestBody;
+      const defaultAgentId = request.body.default_agent_id;
 
-      if (payload.default_agent_id !== null) {
+      if (defaultAgentId !== null) {
         const registry = await agents.getRegistry({ request });
-        const profile = await registry.get(payload.default_agent_id);
+        const profile = await registry.get(defaultAgentId);
         if (profile.access_control?.access_mode === AgentAccessControlMode.Private) {
           throw createBadRequestError(
             'A private agent cannot be assigned as the space default. Change the agent access to public or shared, or pick another agent.'
@@ -73,7 +70,7 @@ export function registerSpaceSettingsRoutes({
         }
       }
 
-      const updated = await spaceSettings.set(request, payload.default_agent_id);
+      const updated = await spaceSettings.set(request, defaultAgentId);
       return response.ok<SpaceSettingsResponse>({
         body: { default_agent_id: updated.defaultAgentId },
       });
