@@ -175,6 +175,27 @@
       "reason": "OAS accuracy fix: schema.any() now correctly preserves nullable in OAS output. Response property attributes became nullable for status 400. No runtime behavior change.",
       "approvedBy": "@elastic/fleet",
       "prUrl": "https://github.com/elastic/kibana/pull/264235"
+    },
+    {
+      "path": "/api/security/entity_store/entities/{entityType}",
+      "method": "post",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "request-body-any-of-removed"
+    },
+    {
+      "path": "/api/security/entity_store/entities/{entityType}",
+      "method": "put",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "request-body-any-of-removed"
+    },
+    {
+      "path": "/api/security/entity_store/entities/bulk",
+      "method": "put",
+      "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
+      "approvedBy": "@elastic/security-entity-analytics",
+      "oasdiffId": "request-property-any-of-removed"
     }
   ]
 }
