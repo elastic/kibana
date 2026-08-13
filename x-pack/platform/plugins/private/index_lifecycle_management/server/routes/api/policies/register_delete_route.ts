@@ -21,7 +21,7 @@ async function deletePolicies(client: ElasticsearchClient, policyName: string): 
 }
 
 const paramsSchema = schema.object({
-  policyNames: schema.string(),
+  policyNames: schema.string({ maxLength: 10000 }),
 });
 
 export function registerDeleteRoute({

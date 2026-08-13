@@ -196,8 +196,7 @@ const validatePackageRequiredVars = (
   return hasMetRequiredCriteria ? null : evaluatedRequiredVars;
 };
 
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiling)-(.+)$/;
 
 /*
  * Returns validation information for a given package policy and package info
