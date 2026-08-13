@@ -136,6 +136,8 @@ const RulesListChangeHistoryStory = (): JSX.Element => {
         onRun={action('run')}
         onViewChangeHistory={onViewChangeHistory}
         onTableChange={noop}
+        onBulkUpdateApiKey={noop}
+        onUpdateApiKey={noop}
       />
       {historySession && historyAdapter ? (
         <RuleChangeHistoryProvider
