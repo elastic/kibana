@@ -12,7 +12,6 @@ import {
   isToolCallStep,
   isCompactionStep,
   isBackgroundAgentCompleteStep,
-  isSubagentRosterUpdatedStep,
   isAskUserQuestionStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type {
@@ -63,10 +62,6 @@ export const StepItem: React.FC<StepItemProps> = ({
   }
   if (isAskUserQuestionStep(step)) {
     return <AskUserQuestionStepEvent step={step} />;
-  }
-  if (isSubagentRosterUpdatedStep(step)) {
-    // Only user server-side, explicitly not rendering anything
-    return null;
   }
   return null;
 };
