@@ -113,6 +113,10 @@ export const ProjectPicker = ({
   }, [projects?.origin, projects?.linkedProjects, totalProjectCount]);
 
   if (isDisabled) {
+    if (totalProjectCount <= 1) {
+      return null;
+    }
+
     return (
       <ProjectPickerButton
         // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
