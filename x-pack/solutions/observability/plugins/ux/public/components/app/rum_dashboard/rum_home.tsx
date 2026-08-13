@@ -21,7 +21,7 @@ import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
 import { useHistory, useLocation } from 'react-router-dom';
 import { WebApplicationSelect } from './panels/web_application_select';
-import { UserPercentile } from './user_percentile';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useHasRumData } from './hooks/use_has_rum_data';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
@@ -29,19 +29,35 @@ import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { UxEnvironmentFilter } from './environment_filter';
 import { useAppMenu } from '../../../hooks/use_app_menu';
 import { useUxPluginContext } from '../../../context/use_ux_plugin_context';
-
-import { RumOverview } from '.';
+import { RumOverviewV2 } from '../rum_overview';
+import { RumPagesPanel } from '../rum_pages';
+import { RumErrorsPanel } from '../rum_errors';
 import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
+import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
+import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
+import { RumKueryBar } from '../rum_filters/rum_kuery_bar';
 
-export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
-  defaultMessage: 'Dashboard',
+export const DASHBOARD_LABEL = i18n.translate('xpack.ux.overview.tab', {
+  defaultMessage: 'Overview',
+});
+
+const PAGES_LABEL = i18n.translate('xpack.ux.pages.tab', {
+  defaultMessage: 'Pages',
+});
+
+const ERRORS_LABEL = i18n.translate('xpack.ux.errors.tab', {
+  defaultMessage: 'Errors',
 });
 
 const SESSIONS_LABEL = i18n.translate('xpack.ux.sessions.tab', {
   defaultMessage: 'Sessions',
 });
 
-export type UxHomeTab = 'dashboard' | 'session-replay';
+const JOURNEYS_LABEL = i18n.translate('xpack.ux.journeys.tab', {
+  defaultMessage: 'Journeys',
+});
+
+export type UxHomeTab = 'overview' | 'pages' | 'errors' | 'session-replay' | 'journeys';
 
 export function RumHome({ tab }: { tab: UxHomeTab }) {
   const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
@@ -106,13 +122,6 @@ export function RumHome({ tab }: { tab: UxHomeTab }) {
     });
   }, [hasData, observabilityAIAssistant?.service, screenDescription]);
 
-  const headerTitle =
-    tab === 'session-replay'
-      ? i18n.translate('xpack.ux.home.sessionsTitle', {
-          defaultMessage: 'Sessions',
-        })
-      : DASHBOARD_LABEL;
-
   return (
     <PageTemplateComponent
       noDataConfig={isLoading ? undefined : noDataConfig}
@@ -121,13 +130,23 @@ export function RumHome({ tab }: { tab: UxHomeTab }) {
         paddingSize: 'none',
       }}
     >
-      <AppHeader title={headerTitle} menu={appMenu} spacing="standard" />
+      <AppHeader
+        title={i18n.translate('xpack.ux.home.title', {
+          defaultMessage: 'User Experience',
+        })}
+        menu={appMenu}
+        spacing="standard"
+      />
 
       <EuiPageSection paddingSize="m" restrictWidth={false}>
         <DashboardToolbar tab={tab} />
-        {isLoading && tab === 'dashboard' && <EmptyStateLoading />}
-        <div style={{ visibility: isLoading && tab === 'dashboard' ? 'hidden' : 'initial' }}>
-          {tab === 'dashboard' ? <RumOverview /> : <SessionReplayPanel />}
+        {isLoading && tab === 'overview' && <EmptyStateLoading />}
+        <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
+          {tab === 'overview' && <RumOverviewV2 />}
+          {tab === 'pages' && <RumPagesPanel />}
+          {tab === 'errors' && <RumErrorsPanel />}
+          {tab === 'session-replay' && <SessionReplayPanel />}
+          {tab === 'journeys' && <SessionFunnelPanel />}
         </div>
       </EuiPageSection>
     </PageTemplateComponent>
@@ -137,61 +156,72 @@ export function RumHome({ tab }: { tab: UxHomeTab }) {
 function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
   const history = useHistory();
   const location = useLocation();
+  const sizes = useBreakpoints();
+
+  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
+
+  const tabHref = (pathname: string) => ({
+    href: history.createHref({ pathname, search: location.search }),
+    onClick: (e: React.MouseEvent) => {
+      e.preventDefault();
+      history.push({ pathname, search: location.search });
+    },
+  });
 
   return (
     <>
       <EuiFlexGroup wrap>
-        <EuiFlexItem>
-          <WebApplicationSelect />
-        </EuiFlexItem>
-        {tab === 'dashboard' && (
-          <EuiFlexItem>
-            <UserPercentile />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <UxEnvironmentFilter />
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiBetaBadge
+            label={i18n.translate('xpack.ux.sessionReplay.experimentalBadge', {
+              defaultMessage: 'Technical preview',
+            })}
+            tooltipContent={i18n.translate('xpack.ux.sessionReplay.experimentalTooltip', {
+              defaultMessage:
+                'OTel-first RUM views, sessions, journeys, and Session Replay are an experimental POC and may change or be removed.',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
           <RumDatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      <RumKueryBar />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+        <EuiFlexItem grow={false} style={{ minWidth: 240, maxWidth: 360 }}>
+          <WebApplicationSelect />
+        </EuiFlexItem>
+        <UxEnvironmentFilter />
+        <EuiFlexItem grow={false}>
+          <OtelFilterBar />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiTabs>
-        <EuiTab
-          isSelected={tab === 'dashboard'}
-          href={history.createHref({ pathname: '/', search: location.search })}
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault();
-            history.push({ pathname: '/', search: location.search });
-          }}
-          data-test-subj="uxDashboardTab"
-        >
+        <EuiTab isSelected={tab === 'overview'} data-test-subj="uxDashboardTab" {...tabHref('/')}>
           {DASHBOARD_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={tab === 'pages'} data-test-subj="uxPagesTab" {...tabHref('/pages')}>
+          {PAGES_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={tab === 'errors'} data-test-subj="uxErrorsTab" {...tabHref('/errors')}>
+          {ERRORS_LABEL}
         </EuiTab>
         <EuiTab
           isSelected={tab === 'session-replay'}
-          href={history.createHref({ pathname: '/session-replay', search: location.search })}
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault();
-            history.push({ pathname: '/session-replay', search: location.search });
-          }}
           data-test-subj="uxSessionReplayTab"
+          {...tabHref('/session-replay')}
         >
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{SESSIONS_LABEL}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.ux.sessionReplay.experimentalBadge', {
-                  defaultMessage: 'Technical preview',
-                })}
-                tooltipContent={i18n.translate('xpack.ux.sessionReplay.experimentalTooltip', {
-                  defaultMessage:
-                    'Sessions and Session Replay are an experimental POC and may change or be removed.',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {SESSIONS_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'journeys'}
+          data-test-subj="uxFunnelsTab"
+          {...tabHref('/journeys')}
+        >
+          {JOURNEYS_LABEL}
         </EuiTab>
       </EuiTabs>
       <EuiSpacer size="m" />

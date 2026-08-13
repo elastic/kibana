@@ -154,7 +154,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
                 entries: [
                   {
                     label: i18n.translate('xpack.ux.overview.heading', {
-                      defaultMessage: 'Dashboard',
+                      defaultMessage: 'Overview',
                     }),
                     app: OBLT_UX_APP_ID,
                     path: '/',

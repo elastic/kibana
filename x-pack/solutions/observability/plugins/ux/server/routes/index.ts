@@ -9,18 +9,30 @@ import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-reposi
 import { listSessionReplaySessionsRoute } from './session_replay/list_sessions';
 import { getSessionRoute } from './session_replay/get_session';
 import { getSessionReplayEventsRoute } from './session_replay/get_events';
+import { getSessionFunnelRoute } from './session_replay/funnel';
+import { getSessionPatternsRoute } from './session_replay/patterns';
 import {
   getSessionReplaySettingsRoute,
   updateSessionReplaySettingsRoute,
 } from './session_replay/settings';
+import { getRumFiltersRoute } from './rum/filters';
+import { getRumOverviewRoute } from './rum/overview';
+import { getRumPagesRoute } from './rum/pages';
+import { getRumErrorsRoute } from './rum/errors';
 
 function getTypedUxServerRouteRepository() {
   return {
     ...listSessionReplaySessionsRoute,
     ...getSessionRoute,
     ...getSessionReplayEventsRoute,
+    ...getSessionFunnelRoute,
+    ...getSessionPatternsRoute,
     ...getSessionReplaySettingsRoute,
     ...updateSessionReplaySettingsRoute,
+    ...getRumFiltersRoute,
+    ...getRumOverviewRoute,
+    ...getRumPagesRoute,
+    ...getRumErrorsRoute,
   };
 }
 

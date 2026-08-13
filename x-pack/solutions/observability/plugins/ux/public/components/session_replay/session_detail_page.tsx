@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -33,21 +34,29 @@ import type { PageVisit, RumSessionDetail, SessionAction } from '../../../common
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionDetail } from '../../services/rest/session_replay_api';
 import { UserCell, WebVitalBadges, formatDurationMs, formatTime } from './session_ui';
+import { mergeRumSearch, pushRumPath, sessionsPatch } from '../../utils/rum_search';
+import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 
 const ACTION_ICON: Record<SessionAction['kind'], string> = {
   click: 'clickLeft',
   navigation: 'sortRight',
   error: 'warning',
   load: 'globe',
+  http: 'symlink',
+  inp: 'bolt',
+  longtask: 'clock',
 };
 
-type ActionColorKey = 'primary' | 'accent' | 'danger' | 'success';
+type ActionColorKey = 'primary' | 'accent' | 'danger' | 'success' | 'warning';
 
 const ACTION_COLOR: Record<SessionAction['kind'], ActionColorKey> = {
   click: 'primary',
   navigation: 'accent',
   error: 'danger',
   load: 'success',
+  http: 'primary',
+  inp: 'accent',
+  longtask: 'warning',
 };
 
 const formatOffset = (ms: number): string => {
@@ -96,6 +105,16 @@ const SessionWaterfall = ({
       .map((action) => ({
         pct: Math.min(100, (action.offsetMs / total) * 100),
         label: action.label,
+        kind: 'error' as const,
+      }))
+  );
+  const perfMarkers = visits.flatMap((visit) =>
+    visit.actions
+      .filter((action) => action.kind === 'inp' || action.kind === 'longtask')
+      .map((action) => ({
+        pct: Math.min(100, (action.offsetMs / total) * 100),
+        label: action.label,
+        kind: action.kind,
       }))
   );
 
@@ -162,6 +181,23 @@ const SessionWaterfall = ({
             style={{ left: `${marker.pct}%` }}
           />
         ))}
+        {perfMarkers.map((marker, index) => (
+          <span
+            key={`perf-${index}`}
+            title={marker.label}
+            css={css`
+              position: absolute;
+              top: 4px;
+              bottom: 4px;
+              width: 2px;
+              background: ${marker.kind === 'inp'
+                ? euiTheme.colors.accent
+                : euiTheme.colors.warning};
+              box-shadow: 0 0 0 1px ${euiTheme.colors.emptyShade};
+            `}
+            style={{ left: `${marker.pct}%` }}
+          />
+        ))}
       </div>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" wrap responsive={false}>
@@ -199,12 +235,49 @@ const SessionWaterfall = ({
   );
 };
 
-const ActionRow = ({ action }: { action: SessionAction }) => {
+const ActionRow = ({
+  action,
+  apmHref,
+  onOpenError,
+  onSeek,
+}: {
+  action: SessionAction;
+  apmHref?: string;
+  onOpenError?: (errorGroup: string) => void;
+  onSeek?: (offsetMs: number) => void;
+}) => {
   const { euiTheme } = useEuiTheme();
   const colorKey = ACTION_COLOR[action.kind];
   const color = euiTheme.colors[colorKey];
+  const seekable = Boolean(onSeek);
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      onClick={seekable ? () => onSeek?.(action.offsetMs) : undefined}
+      css={
+        seekable
+          ? css`
+              cursor: pointer;
+              border-radius: ${euiTheme.border.radius.medium};
+              padding: 2px 4px;
+              margin: 0 -4px;
+              &:hover {
+                background: ${euiTheme.colors.lightestShade};
+              }
+            `
+          : undefined
+      }
+      aria-label={
+        seekable
+          ? i18n.translate('xpack.ux.sessionDetail.seekActionAria', {
+              defaultMessage: 'Play replay at {time}',
+              values: { time: formatOffset(action.offsetMs) },
+            })
+          : undefined
+      }
+    >
       <EuiFlexItem grow={false}>
         <EuiText
           size="xs"
@@ -243,6 +316,11 @@ const ActionRow = ({ action }: { action: SessionAction }) => {
           {action.label}
         </EuiText>
       </EuiFlexItem>
+      {action.detail && action.kind === 'http' && action.graphqlOperation && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{action.graphqlOperation}</EuiBadge>
+        </EuiFlexItem>
+      )}
       {action.detail && action.kind === 'error' && (
         <EuiFlexItem
           grow
@@ -255,6 +333,42 @@ const ActionRow = ({ action }: { action: SessionAction }) => {
           </EuiText>
         </EuiFlexItem>
       )}
+      {action.kind === 'error' && action.errorGroup && onOpenError && (
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            data-test-subj="uxActionRowErrorGroupLink"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              if (action.errorGroup) {
+                onOpenError(action.errorGroup);
+              }
+            }}
+          >
+            {i18n.translate('xpack.ux.sessionDetail.errorGroupLink', {
+              defaultMessage: 'Error group',
+            })}
+          </EuiLink>
+        </EuiFlexItem>
+      )}
+      {apmHref && (
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            data-test-subj="uxActionRowViewInApmLink"
+            href={apmHref}
+            target="_blank"
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
+            {i18n.translate('xpack.ux.sessionDetail.viewInApm', {
+              defaultMessage: 'View in APM',
+            })}
+          </EuiLink>
+        </EuiFlexItem>
+      )}
+      {seekable && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="play" size="s" color="subdued" aria-hidden={true} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
@@ -265,12 +379,18 @@ const PageVisitNode = ({
   color,
   isLast,
   registerRef,
+  apmHrefFor,
+  onOpenError,
+  onSeek,
 }: {
   visit: PageVisit;
   sessionDurationMs: number;
   color: string;
   isLast: boolean;
   registerRef: (index: number, node: HTMLDivElement | null) => void;
+  apmHrefFor: (action: SessionAction) => string | undefined;
+  onOpenError: (errorGroup: string) => void;
+  onSeek?: (offsetMs: number) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const pctOfSession =
@@ -437,7 +557,13 @@ const PageVisitNode = ({
               `}
             >
               {visit.actions.map((action, index) => (
-                <ActionRow key={index} action={action} />
+                <ActionRow
+                  key={index}
+                  action={action}
+                  apmHref={apmHrefFor(action)}
+                  onOpenError={onOpenError}
+                  onSeek={onSeek}
+                />
               ))}
             </div>
           </>
@@ -505,6 +631,9 @@ export function SessionDetailPage() {
   const { http, observabilityShared } = useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
   const history = useHistory();
+  const {
+    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now' },
+  } = useLegacyUrlParams();
 
   const [detail, setDetail] = useState<RumSessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -570,14 +699,45 @@ export function SessionDetailPage() {
     loadDetail();
   }, [loadDetail]);
 
-  const openPlayer = useCallback(() => {
-    history.push({
-      pathname: `/session-replay/${encodeURIComponent(sessionId)}/replay`,
-      search: history.location.search,
-    });
-  }, [history, sessionId]);
+  const openPlayer = useCallback(
+    (offsetMs?: number) => {
+      const search =
+        offsetMs != null
+          ? mergeRumSearch(history.location.search, {
+              t: String(Math.max(0, Math.round(offsetMs))),
+            })
+          : history.location.search;
+      history.push({
+        pathname: `/session-replay/${encodeURIComponent(sessionId)}/replay`,
+        search,
+      });
+    },
+    [history, sessionId]
+  );
 
   const pageColors = usePageColors(detail?.pageVisits ?? []);
+
+  const apmHrefFor = useCallback(
+    (action: SessionAction): string | undefined => {
+      if (!action.traceId) {
+        return undefined;
+      }
+      return observabilityShared.locators.apm.transactionDetailsByTraceId.getRedirectUrl({
+        traceId: action.traceId,
+        waterfallItemId: action.spanId ?? undefined,
+        rangeFrom,
+        rangeTo,
+      });
+    },
+    [observabilityShared, rangeFrom, rangeTo]
+  );
+
+  const onOpenError = useCallback(
+    (errorGroup: string) => {
+      pushRumPath(history, '/session-replay', sessionsPatch({ errorGroup }));
+    },
+    [history]
+  );
 
   const rightSideItems = useMemo(() => {
     const items: React.ReactNode[] = [
@@ -599,7 +759,7 @@ export function SessionDetailPage() {
           fill
           iconType="playFilled"
           data-test-subj="uxSessionDetailPlay"
-          onClick={openPlayer}
+          onClick={() => openPlayer()}
         >
           {i18n.translate('xpack.ux.sessionDetail.play', { defaultMessage: 'Play replay' })}
         </EuiButton>
@@ -794,6 +954,9 @@ export function SessionDetailPage() {
                     color={pageColors.get(visit.path) ?? euiTheme.colors.primary}
                     isLast={index === detail.pageVisits.length - 1}
                     registerRef={registerRef}
+                    apmHrefFor={apmHrefFor}
+                    onOpenError={onOpenError}
+                    onSeek={detail.hasReplay ? openPlayer : undefined}
                   />
                 ))}
               </div>

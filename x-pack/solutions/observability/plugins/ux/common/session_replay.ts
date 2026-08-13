@@ -28,6 +28,8 @@ export interface SessionClient {
   device: string | null;
   mobile: boolean | null;
   country: string | null;
+  breakpoint: string | null;
+  connection: string | null;
 }
 
 /** One activity slot for the per-row sparkline. */
@@ -45,6 +47,9 @@ export interface RumSessionSummary {
   errorCount: number;
   actionCount: number;
   rageClickCount: number;
+  deadClickCount: number;
+  /** Exception group keys seen in the sampled hits. */
+  errorGroups: string[];
   /** Milliseconds with activity (gaps > idle threshold excluded). */
   activeMs: number;
   /** Wall-clock duration (end - start) in ms. */
@@ -92,6 +97,8 @@ export interface SessionFacetBucket {
 export interface SessionListFacets {
   browsers: SessionFacetBucket[];
   os: SessionFacetBucket[];
+  /** Identified users (name, email, or id) with session counts. */
+  users: SessionFacetBucket[];
   hasReplay: number;
   hasErrors: number;
   hasRage: number;
@@ -118,9 +125,13 @@ export interface SessionAction {
   /** ms offset from session start. */
   offsetMs: number;
   timestamp: string;
-  kind: 'click' | 'navigation' | 'error' | 'load';
+  kind: 'click' | 'navigation' | 'error' | 'load' | 'http' | 'inp' | 'longtask';
   label: string;
   detail: string | null;
+  traceId?: string | null;
+  spanId?: string | null;
+  errorGroup?: string | null;
+  graphqlOperation?: string | null;
 }
 
 export interface SessionWebVitals {

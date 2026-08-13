@@ -142,17 +142,23 @@ export const UserCell = ({
       </EuiFlexItem>
       <EuiFlexItem grow css={{ minWidth: 0 }}>
         {onOpen ? (
-          <EuiLink
-            data-test-subj="uxUserCellLink"
-            css={{ fontWeight: 600, display: 'block', maxWidth: '100%' }}
-            className="eui-textTruncate"
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              onOpen();
-            }}
+          <EuiToolTip
+            content={i18n.translate('xpack.ux.sessions.filterByUser', {
+              defaultMessage: 'Filter sessions for this user',
+            })}
           >
-            {displayName}
-          </EuiLink>
+            <EuiLink
+              data-test-subj="uxUserCellLink"
+              css={{ fontWeight: 600, display: 'block', maxWidth: '100%' }}
+              className="eui-textTruncate"
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                onOpen();
+              }}
+            >
+              {displayName}
+            </EuiLink>
+          </EuiToolTip>
         ) : (
           <EuiText size="s" css={{ fontWeight: 600 }} className="eui-textTruncate">
             {displayName}
@@ -276,7 +282,10 @@ export const JourneyTrail = ({
 export const SignalBadges = ({
   session,
 }: {
-  session: Pick<RumSessionSummary, 'errorCount' | 'rageClickCount' | 'actionCount'>;
+  session: Pick<
+    RumSessionSummary,
+    'errorCount' | 'rageClickCount' | 'actionCount' | 'deadClickCount'
+  >;
 }) => {
   const badges: React.ReactNode[] = [];
   if (session.errorCount > 0) {
@@ -306,6 +315,23 @@ export const SignalBadges = ({
           {i18n.translate('xpack.ux.sessions.signal.rage', {
             defaultMessage: 'Rage {count}',
             values: { count: session.rageClickCount },
+          })}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
+  if (session.deadClickCount > 0) {
+    badges.push(
+      <EuiToolTip
+        key="dead"
+        content={i18n.translate('xpack.ux.sessions.signal.deadTip', {
+          defaultMessage: 'Dead clicks: clicks with no navigation or request within 1s',
+        })}
+      >
+        <EuiBadge color="default" iconType="faceNeutral" tabIndex={0}>
+          {i18n.translate('xpack.ux.sessions.signal.dead', {
+            defaultMessage: 'Dead {count}',
+            values: { count: session.deadClickCount },
           })}
         </EuiBadge>
       </EuiToolTip>

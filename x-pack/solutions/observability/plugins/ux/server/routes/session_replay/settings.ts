@@ -15,6 +15,9 @@ import {
   normalizeSessionReplaySettings,
   OTLP_ENDPOINT_MAX_LENGTH,
   SERVICE_NAME_MAX_LENGTH,
+  IGNORE_URLS_MAX_LENGTH,
+  URL_GROUPING_RULES_MAX_LENGTH,
+  MASK_TEXT_SELECTOR_MAX_LENGTH,
   type SessionReplaySettings,
 } from '../../../common/session_replay_settings';
 
@@ -31,7 +34,7 @@ export const readSessionReplaySettings = async (
       SESSION_REPLAY_SETTINGS_SO_TYPE,
       SESSION_REPLAY_SETTINGS_SO_ID
     );
-    return { ...DEFAULT_SESSION_REPLAY_SETTINGS, ...so.attributes };
+    return normalizeSessionReplaySettings({ ...DEFAULT_SESSION_REPLAY_SETTINGS, ...so.attributes });
   } catch (error) {
     if (isNotFound(error)) {
       return { ...DEFAULT_SESSION_REPLAY_SETTINGS };
@@ -68,12 +71,21 @@ const boundedString = (max: number) =>
     t.identity
   );
 
-const settingsBody = t.type({
-  enabled: t.boolean,
-  otlpEndpoint: boundedString(OTLP_ENDPOINT_MAX_LENGTH),
-  serviceName: boundedString(SERVICE_NAME_MAX_LENGTH),
-  sampleRate: t.number,
-});
+const settingsBody = t.intersection([
+  t.type({
+    enabled: t.boolean,
+    otlpEndpoint: boundedString(OTLP_ENDPOINT_MAX_LENGTH),
+    serviceName: boundedString(SERVICE_NAME_MAX_LENGTH),
+    sampleRate: t.number,
+  }),
+  t.partial({
+    ignoreUrls: boundedString(IGNORE_URLS_MAX_LENGTH),
+    urlGroupingDepth: t.number,
+    urlGroupingRules: boundedString(URL_GROUPING_RULES_MAX_LENGTH),
+    maskTextSelector: boundedString(MASK_TEXT_SELECTOR_MAX_LENGTH),
+    captureGraphql: t.boolean,
+  }),
+]);
 
 export const updateSessionReplaySettingsRoute = createUxServerRoute({
   endpoint: 'PUT /internal/ux/session_replay/settings',
@@ -92,6 +104,6 @@ export const updateSessionReplaySettingsRoute = createUxServerRoute({
         overwrite: true,
       }
     );
-    return { ...DEFAULT_SESSION_REPLAY_SETTINGS, ...so.attributes };
+    return normalizeSessionReplaySettings({ ...DEFAULT_SESSION_REPLAY_SETTINGS, ...so.attributes });
   },
 });

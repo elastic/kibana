@@ -17,20 +17,17 @@ import {
   type SessionSortField,
 } from '../../../common/session_replay';
 import {
-  attrString,
   buildSparkline,
   clientFromHits,
+  collectSessionSignals,
   computeActiveMs,
-  countRageClicks,
+  countDeadAndErrorClicks,
   dedupeConsecutive,
-  docName,
-  docTimestamp,
-  isAssetPath,
-  labelFromXPath,
-  pageFromHit,
   userFromHits,
   type OtelHit,
 } from './session_attributes';
+import { kueryFilters } from '../rum/kuery';
+import { botExclusionFilters } from '../rum/bots';
 
 interface SessionBucket {
   key: string;
@@ -55,7 +52,13 @@ const toIso = (agg?: { value_as_string?: string; value?: number | null }): strin
   return null;
 };
 
-const SAMPLE_SOURCE = ['name', 'event_name', '@timestamp', 'attributes', 'resource.attributes'];
+export const SAMPLE_SOURCE = [
+  'name',
+  'event_name',
+  '@timestamp',
+  'attributes',
+  'resource.attributes',
+];
 
 interface SessionDerived {
   entryPage: string | null;
@@ -64,6 +67,8 @@ interface SessionDerived {
   pageCount: number;
   activityPath: string[];
   rageClickCount: number;
+  deadClickCount: number;
+  errorGroups: string[];
   activeMs: number;
   sparkline: RumSessionSummary['sparkline'];
   user: RumSessionSummary['user'];
@@ -71,46 +76,10 @@ interface SessionDerived {
 }
 
 const deriveFromSample = (hits: OtelHit[], startMs: number, endMs: number): SessionDerived => {
-  const pages: string[] = [];
-  const activities: string[] = [];
-  const clicks: Array<{ xpath: string | null; ts: number }> = [];
-  const timestamps: number[] = [];
-
-  for (const hit of hits) {
-    const source = hit._source ?? {};
-    const name = docName(source);
-    const page = pageFromHit(source);
-    const tsRaw = docTimestamp(source);
-    const ts = tsRaw ? Date.parse(tsRaw) : NaN;
-    if (Number.isFinite(ts)) {
-      timestamps.push(ts);
-    }
-
-    const pageIsSignal =
-      Boolean(page) &&
-      !isAssetPath(page) &&
-      (name === 'documentLoad' ||
-        name === 'documentFetch' ||
-        name === 'page.view' ||
-        name === 'click' ||
-        name === 'navigation' ||
-        name == null);
-    if (pageIsSignal && page && pages[pages.length - 1] !== page) {
-      pages.push(page);
-    }
-
-    if (name === 'click') {
-      const xpath = attrString(source, 'target_xpath');
-      clicks.push({ xpath, ts: Number.isFinite(ts) ? ts : 0 });
-      const label = labelFromXPath(xpath);
-      if (label) {
-        activities.push(label);
-      }
-    }
-  }
-
+  const { pages, activities, clicks, timestamps, errorGroups } = collectSessionSignals(hits);
   const pagePath = dedupeConsecutive(pages).slice(0, 12);
   const activityPath = dedupeConsecutive(activities).slice(0, 10);
+  const { dead, rage } = countDeadAndErrorClicks(hits, clicks);
 
   return {
     entryPage: pagePath[0] ?? null,
@@ -118,7 +87,9 @@ const deriveFromSample = (hits: OtelHit[], startMs: number, endMs: number): Sess
     pagePath,
     pageCount: pagePath.length,
     activityPath,
-    rageClickCount: countRageClicks(clicks),
+    rageClickCount: rage,
+    deadClickCount: dead,
+    errorGroups: errorGroups.slice(0, 8),
     activeMs: computeActiveMs(timestamps),
     sparkline: buildSparkline(hits, startMs, endMs),
     user: userFromHits(hits),
@@ -127,7 +98,7 @@ const deriveFromSample = (hits: OtelHit[], startMs: number, endMs: number): Sess
 };
 
 /** Resolve session id from resource or document attributes (EDOT Browser). */
-const SESSION_ID_SCRIPT = `
+export const SESSION_ID_SCRIPT = `
   def rum = doc.containsKey('resource.attributes.rum.sessionId') ? doc['resource.attributes.rum.sessionId'] : null;
   if (rum != null && rum.size() > 0) { return rum.value; }
   def sid = doc.containsKey('resource.attributes.session.id') ? doc['resource.attributes.session.id'] : null;
@@ -164,14 +135,25 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       hasReplay: t.string,
       hasErrors: t.string,
       hasRage: t.string,
+      hasDead: t.string,
       browser: t.string,
       os: t.string,
+      pageUrl: t.string,
+      errorGroup: t.string,
+      sessionIds: t.string,
+      frustration: t.string,
       minDurationMs: t.string,
       maxDurationMs: t.string,
+      user: t.string,
+      includeBots: t.string,
+      kuery: t.string,
+      breakpoint: t.string,
+      connection: t.string,
+      device: t.string,
     }),
   }),
   handler: async ({ context, params }): Promise<SessionListResponse> => {
-    const { rangeFrom = 'now-24h', rangeTo = 'now', serviceName } = params.query;
+    const { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery } = params.query;
     // Server-side sort/paginate/search operate over a bounded candidate window derived
     // from the terms aggregation. Sufficient for the POC; true scale needs a composite agg.
     const candidateSize = 200;
@@ -192,6 +174,29 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
           },
         ]
       : [];
+    const filters = [
+      timeFilter,
+      ...serviceFilters,
+      ...botExclusionFilters(params.query.includeBots),
+      ...kueryFilters(kuery),
+    ];
+    if (params.query.breakpoint) {
+      filters.push({ term: { 'attributes.browser.breakpoint': params.query.breakpoint } });
+    }
+    if (params.query.connection) {
+      filters.push({ term: { 'attributes.network.connection.type': params.query.connection } });
+    }
+    if (params.query.device) {
+      filters.push({
+        bool: {
+          should: [
+            { term: { 'attributes.device.memory': params.query.device } },
+            { term: { 'resource.attributes.device.memory': params.query.device } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
 
     const [rumResult, replayResult] = await Promise.all([
       client.search({
@@ -199,7 +204,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
         ignore_unavailable: true,
         allow_no_indices: true,
         size: 0,
-        query: { bool: { filter: [timeFilter, ...serviceFilters] } },
+        query: { bool: { filter: filters } },
         aggs: {
           sessions: {
             terms: {
@@ -240,7 +245,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
         ignore_unavailable: true,
         allow_no_indices: true,
         size: 0,
-        query: { bool: { filter: [timeFilter, ...serviceFilters] } },
+        query: { bool: { filter: filters } },
         aggs: {
           sessions: {
             terms: {
@@ -309,6 +314,8 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
         errorCount: bucket.error_count?.doc_count ?? 0,
         actionCount: bucket.click_count?.doc_count ?? 0,
         rageClickCount: derived.rageClickCount,
+        deadClickCount: derived.deadClickCount,
+        errorGroups: derived.errorGroups,
         activeMs: derived.activeMs,
         durationMs: Math.max(0, endMs - startMs),
         pageCount: derived.pageCount > 0 ? derived.pageCount : replay?.derived.pageCount ?? 0,
@@ -337,6 +344,8 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
         errorCount: 0,
         actionCount: 0,
         rageClickCount: replay.derived.rageClickCount,
+        deadClickCount: replay.derived.deadClickCount,
+        errorGroups: replay.derived.errorGroups,
         activeMs: replay.derived.activeMs,
         durationMs: (() => {
           const s = replay.startTime ? Date.parse(replay.startTime) : 0;
@@ -380,18 +389,49 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
     const facets = computeFacets(searchFiltered);
 
     // Facet filters.
-    const { hasReplay, hasErrors, hasRage, browser, os, minDurationMs, maxDurationMs } =
-      params.query;
+    const {
+      hasReplay,
+      hasErrors,
+      hasRage,
+      hasDead,
+      browser,
+      os,
+      minDurationMs,
+      maxDurationMs,
+      pageUrl,
+      errorGroup,
+      sessionIds,
+      frustration,
+      user,
+    } = params.query;
     const minDur = minDurationMs ? Number(minDurationMs) : undefined;
     const maxDur = maxDurationMs ? Number(maxDurationMs) : undefined;
+    const idSet =
+      sessionIds && sessionIds.trim()
+        ? new Set(
+            sessionIds
+              .split(',')
+              .map((id) => id.trim())
+              .filter(Boolean)
+              .slice(0, 50)
+          )
+        : null;
+    const wantRage = hasRage === 'true' || frustration === 'rage';
+    const wantErrors = hasErrors === 'true' || frustration === 'error';
+    const wantDead = hasDead === 'true' || frustration === 'dead';
     const filtered = searchFiltered.filter((session) => {
       if (hasReplay === 'true' && !session.hasReplay) return false;
-      if (hasErrors === 'true' && session.errorCount === 0) return false;
-      if (hasRage === 'true' && session.rageClickCount === 0) return false;
+      if (wantErrors && session.errorCount === 0) return false;
+      if (wantRage && session.rageClickCount === 0) return false;
+      if (wantDead && session.deadClickCount === 0) return false;
       if (browser && session.client.browser !== browser) return false;
       if (os && session.client.os !== os) return false;
       if (minDur != null && session.durationMs < minDur) return false;
       if (maxDur != null && session.durationMs > maxDur) return false;
+      if (pageUrl && !session.pagePath.some((path) => path.includes(pageUrl))) return false;
+      if (errorGroup && !session.errorGroups.includes(errorGroup)) return false;
+      if (idSet && !idSet.has(session.sessionId)) return false;
+      if (user && userKey(session) !== user) return false;
       return true;
     });
 
@@ -434,9 +474,14 @@ const topBuckets = (
     .slice(0, 12);
 };
 
+/** Stable display key for a session's user: name, else email, else id. */
+const userKey = (session: RumSessionSummary): string | null =>
+  session.user.name || session.user.email || session.user.id;
+
 const computeFacets = (sessions: RumSessionSummary[]): SessionListFacets => ({
   browsers: topBuckets(sessions, (session) => session.client.browser),
   os: topBuckets(sessions, (session) => session.client.os),
+  users: topBuckets(sessions, userKey),
   hasReplay: sessions.filter((session) => session.hasReplay).length,
   hasErrors: sessions.filter((session) => session.errorCount > 0).length,
   hasRage: sessions.filter((session) => session.rageClickCount > 0).length,

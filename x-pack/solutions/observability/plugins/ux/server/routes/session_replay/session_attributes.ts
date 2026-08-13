@@ -11,6 +11,7 @@ import type {
   SessionClient,
   SessionUser,
 } from '../../../common/session_replay';
+import { makeErrorGroupKey } from '../../../common/rum_app';
 
 export interface OtelHit {
   _source?: Record<string, unknown>;
@@ -80,7 +81,7 @@ export const attrBool = (source: Record<string, unknown>, path: string): boolean
 };
 
 export const docName = (source: Record<string, unknown>): string | null => {
-  const name = source.name ?? source.event_name;
+  const name = source.name ?? source.event_name ?? attrString(source, 'event.name');
   return typeof name === 'string' ? name : null;
 };
 
@@ -142,6 +143,32 @@ const ACTIVITY_ID_LABELS: Record<string, string> = {
 
 const NAV_TABS = ['Catalog', 'Cart', 'Account', 'Support'];
 
+/** Tokens to wildcard-match `attributes.target_xpath` for an activity label. */
+export const activitySearchTokens = (label: string): string[] => {
+  const trimmed = label.trim();
+  const lower = trimmed.toLowerCase();
+  if (!trimmed) {
+    return [];
+  }
+  if (lower === 'add to cart') {
+    return ['data-add', 'product-grid'];
+  }
+  if (lower === 'remove item') {
+    return ['data-remove', 'cart-list'];
+  }
+  const id = Object.entries(ACTIVITY_ID_LABELS).find(
+    ([, name]) => name.toLowerCase() === lower
+  )?.[0];
+  if (id) {
+    return [`@id="${id}"`, id];
+  }
+  const tabIndex = NAV_TABS.findIndex((name) => name.toLowerCase() === lower);
+  if (tabIndex >= 0) {
+    return [`/nav/button[${tabIndex + 1}]`, NAV_TABS[tabIndex]];
+  }
+  return [trimmed];
+};
+
 export const labelFromXPath = (xpath: string | null): string | null => {
   if (!xpath) {
     return null;
@@ -162,6 +189,64 @@ export const labelFromXPath = (xpath: string | null): string | null => {
     return NAV_TABS[index - 1] ?? 'Navigate';
   }
   return null;
+};
+
+export interface SessionSignalCollections {
+  pages: string[];
+  activities: string[];
+  clicks: Array<{ xpath: string | null; ts: number }>;
+  timestamps: number[];
+  errorGroups: string[];
+}
+
+/** Walk sampled hits into ordered pages, labeled clicks, and timestamps. */
+export const collectSessionSignals = (hits: OtelHit[]): SessionSignalCollections => {
+  const pages: string[] = [];
+  const activities: string[] = [];
+  const clicks: Array<{ xpath: string | null; ts: number }> = [];
+  const timestamps: number[] = [];
+  const errorGroups: string[] = [];
+
+  for (const hit of hits) {
+    const source = hit._source ?? {};
+    const name = docName(source);
+    const page = pageFromHit(source);
+    const tsRaw = docTimestamp(source);
+    const ts = tsRaw ? Date.parse(tsRaw) : NaN;
+    if (Number.isFinite(ts)) {
+      timestamps.push(ts);
+    }
+
+    const pageIsSignal =
+      Boolean(page) &&
+      !isAssetPath(page) &&
+      (name === 'documentLoad' ||
+        name === 'documentFetch' ||
+        name === 'page.view' ||
+        name === 'click' ||
+        name === 'navigation' ||
+        name === 'browser.navigation' ||
+        name == null);
+    if (pageIsSignal && page && pages[pages.length - 1] !== page) {
+      pages.push(page);
+    }
+
+    if (name === 'click') {
+      const xpath = attrString(source, 'target_xpath');
+      clicks.push({ xpath, ts: Number.isFinite(ts) ? ts : 0 });
+      const label = labelFromXPath(xpath);
+      if (label) {
+        activities.push(label);
+      }
+    }
+
+    const group = errorGroupFromHit(source);
+    if (group && !errorGroups.includes(group.key)) {
+      errorGroups.push(group.key);
+    }
+  }
+
+  return { pages, activities, clicks, timestamps, errorGroups };
 };
 
 export const isErrorHit = (source: Record<string, unknown>): boolean => {
@@ -208,6 +293,8 @@ export const clientFromHits = (hits: OtelHit[]): SessionClient => {
     device: null,
     mobile: null,
     country: null,
+    breakpoint: null,
+    connection: null,
   };
   for (const hit of hits) {
     const source = hit._source ?? {};
@@ -227,11 +314,145 @@ export const clientFromHits = (hits: OtelHit[]): SessionClient => {
       client.country ||
       attrString(source, 'client.geo.country_name') ||
       attrString(source, 'geo.country_name');
-    if (client.browser && client.os && client.country) {
+    client.breakpoint = client.breakpoint || attrString(source, 'browser.breakpoint');
+    client.connection = client.connection || attrString(source, 'network.connection.type');
+    if (client.browser && client.os && client.country && client.breakpoint && client.connection) {
       break;
     }
   }
   return client;
+};
+
+const HTTP_METHODS = new Set(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']);
+
+const isFollowUpName = (name: string | null): boolean => {
+  if (!name) {
+    return false;
+  }
+  return (
+    name === 'documentLoad' ||
+    name === 'documentFetch' ||
+    name === 'page.view' ||
+    name === 'browser.navigation' ||
+    name === 'navigation' ||
+    HTTP_METHODS.has(name)
+  );
+};
+
+export const errorGroupFromHit = (
+  source: Record<string, unknown>
+): {
+  key: string;
+  type: string;
+  message: string;
+  groupingKey: string | null;
+} | null => {
+  if (!isErrorHit(source)) {
+    return null;
+  }
+  const type = attrString(source, 'exception.type') || attrString(source, 'error.type') || 'Error';
+  const message =
+    attrString(source, 'exception.message') || attrString(source, 'error.message') || '';
+  const groupingKey =
+    attrString(source, 'error.grouping_key') || attrString(source, 'grouping_key');
+  return {
+    key: groupingKey || makeErrorGroupKey(type, message),
+    type,
+    message,
+    groupingKey,
+  };
+};
+
+export const traceIdFromHit = (source: Record<string, unknown>): string | null =>
+  attrString(source, 'trace.id') ||
+  (typeof source.trace_id === 'string' ? source.trace_id : null) ||
+  (typeof source['trace.id'] === 'string' ? (source['trace.id'] as string) : null);
+
+export const spanIdFromHit = (source: Record<string, unknown>): string | null =>
+  attrString(source, 'span.id') ||
+  (typeof source.span_id === 'string' ? source.span_id : null) ||
+  (typeof source['span.id'] === 'string' ? (source['span.id'] as string) : null);
+
+/** Dead = click with no navigation/http within 1s. Error-click = click followed by an exception. */
+export const SDK_FRUSTRATION_EVENTS = {
+  rage: 'browser.frustration.rage_click',
+  dead: 'browser.frustration.dead_click',
+  error: 'browser.frustration.error_click',
+} as const;
+
+export const countSdkFrustration = (
+  hits: OtelHit[]
+): { dead: number; errorClicks: number; rage: number } => {
+  let rage = 0;
+  let dead = 0;
+  let errorClicks = 0;
+  for (const hit of hits) {
+    const name = docName(hit._source ?? {});
+    if (name === SDK_FRUSTRATION_EVENTS.rage) {
+      rage += 1;
+    } else if (name === SDK_FRUSTRATION_EVENTS.dead) {
+      dead += 1;
+    } else if (name === SDK_FRUSTRATION_EVENTS.error) {
+      errorClicks += 1;
+    }
+  }
+  return { rage, dead, errorClicks };
+};
+
+export const countDeadAndErrorClicks = (
+  hits: OtelHit[],
+  clicks: Array<{ xpath: string | null; ts: number }>
+): { dead: number; errorClicks: number; rage: number } => {
+  const sdk = countSdkFrustration(hits);
+  const rage = countRageClicks(clicks);
+  const events = hits
+    .map((hit) => {
+      const source = hit._source ?? {};
+      const tsRaw = docTimestamp(source);
+      const ts = tsRaw ? Date.parse(tsRaw) : NaN;
+      const name = docName(source);
+      return {
+        ts,
+        isClick: name === 'click',
+        isError: isErrorHit(source),
+        isFollowUp: isFollowUpName(name) || attrString(source, 'http.request.method') != null,
+      };
+    })
+    .filter((event) => Number.isFinite(event.ts))
+    .sort((a, b) => a.ts - b.ts);
+
+  let dead = 0;
+  let errorClicks = 0;
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    if (!event.isClick) {
+      continue;
+    }
+    let sawFollowUp = false;
+    let sawError = false;
+    for (let j = i + 1; j < events.length; j++) {
+      const next = events[j];
+      if (next.ts - event.ts > 1000) {
+        break;
+      }
+      if (next.isError) {
+        sawError = true;
+      }
+      if (next.isFollowUp && !next.isClick) {
+        sawFollowUp = true;
+      }
+    }
+    if (sawError) {
+      errorClicks += 1;
+    } else if (!sawFollowUp) {
+      dead += 1;
+    }
+  }
+  return {
+    dead: sdk.dead || dead,
+    errorClicks: sdk.errorClicks || errorClicks,
+    rage: sdk.rage || rage,
+  };
 };
 
 /** Rage clicks = >= 3 clicks on the same target within a 1s window. */
@@ -340,15 +561,20 @@ export const actionFromHit = (
   const ts = Date.parse(tsRaw);
   const offsetMs = Number.isFinite(ts) ? Math.max(0, ts - sessionStartMs) : 0;
   const name = docName(source);
+  const traceId = traceIdFromHit(source);
+  const spanId = spanIdFromHit(source);
 
   if (isErrorHit(source)) {
+    const group = errorGroupFromHit(source);
     return {
       offsetMs,
       timestamp: tsRaw,
       kind: 'error',
-      label: attrString(source, 'exception.type') || attrString(source, 'error.type') || 'Error',
-      detail:
-        attrString(source, 'exception.message') || attrString(source, 'error.message') || null,
+      label: group?.type || 'Error',
+      detail: group?.message || null,
+      traceId,
+      spanId,
+      errorGroup: group?.key ?? null,
     };
   }
 
@@ -360,6 +586,8 @@ export const actionFromHit = (
       kind: 'click',
       label: label ?? 'Click',
       detail: attrString(source, 'target_xpath'),
+      traceId,
+      spanId,
     };
   }
 
@@ -370,6 +598,68 @@ export const actionFromHit = (
       kind: 'load',
       label: 'Page load',
       detail: pageFromHit(source),
+      traceId,
+      spanId,
+    };
+  }
+
+  if (name === 'browser.navigation' || name === 'navigation') {
+    return {
+      offsetMs,
+      timestamp: tsRaw,
+      kind: 'navigation',
+      label: 'Navigation',
+      detail: pageFromHit(source),
+      traceId,
+      spanId,
+    };
+  }
+
+  const vital = readWebVital(source);
+  if (vital?.name === 'inp') {
+    const target = attrString(source, 'browser.web_vital.inp.target');
+    return {
+      offsetMs,
+      timestamp: tsRaw,
+      kind: 'inp',
+      label: target ? `INP · ${target}` : 'INP',
+      detail: `${Math.round(vital.value)}ms`,
+      traceId,
+      spanId,
+    };
+  }
+
+  if (name === 'longtask' || name === 'long_task') {
+    const src =
+      attrString(source, 'longtask.script_source') ||
+      attrString(source, 'longtask.attribution.container_src');
+    const duration = attrNumber(source, 'longtask.duration');
+    return {
+      offsetMs,
+      timestamp: tsRaw,
+      kind: 'longtask',
+      label: src ? `Long task · ${src}` : 'Long task',
+      detail: duration != null ? `${Math.round(duration)}ms` : null,
+      traceId,
+      spanId,
+    };
+  }
+
+  const method =
+    attrString(source, 'http.request.method') || (name && HTTP_METHODS.has(name) ? name : null);
+  if (method) {
+    const status = attrString(source, 'http.response.status_code');
+    const url = pageFromHit(source) || urlFromHit(source);
+    const gql = attrString(source, 'graphql.operation.name');
+    return {
+      offsetMs,
+      timestamp: tsRaw,
+      kind: 'http',
+      label: gql ? `GQL ${gql}` : status ? `${method} ${status}` : method,
+      detail: url,
+      traceId,
+      spanId,
+      graphqlOperation: gql,
     };
   }
 

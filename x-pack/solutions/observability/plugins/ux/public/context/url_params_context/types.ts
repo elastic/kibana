@@ -23,6 +23,16 @@ export type UrlParams = {
   percentile?: number;
   exactStart?: string;
   exactEnd?: string;
+  frustration?: string;
+  pageUrl?: string;
+  errorGroup?: string;
+  sessionIds?: string;
+  user?: string;
+  includeBots?: string;
+  kuery?: string;
+  breakpoint?: string;
+  connection?: string;
+  device?: string;
 } & Partial<Record<UxLocalUIFilterName, string>>;
 
 type StringifyAll<T> = { [K in keyof T]: string };

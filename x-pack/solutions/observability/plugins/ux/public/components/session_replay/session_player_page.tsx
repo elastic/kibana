@@ -22,12 +22,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useParams } from '@kbn/typed-react-router-config';
 import { css } from '@emotion/react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplayEvents } from '../../services/rest/session_replay_api';
+import { mergeRumSearch, parseReplayOffsetMs } from '../../utils/rum_search';
 
 interface ReplayerMirror {
   getId: (node: Node) => number;
@@ -350,6 +351,7 @@ export function SessionPlayerPage() {
   const { http, observabilityShared } = useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
   const history = useHistory();
+  const location = useLocation();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -372,6 +374,8 @@ export function SessionPlayerPage() {
   const speedRef = useRef(speed);
   speedRef.current = speed;
   const finishedRef = useRef(false);
+  const lastSeekMsRef = useRef<number | null>(null);
+  const lastTWriteRef = useRef(0);
   playingRef.current = playing;
 
   const styles = useMemo(
@@ -639,6 +643,20 @@ export function SessionPlayerPage() {
     setTotalMs(total);
   }, []);
 
+  const replaceSeekParam = useCallback(
+    (offsetMs: number) => {
+      const rounded = Math.max(0, Math.round(offsetMs));
+      lastSeekMsRef.current = rounded;
+      const next = mergeRumSearch(history.location.search, { t: String(rounded) });
+      const current = history.location.search.replace(/^\?/, '');
+      if (next === current) {
+        return;
+      }
+      history.replace({ ...history.location, search: next });
+    },
+    [history]
+  );
+
   const fitReplayToStage = useCallback((pageWidth?: number, pageHeight?: number) => {
     const stage = containerRef.current;
     const wrapper = stage?.querySelector('.replayer-wrapper') as HTMLElement | null;
@@ -801,6 +819,14 @@ export function SessionPlayerPage() {
 
         replayerRef.current = replayer;
         setReady(true);
+
+        const initialOffset = parseReplayOffsetMs(history.location.search);
+        if (initialOffset != null && initialOffset > 0) {
+          const offset = Math.min(initialOffset, duration);
+          lastSeekMsRef.current = offset;
+          replayer.pause(offset);
+          setCurrentMs(offset);
+        }
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : String(err));
@@ -817,7 +843,28 @@ export function SessionPlayerPage() {
       cancelled = true;
       destroyPlayer();
     };
-  }, [http, sessionId, destroyPlayer, syncProgress, fitReplayToStage]);
+  }, [http, sessionId, destroyPlayer, syncProgress, fitReplayToStage, history]);
+
+  useEffect(() => {
+    if (!ready) {
+      return;
+    }
+    const seekMs = parseReplayOffsetMs(location.search);
+    if (seekMs == null || lastSeekMsRef.current === seekMs) {
+      return;
+    }
+    const replayer = replayerRef.current;
+    if (!replayer) {
+      return;
+    }
+    const total = Math.max(replayer.getMetaData().totalTime || 0, 1);
+    const offset = Math.min(seekMs, total);
+    lastSeekMsRef.current = offset;
+    finishedRef.current = false;
+    replayer.pause(offset);
+    setCurrentMs(offset);
+    setPlaying(false);
+  }, [ready, location.search]);
 
   useEffect(() => {
     if (shellHeight != null) {
@@ -956,6 +1003,7 @@ export function SessionPlayerPage() {
       // pause(offset) casts events up to offset then pauses (rrweb API).
       replayer.pause(offset);
       setCurrentMs(offset);
+      replaceSeekParam(offset);
       if (wasPlaying) {
         replayer.play(offset);
         setPlaying(true);
@@ -963,7 +1011,7 @@ export function SessionPlayerPage() {
         setPlaying(false);
       }
     },
-    [totalMs]
+    [totalMs, replaceSeekParam]
   );
 
   const onTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -1023,9 +1071,14 @@ export function SessionPlayerPage() {
         return;
       }
       syncProgress(replayer);
+      const now = Date.now();
+      if (now - lastTWriteRef.current >= 1000) {
+        lastTWriteRef.current = now;
+        replaceSeekParam(replayer.getCurrentTime());
+      }
     }, 100);
     return () => window.clearInterval(id);
-  }, [playing, syncProgress]);
+  }, [playing, syncProgress, replaceSeekParam]);
 
   const progressPct = totalMs > 0 ? Math.min(100, (currentMs / totalMs) * 100) : 0;
   const controlsDisabled = loading || Boolean(error) || !ready;

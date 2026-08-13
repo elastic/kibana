@@ -60,7 +60,41 @@ function UxDashboardPage() {
 
   return (
     <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="dashboard" />
+      <RumHome tab="overview" />
+    </div>
+  );
+}
+
+function UxPagesPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.pages', {
+        defaultMessage: 'Pages',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="pages" />
+    </div>
+  );
+}
+
+function UxErrorsPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.errors', {
+        defaultMessage: 'Errors',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="errors" />
     </div>
   );
 }
@@ -70,7 +104,7 @@ function UxSessionReplayPage() {
     UX_BREADCRUMBS[0],
     {
       text: i18n.translate('xpack.ux.breadcrumbs.sessionReplay', {
-        defaultMessage: 'Session Replay',
+        defaultMessage: 'Sessions',
       }),
     },
   ]);
@@ -82,12 +116,44 @@ function UxSessionReplayPage() {
   );
 }
 
+function UxSessionFunnelPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.journeys', {
+        defaultMessage: 'Journeys',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="journeys" />
+    </div>
+  );
+}
+
 const uxRouter = createRouter({
   '/': {
     element: <UxDashboardPage />,
   },
+  '/pages': {
+    element: <UxPagesPage />,
+  },
+  '/errors': {
+    element: <UxErrorsPage />,
+  },
   '/session-replay': {
     element: <UxSessionReplayPage />,
+  },
+  '/funnels': {
+    element: <UxSessionFunnelPage />,
+  },
+  '/patterns': {
+    element: <UxSessionFunnelPage />,
+  },
+  '/journeys': {
+    element: <UxSessionFunnelPage />,
   },
   '/session-replay/settings': {
     element: <SessionReplaySettingsPage />,

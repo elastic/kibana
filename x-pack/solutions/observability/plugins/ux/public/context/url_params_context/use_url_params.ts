@@ -19,7 +19,7 @@ export function useLegacyUrlParams(): Assign<
   return useMemo(() => {
     return {
       ...context,
-      urlParams: omit(context.urlParams, ['environment', 'kuery']),
+      urlParams: omit(context.urlParams, ['environment']),
     };
   }, [context]);
 }

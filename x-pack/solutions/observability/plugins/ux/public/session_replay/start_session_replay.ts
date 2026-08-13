@@ -8,13 +8,22 @@
 import type { CoreStart } from '@kbn/core/public';
 import { SESSION_REPLAY_VENDOR_BUNDLE_PATH } from '../../common/session_replay_inject';
 import { fetchSessionReplaySettings } from '../services/rest/session_replay_api';
+import { sdkCaptureFromSettings } from '../../common/session_replay_settings';
+
+interface EdotUserIdentity {
+  id: string;
+  email?: string;
+  name?: string;
+}
 
 interface EdotBrowserHandle {
   sessionId?: string;
+  setUser?: (user: EdotUserIdentity) => void;
+  clearUser?: () => void;
   forceFlush?: () => Promise<void>;
 }
 
-type StartBrowserSdk = (cfg: Record<string, unknown>) => EdotBrowserHandle;
+type StartBrowserSdk = (cfg: Record<string, unknown>) => EdotBrowserHandle | undefined;
 
 interface EdotWindow extends Window {
   __edotStarted?: boolean;
@@ -72,20 +81,33 @@ export const startSessionReplay = async (core: CoreStart): Promise<void> => {
 
     const user = await getCurrentUserSafe(core);
     edotWindow.__edotStarted = true;
-    edotWindow.edotBrowser = edotWindow.startBrowserSdk({
+    const capture = sdkCaptureFromSettings(settings);
+    const handle = edotWindow.startBrowserSdk({
       serviceName: settings.serviceName,
       otlpEndpoint: settings.otlpEndpoint,
       resourceAttributes: {
         'deployment.environment': 'kibana',
-        ...(user?.username ? { 'user.name': user.username } : {}),
-        ...(user?.email ? { 'user.email': user.email } : {}),
       },
+      capture,
       replay: {
         enabled: true,
         samplingRate: settings.sampleRate,
         errorSamplingRate: 100,
+        ...(settings.maskTextSelector
+          ? { privacy: { maskAllInputs: true, maskTextSelector: settings.maskTextSelector } }
+          : {}),
       },
     });
+    if (handle) {
+      if (user?.username) {
+        handle.setUser?.({
+          id: user.username,
+          email: user.email,
+          name: user.username,
+        });
+      }
+      edotWindow.edotBrowser = handle;
+    }
   } catch {
     // Best-effort: replay must never break Kibana. Reset the guard so a later
     // navigation can retry loading the SDK.

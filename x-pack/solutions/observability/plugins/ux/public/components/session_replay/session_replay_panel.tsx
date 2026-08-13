@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFilterButton,
@@ -42,6 +43,7 @@ import type {
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplaySessions } from '../../services/rest/session_replay_api';
+import { mergeRumSearch } from '../../utils/rum_search';
 import {
   SessionReplayInjectButton,
   SessionReplayInjectFlyout,
@@ -54,11 +56,13 @@ import {
   formatDurationMs,
   formatRelativeTime,
   formatTime,
+  userDisplayName,
 } from './session_ui';
 
 const EMPTY_FACETS: SessionListFacets = {
   browsers: [],
   os: [],
+  users: [],
   hasReplay: 0,
   hasErrors: 0,
   hasRage: 0,
@@ -245,7 +249,23 @@ export function SessionReplayPanel() {
   const { http } = useKibanaServices();
   const history = useHistory();
   const {
-    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', serviceName },
+    urlParams: {
+      rangeFrom = 'now-24h',
+      rangeTo = 'now',
+      serviceName,
+      browser: urlBrowser,
+      os: urlOs,
+      pageUrl,
+      errorGroup,
+      sessionIds,
+      frustration,
+      user: urlUser,
+      includeBots,
+      kuery,
+      breakpoint,
+      connection,
+      device,
+    },
   } = useLegacyUrlParams();
 
   const [sessions, setSessions] = useState<RumSessionSummary[]>([]);
@@ -304,10 +324,20 @@ export function SessionReplayPanel() {
         hasReplay: onlyReplay || undefined,
         hasErrors: onlyErrors || undefined,
         hasRage: onlyRage || undefined,
-        browser,
-        os,
+        browser: urlBrowser || browser,
+        os: urlOs || os,
+        pageUrl,
+        errorGroup,
+        sessionIds,
+        frustration,
         minDurationMs: duration.min,
         maxDurationMs: duration.max,
+        user: urlUser,
+        includeBots,
+        kuery,
+        breakpoint,
+        connection,
+        device,
       });
       setSessions(result.sessions);
       setTotal(result.total);
@@ -336,6 +366,18 @@ export function SessionReplayPanel() {
     browser,
     os,
     duration,
+    urlBrowser,
+    urlOs,
+    pageUrl,
+    errorGroup,
+    sessionIds,
+    frustration,
+    urlUser,
+    includeBots,
+    kuery,
+    breakpoint,
+    connection,
+    device,
   ]);
 
   useEffect(() => {
@@ -378,14 +420,50 @@ export function SessionReplayPanel() {
     [sortField, sortDirection]
   );
 
+  const setUserFilter = useCallback(
+    (next?: string) => {
+      setPageIndex(0);
+      history.push({
+        ...history.location,
+        search: mergeRumSearch(history.location.search, { user: next ?? '' }),
+      });
+    },
+    [history]
+  );
+
+  const toggleIncludeBots = useCallback(() => {
+    setPageIndex(0);
+    history.push({
+      ...history.location,
+      search: mergeRumSearch(history.location.search, {
+        includeBots: includeBots === 'true' ? '' : 'true',
+      }),
+    });
+  }, [history, includeBots]);
+
+  const userFacetOptions = useMemo(() => {
+    const options = facets.users.map((bucket) => ({ key: bucket.key, count: bucket.count }));
+    if (urlUser && !options.some((option) => option.key === urlUser)) {
+      return [{ key: urlUser }, ...options];
+    }
+    return options;
+  }, [facets.users, urlUser]);
+
   const columns: Array<EuiBasicTableColumn<RumSessionSummary>> = [
     {
       field: 'user',
       name: i18n.translate('xpack.ux.sessions.table.user', { defaultMessage: 'User' }),
       width: '210px',
-      render: (_: RumSessionSummary['user'], item) => (
-        <UserCell user={item.user} client={item.client} onOpen={() => openDetail(item.sessionId)} />
-      ),
+      render: (_: RumSessionSummary['user'], item) => {
+        const userKey = userDisplayName(item.user);
+        return (
+          <UserCell
+            user={item.user}
+            client={item.client}
+            onOpen={userKey ? () => setUserFilter(userKey) : undefined}
+          />
+        );
+      },
     },
     {
       field: 'pagePath',
@@ -505,6 +583,8 @@ export function SessionReplayPanel() {
     },
   ];
 
+  const includeBotsActive = includeBots === 'true';
+
   const anyFilterActive =
     onlyReplay ||
     onlyErrors ||
@@ -512,7 +592,15 @@ export function SessionReplayPanel() {
     Boolean(browser) ||
     Boolean(os) ||
     durationKey !== 'any' ||
-    Boolean(search);
+    Boolean(search) ||
+    Boolean(pageUrl) ||
+    Boolean(errorGroup) ||
+    Boolean(sessionIds) ||
+    Boolean(frustration) ||
+    Boolean(urlUser) ||
+    Boolean(urlBrowser) ||
+    Boolean(urlOs) ||
+    includeBotsActive;
 
   const clearFilters = useCallback(() => {
     setOnlyReplay(false);
@@ -524,7 +612,20 @@ export function SessionReplayPanel() {
     setSearchInput('');
     setSearch('');
     setPageIndex(0);
-  }, []);
+    history.push({
+      ...history.location,
+      search: mergeRumSearch(history.location.search, {
+        frustration: '',
+        pageUrl: '',
+        errorGroup: '',
+        sessionIds: '',
+        browser: '',
+        os: '',
+        user: '',
+        includeBots: '',
+      }),
+    });
+  }, [history]);
 
   const [injectOpen, setInjectOpen] = useState(false);
 
@@ -535,6 +636,56 @@ export function SessionReplayPanel() {
   return (
     <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
       {injectOpen && <SessionReplayInjectFlyout http={http} onClose={() => setInjectOpen(false)} />}
+      {(pageUrl || errorGroup || sessionIds || frustration || urlUser) && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            iconType="filter"
+            title={i18n.translate('xpack.ux.sessions.deepLinkTitle', {
+              defaultMessage: 'Filtered from another view',
+            })}
+          >
+            <p>
+              {[
+                pageUrl
+                  ? i18n.translate('xpack.ux.sessions.deepLink.page', {
+                      defaultMessage: 'Page: {page}',
+                      values: { page: pageUrl },
+                    })
+                  : null,
+                errorGroup
+                  ? i18n.translate('xpack.ux.sessions.deepLink.error', {
+                      defaultMessage: 'Error group: {group}',
+                      values: { group: errorGroup },
+                    })
+                  : null,
+                frustration
+                  ? i18n.translate('xpack.ux.sessions.deepLink.frustration', {
+                      defaultMessage: 'Frustration: {kind}',
+                      values: { kind: frustration },
+                    })
+                  : null,
+                urlUser
+                  ? i18n.translate('xpack.ux.sessions.deepLink.user', {
+                      defaultMessage: 'User: {user}',
+                      values: { user: urlUser },
+                    })
+                  : null,
+                sessionIds
+                  ? i18n.translate('xpack.ux.sessions.deepLink.ids', {
+                      defaultMessage: '{count} linked sessions',
+                      values: { count: sessionIds.split(',').filter(Boolean).length },
+                    })
+                  : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <SessionReplayInjectButton onClick={() => setInjectOpen(true)} />
@@ -620,16 +771,35 @@ export function SessionReplayPanel() {
                 defaultMessage: 'Browser',
               })}
               options={facets.browsers.map((bucket) => ({ key: bucket.key, count: bucket.count }))}
-              value={browser}
+              value={urlBrowser || browser}
               searchable
-              onChange={(next) => resetPage(() => setBrowser(next))}
+              onChange={(next) => {
+                resetPage(() => setBrowser(next));
+                history.push({
+                  ...history.location,
+                  search: mergeRumSearch(history.location.search, { browser: next ?? '' }),
+                });
+              }}
             />
             <FacetSelect
               label={i18n.translate('xpack.ux.sessions.filter.os', { defaultMessage: 'OS' })}
               options={facets.os.map((bucket) => ({ key: bucket.key, count: bucket.count }))}
-              value={os}
+              value={urlOs || os}
               searchable
-              onChange={(next) => resetPage(() => setOs(next))}
+              onChange={(next) => {
+                resetPage(() => setOs(next));
+                history.push({
+                  ...history.location,
+                  search: mergeRumSearch(history.location.search, { os: next ?? '' }),
+                });
+              }}
+            />
+            <FacetSelect
+              label={i18n.translate('xpack.ux.sessions.filter.user', { defaultMessage: 'User' })}
+              options={userFacetOptions}
+              value={urlUser}
+              searchable
+              onChange={setUserFilter}
             />
             <FacetSelect
               label={i18n.translate('xpack.ux.sessions.filter.duration', {
@@ -642,6 +812,15 @@ export function SessionReplayPanel() {
               value={durationKey === 'any' ? undefined : durationKey}
               onChange={(next) => resetPage(() => setDurationKey(next ?? 'any'))}
             />
+            <EuiFilterButton
+              hasActiveFilters={includeBotsActive}
+              onClick={toggleIncludeBots}
+              data-test-subj="uxSessionFilterIncludeBots"
+            >
+              {i18n.translate('xpack.ux.sessions.filter.includeBots', {
+                defaultMessage: 'Include bots',
+              })}
+            </EuiFilterButton>
           </EuiFilterGroup>
         </EuiFlexItem>
         {anyFilterActive && (

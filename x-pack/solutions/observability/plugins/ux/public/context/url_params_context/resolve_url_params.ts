@@ -33,6 +33,16 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     environment,
     searchTerm,
     percentile,
+    frustration,
+    pageUrl,
+    errorGroup,
+    sessionIds,
+    user,
+    includeBots,
+    kuery,
+    breakpoint,
+    connection,
+    device,
   } = query;
 
   const localUIFilters = pickKeys(query, ...uxLocalUIFilterNames);
@@ -53,6 +63,16 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     pageSize: pageSize ? toNumber(pageSize) : undefined,
     searchTerm: toString(searchTerm),
     percentile: toNumber(percentile),
+    frustration: toString(frustration),
+    pageUrl: toString(pageUrl),
+    errorGroup: toString(errorGroup),
+    sessionIds: toString(sessionIds),
+    user: toString(user),
+    includeBots: toString(includeBots),
+    kuery: toString(kuery),
+    breakpoint: toString(breakpoint),
+    connection: toString(connection),
+    device: toString(device),
 
     ...localUIFilters,
   });

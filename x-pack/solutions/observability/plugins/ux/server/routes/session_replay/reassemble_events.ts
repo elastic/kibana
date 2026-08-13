@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { inflateSync } from 'zlib';
+
 export interface ReplayEventHitSource {
   body?: string | { text?: string } | null;
   attributes?: Record<string, unknown>;
@@ -14,6 +16,7 @@ export interface ReplayEventHitSource {
 interface ChunkEntry {
   total: number;
   parts: Array<string | undefined>;
+  packed: boolean;
 }
 
 const getAttrNumber = (
@@ -70,6 +73,7 @@ export const reassembleReplayEvents = (hits: ReplayEventHitSource[]): unknown[] 
 
     const chunk = getAttrNumber(attrs, 'rr-web.chunk', ['rr-web', 'chunk']) ?? 1;
     const total = getAttrNumber(attrs, 'rr-web.total-chunks', ['rr-web', 'total-chunks']) ?? 1;
+    const packed = (getAttrNumber(attrs, 'rrweb.packed', ['rrweb', 'packed']) ?? 0) === 1;
     const bodyText = getBodyText(hit.body);
     if (bodyText == null) {
       continue;
@@ -77,9 +81,10 @@ export const reassembleReplayEvents = (hits: ReplayEventHitSource[]): unknown[] 
 
     let entry = chunks.get(eventKey);
     if (!entry) {
-      entry = { total, parts: [] };
+      entry = { total, parts: [], packed };
       chunks.set(eventKey, entry);
     }
+    entry.packed = entry.packed || packed;
     entry.parts[chunk - 1] = bodyText;
   }
 
@@ -92,11 +97,23 @@ export const reassembleReplayEvents = (hits: ReplayEventHitSource[]): unknown[] 
       continue;
     }
     try {
-      events.push(JSON.parse(filled.join('')));
+      events.push(unpackReplayPayload(JSON.parse(filled.join('')), entry.packed));
     } catch {
       // skip malformed payloads
     }
   }
 
   return events;
+};
+
+/** Undo rrweb `@rrweb/packer` payloads (`fflate` zlib as a latin1 string). */
+export const unpackReplayPayload = (parsed: unknown, packed: boolean): unknown => {
+  if (!packed || typeof parsed !== 'string') {
+    return parsed;
+  }
+  try {
+    return JSON.parse(inflateSync(Buffer.from(parsed, 'latin1')).toString('utf8'));
+  } catch {
+    return parsed;
+  }
 };

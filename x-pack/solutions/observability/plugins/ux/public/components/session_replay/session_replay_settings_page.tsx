@@ -21,14 +21,21 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import {
   DEFAULT_SESSION_REPLAY_SETTINGS,
+  IGNORE_URLS_MAX_LENGTH,
+  MASK_TEXT_SELECTOR_MAX_LENGTH,
   OTLP_ENDPOINT_MAX_LENGTH,
   SERVICE_NAME_MAX_LENGTH,
+  URL_GROUPING_DEPTH_MAX,
+  URL_GROUPING_DEPTH_MIN,
+  URL_GROUPING_RULES_MAX_LENGTH,
   normalizeSessionReplaySettings,
   type SessionReplaySettings,
 } from '../../../common/session_replay_settings';
@@ -52,7 +59,7 @@ export function SessionReplaySettingsPage() {
     },
     {
       text: i18n.translate('xpack.ux.breadcrumbs.sessionReplay', {
-        defaultMessage: 'Session Replay',
+        defaultMessage: 'Sessions',
       }),
       href: http.basePath.prepend('/app/ux/session-replay'),
       onClick: (e: React.MouseEvent) => {
@@ -249,6 +256,111 @@ export function SessionReplaySettingsPage() {
                     setSettings((s) => ({ ...s, sampleRate: Number(e.target.value) }))
                   }
                   data-test-subj="uxSessionReplaySampleRateField"
+                />
+              </EuiFormRow>
+
+              <EuiSpacer size="l" />
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate('xpack.ux.sessionReplaySettings.capturePolicyTitle', {
+                    defaultMessage: 'Capture policy',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
+                <p>
+                  {i18n.translate('xpack.ux.sessionReplaySettings.capturePolicyHelp', {
+                    defaultMessage:
+                      'Applied to the inject snippet and to Kibana auto-capture. URL grouping is also applied when aggregating Pages and Journeys.',
+                  })}
+                </p>
+              </EuiText>
+              <EuiSpacer size="m" />
+
+              <EuiFormRow
+                label={i18n.translate('xpack.ux.sessionReplaySettings.ignoreUrlsLabel', {
+                  defaultMessage: 'Ignore URLs',
+                })}
+                helpText={i18n.translate('xpack.ux.sessionReplaySettings.ignoreUrlsHelp', {
+                  defaultMessage:
+                    'One substring or pattern per line. Matching fetch/XHR/document URLs are not captured.',
+                })}
+              >
+                <EuiTextArea
+                  value={settings.ignoreUrls}
+                  maxLength={IGNORE_URLS_MAX_LENGTH}
+                  onChange={(e) => setSettings((s) => ({ ...s, ignoreUrls: e.target.value }))}
+                  data-test-subj="uxSessionReplayIgnoreUrlsField"
+                  rows={3}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={i18n.translate('xpack.ux.sessionReplaySettings.groupingDepthLabel', {
+                  defaultMessage: 'URL grouping depth',
+                })}
+                helpText={i18n.translate('xpack.ux.sessionReplaySettings.groupingDepthHelp', {
+                  defaultMessage:
+                    'Path segments after this depth collapse to /*. IDs are replaced with :id.',
+                })}
+              >
+                <EuiFieldNumber
+                  value={settings.urlGroupingDepth}
+                  min={URL_GROUPING_DEPTH_MIN}
+                  max={URL_GROUPING_DEPTH_MAX}
+                  onChange={(e) =>
+                    setSettings((s) => ({ ...s, urlGroupingDepth: Number(e.target.value) }))
+                  }
+                  data-test-subj="uxSessionReplayGroupingDepthField"
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={i18n.translate('xpack.ux.sessionReplaySettings.groupingRulesLabel', {
+                  defaultMessage: 'URL grouping rules',
+                })}
+                helpText={i18n.translate('xpack.ux.sessionReplaySettings.groupingRulesHelp', {
+                  defaultMessage: 'One glob per line, for example /user/*.',
+                })}
+              >
+                <EuiTextArea
+                  value={settings.urlGroupingRules}
+                  maxLength={URL_GROUPING_RULES_MAX_LENGTH}
+                  onChange={(e) => setSettings((s) => ({ ...s, urlGroupingRules: e.target.value }))}
+                  data-test-subj="uxSessionReplayGroupingRulesField"
+                  rows={3}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={i18n.translate('xpack.ux.sessionReplaySettings.maskSelectorLabel', {
+                  defaultMessage: 'Mask text selector',
+                })}
+                helpText={i18n.translate('xpack.ux.sessionReplaySettings.maskSelectorHelp', {
+                  defaultMessage: 'CSS selector whose text is masked in session replay.',
+                })}
+              >
+                <EuiFieldText
+                  fullWidth
+                  value={settings.maskTextSelector}
+                  maxLength={MASK_TEXT_SELECTOR_MAX_LENGTH}
+                  onChange={(e) => setSettings((s) => ({ ...s, maskTextSelector: e.target.value }))}
+                  data-test-subj="uxSessionReplayMaskSelectorField"
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={i18n.translate('xpack.ux.sessionReplaySettings.graphqlLabel', {
+                  defaultMessage: 'GraphQL operation names',
+                })}
+              >
+                <EuiSwitch
+                  label={i18n.translate('xpack.ux.sessionReplaySettings.graphqlSwitch', {
+                    defaultMessage: 'Read operation names from fetch/XHR bodies and headers',
+                  })}
+                  checked={settings.captureGraphql}
+                  onChange={(e) => setSettings((s) => ({ ...s, captureGraphql: e.target.checked }))}
+                  data-test-subj="uxSessionReplayGraphqlSwitch"
                 />
               </EuiFormRow>
 

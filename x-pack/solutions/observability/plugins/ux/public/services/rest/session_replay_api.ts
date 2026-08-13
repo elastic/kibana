@@ -13,6 +13,8 @@ import type {
   SessionSortDirection,
   SessionSortField,
 } from '../../../common/session_replay';
+import type { FunnelStepDef, SessionFunnelResponse } from '../../../common/session_funnel';
+import type { SessionPatternsResponse } from '../../../common/session_patterns';
 import {
   SESSION_REPLAY_SETTINGS_API,
   type SessionReplaySettings,
@@ -31,10 +33,21 @@ export interface FetchSessionsParams {
   hasReplay?: boolean;
   hasErrors?: boolean;
   hasRage?: boolean;
+  hasDead?: boolean;
   browser?: string;
   os?: string;
+  pageUrl?: string;
+  errorGroup?: string;
+  sessionIds?: string;
+  frustration?: string;
   minDurationMs?: number;
   maxDurationMs?: number;
+  user?: string;
+  includeBots?: string;
+  kuery?: string;
+  breakpoint?: string;
+  connection?: string;
+  device?: string;
 }
 
 export const fetchSessionReplaySessions = async ({
@@ -50,10 +63,21 @@ export const fetchSessionReplaySessions = async ({
   hasReplay,
   hasErrors,
   hasRage,
+  hasDead,
   browser,
   os,
+  pageUrl,
+  errorGroup,
+  sessionIds,
+  frustration,
   minDurationMs,
   maxDurationMs,
+  user,
+  includeBots,
+  kuery,
+  breakpoint,
+  connection,
+  device,
 }: FetchSessionsParams): Promise<SessionListResponse> => {
   return http.get<SessionListResponse>('/internal/ux/session_replay/sessions', {
     query: {
@@ -68,10 +92,21 @@ export const fetchSessionReplaySessions = async ({
       ...(hasReplay ? { hasReplay: 'true' } : {}),
       ...(hasErrors ? { hasErrors: 'true' } : {}),
       ...(hasRage ? { hasRage: 'true' } : {}),
+      ...(hasDead ? { hasDead: 'true' } : {}),
       ...(browser ? { browser } : {}),
       ...(os ? { os } : {}),
+      ...(pageUrl ? { pageUrl } : {}),
+      ...(errorGroup ? { errorGroup } : {}),
+      ...(sessionIds ? { sessionIds } : {}),
+      ...(frustration ? { frustration } : {}),
       ...(minDurationMs != null ? { minDurationMs: String(minDurationMs) } : {}),
       ...(maxDurationMs != null ? { maxDurationMs: String(maxDurationMs) } : {}),
+      ...(user ? { user } : {}),
+      ...(includeBots ? { includeBots } : {}),
+      ...(kuery ? { kuery } : {}),
+      ...(breakpoint ? { breakpoint } : {}),
+      ...(connection ? { connection } : {}),
+      ...(device ? { device } : {}),
     },
   });
 };
@@ -98,6 +133,55 @@ export const fetchSessionReplayEvents = async ({
   return http.get<SessionReplayEventsResponse>(
     `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}/events`
   );
+};
+
+export const fetchSessionFunnel = async ({
+  http,
+  rangeFrom,
+  rangeTo,
+  serviceName,
+  steps,
+  kuery,
+}: {
+  http: HttpStart;
+  rangeFrom: string;
+  rangeTo: string;
+  serviceName?: string;
+  steps: FunnelStepDef[];
+  kuery?: string;
+}): Promise<SessionFunnelResponse> => {
+  return http.post<SessionFunnelResponse>('/internal/ux/session_replay/funnel', {
+    body: JSON.stringify({
+      rangeFrom,
+      rangeTo,
+      serviceName: serviceName || undefined,
+      steps,
+      ...(kuery ? { kuery } : {}),
+    }),
+  });
+};
+
+export const fetchSessionPatterns = async ({
+  http,
+  rangeFrom,
+  rangeTo,
+  serviceName,
+  kuery,
+}: {
+  http: HttpStart;
+  rangeFrom: string;
+  rangeTo: string;
+  serviceName?: string;
+  kuery?: string;
+}): Promise<SessionPatternsResponse> => {
+  return http.get<SessionPatternsResponse>('/internal/ux/session_replay/patterns', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      ...(serviceName ? { serviceName } : {}),
+      ...(kuery ? { kuery } : {}),
+    },
+  });
 };
 
 export const fetchSessionReplaySettings = async ({

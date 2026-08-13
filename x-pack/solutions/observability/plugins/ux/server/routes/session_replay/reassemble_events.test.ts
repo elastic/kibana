@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { deflateSync } from 'zlib';
 import { reassembleReplayEvents } from './reassemble_events';
 
 describe('reassembleReplayEvents', () => {
@@ -91,5 +92,26 @@ describe('reassembleReplayEvents', () => {
     ]);
 
     expect(events).toEqual([{ type: 4, timestamp: 10 }]);
+  });
+});
+
+describe('packed replay events', () => {
+  it('inflates rrweb packer payloads', () => {
+    const event = { type: 2, timestamp: 1, data: { packed: true } };
+    const packed = deflateSync(Buffer.from(JSON.stringify(event), 'utf8')).toString('latin1');
+
+    const events = reassembleReplayEvents([
+      {
+        body: JSON.stringify(packed),
+        attributes: {
+          'rr-web.event': 1,
+          'rr-web.chunk': 1,
+          'rr-web.total-chunks': 1,
+          'rrweb.packed': 1,
+        },
+      },
+    ]);
+
+    expect(events).toEqual([event]);
   });
 });

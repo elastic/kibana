@@ -12,7 +12,7 @@ describe('UX_BREADCRUMBS', () => {
     expect(UX_BREADCRUMBS.every((crumb) => crumb.href === undefined)).toBe(true);
   });
 
-  it('ends on the dashboard crumb', () => {
-    expect(UX_BREADCRUMBS.at(-1)?.text).toEqual('Dashboard');
+  it('ends on the overview crumb', () => {
+    expect(UX_BREADCRUMBS.at(-1)?.text).toEqual('Overview');
   });
 });

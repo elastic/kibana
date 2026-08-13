@@ -30,7 +30,12 @@ import {
   buildSessionReplayInjectSnippet,
   SESSION_REPLAY_VENDOR_BUNDLE_PATH,
 } from '../../../common/session_replay_inject';
-import { SERVICE_NAME_MAX_LENGTH } from '../../../common/session_replay_settings';
+import {
+  DEFAULT_SESSION_REPLAY_SETTINGS,
+  SERVICE_NAME_MAX_LENGTH,
+  sdkCaptureFromSettings,
+  type SessionReplaySettings,
+} from '../../../common/session_replay_settings';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplaySettings } from '../../services/rest/session_replay_api';
 
@@ -43,6 +48,7 @@ export function SessionReplayInjectFlyout({ http, onClose }: Props) {
   const { notifications } = useKibanaServices();
   const [otlpEndpoint, setOtlpEndpoint] = useState('');
   const [serviceName, setServiceName] = useState('');
+  const [settings, setSettings] = useState<SessionReplaySettings>(DEFAULT_SESSION_REPLAY_SETTINGS);
   const [agentSource, setAgentSource] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -55,7 +61,7 @@ export function SessionReplayInjectFlyout({ http, onClose }: Props) {
       setLoadError(null);
       try {
         const agentUrl = http.basePath.prepend(SESSION_REPLAY_VENDOR_BUNDLE_PATH);
-        const [settings, agentRes] = await Promise.all([
+        const [saved, agentRes] = await Promise.all([
           fetchSessionReplaySettings({ http }),
           fetch(agentUrl),
         ]);
@@ -67,7 +73,8 @@ export function SessionReplayInjectFlyout({ http, onClose }: Props) {
           throw new Error('Session replay agent bundle is invalid');
         }
         if (!cancelled) {
-          setOtlpEndpoint(settings.otlpEndpoint);
+          setOtlpEndpoint(saved.otlpEndpoint);
+          setSettings(saved);
           setAgentSource(source);
         }
       } catch (err) {
@@ -85,6 +92,8 @@ export function SessionReplayInjectFlyout({ http, onClose }: Props) {
     };
   }, [http]);
 
+  const capture = sdkCaptureFromSettings(settings);
+
   const snippet = useMemo(
     () =>
       agentSource
@@ -92,9 +101,22 @@ export function SessionReplayInjectFlyout({ http, onClose }: Props) {
             agentSource,
             otlpEndpoint,
             serviceName: serviceName.trim(),
+            ignoreUrls: capture.ignoreUrls,
+            urlGroupingDepth: capture.urlGrouping.depth,
+            urlGroupingRules: capture.urlGrouping.rules,
+            maskTextSelector: settings.maskTextSelector,
+            captureGraphql: capture.graphql,
+            sampleRate: settings.sampleRate,
           })
         : '',
-    [agentSource, otlpEndpoint, serviceName]
+    [
+      agentSource,
+      otlpEndpoint,
+      serviceName,
+      capture,
+      settings.maskTextSelector,
+      settings.sampleRate,
+    ]
   );
 
   const preview = useMemo(
@@ -102,8 +124,14 @@ export function SessionReplayInjectFlyout({ http, onClose }: Props) {
       buildSessionReplayInjectPreview({
         otlpEndpoint,
         serviceName: serviceName.trim(),
+        ignoreUrls: capture.ignoreUrls,
+        urlGroupingDepth: capture.urlGrouping.depth,
+        urlGroupingRules: capture.urlGrouping.rules,
+        maskTextSelector: settings.maskTextSelector,
+        captureGraphql: capture.graphql,
+        sampleRate: settings.sampleRate,
       }),
-    [otlpEndpoint, serviceName]
+    [otlpEndpoint, serviceName, capture, settings.maskTextSelector, settings.sampleRate]
   );
 
   const missingEndpoint = !loading && otlpEndpoint.trim().length === 0;
@@ -216,9 +244,12 @@ export function SessionReplayInjectFlyout({ http, onClose }: Props) {
             >
               <EuiFieldText
                 fullWidth
-                placeholder={i18n.translate('xpack.ux.sessions.injectFlyoutServiceNamePlaceholder', {
-                  defaultMessage: 'my-app',
-                })}
+                placeholder={i18n.translate(
+                  'xpack.ux.sessions.injectFlyoutServiceNamePlaceholder',
+                  {
+                    defaultMessage: 'my-app',
+                  }
+                )}
                 value={serviceName}
                 maxLength={SERVICE_NAME_MAX_LENGTH}
                 onChange={(e) => setServiceName(e.target.value)}

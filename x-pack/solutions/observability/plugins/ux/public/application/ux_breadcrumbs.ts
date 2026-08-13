@@ -18,7 +18,7 @@ export const UX_BREADCRUMBS: ChromeBreadcrumb[] = [
   },
   {
     text: i18n.translate('xpack.ux.breadcrumbs.dashboard', {
-      defaultMessage: 'Dashboard',
+      defaultMessage: 'Overview',
     }),
   },
 ];
