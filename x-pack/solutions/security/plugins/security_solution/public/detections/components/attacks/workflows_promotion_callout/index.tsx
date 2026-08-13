@@ -6,7 +6,16 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 
 import {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
@@ -107,7 +116,6 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
     <>
       <EuiCallOut
         color="primary"
-        title={i18n.CALLOUT_TITLE}
         data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_TEST_ID}
         onDismiss={onDismiss}
         dismissButtonProps={{
@@ -115,8 +123,18 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
           'data-test-subj': WORKFLOWS_PROMOTION_CALLOUT_DISMISS_TEST_ID,
         }}
       >
+        {/* EUI 116 (9.5) does not auto-render the color icon or vertically center
+            the action, so the icon, title, text, and action are laid out manually
+            to match the `KbnInfoCallout` appearance used on `main`. */}
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="info" size="l" color="primary" aria-hidden={true} />
+          </EuiFlexItem>
           <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h2>{i18n.CALLOUT_TITLE}</h2>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
             {canSaveAdvancedSettings ? (
               <EuiText size="s">
                 <p>{i18n.CALLOUT_DESCRIPTION}</p>
