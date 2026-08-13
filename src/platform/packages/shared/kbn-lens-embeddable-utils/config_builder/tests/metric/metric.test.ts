@@ -129,6 +129,41 @@ describe('Metric', () => {
         background_chart: { type: 'trend' },
       });
     });
+
+    it('uses an aliased TBUCKET result column for a TS metric trendline', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'TS metrics-* | STATS avg_cpu = AVG(AVG_OVER_TIME(cpu)) BY custom_time_bucket = TBUCKET(100)';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'TS metric with aliased TBUCKET trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'avg_cpu',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(query);
+      expect(trendlineLayer?.query?.esql).not.toContain('BUCKET(@timestamp');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('custom_time_bucket');
+    });
   });
 
   describe('form-based trendline breakdown ordering', () => {
