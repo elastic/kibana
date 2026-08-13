@@ -34,7 +34,6 @@ describe('project watch', () => {
         consts: {
           watch_policy: {
             mandate: 'Deep investigation & hunts',
-            autonomyLevel: 3,
             handoff: 'records',
             ui: { color: '#8b5cf6', icon: 'console', order: 40 },
           },
@@ -44,7 +43,6 @@ describe('project watch', () => {
 
       expect(extractWatchPolicy(definition)).toMatchObject({
         mandate: 'Deep investigation & hunts',
-        autonomyLevel: 3,
         handoff: 'records',
         ui: { color: '#8b5cf6', icon: 'console', order: 40 },
       });

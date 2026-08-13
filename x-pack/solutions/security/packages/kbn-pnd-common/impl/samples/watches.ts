@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+/**
+ * Default values the server's watch store is seeded from on first access.
+ *
+ * These are defaults only — the store owns runtime state, so nothing outside the store should read
+ * this array. Toggling a watch off mutates the store, not these constants.
+ */
+
 import {
-  SYSTEM_SECURITY_WATCH_DARK_ID,
-  SYSTEM_SECURITY_WATCH_DEEP_ID,
-  SYSTEM_SECURITY_WATCH_DETECTION_ID,
-  SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  SYSTEM_SECURITY_WATCH_CATALOG,
   WATCH_DARK_TAG,
   WATCH_DEEP_TAG,
   WATCH_DETECTION_TAG,
@@ -20,11 +23,28 @@ import {
 } from '../../constants';
 import type { Watch } from '../schemas/components/watch.gen';
 
+/**
+ * Identity, name, accent colour and lifecycle come from the shared catalog constant so the seed, the
+ * app's deep links and the solution navigation tree cannot disagree about them.
+ */
+const catalogEntry = (deepLinkId: string): Pick<Watch, 'id' | 'name' | 'color' | 'lifecycle'> => {
+  const entry = SYSTEM_SECURITY_WATCH_CATALOG.find(
+    (candidate) => candidate.deepLinkId === deepLinkId
+  );
+  if (!entry) {
+    throw new Error(`No managed watch catalog entry for "${deepLinkId}"`);
+  }
+  return {
+    id: entry.id,
+    name: entry.name,
+    color: entry.color,
+    ...('isBeta' in entry && entry.isBeta ? { lifecycle: 'beta' as const } : {}),
+  };
+};
+
 const floorWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
-  name: 'Watch Floor',
+  ...catalogEntry('watch_floor'),
   tags: [WATCH_TAG, WATCH_FLOOR_TAG],
-  color: '#16b3a6',
   icon: 'alert',
   enabled: true,
   draft: false,
@@ -51,7 +71,9 @@ const floorWatchBase: Watch = {
   scopeSummary: 'Security indices · APM · logs',
   scopes: [
     { name: 'Security indices', access: 'full', label: 'Read' },
-    { name: 'APM · logs · SLOs', access: 'full', label: 'Read' },
+    { name: 'APM', access: 'full', label: 'Read' },
+    { name: 'logs', access: 'full', label: 'Read' },
+    { name: 'SLOs', access: 'full', label: 'Read' },
     { name: 'Finance PII', access: 'masked', label: 'Masked' },
   ],
   callables: [
@@ -65,7 +87,6 @@ const floorWatchBase: Watch = {
       lastRun: '2026-07-20T14:02:00Z',
     },
   ],
-  autonomyLevel: 3,
   metrics: {
     runs7d: 847,
     acceptedPct: 91,
@@ -98,10 +119,8 @@ const floorWatchBase: Watch = {
 };
 
 const officerWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
-  name: 'Watch Officer',
+  ...catalogEntry('watch_officer'),
   tags: [WATCH_TAG, WATCH_OFFICER_TAG],
-  color: '#3b82f6',
   icon: 'bell',
   enabled: true,
   draft: false,
@@ -129,7 +148,6 @@ const officerWatchBase: Watch = {
     { name: 'Deploy history', access: 'full', label: 'Read' },
   ],
   callables: [],
-  autonomyLevel: 4,
   metrics: {
     runs7d: 23,
     acceptedPct: 78,
@@ -153,10 +171,8 @@ const officerWatchBase: Watch = {
 };
 
 const darkWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_DARK_ID,
-  name: 'Dark Watch',
+  ...catalogEntry('watch_dark'),
   tags: [WATCH_TAG, WATCH_DARK_TAG],
-  color: '#f59e0b',
   icon: 'bolt',
   enabled: true,
   draft: false,
@@ -190,7 +206,6 @@ const darkWatchBase: Watch = {
     { name: 'Customer data', access: 'denied', label: 'No access' },
   ],
   callables: [],
-  autonomyLevel: 2,
   metrics: {
     runs7d: 56,
     acceptedPct: 65,
@@ -211,10 +226,8 @@ const darkWatchBase: Watch = {
 };
 
 const deepWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_DEEP_ID,
-  name: 'Deep Watch',
+  ...catalogEntry('watch_deep'),
   tags: [WATCH_TAG, WATCH_DEEP_TAG],
-  color: '#8b5cf6',
   icon: 'console',
   enabled: true,
   draft: false,
@@ -242,7 +255,6 @@ const deepWatchBase: Watch = {
     { name: 'DNS · netflow', access: 'full', label: 'Read' },
   ],
   callables: [],
-  autonomyLevel: 3,
   metrics: {
     runs7d: 4,
     acceptedPct: null,
@@ -263,18 +275,16 @@ const deepWatchBase: Watch = {
 };
 
 const detectionWatchBase: Watch = {
-  id: SYSTEM_SECURITY_WATCH_DETECTION_ID,
-  name: 'Detection Watch',
+  ...catalogEntry('watch_detection'),
   tags: [WATCH_TAG, WATCH_DETECTION_TAG],
-  color: '#e7664c',
-  icon: 'sparkles',
+  icon: 'crosshairs',
   enabled: true,
   draft: false,
   managed: true,
   sortOrder: 50,
-  mandate: 'Detection engineering',
+  mandate: 'Rule tuning & coverage',
   description:
-    'Dispatches to one worker per run: rule tuning on a schedule, or rule creation for a reported detection gap.',
+    'Detection Watch skeleton. Turns false-positive signals and coverage gaps into reviewable rule proposals — tuning, creation, and prebuilt onboarding.',
   schedule: {
     set: true,
     mode: 'always',
@@ -283,62 +293,43 @@ const detectionWatchBase: Watch = {
     onDemand: true,
     cadence: 'sweep',
     every: 60,
-    handoff: 'none',
+    handoff: 'records',
   },
   triggers: [
     { type: 'schedule', summary: 'Schedule · hourly' },
     { type: 'manual', summary: 'Manual / on demand' },
   ],
   coverage: [[0, 24]],
-  scopeSummary: 'Detection rules · security alerts',
+  scopeSummary: 'Detection rules · alerts · coverage gaps',
   scopes: [
-    { name: 'Detection rules', access: 'full', label: 'Read + act' },
-    { name: 'Security alerts', access: 'full', label: 'Read' },
+    { name: 'Detection rules', access: 'full', label: 'Read + propose' },
+    { name: 'Security indices', access: 'full', label: 'Read' },
+    { name: 'Customer data', access: 'denied', label: 'No access' },
   ],
-  callables: [
-    {
-      id: 'system-security-rule-tuning',
-      name: 'Rule Tuning Worker',
-      kind: 'workflow',
-      summary: 'Diagnose noisy rules and apply approved query changes',
-      gated: true,
-      enabled: true,
-      lastRun: null,
-    },
-    {
-      id: 'system-security-rule-creation',
-      name: 'Rule Creation Worker',
-      kind: 'workflow',
-      summary: 'Draft an ES|QL rule for a detection gap and create it on approval',
-      gated: true,
-      enabled: true,
-      lastRun: null,
-    },
-  ],
-  autonomyLevel: 2,
+  callables: [],
   metrics: {
-    runs7d: null,
-    acceptedPct: null,
-    timeSaved: null,
-    lastRun: null,
+    runs7d: 412,
+    acceptedPct: 83,
+    timeSaved: '15h',
+    lastRun: '2026-07-20T13:44:00Z',
   },
-  recentRuns: [],
+  recentRuns: [
+    {
+      executionId: 'exec-detection-20260720-1344',
+      startedAt: '2026-07-20T13:44:00Z',
+      status: 'completed',
+      triggerType: 'schedule',
+      steps: [{ name: 'tune_rule', type: 'ai.agent', status: 'completed' }],
+      summary: 'Exception proposal drafted · 1 rule',
+      action: 'draft',
+    },
+  ],
 };
 
-export const MOCK_MANAGED_WATCHES: Watch[] = [
+export const WATCHES_SEED: Watch[] = [
   floorWatchBase,
   officerWatchBase,
   darkWatchBase,
   deepWatchBase,
   detectionWatchBase,
 ];
-
-export const createMockWatch = (overrides: Partial<Watch> = {}): Watch => ({
-  ...floorWatchBase,
-  ...overrides,
-  schedule: { ...floorWatchBase.schedule, ...overrides.schedule },
-  metrics: { ...floorWatchBase.metrics, ...overrides.metrics },
-});
-
-export const getMockWatchById = (watchId: string): Watch | undefined =>
-  MOCK_MANAGED_WATCHES.find((watch) => watch.id === watchId);
