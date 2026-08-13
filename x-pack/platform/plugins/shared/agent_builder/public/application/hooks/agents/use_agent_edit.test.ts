@@ -80,6 +80,17 @@ describe('useAgentEdit submit (create/clone branch)', () => {
     });
   });
 
+  it('defaults a brand-new agent to private', () => {
+    const { result } = renderHook(() =>
+      useAgentEdit({ onSaveSuccess: jest.fn(), onSaveError: jest.fn() })
+    );
+
+    expect(result.current.state.access_control).toEqual({
+      access_mode: AgentAccessControlMode.Private,
+      entries: [],
+    });
+  });
+
   it('strips access control entries, created_by and avatar_icon from the create payload when cloning', async () => {
     const cloneData: AgentEditState = {
       id: 'cloned-agent',

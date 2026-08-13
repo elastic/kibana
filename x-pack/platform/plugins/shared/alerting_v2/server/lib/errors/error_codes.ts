@@ -387,6 +387,16 @@ export const ALERTING_LOG_CODES = {
    */
   RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
   /**
+   * A bulk executor-task API key rotation call (`bulkUpdateSchedules`) failed
+   * for one or more rules — e.g. the per-task-type key grant was rejected. The
+   * affected rules' keys were left unrotated (their old key still works) and
+   * are reported per-rule in the bulk response; no saved object was written,
+   * so rule and task state stay consistent (this is not
+   * `RULE_TASK_MANAGER_DRIFT`).
+   */
+  RULE_API_KEY_ROTATION_FAILED: 'RULE_API_KEY_ROTATION_FAILED',
+
+  /**
    * Scheduling a new rule's executor task failed and the compensating delete
    * of the already-persisted saved object failed too. The rule is left
    * orphaned — enabled, but with no executor task — and needs manual removal.
