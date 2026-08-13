@@ -61,7 +61,11 @@ const RESOURCE_LINK = (
         text="etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system"
         truncation="middle"
       >
-        {(truncatedText) => <EuiLink href="#">{truncatedText}</EuiLink>}
+        {(truncatedText) => (
+          <EuiLink href="#" onClick={(event) => event.preventDefault()}>
+            {truncatedText}
+          </EuiLink>
+        )}
       </EuiTextTruncate>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
