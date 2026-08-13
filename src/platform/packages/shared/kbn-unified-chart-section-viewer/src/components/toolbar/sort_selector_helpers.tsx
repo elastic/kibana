@@ -46,6 +46,7 @@ const directionOptions = [
     'data-test-subj': 'metricsExperienceSortDirectionAsc',
     label: ascendingLabel,
     toolTipContent: ascendingLabel,
+    title: '',
     ...getEbtProps({
       action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
       element: CHARTS_TOOLBAR_EBT_ELEMENT,
@@ -58,6 +59,7 @@ const directionOptions = [
     'data-test-subj': 'metricsExperienceSortDirectionDesc',
     label: descendingLabel,
     toolTipContent: descendingLabel,
+    title: '',
     ...getEbtProps({
       action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
       element: CHARTS_TOOLBAR_EBT_ELEMENT,
