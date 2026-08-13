@@ -7,8 +7,10 @@
 
 import { Builder, LeafPrinter, esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
-import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
-
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  DEFAULT_TIME_FIELD as TIME_FIELD,
+} from '@kbn/alerting-v2-constants';
 export interface EpisodeTrendRow {
   '@timestamp': string;
   'episode.status': AlertEpisodeStatus;

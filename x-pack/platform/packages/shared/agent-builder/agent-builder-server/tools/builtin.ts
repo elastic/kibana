@@ -8,14 +8,55 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { z, ZodObject } from '@kbn/zod/v4';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
+import type {
+  ToolCallWithResult,
+  ToolDefinition,
+  ToolType,
+  ToolConfirmationPolicy,
+} from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
 import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/types/index_search';
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
+import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import type { ToolHandlerFn } from './handler';
+
+/**
+ * MCP tool annotations for builtin tools exposed via the Agent Builder MCP server.
+ *
+ * All five fields are required so tool authors must make an explicit classification
+ * choice. The type is derived from the MCP SDK's ToolAnnotations to stay in sync
+ * with the spec — if the SDK renames or removes a field, TypeScript will surface
+ * the break here.
+ *
+ * Annotation guide (copy these values directly):
+ *
+ * Pure read (search, list, get):
+ *   readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false
+ *
+ * Create / upsert (non-destructive write):
+ *   readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false
+ *
+ * Delete / irreversible overwrite:
+ *   readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false
+ *
+ * Calls external API / webhook / email (combine with one of the above):
+ *   openWorldHint: true
+ *
+ * Rules:
+ * - readOnlyHint and destructiveHint must not both be true.
+ * - Read-only tools should always set idempotentHint: true.
+ *
+ * See: https://modelcontextprotocol.io/specification/2025-11-25/schema#toolannotations
+ */
+export type McpToolAnnotations = Required<
+  Pick<
+    ToolAnnotations,
+    'title' | 'readOnlyHint' | 'destructiveHint' | 'idempotentHint' | 'openWorldHint'
+  >
+>;
 
 /**
  * Information exposed to the {@link ToolAvailabilityHandler}.
@@ -70,27 +111,11 @@ export interface ToolAvailabilityConfig {
   cacheTtl?: number;
 }
 
-/**
- * Controls how often the user is prompted for confirmation when the agent calls a tool.
- *
- * - once:   prompt once per tool type for the entire conversation. After the user
- *           accepts (or rejects), all subsequent calls to the same tool reuse that
- *           response — including retries after failures.
- * - always: prompt on every individual tool call. Each invocation gets its own
- *           confirmation, even if it targets the same tool type.
- * - never:  skip confirmation entirely.
- */
-export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
-
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
-export interface ToolConfirmationPolicy<
+export interface BuiltInToolConfirmationPolicy<
   TParams extends Record<string, unknown> = Record<string, unknown>
-> {
-  /**
-   * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
-   */
-  askUser?: ToolConfirmationPolicyMode;
+> extends ToolConfirmationPolicy {
   /**
    * If set, will be used to get the confirmation
    */
@@ -115,7 +140,7 @@ export interface BuiltInToolSpecificConfig<
   /**
    * Optional tool call policy to control tool call confirmation behavior
    */
-  confirmation?: ToolConfirmationPolicy<TParams>;
+  confirmation?: BuiltInToolConfirmationPolicy<TParams>;
   /**
    * Optional function to summarize a tool return for conversation history.
    * When provided, this function will be called when processing conversation history
@@ -152,7 +177,10 @@ export type ToolReturnSummarizerFn = (
 export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   TResult extends ToolResult = ToolResult
-> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration' | 'experimental'>,
+> extends Omit<
+      ToolDefinition,
+      'type' | 'readonly' | 'configuration' | 'experimental' | 'confirmation'
+    >,
     BuiltInToolSpecificConfig<z.infer<RunInput>> {
   /**
    * built-in tool types
@@ -171,6 +199,12 @@ export interface BuiltinToolDefinition<
    * Refer to {@link ToolAvailabilityConfig}
    */
   availability?: ToolAvailabilityConfig;
+  /**
+   * MCP annotations for this tool. Required for all builtin tools exposed via the MCP server.
+   * Optional during the rollout period — will become required once all tools have been annotated.
+   * See {@link McpToolAnnotations} for the full guide.
+   */
+  annotations?: McpToolAnnotations;
 }
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &

@@ -8,6 +8,7 @@
 import type { Container } from 'inversify';
 import { AlertActionWorkflowSubscriber } from './alert_action_workflow_subscriber/alert_action_workflow_subscriber';
 import { RuleWorkflowSubscriber } from './rule_workflow_subscriber/rule_workflow_subscriber';
+import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber/rule_changes_history_subscriber';
 import { RuleExecutorWorkflowSubscriber } from './rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
 
 /**
@@ -20,5 +21,6 @@ import { RuleExecutorWorkflowSubscriber } from './rule_executor_workflow_subscri
 export function initSubscribers(container: Container): void {
   container.get(AlertActionWorkflowSubscriber).start();
   container.get(RuleWorkflowSubscriber).start();
+  container.get(RuleChangesHistorySubscriber).start();
   container.get(RuleExecutorWorkflowSubscriber).start();
 }
