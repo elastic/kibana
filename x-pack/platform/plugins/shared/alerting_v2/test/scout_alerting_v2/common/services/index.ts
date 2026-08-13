@@ -14,6 +14,9 @@ export type {
 } from './rule_changes_history_service';
 export { getRuleChangesHistoryApiService } from './rule_changes_history_service';
 
+export type { RuleTemplatesApiService, SeedRuleTemplateParams } from './rule_templates_api_service';
+export { getRuleTemplatesApiService } from './rule_templates_api_service';
+
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
