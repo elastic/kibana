@@ -91,9 +91,10 @@ export class NightshiftInvestigationsClient {
     );
 
     if (!workflow?.definition) {
-      throw new Error(
+      this.logger.error(
         `Investigation workflow "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}" is not installed in space "${spaceId}"`
       );
+      throw new Error('Investigations are not configured in this space');
     }
 
     const inputs = {
