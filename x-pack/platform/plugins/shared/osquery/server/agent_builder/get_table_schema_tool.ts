@@ -14,6 +14,7 @@ import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import type { SchemaService } from '../lib/schema_service';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
+import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const GET_TABLE_SCHEMA_TOOL_ID = osqueryTool('get_table_schema');
 
@@ -43,7 +44,11 @@ export const getTableSchemaTool = (
   schema: getTableSchemaSchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (input, { request }) => {
-    const { table_name: tableName, platform: _platform } = input;
+    const { table_name: tableName, platform } = input;
+
+    if (!(await hasOsqueryToolPrivilege(osqueryContext, request, 'read'))) {
+      return unauthorizedToolResult('read');
+    }
 
     const packageService = osqueryContext.service.getPackageService();
     const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
@@ -76,8 +81,30 @@ export const getTableSchemaTool = (
               data: {
                 table_name: tableName,
                 found: false,
-                error: `Table "${tableName}" not found in the Osquery schema. Available tables can be retrieved by omitting table_name.`,
+                error: `Table "${tableName}" not found in the Osquery schema. Pick one of available_tables below.`,
                 available_tables: osqueryTables.map((t) => t.name).sort(),
+              },
+            },
+          ],
+        };
+      }
+
+      // `platform` is advertised as narrowing the schema, so it has to actually
+      // narrow it rather than being accepted and ignored.
+      if (platform && !table.platforms?.includes(platform)) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                table_name: table.name,
+                found: false,
+                platform,
+                platforms: table.platforms,
+                error: `Table "${tableName}" is not available on ${platform}. It exists on: ${(
+                  table.platforms ?? []
+                ).join(', ')}.`,
               },
             },
           ],
@@ -93,6 +120,7 @@ export const getTableSchemaTool = (
               table_name: table.name,
               description: table.description,
               platforms: table.platforms,
+              ...(platform && { platform }),
               columns: table.columns,
               found: true,
               schema_version: schemaResponse.version,

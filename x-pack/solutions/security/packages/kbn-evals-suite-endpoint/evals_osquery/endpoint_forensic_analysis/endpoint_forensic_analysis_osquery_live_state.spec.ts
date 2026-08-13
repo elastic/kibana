@@ -11,6 +11,10 @@ import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
 import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
 import { cleanupForensicData } from '../../src/data_generators/cleanup';
+import {
+  assertOsqueryLiveQuerySupported,
+  getOsqueryLiveQueryReadiness,
+} from '../../src/data_generators/osquery_readiness';
 
 /**
  * Osquery live-state tool sequences (minimum-sufficient per golden-dataset reconciliation).
@@ -25,9 +29,9 @@ const OSQUERY_CHECK_INTEGRATION = 'osquery.check_integration' as const;
 const OSQUERY_LIST_SAVED_QUERIES = 'osquery.list_saved_queries' as const;
 const OSQUERY_LIST_PACKS = 'osquery.list_packs' as const;
 const OSQUERY_GET_TABLE_SCHEMA = 'osquery.get_table_schema' as const;
+const OSQUERY_RESOLVE_AGENT_IDS = 'osquery.resolve_agent_ids' as const;
 const OSQUERY_RUN_LIVE_QUERY = 'osquery.run_live_query' as const;
-const PLATFORM_GENERATE_ESQL = 'platform.core.generate_esql' as const;
-const PLATFORM_EXECUTE_ESQL = 'platform.core.execute_esql' as const;
+const OSQUERY_GET_LIVE_QUERY_RESULTS = 'osquery.get_live_query_results' as const;
 
 evaluate.describe(
   'Endpoint Forensic Analysis — Osquery live state',
@@ -38,6 +42,14 @@ evaluate.describe(
         await waitForEndpointPackage(kbnClient, esClient, log);
         await cleanupForensicData({ esClient, internalEsClient });
         await seedForensicTimeline({ esClient }, log);
+
+        // Defend documents alone do not make a live query executable — surface
+        // whether an Osquery-capable, online agent actually exists.
+        const readiness = await getOsqueryLiveQueryReadiness(kbnClient, log);
+        assertOsqueryLiveQuerySupported(
+          readiness,
+          'Endpoint Forensic Analysis — Osquery live state'
+        );
 
         try {
           await agentBuilderClient.converse({
@@ -53,44 +65,6 @@ evaluate.describe(
     evaluate.afterAll(async ({ esClient, internalEsClient }) => {
       await cleanupForensicData({ esClient, internalEsClient });
     });
-
-    evaluate(
-      'capability detection — Osquery not installed, falls back to ES|QL',
-      async ({ evaluateForensicDataset }) => {
-        await evaluateForensicDataset({
-          dataset: {
-            name: 'security: endpoint-forensic-analysis-osquery-capability-no-osquery',
-            description:
-              'Capability detection: agent checks Osquery integration, finds it NOT installed, routes to ES|QL fallback.',
-            examples: [
-              {
-                input: {
-                  question:
-                    'Show me all processes on WKSTN-RECV01 that have open sockets to external IPs — use whatever data source is available.',
-                },
-                output: {
-                  criteria: [
-                    'Checks whether Osquery integration is available before attempting an Osquery query',
-                    'Routes to ES|QL / Defend telemetry when Osquery is not installed (graceful degradation)',
-                    'Does NOT attempt osquery.run_live_query when the integration is absent',
-                    'Returns a structured answer with the data source it actually used cited',
-                  ],
-                  tool_sequence: [
-                    OSQUERY_CHECK_INTEGRATION,
-                    PLATFORM_GENERATE_ESQL,
-                    PLATFORM_EXECUTE_ESQL,
-                  ],
-                },
-                metadata: {
-                  golden_id: 'ef-016-capability-no-osquery-fallback',
-                  row_type: 'happy',
-                },
-              },
-            ],
-          },
-        });
-      }
-    );
 
     evaluate(
       'capability detection — both installed, Osquery preferred for live state',
@@ -118,7 +92,9 @@ evaluate.describe(
                     OSQUERY_CHECK_INTEGRATION,
                     OSQUERY_LIST_SAVED_QUERIES,
                     OSQUERY_GET_TABLE_SCHEMA,
+                    OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
+                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -156,7 +132,9 @@ evaluate.describe(
                   tool_sequence: [
                     OSQUERY_CHECK_INTEGRATION,
                     OSQUERY_LIST_PACKS,
+                    OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
+                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -193,7 +171,9 @@ evaluate.describe(
                   tool_sequence: [
                     OSQUERY_CHECK_INTEGRATION,
                     OSQUERY_LIST_SAVED_QUERIES,
+                    OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
+                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -229,7 +209,9 @@ evaluate.describe(
                   OSQUERY_CHECK_INTEGRATION,
                   OSQUERY_LIST_SAVED_QUERIES,
                   OSQUERY_GET_TABLE_SCHEMA,
+                  OSQUERY_RESOLVE_AGENT_IDS,
                   OSQUERY_RUN_LIVE_QUERY,
+                  OSQUERY_GET_LIVE_QUERY_RESULTS,
                 ],
               },
               metadata: {

@@ -52,4 +52,59 @@ describe('validateReadOnlyQuery', () => {
       validateReadOnlyQuery('-- comment\nSELECT pid FROM processes /* block */', ALLOWED)
     ).toBeNull();
   });
+
+  describe('comma-separated table lists (review finding 6)', () => {
+    it('validates every table in a comma-separated FROM clause, not just the first', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM processes, shell', ALLOWED)).toMatch(
+        /not in the Osquery schema catalog.*shell/i
+      );
+    });
+
+    it('accepts a comma-separated list when every table is allowlisted', () => {
+      expect(
+        validateReadOnlyQuery('SELECT * FROM processes, process_open_sockets', ALLOWED)
+      ).toBeNull();
+    });
+
+    it('ignores table aliases when validating', () => {
+      expect(
+        validateReadOnlyQuery('SELECT p.pid FROM processes p, users AS u', ALLOWED)
+      ).toBeNull();
+    });
+
+    it('validates joined tables after a comma-separated list', () => {
+      expect(
+        validateReadOnlyQuery('SELECT * FROM processes, users JOIN shell ON 1=1', ALLOWED)
+      ).toMatch(/shell/i);
+    });
+  });
+
+  describe('read-only SQL false positives (review finding 17)', () => {
+    it("accepts SQLite's replace() string function", () => {
+      expect(
+        validateReadOnlyQuery("SELECT replace(path, '\\', '/') FROM processes", ALLOWED)
+      ).toBeNull();
+    });
+
+    it('accepts a forbidden keyword appearing inside a string literal', () => {
+      expect(
+        validateReadOnlyQuery("SELECT pid FROM processes WHERE name = 'update.exe'", ALLOWED)
+      ).toBeNull();
+    });
+
+    it('still rejects REPLACE INTO', () => {
+      expect(validateReadOnlyQuery('REPLACE INTO processes VALUES (1)', ALLOWED)).toMatch(
+        /read-only SELECT|forbidden keyword/i
+      );
+    });
+
+    it('still rejects a mutating keyword outside a literal', () => {
+      expect(
+        validateReadOnlyQuery(
+          "SELECT pid FROM processes WHERE name = 'x'; DROP TABLE users",
+          ALLOWED
+        )
+      ).toMatch(/forbidden keyword/i);
+    });
+  });
 });

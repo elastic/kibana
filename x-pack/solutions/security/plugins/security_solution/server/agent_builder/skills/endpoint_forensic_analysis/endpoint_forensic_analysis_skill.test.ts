@@ -69,4 +69,37 @@ describe('endpointForensicAnalysisSkill', () => {
       'do **not** present an expected attack sequence as that host'
     );
   });
+
+  it('routes the installed-but-unenrolled state to the ES|QL path (review finding 13)', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '**If Osquery IS installed but NO agents are enrolled**'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain('agents_enrolled: false');
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'Do **not** call `osquery.run_live_query` — it has no agent to run on.'
+    );
+  });
+
+  it('distinguishes an inconclusive capability check from "no agents"', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain('`enrollment_status` is `unknown`');
+    expect(endpointForensicAnalysisSkill.content).toContain('NOT the same as "no agents"');
+  });
+
+  it('scopes discover_telemetry to the ES|QL path only (review finding 21)', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '**On the ES|QL / Defend telemetry path only**'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain('it is ES|QL-only');
+    // The unconditional "call it first" phrasing is what made Process §1 and
+    // Phase 0 contradict each other; it must be gone.
+    expect(endpointForensicAnalysisSkill.content).not.toMatch(
+      /^Call `[^`]+` first with host names/m
+    );
+  });
+
+  it('requires resolve_agent_ids before dispatching a live query (review finding 16)', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '**Always** call `osquery.resolve_agent_ids` before `osquery.run_live_query`'
+    );
+  });
 });

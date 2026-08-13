@@ -10,11 +10,14 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import { savedQuerySavedObjectType } from '../../common/types';
 import type { SavedQuerySavedObject } from '../common/types';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
+import { getInstalledSavedQueriesMap } from '../routes/saved_query/utils';
+import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const LIST_SAVED_QUERIES_TOOL_ID = osqueryTool('list_saved_queries');
 
@@ -40,12 +43,28 @@ export const listSavedQueriesTool = (
   handler: async (input, { request }) => {
     const { search, page, page_size: pageSize } = input;
 
+    if (!(await hasOsqueryToolPrivilege(osqueryContext, request, 'readSavedQueries'))) {
+      return unauthorizedToolResult('readSavedQueries');
+    }
+
+    const space = await osqueryContext.service.getActiveSpace(request);
+    const spaceId = space?.id ?? DEFAULT_SPACE_ID;
     const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
       osqueryContext,
       request
     );
 
     try {
+      // Prebuilt status comes from the Fleet installation map plus `originId`,
+      // exactly as the saved-query routes determine it. Saved-query saved
+      // objects carry no `osquery-saved-query-asset` reference, so a
+      // reference-based check reports every prebuilt query as custom.
+      const installedSavedQueries = await getInstalledSavedQueriesMap(
+        osqueryContext.service.getPackageService()?.asInternalUser,
+        spaceScopedClient,
+        spaceId
+      );
+
       const savedQueries = await spaceScopedClient.find<SavedQuerySavedObject>({
         type: savedQuerySavedObjectType,
         page,
@@ -68,9 +87,7 @@ export const listSavedQueriesTool = (
           query: attrs.query,
           platform: attrs.platform,
           interval: attrs.interval,
-          prebuilt: sq.references.some(
-            (ref) => ref.type === 'osquery-pack-asset' || ref.type === 'osquery-saved-query-asset'
-          ),
+          prebuilt: !!installedSavedQueries[sq.originId ?? sq.id],
         };
       });
 

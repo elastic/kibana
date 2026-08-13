@@ -10,9 +10,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { pollActionResponses } from './poll_action_responses';
+import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
+import { assertActionBelongsToSpace } from './assert_action_in_space';
 
 export const GET_LIVE_QUERY_RESULTS_TOOL_ID = osqueryTool('get_live_query_results');
 
@@ -58,12 +61,38 @@ export const getLiveQueryResultsTool = (
     const waitBudgetMs = (waitSeconds ?? DEFAULT_WAIT_SECONDS) * 1_000;
     const rowLimit = maxRows ?? MAX_RESULT_ROWS;
 
+    if (!(await hasOsqueryToolPrivilege(osqueryContext, request, 'readLiveQueries'))) {
+      return unauthorizedToolResult('readLiveQueries');
+    }
+
     try {
       const [coreStart] = await osqueryContext.getStartServices();
       const esClient = coreStart.elasticsearch.client.asInternalUser;
+      const space = await osqueryContext.service.getActiveSpace(request);
+      const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+
+      // `action_id` arrives straight from the model. Without confirming the
+      // action was created in the caller's space, any id read out of a chat
+      // transcript would return another space's rows.
+      const ownership = await assertActionBelongsToSpace(esClient, actionId, spaceId);
+      if (!ownership.found) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message: `No live query action ${actionId} exists in this space.`,
+              },
+            },
+          ],
+        };
+      }
 
       const pollResult = await pollActionResponses(esClient, actionId, {
         budgetMs: waitBudgetMs,
+        spaceId,
+        expectedAgentCount: ownership.expectedAgentCount,
         maxRows: rowLimit,
         logger,
       });
@@ -77,6 +106,7 @@ export const getLiveQueryResultsTool = (
               action_id: actionId,
               status: pollResult.status,
               responded_agents: pollResult.responded,
+              ...(pollResult.expected !== undefined && { expected_agents: pollResult.expected }),
               row_count: pollResult.rows.length,
               rows: pollResult.rows,
               wait_seconds: waitSeconds ?? DEFAULT_WAIT_SECONDS,

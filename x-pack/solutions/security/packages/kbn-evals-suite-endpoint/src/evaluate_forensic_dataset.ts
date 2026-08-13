@@ -79,7 +79,40 @@ export const createForensicTrajectoryEvaluator = (): Evaluator<
           explanation: 'No tool_sequence annotation — skipping trajectory evaluation.',
         };
       }
-      return inner.evaluate(args);
+
+      const result = await inner.evaluate(args);
+
+      // Guard against a full-coverage score when a golden step never ran.
+      // Partial-credit weighting can otherwise round an incomplete trajectory up
+      // to 1, which is how a missing `resolve_agent_ids` scored as complete.
+      const actual = new Set(
+        getToolCallSteps(args.output as TaskOutput)
+          .map((step) => step.tool_id)
+          .filter((id): id is string => typeof id === 'string')
+      );
+      const missing = exp.tool_sequence.filter((toolId) => !actual.has(toolId));
+
+      if (missing.length === 0) {
+        return result;
+      }
+
+      // Always record which golden steps never ran, and never let an incomplete
+      // trajectory keep a full-coverage score — partial-credit weighting can
+      // otherwise round it up to 1, which is how a missing `resolve_agent_ids`
+      // scored as complete.
+      const cappedScore =
+        typeof result.score === 'number' && result.score >= 1
+          ? 1 - missing.length / exp.tool_sequence.length
+          : result.score;
+
+      return {
+        ...result,
+        score: cappedScore,
+        explanation: `${result.explanation ?? ''} Golden tool(s) never called — ${missing.join(
+          ', '
+        )}.`.trim(),
+        metadata: { ...(result.metadata ?? {}), missing_golden_tools: missing },
+      };
     },
   } as Evaluator<ForensicDatasetExample, TaskOutput>;
 };
