@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient, RequestHandlerContext } from '@kbn/core/server';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { putCriblRoutingPipeline } from './handlers/put_cribl_routing_pipeline';
+import { getRouteEntriesFromPolicyConfig } from '../../common/security_integrations/cribl/translator';
 
 const isCriblPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -15,12 +16,32 @@ const isCriblPackagePolicy = <T extends { package?: { name: string } }>(
   return packagePolicy.package?.name === 'cribl';
 };
 
+const createApiPassThroughError = (message: string): Error & { apiPassThrough: boolean } => {
+  const error = new Error(message) as Error & { apiPassThrough: boolean };
+  error.apiPassThrough = true;
+  return error;
+};
+
 export const getCriblPackagePolicyPostCreateOrUpdateCallback = async (
-  esClient: ElasticsearchClient,
   packagePolicy: NewPackagePolicy,
-  logger: Logger
+  logger: Logger,
+  context?: RequestHandlerContext
 ): Promise<void> => {
-  if (isCriblPackagePolicy(packagePolicy)) {
-    return putCriblRoutingPipeline(esClient, packagePolicy, logger);
+  if (!isCriblPackagePolicy(packagePolicy)) {
+    return;
   }
+
+  const mappings = getRouteEntriesFromPolicyConfig(packagePolicy.vars);
+  if (mappings.length === 0) {
+    return;
+  }
+
+  if (!context) {
+    throw createApiPassThroughError(
+      'Unable to update Cribl routing pipeline: request context is required'
+    );
+  }
+
+  const esClient: ElasticsearchClient = (await context.core).elasticsearch.client.asCurrentUser;
+  return putCriblRoutingPipeline(esClient, packagePolicy, logger);
 };

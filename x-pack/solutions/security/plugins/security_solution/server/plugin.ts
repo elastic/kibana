@@ -16,7 +16,6 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-types';
-import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
@@ -1095,11 +1094,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     if (registerIngestCallback) {
       registerIngestCallback(
         'packagePolicyCreate',
-        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+        async (packagePolicy, _soClient, _esClient, context) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context
           );
           return packagePolicy;
         }
@@ -1107,11 +1106,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       registerIngestCallback(
         'packagePolicyUpdate',
-        async (packagePolicy: UpdatePackagePolicy): Promise<UpdatePackagePolicy> => {
+        async (packagePolicy, _soClient, _esClient, context) => {
           await getCriblPackagePolicyPostCreateOrUpdateCallback(
-            core.elasticsearch.client.asInternalUser,
             packagePolicy,
-            this.logger
+            this.logger,
+            context
           );
           return packagePolicy;
         }
