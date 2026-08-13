@@ -36,11 +36,14 @@ const searchEventsSchema = significantEventSchema
     status: true,
     stream_names: true,
   })
-  .partial({
-    status: true,
-    stream_names: true,
-  })
+  .partial({ stream_names: true })
   .extend({
+    status: significantEventSchema.shape.status.default('open').describe(
+      i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.schema.status', {
+        defaultMessage:
+          'Event state to search. Defaults to open so continuation searches cannot select closed events. Specify closed or dismissed only when intentionally reviewing that state.',
+      })
+    ),
     query: z
       .string()
       .transform(normalizeEventSearchQuery)
@@ -66,13 +69,13 @@ const searchEventsSchema = significantEventSchema
     exclude_unconfirmed_signals: z
       .boolean()
       .optional()
-      .default(false)
+      .default(true)
       .describe(
         i18n.translate(
           'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.excludeUnconfirmedSignals',
           {
             defaultMessage:
-              'When true, omit signals whose confirmed value is false from returned events. Signals with confirmed true or omitted remain.',
+              'Defaults to true. Omit signals whose confirmed value is false from returned events. Rule-filtered searches also omit events that matched only excluded signals, except the discovery recovery path may retain a requested same-rule signal for episode reconciliation. Signals with confirmed true or omitted remain. Note: total and has_more reflect the pre-filter ES count; use has_more and next_page to continue scanning source pages when this filter is active.',
           }
         )
       ),
@@ -152,7 +155,19 @@ const searchEventsSchema = significantEventSchema
             'End of the search range as ISO 8601 or Elasticsearch date math. Defaults to now.',
         })
       ),
-  });
+  })
+  .refine(
+    ({ event_ids, query, rule_uuids, stream_names, topology_feature_ids }) =>
+      query !== undefined ||
+      (stream_names?.length ?? 0) > 0 ||
+      (rule_uuids?.length ?? 0) > 0 ||
+      (event_ids?.length ?? 0) > 0 ||
+      (topology_feature_ids?.length ?? 0) > 0,
+    {
+      message:
+        'Provide at least one search filter: query, stream_names, rule_uuids, event_ids, or topology_feature_ids. Do not call event_search with an empty object.',
+    }
+  );
 
 export function createSearchEventsTool({
   getScopedClients,
@@ -176,15 +191,15 @@ export function createSearchEventsTool({
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line2', {
         defaultMessage:
-          'Use compact for broad searches and continuation matching. Use full only when complete evidence and assessment details are required. While has_more is true, set page to the next_page value from the previous response. Omit status to return all states.',
+          'Use compact for broad searches and continuation matching. Use full only when complete evidence and assessment details are required. Follow next_page while has_more is true. Searches default to open events; specify a non-open status only when intentionally reviewing that state.',
       })}
 
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
         defaultMessage:
-          'Never re-call this tool with the same filters (rule_uuids, stream_names, topology_feature_ids, query) and a different per_page to retry — per_page only controls page size. When has_more is true, set page to the next_page value from the previous response with all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
+          'Provide at least one filter. Good: `\'{ "rule_uuids": ["..."], "status": "open" }\'`. Invalid: `\'{}\'`. Never re-call this tool with the same filters and a different per_page to retry — per_page only controls page size. When has_more is true, set page to the next_page value from the previous response with all other parameters unchanged. When has_more is false, the result set is complete; do not re-query.',
       })}
 
-      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line4', {
         defaultMessage:
           'A compact event caps its signals list and sets signals_truncated to true when a long-running event has more signals than shown; total_signals holds the real count. To read every signal for such an event, call again with view: full and event_ids: [event_id].',
       })}

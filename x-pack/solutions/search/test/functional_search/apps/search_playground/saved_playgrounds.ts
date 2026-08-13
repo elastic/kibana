@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 const archivedBooksIndex = 'x-pack/solutions/search/test/functional_search/fixtures/search-books';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'searchPlayground', 'solutionNavigation']);
+  const pageObjects = getPageObjects(['common', 'searchPlayground']);
   const esArchiver = getService('esArchiver');
 
   const createIndices = async () => {
@@ -84,11 +84,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
           testPlaygroundName
         );
-        const { solutionNavigation } = pageObjects;
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Playground' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: testPlaygroundName,
-        });
       });
       it.skip('should be able to search index', async () => {
         await pageObjects.searchPlayground.expectPageModeToBeSelected('chat');

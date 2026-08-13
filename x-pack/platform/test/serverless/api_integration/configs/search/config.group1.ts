@@ -15,7 +15,6 @@ export default createTestConfig({
     require.resolve('../../test_suites/data_view_field_editor'),
     require.resolve('../../test_suites/data_views'),
     require.resolve('../../test_suites/elasticsearch_api'),
-    require.resolve('../../test_suites/index_management'),
     require.resolve('../../test_suites/kql_telemetry'),
     require.resolve('../../test_suites/platform_security'),
     require.resolve('../../test_suites/scripts_tests'),

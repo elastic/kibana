@@ -31,5 +31,14 @@ export default function ({ getService }: FtrProviderContext) {
         .set(svlCommonApi.getInternalRequestHeader())
         .expect(404);
     });
+
+    it('Significant Events API is not available', async () => {
+      await supertestAdminWithCookieCredentials
+        .get(
+          '/api/streams/{name}/significant_events?from=2025-06-17T00:00:00.000Z&to=2025-06-17T00:00:00.000Z&bucketSize=1m'
+        )
+        .set(svlCommonApi.getInternalRequestHeader())
+        .expect(404);
+    });
   });
 }

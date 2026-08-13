@@ -34,7 +34,6 @@ tags:
   - prod
   - group-platform
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - index.ts
@@ -42,6 +41,4 @@ fileGroups:
     - public/**/*.tsx
     - server/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

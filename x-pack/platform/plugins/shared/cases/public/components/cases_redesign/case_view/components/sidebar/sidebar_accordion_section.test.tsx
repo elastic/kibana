@@ -52,13 +52,35 @@ describe('SidebarAccordionSection', () => {
     );
   });
 
+  it('renders the subtitle inside the trigger when provided', () => {
+    const onToggle = jest.fn();
+
+    render(
+      <SidebarAccordionSection
+        id="templateFields"
+        title="Fields"
+        subtitle={<div data-test-subj="section-subtitle">{'Template: My template'}</div>}
+        isOpen={true}
+        onToggle={onToggle}
+        data-test-subj="case-view-sidebar-template-fields"
+      >
+        <div>{'Child content'}</div>
+      </SidebarAccordionSection>
+    );
+
+    // Rendered within the accordion's trigger so it stays pinned with the title.
+    expect(screen.getByTestId('case-view-sidebar-template-fields-toggle')).toContainElement(
+      screen.getByTestId('section-subtitle')
+    );
+  });
+
   it('renders extraAction when provided', () => {
     const onToggle = jest.fn();
 
     render(
       <SidebarAccordionSection
         id="templateFields"
-        title="Template fields"
+        title="Fields"
         extraAction={
           <button type="button" data-test-subj="extra-action">
             {'Settings'}

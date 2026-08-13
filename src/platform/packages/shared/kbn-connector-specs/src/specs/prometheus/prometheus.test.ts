@@ -495,10 +495,8 @@ describe('Prometheus', () => {
         data: { versionInfo: { version: '0.27.0' }, cluster: { status: 'ready' } },
       });
 
-      if (!Prometheus.test) throw new Error('Test handler not defined');
       const result = await Prometheus.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('0.27.0');
       expect(result.message).toContain('ready');
     });

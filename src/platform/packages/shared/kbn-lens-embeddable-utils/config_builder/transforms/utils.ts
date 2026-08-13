@@ -601,30 +601,28 @@ export const addLayerColumn = (
   layer: PersistedIndexPatternLayer,
   columnName: string,
   config: GenericIndexPatternColumn | GenericIndexPatternColumn[],
-  first = false,
-  postfix = ''
+  first = false
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
-  const name = columnName + postfix;
 
   layer.columns = {
     ...layer.columns,
-    [name]: column,
+    [columnName]: column,
   };
 
-  const referenceColumnId = `${name}_reference`;
+  const referenceColumnId = `${columnName}_reference`;
   if (referenceColumn && 'references' in column) {
     column.references = [referenceColumnId];
     layer.columns[referenceColumnId] = referenceColumn;
   }
 
   if (first) {
-    layer.columnOrder.unshift(name);
+    layer.columnOrder.unshift(columnName);
     if (referenceColumn) {
       layer.columnOrder.unshift(referenceColumnId);
     }
   } else {
-    layer.columnOrder.push(name);
+    layer.columnOrder.push(columnName);
     if (referenceColumn) {
       layer.columnOrder.push(referenceColumnId);
     }
