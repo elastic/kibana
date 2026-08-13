@@ -13,6 +13,7 @@ import type {
   SavedObjectReference,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SetOptional } from 'type-fest';
 import type {
@@ -20,6 +21,7 @@ import type {
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
+import { nodeBuilder } from '@kbn/es-query';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
 import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { validateWatchlistUpdate } from './validation';
@@ -53,6 +55,8 @@ type WatchlistSavedObjectAttributes = Omit<
 >;
 type WatchlistUpdateAttrs = Partial<WatchlistSavedObjectAttributes>;
 type WatchlistObjectWithId = WatchlistObject & { id: string };
+
+export type ResolveWatchlistResult = { id: string; name: string } | { error: string };
 
 interface WatchlistEntityMetadata {
   entityCount: number;
@@ -125,7 +129,7 @@ export class WatchlistConfigClient {
       options: {
         index: getIndexForWatchlist(this.deps.namespace),
         mappings: generateWatchlistEntityIndexMappings(),
-        settings: { hidden: true },
+        settings: { hidden: true, auto_expand_replicas: '0-1' },
       },
     });
 
@@ -175,6 +179,55 @@ export class WatchlistConfigClient {
       }
     }
     return watchlists;
+  }
+
+  /**
+   * Resolves a watchlist reference that may be either an id or a name to its canonical id.
+   *
+   * Tries the reference as an id first (a direct saved-object get); on a miss, looks it up by an
+   * **exact** name match. Because the `name` field is a case-sensitive `keyword` (no normalizer),
+   * the name match is exact and case-sensitive. Returns an actionable `error` when the name is
+   * unknown or ambiguous. Does not populate entity counts — resolution only needs id + name.
+   */
+  async resolveIdentifier(identifier: string): Promise<ResolveWatchlistResult> {
+    const trimmed = identifier.trim();
+
+    // 1. Treat the reference as an id.
+    try {
+      const so = await this.deps.soClient.get<WatchlistSavedObjectAttributes>(
+        watchlistConfigTypeName,
+        trimmed
+      );
+      return { id: so.id, name: so.attributes.name };
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw error;
+      }
+    }
+
+    // 2. Look it up by exact name
+    const response = await this.deps.soClient.find<WatchlistSavedObjectAttributes>({
+      type: watchlistConfigTypeName,
+      namespaces: [this.deps.namespace],
+      filter: nodeBuilder.is(`${watchlistConfigTypeName}.attributes.name`, trimmed),
+      perPage: 100,
+      fields: ['name'],
+    });
+
+    const matches = response.saved_objects;
+    if (matches.length === 1) {
+      return { id: matches[0].id, name: matches[0].attributes.name };
+    }
+    if (matches.length > 1) {
+      return {
+        error: `Multiple watchlists are named "${trimmed}". Pass the watchlist id instead. Candidates: ${matches
+          .map((so) => `${so.attributes.name} (${so.id})`)
+          .join(', ')}.`,
+      };
+    }
+    return {
+      error: `No watchlist found named "${trimmed}". The name must match exactly (case-sensitive) — use security.list_watchlists to see the available watchlists, or pass the watchlist id.`,
+    };
   }
 
   async get(id: string) {

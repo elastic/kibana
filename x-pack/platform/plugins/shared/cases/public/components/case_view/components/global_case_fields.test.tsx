@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 
 import type { CaseUI } from '../../../../common';
 import { stringify as yamlStringify } from 'yaml';
 import { GlobalCaseFields } from './global_case_fields';
+import { renderWithTestingProviders } from '../../../common/mock';
+
+const render = (ui: React.ReactElement) => renderWithTestingProviders(ui);
 
 const mockUseGetTemplate = jest.fn();
 jest.mock('../../templates_v2/hooks/use_get_template', () => ({

@@ -169,7 +169,7 @@ export const AnomalyTabTableSection: React.FC<AnomalyTabTableSectionProps> = ({
                 data-test-subj={ANOMALIES_TABLE_ROW_EXPAND_BUTTON_TEST_ID}
                 aria-label={label}
                 aria-expanded={isExpanded}
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 color="text"
                 onClick={() => toggleRowExpanded(item.id)}
               />

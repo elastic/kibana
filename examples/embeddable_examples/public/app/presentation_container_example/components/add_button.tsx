@@ -82,7 +82,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
     <EuiPopover
       button={
         <EuiButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
