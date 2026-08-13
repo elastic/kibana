@@ -138,6 +138,7 @@ export const registerInternalTools = async ({
         capabilities,
         subAgentExecutor,
         abortSignal,
+        backgroundExecutionService,
         subagentTracker,
       })
     );

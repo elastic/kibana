@@ -13,6 +13,7 @@ import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
+import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
 
 const schema = z.object({
@@ -46,6 +47,7 @@ export const createSendMessageTool = ({
   capabilities,
   subAgentExecutor,
   abortSignal,
+  backgroundExecutionService,
   subagentTracker,
 }: {
   agentId: string;
@@ -53,6 +55,7 @@ export const createSendMessageTool = ({
   capabilities?: AgentCapabilities;
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
+  backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
 }): BuiltinToolDefinition<typeof schema> => {
   return {
@@ -109,6 +112,7 @@ export const createSendMessageTool = ({
         });
 
         if (run_in_background) {
+          backgroundExecutionService?.registerExecution(executionId);
           return {
             results: [
               createOtherResult({
