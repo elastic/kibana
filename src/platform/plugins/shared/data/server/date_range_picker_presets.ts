@@ -22,10 +22,17 @@ const presetItemSchema = z.object({
   label: z.string().max(255).optional(),
 });
 
-const storedPresetsSchema: ZodType<StoredPresets> = z.object({
-  version: z.literal(1),
-  presets: z.array(presetItemSchema).max(MAX_PRESETS).nullable(),
-});
+// v1 stays accepted so legacy documents keep validating; writes always emit v2.
+const storedPresetsSchema: ZodType<StoredPresets> = z.discriminatedUnion('version', [
+  z.object({
+    version: z.literal(1),
+    presets: z.array(presetItemSchema).max(MAX_PRESETS).nullable(),
+  }),
+  z.object({
+    version: z.literal(2),
+    presets: z.array(presetItemSchema).max(MAX_PRESETS),
+  }),
+]);
 
 export const dateRangePickerPresetsStorageDefinition: UserStorageDefinition<StoredPresets> = {
   schema: storedPresetsSchema,

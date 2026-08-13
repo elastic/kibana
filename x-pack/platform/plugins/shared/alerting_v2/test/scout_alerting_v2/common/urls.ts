@@ -113,11 +113,6 @@ export const getDeactivateAlertActionUrl = (groupHash: string) =>
 
 export const BULK_ALERT_ACTION_URL = `${ALERT_API_PATH}/_bulk_action`;
 
-export const CREATE_ALERT_EVENT_URL = ALERT_API_PATH;
-
-export const getCreateAlertEventBySourceUrl = (source: string) =>
-  `${ALERT_API_PATH}/${encodeURIComponent(source)}`;
-
 export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
