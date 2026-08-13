@@ -29,5 +29,10 @@ paths:
                 properties:
                   watch:
                     $ref: '../components/watch.schema.yaml#/components/schemas/Watch'
+                  settings:
+                    $ref: '../components/watch_settings.schema.yaml#/components/schemas/WatchSettings'
+                    description: >-
+                      Omitted when the watch has no settings to expose, which is the case for live
+                      projected watches until settings are applied to the managed workflow definition.
                 required:
                   - watch

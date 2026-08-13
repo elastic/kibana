@@ -118,6 +118,7 @@ const ENTRIES_FILTER = 'entries';
 export const FOREACH_ITEM_SCHEMA_DESC = {
   UNRESOLVED_PATH: 'Unable to parse foreach parameter',
   RUNTIME_JSON: 'Unable to determine foreach item type',
+  RUNTIME_TYPE: 'Collection type cannot be determined statically, it will be resolved at runtime',
 } as const;
 
 export interface ForeachCollectionDiagnostic {
@@ -143,7 +144,10 @@ export function getForeachCollectionDiagnostic(
       severity: 'error',
     };
   }
-  if (description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON) {
+  if (
+    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON ||
+    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
+  ) {
     return {
       message: description,
       severity: 'warning',
@@ -191,18 +195,20 @@ export function getForeachItemSchema(
     } else if (iterableSchema instanceof z.ZodString) {
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
       return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON);
+    } else if (iterableSchema instanceof z.ZodUnknown || iterableSchema instanceof z.ZodAny) {
+      // The type isn't statically inferable (e.g. an output shape we don't model),
+      // so we can't prove it isn't iterable — leave it to runtime.
+      return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
     } else if (iterableSchema instanceof z.ZodUnion) {
       const arrayOption = iterableSchema.options.find((option) => option instanceof z.ZodArray);
       if (arrayOption && arrayOption instanceof z.ZodArray) {
         return arrayOption.element as z.ZodType;
-      } else {
-        throw new InvalidForeachParameterError(
-          `Expected array in union for foreach iteration, but no array type was found. Union options: [${iterableSchema.options
-            .map((opt) => getZodTypeName(opt as z.ZodType))
-            .join(', ')}]`,
-          InvalidForeachParameterErrorCodes.INVALID_UNION
-        );
       }
+      // A union means the type was never narrowed to a single branch. Elasticsearch
+      // result cells, for instance, are all typed by a primitive-only union even
+      // when the underlying field is multivalued, so a missing array branch is not
+      // proof that the collection isn't iterable — leave it to runtime.
+      return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
     } else if (iterableSchema instanceof z.ZodObject && hasEntriesFilter) {
       return z.object({ key: z.string(), value: z.unknown() });
     } else {

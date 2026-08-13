@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const isSnoozed = (snoozedUntil: string | undefined | null): boolean =>
+export const isSnoozed = (snoozedUntil: string | undefined | null): snoozedUntil is string =>
   snoozedUntil != null && new Date(snoozedUntil).getTime() > Date.now();

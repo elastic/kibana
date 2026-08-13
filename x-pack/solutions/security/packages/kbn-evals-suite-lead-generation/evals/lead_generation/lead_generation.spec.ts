@@ -28,7 +28,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
    *
    * 2. **Golden cluster** (set LEAD_GENERATION_DATASET_NAME):
    *    Fetches the named dataset from the upstream golden cluster
-   *    (EVALUATIONS_KBN_URL must also be configured).
+   *    (EVAL_KBN_URL must also be configured).
    *    Run `scripts/upload_dataset.js` first to publish the dataset.
    *
    * 3. **Bundled default dataset** (no env vars required):
