@@ -29,7 +29,7 @@ export const RoundTraceButton: React.FC<RoundTraceButtonProps> = ({ traceId }) =
   return (
     <>
       <EuiButtonIcon
-        iconType="apmTrace"
+        iconType="chartWaterfall"
         color="text"
         aria-label={ariaLabel}
         onClick={openFlyout}

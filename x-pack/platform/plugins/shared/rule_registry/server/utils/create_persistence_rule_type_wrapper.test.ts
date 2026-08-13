@@ -19,6 +19,7 @@ import {
   suppressAlertsInMemory,
   isExistingDateGtEqThanAlert,
   getUpdatedSuppressionBoundaries,
+  getAlertSourceField,
 } from './create_persistence_rule_type_wrapper';
 
 describe('suppressAlertsInMemory', () => {
@@ -352,5 +353,77 @@ describe('getUpdatedSuppressionBoundaries', () => {
       'mock-id'
     );
     expect(boundaries[ALERT_SUPPRESSION_START]).toBeUndefined();
+  });
+});
+
+describe('getAlertSourceField', () => {
+  it('should read a field stored with a flat dotted key', () => {
+    expect(getAlertSourceField({ [ALERT_INSTANCE_ID]: 'instance-id-1' }, ALERT_INSTANCE_ID)).toBe(
+      'instance-id-1'
+    );
+  });
+
+  it('should read a field when `_source` is returned in nested form', () => {
+    // synthetic `_source` and ingest pipelines (e.g. dot_expander) return
+    // the same indexed fields as nested objects instead of flat dotted keys
+    expect(
+      getAlertSourceField(
+        { kibana: { alert: { instance: { id: 'instance-id-1' } } } },
+        ALERT_INSTANCE_ID
+      )
+    ).toBe('instance-id-1');
+  });
+
+  it('should prefer the flat key when both shapes are present', () => {
+    expect(
+      getAlertSourceField(
+        {
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+          kibana: { alert: { suppression: { docs_count: 1 } } },
+        },
+        ALERT_SUPPRESSION_DOCS_COUNT
+      )
+    ).toBe(3);
+  });
+
+  it('should return undefined for a missing field', () => {
+    expect(
+      getAlertSourceField({ kibana: { alert: { uuid: 'abc' } } }, ALERT_INSTANCE_ID)
+    ).toBeUndefined();
+  });
+
+  it('should return undefined when source is null or undefined', () => {
+    expect(getAlertSourceField(null, ALERT_INSTANCE_ID)).toBeUndefined();
+    expect(getAlertSourceField(undefined, ALERT_INSTANCE_ID)).toBeUndefined();
+  });
+
+  it('should return undefined when the dotted path runs through an array', () => {
+    expect(
+      getAlertSourceField({ kibana: [{ alert: { instance: { id: 'x' } } }] }, ALERT_INSTANCE_ID)
+    ).toBeUndefined();
+  });
+});
+
+describe('isExistingDateGtEqThanAlert with nested existing alert source', () => {
+  it('should compare dates when existing alert `_source` is nested', () => {
+    expect(
+      isExistingDateGtEqThanAlert(
+        {
+          _source: {
+            kibana: { alert: { suppression: { start: '2020-10-28T05:50:00.000Z' } } },
+          },
+          _id: 'a1',
+          _index: 'test-index',
+        } as unknown as estypes.SearchHit<BackendAlertWithSuppressionFields870>,
+        {
+          _id: 'alert-a',
+          _source: {
+            [ALERT_SUPPRESSION_START]: new Date('2020-10-28T05:45:00.000Z'),
+            [ALERT_SUPPRESSION_END]: new Date('2020-10-28T05:45:00.000Z'),
+          },
+        },
+        ALERT_SUPPRESSION_START
+      )
+    ).toBe(true);
   });
 });

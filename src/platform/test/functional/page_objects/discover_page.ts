@@ -86,14 +86,10 @@ export class DiscoverPageObject extends FtrService {
   public async saveAsSearch(searchName: string) {
     await this.clickSaveAsSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -113,14 +109,10 @@ export class DiscoverPageObject extends FtrService {
     const isStandaloneSession = await this.isStandaloneDiscoverSession();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     if (tags.length) {
       await this.testSubjects.click('savedObjectTagSelector');
@@ -177,14 +169,10 @@ export class DiscoverPageObject extends FtrService {
       await this.clickSaveSearchButton();
     }
 
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     if (storeTimeRange !== undefined) {
       await this.retry.waitFor(`store time range switch is set`, async () => {
@@ -896,17 +884,10 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
+  public async selectDataViewMode() {
     await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
-    if (options?.discardModal) {
-      await this.testSubjects.exists('discover-esql-to-dataview-modal');
-      await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-      await this.retry.waitFor('the modal to close', async () => {
-        return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-      });
-    }
   }
 
   public async removeHeaderColumn(name: string) {

@@ -361,25 +361,13 @@ export const BigQuery: ConnectorSpec = {
         'Verifies BigQuery API access by running a lightweight SELECT 1 query in the configured project.',
     }),
     handler: async (ctx) => {
-      try {
-        const result = await submitQuery(ctx, {
-          query: 'SELECT 1 AS ok',
-          maxResults: 1,
-        });
-        return {
-          ok: true,
-          message: `Successfully connected to BigQuery${
-            result.jobReference?.jobId ? ` (job ${result.jobReference.jobId})` : ''
-          }`,
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect to BigQuery: ${errorMessage}`,
-        };
-      }
+      await submitQuery(ctx, {
+        query: 'SELECT 1 AS ok',
+        maxResults: 1,
+      });
+      return {};
     },
+    enabled: true,
   },
 
   skill: [
