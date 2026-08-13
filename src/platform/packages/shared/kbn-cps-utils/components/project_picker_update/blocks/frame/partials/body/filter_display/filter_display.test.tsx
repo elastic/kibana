@@ -52,28 +52,32 @@ const createFilterExpressions = (
     ])
   );
 
-const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  controlsState: 'enabled',
-  originProjectId: 'origin',
-  defaultProjectRouting: '',
-  projectRoutingStrategy: 'dynamic',
-  hasUserModifiedRouting: false,
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map(),
-  excludedOverrides: [],
-  filteredProjectIds: [],
-  isFilterSearchLoading: false,
-  filterSearchError: null,
-  visibleProjectIds: [],
-  selectedProjectIds: [],
-  currentProjectRouting: '',
-  isUsingSpaceDefaults: false,
-  ...overrides,
-  defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
-  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
-  originProjectId: overrides.originProjectId,
-});
+const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
+  const filterExpressions = overrides.filterExpressions ?? new Map();
+
+  return {
+    controlsState: 'enabled',
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
+    filterExpressions,
+    filteringDimensions: [],
+    availableProjects: new Map(),
+    excludedOverrides: [],
+    proposedFilters: null,
+    filteredProjectIds: [],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
+    visibleProjectIds: [],
+    selectedProjectIds: [],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
+    ...overrides,
+  };
+};
 
 const defaultActions = {
   invertFilterExpressionOperator: jest.fn(),

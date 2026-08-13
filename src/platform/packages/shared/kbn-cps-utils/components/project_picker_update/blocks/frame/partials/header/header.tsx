@@ -48,7 +48,11 @@ const getContextMenuItems = (
       actions.clearProjectFilters();
     },
     isDisabled: ({ state }) => {
-      return state.filterExpressions.size === 0 || Boolean(state.controlsState === 'disabled');
+      return (
+        state.displayedFilterExpressions.size === 0 ||
+        state.isFilterProposalPending ||
+        Boolean(state.controlsState === 'disabled')
+      );
     },
   },
   {
@@ -60,7 +64,11 @@ const getContextMenuItems = (
       actions.revertToSpaceDefaults();
     },
     isDisabled: ({ state }) => {
-      return state.isUsingSpaceDefaults || Boolean(state.controlsState === 'disabled');
+      return (
+        state.isUsingSpaceDefaults ||
+        state.isFilterProposalPending ||
+        Boolean(state.controlsState === 'disabled')
+      );
     },
   },
 ];

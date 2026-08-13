@@ -13,7 +13,12 @@ import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerList } from './list';
-import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
+import {
+  ProjectPickerStateProvider,
+  useProjectPickerActions,
+  type ProjectPickerStateProviderProps,
+} from '../../state';
+import { FilterOperator, type FilterExpressionValue } from '../../utils/filter_input_codec';
 
 class MockIntersectionObserver {
   static instances: MockIntersectionObserver[] = [];
@@ -104,6 +109,32 @@ const renderComponentWithScrollContainer = (
   props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'controlsState'>> = {}
 ) => {
   return render(<ProjectPickerListWithScrollContainer {...props} />);
+};
+
+const AddFilterExpression = ({ expression }: { expression: FilterExpressionValue }) => {
+  const actions = useProjectPickerActions();
+
+  return (
+    <button
+      type="button"
+      data-test-subj="addFilterExpression"
+      onClick={() => actions.addFilterExpression({ expression })}
+    />
+  );
+};
+
+const createDeferredFetch = () => {
+  let resolve!: (value: { origin: CPSProject | null; linkedProjects: CPSProject[] }) => void;
+  const fetchProjectsByRouting = jest.fn(
+    () =>
+      new Promise<{ origin: CPSProject | null; linkedProjects: CPSProject[] }>((res) => {
+        resolve = res;
+      })
+  );
+  return {
+    fetchProjectsByRouting,
+    resolve: (...args: Parameters<typeof resolve>) => resolve(...args),
+  };
 };
 
 describe('ProjectPickerList', () => {
@@ -444,6 +475,55 @@ describe('ProjectPickerList', () => {
           screen.queryByTestId('projectPickerListItemSwitch-project-b')
         ).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('pending filter proposal', () => {
+    const taggedProjects = [
+      createProject('project-a', { env: 'prod-a' }),
+      createProject('project-b', { env: 'prod-b' }),
+    ];
+
+    it('shows a loader and disables row interactions while a proposal is in flight, then re-enables them once it resolves', async () => {
+      const user = userEvent.setup();
+      const { fetchProjectsByRouting, resolve } = createDeferredFetch();
+
+      render(
+        <ProjectPickerStateProvider
+          {...defaultProps}
+          availableProjects={taggedProjects}
+          fetchProjectsByRouting={fetchProjectsByRouting}
+        >
+          <AddFilterExpression
+            expression={{ operator: FilterOperator.EQUALS, tagName: 'env', tagValue: 'prod-a' }}
+          />
+          <ProjectPickerList />
+        </ProjectPickerStateProvider>
+      );
+
+      expect(screen.queryByTestId('projectPickerListLoadingIndicator')).not.toBeInTheDocument();
+      expect(screen.getByTestId('projectPickerListItemSwitch-project-a')).not.toBeDisabled();
+
+      await user.click(screen.getByTestId('addFilterExpression'));
+
+      await waitFor(() => {
+        expect(fetchProjectsByRouting).toHaveBeenCalled();
+      });
+
+      expect(screen.getByTestId('projectPickerListLoadingIndicator')).toBeInTheDocument();
+      expect(screen.getByTestId('projectPickerListItemSwitch-project-a')).toBeDisabled();
+      expect(screen.getByTestId('projectPickerListItemContextMenu-project-a')).toBeDisabled();
+
+      resolve({ origin: null, linkedProjects: [taggedProjects[0]] });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('projectPickerListLoadingIndicator')).not.toBeInTheDocument();
+      });
+
+      // project-a is now the only visible project (env:prod-a matched only it), so its own
+      // switch is separately disabled by the "last included project" guard; assert re-enablement
+      // via its context menu button instead, which isn't subject to that guard.
+      expect(screen.getByTestId('projectPickerListItemContextMenu-project-a')).not.toBeDisabled();
     });
   });
 });

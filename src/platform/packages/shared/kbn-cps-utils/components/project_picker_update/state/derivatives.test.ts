@@ -47,16 +47,18 @@ const createFilterExpressions = (
 
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
+  const filterExpressions = overrides.filterExpressions ?? new Map();
 
   return {
     originProjectId: 'origin',
     defaultProjectRouting: '',
     projectRoutingStrategy: 'dynamic',
     hasUserModifiedRouting: false,
-    filterExpressions: new Map(),
+    filterExpressions,
     filteringDimensions: [],
     availableProjects,
     excludedOverrides: [],
+    proposedFilters: null,
     filteredProjectIds: [],
     isFilterSearchLoading: false,
     filterSearchError: null,
@@ -64,6 +66,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     selectedProjectIds: [],
     currentProjectRouting: '',
     isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
     controlsState: 'enabled',
     ...overrides,
     defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
@@ -299,5 +303,59 @@ describe('projectPickerDerivatives', () => {
     );
 
     expect(derivedState.isUsingSpaceDefaults).toBe(false);
+  });
+
+  describe('displayedFilterExpressions / isFilterProposalPending', () => {
+    it('reads the committed filters and reports no pending proposal when none exists', () => {
+      const committed = createFilterExpressions([[typeSecurityExpression]]);
+
+      const derivedState = applyStoreDerivatives(
+        createState({ filterExpressions: committed, proposedFilters: null }),
+        [...projectPickerDerivatives]
+      );
+
+      expect(derivedState.displayedFilterExpressions).toBe(committed);
+      expect(derivedState.isFilterProposalPending).toBe(false);
+    });
+
+    it('prefers the proposed filters and reports a pending proposal while one exists', () => {
+      const committed = createFilterExpressions([[typeSecurityExpression]]);
+      const proposed = createFilterExpressions([]);
+
+      const derivedState = applyStoreDerivatives(
+        createState({
+          filterExpressions: committed,
+          proposedFilters: { filterExpressions: proposed, excludedOverrides: [] },
+        }),
+        [...projectPickerDerivatives]
+      );
+
+      expect(derivedState.displayedFilterExpressions).toBe(proposed);
+      expect(derivedState.isFilterProposalPending).toBe(true);
+    });
+
+    it('leaves visibleProjectIds/selectedProjectIds keyed off the committed filters while a proposal is pending', () => {
+      const availableProjects = new Map([
+        ['p1', createProject({ _id: 'p1', _type: 'security' })],
+        ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+      ]);
+      const committed = createFilterExpressions([[typeSecurityExpression]]);
+      const proposed = createFilterExpressions([]);
+
+      const derivedState = applyStoreDerivatives(
+        createState({
+          availableProjects,
+          filterExpressions: committed,
+          filteredProjectIds: ['p1'],
+          proposedFilters: { filterExpressions: proposed, excludedOverrides: [] },
+        }),
+        [...projectPickerDerivatives]
+      );
+
+      // still the pre-proposal list, since filterExpressions/filteredProjectIds are untouched
+      // until the proposal is committed
+      expect(derivedState.visibleProjectIds).toEqual(['p1']);
+      expect(derivedState.selectedProjectIds).toEqual(['p1']);
+    });
   });
 });

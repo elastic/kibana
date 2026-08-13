@@ -29,6 +29,8 @@ export interface ProjectPickerListItemProps {
   controlsState: NonNullable<ProjectPickerStateProviderProps['controlsState']>;
   isSelected: boolean;
   isToggleDisabled?: boolean;
+  /** True while a filter/selection edit is awaiting server confirmation; disables all row interactions. */
+  isInteractionsDisabled?: boolean;
   isOriginProject: boolean;
   toggleDisabledMessage: string;
   project: CPSProject;
@@ -45,6 +47,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   controlsState,
   isSelected,
   isToggleDisabled = false,
+  isInteractionsDisabled = false,
   isOriginProject,
   toggleDisabledMessage,
   project,
@@ -60,7 +63,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   const switchControl = (
     <EuiSwitch
       checked={isSelected}
-      disabled={isToggleDisabled || controlsState === 'disabled'}
+      disabled={isToggleDisabled || isInteractionsDisabled || controlsState === 'disabled'}
       onChange={(evt) => onToggle(project, evt.target.checked)}
       label={null}
       data-test-subj={getProjectPickerListItemSwitchTestSubj(project._id)}
@@ -152,7 +155,7 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
               >
                 <EuiButtonIcon
                   iconType="ellipsis"
-                  isDisabled={controlsState === 'disabled'}
+                  isDisabled={isInteractionsDisabled || controlsState === 'disabled'}
                   onClick={onContextMenu.bind(null, project)}
                   aria-labelledby={contextMenuTooltipId}
                   data-test-subj={`projectPickerListItemContextMenu-${project._id}`}

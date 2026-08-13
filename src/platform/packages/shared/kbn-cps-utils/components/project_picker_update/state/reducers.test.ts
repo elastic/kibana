@@ -49,6 +49,7 @@ const createFilterExpressions = (
 
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
+  const filterExpressions = overrides.filterExpressions ?? new Map();
 
   return {
     controlsState: 'enabled',
@@ -56,10 +57,11 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     defaultProjectRouting: '',
     projectRoutingStrategy: 'dynamic',
     hasUserModifiedRouting: false,
-    filterExpressions: new Map(),
+    filterExpressions,
     filteringDimensions: [],
     availableProjects,
     excludedOverrides: [],
+    proposedFilters: null,
     filteredProjectIds: [],
     isFilterSearchLoading: false,
     filterSearchError: null,
@@ -67,6 +69,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     selectedProjectIds: [],
     currentProjectRouting: '',
     isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
     ...overrides,
   };
 };
@@ -88,7 +92,7 @@ describe('createStoreReducers', () => {
   });
 
   describe('#clearProjectFilters', () => {
-    it('clears stored tag filters without clearing project exclusions', () => {
+    it('proposes clearing tag filters without touching committed state or project exclusions', () => {
       const state = createState({
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
         excludedOverrides: ['p2'],
@@ -96,13 +100,29 @@ describe('createStoreReducers', () => {
 
       const nextState = reducers.clearProjectFilters(state);
 
-      expect(nextState.filterExpressions).toEqual(new Map());
+      expect(nextState.filterExpressions).toBe(state.filterExpressions);
+      expect(nextState.filteredProjectIds).toBe(state.filteredProjectIds);
+      expect(nextState.proposedFilters).toEqual({
+        filterExpressions: new Map(),
+        excludedOverrides: ['p2'],
+      });
       expect(nextState.excludedOverrides).toEqual(['p2']);
     });
 
-    it('does not clear project exclusions when there are no filter expressions', () => {
+    it('does not propose a change when there are no filter expressions', () => {
       const state = createState({
         excludedOverrides: ['p2'],
+      });
+
+      const nextState = reducers.clearProjectFilters(state);
+
+      expect(nextState).toBe(state);
+    });
+
+    it('does not propose a change when a pending proposal already has no filters', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        proposedFilters: { filterExpressions: new Map(), excludedOverrides: [] },
       });
 
       const nextState = reducers.clearProjectFilters(state);
@@ -112,7 +132,7 @@ describe('createStoreReducers', () => {
   });
 
   describe('#revertToSpaceDefaults', () => {
-    it('resets filters and overrides when reverting to space defaults', () => {
+    it('proposes space-default filters and overrides without touching committed state', () => {
       const state = createState({
         defaultProjectRouting: '_type:security AND (_id:* AND NOT _id:p2)',
         availableProjects: new Map([
@@ -125,16 +145,34 @@ describe('createStoreReducers', () => {
 
       const nextState = reducers.revertToSpaceDefaults(state);
 
-      expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
+      expect(nextState.filterExpressions).toBe(state.filterExpressions);
+      expect(nextState.excludedOverrides).toEqual(['p1']);
+      expect(nextState.proposedFilters?.filterExpressions.get(typeSecurityKey)).toEqual({
         expression: typeSecurityExpression,
         enabled: true,
       });
-      expect(nextState.excludedOverrides).toEqual(['p2']);
+      expect(nextState.proposedFilters?.excludedOverrides).toEqual(['p2']);
+    });
+
+    it('does not propose a change when already using space defaults', () => {
+      const state = createState({
+        defaultProjectRouting: '_type:security AND (_id:* AND NOT _id:p2)',
+        availableProjects: new Map([
+          ['p1', createProject({ _id: 'p1' })],
+          ['p2', createProject({ _id: 'p2' })],
+        ]),
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        excludedOverrides: ['p2'],
+      });
+
+      const nextState = reducers.revertToSpaceDefaults(state);
+
+      expect(nextState).toBe(state);
     });
   });
 
   describe('#addFilterExpression', () => {
-    it('adds filter expressions without touching overrides', () => {
+    it('proposes the added filter expression without touching committed state or overrides', () => {
       const state = createState({
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
         excludedOverrides: ['p1'],
@@ -144,19 +182,23 @@ describe('createStoreReducers', () => {
         expression: { operator: FilterOperator.EQUALS, tagName: '_region', tagValue: 'us-east-1' },
       });
 
-      expect(nextState.filterExpressions.size).toBe(2);
-      expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
+      expect(nextState.filterExpressions).toBe(state.filterExpressions);
+      expect(nextState.excludedOverrides).toEqual(['p1']);
+      expect(nextState.proposedFilters?.filterExpressions.size).toBe(2);
+      expect(nextState.proposedFilters?.filterExpressions.get(typeSecurityKey)).toEqual({
         expression: typeSecurityExpression,
         enabled: true,
       });
       expect(
-        [...nextState.filterExpressions.values()].map((entry) => entry.expression)
+        [...(nextState.proposedFilters?.filterExpressions.values() ?? [])].map(
+          (entry) => entry.expression
+        )
       ).toContainEqual({
         operator: FilterOperator.EQUALS,
         tagName: '_region',
         tagValue: 'us-east-1',
       });
-      expect(nextState.excludedOverrides).toEqual(['p1']);
+      expect(nextState.proposedFilters?.excludedOverrides).toEqual(['p1']);
     });
 
     it('does not add a duplicate filter expression', () => {
@@ -184,6 +226,23 @@ describe('createStoreReducers', () => {
       });
 
       expect(nextState).toBe(state);
+    });
+
+    it('stacks a second add on top of a still-pending proposal instead of the committed state', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      const afterFirstAdd = reducers.addFilterExpression(state, {
+        expression: regionUsEastExpression,
+      });
+      const afterSecondAdd = reducers.addFilterExpression(afterFirstAdd, {
+        expression: { operator: FilterOperator.EQUALS, tagName: '_organisation', tagValue: 'acme' },
+      });
+
+      // still untouched — proposals only ever commit atomically via `_commitProposedFilters`
+      expect(afterSecondAdd.filterExpressions).toBe(state.filterExpressions);
+      expect(afterSecondAdd.proposedFilters?.filterExpressions.size).toBe(3);
     });
   });
 
@@ -227,7 +286,7 @@ describe('createStoreReducers', () => {
       expect(nextState).toBe(state);
     });
 
-    it('updates an existing filter expression and re-keys when the expression changes', () => {
+    it('proposes the updated filter expression, re-keyed, without touching committed state', () => {
       const observabilityExpression = {
         operator: FilterOperator.EQUALS,
         tagName: '_type',
@@ -243,11 +302,12 @@ describe('createStoreReducers', () => {
         expression: observabilityExpression,
       });
 
-      expect(nextState.filterExpressions).toEqual(
+      expect(nextState.filterExpressions).toBe(state.filterExpressions);
+      expect(nextState.proposedFilters?.filterExpressions).toEqual(
         createFilterExpressions([[observabilityExpression]])
       );
-      expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
-      expect(nextState.filterExpressions.size).toBe(1);
+      expect(nextState.proposedFilters?.filterExpressions.has(typeSecurityKey)).toBe(false);
+      expect(nextState.proposedFilters?.filterExpressions.size).toBe(1);
     });
 
     it('does not change state when updating a missing filter id', () => {
@@ -269,7 +329,7 @@ describe('createStoreReducers', () => {
   });
 
   describe('#invertFilterExpressionOperator', () => {
-    it('re-keys when inverting a filter operator', () => {
+    it('proposes the re-keyed inverted filter without touching committed state', () => {
       const state = createState({
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       });
@@ -285,8 +345,9 @@ describe('createStoreReducers', () => {
       } as const;
       const invertedKey = getFilterExpressionLookupKey(invertedExpression);
 
-      expect(nextState.filterExpressions.has(typeSecurityKey)).toBe(false);
-      expect(nextState.filterExpressions.get(invertedKey)).toEqual({
+      expect(nextState.filterExpressions).toBe(state.filterExpressions);
+      expect(nextState.proposedFilters?.filterExpressions.has(typeSecurityKey)).toBe(false);
+      expect(nextState.proposedFilters?.filterExpressions.get(invertedKey)).toEqual({
         expression: invertedExpression,
         enabled: true,
       });
@@ -315,7 +376,7 @@ describe('createStoreReducers', () => {
   });
 
   describe('#removeFilterExpression', () => {
-    it('removes a filter expression by id', () => {
+    it('proposes removing a filter expression by id without touching committed state', () => {
       const state = createState({
         filterExpressions: createFilterExpressions([
           [typeSecurityExpression],
@@ -325,9 +386,136 @@ describe('createStoreReducers', () => {
 
       const nextState = reducers.removeFilterExpression(state, { filterId: typeSecurityKey });
 
+      expect(nextState.filterExpressions).toBe(state.filterExpressions);
+      expect(nextState.proposedFilters?.filterExpressions).toEqual(
+        createFilterExpressions([[regionUsEastExpression]])
+      );
+    });
+  });
+
+  describe('#_commitProposedFilters', () => {
+    it('applies the proposal to committed state, sets filteredProjectIds, and clears the proposal', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        excludedOverrides: ['p2'],
+        proposedFilters: {
+          filterExpressions: createFilterExpressions([[regionUsEastExpression]]),
+          excludedOverrides: ['p3'],
+        },
+        isFilterSearchLoading: true,
+        filterSearchError: new Error('previous failure'),
+      });
+
+      const nextState = reducers._commitProposedFilters(state, {
+        filteredProjectIds: ['p1'],
+      });
+
       expect(nextState.filterExpressions).toEqual(
         createFilterExpressions([[regionUsEastExpression]])
       );
+      expect(nextState.excludedOverrides).toEqual(['p3']);
+      expect(nextState.filteredProjectIds).toEqual(['p1']);
+      expect(nextState.proposedFilters).toBeNull();
+      expect(nextState.filterSearchError).toBeNull();
+      expect(nextState.isFilterSearchLoading).toBe(false);
+    });
+
+    it('is a no-op when there is no pending proposal', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1'],
+      });
+
+      const nextState = reducers._commitProposedFilters(state, {
+        filteredProjectIds: ['p2'],
+      });
+
+      expect(nextState).toBe(state);
+    });
+  });
+
+  describe('#_setFilterSearchLoading', () => {
+    it('sets isFilterSearchLoading and clears any previous error', () => {
+      const state = createState({
+        proposedFilters: {
+          filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+          excludedOverrides: [],
+        },
+        filterSearchError: new Error('previous failure'),
+      });
+
+      const nextState = reducers._setFilterSearchLoading(state);
+
+      expect(nextState.isFilterSearchLoading).toBe(true);
+      expect(nextState.filterSearchError).toBeNull();
+      expect(nextState.proposedFilters).toBe(state.proposedFilters);
+    });
+
+    it('is a no-op when already loading with no error', () => {
+      const state = createState({ isFilterSearchLoading: true, filterSearchError: null });
+
+      const nextState = reducers._setFilterSearchLoading(state);
+
+      expect(nextState).toBe(state);
+    });
+  });
+
+  describe('#_setFilterSearchError', () => {
+    it('records the error, stops loading, and leaves the pending proposal intact', () => {
+      const proposedFilters = {
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        excludedOverrides: [],
+      };
+      const state = createState({ proposedFilters, isFilterSearchLoading: true });
+      const error = new Error('search failed');
+
+      const nextState = reducers._setFilterSearchError(state, { error });
+
+      expect(nextState.filterSearchError).toBe(error);
+      expect(nextState.isFilterSearchLoading).toBe(false);
+      expect(nextState.proposedFilters).toBe(proposedFilters);
+    });
+  });
+
+  describe('#_setStoreState rehydration through the propose/commit pipeline', () => {
+    it('stages differing incoming filters as a proposal instead of committing them directly', () => {
+      const availableProjects = new Map([
+        ['p1', createProject({ _id: 'p1' })],
+        ['p2', createProject({ _id: 'p2' })],
+      ]);
+      const state = createState({
+        availableProjects,
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1'],
+      });
+
+      const nextState = reducers._setStoreState(state, {
+        availableProjects,
+        filterExpressions: [regionUsEastExpression],
+        excludedOverrides: [],
+      });
+
+      expect(nextState.filterExpressions).toBe(state.filterExpressions);
+      expect(nextState.filteredProjectIds).toBe(state.filteredProjectIds);
+      expect(nextState.proposedFilters?.filterExpressions).toEqual(
+        createFilterExpressions([[regionUsEastExpression]])
+      );
+    });
+
+    it('does not stage a proposal when the incoming filters match the committed ones', () => {
+      const availableProjects = new Map([['p1', createProject({ _id: 'p1' })]]);
+      const state = createState({
+        availableProjects,
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      const nextState = reducers._setStoreState(state, {
+        availableProjects,
+        filterExpressions: [typeSecurityExpression],
+        excludedOverrides: [],
+      });
+
+      expect(nextState.proposedFilters).toBeNull();
     });
   });
 
@@ -548,11 +736,10 @@ describe('createStoreReducers', () => {
         expression: typeSecurityExpression,
       });
       const rehydrated = reducers._setStoreState(modified, { availableProjects });
-      const afterSearchResult = reducers._setFilterSearchResult(rehydrated, {
-        isFilterSearchLoading: false,
-        filterSearchError: null,
+      const afterCommit = reducers._commitProposedFilters(rehydrated, {
+        filteredProjectIds: [],
       });
-      const afterControls = reducers._setControlsState(afterSearchResult, {
+      const afterControls = reducers._setControlsState(afterCommit, {
         controlsState: 'disabled',
       });
 

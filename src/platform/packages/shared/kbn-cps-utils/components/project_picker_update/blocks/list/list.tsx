@@ -9,7 +9,7 @@
 
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerListItem, type ProjectPickerListItemProps } from './list_item';
@@ -165,6 +165,15 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
           projectTags={getProjectTags(activeProject)}
         />
       ) : null}
+      {state.isFilterProposalPending && (
+        <EuiFlexItem grow={false}>
+          <EuiProgress
+            size="xs"
+            color="primary"
+            data-test-subj="projectPickerListLoadingIndicator"
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
           {projectsToRender.map((project) => {
@@ -175,6 +184,7 @@ export function ProjectPickerList({ scrollContainerRef }: ProjectPickerListProps
                 <ProjectPickerListItem
                   isSelected={isSelected}
                   isToggleDisabled={isSelected && includedVisibleProjectIds.length === 1}
+                  isInteractionsDisabled={state.isFilterProposalPending}
                   controlsState={state.controlsState}
                   isOriginProject={state.originProjectId === project._id}
                   toggleDisabledMessage={toggleDisabledMessage}

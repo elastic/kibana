@@ -24,7 +24,7 @@ import {
   from,
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { PROJECT_ROUTING } from '..';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
 import {

@@ -12,9 +12,11 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { CPSProject } from '../../../types';
+import type { CPSProject, ProjectsData } from '../../../types';
 import { ProjectPickerList } from '../blocks/list/list';
 import { getProjectPickerListItemSwitchTestSubj } from '../blocks/list/list_item/list_item';
+import { ProjectPickerFrameHeader } from '../blocks/frame/partials/header/header';
+import { ProjectPickerFrameBodyHeader } from '../blocks/frame/partials/body/body';
 import { FilterOperator, type FilterExpressionValue } from '../utils/filter_input_codec';
 import {
   PROJECT_SELECTION_DIMENSION,
@@ -129,6 +131,42 @@ const renderProjectPicker = (
   );
 
   return { onProjectRoutingChange };
+};
+
+const renderFullProjectPicker = (
+  props: Partial<Omit<ProjectPickerStateProviderProps, 'children'>> = {}
+) => {
+  const onProjectRoutingChange = props.onProjectRoutingChange ?? jest.fn();
+
+  render(
+    <ProjectPickerStateProvider
+      {...defaultProviderProps}
+      {...props}
+      onProjectRoutingChange={onProjectRoutingChange}
+    >
+      <ProjectPickerFrameHeader />
+      <ProjectPickerFrameBodyHeader />
+      <ProjectPickerList />
+    </ProjectPickerStateProvider>
+  );
+
+  return { onProjectRoutingChange };
+};
+
+const createDeferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+
+const clickRevertToSpaceDefaults = async (user: UserEvent) => {
+  const [globalActionsButton] = screen.getAllByRole('button');
+  await user.click(globalActionsButton);
+  await user.click(screen.getByText('Revert to space defaults').closest('button')!);
 };
 
 const AddFilterExpression = ({
@@ -524,6 +562,95 @@ describe('ProjectPickerStateProvider', () => {
       });
 
       expect(fetchProjectsByRouting.mock.calls.length).toBe(callsAfterFilter);
+    });
+  });
+
+  describe('propose-then-commit filter state (no-flash behavior)', () => {
+    it('keeps the current list and warning-free while a proposal is in flight, then applies the result atomically once it resolves', async () => {
+      const user = userEvent.setup();
+      const deferred = createDeferred<ProjectsData>();
+      const fetchProjectsByRouting = jest.fn(() => deferred.promise);
+
+      renderFullProjectPicker({
+        defaultProjectRoutingGetter: () => '_type:security',
+        currentProjectRoutingGetter: () => '',
+        fetchProjectsByRouting,
+      });
+
+      // before any change, all three catalog projects are shown and nothing warns
+      expect(getProjectListItemSwitch(originProject._id)).toBeInTheDocument();
+      expect(getProjectListItemSwitch(linkedProjectOne._id)).toBeInTheDocument();
+      expect(getProjectListItemSwitch(linkedProjectTwo._id)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('projectPickerFilterDisplayNoMatchCallout')
+      ).not.toBeInTheDocument();
+
+      await clickRevertToSpaceDefaults(user);
+
+      await waitFor(() => {
+        expect(fetchProjectsByRouting).toHaveBeenCalledWith('_type:security');
+      });
+
+      // proposal is pending: loader is visible, previously-shown projects are still rendered
+      // untouched, and the no-matches warning never flashes in the gap before the fetch resolves
+      expect(screen.getByTestId('projectPickerListLoadingIndicator')).toBeInTheDocument();
+      expect(getProjectListItemSwitch(originProject._id)).toBeInTheDocument();
+      expect(getProjectListItemSwitch(linkedProjectOne._id)).toBeInTheDocument();
+      expect(getProjectListItemSwitch(linkedProjectTwo._id)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('projectPickerFilterDisplayNoMatchCallout')
+      ).not.toBeInTheDocument();
+
+      deferred.resolve({ origin: null, linkedProjects: [linkedProjectOne] });
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('projectPickerListLoadingIndicator')).not.toBeInTheDocument();
+      });
+
+      // the committed list now reflects the resolved proposal, still without ever having warned
+      expect(getProjectListItemSwitch(linkedProjectOne._id)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId(getProjectPickerListItemSwitchTestSubj(originProject._id))
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('projectPickerFilterDisplayNoMatchCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('leaves the proposal and current list intact and shows an error callout when the search fails', async () => {
+      const user = userEvent.setup();
+      const deferred = createDeferred<ProjectsData>();
+      const fetchProjectsByRouting = jest.fn(() => deferred.promise);
+
+      renderFullProjectPicker({
+        defaultProjectRoutingGetter: () => '_type:security',
+        currentProjectRoutingGetter: () => '',
+        fetchProjectsByRouting,
+      });
+
+      await clickRevertToSpaceDefaults(user);
+
+      await waitFor(() => {
+        expect(fetchProjectsByRouting).toHaveBeenCalledWith('_type:security');
+      });
+
+      deferred.reject(new Error('network down'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('projectPickerFilterSearchErrorCallout')).toBeInTheDocument();
+      });
+
+      // the failed proposal's filters stay visible and the previously-shown list is untouched;
+      // the proposal itself is still pending (the user hasn't resolved the error yet), so the
+      // "edit in progress" indicator stays up alongside the error callout
+      expect(screen.getByText('_type:security')).toBeInTheDocument();
+      expect(getProjectListItemSwitch(originProject._id)).toBeInTheDocument();
+      expect(getProjectListItemSwitch(linkedProjectOne._id)).toBeInTheDocument();
+      expect(getProjectListItemSwitch(linkedProjectTwo._id)).toBeInTheDocument();
+      expect(screen.getByTestId('projectPickerListLoadingIndicator')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('projectPickerFilterDisplayNoMatchCallout')
+      ).not.toBeInTheDocument();
     });
   });
 });

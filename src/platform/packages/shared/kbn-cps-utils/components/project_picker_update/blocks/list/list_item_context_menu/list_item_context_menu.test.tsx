@@ -21,31 +21,35 @@ const createProject = (id: string): CPSProject => ({
   _csp: 'AWS',
 });
 
-const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  controlsState: 'enabled',
-  originProjectId: 'origin',
-  defaultProjectRouting: '',
-  projectRoutingStrategy: 'dynamic',
-  hasUserModifiedRouting: false,
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map([
-    ['p1', createProject('p1')],
-    ['p2', createProject('p2')],
-  ]),
-  excludedOverrides: [],
-  filteredProjectIds: ['p1', 'p2'],
-  isFilterSearchLoading: false,
-  filterSearchError: null,
-  visibleProjectIds: ['p1', 'p2'],
-  selectedProjectIds: ['p1', 'p2'],
-  currentProjectRouting: '',
-  isUsingSpaceDefaults: false,
-  ...overrides,
-  defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
-  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
-  originProjectId: overrides.originProjectId,
-});
+const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
+  const filterExpressions = overrides.filterExpressions ?? new Map();
+
+  return {
+    controlsState: 'enabled',
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
+    filterExpressions,
+    filteringDimensions: [],
+    availableProjects: new Map([
+      ['p1', createProject('p1')],
+      ['p2', createProject('p2')],
+    ]),
+    excludedOverrides: [],
+    proposedFilters: null,
+    filteredProjectIds: ['p1', 'p2'],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
+    visibleProjectIds: ['p1', 'p2'],
+    selectedProjectIds: ['p1', 'p2'],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
+    ...overrides,
+  };
+};
 
 describe('getProjectPickerListContextMenuConfig', () => {
   const actions = {

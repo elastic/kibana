@@ -28,17 +28,17 @@ import {
   intersectServerMatchIds,
 } from '../utils/state_utils';
 import { type CPSProject, type ProjectsData } from '../../../types';
-import {
-  createFilterExpressionsMap,
-  parseDefaultProjectRouting,
-  type ProjectRoutingStrategy,
-} from '../utils';
+import { parseDefaultProjectRouting, type ProjectRoutingStrategy } from '../utils';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
   actions: Omit<
     ActionsFromReducers<ReturnType<typeof createStoreReducers>>,
-    '_setStoreState' | '_setFilterSearchResult' | '_setControlsState'
+    | '_setStoreState'
+    | '_setControlsState'
+    | '_commitProposedFilters'
+    | '_setFilterSearchLoading'
+    | '_setFilterSearchError'
   >;
   fetchProjectsByRouting: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
 }
@@ -107,43 +107,43 @@ export const useFetchProjectsByRouting = () => {
   return ctx.fetchProjectsByRouting;
 };
 
+/**
+ * Builds the store's pre-mount state. Committed `filterExpressions`/`excludedOverrides` start
+ * empty — matching the also-empty `filteredProjectIds` — rather than being parsed eagerly from
+ * the incoming routing: that parsing (and the resulting proposal/search/commit) is instead
+ * driven by the mount `_setStoreState` effect below, so the initial routing is bootstrapped
+ * through the exact same propose-then-commit pipeline as any later prop-driven change.
+ */
 const createInitialPickerState = ({
   availableProjects,
-  currentProjectRouting,
   defaultProjectRouting,
   controlsState,
   originProjectId,
   projectRoutingStrategy,
 }: Pick<
   ProjectPickerState,
-  | 'currentProjectRouting'
-  | 'defaultProjectRouting'
-  | 'controlsState'
-  | 'originProjectId'
-  | 'projectRoutingStrategy'
-> & { availableProjects: CPSProject[] }): ProjectPickerState => {
-  const availableProjectIds = availableProjects.map((project) => project._id);
-  const parsed = parseDefaultProjectRouting(currentProjectRouting, availableProjectIds);
-
-  return {
-    controlsState,
-    originProjectId,
-    defaultProjectRouting,
-    projectRoutingStrategy,
-    hasUserModifiedRouting: false,
-    filterExpressions: createFilterExpressionsMap(parsed.filterExpressions),
-    filteringDimensions: [],
-    availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
-    excludedOverrides: [...parsed.excludedOverrides],
-    filteredProjectIds: [],
-    isFilterSearchLoading: false,
-    filterSearchError: null,
-    visibleProjectIds: [],
-    selectedProjectIds: [],
-    currentProjectRouting: '',
-    isUsingSpaceDefaults: false,
-  };
-};
+  'defaultProjectRouting' | 'controlsState' | 'originProjectId' | 'projectRoutingStrategy'
+> & { availableProjects: CPSProject[] }): ProjectPickerState => ({
+  controlsState,
+  originProjectId,
+  defaultProjectRouting,
+  projectRoutingStrategy,
+  hasUserModifiedRouting: false,
+  filterExpressions: new Map(),
+  filteringDimensions: [],
+  availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
+  excludedOverrides: [],
+  proposedFilters: null,
+  filteredProjectIds: [],
+  isFilterSearchLoading: false,
+  filterSearchError: null,
+  visibleProjectIds: [],
+  selectedProjectIds: [],
+  currentProjectRouting: '',
+  isUsingSpaceDefaults: false,
+  displayedFilterExpressions: new Map(),
+  isFilterProposalPending: false,
+});
 
 export const ProjectPickerStateProvider = ({
   children,
@@ -165,7 +165,6 @@ export const ProjectPickerStateProvider = ({
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: createInitialPickerState({
       availableProjects,
-      currentProjectRouting: currentProjectRoutingGetter() ?? defaultProjectRoutingGetter(),
       defaultProjectRouting: defaultProjectRoutingGetter(),
       controlsState,
       originProjectId,
@@ -195,7 +194,14 @@ export const ProjectPickerStateProvider = ({
     store.actions._setControlsState({ controlsState });
   }, [controlsState, store.actions]);
 
-  const enabledFiltersIdentity = getEnabledFiltersIdentity(store.state.filterExpressions);
+  // The identity of the pending proposal's enabled filters, or null when there is no proposal
+  // to resolve. Search re-runs are keyed off this rather than off `proposedFilters` itself, so
+  // a proposal that changes only `excludedOverrides` (no re-fetch needed) doesn't refire it —
+  // whichever proposal is live when an in-flight fetch for a given identity resolves is the one
+  // that gets committed, since `_commitProposedFilters` always reads the latest `proposedFilters`.
+  const proposedFiltersIdentity = store.state.proposedFilters
+    ? getEnabledFiltersIdentity(store.state.proposedFilters.filterExpressions)
+    : null;
 
   const runFilterSearch = useCallback(
     async (filterIdentity: string, availableProjectsMap: Map<string, CPSProject>) => {
@@ -204,18 +210,11 @@ export const ProjectPickerStateProvider = ({
       filterFetchAbortRef.current = abortController;
 
       if (!filterIdentity) {
-        store.actions._setFilterSearchResult({
-          filteredProjectIds: [],
-          isFilterSearchLoading: false,
-          filterSearchError: null,
-        });
+        store.actions._commitProposedFilters({ filteredProjectIds: [] });
         return;
       }
 
-      store.actions._setFilterSearchResult({
-        isFilterSearchLoading: true,
-        filterSearchError: null,
-      });
+      store.actions._setFilterSearchLoading();
 
       try {
         const data = await fetchProjectsByRoutingRef.current(filterIdentity);
@@ -226,19 +225,14 @@ export const ProjectPickerStateProvider = ({
         const serverIds = collectProjectIdsFromProjectsData(data);
         const filteredProjectIds = intersectServerMatchIds(availableProjectsMap, serverIds);
 
-        store.actions._setFilterSearchResult({
-          filteredProjectIds,
-          isFilterSearchLoading: false,
-          filterSearchError: null,
-        });
+        store.actions._commitProposedFilters({ filteredProjectIds });
       } catch (error) {
         if (abortController.signal.aborted) {
           return;
         }
 
-        store.actions._setFilterSearchResult({
-          isFilterSearchLoading: false,
-          filterSearchError: error instanceof Error ? error : new Error(String(error)),
+        store.actions._setFilterSearchError({
+          error: error instanceof Error ? error : new Error(String(error)),
         });
       }
     },
@@ -246,25 +240,31 @@ export const ProjectPickerStateProvider = ({
   );
 
   useEffect(() => {
+    if (proposedFiltersIdentity === null) {
+      return;
+    }
+
     const availableProjectsMap = new Map(
       availableProjects.map((project) => [project._id, project])
     );
-    void runFilterSearch(enabledFiltersIdentity, availableProjectsMap);
+    void runFilterSearch(proposedFiltersIdentity, availableProjectsMap);
 
     return () => {
       filterFetchAbortRef.current?.abort();
     };
-  }, [enabledFiltersIdentity, availableProjects, runFilterSearch]);
+  }, [proposedFiltersIdentity, availableProjects, runFilterSearch]);
 
   useEffect(() => {
     const routing = store.state.currentProjectRouting;
 
-    // Only report routing changes that originate from user edits, once any in-flight
-    // filter search has settled — never rewrite the incoming routing on mount, even
-    // when it was encoded with a different strategy than the configured one.
+    // Only report routing changes that originate from user edits, once any pending proposal has
+    // been confirmed or has failed — never rewrite the incoming routing on mount, even when it
+    // was encoded with a different strategy than the configured one. Gating on `proposedFilters`
+    // (rather than just the in-flight loading flag) also means a routing computed from
+    // pre-proposal selection/results is never reported while a newer filter set is still pending.
     if (
       store.state.hasUserModifiedRouting &&
-      !store.state.isFilterSearchLoading &&
+      store.state.proposedFilters === null &&
       routing !== (currentProjectRoutingGetter() ?? '') &&
       store.state.controlsState === 'enabled'
     ) {
@@ -276,12 +276,18 @@ export const ProjectPickerStateProvider = ({
     currentProjectRoutingGetter,
     store.state.controlsState,
     store.state.hasUserModifiedRouting,
-    store.state.isFilterSearchLoading,
+    store.state.proposedFilters,
   ]);
 
   const contextValue = useMemo((): ProjectPickerContext => {
-    const { _setStoreState, _setFilterSearchResult, _setControlsState, ...publicActions } =
-      store.actions;
+    const {
+      _setStoreState,
+      _setControlsState,
+      _commitProposedFilters,
+      _setFilterSearchLoading,
+      _setFilterSearchError,
+      ...publicActions
+    } = store.actions;
 
     return {
       state: store.state,

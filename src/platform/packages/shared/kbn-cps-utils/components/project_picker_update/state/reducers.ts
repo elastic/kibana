@@ -33,6 +33,12 @@ export interface FilterEntry {
 
 export type ProjectPickerControlsState = 'enabled' | 'disabled' | 'hidden';
 
+/** A filter/selection edit that hasn't been confirmed by the server yet. */
+export interface ProposedFilters {
+  filterExpressions: Map<string, FilterEntry>;
+  excludedOverrides: string[];
+}
+
 export interface ProjectPickerStoredState {
   controlsState: ProjectPickerControlsState;
   originProjectId?: string;
@@ -44,9 +50,23 @@ export interface ProjectPickerStoredState {
    */
   hasUserModifiedRouting: boolean;
   filteringDimensions: string[];
+  /**
+   * Committed filter expressions. Only ever changes together with {@link ProjectPickerStoredState.excludedOverrides}
+   * and {@link ProjectPickerState.filteredProjectIds}, all at once, when a proposal is confirmed (see
+   * the `_commitProposedFilters` reducer) — so these three can never describe different filter
+   * generations, and the list can never be derived from mismatched inputs.
+   */
   filterExpressions: Map<string, FilterEntry>;
   availableProjects: Map<CPSProject['_id'], CPSProject>;
+  /** Committed selection overrides — see {@link ProjectPickerStoredState.filterExpressions}. */
   excludedOverrides: string[];
+  /**
+   * A filter/selection edit the user has requested but that the server hasn't confirmed yet.
+   * While set, {@link ProjectPickerStoredState.filterExpressions} and
+   * {@link ProjectPickerStoredState.excludedOverrides} stay exactly as they were, so the
+   * currently-rendered list is never recomputed from a mix of new filters and stale results.
+   */
+  proposedFilters: ProposedFilters | null;
 }
 
 export interface ProjectPickerState extends ProjectPickerStoredState {
@@ -62,7 +82,8 @@ export interface ProjectPickerState extends ProjectPickerStoredState {
    */
   isFilterSearchLoading: boolean;
   /**
-   * Last filter-search error, if any.
+   * Last filter-search error, if any. The proposal that triggered it stays pending so the
+   * attempted filters remain visible alongside the error.
    */
   filterSearchError: Error | null;
   /**
@@ -74,6 +95,14 @@ export interface ProjectPickerState extends ProjectPickerStoredState {
    * considering if the user has made any overrides to exclude certain projects from the list.
    */
   selectedProjectIds: string[];
+  /**
+   * {@link ProjectPickerStoredState.proposedFilters}' filters when a proposal is pending, otherwise the
+   * committed {@link ProjectPickerStoredState.filterExpressions}. What filter chips/menus should read so
+   * edits are reflected immediately, ahead of server confirmation.
+   */
+  displayedFilterExpressions: Map<string, FilterEntry>;
+  /** True while a filter/selection edit is awaiting server confirmation. */
+  isFilterProposalPending: boolean;
 }
 
 const addOverrides = (overrides: string[], projectIds: string[]): string[] => {
@@ -82,6 +111,52 @@ const addOverrides = (overrides: string[], projectIds: string[]): string[] => {
 
 const removeOverrides = (overrides: string[], projectIds: string[]): string[] => {
   return overrides.filter((id) => !projectIds.includes(id));
+};
+
+/**
+ * The filters a filter-editing reducer should build on: a pending proposal if one exists,
+ * otherwise the committed filters. Lets edits stack correctly when the user changes filters
+ * again before a prior proposal has been confirmed by the server.
+ */
+const getEffectiveFilters = (state: ProjectPickerState): ProposedFilters =>
+  state.proposedFilters ?? {
+    filterExpressions: state.filterExpressions,
+    excludedOverrides: state.excludedOverrides,
+  };
+
+const sameProjectIdSet = (a: string[], b: string[]): boolean => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  const bSet = new Set(b);
+  return a.every((id) => bSet.has(id));
+};
+
+/**
+ * Stages a candidate filter/selection edit as a proposal rather than committing it directly, so
+ * {@link ProjectPickerStoredState.filterExpressions}/{@link ProjectPickerStoredState.excludedOverrides}
+ * and the {@link ProjectPickerState.filteredProjectIds} search results they pair with only ever change
+ * together, atomically, once the server confirms the edit (see `_commitProposedFilters`).
+ *
+ * When the candidate is identical to what's already committed, any pending proposal is dropped
+ * instead — this is what lets a user's edit that round-trips back to the live state (e.g. toggling
+ * a filter off then on again) cancel a pending, now-superseded server search instead of leaving it
+ * to commit and clobber the reversal.
+ */
+const proposeFilters = (
+  state: ProjectPickerState,
+  candidate: ProposedFilters
+): ProjectPickerState => {
+  const matchesCommitted =
+    getEnabledFiltersIdentity(candidate.filterExpressions) ===
+      getEnabledFiltersIdentity(state.filterExpressions) &&
+    sameProjectIdSet(candidate.excludedOverrides, state.excludedOverrides);
+
+  if (matchesCommitted) {
+    return state.proposedFilters === null ? state : { ...state, proposedFilters: null };
+  }
+
+  return { ...state, proposedFilters: candidate, filterSearchError: null };
 };
 
 /**
@@ -100,9 +175,13 @@ export function createStoreReducers() {
   return {
     /**
      * This action is used to set the entire store state, it should be used sparingly.
+     *
+     * When the incoming (prop-driven) filters differ from what's committed, they're staged as a
+     * proposal — exactly like a user-initiated filter edit — rather than committed directly, so
+     * the currently-rendered list stays untouched until the server confirms the new filter set.
      */
     _setStoreState(
-      _state: ProjectPickerState,
+      state: ProjectPickerState,
       payload: Pick<ProjectPickerState, 'availableProjects'> & {
         defaultProjectRouting?: ProjectRouting;
         filterExpressions?: FilterExpressionValue[];
@@ -117,36 +196,34 @@ export function createStoreReducers() {
               excludedOverrides: payload.excludedOverrides,
             }
           : parseDefaultProjectRouting(
-              payload.defaultProjectRouting ?? _state.defaultProjectRouting,
+              payload.defaultProjectRouting ?? state.defaultProjectRouting,
               availableProjectIds
             );
 
       const filterExpressions = createFilterExpressionsMap(parsed.filterExpressions);
+      const excludedOverrides = [...parsed.excludedOverrides];
 
-      // filteredProjectIds is only valid for the filter set that produced it, and nothing
-      // re-fetches it unless the enabled-filter identity changes — so only reset it here when
-      // the filter set is actually changing, not on every rehydration.
       const filtersUnchanged =
-        getEnabledFiltersIdentity(_state.filterExpressions) ===
-        getEnabledFiltersIdentity(filterExpressions);
+        getEnabledFiltersIdentity(state.filterExpressions) ===
+          getEnabledFiltersIdentity(filterExpressions) &&
+        sameProjectIdSet(excludedOverrides, state.excludedOverrides);
 
-      return {
-        ..._state,
+      const nextState = {
+        ...state,
         availableProjects: payload.availableProjects,
         ...(payload.defaultProjectRouting !== undefined
           ? { defaultProjectRouting: payload.defaultProjectRouting }
           : {}),
-        filterExpressions,
-        excludedOverrides: [...parsed.excludedOverrides],
-        // these states are derived values we reset them for completeness, their values will be recomputed based on the new state
-        filteringDimensions: [],
-        ...(filtersUnchanged
-          ? {}
-          : { filteredProjectIds: [], isFilterSearchLoading: false, filterSearchError: null }),
-        selectedProjectIds: [],
-        visibleProjectIds: [],
-        currentProjectRouting: '',
-        isUsingSpaceDefaults: false,
+      };
+
+      if (filtersUnchanged) {
+        return nextState;
+      }
+
+      return {
+        ...nextState,
+        proposedFilters: { filterExpressions, excludedOverrides },
+        filterSearchError: null,
       };
     },
     /**
@@ -166,24 +243,41 @@ export function createStoreReducers() {
       };
     },
     /**
-     * Updates filter search loading / result state from an async server fetch.
+     * Confirms the pending proposal: the proposed filters/overrides and the search results they
+     * were fetched for replace the committed ones together, in a single state update, and the
+     * proposal is cleared. No-op if there is no pending proposal.
      */
-    _setFilterSearchResult(
-      state: ProjectPickerState,
-      payload: {
-        filteredProjectIds?: string[];
-        isFilterSearchLoading: boolean;
-        filterSearchError: Error | null;
+    _commitProposedFilters(state: ProjectPickerState, payload: { filteredProjectIds: string[] }) {
+      if (!state.proposedFilters) {
+        return state;
       }
-    ) {
+
       return {
         ...state,
-        ...(payload.filteredProjectIds !== undefined
-          ? { filteredProjectIds: payload.filteredProjectIds }
-          : {}),
-        isFilterSearchLoading: payload.isFilterSearchLoading,
-        filterSearchError: payload.filterSearchError,
+        filterExpressions: state.proposedFilters.filterExpressions,
+        excludedOverrides: state.proposedFilters.excludedOverrides,
+        filteredProjectIds: payload.filteredProjectIds,
+        proposedFilters: null,
+        filterSearchError: null,
+        isFilterSearchLoading: false,
       };
+    },
+    /**
+     * Marks the pending proposal's server search as in flight.
+     */
+    _setFilterSearchLoading(state: ProjectPickerState) {
+      if (state.isFilterSearchLoading && state.filterSearchError === null) {
+        return state;
+      }
+
+      return { ...state, isFilterSearchLoading: true, filterSearchError: null };
+    },
+    /**
+     * Records that the pending proposal's server search failed. The proposal itself is left
+     * intact so the attempted filters stay visible alongside the error.
+     */
+    _setFilterSearchError(state: ProjectPickerState, payload: { error: Error }) {
+      return { ...state, filterSearchError: payload.error, isFilterSearchLoading: false };
     },
     /**
      * Adds a new filter expression.
@@ -194,18 +288,19 @@ export function createStoreReducers() {
           return state;
         }
 
+        const base = getEffectiveFilters(state);
         const id = getFilterExpressionLookupKey(payload.expression);
-        if (state.filterExpressions.has(id)) {
+        if (base.filterExpressions.has(id)) {
           return state;
         }
 
-        const filterExpressions = new Map(state.filterExpressions);
+        const filterExpressions = new Map(base.filterExpressions);
         filterExpressions.set(id, { expression: payload.expression, enabled: true });
 
-        return {
-          ...state,
+        return proposeFilters(state, {
           filterExpressions,
-        };
+          excludedOverrides: base.excludedOverrides,
+        });
       }
     ),
     /**
@@ -217,17 +312,18 @@ export function createStoreReducers() {
           return state;
         }
 
-        const existing = state.filterExpressions.get(payload.id);
+        const base = getEffectiveFilters(state);
+        const existing = base.filterExpressions.get(payload.id);
         if (!existing) {
           return state;
         }
 
         const nextKey = getFilterExpressionLookupKey(payload.expression);
-        if (nextKey !== payload.id && state.filterExpressions.has(nextKey)) {
+        if (nextKey !== payload.id && base.filterExpressions.has(nextKey)) {
           return state;
         }
 
-        const filterExpressions = new Map(state.filterExpressions);
+        const filterExpressions = new Map(base.filterExpressions);
 
         if (nextKey !== payload.id) {
           filterExpressions.delete(payload.id);
@@ -235,10 +331,10 @@ export function createStoreReducers() {
 
         filterExpressions.set(nextKey, { ...existing, expression: payload.expression });
 
-        return {
-          ...state,
+        return proposeFilters(state, {
           filterExpressions,
-        };
+          excludedOverrides: base.excludedOverrides,
+        });
       }
     ),
     /**
@@ -246,13 +342,14 @@ export function createStoreReducers() {
      */
     removeFilterExpression: withUserInteractionMiddleware(
       (state: ProjectPickerState, payload: { filterId: string }) => {
-        const filterExpressions = new Map(state.filterExpressions);
+        const base = getEffectiveFilters(state);
+        const filterExpressions = new Map(base.filterExpressions);
         filterExpressions.delete(payload.filterId);
 
-        return {
-          ...state,
+        return proposeFilters(state, {
           filterExpressions,
-        };
+          excludedOverrides: base.excludedOverrides,
+        });
       }
     ),
     /**
@@ -260,7 +357,8 @@ export function createStoreReducers() {
      */
     toggleFilterExpression: withUserInteractionMiddleware(
       (state: ProjectPickerState, payload: { filterId: string }) => {
-        const filterExpressions = new Map(state.filterExpressions);
+        const base = getEffectiveFilters(state);
+        const filterExpressions = new Map(base.filterExpressions);
         const existing = filterExpressions.get(payload.filterId);
 
         if (!existing) {
@@ -269,10 +367,10 @@ export function createStoreReducers() {
 
         filterExpressions.set(payload.filterId, { ...existing, enabled: !existing.enabled });
 
-        return {
-          ...state,
+        return proposeFilters(state, {
           filterExpressions,
-        };
+          excludedOverrides: base.excludedOverrides,
+        });
       }
     ),
     /**
@@ -280,7 +378,8 @@ export function createStoreReducers() {
      */
     invertFilterExpressionOperator: withUserInteractionMiddleware(
       (state: ProjectPickerState, payload: { filterId: string }) => {
-        const filterExpressions = new Map(state.filterExpressions);
+        const base = getEffectiveFilters(state);
+        const filterExpressions = new Map(base.filterExpressions);
         const existing = filterExpressions.get(payload.filterId);
 
         if (!existing) {
@@ -329,24 +428,25 @@ export function createStoreReducers() {
           expression: inverted,
         });
 
-        return {
-          ...state,
+        return proposeFilters(state, {
           filterExpressions,
-        };
+          excludedOverrides: base.excludedOverrides,
+        });
       }
     ),
     /**
      * Clears all filter expressions.
      */
     clearProjectFilters: withUserInteractionMiddleware((state: ProjectPickerState) => {
-      if (state.filterExpressions.size === 0) {
+      const base = getEffectiveFilters(state);
+      if (base.filterExpressions.size === 0) {
         return state;
       }
 
-      return {
-        ...state,
+      return proposeFilters(state, {
         filterExpressions: new Map<string, FilterEntry>(),
-      };
+        excludedOverrides: base.excludedOverrides,
+      });
     }),
     /**
      * Excludes the provided project ids from the selected projects list.
@@ -380,11 +480,10 @@ export function createStoreReducers() {
         Array.from(state.availableProjects.keys())
       );
 
-      return {
-        ...state,
+      return proposeFilters(state, {
         filterExpressions: createFilterExpressionsMap(parsed.filterExpressions),
         excludedOverrides: [...parsed.excludedOverrides],
-      };
+      });
     }),
     /**
      * Includes all visible projects.

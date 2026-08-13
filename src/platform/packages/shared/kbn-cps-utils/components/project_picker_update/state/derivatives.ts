@@ -57,6 +57,18 @@ export const computeSelectedProjects = (
   return base.filter((id) => !state.excludedOverrides.includes(id));
 };
 
+/**
+ * The filters chips/menus should read: the pending proposal's filters if one exists, otherwise
+ * the committed ones. Lets edits appear immediately in the UI, ahead of server confirmation.
+ */
+export const computeDisplayedFilterExpressions = (
+  state: Pick<ProjectPickerState, 'proposedFilters' | 'filterExpressions'>
+): Map<string, FilterEntry> => state.proposedFilters?.filterExpressions ?? state.filterExpressions;
+
+export const computeIsFilterProposalPending = (
+  state: Pick<ProjectPickerState, 'proposedFilters'>
+): boolean => state.proposedFilters !== null;
+
 export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
   let routing = projectRoutingCodec.encode({
     filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
@@ -87,6 +99,14 @@ export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
  * Order is important here, when derivations depend on other derivations, they should be computed after the dependent derivations.
  */
 export const projectPickerDerivatives = [
+  {
+    key: 'displayedFilterExpressions',
+    compute: (state: ProjectPickerState) => computeDisplayedFilterExpressions(state),
+  },
+  {
+    key: 'isFilterProposalPending',
+    compute: (state: ProjectPickerState) => computeIsFilterProposalPending(state),
+  },
   {
     key: 'visibleProjectIds',
     compute: (state: ProjectPickerState) => computeVisibleProjectIds(state),
