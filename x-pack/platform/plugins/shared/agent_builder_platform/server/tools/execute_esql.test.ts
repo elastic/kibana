@@ -126,4 +126,58 @@ describe('executeEsqlTool', () => {
     const esqlResults = result.results.find((r) => r.type === ToolResultType.esqlResults);
     expect(esqlResults?.data).not.toHaveProperty('time_range');
   });
+
+  describe('filter', () => {
+    it('forwards a supplied filter to the ES|QL helper', async () => {
+      const tool = executeEsqlTool();
+      const filter = { term: { status: 'open' } };
+
+      await tool.handler({ query: 'FROM logs', limit: 100, filter }, createHandlerContext() as any);
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ filter });
+    });
+
+    it('passes no filter when the caller omits one', async () => {
+      const tool = executeEsqlTool();
+
+      await tool.handler({ query: 'FROM logs', limit: 100 }, createHandlerContext() as any);
+
+      expect(executeEsqlMock.mock.calls[0][0].filter).toBeUndefined();
+    });
+
+    it('keeps the filter out of the echoed ES|QL query', async () => {
+      const tool = executeEsqlTool();
+      const filter = { range: { '@timestamp': { gte: 'now-1h' } } };
+
+      const result = (await tool.handler(
+        {
+          query: 'FROM logs | WHERE host == ?host',
+          params: { host: 'server-1' },
+          limit: 100,
+          filter,
+        },
+        createHandlerContext() as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({
+        query: 'FROM logs | WHERE host == ?host',
+        filter,
+      });
+
+      const query = result.results.find((r) => r.type === ToolResultType.query);
+      expect((query?.data as { esql: string }).esql).not.toContain('range');
+    });
+
+    it('propagates a rejected filter so the runner can convert it into an error result', async () => {
+      const tool = executeEsqlTool();
+      executeEsqlMock.mockRejectedValue(new Error('parsing_exception: unknown query [nope]'));
+
+      await expect(
+        tool.handler(
+          { query: 'FROM logs', limit: 100, filter: { nope: {} } },
+          createHandlerContext() as any
+        )
+      ).rejects.toThrow('parsing_exception');
+    });
+  });
 });
