@@ -281,6 +281,31 @@ describe('buildRawMessage', () => {
     expect(headerLines).toContain('References: <first@mail.gmail.com> <new@mail.gmail.com>');
   });
 
+  it('emits References but not In-Reply-To when references is provided without inReplyTo', () => {
+    const { headerLines } = decodeRaw(
+      buildRawMessage({
+        to: ['a@example.com'],
+        subject: 'Re: Hi',
+        body: 'body',
+        references: '<first@mail.gmail.com>',
+      })
+    );
+    expect(headerLines).toContain('References: <first@mail.gmail.com>');
+    expect(headerLines.some((l) => l.startsWith('In-Reply-To:'))).toBe(false);
+  });
+
+  it('rejects a References value containing a newline (header injection)', () => {
+    expect(() =>
+      buildRawMessage({
+        to: ['a@example.com'],
+        subject: 'Re: Hi',
+        body: 'body',
+        inReplyTo: '<msg@mail.gmail.com>',
+        references: '<first@mail.gmail.com>\r\nBcc: attacker@evil.com',
+      })
+    ).toThrow(/must not contain line breaks/);
+  });
+
   it('omits In-Reply-To and References when inReplyTo is not provided', () => {
     const { headerLines } = decodeRaw(
       buildRawMessage({ to: ['a@example.com'], subject: 'Hi', body: 'body' })

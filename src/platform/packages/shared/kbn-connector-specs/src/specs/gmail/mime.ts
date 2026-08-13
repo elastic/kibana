@@ -83,10 +83,13 @@ const encodeHeaderValue = (value: string): string => {
     .join('\r\n ');
 };
 
+/** Constructed once from the module constant; hoisted to avoid per-call allocation. */
+const BASE64_LINE_RE = new RegExp(`.{1,${BASE64_LINE_LENGTH}}`, 'g');
+
 /** Base64-encodes a body string and wraps lines at 76 characters per RFC 2045. */
 const encodeBody = (body: string): string => {
   const encoded = Buffer.from(body, 'utf8').toString('base64');
-  return (encoded.match(new RegExp(`.{1,${BASE64_LINE_LENGTH}}`, 'g')) ?? ['']).join('\r\n');
+  return (encoded.match(BASE64_LINE_RE) ?? ['']).join('\r\n');
 };
 
 export interface BuildRawMessageArgs {
@@ -142,8 +145,23 @@ export const buildRawMessage = ({
   if (inReplyTo) {
     assertSingleLineHeader('In-Reply-To', inReplyTo);
     headers.push(`In-Reply-To: ${inReplyTo}`);
-    // Per RFC 5322 §3.6.4: append inReplyTo to the existing chain, or start one.
-    headers.push(`References: ${references ? `${references} ${inReplyTo}` : inReplyTo}`);
+  }
+
+  // Per RFC 5322 §3.6.4: carry forward the existing References chain and append
+  // the message being replied to (if known). Emitted even when inReplyTo is absent
+  // so the chain is preserved for messages that lack a Message-Id header.
+  // assertSingleLineHeader guards against a crafted References value that contains
+  // CRLF, which could inject arbitrary headers into the outgoing message.
+  const refsChain = references
+    ? inReplyTo
+      ? `${references} ${inReplyTo}`
+      : references
+    : inReplyTo;
+  if (refsChain) {
+    if (references) {
+      assertSingleLineHeader('References', references);
+    }
+    headers.push(`References: ${refsChain}`);
   }
 
   headers.push('MIME-Version: 1.0');
@@ -173,4 +191,7 @@ export const extractAddrSpec = (headerValue: string): string => {
 export const findHeader = (
   headers: Array<{ name?: string; value?: string }> | undefined,
   name: string
-): string | undefined => headers?.find((h) => h.name?.toLowerCase() === name.toLowerCase())?.value;
+): string | undefined => {
+  const lowerName = name.toLowerCase();
+  return headers?.find((h) => h.name?.toLowerCase() === lowerName)?.value;
+};

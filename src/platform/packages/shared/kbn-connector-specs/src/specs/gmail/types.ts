@@ -25,9 +25,11 @@ export const GMAIL_MAX_SUBJECT_LENGTH = 998; // RFC 5322 line limit
 export const GMAIL_MAX_BODY_LENGTH = 100_000;
 
 // Bare addr-spec only; display names ("Alice" <a@b.com>) are not supported.
+// Dot handling: the local part is structured as atom(\.atom)* — consecutive dots,
+// a leading dot, and a trailing dot are all RFC 5321 violations and are rejected.
 // The character class excludes CR/LF, which would allow header injection.
 export const GMAIL_EMAIL_REGEX =
-  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/;
+  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/;
 
 // ===== Read action inputs =====
 
@@ -264,20 +266,17 @@ export type ReplyMessageInput = z.infer<typeof ReplyMessageInputSchema>;
 
 // ===== Shared outputs =====
 
-export const ModifyMessageOutputSchema = lazySchema(() =>
+// Shared shape for all Gmail message mutation responses (modify, trash, send, reply).
+const GmailMessageResultSchema = lazySchema(() =>
   z.object({
     id: z.string(),
     threadId: z.string(),
     labelIds: z.array(z.string()),
   })
 );
-export type ModifyMessageOutput = z.infer<typeof ModifyMessageOutputSchema>;
 
-export const SendMessageOutputSchema = lazySchema(() =>
-  z.object({
-    id: z.string(),
-    threadId: z.string(),
-    labelIds: z.array(z.string()),
-  })
-);
-export type SendMessageOutput = z.infer<typeof SendMessageOutputSchema>;
+export const ModifyMessageOutputSchema = GmailMessageResultSchema;
+export type ModifyMessageOutput = z.infer<typeof GmailMessageResultSchema>;
+
+export const SendMessageOutputSchema = GmailMessageResultSchema;
+export type SendMessageOutput = z.infer<typeof GmailMessageResultSchema>;

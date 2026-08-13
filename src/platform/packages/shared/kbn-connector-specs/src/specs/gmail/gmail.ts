@@ -493,7 +493,7 @@ export const GmailConnector: ConnectorSpec = {
 
         // Fetch the original message to extract threading metadata.
         let original: {
-          threadId: string;
+          threadId?: string;
           payload?: { headers?: Array<{ name?: string; value?: string }> };
         };
         try {
@@ -511,7 +511,8 @@ export const GmailConnector: ConnectorSpec = {
         }
 
         const headers = original.payload?.headers;
-        const inReplyTo = findHeader(headers, 'Message-Id') ?? findHeader(headers, 'Message-ID');
+        // findHeader is case-insensitive; a single call covers Message-Id, Message-ID, etc.
+        const inReplyTo = findHeader(headers, 'Message-Id');
         const references = findHeader(headers, 'References');
         const originalSubject = findHeader(headers, 'Subject') ?? '';
 
@@ -549,6 +550,12 @@ export const GmailConnector: ConnectorSpec = {
           inReplyTo,
           references,
         });
+
+        if (!original.threadId) {
+          throw new Error(
+            'The original message is missing a thread ID; cannot create a threaded reply.'
+          );
+        }
 
         try {
           ctx.log.debug(`Gmail replyMessage: threadId=${original.threadId}`);
