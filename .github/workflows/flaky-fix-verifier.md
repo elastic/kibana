@@ -114,6 +114,7 @@ network:
     - github.com
     - api.github.com
     - openrouter.ai
+    - elastic.co
 sandbox:
   agent: awf
 
