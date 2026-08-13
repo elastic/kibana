@@ -232,10 +232,11 @@ export function registerConversationRoutes({
       access: 'public',
       summary: "Get a conversation's access control",
       description:
-        '**Technical Preview; added in 9.6.0.** Get the access control for a specific conversation. Anyone who can read the conversation sees the full member list; `permissions.update_access_control` reports whether the caller can change it. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
+        'Get the access control for a specific conversation. Anyone who can read the conversation sees the full member list; `permissions.update_access_control` reports whether the caller can change it. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },
@@ -284,10 +285,11 @@ export function registerConversationRoutes({
       access: 'public',
       summary: "Update a conversation's access control",
       description:
-        "**Technical Preview; added in 9.6.0.** Replace a conversation's access mode and member list. Only the conversation owner can call this endpoint; every other caller receives a not-found response. Each call replaces the entire access control — the most recent successful update wins. Members can read and continue the conversation, but still need access to the conversation's agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).",
+        "Replace a conversation's access mode and member list. Only the conversation owner can call this endpoint; every other caller receives a not-found response. Each call replaces the entire access control — the most recent successful update wins. Members can read and continue the conversation, but still need access to the conversation's agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).",
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },
