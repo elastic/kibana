@@ -68,6 +68,7 @@ describe('ki_feature_create tool', () => {
         properties: {},
         confidence: 80,
       },
+      context: createMockToolContext(),
     });
 
     expect(confirmation).toEqual(

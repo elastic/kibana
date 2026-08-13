@@ -68,6 +68,7 @@ describe('ki_query_create tool', () => {
           query: 'FROM logs.test, logs.test.* | WHERE http.response.status_code >= 500',
         },
       },
+      context: createMockToolContext(),
     });
 
     expect(confirmation).toEqual(
