@@ -37,6 +37,11 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
       expect(created?.id).toBe(datasetId);
       expect(created?.examples).toHaveLength(1);
 
+      // This test reports no scores, so the results table can't speak for it.
+      // Each phase says it finished, leaving a failed run pointed at the call
+      // that broke rather than at the whole lifecycle.
+      log.info(`🧪 Created dataset "${datasetName}" as ${datasetId} with 1 example`);
+
       // A second upsert has to land on the same dataset: scores are stamped
       // with this id, so a new one each run would detach them.
       const updatedId = await evalsClient.upsertDataset({
@@ -49,11 +54,15 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
       const updated = await evalsClient.getDatasetByName(datasetName);
       expect(updated?.examples).toHaveLength(2);
 
+      log.info(`🔧 Upserted the same dataset again, now holding 2 examples`);
+
       // The dataset was never shared, since this creates it without naming any
       // spaces, so the delete is a real one wherever the run works.
       const { unshared } = await evalsClient.deleteDataset(datasetId);
       expect(unshared).toBe(false);
       expect(await evalsClient.getDatasetByName(datasetName)).toBeNull();
+
+      log.success(`🧹 Deleted ${datasetId}: dataset lifecycle verified`);
 
       datasetToCleanUp = undefined;
     } finally {
