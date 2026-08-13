@@ -22,6 +22,8 @@ import {
   buildClassicAlertsQuery,
   buildClassicAlertsSort,
   buildClassicAlertsTagsAggs,
+  normalizeV1StatusValue,
+  resolveV1BreakdownField,
   type ClassicAlertsTimeRange,
 } from '../classic_alerts/query';
 import {
@@ -213,12 +215,16 @@ export const fetchV1AlertsHistogram = async ({
 }: FetchV1AlertsHistogramOptions): Promise<HistogramBucketCount[]> => {
   if (buckets.length === 0) return [];
 
+  const v1BreakdownField = breakdownField ? resolveV1BreakdownField(breakdownField) : undefined;
+  if (breakdownField && !v1BreakdownField) return [];
+  const isStatusBreakdown = breakdownField === 'episode.status';
+
   const response = await findClassicAlerts<Record<string, ClassicHistogramBucketAgg>>(
     http,
     {
       index: CLASSIC_ALERTS_INDEX,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
-      aggs: buildClassicAlertsHistogramAggs(buckets, breakdownField),
+      aggs: buildClassicAlertsHistogramAggs(buckets, v1BreakdownField),
       size: 0,
       track_total_hits: false,
       _source: false,
@@ -226,11 +232,11 @@ export const fetchV1AlertsHistogram = async ({
     abortSignal
   );
 
-  return buckets.flatMap(({ start }, i) => {
+  const rawCounts: HistogramBucketCount[] = buckets.flatMap(({ start }, i) => {
     const agg = response.aggregations?.[`bucket_${i}`];
     if (!agg) return [];
 
-    if (!breakdownField) {
+    if (!v1BreakdownField) {
       return [{ bucketStart: start, count: agg.doc_count }];
     }
 
@@ -240,6 +246,25 @@ export const fetchV1AlertsHistogram = async ({
       breakdown: String(b.key),
     }));
   });
+
+  if (!isStatusBreakdown) {
+    return rawCounts;
+  }
+
+  const merged = new Map<string, HistogramBucketCount>();
+  for (const entry of rawCounts) {
+    const normalizedBreakdown = entry.breakdown
+      ? normalizeV1StatusValue(entry.breakdown)
+      : entry.breakdown;
+    const key = `${entry.bucketStart}::${normalizedBreakdown}`;
+    const existing = merged.get(key);
+    if (existing) {
+      existing.count += entry.count;
+    } else {
+      merged.set(key, { ...entry, breakdown: normalizedBreakdown });
+    }
+  }
+  return [...merged.values()];
 };
 
 export interface FetchV1AlertsTagsOptions {

@@ -141,13 +141,19 @@ describe('classic_alerts_api', () => {
       ]);
     });
 
-    it('returns pre-computed breakdown counts when breakdownField is provided', async () => {
+    it('maps episode.status breakdown to kibana.alert.status and normalizes values', async () => {
       mockHttp.post.mockResolvedValue({
         hits: { hits: [] },
         aggregations: {
           bucket_0: {
-            doc_count: 2,
-            breakdown: { buckets: [{ key: 'critical', doc_count: 2 }] },
+            doc_count: 5,
+            breakdown: {
+              buckets: [
+                { key: 'active', doc_count: 2 },
+                { key: 'recovered', doc_count: 2 },
+                { key: 'untracked', doc_count: 1 },
+              ],
+            },
           },
           bucket_1: { doc_count: 0, breakdown: { buckets: [] } },
         },
@@ -156,10 +162,59 @@ describe('classic_alerts_api', () => {
       const counts = await fetchV1AlertsHistogram({
         services: { http: mockHttp },
         buckets,
-        breakdownField: 'kibana.alert.severity',
+        breakdownField: 'episode.status',
       });
 
-      expect(counts).toEqual([{ bucketStart: buckets[0].start, count: 2, breakdown: 'critical' }]);
+      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
+      const body = JSON.parse(callOptions.body);
+      expect(body.aggs.bucket_0.aggs.breakdown.terms.field).toBe('kibana.alert.status');
+      expect(counts).toEqual([
+        { bucketStart: buckets[0].start, count: 2, breakdown: 'active' },
+        { bucketStart: buckets[0].start, count: 3, breakdown: 'inactive' },
+      ]);
+    });
+
+    it('maps rule.id breakdown to kibana.alert.rule.uuid without value normalization', async () => {
+      mockHttp.post.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          bucket_0: {
+            doc_count: 4,
+            breakdown: {
+              buckets: [
+                { key: 'rule-aaa', doc_count: 3 },
+                { key: 'rule-bbb', doc_count: 1 },
+              ],
+            },
+          },
+          bucket_1: { doc_count: 0, breakdown: { buckets: [] } },
+        },
+      });
+
+      const counts = await fetchV1AlertsHistogram({
+        services: { http: mockHttp },
+        buckets,
+        breakdownField: 'rule.id',
+      });
+
+      const [, callOptions] = mockHttp.post.mock.calls[0] as unknown as [string, { body: string }];
+      const body = JSON.parse(callOptions.body);
+      expect(body.aggs.bucket_0.aggs.breakdown.terms.field).toBe('kibana.alert.rule.uuid');
+      expect(counts).toEqual([
+        { bucketStart: buckets[0].start, count: 3, breakdown: 'rule-aaa' },
+        { bucketStart: buckets[0].start, count: 1, breakdown: 'rule-bbb' },
+      ]);
+    });
+
+    it('returns empty array for breakdown fields with no v1 equivalent', async () => {
+      const counts = await fetchV1AlertsHistogram({
+        services: { http: mockHttp },
+        buckets,
+        breakdownField: 'last_ack_action',
+      });
+
+      expect(mockHttp.post).not.toHaveBeenCalled();
+      expect(counts).toEqual([]);
     });
 
     it('returns empty array when no buckets are provided', async () => {

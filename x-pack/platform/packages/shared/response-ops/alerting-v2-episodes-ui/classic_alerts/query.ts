@@ -236,6 +236,19 @@ export const buildClassicAlertsTagsAggs = (
   },
 });
 
+const CLASSIC_BREAKDOWN_FIELD_MAP: Readonly<Record<string, string | undefined>> = {
+  'episode.status': ALERT_STATUS,
+  'rule.id': ALERT_RULE_UUID,
+  last_ack_action: undefined,
+  last_assignee_uid: undefined,
+};
+
+export const resolveV1BreakdownField = (v2Field: string): string | undefined =>
+  CLASSIC_BREAKDOWN_FIELD_MAP[v2Field];
+
+export const normalizeV1StatusValue = (value: string): string =>
+  value === ALERT_STATUS_ACTIVE ? ALERT_EPISODE_STATUS.ACTIVE : ALERT_EPISODE_STATUS.INACTIVE;
+
 const BREAKDOWN_TERMS_SIZE = 50;
 
 export const buildClassicAlertsHistogramAggs = (
