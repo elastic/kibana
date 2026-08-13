@@ -195,14 +195,23 @@ export const useFeedback = (
           setIsSubmitting(true);
           conversationsService
             .submitRoundFeedback({ conversationId, roundId, vote: 'up' })
-            .then(() =>
+            .then(() => {
               patchCache({
                 vote: 'up',
                 chips: [],
                 comment: '',
                 submitted_at: new Date().toISOString(),
-              })
-            )
+              });
+              services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+                round_id: roundId,
+                conversation_id: conversationId,
+                vote: 'up',
+                chips: [],
+                trace_id: ebtContext?.traceId,
+                connector_id: ebtContext?.connectorId,
+                model: ebtContext?.model,
+              });
+            })
             .catch(() => {
               addErrorToast({ title: labels.voteError });
               setVoteState(prev);
@@ -223,6 +232,8 @@ export const useFeedback = (
       clearSubmittedTimers,
       patchCache,
       addErrorToast,
+      ebtContext,
+      services.analytics,
     ]
   );
 
