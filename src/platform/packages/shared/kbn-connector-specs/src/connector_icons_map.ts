@@ -159,10 +159,7 @@ export const ConnectorIconsMap: Map<
     '.tavily_mcp',
     lazy(() => import(/* webpackChunkName: "connectorIconTavilyMcp" */ './specs/tavily/icon')),
   ],
-  [
-    '.mcp_v2',
-    lazy(() => import(/* webpackChunkName: "connectorIconMcpV2" */ './specs/mcp/icon')),
-  ],
+  ['.mcp_v2', lazy(() => import(/* webpackChunkName: "connectorIconMcpV2" */ './specs/mcp/icon'))],
   [
     '.google_calendar',
     lazy(
