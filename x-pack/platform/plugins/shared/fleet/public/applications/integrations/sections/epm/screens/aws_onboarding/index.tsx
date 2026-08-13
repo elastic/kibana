@@ -510,12 +510,15 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 selected.size === 0 ||
                 // Authenticate & Deploy: credentials for the selected method must
                 // be filled, and (managed only) CloudFormation must be launched
-                // and the stack name entered — the stack fields only appear once
-                // every service is receiving data.
+                // and both stack fields entered — they only appear once every
+                // service is receiving data.
                 (currentStep === 3 &&
                   (!isCredentialsValid ||
                     (deploymentMethod === 'managed' &&
-                      (!isDeployed || stackName.trim().length === 0 || !isManagedDeployed)) ||
+                      (!isDeployed ||
+                        stackName.trim().length === 0 ||
+                        stackVersion.trim().length === 0 ||
+                        !isManagedDeployed)) ||
                     (deploymentMethod === 'agent' && !isAgentEnrolled)))
               }
               onClick={() => setCurrentStep(currentStep + 1)}
