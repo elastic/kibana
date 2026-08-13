@@ -31,8 +31,8 @@ import {
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -41,6 +41,7 @@ import {
 import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view/index_data_visualizer_esql';
 
 import { useDataVisualizerKibana } from '../kibana_context';
+import { DataVisualizerDataSourcePicker } from '../common/components/data_source_picker';
 import type { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
 import { DATA_VISUALIZER_INDEX_VIEWER } from './constants/index_data_visualizer_viewer';
@@ -91,7 +92,7 @@ const DataVisualizerESQLStateContextProvider = () => {
 
   if (!isEsqlEnabled) {
     return (
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount={false}
         title={
           <FormattedMessage
@@ -209,6 +210,11 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       if (typeof parsedQueryString?.index === 'string') {
         const dataView = await dataViews.get(parsedQueryString.index);
         setCurrentDataView(dataView);
+      } else if (typeof parsedQueryString?.savedSearchId !== 'string') {
+        const defaultDataView = await dataViews.getDefaultDataView().catch(() => null);
+        if (defaultDataView) {
+          setCurrentDataView(defaultDataView);
+        }
       }
     };
     getDataView();
@@ -280,12 +286,15 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
     <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
       {currentDataView ? (
         <IndexDataVisualizerComponent
+          key={`${currentDataView.id}-${currentSavedSearch?.id ?? 'none'}`}
           currentDataView={currentDataView}
           currentSavedSearch={currentSavedSearch}
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
         />
-      ) : null}
+      ) : (
+        <DataVisualizerDataSourcePicker currentDataView={null} />
+      )}
     </UrlStateContextProvider>
   );
 };
@@ -310,6 +319,8 @@ export const IndexDataVisualizer: FC<Props> = ({
     fileUpload,
     lens,
     dataViewFieldEditor,
+    dataViewEditor,
+    contentManagement,
     uiActions,
     charts,
     unifiedSearch,
@@ -323,6 +334,8 @@ export const IndexDataVisualizer: FC<Props> = ({
     fileUpload,
     lens,
     dataViewFieldEditor,
+    dataViewEditor,
+    contentManagement,
     uiActions,
     charts,
     unifiedSearch,

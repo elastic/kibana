@@ -79,6 +79,12 @@ describe('HistorySnapshotClient', () => {
         expect.objectContaining({
           source: { index: '.entities.v2.latest.security_default-00001' },
           dest: { index: expect.stringMatching(/\.entities\.v2\.history\.security_default\./) },
+          waitForTask: {
+            logger: expect.anything(),
+            minTimeout: 5 * 1000,
+            maxTimeout: 30 * 1000,
+            forever: true,
+          },
         })
       );
       expect(mockUpdateByQueryWithScript).toHaveBeenCalledWith(
@@ -88,6 +94,12 @@ describe('HistorySnapshotClient', () => {
           query: { match_all: {} },
           script: HISTORY_SNAPSHOT_RESET_SCRIPT,
           params: expect.objectContaining({ timestampNow: expect.any(String) }),
+          waitForTask: {
+            logger: expect.anything(),
+            minTimeout: 5 * 1000,
+            maxTimeout: 30 * 1000,
+            forever: true,
+          },
         })
       );
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({

@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/269687
+issues:
+- https://github.com/elastic/security-team/issues/17429
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+title: Fix Elasticsearch search sort validation in workflows
+description: Workflow `elasticsearch.search` steps now accept Elasticsearch body-style `sort` syntax, including object entries with `order`.

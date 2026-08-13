@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { load as parseYaml } from 'js-yaml';
+import { parse as parseYaml } from 'yaml';
 
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 
@@ -52,6 +52,10 @@ fields:
     control: TEXTAREA
     label: Textarea label
     type: keyword
+  - name: requires_escalation
+    control: TOGGLE
+    label: Toggle label
+    type: boolean
 `;
 
 const invalidTemplateDefinition = `
@@ -76,12 +80,11 @@ const TestTemplatedFormRenderer = ({ templateDefinition }: { templateDefinition:
 describe('controlRegistry', () => {
   it('should render all the controls specified in the template', () => {
     render(<TestTemplatedFormRenderer templateDefinition={mockTemplateDefinition} />);
-    expect(screen.getByTestId('select')).toBeInTheDocument();
-    expect(screen.getAllByTestId('input')).toHaveLength(3);
-    expect(screen.getByText('Select label')).toBeInTheDocument();
-    expect(screen.getByText('Input text label')).toBeInTheDocument();
-    expect(screen.getByText('Input number label')).toBeInTheDocument();
-    expect(screen.getByText('Textarea label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Select label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Input text label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Input number label')).toBeInTheDocument();
+    expect(screen.getByLabelText('Textarea label')).toBeInTheDocument();
+    expect(screen.getByText('Toggle label')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'low' })).toBeInTheDocument();
   });
 
@@ -100,6 +103,7 @@ describe('controlRegistry', () => {
       'Input text label',
       'Input number label',
       'Textarea label',
+      'Toggle label',
     ]);
   });
 });

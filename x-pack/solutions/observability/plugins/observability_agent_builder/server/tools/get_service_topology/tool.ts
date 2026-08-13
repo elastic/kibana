@@ -16,6 +16,7 @@ import type {
 } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
+import { MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
 
@@ -25,7 +26,11 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 
 const getServiceTopologyToolSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
-  serviceName: z.string().min(1).describe('The name of the service to get the topology for'),
+  serviceName: z
+    .string()
+    .min(1)
+    .max(MAX_SHORT_STRING_LENGTH)
+    .describe('The name of the service to get the topology for'),
   direction: z
     .enum(['downstream', 'upstream', 'both'])
     .default('downstream')

@@ -45,7 +45,7 @@ export function RootCauseAnalysisStepItem({
             {loading ? (
               <EuiLoadingSpinner size="m" />
             ) : (
-              <EuiIcon type={iconType || 'logoElastic'} />
+              <EuiIcon aria-hidden={true} type={iconType || 'logoElastic'} />
             )}
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -7,28 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMenuActionId } from '@kbn/discover-utils';
+import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-utils';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
 import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/types';
 import type { IntlShape } from '@kbn/i18n-react';
 import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
-import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
+import {
+  getColumnsWithTimeField,
+  getSharingData,
+  showPublicUrlSwitch,
+} from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import type { TabState } from '../../../state_management/redux';
+import {
+  selectCurrentProfileLocatorState,
+  type RuntimeStateManager,
+  type TabState,
+} from '../../../state_management/redux';
 
 interface BuildShareOptionsParams {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   currentTab: TabState;
+  runtimeStateManager: RuntimeStateManager;
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
   hasUnsavedChanges: boolean;
@@ -46,6 +56,7 @@ export const buildShareOptions = async ({
   discoverParams,
   services,
   currentTab,
+  runtimeStateManager,
   persistedDiscoverSession,
   totalHitsState,
   hasUnsavedChanges,
@@ -64,19 +75,28 @@ export const buildShareOptions = async ({
     services,
   });
 
+  const { locator } = services;
+  const { timefilter } = services.data.query.timefilter;
+  const timeRange = timefilter.getTime();
+  // Use the absolute time range captured at the most recent on-screen fetch so the export
+  // covers the exact window the user saw, rather than re-resolving "now" at click time.
+  const absoluteTimeRange =
+    currentTab.dataRequestParams.timeRangeAbsolute ?? timefilter.getAbsoluteTime();
+  const refreshInterval = timefilter.getRefreshInterval();
+
   const searchSourceSharingData = await getSharingData(
     searchSource,
     currentTab.appState,
     services,
-    isEsqlMode
+    absoluteTimeRange
   );
-
-  const { locator } = services;
-  const { timefilter } = services.data.query.timefilter;
-  const timeRange = timefilter.getTime();
-  const absoluteTimeRange = timefilter.getAbsoluteTime();
-  const refreshInterval = timefilter.getRefreshInterval();
   const filters = services.filterManager.getFilters();
+  const profileState = selectCurrentProfileLocatorState({
+    runtimeStateManager,
+    tabId: currentTab.id,
+    profileStateMap: currentTab.profileState,
+    profileStateRegistry: services.profileStateRegistry,
+  });
 
   // Share -> Get links -> Snapshot
   const params: DiscoverSharingData['locatorParams'][number]['params'] = {
@@ -88,6 +108,7 @@ export const buildShareOptions = async ({
     filters,
     timeRange,
     refreshInterval,
+    profileState,
   };
 
   if (currentTab) {
@@ -122,6 +143,8 @@ export const buildShareOptions = async ({
     allowShortUrl: !!services.capabilities.discover_v2.createShortUrl,
     shareableUrl,
     shareableUrlForSavedObject,
+    // Share URL gets the unmodified `columns` array (without the automatically added time field)
+    // so it does not trigger the unsaved changes badge when user opens the link
     shareableUrlLocatorParams: { locator, params },
     objectId: persistedDiscoverSession?.id,
     objectType: 'search',
@@ -151,7 +174,29 @@ export const buildShareOptions = async ({
     },
     sharingData: {
       isTextBased: isEsqlMode,
-      locatorParams: [{ id: locator.id, version: services.metadata.version, params }],
+      locatorParams: [
+        {
+          id: locator.id,
+          version: services.metadata.version,
+          params: isEsqlMode
+            ? {
+                ...params,
+                // in ES|QL mode this `columns` array will be used when generating CSV on Discover page (CSV v2)
+                // this way the time field will be included only for CSV export and not for Share URL
+                columns: getColumnsWithTimeField({
+                  columns: (params.columns as string[]) || [],
+                  timeFieldName: dataView?.timeFieldName,
+                  uiSettings: services.uiSettings,
+                  query: currentTab.appState.query,
+                }),
+                // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
+                ...(currentTab.esqlVariables?.length
+                  ? { esqlVariables: currentTab.esqlVariables }
+                  : {}),
+              }
+            : params,
+        },
+      ],
       ...searchSourceSharingData,
       // CSV reports can be generated without a saved search so we provide a fallback title
       title:
@@ -160,7 +205,7 @@ export const buildShareOptions = async ({
           defaultMessage: 'Untitled Discover session',
         }),
       totalHits: totalHitsState.result || 0,
-      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
+      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined, // used by ES|QL immediate export via toAbsoluteTimeRange
     },
     isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
   };
@@ -172,7 +217,7 @@ export const buildShareOptions = async ({
 const getExportItems = (
   buildShareOptionsParams: BuildShareOptionsParams,
   intl: IntlShape
-): AppMenuPopoverItem[] => {
+): DiscoverAppMenuPopoverItem[] => {
   const { services } = buildShareOptionsParams;
 
   if (!services.share) return [];
@@ -189,7 +234,7 @@ const getExportItems = (
       item.shareType === 'integration' && 'id' in item && item.id === 'scheduledReports'
   );
 
-  const exportItems: AppMenuPopoverItem[] = [];
+  const exportItems: DiscoverAppMenuPopoverItem[] = [];
 
   if (hasCsvReports) {
     exportItems.push({
@@ -232,54 +277,53 @@ const getExportItems = (
 };
 
 export const getShareAppMenuItem = ({
+  shareAction,
   discoverParams,
   services,
   hasIntegrations,
   hasUnsavedChanges,
   currentTab,
+  runtimeStateManager,
   persistedDiscoverSession,
   totalHitsState,
   intl,
 }: {
+  shareAction?: AppHeaderShareAction;
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   hasIntegrations: boolean;
   hasUnsavedChanges: boolean;
   currentTab: TabState;
+  runtimeStateManager: RuntimeStateManager;
   persistedDiscoverSession: DiscoverSession | undefined;
   totalHitsState: DataTotalHitsMsg;
   intl: IntlShape;
-}): AppMenuItemType[] => {
-  if (!services.share) {
-    return [];
-  }
+}): DiscoverAppMenuItemType[] => {
+  const menuItems: DiscoverAppMenuItemType[] = [];
 
-  const shareExecutor = async () => {
-    const shareOptions = await buildShareOptions({
-      discoverParams,
-      services,
-      currentTab,
-      persistedDiscoverSession,
-      totalHitsState,
-      hasUnsavedChanges,
-    });
-    services.share?.toggleShareContextMenu(shareOptions);
-  };
-
-  const menuItems: AppMenuItemType[] = [
-    {
+  if (shareAction) {
+    menuItems.push({
       id: AppMenuActionId.share,
       order: 1,
       label: i18n.translate('discover.localMenu.shareTitle', {
         defaultMessage: 'Share',
       }),
+      tooltipContent:
+        shareAction.tooltip?.content ??
+        i18n.translate('discover.localMenu.shareTooltip', {
+          defaultMessage: 'Share session',
+        }),
+      tooltipTitle: shareAction.tooltip?.title,
       iconType: 'share',
       testId: 'shareTopNavButton',
-      run: () => {
-        shareExecutor();
+      disableButton: shareAction.isDisabled,
+      run: (params) => {
+        void shareAction.onClick({
+          returnFocus: params?.returnFocus ?? (() => params?.triggerElement?.focus()),
+        });
       },
-    },
-  ];
+    });
+  }
 
   if (hasIntegrations) {
     const exportItems = getExportItems(
@@ -287,6 +331,7 @@ export const getShareAppMenuItem = ({
         discoverParams,
         services,
         currentTab,
+        runtimeStateManager,
         persistedDiscoverSession,
         totalHitsState,
         hasUnsavedChanges,
@@ -298,7 +343,7 @@ export const getShareAppMenuItem = ({
       id: AppMenuActionId.export,
       order: 8,
       label: i18n.translate('discover.localMenu.exportTitle', {
-        defaultMessage: 'Export',
+        defaultMessage: 'Export tab results',
       }),
       iconType: 'upload',
       testId: 'exportTopNavButton',

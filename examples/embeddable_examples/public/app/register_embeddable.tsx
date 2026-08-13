@@ -16,8 +16,6 @@ import registerSearchPanelAction from '../react_embeddables/search/register_sear
 // @ts-ignore
 import createPanelAction from '../react_embeddables/search/create_search_panel_action?raw';
 // @ts-ignore
-import registerFieldListEmbeddableSource from '../react_embeddables/field_list/register_field_list_embeddable?raw';
-// @ts-ignore
 import registerReactEmbeddableSavedObjectSource from '../react_embeddables/register_saved_object_example?raw';
 
 export const RegisterEmbeddable = () => {
@@ -66,29 +64,6 @@ export const RegisterEmbeddable = () => {
       <EuiSpacer size="s" />
       <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
         {createPanelAction}
-      </EuiCodeBlock>
-
-      <EuiSpacer size="l" />
-
-      <EuiText>
-        <h2>Configure initial dashboard placement (optional)</h2>
-        <p>
-          Add an entry to <strong>registerPanelPlacementSettings</strong> provided by the Dashboard
-          plugin start contract to configure initial dashboard placement and/or restrict the
-          possible sizes of the dashboard panel.
-        </p>
-        <p>
-          Panel placement lets you configure the width, height, and placement strategy for when
-          panels initially get added to a dashboard. Panel resize settings let you configure the
-          minimum and maximum dimensions of the panel on the dashboard. In the example below, the
-          Field List embeddable will be added to dashboards as a narrow and tall panel with a
-          minimum width of 12 columns and a minumum height of 4 rows.
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-
-      <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-        {registerFieldListEmbeddableSource}
       </EuiCodeBlock>
 
       <EuiSpacer size="l" />

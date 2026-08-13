@@ -54,11 +54,15 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     // Uninstall tokens
     loadTestFile(require.resolve('./uninstall_token/get')); // ~ 20s
     loadTestFile(require.resolve('./uninstall_token/privileges')); // ~ 20s
+    loadTestFile(require.resolve('./uninstall_token/rotate')); // ~ 20s
 
     // Uninstall tokens
     loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
 
     // Cloud connectors
     loadTestFile(require.resolve('./cloud_connector'));
+
+    // Cloud onboarding deployments
+    loadTestFile(require.resolve('./cloud_onboarding_deployment'));
   });
 }

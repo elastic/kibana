@@ -9,7 +9,7 @@ import 'jest-canvas-mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { JourneyScreenshotDialog } from './journey_screenshot_dialog';
+import { JourneyScreenshotDialog, getScreenshotUrl } from './journey_screenshot_dialog';
 
 const testCheckGroup = 'test-check-group';
 const testImgUrl1 = 'test-img-url-1';
@@ -78,5 +78,52 @@ describe('JourneyScreenshotDialog', () => {
       'http://localhost/test-img-url-1'
     );
     expect(getByText('Step: 1 of 1')).toBeInTheDocument();
+  });
+});
+
+describe('getScreenshotUrl', () => {
+  const basePath = '/abc';
+
+  it('returns empty string when checkGroup is missing', () => {
+    expect(getScreenshotUrl({ basePath, checkGroup: undefined, stepNumber: 1 })).toBe('');
+  });
+
+  it('returns a path without remoteName query param for local monitors', () => {
+    expect(getScreenshotUrl({ basePath, checkGroup: 'cg-1', stepNumber: 2 })).toBe(
+      '/abc/internal/synthetics/journey/screenshot/cg-1/2'
+    );
+  });
+
+  it('appends a url-encoded remoteName query param for remote monitors', () => {
+    expect(
+      getScreenshotUrl({ basePath, checkGroup: 'cg-1', stepNumber: 2, remoteName: 'remote a' })
+    ).toBe('/abc/internal/synthetics/journey/screenshot/cg-1/2?remoteName=remote%20a');
+  });
+
+  it('appends a url-encoded timestamp query param when provided', () => {
+    expect(
+      getScreenshotUrl({
+        basePath,
+        checkGroup: 'cg-1',
+        stepNumber: 2,
+        timestamp: '2023-01-01T00:00:00.000Z',
+      })
+    ).toBe(
+      '/abc/internal/synthetics/journey/screenshot/cg-1/2?timestamp=2023-01-01T00%3A00%3A00.000Z'
+    );
+  });
+
+  it('appends both remoteName and timestamp query params when provided', () => {
+    expect(
+      getScreenshotUrl({
+        basePath,
+        checkGroup: 'cg-1',
+        stepNumber: 2,
+        remoteName: 'remote a',
+        timestamp: '2023-01-01T00:00:00.000Z',
+      })
+    ).toBe(
+      '/abc/internal/synthetics/journey/screenshot/cg-1/2?remoteName=remote%20a&timestamp=2023-01-01T00%3A00%3A00.000Z'
+    );
   });
 });

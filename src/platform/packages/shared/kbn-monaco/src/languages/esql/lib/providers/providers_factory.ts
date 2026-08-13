@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import { isPromise } from '@kbn/std';
 import type { monaco } from '../../../../monaco_imports';
 
 export interface CreateProviderParams<T> {
@@ -15,10 +17,16 @@ export interface CreateProviderParams<T> {
   emptyResult: T;
 }
 
-export class DisposedModelAccessError extends Error {
-  constructor() {
-    super('DisposedModelAccessError');
-    this.name = 'DisposedModelAccessError';
+/**
+ * Throwing ProviderEmptyResultError will cause the provider to stop execution and return the emptyResult.
+ */
+export type ProviderEmptyResultErrorCode =
+  | 'DisposedModelAccessError'
+  | 'AbortedDueToCancellationError';
+export class ProviderEmptyResultError extends Error {
+  constructor(public readonly code: ProviderEmptyResultErrorCode) {
+    super(code);
+    this.name = 'ProviderEmptyResultError';
   }
 }
 
@@ -37,11 +45,12 @@ export async function createMonacoProvider<T>({
   emptyResult,
 }: CreateProviderParams<T>): Promise<T> {
   const safeModel = createDisposedSafeModel(model);
+
   try {
     const result = await Promise.resolve(run(safeModel));
     return model.isDisposed() ? emptyResult : result;
   } catch (error) {
-    if (error instanceof DisposedModelAccessError) {
+    if (error instanceof ProviderEmptyResultError) {
       return emptyResult;
     }
     throw error;
@@ -76,6 +85,54 @@ export function createDisposedSafeModel(model: monaco.editor.ITextModel): monaco
 
 function assertModelIsUsable(target: monaco.editor.ITextModel) {
   if (target.isDisposed()) {
-    throw new DisposedModelAccessError();
+    throw new ProviderEmptyResultError('DisposedModelAccessError');
   }
+}
+
+/**
+ * Wraps every callback in a function that throws an error if the cancellation token is triggered by Monaco.
+ * The token is checked before and after the callback is executed.
+ * The exception is caught by the providers factory to return an empty result and cut the execution of the provider,
+ * saving other api calls and further processing time.
+ *
+ * Note: we can't abort the in-flight promise as they are memoized and awaited by different callers at the same time.
+ * @param callbacks
+ * @param token
+ * @returns
+ */
+export function createCancellableCallbacks<TCallbacks extends ESQLCallbacks | undefined>(
+  callbacks: TCallbacks,
+  token?: monaco.CancellationToken
+): TCallbacks {
+  if (!callbacks) {
+    return callbacks;
+  }
+
+  const abortIfCancelled = () => {
+    if (token?.isCancellationRequested) {
+      throw new ProviderEmptyResultError('AbortedDueToCancellationError');
+    }
+  };
+
+  return Object.fromEntries(
+    Object.entries(callbacks).map(([callbackName, callbackFn]) => {
+      if (typeof callbackFn !== 'function') {
+        return [callbackName, callbackFn];
+      }
+
+      return [
+        callbackName,
+        function (...args: unknown[]) {
+          abortIfCancelled();
+          const result = callbackFn(...args);
+          if (isPromise(result)) {
+            return Promise.resolve(result).finally(() => {
+              abortIfCancelled();
+            });
+          }
+          return result;
+        },
+      ];
+    })
+  ) as TCallbacks;
 }

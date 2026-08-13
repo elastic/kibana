@@ -40,6 +40,15 @@ Rule executor / director               Dispatcher
 
 Signal events never enter this pipeline. The dispatcher only processes alert-type rule events that carry `episode.*` state.
 
+### Episode identity: the subject
+
+Episodes are keyed by a `subject`, computed identically in ES|QL (`SUBJECT_EVAL` in `queries.ts`) and in TypeScript (`episodeSubject` in `steps/utils/subject.ts`):
+
+- internal episodes (`source` is `internal` or absent): `subject = rule_id`
+- external episodes (any other `source`): `subject = ${space_id}::${source}`
+
+The subject, not `group_hash`, is what makes a series unique. `group_hash` is only a grouping key — `buildGroupHash` hashes the grouping fields and their values, so the same hash occurs across rules and spaces. A rule id is a globally unique saved-object id and therefore implies a space; a vendor name does not, so the space is folded into external subjects to keep episode aggregation, throttling and suppression isolated per space.
+
 ## How one execution works
 
 Each dispatcher run has two time anchors:
@@ -51,16 +60,18 @@ Those anchors, plus persisted action history, let the dispatcher decide which ep
 
 The pipeline then moves through these phases:
 
-1. Fetch candidate episodes
-2. Fetch suppression facts
-3. Split into dispatchable vs suppressed episodes
-4. Load rule metadata for dispatchable episodes
-5. Load enabled action policies
-6. Evaluate policy matchers
-7. Build action groups
-8. Apply throttling
-9. Dispatch eligible groups
-10. Store final actions and reasons
+1. Wait for plugin resources to be ready
+2. Fetch candidate episodes (keys-only scan — no `data` payload)
+3. Fetch suppression facts
+4. Split into dispatchable vs suppressed episodes
+5. Hydrate `data` payload for dispatchable episodes only
+6. Load rule metadata for dispatchable episodes
+7. Load enabled action policies
+8. Evaluate policy matchers
+9. Build action groups
+10. Apply throttling
+11. Dispatch eligible groups
+12. Store final actions and reasons
 
 ### Decision outcomes written to `.alert-actions`
 
@@ -96,9 +107,11 @@ DispatcherService
    v
 DispatcherPipeline
    |
-   +--> FetchEpisodesStep
+   +--> WaitForResourcesStep
+   +--> FetchEpisodesStep          (keys-only scan)
    +--> FetchSuppressionsStep
    +--> ApplySuppressionStep
+   +--> HydrateEpisodeDataStep     (lazy data fetch for survivors)
    +--> FetchRulesStep
    +--> FetchPoliciesStep
    +--> EvaluateMatchersStep
@@ -147,6 +160,7 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `episodes` | `FetchEpisodesStep` | Candidate `AlertEpisode` rows. |
 | `suppressions` | `FetchSuppressionsStep` | Suppression facts from `.alert-actions`. |
 | `dispatchable` / `suppressed` | `ApplySuppressionStep` | Split of episodes that may continue vs those that must not notify. |
+| `dispatchable` (with `data`) | `HydrateEpisodeDataStep` | Replaces `dispatchable` with the same episodes enriched with their `data` payload. |
 | `rules` | `FetchRulesStep` | Rule metadata keyed by rule id. |
 | `policies` | `FetchPoliciesStep` | Enabled action policies keyed by id. |
 | `matched` | `EvaluateMatchersStep` | Concrete `(episode, policy)` matches. |
@@ -159,16 +173,18 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 | # | Step | Responsibility |
 | --- | --- | --- |
-| 1 | `FetchEpisodesStep` | Load episodes that should be considered in this run. |
-| 2 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
-| 3 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
-| 4 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
-| 5 | `FetchPoliciesStep` | Load enabled action policies for the space. |
-| 6 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
-| 7 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
-| 8 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
-| 9 | `DispatchStep` | Perform delivery side effects for eligible groups. |
-| 10 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
+| 1 | `WaitForResourcesStep` | Block the run until the dispatcher's required plugin resources are ready. |
+| 2 | `FetchEpisodesStep` | Load episodes via a keys-only scan (no `_source`/`data` payload). Halts on empty result. |
+| 3 | `FetchSuppressionsStep` | Load alert-action facts needed for suppression decisions. |
+| 4 | `ApplySuppressionStep` | Mark each episode as dispatchable or suppressed, preserving reasons. |
+| 5 | `HydrateEpisodeDataStep` | Fetch `data` payloads for the surviving dispatchable episodes only, via `getEpisodeDataQueries`. |
+| 6 | `FetchRulesStep` | Load rule metadata for the remaining dispatchable set. |
+| 7 | `FetchPoliciesStep` | Load enabled action policies for the space. |
+| 8 | `EvaluateMatchersStep` | Evaluate each policy matcher against each episode context. |
+| 9 | `BuildGroupsStep` | Build `ActionGroup` objects based on policy grouping settings. |
+| 10 | `ApplyThrottlingStep` | Compare candidate groups with action history and split them into dispatch vs throttled. |
+| 11 | `DispatchStep` | Perform delivery side effects for eligible groups. |
+| 12 | `StoreActionsStep` | Persist the execution outcome to `.alert-actions`. |
 
 ## Halt reasons
 

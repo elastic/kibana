@@ -24,6 +24,8 @@ import {
 import React, { useEffect, useMemo } from 'react';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { usePageReady } from '@kbn/ebt-tools';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { LoadingObservability } from '../../components/loading_observability';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
@@ -41,13 +43,7 @@ import type { DataContextApps, HasDataMap } from '../../context/has_data_context
 import { appLabels } from '../../context/has_data_context/has_data_context';
 
 export function OverviewPage() {
-  const {
-    http,
-    observabilityAIAssistant,
-    kibanaVersion,
-    serverless: isServerless,
-    share,
-  } = useKibana().services;
+  const { http, observabilityAIAssistant, kibanaVersion, serverless, share } = useKibana().services;
 
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -64,16 +60,14 @@ export function OverviewPage() {
         }),
       },
     ],
-    {
-      classicOnly: true,
-    }
+    { serverless }
   );
 
   const { data: newsFeed } = useFetcher(() => {
-    if (!Boolean(isServerless)) {
+    if (!Boolean(serverless)) {
       return getNewsFeed({ http, kibanaVersion });
     }
-  }, [http, kibanaVersion, isServerless]);
+  }, [http, kibanaVersion, serverless]);
 
   const { hasDataMap } = useHasData();
   // we need to filter out unwanted apps
@@ -92,8 +86,8 @@ export function OverviewPage() {
 
   const isAllRequestsComplete = useMemo(() => {
     return DATA_SECTIONS.every((app) => {
-      const section = hasData[app as DataSectionsApps];
-      return section?.status === FETCH_STATUS.SUCCESS;
+      const status = hasData[app as DataSectionsApps]?.status;
+      return status !== undefined && status !== FETCH_STATUS.LOADING;
     });
   }, [hasData]);
 
@@ -142,7 +136,7 @@ export function OverviewPage() {
     });
   }, [appsWithoutData, hasData, setScreenContext]);
 
-  const { absoluteStart, absoluteEnd } = useDatePickerContext();
+  const { absoluteStart, absoluteEnd, relativeStart, relativeEnd } = useDatePickerContext();
 
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
@@ -154,6 +148,20 @@ export function OverviewPage() {
       }),
     [absoluteStart, absoluteEnd, timeBuckets]
   );
+
+  usePageReady({
+    isReady: isAllRequestsComplete,
+    isRefreshing: !isAllRequestsComplete,
+    meta: {
+      rangeFrom: relativeStart,
+      rangeTo: relativeEnd,
+      description: '[ttfmp_observability_overview] The Observability Overview page has loaded.',
+    },
+    customMetrics: {
+      key1: 'hasAnyData',
+      value1: hasAnyData ? 1 : 0,
+    },
+  });
 
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
@@ -225,6 +233,10 @@ export function OverviewPage() {
               color="primary"
               fill
               href={onboardingHref}
+              {...getEbtProps({
+                action: EBT_CLICK_ACTIONS.ADD_DATA,
+                element: 'obsOverviewPageEmptyPrompt',
+              })}
             >
               {i18n.translate('xpack.observability.overview.emptyState.action', {
                 defaultMessage: 'Add data',

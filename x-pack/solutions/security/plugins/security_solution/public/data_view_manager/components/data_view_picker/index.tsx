@@ -7,7 +7,7 @@
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

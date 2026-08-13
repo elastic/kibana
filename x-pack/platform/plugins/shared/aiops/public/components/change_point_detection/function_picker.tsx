@@ -7,13 +7,14 @@
 
 import { EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ChangePointAggregationFunction } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import type { FC } from 'react';
 import React from 'react';
 import { fnOperationTypeMapping } from './constants';
 
 interface FunctionPickerProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: ChangePointAggregationFunction;
+  onChange: (value: ChangePointAggregationFunction) => void;
 }
 
 export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onChange }) => {
@@ -31,7 +32,7 @@ export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onCh
       })}
       options={options}
       idSelected={value}
-      onChange={(id) => onChange(id)}
+      onChange={(id) => onChange(id as ChangePointAggregationFunction)}
       isFullWidth
       buttonSize="compressed"
     />

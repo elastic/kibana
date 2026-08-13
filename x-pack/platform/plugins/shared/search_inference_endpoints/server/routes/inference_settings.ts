@@ -78,7 +78,7 @@ export const defineInferenceSettingsRoutes = ({
       path: APIRoutes.GET_INFERENCE_SETTINGS,
       security: {
         authz: {
-          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+          requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
         },
       },
     })
@@ -86,7 +86,7 @@ export const defineInferenceSettingsRoutes = ({
       {
         security: {
           authz: {
-            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
+            requiredPrivileges: [ApiPrivileges.read(PLUGIN_ID)],
           },
         },
         validate: {},
@@ -104,25 +104,6 @@ export const defineInferenceSettingsRoutes = ({
             INFERENCE_SETTINGS_SO_TYPE,
             INFERENCE_SETTINGS_ID
           );
-
-          if (so.error) {
-            if (so.error.statusCode === 404) {
-              return response.ok({
-                body: EMPTY_SETTINGS,
-                headers: { 'content-type': 'application/json' },
-              });
-            }
-            return response.customError({
-              statusCode: so.error.statusCode,
-              body: {
-                message: so.error.message,
-                attributes: {
-                  error: so.error.error,
-                  ...(so.error.metadata ?? {}),
-                },
-              },
-            });
-          }
 
           settingsBody = parseInferenceSettingsSO(so);
         } catch (e) {
@@ -203,19 +184,6 @@ export const defineInferenceSettingsRoutes = ({
           attrs,
           { id: INFERENCE_SETTINGS_ID, overwrite: true }
         );
-
-        if (so.error) {
-          return response.customError({
-            statusCode: so.error.statusCode,
-            body: {
-              message: so.error.message,
-              attributes: {
-                error: so.error.error,
-                ...(so.error.metadata ?? {}),
-              },
-            },
-          });
-        }
 
         const body: InferenceSettingsResponse = parseInferenceSettingsSO(so);
         return response.ok({

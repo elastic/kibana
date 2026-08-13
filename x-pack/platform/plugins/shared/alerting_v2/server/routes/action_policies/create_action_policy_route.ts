@@ -8,6 +8,7 @@
 import {
   createActionPolicyDataSchema,
   actionPolicyResponseSchema,
+  errorResponseSchema,
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
@@ -16,9 +17,10 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { createActionPolicyOasExamples } from './create_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class CreateActionPolicyRoute extends BaseAlertingRoute {
@@ -26,25 +28,30 @@ export class CreateActionPolicyRoute extends BaseAlertingRoute {
   static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.write],
+      requiredPrivileges: [
+        ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+        ALERTING_V2_API_PRIVILEGES.rules.read,
+      ],
     },
   };
   static routeOptions = {
     summary: 'Create an action policy',
     description:
       'Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.',
+    oasOperationObject: createActionPolicyOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createActionPolicyDataSchema),
+      body: createActionPolicyDataSchema,
     },
     response: {
       201: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the newly created action policy.',
       },
       400: {
-        description: 'Indicates invalid request parameters or body.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

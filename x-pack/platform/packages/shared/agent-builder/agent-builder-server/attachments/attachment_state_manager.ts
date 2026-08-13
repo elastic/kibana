@@ -349,13 +349,14 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       versions: [version],
       current_version: 1,
       active: true,
-      ...(input.description && { description: input.description }),
+      ...(input.description !== undefined && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
       ...(input.origin !== undefined && { origin: input.origin }),
       // When created with origin (by-reference), record snapshot time for isStale comparison.
       // By-value attachments leave this undefined.
       ...(input.origin !== undefined && { origin_snapshot_at: now }),
+      ...(input.group_id !== undefined && { group_id: input.group_id }),
     };
 
     this.attachments.set(id, attachment);

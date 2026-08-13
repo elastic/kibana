@@ -45,4 +45,6 @@ export {
   reverseMap,
   type ToolIdMapping,
   type ToolsAndMappings,
+  type BuildToolContentParams,
+  type BuildToolContentFn,
 } from './tools';

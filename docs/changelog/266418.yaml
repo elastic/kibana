@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/266418
+issues:
+- https://github.com/elastic/kibana/issues/149555
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Search and data
+title: Fix variable substitution in the Console
+description: Fixed an issue where Console variables were not substituted correctly inside partial string values in request bodies.

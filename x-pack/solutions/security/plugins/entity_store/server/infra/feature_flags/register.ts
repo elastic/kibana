@@ -15,7 +15,7 @@ export function registerUiSettings(uiSettings: UiSettingsServiceSetup) {
       name: 'Enable entity store v2',
       description: 'Switches the Entity Store Engine to v2',
       schema: schema.boolean(),
-      value: false,
+      value: true,
       requiresPageReload: false,
       readonly: true,
       readonlyMode: 'ui',

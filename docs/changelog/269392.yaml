@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/269392
+issues:
+- https://github.com/elastic/search-team/issues/14019
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Search and data
+title: "Move `ai.prompt`, `ai.summarize`, and `ai.classify` workflows to the inference plugin"
+description: "Moves the `ai.prompt`, `ai.summarize`, and `ai.classify` workflow steps into the inference plugin, centralizing AI workflow execution."

@@ -148,6 +148,10 @@ export type ChatCompleteOptions = {
    * The timeout for the chat completion request.
    */
   timeout?: number;
+  /**
+   * Optional response content length override for connectors that support it.
+   */
+  maxContentLength?: number;
 } & ToolOptions;
 
 export interface ChatCompleteRetryConfiguration {

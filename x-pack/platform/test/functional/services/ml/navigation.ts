@@ -72,7 +72,9 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToAlertsAndAction() {
-      await PageObjects.common.navigateToApp('rules');
+      await PageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
       await testSubjects.existOrFail('rulesListSection');
     },
@@ -302,8 +304,11 @@ export function MachineLearningNavigationProvider({
       await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail('mlSuppliedConfigurationsButton');
-
+        // Supplied configurations lives in the app menu overflow ("More") popover.
+        if (!(await testSubjects.exists('mlSuppliedConfigurationsButton', { timeout: 1000 }))) {
+          await testSubjects.click('app-menu-overflow-button', 1000);
+          await testSubjects.existOrFail('mlSuppliedConfigurationsButton', { timeout: 5000 });
+        }
         await testSubjects.click('mlSuppliedConfigurationsButton');
         await testSubjects.existOrFail('mlPageSuppliedConfigurations');
       });

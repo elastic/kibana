@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('lens show underlying data from dashboard', () => {
-    it('should show the open button for a compatible saved visualization', async () => {
+    it('should bring both dashboard context and visualization context to discover', async () => {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
@@ -40,56 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
         saveAsNew: true,
-        exitFromEditMode: true,
+        exitFromEditMode: false,
       });
 
-      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
-
-      const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
-      await browser.switchToWindow(discoverWindowHandle);
-
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('unifiedHistogramChart');
-      // check the table columns
-      const columns = await discover.getColumnHeaders();
-      expect(columns).to.eql(['@timestamp', 'ip', 'bytes']);
-
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(dashboardWindowHandle);
-    });
-
-    it('should show the open button for a compatible saved visualization with annotations and reference line', async () => {
-      await dashboard.switchToEditMode();
-      await dashboardPanelActions.navigateToEditorFromFlyout();
-      await header.waitUntilLoadingHasFinished();
-      await lens.createLayer('annotations');
-      await lens.waitForVisualization('xyVisChart');
-
-      await lens.createLayer('referenceLine');
-      await lens.save('Embedded Visualization', false);
-
-      await dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
-        saveAsNew: false,
-        exitFromEditMode: true,
-      });
-
-      await dashboardPanelActions.clickPanelAction(OPEN_IN_DISCOVER_DATA_TEST_SUBJ);
-
-      const [dashboardWindowHandle, discoverWindowHandle] = await browser.getAllWindowHandles();
-      await browser.switchToWindow(discoverWindowHandle);
-
-      await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('unifiedHistogramChart');
-      // check the table columns
-      const columns = await discover.getColumnHeaders();
-      expect(columns).to.eql(['@timestamp', 'ip', 'bytes']);
-
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(dashboardWindowHandle);
-    });
-
-    it('should bring both dashboard context and visualization context to discover', async () => {
-      await dashboard.switchToEditMode();
       await dashboardPanelActions.navigateToEditorFromFlyout();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('lucene');
@@ -152,8 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBarService.removeAllFilters();
 
       // Create a new panel
-      await dashboardAddPanel.openAddPanelFlyout();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
+      await dashboardAddPanel.clickAddEsqlPanel();
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
 
       const ESQL_QUERY = 'from logs* | stats maxB = max(bytes)';

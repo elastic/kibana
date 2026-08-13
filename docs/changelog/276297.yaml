@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/276297
+issues:
+- https://github.com/elastic/security-team/issues/18059
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- AI and machine Learning
+title: Allow per-page override of the AI sidebar greeting

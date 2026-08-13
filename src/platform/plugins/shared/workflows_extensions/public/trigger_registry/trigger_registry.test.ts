@@ -15,6 +15,7 @@ const triggerId = 'example.test_trigger';
 const eventSchema = z.object({ message: z.string() });
 const defaultDefinition: PublicTriggerDefinition<typeof eventSchema> = {
   id: triggerId,
+  stability: 'tech_preview',
   title: 'Test Trigger',
   description: 'A trigger for testing',
   eventSchema,
@@ -96,6 +97,7 @@ describe('PublicTriggerRegistry', () => {
     it('should return all registered trigger definitions', () => {
       const definition2: PublicTriggerDefinition = {
         id: 'other.trigger',
+        stability: 'tech_preview',
         title: 'Other',
         description: 'Another trigger',
         eventSchema: z.object({ id: z.string() }),

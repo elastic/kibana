@@ -12,7 +12,7 @@ import {
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { UserProfile } from '@kbn/user-profile-components';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,

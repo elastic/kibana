@@ -304,6 +304,117 @@ describe('EPM index template install', () => {
       });
     });
 
+    it('should default OTel metrics data streams to time_series index mode', () => {
+      const otelIntegrationPackageInstallContext = {
+        packageInfo: {
+          name: 'supabase',
+          version: '0.1.0',
+          type: 'integration',
+          policy_templates: [
+            {
+              name: 'supabase',
+              title: 'Supabase',
+              inputs: [
+                { type: 'otelcol', title: 'OTel Prometheus', description: 'Collect metrics' },
+              ],
+            },
+          ],
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      const dataStream = {
+        type: 'metrics',
+        dataset: 'supabase.metrics',
+        title: 'Supabase Metrics',
+        release: 'experimental',
+        package: 'supabase',
+        path: 'metrics',
+        ingest_pipeline: 'default',
+        streams: [{ input: 'otelcol', title: 'Supabase Metrics' }],
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext: otelIntegrationPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.template.settings).toEqual({
+        index: { mode: 'time_series' },
+      });
+      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
+        'metrics-supabase.metrics.otel-*',
+      ]);
+    });
+
+    it('should not default OTel non-metrics data streams to time_series index mode', () => {
+      const otelIntegrationPackageInstallContext = {
+        packageInfo: {
+          name: 'integration_otel',
+          version: '1.0.0',
+          type: 'integration',
+          policy_templates: [
+            {
+              name: 'integration_otel',
+              title: 'Integration OTel',
+              inputs: [{ type: 'otelcol', title: 'OTel', description: 'Collect OTel data' }],
+            },
+          ],
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      const dataStream = {
+        type: 'logs',
+        dataset: 'integration_otel.otel_logs',
+        title: 'OTel logs',
+        release: 'experimental',
+        package: 'integration_otel',
+        path: 'otel_logs',
+        ingest_pipeline: 'default',
+        streams: [{ input: 'otelcol', title: 'OTel logs' }],
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext: otelIntegrationPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.template.settings).toEqual({
+        index: {},
+      });
+    });
+
+    it('should not default non-OTel metrics data streams to time_series index mode', () => {
+      const dataStream = {
+        type: 'metrics',
+        dataset: 'package.dataset',
+        title: 'test data stream',
+        release: 'experimental',
+        package: 'package',
+        path: 'path',
+        ingest_pipeline: 'default',
+        streams: [{ input: 'system/metrics', title: 'System metrics' }],
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.template.settings).toEqual({
+        index: {},
+      });
+    });
+
     it('should set ignore_malformed in settings', () => {
       const dataStream = {
         type: 'logs',
@@ -781,11 +892,15 @@ describe('EPM index template install', () => {
         ],
       } as RegistryDataStream;
 
-      const { componentTemplates } = prepareTemplate({
+      const { componentTemplates, indexTemplate } = prepareTemplate({
         packageInstallContext: otelInputPackageInstallContext,
         fieldAssetsMap: new Map(),
         dataStream,
         ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.template.settings).toEqual({
+        index: { mode: 'time_series' },
       });
 
       expect(componentTemplates).toStrictEqual({
@@ -827,6 +942,7 @@ describe('EPM index template install', () => {
               properties: {
                 test_dimension: {
                   type: 'keyword',
+                  time_series_dimension: true,
                 },
               },
             },
@@ -870,6 +986,119 @@ describe('EPM index template install', () => {
           },
         },
       });
+    });
+
+    it('should apply .otel index pattern suffix for integration package with named otelcol input (named input case)', () => {
+      // This test covers the bug: when a data stream's stream.input references the *name*
+      // of an otelcol input (rather than the literal type "otelcol"), Fleet must still
+      // recognise it as an OTel data stream and apply the .otel suffix to the index pattern.
+      const integrationOtelPackageInstallContext = {
+        packageInfo: {
+          name: 'good_integration_otel',
+          version: '0.0.1',
+          type: 'integration',
+          policy_templates: [
+            {
+              name: 'otel',
+              title: 'OTel template',
+              inputs: [
+                { name: 'otel_logs', type: 'otelcol', title: 'OTel Logs', description: '' },
+                { name: 'otel_metrics', type: 'otelcol', title: 'OTel Metrics', description: '' },
+              ],
+            },
+          ],
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      appContextService.start(
+        createAppContextStartContractMock(
+          { internal: { disableILMPolicies: false } } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: true } as ExperimentalFeatures
+        )
+      );
+
+      const dataStream = {
+        type: 'logs',
+        dataset: 'good_integration_otel.otel_logs',
+        title: 'OTel Logs',
+        release: 'experimental',
+        package: 'good_integration_otel',
+        path: 'otel_logs',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            // Named input reference — NOT the literal type 'otelcol'
+            input: 'otel_logs',
+            title: 'OTel log stream',
+          },
+        ],
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext: integrationOtelPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      // The index pattern MUST include the .otel suffix
+      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
+        'logs-good_integration_otel.otel_logs.otel-*',
+      ]);
+    });
+
+    it('should NOT apply .otel suffix when enableOtelIntegrations is false, even for named otelcol input', () => {
+      const integrationOtelPackageInstallContext = {
+        packageInfo: {
+          name: 'good_integration_otel',
+          version: '0.0.1',
+          type: 'integration',
+          policy_templates: [
+            {
+              name: 'otel',
+              title: 'OTel template',
+              inputs: [{ name: 'otel_logs', type: 'otelcol', title: 'OTel Logs', description: '' }],
+            },
+          ],
+        },
+        paths: [],
+        archiveIterator: {},
+      } as any as PackageInstallContext;
+
+      appContextService.start(
+        createAppContextStartContractMock(
+          { internal: { disableILMPolicies: false } } as any,
+          undefined,
+          undefined,
+          { enableOtelIntegrations: false } as ExperimentalFeatures
+        )
+      );
+
+      const dataStream = {
+        type: 'logs',
+        dataset: 'good_integration_otel.otel_logs',
+        title: 'OTel Logs',
+        release: 'experimental',
+        package: 'good_integration_otel',
+        path: 'otel_logs',
+        ingest_pipeline: 'default',
+        streams: [{ input: 'otel_logs', title: 'OTel log stream' }],
+      } as RegistryDataStream;
+
+      const { indexTemplate } = prepareTemplate({
+        packageInstallContext: integrationOtelPackageInstallContext,
+        fieldAssetsMap: new Map(),
+        dataStream,
+        ilmMigrationStatusMap: new Map(),
+      });
+
+      expect(indexTemplate.indexTemplate.index_patterns).toEqual([
+        'logs-good_integration_otel.otel_logs-*',
+      ]);
     });
   });
 

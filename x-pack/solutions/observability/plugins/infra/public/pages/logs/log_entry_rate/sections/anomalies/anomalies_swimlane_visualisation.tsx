@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-plugin/public';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import { MissingEmbeddableFactoryCallout } from '../../../../../components/missing_embeddable_factory_callout';
 import { partitionField } from '../../../../../../common/infra_ml';
 import type { TimeRange } from '../../../../../../common/time/time_range';
@@ -20,12 +20,6 @@ interface Props {
   selectedDatasets: string[];
   autoRefresh: AutoRefresh;
 }
-
-// Disable refresh, allow our timerange changes to refresh the embeddable.
-const REFRESH_CONFIG = {
-  pause: true,
-  value: 0,
-};
 
 export const AnomaliesSwimlaneVisualisation: React.FC<Props> = (props) => {
   const { embeddable: embeddablePlugin } = useKibanaContextForPlugin().services;
@@ -64,8 +58,7 @@ export const VisualisationContent: React.FC<Props> = ({ timeRange, jobIds, selec
       jobIds={jobIds}
       swimlaneType="viewBy"
       viewBy={partitionField}
-      refreshConfig={REFRESH_CONFIG}
-      time_range={formattedTimeRange}
+      timeRange={formattedTimeRange}
       query={query}
     />
   );

@@ -99,7 +99,7 @@ export class IngestPipelinesPage {
 
   async goto() {
     await this.page.gotoApp('management/ingest/ingest_pipelines');
-    await this.appTitle.waitFor();
+    await this.appTitle.waitFor({ timeout: 60_000 });
   }
 
   async sectionHeadingText() {
@@ -163,6 +163,7 @@ export class IngestPipelinesPage {
 
   async closePipelineDetailsFlyout() {
     await this.flyoutCloseButton.click();
+    await this.detailsFlyout.waitFor({ state: 'hidden' });
   }
 
   async getDetailsFlyoutTitle() {
@@ -238,6 +239,7 @@ export class IngestPipelinesPage {
     await row.locator('[data-test-subj="deleteGeoipDatabaseButton"]').click();
     await this.geoipDatabaseConfirmation.fill('delete');
     await this.deleteGeoipDatabaseSubmitButton.click();
+    await this.deleteGeoipDatabaseSubmitButton.waitFor({ state: 'detached' });
   }
 
   private async fillDescription(description: string) {

@@ -16,12 +16,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { PageScope } from '../../../data_view_manager/constants';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { HeaderPage } from '../../../common/components/header_page';
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { AlertsPageContent } from './content';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 
@@ -33,54 +29,24 @@ const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertsPage.dataVie
   defaultMessage: 'Unable to retrieve the data view',
 });
 
+interface WrapperProps {
+  /** the alerts data view, retrieved once by the parent via useDataView(PageScope.alerts) */
+  dataView: DataView;
+  /** the status of the alerts data view retrieval */
+  status: 'pristine' | 'loading' | 'ready' | 'error';
+}
+
 /**
- * Retrieves the dataView for the alerts page then renders the alerts page when the dataView is valid.
+ * Renders the alerts page when the provided dataView is valid.
  * Shows a loading skeleton while retrieving.
  * Shows an error message if the dataView is invalid.
  */
-export const Wrapper = memo(() => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldSourcererDataViewIsLoading } =
-    useSourcererDataView(PageScope.alerts);
-  // TODO rename to just dataView and status once we remove the newDataViewPickerEnabled feature flag
-  const { dataView: experimentalDataView, status: experimentalDataViewStatus } = useDataView(
-    PageScope.alerts
-  );
-
-  const isLoading: boolean = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'loading' || experimentalDataViewStatus === 'pristine'
-        : oldSourcererDataViewIsLoading,
-    [experimentalDataViewStatus, newDataViewPickerEnabled, oldSourcererDataViewIsLoading]
-  );
-
-  // TODO this will not be needed anymore once we remove the newDataViewPickerEnabled feature flag.
-  //  We currently only need the runtimeMappings in the KPIsSection, so we can just pass down the dataView
-  //  and extract the runtimeMappings from it there using experimentalDataView.getRuntimeMappings()
-  const runtimeMappings: RunTimeMappings = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? (experimentalDataView?.getRuntimeMappings() as RunTimeMappings) ?? {} // TODO remove the ? as the dataView should never be undefined
-        : (oldSourcererDataViewSpec?.runtimeFieldMap as RunTimeMappings) ?? {},
-    [newDataViewPickerEnabled, experimentalDataView, oldSourcererDataViewSpec?.runtimeFieldMap]
-  );
+export const Wrapper = memo(({ dataView, status }: WrapperProps) => {
+  const isLoading: boolean = useMemo(() => status === 'loading' || status === 'pristine', [status]);
 
   const isDataViewInvalid: boolean = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataViewStatus === 'error' ||
-          (experimentalDataViewStatus === 'ready' && !experimentalDataView.hasMatchedIndices())
-        : !oldSourcererDataViewSpec ||
-          !oldSourcererDataViewSpec.id ||
-          !oldSourcererDataViewSpec.title,
-    [
-      experimentalDataView,
-      experimentalDataViewStatus,
-      newDataViewPickerEnabled,
-      oldSourcererDataViewSpec,
-    ]
+    () => status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices()),
+    [dataView, status]
   );
 
   return (
@@ -120,11 +86,7 @@ export const Wrapper = memo(() => {
               title={<h2>{DATAVIEW_ERROR}</h2>}
             />
           ) : (
-            <AlertsPageContent
-              dataView={experimentalDataView}
-              oldSourcererDataViewSpec={oldSourcererDataViewSpec}
-              runtimeMappings={runtimeMappings}
-            />
+            <AlertsPageContent dataView={dataView} />
           )}
         </>
       }

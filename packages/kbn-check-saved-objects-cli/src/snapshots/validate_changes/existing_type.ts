@@ -25,6 +25,7 @@ import {
   validateIgnoreAboveExistingType,
   validateNameTitleFieldTypesExistingType,
 } from './existing_type_utils';
+import { validateAdditiveOnlyMappings } from './additive_only_mappings';
 
 interface ValidateChangesExistingTypeParams {
   from: MigrationInfoRecord;
@@ -73,6 +74,8 @@ export function validateChangesExistingType({
 
   validateNameTitleFieldTypesExistingType(name, to, from, registeredType, log);
 
+  // assert that no mapped property has been removed compared to the baseline snapshot
+  validateAdditiveOnlyMappings(name, from.mappings, to.mappings);
   // validate that keyword and flattened fields have ignore_above
   validateIgnoreAboveExistingType(name, to, from, log);
 

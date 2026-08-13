@@ -7,7 +7,11 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { dismissGlobalToastsIfPresent, waitForApmSettingsHeaderLink } from '../page_helpers';
+import {
+  dismissGlobalToastsIfPresent,
+  waitForApmAppMenuReady,
+  waitForSearchBarReady,
+} from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 import { type TraceWaterfallFlyout, createTraceWaterfallFlyout } from './trace_waterfall_flyout';
 
@@ -36,7 +40,7 @@ export class TransactionDetailsPage {
         }
       )}`
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   /**
@@ -63,7 +67,7 @@ export class TransactionDetailsPage {
         }
       )}`
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   /**
@@ -76,7 +80,7 @@ export class TransactionDetailsPage {
     const url = new URL(this.page.url());
     url.searchParams.delete('transactionName');
     await this.page.goto(url.toString());
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   /**
@@ -117,7 +121,7 @@ export class TransactionDetailsPage {
 
   async reload() {
     await this.page.reload();
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   async fillApmUnifiedSearchBar(query: string) {
@@ -127,9 +131,7 @@ export class TransactionDetailsPage {
   }
 
   async waitForPageToLoad(page: ScoutPage) {
-    await page
-      .getByTestId('superDatePickerToggleQuickMenuButton')
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
+    await waitForSearchBarReady(page);
   }
 
   // Span links methods

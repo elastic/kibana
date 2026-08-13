@@ -8,8 +8,12 @@
  */
 
 import { DynamicStepContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { z } from '@kbn/zod/v4';
-import { getDataMapContextSchema } from './get_data_map_context_schema';
+import {
+  getDataMapContextSchema,
+  getDataMapNestedContextSchema,
+} from './get_data_map_context_schema';
 
 describe('getDataMapContextSchema', () => {
   describe('index schema', () => {
@@ -74,9 +78,9 @@ describe('getDataMapContextSchema', () => {
       expect(item.safeParse('anything').success).toBe(true);
     });
 
-    it('returns z.unknown() for object items', () => {
+    it('infers object item schema from object items', () => {
       const { item } = getDataMapContextSchema(DynamicStepContextSchema, { key: 'val' });
-      expect(item.safeParse('anything').success).toBe(true);
+      expect(getSchemaAtPath(item, 'key').schema).toBeInstanceOf(z.ZodString);
     });
 
     it('returns z.unknown() for null items', () => {
@@ -147,12 +151,129 @@ describe('getDataMapContextSchema', () => {
       expect(item.safeParse(123).success).toBe(true);
     });
 
+    it('resolves object schema from a variable referencing a single object', () => {
+      const schemaWithObject = DynamicStepContextSchema.extend({
+        consts: z.object({
+          item: z.object({
+            title: z.string(),
+          }),
+        }),
+      });
+
+      const { item } = getDataMapContextSchema(schemaWithObject, '{{ consts.item }}');
+
+      expect(getSchemaAtPath(item, 'title').schema).toBeInstanceOf(z.ZodString);
+    });
+
     it('returns z.unknown() when variable path does not exist in schema', () => {
       const { item } = getDataMapContextSchema(
         DynamicStepContextSchema,
         '{{ steps.nonexistent.output.items }}'
       );
       expect(item.safeParse('anything').success).toBe(true);
+    });
+  });
+
+  describe('nested $map context schema', () => {
+    it('adds the custom item binding for variables inside a nested $map body', () => {
+      const stepContextSchema = DynamicStepContextSchema.extend({
+        item: z.object({
+          labels: z.array(
+            z.object({
+              name: z.string(),
+            })
+          ),
+        }),
+      });
+      const step = {
+        type: 'data.map',
+        with: {
+          fields: {
+            labels: {
+              $map: { items: '{{ item.labels }}', item: 'label' },
+              name: '{{ label.name }}',
+            },
+          },
+        },
+      };
+
+      const nestedContext = getDataMapNestedContextSchema(stepContextSchema, step, [
+        'with',
+        'fields',
+        'labels',
+        'name',
+      ]);
+      const context = stepContextSchema.extend(nestedContext);
+
+      expect(getSchemaAtPath(context, 'label.name').schema).toBeInstanceOf(z.ZodString);
+      expect(getSchemaAtPath(context, 'index').schema).toBeInstanceOf(z.ZodNumber);
+    });
+
+    it('does not add the current $map binding while validating its items expression', () => {
+      const stepContextSchema = DynamicStepContextSchema.extend({
+        item: z.object({
+          labels: z.array(z.object({ name: z.string() })),
+        }),
+      });
+      const step = {
+        type: 'data.map',
+        with: {
+          fields: {
+            labels: {
+              $map: { items: '{{ item.labels }}', item: 'label' },
+              name: '{{ label.name }}',
+            },
+          },
+        },
+      };
+
+      const nestedContext = getDataMapNestedContextSchema(stepContextSchema, step, [
+        'with',
+        'fields',
+        'labels',
+        '$map',
+        'items',
+      ]);
+
+      expect(nestedContext).toEqual({});
+    });
+
+    it('keeps parent $map bindings available when resolving nested $map items', () => {
+      const stepContextSchema = DynamicStepContextSchema.extend({
+        item: z.object({
+          departments: z.array(
+            z.object({
+              employees: z.array(z.object({ name: z.string() })),
+            })
+          ),
+        }),
+      });
+      const step = {
+        type: 'data.map',
+        with: {
+          fields: {
+            departments: {
+              $map: { items: '{{ item.departments }}', item: 'dept' },
+              employees: {
+                $map: { items: '{{ dept.employees }}', item: 'employee' },
+                name: '{{ employee.name }}',
+              },
+            },
+          },
+        },
+      };
+
+      const nestedContext = getDataMapNestedContextSchema(stepContextSchema, step, [
+        'with',
+        'fields',
+        'departments',
+        'employees',
+        'name',
+      ]);
+      const context = stepContextSchema.extend(nestedContext);
+
+      expect(getSchemaAtPath(context, 'dept.employees.0.name').schema).toBeInstanceOf(z.ZodString);
+      expect(getSchemaAtPath(context, 'employee.name').schema).toBeInstanceOf(z.ZodString);
     });
   });
 });

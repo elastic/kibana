@@ -16,6 +16,11 @@ if [[ "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
   ts-node "$(dirname "${0}")/ci_stats_complete.ts"
 fi
 
+# Publish a build duration summary as pr_comment metadata so the PR comment
+# bot includes it in the build status comment. Best-effort; never fail the
+# post-build step on an API hiccup.
+ts-node "$(dirname "${0}")/build_timing.ts" || true
+
 if is_pr_with_label "ci:collect-ftr-timing"; then
   ts-node "$(dirname "${0}")/aggregate_ftr_timing.ts"
 fi

@@ -174,4 +174,41 @@ describe('Document view mode toggle component', () => {
     });
     expect(screen.getAllByRole('tab')).toHaveLength(2);
   });
+
+  it('should not show Pattern Analysis tab when aiops service is unavailable (basic license)', async () => {
+    const services = createDiscoverServicesMock();
+
+    services.uiSettings.get = jest.fn().mockReturnValue(true); // showFieldStatistics = true
+    services.aiops = undefined; // Simulate basic license - aiops not available
+
+    const dataView = buildDataViewMock({ name: 'logs-*' });
+    const toolkit = getDiscoverInternalStateMock({ services });
+
+    await toolkit.initializeTabs();
+
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 10,
+    });
+
+    renderWithKibanaRenderContext(
+      <DiscoverToolkitTestProvider toolkit={toolkit}>
+        <DocumentViewModeToggle
+          viewMode={VIEW_MODE.DOCUMENT_LEVEL}
+          isEsqlMode={false}
+          setDiscoverViewMode={jest.fn()}
+          dataView={dataView}
+        />
+      </DiscoverToolkitTestProvider>
+    );
+
+    expect(screen.getByTestId('discoverQueryTotalHits')).toBeVisible();
+    expect(screen.queryByTestId('dscViewModePatternAnalysisButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('dscViewModeDocumentButton')).toBeVisible();
+    expect(screen.getByTestId('dscViewModeFieldStatsButton')).toBeVisible();
+  });
 });

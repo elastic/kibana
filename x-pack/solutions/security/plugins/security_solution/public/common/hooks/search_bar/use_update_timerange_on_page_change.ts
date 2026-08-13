@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import usePrevious from 'react-use/lib/usePrevious';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { SecurityPageName } from '../../../app/types';

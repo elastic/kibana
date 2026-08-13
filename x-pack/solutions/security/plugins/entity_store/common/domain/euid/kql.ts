@@ -123,9 +123,9 @@ export function getEuidKqlFilterBasedOnDocument(
     })
     .map((evaluation) => ({ evaluation, spec: getSourceMatchSpec(doc, evaluation) }));
 
-  // For condition-based namespaces (e.g. local users identified by user.name + host.id from
-  // authentication events), the identity fields alone are sufficient — no higher-ranked field
-  // guards or source clause needed.
+  // Field guards (higher-ranked field exclusions from EUID ranking) are only needed when the
+  // namespace is source-value-based. Condition-based namespaces (e.g. local, cloud.provider
+  // mapping) skip the guards because the condition itself is the discriminator.
   const isConditionBased = evaluationSpecs.some(({ spec }) => spec.type === 'condition');
 
   if (!isConditionBased) {
@@ -135,12 +135,16 @@ export function getEuidKqlFilterBasedOnDocument(
     for (const field of toBeFilteredOut) {
       conditions.push(fieldMissingOrEmptyKql(field));
     }
+  }
 
-    for (const { evaluation, spec } of evaluationSpecs) {
-      const kqlClause = buildSourceClauseKql(evaluation, spec);
-      if (kqlClause !== undefined) {
-        conditions.push(kqlClause);
-      }
+  // Source clauses are always added regardless of isConditionBased.
+  // For condition specs (e.g. local namespace or cloud.provider field-mapping), buildSourceClauseKql
+  // translates the condition to KQL via conditionToKql — this ensures that a filter for
+  // user:alice@aws also requires cloud.provider==aws and does not accidentally match alice@gcp.
+  for (const { evaluation, spec } of evaluationSpecs) {
+    const kqlClause = buildSourceClauseKql(evaluation, spec);
+    if (kqlClause !== undefined) {
+      conditions.push(kqlClause);
     }
   }
 
@@ -159,9 +163,9 @@ function fieldMissingOrEmptyKql(field: string): string {
 
 /**
  * Translates a field evaluation back to KQL source-field conditions using the known
- * destination value. Only `sourceMatchesAny` when-clauses can be reversed to KQL;
- * condition-based when-clauses are skipped (the identity fields are sufficient for those
- * cases, e.g. the `local` namespace).
+ * destination value. For condition-based when-clauses the condition is translated directly
+ * to KQL via conditionToKql, ensuring provider-specific filters (e.g. cloud.provider==aws)
+ * are included and not accidentally omitted.
  */
 function buildSourceClauseKql(
   evaluation: FieldEvaluation,

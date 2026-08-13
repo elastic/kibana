@@ -9,23 +9,7 @@ import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { ResolvedConfiguration } from '../types';
 
 export const resolveConfiguration = (configuration: AgentConfiguration): ResolvedConfiguration => {
-  let researchInstructions = configuration.research?.instructions ?? '';
-  let answerInstructions = configuration.answer?.instructions ?? '';
-  if (configuration.instructions) {
-    researchInstructions = researchInstructions
-      ? `${researchInstructions}\n${configuration.instructions}`
-      : configuration.instructions;
-    answerInstructions = answerInstructions
-      ? `${answerInstructions}\n${configuration.instructions}`
-      : configuration.instructions;
-  }
-
   return {
-    research: {
-      instructions: researchInstructions,
-    },
-    answer: {
-      instructions: answerInstructions,
-    },
+    instructions: configuration.instructions ?? '',
   };
 };

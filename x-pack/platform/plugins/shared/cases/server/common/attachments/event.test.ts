@@ -49,7 +49,7 @@ describe('event attachment transformer', () => {
       });
     });
 
-    it('normalizes single-item arrays to scalar values', () => {
+    it('preserves single-item arrays so event id and index round-trip to the same shape', () => {
       const payload = eventAttachmentTransformer.toUnifiedPayload({
         type: AttachmentType.event,
         owner: SECURITY_SOLUTION_OWNER,
@@ -59,9 +59,9 @@ describe('event attachment transformer', () => {
 
       expect(payload).toEqual({
         type: SECURITY_EVENT_ATTACHMENT_TYPE,
-        attachmentId: 'event-1',
+        attachmentId: ['event-1'],
         metadata: {
-          index: 'index-1',
+          index: ['index-1'],
         },
         owner: SECURITY_SOLUTION_OWNER,
       });

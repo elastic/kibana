@@ -74,7 +74,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
         }),
       },
     },
@@ -121,7 +121,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
         }),
         body: createRouteValidationFunction(partialMetricsSourceConfigurationReqPayloadRT),
       },
@@ -185,7 +185,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       path: '/api/metrics/source/{sourceId}/hasData',
       validate: {
         params: schema.object({
-          sourceId: schema.string(),
+          sourceId: schema.string({ maxLength: 256 }),
         }),
       },
     },

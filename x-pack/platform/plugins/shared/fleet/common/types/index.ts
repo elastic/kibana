@@ -17,6 +17,7 @@ import type {
 export interface FleetConfigType {
   enabled: boolean;
   isAirGapped?: boolean;
+  productVersionsApiTimeoutMs?: number;
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
@@ -48,6 +49,20 @@ export interface FleetConfigType {
     customIntegrations?: {
       enabled?: boolean;
     };
+    managedBulk?: {
+      enabled: boolean;
+    };
+  };
+  iacProvisioner?: {
+    enabled: boolean;
+    api?: {
+      url?: string;
+      tls?: {
+        certificate?: string;
+        key?: string;
+        ca?: string;
+      };
+    };
   };
   spaceSettings?: Array<{
     space_id: string;
@@ -72,6 +87,9 @@ export interface FleetConfigType {
     deferPackageBumpInstallVersion?: boolean;
     maxConcurrentPackageOperations?: number;
     packageUpgradeBatchSize?: number;
+  };
+  packageInstallation?: {
+    maxConcurrentDatastreamOperations?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
@@ -128,6 +146,7 @@ export interface FleetConfigType {
   };
   unenrollInactiveAgents?: {
     taskInterval?: string;
+    gracePeriodMs?: number;
   };
 }
 

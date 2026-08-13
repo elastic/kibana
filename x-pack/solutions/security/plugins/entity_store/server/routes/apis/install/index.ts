@@ -6,14 +6,14 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
-import { getMissingPrivileges } from '../utils/get_missing_privileges';
+import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
@@ -39,7 +39,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(BodySchema),
+            body: buildStrictRouteValidationWithZod(BodySchema),
           },
         },
         options: {
@@ -56,18 +56,13 @@ export function registerInstall(router: EntityStorePluginRouter) {
         const { entityTypes, logExtraction, historySnapshot } = req.body;
         logger.debug('Install api called');
 
-        const privileges = await assetManager.getPrivileges(
+        const forbidden = await enforceEntityStorePrivileges(
+          assetManager,
           req,
+          res,
           logExtraction?.additionalIndexPatterns
         );
-        if (!privileges.hasAllRequested) {
-          return res.forbidden({
-            body: {
-              attributes: getMissingPrivileges(privileges),
-              message: `User '${privileges.username}' has insufficient privileges`,
-            },
-          });
-        }
+        if (forbidden) return forbidden;
         const { engines } = await assetManager.getStatus();
         const installedTypes = new Set(engines.map((e) => e.type));
         const toInstall = entityTypes.filter((type) => !installedTypes.has(type));

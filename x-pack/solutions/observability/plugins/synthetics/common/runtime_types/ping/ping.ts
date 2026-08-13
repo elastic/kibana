@@ -245,14 +245,25 @@ export const PingType = t.intersection([
   }),
 ]);
 
-export const PingStateType = t.type({
-  timestamp: t.string,
-  '@timestamp': t.string,
-  monitor: MonitorType,
-  docId: t.string,
-  state: ErrorStateCodec,
-  error: PingErrorType,
-});
+export const PingStateType = t.intersection([
+  t.type({
+    timestamp: t.string,
+    '@timestamp': t.string,
+    monitor: MonitorType,
+    docId: t.string,
+    state: ErrorStateCodec,
+    error: PingErrorType,
+    config_id: t.string,
+    observer: ObserverCodec,
+  }),
+  t.partial({
+    http: t.partial({
+      response: t.partial({
+        status_code: t.number,
+      }),
+    }),
+  }),
+]);
 export type Ping = t.TypeOf<typeof PingType>;
 export type PingState = t.TypeOf<typeof PingStateType>;
 
@@ -276,6 +287,7 @@ export const GetPingsParamsType = t.intersection([
     monitorId: t.string,
     sort: t.string,
     status: t.string,
+    remoteName: t.string,
   }),
 ]);
 

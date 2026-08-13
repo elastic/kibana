@@ -7,8 +7,8 @@
 
 import React, { useEffect } from 'react';
 import {
-  ServiceMapSearchProvider,
-  useServiceMapSearchContext,
+  ServiceMapHighlightProvider,
+  useServiceMapHighlight,
 } from '../../../shared/service_map/service_map_search_context';
 
 interface SearchHighlightProps {
@@ -18,7 +18,7 @@ interface SearchHighlightProps {
 }
 
 function SearchHighlightInit({ matchNodeIds, activeMatchNodeId, children }: SearchHighlightProps) {
-  const { setSearchHighlight } = useServiceMapSearchContext();
+  const { setSearchHighlight } = useServiceMapHighlight();
   useEffect(() => {
     setSearchHighlight({ matchNodeIds, activeMatchNodeId });
   }, [matchNodeIds, activeMatchNodeId, setSearchHighlight]);
@@ -26,7 +26,7 @@ function SearchHighlightInit({ matchNodeIds, activeMatchNodeId, children }: Sear
 }
 
 /**
- * Wraps children in a fresh `ServiceMapSearchProvider` pre-configured with the given highlight state.
+ * Wraps children in a fresh `ServiceMapHighlightProvider` pre-configured with the given highlight state.
  */
 export function WithSearchHighlight({
   matchNodeIds,
@@ -34,10 +34,10 @@ export function WithSearchHighlight({
   children,
 }: SearchHighlightProps) {
   return (
-    <ServiceMapSearchProvider>
+    <ServiceMapHighlightProvider>
       <SearchHighlightInit matchNodeIds={matchNodeIds} activeMatchNodeId={activeMatchNodeId}>
         {children}
       </SearchHighlightInit>
-    </ServiceMapSearchProvider>
+    </ServiceMapHighlightProvider>
   );
 }

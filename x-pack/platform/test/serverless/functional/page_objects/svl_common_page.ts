@@ -7,6 +7,11 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+interface LoginWithRoleOptions {
+  /** Path appended to the deployment host after setting the session cookie (defaults to `/`). */
+  initialPath?: string;
+}
+
 export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -68,7 +73,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     /**
      * Login to Kibana using SAML authentication with provided project-specfic role
      */
-    async loginWithRole(role: string) {
+    async loginWithRole(role: string, { initialPath = '' }: LoginWithRoleOptions = {}) {
       svlUserManager.checkRoleIsSupported(role);
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getInteractiveUserSessionCookieWithRoleScope(role);
@@ -88,16 +93,17 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           log.debug(`browser: refresh the page`);
           await browser.refresh();
           log.debug(`browser: load base url and validate the cookie`);
-          await browser.get(deployment.getHostPort());
+          await browser.get(deployment.getHostPort() + initialPath);
           // Validating that the new cookie in the browser is set for the correct user
           const browserCookies = await browser.getCookies();
-          if (browserCookies.length === 0) {
+          const sidCookieInBrowser = browserCookies.find((c) => c.name === 'sid');
+          if (!sidCookieInBrowser) {
             throw new Error(`The cookie is missing in browser context`);
           }
           const { body } = await supertestWithoutAuth
             .get('/internal/security/me')
             .set(svlCommonApi.getInternalRequestHeader())
-            .set({ Cookie: `sid=${browserCookies[0].value}` });
+            .set({ Cookie: `sid=${sidCookieInBrowser.value}` });
 
           const email = await svlUserManager.getEmail(role);
           // email returned from API call must match the email for the specified role
@@ -162,8 +168,8 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
      *
      * Login to Kibana using SAML authentication with custom role
      */
-    async loginWithCustomRole() {
-      await this.loginWithRole(svlUserManager.CUSTOM_ROLE);
+    async loginWithCustomRole(options: LoginWithRoleOptions = {}) {
+      await this.loginWithRole(svlUserManager.CUSTOM_ROLE, options);
     },
 
     async navigateToLoginForm() {
@@ -176,7 +182,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async assertProjectHeaderExists() {
-      await testSubjects.existOrFail('kibanaProjectHeader');
+      await retry.try(async () => {
+        const exists =
+          (await testSubjects.exists('chromeNextGlobalHeader', { timeout: 0 })) ||
+          (await testSubjects.exists('kibanaProjectHeader', { timeout: 0 }));
+        if (!exists) {
+          throw new Error('Neither chromeNextGlobalHeader nor kibanaProjectHeader is present');
+        }
+      });
     },
 
     async clickUserAvatar() {

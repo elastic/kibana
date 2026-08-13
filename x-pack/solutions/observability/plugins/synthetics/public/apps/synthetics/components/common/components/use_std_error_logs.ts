@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
+import { createEsParams } from '@kbn/observability-shared-plugin/public';
+import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import type { Ping } from '../../../../../../common/runtime_types';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 
-export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
-  const { data, loading } = useEsSearch(
+export const useStdErrorLogs = ({
+  checkGroup,
+  remoteName,
+}: {
+  checkGroup?: string;
+  remoteName?: string;
+}) => {
+  const index = !checkGroup ? '' : getSyntheticsCcsIndex(remoteName);
+
+  const { data, loading } = useSyntheticsEsSearch(
     createEsParams({
-      index: !checkGroup ? '' : SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 1000,
       query: {
         bool: {
@@ -35,7 +44,7 @@ export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
         },
       },
     }),
-    [checkGroup],
+    [checkGroup, remoteName],
     { name: 'getStdErrLogs' }
   );
 

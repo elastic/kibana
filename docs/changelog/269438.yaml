@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269438
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- AI and machine Learning
+title: Restore SPARKLINE in the identify patterns recommended query

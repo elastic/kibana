@@ -230,6 +230,7 @@ Fired at the end of each successful conversation round.
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
 | `input_tokens` | integer | yes | Input tokens consumed in this round. |
+| `cached_input_tokens` | integer | no | Input tokens served from cache in this round (subset of `input_tokens`), when reported by the provider. |
 | `llm_calls` | integer | yes | Number of LLM calls made during the round. |
 | `message_length` | integer | yes | Character length of the user's input message. |
 | `model` | keyword | no | LLM model identifier. |
@@ -295,8 +296,8 @@ Fired when a tool call fails.
 
 ### Skill CRUD events
 
-These three events share the same schema. They fire on skill create/update/delete via the
-public API or during plugin import.
+Skill create/update/delete events fire on skill CRUD via the public API. Created and Updated
+include `tool_ids`; Deleted does not.
 
 | Event type | Constant |
 |------------|----------|
@@ -304,10 +305,11 @@ public API or during plugin import.
 | `agent_builder_skill_updated` | `AGENT_BUILDER_EVENT_TYPES.SkillUpdated` |
 | `agent_builder_skill_deleted` | `AGENT_BUILDER_EVENT_TYPES.SkillDeleted` |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `skill_id` | keyword | yes | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
-| `origin` | keyword | no | `custom` (direct API) or `plugin` (plugin-bundled). |
+| Field | Type | Required | Events | Description |
+|-------|------|----------|--------|-------------|
+| `skill_id` | keyword | yes | all | Normalized skill ID. Custom → `custom-<hash>`, plugin-bundled → `plugin-<plugin_hash>-<skill_hash>`. |
+| `origin` | keyword | no | all | `custom` (direct API) or `plugin` (plugin-bundled). |
+| `tool_ids` | keyword[] | yes | created, updated | Deduplicated, normalized tool IDs included in the skill after create/update. |
 
 ### `agent_builder_skill_invoked`
 

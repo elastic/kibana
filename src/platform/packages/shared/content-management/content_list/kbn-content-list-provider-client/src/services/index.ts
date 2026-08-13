@@ -43,5 +43,5 @@ export {
   type RecentlyAccessedHistorySource,
 } from './recently_accessed';
 
-// Helpers for wrapping `findItems` / `onDelete` with EBT performance metrics.
+// Helpers for wrapping `findItems` / `actions.delete.onBulkAction` with EBT performance metrics.
 export { withPerformanceMetrics, type PerformanceMetricsOptions } from './performance_metrics';

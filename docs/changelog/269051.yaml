@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/269051
+issues:
+- https://github.com/elastic/kibana/issues/269029
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Discover and ES|QL
+title: 'Allow null in combination with any other type in `CASE()`'

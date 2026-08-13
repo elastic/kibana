@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/269228
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+areas:
+- Alerting and reporting
+- Dashboards and visualizations
+title: Hide markdown panels from library flyout when tag filter is applied

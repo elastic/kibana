@@ -17,6 +17,7 @@ import {
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from './types';
 import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
+import { createGetStreamFeaturesTool } from '../features/tool';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
@@ -28,7 +29,7 @@ export function createGenerateSignificantEventsPrompt({
   additionalTools?: Record<string, ToolDefinition>;
 }) {
   return createPrompt({
-    name: 'generate_significant_events',
+    name: 'generate_significant_events_ki_queries',
     input: z.object({
       name: z.string(),
       description: z.string(),
@@ -49,31 +50,7 @@ export function createGenerateSignificantEventsPrompt({
         },
       },
       tools: {
-        get_stream_features: {
-          description:
-            'Fetches extracted stream features for this stream. Supports optional filtering by type, confidence, and limit.',
-          schema: {
-            type: 'object',
-            properties: {
-              feature_types: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                  enum: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
-                },
-              },
-              min_confidence: {
-                type: 'number',
-                minimum: 0,
-                maximum: 100,
-              },
-              limit: {
-                type: 'number',
-                minimum: 1,
-              },
-            },
-          },
-        },
+        get_stream_features: createGetStreamFeaturesTool(SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES),
         add_queries: {
           description: `Add queries to suggest to the user`,
           schema: {
@@ -127,8 +104,23 @@ export function createGenerateSignificantEventsPrompt({
                       description:
                         'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query from `existing_queries`.',
                     },
+                    feature_ids: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                      },
+                      description:
+                        'IDs of the features (from get_stream_features) that informed this query. Each ID must match a feature `id` returned by a previous get_stream_features call.',
+                    },
                   },
-                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
+                  required: [
+                    'esql',
+                    'title',
+                    'description',
+                    'category',
+                    'severity_score',
+                    'feature_ids',
+                  ],
                 },
               },
             },

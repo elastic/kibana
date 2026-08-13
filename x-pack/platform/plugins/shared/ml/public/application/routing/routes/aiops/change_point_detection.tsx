@@ -34,7 +34,6 @@ export const changePointDetectionRouteFactory = (
   render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.aiopsBreadcrumbs.changePointDetectionLabel', {
         defaultMessage: 'Change point detection',

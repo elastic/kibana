@@ -198,6 +198,22 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
               defaultMessage: 'Zoom',
             }
           )}
+          minInputProps={{
+            'aria-label': i18n.translate(
+              'xpack.maps.source.MVTSingleLayerVectorSourceEditor.minZoomAriaLabel',
+              {
+                defaultMessage: 'Available levels minimum zoom',
+              }
+            ),
+          }}
+          maxInputProps={{
+            'aria-label': i18n.translate(
+              'xpack.maps.source.MVTSingleLayerVectorSourceEditor.maxZoomAriaLabel',
+              {
+                defaultMessage: 'Available levels maximum zoom',
+              }
+            ),
+          }}
         />
         {fieldEditor}
       </Fragment>

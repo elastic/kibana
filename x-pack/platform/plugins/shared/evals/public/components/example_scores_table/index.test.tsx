@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { EvaluationRunDatasetExample } from '@kbn/evals-common';
+import type { EvaluationExperimentDatasetExample } from '@kbn/evals-common';
 import { ExampleScoresTable } from '.';
 
 const buildScore = ({
@@ -34,9 +34,8 @@ const buildScore = ({
   repetitionIndex: number;
   exampleInput?: Record<string, unknown> | null;
   taskOutput?: Record<string, unknown> | null;
-}): EvaluationRunDatasetExample['scores'][number] => ({
+}): EvaluationExperimentDatasetExample['scores'][number] => ({
   '@timestamp': timestamp,
-  run_id: 'run-1',
   experiment_id: 'experiment-1',
   example: {
     id: 'example-1',
@@ -66,16 +65,15 @@ const buildScore = ({
       id: 'evaluator-model-1',
     },
   },
-  run_metadata: {
+  metadata: {
     total_repetitions: 1,
   },
-  environment: {},
 });
 
 describe('ExampleScoresTable', () => {
   it('renders repetition navigation and inline JSON previews for multi-repetition rows', () => {
     const onTraceClick = jest.fn();
-    const examples: EvaluationRunDatasetExample[] = [
+    const examples: EvaluationExperimentDatasetExample[] = [
       {
         example_id: 'example-id-0000000000000001',
         example_index: 2,
@@ -102,15 +100,9 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
-    expect(screen.getByText('example-id-00000...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-0000000000000001')).toBeInTheDocument();
 
     const pagination = screen.getByRole('navigation', {
       name: 'Select repetition for example example-id-0000000000000001',
@@ -148,7 +140,7 @@ describe('ExampleScoresTable', () => {
   });
 
   it('does not render repetition pagination for single-repetition rows', () => {
-    const examples: EvaluationRunDatasetExample[] = [
+    const examples: EvaluationExperimentDatasetExample[] = [
       {
         example_id: 'example-id-single-repetition',
         example_index: 0,
@@ -166,20 +158,18 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(
       screen.queryByRole('navigation', {
         name: 'Select repetition for example example-id-single-repetition',
       })
     ).not.toBeInTheDocument();
-    expect(screen.getByText('example-id-singl...')).toBeInTheDocument();
+    expect(screen.getByText('example-id-single-repetition')).toBeInTheDocument();
   });
 
   it('renders evaluator label as a badge when present', () => {
-    const examples: EvaluationRunDatasetExample[] = [
+    const examples: EvaluationExperimentDatasetExample[] = [
       {
         example_id: 'example-with-label',
         example_index: 0,
@@ -195,9 +185,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('Factuality:')).toBeInTheDocument();
     expect(screen.getByText('0.80')).toBeInTheDocument();
@@ -205,7 +193,7 @@ describe('ExampleScoresTable', () => {
   });
 
   it('shows explanation and metadata when accordion is expanded', () => {
-    const examples: EvaluationRunDatasetExample[] = [
+    const examples: EvaluationExperimentDatasetExample[] = [
       {
         example_id: 'example-with-details',
         example_index: 0,
@@ -222,9 +210,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('Relevance:')).toBeInTheDocument();
     expect(screen.getByText('0.90')).toBeInTheDocument();
@@ -241,7 +227,7 @@ describe('ExampleScoresTable', () => {
 
   it('shows evaluator trace button when evaluator trace_id is present', () => {
     const onTraceClick = jest.fn();
-    const examples: EvaluationRunDatasetExample[] = [
+    const examples: EvaluationExperimentDatasetExample[] = [
       {
         example_id: 'example-with-eval-trace',
         example_index: 0,
@@ -257,13 +243,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable
-        examples={examples}
-        onExampleClick={jest.fn()}
-        onTraceClick={onTraceClick}
-      />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={onTraceClick} />);
 
     const accordion = screen.getByLabelText('Toggle details for evaluator Criteria');
     const accordionButton = accordion.querySelector('.euiAccordion__button') as HTMLButtonElement;
@@ -278,7 +258,7 @@ describe('ExampleScoresTable', () => {
   });
 
   it('does not render accordion when no details are available', () => {
-    const examples: EvaluationRunDatasetExample[] = [
+    const examples: EvaluationExperimentDatasetExample[] = [
       {
         example_id: 'example-no-details',
         example_index: 0,
@@ -293,9 +273,7 @@ describe('ExampleScoresTable', () => {
       },
     ];
 
-    render(
-      <ExampleScoresTable examples={examples} onExampleClick={jest.fn()} onTraceClick={jest.fn()} />
-    );
+    render(<ExampleScoresTable examples={examples} onTraceClick={jest.fn()} />);
 
     expect(screen.getByText('SimpleScore:')).toBeInTheDocument();
     expect(screen.getByText('1.00')).toBeInTheDocument();

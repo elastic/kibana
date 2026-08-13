@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
+  EuiToolTip,
   useEuiTheme,
   keys,
 } from '@elastic/eui';
@@ -29,7 +30,7 @@ interface RightSideActionsProps {
 }
 
 const searchButtonLabel = i18n.translate('metricsExperience.searchButton', {
-  defaultMessage: 'Search',
+  defaultMessage: 'Search metrics',
 });
 
 const DEBOUNCE_TIME = 300;
@@ -123,25 +124,26 @@ export const SearchButton = ({
             </EuiFlexItem>
           ) : (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="magnify"
-                aria-label={searchButtonLabel}
-                title={searchButtonLabel}
-                onClick={onShowSearch}
-                data-test-subj="metricsExperienceToolbarSearch"
-                size="s"
-                css={css`
-                  border: ${euiTheme.border.thin};
-                  border-top-right-radius: 0;
-                  border-bottom-right-radius: 0;
+              <EuiToolTip content={searchButtonLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="magnify"
+                  aria-label={searchButtonLabel}
+                  onClick={onShowSearch}
+                  data-test-subj="metricsExperienceToolbarSearch"
+                  size="s"
+                  css={css`
+                    border: ${euiTheme.border.thin};
+                    border-top-right-radius: 0;
+                    border-bottom-right-radius: 0;
 
-                  &:focus {
-                    outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
-                    outline-offset: -${euiTheme.focus.width};
-                  }
-                `}
-                color="text"
-              />
+                    &:focus {
+                      outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+                      outline-offset: -${euiTheme.focus.width};
+                    }
+                  `}
+                  color="text"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

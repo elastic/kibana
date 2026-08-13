@@ -7,8 +7,7 @@
 
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { Plugin, CoreSetup, CoreStart, KibanaRequest } from '@kbn/core/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -16,6 +15,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
+  RunContext,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import {
@@ -23,6 +23,7 @@ import {
   TaskCost,
   TaskPriority,
 } from '@kbn/task-manager-plugin/server/task';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
@@ -30,7 +31,6 @@ export interface SampleTaskManagerFixtureSetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 export interface SampleTaskManagerFixtureStartDeps {
-  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -38,10 +38,6 @@ export class SampleTaskManagerFixturePlugin
   implements
     Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
 {
-  securityStart$: Subject<SecurityPluginStart | undefined> = new Subject<
-    SecurityPluginStart | undefined
-  >();
-  securityStart: Promise<SecurityPluginStart | undefined> = firstValueFrom(this.securityStart$);
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
   taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
@@ -58,7 +54,8 @@ export class SampleTaskManagerFixturePlugin
       //    failOn: number - If specified, the task will only throw the `failWith` error when `count` equals to the failOn value
       //    waitForParams : boolean - should the task stall ands wait to receive params asynchronously before using the default params
       //    waitForEvent : string - if provided, the task will stall (after completing the run) and wait for an asyn event before completing
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+      //    addEventFields : object - if provided, the task will attach these fields to its task-run event log document
+      createTaskRunner: ({ taskInstance, setCustomTaskRunEventFields }: RunContext) => ({
         async run() {
           const { params, state, id } = taskInstance;
           const prevState = state || { count: 0 };
@@ -70,6 +67,10 @@ export class SampleTaskManagerFixturePlugin
             // if this task requires custom params provided async - wait for them
             ...(params.waitForParams ? await once(taskTestingEvents, id) : {}),
           };
+
+          if (runParams.addEventFields) {
+            setCustomTaskRunEventFields(runParams.addEventFields);
+          }
 
           if (runParams.failWith) {
             if (!runParams.failOn || (runParams.failOn && count === runParams.failOn)) {
@@ -116,6 +117,92 @@ export class SampleTaskManagerFixturePlugin
             }),
           },
         },
+      },
+      sampleUserResolvingTask: {
+        title: 'Sample User Resolving Task',
+        description:
+          'A task that captures security.authc.getCurrentUser(fakeRequest) and the output of enriching a child request into task state, used to verify profile_uid enrichment end-to-end.',
+        timeout: '1m',
+        maxAttempts: 1,
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => state,
+            schema: schema.object({
+              resolvedFromTaskRequest: schema.maybe(
+                schema.nullable(
+                  schema.object({
+                    profileUid: schema.maybe(schema.string()),
+                    username: schema.maybe(schema.string()),
+                  })
+                )
+              ),
+              resolvedFromChildRequest: schema.maybe(
+                schema.nullable(
+                  schema.object({
+                    profileUid: schema.maybe(schema.string()),
+                    username: schema.maybe(schema.string()),
+                  })
+                )
+              ),
+              ran: schema.maybe(schema.boolean()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance, fakeRequest, enrichRequest }: RunContext) => ({
+          async run() {
+            // Use Core's wrapped security so getCurrentUser consults the
+            // fake-request enrichment map.
+            const [{ security, elasticsearch }] = await core.getStartServices();
+
+            const resolveUser = (request: KibanaRequest | undefined) => {
+              if (!request) {
+                return null;
+              }
+              const user = security.authc.getCurrentUser(request);
+              if (!user) {
+                return null;
+              }
+              // Capture the enriched identity fields exposed on the fake request.
+              return { profileUid: user.profile_uid, username: user.username };
+            };
+
+            const resolvedFromTaskRequest = resolveUser(fakeRequest);
+
+            let resolvedFromChildRequest = null;
+            if (fakeRequest && enrichRequest) {
+              const childFakeRequest = kibanaRequestFactory({
+                headers: {
+                  authorization: (fakeRequest.headers.authorization as string) ?? '',
+                },
+                path: '/',
+              });
+              enrichRequest(childFakeRequest);
+              resolvedFromChildRequest = resolveUser(childFakeRequest);
+            }
+
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify({
+                  resolvedFromTaskRequest,
+                  resolvedFromChildRequest,
+                }),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: {
+                resolvedFromTaskRequest,
+                resolvedFromChildRequest,
+                ran: true,
+              },
+            };
+          },
+        }),
       },
       sampleRecurringTask: {
         timeout: '1m',
@@ -274,6 +361,34 @@ export class SampleTaskManagerFixturePlugin
             },
           };
         },
+      },
+      sampleRecurringTaskWhichOverrunsRetryAt: {
+        title: 'Sample Recurring Task that overruns its retryAt',
+        description:
+          'A recurring task that records each run start, has a short timeout, and runs longer than its retryAt so Task Manager reclaims and re-runs it while the original run is still in flight. It intentionally does not support cancellation.',
+        timeout: '3s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { state } = taskInstance;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+            await new Promise((resolve) => setTimeout(resolve, 10000)); // 10 seconds
+
+            return {
+              state: {},
+            };
+          },
+        }),
       },
       sampleRecurringTaskThatDeletesItself: {
         title: 'Sample Recurring Task that Times Out',
@@ -563,16 +678,14 @@ export class SampleTaskManagerFixturePlugin
     initRoutes(
       core.http.createRouter(),
       this.taskManagerStart,
-      this.securityStart,
+      core.getStartServices().then(([{ security }]) => security),
       taskTestingEvents
     );
   }
 
-  public start(core: CoreStart, { security, taskManager }: SampleTaskManagerFixtureStartDeps) {
+  public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {
     this.taskManagerStart$.next(taskManager);
     this.taskManagerStart$.complete();
-    this.securityStart$.next(security);
-    this.securityStart$.complete();
   }
   public stop() {}
 }

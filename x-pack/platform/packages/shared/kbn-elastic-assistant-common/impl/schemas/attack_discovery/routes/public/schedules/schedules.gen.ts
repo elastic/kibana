@@ -62,6 +62,21 @@ export const AttackDiscoveryScheduleParams = lazySchema(() =>
     combinedFilter: z.object({}).catchall(z.unknown()).optional(),
     size: z.number(),
     start: z.string().optional(),
+    /**
+      * Composite workflow configuration that signals this schedule should use the orchestrator workflow executor, enabling tracking events (alert retrieval, generation, validation) to be written to the event log. Three independent retrieval toggles (skillEnabled, defaultRetrievalEnabled, alertRetrievalWorkflowsEnabled) compose the alert set; at least one must be enabled.
+
+      */
+    workflowConfig: z
+      .object({
+        alertRetrievalMode: z.enum(['custom_query', 'esql']).optional().default('custom_query'),
+        alertRetrievalWorkflowIds: z.array(z.string()).optional().default([]),
+        alertRetrievalWorkflowsEnabled: z.boolean().optional().default(false),
+        defaultRetrievalEnabled: z.boolean().optional().default(false),
+        esqlQuery: z.string().optional(),
+        skillEnabled: z.boolean().optional().default(true),
+        validationWorkflowId: z.string().optional().default('default'),
+      })
+      .optional(),
   })
 );
 export type AttackDiscoveryScheduleParams = z.infer<typeof AttackDiscoveryScheduleParams>;

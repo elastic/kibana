@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isLiteral } from '@elastic/esql';
+import {
+  isBinaryExpression,
+  isFunctionExpression,
+  isLiteral,
+  isUnaryExpression,
+} from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
-import { getFunctionDefinition } from '../..';
+import { getFunctionDefinition } from '../../functions';
 import { resolveArgumentTypes } from '../../expressions';
 import type { SupportedDataType } from '../../../types';
 import {
@@ -29,6 +34,23 @@ export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
+
+/** Returns the deepest function expression along the rightmost binary or prefix-unary path. */
+export function getRightmostOperator(expression: ESQLFunction): ESQLFunction {
+  let operator = expression;
+
+  while (isBinaryExpression(operator) || isUnaryExpression(operator)) {
+    const rightOperand = isBinaryExpression(operator) ? operator.args[1] : operator.args[0];
+
+    if (!isFunctionExpression(rightOperand)) {
+      break;
+    }
+
+    operator = rightOperand;
+  }
+
+  return operator;
+}
 
 /** Checks if operator is a NULL check (IS NULL, IS NOT NULL) */
 export function isNullCheckOperator(name: string) {
@@ -207,14 +229,23 @@ export async function getKqlSuggestionsIfApplicable(
   const cursorPositionInKql = kqlQuery.length;
 
   try {
-    // Get KQL suggestions from the autocomplete service
     const suggestions = await getKqlSuggestions(kqlQuery, cursorPositionInKql);
 
     if (!suggestions || suggestions.length === 0) {
       return null;
     }
 
-    return suggestions;
+    const startOffset = innerText.length - kqlQuery.length;
+
+    return suggestions.map(({ range, ...suggestion }) => ({
+      ...suggestion,
+      // Exception to the standard attachReplacementRanges path (no strategy / prefix resolver):
+      // KQL provider already owns the replace range; we shift to ES|QL coords — lexer sees """…""" as one token.
+      rangeToReplace: {
+        start: startOffset + range.start,
+        end: startOffset + range.end,
+      },
+    }));
   } catch (error) {
     return null;
   }

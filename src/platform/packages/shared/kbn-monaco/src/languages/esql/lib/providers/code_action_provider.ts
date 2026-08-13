@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getQuickFixForMessage } from '@kbn/esql-language';
+import { getQuickFixesForMessage } from '@kbn/esql-language';
 import type { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoCodeAction } from '../converters/code_actions';
 import { findMessageByMarker } from '../shared/utils';
 import type { ESQLDependencies } from './types';
@@ -18,13 +18,13 @@ export function getCodeActionProvider(
   deps?: ESQLDependencies
 ): monaco.languages.CodeActionProvider {
   return {
-    async provideCodeActions(model, _range, context, _token) {
+    async provideCodeActions(model, _range, context, token) {
       return createMonacoProvider({
         model,
         run: async (safeModel) => {
-          const actions: monaco.languages.CodeAction[] = [];
           const modelDeps = deps?.getModelDependencies?.(model);
           const resolvedDeps = modelDeps ? { ...deps, ...modelDeps } : deps;
+          const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
 
           const editorMessages = resolvedDeps?.getEditorMessages?.();
           const allMessages = editorMessages
@@ -33,22 +33,22 @@ export function getCodeActionProvider(
 
           const queryString = safeModel.getValue();
 
-          await Promise.all(
+          const actions = await Promise.all(
             context.markers.map(async (marker) => {
               const message = findMessageByMarker(allMessages, marker);
               if (!message) return [];
-              const quickFix = await getQuickFixForMessage({
+              const quickFixes = await getQuickFixesForMessage({
                 queryString,
                 message,
-                callbacks: resolvedDeps,
+                callbacks: cancellableCallbacks,
               });
 
-              if (quickFix) {
-                actions.push(wrapAsMonacoCodeAction(safeModel, marker, quickFix));
-              }
+              return quickFixes.map((quickFix) =>
+                wrapAsMonacoCodeAction(safeModel, marker, quickFix)
+              );
             })
           );
-          return { actions, dispose: () => {} };
+          return { actions: actions.flat(), dispose: () => {} };
         },
         emptyResult: { actions: [], dispose: () => {} },
       });

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
+import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 import { maintainerIdParamsSchema, runMaintainerQuerySchema } from './utils/validator';
 
 const RUN_MAINTAINER_SYNC_SOCKET_TIMEOUT_MS = 10 * 60 * 1000;
@@ -37,18 +38,21 @@ export function registerRunMaintainer(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(maintainerIdParamsSchema),
-            query: buildRouteValidationWithZod(runMaintainerQuerySchema),
+            params: buildStrictRouteValidationWithZod(maintainerIdParamsSchema),
+            query: buildStrictRouteValidationWithZod(runMaintainerQuerySchema),
           },
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, entityMaintainersClient } = entityStoreCtx;
+        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
         const { id } = req.params;
         const { sync } = req.query;
 
         logger.debug(`Run maintainer API invoked for id: ${id}`);
+
+        const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
+        if (forbidden) return forbidden;
 
         if (sync) {
           await entityMaintainersClient.runSync(id, req);

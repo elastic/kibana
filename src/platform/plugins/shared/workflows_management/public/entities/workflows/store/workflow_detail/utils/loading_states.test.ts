@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionReducerMapBuilder } from '@reduxjs/toolkit';
+import type { Action, ActionReducerMapBuilder } from 'redux-toolkit-v1';
 import { addLoadingStateReducers, initialLoadingState } from './loading_states';
 import type { WorkflowDetailState } from '../types';
 
@@ -21,6 +21,37 @@ jest.mock('../../../../../trigger_schemas', () => ({
 jest.mock('../../../../../shared/lib/query_client', () => ({
   queryClient: { invalidateQueries: jest.fn() },
 }));
+
+type MatcherEntry = [
+  (action: Action) => boolean,
+  (state: WorkflowDetailState, action: Action) => void
+];
+
+interface MockBuilder {
+  addMatcher: jest.Mock<MockBuilder, [MatcherEntry[0], MatcherEntry[1]]>;
+}
+
+const createMockBuilder = () => {
+  const matchers: MatcherEntry[] = [];
+  const builder: MockBuilder = {
+    addMatcher: jest.fn((predicate: MatcherEntry[0], reducer: MatcherEntry[1]) => {
+      matchers.push([predicate, reducer]);
+      return builder;
+    }),
+  };
+  return {
+    builder: builder as unknown as ActionReducerMapBuilder<WorkflowDetailState>,
+    addMatcher: builder.addMatcher,
+    dispatch: (type: string, state: WorkflowDetailState) => {
+      const action = { type } as Action;
+      matchers.forEach(([predicate, reducer]) => {
+        if (predicate(action)) {
+          reducer(state, action);
+        }
+      });
+    },
+  };
+};
 
 describe('loading_states', () => {
   beforeEach(() => {
@@ -42,79 +73,49 @@ describe('loading_states', () => {
   });
 
   describe('addLoadingStateReducers', () => {
-    it('should add pending, fulfilled, and rejected cases to the builder', () => {
-      const mockBuilder = {
-        addCase: jest.fn().mockReturnThis(),
-      } as unknown as ActionReducerMapBuilder<WorkflowDetailState>;
+    it('should register a matcher for each loading state (pending + settled)', () => {
+      const { builder, addMatcher } = createMockBuilder();
 
-      addLoadingStateReducers(mockBuilder);
+      addLoadingStateReducers(builder);
 
-      // For each thunk in the map (currently only saveYamlThunk), 3 addCase calls:
-      // pending, fulfilled, rejected
-      expect(mockBuilder.addCase).toHaveBeenCalledTimes(3);
+      // For each thunk in the map (currently only saveYamlThunk), 2 addMatcher calls:
+      // one for pending, one for fulfilled|rejected
+      expect(addMatcher).toHaveBeenCalledTimes(2);
     });
 
-    it('should call pending handler that sets loading to true', () => {
-      const handlers: Record<string, (state: WorkflowDetailState) => void> = {};
-      const mockBuilder = {
-        addCase: jest.fn(
-          (actionCreator: { type: string }, handler: (state: WorkflowDetailState) => void) => {
-            handlers[actionCreator.type] = handler;
-            return mockBuilder;
-          }
-        ),
-      } as unknown as ActionReducerMapBuilder<WorkflowDetailState>;
-
-      addLoadingStateReducers(mockBuilder);
-
-      // Find the pending handler (type ends with /pending)
-      const pendingKey = Object.keys(handlers).find((key) => key.endsWith('/pending'));
-      expect(pendingKey).toBeDefined();
+    it('sets isSavingYaml to true on saveYamlThunk/pending', () => {
+      const { builder, dispatch } = createMockBuilder();
+      addLoadingStateReducers(builder);
 
       const state = { loading: { isSavingYaml: false } } as WorkflowDetailState;
-      handlers[pendingKey!](state);
+      dispatch('detail/saveYamlThunk/pending', state);
       expect(state.loading.isSavingYaml).toBe(true);
     });
 
-    it('should call fulfilled handler that sets loading to false', () => {
-      const handlers: Record<string, (state: WorkflowDetailState) => void> = {};
-      const mockBuilder = {
-        addCase: jest.fn(
-          (actionCreator: { type: string }, handler: (state: WorkflowDetailState) => void) => {
-            handlers[actionCreator.type] = handler;
-            return mockBuilder;
-          }
-        ),
-      } as unknown as ActionReducerMapBuilder<WorkflowDetailState>;
-
-      addLoadingStateReducers(mockBuilder);
-
-      const fulfilledKey = Object.keys(handlers).find((key) => key.endsWith('/fulfilled'));
-      expect(fulfilledKey).toBeDefined();
+    it('sets isSavingYaml to false on saveYamlThunk/fulfilled', () => {
+      const { builder, dispatch } = createMockBuilder();
+      addLoadingStateReducers(builder);
 
       const state = { loading: { isSavingYaml: true } } as WorkflowDetailState;
-      handlers[fulfilledKey!](state);
+      dispatch('detail/saveYamlThunk/fulfilled', state);
       expect(state.loading.isSavingYaml).toBe(false);
     });
 
-    it('should call rejected handler that sets loading to false', () => {
-      const handlers: Record<string, (state: WorkflowDetailState) => void> = {};
-      const mockBuilder = {
-        addCase: jest.fn(
-          (actionCreator: { type: string }, handler: (state: WorkflowDetailState) => void) => {
-            handlers[actionCreator.type] = handler;
-            return mockBuilder;
-          }
-        ),
-      } as unknown as ActionReducerMapBuilder<WorkflowDetailState>;
-
-      addLoadingStateReducers(mockBuilder);
-
-      const rejectedKey = Object.keys(handlers).find((key) => key.endsWith('/rejected'));
-      expect(rejectedKey).toBeDefined();
+    it('sets isSavingYaml to false on saveYamlThunk/rejected', () => {
+      const { builder, dispatch } = createMockBuilder();
+      addLoadingStateReducers(builder);
 
       const state = { loading: { isSavingYaml: true } } as WorkflowDetailState;
-      handlers[rejectedKey!](state);
+      dispatch('detail/saveYamlThunk/rejected', state);
+      expect(state.loading.isSavingYaml).toBe(false);
+    });
+
+    it('ignores unrelated action types', () => {
+      const { builder, dispatch } = createMockBuilder();
+      addLoadingStateReducers(builder);
+
+      const state = { loading: { isSavingYaml: false } } as WorkflowDetailState;
+      dispatch('some/other/action', state);
       expect(state.loading.isSavingYaml).toBe(false);
     });
   });

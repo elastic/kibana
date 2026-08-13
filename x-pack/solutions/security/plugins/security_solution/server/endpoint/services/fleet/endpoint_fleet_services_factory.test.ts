@@ -13,6 +13,7 @@ import { createEndpointFleetServicesFactoryMock } from './endpoint_fleet_service
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { NotFoundError } from '../../errors';
 import {
+  type Agent,
   type AgentPolicy,
   type PackagePolicy,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -46,6 +47,9 @@ describe('EndpointServiceFactory', () => {
       'getIntegrationNamespaces',
       'getSoClient',
       'isEndpointPackageInstalled',
+      'fetchAgent',
+      'fetchAgentsById',
+      'fetchAgentList',
     ]);
   });
 
@@ -438,6 +442,109 @@ describe('EndpointServiceFactory', () => {
         ({ name }) => name !== 'endpoint'
       );
       await expect(fleetServicesMock.isEndpointPackageInstalled()).resolves.toBe(false);
+    });
+  });
+
+  describe('Agent fetch methods', () => {
+    let fleetAgentGenerator: FleetAgentGenerator;
+    let agentServiceMock: EndpointInternalFleetServicesInterfaceMocked['agent'];
+
+    beforeEach(() => {
+      fleetAgentGenerator = new FleetAgentGenerator('test');
+      agentServiceMock =
+        fleetServicesFactoryMock.dependencies.fleetDependencies.agentService.asInternalUser;
+    });
+
+    describe('#fetchAgent()', () => {
+      let agentMock: Agent;
+
+      beforeEach(() => {
+        agentMock = fleetAgentGenerator.generate({ id: '1-2-3', policy_id: 'policy-1#9.2' });
+        agentServiceMock.getAgent.mockResolvedValue(agentMock);
+      });
+
+      it('should call the fleet agent client with the provided arguments', async () => {
+        await fleetServicesMock.fetchAgent('1-2-3');
+
+        expect(agentServiceMock.getAgent).toHaveBeenCalledWith('1-2-3');
+      });
+
+      it('should remove the version suffix from the returned agent `policy_id`', async () => {
+        await expect(fleetServicesMock.fetchAgent('1-2-3')).resolves.toEqual(
+          expect.objectContaining({ policy_id: 'policy-1' })
+        );
+      });
+
+      it('should leave `policy_id` unchanged when no version suffix is present', async () => {
+        agentMock.policy_id = 'policy-1';
+
+        await expect(fleetServicesMock.fetchAgent('1-2-3')).resolves.toEqual(
+          expect.objectContaining({ policy_id: 'policy-1' })
+        );
+      });
+    });
+
+    describe('#fetchAgentsById()', () => {
+      let agentsMock: Agent[];
+
+      beforeEach(() => {
+        agentsMock = [
+          fleetAgentGenerator.generate({ id: '1-2-3', policy_id: 'policy-1#9.2' }),
+          fleetAgentGenerator.generate({ id: '4-5-6', policy_id: 'policy-2#10.1' }),
+        ];
+        agentServiceMock.getByIds.mockResolvedValue(agentsMock);
+      });
+
+      it('should call the fleet agent client with the provided arguments', async () => {
+        await fleetServicesMock.fetchAgentsById(['1-2-3', '4-5-6']);
+
+        expect(agentServiceMock.getByIds).toHaveBeenCalledWith(['1-2-3', '4-5-6']);
+      });
+
+      it('should remove the version suffix from every returned agent `policy_id`', async () => {
+        await expect(fleetServicesMock.fetchAgentsById(['1-2-3', '4-5-6'])).resolves.toEqual([
+          expect.objectContaining({ id: '1-2-3', policy_id: 'policy-1' }),
+          expect.objectContaining({ id: '4-5-6', policy_id: 'policy-2' }),
+        ]);
+      });
+    });
+
+    describe('#fetchAgentList()', () => {
+      let agentsMock: Agent[];
+
+      beforeEach(() => {
+        agentsMock = [
+          fleetAgentGenerator.generate({ id: '1-2-3', policy_id: 'policy-1#9.2' }),
+          fleetAgentGenerator.generate({ id: '4-5-6', policy_id: 'policy-2' }),
+        ];
+        agentServiceMock.listAgents.mockResolvedValue({
+          agents: agentsMock,
+          total: agentsMock.length,
+          page: 1,
+          perPage: 20,
+        });
+      });
+
+      it('should call the fleet agent client with the provided arguments', async () => {
+        const listOptions = { page: 1, perPage: 20, showInactive: false };
+
+        await fleetServicesMock.fetchAgentList(listOptions);
+
+        expect(agentServiceMock.listAgents).toHaveBeenCalledWith(listOptions);
+      });
+
+      it('should remove the version suffix from the returned agents `policy_id`', async () => {
+        await expect(
+          fleetServicesMock.fetchAgentList({ page: 1, perPage: 20, showInactive: false })
+        ).resolves.toEqual(
+          expect.objectContaining({
+            agents: [
+              expect.objectContaining({ id: '1-2-3', policy_id: 'policy-1' }),
+              expect.objectContaining({ id: '4-5-6', policy_id: 'policy-2' }),
+            ],
+          })
+        );
+      });
     });
   });
 });

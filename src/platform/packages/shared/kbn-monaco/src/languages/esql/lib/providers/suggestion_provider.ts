@@ -9,7 +9,7 @@
 
 import { getIndexSourcesFromQuery, suggest } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoSuggestions } from '../converters/suggestions';
 import { filterSuggestionsWithCustomCommands, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
@@ -35,7 +35,9 @@ export function getSuggestionProvider(
     triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
     async provideCompletionItems(
       model: monaco.editor.ITextModel,
-      position: monaco.Position
+      position: monaco.Position,
+      _context: monaco.languages.CompletionContext,
+      token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> {
       return createMonacoProvider({
         model,
@@ -59,7 +61,8 @@ export function getSuggestionProvider(
           const offset = monacoPositionToOffset(fullText, position);
 
           const computeStart = performance.now();
-          const suggestions = await suggest(fullText, offset, resolvedDeps);
+          const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
+          const suggestions = await suggest(fullText, offset, cancellableCallbacks);
 
           const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
           if (suggestionsWithCustomCommands.length) {

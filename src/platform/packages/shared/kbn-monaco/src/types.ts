@@ -33,7 +33,8 @@ interface LanguageProvidersModule<Deps = unknown, MarkerDataType = monaco.editor
     model: monaco.editor.ITextModel,
     code: string,
     callbacks?: Deps,
-    options?: { invalidateColumnsCache?: boolean }
+    options?: { invalidateColumnsCache?: boolean },
+    token?: monaco.CancellationToken
   ) => Promise<{ errors: MarkerDataType[]; warnings: MarkerDataType[] }>;
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;

@@ -261,6 +261,7 @@ export class JobActionMenuUi extends Component {
       <div>
         {this.confirmDeleteModal()}
         <EuiPopover
+          aria-label={actionsAriaLabel}
           button={button}
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover}

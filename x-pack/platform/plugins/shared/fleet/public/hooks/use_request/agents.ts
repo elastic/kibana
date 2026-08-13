@@ -99,10 +99,17 @@ export function useGetAgents(query: GetAgentsRequest['query'], options?: Request
 }
 export function useGetAgentsQuery(
   query: GetAgentsRequest['query'],
-  options: Partial<{ enabled: boolean }> = {}
+  options: Partial<{
+    enabled: boolean;
+    refetchInterval: number | false;
+    keepPreviousData: boolean;
+  }> = {}
 ) {
   return useQuery(['agents', query], () => sendGetAgents(query), {
     enabled: options.enabled,
+    refetchInterval: options.refetchInterval,
+    refetchIntervalInBackground: false,
+    keepPreviousData: options.keepPreviousData,
   });
 }
 

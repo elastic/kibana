@@ -17,7 +17,7 @@ import {
   defineAttachment,
   type UnifiedValueAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
-import { COMMENT, ADDED_COMMENT, DELETE_COMMENT_SUCCESS_TITLE } from './translations';
+import { COMMENT, ADDED_COMMENT, REMOVED_COMMENT_LABEL_TITLE } from './translations';
 import { createCommentActionCss, hasDraftComment } from './utils';
 
 type CommentViewProps = UnifiedValueAttachmentViewProps<CommentAttachmentData>;
@@ -111,9 +111,9 @@ const getCommentAttachmentViewObject = (props: CommentViewProps) => {
 export const getCommentAttachmentType = () =>
   defineAttachment({
     id: COMMENT_ATTACHMENT_TYPE,
-    icon: 'editorComment',
+    icon: 'comment',
     displayName: COMMENT,
     getAttachmentViewObject: getCommentAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: DELETE_COMMENT_SUCCESS_TITLE }),
+    getAttachmentRemovalObject: () => ({ event: REMOVED_COMMENT_LABEL_TITLE }),
     schema: CommentAttachmentPayloadSchema,
   });

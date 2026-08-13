@@ -9,7 +9,7 @@ import type { Theme } from '@elastic/charts';
 import type { RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
@@ -34,7 +34,10 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
-import { RED_METRICS_CHART_ELEMENT, RedMetricsChartActions } from './red_metrics_chart_actions';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { RedMetricsChartActions } from './red_metrics_chart_actions';
+import { AnomalyChartPanel } from './anomaly_chart_panel';
+import { AnomalySeverityBadge, type AnomalyChartInfo } from './anomaly_severity_badge';
 
 export function LatencyChart({
   alert,
@@ -57,6 +60,7 @@ export function LatencyChart({
   kuery = '',
   filters,
   threshold,
+  anomaly,
   ruleTypeId,
   compact,
   showAlertAnnotations,
@@ -79,6 +83,7 @@ export function LatencyChart({
   timeZone: string;
   customAlertEvaluationThreshold?: number;
   threshold?: ReactElement;
+  anomaly?: AnomalyChartInfo;
   kuery?: string;
   filters?: BoolQuery;
   ruleTypeId?: ApmRuleType;
@@ -177,7 +182,7 @@ export function LatencyChart({
 
   return (
     <EuiFlexItem>
-      <EuiPanel hasBorder={true}>
+      <AnomalyChartPanel anomalyScore={anomaly?.score}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
@@ -188,6 +193,11 @@ export function LatencyChart({
               </h2>
             </EuiTitle>
           </EuiFlexItem>
+          {anomaly && (
+            <EuiFlexItem grow={false}>
+              <AnomalySeverityBadge severity={anomaly.severity} score={anomaly.score} />
+            </EuiFlexItem>
+          )}
           {setLatencyAggregationType && (
             <EuiFlexItem grow={false}>
               <LatencyAggregationTypeSelect
@@ -218,7 +228,8 @@ export function LatencyChart({
                   }}
                   timeRange={{ from: start, to: end }}
                   ruleTypeId={ruleTypeId}
-                  element={RED_METRICS_CHART_ELEMENT.LATENCY}
+                  element={APM_CHART_EBT_ELEMENTS.LATENCY}
+                  anomaly={anomaly}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -246,7 +257,7 @@ export function LatencyChart({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </AnomalyChartPanel>
     </EuiFlexItem>
   );
 }

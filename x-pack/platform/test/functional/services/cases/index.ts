@@ -25,7 +25,7 @@ export function CasesServiceProvider(context: FtrProviderContext) {
     casesFilesTable: CasesFilesTableServiceProvider(context),
     create: CasesCreateViewServiceProvider(context, casesCommon),
     navigation: CasesNavigationProvider(context),
-    singleCase: CasesSingleViewServiceProvider(context),
+    singleCase: CasesSingleViewServiceProvider(context, casesCommon),
     testResources: CasesTestResourcesServiceProvider(context),
   };
 }

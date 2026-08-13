@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  coreFeatureFlagsMock,
-  savedObjectsClientMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { schema } from '@kbn/config-schema';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup } from '../../../../../common';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
@@ -41,9 +27,7 @@ import {
   enabledRuleForBulkOpsWithActions1WithUiam,
   enabledRuleForBulkOpsWithActions2WithUiam,
 } from '../../../../rules_client/tests/test_helpers';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
@@ -56,53 +40,27 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
 }));
 
 const softDeleteGapsMock = softDeleteGaps as jest.Mock;
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
 const logger = loggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-const backfillClient = backfillClientMock.create();
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
-  logger,
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
   backfillClient,
-  uiSettings: uiSettingsServiceMock.createStartContract(),
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
+  logger,
   eventLogger,
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({
   id: 'id2',
@@ -844,7 +802,7 @@ describe('bulkDelete', () => {
       );
     });
 
-    test('captures the full pre-deletion attributes and references of each rule', async () => {
+    test('captures the full pre-deletion attributes of each rule', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
@@ -863,27 +821,58 @@ describe('bulkDelete', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
-          {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: enabledRuleForBulkOpsWithActions1.id,
+              name: enabledRuleForBulkOpsWithActions1.attributes.name,
+              alertTypeId: enabledRuleForBulkOpsWithActions1.attributes.alertTypeId,
+              createdAt: enabledRuleForBulkOpsWithActions1.attributes.createdAt,
+              updatedAt: enabledRuleForBulkOpsWithActions1.attributes.updatedAt,
+            }),
+          }),
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: enabledRuleForBulkOpsWithActions2.id,
+              name: enabledRuleForBulkOpsWithActions2.attributes.name,
+              alertTypeId: enabledRuleForBulkOpsWithActions2.attributes.alertTypeId,
+              createdAt: enabledRuleForBulkOpsWithActions2.attributes.createdAt,
+              updatedAt: enabledRuleForBulkOpsWithActions2.attributes.updatedAt,
+            }),
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('captures context of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [enabledRuleForBulkOpsWithActions1, enabledRuleForBulkOpsWithActions2],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          { id: 'id2', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
             objectId: enabledRuleForBulkOpsWithActions1.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: enabledRuleForBulkOpsWithActions1.attributes,
-              references: enabledRuleForBulkOpsWithActions1.references,
-            },
-          },
-          {
-            timestamp: '2019-02-12T21:01:22.479Z',
+          }),
+          expect.objectContaining({
             objectId: enabledRuleForBulkOpsWithActions2.id,
             objectType: RULE_SAVED_OBJECT_TYPE,
             module: 'stack',
-            snapshot: {
-              attributes: enabledRuleForBulkOpsWithActions2.attributes,
-              references: enabledRuleForBulkOpsWithActions2.references,
-            },
-          },
+          }),
         ],
         expect.any(Object)
       );
@@ -1111,6 +1100,30 @@ describe('bulkDelete', () => {
       // Default rulesClient has no changeTrackingService; verify the call simply did not throw.
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
       expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalled();
+    });
+
+    test('captures rule.revision in object.sequence', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [enabledRuleForBulkOps1],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
+      });
+
+      await trackingClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            sequence: 1,
+          }),
+        ],
+        expect.any(Object)
+      );
     });
   });
 });

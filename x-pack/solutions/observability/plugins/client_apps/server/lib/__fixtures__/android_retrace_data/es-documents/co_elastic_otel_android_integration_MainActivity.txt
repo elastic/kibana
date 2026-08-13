@@ -1,0 +1,2031 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "co.elastic.otel.android.integration.MainActivity",
+  "original_class": "co.elastic.otel.android.integration.MainActivity",
+  "source_file": "MainActivity.kt",
+  "methods": {
+    "onCreate": {
+      "mappings": [
+        {
+          "obf_range": [
+            1,
+            3
+          ],
+          "orig_range": [
+            17,
+            17
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            4,
+            10
+          ],
+          "orig_range": [
+            9,
+            9
+          ],
+          "method": "getAgent$app",
+          "class": "co.elastic.otel.android.integration.MyApp$Companion",
+          "source_file": "MyApp.kt"
+        },
+        {
+          "obf_range": [
+            4,
+            10
+          ],
+          "orig_range": [
+            18,
+            18
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            11,
+            14
+          ],
+          "orig_range": [
+            18,
+            18
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            15,
+            20
+          ],
+          "orig_range": [
+            30,
+            30
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            15,
+            20
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            21,
+            32
+          ],
+          "orig_range": [
+            31,
+            31
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            21,
+            32
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            33,
+            38
+          ],
+          "orig_range": [
+            33,
+            33
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            33,
+            38
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            39,
+            41
+          ],
+          "orig_range": [
+            34,
+            34
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            39,
+            41
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            42,
+            48
+          ],
+          "orig_range": [
+            35,
+            35
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            42,
+            48
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            49,
+            55
+          ],
+          "orig_range": [
+            36,
+            36
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            49,
+            55
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            56,
+            62
+          ],
+          "orig_range": [
+            37,
+            37
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            56,
+            62
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            63,
+            68
+          ],
+          "orig_range": [
+            38,
+            38
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            63,
+            68
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            69,
+            79
+          ],
+          "orig_range": [
+            39,
+            39
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            69,
+            79
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            80,
+            84
+          ],
+          "orig_range": [
+            40,
+            40
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            80,
+            84
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            85,
+            88
+          ],
+          "orig_range": [
+            42,
+            42
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            85,
+            88
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            89,
+            91
+          ],
+          "orig_range": [
+            43,
+            43
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            89,
+            91
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            92,
+            96
+          ],
+          "orig_range": [
+            44,
+            44
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            92,
+            96
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            97,
+            101
+          ],
+          "orig_range": [
+            45,
+            45
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            97,
+            101
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            102,
+            106
+          ],
+          "orig_range": [
+            46,
+            46
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            102,
+            106
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            107,
+            111
+          ],
+          "orig_range": [
+            47,
+            47
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            107,
+            111
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            112,
+            120
+          ],
+          "orig_range": [
+            48,
+            48
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            112,
+            120
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            121,
+            125
+          ],
+          "orig_range": [
+            49,
+            49
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            121,
+            125
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            126,
+            130
+          ],
+          "orig_range": [
+            50,
+            50
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            126,
+            130
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            131,
+            135
+          ],
+          "orig_range": [
+            51,
+            51
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            131,
+            135
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            136,
+            145
+          ],
+          "orig_range": [
+            52,
+            52
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            136,
+            145
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            146,
+            148
+          ],
+          "orig_range": [
+            53,
+            53
+          ],
+          "method": "exerciseTracingApi"
+        },
+        {
+          "obf_range": [
+            146,
+            148
+          ],
+          "orig_range": [
+            20,
+            20
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            149,
+            150
+          ],
+          "orig_range": [
+            82,
+            82
+          ],
+          "method": "getLogsBridge",
+          "class": "io.opentelemetry.sdk.OpenTelemetrySdk",
+          "source_file": "OpenTelemetrySdk.java"
+        },
+        {
+          "obf_range": [
+            149,
+            150
+          ],
+          "orig_range": [
+            57,
+            57
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            149,
+            150
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            151,
+            156
+          ],
+          "orig_range": [
+            57,
+            57
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            151,
+            156
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            157,
+            168
+          ],
+          "orig_range": [
+            58,
+            58
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            157,
+            168
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            169,
+            172
+          ],
+          "orig_range": [
+            60,
+            60
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            169,
+            172
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            173,
+            175
+          ],
+          "orig_range": [
+            61,
+            61
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            173,
+            175
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            176,
+            180
+          ],
+          "orig_range": [
+            62,
+            62
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            176,
+            180
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            181,
+            185
+          ],
+          "orig_range": [
+            63,
+            63
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            181,
+            185
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            186,
+            190
+          ],
+          "orig_range": [
+            64,
+            64
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            186,
+            190
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            191,
+            195
+          ],
+          "orig_range": [
+            65,
+            65
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            191,
+            195
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            196,
+            200
+          ],
+          "orig_range": [
+            66,
+            66
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            196,
+            200
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            201,
+            205
+          ],
+          "orig_range": [
+            67,
+            67
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            201,
+            205
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            206,
+            210
+          ],
+          "orig_range": [
+            68,
+            68
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            206,
+            210
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            211,
+            213
+          ],
+          "orig_range": [
+            69,
+            69
+          ],
+          "method": "exerciseLogsApi"
+        },
+        {
+          "obf_range": [
+            211,
+            213
+          ],
+          "orig_range": [
+            21,
+            21
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            214,
+            219
+          ],
+          "orig_range": [
+            73,
+            73
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            214,
+            219
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            220,
+            231
+          ],
+          "orig_range": [
+            74,
+            74
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            220,
+            231
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            232,
+            244
+          ],
+          "orig_range": [
+            76,
+            76
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            232,
+            244
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            245,
+            261
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            245,
+            261
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            262,
+            276
+          ],
+          "orig_range": [
+            78,
+            78
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            262,
+            276
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            277,
+            295
+          ],
+          "orig_range": [
+            79,
+            79
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            277,
+            295
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            296,
+            308
+          ],
+          "orig_range": [
+            80,
+            80
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            296,
+            308
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            309,
+            325
+          ],
+          "orig_range": [
+            81,
+            81
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            309,
+            325
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            326,
+            338
+          ],
+          "orig_range": [
+            82,
+            82
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            326,
+            338
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            339,
+            355
+          ],
+          "orig_range": [
+            83,
+            83
+          ],
+          "method": "exerciseMetricsApi"
+        },
+        {
+          "obf_range": [
+            339,
+            355
+          ],
+          "orig_range": [
+            22,
+            22
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            356,
+            359
+          ],
+          "orig_range": [
+            9,
+            9
+          ],
+          "method": "getAgent$app",
+          "class": "co.elastic.otel.android.integration.MyApp$Companion",
+          "source_file": "MyApp.kt"
+        },
+        {
+          "obf_range": [
+            356,
+            359
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            360,
+            375
+          ],
+          "orig_range": [
+            86,
+            86
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            360,
+            375
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            360,
+            375
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            376,
+            379
+          ],
+          "orig_range": [
+            91,
+            91
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            376,
+            379
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            376,
+            379
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            380,
+            383
+          ],
+          "orig_range": [
+            92,
+            92
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            380,
+            383
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            380,
+            383
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            384,
+            387
+          ],
+          "orig_range": [
+            9,
+            9
+          ],
+          "method": "getAgent$app",
+          "class": "co.elastic.otel.android.integration.MyApp$Companion",
+          "source_file": "MyApp.kt"
+        },
+        {
+          "obf_range": [
+            384,
+            387
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            384,
+            387
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            384,
+            387
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            384,
+            387
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            388,
+            389
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            388,
+            389
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            388,
+            389
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            388,
+            389
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            390,
+            393
+          ],
+          "orig_range": [
+            55,
+            55
+          ],
+          "method": "log",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            390,
+            393
+          ],
+          "orig_range": [
+            45,
+            45
+          ],
+          "method": "log$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            390,
+            393
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            390,
+            393
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            390,
+            393
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            390,
+            393
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            394,
+            395
+          ],
+          "orig_range": [
+            82,
+            82
+          ],
+          "method": "getLogsBridge",
+          "class": "io.opentelemetry.sdk.OpenTelemetrySdk",
+          "source_file": "OpenTelemetrySdk.java"
+        },
+        {
+          "obf_range": [
+            394,
+            395
+          ],
+          "orig_range": [
+            55,
+            55
+          ],
+          "method": "log",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            394,
+            395
+          ],
+          "orig_range": [
+            45,
+            45
+          ],
+          "method": "log$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            394,
+            395
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            394,
+            395
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            394,
+            395
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            394,
+            395
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate",
+          "extras": [
+            {
+              "id": "com.android.tools.r8.rewriteFrame",
+              "conditions": [
+                "throws(Ljava/lang/NullPointerException;)"
+              ],
+              "actions": [
+                "removeInnerFrames(6)"
+              ]
+            }
+          ]
+        },
+        {
+          "obf_range": [
+            396,
+            403
+          ],
+          "orig_range": [
+            55,
+            55
+          ],
+          "method": "log",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            396,
+            403
+          ],
+          "orig_range": [
+            45,
+            45
+          ],
+          "method": "log$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            396,
+            403
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            396,
+            403
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            396,
+            403
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            396,
+            403
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            404,
+            407
+          ],
+          "orig_range": [
+            56,
+            56
+          ],
+          "method": "log",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            404,
+            407
+          ],
+          "orig_range": [
+            45,
+            45
+          ],
+          "method": "log$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            404,
+            407
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            404,
+            407
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            404,
+            407
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            404,
+            407
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            408,
+            412
+          ],
+          "orig_range": [
+            63,
+            63
+          ],
+          "method": "log",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            408,
+            412
+          ],
+          "orig_range": [
+            45,
+            45
+          ],
+          "method": "log$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            408,
+            412
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            408,
+            412
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            408,
+            412
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            408,
+            412
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            413,
+            415
+          ],
+          "orig_range": [
+            99,
+            99
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            413,
+            415
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            413,
+            415
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            416,
+            421
+          ],
+          "orig_range": [
+            100,
+            100
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            416,
+            421
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            416,
+            421
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            422,
+            425
+          ],
+          "orig_range": [
+            9,
+            9
+          ],
+          "method": "getAgent$app",
+          "class": "co.elastic.otel.android.integration.MyApp$Companion",
+          "source_file": "MyApp.kt"
+        },
+        {
+          "obf_range": [
+            422,
+            425
+          ],
+          "orig_range": [
+            25,
+            25
+          ],
+          "method": "onCreate$lambda$0"
+        },
+        {
+          "obf_range": [
+            422,
+            425
+          ],
+          "orig_range": [
+            94,
+            94
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            422,
+            425
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            422,
+            425
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            426,
+            430
+          ],
+          "orig_range": [
+            96,
+            96
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            426,
+            430
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            426,
+            430
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            431,
+            434
+          ],
+          "orig_range": [
+            97,
+            97
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            431,
+            434
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            431,
+            434
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            435,
+            437
+          ],
+          "orig_range": [
+            99,
+            99
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            435,
+            437
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            435,
+            437
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            438,
+            441
+          ],
+          "orig_range": [
+            100,
+            100
+          ],
+          "method": "span",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            438,
+            441
+          ],
+          "orig_range": [
+            77,
+            77
+          ],
+          "method": "span$default",
+          "class": "co.elastic.otel.android.extensions.ElasticOtelAgentExtensionsKt",
+          "source_file": "ElasticOtelAgentExtensions.kt"
+        },
+        {
+          "obf_range": [
+            438,
+            441
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            442,
+            445
+          ],
+          "orig_range": [
+            9,
+            9
+          ],
+          "method": "getAgent$app",
+          "class": "co.elastic.otel.android.integration.MyApp$Companion",
+          "source_file": "MyApp.kt"
+        },
+        {
+          "obf_range": [
+            442,
+            445
+          ],
+          "orig_range": [
+            24,
+            24
+          ],
+          "method": "onCreate"
+        },
+        {
+          "obf_range": [
+            446,
+            449
+          ],
+          "orig_range": [
+            9,
+            9
+          ],
+          "method": "getAgent$app",
+          "class": "co.elastic.otel.android.integration.MyApp$Companion",
+          "source_file": "MyApp.kt"
+        },
+        {
+          "obf_range": [
+            446,
+            449
+          ],
+          "orig_range": [
+            18,
+            18
+          ],
+          "method": "onCreate"
+        }
+      ]
+    }
+  }
+}

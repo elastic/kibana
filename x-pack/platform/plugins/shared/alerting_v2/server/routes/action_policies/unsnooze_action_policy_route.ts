@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { actionPolicyResponseSchema, ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
+import {
+  actionPolicyResponseSchema,
+  errorResponseSchema,
+  ID_MAX_LENGTH,
+} from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
@@ -13,9 +17,13 @@ import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { unsnoozeActionPolicyOasExamples } from './unsnooze_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
+} from './action_policy_route_descriptions';
 
 const unsnoozeActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -33,18 +41,24 @@ export class UnsnoozeActionPolicyRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'Unsnooze an action policy',
     description: 'Remove the snooze from an action policy.',
+    oasOperationObject: unsnoozeActionPolicyOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(unsnoozeActionPolicyParamsSchema),
+      params: unsnoozeActionPolicyParamsSchema,
     },
     response: {
       200: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the unsnoozed action policy.',
       },
       404: {
-        description: 'Indicates an action policy with the given ID does not exist.',
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };

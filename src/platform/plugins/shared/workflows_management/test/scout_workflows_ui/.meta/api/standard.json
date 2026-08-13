@@ -1,5 +1,5 @@
 {
-  "sha1": "b84bb9c3f088b03c96a4c9ae86a029ea5ffd9425",
+  "sha1": "ca38290d83a3b2985c21aa9effa97adab2cc7587",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -244,6 +244,110 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/hard_delete_race_condition.spec.ts",
         "line": 95,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-775280f60f1f363",
+      "title": "kibana.request step execution invokes an internal API with a body successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 146,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-112969a4aa2e06f",
+      "title": "kibana.request step execution invokes a public API without a body successfully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 168,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-d7f3506e77fa66a",
+      "title": "kibana.request step execution fails when missing required body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 193,
+        "column": 12
+      }
+    },
+    {
+      "id": "5056b49ce700453-0dce0a0a9aa4653",
+      "title": "kibana.request step execution fails when sending an invalid body payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/kibana_request_step.spec.ts",
+        "line": 207,
         "column": 12
       }
     },

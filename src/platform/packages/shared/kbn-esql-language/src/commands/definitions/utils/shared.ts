@@ -11,7 +11,6 @@ import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLColumn, ESQLIdentifier } from '@elastic/esql/types';
 import type { ESQLAstItem } from '@elastic/esql/types';
 import type { ESQLUserDefinedColumn, ICommandContext } from '../../registry/types';
-import { getLastNonWhitespaceChar } from './autocomplete/helpers';
 import type { SupportedDataType } from '../types';
 
 export { getTrailingIdentifier } from './regex';
@@ -143,6 +142,10 @@ export function findPipeOutsideQuotes(text: string, start: number = 0): number {
   }
 
   return -1;
+}
+
+export function getLastNonWhitespaceChar(text: string) {
+  return text[text.trimEnd().length - 1];
 }
 
 /**

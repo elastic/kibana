@@ -5,19 +5,4 @@
  * 2.0.
  */
 
-import type { FieldValuePair, HistogramItem } from '../types';
-
-export interface LatencyCorrelation extends FieldValuePair {
-  correlation: number;
-  histogram?: HistogramItem[];
-  ksTest: number;
-  isFallbackResult?: boolean;
-}
-
-export interface LatencyCorrelationsResponse {
-  ccsWarning: boolean;
-  totalDocCount?: number;
-  overallHistogram?: HistogramItem[];
-  percentileThresholdValue?: number | null;
-  latencyCorrelations?: LatencyCorrelation[];
-}
+export type { LatencyCorrelation, LatencyCorrelationsResponse } from '@kbn/apm-types';

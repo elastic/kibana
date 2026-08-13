@@ -44,6 +44,7 @@ interface UseEditorConfigParams {
   >;
   esqlCallbacks: ESQLCallbacks;
   telemetryCallbacks: ESQLTelemetryCallbacks;
+  isSuggestFixEnabled: boolean;
   isDisabled: boolean | undefined;
   measuredEditorWidth: number;
   setMeasuredEditorWidth: (width: number) => void;
@@ -61,6 +62,7 @@ export const useEditorConfig = ({
   editorCommandDisposables,
   esqlCallbacks,
   telemetryCallbacks,
+  isSuggestFixEnabled,
   isDisabled,
   measuredEditorWidth,
   setMeasuredEditorWidth,
@@ -76,18 +78,26 @@ export const useEditorConfig = ({
       esqlDepsByModelUri.set(modelUri, {
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
+        isSuggestFixEnabled,
         getEditorMessages: () => editorMessagesRef.current,
       });
     }
-  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef, editorMessagesRef]);
+  }, [
+    esqlCallbacks,
+    telemetryCallbacks,
+    isSuggestFixEnabled,
+    editorModelUriRef,
+    editorMessagesRef,
+  ]);
 
   const hoverProvider = useMemo(
     () =>
       ESQLLang.getHoverProvider?.({
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
+        isSuggestFixEnabled,
       }),
-    [esqlCallbacks, telemetryCallbacks]
+    [esqlCallbacks, telemetryCallbacks, isSuggestFixEnabled]
   );
 
   const signatureProvider = useMemo(() => {

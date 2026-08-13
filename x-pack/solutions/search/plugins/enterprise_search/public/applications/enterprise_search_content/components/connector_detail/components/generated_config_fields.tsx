@@ -21,6 +21,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -188,16 +189,24 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={connector.id}>
                   {(copy) => (
-                    <EuiButtonIcon
-                      size="xs"
-                      data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                      iconType="copy"
-                      onClick={copy}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.enterpriseSearch.connectorDeployment.copyConnectorId',
                         { defaultMessage: 'Copy connector ID' }
                       )}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        size="xs"
+                        data-test-subj="enterpriseSearchConnectorDeploymentButton"
+                        iconType="copy"
+                        onClick={copy}
+                        aria-label={i18n.translate(
+                          'xpack.enterpriseSearch.connectorDeployment.copyConnectorId',
+                          { defaultMessage: 'Copy connector ID' }
+                        )}
+                      />
+                    </EuiToolTip>
                   )}
                 </EuiCopy>
               </EuiFlexItem>
@@ -265,29 +274,42 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                             </EuiFlexItem>
                             {generateApiKey && (
                               <EuiFlexItem grow={false}>
-                                <EuiButtonIcon
-                                  data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                                  size="xs"
-                                  iconType="refresh"
-                                  buttonRef={refreshButtonRef}
-                                  isLoading={isGenerateLoading}
-                                  onClick={refreshButtonClick}
-                                  disabled={!connector.index_name}
-                                  aria-label={refreshApiKeyAriaLabel}
-                                />
+                                <EuiToolTip
+                                  content={refreshApiKeyAriaLabel}
+                                  disableScreenReaderOutput
+                                >
+                                  <EuiButtonIcon
+                                    data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                                    size="xs"
+                                    iconType="refresh"
+                                    buttonRef={refreshButtonRef}
+                                    isLoading={isGenerateLoading}
+                                    onClick={refreshButtonClick}
+                                    disabled={!connector.index_name}
+                                    aria-label={refreshApiKeyAriaLabel}
+                                  />
+                                </EuiToolTip>
                               </EuiFlexItem>
                             )}
                             <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
-                                size="xs"
-                                data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                                iconType="copy"
-                                onClick={copy}
-                                aria-label={i18n.translate(
+                              <EuiToolTip
+                                content={i18n.translate(
                                   'xpack.enterpriseSearch.connectorDeployment.copyIndexName',
                                   { defaultMessage: 'Copy index name' }
                                 )}
-                              />
+                                disableScreenReaderOutput
+                              >
+                                <EuiButtonIcon
+                                  size="xs"
+                                  data-test-subj="enterpriseSearchConnectorDeploymentButton"
+                                  iconType="copy"
+                                  onClick={copy}
+                                  aria-label={i18n.translate(
+                                    'xpack.enterpriseSearch.connectorDeployment.copyIndexName',
+                                    { defaultMessage: 'Copy index name' }
+                                  )}
+                                />
+                              </EuiToolTip>
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         )}
@@ -296,16 +318,18 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   ) : (
                     generateApiKey && (
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                          size="xs"
-                          iconType="refresh"
-                          buttonRef={generateButtonRef}
-                          isLoading={isGenerateLoading}
-                          onClick={refreshButtonClick}
-                          disabled={!connector.index_name}
-                          aria-label={refreshApiKeyAriaLabel}
-                        />
+                        <EuiToolTip content={refreshApiKeyAriaLabel} disableScreenReaderOutput>
+                          <EuiButtonIcon
+                            data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                            size="xs"
+                            iconType="refresh"
+                            buttonRef={generateButtonRef}
+                            isLoading={isGenerateLoading}
+                            onClick={refreshButtonClick}
+                            disabled={!connector.index_name}
+                            aria-label={refreshApiKeyAriaLabel}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     )
                   )}

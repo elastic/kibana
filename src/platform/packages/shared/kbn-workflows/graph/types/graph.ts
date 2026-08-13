@@ -10,4 +10,7 @@
 import type { graphlib } from '@dagrejs/dagre';
 import type { GraphNodeUnion } from './nodes/union';
 
-export type WorkflowGraphType = graphlib.Graph<GraphNodeUnion>;
+// graphlib v4's `Graph<GraphLabel, NodeLabel, EdgeLabel>` takes the node label as its
+// SECOND generic (the first is the graph label). `GraphNodeUnion` must go in the second
+// slot so `graph.node()` stays typed; a single-generic form silently returns `any`.
+export type WorkflowGraphType = graphlib.Graph<unknown, GraphNodeUnion>;

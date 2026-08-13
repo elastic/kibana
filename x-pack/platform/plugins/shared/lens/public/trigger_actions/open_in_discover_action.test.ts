@@ -133,7 +133,10 @@ describe('open in discover action', () => {
     } as ActionExecutionContext<EmbeddableApiContext>);
 
     expect(embeddable.getViewUnderlyingDataArgs).toHaveBeenCalled();
-    expect(locator.getRedirectUrl).toHaveBeenCalledWith(viewUnderlyingDataArgs);
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith({
+      ...viewUnderlyingDataArgs,
+      isApproximate: false,
+    });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
 
@@ -183,6 +186,7 @@ describe('open in discover action', () => {
       ...viewUnderlyingDataArgs,
       filters: [],
       query: { esql: 'FROM logs\n| WHERE `host.name` : "web-1"' },
+      isApproximate: false,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
   });
@@ -232,6 +236,7 @@ describe('open in discover action', () => {
       ...viewUnderlyingDataArgs,
       filters: [],
       query: { esql: 'FROM logs\n| WHERE KQL("""host.name : "web-1"""")' },
+      isApproximate: false,
     });
   });
 
@@ -275,7 +280,52 @@ describe('open in discover action', () => {
     expect(locator.getRedirectUrl).toHaveBeenCalledWith({
       ...viewUnderlyingDataArgs,
       filters: [],
+      isApproximate: false,
     });
     expect(globalThis.open).toHaveBeenCalledWith(discoverUrl, '_blank');
+  });
+
+  it('passes isApproximate to the locator when parentApi publishes approximation', async () => {
+    const viewUnderlyingDataArgs = {
+      dataViewSpec: { id: 'index-pattern-id' },
+      timeRange: {},
+      filters: [],
+      query: { esql: 'FROM logs' },
+      esqlControls: undefined,
+      columns: [],
+    };
+
+    const embeddable = {
+      ...compatibleEmbeddableApi,
+      getViewUnderlyingDataArgs: jest.fn(() => viewUnderlyingDataArgs),
+      isTextBasedLanguage: jest.fn(() => true),
+      parentApi: {
+        isApproximate$: { value: true },
+      },
+    };
+
+    const discoverUrl = 'https://discover-redirect-url';
+    const locator = {
+      getRedirectUrl: jest.fn(() => discoverUrl),
+    } as unknown as DiscoverAppLocator;
+
+    globalThis.open = jest.fn();
+
+    await createOpenInDiscoverAction(
+      locator,
+      {
+        get: () => ({
+          isTimeBased: () => false,
+          toSpec: () => ({ id: 'index-pattern-id' }),
+        }),
+      } as unknown as DataViewsService,
+      true
+    ).execute({
+      embeddable,
+    } as ActionExecutionContext<EmbeddableApiContext>);
+
+    expect(locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({ isApproximate: true })
+    );
   });
 });

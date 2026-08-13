@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import { getNetworkEvents } from '../../../../../state/actions/network_events';
 import { networkEventsSelector } from '../../../../../state/selectors';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';

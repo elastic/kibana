@@ -30,6 +30,7 @@ const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof 
 const mockFormatThousands = formatThousands as jest.MockedFunction<typeof formatThousands>;
 
 const defaultProps = {
+  isSample: false as const,
   hoursSaved: 120,
   hoursSavedCompare: 100,
   from: '2023-01-01T00:00:00.000Z',
@@ -44,11 +45,37 @@ describe('TimeSaved', () => {
     mockFormatThousands.mockReturnValue('100');
   });
 
-  it('renders the component with correct structure', () => {
+  it('renders the live component with correct structure', () => {
     render(<TimeSaved {...defaultProps} />);
 
     expect(TimeSavedMetric).toHaveBeenCalledWith(
       expect.objectContaining({
+        minutesPerAlert: defaultProps.minutesPerAlert,
+        from: defaultProps.from,
+        to: defaultProps.to,
+      }),
+      {}
+    );
+
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        positionForLens: true,
+        currentCount: defaultProps.hoursSaved,
+        previousCount: defaultProps.hoursSavedCompare,
+        stat: '100',
+        statType: 'time saved in hours',
+        timeRange: `30`,
+      }),
+      {}
+    );
+  });
+
+  it('renders the sample component with correct structure', () => {
+    render(<TimeSaved {...defaultProps} isSample={true} />);
+
+    expect(TimeSavedMetric).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isSample: true,
         minutesPerAlert: defaultProps.minutesPerAlert,
         from: defaultProps.from,
         to: defaultProps.to,

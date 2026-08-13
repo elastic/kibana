@@ -14,7 +14,9 @@ import { TransactionsTab } from './transactions_tab';
 import { ErrorsTab } from './errors_tab';
 import { DashboardsTab } from './dashboards_tab';
 import { MetricsTab } from './metrics_tab';
+import { InfrastructureTab } from './infrastructure_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
+import { waitForSearchBarReady } from '../../page_helpers';
 
 export class ServiceDetailsPage {
   public readonly SERVICE_NAME = testData.SERVICE_OPBEANS_JAVA;
@@ -22,10 +24,12 @@ export class ServiceDetailsPage {
   public readonly dependenciesTab: DependenciesTab;
   public readonly alertsTab: AlertsTab;
   public readonly overviewTab: OverviewTab;
+  public readonly mobileOverviewTab: OverviewTab;
   public readonly transactionsTab: TransactionsTab;
   public readonly errorsTab: ErrorsTab;
   public readonly dashboardsTab: DashboardsTab;
   public readonly metricsTab: MetricsTab;
+  public readonly infrastructureTab: InfrastructureTab;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.dependenciesTab = createLazyPageObject(
@@ -36,6 +40,13 @@ export class ServiceDetailsPage {
     );
     this.alertsTab = createLazyPageObject(AlertsTab, this.page, this.kbnUrl, this.SERVICE_NAME);
     this.overviewTab = createLazyPageObject(OverviewTab, this.page, this.kbnUrl, this.SERVICE_NAME);
+    this.mobileOverviewTab = createLazyPageObject(
+      OverviewTab,
+      this.page,
+      this.kbnUrl,
+      this.SERVICE_NAME,
+      'mobile'
+    );
     this.transactionsTab = createLazyPageObject(
       TransactionsTab,
       this.page,
@@ -50,6 +61,12 @@ export class ServiceDetailsPage {
       this.SERVICE_NAME
     );
     this.metricsTab = createLazyPageObject(MetricsTab, this.page, this.kbnUrl, this.SERVICE_NAME);
+    this.infrastructureTab = createLazyPageObject(
+      InfrastructureTab,
+      this.page,
+      this.kbnUrl,
+      this.SERVICE_NAME
+    );
   }
 
   public async goToPage(
@@ -63,9 +80,7 @@ export class ServiceDetailsPage {
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
       })}`
     );
-    await this.page
-      .getByTestId('superDatePickerToggleQuickMenuButton')
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await waitForSearchBarReady(this.page);
     await this.page
       .getByTestId('apmMainTemplateServiceAgentLoader')
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });

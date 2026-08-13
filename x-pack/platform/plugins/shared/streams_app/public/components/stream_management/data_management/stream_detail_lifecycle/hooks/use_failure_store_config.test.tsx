@@ -9,8 +9,14 @@ import { renderHook } from '@testing-library/react';
 import type { EffectiveFailureStore, Streams } from '@kbn/streams-schema';
 import { useFailureStoreConfig, transformFailureStoreConfig } from './use_failure_store_config';
 
+let mockIsServerless = false;
+
+jest.mock('../../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({ isServerless: mockIsServerless }),
+}));
+
 jest.mock('./use_failure_store_default_retention', () => ({
-  useFailureStoreDefaultRetention: jest.fn(() => ({ value: undefined })),
+  useFailureStoreDefaultRetention: jest.fn(() => ({ clusterDefaultRetention: undefined })),
 }));
 
 const createBaseDefinition = (name: string) => ({
@@ -56,7 +62,6 @@ const createClassicDefinition = (
   effective_failure_store: failureStoreConfig,
   data_stream_exists: true,
   dashboards: [],
-  queries: [],
   rules: [],
 });
 
@@ -100,11 +105,14 @@ const createWiredDefinition = (
   data_stream_exists: true,
   inherited_fields: {},
   dashboards: [],
-  queries: [],
   rules: [],
 });
 
 describe('useFailureStoreConfig', () => {
+  beforeEach(() => {
+    mockIsServerless = false;
+  });
+
   describe('Classic Stream', () => {
     it('should return config for enabled failure store with custom retention', () => {
       const definition = createClassicDefinition('logs-test', {
@@ -122,6 +130,7 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: '7d',
         defaultRetentionPeriod: undefined,
+        clusterDefaultRetention: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
@@ -134,7 +143,7 @@ describe('useFailureStoreConfig', () => {
     it('should return config for enabled failure store without custom retention', () => {
       const definition = createClassicDefinition('logs-test', {
         lifecycle: {
-          enabled: { is_default_retention: true },
+          enabled: { data_retention: '30d', is_default_retention: true },
         },
       });
 
@@ -143,7 +152,8 @@ describe('useFailureStoreConfig', () => {
       expect(result.current).toEqual({
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
-        defaultRetentionPeriod: undefined,
+        defaultRetentionPeriod: '30d',
+        clusterDefaultRetention: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
@@ -164,6 +174,7 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: false,
         customRetentionPeriod: undefined,
         defaultRetentionPeriod: undefined,
+        clusterDefaultRetention: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
@@ -186,6 +197,7 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
         defaultRetentionPeriod: undefined,
+        clusterDefaultRetention: undefined,
         retentionDisabled: true,
         inheritOptions: {
           canShowInherit: true,
@@ -213,7 +225,8 @@ describe('useFailureStoreConfig', () => {
       expect(result.current.inheritOptions.isCurrentlyInherited).toBe(false);
     });
 
-    it('should use cluster default retention when stream has no default retention', () => {
+    it('should use cluster default retention in Serverless when stream has no default retention', () => {
+      mockIsServerless = true;
       const { useFailureStoreDefaultRetention } = jest.requireMock(
         './use_failure_store_default_retention'
       );
@@ -236,6 +249,39 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: '30d',
         defaultRetentionPeriod: '90d',
+        clusterDefaultRetention: '90d',
+        retentionDisabled: false,
+        inheritOptions: {
+          canShowInherit: true,
+          isWired: false,
+          isCurrentlyInherited: true,
+        },
+      });
+    });
+
+    it('should not surface the cluster default as effective retention in stateful (infinite retention, no delete phase), but still expose it for "Restore default"', () => {
+      const { useFailureStoreDefaultRetention } = jest.requireMock(
+        './use_failure_store_default_retention'
+      );
+      useFailureStoreDefaultRetention.mockReturnValueOnce({
+        clusterDefaultRetention: '90d',
+      });
+
+      const definition = createClassicDefinition('logs-test', {
+        lifecycle: {
+          enabled: {
+            is_default_retention: false,
+          },
+        },
+      });
+
+      const { result } = renderHook(() => useFailureStoreConfig(definition));
+
+      expect(result.current).toEqual({
+        failureStoreEnabled: true,
+        customRetentionPeriod: undefined,
+        defaultRetentionPeriod: undefined,
+        clusterDefaultRetention: '90d',
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
@@ -263,6 +309,7 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: '5d',
         defaultRetentionPeriod: undefined,
+        clusterDefaultRetention: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
@@ -333,6 +380,7 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
         defaultRetentionPeriod: '30d',
+        clusterDefaultRetention: undefined,
         retentionDisabled: false,
         inheritOptions: {
           canShowInherit: false,

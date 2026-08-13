@@ -6,9 +6,9 @@
  */
 
 import path from 'node:path';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
@@ -40,34 +40,36 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(bodySchema),
+            body: buildStrictRouteValidationWithZod(bodySchema),
           },
         },
         options: {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_delete.yaml'),
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const { logger, crudClient } = entityStoreCtx;
+      wrapMiddlewares<never, never, z.infer<typeof bodySchema>>(
+        async (ctx, req, res): Promise<IKibanaResponse> => {
+          const entityStoreCtx = await ctx.entityStore;
+          const { logger, crudClient } = entityStoreCtx;
 
-        logger.debug('CRUD Delete api called');
+          logger.debug('CRUD Delete api called');
 
-        try {
-          await crudClient.deleteEntity(req.body.entityId);
-        } catch (error) {
-          if (error instanceof EntityNotFoundError) {
-            return res.customError({
-              statusCode: 404,
-              body: error,
-            });
+          try {
+            await crudClient.deleteEntity(req.body.entityId);
+          } catch (error) {
+            if (error instanceof EntityNotFoundError) {
+              return res.customError({
+                statusCode: 404,
+                body: error,
+              });
+            }
+
+            logger.error(error);
+            throw error;
           }
 
-          logger.error(error);
-          throw error;
+          return res.ok({ body: { deleted: true } });
         }
-
-        return res.ok({ body: { deleted: true } });
-      })
+      )
     );
 }

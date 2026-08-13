@@ -17,15 +17,23 @@ import type {
 } from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
-import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
+import { ProfileStateType, type ProfileStateRegistry } from './context_awareness';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  TAB_STATE_URL_KEY,
+} from './constants';
 
 export const appLocatorGetLocationCommon = async (
   {
     useHash: useHashOriginal,
     setStateToKbnUrl,
+    profileStateRegistry,
   }: {
     useHash: boolean;
     setStateToKbnUrl: typeof setStateToKbnUrlCommon;
+    profileStateRegistry: ProfileStateRegistry;
   },
   ...[params]: Parameters<DiscoverAppLocatorGetLocation>
 ): ReturnType<DiscoverAppLocatorGetLocation> => {
@@ -38,7 +46,10 @@ export const appLocatorGetLocationCommon = async (
     path = `${path}?searchSessionId=${searchSessionId}`;
   }
 
-  const { appState, globalState, state } = parseAppLocatorParams(params);
+  const { appState, globalState, profileUrlState, state } = parseAppLocatorParams(
+    params,
+    profileStateRegistry
+  );
 
   if (Object.keys(globalState).length) {
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
@@ -51,6 +62,10 @@ export const appLocatorGetLocationCommon = async (
 
   if (Object.keys(appState).length) {
     path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
+  }
+
+  if (Object.keys(profileUrlState).length) {
+    path = setStateToKbnUrl(PROFILE_STATE_URL_KEY, profileUrlState, { useHash }, path);
   }
 
   if (tab?.id) {
@@ -69,7 +84,10 @@ export const appLocatorGetLocationCommon = async (
   };
 };
 
-export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
+export const parseAppLocatorParams = (
+  params: DiscoverAppLocatorParams,
+  profileStateRegistry: ProfileStateRegistry
+) => {
   const {
     filters,
     dataViewId,
@@ -88,9 +106,12 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
     breakdownField,
     hideChart,
     hideTable,
+    hideSidebar,
     sampleSize,
     isAlertResults,
     esqlControls,
+    isApproximate,
+    profileState,
   } = params;
 
   const appState: Partial<DiscoverAppState> = {};
@@ -115,7 +136,9 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
   if (breakdownField) appState.breakdownField = breakdownField;
   if (typeof hideChart === 'boolean') appState.hideChart = hideChart;
   if (typeof hideTable === 'boolean') appState.hideTable = hideTable;
+  if (typeof hideSidebar === 'boolean') appState.hideSidebar = hideSidebar;
   if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
+  if (typeof isApproximate === 'boolean') appState.isApproximate = isApproximate;
 
   const state: MainHistoryLocationState = {};
 
@@ -123,5 +146,18 @@ export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
   if (isAlertResults) state.isAlertResults = isAlertResults;
   if (esqlControls) state.esqlControls = esqlControls;
 
-  return { appState, globalState, state };
+  const profileUrlState = profileStateRegistry.pickStateByType({
+    profileStateMap: profileState,
+    stateTypes: [ProfileStateType.Url],
+  });
+  const persistentProfileState = profileStateRegistry.pickStateByType({
+    profileStateMap: profileState,
+    stateTypes: [ProfileStateType.Persistent],
+  });
+
+  if (Object.keys(persistentProfileState).length) {
+    state.profileState = persistentProfileState;
+  }
+
+  return { appState, globalState, profileUrlState, state };
 };

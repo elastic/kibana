@@ -30,6 +30,7 @@
     "@kbn/projects-solutions-groups",
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-agent-builder",
+    "@kbn/deeplinks-context-engine",
     "@kbn/ui-side-navigation",
     "@kbn/core-chrome-sidebar"
   ],

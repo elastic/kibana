@@ -76,8 +76,8 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       const query = buildTargetsPerActorQuery(config, 'default');
       expect(query).toMatch(/^SET unmapped_fields="nullify";\nFROM /);
       expect(query).toContain('| WHERE ');
-      expect(query).toContain('| EVAL actorUserId = ');
-      expect(query).toContain('| EVAL targetEntityId = ');
+      expect(query).toContain('actorUserId = ');
+      expect(query).toContain('targetEntityId = ');
       expect(query).toContain('| WHERE COALESCE(actorUserId, "") != ""');
       expect(query).toContain('| WHERE COALESCE(targetEntityId, "") != ""');
       expect(query).toMatch(/\| LIMIT \d+/);
@@ -128,5 +128,22 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
         expect(buildTargetsPerActorQuery(config, '__namespace__')).toMatchSnapshot();
       }
     );
+  });
+
+  describe('hostScopedUsersOnly flag', () => {
+    it('system_auth has hostScopedUsersOnly: true', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'system_auth');
+      expect(cfg?.hostScopedUsersOnly).toBe(true);
+    });
+
+    it('system_security has hostScopedUsersOnly: true', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'system_security');
+      expect(cfg?.hostScopedUsersOnly).toBe(true);
+    });
+
+    it('elastic_defend does NOT have hostScopedUsersOnly', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'elastic_defend');
+      expect(cfg?.hostScopedUsersOnly).toBeUndefined();
+    });
   });
 });

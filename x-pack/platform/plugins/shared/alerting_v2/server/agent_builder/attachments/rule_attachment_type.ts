@@ -15,27 +15,34 @@ import {
   ruleAttachmentDataSchema,
   type RuleAttachmentData,
 } from '@kbn/alerting-v2-schemas';
-import type { Logger } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { RulesClient } from '../../lib/rules_client';
 
 interface CreateRuleAttachmentTypeOptions {
-  logger: Logger;
+  logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
 }
 
 const formatRuleAttachmentDescription = (
   attachmentId: string,
-  data: RuleAttachmentData
+  data: RuleAttachmentData,
+  savedObjectId?: string
 ): string => {
-  const status = data.id ? (data.enabled ? 'enabled' : 'disabled') : 'proposed (not yet saved)';
+  const isPersisted = Boolean(savedObjectId);
+  const status = isPersisted ? (data.enabled ? 'enabled' : 'disabled') : 'proposed (not yet saved)';
   const schedule = data.schedule?.every ? `every ${data.schedule.every}` : 'unknown';
 
-  return `Rule "${data.metadata.name}" (ruleAttachment.id: "${attachmentId}")
-Kind: ${data.kind}
-Status: ${status}
-Schedule: ${schedule}
-${data.metadata.description ? `Description: ${data.metadata.description}` : ''}
-${data.metadata.tags?.length ? `Tags: ${data.metadata.tags.join(', ')}` : ''}`.trim();
+  return [
+    `Rule "${data.metadata.name}" (ruleAttachment.id: "${attachmentId}")`,
+    ...(savedObjectId ? [`Rule ID: ${savedObjectId}`] : []),
+    `Kind: ${data.kind}`,
+    `Status: ${status}`,
+    `Schedule: ${schedule}`,
+    ...(data.metadata.description ? [`Description: ${data.metadata.description}`] : []),
+    ...(data.metadata.tags?.length ? [`Tags: ${data.metadata.tags.join(', ')}`] : []),
+  ].join('\n');
 };
 
 export const createRuleAttachmentType = ({
@@ -64,7 +71,15 @@ export const createRuleAttachmentType = ({
       const rule = await rulesClient.getRule({ id: origin });
       return ruleAttachmentDataSchema.parse(rule);
     } catch (error) {
-      logger.warn(`Failed to resolve rule attachment for origin "${origin}": ${error}`);
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to resolve rule attachment',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_RESOLVE_FAILED,
+          labels: { rule_id: origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return undefined;
     }
   },
@@ -86,7 +101,15 @@ export const createRuleAttachmentType = ({
       }
       return false;
     } catch (error) {
-      logger.warn(`Failed to check staleness for rule attachment "${attachment.origin}": ${error}`);
+      const isNotFound = Boom.isBoom(error) && error.output.statusCode === 404;
+      if (!isNotFound) {
+        logger.warn({
+          message: 'Failed to check rule attachment staleness',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED,
+          labels: { rule_id: attachment.origin, space_id: context.spaceId },
+          error,
+        });
+      }
       return false;
     }
   },
@@ -94,7 +117,7 @@ export const createRuleAttachmentType = ({
   format: (attachment) => ({
     getRepresentation: () => ({
       type: 'text',
-      value: formatRuleAttachmentDescription(attachment.id, attachment.data),
+      value: formatRuleAttachmentDescription(attachment.id, attachment.data, attachment.origin),
     }),
   }),
 

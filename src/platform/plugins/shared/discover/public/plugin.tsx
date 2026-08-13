@@ -22,13 +22,14 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
+import type { TimeRange } from '@kbn/es-query';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -107,9 +108,17 @@ export class DiscoverPlugin
 
       this.locator = plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
+        getTimeRange: (params) => params.timeRange,
+        setTimeRange: (params, timeRange?: TimeRange) => ({
+          ...params,
+          timeRange,
+        }),
         getLocation: async (params) => {
-          const { appLocatorGetLocation } = await getLocators();
-          return appLocatorGetLocation({ useHash }, params);
+          const [{ appLocatorGetLocation }, profileStateRegistry] = await Promise.all([
+            getLocators(),
+            getProfileStateRegistry(),
+          ]);
+          return appLocatorGetLocation({ useHash, profileStateRegistry }, params);
         },
       });
 
@@ -184,7 +193,7 @@ export class DiscoverPlugin
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
-      visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
         const [[coreStart, discoverStartPlugins], historyService, ebtManager, { renderApp }] =
           await Promise.all([
@@ -398,9 +407,10 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const [{ buildServices }, historyService] = await Promise.all([
+    const [{ buildServices }, historyService, profileStateRegistry] = await Promise.all([
       getSharedServices(),
       getHistoryService(),
+      getProfileStateRegistry(),
     ]);
     return buildServices({
       core,
@@ -413,6 +423,7 @@ export class DiscoverPlugin
       scopedHistory,
       urlTracker: this.urlTracker!,
       profilesManager,
+      profileStateRegistry,
       ebtManager,
       setHeaderActionMenu,
     });
@@ -439,7 +450,7 @@ export class DiscoverPlugin
       });
     };
 
-    plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
+    plugins.embeddable.registerAddFromLibraryType<DiscoverSessionAttributes>({
       onAdd: async (container, savedObject) => {
         const { addPanelFromLibrary } = await getEmbeddableServices();
         await addPanelFromLibrary(container, savedObject);
@@ -509,4 +520,9 @@ const getHistoryService = once(async () => {
 const getEmptyEbtManager = once(async () => {
   const { DiscoverEBTManager } = await getSharedServices();
   return new DiscoverEBTManager(); // It is not initialized outside of Discover
+});
+
+const getProfileStateRegistry = once(async () => {
+  const { createProfileStateRegistry } = await getSharedServices();
+  return createProfileStateRegistry();
 });

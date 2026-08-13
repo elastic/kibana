@@ -33,6 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.versionSpecificPolicyAssignment.taskInterval=30s`,
         `--xpack.fleet.enableExperimental=${JSON.stringify(['enableVersionSpecificPolicies'])}`,
         `--xpack.fleet.unenrollInactiveAgents.taskInterval=10s`,
+        `--xpack.fleet.unenrollInactiveAgents.gracePeriodMs=1000`,
       ],
     },
   };

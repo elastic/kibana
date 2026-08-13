@@ -25,10 +25,6 @@ xpack.features.overrides:
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover_v2.category: 'observability'
-  ### Agent Builder should be moved from Analytics category to the Observability one.
-  agentBuilder.category: 'observability'
-  ### Agent Context Layer should match Agent Builder for role management (avoid orphan Kibana category).
-  agentContextLayer.category: 'observability'
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'

@@ -60,7 +60,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -94,6 +94,7 @@ export const PagerdutyConnector: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://mcp.pagerduty.com/mcp',
+          hidden: true,
           label: i18n.translate('connectorSpecs.pagerduty.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),
@@ -249,13 +250,11 @@ export const PagerdutyConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to PagerDuty MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
+    enabled: true,
   },
 
   skill: [

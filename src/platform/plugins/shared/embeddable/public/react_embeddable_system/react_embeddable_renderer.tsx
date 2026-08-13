@@ -17,7 +17,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { PresentationPanelProps } from './panel_component/types';
 import type { DefaultEmbeddableApi } from './types';
 import { untilPluginStartServicesReady } from '../kibana_services';
-import { getReactEmbeddableFactory } from './react_embeddable_registry';
+import { getEmbeddableDefinition } from './react_embeddable_registry';
 
 /**
  * Renders a component from the React Embeddable registry into a Presentation Panel.
@@ -38,7 +38,10 @@ export const EmbeddableRenderer = <
   maybeId?: string;
   getParentApi: () => ParentApi;
   onApiAvailable?: (api: Api) => void;
-  panelProps?: Omit<PresentationPanelProps<Api>, 'Component' | 'componentApi'>;
+  panelProps?: Omit<
+    PresentationPanelProps<Api>,
+    'Component' | 'componentApi' | 'componentInternalApi'
+  >;
   hidePanelChrome?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -47,13 +50,13 @@ export const EmbeddableRenderer = <
 
     const [, factory, { buildEmbeddable, PhaseTracker, PresentationPanel }] = await Promise.all([
       untilPluginStartServicesReady(),
-      getReactEmbeddableFactory<SerializedState, Api>(type),
+      getEmbeddableDefinition<SerializedState, Api>(type),
       import('../async_module'),
     ]);
 
     const phaseTracker = new PhaseTracker(startTime);
 
-    const { Component, componentApi } = await buildEmbeddable<SerializedState, Api>({
+    const { Component, componentApi, internalApi } = await buildEmbeddable<SerializedState, Api>({
       factory,
       maybeId,
       parentApi: getParentApi(),
@@ -67,6 +70,7 @@ export const EmbeddableRenderer = <
     return {
       Component,
       componentApi,
+      internalApi,
       Panel: PresentationPanel,
       phaseTracker,
     };
@@ -100,6 +104,7 @@ export const EmbeddableRenderer = <
     <value.Panel<Api, {}>
       Component={value.Component}
       componentApi={value.componentApi}
+      componentInternalApi={value.internalApi}
       hidePanelChrome={hidePanelChrome}
       {...panelProps}
     />

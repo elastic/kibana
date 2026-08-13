@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/context-engine-plugin",
+  "owner": "@elastic/context-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "contextEngine",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["actions", "data", "features", "share", "esql", "triggersActionsUi", "taskManager"],
+    "optionalPlugins": ["console", "spaces", "workflowsManagement"],
+    "requiredBundles": ["kibanaReact", "actions"]
+  }
+}

@@ -17,7 +17,7 @@ import {
   registerGetMaintainers,
   registerInitMaintainers,
   registerRunMaintainer,
-  registerForceCcsExtractToUpdates,
+  registerForceRemoteExtractToUpdates,
   registerForceHistorySnapshot,
   registerCRUDCreate,
   registerCRUDUpdate,
@@ -27,6 +27,9 @@ import {
   registerResolutionLink,
   registerResolutionUnlink,
   registerResolutionGroup,
+  registerResolutionRulesList,
+  registerResolutionRulesEnable,
+  registerResolutionRulesDisable,
   registerUpdate,
   registerCheckPrivileges,
 } from './apis';
@@ -38,7 +41,7 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerStatus(router);
   registerUninstall(router);
   registerForceLogExtraction(router);
-  registerForceCcsExtractToUpdates(router);
+  registerForceRemoteExtractToUpdates(router);
   registerForceHistorySnapshot(router);
   registerCheckPrivileges(router);
   registerCRUDCreate(router);
@@ -51,6 +54,9 @@ export function registerRoutes(router: EntityStorePluginRouter) {
   registerResolutionLink(router);
   registerResolutionUnlink(router);
   registerResolutionGroup(router);
+  registerResolutionRulesList(router);
+  registerResolutionRulesEnable(router);
+  registerResolutionRulesDisable(router);
   registerStartMaintainer(router);
   registerStopMaintainer(router);
   registerGetMaintainers(router);

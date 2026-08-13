@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): x-pack/platform/test/functional/apps/discover/group1/reporting.ts
 import expect from '@kbn/expect';
 import moment from 'moment';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -73,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await reportingAPI.initEcommerce({
         batchSize: 5000,
-        concurrency: 4,
+        concurrency: 1,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilTabIsLoaded();
@@ -174,6 +175,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
         await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
+        await PageObjects.discover.waitUntilTabIsLoaded();
+        await PageObjects.discover.saveSearch('large export');
         await PageObjects.discover.waitUntilTabIsLoaded();
         const { text: csvFileOrderId } = await getReport({ timeout: 80 * 1000 });
         expectSnapshot(csvFileOrderId.slice(0, 5000)).toMatch();

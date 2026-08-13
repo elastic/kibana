@@ -9,6 +9,7 @@ import type { Case, CaseCustomField, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
+  CasesSearchResponse,
   CaseResolveResponse,
   CasesBulkGetRequest,
   CasesPatchRequest,
@@ -51,6 +52,9 @@ import {
   deleteObservable,
   updateObservable,
 } from './observables';
+import type { GetApplicableFieldsParams } from './applicable_fields';
+import { getApplicableFields } from './applicable_fields';
+import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
 
 /**
  * API for interacting with the cases entities.
@@ -75,7 +79,7 @@ export interface CasesSubClient {
    * Supports nested fields and attachment filtering.
    * Owner field is required.
    */
-  search(params: CasesSearchRequest): Promise<CasesFindResponse>;
+  search(params: CasesSearchRequest): Promise<CasesSearchResponse>;
   /**
    * Retrieves a single case with the specified ID.
    */
@@ -147,6 +151,12 @@ export interface CasesSubClient {
    * Bulk adds observables to the case
    */
   bulkAddObservables(params: BulkAddObservablesRequest): Promise<Case>;
+  /**
+   * Returns the fully-formed `extended_fields` a caller may apply — the owner's global field-library
+   * fields plus, when a template is in scope, that template's fields. Pass `caseId` to derive owner +
+   * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
+   */
+  getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
 }
 
 /**
@@ -186,6 +196,8 @@ export const createCasesSubClient = (
       deleteObservable(caseId, observableId, clientArgs, casesClient),
     bulkAddObservables: (params: BulkAddObservablesRequest) =>
       bulkAddObservables(params, clientArgs, casesClient),
+    getApplicableFields: (params: GetApplicableFieldsParams) =>
+      getApplicableFields(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

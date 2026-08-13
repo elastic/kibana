@@ -45,10 +45,12 @@ elastic.apm.contextPropagationOnly: false
 telemetry.enabled: true
 telemetry.tracing.enabled: true
 
-telemetry.tracing.exporters.phoenix.base_url: 'http://localhost:6006/'
-telemetry.tracing.exporters.phoenix.public_url: 'http://localhost:6006/'
+telemetry.tracing.exporters.phoenix.base_url: 'http://localhost:6006'
+telemetry.tracing.exporters.phoenix.public_url: 'http://localhost:6006'
 telemetry.tracing.exporters.phoenix.project_name: '1chat'
 ```
+
+You can then view traces in the Phoenix Web UI `http://localhost:6006`
 
 ## Overview
 

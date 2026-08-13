@@ -49,6 +49,9 @@ const SUPPORTED_LOGOS = [
   'confluence',
   'salesforce',
   'splunk',
+  'supabase',
+  'vercel_black',
+  'vercel_white',
 ] as const;
 
 export type SupportedLogo = (typeof SUPPORTED_LOGOS)[number];
@@ -59,7 +62,7 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
 
 // Logos that EUI ships natively. Anything not listed here falls through to a
 // bundled SVG asset served from the plugin's `public/assets/` folder.
-const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
+export const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   aws: 'logoAWS',
   azure: 'logoAzure',
   gcp: 'logoGCP',
@@ -77,7 +80,7 @@ const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   logstash: 'logoLogstash',
 };
 
-function useIconForLogo(logo?: SupportedLogo): string | undefined {
+export function useIconForLogo(logo?: SupportedLogo): string | undefined {
   const {
     services: { http },
   } = useKibana();
@@ -93,7 +96,7 @@ export interface LogoIconProps {
   isAvatar?: boolean;
   size?: LogoIconSizeProp;
   className?: string;
-  type?: EuiAvatarProps['type'];
+  avatarType?: EuiAvatarProps['type'];
   hasBorder?: boolean;
   color?: EuiAvatarProps['color'];
 }
@@ -108,7 +111,7 @@ export function LogoIcon({
   isAvatar,
   size,
   className,
-  type,
+  avatarType,
   hasBorder,
   color = 'subdued',
 }: LogoIconProps) {
@@ -122,7 +125,7 @@ export function LogoIcon({
         iconType={resolvedIconType}
         name="logoIcon"
         size={size}
-        type={type}
+        type={avatarType}
         className={className}
         aria-hidden={true}
         css={
