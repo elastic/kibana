@@ -20,11 +20,7 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
-      ...uiamConfig.kbnTestServer.serverArgs.filter(
-        (arg) =>
-          !arg.startsWith('--xpack.security.uiam.ssl.certificate=') &&
-          !arg.startsWith('--xpack.security.uiam.ssl.key=')
-      ),
+      ...uiamConfig.kbnTestServer.serverArgs,
       `--xpack.security.mcp.oauth2.metadata.authorization_servers=${JSON.stringify([
         MOCK_IDP_UIAM_OAUTH_BASE_URL,
       ])}`,
