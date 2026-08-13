@@ -37,7 +37,7 @@ test.describe('Metrics UI Anomaly Flyout', { tag: tags.stateful.classic }, () =>
     // Repair state left by a previously interrupted run, and isolate tests that mutate
     // the shared default source configuration.
     await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
-    await page.clock.install({ time: new Date('2021-04-24T00:00:00.000Z') });
+    await page.clock.install({ time: new Date('2021-05-24T00:00:00.000Z') });
     await browserAuth.loginAsAdmin();
   });
 
