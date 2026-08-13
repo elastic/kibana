@@ -12,7 +12,7 @@ import { useBulkSelect } from './use_bulk_select';
 const pageItems = [{ id: 'rule-1' }];
 
 describe('useBulkSelect', () => {
-  it('caps selectedCount at BULK_FILTER_MAX_RULES when select-all and total exceeds cap', () => {
+  it('reports the full logical count in select-all mode without an artificial cap', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: BULK_FILTER_MAX_RULES + 500,
@@ -25,7 +25,7 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.isAllSelected).toBe(true);
-    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
+    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES + 500);
   });
 
   it('does not cap selectedCount when total is at or below BULK_FILTER_MAX_RULES', () => {
@@ -43,7 +43,7 @@ describe('useBulkSelect', () => {
     expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
   });
 
-  it('uses logical count when exclusions bring match set below bulk cap', () => {
+  it('subtracts exclusions from the select-all logical count', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: BULK_FILTER_MAX_RULES + 1000,
@@ -54,7 +54,7 @@ describe('useBulkSelect', () => {
     act(() => {
       result.current.onSelectAll();
     });
-    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
+    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES + 1000);
 
     act(() => {
       for (let i = 0; i < 1500; i++) {
@@ -184,7 +184,6 @@ describe('useBulkSelect', () => {
     });
     expect(result.current.selectedCount).toBe(3);
     expect(result.current.getBulkParams()).toEqual({
-      mode: 'by_ids',
       ids: expect.arrayContaining(['rule-1', 'rule-2', 'rule-3']),
     });
   });
@@ -211,7 +210,7 @@ describe('useBulkSelect', () => {
 
     expect(result.current.isAllSelected).toBe(false);
     expect(result.current.selectedCount).toBe(0);
-    expect(result.current.getBulkParams()).toEqual({ mode: 'by_ids', ids: [] });
+    expect(result.current.getBulkParams()).toEqual({ ids: [] });
   });
 
   it('clears selection when the search scope changes', () => {
@@ -254,7 +253,7 @@ describe('useBulkSelect', () => {
     rerender({ items: [{ id: 'rule-21' }] });
 
     expect(result.current.selectedCount).toBe(1);
-    expect(result.current.getBulkParams()).toEqual({ mode: 'by_ids', ids: ['rule-1'] });
+    expect(result.current.getBulkParams()).toEqual({ ids: ['rule-1'] });
   });
 
   it('clamps select-all selectedCount at zero when exclusions exceed total', () => {
