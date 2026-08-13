@@ -60,6 +60,8 @@ export const isProjectScopedSourceIndexUnavailableError = (
   error: unknown,
   projectRouting?: StepDefineExposedState['projectRouting']
 ): boolean =>
+  // ORIGIN routes to the current project, so unavailable source indices there are real errors.
+  // Only suppress this known preview failure for custom linked-project scopes.
   projectRouting !== PROJECT_ROUTING.ORIGIN &&
   isCustomProjectRouting(projectRouting) &&
   isSourceIndexUnavailableError(error);

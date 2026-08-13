@@ -17,7 +17,7 @@ import { getErrorMessage } from '../../../../../common/utils/errors';
 
 import { useToastNotifications } from '../../../app_dependencies';
 import { useGetTransformsPreview } from '../../../hooks';
-import { isProjectScopedSourceIndexUnavailableError } from '../../../hooks/transform_preview_errors';
+import { isProjectScopedSourceIndexUnavailableError } from '../../../hooks/use_transform_config_data';
 import { useToastNotificationText } from '../../../components';
 
 import {
