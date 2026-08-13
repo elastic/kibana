@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/files-plugin'
 tags:
   - plugin
   - prod
