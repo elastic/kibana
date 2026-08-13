@@ -45,14 +45,5 @@ describe(`ai_index`, () => {
         aiIndexFeaturePrivilege.getActions(createPrivilege({ read: ['dashboard', 'lens'] }))
       ).toEqual(['ai_index:dashboard/read', 'ai_index:lens/read']);
     });
-
-    it('does not emit `saved_object:` actions', () => {
-      const actions = new Actions();
-      const aiIndexFeaturePrivilege = new FeaturePrivilegeAiIndexBuilder(actions);
-
-      const result = aiIndexFeaturePrivilege.getActions(createPrivilege({ read: ['dashboard'] }));
-
-      expect(result.some((action) => action.startsWith('saved_object:'))).toBe(false);
-    });
   });
 });

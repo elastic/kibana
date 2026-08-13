@@ -95,9 +95,6 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               ),
               includeIn: 'read',
               savedObject: { all: [], read: [] },
-              // The workflow KI type gates every catalogue entry — managed and unmanaged alike — on
-              // `api:${WorkflowsManagementApiActions.read}`, so the AI Index grant belongs on this
-              // privilege only, not on `workflow_read_managed`.
               aiIndex: { read: [WORKFLOW_SML_TYPE] },
               api: [WorkflowsManagementApiActions.read],
               ui: [WorkflowsManagementUiActions.read],

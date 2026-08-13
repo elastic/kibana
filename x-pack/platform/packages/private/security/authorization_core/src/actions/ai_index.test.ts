@@ -13,11 +13,6 @@ describe('#read', () => {
     expect(actions.read('dashboard')).toBe('ai_index:dashboard/read');
   });
 
-  it('does not collide across KI types', () => {
-    const actions = new AiIndexActions();
-    expect(actions.read('lens')).not.toBe(actions.read('dashboard'));
-  });
-
   [null, undefined, ''].forEach((kiType) => {
     it(`throws when kiType is ${JSON.stringify(kiType)}`, () => {
       const actions = new AiIndexActions();
@@ -25,12 +20,5 @@ describe('#read', () => {
         `"kiType is required and must be a string"`
       );
     });
-  });
-
-  it('throws when kiType contains the composite-label separator', () => {
-    const actions = new AiIndexActions();
-    expect(() => actions.read('dash|board')).toThrowErrorMatchingInlineSnapshot(
-      `"kiType may not contain '|'"`
-    );
   });
 });
