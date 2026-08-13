@@ -49,8 +49,8 @@ export function createEventStatusUpdateTool({
     annotations: {
       title: 'Update Significant Event Status',
       readOnlyHint: false,
-      destructiveHint: false,
-      idempotentHint: false,
+      destructiveHint: true,
+      idempotentHint: true,
       openWorldHint: false,
     },
     schema: eventStatusUpdateSchema,

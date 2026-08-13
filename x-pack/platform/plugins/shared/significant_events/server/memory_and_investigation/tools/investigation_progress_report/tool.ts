@@ -51,7 +51,7 @@ export const createInvestigationProgressReportTool = ({
   description: toolDescription,
   annotations: {
     title: 'Report Investigation Progress',
-    readOnlyHint: false,
+    readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: false,
     openWorldHint: false,
