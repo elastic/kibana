@@ -234,7 +234,7 @@ spaceTest.describe(
           await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
           await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 180_000);
           await page.reload();
-          await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+          await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         });
 
         await spaceTest.step('open the add-rule-exception flyout', async () => {

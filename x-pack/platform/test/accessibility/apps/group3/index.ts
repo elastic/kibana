@@ -18,10 +18,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./reporting'));
     loadTestFile(require.resolve('./search_sessions'));
 
-    loadTestFile(require.resolve('./license_management'));
     loadTestFile(require.resolve('./stack_monitoring'));
-
-    // Deprecated features; scheduled for removal in v10
-    loadTestFile(require.resolve('./rollup_jobs'));
   });
 };

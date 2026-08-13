@@ -25,7 +25,7 @@ const mockUseConversationListMutations = jest.mocked(useConversationListMutation
 
 const conversationId = 'conversation-1';
 
-const renderRow = (permissions: ConversationPermissions) => {
+const renderRow = (permissions: Partial<ConversationPermissions>) => {
   render(
     <IntlProvider locale="en">
       <MemoryRouter>
@@ -35,7 +35,12 @@ const renderRow = (permissions: ConversationPermissions) => {
           title="My conversation"
           isActive={false}
           routeConversationId={conversationId}
-          permissions={permissions}
+          permissions={{
+            rename: false,
+            delete: false,
+            update_access_control: false,
+            ...permissions,
+          }}
         />
       </MemoryRouter>
     </IntlProvider>

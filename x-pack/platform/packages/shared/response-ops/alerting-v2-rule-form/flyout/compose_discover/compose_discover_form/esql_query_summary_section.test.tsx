@@ -105,12 +105,17 @@ describe('getEsqlSummaryState', () => {
 });
 
 describe('EsqlQuerySummarySection callouts', () => {
-  const renderSection = (queryCommitted: boolean, query: RuleQuery) =>
+  const renderSection = (
+    queryCommitted: boolean,
+    query: RuleQuery,
+    kind: 'alert' | 'signal' = 'alert'
+  ) =>
     render(
       <IntlProvider locale="en">
         <EsqlQuerySummarySection
           query={query}
           queryCommitted={queryCommitted}
+          kind={kind}
           isEditorOpen={false}
           onOpenEditor={jest.fn()}
         />
@@ -142,6 +147,17 @@ describe('EsqlQuerySummarySection callouts', () => {
   it('does not render a warning callout for success', () => {
     renderSection(true, composedQuery(BASE, ALERT_SEGMENT));
     expect(screen.queryByTestId('esqlSummaryEmptyCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
+  });
+
+  it('hides alert-condition subtitle and callout for signal kind', () => {
+    renderSection(true, standaloneQuery(BASE), 'signal');
+
+    expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
+    expect(screen.getByText('Query')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Base query defined — no separate alert condition')
+    ).not.toBeInTheDocument();
     expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
   });
 });

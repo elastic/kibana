@@ -15,7 +15,7 @@ import type {
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
-import { getDefaultConversationAccessControl } from '@kbn/agent-builder-common';
+import { normalizeConversationAccessControl } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -137,7 +137,7 @@ export const getConversation = async ({
   conversationId: string | undefined;
   autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
-  accessControl?: ConversationAccessControl;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
@@ -189,14 +189,14 @@ export const placeholderConversation = ({
 }: {
   agentId: string;
   conversationId?: string;
-  accessControl?: ConversationAccessControl;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
     title: 'New conversation',
     agent_id: agentId,
-    access_control: accessControl ?? getDefaultConversationAccessControl(),
+    access_control: normalizeConversationAccessControl(accessControl),
     rounds: [],
     ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),

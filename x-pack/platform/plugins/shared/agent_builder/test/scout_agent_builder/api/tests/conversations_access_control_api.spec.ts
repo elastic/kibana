@@ -489,10 +489,10 @@ apiTest.describe(
         );
 
         await apiTest.step(
-          'public conversation rounds are attributed to the Kibana user who sent them',
+          'conversation rounds are attributed to the Kibana user who sent them',
           async () => {
             expect(publicConversation.author?.username).toBe(alice.username);
-            expect(privateConversation.author).toBeUndefined();
+            expect(privateConversation.author?.username).toBe(alice.username);
 
             const getPublicResponse = await apiClient.get(
               `${accessControlApiBase}/conversations/${encodeURIComponent(
@@ -515,7 +515,11 @@ apiTest.describe(
               { headers: headersFor(alice), responseType: 'json' }
             );
             expect(getPrivateResponse).toHaveStatusCode(200);
-            expect((getPrivateResponse.body as Conversation).rounds[0].author).toBeUndefined();
+            // Private rounds are attributed too, so authorship survives the conversation later
+            // being shared.
+            const privateRound = (getPrivateResponse.body as Conversation).rounds[0];
+            expect(privateRound.author?.username).toBe(alice.username);
+            expect(privateRound.author?.id).toBeDefined();
           }
         );
 
@@ -550,10 +554,12 @@ apiTest.describe(
             expect((await getAs(alice)).permissions).toStrictEqual({
               rename: true,
               delete: true,
+              update_access_control: true,
             });
             expect((await getAs(bob)).permissions).toStrictEqual({
               rename: false,
               delete: false,
+              update_access_control: false,
             });
 
             const listedForBob = await apiClient.get(`${accessControlApiBase}/conversations`, {
@@ -567,6 +573,7 @@ apiTest.describe(
             expect(listedPublicConversation?.permissions).toStrictEqual({
               rename: false,
               delete: false,
+              update_access_control: false,
             });
           }
         );
