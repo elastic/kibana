@@ -34,9 +34,7 @@ export const toClientContract = (
     tags: location.tags,
     geo: location.geo,
     spaces: locationObject.namespaces,
-    ...(location.agentConditionSharding != null
-      ? { agentConditionSharding: location.agentConditionSharding }
-      : {}),
+    ...(location.agentConditionSharding === true ? { agentConditionSharding: true } : {}),
   };
 };
 
@@ -55,9 +53,7 @@ export const allLocationsToClientContract = (
       tags: location.tags,
       geo: location.geo,
       spaces: location.spaces,
-      ...(location.agentConditionSharding != null
-        ? { agentConditionSharding: location.agentConditionSharding }
-        : {}),
+      ...(location.agentConditionSharding === true ? { agentConditionSharding: true } : {}),
     };
   });
 };
@@ -72,9 +68,7 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     geo: location.geo,
     namespace: location.namespace,
     spaces: location.spaces,
-    ...(location.agentConditionSharding != null
-      ? { agentConditionSharding: location.agentConditionSharding }
-      : {}),
+    ...(location.agentConditionSharding === true ? { agentConditionSharding: true } : {}),
   };
 };
 

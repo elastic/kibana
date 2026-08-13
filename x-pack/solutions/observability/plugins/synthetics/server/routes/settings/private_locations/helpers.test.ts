@@ -286,6 +286,18 @@ describe('agentConditionSharding contract mappers', () => {
     expect(toSavedObjectContract(baseLocation).agentConditionSharding).toBeUndefined();
   });
 
+  it('omits agentConditionSharding: false so classic and explicitly-off look the same', () => {
+    expect(
+      toSavedObjectContract({ ...baseLocation, agentConditionSharding: false })
+    ).not.toHaveProperty('agentConditionSharding');
+    expect(
+      toClientContract({
+        attributes: { ...baseLocation, agentConditionSharding: false },
+        namespaces: ['default'],
+      } as any)
+    ).not.toHaveProperty('agentConditionSharding');
+  });
+
   it('returns agentConditionSharding on the single-location client contract', () => {
     expect(
       toClientContract({

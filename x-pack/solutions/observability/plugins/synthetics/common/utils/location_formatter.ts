@@ -15,9 +15,7 @@ export const formatLocation = (location: ServiceLocation | PrivateLocation) => {
       geo: location.geo,
       isServiceManaged: location.isServiceManaged,
       agentPolicyId: location.agentPolicyId,
-      ...(location.agentConditionSharding != null
-        ? { agentConditionSharding: location.agentConditionSharding }
-        : {}),
+      ...(location.agentConditionSharding === true ? { agentConditionSharding: true } : {}),
     };
   }
 

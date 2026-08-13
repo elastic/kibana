@@ -29,4 +29,10 @@ describe('formatLocation', () => {
   it('does not add agentConditionSharding for a classic private location', () => {
     expect(formatLocation(privateLocation)).not.toHaveProperty('agentConditionSharding');
   });
+
+  it('omits agentConditionSharding: false', () => {
+    expect(
+      formatLocation({ ...privateLocation, agentConditionSharding: false })
+    ).not.toHaveProperty('agentConditionSharding');
+  });
 });
