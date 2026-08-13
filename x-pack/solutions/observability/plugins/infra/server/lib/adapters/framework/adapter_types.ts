@@ -90,6 +90,10 @@ export interface CallWithRequestParams extends estypes.RequestBase {
    * Elasticsearch client call. Not part of the request body — it is
    * extracted and forwarded as a transport option so the call can't hang
    * indefinitely against a slow or unreachable cluster.
+   *
+   * NOTE: currently only honored for the `search` endpoint in
+   * `KibanaFramework#callWithRequest`. Setting it for `msearch`/`indices.*`
+   * is a no-op until those call sites forward it too.
    */
   requestTimeout?: string | number;
 }
