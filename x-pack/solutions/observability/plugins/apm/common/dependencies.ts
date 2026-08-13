@@ -10,11 +10,6 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { PROCESSOR_EVENT, SPAN_DESTINATION_SERVICE_RESOURCE } from './es_fields/apm';
 import { environmentQuery } from './utils/environment_query';
 
-export const DependenciesInventoryTitle = i18n.translate(
-  'xpack.apm.views.dependenciesInventory.title',
-  { defaultMessage: 'Dependencies' }
-);
-
 export const unifiedSearchBarPlaceholder = i18n.translate(
   'xpack.apm.dependencies.unifiedSearchBarPlaceholder',
   {

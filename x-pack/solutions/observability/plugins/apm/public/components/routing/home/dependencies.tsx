@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { z } from '@kbn/zod/v4';
 import React from 'react';
@@ -12,7 +13,6 @@ import { Redirect } from 'react-router-dom';
 import qs from 'query-string';
 import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import {
-  DependenciesInventoryTitle,
   unifiedSearchBarPlaceholder,
   getSearchBarBoolFilter,
 } from '../../../../common/dependencies';
@@ -27,7 +27,10 @@ import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 
-export { DependenciesInventoryTitle };
+export const DependenciesInventoryTitle = i18n.translate(
+  'xpack.apm.views.dependenciesInventory.title',
+  { defaultMessage: 'Dependencies' }
+);
 
 function DependenciesInventorySearchBar() {
   const {

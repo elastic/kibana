@@ -8,10 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import React from 'react';
-import {
-  DependenciesInventoryTitle,
-  unifiedSearchBarPlaceholder,
-} from '../../../../common/dependencies';
+import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
 import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -27,20 +24,21 @@ interface Props {
 export function DependencyDetailTemplate({ children }: Props) {
   const {
     query,
-    query: { dependencyName, rangeFrom, rangeTo, refreshInterval, refreshPaused, environment, kuery, comparisonEnabled },
+    query: {
+      dependencyName,
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+      environment,
+      kuery,
+      comparisonEnabled,
+    },
   } = useApmParams('/dependencies');
 
   const router = useApmRouter();
 
   const path = useApmRoutePath();
-
-  const overviewLabel = i18n.translate('xpack.apm.DependencyDetailOverview.title', {
-    defaultMessage: 'Overview',
-  });
-
-  const operationsLabel = i18n.translate('xpack.apm.DependencyDetailOperations.title', {
-    defaultMessage: 'Operations',
-  });
 
   const inventoryHref = router.link('/dependencies/inventory', {
     query: {
@@ -59,14 +57,18 @@ export function DependencyDetailTemplate({ children }: Props) {
   const tabs: AppHeaderTab[] = [
     {
       id: 'overview',
-      label: overviewLabel,
+      label: i18n.translate('xpack.apm.DependencyDetailOverview.title', {
+        defaultMessage: 'Overview',
+      }),
       href: router.link('/dependencies/overview', { query }),
       isSelected: path === '/dependencies/overview',
       'data-test-subj': 'apmDependencyDetailTab_overview',
     },
     {
       id: 'operations',
-      label: operationsLabel,
+      label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
+        defaultMessage: 'Operations',
+      }),
       href: operationsHref,
       // Keep both clauses so the operation detail subpage keeps the Operations tab selected.
       isSelected: path === '/dependencies/operations' || path === '/dependencies/operation',
@@ -79,13 +81,25 @@ export function DependencyDetailTemplate({ children }: Props) {
   // produces today: [Operations, Dependencies]. On the other tab pages a single inventory target
   // matches the existing behaviour. Mounting an inline AppHeader suppresses the breadcrumb-derived
   // fallback, so this must be explicit.
+  const backToInventory: AppHeaderBack = {
+    href: inventoryHref,
+    label: i18n.translate('xpack.apm.views.dependenciesInventory.title', {
+      defaultMessage: 'Dependencies',
+    }),
+  };
+
   const back: AppHeaderBack | AppHeaderBack[] =
     path === '/dependencies/operation'
       ? [
-          { href: operationsHref, label: operationsLabel },
-          { href: inventoryHref, label: DependenciesInventoryTitle },
+          {
+            href: operationsHref,
+            label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
+              defaultMessage: 'Operations',
+            }),
+          },
+          backToInventory,
         ]
-      : { href: inventoryHref, label: DependenciesInventoryTitle };
+      : backToInventory;
 
   return (
     <ApmIndexSettingsContextProvider>
