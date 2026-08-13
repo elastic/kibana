@@ -11,6 +11,7 @@ import ivm from 'isolated-vm';
 import { CONSOLE_BRIDGE_SCRIPT } from './console_bridge_script';
 import { createAbortError } from './create_abort_error';
 import { createIsolateWithCatastrophicHandler } from './create_isolate_with_catastrophic_handler';
+import { createWallClockTimeout } from './create_wall_clock_timeout';
 import type { ExecuteScriptInIsolateParams } from './execute_script_in_isolate_params';
 import { normalizeIsolateExecutionError } from './normalize_isolate_execution_error';
 import { raceWithAbort } from './race_with_abort';
@@ -33,6 +34,11 @@ export const executeScriptInIsolate = async ({
     memoryLimitMb,
     logger,
   });
+
+  const { promise: wallClockTimeout, cancel: cancelWallClockTimeout } = createWallClockTimeout(
+    isolate,
+    executionTimeoutMs
+  );
 
   try {
     const ivmContext = await isolate.createContext();
@@ -59,7 +65,11 @@ export const executeScriptInIsolate = async ({
     await jail.delete('__logBridge__');
 
     const resultPromise = await raceWithAbort(
-      Promise.race([catastrophicPromise, runUserScript(ivmContext, script, executionTimeoutMs)]),
+      Promise.race([
+        catastrophicPromise,
+        wallClockTimeout,
+        runUserScript(ivmContext, script, executionTimeoutMs),
+      ]),
       abortSignal,
       isolate
     );
@@ -68,6 +78,7 @@ export const executeScriptInIsolate = async ({
   } catch (error) {
     throw normalizeIsolateExecutionError(error, { memoryLimitMb, executionTimeoutMs });
   } finally {
+    cancelWallClockTimeout();
     if (!isolate.isDisposed) {
       isolate.dispose();
     }
