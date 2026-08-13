@@ -260,7 +260,7 @@ describe('registerProfileProviders', () => {
           dataView: createStubIndexPattern({ spec: { title: CUSTOM_TRACES_INDEX_PATTERN } }),
         },
       ],
-    ])('resolves the traces profile for a custom logs-shaped pattern in %s', async (_, params) => {
+    ])('resolves the traces profile for a custom traces-shaped pattern in %s', async (_, params) => {
       const { dataSourceProfileServiceMock, profileProviderServices, rootContext } =
         await setupObservabilityProfileStack();
       const apmSourcesAccess = {
