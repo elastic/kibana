@@ -221,12 +221,10 @@ export const isExcludedLoggingPath = (filePath: string): boolean => {
  *
  * Recall boundary (Tier-1): convention-named loggers, chained builder calls,
  * standard stream calls, and process-aborting emits that write their message to
- * stderr (`panic`, `.expect`). A repo's own PROJECT-LOCAL WRAPPER --
- * `log_error(...)` / `serverLog(...)`, a house helper that calls a real logger
- * internally -- is NOT covered by this list (the wrapper name is per-repo, so
- * no fixed pattern can name it); `discoverLoggingWrappers` is the second pass
- * that finds that wrapper's name at runtime and greps its call sites, joining
- * the idiom hits found here (see `discover_logging_sites.ts`).
+ * stderr (`panic`, `.expect`). Misses PROJECT-LOCAL WRAPPERS — a repo's own
+ * `log_error(...)` / `serverLog(...)` helper that calls a real logger inside.
+ * The wrapper name is per-repo, so no fixed pattern can cover it; that tail needs
+ * a second discovery pass, not another regex here.
  *
  * Measured recall against a 14-repo / 18.3M-line corpus is recorded in the vault
  * (`logger-idiom-recall-survey-results`); re-score there before adding a pattern.
@@ -294,80 +292,6 @@ export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   // System.out.println is covered above).
   '.*println[ (].*',
 ] as const;
-
-/**
- * Lucene RLIKE patterns matching a function/method DEFINITION line, one
- * language (or family) per key -- the same values {@link EXTENSION_LANGUAGE}
- * produces (e.g. `Go`, `Elixir`, `C`, `Python`). Used by
- * `discoverLoggingWrappers` to find where a service's own logging-wrapper
- * helper is DECLARED, so its call sites can be grepped even though the call
- * site itself never names a real logger.
- *
- * Recall boundary: SINGLE-LINE definitions only (name, parameter list, and the
- * opening delimiter all on one source line). A signature split across lines
- * (trailing-comma continuation, a return-type-then-`=` on its own line, etc.)
- * is missed -- this mirrors the existing idiom greps, which also see one line
- * at a time. The value here is discovering the wrapper NAME so its call sites
- * can be grepped with {@link LOGGER_IDIOM_PATTERNS}-style precision, not
- * catching every declaration shape a language allows.
- *
- * Lucene RLIKE gotchas (same as {@link LOGGER_IDIOM_PATTERNS}):
- * - anchored to the whole value: a "contains" pattern is wrapped in `.*` on
- *   both ends, an "ends with" pattern omits the trailing `.*` (used here to
- *   tell a same-line-brace/paren DEFINITION from a `;`-terminated CALL);
- * - case-sensitive, so case is enumerated where needed;
- * - no `\b`, `\s`, `\d` -- a literal space is a plain space character and a
- *   literal dot is written `[.]`.
- *
- * `unknown` is the fallback used when the language is absent or has no entry
- * below.
- */
-export const FUNCTION_DEFINITION_PATTERNS: Readonly<Record<string, readonly string[]>> = {
-  // func serverLog(level int) { -- go.
-  Go: ['.*func .*[(].*'],
-  // def log_error(socket, code, msg) do / defp log(socket, level, code, msg) do -- elixir.
-  Elixir: ['.*defp?[ ].*'],
-  // fn log_error(e: &Error) { -- rust.
-  Rust: ['.*fn .*[(].*'],
-  // def log_error(msg): -- python.
-  Python: ['.*def .*[(].*'],
-  // def log_error(msg) -- ruby (parens are optional in ruby, so no paren requirement).
-  Ruby: ['.*def .*'],
-  // function logError(msg) { / const logError = (msg) => { -- php/js/ts.
-  PHP: ['.*function .*[(].*', '.*const .*=.*[(].*=>.*'],
-  JavaScript: ['.*function .*[(].*', '.*const .*=.*[(].*=>.*'],
-  TypeScript: ['.*function .*[(].*', '.*const .*=.*[(].*=>.*'],
-  // private void logError(String msg) { -- java (modifier + type + name + '(', ends same line).
-  Java: ['.*(public|private|protected|static|final)[ ].*[(].*[)][ ]*[{]'],
-  'C#': ['.*(public|private|protected|internal|static)[ ].*[(].*[)][ ]*[{]'],
-  // def logError(msg: String): Unit = { -- scala.
-  Scala: ['.*(def|override)[ ].*[(].*'],
-  // def logError(msg) { / private void logError(msg) { -- groovy.
-  Groovy: ['.*(def|public|private|protected|static)[ ].*[(].*[)][ ]*[{]'],
-  // int server_log(int level, char *msg) { -- c/c++, k&r-style brace on the same
-  // line, or a bare prototype ending the line in ')' with the brace on the
-  // next line. Either way a CALL site is `;`-terminated, so anchoring the
-  // pattern's end to '{' or ')' (no trailing '.*') is what excludes it.
-  C: ['.*[A-Za-z_][A-Za-z0-9_]*[ ]*[(].*[)][ ]*[{]', '.*[A-Za-z_][A-Za-z0-9_]*[ ]*[(].*[)]'],
-  'C++': ['.*[A-Za-z_][A-Za-z0-9_]*[ ]*[(].*[)][ ]*[{]', '.*[A-Za-z_][A-Za-z0-9_]*[ ]*[(].*[)]'],
-  unknown: ['.*[A-Za-z_][A-Za-z0-9_]*[ ]*[(].*[)][ ]*[{]', '.*(def|fn|func)[ ].*[(].*'],
-} as const;
-
-/**
- * INV-002 bounds on `discoverLoggingWrappers`: keeps the pass's added latency
- * proportional to these caps, not to repository size. See
- * `discover_logging_wrappers.ts`.
- */
-export const WRAPPER_DISCOVERY_LIMITS = {
-  /** Seed file search is confined to the top N files by idiom-hit count. */
-  maxSeedFiles: 5,
-  /** Both known motivating cases (Elixir, C) are 2 hops; a 3rd round confirms convergence. */
-  maxRounds: 3,
-  /** Ceiling on distinct wrapper names returned, regardless of rounds run. */
-  maxWrapperNames: 12,
-  /** Shorter identifiers are almost always accessors/keywords, not a house logger. */
-  minWrapperNameLength: 3,
-} as const;
 
 /**
  * JS regex sources (NOT Lucene — these run in-process on the grep hit line, not
