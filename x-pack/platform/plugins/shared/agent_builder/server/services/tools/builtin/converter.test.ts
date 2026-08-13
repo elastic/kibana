@@ -148,7 +148,7 @@ describe('convertTool (static/non-builtin) — default annotations', () => {
     const tool = makeStaticEsqlTool();
     const result = convertTool({
       tool,
-      definition: { ...nonBuiltinDefinition, toolType: ToolType.esql },
+      definition: nonBuiltinDefinition,
       context: baseContext,
       cache: new ToolAvailabilityCache(),
     });
@@ -165,7 +165,7 @@ describe('convertTool (static/non-builtin) — default annotations', () => {
     const tool = makeStaticIndexSearchTool();
     const result = convertTool({
       tool,
-      definition: { ...nonBuiltinDefinition, toolType: ToolType.index_search },
+      definition: nonBuiltinDefinition,
       context: baseContext,
       cache: new ToolAvailabilityCache(),
     });
@@ -182,7 +182,7 @@ describe('convertTool (static/non-builtin) — default annotations', () => {
     const tool = makeStaticWorkflowTool();
     const result = convertTool({
       tool,
-      definition: { ...nonBuiltinDefinition, toolType: ToolType.workflow },
+      definition: nonBuiltinDefinition,
       context: baseContext,
       cache: new ToolAvailabilityCache(),
     });
@@ -199,7 +199,7 @@ describe('convertTool (static/non-builtin) — default annotations', () => {
     const tool = makeStaticEsqlTool({ id: 'custom.query.v2' });
     const result = convertTool({
       tool,
-      definition: { ...nonBuiltinDefinition, toolType: ToolType.esql },
+      definition: nonBuiltinDefinition,
       context: baseContext,
       cache: new ToolAvailabilityCache(),
     });
