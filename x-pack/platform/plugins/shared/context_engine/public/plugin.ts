@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
-import { createAnalyzeChatOpener } from './analyze_chat_opener';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -84,7 +83,10 @@ export class ContextEnginePlugin
       ),
       defaultPath: '/',
       async mount(params: AppMountParameters) {
-        const { mountApp } = await import('./application');
+        const [{ mountApp }, { createAnalyzeChatOpener }] = await Promise.all([
+          import('./application'),
+          import('./analyze_chat_opener'),
+        ]);
         const [coreStart, pluginsStart] = await core.getStartServices();
         const agentBuilder = await getAgentBuilder();
         const chatOpener = createAnalyzeChatOpener({ coreStart, agentBuilder });
