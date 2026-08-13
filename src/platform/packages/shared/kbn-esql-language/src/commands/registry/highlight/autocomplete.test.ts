@@ -82,9 +82,11 @@ const expectHighlightSuggestions = async (
     expect(texts).toEqual(expect.arrayContaining(expected.contains));
   }
 
-  if (expected.notContains?.length) {
-    expect(texts).not.toEqual(expect.arrayContaining(expected.notContains));
-  }
+  // Assert per item: `not.toEqual(arrayContaining([...]))` only fails when *every* listed
+  // suggestion is present, so it would let a partial regression through.
+  expected.notContains?.forEach((text) => {
+    expect(texts).not.toContain(text);
+  });
 };
 
 describe('HIGHLIGHT Autocomplete', () => {

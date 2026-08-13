@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMap } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAst, ESQLAstHighlightCommand } from '@elastic/esql/types';
+import { isFunctionExpression, isMap, isStringLiteral } from '@elastic/esql';
+import type {
+  ESQLAstAllCommands,
+  ESQLAst,
+  ESQLAstHighlightCommand,
+  ESQLAstItem,
+} from '@elastic/esql/types';
 import type { ESQLMessage } from '../../definitions/types';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { validateMap } from '../../definitions/utils/validation/map';
 import type { ICommandContext, ICommandCallbacks } from '../types';
-import { getItemLocation } from './utils';
+import { HIGHLIGHT_PREFIX_KEYWORD, getPrefixKeyword } from './utils';
 
 // `pre_tags`/`post_tags` accept `keyword | keyword[]`; using type=[keyword] still validates
 // list values because getExpressionType delegates a list's type to its first element.
@@ -25,18 +30,52 @@ const HIGHLIGHT_MAP_DEFINITION =
   "{name='post_tags', description='HTML tag to insert after highlighted text', type=[keyword]}" +
   "{name='number_of_fragments', description='Maximum number of fragments to return', type=[integer]}" +
   "{name='fragment_size', description='Size of each fragment in characters', type=[integer]}" +
-  "{name='encoder', description='Encoding for highlighted text', type=[keyword]}" +
-  "{name='boundary_scanner', description='How to split fragments', type=[keyword]}" +
+  "{name='encoder', values=[default, html], description='Encoding for highlighted text', type=[keyword]}" +
+  "{name='boundary_scanner', values=[sentence, word], description='How to split fragments', type=[keyword]}" +
   "{name='boundary_scanner_locale', description='Locale for boundary scanning', type=[keyword]}" +
   "{name='boundary_chars', description='Characters used as boundary markers', type=[keyword]}" +
   "{name='boundary_max_scan', description='Maximum characters scanned for a boundary', type=[integer]}" +
-  "{name='order', description='Order of fragments', type=[keyword]}" +
+  "{name='order', values=[none, score], description='Order of fragments', type=[keyword]}" +
   "{name='no_match_size', description='Characters to return when there is no match', type=[integer]}" +
   "{name='max_analyzed_offset', description='Maximum character offset to analyze', type=[integer]}" +
   "{name='phrase_limit', description='Maximum number of phrases to examine', type=[integer]}";
 
 /** Field types accepted by ES for the HIGHLIGHT ON list. */
 const ALLOWED_HIGHLIGHT_FIELD_TYPES = ['text', 'keyword', 'param', 'unknown'];
+
+/** Full-text functions usable as a HIGHLIGHT query, mirroring HighlightQueryBuilders. */
+const FULL_TEXT_QUERY_FUNCTIONS = ['match', 'match_phrase', 'qstr', 'kql', ':'];
+
+/** Boolean operators that may combine full-text queries. */
+const BOOLEAN_QUERY_OPERATORS = ['and', 'or', 'not'];
+
+/**
+ * Returns the first node that Elasticsearch would reject as a HIGHLIGHT query, or undefined when
+ * the whole expression is valid. Valid shapes are a string literal, a full-text function
+ * (including the `:` operator), and AND/OR/NOT combinations of those — mirroring
+ * `HighlightQueryBuilders.verifyQueryStructure`.
+ */
+const findInvalidQueryNode = (expression: ESQLAstItem): ESQLAstItem | undefined => {
+  if (Array.isArray(expression)) {
+    return expression.map(findInvalidQueryNode).find(Boolean);
+  }
+
+  if (isStringLiteral(expression)) {
+    return undefined;
+  }
+
+  if (!isFunctionExpression(expression)) {
+    return expression;
+  }
+
+  const functionName = expression.name.toLowerCase();
+
+  if (BOOLEAN_QUERY_OPERATORS.includes(functionName)) {
+    return expression.args.map(findInvalidQueryNode).find(Boolean);
+  }
+
+  return FULL_TEXT_QUERY_FUNCTIONS.includes(functionName) ? undefined : expression;
+};
 
 export const validate = (
   command: ESQLAstAllCommands,
@@ -47,7 +86,53 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   const highlightCommand = command as ESQLAstHighlightCommand;
-  const { highlightFields, namedParameters } = highlightCommand;
+  const { highlightFields, namedParameters, queryExpression } = highlightCommand;
+
+  // ES rejects any modifier keyword other than `prefix`, so the assignment is only a valid
+  // prefix clause when the left-hand identifier matches.
+  const prefixKeyword = getPrefixKeyword(highlightCommand);
+
+  if (
+    prefixKeyword !== undefined &&
+    prefixKeyword.name.toLowerCase() !== HIGHLIGHT_PREFIX_KEYWORD
+  ) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'highlightInvalidPrefixModifier',
+        values: { keyword: prefixKeyword.name },
+        locations: prefixKeyword.location,
+      })
+    );
+  }
+
+  const invalidQueryNode = queryExpression ? findInvalidQueryNode(queryExpression) : undefined;
+
+  // A disallowed *function* is already reported by the shared location check
+  // ("Function X not allowed in HIGHLIGHT"), so only report the shapes it cannot see.
+  if (
+    invalidQueryNode !== undefined &&
+    !Array.isArray(invalidQueryNode) &&
+    !isFunctionExpression(invalidQueryNode)
+  ) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'highlightInvalidQueryExpression',
+        values: { expression: invalidQueryNode.text },
+        locations: invalidQueryNode.location,
+      })
+    );
+  }
+
+  // ON is mandatory in the grammar; the parser leaves highlightFields undefined when it is absent.
+  if (highlightFields === undefined) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'highlightMissingOnClause',
+        values: {},
+        locations: command.location,
+      })
+    );
+  }
 
   // Validate ON field types: each field must be text or keyword.
   for (const field of highlightFields ?? []) {
@@ -58,7 +143,7 @@ export const validate = (
         getMessageFromId({
           messageId: 'highlightOnFieldWrongType',
           values: { fieldName: field.name, type: fieldType },
-          locations: getItemLocation(field, command.location),
+          locations: field.location,
         })
       );
     }

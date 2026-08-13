@@ -507,6 +507,19 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'invalidMapParameterValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValue', {
+          defaultMessage:
+            'Invalid value "{value}" for parameter "{paramName}". Expected one of: {allowedValues}.',
+          values: {
+            paramName: out.paramName,
+            value: out.value,
+            allowedValues: out.allowedValues,
+          },
+        }),
+        type: 'error',
+      };
     case 'highlightOnFieldWrongType':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.highlightOnFieldWrongType', {
@@ -514,6 +527,36 @@ Expected one of:
             '[HIGHLIGHT] ON field [{fieldName}] must be of type text or keyword. Found {type}',
           values: { fieldName: out.fieldName, type: out.type },
         }),
+        type: 'error',
+      };
+    case 'highlightMissingOnClause':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightMissingOnClause', {
+          defaultMessage: '[HIGHLIGHT] Missing ON clause. Specify the fields to highlight.',
+        }),
+        type: 'error',
+      };
+    case 'highlightInvalidPrefixModifier':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.highlightInvalidPrefixModifier',
+          {
+            defaultMessage: '[HIGHLIGHT] Invalid modifier [{keyword}], expected [prefix]',
+            values: { keyword: out.keyword },
+          }
+        ),
+        type: 'error',
+      };
+    case 'highlightInvalidQueryExpression':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.highlightInvalidQueryExpression',
+          {
+            defaultMessage:
+              '[HIGHLIGHT] Query must be a full-text function (MATCH, MATCH_PHRASE, QSTR, KQL), a string literal, or a boolean combination of them. Found [{expression}]',
+            values: { expression: out.expression },
+          }
+        ),
         type: 'error',
       };
     case 'tsdbIncompatibleFunction':

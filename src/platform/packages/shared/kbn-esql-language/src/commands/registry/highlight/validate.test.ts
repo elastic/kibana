@@ -48,12 +48,74 @@ describe('HIGHLIGHT Validation', () => {
       ]);
     });
 
-    it('does not report an error for a text field', () => {
-      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON textField', []);
-    });
-
     it('does not report an error for a keyword field', () => {
       highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON keywordField', []);
+    });
+
+    it('reports an error for every offending field in the list', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON integerField, doubleField', [
+        '[HIGHLIGHT] ON field [integerField] must be of type text or keyword. Found integer',
+        '[HIGHLIGHT] ON field [doubleField] must be of type text or keyword. Found double',
+      ]);
+    });
+
+    it('reports a missing ON clause', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring"', [
+        '[HIGHLIGHT] Missing ON clause. Specify the fields to highlight.',
+      ]);
+    });
+  });
+
+  describe('prefix modifier validation', () => {
+    it('reports a modifier keyword other than prefix', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT foo = "hl_" "ring" ON textField', [
+        '[HIGHLIGHT] Invalid modifier [foo], expected [prefix]',
+      ]);
+    });
+
+    it('accepts the prefix keyword regardless of case', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT PREFIX = "hl_" "ring" ON textField', []);
+    });
+  });
+
+  describe('query expression validation', () => {
+    it.each([
+      'FROM index | HIGHLIGHT MATCH(textField, "ring") ON textField',
+      'FROM index | HIGHLIGHT MATCH_PHRASE(textField, "ring") ON textField',
+      'FROM index | HIGHLIGHT QSTR("ring") ON textField',
+      'FROM index | HIGHLIGHT KQL("a:b") ON textField',
+      'FROM index | HIGHLIGHT textField : "ring" ON textField',
+      'FROM index | HIGHLIGHT MATCH(textField, "a") AND "b" ON textField',
+      'FROM index | HIGHLIGHT KQL("a:b") OR QSTR("c") ON textField',
+      'FROM index | HIGHLIGHT NOT "ring" ON textField',
+    ])('accepts %s', (query) => {
+      highlightExpectErrors(query, []);
+    });
+
+    it('reports a bare column used as the query', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT textField ON textField', [
+        '[HIGHLIGHT] Query must be a full-text function (MATCH, MATCH_PHRASE, QSTR, KQL), a string literal, or a boolean combination of them. Found [textField]',
+      ]);
+    });
+
+    it('reports a non-string literal used as the query', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT 5 ON textField', [
+        '[HIGHLIGHT] Query must be a full-text function (MATCH, MATCH_PHRASE, QSTR, KQL), a string literal, or a boolean combination of them. Found [5]',
+      ]);
+    });
+
+    it('reports an invalid operand nested inside a boolean combination', () => {
+      // The shared operator check also reports AND's operand types; both messages are correct.
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" AND integerField ON textField', [
+        '[HIGHLIGHT] Query must be a full-text function (MATCH, MATCH_PHRASE, QSTR, KQL), a string literal, or a boolean combination of them. Found [integerField]',
+        'Invalid input types for AND.\n\nReceived (keyword, integer).\n\nExpected one of:\n  - (boolean, boolean)',
+      ]);
+    });
+
+    it('defers to the shared location check for a disallowed function', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT LENGTH(textField) ON textField', [
+        'Function LENGTH not allowed in HIGHLIGHT',
+      ]);
     });
   });
 
@@ -77,9 +139,27 @@ describe('HIGHLIGHT Validation', () => {
       );
     });
 
-    it('does not report errors for a valid query with multiple WITH options', () => {
+    it.each([
+      ['encoder', 'default, html'],
+      ['order', 'none, score'],
+      ['boundary_scanner', 'sentence, word'],
+    ])('reports a value outside the allowed set for %s', (option, allowed) => {
       highlightExpectErrors(
-        'FROM index | HIGHLIGHT "ring" ON textField WITH { "encoder": "html" }',
+        `FROM index | HIGHLIGHT "ring" ON textField WITH { "${option}": "bogus" }`,
+        [`Invalid value "bogus" for parameter "${option}". Expected one of: ${allowed}.`]
+      );
+    });
+
+    it('accepts an enum value in a different case', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "order": "SCORE" }',
+        []
+      );
+    });
+
+    it('does not constrain options that have no allowed set', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "analyzer": "my_custom_analyzer" }',
         []
       );
     });

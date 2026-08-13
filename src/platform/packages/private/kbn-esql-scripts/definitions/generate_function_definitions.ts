@@ -73,7 +73,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
       ? defaultScalarFunctionLocations
       : defaultAggFunctionLocations;
 
-  // MATCH and QSTR have limited support for WHERE, STATS_WHERE, and JOIN commands only
+  // Full-text search functions are only supported in a fixed set of locations
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
     locationsAvailable = [
       Location.WHERE,

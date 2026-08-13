@@ -8,11 +8,12 @@
  */
 import type {
   ESQLAstHighlightCommand,
-  ESQLAstItem,
-  ESQLCommand,
+  ESQLColumn,
   ESQLCommandOption,
+  ESQLFunction,
+  ESQLIdentifier,
 } from '@elastic/esql/types';
-import { isMap, isOptionNode } from '@elastic/esql';
+import { isColumn, isFunctionExpression, isIdentifier, isMap, isOptionNode } from '@elastic/esql';
 
 /**
  * The keyword accepted by the optional `prefix = "..."` modifier. Elasticsearch rejects
@@ -109,6 +110,28 @@ export function getPosition(
 }
 
 /**
+ * The identifier on the left of the `prefix = "..."` assignment, when the command has one.
+ * The parser accepts any identifier there, so callers must check it against
+ * {@link HIGHLIGHT_PREFIX_KEYWORD} — Elasticsearch rejects anything else.
+ */
+export const getPrefixKeyword = (
+  command: ESQLAstHighlightCommand
+): ESQLColumn | ESQLIdentifier | undefined => {
+  const assignment = command.args.find(
+    (arg): arg is ESQLFunction =>
+      !Array.isArray(arg) && isFunctionExpression(arg) && arg.name === '='
+  );
+
+  if (!assignment) {
+    return undefined;
+  }
+
+  const [left] = assignment.args;
+
+  return !Array.isArray(left) && (isColumn(left) || isIdentifier(left)) ? left : undefined;
+};
+
+/**
  * Whether the `prefix = "..."` modifier can still be typed at the cursor: it must come first
  * and only once.
  */
@@ -138,23 +161,4 @@ export const getHighlightColumnNames = (command: ESQLAstHighlightCommand): strin
   const prefix = getHighlightPrefix(command);
 
   return (command.highlightFields ?? []).map(({ name }) => `${prefix}${name}`);
-};
-
-/** Returns the location of an AST item for use in error messages. */
-export const getItemLocation = (
-  item: ESQLAstItem | undefined,
-  fallback: ESQLCommand['location']
-) => {
-  if (!item) {
-    return fallback;
-  }
-
-  if (Array.isArray(item)) {
-    const firstNode = item[0];
-    return firstNode && typeof firstNode === 'object' && 'location' in firstNode
-      ? firstNode.location
-      : fallback;
-  }
-
-  return item.location;
 };
