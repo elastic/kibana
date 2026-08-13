@@ -206,33 +206,65 @@ export class SpacesPage {
     return this.page.testSubj.locator('cpsDefaultScopePanel');
   }
 
-  allProjectsRoutingButtonLocator() {
-    return this.page.testSubj.locator('cpsProjectRoutingButton-all');
+  /** The picker's project list (one row per origin/linked project, each with its own include/exclude switch). */
+  projectPickerListLocator() {
+    return this.page.testSubj.locator('projectPickerList');
   }
 
-  originProjectRoutingButtonLocator() {
-    return this.page.testSubj.locator('cpsProjectRoutingButton-origin');
+  projectPickerListItemLocator() {
+    return this.page.testSubj.locator('projectPickerListItem');
   }
 
-  /** Waits until the CPS panel and project-routing button group have loaded. */
+  /** The row for the space's own (origin) project — identified by its "This Project" badge, not by id. */
+  originProjectListItemLocator() {
+    return this.projectPickerListItemLocator().filter({
+      has: this.page.testSubj.locator('projectPickerListItemOriginBadge'),
+    });
+  }
+
+  /** The origin project row's include/exclude switch. */
+  originProjectSwitchLocator() {
+    return this.originProjectListItemLocator().locator(
+      '[data-test-subj^="projectPickerListItemSwitch-"]'
+    );
+  }
+
+  originProjectContextMenuButtonLocator() {
+    return this.originProjectListItemLocator().locator(
+      '[data-test-subj^="projectPickerListItemContextMenu-"]'
+    );
+  }
+
+  /** Footer action that includes every currently visible project; disabled once all are already included. */
+  includeAllVisibleButtonLocator() {
+    return this.page.testSubj.locator('projectPickerIncludeAllVisibleBtn');
+  }
+
+  /** Waits until the CPS panel and its project list have loaded. */
   async waitForProjectRoutingPicker() {
     await this.cpsDefaultScopePanelLocator().waitFor({ state: 'visible' });
-    await this.allProjectsRoutingButtonLocator().waitFor({ state: 'visible' });
+    await this.projectPickerListLocator().waitFor({ state: 'visible' });
   }
 
+  /** Includes every visible project (the "all projects" routing outcome). No-op if already all-included. */
   async selectAllProjectsRouting() {
-    await this.allProjectsRoutingButtonLocator().click();
+    const includeAllButton = this.includeAllVisibleButtonLocator();
+    if (await includeAllButton.isEnabled()) {
+      await includeAllButton.click();
+    }
   }
 
+  /** Excludes every project except the origin project (the "origin-only" routing outcome). */
   async selectOriginProjectRouting() {
-    await this.originProjectRoutingButtonLocator().click();
+    await this.originProjectContextMenuButtonLocator().click();
+    await this.page.testSubj.locator('projectPickerIncludeOnlyThisProjectMenuItem').click();
   }
 
   /**
    * CPS chrome nav project-picker button (visible when CPS is enabled and projects are linked).
    */
   cpsProjectPickerButtonLocator() {
-    return this.page.testSubj.locator('project-picker-button');
+    return this.page.testSubj.locator('cps-project-picker-button');
   }
 
   async setSpaceName(name: string) {
