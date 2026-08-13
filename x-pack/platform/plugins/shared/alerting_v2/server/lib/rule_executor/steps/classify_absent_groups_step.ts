@@ -17,6 +17,7 @@ import {
   resolveAlertEventType,
 } from '../build_alert_events';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { detectDataPresence } from '../detect_data_presence';
 import { executeRecoveryQuery } from '../execute_recovery_query';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
@@ -111,6 +112,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
         if (truncatedEventsCount > 0) {
           this.logger.warn({
             message: `[${this.name}] Truncated the data payload of ${truncatedEventsCount} recovery event(s) for rule ${lastState.input.ruleId}: rows exceeded the configured maxDocSize of ${this.maxDocSizeBytes} bytes`,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_ALERT_DATA_PAYLOAD_TRUNCATED,
           });
         }
 

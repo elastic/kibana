@@ -16,6 +16,7 @@ import {
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
 
 const DEFAULT_MAX_DOC_SIZE = 5000;
@@ -171,7 +172,12 @@ describe('CreateAlertEventsStep', () => {
 
       expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('maxDocSize of 1024 bytes')
+        expect.stringContaining('maxDocSize of 1024 bytes'),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_ALERT_DATA_PAYLOAD_TRUNCATED,
+          }),
+        })
       );
     });
 

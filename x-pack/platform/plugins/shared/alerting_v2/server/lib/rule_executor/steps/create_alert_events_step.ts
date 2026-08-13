@@ -20,6 +20,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import { guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { PluginConfig } from '../../../config';
 
 @injectable()
@@ -66,6 +67,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         truncationWarningLogged = true;
         step.logger.warn({
           message: `[${step.name}] Truncated the data payload of ${truncatedEventsCount} alert event(s) for rule ${state.input.ruleId}: rows exceeded the configured maxDocSize of ${step.maxDocSizeBytes} bytes`,
+          code: ALERTING_LOG_CODES.RULE_EXECUTION_ALERT_DATA_PAYLOAD_TRUNCATED,
         });
       }
 

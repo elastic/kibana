@@ -372,6 +372,12 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /**
+   * One or more alert event `data` payloads exceeded the configured
+   * `xpack.alerting_v2.rules.run.alerts.maxDocSize` limit and were truncated
+   * to the rule's grouping fields only.
+   */
+  RULE_EXECUTION_ALERT_DATA_PAYLOAD_TRUNCATED: 'RULE_EXECUTION_ALERT_DATA_PAYLOAD_TRUNCATED',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
