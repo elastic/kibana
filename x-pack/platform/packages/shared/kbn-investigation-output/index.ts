@@ -14,5 +14,8 @@ export type { InvestigationOutputProps, InvestigationStatus } from './src/types'
 export { EvidenceList, type EvidenceListProps } from './src/evidence_list';
 export {
   buildEvidenceDiscoverParams,
+  buildCodeReferenceUrl,
+  formatCodeReferenceDetail,
+  formatCodeReferenceLabel,
   type InvestigationDiscoverParams,
 } from './src/evidence_links';
