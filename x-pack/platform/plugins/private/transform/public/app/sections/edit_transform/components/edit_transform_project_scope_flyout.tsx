@@ -40,9 +40,10 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   const cpsManager = cps?.cpsManager;
   const { value } = useFormField('projectRouting');
   const { setFormField } = useEditTransformFlyoutActions();
-  const initialProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as ProjectRouting;
+  const currentProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as ProjectRouting;
   const [stagedProjectRouting, setStagedProjectRouting] =
-    useState<ProjectRouting>(initialProjectRouting);
+    useState<ProjectRouting>(currentProjectRouting);
+  const [pickerResetCounter, setPickerResetCounter] = useState(0);
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) =>
       cpsManager?.fetchProjects(routing) ?? Promise.resolve({ origin: null, linkedProjects: [] }),
@@ -64,12 +65,17 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
     onClose();
   }, [onClose, setFormField, stagedProjectRouting]);
 
+  const discardProjectScopeChanges = useCallback(() => {
+    setStagedProjectRouting(currentProjectRouting);
+    setPickerResetCounter((counter) => counter + 1);
+  }, [currentProjectRouting]);
+
   return (
     <ProjectScopePickerFlyoutContent
       applyButtonLabel={i18n.translate(
         'xpack.transform.transformList.editFlyoutProjectScopeApplyButtonText',
         {
-          defaultMessage: 'Apply project scope',
+          defaultMessage: 'Apply changes',
         }
       )}
       availableProjects={availableProjects}
@@ -82,9 +88,10 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
       )}
       isApplyDisabled={Boolean(error) || isLoading}
       isReadOnly={Boolean(error) || isLoading}
+      key={pickerResetCounter}
       onApplyChanges={applyProjectScope}
       onClose={onClose}
-      onDiscardChanges={onClose}
+      onDiscardChanges={discardProjectScopeChanges}
       onProjectRoutingChange={setStagedProjectRouting}
       originProjectId={originProject?._id}
       projectRouting={stagedProjectRouting}
