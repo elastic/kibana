@@ -207,7 +207,6 @@ export const categorizeLogsService = setup({
       },
     },
 
-    // Not `type: 'final'` — keeps the actor alive to receive the `retry` event.
     cancelled: {
       on: {
         retry: { target: 'countingDocuments' },
