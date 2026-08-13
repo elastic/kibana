@@ -19,8 +19,35 @@ import { CustomFieldTypes } from '../types/domain/custom_field/v1';
 
 export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
 
+/**
+ * Normalizes a field definition name for case-insensitive lookup and uniqueness.
+ *
+ * Matches the field-definitions API, which compares names with `toLowerCase()` — not
+ * `toLocaleLowerCase()`, which `ensureUniqueTemplateName` uses for template titles.
+ * `trim()` is stricter than the API uniqueness check. Callers use the result to skip
+ * duplicate work or to gate deletes of in-use definitions, never to reject a
+ * create/update write.
+ */
+export const normalizeFieldDefinitionName = (name: string): string => name.trim().toLowerCase();
+
 export const getFieldCamelKey = (name: string, type: string): string =>
   camelCase(getFieldSnakeKey(name, type));
+
+/**
+ * Collects the normalized (case-insensitive) `$ref` names from a template's fields array.
+ *
+ * Used to exclude a global field from the global-fields section when the active template
+ * already renders it via `$ref` — normalized so a ref differing only in case from the field
+ * definition's name (e.g. after a case-only rename) still excludes it, matching the
+ * case-insensitive resolution in {@link resolveTemplateFields} / `useResolvedFields`.
+ */
+export const collectNormalizedRefNames = (
+  fields: readonly Field[] | undefined
+): ReadonlySet<string> =>
+  (fields ?? []).reduce((refNames, field) => {
+    if (isRefField(field)) refNames.add(normalizeFieldDefinitionName(field.$ref));
+    return refNames;
+  }, new Set<string>());
 
 /**
  * Parses an array of field definitions into resolved inline fields, skipping any
@@ -167,9 +194,10 @@ export const applyRefFieldOverride = (
 /**
  * Resolves a template `fields` array into a flat list of inline fields by:
  * - passing inline fields through as-is,
- * - looking up `$ref` fields by name in `libraryDefs`, parsing their YAML definition,
- *   and applying the ref entry's `name` alias and `metadata.default` override (see
- *   {@link applyRefFieldOverride}).
+ * - looking up `$ref` fields by name in `libraryDefs` (case-insensitive, matching the
+ *   uniqueness semantics the field-definitions API enforces on names), parsing their
+ *   YAML definition, and applying the ref entry's `name` alias and `metadata.default`
+ *   override (see {@link applyRefFieldOverride}).
  *
  * Fields that cannot be resolved or that produce another ref are silently dropped.
  */
@@ -180,7 +208,8 @@ export const resolveTemplateFields = (
   definitionFields.flatMap((field): InlineField[] => {
     if (isInlineField(field)) return [field];
     const refField = field as RefField;
-    const fd = libraryDefs.find((d) => d.name === refField.$ref);
+    const normalizedRef = normalizeFieldDefinitionName(refField.$ref);
+    const fd = libraryDefs.find((d) => normalizeFieldDefinitionName(d.name) === normalizedRef);
     if (!fd) return [];
     try {
       const parsed = parseYaml(fd.definition);
