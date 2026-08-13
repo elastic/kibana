@@ -17,8 +17,9 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
  * ES built-in roles grant read + view_index_metadata on all non-dot indices,
  * so no role changes are needed.
  *
- * Plugin operations must use `asCurrentUser`. `kibana_system` has no privileges
- * on non-dot user-data indices (see Kibana system-user security guidelines).
+ * Document and index operations use `asCurrentUser`. Template operations use
+ * `asInternalUser`, because end users must not need the cluster-wide
+ * `manage_index_templates` privilege.
  *
  * The schema is KI-envelope-shaped (type = 'memory') so a Phase-2 reindex is
  * a schema migration, not a redesign. All D5/D6/D11 fields are mapped from
@@ -191,13 +192,16 @@ export type MemoryStorage = StorageIndexAdapter<MemoryStorageSettings, MemoryDoc
 export const createMemoryStorage = ({
   logger,
   esClient,
+  indexManagementClient,
 }: {
   logger: Logger;
   esClient: ElasticsearchClient;
+  indexManagementClient: ElasticsearchClient;
 }): MemoryStorage => {
   return new StorageIndexAdapter<MemoryStorageSettings, MemoryDocument>(
     esClient,
     logger,
-    memoryStorageSettings
+    memoryStorageSettings,
+    { indexManagementClient }
   );
 };

@@ -51,8 +51,8 @@ export class AgentMemoryPlugin
 
   // All of these are set in start() before any request handler runs.
   /**
-   * Factory for request-scoped storage. `agent-memory` is a user data index,
-   * so each call must receive `asCurrentUser` — kibana_system cannot search it.
+   * Factory for request-scoped storage. Data operations use `asCurrentUser`;
+   * fixed index-template operations use the internal client.
    */
   private createStorage?: GetMemoryStorage;
   private historyClient?: DataStreamClient<typeof agentMemoryHistoryMappings>;
@@ -198,12 +198,13 @@ export class AgentMemoryPlugin
     this.elasticsearch = coreStart.elasticsearch;
     this.spacesStart = startDeps.spaces;
 
-    // Belief-store factory — callers pass asCurrentUser. kibana_system has no
-    // privileges on the non-dot `agent-memory` user-data index.
+    // Belief-store factory — callers pass asCurrentUser for data operations;
+    // the internal user manages only the plugin-owned index template.
     this.createStorage = (esClient) =>
       createMemoryStorage({
         logger: this.logger.get('storage'),
         esClient,
+        indexManagementClient: internalEsClient,
       });
 
     // History client — a thin wrapper; create once and reuse across requests.
