@@ -61,15 +61,12 @@ export const StepItem: React.FC<StepItemProps> = ({
   if (isBackgroundAgentCompleteStep(step)) {
     return <BackgroundAgentStep step={step} />;
   }
-  if (isSubagentRosterUpdatedStep(step)) {
-    // Roster updates exist for prompt injection (LLM-visible <active_subagents>
-    // notice in subsequent rounds). The user already sees sub-agent creations
-    // via the run_subagent tool call, so we don't surface roster steps in the
-    // thinking panel.
-    return null;
-  }
   if (isAskUserQuestionStep(step)) {
     return <AskUserQuestionStepEvent step={step} />;
+  }
+  if (isSubagentRosterUpdatedStep(step)) {
+    // Only user server-side, explicitly not rendering anything
+    return null;
   }
   return null;
 };

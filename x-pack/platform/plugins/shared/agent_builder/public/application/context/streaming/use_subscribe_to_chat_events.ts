@@ -20,7 +20,6 @@ import {
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
   isBackgroundAgentCompleteEvent,
-  isSubagentRosterUpdatedEvent,
   isTodosUpdatedEvent,
   ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
@@ -156,13 +155,6 @@ export const subscribeToChatEvents = ({
         step: {
           type: ConversationRoundStepType.backgroundAgentComplete,
           ...event.data.execution,
-        },
-      });
-    } else if (isSubagentRosterUpdatedEvent(event)) {
-      conversationActions.addSubagentRosterUpdatedStep({
-        step: {
-          type: ConversationRoundStepType.subagentRosterUpdated,
-          roster: event.data.roster,
         },
       });
     } else if (isTodosUpdatedEvent(event)) {

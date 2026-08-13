@@ -12,28 +12,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type {
-  AgentExecutionMode,
-  InteractivityConfig,
-  SubagentRosterEntry,
-} from '@kbn/agent-builder-common';
+import type { AgentExecutionMode, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
-
-/**
- * Narrow accessor exposed to tools for mutating the round-local persistent
- * sub-agent tracker. Reading full rosters is done by the graph layer, not by
- * individual tool handlers.
- */
-export interface SubagentTrackerRef {
-  /** Look up the child conversation id for a given persistent sub-agent name. */
-  get(name: string): string | undefined;
-  /** Register a new persistent sub-agent under the given name. */
-  register(entry: SubagentRosterEntry): void;
-  /** Drop an entry — used for stale-recovery paths. */
-  clear(name: string): void;
-  /** Full current roster snapshot; used by send_message for error hints. */
-  snapshot(): Record<string, string>;
-}
 import type { ExperimentalFeatures } from '../agents/provider';
 import type {
   ToolEventEmitter,
@@ -190,8 +170,7 @@ export interface ToolHandlerContext {
    */
   executionMode?: AgentExecutionMode;
   /**
-   * Canonical interactivity config for this run. When `enabled: false`,
-   * HITL prompts / `ask_user_question` are gated off (auto-declined or hidden).
+   * Canonical interactivity config for this run.
    */
   interactivity: InteractivityConfig;
   /**

@@ -156,8 +156,7 @@ class ConversationClientImpl implements ConversationClient {
           filter: [
             createSpaceDslFilter(this.space),
             buildReadAccessFilter({ user: this.user, agentIds }),
-            // Hide sub-agent conversations from the nav list — they are only
-            // reachable via the parent's tool-call flyout / direct URL.
+            // Hide sub-agent conversations from the nav list - hardcoded until we need to do better
             { bool: { must_not: [{ exists: { field: 'parent_conversation_id' } }] } },
           ],
         },
