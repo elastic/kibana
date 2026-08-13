@@ -14,7 +14,7 @@ import {
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
 } from '../../tools/siem_migrations';
 import {
-  AUTOMATIC_MIGRATION_CAPABILITIES_BLOCK,
+  AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
   NAME_NEVER_ID_BLOCK,
 } from './shared/content';
 
@@ -35,7 +35,7 @@ Use this skill when the user wants an **overview of Automatic Migrations** — t
 translates third-party (Sentinel, QRadar, Splunk) rules into Elastic detection rules. This skill
 is read-only: it inspects and summarizes, it does not mutate.
 
-${AUTOMATIC_MIGRATION_CAPABILITIES_BLOCK}
+${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
 
 ${NAME_NEVER_ID_BLOCK}
 

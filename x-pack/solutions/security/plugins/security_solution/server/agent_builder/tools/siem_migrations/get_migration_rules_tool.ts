@@ -25,7 +25,12 @@ import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
 // dropped — a deliberate divergence called out in the plan).
 const schema = z.object({
   migration_id: NonEmptyString.describe('The id of the rule migration whose rules to retrieve.'),
-  page: z.coerce.number().int().min(0).default(0).describe('Zero-based page number (0 = first page).'),
+  page: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .default(0)
+    .describe('Zero-based page number (0 = first page).'),
   per_page: z.coerce
     .number()
     .int()
@@ -60,9 +65,9 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   },
   elastic_rule: rule.elastic_rule
     ? {
-        title: rule.elastic_rule.title,
-        prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-      }
+      title: rule.elastic_rule.title,
+      prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+    }
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,

@@ -21,10 +21,10 @@
  * agent can route the user to the right sibling (and give an overview when asked "what can you
  * do"). This is the single source of truth — do not duplicate the list per skill.
  */
-export const AUTOMATIC_MIGRATION_CAPABILITIES_BLOCK = `
-## Automatic Migration Capabilities (sibling skills)
+export const AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK = `
+## Automatic Rule Migration Capabilities (sibling skills)
 
-Automatic Migration is split across sibling skills. This skill handles one workflow; the others
+Automatic Rule Migration is split across sibling skills. This skill handles one workflow; the others
 are available when the user's request shifts. Cross-references are advisory — naming a sibling
 does not auto-load its tools, the user must move to that workflow.
 
@@ -50,6 +50,12 @@ export const NAME_NEVER_ID_BLOCK = `
 
 The user knows migrations by **name**, not by id. You own the name→id resolution.
 
+**Always present migrations to the user by name.** In every response — tables, lists, prose,
+JSON examples — use the migration **name**, never the migration **id**. The only exceptions:
+(a) the user explicitly asks for the id, or (b) same-name disambiguation reached the last-resort
+step below. Never show migration ids in table headers, column values, or example payloads; use
+the name instead and resolve it to the id internally when calling tools.
+
 1. Resolve a user-provided migration **name** to its **migration id** by calling
    \`security.siem_migration.get_all_rule_migration_stats\` and matching on the \`name\` field.
 2. If two migrations share the same name, disambiguate using the hierarchy in
@@ -71,7 +77,7 @@ The user knows migrations by **name**, not by id. You own the name→id resoluti
  * Collision-handling hierarchy for same-name migrations. Vendor-first, then status, then
  * creation date, then full id as last resort.
  */
-export const TYPE_DISAMBIGUATION_BLOCK = `
+export const MIGRATION_NAME_DISAMBIGUATION_BLOCK = `
 ## Disambiguating Same-Name Migrations
 
 When two or more migrations share the same name, disambiguate in this order (stop at the first
@@ -83,4 +89,13 @@ attribute that separates them):
 4. **Full migration id** — last resort. Present the still-tied migrations as a numbered list
    (number — name — vendor — status — created date — full id) and ask the user to pick by number.
    Do not ask the user to type the id.
+`;
+
+export const MIGRATION_TYPE_DISAMBIGUATION_BLOCK = `
+Automatic Migrations are of 2 types:
+- **Rule Migration** — translates third-party (Sentinel, QRadar, Splunk) rules into Elastic detection rules. This is the most common type and the one that uses the Automatic Migration sibling skills.
+- **Dashboard Migration** — translates third-party dashboards into Elastic dashboards. This type is not supported today.
+
+This skill only supports **Rule Migrations**.  IF user has not specified the migration type, ask them to clarify if they are talking about Dashboard or Rule Migration.  If they say Dashboard, tell them that this skill only supports Rule Migrations and that Dashboard Migrations are not supported today.  If they say Rule Migration, continue with the workflow.
+
 `;

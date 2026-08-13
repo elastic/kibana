@@ -82,7 +82,11 @@ export const registerSiemMigrationTools = (
   agentBuilder.tools.register({ ...getRuleMigration, availability });
 
   const startRuleMigration = startRuleMigrationTool(core, logger);
-  agentBuilder.tools.register({ ...startRuleMigration, availability });
+  agentBuilder.tools.register({
+    ...startRuleMigration,
+    availability,
+    confirmation: { askUser: 'always' },
+  });
 
   const getAllRuleMigrationStats = getAllRuleMigrationStatsTool(core, logger);
   agentBuilder.tools.register({ ...getAllRuleMigrationStats, availability });

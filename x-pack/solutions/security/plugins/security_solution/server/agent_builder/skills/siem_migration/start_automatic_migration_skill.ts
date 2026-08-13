@@ -16,9 +16,10 @@ import {
   SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
 } from '../../tools/siem_migrations';
 import {
-  AUTOMATIC_MIGRATION_CAPABILITIES_BLOCK,
+  AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
   NAME_NEVER_ID_BLOCK,
-  TYPE_DISAMBIGUATION_BLOCK,
+  MIGRATION_NAME_DISAMBIGUATION_BLOCK,
+  MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
 } from './shared/content';
 
 export const startAutomaticMigrationSkill = defineSkillType({
@@ -28,21 +29,20 @@ export const startAutomaticMigrationSkill = defineSkillType({
   description:
     'Start, reprocess, or resume an Automatic Rule Migration translation run. Resolves the AI ' +
     'connector, confirms the mutating action with the user, and picks the right request body ' +
-    '(START vs REPROCESS vs RESUME) from the rule migration state. Mutating — always confirm ' +
-    'first. (Automatic Migration also covers dashboards; this skill handles rule migrations only.)',
+    '(START vs REPROCESS vs RESUME) from the rule migration state.',
   content: `
-# Start / Reprocess / Resume an Automatic Migration
+# Start / Reprocess / Resume an Automatic Rule Migration
 
-Use this skill when the user wants to **run** an Automatic Migration translation — the feature
-that translates third-party (Sentinel, QRadar, Splunk) rules into Elastic detection rules. This
-skill is **mutating**: it consumes AI connector credits and changes migration state. Always
-confirm with the user before calling the start tool.
+## When to use this skill
 
-${AUTOMATIC_MIGRATION_CAPABILITIES_BLOCK}
+- When user wants to **start**, **reprocess**, or **resume** an Automatic Rule Migration translation run.
+- ${MIGRATION_TYPE_DISAMBIGUATION_BLOCK}
+
+${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
 
 ${NAME_NEVER_ID_BLOCK}
 
-${TYPE_DISAMBIGUATION_BLOCK}
+${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ## Available Tools
 
@@ -73,13 +73,13 @@ ${TYPE_DISAMBIGUATION_BLOCK}
 
 ## START vs REPROCESS vs RESUME Decision Matrix
 
-Read \`status\` from \`get_rule_migration_stats\` and the translation counts from
+If the \`status\` of the migration from \`get_rule_migration_stats\` and the translation counts from
 \`get_rule_migration_translation_stats\`. Both are single-source — do not cross-reference counts
 between them.
 
 | Task status | items.pending | Translation counts | Action | Request body |
 |---|---|---|---|---|
-| \`ready\` | any | any | **START** (first run) | \`{ settings: { connector_id } }\` |
+| \`ready\` | any | any | **START** (first run) | \`{ settings: { connector_id, skip_prebuilt_rules_matching } }\` |
 | \`finished\` | 0 | \`rules.failed > 0\` | **REPROCESS failed** | \`{ retry: "failed" }\` |
 | \`finished\` | 0 | \`rules.success.result.partial > 0\` OR \`untranslatable > 0\` | **REPROCESS not_fully_translated** | \`{ retry: "not_fully_translated" }\` |
 | \`finished\` | 0 | \`rules.success.installable > 0\` | Route to **install-automatic-migration-rules** (do not start) | — |
@@ -88,35 +88,37 @@ between them.
 
 ### Notes on the matrix
 
-- **START** is the first execution of a \`ready\` migration. \`settings.connector_id\` is required.
-  Optionally pass \`settings.skip_prebuilt_rules_matching\` if the user asks to skip prebuilt matches.
-- **REPROCESS** re-runs a subset of rules. Pass \`retry: "failed"\` to retry only failed rules, or
-  \`retry: "not_fully_translated"\` to retry partial + untranslatable rules. Matching items are
-  reset to \`pending\` before the task starts. \`retry: "not_fully_translated"\` has a wider blast
-  radius than \`retry: "failed"\` — state which one you are using in the confirmation.
+#### START
+- It is the first execution of a \`ready\` migration. complete \`settings\`  object is required and values must be confirmed with user.
+- Ask user for both which connector they want to use and whether they want to skip prebuilt rules matching. No retry, no selection.
+
+#### REPROCESS ( Also called retry)
+- Connector ID and skip_prebuilt_rules_matching must be asked from the user for REPROCESS.
+- re-runs a subset of rules. Pass \`retry: "failed"\` ONLY to retry only failed rules, or
+  \`retry: "not_fully_translated"\` to retry partially Translated rules. Both settings must be confirmed with user. No selection.
 - **REPROCESS a specific subset**: if the user names specific rules to re-run, resolve their
   **titles** to **rule item ids** via \`get_migration_rules\` and pass \`selection: { ids }\`. A
   \`selection\` WITHOUT \`retry: "selected"\` is a no-op — always pair \`selection\` with
   \`retry: "selected"\`. Do not set \`connector_id\` on a reprocess unless the user explicitly asks
   to change it.
+
+#### RESUME
 - **RESUME** continues a stopped/interrupted run that still has pending items. It uses the SAME
-  body as START (\`{ settings: { connector_id } }\`, no \`retry\`, no \`selection\`). Confirm the
-  connector with the user first.
-- **Install is a different skill**: a \`finished\` migration with \`installable > 0\` rules is ready
-  to install, not to start. Route the user to **install-automatic-migration-rules**.
+  body as START (\`{ settings: { connector_id } }\`, no \`retry\`, no \`selection\`). Confirmation of settings is not needed and MUST be same as Last execution values. But user should be informed that you are using values from the last run.
 
 ## Interpreting the start response
 
 \`start_rule_migration\` returns \`{ started: boolean }\`:
 - \`started: true\` — the task was started/resumed. Tell the user it runs asynchronously; they can
   re-check progress with the summarize skill.
-- \`started: false\` — the task did not start (e.g. already running, or no matching items for the
-  retry filter). Report this plainly and suggest re-inspecting the state.
+- \`started: false\` — the task did not start (e.g. already running(\`status\` field in migration stats), or no matching items for the retry filter). Report this plainly and suggest re-inspecting the state.
 
-## No Silent Mutations
+## Before Starting
 
-Never start, reprocess, or resume without explicit user confirmation AND a user-chosen connector
-id (for START/RESUME). If the user asks to install rules, delete a migration, or update an index
+- Don't ask a question again if you have already got the answer from the user in previous steps. For example, if you have already asked for connector_id and skip_prebuilt_rules_matching, don't ask again.
+- Show users complete all the parameters in form of table before running the tool in all cases i.e. START, REPROCESS and RESUME.
+
+If the user asks to install rules, delete a migration, or update an index
 pattern, route them to the relevant sibling skill — this skill only starts/reprocesses/resumes.
 `,
   getRegistryTools: () => [

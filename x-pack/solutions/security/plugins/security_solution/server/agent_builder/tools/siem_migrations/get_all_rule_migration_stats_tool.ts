@@ -36,10 +36,19 @@ export const getAllRuleMigrationStatsTool = (
     id: SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'List task-progress stats for every SIEM rule migration available to the current user. ' +
-      'Returns one entry per migration (id, status, and pending/processing/completed/failed rule ' +
-      'counts). Use this to get an overview of all migrations before drilling into a specific one ' +
-      'with get_rule_migration. Read-only.',
+      'List stats for every Automatic Rule Migration in the current space. ' +
+      'Returns { total: number, migrations: [{ id, name, status, items: { total, pending, ' +
+      'processing, completed, failed }, created_at, last_updated_at, vendor?, last_execution? }] }. ' +
+      '`status` is the status of the migration and can be one of ready|running|stopped|finished|interrupted and drives START vs RESUME vs ' +
+      'REPROCESS decisions. `vendor` is ' +
+      'splunk|qradar|microsoft-sentinel' +
+      '`last_execution`, when present, has `started_at`, `finished_at?`, `total_execution_time_ms`, ' +
+      '`connector_id`, `error?`, `is_stopped`, and `skip_prebuilt_rules_matching`. This can be used to answer questions that user may ask regarding the previous execution' +
+      ' Use `name` to resolve the user-supplied migration name to `id` (names can collide — disambiguate by vendor, ' +
+      'then status/created_at/counts; see the active skill for the full hierarchy). Only migrations ' +
+      'with >=1 eligible rule item are returned — a migration with zero or only non-eligible items ' +
+      'is invisible here; if the user names one that is missing, ask them to paste the migration id ' +
+      'from the UI and verify it via get_rule_migration. Read-only.',
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (_input, { request }) => {

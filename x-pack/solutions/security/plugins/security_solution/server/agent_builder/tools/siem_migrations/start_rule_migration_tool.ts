@@ -16,6 +16,7 @@ import {
   StartRuleMigrationRequestBody,
   type StartRuleMigrationResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { RuleMigrationRetryFilter } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { NonEmptyString } from '../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { createSiemMigrationClient, type SiemMigrationClient } from './self_client';
@@ -26,14 +27,27 @@ import { SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 // stays in lockstep with the API model (no schema drift). `.extend` on a lazySchema
 // materializes a real ZodObject. `selection.ids` is bounded to max 200 (repo rule: prevent
 // unbounded-input DoS) — a deliberate divergence from the unbounded API model.
+// `langsmith_options` is omitted — it is not agent-facing. `retry` and `selection` are
+// REPROCESS-only; their descriptions say so to keep the model from populating them on START.
 const schema = StartRuleMigrationRequestBody.extend({
   migration_id: NonEmptyString.describe('The id of the rule migration to start or reprocess.'),
+  retry: RuleMigrationRetryFilter.optional().describe(
+    'REPROCESS only — omit for START/RESUME. "failed" retries only failed rules; "not_fully_translated" retries partial + untranslatable rules; "selected" retries a specific subset (pair with selection.ids).'
+  ),
   selection: z
     .object({
-      ids: z.array(NonEmptyString).max(200),
+      ids: z
+        .array(NonEmptyString)
+        .max(200)
+        .describe(
+          'REPROCESS only, paired with retry: "selected". The rule item ids to reprocess. Omit for START/RESUME.'
+        ),
     })
-    .optional(),
-});
+    .optional()
+    .describe(
+      'REPROCESS only, paired with retry: "selected". Omit for START/RESUME. Resolve rule titles to ids via get_migration_rules.'
+    ),
+}).omit({ langsmith_options: true });
 
 export const startRuleMigrationTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -44,10 +58,11 @@ export const startRuleMigrationTool = (
   return {
     id: SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'Start or reprocess a SIEM rule migration. Mutating: confirms with the user and ' +
-      'resolves the connector via list_ai_connectors first. See the start-automatic-migration ' +
-      'skill for the START vs REPROCESS vs RESUME decision policy.',
+    description: `
+      Start or reprocess a SIEM rule migration. Mutating: confirms with the user and
+      resolves the connector via list_ai_connectors first. See the start-automatic-migration
+      skill for the START vs REPROCESS vs RESUME decision policy.
+`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {
