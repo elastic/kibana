@@ -14,6 +14,8 @@ import { getColor, getGradientColorScale } from '../color/color_handling';
 import { getOtherAssignmentColor } from './utils';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
+export const DEFAULT_NEUTRAL_OTHERS_PALETTE_INDEX = 2;
+
 export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
 
 export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
@@ -28,7 +30,17 @@ export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
  * The default color mapping used in Kibana, starts with the EUI color palette
  */
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
-  assignments: [],
+  assignments: [
+    {
+      rules: [{ type: 'raw', value: '__other__' }],
+      color: {
+        type: 'categorical',
+        paletteId: KbnPalette.Neutral,
+        colorIndex: DEFAULT_NEUTRAL_OTHERS_PALETTE_INDEX,
+      },
+      touched: false,
+    },
+  ],
   specialAssignments: [DEFAULT_OTHER_ASSIGNMENT],
   paletteId: KbnPalette.Default,
   colorMode: {
