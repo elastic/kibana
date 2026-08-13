@@ -8,10 +8,12 @@
  */
 
 import {
+  EuiButtonIcon,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -60,10 +62,22 @@ const useTitleStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
+    // A flex row so the trailing edit icon of an editable title sits on the text baseline
+    // without entering the title frame's grid (which must stay single-column for the
+    // sizer-driven width contract below).
     const titleWrapper = css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
       flex: 0 1 auto;
       min-inline-size: 0;
       max-width: 100%;
+    `;
+
+    // The heading becomes a flex item; without this a long title refuses to shrink and
+    // the truncation inside the frame never engages.
+    const titleHeading = css`
+      min-inline-size: 0;
     `;
 
     // The hover/edit affordance is drawn by two absolutely positioned overlays that bleed
@@ -246,6 +260,7 @@ const useTitleStyles = () => {
 
     return {
       titleWrapper,
+      titleHeading,
       titleFrame,
       editingTitleFrame,
       invalidTitleFrame,
@@ -413,7 +428,7 @@ export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' })
 
   return (
     <div css={[styles.titleWrapper, titleOffset ? styles.titleOffsetStyle : undefined]}>
-      <EuiTitle size={size}>
+      <EuiTitle size={size} css={styles.titleHeading}>
         <h1>
           {isEditing ? (
             <div css={[styles.editingTitleFrame, error ? styles.invalidTitleFrame : undefined]}>
@@ -502,9 +517,22 @@ export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' })
       </EuiTitle>
       {/* Kept outside the h1 so it never feeds the heading's name-from-content. */}
       {editable && !isEditing && (
-        <EuiScreenReaderOnly>
-          <span id={instructionsId}>{editInstructions}</span>
-        </EuiScreenReaderOnly>
+        <>
+          <EuiToolTip content={ariaLabel ?? defaultAriaLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="pencil"
+              color="text"
+              display="empty"
+              size="xs"
+              aria-label={ariaLabel ?? defaultAriaLabel}
+              data-test-subj={APP_HEADER_TEST_SUBJECTS.titleEditIcon}
+              onClick={() => startEditing(false)}
+            />
+          </EuiToolTip>
+          <EuiScreenReaderOnly>
+            <span id={instructionsId}>{editInstructions}</span>
+          </EuiScreenReaderOnly>
+        </>
       )}
     </div>
   );
