@@ -14,6 +14,7 @@ import {
   LOGGER_IDIOM_PATTERNS,
   SOURCERER_LINES_INDEX,
 } from './constants';
+import { discoverLoggingWrappers, escapeLuceneLiteral } from './discover_logging_wrappers';
 import type { LoggingCandidate } from './types';
 
 /** One matched source line returned by {@link codeGrep}. */
@@ -210,20 +211,33 @@ export interface DiscoverLoggingSitesOptions {
    * what the window fetch and the LLM classifier actually pay for.
    */
   maxCandidates?: number;
+  /**
+   * Whether to run the second-pass {@link discoverLoggingWrappers} discovery
+   * and grep its returned wrapper names for call sites (defaults to `true`).
+   * Set `false` to disable the pass without editing constants.
+   */
+  discoverWrappers?: boolean;
 }
 
 /**
  * Deterministically discovers candidate logging call sites for one service by
- * grepping the indexed source with the logger idiom patterns. Each candidate
- * carries a +/-1 line window, so multi-line logger calls keep their `logger.x(`
- * context. Deduplicated by `path:line`. The classifier
- * ({@link classifyLoggingSites}) then decides keep/drop + level, and kept
- * candidates become {@link LoggingChunk}s.
+ * grepping the indexed source with the logger idiom patterns, then a second
+ * pass ({@link discoverLoggingWrappers}) that finds the service's OWN logging-
+ * wrapper function names (a house `log_error(...)` / `serverLog(...)` helper
+ * that calls a real logger internally) and greps their call sites too. Idiom
+ * hits are the seed for the wrapper pass; wrapper call sites only ADD to the
+ * candidate set, never replace or filter idiom hits. Each candidate carries a
+ * +/-1 line window, so multi-line logger calls keep their `logger.x(` context.
+ * Deduplicated by `path:line`. The classifier ({@link classifyLoggingSites})
+ * then decides keep/drop + level, and kept candidates become
+ * {@link LoggingChunk}s.
  *
- * Idioms are the whole recall surface on purpose: a string-literal phrase
- * lexicon was measured to surface mostly non-log constructs (error values,
- * throws, span events) whose text never reaches the logs, so it was removed
- * rather than left for the classifier to filter.
+ * Idioms are the whole FIRST-pass recall surface on purpose: a string-literal
+ * phrase lexicon was measured to surface mostly non-log constructs (error
+ * values, throws, span events) whose text never reaches the logs, so it was
+ * removed rather than left for the classifier to filter. Project-local
+ * wrappers are no longer a documented recall boundary of idiom matching alone
+ * (see {@link LOGGER_IDIOM_PATTERNS}) -- the wrapper pass covers that tail.
  */
 export async function discoverLoggingSites({
   esClient,
@@ -234,6 +248,7 @@ export async function discoverLoggingSites({
   logger,
   perPatternLimit = 500,
   maxCandidates = 3000,
+  discoverWrappers = true,
 }: DiscoverLoggingSitesOptions): Promise<LoggingCandidate[]> {
   const { org, repo } = splitRepository(repository);
   const gitCommit = gitSha || '*';
@@ -293,6 +308,39 @@ export async function discoverLoggingSites({
     await runGrep(regex);
   }
 
+  // Second pass: find the service's own logging-wrapper function names from
+  // the idiom hits just found, then grep their call sites too. Strictly
+  // additive -- wrapper hits join the same `locations` set, subject to the
+  // same path exclusion and candidate ceiling as idiom hits.
+  let wrapperNames: string[] = [];
+  let wrapperLocations = 0;
+  if (discoverWrappers && locations.size < maxCandidates) {
+    wrapperNames = await discoverLoggingWrappers({
+      esClient,
+      gitOrg: org,
+      gitRepo: repo,
+      gitCommit,
+      filePath,
+      language,
+      logger,
+      idiomHitLocations: [...locations],
+      perPatternLimit,
+    });
+
+    for (const name of wrapperNames) {
+      if (locations.size >= maxCandidates) {
+        logger.warn(
+          `logging_sites: "${repository}" @ "${root}" reached the ${maxCandidates}-candidate ceiling; ` +
+            `remaining wrapper name(s) skipped.`
+        );
+        break;
+      }
+      const before = locations.size;
+      await runGrep(`.*${escapeLuceneLiteral(name)}[(].*`);
+      wrapperLocations += locations.size - before;
+    }
+  }
+
   // Fetch +/-1 windows for all hits (batched per file).
   const hitsByFile = new Map<string, Set<number>>();
   for (const location of locations) {
@@ -342,7 +390,10 @@ export async function discoverLoggingSites({
     `logging_sites: discovered ${candidates.length} candidate line(s) for "${repository}" @ "${root}"` +
       (excludedPaths > 0 ? ` (${excludedPaths} test/build path hit(s) excluded)` : '') +
       (nonEmitting > 0 ? ` (${nonEmitting} non-emitting line(s) dropped)` : '') +
-      (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '')
+      (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '') +
+      (wrapperNames.length > 0
+        ? ` (${wrapperNames.length} wrapper name(s), ${wrapperLocations} wrapper-sourced location(s))`
+        : '')
   );
   return candidates;
 }

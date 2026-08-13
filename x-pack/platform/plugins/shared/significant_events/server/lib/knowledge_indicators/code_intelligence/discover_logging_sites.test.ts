@@ -7,8 +7,22 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { isExcludedLoggingPath, isNonEmittingLine, LOGGER_IDIOM_PATTERNS } from './constants';
+import {
+  FUNCTION_DEFINITION_PATTERNS,
+  isExcludedLoggingPath,
+  isNonEmittingLine,
+  LOGGER_IDIOM_PATTERNS,
+} from './constants';
 import { codeGrep, discoverLoggingSites, splitRepository } from './discover_logging_sites';
+import { discoverLoggingWrappers } from './discover_logging_wrappers';
+
+jest.mock('./discover_logging_wrappers', () => {
+  const actual = jest.requireActual('./discover_logging_wrappers');
+  return { ...actual, discoverLoggingWrappers: jest.fn() };
+});
+const mockedDiscoverLoggingWrappers = discoverLoggingWrappers as jest.MockedFunction<
+  typeof discoverLoggingWrappers
+>;
 
 const COLUMNS = [
   { name: 'git.org', type: 'keyword' },
@@ -111,6 +125,36 @@ describe('logging-site patterns', () => {
     expect(matchesAnyIdiom('fprintf(stderr, "fatal: %s\\n", msg);')).toBe(true);
     expect(matchesAnyIdiom('println("started")')).toBe(true);
     expect(matchesAnyIdiom('println "deploy failed"')).toBe(true);
+  });
+});
+
+describe('FUNCTION_DEFINITION_PATTERNS', () => {
+  const matcher = (pattern: string) => new RegExp(`^${pattern}$`);
+  const matchesAny = (language: string, line: string): boolean =>
+    FUNCTION_DEFINITION_PATTERNS[language].some((pattern) => matcher(pattern).test(line));
+
+  it.each([
+    ['Go', 'func serverLog(level int) {', 'serverLog(LL_WARNING, "x")'],
+    ['Elixir', 'defp log(socket, level, code, msg) do', 'log(socket, :error, code, msg)'],
+    ['Rust', 'fn log_error(e: &Error) {', 'log_error(e)'],
+    ['Python', 'def log_error(msg):', 'log_error(msg)'],
+    ['Ruby', 'def log_error(msg)', 'log_error(msg)'],
+    ['PHP', 'function logError(msg) {', 'logError(msg);'],
+    ['JavaScript', 'const logError = (msg) => {', 'logError(msg);'],
+    ['TypeScript', 'function logError(msg: string) {', 'logError(msg);'],
+    ['Java', 'private void logError(String msg) {', 'logError(msg);'],
+    ['C#', 'private void LogError(string msg) {', 'LogError(msg);'],
+    ['Scala', 'def logError(msg: String): Unit = {', 'logError(msg)'],
+    ['Groovy', 'def logError(msg) {', 'logError(msg)'],
+    ['C', 'int server_log(int level, char *msg) {', 'server_log(LL_WARNING, "x");'],
+    ['C++', 'void server_log(int level, const char *msg) {', 'server_log(LL_WARNING, "x");'],
+  ])('%s: matches a definition line and rejects a call site', (language, definition, call) => {
+    expect(matchesAny(language, definition)).toBe(true);
+    expect(matchesAny(language, call)).toBe(false);
+  });
+
+  it('has an unknown fallback', () => {
+    expect(FUNCTION_DEFINITION_PATTERNS.unknown.length).toBeGreaterThan(0);
   });
 });
 
@@ -283,6 +327,11 @@ describe('codeGrep', () => {
 });
 
 describe('discoverLoggingSites', () => {
+  beforeEach(() => {
+    mockedDiscoverLoggingWrappers.mockReset();
+    mockedDiscoverLoggingWrappers.mockResolvedValue([]);
+  });
+
   it('greps every idiom pattern, scoped to <serviceRoot>/**', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
@@ -523,6 +572,131 @@ describe('discoverLoggingSites', () => {
 
     for (const [{ params }] of esClient.esql.query.mock.calls) {
       expect(params).toContainEqual({ file_path: '**' });
+    }
+  });
+
+  it('merges wrapper call sites into the candidate set', async () => {
+    mockedDiscoverLoggingWrappers.mockResolvedValue(['reportErr']);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockImplementation((async (req: {
+      query: string;
+      params: Array<Record<string, unknown>>;
+    }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[9, 'reportErr("boom")']] };
+      }
+      const regex = req.params.find((p) => 'regex' in p)?.regex;
+      if (regex === '.*reportErr[(].*') {
+        return { columns: COLUMNS, values: [row('src/x.go', 9, 'reportErr("boom")')] };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+    });
+
+    expect(candidates.map((c) => c.location)).toEqual(['src/x.go:9']);
+    expect(mockedDiscoverLoggingWrappers).toHaveBeenCalledWith(
+      expect.objectContaining({ idiomHitLocations: [] })
+    );
+  });
+
+  it('excludes a wrapper call site in an excluded path or on a non-emitting line (INV-005)', async () => {
+    mockedDiscoverLoggingWrappers.mockResolvedValue(['reportErr']);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockImplementation((async (req: {
+      query: string;
+      params: Array<Record<string, unknown>>;
+    }) => {
+      if (isWindowQuery(req.query)) {
+        return {
+          columns: WINDOW_COLUMNS,
+          values: [
+            [9, 'reportErr("boom")'],
+            [20, '// reportErr("commented out")'],
+          ],
+        };
+      }
+      const regex = req.params.find((p) => 'regex' in p)?.regex;
+      if (regex === '.*reportErr[(].*') {
+        return {
+          columns: COLUMNS,
+          values: [
+            row('src/x.go', 9, 'reportErr("boom")'),
+            row('src/x.test.go', 5, 'reportErr("boom")'),
+            row('src/x.go', 20, '// reportErr("commented out")'),
+          ],
+        };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+    });
+
+    expect(candidates.map((c) => c.location)).toEqual(['src/x.go:9']);
+  });
+
+  it('does not run the wrapper pass once the candidate ceiling is already reached (INV-004)', async () => {
+    mockedDiscoverLoggingWrappers.mockResolvedValue(['reportErr']);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    let firstIdiomGrep = true;
+    esClient.esql.query.mockImplementation((async (req: {
+      query: string;
+      params: Array<Record<string, unknown>>;
+    }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[1, 'logger.info("hi")']] };
+      }
+      if (firstIdiomGrep) {
+        firstIdiomGrep = false;
+        return { columns: COLUMNS, values: [row('src/a.ts', 1, 'logger.info("hi")')] };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      maxCandidates: 1,
+    });
+
+    expect(candidates).toHaveLength(1);
+    expect(mockedDiscoverLoggingWrappers).not.toHaveBeenCalled();
+  });
+
+  it('discoverWrappers: false skips the wrapper pass entirely', async () => {
+    mockedDiscoverLoggingWrappers.mockResolvedValue(['reportErr']);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
+
+    await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      discoverWrappers: false,
+    });
+
+    expect(mockedDiscoverLoggingWrappers).not.toHaveBeenCalled();
+    for (const [{ params }] of esClient.esql.query.mock.calls) {
+      expect(params).not.toContainEqual(
+        expect.objectContaining({ regex: expect.stringContaining('reportErr') })
+      );
     }
   });
 });

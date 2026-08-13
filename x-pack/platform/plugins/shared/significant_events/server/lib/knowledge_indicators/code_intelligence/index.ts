@@ -62,6 +62,11 @@ export {
   type CodeGrepOptions,
   type DiscoverLoggingSitesOptions,
 } from './discover_logging_sites';
+export {
+  discoverLoggingWrappers,
+  escapeLuceneLiteral,
+  type DiscoverLoggingWrappersOptions,
+} from './discover_logging_wrappers';
 export { classifyLoggingSites, type ClassifyLoggingSitesOptions } from './classify_logging_sites';
 export {
   listIndexedRepos,
