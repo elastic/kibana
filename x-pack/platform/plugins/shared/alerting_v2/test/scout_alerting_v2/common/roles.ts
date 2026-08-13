@@ -35,10 +35,10 @@ export const ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_rules: ['all'],
-        alerting_v2_alerts: ['all'],
-        alerting_v2_action_policies: ['all'],
-        alerting_v2_execution_history: ['all'],
+        alerting_rules: ['all'],
+        alerting_alerts: ['all'],
+        alerting_action_policies: ['all'],
+        alerting_execution_history: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -56,10 +56,10 @@ export const READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_rules: ['read'],
-        alerting_v2_alerts: ['read'],
-        alerting_v2_action_policies: ['read'],
-        alerting_v2_execution_history: ['read'],
+        alerting_rules: ['read'],
+        alerting_alerts: ['read'],
+        alerting_action_policies: ['read'],
+        alerting_execution_history: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -100,7 +100,7 @@ export const ALERTING_V2_RULES_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_rules: ['all'],
+        alerting_rules: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -114,7 +114,7 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_rules: ['read'],
+        alerting_rules: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -128,7 +128,7 @@ export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_alerts: ['all'],
+        alerting_alerts: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -142,7 +142,7 @@ export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_alerts: ['read'],
+        alerting_alerts: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -156,7 +156,7 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_action_policies: ['all'],
+        alerting_action_policies: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -170,7 +170,7 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_action_policies: ['read'],
+        alerting_action_policies: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],
@@ -180,7 +180,7 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
 
 /**
  * Composite role granting full access to action policies plus read access to
- * rules. Used by routes that also need `alerting_v2_rules: ['read']`, such as
+ * rules. Used by routes that also need `alerting_rules: ['read']`, such as
  * matching action policies for a rule.
  */
 export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
@@ -189,8 +189,8 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_action_policies: ['all'],
-        alerting_v2_rules: ['read'],
+        alerting_action_policies: ['all'],
+        alerting_rules: ['read'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -203,9 +203,9 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
  * round-trip in the browser. Each extra privilege is one the form actually
  * exercises:
  *
- * - `alerting_v2_rules: ['read']` — the create and upsert routes require
+ * - `alerting_rules: ['read']` — the create and upsert routes require
  *   `rules.read` on top of `actionPolicies.write`.
- * - `alerting_v2_alerts: ['read']` — the matcher input fetches data-field
+ * - `alerting_alerts: ['read']` — the matcher input fetches data-field
  *   suggestions from `GET /suggestions/rule_event_fields`.
  * - `workflowsManagement: ['read']` — destinations are workflow references, so
  *   the `destinationsInput` combo box lists workflows via the workflows plugin.
@@ -216,9 +216,9 @@ export const ALERTING_V2_ACTION_POLICY_FORM_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_action_policies: ['all'],
-        alerting_v2_rules: ['read'],
-        alerting_v2_alerts: ['read'],
+        alerting_action_policies: ['all'],
+        alerting_rules: ['read'],
+        alerting_alerts: ['read'],
         workflowsManagement: ['read'],
         discover: ['all'],
       },
@@ -233,7 +233,7 @@ export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_execution_history: ['all'],
+        alerting_execution_history: ['all'],
         discover: ['all'],
       },
       spaces: ['*'],
@@ -247,7 +247,7 @@ export const ALERTING_V2_EXECUTION_HISTORY_READ_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        alerting_v2_execution_history: ['read'],
+        alerting_execution_history: ['read'],
         discover: ['read'],
       },
       spaces: ['*'],

@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 
 /** Feature id from `@kbn/alerting-v2-plugin/common/feature_privileges`. */
-const ALERTING_V2_RULES_FEATURE_ID = 'alerting_v2_rules';
+const ALERTING_V2_RULES_FEATURE_ID = 'alerting_rules';
 
 /** UI capability key for write access from `ALERTING_V2_UI_CAPABILITIES.rules.all`. */
 const ALERTING_V2_RULES_WRITE_UI_CAPABILITY = 'all';

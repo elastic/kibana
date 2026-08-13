@@ -16,7 +16,7 @@ type AlertingCapability = 'read' | 'all';
  * which is an implementation detail users do not recognise.
  */
 export interface AlertingRequiredPrivilege {
-  /** Kibana feature id backing the capability, e.g. "alerting_v2_rules". */
+  /** Kibana feature id backing the capability, e.g. "alerting_rules". */
   featureId: string;
   /** Feature name as it appears in role management, e.g. "Rules". */
   featureName: string;

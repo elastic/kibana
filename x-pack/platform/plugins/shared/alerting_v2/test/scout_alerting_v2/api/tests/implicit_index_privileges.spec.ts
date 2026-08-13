@@ -9,7 +9,7 @@
  * These specs exercise the Elasticsearch-side *implicit* index privileges the
  * `KibanaAlertsImplicitPrivilegesProvider` grants (elastic/elasticsearch#148331):
  * a role that holds the Kibana `alerts:read` application privilege (via the
- * `alerting_v2_alerts` feature) implicitly gains `read` on `.alert-actions*` and
+ * `alerting_alerts` feature) implicitly gains `read` on `.alert-actions*` and
  * `.rule-events*`, document-level-security-scoped by `space_id`. There are no
  * Kibana routes involved - we talk to Elasticsearch directly (`esClient`) to
  * observe the grant and its DLS filter.
@@ -103,30 +103,30 @@ const PERSONAS = {
 
   // Custom roles.
   readAllSpaces: {
-    role: alertingV2Role({ alerting_v2_alerts: ['read'] }, ['*']),
+    role: alertingV2Role({ alerting_alerts: ['read'] }, ['*']),
     user: 'impl_priv_u_read_all',
   },
   allAllSpaces: {
-    role: alertingV2Role({ alerting_v2_alerts: ['all'] }, ['*']),
+    role: alertingV2Role({ alerting_alerts: ['all'] }, ['*']),
     user: 'impl_priv_u_all_all',
   },
 
   readMarketing: {
-    role: alertingV2Role({ alerting_v2_alerts: ['read'] }, ['marketing']),
+    role: alertingV2Role({ alerting_alerts: ['read'] }, ['marketing']),
     user: 'impl_priv_u_read_marketing',
   },
   allMarketing: {
-    role: alertingV2Role({ alerting_v2_alerts: ['all'] }, ['marketing']),
+    role: alertingV2Role({ alerting_alerts: ['all'] }, ['marketing']),
     user: 'impl_priv_u_all_marketing',
   },
 
   readMarketingFinance: {
-    role: alertingV2Role({ alerting_v2_alerts: ['read'] }, ['marketing', 'finance']),
+    role: alertingV2Role({ alerting_alerts: ['read'] }, ['marketing', 'finance']),
     user: 'impl_priv_u_read_multi',
   },
 
   rulesOnly: {
-    role: alertingV2Role({ alerting_v2_rules: ['read'] }, ['*']),
+    role: alertingV2Role({ alerting_rules: ['read'] }, ['*']),
     user: 'impl_priv_u_rules_only',
   },
   noAlertingV2: {

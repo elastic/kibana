@@ -21,22 +21,22 @@ interface AlertingAppMeta {
 export const ALERTING_APP_META: Record<AlertingApp, AlertingAppMeta> = {
   rules: {
     path: 'management/alertingV2/rules',
-    featureId: 'alerting_v2_rules',
+    featureId: 'alerting_rules',
     heading: /^Rules/i,
   },
   alerts: {
     path: 'management/alertingV2/episodes',
-    featureId: 'alerting_v2_alerts',
+    featureId: 'alerting_alerts',
     heading: /alert episodes/i,
   },
   actionPolicies: {
     path: 'management/alertingV2/action_policies',
-    featureId: 'alerting_v2_action_policies',
+    featureId: 'alerting_action_policies',
     heading: /action policies/i,
   },
   executionHistory: {
     path: 'management/alertingV2/execution_history',
-    featureId: 'alerting_v2_execution_history',
+    featureId: 'alerting_execution_history',
     heading: /execution history/i,
   },
 };

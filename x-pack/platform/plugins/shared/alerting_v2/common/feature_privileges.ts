@@ -25,19 +25,19 @@ type NestedValueOf<T extends Record<string, Record<string, string>>> = ValueOf<{
 
 export const ALERTING_V2_API_PRIVILEGES = {
   rules: {
-    read: 'read_alerting-v2-rules',
-    write: 'manage_alerting-v2-rules',
+    read: 'read_alerting-rules',
+    write: 'manage_alerting-rules',
   },
   alerts: {
-    read: 'read_alerting-v2-alerts',
-    write: 'manage_alerting-v2-alerts',
+    read: 'read_alerting-alerts',
+    write: 'manage_alerting-alerts',
   },
   actionPolicies: {
-    read: 'read_alerting-v2-action-policies',
-    write: 'manage_alerting-v2-action-policies',
+    read: 'read_alerting-action-policies',
+    write: 'manage_alerting-action-policies',
   },
   executionHistory: {
-    read: 'read_alerting-v2-execution-history',
+    read: 'read_alerting-execution-history',
   },
 } as const;
 
@@ -129,7 +129,7 @@ export interface AlertingV2FeatureDefinition {
 
 export const ALERTING_V2_FEATURES = {
   rules: {
-    id: 'alerting_v2_rules',
+    id: 'alerting_rules',
     name: 'Rules',
     managementApp: ALERTING_V2_RULES_APP_ID,
     privileges: {
@@ -153,7 +153,7 @@ export const ALERTING_V2_FEATURES = {
     subFeatures: [] as const,
   },
   alerts: {
-    id: 'alerting_v2_alerts',
+    id: 'alerting_alerts',
     name: 'Alerts',
     managementApp: ALERTING_V2_EPISODES_APP_ID,
     privileges: {
@@ -179,7 +179,7 @@ export const ALERTING_V2_FEATURES = {
     subFeatures: [] as const,
   },
   actionPolicies: {
-    id: 'alerting_v2_action_policies',
+    id: 'alerting_action_policies',
     name: 'Action Policies',
     managementApp: ALERTING_V2_ACTION_POLICIES_APP_ID,
     privileges: {
@@ -209,7 +209,7 @@ export const ALERTING_V2_FEATURES = {
     subFeatures: [] as const,
   },
   executionHistory: {
-    id: 'alerting_v2_execution_history',
+    id: 'alerting_execution_history',
     name: 'Execution history',
     managementApp: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
     privileges: {

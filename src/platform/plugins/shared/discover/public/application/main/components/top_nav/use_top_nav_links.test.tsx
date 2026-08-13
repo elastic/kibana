@@ -68,7 +68,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
   services.settings.globalClient.get = <T,>(_key: string) => true as T;
   services.core.application.capabilities = {
     ...services.core.application.capabilities,
-    alerting_v2_rules: {
+    alerting_rules: {
       all: true,
     },
   };
@@ -399,7 +399,7 @@ describe('useTopNavLinks', () => {
 
       v2Services.settings.globalClient.get = <T,>(_key: string) => alertingV2Enabled as T;
       if (!alertingV2Enabled) {
-        const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+        const { alerting_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2Services.core.application.capabilities;
         v2Services.core.application.capabilities = capabilitiesWithoutRules;
       }
@@ -565,7 +565,7 @@ describe('useTopNavLinks', () => {
 
       v2OnlyServices.settings.globalClient.get = <T,>(_key: string) => alertingVTwoEnabled as T;
       if (!alertingVTwoEnabled) {
-        const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
+        const { alerting_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2OnlyServices.core.application.capabilities;
         v2OnlyServices.core.application.capabilities = capabilitiesWithoutRules;
       }

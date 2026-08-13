@@ -33,7 +33,7 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({
-          capabilities: { alerting_v2_action_policies: { read: true, all: true } },
+          capabilities: { alerting_action_policies: { read: true, all: true } },
         });
       }
       if (token === 'application') return { navigateToUrl: mockNavigateToUrl };

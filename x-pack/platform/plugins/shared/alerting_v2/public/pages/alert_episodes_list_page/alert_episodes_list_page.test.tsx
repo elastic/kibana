@@ -28,8 +28,8 @@ import {
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
 
-const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
-const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
+const WRITE_CAPABILITIES = { alerting_alerts: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { alerting_alerts: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 
 jest.mock('@kbn/core-di-browser', () => {

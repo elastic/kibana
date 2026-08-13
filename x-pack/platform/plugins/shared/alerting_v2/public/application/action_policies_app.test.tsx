@@ -11,8 +11,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 import { ActionPoliciesApp } from './action_policies_app';
 
-const WRITE_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: true } };
-const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all: false } };
+const WRITE_CAPABILITIES = { alerting_action_policies: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { alerting_action_policies: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 
 jest.mock('@kbn/core-di-browser', () => {

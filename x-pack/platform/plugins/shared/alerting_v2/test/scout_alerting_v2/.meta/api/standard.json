@@ -5442,7 +5442,7 @@
     },
     {
       "id": "1e38d3a6f95185b-5b875229280a9b5",
-      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history read privilege",
+      "title": "List action policy execution history API authorization: 200 with alerting_execution_history read privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -5455,7 +5455,7 @@
     },
     {
       "id": "1e38d3a6f95185b-ae43868df72210a",
-      "title": "List action policy execution history API authorization: 200 with alerting_v2_execution_history all privilege",
+      "title": "List action policy execution history API authorization: 200 with alerting_execution_history all privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -5572,7 +5572,7 @@
     },
     {
       "id": "8773fbf2f1ea1f7-77783faff1b5063",
-      "title": "List rule executions API authorization: 200 with alerting_v2_execution_history read privilege",
+      "title": "List rule executions API authorization: 200 with alerting_execution_history read privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -5585,7 +5585,7 @@
     },
     {
       "id": "8773fbf2f1ea1f7-6a966cfb4221288",
-      "title": "List rule executions API authorization: 200 with alerting_v2_execution_history all privilege",
+      "title": "List rule executions API authorization: 200 with alerting_execution_history all privilege",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

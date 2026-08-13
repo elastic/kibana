@@ -68,7 +68,7 @@ describe('RequireAlertingPrivilege', () => {
     expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
     expect(screen.getByText('Privileges required')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingRequiredPrivilege-alerting_v2_rules')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingRequiredPrivilege-alerting_rules')).toBeInTheDocument();
   });
 
   it('checks read access for the requested feature', () => {
@@ -102,7 +102,7 @@ describe('RequireAlertingPrivilege', () => {
       expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
       expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
       expect(
-        screen.getByTestId('alertingRequiredPrivilege-alerting_v2_action_policies')
+        screen.getByTestId('alertingRequiredPrivilege-alerting_action_policies')
       ).toBeInTheDocument();
     });
   });

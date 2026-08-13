@@ -11,7 +11,7 @@ describe('getAlertingRequiredPrivileges', () => {
   it('maps a feature to its id, name, and privilege level', () => {
     expect(getAlertingRequiredPrivileges(['rules'])).toEqual([
       {
-        featureId: 'alerting_v2_rules',
+        featureId: 'alerting_rules',
         featureName: 'Rules',
         privilege: 'read',
       },
@@ -21,15 +21,15 @@ describe('getAlertingRequiredPrivileges', () => {
   it('preserves order and maps every feature in the set', () => {
     const result = getAlertingRequiredPrivileges(['alerts', 'actionPolicies']);
     expect(result.map(({ featureId }) => featureId)).toEqual([
-      'alerting_v2_alerts',
-      'alerting_v2_action_policies',
+      'alerting_alerts',
+      'alerting_action_policies',
     ]);
   });
 
   it('reflects the requested capability in the privilege level', () => {
     expect(getAlertingRequiredPrivileges(['executionHistory'], 'all')).toEqual([
       {
-        featureId: 'alerting_v2_execution_history',
+        featureId: 'alerting_execution_history',
         featureName: 'Execution history',
         privilege: 'all',
       },
