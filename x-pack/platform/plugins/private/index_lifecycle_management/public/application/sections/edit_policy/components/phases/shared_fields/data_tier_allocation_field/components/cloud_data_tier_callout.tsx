@@ -44,6 +44,8 @@ export const CloudDataTierCallout: FunctionComponent<Props> = ({ linkToCloudDepl
                 href: linkToCloudDeployment,
                 target: '_blank',
                 children: i18nTexts.linkText,
+                iconType: 'external',
+                iconSide: 'right',
               },
             }
           : undefined
