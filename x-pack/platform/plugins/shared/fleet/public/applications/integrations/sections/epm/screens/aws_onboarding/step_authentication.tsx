@@ -36,6 +36,7 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -62,84 +63,126 @@ export const DEPLOYMENT_METHOD_META: Record<
   },
 };
 
-// Shaded header band (icon + title + "N services"), bled to the panel's
-// edges via negative margins so the parent EuiPanel can keep its normal
-// paddingSize="l" — parent must set `style={{ overflow: 'hidden' }}` so the
-// square-cornered tint clips to the panel's rounded corners. When `onToggle`
-// is passed, the whole header becomes a collapse/expand control: a "Done"
-// badge appears once the card is complete, with a chevron on the far right.
-const PanelHeader: React.FunctionComponent<{
+// A real EuiAccordion driving each card: chevron on the left (before the
+// feature icon and title), shaded header band bled to the panel's edges via
+// negative margins on the trigger button (parent EuiPanel keeps its normal
+// paddingSize="l" and must set `style={{ overflow: 'hidden' }}` to clip the
+// square-cornered tint to the panel's rounded corners). A "Done" badge
+// appears once the card is complete. `isOpen`/`onToggle` are fully
+// controlled by the caller so a group of cards can enforce "only one open
+// at a time" sequencing.
+const AccordionCard: React.FunctionComponent<{
+  id: string;
   iconType: string;
   title: string;
   servicesCount: number;
-  isComplete?: boolean;
-  isOpen?: boolean;
-  onToggle?: () => void;
+  isComplete: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
   'data-test-subj'?: string;
-}> = ({ iconType, title, servicesCount, isComplete, isOpen, onToggle, ...rest }) => {
+}> = ({ id, iconType, title, servicesCount, isComplete, isOpen, onToggle, children, ...rest }) => {
   const { euiTheme } = useEuiTheme();
-  const collapsible = onToggle !== undefined;
   return (
-    <div
-      role={collapsible ? 'button' : undefined}
-      tabIndex={collapsible ? 0 : undefined}
-      onClick={collapsible ? onToggle : undefined}
-      onKeyDown={
-        collapsible
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onToggle?.();
-              }
-            }
-          : undefined
-      }
-      style={{
-        margin: `-${euiTheme.size.l} -${euiTheme.size.l} 0`,
-        padding: euiTheme.size.l,
-        background: HEADER_TINT,
-        borderBottom: euiTheme.border.thin,
-        cursor: collapsible ? 'pointer' : undefined,
-      }}
+    <EuiPanel
+      hasBorder
+      paddingSize="l"
+      style={{ overflow: 'hidden' }}
       data-test-subj={rest['data-test-subj']}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} size="m" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {isComplete && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="success" iconType="check">
-              Done
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiLink>{`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}</EuiLink>
-        </EuiFlexItem>
-        {collapsible && (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={isOpen ? 'arrowUp' : 'arrowDown'} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </div>
+      <EuiAccordion
+        id={id}
+        arrowDisplay="none"
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={onToggle}
+        buttonProps={{
+          style: {
+            display: 'flex',
+            margin: `-${euiTheme.size.l} -${euiTheme.size.l} 0`,
+            width: `calc(100% + ${euiTheme.size.l} * 2)`,
+            padding: euiTheme.size.l,
+            background: HEADER_TINT,
+            borderBottom: euiTheme.border.thin,
+          },
+        }}
+        buttonContent={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} size="s" color="subdued" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={iconType} size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>{title}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {isComplete && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="success" iconType="check">
+                  Done
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <EuiTextColor color="primary">
+                  {`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}
+                </EuiTextColor>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <EuiSpacer size="m" />
+        {children}
+      </EuiAccordion>
+    </EuiPanel>
   );
 };
 
-// Drives a card's collapsed/expanded state: open while incomplete, auto-
-// collapsed once complete, always overridable by an explicit user click so
-// a finished card can still be reopened for review or edits.
-function useCollapsibleCard(isComplete: boolean) {
-  const [manualOverride, setManualOverride] = useState<boolean | null>(null);
-  const isOpen = manualOverride ?? !isComplete;
-  const toggle = () => setManualOverride(!isOpen);
-  return { isOpen, toggle };
+// Enforces "only one card open at a time" across an ordered pair of cards:
+// the first starts open, the second closed. When the currently-open card's
+// completeness flips to true, the accordion waits briefly before advancing
+// to the next incomplete card — an instant swap would feel like the UI
+// yanking control away rather than the user finishing a step. Any card can
+// still be clicked open/closed manually at any time.
+function useSequentialAccordion(ids: [string, string], completions: [boolean, boolean]) {
+  const ADVANCE_DELAY_MS = 900;
+  const [activeId, setActiveId] = useState<string | null>(ids[0]);
+  const timerRef = useRef<number | null>(null);
+  const prevCompletionsRef = useRef<[boolean, boolean]>(completions);
+
+  useEffect(() => {
+    const activeIndex = activeId ? ids.indexOf(activeId) : -1;
+    if (
+      activeIndex !== -1 &&
+      !prevCompletionsRef.current[activeIndex] &&
+      completions[activeIndex]
+    ) {
+      timerRef.current = window.setTimeout(() => {
+        const nextIndex = activeIndex === 0 ? 1 : 0;
+        setActiveId(completions[nextIndex] ? null : ids[nextIndex]);
+      }, ADVANCE_DELAY_MS);
+    }
+    prevCompletionsRef.current = completions;
+    return () => {
+      if (timerRef.current) window.clearTimeout(timerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completions[0], completions[1], activeId]);
+
+  return {
+    isOpen: (id: string) => activeId === id,
+    toggle: (id: string) => {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      setActiveId((current) => (current === id ? null : id));
+    },
+  };
 }
 
 // Every field on this step is constrained to half the card's content width.
@@ -201,6 +244,7 @@ const ServiceDetectionCard: React.FunctionComponent<{
 // Elastic Cloud Forwarder widget — owns the FULL CloudFormation lifecycle:
 // launch → per-service detection animation → stack name/version capture.
 // Deploy state is lifted to the parent flow so Detect & Review can read it.
+// Open/closed state is controlled by the parent's sequential accordion.
 const CloudFormationWidget: React.FunctionComponent<{
   services: AwsServiceEntry[];
   region: string;
@@ -212,6 +256,9 @@ const CloudFormationWidget: React.FunctionComponent<{
   onStackNameChange: (value: string) => void;
   stackVersion: string;
   onStackVersionChange: (value: string) => void;
+  isOpen: boolean;
+  onToggle: () => void;
+  onCompleteChange: (isComplete: boolean) => void;
 }> = ({
   services,
   region,
@@ -223,25 +270,28 @@ const CloudFormationWidget: React.FunctionComponent<{
   onStackNameChange,
   stackVersion,
   onStackVersionChange,
+  isOpen,
+  onToggle,
+  onCompleteChange,
 }) => {
   const allReceived = services.length > 0 && receivedCount >= services.length;
   const isComplete = allReceived && stackName.trim().length > 0;
-  const { isOpen, toggle } = useCollapsibleCard(isComplete);
+
+  useEffect(() => {
+    onCompleteChange(isComplete);
+  }, [isComplete, onCompleteChange]);
 
   return (
-    <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
-      <PanelHeader
-        iconType="rocket"
-        title="Elastic Cloud Forwarder"
-        servicesCount={services.length}
-        isComplete={isComplete}
-        isOpen={isOpen}
-        onToggle={toggle}
-        data-test-subj="awsOnboardingCloudFormationCollapseToggle"
-      />
-      {isOpen && (
-        <>
-      <EuiSpacer size="m" />
+    <AccordionCard
+      id="awsOnboardingCloudFormationAccordion"
+      iconType="rocket"
+      title="Elastic Cloud Forwarder"
+      servicesCount={services.length}
+      isComplete={isComplete}
+      isOpen={isOpen}
+      onToggle={onToggle}
+      data-test-subj="awsOnboardingCloudFormationCollapseToggle"
+    >
       <EuiText size="s">
         <p>
           Log collection via a single AWS CloudFormation stack — no agents required. Trigger
@@ -367,9 +417,7 @@ const CloudFormationWidget: React.FunctionComponent<{
           </EuiFormRow>
         </>
       )}
-        </>
-      )}
-    </EuiPanel>
+    </AccordionCard>
   );
 };
 
@@ -380,7 +428,8 @@ type ManagedAccessMethod = 'access_keys' | 'identity_federation';
 // Defaults to Identity Federation; the Federated Identity Name is lifted to
 // the parent flow so Detect & Review's summary can read it. Like the Cloud
 // Forwarder card, it owns its own deploy CTA + arrival animation so the
-// Detect & Review summary arrives already settled.
+// Detect & Review summary arrives already settled. Open/closed state is
+// controlled by the parent's sequential accordion.
 const ManagedIntegrationsWidget: React.FunctionComponent<{
   servicesCount: number;
   onValidityChange: (isValid: boolean) => void;
@@ -389,6 +438,9 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   isDeployed: boolean;
   onDeploy: () => void;
   receivedCount: number;
+  isOpen: boolean;
+  onToggle: () => void;
+  onCompleteChange: (isComplete: boolean) => void;
 }> = ({
   servicesCount,
   onValidityChange,
@@ -397,6 +449,9 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   isDeployed,
   onDeploy,
   receivedCount,
+  isOpen,
+  onToggle,
+  onCompleteChange,
 }) => {
   const [method, setMethod] = useState<ManagedAccessMethod>('identity_federation');
   const [accessKeyId, setAccessKeyId] = useState('');
@@ -419,27 +474,22 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
 
   const allReceived = receivedCount >= MANAGED_INTEGRATION_EXAMPLES.length;
   const isComplete = isDeployed && allReceived;
-  const { isOpen, toggle } = useCollapsibleCard(isComplete);
+
+  useEffect(() => {
+    onCompleteChange(isComplete);
+  }, [isComplete, onCompleteChange]);
 
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="l"
-      style={{ overflow: 'hidden' }}
-      data-test-subj="awsOnboardingManagedIntegrationsPanel"
+    <AccordionCard
+      id="awsOnboardingManagedIntegrationsAccordion"
+      iconType="package"
+      title="Managed Integrations"
+      servicesCount={servicesCount}
+      isComplete={isComplete}
+      isOpen={isOpen}
+      onToggle={onToggle}
+      data-test-subj="awsOnboardingManagedIntegrationsCollapseToggle"
     >
-      <PanelHeader
-        iconType="package"
-        title="Managed Integrations"
-        servicesCount={servicesCount}
-        isComplete={isComplete}
-        isOpen={isOpen}
-        onToggle={toggle}
-        data-test-subj="awsOnboardingManagedIntegrationsCollapseToggle"
-      />
-      {isOpen && (
-        <>
-      <EuiSpacer size="m" />
       <EuiText size="s">
         <p>
           Utilize AWS Access Keys or Federated Identity to set up and deploy your AWS account.
@@ -568,11 +618,7 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
           Deploy integrations
         </EuiButton>
       ) : !allReceived ? (
-        <EuiButton
-          isLoading
-          disabled
-          data-test-subj="awsOnboardingManagedIntegrationsDeploying"
-        >
+        <EuiButton isLoading disabled data-test-subj="awsOnboardingManagedIntegrationsDeploying">
           Deploying integrations...
         </EuiButton>
       ) : (
@@ -597,9 +643,7 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
           </EuiFlexGrid>
         </>
       )}
-        </>
-      )}
-    </EuiPanel>
+    </AccordionCard>
   );
 };
 
@@ -612,21 +656,28 @@ type HostMode = 'new_hosts' | 'existing_hosts';
 // commands, simulated enrollment, and per-service incoming-data tiles.
 // Enrollment in Fleet is the default (no mode choice); the "Listening for
 // agent" state confirms a few seconds after the section appears, which in
-// turn unblocks the step's Next button.
+// turn unblocks the step's Next button. Open/closed state is controlled by
+// the parent's sequential accordion.
 const WhereToAddCard: React.FunctionComponent<{
   services: AwsServiceEntry[];
   isEnrolled: boolean;
   onEnrolled: () => void;
   receivedCount: number;
-}> = ({ services, isEnrolled, onEnrolled, receivedCount }) => {
+  isOpen: boolean;
+  onToggle: () => void;
+  onCompleteChange: (isComplete: boolean) => void;
+}> = ({ services, isEnrolled, onEnrolled, receivedCount, isOpen, onToggle, onCompleteChange }) => {
   const [hostMode, setHostMode] = useState<HostMode>('new_hosts');
   const [platform, setPlatform] = useState('linux');
   const enrollTimer = useRef<number | null>(null);
   const servicesCount = services.length;
   const allReceived = servicesCount > 0 && receivedCount >= servicesCount;
   const isComplete = hostMode === 'new_hosts' && isEnrolled && allReceived;
-  const { isOpen, toggle } = useCollapsibleCard(isComplete);
   const { euiTheme } = useEuiTheme();
+
+  useEffect(() => {
+    onCompleteChange(isComplete);
+  }, [isComplete, onCompleteChange]);
 
   useEffect(() => {
     if (isEnrolled || hostMode !== 'new_hosts') return;
@@ -637,24 +688,16 @@ const WhereToAddCard: React.FunctionComponent<{
   }, [isEnrolled, hostMode, onEnrolled]);
 
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="l"
-      style={{ overflow: 'hidden' }}
-      data-test-subj="awsOnboardingAgentPolicyPanel"
+    <AccordionCard
+      id="awsOnboardingWhereToAddAccordion"
+      iconType="compute"
+      title="Where to add this integration?"
+      servicesCount={servicesCount}
+      isComplete={isComplete}
+      isOpen={isOpen}
+      onToggle={onToggle}
+      data-test-subj="awsOnboardingWhereToAddCollapseToggle"
     >
-      <PanelHeader
-        iconType="compute"
-        title="Where to add this integration?"
-        servicesCount={servicesCount}
-        isComplete={isComplete}
-        isOpen={isOpen}
-        onToggle={toggle}
-        data-test-subj="awsOnboardingWhereToAddCollapseToggle"
-      />
-      {isOpen && (
-        <>
-      <EuiSpacer size="m" />
       <EuiRadioGroup
         options={[
           { id: 'new_hosts', label: 'New hosts' },
@@ -683,140 +726,145 @@ const WhereToAddCard: React.FunctionComponent<{
               padding has nothing to connect to and just reads as a big
               trailing gap, so cancel it here. */}
           <div style={{ marginBottom: `-${euiTheme.size.xxl}` }}>
-          <EuiSteps
-            titleSize="xs"
-            steps={[
-              {
-                title: 'Install Elastic Agent on your host',
-                children: (
-                  <>
-                    <EuiText size="s">
-                      <p>
-                        Select the appropriate platform and run commands to install, enroll, and
-                        start Elastic Agent. Reuse commands to set up agents on more than one
-                        host. All builds can be found on our{' '}
-                        <EuiLink href="#" target="_blank" external>
-                          downloads page
-                        </EuiLink>
-                        . For additional guidance, see our{' '}
-                        <EuiLink href="#" target="_blank" external>
-                          installation docs
-                        </EuiLink>
-                        .
-                      </p>
-                    </EuiText>
-                    <EuiSpacer size="m" />
-                    <EuiCallOut title="Root privileges required" color="warning" iconType="alert">
-                      <p>
-                        This agent policy contains the following integrations that require
-                        Elastic Agents to have root privileges. To ensure that all data required
-                        by the integrations can be collected, enroll the agents using an account
-                        with root privileges. For more information, see the{' '}
-                        <EuiLink href="#" target="_blank" external>
-                          Fleet and Elastic Agent Guide
-                        </EuiLink>
-                      </p>
-                      <ul>
-                        <li>System</li>
-                      </ul>
-                    </EuiCallOut>
-                    <EuiSpacer size="m" />
-                    <EuiText size="s">
-                      <p>
-                        To install Elastic Agent without root privileges, add the{' '}
-                        <code>--unprivileged</code> flag to the <code>elastic-agent install</code>{' '}
-                        command below. For more information, see the{' '}
-                        <EuiLink href="#" target="_blank" external>
-                          Fleet and Elastic Agent Guide
-                        </EuiLink>
-                      </p>
-                    </EuiText>
-                    <EuiSpacer size="m" />
-                    <EuiButtonGroup
-                      legend="Platform"
-                      options={AGENT_PLATFORM_OPTIONS}
-                      idSelected={platform}
-                      onChange={setPlatform}
-                      buttonSize="compressed"
-                    />
-                    <EuiSpacer size="s" />
-                    <EuiCodeBlock language="bash" isCopyable paddingSize="m">
-                      {AGENT_INSTALL_COMMANDS}
-                    </EuiCodeBlock>
-                  </>
-                ),
-              },
-              {
-                title: 'Confirm agent enrollment',
-                status: isEnrolled ? 'complete' : 'loading',
-                children: (
-                  <>
-                    <EuiFlexGrid columns={4} gutterSize="m">
-                      <EuiFlexItem style={{ minWidth: 0 }}>
-                        <EuiPanel hasBorder paddingSize="m" data-test-subj="awsOnboardingAgentEnrollmentTile">
-                          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                            <EuiFlexItem grow={false}>
-                              <ServiceStatusBadge receiving={isEnrolled} />
-                            </EuiFlexItem>
-                            <EuiFlexItem style={{ minWidth: 0 }}>
-                              <EuiText size="s" className="eui-textTruncate">
-                                <strong>Elastic Agent</strong>
-                              </EuiText>
-                              <EuiText size="xs" color="subdued">
-                                {isEnrolled ? '1 agent enrolled' : 'Listening for agent...'}
-                              </EuiText>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiPanel>
-                      </EuiFlexItem>
-                    </EuiFlexGrid>
-                    {!isEnrolled && (
-                      <>
-                        <EuiSpacer size="s" />
-                        <EuiText size="s" color="subdued">
-                          <p>
-                            After the agent starts up, the Elastic Stack listens for the agent
-                            and confirms the enrollment in Fleet. If you&apos;re having trouble
-                            connecting, check out the{' '}
-                            <EuiLink href="#" target="_blank" external>
-                              troubleshooting guide
-                            </EuiLink>
-                            .
-                          </p>
-                        </EuiText>
-                      </>
-                    )}
-                  </>
-                ),
-              },
-              {
-                title: 'Confirm incoming data',
-                status: !isEnrolled ? 'incomplete' : allReceived ? 'complete' : 'loading',
-                children: !isEnrolled ? (
-                  <EuiText size="s" color="subdued">
-                    <p>Waiting for agent enrollment.</p>
-                  </EuiText>
-                ) : (
-                  <>
-                    <EuiText size="s" color="subdued">
-                      {`${receivedCount} of ${servicesCount} - data received`}
-                    </EuiText>
-                    <EuiSpacer size="s" />
-                    <EuiFlexGrid columns={4} gutterSize="m">
-                      {services.map((service, i) => (
-                        <EuiFlexItem key={service.id} style={{ minWidth: 0 }}>
-                          <ServiceDetectionCard
-                            service={service}
-                            receiving={i < receivedCount}
-                          />
+            <EuiSteps
+              titleSize="xs"
+              steps={[
+                {
+                  title: 'Install Elastic Agent on your host',
+                  children: (
+                    <>
+                      <EuiText size="s">
+                        <p>
+                          Select the appropriate platform and run commands to install, enroll,
+                          and start Elastic Agent. Reuse commands to set up agents on more than
+                          one host. All builds can be found on our{' '}
+                          <EuiLink href="#" target="_blank" external>
+                            downloads page
+                          </EuiLink>
+                          . For additional guidance, see our{' '}
+                          <EuiLink href="#" target="_blank" external>
+                            installation docs
+                          </EuiLink>
+                          .
+                        </p>
+                      </EuiText>
+                      <EuiSpacer size="m" />
+                      <EuiCallOut title="Root privileges required" color="warning" iconType="alert">
+                        <p>
+                          This agent policy contains the following integrations that require
+                          Elastic Agents to have root privileges. To ensure that all data
+                          required by the integrations can be collected, enroll the agents using
+                          an account with root privileges. For more information, see the{' '}
+                          <EuiLink href="#" target="_blank" external>
+                            Fleet and Elastic Agent Guide
+                          </EuiLink>
+                        </p>
+                        <ul>
+                          <li>System</li>
+                        </ul>
+                      </EuiCallOut>
+                      <EuiSpacer size="m" />
+                      <EuiText size="s">
+                        <p>
+                          To install Elastic Agent without root privileges, add the{' '}
+                          <code>--unprivileged</code> flag to the{' '}
+                          <code>elastic-agent install</code> command below. For more information,
+                          see the{' '}
+                          <EuiLink href="#" target="_blank" external>
+                            Fleet and Elastic Agent Guide
+                          </EuiLink>
+                        </p>
+                      </EuiText>
+                      <EuiSpacer size="m" />
+                      <EuiButtonGroup
+                        legend="Platform"
+                        options={AGENT_PLATFORM_OPTIONS}
+                        idSelected={platform}
+                        onChange={setPlatform}
+                        buttonSize="compressed"
+                      />
+                      <EuiSpacer size="s" />
+                      <EuiCodeBlock language="bash" isCopyable paddingSize="m">
+                        {AGENT_INSTALL_COMMANDS}
+                      </EuiCodeBlock>
+                    </>
+                  ),
+                },
+                {
+                  title: 'Confirm agent enrollment',
+                  status: isEnrolled ? 'complete' : 'loading',
+                  children: (
+                    <>
+                      <EuiFlexGrid columns={4} gutterSize="m">
+                        <EuiFlexItem style={{ minWidth: 0 }}>
+                          <EuiPanel
+                            hasBorder
+                            paddingSize="m"
+                            data-test-subj="awsOnboardingAgentEnrollmentTile"
+                          >
+                            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <ServiceStatusBadge receiving={isEnrolled} />
+                              </EuiFlexItem>
+                              <EuiFlexItem style={{ minWidth: 0 }}>
+                                <EuiText size="s" className="eui-textTruncate">
+                                  <strong>Elastic Agent</strong>
+                                </EuiText>
+                                <EuiText size="xs" color="subdued">
+                                  {isEnrolled ? '1 agent enrolled' : 'Listening for agent...'}
+                                </EuiText>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiPanel>
                         </EuiFlexItem>
-                      ))}
-                    </EuiFlexGrid>
-                  </>
-                ),
-              },
-            ]}
-          />
+                      </EuiFlexGrid>
+                      {!isEnrolled && (
+                        <>
+                          <EuiSpacer size="s" />
+                          <EuiText size="s" color="subdued">
+                            <p>
+                              After the agent starts up, the Elastic Stack listens for the agent
+                              and confirms the enrollment in Fleet. If you&apos;re having trouble
+                              connecting, check out the{' '}
+                              <EuiLink href="#" target="_blank" external>
+                                troubleshooting guide
+                              </EuiLink>
+                              .
+                            </p>
+                          </EuiText>
+                        </>
+                      )}
+                    </>
+                  ),
+                },
+                {
+                  title: 'Confirm incoming data',
+                  status: !isEnrolled ? 'incomplete' : allReceived ? 'complete' : 'loading',
+                  children: !isEnrolled ? (
+                    <EuiText size="s" color="subdued">
+                      <p>Waiting for agent enrollment.</p>
+                    </EuiText>
+                  ) : (
+                    <>
+                      <EuiText size="s" color="subdued">
+                        {`${receivedCount} of ${servicesCount} - data received`}
+                      </EuiText>
+                      <EuiSpacer size="s" />
+                      <EuiFlexGrid columns={4} gutterSize="m">
+                        {services.map((service, i) => (
+                          <EuiFlexItem key={service.id} style={{ minWidth: 0 }}>
+                            <ServiceDetectionCard
+                              service={service}
+                              receiving={i < receivedCount}
+                            />
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGrid>
+                    </>
+                  ),
+                },
+              ]}
+            />
           </div>
         </>
       ) : (
@@ -848,9 +896,7 @@ const WhereToAddCard: React.FunctionComponent<{
           </EuiText>
         </>
       )}
-        </>
-      )}
-    </EuiPanel>
+    </AccordionCard>
   );
 };
 
@@ -865,7 +911,6 @@ const AGENT_INSTALL_COMMANDS = `curl -L -O https://artifacts.elastic.co/download
 tar xzvf elastic-agent-9.5.0-linux-arm64.tar.gz
 cd elastic-agent-9.5.0-linux-arm64
 sudo ./elastic-agent install --url=https://4fc1b088ce026fc9e70a6a0c28b0c58f.fleet.us-east-1.aws.elastic.cloud:443 --enrollment-token=RGVmYXVsdC0wNDE0YTZiLTA5OTY=`;
-
 
 export const StepAuthentication: React.FunctionComponent<{
   services: AwsServiceEntry[];
@@ -922,8 +967,22 @@ export const StepAuthentication: React.FunctionComponent<{
 
   const isAgentSetupAccessComplete =
     agentAccessKeyId.trim().length > 0 && agentSecretAccessKey.trim().length > 0;
-  const { isOpen: isAgentSetupAccessOpen, toggle: toggleAgentSetupAccess } =
-    useCollapsibleCard(isAgentSetupAccessComplete);
+
+  // Sequential ("only one open at a time") accordions for each path's card
+  // pair — the first card starts open, the second closed, and completing
+  // the active card advances to the next after a short, deliberate delay.
+  const [isManagedIntegrationsComplete, setIsManagedIntegrationsComplete] = useState(false);
+  const [isCloudFormationComplete, setIsCloudFormationComplete] = useState(false);
+  const managedAccordion = useSequentialAccordion(
+    ['managedIntegrations', 'cloudFormation'],
+    [isManagedIntegrationsComplete, isCloudFormationComplete]
+  );
+
+  const [isWhereToAddComplete, setIsWhereToAddComplete] = useState(false);
+  const agentAccordion = useSequentialAccordion(
+    ['whereToAdd', 'setupAccess'],
+    [isWhereToAddComplete, isAgentSetupAccessComplete]
+  );
 
   const openModal = () => {
     setPendingMethod(deploymentMethod);
@@ -1003,73 +1062,71 @@ export const StepAuthentication: React.FunctionComponent<{
 
       {deploymentMethod === 'agent' ? (
         <>
-        <WhereToAddCard
-          services={services}
-          isEnrolled={isAgentEnrolled}
-          onEnrolled={onAgentEnrolled}
-          receivedCount={agentReceivedCount}
-        />
-        <EuiSpacer size="m" />
-        <EuiPanel hasBorder paddingSize="l" style={{ overflow: 'hidden' }}>
-          <PanelHeader
+          <WhereToAddCard
+            services={services}
+            isEnrolled={isAgentEnrolled}
+            onEnrolled={onAgentEnrolled}
+            receivedCount={agentReceivedCount}
+            isOpen={agentAccordion.isOpen('whereToAdd')}
+            onToggle={() => agentAccordion.toggle('whereToAdd')}
+            onCompleteChange={setIsWhereToAddComplete}
+          />
+          <EuiSpacer size="m" />
+          <AccordionCard
+            id="awsOnboardingAgentSetupAccessAccordion"
             iconType="rocket"
             title="Setup access"
             servicesCount={servicesCount}
             isComplete={isAgentSetupAccessComplete}
-            isOpen={isAgentSetupAccessOpen}
-            onToggle={toggleAgentSetupAccess}
+            isOpen={agentAccordion.isOpen('setupAccess')}
+            onToggle={() => agentAccordion.toggle('setupAccess')}
             data-test-subj="awsOnboardingAgentSetupAccessCollapseToggle"
-          />
-          {isAgentSetupAccessOpen && (
-            <>
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={
-              <span>
-                Preferred method{' '}
-                <EuiIconTip
-                  content="How Elastic Agent authenticates against your AWS account."
-                  position="right"
-                />
-              </span>
-            }
-            style={HALF_WIDTH}
-            fullWidth
           >
-            <EuiSelect
+            <EuiFormRow
+              label={
+                <span>
+                  Preferred method{' '}
+                  <EuiIconTip
+                    content="How Elastic Agent authenticates against your AWS account."
+                    position="right"
+                  />
+                </span>
+              }
+              style={HALF_WIDTH}
               fullWidth
-              options={[
-                { value: 'access_key', text: 'Direct Access Key' },
-                { value: 'temporary', text: 'Temporary security credentials' },
-                { value: 'shared', text: 'Shared credentials file' },
-                { value: 'iam_role', text: 'IAM role ARN' },
-              ]}
-              aria-label="Preferred authentication method"
-            />
-          </EuiFormRow>
-          <EuiFormRow label="Access Key ID" style={HALF_WIDTH} fullWidth>
-            <EuiFieldPassword
-              type="dual"
-              fullWidth
-              value={agentAccessKeyId}
-              onChange={(e) => setAgentAccessKeyId(e.target.value)}
-              aria-label="Access Key ID"
-              data-test-subj="awsOnboardingAgentAccessKeyId"
-            />
-          </EuiFormRow>
-          <EuiFormRow label="Secret Access Key" style={HALF_WIDTH} fullWidth>
-            <EuiFieldPassword
-              type="dual"
-              fullWidth
-              value={agentSecretAccessKey}
-              onChange={(e) => setAgentSecretAccessKey(e.target.value)}
-              aria-label="Secret Access Key"
-              data-test-subj="awsOnboardingAgentSecretAccessKey"
-            />
-          </EuiFormRow>
-            </>
-          )}
-        </EuiPanel>
+            >
+              <EuiSelect
+                fullWidth
+                options={[
+                  { value: 'access_key', text: 'Direct Access Key' },
+                  { value: 'temporary', text: 'Temporary security credentials' },
+                  { value: 'shared', text: 'Shared credentials file' },
+                  { value: 'iam_role', text: 'IAM role ARN' },
+                ]}
+                aria-label="Preferred authentication method"
+              />
+            </EuiFormRow>
+            <EuiFormRow label="Access Key ID" style={HALF_WIDTH} fullWidth>
+              <EuiFieldPassword
+                type="dual"
+                fullWidth
+                value={agentAccessKeyId}
+                onChange={(e) => setAgentAccessKeyId(e.target.value)}
+                aria-label="Access Key ID"
+                data-test-subj="awsOnboardingAgentAccessKeyId"
+              />
+            </EuiFormRow>
+            <EuiFormRow label="Secret Access Key" style={HALF_WIDTH} fullWidth>
+              <EuiFieldPassword
+                type="dual"
+                fullWidth
+                value={agentSecretAccessKey}
+                onChange={(e) => setAgentSecretAccessKey(e.target.value)}
+                aria-label="Secret Access Key"
+                data-test-subj="awsOnboardingAgentSecretAccessKey"
+              />
+            </EuiFormRow>
+          </AccordionCard>
         </>
       ) : (
         <>
@@ -1081,6 +1138,9 @@ export const StepAuthentication: React.FunctionComponent<{
             isDeployed={isManagedDeployed}
             onDeploy={onDeployManagedIntegrations}
             receivedCount={managedReceivedCount}
+            isOpen={managedAccordion.isOpen('managedIntegrations')}
+            onToggle={() => managedAccordion.toggle('managedIntegrations')}
+            onCompleteChange={setIsManagedIntegrationsComplete}
           />
           <EuiSpacer size="m" />
           <CloudFormationWidget
@@ -1094,6 +1154,9 @@ export const StepAuthentication: React.FunctionComponent<{
             onStackNameChange={onStackNameChange}
             stackVersion={stackVersion}
             onStackVersionChange={onStackVersionChange}
+            isOpen={managedAccordion.isOpen('cloudFormation')}
+            onToggle={() => managedAccordion.toggle('cloudFormation')}
+            onCompleteChange={setIsCloudFormationComplete}
           />
         </>
       )}
