@@ -55,7 +55,7 @@ export const TSDB_ISO_TIME_RANGE = {
 } as const;
 
 export const TSDB_IN_RANGE_DATES = {
-  from: 'Apr 15, 2023 @ 00:00:00.000',
+  from: 'Apr 16, 2023 @ 00:00:00.000',
   to: 'Jun 16, 2023 @ 00:00:00.000',
 } as const;
 
