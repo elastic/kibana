@@ -148,7 +148,7 @@ describe('saveAutomationHandler', () => {
   const logger = loggingSystemMock.createLogger();
   const getCoreStart = jest.fn();
   const getSecurityStart = jest.fn().mockResolvedValue(undefined);
-  let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation'>>;
+  let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'assertCanAcceptAutomation'>>;
   let workflowsManagement: {
     getWorkflow: jest.Mock;
     createWorkflow: jest.Mock;
@@ -164,6 +164,7 @@ describe('saveAutomationHandler', () => {
 
     aiIndexService = {
       addAutomation: jest.fn(),
+      assertCanAcceptAutomation: jest.fn().mockResolvedValue(undefined),
     };
     workflowsManagement = {
       getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-new' }),
@@ -198,15 +199,15 @@ describe('saveAutomationHandler', () => {
       'default',
       request
     );
+    expect(aiIndexService.addAutomation).toHaveBeenCalledWith('my-ai-index', {
+      type: 'workflow',
+      value: 'wf-new',
+    });
     expect(attachments.updateOrigin).toHaveBeenCalledWith(
       WORKFLOW_ATTACHMENT_ID,
       'wf-new',
       ATTACHMENT_REF_ACTOR.agent
     );
-    expect(aiIndexService.addAutomation).toHaveBeenCalledWith('my-ai-index', {
-      type: 'workflow',
-      value: 'wf-new',
-    });
     expect(result).toEqual({
       aiIndexId: 'my-ai-index',
       workflowId: 'wf-new',
@@ -239,6 +240,7 @@ describe('saveAutomationHandler', () => {
       request
     );
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+    expect(attachments.updateOrigin).not.toHaveBeenCalled();
     expect(result).toEqual({
       aiIndexId: 'my-ai-index',
       workflowId: 'wf-persisted',
@@ -397,6 +399,12 @@ describe('saveAutomationHandler', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('attachment origin could not be recorded')
     );
+    expect(aiIndexService.addAutomation).toHaveBeenCalled();
+    expect(attachments.updateOrigin).toHaveBeenCalledWith(
+      WORKFLOW_ATTACHMENT_ID,
+      'wf-new',
+      ATTACHMENT_REF_ACTOR.agent
+    );
     expect(result).toEqual({
       aiIndexId: 'my-ai-index',
       workflowId: 'wf-new',
@@ -425,13 +433,72 @@ describe('saveAutomationHandler', () => {
     expect(result.status).toBe('already_attached');
   });
 
-  it('rejects managed AI indices', async () => {
-    aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
+  it('rejects managed AI indices before creating a workflow', async () => {
+    aiIndexService.assertCanAcceptAutomation.mockRejectedValue(
+      new AiIndexManagedError('my-ai-index')
+    );
     workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
 
     await expect(
       saveAutomationHandler({
         params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+        request,
+        spaceId: 'default',
+        attachments: attachments as never,
+        logger,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toBeInstanceOf(AiIndexManagedError);
+
+    expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+    expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
+    expect(aiIndexService.addAutomation).not.toHaveBeenCalled();
+    expect(attachments.updateOrigin).not.toHaveBeenCalled();
+  });
+
+  it('rejects when the automation limit is reached before creating a workflow', async () => {
+    aiIndexService.assertCanAcceptAutomation.mockRejectedValue(
+      new Error(
+        `AI index "my-ai-index" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
+      )
+    );
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+        request,
+        spaceId: 'default',
+        attachments: attachments as never,
+        logger,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toThrow(/maximum number of automations/);
+
+    expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+    expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
+    expect(aiIndexService.addAutomation).not.toHaveBeenCalled();
+    expect(attachments.updateOrigin).not.toHaveBeenCalled();
+  });
+
+  it('rejects managed AI indices before attaching by workflow id', async () => {
+    aiIndexService.assertCanAcceptAutomation.mockRejectedValue(
+      new AiIndexManagedError('my-ai-index')
+    );
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowId: 'wf-new' },
         request,
         spaceId: 'default',
         attachments: createAttachmentStateManager() as never,
@@ -443,44 +510,13 @@ describe('saveAutomationHandler', () => {
       })
     ).rejects.toBeInstanceOf(AiIndexManagedError);
 
-    expect(workflowsManagement.deleteWorkflows).toHaveBeenCalledWith(
-      ['wf-new'],
-      'default',
-      request
-    );
-  });
-
-  it('rejects when the automation limit is reached', async () => {
-    aiIndexService.addAutomation.mockRejectedValue(
-      new Error(
-        `AI index "my-ai-index" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
-      )
-    );
-    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
-
-    await expect(
-      saveAutomationHandler({
-        params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
-        request,
-        spaceId: 'default',
-        attachments: createAttachmentStateManager() as never,
-        logger,
-        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
-        getCoreStart,
-        getSecurityStart,
-        getWorkflowsManagement: () => workflowsManagement as never,
-      })
-    ).rejects.toThrow(/maximum number of automations/);
-
-    expect(workflowsManagement.deleteWorkflows).toHaveBeenCalledWith(
-      ['wf-new'],
-      'default',
-      request
-    );
+    expect(aiIndexService.addAutomation).not.toHaveBeenCalled();
   });
 
   it('does not roll back workflows created in the edit flow when attach fails', async () => {
-    aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
+    aiIndexService.assertCanAcceptAutomation.mockRejectedValue(
+      new AiIndexManagedError('my-ai-index')
+    );
 
     await expect(
       saveAutomationHandler({
@@ -497,6 +533,37 @@ describe('saveAutomationHandler', () => {
     ).rejects.toBeInstanceOf(AiIndexManagedError);
 
     expect(workflowsManagement.createWorkflow).not.toHaveBeenCalled();
+    expect(workflowsManagement.updateWorkflow).not.toHaveBeenCalled();
     expect(workflowsManagement.deleteWorkflows).not.toHaveBeenCalled();
+    expect(aiIndexService.addAutomation).not.toHaveBeenCalled();
+  });
+
+  it('rolls back a newly created workflow when attach fails after pre-check', async () => {
+    aiIndexService.addAutomation.mockRejectedValue(new AiIndexManagedError('my-ai-index'));
+    workflowsManagement.createWorkflow.mockResolvedValue({ id: 'wf-new', name: 'pilot' });
+
+    const attachments = createAttachmentStateManager();
+
+    await expect(
+      saveAutomationHandler({
+        params: { workflowAttachmentId: WORKFLOW_ATTACHMENT_ID },
+        request,
+        spaceId: 'default',
+        attachments: attachments as never,
+        logger,
+        getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+        getCoreStart,
+        getSecurityStart,
+        getWorkflowsManagement: () => workflowsManagement as never,
+      })
+    ).rejects.toBeInstanceOf(AiIndexManagedError);
+
+    expect(workflowsManagement.createWorkflow).toHaveBeenCalled();
+    expect(workflowsManagement.deleteWorkflows).toHaveBeenCalledWith(
+      ['wf-new'],
+      'default',
+      request
+    );
+    expect(attachments.updateOrigin).not.toHaveBeenCalled();
   });
 });

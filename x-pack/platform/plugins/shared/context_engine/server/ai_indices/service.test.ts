@@ -612,6 +612,80 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('assertCanAcceptAutomation', () => {
+    it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'missing',
+        _index: '.contextengine-ai-indices',
+        found: false,
+      });
+
+      await expect(service.assertCanAcceptAutomation('missing')).rejects.toBeInstanceOf(
+        AiIndexNotFoundError
+      );
+    });
+
+    it('throws AiIndexManagedError when the entry is managed', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(
+        service.assertCanAcceptAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).rejects.toBeInstanceOf(AiIndexManagedError);
+    });
+
+    it('rejects when the automation limit is reached', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: {
+          ...aiIndexDocument,
+          automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+            type: 'workflow' as const,
+            value: `wf-${index}`,
+          })),
+        },
+      });
+
+      await expect(
+        service.assertCanAcceptAutomation('customer_support', { type: 'workflow', value: 'wf-new' })
+      ).rejects.toThrow(/maximum number of automations/);
+    });
+
+    it('allows already attached workflows when the automation limit is reached', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 1,
+        _primary_term: 1,
+        _source: {
+          ...aiIndexDocument,
+          automations: Array.from({ length: MAX_AI_INDEX_AUTOMATIONS }, (_, index) => ({
+            type: 'workflow' as const,
+            value: index === 0 ? 'nightly-refresh' : `wf-${index}`,
+          })),
+        },
+      });
+
+      await expect(
+        service.assertCanAcceptAutomation('customer_support', {
+          type: 'workflow',
+          value: 'nightly-refresh',
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('addAutomation', () => {
     it('appends a workflow automation to the AI index', async () => {
       storageClient.get.mockResolvedValue({

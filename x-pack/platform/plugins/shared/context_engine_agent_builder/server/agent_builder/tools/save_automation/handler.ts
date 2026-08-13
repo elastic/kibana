@@ -273,9 +273,8 @@ const assertWorkflowUpdateAccess = async ({
   }
 };
 
+
 const persistWorkflowFromAttachment = async ({
-  attachments,
-  workflowAttachmentId,
   yaml,
   proposedWorkflowId,
   existingWorkflowId,
@@ -283,10 +282,7 @@ const persistWorkflowFromAttachment = async ({
   spaceId,
   request,
   getSecurityStart,
-  logger,
 }: {
-  attachments: AttachmentStateManager;
-  workflowAttachmentId: string;
   yaml: string;
   proposedWorkflowId?: string;
   existingWorkflowId?: string;
@@ -294,7 +290,6 @@ const persistWorkflowFromAttachment = async ({
   spaceId: string;
   request: KibanaRequest;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-  logger: Logger;
 }): Promise<{ workflowId: string; newlyCreated: boolean }> => {
   if (existingWorkflowId !== undefined) {
     await assertWorkflowUpdateAccess({
@@ -313,18 +308,6 @@ const persistWorkflowFromAttachment = async ({
     spaceId,
     request
   );
-
-  const originUpdated = await attachments.updateOrigin(
-    workflowAttachmentId,
-    created.id,
-    ATTACHMENT_REF_ACTOR.agent
-  );
-  if (!originUpdated) {
-    logger.warn(
-      `Workflow '${created.id}' was created but its attachment origin could not be recorded; ` +
-        `a future save for attachment '${workflowAttachmentId}' may create a duplicate workflow.`
-    );
-  }
 
   return { workflowId: created.id, newlyCreated: true };
 };
@@ -355,6 +338,7 @@ export const saveAutomationHandler = async ({
   const workflowsManagement = getWorkflowsManagement();
   const aiIndexAttachments = flattenAiIndexAttachments(attachments);
   const aiIndexId = resolveAiIndexIdFromAttachments(aiIndexAttachments, params.aiIndexId);
+  const aiIndexService = getAiIndexService();
 
   if (params.workflowId) {
     await assertWorkflowReadAccess({
@@ -365,7 +349,13 @@ export const saveAutomationHandler = async ({
       workflowsManagement,
     });
 
-    const attachStatus = await getAiIndexService().addAutomation(aiIndexId, {
+    // Fail-fast: reject before attach when the index cannot accept this automation.
+    await aiIndexService.assertCanAcceptAutomation(aiIndexId, {
+      type: 'workflow',
+      value: params.workflowId,
+    });
+
+    const attachStatus = await aiIndexService.addAutomation(aiIndexId, {
       type: 'workflow',
       value: params.workflowId,
     });
@@ -388,9 +378,13 @@ export const saveAutomationHandler = async ({
   } = resolveWorkflowYamlFromAttachments(attachments, params.workflowAttachmentId);
   const isUpdate = existingWorkflowId !== undefined;
 
+  // Fail-fast: reject before createWorkflow/updateWorkflow when the index cannot accept this automation.
+  await aiIndexService.assertCanAcceptAutomation(
+    aiIndexId,
+    existingWorkflowId ? { type: 'workflow', value: existingWorkflowId } : undefined
+  );
+
   const { workflowId, newlyCreated } = await persistWorkflowFromAttachment({
-    attachments,
-    workflowAttachmentId: params.workflowAttachmentId,
     yaml,
     proposedWorkflowId,
     existingWorkflowId,
@@ -398,14 +392,28 @@ export const saveAutomationHandler = async ({
     spaceId,
     request,
     getSecurityStart,
-    logger,
   });
 
   try {
-    const attachStatus = await getAiIndexService().addAutomation(aiIndexId, {
+    const attachStatus = await aiIndexService.addAutomation(aiIndexId, {
       type: 'workflow',
       value: workflowId,
     });
+
+    if (newlyCreated) {
+      const originUpdated = await attachments.updateOrigin(
+        params.workflowAttachmentId,
+        workflowId,
+        ATTACHMENT_REF_ACTOR.agent
+      );
+      if (!originUpdated) {
+        logger.warn(
+          `Workflow '${workflowId}' was attached but its attachment origin could not be recorded; ` +
+            `a future save for attachment '${params.workflowAttachmentId}' may create a duplicate workflow.`
+        );
+      }
+    }
+
     return {
       aiIndexId,
       workflowId,

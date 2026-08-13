@@ -44,6 +44,32 @@ const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem =
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 
+type AiIndexAutomationTarget = Pick<AiIndexDocument, 'managed' | 'automations'>;
+
+const assertAiIndexAcceptsAutomation = (
+  aiIndexId: string,
+  index: AiIndexAutomationTarget,
+  automation?: { type: 'workflow'; value: string }
+): { alreadyAttached: boolean } => {
+  if (index.managed) {
+    throw new AiIndexManagedError(aiIndexId);
+  }
+
+  const alreadyAttached =
+    automation !== undefined &&
+    index.automations.some(
+      (entry) => entry.type === automation.type && entry.value === automation.value
+    );
+
+  if (!alreadyAttached && index.automations.length >= MAX_AI_INDEX_AUTOMATIONS) {
+    throw new Error(
+      `AI index "${aiIndexId}" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
+    );
+  }
+
+  return { alreadyAttached };
+};
+
 /**
  * Manages the AI index registry stored in the hidden
  * `.contextengine-ai-indices` system index. Reads and writes go through the
@@ -162,6 +188,21 @@ export class AiIndexService {
   }
 
   /**
+   * Fail-fast validation before expensive side effects.
+   */
+  async assertCanAcceptAutomation(
+    aiIndexId: string,
+    automation?: { type: 'workflow'; value: string }
+  ): Promise<void> {
+    const existing = await this.findDocument(aiIndexId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+
+    assertAiIndexAcceptsAutomation(aiIndexId, existing.document, automation);
+  }
+
+  /**
    * Appends a workflow automation to an AI index, retrying on concurrent writes.
    */
   async addAutomation(
@@ -174,21 +215,14 @@ export class AiIndexService {
         if (!existing) {
           throw new AiIndexNotFoundError(aiIndexId);
         }
-        if (existing.document.managed) {
-          throw new AiIndexManagedError(aiIndexId);
-        }
 
-        const alreadyAttached = existing.document.automations.some(
-          (entry) => entry.type === automation.type && entry.value === automation.value
+        const { alreadyAttached } = assertAiIndexAcceptsAutomation(
+          aiIndexId,
+          existing.document,
+          automation
         );
         if (alreadyAttached) {
           return 'already_attached';
-        }
-
-        if (existing.document.automations.length >= MAX_AI_INDEX_AUTOMATIONS) {
-          throw new Error(
-            `AI index "${aiIndexId}" already has the maximum number of automations (${MAX_AI_INDEX_AUTOMATIONS}).`
-          );
         }
 
         await this.writeDocument(
