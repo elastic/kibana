@@ -10,10 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
-import {
-  ConnectorEventsBridgePlugin,
-  type ConnectorEventsBridgeStartDeps,
-} from './plugin';
+import { ConnectorEventsBridgePlugin, type ConnectorEventsBridgeStartDeps } from './plugin';
 
 describe('ConnectorEventsBridgePlugin', () => {
   const createPlugin = () => {

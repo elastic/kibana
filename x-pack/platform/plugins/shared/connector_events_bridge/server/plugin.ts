@@ -34,9 +34,7 @@ export class ConnectorEventsBridgePlugin
   ) {
     const configUtils = actions.getActionsConfigurationUtilities();
     if (!configUtils.isInboundEventsEnabled()) {
-      this.logger.info(
-        'Inbound events disabled; skipping connector event emitter registration'
-      );
+      this.logger.info('Inbound events disabled; skipping connector event emitter registration');
       return {};
     }
 
