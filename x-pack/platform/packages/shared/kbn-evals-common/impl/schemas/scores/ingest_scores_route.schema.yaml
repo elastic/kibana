@@ -85,6 +85,9 @@ paths:
                           input:
                             type: object
                             additionalProperties: true
+                          metadata:
+                            type: object
+                            additionalProperties: true
                           dataset:
                             type: object
                             properties:

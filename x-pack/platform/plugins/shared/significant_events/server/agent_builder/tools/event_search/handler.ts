@@ -214,14 +214,31 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
       : await eventClient.findLatestPaginated(sharedParams);
 
   const eventsWithUnconfirmedSignalsExcluded = params.exclude_unconfirmed_signals
-    ? response.hits.map((event) => ({
-        ...event,
-        signals: (event.signals ?? []).filter((signal) => signal.confirmed !== false),
-      }))
+    ? response.hits.map((event) => {
+        const confirmedSignals = (event.signals ?? []).filter(
+          (signal) => signal.confirmed !== false
+        );
+        const preserveUnconfirmedRuleMatch =
+          hasRuleFilter &&
+          !hasTopologyFilter &&
+          !hasEventIdFilter &&
+          hasRequestedRule(event, params.rule_uuids ?? []);
+
+        return {
+          ...event,
+          signals: preserveUnconfirmedRuleMatch
+            ? (event.signals ?? []).filter(
+                (signal) =>
+                  signal.confirmed !== false ||
+                  params.rule_uuids?.includes(signal.metadata?.rule_uuid ?? '')
+              )
+            : confirmedSignals,
+        };
+      })
     : response.hits;
-  // Rule matching happens in the data query before excluded signals are removed. Do not return an
-  // event that only matched one of those removed signals: the agent must not route to an event
-  // without a visible matching rule.
+  // Rule matching happens in the data query before excluded signals are removed. Preserve an
+  // otherwise invisible requested rule match so an agent can reconcile that open episode to
+  // closed after a current recovery check. All other unconfirmed signals remain excluded.
   const events =
     params.exclude_unconfirmed_signals && hasRuleFilter && !hasTopologyFilter && !hasEventIdFilter
       ? eventsWithUnconfirmedSignalsExcluded.filter((event) =>
@@ -237,11 +254,13 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
     next_page: response.page * response.perPage < response.total ? response.page + 1 : null,
   };
 
-  return view === 'full'
-    ? ({ ...envelope, view, events } as Extract<EventSearchResponse, { view: V }>)
-    : ({
-        ...envelope,
-        view,
-        events: events.map((event) => toCompactEvent(event, params)),
-      } as Extract<EventSearchResponse, { view: V }>);
+  const result: EventSearchResponse =
+    view === 'full'
+      ? { ...envelope, view, events }
+      : {
+          ...envelope,
+          view,
+          events: events.map((event) => toCompactEvent(event, params)),
+        };
+  return result as Extract<EventSearchResponse, { view: V }>;
 }

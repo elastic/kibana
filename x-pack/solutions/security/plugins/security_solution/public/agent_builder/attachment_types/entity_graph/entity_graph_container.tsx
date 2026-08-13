@@ -49,7 +49,7 @@ export const EntityGraphContainer = memo(({ data, onOpenFullGraph }: EntityGraph
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="popout"
+              iconType="external"
               size="s"
               onClick={onOpenFullGraph}
               data-test-subj={OPEN_FULL_GRAPH_BUTTON_TEST_ID}

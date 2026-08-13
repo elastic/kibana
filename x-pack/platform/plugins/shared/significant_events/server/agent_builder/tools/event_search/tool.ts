@@ -69,13 +69,13 @@ const searchEventsSchema = significantEventSchema
     exclude_unconfirmed_signals: z
       .boolean()
       .optional()
-      .default(false)
+      .default(true)
       .describe(
         i18n.translate(
           'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.excludeUnconfirmedSignals',
           {
             defaultMessage:
-              'When true, omit signals whose confirmed value is false from returned events. Rule-filtered searches also omit events that matched only excluded signals. Signals with confirmed true or omitted remain. Note: total and has_more reflect the pre-filter ES count; treat returned < per_page as the effective end-of-results signal when this filter is active.',
+              'Defaults to true. Omit signals whose confirmed value is false from returned events. Rule-filtered searches also omit events that matched only excluded signals, except the discovery recovery path may retain a requested same-rule signal for episode reconciliation. Signals with confirmed true or omitted remain. Note: total and has_more reflect the pre-filter ES count; use has_more and next_page to continue scanning source pages when this filter is active.',
           }
         )
       ),

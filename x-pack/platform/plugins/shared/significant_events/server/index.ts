@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { ConfigSchema } from './config';
+
+export const config: PluginConfigDescriptor = {
+  schema: ConfigSchema,
+};
 
 export const plugin = async (ctx: PluginInitializerContext) => {
   const { SignificantEventsPlugin } = await import('./plugin');

@@ -17,7 +17,7 @@ import {
   type NightshiftSignificantEventsQueryData,
 } from './use_fetch_significant_events';
 
-const mockHttpGet = jest.fn();
+const mockSignificantEventsFetch = jest.fn();
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
   ({
@@ -36,8 +36,8 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 jest.mock('./use_kibana', () => ({
   useKibana: () => ({
     services: {
-      http: {
-        get: mockHttpGet,
+      significantEvents: {
+        significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
       },
     },
   }),
@@ -67,7 +67,7 @@ describe('useFetchSignificantEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     clearPendingInvestigationCompletionsForTests();
-    mockHttpGet.mockResolvedValue({
+    mockSignificantEventsFetch.mockResolvedValue({
       hits: [],
       page: 1,
       perPage: 1000,
@@ -80,12 +80,14 @@ describe('useFetchSignificantEvents', () => {
 
     await capturedQueryFn!({ signal: undefined });
 
-    expect(mockHttpGet).toHaveBeenCalledWith(
-      '/internal/significant_events/events',
+    expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
+      'GET /internal/significant_events/events',
       expect.objectContaining({
-        query: expect.objectContaining({
-          severity: NIGHTSHIFT_LANDING_SEVERITIES,
-        }),
+        params: {
+          query: expect.objectContaining({
+            severity: NIGHTSHIFT_LANDING_SEVERITIES,
+          }),
+        },
       })
     );
   });
@@ -184,7 +186,7 @@ describe('markEventInvestigationCompleteInCache', () => {
 
     markEventInvestigationCompleteInCache(queryClient, 'evt-uuid-1', '2026-01-01T00:05:00.000Z');
 
-    mockHttpGet.mockResolvedValueOnce({
+    mockSignificantEventsFetch.mockResolvedValueOnce({
       hits: [
         mockEvent({
           event_uuid: 'evt-uuid-2',

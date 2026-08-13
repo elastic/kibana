@@ -120,7 +120,7 @@ it('discovers failures in ftr report', async () => {
         "likelyIrrelevant": true,
         "location": "x-pack/platform/test/functional/apps/machine_learning/anomaly_detection/saved_search_job.ts",
         "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
-        "owners": "elastic/ml-ui",
+        "owners": "elastic/search-ml-ux",
         "system-out": "[00:21:57]         └-: machine learning...",
         "testType": "ftr",
         "time": "6.040",
