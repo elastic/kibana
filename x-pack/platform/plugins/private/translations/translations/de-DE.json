@@ -13432,7 +13432,6 @@
     "xpack.apm.appName": "APM",
     "xpack.apm.betaBadgeDescription": "Dieses Feature befindet sich derzeit in der Beta-Phase. Falls Sie auf Fehler stoßen oder Feedback haben, öffnen Sie bitte ein Ticket oder besuchen Sie unser Diskussionsforum.",
     "xpack.apm.betaBadgeLabel": "Beta",
-    "xpack.apm.chart.annotation.version": "Version",
     "xpack.apm.chart.comparison.defaultPreviousPeriodLabel": "Vorheriger Zeitraum",
     "xpack.apm.chart.cpuSeries.processAverageLabel": "Prozessdurchschnitt",
     "xpack.apm.chart.cpuSeries.processMaxLabel": "Prozess Max.",
