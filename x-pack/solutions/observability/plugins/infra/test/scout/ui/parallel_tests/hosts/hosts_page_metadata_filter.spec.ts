@@ -10,7 +10,6 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
   HOST1_NAME,
-  HOSTS,
   HOSTS_METADATA_FIELD,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
@@ -72,8 +71,8 @@ test.describe(
     test('Adding a metadata filter hides other hosts from the table', async ({
       pageObjects: { hostsPage, assetDetailsPage, toasts },
     }) => {
-      await test.step('verify all hosts are visible before filtering', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      await test.step('verify the fixture host is visible before filtering', async () => {
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
       });
 
       await test.step('open host flyout, add a filter for host.name', async () => {

@@ -57,6 +57,8 @@ export const HOSTS = [
     cpuValue: 0.4,
   },
 ];
+export const HOSTS_QUERY = HOSTS.map(({ hostName }) => `host.name: "${hostName}"`).join(' or ');
+
 export const DEFAULT_HOSTS_INVENTORY_VIEW_NAME = 'Hosts Default View';
 
 export const DATE_WITH_HOSTS_WITHOUT_DATA_FROM = '2024-03-29T18:20:00.000Z';

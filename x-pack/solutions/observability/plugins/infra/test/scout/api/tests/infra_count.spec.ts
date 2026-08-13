@@ -51,7 +51,7 @@ apiTest.describe(
         headers,
         responseType: 'json',
         body: {
-          query: testData.emptyQuery,
+          query: testData.buildHostNameQuery(testData.ECS_ARCHIVE_HOSTS),
           from: ecsTimeRange.from,
           to: ecsTimeRange.to,
           schema: 'ecs',
@@ -69,7 +69,9 @@ apiTest.describe(
         headers,
         responseType: 'json',
         body: {
-          query: testData.emptyQuery,
+          query: testData.buildHostNameQuery(
+            testData.SEMCONV_HOSTS.map(({ hostName }) => hostName)
+          ),
           from: testData.SEMCONV_HOSTS_DATA_FROM,
           to: testData.SEMCONV_HOSTS_DATA_TO,
           schema: 'semconv',
@@ -92,7 +94,11 @@ apiTest.describe(
       const response = await apiClient.post('api/infra/host/count', {
         headers,
         responseType: 'json',
-        body: { query: testData.emptyQuery, ...wideTimerange, schema: 'ecs' },
+        body: {
+          query: testData.buildHostNameQuery(testData.ECS_ARCHIVE_HOSTS),
+          ...wideTimerange,
+          schema: 'ecs',
+        },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -106,7 +112,13 @@ apiTest.describe(
         const response = await apiClient.post('api/infra/host/count', {
           headers,
           responseType: 'json',
-          body: { query: testData.emptyQuery, ...wideTimerange, schema: 'semconv' },
+          body: {
+            query: testData.buildHostNameQuery(
+              testData.SEMCONV_HOSTS.map(({ hostName }) => hostName)
+            ),
+            ...wideTimerange,
+            schema: 'semconv',
+          },
         });
 
         expect(response).toHaveStatusCode(200);

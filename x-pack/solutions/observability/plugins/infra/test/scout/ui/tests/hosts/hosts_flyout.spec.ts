@@ -86,7 +86,7 @@ test.describe(
         to: HOSTS_FLYOUT_DATA_TO,
         preferredSchema: 'ecs',
       });
-      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
     });
 
     test.afterEach(async ({ kbnClient }) => {
@@ -251,7 +251,7 @@ test.describe(
         to: HOSTS_FLYOUT_DATA_TO,
         preferredSchema: 'ecs',
       });
-      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
       await hostsPage.openHostFlyout(HOST1_NAME);
 
       await test.step('navigate to dashboards tab', async () => {

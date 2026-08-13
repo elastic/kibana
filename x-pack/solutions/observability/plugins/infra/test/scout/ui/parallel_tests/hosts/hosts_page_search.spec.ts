@@ -11,6 +11,7 @@ import { test } from '../../fixtures';
 import {
   HOST1_NAME,
   HOSTS,
+  HOSTS_QUERY,
   HOSTS_METADATA_FIELD,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
@@ -27,6 +28,7 @@ test.describe(
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
         preferredSchema: 'ecs',
+        initialQuery: HOSTS_QUERY,
       });
 
       await test.step('verify all hosts are visible before filtering', async () => {

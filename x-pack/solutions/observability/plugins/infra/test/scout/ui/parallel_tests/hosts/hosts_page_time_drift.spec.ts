@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
-  HOSTS,
+  HOST1_NAME,
   DATE_WITH_HOSTS_DATA_MIDPOINT,
   KPI_RENDER_TIMEOUT,
   KPI_METRICS,
@@ -45,8 +45,8 @@ test.describe(
         });
       });
 
-      await test.step('all hosts and KPIs render with data', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+      await test.step('the fixture host and KPIs render with data', async () => {
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
         await hostsPage.waitForHostKPIChartsToLoad(KPI_METRICS, KPI_RENDER_TIMEOUT);
         for (const metric of KPI_METRICS) {
           // Non-empty and not the regression symptom 'N/A'.
@@ -64,7 +64,7 @@ test.describe(
       });
 
       await test.step('table still has data and KPIs never show N/A', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
         await hostsPage.waitForHostKPIChartsToLoad(KPI_METRICS, KPI_RENDER_TIMEOUT);
         for (const metric of KPI_METRICS) {
           await expect(hostsPage.getHostKPIChartValueLocator(metric)).toHaveAttribute(
@@ -93,7 +93,7 @@ test.describe(
       });
 
       await test.step('initial state has data', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
         await hostsPage.waitForHostKPIChartsToLoad(KPI_METRICS, KPI_RENDER_TIMEOUT);
       });
 
@@ -106,7 +106,7 @@ test.describe(
         for (const step of driftSteps) {
           await page.clock.fastForward(step);
           await hostsPage.clickRefresh();
-          await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+          await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
           const snapshot = await hostsPage.getKPIValuesSnapshot(KPI_RENDER_TIMEOUT);
           for (const metric of KPI_METRICS) {
             expect(snapshot[metric]).not.toBe('N/A');

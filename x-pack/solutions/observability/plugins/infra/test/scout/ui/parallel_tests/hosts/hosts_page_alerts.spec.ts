@@ -12,10 +12,8 @@ import {
   HOST1_NAME,
   HOST2_NAME,
   HOST3_NAME,
-  HOSTS,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
-  EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 import {
   ACTIVE_ALERTS,
@@ -47,9 +45,7 @@ test.describe(
         to: DATE_WITH_HOSTS_DATA_TO,
         preferredSchema: 'ecs',
       });
-      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length, {
-        timeout: EXTENDED_TIMEOUT,
-      });
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {

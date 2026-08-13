@@ -74,6 +74,7 @@ apiTest.describe(
           ...basePayload,
           metrics: ['cpuV2'],
           ...wideTimerange,
+          query: testData.buildHostNameQuery(testData.ECS_ARCHIVE_HOSTS),
           schema: 'ecs',
         },
       });
@@ -83,11 +84,7 @@ apiTest.describe(
         .map((p) => p.name)
         .sort();
 
-      expect(names).toStrictEqual([
-        'gke-observability-8--observability-8--bc1afd95-f0zc',
-        'gke-observability-8--observability-8--bc1afd95-ngmh',
-        'gke-observability-8--observability-8--bc1afd95-nhhw',
-      ]);
+      expect(names).toStrictEqual([...testData.ECS_ARCHIVE_HOSTS].sort());
       for (const name of names) {
         expect(testData.SEMCONV_HOSTS.map((h) => h.hostName)).not.toContain(name);
       }
@@ -101,7 +98,9 @@ apiTest.describe(
           limit: 10,
           metrics: ['cpuV2'],
           ...wideTimerange,
-          query: { bool: { must_not: [], filter: [], should: [], must: [] } },
+          query: testData.buildHostNameQuery(
+            testData.SEMCONV_HOSTS.map(({ hostName }) => hostName)
+          ),
           schema: 'semconv',
         },
       });

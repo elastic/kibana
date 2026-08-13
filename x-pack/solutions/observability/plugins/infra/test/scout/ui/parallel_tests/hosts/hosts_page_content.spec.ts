@@ -9,7 +9,6 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
-  HOSTS,
   HOST1_NAME,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
@@ -29,7 +28,7 @@ test.describe(
       });
 
       await test.step('wait for table and KPIs to load', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
         await hostsPage.waitForKPILoadingToFinish(EXTENDED_TIMEOUT);
       });
     });

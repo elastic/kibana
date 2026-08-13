@@ -99,5 +99,20 @@ export const emptyQuery = {
   },
 };
 
+export const ECS_ARCHIVE_HOSTS = [
+  'gke-observability-8--observability-8--bc1afd95-f0zc',
+  'gke-observability-8--observability-8--bc1afd95-ngmh',
+  'gke-observability-8--observability-8--bc1afd95-nhhw',
+] as const;
+
+export const buildHostNameQuery = (hostNames: readonly string[]): Record<string, unknown> => ({
+  bool: {
+    must: [],
+    filter: [{ terms: { 'host.name': [...hostNames] } }],
+    should: [],
+    must_not: [],
+  },
+});
+
 /** Collapse newlines / multi-space runs so validation error assertions stay stable. */
 export const normalizeNewLine = (text: string): string => text.replaceAll(/(\s{2,}|\n\s)/g, ' ');

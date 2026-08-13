@@ -15,6 +15,7 @@ import {
   HOST5_NAME,
   HOST6_NAME,
   HOSTS,
+  HOSTS_QUERY,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
   KPI_RENDER_TIMEOUT,
@@ -36,6 +37,7 @@ test.describe(
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
         preferredSchema: 'ecs',
+        initialQuery: HOSTS_QUERY,
       });
 
       await test.step('wait for table and KPIs to load', async () => {

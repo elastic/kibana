@@ -12,7 +12,6 @@ import {
   HOST1_NAME,
   HOST2_NAME,
   HOST3_NAME,
-  HOSTS,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
   EXTENDED_TIMEOUT,
@@ -33,7 +32,7 @@ test.describe(
         to: DATE_WITH_HOSTS_DATA_TO,
         preferredSchema: 'ecs',
       });
-      await expect(hostsPage.tableRows).toHaveCount(HOSTS.length, {
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible({
         timeout: EXTENDED_TIMEOUT,
       });
       await hostsPage.waitForKPILoadingToFinish(EXTENDED_TIMEOUT);

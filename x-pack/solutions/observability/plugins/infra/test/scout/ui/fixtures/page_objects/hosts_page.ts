@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import rison from '@kbn/rison';
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT, KPI_METRICS } from '../constants';
 
@@ -91,16 +92,23 @@ export class HostsPage {
     to,
     preferredSchema = null,
     skipLoadWait = false,
+    initialQuery = '',
   }: {
     from: string;
     to: string;
     preferredSchema?: PreferredSchema;
     skipLoadWait?: boolean;
+    initialQuery?: string;
   }) {
     const baseUrl = this.kbnUrl.app('metrics');
-    const schemaPart =
-      preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
-    const risonState = `(dateRange:(from:'${from}',to:'${to}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
+    const risonState = rison.encodeUnknown({
+      dateRange: { from, to },
+      filters: [],
+      limit: 100,
+      panelFilters: [],
+      preferredSchema,
+      query: { language: 'kuery', query: initialQuery },
+    });
     await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
     if (!skipLoadWait) {
       await this.waitForTableToLoad();
@@ -112,16 +120,23 @@ export class HostsPage {
     rangeTo,
     preferredSchema = null,
     skipLoadWait = false,
+    initialQuery = '',
   }: {
     rangeFrom: string;
     rangeTo: string;
     preferredSchema?: PreferredSchema;
     skipLoadWait?: boolean;
+    initialQuery?: string;
   }) {
     const baseUrl = this.kbnUrl.app('metrics');
-    const schemaPart =
-      preferredSchema === null ? 'preferredSchema:!n' : `preferredSchema:${preferredSchema}`;
-    const risonState = `(dateRange:(from:'${rangeFrom}',to:'${rangeTo}'),filters:!(),limit:100,panelFilters:!(),${schemaPart},query:(language:kuery,query:''))`;
+    const risonState = rison.encodeUnknown({
+      dateRange: { from: rangeFrom, to: rangeTo },
+      filters: [],
+      limit: 100,
+      panelFilters: [],
+      preferredSchema,
+      query: { language: 'kuery', query: initialQuery },
+    });
     await this.page.goto(`${baseUrl}/hosts?_a=${risonState}`);
     if (!skipLoadWait) {
       await this.waitForTableToLoad();
