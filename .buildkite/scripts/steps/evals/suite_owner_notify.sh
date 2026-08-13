@@ -79,10 +79,10 @@ fi
 echo "--- Preparing model connector for triage summary"
 if [[ -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
   source .buildkite/scripts/steps/evals/setup_connectors.sh || {
-    echo "WARNING: setup_connectors failed; build_suite_owner_slack_message will use vault LiteLLM fallback"
+    echo "WARNING: setup_connectors failed; build_suite_owner_slack_message will use vault OpenRouter fallback"
   }
 else
-  echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault LiteLLM env vars"
+  echo "WARNING: KBN_EVALS_CONFIG_B64 is not set; build_suite_owner_slack_message requires vault OpenRouter env vars"
 fi
 
 FAILING_PROJECTS_CSV="$(IFS=,; echo "${failing_projects[*]}")"
