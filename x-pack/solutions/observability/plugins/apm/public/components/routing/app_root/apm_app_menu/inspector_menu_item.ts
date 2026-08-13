@@ -7,6 +7,7 @@
 
 import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
+import { APM_APP_MENU_EBT_ACTIONS, apmAppMenuEbt } from './ebt_constants';
 
 const inspectLabel = i18n.translate('xpack.apm.inspectButtonText', {
   defaultMessage: 'Inspect',
@@ -30,6 +31,7 @@ export function getInspectorMenuItem({
     label: inspectLabel,
     iconType: 'inspect',
     testId: 'apmInspectHeaderLink',
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_INSPECTOR),
     run: onInspect,
     order,
     overflow: true,

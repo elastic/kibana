@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 export {
   AppMenuComponent,
   AppMenuItem,
@@ -15,6 +14,8 @@ export {
   AppMenuPopover,
   AppMenuPopoverActionButtons,
   APP_MENU_ITEM_LIMIT,
+  APP_MENU_EBT_ELEMENT,
+  APP_MENU_EBT_OPEN_MORE_ACTION,
   APP_MENU_TEST_SUBJECTS,
   getAppMenuItemTestSubj,
   getAppMenuActionButtonTestSubj,
@@ -22,6 +23,7 @@ export {
   getShouldOverflow,
   isDisabled,
   getTooltip,
+  getAppMenuEbtDomProps,
   mapAppMenuItemToPanelItem,
   getAppMenuItems,
   getPopoverPanels,
@@ -35,6 +37,7 @@ export type {
   AppMenuRunAction,
   AppMenuRunActionParams,
   AppMenuConfig,
+  AppMenuEbtAttrs,
   AppMenuItemType,
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,

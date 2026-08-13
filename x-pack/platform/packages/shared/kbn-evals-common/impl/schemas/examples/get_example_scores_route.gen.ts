@@ -20,7 +20,7 @@ import { EvaluationScoreDocument } from '../common_attributes.gen';
 
 export const GetExampleScoresRequestParams = lazySchema(() =>
   z.object({
-    exampleId: z.string(),
+    exampleId: z.string().max(1024),
   })
 );
 export type GetExampleScoresRequestParams = z.infer<typeof GetExampleScoresRequestParams>;
