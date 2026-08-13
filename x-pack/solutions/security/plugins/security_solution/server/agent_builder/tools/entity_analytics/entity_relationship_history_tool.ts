@@ -10,7 +10,6 @@ import { ToolType, ToolResultType, type ErrorResult } from '@kbn/agent-builder-c
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core/server';
-import dateMath from '@kbn/datemath';
 import {
   ENTITY_METADATA,
   RELATIONSHIP_KINDS,
@@ -27,6 +26,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import { securityTool } from '../constants';
 import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
 import { requireResolvedEntity } from './entity_resolution';
+import { parseTimeRangeOrError } from './time_range_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
 const schema = z.object({
@@ -142,12 +142,6 @@ const checkMetadataReadAccess = async ({
   };
 };
 
-/**
- * Temporal relationship observations from the entity metadata event log
- * (`event.action: relationship_observed`). Distinct from:
- * - `security.get_entity` interval/date → coarse profile_history snapshots
- * - `security.get_entity_graph` → relationship graph preview attachment
- */
 export const entityRelationshipHistoryTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
@@ -238,26 +232,26 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
         }
 
         const client = esClient.asCurrentUser;
-        const [resolvedSubject, resolvedTarget] = await Promise.all([
-          requireResolvedEntity({
-            esClient: client,
-            spaceId,
-            entityId,
-            entityType,
-          }),
+
+        const resolvedSubject = await requireResolvedEntity({
+          esClient: client,
+          spaceId,
+          entityId,
+          entityType,
+        });
+        if (!resolvedSubject.ok) {
+          return { results: resolvedSubject.results };
+        }
+
+        const resolvedTarget =
           target !== undefined
-            ? requireResolvedEntity({
+            ? await requireResolvedEntity({
                 esClient: client,
                 spaceId,
                 entityId: target,
                 entityType: targetType,
               })
-            : Promise.resolve(undefined),
-        ]);
-
-        if (!resolvedSubject.ok) {
-          return { results: resolvedSubject.results };
-        }
+            : undefined;
         if (resolvedTarget !== undefined && !resolvedTarget.ok) {
           return { results: resolvedTarget.results };
         }
@@ -266,20 +260,10 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
         const resolvedTargetId =
           resolvedTarget !== undefined ? resolvedTarget.identity.entityStoreId : undefined;
 
-        const min = from !== undefined ? dateMath.parse(from) : undefined;
-        const max = to !== undefined ? dateMath.parse(to, { roundUp: true }) : undefined;
-        if ((from !== undefined && !min?.isValid()) || (to !== undefined && !max?.isValid())) {
-          const errorMessage = `Unable to parse time range from "${from ?? ''}" to "${to ?? ''}".`;
-          telemetryTracker.recordFailure(errorMessage);
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: { message: errorMessage },
-              },
-            ],
-          };
+        const parsedTimeRange = parseTimeRangeOrError({ from, to });
+        if (!parsedTimeRange.ok) {
+          telemetryTracker.recordFailure(parsedTimeRange.results[0].data.message);
+          return { results: parsedTimeRange.results };
         }
 
         const relationshipsClient = entityStore.createRelationshipsClient(client, spaceId);
