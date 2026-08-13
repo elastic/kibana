@@ -60,5 +60,5 @@ export const hasWorkflowExecutePrivilege = (
 ): Promise<boolean> =>
   hasAllApiPrivileges({
     ...params,
-    actions: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.read],
+    actions: [WorkflowsManagementApiActions.execute],
   });
