@@ -260,6 +260,8 @@ describe('Config schema', () => {
       const res = applyConfigDeprecations({
         experimentalFeatures: {
           enableAgentlessPoliciesUI: false,
+          // disableAgentlessLegacyAPI defaults on, so pin it off to isolate "only the UI disabled".
+          disableAgentlessLegacyAPI: false,
         },
       });
 

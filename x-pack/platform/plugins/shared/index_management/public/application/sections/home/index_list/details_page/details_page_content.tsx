@@ -264,7 +264,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
         tabs={headerTabs}
         badges={badges}
         menu={appMenu}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
       />
       <EuiSpacer size="l" />
       {indexErrors.length > 0 && <IndexErrorCallout errors={indexErrors} />}

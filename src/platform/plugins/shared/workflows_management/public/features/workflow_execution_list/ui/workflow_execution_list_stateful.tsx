@@ -9,6 +9,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { type ExecutionStatus, type ExecutionType, isInProgressStatus } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -22,7 +23,6 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 
 export interface ExecutionListFiltersQueryParams {
   statuses: ExecutionStatus[];
@@ -44,7 +44,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const { notifications } = useKibana().services;
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
-  const showExecutor = useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID);
+  const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
 

@@ -58,3 +58,17 @@ export function isScoutTestsOnlyDiff(changedFiles: readonly string[]): boolean {
     SCOUT_TESTS_ONLY_EXCLUDE_GLOBS
   );
 }
+
+/**
+ * Returns `true` when every changed file sits inside a Scout test scope
+ * (fixtures included). Unlike `isScoutTestsOnlyDiff`, fixtures aren't
+ * excluded here: Jest/FTR can't consume Scout fixtures either way, so the
+ * tests-only/dependency-tree distinction only matters to Scout's own pipeline.
+ */
+export function isScoutPathOnlyDiff(changedFiles: readonly string[]): boolean {
+  return allChangedFilesInScope(
+    changedFiles,
+    SCOUT_TESTS_ONLY_SCOPE_GLOBS,
+    SCOUT_TESTS_ONLY_IGNORE_PATTERNS
+  );
+}

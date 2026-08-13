@@ -161,6 +161,10 @@ export const epmRouteService = {
     return EPM_API_ROUTES.REVIEW_UPGRADE_PATTERN.replace('{pkgName}', pkgName);
   },
 
+  getNamespacePreflightCheckPath: (pkgName: string) => {
+    return EPM_API_ROUTES.NAMESPACE_PREFLIGHT_CHECK_PATTERN.replace('{pkgName}', pkgName);
+  },
+
   getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
     return EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS.replace('{pkgName}', pkgName)
       .replace('{pkgVersion}', pkgVersion)
@@ -458,6 +462,8 @@ export const uninstallTokensRouteService = {
   getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
   getInfoPath: (uninstallTokenId: string) =>
     UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
+  getRotatePath: (agentPolicyId: string) =>
+    UNINSTALL_TOKEN_ROUTES.ROTATE_PATTERN.replace('{agentPolicyId}', agentPolicyId),
 };
 
 export const setupRouteService = {

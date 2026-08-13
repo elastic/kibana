@@ -11,9 +11,10 @@ import { map, startWith } from 'rxjs';
 import type { JsonObject } from '@kbn/utility-types';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY } from '../config';
+import { CLAIM_STRATEGY_MGET } from '../config';
 import { getCapacityInCost, getCapacityInWorkers } from '../task_pool';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
+import type { TaskExecutionControlService, TaskExecutionControlState } from '../execution_control';
 
 const CONFIG_FIELDS_TO_EXPOSE = [
   'request_capacity',
@@ -30,16 +31,25 @@ interface CapacityConfig extends JsonObject {
   };
 }
 
+interface ExecutionControlConfig extends JsonObject {
+  execution_control: {
+    paused: boolean;
+    paused_task_types: string[];
+  };
+}
+
 export type ConfigStat = Pick<
   TaskManagerConfig,
   'poll_interval' | 'claim_strategy' | (typeof CONFIG_FIELDS_TO_EXPOSE)[number]
 > &
-  CapacityConfig;
+  CapacityConfig &
+  ExecutionControlConfig;
 
 export function createConfigurationAggregator(
   config: TaskManagerConfig,
   startingCapacity: number,
-  taskPollingLifecycle?: TaskPollingLifecycle
+  taskPollingLifecycle?: TaskPollingLifecycle,
+  executionControlService?: TaskExecutionControlService
 ): AggregatedStatProvider<ConfigStat> {
   const capacity$ = taskPollingLifecycle
     ? taskPollingLifecycle.capacityConfiguration$.pipe(
@@ -60,11 +70,28 @@ export function createConfigurationAggregator(
         },
       });
 
+  // The execution control service runs on every node (including UI-only nodes
+  // that have no polling lifecycle), so read the pause state from it directly
+  // to keep the health output consistent everywhere.
+  const executionControl$ = executionControlService
+    ? executionControlService.state.pipe(
+        map<TaskExecutionControlState, ExecutionControlConfig>((state) => ({
+          execution_control: {
+            paused: state.paused,
+            paused_task_types: state.pausedTaskTypes,
+          },
+        }))
+      )
+    : of<ExecutionControlConfig>({
+        execution_control: { paused: false, paused_task_types: [] },
+      });
+
   return combineLatest([
     of(pick(config, ...CONFIG_FIELDS_TO_EXPOSE)),
-    of({ claim_strategy: config.claim_strategy ?? CLAIM_STRATEGY_UPDATE_BY_QUERY }),
+    of({ claim_strategy: config.claim_strategy ?? CLAIM_STRATEGY_MGET }),
     of({ poll_interval: config.poll_interval }),
     capacity$,
+    executionControl$,
   ]).pipe(
     map((configurations) => ({
       key: 'configuration',

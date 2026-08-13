@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { selectRuleSimpleActionPolicies } from '@kbn/alerting-v2-rule-form';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import type { RuleApiResponse } from '../services/rules_api';
 
@@ -21,18 +20,10 @@ jest.mock('../services/action_policies_api');
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
   buildInlineWorkflowYaml: jest.fn().mockReturnValue('workflow: yaml'),
   buildRuleScopedMatcher: jest.fn((ruleId: string) => `rule.id: "${ruleId}"`),
-  selectRuleSimpleActionPolicies: jest.fn(() => []),
-  getRuleNotificationDraftsQueryKey: jest.fn((ruleId?: string) => [
-    'ruleNotificationDrafts',
-    ruleId,
-  ]),
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
-const mockSelectRuleSimpleActionPolicies = selectRuleSimpleActionPolicies as jest.MockedFunction<
-  typeof selectRuleSimpleActionPolicies
->;
 
 const mockRule = {
   id: 'rule-1',
@@ -72,24 +63,15 @@ const createWrapper = () => {
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 };
 
-const removeQueriesSpy = jest.spyOn(QueryClient.prototype, 'removeQueries');
-
 describe('useSetupRuleNotifications', () => {
   const mockCreateWorkflowFn = jest.fn();
-  const mockUpdateWorkflowFn = jest.fn();
   const mockDeleteWorkflowFn = jest.fn();
   const mockCreateActionPolicy = jest.fn();
-  const mockGetActionPolicy = jest.fn();
-  const mockUpdateActionPolicy = jest.fn();
-  const mockDeleteActionPolicy = jest.fn();
-  const mockMatchActionPoliciesForRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSelectRuleSimpleActionPolicies.mockReturnValue([]);
-    mockMatchActionPoliciesForRule.mockResolvedValue({ items: [] });
 
     mockCoreStart.mockImplementation((key: string) => key as ReturnType<typeof CoreStart>);
 
@@ -97,18 +79,11 @@ describe('useSetupRuleNotifications', () => {
       if (service === WorkflowApi) {
         return {
           createWorkflow: mockCreateWorkflowFn,
-          updateWorkflow: mockUpdateWorkflowFn,
           deleteWorkflow: mockDeleteWorkflowFn,
         } as ReturnType<typeof useService>;
       }
       if (service === ActionPoliciesApi) {
-        return {
-          createActionPolicy: mockCreateActionPolicy,
-          getActionPolicy: mockGetActionPolicy,
-          updateActionPolicy: mockUpdateActionPolicy,
-          deleteActionPolicy: mockDeleteActionPolicy,
-          matchActionPoliciesForRule: mockMatchActionPoliciesForRule,
-        } as ReturnType<typeof useService>;
+        return { createActionPolicy: mockCreateActionPolicy } as ReturnType<typeof useService>;
       }
       if (service === 'notifications') {
         return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as ReturnType<
@@ -310,159 +285,6 @@ describe('useSetupRuleNotifications', () => {
         expect(mockCreateWorkflowFn).toHaveBeenCalledTimes(1);
         expect(mockCreateActionPolicy).toHaveBeenCalledTimes(2);
         expect(mockAddSuccess).toHaveBeenCalledWith(expect.stringContaining('2'));
-      });
-    });
-  });
-
-  describe('reconcile (edit) mode', () => {
-    it('does not create/update/delete or toast when nothing changed', async () => {
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({ rule: mockRule, actions: [], onUpdate: true });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(mockMatchActionPoliciesForRule).toHaveBeenCalledWith('rule-1');
-      expect(mockCreateActionPolicy).not.toHaveBeenCalled();
-      expect(mockUpdateWorkflowFn).not.toHaveBeenCalled();
-      expect(mockDeleteActionPolicy).not.toHaveBeenCalled();
-      expect(mockAddSuccess).not.toHaveBeenCalled();
-    });
-
-    it('creates only the added draft and leaves hydrated ones untouched', async () => {
-      mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-new' });
-      mockCreateActionPolicy.mockResolvedValue({});
-      mockUpdateWorkflowFn.mockResolvedValue({});
-      // The rule already has one inline policy (the hydrated email row).
-      mockSelectRuleSimpleActionPolicies.mockReturnValue([
-        { policyId: 'p-email', policyVersion: 'v1', workflowId: 'wf-email' },
-      ]);
-
-      const hydratedEmail = {
-        ...emailAction,
-        id: 'wf-email',
-        origin: { policyId: 'p-email', policyVersion: 'v1', workflowId: 'wf-email' },
-      };
-
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({
-        rule: mockRule,
-        actions: [hydratedEmail, slackAction],
-        onUpdate: true,
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      // Added slack draft is created; hydrated email is updated in place, not
-      // re-created; nothing is deleted (the email row was kept).
-      expect(mockCreateWorkflowFn).toHaveBeenCalledTimes(1);
-      expect(mockCreateActionPolicy).toHaveBeenCalledTimes(1);
-      expect(mockUpdateWorkflowFn).toHaveBeenCalledWith('wf-email', { yaml: expect.any(String) });
-      expect(mockDeleteActionPolicy).not.toHaveBeenCalled();
-    });
-
-    it('deletes the policy when a hydrated row is removed', async () => {
-      mockDeleteActionPolicy.mockResolvedValue(undefined);
-      mockSelectRuleSimpleActionPolicies.mockReturnValue([
-        { policyId: 'p-email', policyVersion: 'v1', workflowId: 'wf-email' },
-      ]);
-
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
-        wrapper: createWrapper(),
-      });
-
-      // The user removed every simple action, so `actions` is empty.
-      result.current.mutate({ rule: mockRule, actions: [], onUpdate: true });
-
-      await waitFor(() => {
-        expect(mockDeleteActionPolicy).toHaveBeenCalledWith('p-email');
-      });
-      expect(mockCreateActionPolicy).not.toHaveBeenCalled();
-      expect(mockUpdateWorkflowFn).not.toHaveBeenCalled();
-      expect(mockAddSuccess).toHaveBeenCalledWith(expect.stringContaining('removed'));
-      expect(mockAddSuccess).not.toHaveBeenCalledWith(expect.stringContaining('saved'));
-    });
-
-    it('re-points the policy when a hydrated existing-workflow selection changed', async () => {
-      mockGetActionPolicy.mockResolvedValue({ id: 'p-wf', version: 'v9' });
-      mockUpdateActionPolicy.mockResolvedValue({});
-      mockSelectRuleSimpleActionPolicies.mockReturnValue([
-        { policyId: 'p-wf', policyVersion: 'v1', workflowId: 'wf-old' },
-      ]);
-
-      const changedExisting = {
-        id: 'wf-old',
-        source: 'existing' as const,
-        workflowId: 'wf-new',
-        origin: { policyId: 'p-wf', policyVersion: 'v1', workflowId: 'wf-old' },
-      };
-
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({ rule: mockRule, actions: [changedExisting], onUpdate: true });
-
-      await waitFor(() => {
-        expect(mockUpdateActionPolicy).toHaveBeenCalledWith('p-wf', {
-          version: 'v9',
-          destinations: [{ type: 'workflow', id: 'wf-new' }],
-        });
-      });
-      expect(mockDeleteActionPolicy).not.toHaveBeenCalled();
-      expect(mockCreateActionPolicy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('hydration cache', () => {
-    it('drops the rule notification drafts cache on success so re-edits are fresh', async () => {
-      mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-new' });
-      mockCreateActionPolicy.mockResolvedValue({});
-
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({ rule: mockRule, actions: [emailAction] });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(removeQueriesSpy).toHaveBeenCalledWith({
-        queryKey: ['ruleNotificationDrafts', 'rule-1'],
-      });
-      expect(removeQueriesSpy).toHaveBeenCalledWith({
-        queryKey: ['matchedActionPolicies', 'rule-1'],
-      });
-    });
-
-    it('drops the cache even when the reconcile fails, since a partial failure still mutates policies', async () => {
-      mockCreateWorkflowFn.mockResolvedValue({ id: 'wf-new' });
-      mockCreateActionPolicy.mockRejectedValue(new Error('boom'));
-      mockDeleteWorkflowFn.mockResolvedValue(undefined);
-
-      const { result } = renderHook(() => useSetupRuleNotifications(), {
-        wrapper: createWrapper(),
-      });
-
-      result.current.mutate({ rule: mockRule, actions: [emailAction] });
-
-      await waitFor(() => {
-        expect(result.current.isError).toBe(true);
-      });
-
-      expect(removeQueriesSpy).toHaveBeenCalledWith({
-        queryKey: ['ruleNotificationDrafts', 'rule-1'],
       });
     });
   });

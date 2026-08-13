@@ -18,6 +18,7 @@ import { withIndices } from '../../data_view_manager/hooks/__mocks__/use_data_vi
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../flyout_v2/use_flyout_api');
@@ -99,6 +100,7 @@ describe('OpenFlyoutButtonIcon', () => {
     expect(flyoutApi.openDocumentFlyoutFromPattern).toHaveBeenCalledWith({
       documentId: mockEventId,
       indexName: 'test1,test2',
+      origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
     });
   });
 });

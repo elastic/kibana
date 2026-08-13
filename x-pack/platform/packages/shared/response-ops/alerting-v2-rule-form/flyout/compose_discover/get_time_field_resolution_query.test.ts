@@ -30,6 +30,12 @@ describe('getTimeFieldResolutionQuery', () => {
     );
   });
 
+  it('falls back to the breach query for standalone alert rules (YAML sandbox)', () => {
+    expect(getTimeFieldResolutionQuery(standaloneQuery, true, true)).toBe(
+      standaloneQuery.breach.query
+    );
+  });
+
   it('returns empty when the query is not committed', () => {
     expect(getTimeFieldResolutionQuery(composedQuery, true, false)).toBe('');
   });

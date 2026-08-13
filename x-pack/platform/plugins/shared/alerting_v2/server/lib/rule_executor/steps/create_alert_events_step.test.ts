@@ -59,6 +59,16 @@ describe('CreateAlertEventsStep', () => {
     });
   });
 
+  it('captures rule.version from the rule version', async () => {
+    const input = createRuleExecutionInput();
+    const rule = createRuleResponse({ metadata: { version: 5 } });
+    const esqlRowBatch = [{ 'host.name': 'host-a' }];
+
+    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+    expect(result.state.alertEventsBatch?.[0].rule).toEqual({ id: rule.id, version: 5 });
+  });
+
   it('builds signal-typed events for a stateless kind: signal rule', async () => {
     const input = createRuleExecutionInput();
     const rule = createRuleResponse({ kind: 'signal' });

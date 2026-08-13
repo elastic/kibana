@@ -11,17 +11,17 @@ import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function updateEventStatusToolHandler({
   eventClient,
-  eventId,
+  eventUuid,
   status,
 }: {
   eventClient: EventClient;
-  eventId: string;
+  eventUuid: string;
   status: SignificantEventStatus;
 }): Promise<{
-  event_id: string;
+  event_uuid: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
 }> {
-  return updateSignificantEventStatus({ eventClient, eventId, status });
+  return updateSignificantEventStatus({ eventClient, eventUuid, status });
 }

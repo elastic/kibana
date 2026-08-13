@@ -78,7 +78,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                                  |
 | `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                                |
 | `--profile <name>`               |           | Profile for config resolution (see table above)                                             |
-| `--datasets-profile <name>`      |           | Override dataset settings (sets `EVALUATIONS_KBN_URL`/`EVALUATIONS_KBN_API_KEY`)            |
+| `--datasets-profile <name>`      |           | Override dataset settings (sets `EVAL_KBN_URL`/`EVAL_KBN_API_KEY`)            |
 | `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)                       |
 | `--grep <pattern>`               |           | Filter tests by name (passed to Playwright `--grep`)                                        |
 | `--repetitions <n>`              |           | Number of times to repeat each example                                                      |
@@ -158,7 +158,6 @@ node scripts/evals run --suite streams --dry-run
 | `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators                       |
 | `--grep <pattern>`                |           | Filter tests by name (passed to Playwright `--grep`)          |
 | `--repetitions <n>`               |           | Repeat each example N times                                   |
-| `--executor <name>`               |           | `kibana` (default) or `phoenix`                               |
 | `--profile <name>`                |           | Load both dataset + export settings from `config.<name>.json` |
 | `--datasets-profile <name>`       |           | Load dataset settings from `config.<name>.json`               |
 | `--export-profile <name>`         |           | Load export settings from `config.<name>.json`                |
@@ -166,8 +165,6 @@ node scripts/evals run --suite streams --dry-run
 | `--trace-es-api-key <key>`        |           | API key for trace ES                                          |
 | `--evaluations-kbn-url <url>`     |           | Kibana URL for score ingestion and dataset operations         |
 | `--evaluations-kbn-api-key <key>` |           | API key for the target Kibana                                 |
-| `--phoenix-base-url <url>`        |           | Phoenix API URL (when using `--executor phoenix`)             |
-| `--phoenix-api-key <key>`         |           | Phoenix API key                                               |
 | `--dry-run`                       |           | Print the Playwright command and exit                         |
 
 ### `list` -- List available suites

@@ -15,9 +15,10 @@ import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_detail
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { TimelineId } from '../../../../../common/types/timeline';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
+import { getAlertHistoryTitle } from '../../../../flyout_v2/document/main/utils/get_header_title';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import { SHOW_ALERT_TOOLTIP } from '../translations';
 
@@ -25,9 +26,10 @@ export interface ShowAlertButtonProps {
   id: string;
   alertId: string;
   index: string;
+  ruleName?: string | null;
 }
 
-export const ShowAlertButton = ({ id, alertId, index }: ShowAlertButtonProps) => {
+export const ShowAlertButton = ({ id, alertId, index, ruleName }: ShowAlertButtonProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const {
     telemetry,
@@ -62,6 +64,8 @@ export const ShowAlertButton = ({ id, alertId, index }: ShowAlertButtonProps) =>
             documentId: alertId,
             indexName: index,
             renderCellActions: casesCellActionRenderer,
+            origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
+            title: getAlertHistoryTitle(ruleName),
           });
         } else {
           openFlyout({
@@ -93,6 +97,7 @@ export const ShowAlertButton = ({ id, alertId, index }: ShowAlertButtonProps) =>
     navigateToCaseView,
     enableNewFlyout,
     openDocumentFlyoutFromIndex,
+    ruleName,
   ]);
 
   return (

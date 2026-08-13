@@ -21,7 +21,7 @@ interface Dependencies {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClient;
   logger: Logger;
-  abortController: AbortController;
+  signal: AbortSignal;
 }
 
 const SPACES_PER_BATCH = 100;
@@ -134,12 +134,9 @@ export async function cleanupStaleInstances(
 }
 
 async function isTaskRunning(taskId: string, dependencies: Dependencies): Promise<boolean> {
-  const { esClient, logger, abortController } = dependencies;
+  const { esClient, logger, signal } = dependencies;
   try {
-    const response = await esClient.tasks.get(
-      { task_id: taskId },
-      { signal: abortController.signal }
-    );
+    const response = await esClient.tasks.get({ task_id: taskId }, { signal });
 
     if (response.completed) {
       return false;
@@ -152,7 +149,7 @@ async function isTaskRunning(taskId: string, dependencies: Dependencies): Promis
       );
 
       try {
-        await esClient.tasks.cancel({ task_id: taskId }, { signal: abortController.signal });
+        await esClient.tasks.cancel({ task_id: taskId }, { signal });
       } catch (cancelError) {
         logger.debug(`Failed to cancel task ${taskId}: ${cancelError}`);
       }
@@ -179,7 +176,7 @@ async function getNextSpaceBatch(
   searchAfter: string | undefined,
   dependencies: Dependencies
 ): Promise<{ spaceIds: string[]; nextSearchAfter?: string }> {
-  const { esClient, abortController } = dependencies;
+  const { esClient, signal } = dependencies;
   const response = await esClient.search(
     {
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -194,7 +191,7 @@ async function getNextSpaceBatch(
         },
       },
     },
-    { signal: abortController.signal }
+    { signal }
   );
 
   const agg = response.aggregations?.spaces as {
@@ -239,14 +236,14 @@ async function hasDocumentsToDelete(
   query: QueryContainer,
   dependencies: Dependencies
 ): Promise<boolean> {
-  const { esClient, abortController } = dependencies;
+  const { esClient, signal } = dependencies;
   const response = await esClient.count(
     {
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       terminate_after: 1,
       query: query as QueryDslQueryContainer,
     },
-    { signal: abortController.signal }
+    { signal }
   );
 
   return response.count > 0;
@@ -256,7 +253,7 @@ async function executeDeleteByQuery(
   query: QueryContainer,
   dependencies: Dependencies
 ): Promise<string | undefined> {
-  const { esClient, logger, abortController } = dependencies;
+  const { esClient, logger, signal } = dependencies;
   const response = await esClient.deleteByQuery(
     {
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -267,7 +264,7 @@ async function executeDeleteByQuery(
       requests_per_second: REQUESTS_PER_SECOND,
       query: query as QueryDslQueryContainer,
     },
-    { signal: abortController.signal }
+    { signal }
   );
 
   const taskId = 'task' in response ? response.task : undefined;

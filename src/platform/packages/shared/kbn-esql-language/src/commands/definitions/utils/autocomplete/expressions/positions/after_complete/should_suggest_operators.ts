@@ -14,6 +14,7 @@ import {
   arithmeticOperators,
   comparisonFunctions,
   logicalOperators,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
@@ -34,6 +35,13 @@ export interface OperatorRuleContext {
 interface EvaluatedOperatorRuleContext extends OperatorRuleContext {
   isHomogeneous: boolean;
 }
+
+const stringPredicateOperatorNames = [
+  ...matchOperators.map(({ name }) => name),
+  ...patternMatchOperators.map(({ name }) => name),
+  ...inOperators.map(({ name }) => name),
+  ...nullCheckOperators.map(({ name }) => name),
+];
 
 export interface OperatorDecision {
   shouldSuggest: boolean;
@@ -96,9 +104,7 @@ const rules: Rule[] = [
 
         const stringOperators = [
           ...(isBooleanContext ? comparisonFunctions.map(({ name }) => name) : []),
-          ...patternMatchOperators.map(({ name }) => name),
-          ...inOperators.map(({ name }) => name),
-          ...nullCheckOperators.map(({ name }) => name),
+          ...stringPredicateOperatorNames,
         ];
 
         return {
@@ -144,15 +150,9 @@ const rules: Rule[] = [
       const allSignatures = functionParameterContext.functionDefinition?.signatures;
 
       if (allSignatures && hasBooleanSignature(allSignatures)) {
-        const stringOperators = [
-          ...patternMatchOperators.map(({ name }) => name),
-          ...inOperators.map(({ name }) => name),
-          ...nullCheckOperators.map(({ name }) => name),
-        ];
-
         return {
           shouldSuggest: true,
-          allowedOperators: stringOperators,
+          allowedOperators: stringPredicateOperatorNames,
           reason:
             'Homogeneous function first parameter - string operators for boolean expression creation',
         };
@@ -164,15 +164,9 @@ const rules: Rule[] = [
     // If parameter accepts boolean OR any, suggest string-specific operators
     // (any includes boolean, so we can create boolean expressions)
     if (acceptsBoolean || acceptsAny) {
-      const stringOperators = [
-        ...patternMatchOperators.map(({ name }) => name), // LIKE, NOT LIKE, RLIKE, NOT RLIKE
-        ...inOperators.map(({ name }) => name), // IN, NOT IN
-        ...nullCheckOperators.map(({ name }) => name), // IS NULL, IS NOT NULL
-      ];
-
       return {
         shouldSuggest: true,
-        allowedOperators: stringOperators,
+        allowedOperators: stringPredicateOperatorNames,
         reason: 'String operators: pattern matching (LIKE), membership (IN), null checks',
       };
     }
@@ -245,15 +239,9 @@ const rules: Rule[] = [
 
     // For text/keyword fields, limit to string-specific operators
     if (ctx.expressionType === 'text' || ctx.expressionType === 'keyword') {
-      const stringOperators = [
-        ...patternMatchOperators.map(({ name }) => name), // LIKE, NOT LIKE, RLIKE, NOT RLIKE
-        ...inOperators.map(({ name }) => name), // IN, NOT IN
-        ...nullCheckOperators.map(({ name }) => name), // IS NULL, IS NOT NULL
-      ];
-
       return {
         shouldSuggest: true,
-        allowedOperators: stringOperators,
+        allowedOperators: stringPredicateOperatorNames,
         reason: 'Homogeneous function with boolean signature - string operators only',
       };
     }

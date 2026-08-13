@@ -308,10 +308,18 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByRole('link', { name: 'Watchlists settings' })).toBeInTheDocument();
   });
 
-  it('renders empty prompt when indices do not exist', () => {
+  it('renders the homepage (not onboarding) when running even if the data view has no matched indices', () => {
+    // Regression test for elastic/security-team#18599: right after enabling EA the entity-latest
+    // index (and its data view) may not be resolvable yet. The page must not fall back to the
+    // generic Security onboarding screen once the store is running; it should render the homepage
+    // and let the tables handle the empty state.
     mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: [] },
-      status: 'ready',
+      isLoading: false,
+      error: undefined,
+    });
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: { status: 'running', engines: [] },
     });
 
     render(
@@ -321,9 +329,8 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    // EmptyPrompt should be rendered; main content should not
-    expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dynamic-risk-level-panel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
+    expect(screen.getByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
   });
 
   it("renders entity store disabled empty prompt when status is 'not_installed'", () => {
@@ -380,7 +387,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
-  it("does not render disabled empty prompt when status is 'installing'", () => {
+  it("renders a loader (not the disabled prompt or homepage) while status is 'installing'", () => {
     mockUseEntityStoreStatus.mockReturnValue({
       data: { status: 'installing', engines: [] },
     });
@@ -392,8 +399,11 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
+    // While installing we show a loader; the status query polls and re-renders to the homepage
+    // once it flips to `running`. See elastic/security-team#18599.
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
     expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
-    expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
+    expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 
   it('disabled empty prompt footer renders a Read the docs link to the entity analytics docs', () => {
@@ -550,7 +560,10 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.queryByTestId('dynamic-risk-level-panel')).toBeInTheDocument();
   });
 
-  it('indicesExist=false still wins over entity store disabled state', () => {
+  it('renders entity store disabled empty prompt when store is not_installed and no indices exist', () => {
+    // Regression test: in a custom (non-default) space the entity-store index does not exist,
+    // so indicesExist=false. The disabled check must take precedence so the onboarding screen
+    // is shown instead of the generic SIEM landing page. See #278680.
     mockUseEntityStoreDataView.mockReturnValue({
       dataView: { id: 'test', matchedIndices: [] },
       status: 'ready',
@@ -567,7 +580,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.queryByTestId('entityStoreDisabledEmptyPrompt')).not.toBeInTheDocument();
+    expect(screen.getByTestId('entityStoreDisabledEmptyPrompt')).toBeInTheDocument();
     expect(screen.queryByTestId('entity-analytics-home-entities-table')).not.toBeInTheDocument();
   });
 

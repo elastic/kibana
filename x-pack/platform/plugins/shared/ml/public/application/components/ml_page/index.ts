@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MlPageControlsContext, MlPage } from './ml_page';
+export { MlPage } from './ml_page';

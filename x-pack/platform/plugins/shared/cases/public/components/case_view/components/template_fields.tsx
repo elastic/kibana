@@ -26,6 +26,10 @@ type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 interface TemplateFieldsProps {
   caseData: CaseUI;
   onUpdateField: (args: OnUpdateFields) => void;
+  /**
+   * When false, skips the "Extended fields" heading (redesign accordion already labels the section).
+   * Defaults to true for the legacy case view.
+   */
   showHeader?: boolean;
 }
 

@@ -32,7 +32,7 @@ export const categoryComplianceEvaluator: KIQueryGenerationEvaluator = {
               .map((q) => `"${q.title}" has category "${q.category}"`)
               .join('; ')}`
           : `All ${queries.length} queries use valid categories`,
-      details: {
+      metadata: {
         total: queries.length,
         invalidQueries: invalidQueries.map((q) => ({
           title: q.title,

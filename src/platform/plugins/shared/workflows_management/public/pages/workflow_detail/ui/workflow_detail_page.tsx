@@ -9,14 +9,13 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { renderTemplate } from '@kbn/workflows-library';
-import { useTemplate, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { WorkflowDetailHeader } from './workflow_detail_header';
@@ -26,9 +25,16 @@ import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
-import { setActiveTab, setExecution, setYamlString } from '../../../entities/workflows/store';
+import {
+  setActiveTab,
+  setExecution,
+  setIsTestModalOpen,
+  setReplayExecutionId,
+  setYamlString,
+} from '../../../entities/workflows/store';
 import {
   selectActiveTab,
+  selectWorkflowDefinition,
   selectWorkflowId,
   selectWorkflowName,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -43,11 +49,17 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { getFromTemplateSlug } from '../../../shared/utils/template_prefill';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
+
+/**
+ * `location.state` the page can arrive with: list-navigation state (back
+ * link) and, on `/create`, the cross-app initial-content contract
+ * (`WorkflowsCreateRouteState`, e.g. the Template Library's "Remix with AI").
+ */
+type WorkflowDetailLocationState = WorkflowDetailRouteState & WorkflowsCreateRouteState;
 
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
@@ -65,40 +77,25 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     useAsyncThunkState(loadWorkflowThunk);
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
-  const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const location = useLocation<WorkflowDetailLocationState | undefined>();
 
-  // On `/create`, an optional `?fromTemplate=<slug>` seeds the editor from a
-  // Workflow Template Library template. The slug is stable, so the link
-  // survives refreshes and can be shared. The URL query also mutates during
-  // normal editing (view toggle, step selection — `history.replace` in
-  // `useWorkflowUrlState`), so seeding is guarded to run once per slug below
-  // rather than on every `location.search` change.
-  const fromTemplateSlug = useMemo(
-    () => (id ? undefined : getFromTemplateSlug(location.search)),
-    [id, location.search]
-  );
-  const {
-    data: fromTemplate,
-    // Not `isLoading`: in react-query v4 a disabled query (no slug) reports
-    // `isLoading: true` forever, which would deadlock `isReady` below.
-    isInitialLoading: isLoadingTemplate,
-    isError: isTemplateError,
-  } = useTemplate(fromTemplateSlug);
-
-  const isReady = !isLoadingWorkflow && !isLoadingConnectors && !isLoadingTemplate;
+  const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
   const activeTabInStore = useSelector(selectActiveTab);
   const workflowId = useSelector(selectWorkflowId);
   const workflowName = useSelector(selectWorkflowName);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   useWorkflowsBreadcrumbs(workflowName);
 
-  const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+  const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
   const {
     activeTab,
     selectedExecutionId,
     setSelectedExecution,
     setActiveTab: setUrlTab,
+    replayExecutionId,
+    clearReplayExecutionId,
   } = useWorkflowUrlState();
 
   useEffect(() => {
@@ -129,45 +126,33 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     loadWorkflows(); // dispatch load workflows on mount
   }, [loadConnectors, loadWorkflows]);
 
-  // Seed the editor once per create-session: tracks what the editor was last
-  // seeded with (`template:<slug>` or the default) so URL-state churn and
-  // re-renders never clobber in-progress edits or re-fire telemetry.
-  const seededWithRef = useRef<string | undefined>(undefined);
+  // Seed the editor once per create-session: tracks whether the editor was
+  // already seeded so URL-state churn (`history.replace` in
+  // `useWorkflowUrlState` drops `location.state`) and re-renders never
+  // clobber in-progress edits or re-fire telemetry.
+  const seededRef = useRef(false);
 
   // Load workflow when id changes
   useEffect(() => {
     if (id) {
-      seededWithRef.current = undefined;
+      seededRef.current = false;
       loadWorkflow({ id }); // sets loaded yaml string
       return;
     }
-
-    if (fromTemplateSlug && !isTemplateError) {
-      if (!fromTemplate) {
-        return; // still fetching — `isReady` keeps the loading state up
-      }
-      const seedKey = `template:${fromTemplateSlug}`;
-      if (seededWithRef.current === seedKey) {
-        return;
-      }
-      seededWithRef.current = seedKey;
-      dispatch(setYamlString(renderTemplate({ template: fromTemplate })));
-      telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+    if (seededRef.current) {
       return;
     }
+    seededRef.current = true;
 
-    // Plain `/create`, or the template failed to load before any seed — fall
-    // back to the default YAML without erroring. Never override an editor
-    // already seeded from a template: a background refetch (refetch-on-focus)
-    // can flip `isTemplateError` to `true` while the last-good `data` is still
-    // present, which would otherwise wipe the user's in-progress edits.
-    if (seededWithRef.current === 'default' || seededWithRef.current?.startsWith('template:')) {
-      return;
-    }
-    seededWithRef.current = 'default';
-    dispatch(setYamlString(workflowDefaultYaml));
+    // A navigation can hand `/create` its initial content through history
+    // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
+    // "Remix with AI" passes the rendered template. The state travels on the
+    // history entry, not the URL, so plain `/create` links and shared URLs
+    // fall back to the default YAML.
+    const { initialYaml } = location.state ?? {};
+    dispatch(setYamlString(initialYaml || workflowDefaultYaml));
     telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
-  }, [loadWorkflow, id, dispatch, telemetry, fromTemplateSlug, fromTemplate, isTemplateError]);
+  }, [loadWorkflow, id, dispatch, telemetry, location.state]);
 
   // Sync activeTab from URL state to store
   useEffect(() => {
@@ -175,6 +160,32 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
       dispatch(setActiveTab(activeTab));
     }
   }, [activeTab, activeTabInStore, dispatch]);
+
+  useEffect(() => {
+    if (
+      !isReady ||
+      !replayExecutionId ||
+      !canExecuteWorkflow ||
+      !workflowDefinition ||
+      !id ||
+      workflowId !== id
+    ) {
+      return;
+    }
+
+    dispatch(setReplayExecutionId(replayExecutionId));
+    dispatch(setIsTestModalOpen(true));
+    clearReplayExecutionId();
+  }, [
+    canExecuteWorkflow,
+    clearReplayExecutionId,
+    dispatch,
+    id,
+    isReady,
+    replayExecutionId,
+    workflowDefinition,
+    workflowId,
+  ]);
 
   // Load execution when selectedExecutionId changes
   useEffect(() => {

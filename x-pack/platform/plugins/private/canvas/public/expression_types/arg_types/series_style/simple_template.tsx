@@ -15,8 +15,8 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
+import { set, del } from '../../../../common/lib/object_path_immutable';
 import type { ResolvedArgProps, ResolvedLabels } from '../../arg';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { TooltipIcon, IconType } from '../../../components/tooltip_icon';

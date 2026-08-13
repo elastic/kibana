@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import { MIN_SCHEDULE_INTERVAL } from '@kbn/alerting-v2-schemas';
+import { DEFAULT_MINIMUM_SCHEDULE_INTERVAL, MIN_SCHEDULE_INTERVAL } from '@kbn/alerting-v2-schemas';
 import { parseDurationToMs, validateDuration } from './lib/duration';
 
 /** Default value of `xpack.alerting_v2.rules.minimumScheduleInterval`. */
-const MINIMUM_SCHEDULE_INTERVAL_DEFAULT = '1m';
+const MINIMUM_SCHEDULE_INTERVAL_DEFAULT = DEFAULT_MINIMUM_SCHEDULE_INTERVAL;
 /**
  * Lowest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to.
  * Tied to the absolute minimum a rule `schedule.every` can be, so functional
@@ -30,6 +30,7 @@ const rulesRunSchema = schema.object({
   alerts: schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
+  timeout: schema.maybe(schema.string({ validate: validateDuration })),
 });
 
 const rulesSchema = schema.object({

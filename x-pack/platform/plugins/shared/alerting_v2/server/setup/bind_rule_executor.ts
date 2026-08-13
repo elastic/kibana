@@ -17,9 +17,7 @@ import {
   ValidateRuleStep,
   ExecuteRuleQueryStep,
   CreateAlertEventsStep,
-  DetectDataPresenceStep,
-  CreateRecoveryEventsStep,
-  CreateNoDataEventsStep,
+  ClassifyAbsentGroupsStep,
 } from '../lib/rule_executor/steps';
 import {
   CancellationBoundaryMiddleware,
@@ -76,9 +74,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(DetectDataPresenceStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(CreateNoDataEventsStep).inRequestScope();
+  bind(RuleExecutionStepsToken).to(ClassifyAbsentGroupsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 

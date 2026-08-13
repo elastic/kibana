@@ -21,6 +21,7 @@ import type {
   ExportResultsStrategyResponse,
 } from '../../common/search_strategy/osquery';
 import { OsqueryQueries } from '../../common/search_strategy/osquery';
+import { OSQUERY_SEARCH_STRATEGY } from '../search_strategy/constants';
 
 const MAX_EXPORT_RESULTS = 500_000;
 
@@ -148,7 +149,7 @@ export async function exportResultsToStream({
           pit,
           trackTotalHits: true,
         },
-        { strategy: 'osquerySearchStrategy', abortSignal: abortController.signal }
+        { strategy: OSQUERY_SEARCH_STRATEGY, abortSignal: abortController.signal }
       )
     );
 
@@ -254,7 +255,7 @@ export async function exportResultsToStream({
                 pit,
                 searchAfter,
               },
-              { strategy: 'osquerySearchStrategy', abortSignal: signal }
+              { strategy: OSQUERY_SEARCH_STRATEGY, abortSignal: signal }
             )
           );
 

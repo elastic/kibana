@@ -57,7 +57,9 @@ jest.mock('../../../common/components/links', () => ({
   ),
 }));
 
-const renderTable = (onShowFinding: (resourceId: string, ruleId: string) => void) =>
+const renderTable = (
+  onShowFinding: (resourceId: string, ruleId: string, ruleName?: string) => void
+) =>
   render(
     <TestProviders>
       <MisconfigurationFindingsDetailsTable
@@ -79,6 +81,6 @@ describe('MisconfigurationFindingsDetailsTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Preview finding details' }));
 
-    expect(onShowFinding).toHaveBeenCalledWith('resource-1', 'rule-1');
+    expect(onShowFinding).toHaveBeenCalledWith('resource-1', 'rule-1', 'Rule One');
   });
 });

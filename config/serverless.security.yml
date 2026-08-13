@@ -208,9 +208,6 @@ xpack.fleet.internal.registry.excludePackages: [
     'symantec',
     'tomcat',
 
-    # ML integrations
-    'dga',
-
     # Unsupported in serverless
     'cloud_defend',
   ]

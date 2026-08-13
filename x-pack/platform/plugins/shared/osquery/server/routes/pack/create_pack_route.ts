@@ -9,7 +9,7 @@ import moment from 'moment-timezone';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import { has, unset, some, mapKeys, mapValues } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -35,6 +35,7 @@ import {
   validatePackScheduleFields,
   buildScheduleResponseSlice,
   stripPerQueryRruleFields,
+  convergePerQueryIntervals,
 } from './utils';
 import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
@@ -137,18 +138,22 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               return rest;
             });
 
+        const convergedQueries = gatedQueries
+          ? convergePerQueryIntervals(gatedQueries as Record<string, PackQueryInput>, scheduleType)
+          : gatedQueries;
+
         const scheduleErr = validatePackScheduleFields({
           packScheduleType: scheduleType,
           packInterval,
           packRrule: rruleSchedule,
-          queries: gatedQueries as Record<string, PackQueryInput>,
+          queries: convergedQueries as Record<string, PackQueryInput>,
         });
         if (scheduleErr) {
           return response.badRequest({ body: { message: scheduleErr } });
         }
 
         const now = moment().toISOString();
-        const queries = mapValues(gatedQueries, (queryData) => ({
+        const queries = mapValues(convergedQueries, (queryData) => ({
           ...queryData,
           schedule_id: uuidv4(),
           start_date: now,

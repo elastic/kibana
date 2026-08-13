@@ -45,7 +45,7 @@ export const getFollowerIndexInfo = async (
   logger: Logger
 ): Promise<{ info?: CcrFollowInfoFollowerIndex; error?: string }> => {
   try {
-    const index = await getFollowerIndex(esClient, new AbortController());
+    const index = await getFollowerIndex(esClient, new AbortController().signal);
     if (!index) {
       return { error: `Follower index not found` };
     }
@@ -310,11 +310,15 @@ const fetchAndCompareCustomAssets = async (
   const abortController = new AbortController();
 
   try {
-    const installedPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
+    const installedPipelines = await getPipeline(
+      esClient,
+      CUSTOM_ASSETS_PREFIX,
+      abortController.signal
+    );
 
     for (const [_, ccrCustomAsset] of Object.entries(ccrCustomAssets)) {
       if (ccrCustomAsset.type === 'ingest_pipeline' && !ccrCustomAsset.name.includes('@custom')) {
-        const response = await getPipeline(esClient, ccrCustomAsset.name, abortController);
+        const response = await getPipeline(esClient, ccrCustomAsset.name, abortController.signal);
         if (response[ccrCustomAsset.name]) {
           installedPipelines[ccrCustomAsset.name] = response[ccrCustomAsset.name];
         }
@@ -324,7 +328,7 @@ const fetchAndCompareCustomAssets = async (
     const installedComponentTemplates = await getComponentTemplate(
       esClient,
       CUSTOM_ASSETS_PREFIX,
-      abortController
+      abortController.signal
     );
 
     const componentTemplatesByName = (

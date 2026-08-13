@@ -81,7 +81,9 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
   useNavigateToAlertsPageWithFilters: jest.fn().mockReturnValue(jest.fn()),
 }));
 
-const renderTable = (onShowAlert: (eventId: string, indexName: string) => void) =>
+const renderTable = (
+  onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void
+) =>
   render(
     <TestProviders>
       <AlertsDetailsTable
@@ -94,7 +96,7 @@ const renderTable = (onShowAlert: (eventId: string, indexName: string) => void) 
 
 const clickRowAction = () => {
   // The row action is an icon-only button rendered with the `expand` EuiIcon.
-  const expandIcon = document.querySelector('[data-euiicon-type="expand"]');
+  const expandIcon = document.querySelector('[data-euiicon-type="maximize"]');
   fireEvent.click(expandIcon?.closest('button') as HTMLElement);
 };
 
@@ -109,7 +111,7 @@ describe('AlertsDetailsTable', () => {
 
     clickRowAction();
 
-    expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1');
+    expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1', 'Rule');
   });
 
   describe('time range', () => {

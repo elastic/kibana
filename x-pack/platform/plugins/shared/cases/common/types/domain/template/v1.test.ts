@@ -365,6 +365,14 @@ describe('ParsedTemplateDefinitionSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  it('allows a null case-default name (a cleared `name:` in the YAML)', () => {
+    // Typing `name:` with no value in the editor parses to `{ name: null }`. This must behave like
+    // the other cleared case defaults (description/severity/category) and not fail validation.
+    const result = ParsedTemplateDefinitionSchema.safeParse({ name: null, fields: [] });
+
+    expect(result.success).toBe(true);
+  });
+
   it('rejects a case-default name longer than the max case title length', () => {
     const result = ParsedTemplateDefinitionSchema.safeParse({
       name: 'a'.repeat(MAX_TITLE_LENGTH + 1),

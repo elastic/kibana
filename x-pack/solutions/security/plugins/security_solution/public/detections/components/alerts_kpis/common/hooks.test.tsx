@@ -20,6 +20,9 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 jest.mock('../../../../data_view_manager/hooks/use_browser_fields');
+jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: jest.fn(() => ({ dataView: {}, status: 'ready' })),
+}));
 
 describe('getAggregatableFields', () => {
   test('getAggregatableFields when useLensCompatibleFields = false', () => {

@@ -10,11 +10,12 @@ import { EuiFlexGroup, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ApplicationConnectionsEmptyPrompt } from './application_connections_empty_prompt';
+import { getUnselectableRowMessage, matchesActionMode } from './application_connections_filters';
 import { ApplicationConnectionsTableHeader } from './application_connections_table_header';
 import { flatTableStyles } from './application_connections_table_styles';
-import { isConnectionActive, useConnectionTableColumns } from './connection_table_columns';
+import { useConnectionTableColumns } from './connection_table_columns';
 import { labels } from '../constants/i18n';
-import type { ApplicationConnection } from '../constants/types';
+import type { ApplicationConnection, ApplicationConnectionsActionMode } from '../constants/types';
 import { useNavigation } from '../hooks/use_navigation';
 import type { OAuthConnection } from '../service/application_connections_api_client';
 
@@ -23,6 +24,7 @@ export interface ConnectionsListTableProps {
   totalCount: number;
   isLoading: boolean;
   selectedConnections: OAuthConnection[];
+  actionMode: ApplicationConnectionsActionMode | null;
   onSelectionChange: (selection: OAuthConnection[]) => void;
 }
 
@@ -31,6 +33,7 @@ export const ConnectionsListTable = ({
   totalCount,
   isLoading,
   selectedConnections,
+  actionMode,
   onSelectionChange,
 }: ConnectionsListTableProps) => {
   const { mcpClientCreateUrl } = useNavigation();
@@ -48,11 +51,11 @@ export const ConnectionsListTable = ({
   const selectionConfig: EuiTableSelectionType<ApplicationConnection> = {
     selected: selectedItems,
     onSelectionChange: (next) => onSelectionChange(next.map((row) => row.connection)),
-    selectable: isConnectionActive,
-    selectableMessage: (selectable, { connection }) =>
+    selectable: (row) => matchesActionMode(row, actionMode),
+    selectableMessage: (selectable, row) =>
       selectable
-        ? labels.connectionColumns.selectRowLabel(connection.name ?? connection.id)
-        : labels.connectionColumns.revokedRowLabel,
+        ? labels.connectionColumns.selectRowLabel(row.connection.name ?? row.connection.id)
+        : getUnselectableRowMessage(row),
   };
 
   useEffect(() => {

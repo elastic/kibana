@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/278500
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix security authentication anomaly jobs failing without Windows logon type"
+description: "Spike in Logon Events anomaly detection jobs run on Linux authentication logs by treating missing `winlog.event_data.LogonType` as optional."

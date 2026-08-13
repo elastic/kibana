@@ -24,8 +24,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-const I18N_PREFIX = 'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal';
-
 export interface DefaultSnapshotRepositoryRequiredModalProps {
   onCancel: () => void;
   createDefaultRepositoryUrl: string;
@@ -62,9 +60,12 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
   // repositories list to pick one. Otherwise send them to create a new default repository.
   const shouldManageExisting = hasExistingRepositories && Boolean(manageRepositoriesUrl);
 
-  const snapshotRestoreLabel = i18n.translate(`${I18N_PREFIX}.snapshotRestoreLabel`, {
-    defaultMessage: 'Snapshot and Restore',
-  });
+  const snapshotRestoreLabel = i18n.translate(
+    'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.snapshotRestoreLabel',
+    {
+      defaultMessage: 'Snapshot and Restore',
+    }
+  );
 
   const snapshotRestoreLinkUrl = manageRepositoriesUrl ?? createDefaultRepositoryUrl;
 
@@ -72,9 +73,12 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
     <EuiModal onClose={onCancel} aria-labelledby={titleId} maxWidth={euiTheme.breakpoint.s}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId} data-test-subj={`${dataTestSubj}Title`}>
-          {i18n.translate(`${I18N_PREFIX}.title`, {
-            defaultMessage: 'Default snapshot repository required',
-          })}
+          {i18n.translate(
+            'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.title',
+            {
+              defaultMessage: 'Default snapshot repository required',
+            }
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
@@ -116,9 +120,12 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
               flush="left"
               onClick={onCancel}
             >
-              {i18n.translate(`${I18N_PREFIX}.cancel`, {
-                defaultMessage: 'Cancel',
-              })}
+              {i18n.translate(
+                'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.cancel',
+                {
+                  defaultMessage: 'Cancel',
+                }
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
 
@@ -130,9 +137,12 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
                   href={manageRepositoriesUrl}
                   target="_blank"
                 >
-                  {i18n.translate(`${I18N_PREFIX}.manageRepositories`, {
-                    defaultMessage: 'Manage repositories',
-                  })}
+                  {i18n.translate(
+                    'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.manageRepositories',
+                    {
+                      defaultMessage: 'Manage repositories',
+                    }
+                  )}
                 </EuiSplitButton.ActionPrimary>
               ) : (
                 <EuiSplitButton.ActionPrimary
@@ -140,18 +150,24 @@ export const DefaultSnapshotRepositoryRequiredModal = ({
                   href={createDefaultRepositoryUrl}
                   target="_blank"
                 >
-                  {i18n.translate(`${I18N_PREFIX}.createDefaultRepository`, {
-                    defaultMessage: 'Create default repository',
-                  })}
+                  {i18n.translate(
+                    'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.createDefaultRepository',
+                    {
+                      defaultMessage: 'Create default repository',
+                    }
+                  )}
                 </EuiSplitButton.ActionPrimary>
               )}
               <EuiSplitButton.ActionSecondary
                 iconType="refresh"
                 isLoading={Boolean(isRefreshing)}
                 disabled={Boolean(isRefreshing)}
-                aria-label={i18n.translate(`${I18N_PREFIX}.refreshAriaLabel`, {
-                  defaultMessage: 'Refresh snapshot repositories',
-                })}
+                aria-label={i18n.translate(
+                  'xpack.dataLifecyclePhases.defaultSnapshotRepositoryRequiredModal.refreshAriaLabel',
+                  {
+                    defaultMessage: 'Refresh snapshot repositories',
+                  }
+                )}
                 data-test-subj={`${dataTestSubj}RefreshButton`}
                 onClick={onRefresh}
               />
