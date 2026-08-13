@@ -10,7 +10,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
+import { PbfReader } from 'pbf';
 import { convertMapboxVectorTileToJson } from './convert_mapbox_vector_tile_to_json';
 
 const PATH_TO_PBF = resolve(__dirname, './response.pbf'); // Query sample "GET kibana_sample_data_logs/_mvt/geo.coordinates/8/23/63"
@@ -90,7 +90,7 @@ describe('Convert mapbox vector tile to json', () => {
 
   beforeAll(() => {
     const response = readFileSync(PATH_TO_PBF);
-    vectorTile = new VectorTile(new Protobuf(response));
+    vectorTile = new VectorTile(new PbfReader(response));
   });
 
   it('function should convert vectorTile to string', () => {

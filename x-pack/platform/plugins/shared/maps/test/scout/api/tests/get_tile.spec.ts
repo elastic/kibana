@@ -6,12 +6,13 @@
  */
 
 import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
+import { PbfReader } from 'pbf';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 import { findFeature } from '../helpers/find_feature';
+import { plainPoints, plainProperties } from '../helpers/plain_feature';
 
 apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
@@ -75,7 +76,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
       expect(response.headers['content-type']).toBe('application/x-protobuf');
       expect(response.headers['cache-control']).toBe('public, max-age=3600');
 
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.hits;
       expect(layer).toHaveLength(2);
 
@@ -86,14 +87,14 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
       expect(feature.type).toBe(1);
       expect(feature.extent).toBe(4096);
       expect(feature.id).toBeUndefined();
-      expect(feature.properties).toStrictEqual({
+      expect(plainProperties(feature.properties)).toStrictEqual({
         '@timestamp': '1442709961071',
         _id: 'AU_x3_BsGFA8no6Qjjug',
         _index: 'logstash-2015.09.20',
         bytes: 9252,
         'machine.os.raw': 'ios',
       });
-      expect(feature.loadGeometry()).toStrictEqual([[{ x: 44, y: 2382 }]]);
+      expect(plainPoints(feature.loadGeometry())).toStrictEqual([[{ x: 44, y: 2382 }]]);
 
       const metaDataLayer = jsonTile.layers.meta;
       const metadataFeature = metaDataLayer.feature(0);
@@ -104,7 +105,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
       expect(metadataFeature.properties['hits.total.relation']).toBe('eq');
       expect(metadataFeature.properties['hits.total.value']).toBe(2);
       expect(metadataFeature.properties.timed_out).toBe(false);
-      expect(metadataFeature.loadGeometry()).toStrictEqual([
+      expect(plainPoints(metadataFeature.loadGeometry())).toStrictEqual([
         [
           { x: 44, y: 2382 },
           { x: 44, y: 1913 },
@@ -131,7 +132,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
       expect(response.headers['content-type']).toBe('application/x-protobuf');
       expect(response.headers['cache-control']).toBe('public, max-age=3600');
 
-      const jsonTile = new VectorTile(new Protobuf(response.body));
+      const jsonTile = new VectorTile(new PbfReader(response.body));
       const layer = jsonTile.layers.hits;
       expect(layer).toHaveLength(4);
 
@@ -145,7 +146,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
       expect(feature.type).toBe(1);
       expect(feature.extent).toBe(4096);
       expect(feature.id).toBeUndefined();
-      expect(feature.properties).toStrictEqual({
+      expect(plainProperties(feature.properties)).toStrictEqual({
         '@timestamp': '1442709961071',
         _id: 'AU_x3_BsGFA8no6Qjjug',
         _index: 'logstash-2015.09.20',
@@ -153,7 +154,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
         'machine.os.raw': 'ios',
         _mvt_label_position: true,
       });
-      expect(feature.loadGeometry()).toStrictEqual([[{ x: 44, y: 2382 }]]);
+      expect(plainPoints(feature.loadGeometry())).toStrictEqual([[{ x: 44, y: 2382 }]]);
     }
   );
 

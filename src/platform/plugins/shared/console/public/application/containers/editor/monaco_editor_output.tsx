@@ -13,7 +13,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { css as cssClassName } from '@emotion/css';
 import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
+import { PbfReader } from 'pbf';
 import { i18n } from '@kbn/i18n';
 import {
   EuiScreenReaderOnly,
@@ -167,7 +167,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
             if (readOnlySettings.tripleQuotes && isJSONContentType(contentType)) {
               editorOutput = safeExpandLiteralStrings(newValue as string);
             } else if (isMapboxVectorTile(contentType)) {
-              const vectorTile = new VectorTile(new Protobuf(newValue as ArrayBuffer));
+              const vectorTile = new VectorTile(new PbfReader(newValue as ArrayBuffer));
               const vectorTileJson = convertMapboxVectorTileToJson(vectorTile);
               editorOutput = safeExpandLiteralStrings(vectorTileJson as string);
             } else {

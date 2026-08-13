@@ -35,6 +35,16 @@ import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
+// Upstream's exports map only allows ./src/index.js, but maplibre loads the UMD
+// bundle under dist/. require.resolve on the package root returns src/index.js
+// (allowed by exports); require.resolve on the dist/ subpath would throw.
+// Alias before enhanced-resolve's exports check. main already points at dist,
+// but bundlers prefer exports over mainFields.
+const MAPBOX_GL_RTL_TEXT_DIST = Path.resolve(
+  require.resolve('@mapbox/mapbox-gl-rtl-text'),
+  '../../dist/mapbox-gl-rtl-text.js'
+);
+
 export function getWebpackConfig(
   bundle: Bundle,
   bundleRemotes: BundleRemotes,
@@ -286,7 +296,7 @@ export function getWebpackConfig(
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
           include: [
-            require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
+            MAPBOX_GL_RTL_TEXT_DIST,
             require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
           ],
           type: 'asset/resource',
@@ -319,6 +329,8 @@ export function getWebpackConfig(
       alias: {
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
+        // See MAPBOX_GL_RTL_TEXT_DIST above — bypasses exports map for the UMD plugin.
+        '@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js$': MAPBOX_GL_RTL_TEXT_DIST,
         buffer: [
           Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
           require.resolve('buffer'),

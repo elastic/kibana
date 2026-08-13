@@ -19,6 +19,16 @@ import { getSharedConfig } from '@kbn/transpiler-config';
 import { DEFAULT_THEME_TAGS } from '@kbn/core-ui-settings-common';
 import type { ThemeTag } from '../types';
 
+// Upstream's exports map only allows ./src/index.js, but maplibre loads the UMD
+// bundle under dist/. require.resolve on the package root returns src/index.js
+// (allowed by exports); require.resolve on the dist/ subpath would throw.
+// Alias before enhanced-resolve's exports check. main already points at dist,
+// but bundlers prefer exports over mainFields.
+const MAPBOX_GL_RTL_TEXT_DIST = Path.resolve(
+  require.resolve('@mapbox/mapbox-gl-rtl-text'),
+  '../../dist/mapbox-gl-rtl-text.js'
+);
+
 /**
  * Shared resolve configuration for all RSPack builds.
  * Used by both main Kibana build and external plugins.
@@ -37,6 +47,7 @@ export function getSharedResolveConfig(repoRoot: string): Configuration['resolve
       '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       'react-dom$': 'react-dom/profiling',
       'scheduler/tracing': 'scheduler/tracing-profiling',
+      '@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js$': MAPBOX_GL_RTL_TEXT_DIST,
       buffer: [
         Path.resolve(repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
         require.resolve('buffer'),

@@ -34,7 +34,7 @@ import type {
 import type maplibreglDist from 'maplibre-gl/dist/maplibre-gl';
 // @ts-expect-error
 import maplibreglDistCsp from 'maplibre-gl/dist/maplibre-gl-csp';
-import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';
+import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js?asUrl';
 import mbWorkerUrl from 'maplibre-gl/dist/maplibre-gl-csp-worker?asUrl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 

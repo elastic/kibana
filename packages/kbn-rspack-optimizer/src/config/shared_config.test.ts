@@ -60,6 +60,16 @@ describe('shared_config', () => {
       );
     });
 
+    it('should alias mapbox-gl-rtl-text dist UMD past the package exports map', () => {
+      const alias = resolveConfig.alias as Record<string, string>;
+      expect(alias['@mapbox/mapbox-gl-rtl-text/dist/mapbox-gl-rtl-text.js$']).toBe(
+        Path.resolve(
+          require.resolve('@mapbox/mapbox-gl-rtl-text'),
+          '../../dist/mapbox-gl-rtl-text.js'
+        )
+      );
+    });
+
     it('should alias buffer to node-stdlib-browser and package resolve paths', () => {
       const alias = resolveConfig.alias as Record<string, string[]>;
       expect(alias.buffer).toEqual([

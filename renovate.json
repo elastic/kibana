@@ -1427,45 +1427,32 @@
       "enabled": true
     },
     {
-      "groupName": "mapbox-gl-draw (pinned until Kibana supports ESM)",
+      "groupName": "mapbox-gl-draw",
       "matchDepNames": ["@mapbox/mapbox-gl-draw"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "allowedVersions": "<1.5.0"
+      "enabled": true
     },
     {
-      "groupName": "mapbox-gl-rtl-text (pinned until Kibana supports ESM)",
+      "groupName": "mapbox-gl-rtl-text",
+      "description": "0.3+ exports only ./src/index.js; bundlers alias dist/mapbox-gl-rtl-text.js (see kbn-optimizer / kbn-rspack-optimizer). 0.4.0 is the last UMD release.",
       "matchDepNames": ["@mapbox/mapbox-gl-rtl-text"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "allowedVersions": "<0.3.0"
+      "enabled": true
     },
     {
-      "groupName": "mapbox-vector-tile (pinned until Kibana supports ESM)",
-      "matchDepNames": ["@mapbox/vector-tile", "@types/mapbox__vector-tile"],
+      "groupName": "mapbox-vector-tile",
+      "matchDepNames": ["@mapbox/vector-tile"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
       "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "allowedVersions": "<2.0.0"
-    },
-    {
-      "groupName": "mapbox-gl-supported",
-      "description": "versions >=3 mark WebGL1 as incompatible, but maplibre-gl-js supports WebGL1 and WebGL2",
-      "matchDepNames": ["@mapbox/mapbox-gl-supported"],
-      "reviewers": ["team:kibana-presentation"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Presentation"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true,
-      "allowedVersions": "<3.0.0"
+      "enabled": true
     },
     {
       "groupName": "mapbox and maplibre",
@@ -1483,7 +1470,7 @@
     },
     {
       "groupName": "misc kibana-presentation dependencies",
-      "matchDepNames": ["jsts", "pbf", "@types/flot", "@types/pbf"],
+      "matchDepNames": ["jsts", "pbf", "@types/flot"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
