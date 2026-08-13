@@ -114,6 +114,7 @@ network:
     - github.com
     - api.github.com
     - openrouter.ai
+    # to properly display links to best practices docs
     - elastic.co
 sandbox:
   agent: awf
