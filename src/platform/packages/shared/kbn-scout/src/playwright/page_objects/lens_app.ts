@@ -122,8 +122,8 @@ export class LensApp {
   async selectChartSwitchOption(visType: string) {
     const option = this.getChartSwitchOption(visType);
     await option.waitFor({ state: 'visible', timeout: 15_000 });
-    // EUI focuses the filtered option; Enter avoids mouse actionability checks on a re-rendering list item.
-    await this.page.keyboard.press('Enter');
+    // The virtualized list re-renders while filtered; dispatchEvent bypasses mouse actionability checks.
+    await option.dispatchEvent('click');
     // Popover should close after selection; waiting avoids racing with subsequent assertions.
     await this.chartSwitchList.waitFor({ state: 'hidden', timeout: 15_000 });
   }
