@@ -6,6 +6,7 @@
  */
 
 import { confirmationAlignmentEvaluator } from './confirmation_alignment';
+import type { SignalEntry } from '@kbn/significant-events-schema';
 
 const evaluate = (
   significantEvents: unknown,
@@ -18,9 +19,11 @@ const evaluate = (
     metadata: null,
   });
 
-const detection = (ruleUuid: string, confirmed?: boolean) => ({
+const detection = (ruleUuid: string, confirmed?: boolean): SignalEntry => ({
   type: 'detection',
-  metadata: { rule_uuid: ruleUuid },
+  metadata: { rule_uuid: ruleUuid, detection_id: '1', change_point_type: 'spike', p_value: 0.01 },
+  stream_name: 'logs',
+  description: 'test detection',
   ...(confirmed === undefined ? {} : { confirmed }),
 });
 
@@ -86,12 +89,29 @@ describe('confirmationAlignmentEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
-  it('fails when a non-expected rule is not explicitly rejected', async () => {
+  it('accepts an unverified non-expected rule without confirmation metadata', async () => {
     const events = [{ event_id: 'e1', signals: [detection('r1', true), detection('r2')] }];
+    const result = await evaluate(events, { e1: ['r1'] });
+    expect(result.score).toBe(1);
+  });
+
+  it('fails when a verified non-expected rule is neither confirmed nor rejected', async () => {
+    const events = [
+      {
+        event_id: 'e1',
+        signals: [
+          detection('r1', true),
+          {
+            ...detection('r2'),
+            evidence: { result: 'found' },
+            collected_at: '2026-01-01T00:00:00Z',
+          },
+        ],
+      },
+    ];
     const result = await evaluate(events, { e1: ['r1'] });
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('r2');
-    expect(result.explanation).not.toContain('undefined');
   });
 
   it('accepts a non-expected rule that is explicitly rejected', async () => {

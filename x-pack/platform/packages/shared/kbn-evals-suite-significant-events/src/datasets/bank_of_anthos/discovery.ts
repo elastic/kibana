@@ -213,14 +213,6 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       protocol: 'http',
       stream_name: 'logs',
     },
-    {
-      type: 'dependency',
-      feature_id: 'ledgerwriter-postgresql',
-      source: 'ledgerwriter',
-      target: 'postgresql',
-      protocol: 'jdbc',
-      stream_name: 'logs',
-    },
   ],
 };
 
@@ -330,7 +322,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
   blast_radius: [
     {
       type: 'dependency',
-      feature_id: 'frontend-balancereader',
+      feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
       stream_name: 'logs',

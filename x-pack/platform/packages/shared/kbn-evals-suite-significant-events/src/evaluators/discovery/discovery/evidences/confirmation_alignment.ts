@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 
 const asSet = (values: string[]): Set<string> => new Set(values);
 
-interface EventWithSignals {
-  signals?: Array<{
-    type?: string;
-    metadata?: { rule_uuid?: string };
-    confirmed?: boolean;
-  }>;
-}
-
-const getRuleSignals = (event: EventWithSignals) =>
+const getRuleSignals = (event: SignificantEvent) =>
   (event.signals ?? []).flatMap((signal) =>
     signal.type === 'detection' && signal.metadata?.rule_uuid
-      ? [{ ruleUuid: signal.metadata.rule_uuid, confirmed: signal.confirmed }]
+      ? [
+          {
+            ruleUuid: signal.metadata.rule_uuid,
+            confirmed: signal.confirmed,
+            collected_at: signal.collected_at,
+            evidence: signal.evidence,
+          },
+        ]
       : []
   );
 
-const sharedRuleCount = (event: EventWithSignals, expectedRuleUuids: Set<string>) => {
+const sharedRuleCount = (event: SignificantEvent, expectedRuleUuids: Set<string>) => {
   const eventRuleUuids = new Set(
     getRuleSignals(event)
       .filter((signal) => signal.confirmed !== false)
@@ -84,7 +84,14 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
         ruleSignals.filter((signal) => signal.confirmed === true).map((signal) => signal.ruleUuid)
       );
       const nonMembersWithoutRejection = ruleSignals
-        .filter((signal) => !expectedRuleSet.has(signal.ruleUuid) && signal.confirmed !== false)
+        .filter(
+          (signal) =>
+            !expectedRuleSet.has(signal.ruleUuid) &&
+            signal.confirmed !== false &&
+            (signal.confirmed !== undefined ||
+              signal.collected_at !== undefined ||
+              signal.evidence !== undefined)
+        )
         .map((signal) => signal.ruleUuid);
       const isExactMatch =
         actualRuleUuids.size === expectedRuleSet.size &&
