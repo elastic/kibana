@@ -8,15 +8,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
-
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
-import { FIELD_CONFIG } from '../service_settings_step/field_config';
+import type { ServiceChipState } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
+import {
+  buildDeployGroups,
+  buildInstanceStatuses,
+  collectDeployResults,
+  deployGroup,
+} from './deploy_groups';
+import type { DeployGroup } from './deploy_groups';
+
+export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
 
 interface ServiceSettingsPersistedState {
   globalRegion: string;
@@ -30,266 +36,6 @@ export interface UseDeployResult {
   isDeploying: boolean;
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => void;
-}
-
-interface PackageInputEntry {
-  enabled: boolean;
-  vars?: Record<string, string | boolean | string[]>;
-  streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
-}
-
-const BOOLEAN_VAR_NAMES = new Set([
-  'preserve_original_event',
-  'collect_s3_logs',
-  'preserve_duplicate_custom_fields',
-  'collect_esm_metrics',
-  'leaderelection',
-]);
-
-export function getRegionFieldName(
-  service: AwsServiceMatrixEntry,
-  activeTransport: string | null
-): string {
-  const rc = service.requiredConfig ?? [];
-  if (activeTransport === 'aws-s3' && rc.includes('region')) return 'region';
-  if (activeTransport === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
-  if (rc.includes('aws_region')) return 'aws_region';
-  return '';
-}
-
-export function buildStreamVars(
-  service: AwsServiceMatrixEntry,
-  serviceVars: ServiceVars,
-  globalRegion: string
-): Record<string, string | boolean | string[]> {
-  const result: Record<string, string | boolean | string[]> = {};
-
-  for (const [key, value] of Object.entries(serviceVars.vars)) {
-    if (BOOLEAN_VAR_NAMES.has(key)) {
-      result[key] = value === 'true';
-    } else if (FIELD_CONFIG[key]?.multi) {
-      const parts = value
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (parts.length > 0) result[key] = parts;
-    } else {
-      result[key] = value;
-    }
-  }
-
-  // Backfill singular region field from globalRegion when not explicitly set
-  const regionField = getRegionFieldName(service, serviceVars.trigger);
-  if (regionField && !result[regionField] && globalRegion) {
-    result[regionField] = globalRegion;
-  }
-
-  return result;
-}
-
-export function buildPackageInputs(
-  services: AwsServiceMatrixEntry[],
-  storedServiceVars: Record<string, ServiceVars>,
-  globalRegion: string
-): Record<string, PackageInputEntry> {
-  const inputs: Record<string, PackageInputEntry> = {};
-
-  for (const service of services) {
-    const serviceVars: ServiceVars = storedServiceVars[service.id] ?? { trigger: null, vars: {} };
-    const defaultInput = service.inputs?.includes('aws-s3') ? 'aws-s3' : service.inputs?.[0] ?? '';
-    const inputType = serviceVars.trigger ?? defaultInput;
-    if (!inputType) continue;
-
-    const inputKey = service.policyTemplate ? `${service.policyTemplate}-${inputType}` : inputType;
-    const streamKey = `${service.packageName}.${service.dataStream ?? service.id}`;
-    const streamVars = buildStreamVars(service, serviceVars, globalRegion);
-
-    if (!inputs[inputKey]) {
-      inputs[inputKey] = { enabled: true, streams: {} };
-    }
-
-    inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
-  }
-
-  return inputs;
-}
-
-function buildPackageVars(
-  globalRegion: string,
-  staticKeys: DeploySettingsStepState['staticKeys'],
-  pkgVarNames: Set<string>
-): Record<string, string> | undefined {
-  const vars: Record<string, string> = {};
-  if (globalRegion && pkgVarNames.has('default_region')) vars.default_region = globalRegion;
-  if (staticKeys?.access_key_id && staticKeys?.secret_access_key) {
-    if (pkgVarNames.has('access_key_id')) vars.access_key_id = staticKeys.access_key_id;
-    if (pkgVarNames.has('secret_access_key')) vars.secret_access_key = staticKeys.secret_access_key;
-  }
-  return Object.keys(vars).length > 0 ? vars : undefined;
-}
-
-function getPackageVarNames(pkgInfo: { vars?: Array<{ name: string }> }): Set<string> {
-  return new Set((pkgInfo.vars ?? []).map((v) => v.name));
-}
-
-/**
- * A deploy group is the unit of one `sendCreateAgentlessPolicy` call.
- *
- * - Bundled originals: one group per package, covering all non-duplicate agentless instances
- *   of that package. This restores the pre-PR behaviour (one agent policy for all selected
- *   services of the same package) and keeps resource usage equivalent to a non-duplicate deploy.
- * - Duplicates: one group per instance, because duplicate instances of the same service would
- *   collide inside `buildPackageInputs` (stream keys map on dataset name, which is shared).
- */
-interface DeployGroup {
-  /** Package name — used for bundled originals. InstanceId — used for duplicates. */
-  groupId: string;
-  /** All instanceIds whose status, policyId, and error this call resolves. */
-  instanceIds: string[];
-  members: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>;
-  isDuplicateGroup: boolean;
-}
-
-function buildAgentlessPolicyName(group: DeployGroup): string {
-  // Date.now() suffix prevents cross-session collisions: Fleet enforces unique agent-policy
-  // names space-wide, so a fresh-session re-run would fail without it.
-  // Truncate to stay within Fleet's policy name length limit.
-  if (group.isDuplicateGroup) {
-    const { instance } = group.members[0];
-    const safe = instance.instanceId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-    const name = instance.name.slice(0, 40).replace(/[^a-zA-Z0-9_-]/g, '_');
-    return `${safe}-${name}-${Date.now()}`;
-  }
-  // Bundled originals — named after the package.
-  const pkg = group.groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-  return `${pkg}-${Date.now()}`;
-}
-
-interface GroupDeployOutcome {
-  policyId?: string;
-}
-
-async function deployGroup(
-  group: DeployGroup,
-  {
-    namespace,
-    globalRegion,
-    storedServiceVars,
-    deploySettingsStep,
-  }: {
-    namespace: string;
-    globalRegion: string;
-    storedServiceVars: Record<string, ServiceVars>;
-    deploySettingsStep: DeploySettingsStepState;
-  }
-): Promise<GroupDeployOutcome> {
-  // All members share the same packageName — use the first for pkg info.
-  const { service: firstService } = group.members[0];
-  const pkgInfoResponse = await sendGetPackageInfoByKey(firstService.packageName);
-  const pkgInfo = pkgInfoResponse.data?.item;
-  const pkgVersion = pkgInfo?.version;
-  if (!pkgVersion) {
-    throw new Error(`Package ${firstService.packageName} is not installed`);
-  }
-
-  const { connectorId, staticKeys } = deploySettingsStep;
-
-  // Build a vars map keyed by service.id for buildPackageInputs.
-  // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
-  const serviceVarsMap: Record<string, ServiceVars> = {};
-  for (const { instance, service } of group.members) {
-    serviceVarsMap[service.id] = storedServiceVars[instance.instanceId] ??
-      storedServiceVars[instance.serviceId] ?? { trigger: null, vars: {} };
-  }
-
-  const services = group.members.map(({ service }) => service);
-  const inputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
-
-  // Explicitly disable all package inputs not in our selection to avoid Fleet defaulting
-  // enabled inputs that would cause "not allowed for agentless" errors.
-  const pkgTemplates: Array<{ name?: string; type?: string; inputs?: Array<{ type: string }> }> =
-    (pkgInfo as any).policy_templates ?? [];
-  for (const template of pkgTemplates) {
-    const templateInputs = template.inputs ?? (template.type ? [{ type: template.type }] : []);
-    for (const input of templateInputs) {
-      const key = template.name ? `${template.name}-${input.type}` : input.type;
-      if (!inputs[key]) {
-        inputs[key] = { enabled: false, streams: {} };
-      }
-    }
-  }
-
-  const pkgVarNames = getPackageVarNames(pkgInfo);
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
-
-  const response = await sendCreateAgentlessPolicy({
-    name: buildAgentlessPolicyName(group),
-    namespace,
-    package: { name: firstService.packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    ...(connectorId ? { cloud_connector: { enabled: true, cloud_connector_id: connectorId } } : {}),
-  });
-
-  return { policyId: (response as any)?.data?.item?.policy_ids?.[0] };
-}
-
-function extractErrorMessage(reason: unknown): string {
-  if (reason instanceof Error) return reason.message;
-  if (reason !== null && typeof reason === 'object' && 'message' in reason) {
-    return String((reason as { message: unknown }).message);
-  }
-  return String(reason);
-}
-
-export function collectDeployResults(
-  results: PromiseSettledResult<GroupDeployOutcome>[],
-  groups: DeployGroup[]
-): {
-  policyIdsByInstance: Record<string, string>;
-  failedInstances: string[];
-  errorsByInstance: Record<string, string>;
-} {
-  const policyIdsByInstance: Record<string, string> = {};
-  const failedInstances: string[] = [];
-  const errorsByInstance: Record<string, string> = {};
-
-  for (let i = 0; i < groups.length; i++) {
-    const group = groups[i];
-    const result = results[i];
-    if (result.status === 'fulfilled') {
-      // All instances in the group share the one policy — write policyId for each.
-      if (result.value.policyId) {
-        for (const instanceId of group.instanceIds) {
-          policyIdsByInstance[instanceId] = result.value.policyId;
-        }
-      }
-    } else {
-      // A bundled call failure surfaces as an error on every instance in the group.
-      const errorMsg = extractErrorMessage(result.reason);
-      for (const instanceId of group.instanceIds) {
-        failedInstances.push(instanceId);
-        errorsByInstance[instanceId] = errorMsg;
-      }
-    }
-  }
-
-  return { policyIdsByInstance, failedInstances, errorsByInstance };
-}
-
-export function buildInstanceStatuses(
-  targets: string[],
-  failedInstances: string[],
-  succeededState: ServiceChipState = 'instantiating'
-): Record<string, ServiceChipState> {
-  const statuses: Record<string, ServiceChipState> = {};
-  const failedSet = new Set(failedInstances);
-
-  for (const instanceId of targets) {
-    statuses[instanceId] = failedSet.has(instanceId) ? 'error' : succeededState;
-  }
-
-  return statuses;
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
@@ -312,77 +58,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   const [isDeploying, setIsDeploying] = useState(false);
   const [failedInstances, setFailedInstances] = useState<string[]>([]);
 
-  // Build deploy groups from session storage — fall back to one base instance per selected
-  // service id when instances haven't been written yet (e.g. user skipped step 2).
-  //
-  // Grouping strategy:
-  //   - Originals (isDuplicate: false): one group per package, bundled into a single
-  //     sendCreateAgentlessPolicy call. This matches the pre-PR behaviour (one agent policy
-  //     for all selected services of the same package).
-  //   - Duplicates (isDuplicate: true): one group per instance, because duplicate instances
-  //     of the same service share the same stream key inside buildPackageInputs and would
-  //     silently overwrite each other if bundled.
-  const deployGroups: DeployGroup[] = useMemo(() => {
-    const stored = serviceSettings?.instances;
-    const instances: ServiceInstance[] = stored?.length
-      ? stored
-      : selectedServiceIds.map((id) => ({
-          instanceId: id,
-          serviceId: id,
-          name: AWS_SERVICES_MAP.get(id)?.name ?? id,
-          isDuplicate: false,
-        }));
-
-    // Separate agentless originals from duplicates; drop non-agentless entirely.
-    const originals: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
-    const duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }> = [];
-
-    for (const inst of instances) {
-      const service = AWS_SERVICES_MAP.get(inst.serviceId);
-      if (!service) continue;
-      // TODO(follow-up): non-agentless duplicates are silently dropped here.
-      // ECF and agent-based duplicate deploy support are tracked in separate follow-up issues.
-      if (!service.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)) {
-        continue;
-      }
-      if (inst.isDuplicate) {
-        duplicates.push({ instance: inst, service });
-      } else {
-        originals.push({ instance: inst, service });
-      }
-    }
-
-    // Group originals by package name.
-    const bundledByPackage = new Map<
-      string,
-      Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>
-    >();
-    for (const member of originals) {
-      const pkg = member.service.packageName;
-      if (!bundledByPackage.has(pkg)) bundledByPackage.set(pkg, []);
-      bundledByPackage.get(pkg)!.push(member);
-    }
-
-    const groups: DeployGroup[] = [];
-    for (const [pkg, members] of bundledByPackage) {
-      groups.push({
-        groupId: pkg,
-        instanceIds: members.map(({ instance }) => instance.instanceId),
-        members,
-        isDuplicateGroup: false,
-      });
-    }
-    for (const member of duplicates) {
-      groups.push({
-        groupId: member.instance.instanceId,
-        instanceIds: [member.instance.instanceId],
-        members: [member],
-        isDuplicateGroup: true,
-      });
-    }
-
-    return groups;
-  }, [serviceSettings?.instances, selectedServiceIds]);
+  const deployGroups: DeployGroup[] = useMemo(
+    () => buildDeployGroups(serviceSettings?.instances ?? [], selectedServiceIds),
+    [serviceSettings?.instances, selectedServiceIds]
+  );
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
     () =>

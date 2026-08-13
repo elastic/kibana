@@ -7,14 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import {
-  getRegionFieldName,
-  buildStreamVars,
-  buildPackageInputs,
-  collectDeployResults,
-  buildInstanceStatuses,
-  useDeploy,
-} from './use_deploy';
+import { getRegionFieldName, buildStreamVars, buildPackageInputs, useDeploy } from './use_deploy';
+import { collectDeployResults, buildInstanceStatuses } from './deploy_groups';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
