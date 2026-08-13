@@ -46,6 +46,8 @@ const simulationBaseBodySchema = {
   detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
 };
 
+const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
+
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.union([
@@ -55,7 +57,7 @@ const paramsSchema = z.object({
     }),
     z.object({
       ...simulationBaseBodySchema,
-      processors: z.array(z.record(z.string(), z.any())),
+      processors: z.array(z.record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())),
     }),
   ]),
 }) satisfies z.Schema<ProcessingSimulationParams>;
