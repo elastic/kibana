@@ -137,6 +137,6 @@ export async function loadDashboardApi({
       telemetrySubscription.unsubscribe();
     },
     internalApi,
-    useControlsIntegration: creationOptions?.useControlsIntegration,
+    useControlsIntegration: Boolean(creationOptions?.useControlsIntegration),
   };
 }
