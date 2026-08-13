@@ -453,6 +453,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'integrations' },
+              { link: 'integrations:managed_ecf_poc' },
               { link: 'fleet' },
               { link: 'management:ingest_pipelines' },
               { link: 'management:pipelines' },

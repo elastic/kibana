@@ -97,6 +97,25 @@ export interface AgentlessAgentService {
   deleteAgentlessAgent(agentlessPolicyId: string): Promise<AxiosResponse | void>;
 }
 
+export interface ManagedEcfDeploymentRequest {
+  policy_id: string;
+  managed_ecf: {
+    input_type: 'cloudtrail' | 'crowdstrike_fdr';
+    dataset: string;
+    interval: '1m' | '2m' | '5m' | '10m';
+    region: string;
+    sqs_queue_url: string;
+    motel_endpoint: string;
+  };
+  managed_ecf_secrets: {
+    aws_key?: string;
+    aws_secret?: string;
+    aws_token?: string;
+    /** OTel API key for the managed OTLP endpoint — Kibana-created, apm:event:write. */
+    motel_api_key: string;
+  };
+}
+
 class AgentlessAgentServiceImpl implements AgentlessAgentService {
   /** Fleet server host is chosen purely by cloud environment, independent of the policy. */
   public getDefaultFleetServerId() {
@@ -135,6 +154,64 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       outputId: this.getDefaultOutputId(agentPolicy),
       fleetServerId: this.getDefaultFleetServerId(),
     };
+  }
+
+  public async createManagedEcfDeployment(
+    requestData: ManagedEcfDeploymentRequest
+  ): Promise<AxiosResponse<AgentlessApiDeploymentResponse> | void> {
+    const logger = appContextService.getLogger();
+    const traceId = apm.currentTransaction?.traceparent;
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+
+    if (!agentlessConfig?.enabled || !agentlessConfig.api?.url) {
+      throw new AgentlessAgentConfigError(
+        'missing or disabled Agentless API configuration in Kibana'
+      );
+    }
+
+    const data: Record<string, unknown> = {
+      ...requestData,
+      config_mode: 'managed_ecf',
+    };
+    if (!appContextService.getCloud()?.isServerlessEnabled) {
+      data.stack_version = appContextService.getKibanaVersion();
+      data.is_elastic_staff_owned = appContextService.getCloud()?.isElasticStaffOwned ?? false;
+    }
+
+    const requestConfig: AxiosRequestConfig = {
+      url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
+      data,
+      method: 'POST',
+      ...this.getHeaders(this.createTlsConfig(agentlessConfig), traceId),
+    };
+    const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
+    const errorMetadata: LogMeta = { trace: { id: traceId } };
+
+    logger.info(
+      `[Agentless API] Creating managed ECF deployment with request config ${requestConfigDebugStatus}`
+    );
+
+    return pRetry(() => axios<AgentlessApiDeploymentResponse>(requestConfig), {
+      retries: MAXIMUM_RETRIES,
+      minTimeout: 0,
+      maxTimeout: 100,
+      onFailedAttempt: (error: FailedAttemptError) => {
+        if (!this.isErrorRetryable(error as unknown as AxiosError)) {
+          throw error;
+        }
+      },
+    }).catch((error: Error | AxiosError) => {
+      this.catchAgentlessApiError(
+        'create',
+        error,
+        logger,
+        requestData.policy_id,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    });
   }
 
   public async createAgentlessAgent(
@@ -581,11 +658,14 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           'labels',
           'resources',
           'cloud_connectors',
-          'is_elastic_staff_owned'
+          'is_elastic_staff_owned',
+          'stack_version',
+          'managed_ecf'
         ),
         agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
         integration_secrets: requestConfig.data.integration_secrets ? '[REDACTED]' : undefined,
+        managed_ecf_secrets: requestConfig.data.managed_ecf_secrets ? '[REDACTED]' : undefined,
       },
       httpsAgent: {
         ...requestConfig.httpsAgent,

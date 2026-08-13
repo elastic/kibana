@@ -22,6 +22,21 @@ export enum FleetDeepLinkId {
   settings = 'settings',
 }
 
+export enum IntegrationsDeepLinkId {
+  managedEcfPoc = 'managed_ecf_poc',
+}
+
+export const getIntegrationsDeepLinks = (): AppDeepLink[] => [
+  {
+    id: IntegrationsDeepLinkId.managedEcfPoc,
+    title: i18n.translate('xpack.fleet.deepLinks.managedEcfPoc.title', {
+      defaultMessage: 'Managed ECF POC',
+    }),
+    path: '/managed-ecf-poc',
+    visibleIn: ['globalSearch', 'projectSideNav'],
+  },
+];
+
 export const getFleetDeepLinks: (
   experimentalFeatures: ExperimentalFeatures,
   authz?: FleetAuthz

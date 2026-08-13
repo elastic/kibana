@@ -103,6 +103,7 @@ export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
 export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
 export const INTEGRATIONS_SHOW_DEPRECATED_QUERYPARAM = 'showDeprecated';
 export const INTEGRATIONS_ROUTING_PATHS = {
+  managed_ecf_poc: '/managed-ecf-poc',
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
   integrations_installed: '/installed/:category?',

@@ -488,6 +488,9 @@ function createNavTree({
                 link: 'integrations',
               },
               {
+                link: 'integrations:managed_ecf_poc',
+              },
+              {
                 link: 'fleet',
               },
               {
