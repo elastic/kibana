@@ -311,6 +311,15 @@ describe('autocomplete', () => {
       await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM index_d' });
     });
+    it('should send the columns query for the current subquery', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement =
+        'from outer_index | sort dateField desc | where coalesce(keywordField in (from inner_index | keep ';
+
+      await suggest(statement, statement.length, callbackMocks);
+
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM inner_index' });
+    });
     it.each([
       ['EVAL incomplete assignment', 'FROM marker_eval_assignment | EVAL foo = 1, bar = '],
       ['EVAL function argument', 'FROM marker_eval_function | EVAL result = ROUND(doubleField, '],

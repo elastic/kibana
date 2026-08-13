@@ -33,8 +33,8 @@ const parseCorrectedQuery = (correctedQuery: string): ESQLAstQueryExpression => 
 };
 
 /**
- * Detects an expression the parser could not build. The node under the cursor is either the
- * collapsed node itself, or the subquery holding it when the cursor sits inside one.
+ * Detects an expression collapsed to `unknown` at the cursor. Syntax correction can leave the
+ * cursor on that node, a containing query, or a synthetic incomplete node immediately after it.
  */
 const hasCollapsedExpression = (root: ESQLAstQueryExpression, offset: number): boolean => {
   const { node } = findAstPosition(root, offset);
@@ -43,10 +43,15 @@ const hasCollapsedExpression = (root: ESQLAstQueryExpression, offset: number): b
     return true;
   }
 
-  return (
-    isQuery(node) &&
-    Boolean(Walker.find(node, (item) => isUnknownNode(item) && item.text.trim().length > 0))
-  );
+  if (isQuery(node)) {
+    return Boolean(Walker.find(node, (item) => isUnknownNode(item) && item.text.trim().length > 0));
+  }
+
+  if (!node?.incomplete || node.location.min < offset) {
+    return false;
+  }
+
+  return Boolean(Walker.find(root, (item) => isUnknownNode(item) && item.text.trim().length > 0));
 };
 
 /**
@@ -68,12 +73,13 @@ export function parseAutocompleteQuery(fullText: string, offset: number): Parsed
     if (recoveredQuery !== correctedQuery) {
       const recoveredRoot = parseCorrectedQuery(recoveredQuery);
       const recoveredNode = findAstPosition(recoveredRoot, offset).node;
+      const hasCollapsedSubExpression =
+        isQuery(recoveredNode) &&
+        Boolean(
+          Walker.find(recoveredNode, (item) => isUnknownNode(item) && item.text.trim().length > 0)
+        );
 
-      if (
-        recoveredNode &&
-        !isUnknownNode(recoveredNode) &&
-        !hasCollapsedExpression(recoveredRoot, offset)
-      ) {
+      if (recoveredNode && !isUnknownNode(recoveredNode) && !hasCollapsedSubExpression) {
         root = recoveredRoot;
       }
     }
