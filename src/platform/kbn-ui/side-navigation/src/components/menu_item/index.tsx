@@ -99,7 +99,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         align-items: center;
         height: ${euiTheme.size.xl};
         width: ${euiTheme.size.xl};
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.control};
         background-color: ${isHighlighted
           ? euiTheme.components.buttons.backgroundPrimary
           : euiTheme.colors.backgroundTransparent};
@@ -110,7 +110,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         content: '';
         position: absolute;
         inset: 0;
-        border-radius: ${euiTheme.border.radius.medium};
+        border-radius: ${euiTheme.border.radius.control};
         background-color: transparent;
         z-index: 0;
       }

@@ -41,13 +41,13 @@ export const framedAppearanceBackgroundStyles = (euiThemeContext: UseEuiTheme) =
   const darkModeBackground = [
     'radial-gradient(1200px 800px at 50% 50%, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.04))',
     'linear-gradient(rgba(36, 61, 111, 0.1), rgba(36, 61, 111, 0))',
-    'linear-gradient(#07101F 0%, #050D1A 50%, #030A16 100%)',
+    'linear-gradient(#0B0F17 0%, #080C14 50%, #050910 100%)',
   ].join(', ');
 
   // Light mode layered background: subtle blue glow at top center, light gradient base
   const lightModeBackground = [
     'radial-gradient(1200px 800px at 50% 0%, rgba(36, 61, 111, 0.04), rgba(36, 61, 111, 0))',
-    'linear-gradient(#F6F9FC, #F4F7FA)',
+    'linear-gradient(#EAEDF5, #E8ECF4)',
   ].join(', ');
 
   return css`
