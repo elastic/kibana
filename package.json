@@ -104,7 +104,7 @@
     "**/remark-parse/trim": "1.0.1",
     "**/serialize-javascript": "7.0.5",
     "**/sharp": "0.35.2",
-    "**/socket.io-parser": "4.2.6",
+    "**/socket.io-parser": "4.2.7",
     "**/typescript": "6.0.3",
     "**/util": "0.12.5",
     "**/yauzl": "3.4.0",
