@@ -8,7 +8,7 @@
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { createBuildAnalyzeChat } from './analyze_chat';
+import { buildAnalyzeChat as defaultBuildAnalyzeChat } from './analyze_chat';
 import type { AnalyzeAndImproveContext, AnalyzeChatOptions, ChatOpener } from './types';
 
 /**
@@ -19,11 +19,13 @@ import type { AnalyzeAndImproveContext, AnalyzeChatOptions, ChatOpener } from '.
 export const createAnalyzeChatOpener = ({
   coreStart,
   agentBuilder,
-  buildAnalyzeChat = createBuildAnalyzeChat(coreStart.http),
+  buildAnalyzeChat = defaultBuildAnalyzeChat,
 }: {
   coreStart: CoreStart;
   agentBuilder: AgentBuilderPluginStart | undefined;
-  buildAnalyzeChat?: (context: AnalyzeAndImproveContext) => Promise<AnalyzeChatOptions>;
+  buildAnalyzeChat?: (
+    context: AnalyzeAndImproveContext
+  ) => AnalyzeChatOptions | Promise<AnalyzeChatOptions>;
 }): ChatOpener | undefined => {
   if (!agentBuilder || coreStart.application.capabilities.agentBuilder?.show !== true) {
     return undefined;

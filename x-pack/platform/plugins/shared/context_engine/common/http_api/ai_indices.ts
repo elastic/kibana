@@ -37,7 +37,7 @@ export interface AiIndexProperties {
   sources: AiIndexSource[];
   /**
    * Agent Builder agent id that runs this index's feedback-loop analysis ("Analyze & improve").
-   * The analysis agent is the user's own; the Signals panel selects it and the chat bridge opens it.
+   * The analysis agent is the user's own; the Signals panel selects it and Analyze & improve opens it.
    */
   feedback_agent_id?: string;
 }

@@ -41,8 +41,8 @@ export interface AnalyzeChatOptions {
   /** Per-index session so each AI index's analysis is its own conversation, not a shared one. */
   sessionTag: string;
   /**
-   * Built-in attachments describing the index: a `text` summary plus one `workflow.yaml` attachment
-   * (by value) per linked workflow the current user can read.
+   * Built-in attachments describing the index: a `text` summary that lists linked workflow IDs.
+   * Workflow YAML is not attached; the agent can fetch a definition by id.
    */
   attachments: AttachmentInput[];
 }
