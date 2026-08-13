@@ -543,7 +543,7 @@ export function registerWorkflowExecuteStepTool(
     annotations: {
       title: 'Execute Workflow Step',
       readOnlyHint: false,
-      destructiveHint: false,
+      destructiveHint: true,
       idempotentHint: false,
       openWorldHint: true,
     },
