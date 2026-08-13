@@ -16,7 +16,7 @@ import { FlyoutContentId } from '../../../common/constants';
 import { setUnifiedDocViewerServices } from '../../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../../__mocks__';
 import { OriginDocTypeContext } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
-import { GENAI_EBT_CLICK_ACTIONS } from '@kbn/apm-ui-shared';
+import { GENAI_EBT_CLICK_ACTIONS, GENAI_TAB_IMPRESSION_EVENT_TYPE } from '@kbn/apm-ui-shared';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../../ebt_constants';
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
@@ -199,6 +199,29 @@ describe('WaterfallFlyout', () => {
       expect(genAiTab).toHaveAttribute(
         'data-ebt-element',
         TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS
+      );
+    });
+
+    it('reports a genai_tab_impression event when the GenAI tab is rendered', () => {
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      render(<WaterfallFlyout {...defaultProps} hit={genAiHit} />);
+
+      expect(reportEvent).toHaveBeenCalledWith(GENAI_TAB_IMPRESSION_EVENT_TYPE, {
+        element: TRACES_DOC_VIEWER_EBT_ELEMENTS.FLYOUT_TABS,
+      });
+    });
+
+    it('does not report a genai_tab_impression event for documents without gen_ai fields', () => {
+      const reportEvent = mockUnifiedDocViewerServices.analytics.reportEvent as jest.Mock;
+      reportEvent.mockClear();
+
+      render(<WaterfallFlyout {...defaultProps} />);
+
+      expect(reportEvent).not.toHaveBeenCalledWith(
+        GENAI_TAB_IMPRESSION_EVENT_TYPE,
+        expect.anything()
       );
     });
 
