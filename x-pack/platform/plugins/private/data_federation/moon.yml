@@ -26,6 +26,8 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/features-plugin'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/app-header'
+  - '@kbn/core-doc-links-browser'
 tags:
   - plugin
   - prod

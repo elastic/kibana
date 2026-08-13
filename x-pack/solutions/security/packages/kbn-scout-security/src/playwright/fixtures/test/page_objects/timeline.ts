@@ -31,6 +31,10 @@ export class TimelinePage {
   readonly kqlTextarea: Locator;
   readonly saveButtonTooltipAnchor: Locator;
   readonly timelineRows: Locator;
+  readonly batchActionsButton: Locator;
+  readonly superTimelineBadge: Locator;
+  readonly viewSuperTimelineAction: Locator;
+  readonly addToFavoritesButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.panel = this.page.testSubj.locator('timeline-modal-header-panel');
@@ -59,6 +63,21 @@ export class TimelinePage {
       'span:has([data-test-subj="timeline-modal-save-timeline"])'
     );
     this.timelineRows = this.timelinesTable.locator('tbody').getByRole('row');
+    this.batchActionsButton = this.page.testSubj.locator('batchActions');
+    this.superTimelineBadge = this.page.testSubj.locator('timeline-modal-super-timeline-badge');
+    this.viewSuperTimelineAction = this.page.testSubj.locator('view-super-timeline-action');
+    // Scope to the modal header panel so the bottom-bar favorites button (which is
+    // always rendered outside the modal) does not cause false negatives. Match both
+    // star variants so not.toBeVisible() is conclusive regardless of favorited state.
+    this.addToFavoritesButton = this.panel.locator(
+      '[data-test-subj="timeline-favorite-empty-star"], [data-test-subj="timeline-favorite-filled-star"]'
+    );
+  }
+
+  /** Select a timeline row's checkbox by its title text. */
+  async selectTimelineByTitle(title: string) {
+    const row = this.timelineRows.filter({ hasText: title });
+    await row.getByRole('checkbox').click();
   }
 
   async navigateToTimelines() {

@@ -15,6 +15,7 @@ import { conditionToESQLAst } from '@kbn/streamlang';
 import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
+import { createSignificantEventsTracedEsClient } from '../create_significant_events_traced_es_client';
 
 const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
 
@@ -54,7 +55,7 @@ export async function fetchSampleDocuments({
   entityFilteredRatio,
   diverseRatio,
   maxEntityFilters,
-  diverseOffset = 0,
+  iteration,
   samplingTimeoutMs,
 }: {
   esClient: ElasticsearchClient;
@@ -66,7 +67,7 @@ export async function fetchSampleDocuments({
   size: number;
   entityFilteredRatio: number;
   diverseRatio: number;
-  diverseOffset?: number;
+  iteration: number;
   maxEntityFilters: number;
   samplingTimeoutMs: number;
 }) {
@@ -82,6 +83,12 @@ export async function fetchSampleDocuments({
   }
 
   const entityFilters = getEntityFilters(features, maxEntityFilters);
+  const samplingSignal = AbortSignal.timeout(samplingTimeoutMs);
+  const tracedEsClient = createSignificantEventsTracedEsClient({
+    client: esClient,
+    logger,
+    abortSignal: samplingSignal,
+  });
 
   if (entityFilters.length === 0) {
     const diverseSize = Math.round(size * diverseRatio);
@@ -95,14 +102,13 @@ export async function fetchSampleDocuments({
             },
             () =>
               getDiverseSampleDocuments({
-                esClient,
+                esClient: tracedEsClient,
                 index,
                 start,
                 end,
                 size: diverseSize,
-                offset: diverseOffset,
+                iteration,
                 logger,
-                requestTimeout: samplingTimeoutMs,
               })
           ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
@@ -147,7 +153,6 @@ export async function fetchSampleDocuments({
       totalFilters: 0,
       filtersCapped: false,
       hasFilteredDocuments: false,
-      nextOffset: diverseOffset + diverseHits.length,
     };
   }
 
@@ -195,14 +200,13 @@ export async function fetchSampleDocuments({
             },
             () =>
               getDiverseSampleDocuments({
-                esClient,
+                esClient: tracedEsClient,
                 index,
                 start,
                 end,
                 size: diverseSize + entityFilteredSize,
-                offset: diverseOffset,
+                iteration,
                 logger,
-                requestTimeout: samplingTimeoutMs,
               })
           ).catch((err) => {
             logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
@@ -252,7 +256,6 @@ export async function fetchSampleDocuments({
     totalFilters: features.length,
     filtersCapped: features.length > maxEntityFilters,
     hasFilteredDocuments: entityFilteredHits.length > 0,
-    nextOffset: diverseOffset + Math.min(diverseHits.length, diverseSize),
   };
 }
 

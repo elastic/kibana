@@ -12,8 +12,10 @@ import { EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eu
 import { css } from '@emotion/react';
 import React, { Suspense, useMemo } from 'react';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import { getMaskableIconUrl } from './get_maskable_icon_url';
 import { getStepIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
+import type { ResolveRegisteredStepIconDeps } from './resolve_registered_step_icon';
 import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
 import { useWorkflowsUiServices } from '../../context';
 
@@ -26,15 +28,40 @@ const TRIGGER_TYPE_ICONS: Record<string, IconType> = {
 
 const DEFAULT_TRIGGER_ICON: IconType = HardcodedIcons.trigger;
 
-function resolveTriggerIconType(
+/**
+ * A resolved icon plus whether it may be repainted as a single-tint mask. Only the
+ * built-in maps qualify — registry icons are arbitrary and may be multi-color.
+ * `StepIcon` draws the same line by returning registered icons before its own mask
+ * gate, which is what keeps an icon from rendering full-color in the workflow list
+ * and flattened here.
+ */
+interface ResolvedIcon {
+  iconType: IconType;
+  tintable: boolean;
+}
+
+function resolveTriggerIcon(
   triggerType: string,
   workflowsExtensions: WorkflowsExtensionsPublicPluginStart
-): IconType {
-  return (
-    TRIGGER_TYPE_ICONS[triggerType] ??
-    workflowsExtensions.getTriggerDefinition(triggerType)?.icon ??
-    DEFAULT_TRIGGER_ICON
-  );
+): ResolvedIcon {
+  const hardcodedIcon = TRIGGER_TYPE_ICONS[triggerType];
+  if (hardcodedIcon) {
+    return { iconType: hardcodedIcon, tintable: true };
+  }
+
+  const registeredIcon = workflowsExtensions.getTriggerDefinition(triggerType)?.icon;
+  if (registeredIcon) {
+    return { iconType: registeredIcon, tintable: false };
+  }
+
+  return { iconType: DEFAULT_TRIGGER_ICON, tintable: true };
+}
+
+function resolveStepIcon(stepType: string, deps: ResolveRegisteredStepIconDeps): ResolvedIcon {
+  const registeredIcon = resolveRegisteredStepIcon(stepType, deps);
+  return registeredIcon
+    ? { iconType: registeredIcon, tintable: false }
+    : { iconType: getStepIconType(stepType), tintable: true };
 }
 
 export interface TypeIconProps extends Omit<EuiIconProps, 'type'> {
@@ -69,42 +96,42 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
   const { euiTheme } = useEuiTheme();
   const { workflowsExtensions, triggersActionsUi } = useWorkflowsUiServices();
 
-  const iconType = useMemo(
+  const { iconType, tintable } = useMemo(
     () =>
       kind === 'trigger'
-        ? resolveTriggerIconType(type, workflowsExtensions)
-        : resolveRegisteredStepIcon(type, {
+        ? resolveTriggerIcon(type, workflowsExtensions)
+        : resolveStepIcon(type, {
             workflowsExtensions,
             actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-          }) ?? getStepIconType(type),
+          }),
     [kind, type, workflowsExtensions, triggersActionsUi]
   );
 
   const label = title ?? type;
+  const maskUrl = tintable ? getMaskableIconUrl(iconType) : undefined;
 
-  const icon =
-    typeof iconType === 'string' && iconType.startsWith('data:') ? (
-      <span
-        css={css`
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          mask-image: url('${iconType}');
-          mask-size: contain;
-          mask-repeat: no-repeat;
-          mask-position: center;
-          background-color: ${euiTheme.colors.textParagraph};
-        `}
-        aria-hidden={true}
-        data-test-subj="workflowTypeIconDataUrl"
-      />
-    ) : typeof iconType === 'string' ? (
+  const icon = maskUrl ? (
+    <span
+      css={css`
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        mask-image: url('${maskUrl}');
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
+        background-color: ${euiTheme.colors.textParagraph};
+      `}
+      aria-hidden={true}
+      data-test-subj="workflowTypeIconDataUrl"
+    />
+  ) : typeof iconType === 'string' ? (
+    <EuiIcon type={iconType} size="m" {...rest} />
+  ) : (
+    <Suspense fallback={<EuiLoadingSpinner size="s" />}>
       <EuiIcon type={iconType} size="m" {...rest} />
-    ) : (
-      <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-        <EuiIcon type={iconType} size="m" {...rest} />
-      </Suspense>
-    );
+    </Suspense>
+  );
 
   return (
     <EuiToolTip content={label} anchorProps={{ css: css({ display: 'inline-flex' }) }}>
