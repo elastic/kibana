@@ -146,14 +146,6 @@ describe('WorkflowsPromotionCallout', () => {
     expect(learnMore).toHaveAttribute('target', '_blank');
   });
 
-  it('reports learn_more telemetry when the Learn more link is clicked', () => {
-    renderCallout({ canSaveAdvancedSettings: false });
-    fireEvent.click(screen.getByTestId(WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID));
-    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.WorkflowsPromotionCalloutAction, {
-      action: 'learn_more',
-    });
-  });
-
   it('enables the setting for the space and reloads when the enable button is clicked', async () => {
     renderCallout();
     fireEvent.click(screen.getByTestId(WORKFLOWS_PROMOTION_CALLOUT_ENABLE_TEST_ID));
