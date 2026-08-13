@@ -12,19 +12,27 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
+import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags';
 import {
   useObservabilityCuratedCategories,
   useObservabilityMiniTiles,
 } from './observability_flavor';
 
-const buildServices = ({ isServerless = false }: { isServerless?: boolean } = {}) => {
+const buildServices = ({
+  isServerless = false,
+  featureFlagValues = {},
+}: { isServerless?: boolean; featureFlagValues?: Record<string, boolean> } = {}) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockImplementation(
     (app: string, options?: { path?: string }) => `/app/${app}${options?.path ?? ''}`
   );
   return {
     ...core,
-    featureFlags: { getBooleanValue: jest.fn(() => false) },
+    featureFlags: {
+      getBooleanValue: jest.fn(
+        (key: string, fallback: boolean) => featureFlagValues[key] ?? fallback
+      ),
+    },
     observability: { config: { managedOtlpServiceUrl: '' } },
     cloud: undefined,
     context: { isServerless, isCloud: false, isDev: false },
@@ -77,6 +85,19 @@ describe('useObservabilityCuratedCategories', () => {
     expect(kubernetes?.onClick).toBeDefined();
     expect(aws?.href).toBe('/aws');
     expect(aws?.onClick).toBeDefined();
+  });
+
+  it('routes the AWS tile to the guided AWS flow when ingest hub onboarding is enabled', () => {
+    const services = buildServices({
+      featureFlagValues: { [IS_INGEST_HUB_ONBOARDING_ENABLED]: true },
+    });
+    const { result } = renderHook(() => useObservabilityCuratedCategories(), {
+      wrapper: createWrapper(services),
+    });
+    const tiles = result.current.flatMap((category) => category.tiles);
+    const aws = tiles.find((tile) => tile.id === 'aws');
+    expect(aws?.href).toBe('/app/onboarding/aws');
+    expect(aws?.onClick).toBeUndefined();
   });
 
   it('wires EPR-backed tiles to the integrations detail page', () => {

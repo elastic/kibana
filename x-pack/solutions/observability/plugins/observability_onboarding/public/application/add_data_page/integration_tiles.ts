@@ -47,7 +47,6 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
           { defaultMessage: 'Collect logs and metrics from AWS services.' }
         ),
         logo: 'aws',
-        route: '/aws',
       },
       {
         id: 'azure',

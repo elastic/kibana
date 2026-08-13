@@ -16,6 +16,7 @@ import type { LogoIconProps } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import { addPathParamToUrl } from '../package_list_search_form/use_card_url_rewrite';
+import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags';
 import { INTEGRATION_TILES } from './integration_tiles';
 import { INTEGRATION_MINI_TILES } from './integration_mini_tiles';
 
@@ -33,6 +34,7 @@ export const useObservabilityCuratedCategories = (): CuratedCategory[] => {
   const {
     services: {
       application,
+      featureFlags,
       share,
       context: { isServerless },
     },
@@ -54,6 +56,11 @@ export const useObservabilityCuratedCategories = (): CuratedCategory[] => {
     const syntheticsLocator = share?.url.locators.get(syntheticsAddMonitorLocatorID);
     const dynamicNavigation: Record<string, { href?: string; onClick?: React.MouseEventHandler }> =
       {
+        // ingest_hub's guided AWS flow wins over the CloudWatch quickstart
+        // while it rolls out behind its own flag.
+        aws: featureFlags.getBooleanValue(IS_INGEST_HUB_ONBOARDING_ENABLED, false)
+          ? { href: getUrlForApp?.('onboarding', { path: '/aws' }) }
+          : reactRouterNavigate(history, '/aws'),
         opentelemetry: isManagedOtlpServiceAvailable
           ? reactRouterNavigate(history, '/otel-apm')
           : { href: apmUrl },
@@ -87,6 +94,7 @@ export const useObservabilityCuratedCategories = (): CuratedCategory[] => {
     colorMode,
     euiTheme,
     application,
+    featureFlags,
     share,
     isServerless,
     isManagedOtlpServiceAvailable,
