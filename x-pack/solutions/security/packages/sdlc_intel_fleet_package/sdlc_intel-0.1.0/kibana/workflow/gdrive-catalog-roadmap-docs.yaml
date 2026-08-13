@@ -128,14 +128,14 @@ steps:
                     links:
                       catalog_folder_id: '${{ variables.folderId }}'
                       catalog_source: roadmap_folder
-                    payload: '${{ foreach.item | json }}'
+                    payload: '${{ foreach.item }}'
 
           - name: advance_folder_pagination
             type: data.set
             with:
               pageToken: '${{ steps.list_roadmap_folder_files.output.nextPageToken ?? "" }}'
-              pagesFetched: '${{ variables.pagesFetched + 1 }}'
-              filesIndexed: '${{ variables.filesIndexed + steps.list_roadmap_folder_files.output.files.size }}'
+              pagesFetched: '${{ variables.pagesFetched | plus: 1 }}'
+              filesIndexed: '${{ variables.filesIndexed | plus: steps.list_roadmap_folder_files.output.files.size }}'
 
       - name: write_folder_checkpoint
         type: elasticsearch.index

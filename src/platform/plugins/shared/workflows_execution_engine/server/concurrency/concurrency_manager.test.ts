@@ -41,7 +41,7 @@ describe('ConcurrencyManager', () => {
       execution: {
         id: 'test-execution-id',
         isTestRun: false,
-        startedAt: new Date(),
+        startedAt: new Date().toISOString(),
         url: 'http://localhost:5601',
       },
       workflow: {
@@ -69,7 +69,7 @@ describe('ConcurrencyManager', () => {
         serverName: 'mamba',
         hostName: 'server-1',
       },
-      now: new Date(),
+      now: new Date().toISOString(),
     };
   });
 

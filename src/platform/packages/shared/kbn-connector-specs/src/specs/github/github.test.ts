@@ -511,6 +511,31 @@ describe('GithubConnector', () => {
       });
     });
 
+    it('coerces string first from workflow Liquid templates', () => {
+      const input = parse('runQueryTemplate', {
+        templateId: 'orgCatalog.teams',
+        variables: { org: 'elastic' },
+        first: '100',
+      });
+
+      expect(input.first).toBe(100);
+    });
+
+    it('coerces string number variables for GraphQL Int! templates', async () => {
+      await GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+        templateId: 'graph.issueGraph',
+        variables: { owner: 'elastic', repo: 'kibana', number: '1698' },
+      });
+
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            variables: { owner: 'elastic', repo: 'kibana', number: 1698 },
+          }),
+        })
+      );
+    });
+
     it('lists available query templates', async () => {
       const result = await GithubConnector.actions.listQueryTemplates.handler(mockContext, {});
 

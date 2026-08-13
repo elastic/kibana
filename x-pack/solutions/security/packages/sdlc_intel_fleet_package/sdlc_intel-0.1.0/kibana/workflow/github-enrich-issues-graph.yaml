@@ -67,7 +67,7 @@ steps:
 
   - name: ensure_watermark
     type: data.set
-    if: '{{ variables.watermark | size }} : 0'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
@@ -93,6 +93,8 @@ steps:
   - name: enrich_issues
     type: foreach
     foreach: '{{ steps.load_issues_batch.output.hits.hits | json }}'
+    iteration-on-failure:
+      continue: true
     steps:
       - name: set_issue_context
         type: data.set
@@ -116,6 +118,16 @@ steps:
         if: '{{ steps.fetch_issue_graph.output.shouldBackoff }}'
         with:
           duration: 60s
+
+      - name: track_batch_progress
+        type: data.set
+        with:
+          lastUpdatedAt: '{{ foreach.item._source.github.updated_at }}'
+          issuesProcessed: '{{ variables.issuesProcessed | plus: 1 }}'
+
+      - name: skip_if_issue_missing
+        type: loop.continue
+        if: '${{ steps.fetch_issue_graph.output.data.repository.issue.id == null or steps.fetch_issue_graph.output.data.repository.issue.id == "" }}'
 
       - name: upsert_enriched_issue
         type: elasticsearch.index
@@ -150,37 +162,43 @@ steps:
               parent_issue_ref: '{{ steps.fetch_issue_graph.output.data.repository.issue.parent.url }}'
             metrics:
               comments_count: '{{ steps.fetch_issue_graph.output.data.repository.issue.comments.nodes | size }}'
-            payload: '{{ steps.fetch_issue_graph.output.data.repository.issue | json }}'
+            payload: '${{ steps.fetch_issue_graph.output.data.repository.issue }}'
 
       - name: index_issue_comments
-        type: foreach
-        foreach: '{{ steps.fetch_issue_graph.output.data.repository.issue.comments.nodes | json }}'
+        type: if
+        condition: "${{ steps.fetch_issue_graph.output.data.repository.issue.comments.nodes.size > 0 }}"
         steps:
-          - name: upsert_issue_comment
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.commentsIndex }}'
-              id: '{{ foreach.item.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                entity:
-                  type: comment
+          - name: index_issue_comment_docs
+            type: foreach
+            foreach: '{{ steps.fetch_issue_graph.output.data.repository.issue.comments.nodes | json }}'
+            iteration-on-failure:
+              continue: true
+            steps:
+              - name: upsert_issue_comment
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.commentsIndex }}'
                   id: '{{ foreach.item.id }}'
-                org:
-                  login: '{{ consts.orgLogin }}'
-                repository:
-                  name: '{{ variables.issueRepoName }}'
-                  full_name: '{{ variables.issueRepoFullName }}'
-                comment:
-                  body: '{{ foreach.item.body }}'
-                  author: '{{ foreach.item.author.login }}'
-                  issue_ref: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
-                github:
-                  created_at: '{{ foreach.item.createdAt }}'
-                payload: '{{ foreach.item | json }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    entity:
+                      type: comment
+                      id: '{{ foreach.item.id }}'
+                    org:
+                      login: '{{ consts.orgLogin }}'
+                    repository:
+                      name: '{{ variables.issueRepoName }}'
+                      full_name: '{{ variables.issueRepoFullName }}'
+                    comment:
+                      body: '{{ foreach.item.body }}'
+                      author: '{{ foreach.item.author.login }}'
+                      issue_ref: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
+                    github:
+                      created_at: '{{ foreach.item.createdAt }}'
+                    payload: '${{ foreach.item }}'
 
       - name: index_parent_relationship_block
         type: if
@@ -201,34 +219,34 @@ steps:
                 relation: child_of
                 metadata:
                   org: '{{ consts.orgLogin }}'
-                payload: '{{ steps.fetch_issue_graph.output.data.repository.issue.parent | json }}'
+                payload: '${{ steps.fetch_issue_graph.output.data.repository.issue.parent }}'
 
       - name: index_sub_issue_relationships
-        type: foreach
-        foreach: '{{ steps.fetch_issue_graph.output.data.repository.issue.subIssues.nodes | json }}'
+        type: if
+        condition: "${{ steps.fetch_issue_graph.output.data.repository.issue.subIssues.nodes.size > 0 }}"
         steps:
-          - name: upsert_sub_issue_relationship
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.relationshipsIndex }}'
-              id: '{{ variables.issueEntityId }}-parent-of-{{ foreach.item.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                from: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
-                to: '{{ foreach.item.url }}'
-                relation: parent_of
-                metadata:
-                  org: '{{ consts.orgLogin }}'
-                payload: '{{ foreach.item | json }}'
-
-      - name: track_batch_progress
-        type: data.set
-        with:
-          lastUpdatedAt: '{{ foreach.item._source.github.updated_at }}'
-          issuesProcessed: '{{ variables.issuesProcessed | plus: 1 }}'
+          - name: index_sub_issue_relationship_docs
+            type: foreach
+            foreach: '{{ steps.fetch_issue_graph.output.data.repository.issue.subIssues.nodes | json }}'
+            iteration-on-failure:
+              continue: true
+            steps:
+              - name: upsert_sub_issue_relationship
+                type: elasticsearch.index
+                with:
+                  index: '{{ consts.relationshipsIndex }}'
+                  id: '{{ variables.issueEntityId }}-parent-of-{{ foreach.item.id }}'
+                  document:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    from: '{{ steps.fetch_issue_graph.output.data.repository.issue.url }}'
+                    to: '{{ foreach.item.url }}'
+                    relation: parent_of
+                    metadata:
+                      org: '{{ consts.orgLogin }}'
+                    payload: '${{ foreach.item }}'
 
   - name: finalize_watermark
     type: if

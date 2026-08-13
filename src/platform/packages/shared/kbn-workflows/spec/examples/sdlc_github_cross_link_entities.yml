@@ -67,7 +67,7 @@ steps:
 
   - name: ensure_watermark
     type: data.set
-    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
@@ -111,7 +111,7 @@ steps:
             type: elasticsearch.index
             with:
               index: '{{ consts.relationshipsIndex }}'
-              id: '${{ variables.prEntityId }}-closes-${{ foreach.item.id }}'
+              id: '{{ variables.prEntityId }}-closes-{{ foreach.item.id }}'
               document:
                 '@timestamp': '{{ execution.startedAt }}'
                 sync:
@@ -125,7 +125,7 @@ steps:
                   pr_number: '${{ variables.prNumber }}'
                   issue_number: '${{ foreach.item.number }}'
                   repo: '${{ variables.prRepoFullName }}'
-                payload: '${{ foreach.item | json }}'
+                payload: '${{ foreach.item }}'
 
           - name: count_prs_for_issue
             type: elasticsearch.search
@@ -182,21 +182,21 @@ steps:
 
               - name: bump_merged_pr
                 type: data.set
-                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 && steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"MERGED\" }}"
+                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 and steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"MERGED\" }}"
                 with:
-                  prSummaryMerged: '${{ variables.prSummaryMerged + 1 }}'
+                  prSummaryMerged: '${{ variables.prSummaryMerged | plus: 1 }}'
 
               - name: bump_open_pr
                 type: data.set
-                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 && steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"OPEN\" }}"
+                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 and steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"OPEN\" }}"
                 with:
-                  prSummaryOpen: '${{ variables.prSummaryOpen + 1 }}'
+                  prSummaryOpen: '${{ variables.prSummaryOpen | plus: 1 }}'
 
               - name: bump_closed_pr
                 type: data.set
-                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 && steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"CLOSED\" }}"
+                if: "${{ steps.load_linked_pr.output.hits.hits.size > 0 and steps.load_linked_pr.output.hits.hits[0]._source.github.state == \"CLOSED\" }}"
                 with:
-                  prSummaryClosed: '${{ variables.prSummaryClosed + 1 }}'
+                  prSummaryClosed: '${{ variables.prSummaryClosed | plus: 1 }}'
 
           - name: load_issue_for_labels
             type: elasticsearch.search
@@ -243,16 +243,16 @@ steps:
                     sync:
                       run_id: '{{ execution.id }}'
                       source: '{{ consts.syncSource }}'
-                    entity: '${{ foreach.item._source.entity | json }}'
+                    entity: '${{ foreach.item._source.entity }}'
                     org: '${{ foreach.item._source.org | json }}'
                     project: '${{ foreach.item._source.project | json }}'
-                    hierarchy: '${{ foreach.item._source.hierarchy | json }}'
-                    content_ref: '${{ foreach.item._source.content_ref | json }}'
-                    payload: '${{ foreach.item._source.payload | json }}'
+                    hierarchy: '${{ foreach.item._source.hierarchy }}'
+                    content_ref: '${{ foreach.item._source.content_ref }}'
+                    payload: '${{ foreach.item._source.payload }}'
                     delivery:
                       linked_prs_count: '${{ variables.prSummaryTotal }}'
-                      coverage_status: '${{ variables.prSummaryTotal > 0 ? "in_progress" : "not_started" }}'
-                      coverage_pct: '${{ variables.prSummaryMerged > 0 ? 100 : (variables.prSummaryTotal > 0 ? 50 : 0) }}'
+                      coverage_status: '{% if variables.prSummaryTotal > 0 %}in_progress{% else %}not_started{% endif %}'
+                      coverage_pct: '{% if variables.prSummaryMerged > 0 %}100{% elsif variables.prSummaryTotal > 0 %}50{% else %}0{% endif %}'
                       pr_summary:
                         total: '${{ variables.prSummaryTotal }}'
                         merged: '${{ variables.prSummaryMerged }}'
@@ -261,13 +261,13 @@ steps:
                     team_attribution:
                       engineering_team: '${{ foreach.item._source.team_attribution.engineering_team ?? variables.labelTeam }}'
                       org_teams: '${{ foreach.item._source.team_attribution.org_teams ?? variables.labelTeam }}'
-                      attribution_source: '${{ foreach.item._source.team_attribution.engineering_team ? "project_field" : "issue_label" }}'
+                      attribution_source: '{% if foreach.item._source.team_attribution.engineering_team %}project_field{% else %}issue_label{% endif %}'
 
       - name: track_pr_progress
         type: data.set
         with:
           lastUpdatedAt: '${{ foreach.item._source.github.updated_at }}'
-          prsProcessed: '${{ variables.prsProcessed + 1 }}'
+          prsProcessed: '${{ variables.prsProcessed | plus: 1 }}'
 
   - name: load_project_items_batch
     type: elasticsearch.search
@@ -291,7 +291,7 @@ steps:
         type: elasticsearch.index
         with:
           index: '{{ consts.relationshipsIndex }}'
-          id: '${{ foreach.item._source.entity.id }}-contains-${{ foreach.item._source.content_ref.id }}'
+          id: '{{ foreach.item._source.entity.id }}-contains-{{ foreach.item._source.content_ref.id }}'
           document:
             '@timestamp': '{{ execution.startedAt }}'
             sync:
@@ -304,12 +304,12 @@ steps:
               org: '{{ consts.orgLogin }}'
               project_number: '${{ foreach.item._source.project.number }}'
               content_type: '${{ foreach.item._source.content_ref.type }}'
-            payload: '${{ foreach.item._source.content_ref | json }}'
+            payload: '${{ foreach.item._source.content_ref }}'
 
       - name: track_item_progress
         type: data.set
         with:
-          itemsLinked: '${{ variables.itemsLinked + 1 }}'
+          itemsLinked: '${{ variables.itemsLinked | plus: 1 }}'
 
   - name: load_issues_with_parents
     type: elasticsearch.search
@@ -345,7 +345,7 @@ steps:
             metadata:
               org: '{{ consts.orgLogin }}'
               issue_number: '${{ foreach.item._source.entity.number }}'
-            payload: '${{ foreach.item._source.hierarchy | json }}'
+            payload: '${{ foreach.item._source.hierarchy }}'
 
       - name: upsert_epic_contains_edge
         type: elasticsearch.index
@@ -363,7 +363,7 @@ steps:
             metadata:
               org: '{{ consts.orgLogin }}'
               issue_number: '${{ foreach.item._source.entity.number }}'
-            payload: '${{ foreach.item._source.entity | json }}'
+            payload: '${{ foreach.item._source.entity }}'
 
   - name: finalize_watermark
     type: if

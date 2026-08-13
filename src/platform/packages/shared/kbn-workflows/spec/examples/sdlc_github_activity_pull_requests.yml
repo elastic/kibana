@@ -20,7 +20,8 @@ consts:
   pullRequestsIndex: github-intel-pull-requests
   syncSource: github-activity-pull-requests
   entityType: pull_request
-  pageSize: 50
+  pageSize: 100
+  pagesPerRun: 10
   initialWatermark: '2024-01-01T00:00:00Z'
 
 settings:
@@ -57,21 +58,22 @@ steps:
   - name: init_state
     type: data.set
     with:
-      cursor: '{{ steps.read_checkpoint.output.hits.hits.0._source.cursor }}'
-      watermark: '{{ steps.read_checkpoint.output.hits.hits.0._source.watermark }}'
+      cursor: '${{ steps.read_checkpoint.output.hits.hits[0]._source.cursor ?? "" }}'
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
       runStartedAt: '{{ execution.startedAt }}'
       pagesFetched: 0
+      lastIssueUpdatedAt: ''
 
   - name: ensure_watermark
     type: data.set
-    if: '{{ variables.watermark | size }} : 0'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
   - name: build_search_query
     type: data.set
     with:
-      searchQuery: 'org:{{ consts.orgLogin }} is:pr updated:>{{ variables.watermark }}'
+      searchQuery: 'org:{{ consts.orgLogin }} is:pr sort:updated-asc updated:>{{ variables.watermark }}'
 
   - name: paginate_pull_requests
     type: while
@@ -97,7 +99,13 @@ steps:
       - name: index_pull_requests
         type: foreach
         foreach: '{{ steps.fetch_pull_requests.output.data.search.nodes | json }}'
+        iteration-on-failure:
+          continue: true
         steps:
+          - name: skip_if_not_pull_request
+            type: loop.continue
+            if: '${{ foreach.item.id == "" or foreach.item.createdAt == "" }}'
+
           - name: upsert_pull_request
             type: elasticsearch.index
             with:
@@ -128,7 +136,12 @@ steps:
                   title: '{{ foreach.item.title }}'
                   draft: '{{ foreach.item.isDraft }}'
                   merged_at: '{{ foreach.item.mergedAt }}'
-                payload: '{{ foreach.item | json }}'
+                payload: '${{ foreach.item }}'
+
+          - name: track_last_updated
+            type: data.set
+            with:
+              lastIssueUpdatedAt: '{{ foreach.item.updatedAt }}'
 
       - name: advance_cursor
         type: data.set
@@ -136,11 +149,46 @@ steps:
           cursor: '{{ steps.fetch_pull_requests.output.pageInfo.endCursor }}'
           pagesFetched: '{{ variables.pagesFetched | plus: 1 }}'
 
-  - name: clear_cursor_if_complete
-    type: data.set
-    if: 'steps.fetch_pull_requests.output.pageInfo.hasNextPage : false'
-    with:
-      cursor: ''
+      - name: write_page_checkpoint
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            cursor: '{{ variables.cursor }}'
+            watermark: '{{ variables.watermark }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: in_progress
+            stats:
+              pages_fetched: '{{ variables.pagesFetched }}'
+              has_next_page: '{{ steps.fetch_pull_requests.output.pageInfo.hasNextPage }}'
+              search_query: '{{ variables.searchQuery }}'
+              last_issue_updated_at: '{{ variables.lastIssueUpdatedAt }}'
+              rate_limit_remaining: '{{ steps.fetch_pull_requests.output.rateLimit.remaining }}'
+
+  - name: finalize_window
+    type: if
+    condition: 'variables.pagesFetched : {{ consts.pagesPerRun }}'
+    steps:
+      - name: slide_search_window
+        type: data.set
+        if: '${{ variables.lastIssueUpdatedAt != "" }}'
+        with:
+          watermark: '${{ variables.lastIssueUpdatedAt }}'
+          cursor: ''
+    else:
+      - name: mark_caught_up
+        type: data.set
+        with:
+          watermark: '${{ variables.runStartedAt }}'
+          cursor: ''
 
   - name: write_checkpoint
     type: elasticsearch.index
@@ -156,11 +204,12 @@ steps:
         org:
           login: '{{ consts.orgLogin }}'
         cursor: '{{ variables.cursor }}'
-        watermark: '{{ variables.runStartedAt }}'
+        watermark: '{{ variables.watermark }}'
         last_run_at: '{{ execution.startedAt }}'
         last_run_status: success
         stats:
           pages_fetched: '{{ variables.pagesFetched }}'
           has_next_page: '{{ steps.fetch_pull_requests.output.pageInfo.hasNextPage }}'
           search_query: '{{ variables.searchQuery }}'
+          last_issue_updated_at: '{{ variables.lastIssueUpdatedAt }}'
           rate_limit_remaining: '{{ steps.fetch_pull_requests.output.rateLimit.remaining }}'

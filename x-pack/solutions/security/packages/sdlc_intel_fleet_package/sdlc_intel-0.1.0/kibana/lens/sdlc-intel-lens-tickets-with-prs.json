@@ -3,7 +3,7 @@
     "description": "Child tickets with at least one linked PR",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],

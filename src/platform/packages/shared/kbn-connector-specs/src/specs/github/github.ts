@@ -78,6 +78,17 @@ import {
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 const GITHUB_INGEST_OAUTH_SCOPE = 'read:org read:project repo';
 
+/** Coerce Liquid-stringified ints (e.g. number: '{{ entity.number }}') for GraphQL Int! vars. */
+const coerceIntVariable = (value: unknown): unknown => {
+  if (typeof value === 'number' && Number.isInteger(value)) {
+    return value;
+  }
+  if (typeof value === 'string' && /^-?\d+$/.test(value.trim())) {
+    return Number.parseInt(value, 10);
+  }
+  return value;
+};
+
 const mergeTemplateVariables = (
   input: RunQueryTemplateInput
 ): Record<string, unknown> | undefined => {
@@ -87,6 +98,12 @@ const mergeTemplateVariables = (
   }
   if (input.after !== undefined) {
     variables.after = input.after;
+  }
+  // Workflow templates often stringify ints; GraphQL Int! rejects strings.
+  for (const key of ['number', 'first'] as const) {
+    if (key in variables) {
+      variables[key] = coerceIntVariable(variables[key]);
+    }
   }
   return Object.keys(variables).length > 0 ? variables : undefined;
 };

@@ -3,7 +3,8 @@
     "fieldFormatMap": "{}",
     "fields": "[]",
     "runtimeFieldMap": "{}",
-    "title": "sdlc-github-raw-summary-view"
+    "timeFieldName": "@timestamp",
+    "title": "github-intel-raw-project-pages"
   },
   "id": "sdlc-github-raw-summary-view",
   "type": "index-pattern",

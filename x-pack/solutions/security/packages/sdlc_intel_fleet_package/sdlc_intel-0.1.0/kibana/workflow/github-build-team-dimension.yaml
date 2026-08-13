@@ -39,6 +39,8 @@ steps:
     type: elasticsearch.search
     with:
       index: '{{ consts.teamsIndex }}'
+      ignore_unavailable: true
+      allow_no_indices: true
       size: '{{ consts.pageSize }}'
       query:
         term:
@@ -65,8 +67,8 @@ steps:
               github_org_slugs:
                 - '${{ foreach.item._source.team.slug }}'
               github_labels:
-                - '${{ "Team:" + foreach.item._source.team.name }}'
-            payload: '${{ foreach.item._source.payload | json }}'
+                - '${{ "Team:" | append: foreach.item._source.team.name }}'
+            payload: '${{ foreach.item._source.payload }}'
 
   - name: write_checkpoint
     type: elasticsearch.index

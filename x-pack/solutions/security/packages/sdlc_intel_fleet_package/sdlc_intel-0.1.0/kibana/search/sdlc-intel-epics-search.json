@@ -2,7 +2,7 @@
   "attributes": {
     "columns": [
       "epic.title",
-      "epic.teams",
+      "teams.own_engineering_team",
       "release.roadmap_stage",
       "release.milestone",
       "rollup.status",

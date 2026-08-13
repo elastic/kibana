@@ -110,7 +110,7 @@ steps:
                 github:
                   created_at: '{{ foreach.item.createdAt }}'
                   updated_at: '{{ foreach.item.updatedAt }}'
-                payload: '{{ foreach.item | json }}'
+                payload: '${{ foreach.item }}'
 
       - name: advance_cursor
         type: data.set

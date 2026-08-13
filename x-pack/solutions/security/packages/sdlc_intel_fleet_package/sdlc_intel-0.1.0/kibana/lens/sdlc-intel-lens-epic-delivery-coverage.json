@@ -3,7 +3,7 @@
     "description": "Epic delivery coverage percentage",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["bucket-col", "metric-col"],

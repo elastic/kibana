@@ -122,14 +122,14 @@ steps:
                 feedback:
                   is_escalated: false
                   linked_to_sdh: false
-                payload: '${{ foreach.item | json }}'
+                payload: '${{ foreach.item }}'
 
       - name: advance_pagination
         type: data.set
         with:
           nextRecordsUrl: '${{ steps.fetch_cases.output.nextRecordsUrl ?? "" }}'
-          pagesFetched: '${{ variables.pagesFetched + 1 }}'
-          recordsIndexed: '${{ variables.recordsIndexed + steps.fetch_cases.output.records.size }}'
+          pagesFetched: '${{ variables.pagesFetched | plus: 1 }}'
+          recordsIndexed: '${{ variables.recordsIndexed | plus: steps.fetch_cases.output.records.size }}'
 
   - name: write_checkpoint
     type: elasticsearch.index

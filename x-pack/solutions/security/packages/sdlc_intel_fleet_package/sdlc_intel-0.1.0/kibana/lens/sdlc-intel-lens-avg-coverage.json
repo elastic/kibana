@@ -3,7 +3,7 @@
     "description": "Average epic coverage percentage from sdlc-epic-phases rollup",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],

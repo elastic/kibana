@@ -3,7 +3,7 @@
     "description": "Total project items in raw page payloads",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],
@@ -14,7 +14,7 @@
                   "label": "Items fetched",
                   "operationType": "sum",
                   "scale": "ratio",
-                  "sourceField": "items_fetched"
+                  "sourceField": "item_count"
                 }
               },
               "incompleteColumns": {}

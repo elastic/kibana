@@ -46,13 +46,16 @@
         "github": {
           "properties": {
             "created_at": {
-              "type": "date"
+              "type": "date",
+              "ignore_malformed": true
             },
             "updated_at": {
-              "type": "date"
+              "type": "date",
+              "ignore_malformed": true
             },
             "closed_at": {
-              "type": "date"
+              "type": "date",
+              "ignore_malformed": true
             },
             "state": {
               "type": "keyword"

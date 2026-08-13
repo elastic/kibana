@@ -3,7 +3,7 @@
     "description": "Total child tickets linked to epics",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],

@@ -1,12 +1,12 @@
 {
   "attributes": {
-    "columns": ["org_login", "project_number", "page_count", "items_fetched"],
-    "description": "Raw page counts per GitHub project",
+    "columns": ["org.login", "project.number", "project.title", "item_count", "@timestamp"],
+    "description": "Raw page fetches from github-intel-raw-project-pages",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
     },
-    "sort": [["page_count", "desc"]],
+    "sort": [["@timestamp", "desc"]],
     "title": "SDLC raw pages by project",
     "version": 1
   },

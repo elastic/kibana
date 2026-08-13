@@ -3,7 +3,7 @@
     "description": "GitHub org teams by member count",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["bucket-col", "metric-col"],

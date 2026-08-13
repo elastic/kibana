@@ -67,7 +67,7 @@ steps:
 
   - name: ensure_watermark
     type: data.set
-    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
@@ -75,6 +75,8 @@ steps:
     type: elasticsearch.search
     with:
       index: '{{ consts.productIssuesIndex }}'
+      ignore_unavailable: true
+      allow_no_indices: true
       size: '{{ consts.productBatchSize }}'
       sort:
         - github.updated_at:
@@ -91,7 +93,8 @@ steps:
                   gt: '{{ variables.watermark }}'
           must_not:
             - wildcard:
-                repository.full_name: '*{{ consts.sdhRepoPattern }}*'
+                repository.full_name:
+                  value: '*{{ consts.sdhRepoPattern }}*'
 
   - name: link_sdh_to_product_by_url_reference
     type: foreach
@@ -109,6 +112,8 @@ steps:
         type: elasticsearch.search
         with:
           index: '{{ consts.sdhIssuesIndex }}'
+          ignore_unavailable: true
+          allow_no_indices: true
           size: 1
           query:
             simple_query_string:
@@ -124,7 +129,7 @@ steps:
         if: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits.size > 0 }}'
         with:
           index: '{{ consts.relationshipsIndex }}'
-          id: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.entity.id }}-sdh_links_product-${{ variables.productIssueId }}'
+          id: '{{ steps.find_sdh_issue_referencing_product_url.output.hits.hits[0]._source.entity.id }}-sdh_links_product-{{ variables.productIssueId }}'
           document:
             '@timestamp': '{{ execution.startedAt }}'
             sync:
@@ -162,7 +167,7 @@ steps:
         type: data.set
         if: '${{ steps.find_sdh_issue_referencing_product_url.output.hits.hits.size > 0 }}'
         with:
-          linksFromProductUrl: '${{ variables.linksFromProductUrl + 1 }}'
+          linksFromProductUrl: '${{ variables.linksFromProductUrl | plus: 1 }}'
 
   - name: write_checkpoint
     type: elasticsearch.index

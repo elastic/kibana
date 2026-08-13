@@ -75,6 +75,13 @@ describe('buildWorkflowContext', () => {
   });
 
   describe('execution context', () => {
+    it('exposes startedAt and now as ISO 8601 strings for Liquid/ES date fields', () => {
+      const context = buildWorkflowContext(baseExecution, undefined, dependencies);
+
+      expect(context.execution.startedAt).toBe('2023-01-01T00:00:00.000Z');
+      expect(context.now).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    });
+
     it('should include executedBy and triggeredBy in execution context', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,

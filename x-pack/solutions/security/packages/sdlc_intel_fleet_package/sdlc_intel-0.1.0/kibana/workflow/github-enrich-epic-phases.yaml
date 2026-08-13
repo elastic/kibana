@@ -23,7 +23,7 @@ consts:
   pullRequestsIndex: github-intel-pull-requests
   syncSource: github-enrich-epic-phases
   entityType: epic_phases_enrich
-  batchSize: 25
+  batchSize: 100
   initialWatermark: '2024-01-01T00:00:00Z'
 
 settings:
@@ -67,7 +67,7 @@ steps:
 
   - name: ensure_watermark
     type: data.set
-    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
@@ -75,6 +75,8 @@ steps:
     type: elasticsearch.search
     with:
       index: '{{ consts.epicPhasesIndex }}'
+      ignore_unavailable: true
+      allow_no_indices: true
       size: '{{ consts.batchSize }}'
       sort:
         - '@timestamp':
@@ -91,6 +93,8 @@ steps:
   - name: enrich_epics
     type: foreach
     foreach: '${{ steps.load_epics_batch.output.hits.hits | json }}'
+    iteration-on-failure:
+      continue: true
     steps:
       - name: init_epic_context
         type: data.set
@@ -108,6 +112,8 @@ steps:
         type: elasticsearch.search
         with:
           index: '{{ consts.relationshipsIndex }}'
+          ignore_unavailable: true
+          allow_no_indices: true
           size: 200
           query:
             bool:
@@ -125,6 +131,8 @@ steps:
             type: elasticsearch.search
             with:
               index: '{{ consts.issuesIndex }}'
+              ignore_unavailable: true
+              allow_no_indices: true
               size: 1
               query:
                 bool:
@@ -134,24 +142,26 @@ steps:
                     - term:
                         entity.url: '${{ foreach.item._source.to }}'
 
-          - name: skip_when_issue_missing
+          - name: skip_when_child_unresolved
             type: if
-            condition: "${{ steps.load_child_issue.output.hits.hits.size > 0 }}"
+            condition: "${{ steps.load_child_issue.output.hits.hits.size > 0 or (foreach.item._source.to != null and foreach.item._source.to != \"\") }}"
             steps:
               - name: set_child_context
                 type: data.set
                 with:
                   childIssueUrl: '${{ foreach.item._source.to }}'
-                  childIssueId: '${{ steps.load_child_issue.output.hits.hits[0]._source.entity.id }}'
-                  childIssueNumber: '${{ steps.load_child_issue.output.hits.hits[0]._source.entity.number }}'
-                  childIssueTitle: '${{ steps.load_child_issue.output.hits.hits[0]._source.content.title }}'
-                  childIssueStatus: '${{ steps.load_child_issue.output.hits.hits[0]._source.github.state }}'
-                  childIssueRepo: '${{ steps.load_child_issue.output.hits.hits[0]._source.repository.full_name }}'
+                  childIssueId: '${{ steps.load_child_issue.output.hits.hits[0]._source.entity.id | default: foreach.item._source.payload.id }}'
+                  childIssueNumber: '${{ steps.load_child_issue.output.hits.hits[0]._source.entity.number | default: foreach.item._source.payload.number }}'
+                  childIssueTitle: '${{ steps.load_child_issue.output.hits.hits[0]._source.content.title | default: foreach.item._source.payload.title }}'
+                  childIssueStatus: '${{ steps.load_child_issue.output.hits.hits[0]._source.github.state | default: foreach.item._source.payload.state }}'
+                  childIssueRepo: '${{ steps.load_child_issue.output.hits.hits[0]._source.repository.full_name | default: foreach.item._source.payload.repository.nameWithOwner }}'
 
               - name: count_prs_for_child
                 type: elasticsearch.search
                 with:
                   index: '{{ consts.relationshipsIndex }}'
+                  ignore_unavailable: true
+                  allow_no_indices: true
                   size: 0
                   track_total_hits: true
                   query:
@@ -169,11 +179,38 @@ steps:
                   childHasPr: '${{ steps.count_prs_for_child.output.hits.total.value > 0 }}'
                   childMergedCount: 0
 
+              - name: count_prs_from_index
+                type: elasticsearch.search
+                if: '${{ variables.childPrCount == 0 }}'
+                with:
+                  index: '{{ consts.pullRequestsIndex }}'
+                  ignore_unavailable: true
+                  allow_no_indices: true
+                  size: 0
+                  track_total_hits: true
+                  query:
+                    bool:
+                      should:
+                        - term:
+                            links.closing_issues: '${{ variables.childIssueUrl }}'
+                        - term:
+                            links.linked_issues: '${{ variables.childIssueUrl }}'
+                      minimum_should_match: 1
+
+              - name: apply_pr_index_fallback
+                type: data.set
+                if: '${{ variables.childPrCount == 0 }}'
+                with:
+                  childPrCount: '${{ steps.count_prs_from_index.output.hits.total.value }}'
+                  childHasPr: '${{ steps.count_prs_from_index.output.hits.total.value > 0 }}'
+
               - name: load_closing_pr_edges
                 type: elasticsearch.search
                 if: '${{ variables.childHasPr }}'
                 with:
                   index: '{{ consts.relationshipsIndex }}'
+                  ignore_unavailable: true
+                  allow_no_indices: true
                   size: 50
                   query:
                     bool:
@@ -191,6 +228,8 @@ steps:
                     type: elasticsearch.search
                     with:
                       index: '{{ consts.pullRequestsIndex }}'
+                      ignore_unavailable: true
+                      allow_no_indices: true
                       size: 1
                       query:
                         bool:
@@ -202,15 +241,15 @@ steps:
 
                   - name: increment_child_merged
                     type: data.set
-                    if: "${{ steps.load_closing_pr.output.hits.hits.size > 0 && steps.load_closing_pr.output.hits.hits[0]._source.github.state == \"MERGED\" }}"
+                    if: "${{ steps.load_closing_pr.output.hits.hits.size > 0 and steps.load_closing_pr.output.hits.hits[0]._source.github.state == \"MERGED\" }}"
                     with:
-                      childMergedCount: '${{ variables.childMergedCount + 1 }}'
+                      childMergedCount: '${{ variables.childMergedCount | plus: 1 }}'
 
               - name: upsert_epic_ticket
                 type: elasticsearch.index
                 with:
                   index: '{{ consts.epicTicketsIndex }}'
-                  id: '${{ variables.epicProjectItemId }}-${{ variables.childIssueId }}'
+                  id: '{{ variables.epicProjectItemId }}-{{ variables.childIssueId }}'
                   document:
                     '@timestamp': '{{ execution.startedAt }}'
                     sync:
@@ -236,10 +275,10 @@ steps:
               - name: accumulate_ticket_stats
                 type: data.set
                 with:
-                  ticketTotal: '${{ variables.ticketTotal + 1 }}'
-                  ticketsWithPrs: '${{ variables.ticketsWithPrs + (variables.childHasPr ? 1 : 0) }}'
-                  prTotal: '${{ variables.prTotal + variables.childPrCount }}'
-                  mergedPrTotal: '${{ variables.mergedPrTotal + variables.childMergedCount }}'
+                  ticketTotal: '${{ variables.ticketTotal | plus: 1 }}'
+                  ticketsWithPrs: '${{ variables.ticketsWithPrs | plus: variables.childHasPr }}'
+                  prTotal: '${{ variables.prTotal | plus: variables.childPrCount }}'
+                  mergedPrTotal: '${{ variables.mergedPrTotal | plus: variables.childMergedCount }}'
 
       - name: compute_gate_status
         type: data.set
@@ -249,30 +288,30 @@ steps:
           epicArchUrl: '${{ foreach.item._source.links.arch_url ?? "" }}'
           epicRoadmapStage: '${{ foreach.item._source.release.roadmap_stage ?? "" }}'
           epicMilestone: '${{ foreach.item._source.release.milestone ?? "" }}'
-          p1Status: '${{ (variables.epicPrdUrl != "" || variables.epicSummary != "") ? "passed" : "pending" }}'
-          p2Status: '${{ variables.epicArchUrl != "" ? "passed" : "pending" }}'
-          p4Status: '${{ variables.ticketTotal > 0 ? "passed" : "pending" }}'
-          p5Status: '${{ variables.mergedPrTotal > 0 ? "passed" : "pending" }}'
-          p7Applicable: '${{ variables.epicMilestone != "" || variables.epicRoadmapStage != "" }}'
+          p1Status: '{% if variables.epicPrdUrl != "" or variables.epicSummary != "" %}passed{% else %}pending{% endif %}'
+          p2Status: '{% if variables.epicArchUrl != "" %}passed{% else %}pending{% endif %}'
+          p4Status: '{% if variables.ticketTotal > 0 %}passed{% else %}pending{% endif %}'
+          p5Status: '{% if variables.mergedPrTotal > 0 %}passed{% else %}pending{% endif %}'
+          p7Applicable: '${{ variables.epicMilestone != "" or variables.epicRoadmapStage != "" }}'
 
       - name: compute_p7_status
         type: data.set
         with:
-          p7Status: '${{ variables.p7Applicable && (variables.epicRoadmapStage == "GA" || variables.epicRoadmapStage == "Production" || variables.epicRoadmapStage == "Released") ? "passed" : "pending" }}'
+          p7Status: '{% if variables.p7Applicable %}{% if variables.epicRoadmapStage == "GA" or variables.epicRoadmapStage == "Production" or variables.epicRoadmapStage == "Released" %}passed{% else %}pending{% endif %}{% else %}pending{% endif %}'
 
       - name: compute_coverage
         type: data.set
         with:
-          coveragePct: '${{ variables.ticketTotal > 0 ? (variables.ticketsWithPrs * 100 / variables.ticketTotal) : 0 }}'
-          deliveryCoveragePct: '${{ variables.ticketTotal > 0 ? (variables.mergedPrTotal * 100 / variables.ticketTotal) : 0 }}'
-          gatesApplicable: '${{ 4 + (variables.p7Applicable ? 1 : 0) }}'
-          gatesPassed: '${{ (variables.p1Status == "passed" ? 1 : 0) + (variables.p2Status == "passed" ? 1 : 0) + (variables.p4Status == "passed" ? 1 : 0) + (variables.p5Status == "passed" ? 1 : 0) + (variables.p7Applicable && variables.p7Status == "passed" ? 1 : 0) }}'
+          coveragePct: '{% if variables.ticketTotal > 0 %}{{ variables.ticketsWithPrs | times: 100 | divided_by: variables.ticketTotal }}{% else %}0{% endif %}'
+          deliveryCoveragePct: '{% if variables.ticketTotal > 0 %}{{ variables.mergedPrTotal | times: 100 | divided_by: variables.ticketTotal }}{% else %}0{% endif %}'
+          gatesApplicable: '{% if variables.p7Applicable %}5{% else %}4{% endif %}'
+          gatesPassed: '{% assign gp = 0 %}{% if variables.p1Status == "passed" %}{% assign gp = gp | plus: 1 %}{% endif %}{% if variables.p2Status == "passed" %}{% assign gp = gp | plus: 1 %}{% endif %}{% if variables.p4Status == "passed" %}{% assign gp = gp | plus: 1 %}{% endif %}{% if variables.p5Status == "passed" %}{% assign gp = gp | plus: 1 %}{% endif %}{% if variables.p7Applicable and variables.p7Status == "passed" %}{% assign gp = gp | plus: 1 %}{% endif %}{{ gp }}'
 
       - name: compute_rollup
         type: data.set
         with:
-          gatesPassedPct: '${{ variables.gatesApplicable > 0 ? (variables.gatesPassed * 100 / variables.gatesApplicable) : 0 }}'
-          rollupStatus: '${{ variables.coveragePct >= 80 ? "healthy" : (variables.coveragePct >= 40 ? "at_risk" : "blocked") }}'
+          gatesPassedPct: '{% if variables.gatesApplicable > 0 %}{{ variables.gatesPassed | times: 100 | divided_by: variables.gatesApplicable }}{% else %}0{% endif %}'
+          rollupStatus: '{% if variables.ticketTotal == 0 %}blocked{% elsif variables.coveragePct >= 80 %}healthy{% elsif variables.coveragePct >= 40 %}at_risk{% else %}in_progress{% endif %}'
 
       - name: upsert_enriched_epic
         type: elasticsearch.index
@@ -284,12 +323,12 @@ steps:
             sync:
               run_id: '{{ execution.id }}'
               source: '{{ consts.syncSource }}'
-            roadmap: '${{ foreach.item._source.roadmap | json }}'
-            epic: '${{ foreach.item._source.epic | json }}'
-            teams: '${{ foreach.item._source.teams | json }}'
-            release: '${{ foreach.item._source.release | json }}'
-            links: '${{ foreach.item._source.links | json }}'
-            payload: '${{ foreach.item._source.payload | json }}'
+            roadmap: '${{ foreach.item._source.roadmap }}'
+            epic: '${{ foreach.item._source.epic }}'
+            teams: '${{ foreach.item._source.teams }}'
+            release: '${{ foreach.item._source.release }}'
+            links: '${{ foreach.item._source.links }}'
+            payload: '${{ foreach.item._source.payload }}'
             phases:
               p1_prd:
                 status: '${{ variables.p1Status }}'
@@ -331,7 +370,7 @@ steps:
         type: data.set
         with:
           lastUpdatedAt: '${{ foreach.item._source["@timestamp"] }}'
-          epicsProcessed: '${{ variables.epicsProcessed + 1 }}'
+          epicsProcessed: '${{ variables.epicsProcessed | plus: 1 }}'
 
   - name: finalize_watermark
     type: if

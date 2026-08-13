@@ -3,13 +3,13 @@
     "description": "Raw pages grouped by GitHub project number",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["bucket-col", "metric-col"],
               "columns": {
                 "bucket-col": {
-                  "dataType": "number",
+                  "dataType": "string",
                   "isBucketed": true,
                   "label": "Project #",
                   "operationType": "terms",
@@ -21,15 +21,15 @@
                     "size": 10
                   },
                   "scale": "ordinal",
-                  "sourceField": "project_number"
+                  "sourceField": "project.number"
                 },
                 "metric-col": {
                   "dataType": "number",
                   "isBucketed": false,
                   "label": "Pages",
-                  "operationType": "sum",
+                  "operationType": "count",
                   "scale": "ratio",
-                  "sourceField": "page_count"
+                  "sourceField": "___records___"
                 }
               },
               "incompleteColumns": {}

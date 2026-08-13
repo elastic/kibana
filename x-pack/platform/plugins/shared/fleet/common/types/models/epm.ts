@@ -794,6 +794,7 @@ export enum INSTALL_STATES {
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
   UPDATE_CURRENT_WRITE_INDICES = 'update_current_write_indices',
+  CREATE_INDICES = 'create_indices',
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',

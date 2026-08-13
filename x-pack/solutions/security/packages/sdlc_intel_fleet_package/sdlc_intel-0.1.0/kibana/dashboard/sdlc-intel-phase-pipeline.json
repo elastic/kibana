@@ -1,6 +1,6 @@
 {
   "attributes": {
-    "description": "Project item pipeline from sdlc-project-items-enriched-view: ticket types, teams, and roadmap stages.",
+    "description": "Project item pipeline from github-intel-project-items: ticket types, teams, and roadmap stages.",
     "hits": 0,
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"

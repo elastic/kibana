@@ -3,7 +3,7 @@
     "description": "Total raw project pages fetched",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],
@@ -12,9 +12,9 @@
                   "dataType": "number",
                   "isBucketed": false,
                   "label": "Pages fetched",
-                  "operationType": "sum",
+                  "operationType": "count",
                   "scale": "ratio",
-                  "sourceField": "page_count"
+                  "sourceField": "___records___"
                 }
               },
               "incompleteColumns": {}

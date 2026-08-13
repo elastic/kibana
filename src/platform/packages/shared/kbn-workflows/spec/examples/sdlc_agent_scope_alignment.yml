@@ -130,4 +130,4 @@ steps:
           confidence: '${{ steps.run_scope_alignment_agent.output.confidence ?? 0.7 }}'
         misalignments: '${{ steps.run_scope_alignment_agent.output.misalignments | json }}'
         scope_claim: '${{ steps.run_scope_alignment_agent.output.scope_claim | json }}'
-        payload: '${{ steps.run_scope_alignment_agent.output | json }}'
+        payload: '${{ steps.run_scope_alignment_agent.output }}'

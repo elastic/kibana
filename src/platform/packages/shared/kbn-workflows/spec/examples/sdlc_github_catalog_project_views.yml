@@ -3,7 +3,8 @@ name: SDLC GitHub catalog project views
 description: >
   Tier-1 catalog workflow. Pages GitHub Project v2 saved views via GraphQL (orgCatalog.projectViews)
   for each project in github-intel-projects and upserts github-intel-project-views. Run
-  github-catalog-projects first.
+  github-catalog-projects first. Pages projects from Elasticsearch in batches (projectsPageSize)
+  until all projects are processed.
 enabled: false
 tags:
   - sdlc
@@ -22,10 +23,10 @@ consts:
   syncSource: github-catalog-project-views
   entityType: project_view
   pageSize: 50
-  projectBatchSize: 10
+  projectsPageSize: 100
 
 settings:
-  timeout: 30m
+  timeout: 60m
   concurrency:
     key: sdlc-github-catalog-project-views
     strategy: drop
@@ -38,91 +39,112 @@ triggers:
   - type: manual
 
 steps:
-  - name: load_projects
-    type: elasticsearch.search
-    with:
-      index: '{{ consts.projectsIndex }}'
-      size: '{{ consts.projectBatchSize }}'
-      sort:
-        - project.number:
-            order: asc
-
   - name: init_stats
     type: data.set
     with:
       projectsProcessed: 0
       viewsIndexed: 0
+      projectOffset: 0
+      hasMoreProjects: true
 
-  - name: catalog_project_views
-    type: foreach
-    foreach: '${{ steps.load_projects.output.hits.hits | json }}'
+  - name: paginate_projects
+    type: while
+    condition: 'variables.hasMoreProjects : true'
+    max-iterations: 50
     steps:
-      - name: set_project_context
-        type: data.set
+      - name: load_projects
+        type: elasticsearch.search
         with:
-          projectId: '${{ foreach.item._source.project.id }}'
-          projectNumber: '${{ foreach.item._source.project.number }}'
-          viewCursor: ''
+          index: '{{ consts.projectsIndex }}'
+          ignore_unavailable: true
+          allow_no_indices: true
+          from: '${{ variables.projectOffset }}'
+          size: '{{ consts.projectsPageSize }}'
+          sort:
+            - project.number:
+                order: asc
 
-      - name: paginate_views
-        type: while
-        condition: 'steps.fetch_views.output.pageInfo.hasNextPage : true'
-        max-iterations: 10
+      - name: catalog_project_views
+        type: foreach
+        foreach: '{{ steps.load_projects.output.hits.hits | json }}'
         steps:
-          - name: fetch_views
-            type: github.runQueryTemplate
-            connector-id: '{{ consts.githubConnectorId }}'
-            with:
-              templateId: orgCatalog.projectViews
-              variables:
-                projectId: '${{ variables.projectId }}'
-              first: '{{ consts.pageSize }}'
-              after: '${{ variables.viewCursor }}'
-
-          - name: backoff_if_needed
-            type: wait
-            if: '{{ steps.fetch_views.output.shouldBackoff }}'
-            with:
-              duration: 60s
-
-          - name: index_views
-            type: foreach
-            foreach: '${{ steps.fetch_views.output.data.node.views.nodes | json }}'
-            steps:
-              - name: upsert_view
-                type: elasticsearch.index
-                with:
-                  index: '{{ consts.projectViewsIndex }}'
-                  id: '${{ variables.projectId }}-${{ foreach.item.id }}'
-                  document:
-                    '@timestamp': '{{ execution.startedAt }}'
-                    sync:
-                      run_id: '{{ execution.id }}'
-                      source: '{{ consts.syncSource }}'
-                    project:
-                      id: '${{ variables.projectId }}'
-                      number: '${{ variables.projectNumber }}'
-                    view:
-                      id: '${{ foreach.item.id }}'
-                      number: '${{ foreach.item.number }}'
-                      name: '${{ foreach.item.name }}'
-                      filter: '${{ foreach.item.filter }}'
-                    payload: '${{ foreach.item | json }}'
-
-              - name: increment_views_indexed
-                type: data.set
-                with:
-                  viewsIndexed: '${{ variables.viewsIndexed + 1 }}'
-
-          - name: advance_view_cursor
+          - name: set_project_context
             type: data.set
             with:
-              viewCursor: '${{ steps.fetch_views.output.pageInfo.endCursor }}'
+              projectId: '${{ foreach.item._source.project.id }}'
+              projectNumber: '${{ foreach.item._source.project.number }}'
+              viewCursor: ''
 
-      - name: track_project_progress
+          - name: paginate_views
+            type: while
+            condition: 'steps.fetch_views.output.pageInfo.hasNextPage : true'
+            max-iterations: 10
+            steps:
+              - name: fetch_views
+                type: github.runQueryTemplate
+                connector-id: '{{ consts.githubConnectorId }}'
+                with:
+                  templateId: orgCatalog.projectViews
+                  variables:
+                    projectId: '${{ variables.projectId }}'
+                  first: '{{ consts.pageSize }}'
+                  after: '${{ variables.viewCursor }}'
+
+              - name: backoff_if_needed
+                type: wait
+                if: '{{ steps.fetch_views.output.shouldBackoff }}'
+                with:
+                  duration: 60s
+
+              - name: index_views
+                type: foreach
+                foreach: '{{ steps.fetch_views.output.data.node.views.nodes | json }}'
+                steps:
+                  - name: upsert_view
+                    type: elasticsearch.index
+                    with:
+                      index: '{{ consts.projectViewsIndex }}'
+                      id: '{{ variables.projectId }}-{{ foreach.item.id }}'
+                      document:
+                        '@timestamp': '{{ execution.startedAt }}'
+                        sync:
+                          run_id: '{{ execution.id }}'
+                          source: '{{ consts.syncSource }}'
+                        project:
+                          id: '${{ variables.projectId }}'
+                          number: '${{ variables.projectNumber }}'
+                        view:
+                          id: '${{ foreach.item.id }}'
+                          number: '${{ foreach.item.number }}'
+                          name: '${{ foreach.item.name }}'
+                          filter: '${{ foreach.item.filter }}'
+                        payload: '${{ foreach.item }}'
+
+                  - name: increment_views_indexed
+                    type: data.set
+                    with:
+                      viewsIndexed: '${{ variables.viewsIndexed | plus: 1 }}'
+
+              - name: advance_view_cursor
+                type: data.set
+                with:
+                  viewCursor: '${{ steps.fetch_views.output.pageInfo.endCursor }}'
+
+          - name: track_project_progress
+            type: data.set
+            with:
+              projectsProcessed: '${{ variables.projectsProcessed | plus: 1 }}'
+
+      - name: capture_batch_size
         type: data.set
         with:
-          projectsProcessed: '${{ variables.projectsProcessed + 1 }}'
+          lastProjectsBatchSize: '${{ steps.load_projects.output.hits.hits | size }}'
+
+      - name: advance_project_offset
+        type: data.set
+        with:
+          projectOffset: '${{ variables.projectOffset | plus: variables.lastProjectsBatchSize }}'
+          hasMoreProjects: '${{ variables.lastProjectsBatchSize == consts.projectsPageSize }}'
 
   - name: write_checkpoint
     type: elasticsearch.index

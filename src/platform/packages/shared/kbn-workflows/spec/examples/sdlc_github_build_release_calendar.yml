@@ -18,7 +18,7 @@ consts:
   releaseCalendarIndex: sdlc-release-calendar
   syncSource: github-build-release-calendar
   entityType: release_calendar
-  batchSize: 100
+  batchSize: 200
 
 settings:
   timeout: 30m
@@ -42,10 +42,20 @@ steps:
       query:
         bool:
           should:
-            - exists:
-                field: release.milestone
-            - exists:
-                field: release.roadmap_stage
+            - bool:
+                must:
+                  - exists:
+                      field: release.milestone
+                must_not:
+                  - term:
+                      release.milestone: ''
+            - bool:
+                must:
+                  - exists:
+                      field: release.roadmap_stage
+                must_not:
+                  - term:
+                      release.roadmap_stage: ''
           minimum_should_match: 1
 
   - name: init_stats
@@ -56,6 +66,8 @@ steps:
   - name: project_release_entries
     type: foreach
     foreach: '${{ steps.load_epics_with_release.output.hits.hits | json }}'
+    iteration-on-failure:
+      continue: true
     steps:
       - name: upsert_release_entry
         type: elasticsearch.index
@@ -84,7 +96,7 @@ steps:
       - name: track_entry_progress
         type: data.set
         with:
-          entriesProjected: '${{ variables.entriesProjected + 1 }}'
+          entriesProjected: '${{ variables.entriesProjected | plus: 1 }}'
 
   - name: write_checkpoint
     type: elasticsearch.index

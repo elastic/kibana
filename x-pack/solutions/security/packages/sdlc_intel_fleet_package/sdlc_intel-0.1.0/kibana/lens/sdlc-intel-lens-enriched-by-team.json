@@ -3,7 +3,7 @@
     "description": "Project items grouped by team from enriched ES|QL view",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["bucket-col", "metric-col"],
@@ -29,7 +29,7 @@
                   "label": "Items",
                   "operationType": "count",
                   "scale": "ratio",
-                  "sourceField": "Records"
+                  "sourceField": "___records___"
                 }
               },
               "incompleteColumns": {}

@@ -67,7 +67,7 @@ steps:
 
   - name: ensure_watermark
     type: data.set
-    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
@@ -75,6 +75,8 @@ steps:
     type: elasticsearch.search
     with:
       index: '{{ consts.casesIndex }}'
+      ignore_unavailable: true
+      allow_no_indices: true
       size: '{{ consts.caseBatchSize }}'
       sort:
         - case.last_modified_at:
@@ -106,6 +108,8 @@ steps:
         type: elasticsearch.search
         with:
           index: '{{ consts.sdhIssuesIndex }}'
+          ignore_unavailable: true
+          allow_no_indices: true
           size: 1
           query:
             term:
@@ -116,7 +120,7 @@ steps:
         if: '${{ steps.find_sdh_issue_by_url.output.hits.hits.size > 0 }}'
         with:
           index: '{{ consts.relationshipsIndex }}'
-          id: '${{ variables.caseId }}-customer_case_links_sdh-${{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.id }}'
+          id: '{{ variables.caseId }}-customer_case_links_sdh-{{ steps.find_sdh_issue_by_url.output.hits.hits[0]._source.entity.id }}'
           document:
             '@timestamp': '{{ execution.startedAt }}'
             sync:
@@ -165,12 +169,14 @@ steps:
         type: data.set
         if: '${{ steps.find_sdh_issue_by_url.output.hits.hits.size > 0 }}'
         with:
-          linksFromSalesforceField: '${{ variables.linksFromSalesforceField + 1 }}'
+          linksFromSalesforceField: '${{ variables.linksFromSalesforceField | plus: 1 }}'
 
   - name: load_unlinked_cases
     type: elasticsearch.search
     with:
       index: '{{ consts.casesIndex }}'
+      ignore_unavailable: true
+      allow_no_indices: true
       size: '{{ consts.caseBatchSize }}'
       sort:
         - case.last_modified_at:
@@ -183,7 +189,8 @@ steps:
                   gt: '{{ variables.watermark }}'
           must_not:
             - term:
-                feedback.linked_to_sdh: true
+                feedback.linked_to_sdh:
+                  value: true
 
   - name: link_from_sdh_body_case_number
     type: foreach
@@ -199,6 +206,8 @@ steps:
         type: elasticsearch.search
         with:
           index: '{{ consts.sdhIssuesIndex }}'
+          ignore_unavailable: true
+          allow_no_indices: true
           size: 1
           query:
             simple_query_string:
@@ -214,7 +223,7 @@ steps:
         if: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits.size > 0 }}'
         with:
           index: '{{ consts.relationshipsIndex }}'
-          id: '${{ variables.caseId }}-customer_case_links_sdh-${{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.id }}'
+          id: '{{ variables.caseId }}-customer_case_links_sdh-{{ steps.find_sdh_issue_by_case_number.output.hits.hits[0]._source.entity.id }}'
           document:
             '@timestamp': '{{ execution.startedAt }}'
             sync:
@@ -263,7 +272,7 @@ steps:
         type: data.set
         if: '${{ steps.find_sdh_issue_by_case_number.output.hits.hits.size > 0 }}'
         with:
-          linksFromSdhBody: '${{ variables.linksFromSdhBody + 1 }}'
+          linksFromSdhBody: '${{ variables.linksFromSdhBody | plus: 1 }}'
 
   - name: write_checkpoint
     type: elasticsearch.index

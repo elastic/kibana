@@ -262,8 +262,10 @@ export const RunQueryTemplateInputSchema = lazySchema(() =>
       .record(z.string(), z.unknown())
       .optional()
       .describe('Template variables (org, owner, repo, number, query, teamSlug, etc.)'),
+    // Workflow Liquid templates stringify consts (e.g. first: '{{ consts.pageSize }}').
+    // Coerce so connector validation accepts those string inputs.
     first: z
-      .number()
+      .coerce.number()
       .int()
       .min(1)
       .max(100)

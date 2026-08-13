@@ -3,7 +3,7 @@
     "description": "Average checkpoint lag across GitHub ingest workflows",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],

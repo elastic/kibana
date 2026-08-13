@@ -12,6 +12,7 @@ export * from './step_install_ilm_policies';
 export * from './step_install_index_template_pipelines';
 export * from './step_remove_legacy_templates';
 export * from './step_update_current_write_indices';
+export * from './step_create_indices';
 export * from './step_install_transforms';
 export * from './step_delete_previous_pipelines';
 export * from './step_save_archive_entries';

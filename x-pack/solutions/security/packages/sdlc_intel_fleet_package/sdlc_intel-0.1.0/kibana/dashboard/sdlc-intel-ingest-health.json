@@ -6,7 +6,7 @@
       "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
     },
     "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
-    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"sync_source\",\"entity\",\"org_login\",\"lag_hours\",\"run_status\",\"last_run_at\"],\"sort\":[[\"lag_hours\",\"desc\"]]},\"gridData\":{\"h\":18,\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"}]",
+    "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"1\",\"w\":16,\"x\":0,\"y\":0},\"panelIndex\":\"1\",\"panelRefName\":\"panel_0\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{},\"gridData\":{\"h\":8,\"i\":\"2\",\"w\":16,\"x\":16,\"y\":0},\"panelIndex\":\"2\",\"panelRefName\":\"panel_1\",\"version\":\"8.0.0\"},{\"embeddableConfig\":{\"columns\":[\"sync.source\",\"entity_type\",\"org.login\",\"lag_hours\",\"last_run_status\",\"last_run_at\"],\"sort\":[[\"lag_hours\",\"desc\"]]},\"gridData\":{\"h\":18,\"w\":48,\"x\":0,\"y\":8},\"panelIndex\":\"3\",\"panelRefName\":\"panel_2\",\"version\":\"8.0.0\"}]",
     "timeRestore": false,
     "title": "SDLC Ingest health",
     "version": 1

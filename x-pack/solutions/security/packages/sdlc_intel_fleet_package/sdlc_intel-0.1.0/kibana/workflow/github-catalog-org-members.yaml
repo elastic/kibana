@@ -82,23 +82,23 @@ steps:
 
       - name: index_members
         type: foreach
-        foreach: '{{ steps.fetch_members.output.data.organization.membersWithRole.nodes | json }}'
+        foreach: '{{ steps.fetch_members.output.data.organization.membersWithRole.edges | json }}'
         steps:
           - name: upsert_member
             type: elasticsearch.index
             with:
               index: '{{ consts.peopleIndex }}'
-              id: '{{ foreach.item.user.id }}'
+              id: '{{ foreach.item.node.id }}'
               document:
                 '@timestamp': '{{ execution.startedAt }}'
                 sync:
                   run_id: '{{ execution.id }}'
                   source: '{{ consts.syncSource }}'
                 person:
-                  login: '{{ foreach.item.user.login }}'
-                  name: '{{ foreach.item.user.name }}'
-                  id: '{{ foreach.item.user.id }}'
-                payload: '{{ foreach.item | json }}'
+                  login: '{{ foreach.item.node.login }}'
+                  name: '{{ foreach.item.node.name }}'
+                  id: '{{ foreach.item.node.id }}'
+                payload: '${{ foreach.item }}'
 
       - name: advance_cursor
         type: data.set

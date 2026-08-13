@@ -27,7 +27,13 @@ Each document represents one **Epic** project item projected from GitHub Project
 
 `rollup.gates_passed_pct` = passed applicable gates ÷ applicable gates × 100.
 
-`rollup.status`: `healthy` (coverage ≥ 80%), `at_risk` (≥ 40%), `blocked` (< 40%).
+`rollup.status`:
+- `blocked` — no child tickets (`phases.p4_tickets.total == 0`)
+- `in_progress` — has child tickets, PR coverage < 40%
+- `at_risk` — PR coverage 40–79%
+- `healthy` — PR coverage ≥ 80%
+
+`rollup.coverage_pct` is the share of child tickets with a linked PR (`closes` edge or `links.closing_issues`), not GitHub Project Status.
 
 ## Example ES|QL queries
 

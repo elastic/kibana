@@ -3,7 +3,7 @@
     "description": "Count of ingest workflows with checkpoint lag over 24 hours",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],
@@ -14,7 +14,7 @@
                   "label": "Stale workflows (>24h)",
                   "operationType": "count",
                   "scale": "ratio",
-                  "sourceField": "Records"
+                  "sourceField": "___records___"
                 }
               },
               "incompleteColumns": {}

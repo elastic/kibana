@@ -323,7 +323,7 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     id: 'sdlc_github_catalog_sdh_issues',
     name: 'SDLC GitHub catalog SDH issues',
     description:
-      'Repo-scoped SDH issue catalog via activity.searchIssues into github-intel-sdh-issues',
+      'Per-repo SDH issue catalog via activity.searchIssues into github-intel-sdh-issues',
     category: 'security',
     tags: ['scheduled', 'github', 'ingest', 'sdlc', 'issues', 'sdh', 'feedback', 'foreach', 'while'],
     filename: 'sdlc_github_catalog_sdh_issues.yml',
@@ -390,6 +390,15 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     category: 'security',
     tags: ['scheduled', 'agent', 'ai', 'sdlc', 'development', 'scope-alignment'],
     filename: 'sdlc_agent_scope_alignment.yml',
+  },
+  {
+    id: 'sdlc_agent_pr_missing_related_issue',
+    name: 'SDLC agent PR missing related issue',
+    description:
+      'Scans open PRs without closing-issue links, indexes findings for detection alerts, summarizes to sdlc-agent-insights',
+    category: 'security',
+    tags: ['scheduled', 'agent', 'ai', 'sdlc', 'development', 'pull-request', 'alerting'],
+    filename: 'sdlc_agent_pr_missing_related_issue.yml',
   },
 ];
 

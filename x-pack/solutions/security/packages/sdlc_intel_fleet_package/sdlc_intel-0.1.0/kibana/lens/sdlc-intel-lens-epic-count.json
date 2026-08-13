@@ -3,7 +3,7 @@
     "description": "Total epics projected into sdlc-epic-phases",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],
@@ -14,7 +14,7 @@
                   "label": "Epics",
                   "operationType": "count",
                   "scale": "ratio",
-                  "sourceField": "Records"
+                  "sourceField": "___records___"
                 }
               },
               "incompleteColumns": {}

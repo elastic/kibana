@@ -59,6 +59,8 @@ If vars are unset, workflows retain `REPLACE_WITH_*` placeholders for manual edi
 
 Fleet installs `elasticsearch/ilm_policy/sdlc_intel_retention.json` during package install (unless Fleet internal ILM is disabled). All 25 index templates reference `index.lifecycle.name: sdlc_intel_retention`.
 
+After templates are installed, Fleet also **creates empty concrete indices** for each non-wildcard `index_patterns` entry (for example `github-intel-teams`). That means dependent workflows and dashboards work immediately without waiting for a first write. Existing indices are left untouched; package uninstall does **not** delete these indices (data is preserved).
+
 | Phase | Age | Action |
 |-------|-----|--------|
 | Hot | 0 | Priority 100 |
@@ -195,12 +197,13 @@ Two workflow-backed agents synthesize over existing SDLC indices and persist str
 |----------|----------|----------------------------|---------|
 | **agent coverage analysis** | daily | `fleet-{space}-sdlc_intel-sdlc-coverage-analysis` | Thin epics, roadmap ownership gaps, failing phase gates |
 | **agent scope alignment** | every 12h | `fleet-{space}-sdlc_intel-sdlc-scope-alignment` | PR scope vs linked issue/epic intent |
+| **agent PR missing related issue** | hourly | `fleet-{space}-sdlc_intel-sdlc-pr-missing-related-issue` | Open PRs without Fixes/Closes link; findings feed a Security detection rule |
 
 **Prerequisites:** `agentBuilder` + `workflowsManagement` enabled, `ai_connector_id` set on the integration policy, GitHub ingest + epic enrichment workflows populated.
 
 **Fleet-installed agents** — definitions ship under `kibana/agent/*.yaml` and are created as persisted Agent Builder agents on package install (no `security_solution` code). Agents use platform ES\|QL + integration knowledge tools only; schema semantics come from `docs/knowledge_base/`.
 
-No GitHub writes — findings land in `sdlc-agent-insights` only (NFR-003).
+No GitHub writes — agent summaries land in `sdlc-agent-insights` only (NFR-003). PR gap events are indexed to `sdlc-pr-missing-related-issue` so the packaged **Security detection rule** (`sdlc-pr-missing-related-issue`) can create alerts in `.alerts-security.alerts-<space>`.
 
 ### Phase F — Knowledge base and alerting templates (available today)
 
@@ -223,7 +226,13 @@ Requires Enterprise license and **Integrations → Settings → Integration know
 | `sdlc-no-linked-prd` | Roadmap epics missing `links.prd_url` |
 | `sdlc-roadmap-unassigned-team` | Roadmap project items without engineering team |
 
-Enable from **Fleet → Integrations → SDLC Intelligence → Alerting** after install. Rules are created **disabled**; add actions/connectors before enabling.
+**Security detection rule** — shipped under `kibana/security_rule/`:
+
+| Rule ID | Detects | Alerts index |
+|---------|---------|--------------|
+| `sdlc-pr-missing-related-issue` | Finding docs from open PRs without closing-issue links | `.alerts-security.alerts-<space>` |
+
+Enable from **Security → Rules** after install (rule is created **disabled**). The agentic workflow must run first so `sdlc-pr-missing-related-issue` has source events.
 
 Platform RFC for the generic extension (`KibanaAssetType.agent`): [`docs/PLATFORM_RFC_KIBANA_ASSET_EXTENSIONS.md`](docs/PLATFORM_RFC_KIBANA_ASSET_EXTENSIONS.md) — **P1/P2 implemented** in Fleet + Agent Builder.
 
@@ -232,11 +241,11 @@ Platform RFC for the generic extension (`KibanaAssetType.agent`): [`docs/PLATFOR
 | Dashboard | Data source | Purpose |
 |-----------|-------------|---------|
 | **SDLC Executive roadmap** | `sdlc-epic-phases` | Epic count, coverage, status, roadmap stage |
-| **SDLC Project item pipeline** | `sdlc-project-items-enriched-view` | Ticket types, teams, roadmap stages from ES\|QL |
+| **SDLC Project item pipeline** | `github-intel-project-items` | Ticket types, teams, roadmap stages |
 | **SDLC Team dimension** | `sdlc-team-dimension` + `sdlc-epic-phases` | Org teams and epic ownership |
-| **SDLC GitHub sync overview** | `sdlc-github-raw-summary-view` | Raw ingest page/item counts per project |
+| **SDLC GitHub sync overview** | `github-intel-raw-project-pages` | Raw ingest page/item counts per project |
 | **SDLC Epic phase gates** | `sdlc-epic-phases` + `sdlc-epic-tickets-by-repo-view` | Child ticket coverage, PR linkage, gate pass rates |
-| **SDLC Ingest health** | `sdlc-ingest-health-view` | Checkpoint lag, stale workflows, last run status |
+| **SDLC Ingest health** | `*-intel-sync-state` | Checkpoint lag, stale workflows, last run status |
 | **SDLC Salesforce feedback loop** | `sdlc-salesforce-feedback-view`, `sdlc-feedback-loop-enriched-view` | Case ↔ SDH linkage and Case → SDH → product three-hop view |
 | **SDLC Design doc coverage** | `sdlc-design-doc-coverage-view` | Epic/product/SDH issues linked to Google Drive design docs |
 
@@ -268,5 +277,6 @@ node scripts/jest x-pack/platform/plugins/shared/fleet/server/services/epm/packa
 - Google Drive ingest actions: `src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/`
 - Fleet agent installer: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_agent_assets.ts`
 - Fleet workflow installer: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_workflow_assets.ts`
+- Fleet concrete index bootstrap: `x-pack/platform/plugins/shared/fleet/server/services/epm/elasticsearch/index/install.ts` (`create_indices` install state)
 - Fleet workflow uninstall: `x-pack/platform/plugins/shared/fleet/server/services/epm/packages/remove.ts`
 - Bundled workflow examples: `src/platform/packages/shared/kbn-workflows/spec/examples/sdlc_*.yml`

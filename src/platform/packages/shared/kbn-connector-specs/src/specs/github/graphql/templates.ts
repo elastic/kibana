@@ -136,9 +136,9 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
               hasNextPage
               endCursor
             }
-            nodes {
+            edges {
               role
-              user {
+              node {
                 id
                 login
                 name
@@ -259,7 +259,7 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
                     body
                   }
                 }
-                fieldValues(first: 20) {
+                fieldValues(first: 50) {
                   nodes {
                     __typename
                     ... on ProjectV2ItemFieldTextValue {
@@ -273,6 +273,74 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
                     }
                     ... on ProjectV2ItemFieldSingleSelectValue {
                       name
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                    ... on ProjectV2ItemFieldNumberValue {
+                      number
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                    ... on ProjectV2ItemFieldDateValue {
+                      date
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                    ... on ProjectV2ItemFieldIterationValue {
+                      title
+                      startDate
+                      duration
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                    ... on ProjectV2ItemFieldMilestoneValue {
+                      milestone {
+                        title
+                        dueOn
+                      }
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                    ... on ProjectV2ItemFieldUserValue {
+                      users(first: 10) {
+                        nodes {
+                          login
+                          name
+                        }
+                      }
+                      field {
+                        ... on ProjectV2FieldCommon {
+                          id
+                          name
+                        }
+                      }
+                    }
+                    ... on ProjectV2ItemFieldLabelValue {
+                      labels(first: 10) {
+                        nodes {
+                          name
+                        }
+                      }
                       field {
                         ... on ProjectV2FieldCommon {
                           id

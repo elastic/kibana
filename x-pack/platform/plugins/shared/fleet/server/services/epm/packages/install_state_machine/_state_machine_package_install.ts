@@ -39,6 +39,7 @@ import {
   stepInstallIndexTemplatePipelines,
   stepRemoveLegacyTemplates,
   stepUpdateCurrentWriteIndices,
+  stepCreateIndices,
   stepInstallTransforms,
   stepDeletePreviousPipelines,
   stepSaveArchiveEntries,
@@ -148,6 +149,11 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   update_current_write_indices: {
     onTransition: stepUpdateCurrentWriteIndices,
+    nextState: INSTALL_STATES.CREATE_INDICES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_indices: {
+    onTransition: stepCreateIndices,
     nextState: INSTALL_STATES.INSTALL_TRANSFORMS,
     onPostTransition: updateLatestExecutedState,
   },

@@ -15,13 +15,16 @@ This document describes the GitHub-side indices installed by the **SDLC Intellig
 | `github-intel-sync-state` | Ingest watermarks and workflow health |
 | `sdlc-epic-phases` | Epic projection with phase gates and rollup metrics |
 | `sdlc-team-dimension` | Org team catalog for project field matching |
+| `sdlc-pr-missing-related-issue` | Open PRs missing a closing-issue link (source events for detection alerts) |
+| `sdlc-agent-insights` | Agentic analysis summaries (coverage, scope, missing related issue) |
 
 ## Key relationships
 
 - **Epic spine:** `github-intel-relationships` with `relation: parent_of` links epic URL → child issue URL.
-- **PR closure:** `links.closing_issues` on `github-intel-pull-requests`; `relation: closes` in relationships.
+- **PR closure:** `links.closing_issues` on `github-intel-pull-requests`; `relation: closes` (and legacy `closes_issue`) in relationships.
 - **SDH feedback loop:** `customer_case_links_sdh`, `sdh_links_product` relationship types.
 - **Design docs:** `issue_references_design_doc` edges to `gdrive-intel-documents` (metadata only).
+- **Missing related issue:** `agent-pr-missing-related-issue` indexes findings to `sdlc-pr-missing-related-issue` (`sdlc.finding.type: pr_missing_related_issue`). The packaged Security rule `sdlc-pr-missing-related-issue` creates alerts in `.alerts-security.alerts-<space>`.
 
 ## Common fields
 
@@ -58,3 +61,5 @@ Prefer packaged views for dashboards and agents:
 ## Ingest order
 
 Run catalog → normalize → activity → enrich → cross-link workflows before planning or agentic analysis. See the package README for the recommended workflow order.
+
+For PR missing-related-issue alerts: run `github-activity-pull-requests` → `github-enrich-pull-requests-graph` → `agent-pr-missing-related-issue`, then enable the `sdlc-pr-missing-related-issue` Security detection rule.

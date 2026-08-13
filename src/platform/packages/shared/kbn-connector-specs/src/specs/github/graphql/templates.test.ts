@@ -35,6 +35,23 @@ describe('github graphql templates', () => {
     expect(template.query).toContain('OrgCatalogRepos');
   });
 
+  it('queries org member role on OrganizationMemberEdge, not User', () => {
+    const template = getGitHubQueryTemplate('orgCatalog.members');
+    expect(template.pageInfoPath).toBe('organization.membersWithRole');
+    expect(template.query).toContain('membersWithRole');
+    expect(template.query).toMatch(/edges\s*\{[\s\S]*role[\s\S]*node\s*\{/);
+    expect(template.query).not.toMatch(/nodes\s*\{[\s\S]*role/);
+    expect(template.query).not.toMatch(/user\s*\{/);
+  });
+
+  it('loads project item field names for users, milestones, and iterations', () => {
+    const template = getGitHubQueryTemplate('orgCatalog.projectItems');
+    expect(template.query).toContain('fieldValues(first: 50)');
+    expect(template.query).toContain('ProjectV2ItemFieldUserValue');
+    expect(template.query).toContain('ProjectV2ItemFieldMilestoneValue');
+    expect(template.query).toContain('ProjectV2ItemFieldIterationValue');
+  });
+
   it('throws for unknown template ids', () => {
     expect(() => getGitHubQueryTemplate('unknown.template')).toThrow('Unknown GitHub GraphQL template');
   });

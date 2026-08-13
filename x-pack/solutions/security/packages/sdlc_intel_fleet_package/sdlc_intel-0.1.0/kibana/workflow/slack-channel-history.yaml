@@ -118,7 +118,7 @@ steps:
                     type: elasticsearch.index
                     with:
                       index: '{{ consts.messagesIndex }}'
-                      id: '${{ variables.channelId }}-${{ foreach.item.ts }}'
+                      id: '{{ variables.channelId }}-{{ foreach.item.ts }}'
                       document:
                         '@timestamp': '{{ execution.startedAt }}'
                         sync:
@@ -134,13 +134,13 @@ steps:
                         channel:
                           id: '${{ variables.channelId }}'
                           name: '${{ variables.channelName }}'
-                        payload: '${{ foreach.item | json }}'
+                        payload: '${{ foreach.item }}'
 
               - name: advance_history_cursor
                 type: data.set
                 with:
                   historyCursor: '${{ steps.fetch_channel_history.output.nextCursor }}'
-                  historyPagesFetched: '${{ variables.historyPagesFetched + 1 }}'
+                  historyPagesFetched: '${{ variables.historyPagesFetched | plus: 1 }}'
 
               - name: track_newest_message_ts
                 type: data.set
@@ -174,4 +174,4 @@ steps:
         type: data.set
         with:
           channelCursor: '${{ steps.list_channels_page.output.nextCursor }}'
-          channelPagesFetched: '${{ variables.channelPagesFetched + 1 }}'
+          channelPagesFetched: '${{ variables.channelPagesFetched | plus: 1 }}'

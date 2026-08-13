@@ -3,7 +3,7 @@
     "description": "Average gates passed percentage across epics",
     "state": {
       "datasourceStates": {
-        "indexpattern": {
+        "formBased": {
           "layers": {
             "layer1": {
               "columnOrder": ["metric-col"],

@@ -2,7 +2,7 @@
   "attributes": {
     "columns": [
       "epic.title",
-      "epic.teams",
+      "teams.own_engineering_team",
       "phases.p4_tickets.total",
       "phases.p4_tickets.with_prs",
       "phases.p5_prs.total",

@@ -108,7 +108,7 @@ steps:
           issueNumber: '${{ foreach.item._source.entity.number }}'
           issueRepo: '${{ foreach.item._source.repository.full_name }}'
           issueTicketType: '${{ foreach.item._source.hierarchy.ticket_type ?? "" }}'
-          searchableText: '${{ foreach.item._source.content.title }} ${{ foreach.item._source.content.body }}'
+          searchableText: '{{ foreach.item._source.content.title }} {{ foreach.item._source.content.body }}'
 
       - name: parse_product_issue_drive_urls
         type: google_drive.parseDriveUrlsFromText
@@ -156,14 +156,14 @@ steps:
                   discovered_from_issue_target: '${{ variables.issueTicketType == "Epic" ? "epic" : "product" }}'
                   source_url: '${{ foreach.item.url }}'
                   catalog_source: issue_body_url
-                payload: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0] | json }}'
+                payload: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0] }}'
 
           - name: write_product_issue_design_doc_relationship
             type: elasticsearch.index
             if: '${{ steps.fetch_drive_metadata_for_product_issue.output.files.size > 0 }}'
             with:
               index: '{{ consts.relationshipsIndex }}'
-              id: '${{ variables.issueEntityId }}-issue_references_design_doc-${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].id }}'
+              id: '{{ variables.issueEntityId }}-issue_references_design_doc-{{ steps.fetch_drive_metadata_for_product_issue.output.files[0].id }}'
               document:
                 '@timestamp': '{{ execution.startedAt }}'
                 sync:
@@ -187,7 +187,7 @@ steps:
             type: data.set
             if: '${{ steps.fetch_drive_metadata_for_product_issue.output.files.size > 0 }}'
             with:
-              productLinksWritten: '${{ variables.productLinksWritten + 1 }}'
+              productLinksWritten: '${{ variables.productLinksWritten | plus: 1 }}'
 
   - name: load_sdh_issues_with_drive_urls
     type: elasticsearch.search
@@ -223,7 +223,7 @@ steps:
           issueUrl: '${{ foreach.item._source.entity.url }}'
           issueNumber: '${{ foreach.item._source.entity.number }}'
           issueRepo: '${{ foreach.item._source.repository.full_name }}'
-          searchableText: '${{ foreach.item._source.content.title }} ${{ foreach.item._source.content.body }}'
+          searchableText: '{{ foreach.item._source.content.title }} {{ foreach.item._source.content.body }}'
 
       - name: parse_sdh_issue_drive_urls
         type: google_drive.parseDriveUrlsFromText
@@ -271,14 +271,14 @@ steps:
                   discovered_from_issue_target: sdh
                   source_url: '${{ foreach.item.url }}'
                   catalog_source: issue_body_url
-                payload: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0] | json }}'
+                payload: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0] }}'
 
           - name: write_sdh_issue_design_doc_relationship
             type: elasticsearch.index
             if: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files.size > 0 }}'
             with:
               index: '{{ consts.relationshipsIndex }}'
-              id: '${{ variables.issueEntityId }}-issue_references_design_doc-${{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].id }}'
+              id: '{{ variables.issueEntityId }}-issue_references_design_doc-{{ steps.fetch_drive_metadata_for_sdh_issue.output.files[0].id }}'
               document:
                 '@timestamp': '{{ execution.startedAt }}'
                 sync:
@@ -302,7 +302,7 @@ steps:
             type: data.set
             if: '${{ steps.fetch_drive_metadata_for_sdh_issue.output.files.size > 0 }}'
             with:
-              sdhLinksWritten: '${{ variables.sdhLinksWritten + 1 }}'
+              sdhLinksWritten: '${{ variables.sdhLinksWritten | plus: 1 }}'
 
   - name: write_checkpoint
     type: elasticsearch.index
