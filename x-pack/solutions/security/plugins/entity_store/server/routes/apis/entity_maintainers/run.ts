@@ -12,7 +12,11 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
-import { maintainerIdExists, maintainerIdParamsSchema, runMaintainerQuerySchema } from './utils/validator';
+import {
+  maintainerIdExists,
+  maintainerIdParamsSchema,
+  runMaintainerQuerySchema,
+} from './utils/validator';
 
 const RUN_MAINTAINER_SYNC_SOCKET_TIMEOUT_MS = 10 * 60 * 1000;
 
