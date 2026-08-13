@@ -280,6 +280,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       query: transformConfigQuery,
       populatedFields,
       combinedRuntimeMappings: runtimeMappings,
+      projectRouting: props.overrides?.projectRouting,
       timeRangeMs,
     }),
     dataTestSubj: 'transformIndexPreview',
