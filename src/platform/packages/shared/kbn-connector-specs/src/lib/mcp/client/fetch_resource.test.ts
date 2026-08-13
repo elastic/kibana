@@ -17,9 +17,11 @@ const undiciFetchMock = undiciFetch as unknown as jest.Mock;
 jest.mock('undici', () => {
   const MockAgent = jest.fn().mockImplementation(() => ({
     close: jest.fn().mockResolvedValue(undefined),
+    destroy: jest.fn(),
   }));
   const MockProxyAgent = jest.fn().mockImplementation(() => ({
     close: jest.fn().mockResolvedValue(undefined),
+    destroy: jest.fn(),
   }));
   return {
     Agent: MockAgent,
@@ -566,7 +568,7 @@ describe('createFetchResource', () => {
   });
 
   describe('close()', () => {
-    it('closes all cached dispatchers', async () => {
+    it('destroys all cached dispatchers', async () => {
       const resource = createResource({ targetUrl });
 
       undiciFetchMock.mockResolvedValueOnce(new Response('ok', { status: 200 }));
@@ -575,7 +577,22 @@ describe('createFetchResource', () => {
       await resource.close();
 
       const agentInstance = (Agent as unknown as jest.Mock).mock.results[0].value;
-      expect(agentInstance.close).toHaveBeenCalledTimes(1);
+      expect(agentInstance.destroy).toHaveBeenCalledTimes(1);
+      expect(agentInstance.close).not.toHaveBeenCalled();
+    });
+
+    it('finishes immediately while a GET is still in flight', async () => {
+      const resource = createResource({ targetUrl });
+      undiciFetchMock.mockReturnValue(new Promise(() => undefined));
+
+      void resource.fetch(targetUrl, { method: 'GET' });
+      await Promise.resolve();
+
+      await expect(resource.close()).resolves.toBeUndefined();
+
+      const agentInstance = (Agent as unknown as jest.Mock).mock.results[0].value;
+      expect(agentInstance.destroy).toHaveBeenCalledTimes(1);
+      expect(agentInstance.close).not.toHaveBeenCalled();
     });
 
     it('is idempotent: calling close() twice does not throw', async () => {
@@ -588,8 +605,7 @@ describe('createFetchResource', () => {
       await expect(resource.close()).resolves.toBeUndefined();
 
       const agentInstance = (Agent as unknown as jest.Mock).mock.results[0].value;
-      // Second close should be a no-op
-      expect(agentInstance.close).toHaveBeenCalledTimes(1);
+      expect(agentInstance.destroy).toHaveBeenCalledTimes(1);
     });
 
     it('rejects requests after the resource is closed', async () => {

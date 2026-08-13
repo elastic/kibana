@@ -118,26 +118,12 @@ describe('actionTypeRegistry', () => {
       );
     });
 
-    test('throws if empty supported feature ids provided for non-spec connectors', () => {
+    test('allows empty supported feature ids (support-only)', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       expect(() =>
         actionTypeRegistry.register(
           getConnectorType({
             supportedFeatureIds: [],
-          })
-        )
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-connector-type\\"."`
-      );
-    });
-
-    test('allows empty supported feature ids for spec connectors (support-only)', () => {
-      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-      expect(() =>
-        actionTypeRegistry.register(
-          getConnectorType({
-            supportedFeatureIds: [],
-            source: 'spec',
           })
         )
       ).not.toThrow();

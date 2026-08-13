@@ -114,6 +114,31 @@ describe('createSseGatedFetch', () => {
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
+    it('does not wait when GET opens the gate before the initialized 202', async () => {
+      mockFetch
+        .mockResolvedValueOnce(makeResponse(200)) // GET SSE wins the race
+        .mockResolvedValueOnce(makeResponse(202, { 'mcp-session-id': 'A' })) // initialized 202
+        .mockResolvedValueOnce(makeResponse(200)); // POST tool-call
+
+      await fetch('https://example.com/mcp', {
+        method: 'GET',
+        headers: { 'mcp-session-id': 'A' },
+      });
+
+      await fetch('https://example.com/mcp', {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'A' },
+      });
+
+      const toolCall = fetch('https://example.com/mcp', {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'A' },
+      });
+      await toolCall;
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
     it('resolves the gate when the GET SSE channel opens', async () => {
       mockFetch
         .mockResolvedValueOnce(makeResponse(202)) // POST init

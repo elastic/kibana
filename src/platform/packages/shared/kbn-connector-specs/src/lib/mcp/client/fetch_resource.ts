@@ -344,11 +344,12 @@ export function createFetchResource({
         return;
       }
       closed = true;
-      for (const [, dispatcher] of dispatchers) {
+      for (const dispatcher of dispatchers.values()) {
         try {
-          await dispatcher.close();
+          // destroy() aborts in-flight GET SSE; close() would wait forever (bodyTimeout: 0).
+          dispatcher.destroy();
         } catch {
-          // ignore errors on close
+          // ignore errors on destroy
         }
       }
       dispatchers.clear();

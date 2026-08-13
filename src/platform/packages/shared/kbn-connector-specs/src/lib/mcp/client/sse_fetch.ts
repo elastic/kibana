@@ -74,12 +74,11 @@ export function createSseGatedFetch(resource: McpFetchResource): FetchLike {
     const sessionId = getSessionId(headers);
 
     if (method === 'GET') {
-      // Fire the underlying fetch for the SSE channel and resolve the gate on return.
+      // Create-or-get so a GET that wins the race with the initialized 202 still opens the gate.
       const response = await resource.fetch(url, init);
-      const gate = gates.get(sessionId);
-      if (gate) {
-        gate.markOpen?.();
-      }
+      const gate = ensureChannelGate(sessionId);
+      gate.markOpen?.();
+      gate.markOpen = null;
       return response;
     }
 

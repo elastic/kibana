@@ -295,7 +295,10 @@ describe('McpClient', () => {
 
       // The SDK formats the message as "Streamable HTTP error: Connection failed"
       // Our client just passes through the message without adding a prefix
-      await expect(client.connect()).rejects.toThrow('Streamable HTTP error: Connection failed');
+      await expect(client.connect()).rejects.toMatchObject({
+        message: 'Streamable HTTP error: Connection failed',
+        cause: error,
+      });
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -309,7 +312,10 @@ describe('McpClient', () => {
       const error = new UnauthorizedError('Unauthorized');
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toThrow('Unauthorized error: Unauthorized');
+      await expect(client.connect()).rejects.toMatchObject({
+        message: 'Unauthorized error: Unauthorized',
+        cause: error,
+      });
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -323,9 +329,10 @@ describe('McpClient', () => {
       const error = new Error('Generic error');
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toThrow(
-        'Error connecting to MCP server: Generic error'
-      );
+      await expect(client.connect()).rejects.toMatchObject({
+        message: 'Error connecting to MCP server: Generic error',
+        cause: error,
+      });
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );

@@ -79,15 +79,8 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
     }
 
     // Auth headers come from the connector's configured auth type via the framework credential.
-    // Tolerate auth types without a header producer (e.g. `none`) by falling back to no headers.
-    let authHeaders: Record<string, string> = {};
-    try {
-      authHeaders = await ctx.credential.getAuthHeaders();
-    } catch (err) {
-      ctx.logger.debug(
-        `No auth headers for MCP client: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
+    // `none` implements getAuthHeaders as `{}`; other failures must propagate.
+    const authHeaders = await ctx.credential.getAuthHeaders();
 
     const credentialHeaderNames = Object.keys(authHeaders);
     const headers: Record<string, string> = { ...(deps.defaultHeaders ?? {}), ...authHeaders };
@@ -159,17 +152,17 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       if (current instanceof StreamableHTTPError) {
         return current.code === 401 || current.code === 403;
       }
-      if (current instanceof Error && current.message.startsWith('Unauthorized error:')) {
-        return true;
-      }
       return false;
     });
   },
 
   shouldInvalidateOnError(err: unknown): boolean {
     return walkCauseChain(err, (current) => {
-      if (current instanceof StreamableHTTPError && current.code === 404) {
+      if (current instanceof UnauthorizedError) {
         return true;
+      }
+      if (current instanceof StreamableHTTPError) {
+        return current.code === 401 || current.code === 403 || current.code === 404;
       }
       const code = getErrorCode(current);
       return code !== undefined && TERMINAL_UNDICI_CODES.has(code);

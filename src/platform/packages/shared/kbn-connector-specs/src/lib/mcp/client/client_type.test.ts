@@ -154,15 +154,28 @@ describe('createMcpClientType', () => {
       );
     });
 
-    it('proceeds without auth headers when getAuthHeaders throws', async () => {
+    it('builds without auth headers when getAuthHeaders returns an empty object', async () => {
+      const { createFetchResource } = jest.requireMock('./fetch_resource') as {
+        createFetchResource: jest.Mock;
+      };
       const ctx = makeBuildContext({
-        credential: { getAuthHeaders: jest.fn().mockRejectedValue(new Error('unsupported')) },
+        credential: { getAuthHeaders: jest.fn().mockResolvedValue({}) },
       });
 
-      const client = await createMcpClientType().build(ctx);
+      await createMcpClientType().build(ctx);
 
-      expect(client.connect).toHaveBeenCalled();
-      expect(ctx.logger.debug).toHaveBeenCalledWith(expect.stringContaining('No auth headers'));
+      expect(createFetchResource).toHaveBeenCalledWith(
+        expect.not.objectContaining({ headers: expect.anything() })
+      );
+    });
+
+    it('propagates getAuthHeaders failures', async () => {
+      const authError = new Error('token client failed');
+      const ctx = makeBuildContext({
+        credential: { getAuthHeaders: jest.fn().mockRejectedValue(authError) },
+      });
+
+      await expect(createMcpClientType().build(ctx)).rejects.toBe(authError);
     });
 
     it('closes the fetch resource and preserves the original error when connect fails', async () => {
@@ -274,15 +287,20 @@ describe('createMcpClientType', () => {
       ).toBe(false);
     });
 
-    it('returns true for McpClient-wrapped Unauthorized error messages', () => {
-      expect(
-        createMcpClientType().isUserError?.(new Error('Unauthorized error: invalid token'))
-      ).toBe(true);
-    });
-
     it('returns true when cause is UnauthorizedError', () => {
       const err = new Error('wrapped', { cause: new UnauthorizedError('nope') });
       expect(createMcpClientType().isUserError?.(err)).toBe(true);
+    });
+
+    it('returns true when cause is StreamableHTTPError 403', () => {
+      const err = new Error('wrapped', { cause: new StreamableHTTPError(403, 'nope') });
+      expect(createMcpClientType().isUserError?.(err)).toBe(true);
+    });
+
+    it('returns false for a wrapped message without a typed cause', () => {
+      expect(
+        createMcpClientType().isUserError?.(new Error('Unauthorized error: invalid token'))
+      ).toBe(false);
     });
 
     it('returns false for plain Error', () => {
@@ -292,7 +310,10 @@ describe('createMcpClientType', () => {
 
   describe('shouldInvalidateOnError', () => {
     it.each([
+      [new StreamableHTTPError(401, 'Unauthorized'), true],
+      [new StreamableHTTPError(403, 'Forbidden'), true],
       [new StreamableHTTPError(404, 'gone'), true],
+      [new UnauthorizedError('nope'), true],
       [Object.assign(new Error('socket gone'), { code: 'UND_ERR_SOCKET' }), true],
       [Object.assign(new Error('socket gone'), { code: 'UND_ERR_CLOSED' }), true],
       [Object.assign(new Error('socket gone'), { code: 'UND_ERR_DESTROYED' }), true],
@@ -300,6 +321,11 @@ describe('createMcpClientType', () => {
       [new Error('boom'), false],
     ])('classifies terminal errors', (error, expected) => {
       expect(createMcpClientType().shouldInvalidateOnError?.(error)).toBe(expected);
+    });
+
+    it('returns true when cause is StreamableHTTPError 403', () => {
+      const err = new Error('wrapped', { cause: new StreamableHTTPError(403, 'nope') });
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
     });
 
     it('returns true when a terminal error is nested in a bounded cause chain', () => {

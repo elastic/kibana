@@ -117,13 +117,13 @@ export class McpClient {
         this.logger.error(
           `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
-        if (error instanceof StreamableHTTPError) {
-          throw new Error(errorMessage);
-        } else if (error instanceof UnauthorizedError) {
-          throw new Error(`Unauthorized error: ${errorMessage}`);
-        } else {
-          throw new Error(`Error connecting to MCP server: ${errorMessage}`);
-        }
+        const message =
+          error instanceof StreamableHTTPError
+            ? errorMessage
+            : error instanceof UnauthorizedError
+            ? `Unauthorized error: ${errorMessage}`
+            : `Error connecting to MCP server: ${errorMessage}`;
+        throw new Error(message, { cause: error });
       }
     }
     // return the full list of capabilities as a by-product of the initialization handshake
