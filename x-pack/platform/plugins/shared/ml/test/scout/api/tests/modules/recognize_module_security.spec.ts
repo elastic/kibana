@@ -11,27 +11,29 @@ import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 // TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe('recognize_module: security datasets', { tag: '@local-stateful-classic' }, () => {
   apiTest.beforeAll(async ({ esArchiver }) => {
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/fixtures/es_archives/ml/module_security_auditbeat'
-    );
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/fixtures/es_archives/ml/module_security_packetbeat'
-    );
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/fixtures/es_archives/ml/module_security_winlogbeat'
-    );
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/fixtures/es_archives/ml/module_security_endpoint'
-    );
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/fixtures/es_archives/ml/module_security_cloudtrail'
-    );
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs'
-    );
-    await esArchiver.loadIfNeeded(
-      'x-pack/platform/test/fixtures/es_archives/ml/module_security_gcp_audit'
-    );
+    await Promise.all([
+      esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_auditbeat'
+      ),
+      esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_packetbeat'
+      ),
+      esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_winlogbeat'
+      ),
+      esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_endpoint'
+      ),
+      esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_cloudtrail'
+      ),
+      esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_azure_activitylogs'
+      ),
+      esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_security_gcp_audit'
+      ),
+    ]);
   });
 
   apiTest(

@@ -8,7 +8,6 @@
 import { sortBy } from 'lodash';
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
-import { createDataView, deleteDataViewByTitle } from '../../fixtures/general_test_helpers';
 
 const SOURCE_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs';
 const MODULE_ID = 'sample_data_weblogs';
@@ -19,14 +18,17 @@ apiTest.describe(
   'setup_module: sample_data_weblogs with startDatafeed false',
   { tag: '@local-stateful-classic' },
   () => {
-    apiTest.beforeAll(async ({ esArchiver, kbnClient }) => {
+    apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
       await esArchiver.loadIfNeeded(SOURCE_ARCHIVE);
-      await createDataView(kbnClient, DATA_VIEW.name, DATA_VIEW.timeField);
+      await apiServices.dataViews.create({
+        title: DATA_VIEW.name,
+        timeFieldName: DATA_VIEW.timeField,
+      });
     });
 
-    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
+    apiTest.afterAll(async ({ apiServices }) => {
       await apiServices.ml.indices.cleanAnomalyDetection();
-      await deleteDataViewByTitle(kbnClient, DATA_VIEW.name);
+      await apiServices.dataViews.deleteByTitle(DATA_VIEW.name);
     });
 
     apiTest(

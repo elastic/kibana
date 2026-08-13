@@ -6,7 +6,6 @@
  */
 
 import { mlApiTest as apiTest } from '../../fixtures';
-import { createDataView, deleteDataViewByTitle } from '../../fixtures/general_test_helpers';
 import { runSetupModuleTest } from '../../fixtures/setup_module_helpers';
 import type { SetupModuleTestData } from '../../fixtures/setup_module_helpers';
 
@@ -50,24 +49,30 @@ apiTest.describe(
   'setup_module: sample data modules with startDatafeed true',
   { tag: '@local-stateful-classic' },
   () => {
-    apiTest.beforeAll(async ({ esArchiver, kbnClient }) => {
+    apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
       );
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
       );
-      await createDataView(kbnClient, 'ft_module_sample_logs', '@timestamp');
-      await createDataView(kbnClient, 'ft_module_sample_ecommerce', 'order_date');
+      await apiServices.dataViews.create({
+        title: 'ft_module_sample_logs',
+        timeFieldName: '@timestamp',
+      });
+      await apiServices.dataViews.create({
+        title: 'ft_module_sample_ecommerce',
+        timeFieldName: 'order_date',
+      });
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.ml.indices.cleanAnomalyDetection();
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await deleteDataViewByTitle(kbnClient, 'ft_module_sample_logs');
-      await deleteDataViewByTitle(kbnClient, 'ft_module_sample_ecommerce');
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.dataViews.deleteByTitle('ft_module_sample_logs');
+      await apiServices.dataViews.deleteByTitle('ft_module_sample_ecommerce');
     });
 
     for (const data of testDataList) {

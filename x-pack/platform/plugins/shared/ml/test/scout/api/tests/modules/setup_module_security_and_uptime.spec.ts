@@ -6,7 +6,6 @@
  */
 
 import { mlApiTest as apiTest } from '../../fixtures';
-import { createDataView, deleteDataViewByTitle } from '../../fixtures/general_test_helpers';
 import { runSetupModuleTest } from '../../fixtures/setup_module_helpers';
 import type { SetupModuleTestData } from '../../fixtures/setup_module_helpers';
 
@@ -94,7 +93,7 @@ apiTest.describe(
   'setup_module: security and uptime modules with startDatafeed true',
   { tag: '@local-stateful-classic' },
   () => {
-    apiTest.beforeAll(async ({ esArchiver, kbnClient }) => {
+    apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/ml/module_security_packetbeat'
       );
@@ -104,19 +103,28 @@ apiTest.describe(
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/ml/module_security_cloudtrail'
       );
-      await createDataView(kbnClient, 'ft_module_security_packetbeat', '@timestamp');
-      await createDataView(kbnClient, 'ft_module_heartbeat', '@timestamp');
-      await createDataView(kbnClient, 'ft_module_security_cloudtrail', '@timestamp');
+      await apiServices.dataViews.create({
+        title: 'ft_module_security_packetbeat',
+        timeFieldName: '@timestamp',
+      });
+      await apiServices.dataViews.create({
+        title: 'ft_module_heartbeat',
+        timeFieldName: '@timestamp',
+      });
+      await apiServices.dataViews.create({
+        title: 'ft_module_security_cloudtrail',
+        timeFieldName: '@timestamp',
+      });
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.ml.indices.cleanAnomalyDetection();
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
-      await deleteDataViewByTitle(kbnClient, 'ft_module_security_packetbeat');
-      await deleteDataViewByTitle(kbnClient, 'ft_module_heartbeat');
-      await deleteDataViewByTitle(kbnClient, 'ft_module_security_cloudtrail');
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.dataViews.deleteByTitle('ft_module_security_packetbeat');
+      await apiServices.dataViews.deleteByTitle('ft_module_heartbeat');
+      await apiServices.dataViews.deleteByTitle('ft_module_security_cloudtrail');
     });
 
     for (const data of testDataList) {

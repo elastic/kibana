@@ -7,7 +7,6 @@
 
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
-import { createDataView, deleteDataViewByTitle } from '../../fixtures/general_test_helpers';
 
 const SPACE_ID = 'ml_jobs_exist_space1';
 const SOURCE_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs';
@@ -20,20 +19,27 @@ apiTest.describe(
   'GET ml/modules/jobs_exist: space-scoped job discovery',
   { tag: '@local-stateful-classic' },
   () => {
-    apiTest.beforeAll(async ({ esArchiver, apiServices, kbnClient }) => {
+    apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
       await esArchiver.loadIfNeeded(SOURCE_ARCHIVE);
       await apiServices.spaces.create({ id: SPACE_ID, disabledFeatures: [] });
-      await createDataView(kbnClient, DATA_VIEW.name, DATA_VIEW.timeField);
-      await createDataView(kbnClient, DATA_VIEW.name, DATA_VIEW.timeField, SPACE_ID);
+      await apiServices.dataViews.create({
+        title: DATA_VIEW.name,
+        timeFieldName: DATA_VIEW.timeField,
+      });
+      await apiServices.dataViews.create({
+        title: DATA_VIEW.name,
+        timeFieldName: DATA_VIEW.timeField,
+        spaceId: SPACE_ID,
+      });
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.ml.indices.cleanAnomalyDetection();
     });
 
-    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
-      await deleteDataViewByTitle(kbnClient, DATA_VIEW.name);
-      await deleteDataViewByTitle(kbnClient, DATA_VIEW.name, SPACE_ID);
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.dataViews.deleteByTitle(DATA_VIEW.name);
+      await apiServices.dataViews.deleteByTitle(DATA_VIEW.name, SPACE_ID);
       await apiServices.spaces.delete(SPACE_ID);
     });
 

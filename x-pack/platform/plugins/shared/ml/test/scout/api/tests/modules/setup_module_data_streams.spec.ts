@@ -7,7 +7,6 @@
 
 import { mlApiTest as apiTest } from '../../fixtures';
 import { setupFleetPackages, removeFleetPackages } from '../../fixtures/fleet_helpers';
-import { createDataView, deleteDataViewByTitle } from '../../fixtures/general_test_helpers';
 import { runSetupModuleTest } from '../../fixtures/setup_module_helpers';
 import type { SetupModuleTestData } from '../../fixtures/setup_module_helpers';
 
@@ -91,7 +90,7 @@ apiTest.describe(
   'setup_module: data stream modules with startDatafeed true (requires Fleet packages)',
   { tag: '@local-stateful-classic' },
   () => {
-    apiTest.beforeAll(async ({ esArchiver, apiServices, kbnClient }) => {
+    apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
       await setupFleetPackages(apiServices);
 
       await esArchiver.loadIfNeeded(
@@ -101,19 +100,25 @@ apiTest.describe(
         'x-pack/platform/test/fixtures/es_archives/ml/module_nginx_data_stream'
       );
 
-      await createDataView(kbnClient, 'ft_module_apache_data_stream', '@timestamp');
-      await createDataView(kbnClient, 'ft_module_nginx_data_stream', '@timestamp');
+      await apiServices.dataViews.create({
+        title: 'ft_module_apache_data_stream',
+        timeFieldName: '@timestamp',
+      });
+      await apiServices.dataViews.create({
+        title: 'ft_module_nginx_data_stream',
+        timeFieldName: '@timestamp',
+      });
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.ml.indices.cleanAnomalyDetection();
     });
 
-    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
+    apiTest.afterAll(async ({ apiServices }) => {
       await removeFleetPackages(apiServices);
 
-      await deleteDataViewByTitle(kbnClient, 'ft_module_apache_data_stream');
-      await deleteDataViewByTitle(kbnClient, 'ft_module_nginx_data_stream');
+      await apiServices.dataViews.deleteByTitle('ft_module_apache_data_stream');
+      await apiServices.dataViews.deleteByTitle('ft_module_nginx_data_stream');
     });
 
     for (const data of testDataList) {

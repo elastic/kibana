@@ -6,7 +6,6 @@
  */
 
 import { mlApiTest as apiTest } from '../../fixtures';
-import { createDataView, deleteDataViewByTitle } from '../../fixtures/general_test_helpers';
 import { runSetupModuleTest, cleanupModuleSavedObjects } from '../../fixtures/setup_module_helpers';
 import type { SetupModuleExpected } from '../../fixtures/setup_module_helpers';
 
@@ -44,18 +43,21 @@ apiTest.describe(
   'setup_module: nginx_ecs with startDatafeed true',
   { tag: '@local-stateful-classic' },
   () => {
-    apiTest.beforeAll(async ({ esArchiver, kbnClient }) => {
+    apiTest.beforeAll(async ({ esArchiver, apiServices }) => {
       await esArchiver.loadIfNeeded(SOURCE_ARCHIVE);
-      await createDataView(kbnClient, DATA_VIEW.name, DATA_VIEW.timeField);
+      await apiServices.dataViews.create({
+        title: DATA_VIEW.name,
+        timeFieldName: DATA_VIEW.timeField,
+      });
     });
 
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.ml.indices.cleanAnomalyDetection();
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
+    apiTest.afterAll(async ({ apiServices, kbnClient }) => {
       await cleanupModuleSavedObjects(kbnClient, EXPECTED);
-      await deleteDataViewByTitle(kbnClient, DATA_VIEW.name);
+      await apiServices.dataViews.deleteByTitle(DATA_VIEW.name);
     });
 
     // eslint-disable-next-line playwright/expect-expect

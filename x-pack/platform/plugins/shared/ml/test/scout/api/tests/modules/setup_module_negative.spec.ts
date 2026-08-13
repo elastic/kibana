@@ -7,18 +7,20 @@
 
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
-import { createDataView, deleteDataViewByTitle } from '../../fixtures/general_test_helpers';
 
 const DATA_VIEW = { name: 'ft_module_sample_logs', timeField: '@timestamp' };
 
 // TODO: Add @cloud-stateful-classic once ECH custom-role support lands (see get_filters.spec.ts TODO).
 apiTest.describe('setup_module: rejected requests', { tag: '@local-stateful-classic' }, () => {
-  apiTest.beforeAll(async ({ kbnClient }) => {
-    await createDataView(kbnClient, DATA_VIEW.name, DATA_VIEW.timeField);
+  apiTest.beforeAll(async ({ apiServices }) => {
+    await apiServices.dataViews.create({
+      title: DATA_VIEW.name,
+      timeFieldName: DATA_VIEW.timeField,
+    });
   });
 
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await deleteDataViewByTitle(kbnClient, DATA_VIEW.name);
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.dataViews.deleteByTitle(DATA_VIEW.name);
   });
 
   apiTest(
