@@ -20,8 +20,8 @@ export const stateSchemaByVersion = {
         typeof state.eventWatermark === 'string'
           ? state.eventWatermark
           : typeof state.previousStartedAt === 'string'
-            ? state.previousStartedAt
-            : undefined,
+          ? state.previousStartedAt
+          : undefined,
     }),
     schema: schema.object({
       eventWatermark: schema.maybe(schema.string({ maxLength: 64 })),
