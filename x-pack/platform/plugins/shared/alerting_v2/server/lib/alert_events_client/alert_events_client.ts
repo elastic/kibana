@@ -61,14 +61,13 @@ export function getGroupHash(event: CreateAlertEventData, spaceId: string): stri
 
   if (event.fingerprint_fields?.length) {
     const data = event.data ?? {};
-    const keyPart = event.fingerprint_fields.join('|');
-    const valuePart = event.fingerprint_fields
-      .map((field) => {
-        const value = getValueByDottedPath(data, field);
-        return value == null ? '' : String(value);
-      })
-      .join('|');
-    return sha256(`${spaceId}:${source}:${keyPart}|${valuePart}`);
+    // Encode as [[field, value], ...] pairs so field names or values containing
+    // the delimiter character cannot produce hash collisions across different inputs.
+    const pairs = event.fingerprint_fields.map((field) => {
+      const value = getValueByDottedPath(data, field);
+      return [field, value == null ? '' : String(value)];
+    });
+    return sha256(`${spaceId}:${source}:${JSON.stringify(pairs)}`);
   }
 
   // Schema requires fingerprint, fingerprint_fields, or rule_id.
@@ -128,9 +127,12 @@ export class AlertEventsClient {
       ...(event.severity != null ? { severity: event.severity } : {}),
     };
 
+    // `refresh: 'wait_for'` ensures the written doc is visible to the next
+    // resolveEpisodeId query when events for the same series arrive back-to-back.
     const { errors } = await this.storageService.bulkIndexDocs({
       index: ALERT_EVENTS_DATA_STREAM,
       docs: [doc],
+      refresh: 'wait_for',
     });
 
     if (errors.length > 0) {

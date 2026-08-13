@@ -21,6 +21,8 @@ export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
   queryMode: DiscoverQueryMode;
+  /** Open a Discover session by id (`#/view/{id}`) instead of a blank Discover page. */
+  savedSearchId?: string;
 }
 
 export interface DataViewOptions {
@@ -48,7 +50,10 @@ export class DiscoverApp {
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
 
-    await this.page.gotoApp('discover');
+    await this.page.gotoApp(
+      'discover',
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+    );
     await this.waitForDiscoverPage();
   }
 
@@ -157,9 +162,13 @@ export class DiscoverApp {
     // user types. Scout sets the title verbatim (`fill`), so append the wildcard
     // here to preserve that contract (`name`, `* will be added automatically`).
     const title = name.endsWith('*') ? name : `${name}*`;
+    const timestampCombo = this.page.components.comboBox('timestampField');
 
     // Retry: title validation can race its debounced index lookup and get stuck
     // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
+    // Re-submitting also covers serverless, where the form's submission re-validation can
+    // transiently report "no matching indices" even though the matching sources panel already
+    // shows results, leaving the flyout open with its submit buttons disabled.
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       const isLastAttempt = attempt === maxAttempts;
@@ -173,10 +182,23 @@ export class DiscoverApp {
         .and(this.page.locator('[data-validation-error="0"]'))
         .waitFor({ state: 'visible' });
 
-      // wait for timestamp options; default @timestamp applies.
-      await timestampField
-        .and(this.page.locator('[data-is-loading="0"]'))
-        .waitFor({ state: 'visible', timeout: 30_000 });
+      // Wait for an actual selection rather than only `data-is-loading="0"`: that is also the
+      // field's initial state, so on its own it cannot tell "options loaded" apart from
+      // "loading has not started". Submitting too early still passes validation, but creates
+      // the data view with no time field, so no time filter is applied and hit counts include
+      // documents outside the selected range.
+      await expect
+        .poll(
+          async () => {
+            const isLoading = await timestampField.getAttribute('data-is-loading');
+            if (isLoading !== '0') {
+              return false;
+            }
+            return (await timestampCombo.getSelectedOptions()).length > 0;
+          },
+          { timeout: 30_000, intervals: [200] }
+        )
+        .toBe(true);
 
       if (adHoc) {
         await this.page.testSubj.click('exploreIndexPatternButton');
@@ -273,11 +295,64 @@ export class DiscoverApp {
       await confirmButton.waitFor({ state: 'visible' });
       await confirmButton.click();
     }
-    await flyout.waitFor({ state: 'hidden' });
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
     await this.waitUntilTabIsLoaded();
   }
 
-  async createRuntimeField(fieldName: string, script: string) {
+  async editDataViewFromSearchBar({
+    newIndexPattern,
+    newTimeField,
+  }: {
+    newIndexPattern?: string;
+    newTimeField?: string;
+  }) {
+    await this.openDataViewSwitcher();
+    await this.page.testSubj.click('indexPattern-manage-field');
+
+    const flyout = this.page.testSubj.locator('indexPatternEditorFlyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    if (newIndexPattern) {
+      const titleInput = this.page.testSubj.locator('createIndexPatternTitleInput');
+      await titleInput.fill(newIndexPattern);
+      const form = this.page.testSubj.locator('indexPatternEditorForm');
+      await form
+        .and(this.page.locator('[data-validation-error="0"]'))
+        .waitFor({ state: 'visible' });
+    }
+
+    if (newTimeField) {
+      const timestampField = this.page.testSubj.locator('timestampField');
+      await timestampField
+        .and(this.page.locator('[data-is-loading="0"]'))
+        .waitFor({ state: 'visible', timeout: 30_000 });
+      await this.page.components.comboBox('timestampField').setSelectedOptions([newTimeField]);
+    }
+
+    await this.page.testSubj.click('saveIndexPatternButton');
+
+    const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
+    const confirmVisible = await confirmButton
+      .waitFor({ state: 'visible', timeout: 3_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (confirmVisible) {
+      await confirmButton.click();
+    }
+
+    await flyout.waitFor({ state: 'hidden', timeout: 30_000 });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async createRuntimeField({
+    fieldName,
+    script,
+    popularity,
+  }: {
+    fieldName: string;
+    script: string;
+    popularity?: number;
+  }) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-add-field');
     const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
@@ -289,8 +364,49 @@ export class DiscoverApp {
       .getByRole('textbox', { name: /Editor content/ })
       .waitFor({ state: 'visible' });
     await this.codeEditor.setCodeEditorValue(script);
+
+    if (typeof popularity === 'number') {
+      await this.setPopularity(popularity);
+    }
+
     await fieldEditor.getByRole('button', { name: 'Save' }).click();
     await fieldEditor.waitFor({ state: 'hidden' });
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async getCurrentDataViewId(): Promise<string> {
+    const currentUrl = this.page.url();
+    const matches = [...currentUrl.matchAll(/dataViewId:[^,]*/g)];
+    const ids = matches.map(([m]) =>
+      decodeURIComponent(m).replace('dataViewId:', '').replaceAll("'", '')
+    );
+    if (!ids.length) {
+      throw new Error(
+        `Discover URL state doesn't contain a dataViewId reference. URL: ${currentUrl}`
+      );
+    }
+    const first = ids[0];
+    if (!ids.every((id) => id === first)) {
+      throw new Error('Discover URL state contains different dataViewId references.');
+    }
+    return first;
+  }
+
+  async deleteRuntimeField(fieldName: string) {
+    // The field may appear in multiple sidebar sections (Popular + Available);
+    // scope to Available fields to avoid strict-mode violations.
+    const fieldItem = this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .locator(`[data-test-subj="field-${fieldName}"]`);
+    await fieldItem.waitFor({ state: 'visible' });
+    await fieldItem.click();
+    await this.page.locator('[data-popover-open="true"]').waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`discoverFieldListPanelDelete-${fieldName}`);
+    const confirmModal = this.page.testSubj.locator('runtimeFieldDeleteConfirmModal');
+    await confirmModal.waitFor({ state: 'visible' });
+    await this.page.testSubj.typeWithDelay('deleteModalConfirmText', 'remove');
+    await this.page.testSubj.click('confirmModalConfirmButton');
+    await confirmModal.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
   }
 
@@ -304,6 +420,13 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmModalConfirmButton');
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
+  }
+
+  async setPopularity(popularity: number) {
+    await this.page.testSubj.click('toggleAdvancedSetting');
+    const row = this.page.testSubj.locator('popularityRow');
+    await row.locator('[data-test-subj="toggle"]').click();
+    await this.page.testSubj.locator('editorFieldCount').fill(String(popularity));
   }
 
   async setCustomLabel(label: string, { enableToggle = false }: { enableToggle?: boolean } = {}) {
@@ -355,20 +478,6 @@ export class DiscoverApp {
     const confirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     await confirmButton.click();
     await fieldEditor.waitFor({ state: 'hidden' });
-  }
-
-  async deleteRuntimeField(fieldName: string) {
-    await this.searchFieldInSidebar(fieldName);
-    const field = this.page.testSubj
-      .locator('fieldListGroupedAvailableFields')
-      .locator(`[data-test-subj="field-${fieldName}"]`);
-    await field.waitFor({ state: 'visible' });
-    await field.click();
-    const deleteButton = this.page.testSubj.locator(`discoverFieldListPanelDelete-${fieldName}`);
-    await deleteButton.click();
-    await this.page.testSubj.fill('deleteModalConfirmText', 'REMOVE');
-    await this.page.testSubj.click('confirmModalConfirmButton');
-    await this.waitUntilTabIsLoaded();
   }
 
   async clickAppMenuItem(
@@ -647,6 +756,10 @@ export class DiscoverApp {
     return Number(await fetchCounter.getAttribute('data-fetch-counter'));
   }
 
+  getErrorCalloutTitle(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutTitle');
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
@@ -679,6 +792,15 @@ export class DiscoverApp {
 
   async waitUntilSearchingHasFinished() {
     await this.dataGrid.waitForLoad();
+    await this.waitUntilHitCountHasSettled();
+  }
+
+  private async waitUntilHitCountHasSettled() {
+    const loadingCounter = this.page.testSubj
+      .locator('discoverQueryTotalHits')
+      .and(this.page.locator('[data-fetch-status="loading"]'));
+
+    await loadingCounter.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 
   async getDocTableIndex(index: number): Promise<string> {
@@ -797,15 +919,6 @@ export class DiscoverApp {
       this.controls.getControlFrame(controlId).getByText(value),
   };
 
-  async clickFieldSort(field: string, sortOption: string) {
-    const header = this.dataGrid.getColumnHeader(field);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
-  }
-
   getDocHeaderLabels(): Locator {
     return this.page.locator(
       '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
@@ -859,10 +972,22 @@ export class DiscoverApp {
 
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async showTable() {
+    await this.page.testSubj.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async hideTable() {
+    await this.page.testSubj.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async expectXYVisChartVisible() {
@@ -1267,8 +1392,27 @@ export class DiscoverApp {
     return this.page.testSubj.locator('data-cascade');
   }
 
+  /**
+   * Trigger for the "Group by" popover in the cascade layout toolbar. Despite
+   * the `...Switch` test subject it is a popover button, not a toggle — use
+   * {@link optOutOfCascadeLayout} to actually leave the cascade layout.
+   */
   getCascadeLayoutSwitch(): Locator {
     return this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+  }
+
+  /**
+   * Leaves the cascade ("grouped results") layout that Discover switches to for
+   * `STATS ... BY` ES|QL queries, restoring the flat doc table. Expects the
+   * cascade layout to be showing — it fails rather than silently doing nothing
+   * if the layout is absent, so callers notice when the trigger stops applying.
+   */
+  async optOutOfCascadeLayout() {
+    await this.getCascadeLayoutSwitch().click();
+    await this.page.testSubj.locator('discoverGroupBySelectionList').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('discoverCascadeLayoutOptOutButton');
+    await this.waitUntilTabIsLoaded();
+    await this.getCascadeLayout().waitFor({ state: 'hidden' });
   }
 
   async isShowingCascadeLayout(): Promise<boolean> {

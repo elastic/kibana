@@ -42,11 +42,7 @@ import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
-import {
-  createExternalReferenceAttachmentTypeRegistryMock,
-  createPersistableStateAttachmentTypeRegistryMock,
-  createUnifiedAttachmentTypeRegistryMock,
-} from '../attachment_framework/mocks';
+import { createUnifiedAttachmentTypeRegistryMock } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
   connectorMappingsServiceMock,
@@ -280,8 +276,6 @@ export const createCasesClientMockArgs = () => {
       profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
     },
     spaceId: 'default',
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
@@ -324,8 +318,6 @@ export const createCasesClientFactoryMockArgs = () => {
         {}
       )
     ),
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     casesEventBus: createCasesEventBusMock(),
