@@ -68,7 +68,7 @@ export class DispatchStep implements DispatcherStep {
           if (signal.aborted) {
             return { groupId: group.id, executionIds: [], failures: [] };
           }
-          return this.dispatchGroup(group, policies);
+          return this.dispatchGroup(group, policies, signal);
         })
       )
     );
@@ -91,7 +91,8 @@ export class DispatchStep implements DispatcherStep {
 
   private async dispatchGroup(
     group: ActionGroup,
-    policies?: Map<ActionPolicyId, ActionPolicy>
+    policies?: Map<ActionPolicyId, ActionPolicy>,
+    signal?: AbortSignal
   ): Promise<DispatchGroupResult> {
     const executionIds: string[] = [];
     const failures: DispatchFailure[] = [];
@@ -115,6 +116,9 @@ export class DispatchStep implements DispatcherStep {
       const fakeRequest = this.craftFakeRequest(apiKey);
 
       for (const destination of group.destinations) {
+        // Stop dispatching new destinations once the tick signal fires to avoid
+        // overrunning the TM timeout with in-progress scheduleWorkflow calls.
+        if (signal?.aborted) break;
         if (destination.type !== 'workflow') {
           continue;
         }

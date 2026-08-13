@@ -45,7 +45,21 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
 
       this.logger.debug({ message: `Dispatcher: Executing step: ${step.name}` });
 
-      const output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
+      let output: Awaited<ReturnType<DispatcherStep['execute']>>;
+      try {
+        output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
+      } catch (err) {
+        // If the tick signal fired while the step had an in-flight request (e.g.
+        // RequestAbortedError from ES|QL), convert to a clean aborted halt so
+        // dispatcher.run() can persist the watermark rather than throwing.
+        if (input.signal.aborted) {
+          this.logger.debug({
+            message: `Dispatcher: step ${step.name} threw while signal was aborted; treating as abort.`,
+          });
+          return { completed: false, haltReason: 'aborted', finalState: pipelineState };
+        }
+        throw err;
+      }
 
       if (output.type === 'halt') {
         this.logger.debug({

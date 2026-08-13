@@ -168,6 +168,7 @@ An empty matcher is a catch-all.
 | Max scan window | `15` minutes | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES` |
 | Settle buffer | `5` seconds | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write |
 | Stuck-tick limit | `10` ticks (~50 s) | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires |
+| Pre-fetch force-advance lag | `15` minutes | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known episodes and lag exceeds this, skip the unread window |
 | Matcher language | KQL | `@kbn/eval-kql` |
 
 ## Important pipeline state
@@ -236,6 +237,8 @@ If the watermark does not advance for `STUCK_TICK_LIMIT` consecutive ticks (defa
 4. Resets the stuck-tick counter to 0.
 
 The blocking episodes are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable episode that would otherwise stall the dispatcher indefinitely.
+
+If the pipeline never reached `FetchEpisodesStep` (`episodes` empty), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so a transient outage can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever.
 
 ## Delivery guarantees and limits
 

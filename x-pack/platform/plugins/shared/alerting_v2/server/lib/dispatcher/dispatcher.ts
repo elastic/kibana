@@ -8,6 +8,7 @@
 import { inject, injectable } from 'inversify';
 import { v4 as uuidV4 } from 'uuid';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { isError } from 'lodash';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
 import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
 import { toAction } from './steps/store_actions_step';
@@ -17,6 +18,7 @@ import {
   SETTLE_BUFFER_SECONDS,
   TICK_DEADLINE_MS,
   STUCK_TICK_LIMIT,
+  PRE_FETCH_STUCK_ADVANCE_LAG_MS,
 } from './constants';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
@@ -48,17 +50,27 @@ export class DispatcherService implements DispatcherServiceContract {
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
 
-    if (!eventWatermark) {
+    const isValidDate = (d: Date | undefined): d is Date =>
+      d instanceof Date && !Number.isNaN(d.getTime());
+
+    if (!isValidDate(eventWatermark)) {
+      const code = eventWatermark
+        ? ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK
+        : ALERTING_LOG_CODES.DISPATCHER_COLD_START;
       this.logger.warn({
-        code: ALERTING_LOG_CODES.DISPATCHER_COLD_START,
+        code,
         message: () =>
-          `Dispatcher: no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
-          `Rule events older than that will not be dispatched.`,
+          eventWatermark
+            ? `Dispatcher: eventWatermark is Invalid Date; falling back to cold start ` +
+              `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`
+            : `Dispatcher: no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
+              `Rule events older than that will not be dispatched.`,
       });
     }
 
-    const resolvedWatermark =
-      eventWatermark ?? new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+    const resolvedWatermark = isValidDate(eventWatermark)
+      ? eventWatermark
+      : new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
 
     const windowStart = new Date(resolvedWatermark.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
     const maxEnd = new Date(windowStart.getTime() + MAX_WINDOW_MINUTES * 60_000);
@@ -76,7 +88,9 @@ export class DispatcherService implements DispatcherServiceContract {
       return {
         startedAt,
         nextWatermark: resolvedWatermark,
-        nextStuckTicks: 0,
+        // Preserve stuckTicks so the escape hatch can eventually fire if the
+        // watermark is permanently future-dated (e.g. corrupt task state).
+        nextStuckTicks: stuckTicks + 1,
         pipelineResult: {
           completed: true,
           finalState: {
@@ -161,23 +175,72 @@ export class DispatcherService implements DispatcherServiceContract {
       });
 
       if (nextStuckTicks >= STUCK_TICK_LIMIT) {
-        // The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks.
-        // A permanent stall is worse than silent loss: force-record the blocking
-        // episodes as `unmatched` so the `.alert-actions` dedup mark moves past
-        // them, then advance the watermark to windowEnd.
         const blockingEpisodes = pipelineResult.finalState.episodes ?? [];
         const lagMs = startedAt.getTime() - resolvedWatermark.getTime();
+
+        if (blockingEpisodes.length === 0) {
+          // Pipeline stuck before FetchEpisodesStep (e.g. WaitForResources timeout or
+          // ES overload aborting before any episodes are fetched). Advancing would
+          // silently drop whatever is in the window. Hold and reset while lag is
+          // still within one max scan window so transient infra pressure can recover.
+          // Once lag exceeds that, skip the unread window rather than stall forever.
+          if (lagMs > PRE_FETCH_STUCK_ADVANCE_LAG_MS) {
+            const clampedEscapeTarget = new Date(
+              Math.max(input.windowEnd.getTime(), resolvedWatermark.getTime())
+            );
+            this.logger.error({
+              code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE,
+              message: () =>
+                `Dispatcher: escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
+                `(lag: ${lagMs}ms > ${MAX_WINDOW_MINUTES}m). Force-advancing to ` +
+                `${clampedEscapeTarget.toISOString()}; unread episodes in this window are skipped.`,
+              error: new Error(`Pre-fetch watermark stuck at ${resolvedWatermark.toISOString()}`),
+            });
+            return {
+              startedAt,
+              nextWatermark: clampedEscapeTarget,
+              nextStuckTicks: 0,
+              pipelineResult,
+            };
+          }
+
+          this.logger.warn({
+            code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK,
+            message: () =>
+              `Dispatcher: escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
+              `(lag: ${lagMs}ms). Holding watermark at ${resolvedWatermark.toISOString()} ` +
+              `and resetting stuck counter.`,
+          });
+          return { startedAt, nextWatermark: resolvedWatermark, nextStuckTicks: 0, pipelineResult };
+        }
+
+        // The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks and
+        // we know the blocking episodes. Force-record them as `unmatched` so the
+        // `.alert-actions` dedup mark moves past them, then advance the watermark.
+        // If the batch was truncated, advance only to the truncation edge so the
+        // tail (beyond EPISODE_QUERY_LIMIT) is re-read and also escape-hatched next tick.
+        const truncated = pipelineResult.finalState.truncated ?? false;
+        const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
+        const escapeTarget = truncated
+          ? new Date(lastEpisode.last_event_timestamp)
+          : input.windowEnd;
+        // Clamp: never regress below the current watermark (guards against clock skew
+        // producing a windowEnd behind resolvedWatermark).
+        const clampedEscapeTarget = new Date(
+          Math.max(escapeTarget.getTime(), resolvedWatermark.getTime())
+        );
 
         this.logger.error({
           code: ALERTING_LOG_CODES.DISPATCHER_WATERMARK_STUCK,
           message: () =>
             `Dispatcher: watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
-            `(lag: ${lagMs}ms, blocking episodes: ${blockingEpisodes.length}). ` +
-            `Force-recording as unmatched and advancing to ${input.windowEnd.toISOString()}.`,
+            `(lag: ${lagMs}ms, blocking episodes: ${blockingEpisodes.length}, ` +
+            `truncated: ${truncated}). ` +
+            `Force-recording as unmatched and advancing to ${clampedEscapeTarget.toISOString()}.`,
           error: new Error(`Watermark stuck at ${resolvedWatermark.toISOString()}`),
         });
 
-        if (blockingEpisodes.length > 0) {
+        try {
           const escapeNow = new Date();
           await this.storageService.bulkIndexDocs({
             index: ALERT_ACTIONS_DATA_STREAM,
@@ -191,11 +254,24 @@ export class DispatcherService implements DispatcherServiceContract {
               })
             ),
           });
+        } catch (writeErr) {
+          const err = isError(writeErr) ? writeErr : new Error(String(writeErr));
+          this.logger.error({
+            error: err,
+            code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_WRITE_FAILED,
+            message: () =>
+              `Dispatcher: escape hatch bulkIndexDocs failed; holding watermark so ` +
+              `episodes will be retried. ${err.message}`,
+          });
+          // Do not advance: the records were not written, so dedup marks are absent.
+          // Reset stuckTicks to avoid re-triggering the escape hatch every tick while
+          // ES is unavailable.
+          return { startedAt, nextWatermark: resolvedWatermark, nextStuckTicks: 0, pipelineResult };
         }
 
         return {
           startedAt,
-          nextWatermark: input.windowEnd,
+          nextWatermark: clampedEscapeTarget,
           nextStuckTicks: 0,
           pipelineResult,
         };

@@ -31,6 +31,7 @@ import {
   MAX_WINDOW_MINUTES,
   STUCK_TICK_LIMIT,
   TICK_DEADLINE_MS,
+  PRE_FETCH_STUCK_ADVANCE_LAG_MS,
 } from './constants';
 import { DispatcherService } from './dispatcher';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
@@ -1314,20 +1315,51 @@ describe('DispatcherService', () => {
       );
     });
 
-    it('does not write terminal records when there are no blocking episodes', async () => {
-      const { loggerService } = createLoggerService();
+    it('holds the watermark when pre-fetch hatch fires and lag is within one max window', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
       const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
         createStorageService();
-      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+      // Lag ≈ 1m, well under PRE_FETCH_STUCK_ADVANCE_LAG_MS (15m).
+      const eventWatermark = new Date(Date.now() - 60_000);
 
-      // Episodes is empty → no docs to write
       const mockPipeline = buildStuckPipeline([]);
       const service = new DispatcherService(mockPipeline, loggerService, escapeStorage);
 
       const result = await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1 });
 
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
       expect(result.nextStuckTicks).toBe(0);
       expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK' }),
+        })
+      );
+    });
+
+    it('force-advances when pre-fetch hatch fires and lag exceeds one max window', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+        createStorageService();
+      const eventWatermark = new Date(Date.now() - PRE_FETCH_STUCK_ADVANCE_LAG_MS - 60_000);
+
+      const mockPipeline = buildStuckPipeline([]);
+      const service = new DispatcherService(mockPipeline, loggerService, escapeStorage);
+
+      const result = await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1 });
+
+      expect(result.nextWatermark.getTime()).toBeGreaterThan(eventWatermark.getTime());
+      expect(result.nextStuckTicks).toBe(0);
+      expect(escapeMockEsClient.bulk).not.toHaveBeenCalled();
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          labels: expect.objectContaining({
+            code: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
+          }),
+        })
+      );
     });
   });
 });

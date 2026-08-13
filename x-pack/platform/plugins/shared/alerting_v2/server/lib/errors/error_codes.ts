@@ -334,6 +334,31 @@ export const ALERTING_LOG_CODES = {
    * episodes (which will NOT be dispatched) and force-advance the watermark.
    */
   DISPATCHER_WATERMARK_STUCK: 'DISPATCHER_WATERMARK_STUCK',
+  /**
+   * The persisted eventWatermark is not a valid ISO date string. The dispatcher
+   * will fall back to cold-start behaviour (scan from now − OVERLAP_WINDOW_MINUTES).
+   */
+  DISPATCHER_INVALID_WATERMARK: 'DISPATCHER_INVALID_WATERMARK',
+  /**
+   * The escape hatch fired but the pipeline stopped before FetchEpisodesStep so
+   * no episodes are known for the window, and watermark lag is still within one
+   * max scan window. The watermark is held; the stuck counter is reset so
+   * transient infra pressure can recover without dropping the window.
+   */
+  DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK: 'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK',
+  /**
+   * The pre-fetch escape hatch fired and watermark lag already exceeds one max
+   * scan window. The window is force-advanced without knowing its episodes;
+   * unread events in that window are skipped so the dispatcher cannot stall
+   * indefinitely.
+   */
+  DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE:
+    'DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE',
+  /**
+   * The escape hatch attempted to write `unmatched` records but the bulkIndexDocs
+   * call failed. The watermark is held so episodes will be retried next tick.
+   */
+  DISPATCHER_ESCAPE_HATCH_WRITE_FAILED: 'DISPATCHER_ESCAPE_HATCH_WRITE_FAILED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**

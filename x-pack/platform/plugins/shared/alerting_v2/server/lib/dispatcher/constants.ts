@@ -33,17 +33,32 @@ export const SETTLE_BUFFER_SECONDS = 5;
  */
 export const STUCK_TICK_LIMIT = 10;
 
+/**
+ * When the pre-fetch escape hatch fires (stuck, no episodes known) and watermark
+ * lag already exceeds one max scan window, force-advance to `windowEnd` instead
+ * of retrying forever. Unread episodes in that window are skipped.
+ */
+export const PRE_FETCH_STUCK_ADVANCE_LAG_MS = MAX_WINDOW_MINUTES * 60_000;
+
 /** Task Manager timeout for one dispatcher tick. Also consumed by task_definition.ts. */
 export const DISPATCHER_TASK_TIMEOUT = '1m' as const;
 
 /**
- * Self-imposed stop at ~70 % of DISPATCHER_TASK_TIMEOUT (60 000 ms). The margin
- * is load-bearing: past the TM timeout `isExpired` is already true and the
+ * Millisecond equivalent of DISPATCHER_TASK_TIMEOUT. Keep in sync with the
+ * string above; both must be updated together when changing the task timeout.
+ * Used to derive TICK_DEADLINE_MS so the relationship is enforced in code
+ * rather than just a comment.
+ */
+export const DISPATCHER_TASK_TIMEOUT_MS = 60_000;
+
+/**
+ * Self-imposed stop at 70 % of DISPATCHER_TASK_TIMEOUT_MS. The margin is
+ * load-bearing: past the TM timeout `isExpired` is already true and the
  * returned state is discarded (task_manager task_runner.ts:764), so the
  * watermark would freeze. A safe margin must account for the time the current
  * step takes to yield after the signal fires.
  */
-export const TICK_DEADLINE_MS = 42_000;
+export const TICK_DEADLINE_MS = Math.round(DISPATCHER_TASK_TIMEOUT_MS * 0.7);
 
 /**
  * Task manager task type and singleton task id used to schedule dispatcher
