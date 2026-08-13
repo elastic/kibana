@@ -10,17 +10,15 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
-import type { MemoryStorage } from '../storage/memory_storage';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { GetMemoryStorage } from '../types';
 
 const recallSchema = z.object({
-  query: z
-    .string()
-    .max(2000)
-    .describe('The query text used to retrieve relevant memories.'),
+  query: z.string().max(2000).describe('The query text used to retrieve relevant memories.'),
   category: z
     .enum(['profile', 'preferences', 'entities', 'events', 'trajectories'])
     .optional()
@@ -46,7 +44,8 @@ const recallSchema = z.object({
 /**
  * Creates the `platform.memory.recall` registered tool.
  *
- * Uses `asInternalUser` for storage access; data isolation is enforced via
+ * Uses `asCurrentUser` for storage access — `agent-memory` is a user data
+ * index, so `kibana_system` is unauthorized. Data isolation is enforced via
  * mandatory `space_id + author` filters in `buildRetriever` (G3). Gated by
  * `read_agent_memory` checked via `checkPrivilegesWithRequest` before any ES
  * call. Recall **fails open**: ES errors return empty results rather than
@@ -55,9 +54,11 @@ const recallSchema = z.object({
 export const createRecallTool = ({
   getStorage,
   getSecurityStart,
+  getCoreSecurity,
 }: {
-  getStorage: () => MemoryStorage;
+  getStorage: GetMemoryStorage;
   getSecurityStart: () => SecurityPluginStart;
+  getCoreSecurity: () => SecurityServiceStart;
 }): BuiltinToolDefinition<typeof recallSchema> => ({
   id: platformMemoryTools.recall,
   type: ToolType.builtin,
@@ -105,7 +106,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
     }
 
     // ── Identity resolution ───────────────────────────────────────────────────
-    const identity = resolveIdentity({ request: context.request, security });
+    const identity = resolveIdentity({ request: context.request, security: getCoreSecurity() });
 
     if (!identity) {
       // No identity — fail open with an informational message.
@@ -120,7 +121,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
     }
 
     const result = await recallMemory({
-      storage: getStorage(),
+      storage: getStorage(context.esClient.asCurrentUser),
       params: {
         query,
         category,

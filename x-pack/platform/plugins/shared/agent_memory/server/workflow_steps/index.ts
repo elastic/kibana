@@ -8,14 +8,17 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { DataStreamClient } from '@kbn/data-streams';
-import type { MemoryStorage } from '../storage/memory_storage';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { agentMemoryHistoryMappings } from '../storage/history_stream';
 import { recallMemory } from '../core/recall_memory';
 import { resolveIdentity } from '../core/resolve_identity';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
+import type { GetMemoryStorage } from '../types';
 
 /**
  * Workflow step type IDs for agent memory operations.
@@ -89,9 +92,7 @@ const RetainInputSchema = z.object({
 const RetainOutputSchema = z.object({
   id: z.string().describe('The agent-memory document id.'),
   revision: z.number().int().describe('The revision number after this operation.'),
-  action: z
-    .enum(['created', 'updated'])
-    .describe('Whether this was a new memory or supersession.'),
+  action: z.enum(['created', 'updated']).describe('Whether this was a new memory or supersession.'),
 });
 
 /**
@@ -103,9 +104,11 @@ const RetainOutputSchema = z.object({
  */
 export const registerMemoryWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  getStorage: () => MemoryStorage,
+  getStorage: GetMemoryStorage,
   getHistoryClient: () => DataStreamClient<typeof agentMemoryHistoryMappings>,
-  getSecurityStart: () => SecurityPluginStart
+  getSecurityStart: () => SecurityPluginStart,
+  getCoreSecurity: () => SecurityServiceStart,
+  getCurrentUserEsClient: (request: KibanaRequest) => ElasticsearchClient
 ): void => {
   // ── memory.recall ──────────────────────────────────────────────────────────
   workflowsExtensions.registerStepDefinition(
@@ -133,13 +136,13 @@ export const registerMemoryWorkflowSteps = (
           return { output: { memories: [] } };
         }
 
-        const identity = resolveIdentity({ request, security });
+        const identity = resolveIdentity({ request, security: getCoreSecurity() });
         if (!identity) {
           return { output: { memories: [] } };
         }
 
         const result = await recallMemory({
-          storage: getStorage(),
+          storage: getStorage(getCurrentUserEsClient(request)),
           params: { query, category, limit, space_id: spaceId, identity },
         });
 
@@ -149,52 +152,50 @@ export const registerMemoryWorkflowSteps = (
   );
 
   // ── memory.retain ──────────────────────────────────────────────────────────
-  workflowsExtensions.registerStepDefinition(
-    async () => {
-      const { writeMemory } = await import('../core/write_memory');
+  workflowsExtensions.registerStepDefinition(async () => {
+    const { writeMemory } = await import('../core/write_memory');
 
-      return createServerStepDefinition({
-        id: MEMORY_RETAIN_STEP_ID,
-        category: StepCategory.Ai,
-        label: 'Retain memory',
-        description:
-          'Stores a new memory or supersedes an existing one with identical content ' +
-          '(find-or-create on content hash). Writes as the executing user.',
-        inputSchema: RetainInputSchema,
-        outputSchema: RetainOutputSchema,
-        handler: async (context) => {
-          const { title, description, category, type, tags } = context.input;
-          const security = getSecurityStart();
-          const request = context.contextManager.getFakeRequest();
-          const spaceId = context.contextManager.getContext().workflow.spaceId;
+    return createServerStepDefinition({
+      id: MEMORY_RETAIN_STEP_ID,
+      category: StepCategory.Ai,
+      label: 'Retain memory',
+      description:
+        'Stores a new memory or supersedes an existing one with identical content ' +
+        '(find-or-create on content hash). Writes as the executing user.',
+      inputSchema: RetainInputSchema,
+      outputSchema: RetainOutputSchema,
+      handler: async (context) => {
+        const { title, description, category, type, tags } = context.input;
+        const security = getSecurityStart();
+        const request = context.contextManager.getFakeRequest();
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
 
-          // ── Authz gate ────────────────────────────────────────────────────
-          const { hasAllRequested } = await security.authz
-            .checkPrivilegesWithRequest(request)
-            .atSpace(spaceId, {
-              kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.write)],
-            });
-
-          if (!hasAllRequested) {
-            throw new Error(
-              'Forbidden: the executing user does not have the write_agent_memory privilege.'
-            );
-          }
-
-          const identity = resolveIdentity({ request, security });
-          if (!identity) {
-            throw new Error('Cannot retain memory: no user identity available for scoping.');
-          }
-
-          const result = await writeMemory({
-            storage: getStorage(),
-            historyClient: getHistoryClient(),
-            params: { title, description, category, type, tags, space_id: spaceId, identity },
+        // ── Authz gate ────────────────────────────────────────────────────
+        const { hasAllRequested } = await security.authz
+          .checkPrivilegesWithRequest(request)
+          .atSpace(spaceId, {
+            kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.write)],
           });
 
-          return { output: { id: result.id, revision: result.revision, action: result.action } };
-        },
-      });
-    }
-  );
+        if (!hasAllRequested) {
+          throw new Error(
+            'Forbidden: the executing user does not have the write_agent_memory privilege.'
+          );
+        }
+
+        const identity = resolveIdentity({ request, security: getCoreSecurity() });
+        if (!identity) {
+          throw new Error('Cannot retain memory: no user identity available for scoping.');
+        }
+
+        const result = await writeMemory({
+          storage: getStorage(getCurrentUserEsClient(request)),
+          historyClient: getHistoryClient(),
+          params: { title, description, category, type, tags, space_id: spaceId, identity },
+        });
+
+        return { output: { id: result.id, revision: result.revision, action: result.action } };
+      },
+    });
+  });
 };

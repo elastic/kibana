@@ -26,8 +26,9 @@ export const registerSetupRoute = ({ router, getMemoryStorage }: AgentMemoryRout
       },
       validate: false,
     },
-    async (_context, _request, response) => {
-      const storage = getMemoryStorage();
+    async (context, _request, response) => {
+      const core = await context.core;
+      const storage = getMemoryStorage(core.elasticsearch.client.asCurrentUser);
       await storage.getClient().reconcileMappings();
       return response.ok({
         body: { status: 'ready' },

@@ -11,12 +11,13 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { DataStreamClient } from '@kbn/data-streams';
-import type { MemoryStorage } from '../storage/memory_storage';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { agentMemoryHistoryMappings } from '../storage/history_stream';
 import { resolveIdentity } from '../core/resolve_identity';
 import { writeMemory } from '../core/write_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { GetMemoryStorage } from '../types';
 
 const rememberSchema = z.object({
   title: z
@@ -41,11 +42,7 @@ const rememberSchema = z.object({
     .describe(
       'Memory type: episodic (specific event), semantic (general fact), procedural (how-to).'
     ),
-  tags: z
-    .array(z.string().max(100))
-    .max(20)
-    .optional()
-    .describe('Optional classification tags.'),
+  tags: z.array(z.string().max(100)).max(20).optional().describe('Optional classification tags.'),
   entities: z
     .array(z.string().max(256))
     .max(50)
@@ -61,7 +58,8 @@ const rememberSchema = z.object({
 /**
  * Creates the `platform.memory.remember` registered tool.
  *
- * Writes via `asInternalUser`; gated by the `write_agent_memory` Kibana
+ * Writes via `asCurrentUser` — `agent-memory` is a user data index, so
+ * `kibana_system` is unauthorized. Gated by the `write_agent_memory` Kibana
  * privilege checked via `checkPrivilegesWithRequest` before any ES call.
  * If the privilege check fails or the identity is missing, returns a typed
  * error without throwing (SIGN-OFF #2, verification item 6).
@@ -70,10 +68,12 @@ export const createRememberTool = ({
   getStorage,
   getHistoryClient,
   getSecurityStart,
+  getCoreSecurity,
 }: {
-  getStorage: () => MemoryStorage;
+  getStorage: GetMemoryStorage;
   getHistoryClient: () => DataStreamClient<typeof agentMemoryHistoryMappings>;
   getSecurityStart: () => SecurityPluginStart;
+  getCoreSecurity: () => SecurityServiceStart;
 }): BuiltinToolDefinition<typeof rememberSchema> => ({
   id: platformMemoryTools.remember,
   type: ToolType.builtin,
@@ -99,10 +99,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
     idempotentHint: false,
     openWorldHint: false,
   },
-  handler: async (
-    { title, description, category, type, tags, entities, expires_at },
-    context
-  ) => {
+  handler: async ({ title, description, category, type, tags, entities, expires_at }, context) => {
     // ── Authz gate: must have write_agent_memory before any ES call ──────────
     const security = getSecurityStart();
     const { hasAllRequested } = await security.authz
@@ -126,7 +123,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
     }
 
     // ── Identity resolution ───────────────────────────────────────────────────
-    const identity = resolveIdentity({ request: context.request, security });
+    const identity = resolveIdentity({ request: context.request, security: getCoreSecurity() });
     if (!identity) {
       return {
         results: [
@@ -142,7 +139,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
 
     // ── Write ─────────────────────────────────────────────────────────────────
     const result = await writeMemory({
-      storage: getStorage(),
+      storage: getStorage(context.esClient.asCurrentUser),
       historyClient: getHistoryClient(),
       params: {
         title,

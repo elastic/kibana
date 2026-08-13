@@ -25,10 +25,14 @@ export interface ResolvedIdentity {
 /**
  * Minimal auth interface accepted by `resolveIdentity`.
  *
- * Using a structural (duck-typed) interface here means the function accepts
- * both `SecurityServiceStart.authc` (core) and `SecurityPluginStart.authc`
- * (plugin) without importing from either package — only `getCurrentUser` is
- * required.
+ * Callers must supply **core's** security service (`CoreStart['security']`),
+ * not `SecurityPluginStart`. Only core's `getCurrentUser` consults the fake
+ * request enrichment map, which is what makes identity resolvable when the
+ * agent builder runs a conversation on Task Manager. The plugin contract reads
+ * auth state off the HTTP request and returns `null` for every fake request.
+ *
+ * The interface is structural so this module does not depend on core-security
+ * types; only `getCurrentUser` is required.
  */
 export interface MinimalAuthService {
   authc: {
