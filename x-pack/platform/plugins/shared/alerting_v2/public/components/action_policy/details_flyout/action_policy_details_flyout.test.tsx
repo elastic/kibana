@@ -156,15 +156,42 @@ describe('ActionPolicyDetailsFlyout', () => {
       expect(screen.getByText('Disabled')).toBeInTheDocument();
     });
 
-    it('renders a snoozed-until chip when the policy is actively snoozed', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+    it('renders a snoozed-until chip for readers when the policy is actively snoozed', () => {
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozedUntil: futureIso() }) });
 
       expect(screen.getByText(/Snoozed until/i)).toBeInTheDocument();
     });
 
     it('does not render a snoozed-until chip when snoozedUntil is null or in the past', () => {
-      renderFlyout({ policy: createPolicy({ snoozedUntil: null }) });
+      renderFlyout({ canWrite: false, policy: createPolicy({ snoozedUntil: null }) });
       expect(screen.queryByText(/Snoozed until/i)).not.toBeInTheDocument();
+    });
+
+    it('replaces the chip with the interactive unsnooze button for writers', () => {
+      renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+
+      expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toBeInTheDocument();
+      expect(screen.queryByText(/^Snoozed until/i)).not.toBeInTheDocument();
+    });
+
+    it('renders the snooze bell for writers on an enabled policy', () => {
+      renderFlyout();
+
+      expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
+    });
+
+    it('does not render the snooze bell for readers', () => {
+      renderFlyout({ canWrite: false });
+
+      expect(screen.queryByTestId('actionPolicySnoozeButton')).not.toBeInTheDocument();
+    });
+
+    it('unsnoozes from the header when the policy is snoozed', async () => {
+      const { handlers } = renderFlyout({ policy: createPolicy({ snoozedUntil: futureIso() }) });
+
+      await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
+
+      expect(handlers.onCancelSnooze).toHaveBeenCalledWith('policy-1');
     });
   });
 

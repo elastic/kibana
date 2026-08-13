@@ -160,16 +160,14 @@ describe('SnoozeDurationPicker', () => {
         { wrapper }
       );
 
-      expect(
-        screen.getByText('Cannot snooze an alert for a past date or time.')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Cannot snooze using a past date and time.')).toBeInTheDocument();
     });
 
     it('does not show the datetime error message when isDateTimeInvalid is false', () => {
       render(<SnoozeDurationPicker value={datetimeValue} onChange={onChangeMock} />, { wrapper });
 
       expect(
-        screen.queryByText('Cannot snooze an alert for a past date or time.')
+        screen.queryByText('Cannot snooze using a past date and time.')
       ).not.toBeInTheDocument();
     });
   });

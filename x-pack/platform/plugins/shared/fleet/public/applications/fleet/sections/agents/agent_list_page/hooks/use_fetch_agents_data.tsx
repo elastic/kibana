@@ -36,6 +36,7 @@ import {
 import { getKuery } from '../utils/get_kuery';
 
 import { removeVersionSuffixFromPolicyId } from '../../../../../../../common/services/version_specific_policies_utils';
+import { isScheduledAction } from '../utils/is_scheduled_action';
 
 import { useSessionAgentListState, defaultAgentListState } from './use_session_agent_list_state';
 
@@ -237,30 +238,48 @@ export function useFetchAgentsData() {
   const [allTags, setAllTags] = useState<string[]>();
   const [latestAgentActionErrors, setLatestAgentActionErrors] = useState<string[]>([]);
 
-  const { data: actionErrors } = useQuery({
+  const { data: errorActionIds } = useQuery({
     refetchInterval: REFRESH_INTERVAL_MS,
     queryKey: ['get-action-statuses'],
     initialData: [] as string[],
     queryFn: async () => {
-      const actionStatusResponse = await sendGetActionStatus({
-        latest: REFRESH_INTERVAL_MS + 5000, // avoid losing errors
+      const response = await sendGetActionStatus({
         perPage: MAX_AGENT_ACTIONS,
+        latest: REFRESH_INTERVAL_MS + 5000,
       });
+      return (response.data?.items ?? [])
+        .filter((action) => (action.latestErrors?.length ?? 0) > 0)
+        .map((action) => action.actionId);
+    },
+  });
 
-      return (
-        actionStatusResponse.data?.items
-          .filter((action) => action.latestErrors?.length ?? 0 > 1)
-          .map((action) => action.actionId) || []
+  const { data: scheduledActionsData } = useQuery({
+    refetchInterval: REFRESH_INTERVAL_MS,
+    queryKey: ['get-scheduled-action-statuses'],
+    initialData: { count: 0, isCapped: false },
+    queryFn: async () => {
+      const response = await sendGetActionStatus({
+        perPage: MAX_AGENT_ACTIONS,
+        scheduledOnly: true,
+      });
+      const items = response.data?.items ?? [];
+      const matching = items.filter(
+        (action) => action.type === 'UNENROLL' && isScheduledAction(action)
       );
+      return {
+        count: matching.reduce((sum, action) => sum + (action.nbAgentsActioned ?? 0), 0),
+        // True when matching actions filled the page: there may be more UNENROLL actions beyond it.
+        isCapped: matching.length >= MAX_AGENT_ACTIONS,
+      };
     },
   });
 
   useEffect(() => {
-    const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...actionErrors])];
+    const allRecentActionErrors = [...new Set([...latestAgentActionErrors, ...errorActionIds])];
     if (!isEqual(latestAgentActionErrors, allRecentActionErrors)) {
       setLatestAgentActionErrors(allRecentActionErrors);
     }
-  }, [latestAgentActionErrors, actionErrors]);
+  }, [latestAgentActionErrors, errorActionIds]);
 
   // Use session storage state for pagination and sort
   const queryKeyPagination = JSON.stringify({
@@ -470,6 +489,8 @@ export function useFetchAgentsData() {
     queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
+    scheduledActionsCount: scheduledActionsData.count,
+    scheduledActionsCapped: scheduledActionsData.isCapped,
     isUsingFilter,
     clearFilters: sessionState.clearFilters,
     onTableChange: sessionState.onTableChange,

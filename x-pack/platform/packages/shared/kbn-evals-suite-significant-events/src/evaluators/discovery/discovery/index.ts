@@ -15,7 +15,11 @@ import {
   createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
-import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
+import {
+  createEvidenceDescriptionEvaluator,
+  createNarrativeFieldsEvaluator,
+  createSignalEvidenceConsistencyEvaluator,
+} from '../common/evidence_quality';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
@@ -24,6 +28,11 @@ import {
   continuationStabilityEvaluator,
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
+import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
+import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
+import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
+import { severityExactEvaluator } from './severity/severity_exact';
+import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
  * Factory that creates the full set of evaluators for the discovery agent eval suite.
@@ -36,6 +45,9 @@ export const createDiscoveryEvaluators = (
     evidenceCollectionEvaluator,
     createDiscoveryToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
+    confirmedEvidencesEvaluator,
+    confirmationAlignmentEvaluator,
+    severityExactEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -48,8 +60,11 @@ export const createDiscoveryEvaluators = (
 
   return [
     ...base,
+    createStatusCorrectnessEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
+    createNarrativeFieldsEvaluator({ criteriaFn }),
+    createSignalEvidenceConsistencyEvaluator({ criteriaFn }),
     createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
@@ -64,5 +79,6 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
   selectEvaluators([
     continuationStabilityEvaluator,
     continuationRoutingEvaluator,
+    continuationSeverityStabilityEvaluator,
     continuationTrajectoryEvaluator,
   ]);

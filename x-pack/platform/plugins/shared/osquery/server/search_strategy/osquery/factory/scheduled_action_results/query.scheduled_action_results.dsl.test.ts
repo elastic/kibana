@@ -142,6 +142,23 @@ describe('buildScheduledActionResultsQuery', () => {
     expect(mustFilters).toContainEqual(defaultSpaceClause);
   });
 
+  it('uses a strict default-space term in aggregations when matchMissingSpaceId is false', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      spaceId: 'default',
+      matchMissingSpaceId: false,
+    });
+
+    const aggs = result.aggs as Record<string, Record<string, unknown>>;
+    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
+    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
+    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
+    const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
+
+    expect(mustFilters).toContainEqual({ term: { space_id: 'default' } });
+    expect(JSON.stringify(mustFilters)).not.toContain('exists');
+  });
+
   it('does not scope the top-level query (centralized in the search strategy)', () => {
     const result = buildScheduledActionResultsQuery(defaultOptions);
     const filterQuery = result.query as Record<string, Record<string, TermFilter[]>>;

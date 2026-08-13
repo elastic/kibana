@@ -10,6 +10,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
@@ -157,9 +158,21 @@ describe('WorkflowDetailHeader', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: {
+            management: {
+              insightsAndAlerting: {
+                triggersActionsConnectors: true,
+              },
+            },
+          },
           navigateToApp: mockNavigateToApp,
           getUrlForApp: jest.fn(
-            (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+            (appId: string, options?: { deepLinkId?: string; path?: string }) => {
+              const deepLinkPath = options?.deepLinkId
+                ? `/insightsAndAlerting/${options.deepLinkId}`
+                : '';
+              return `/app/${appId}${deepLinkPath}${options?.path ?? ''}`;
+            }
           ),
           applications$: of(
             new Map([['context_engine', { id: 'context_engine', title: 'Context Engine' }]])
@@ -197,6 +210,7 @@ describe('WorkflowDetailHeader', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
+          capabilities: {},
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
           applications$: of(new Map()),
@@ -223,6 +237,18 @@ describe('WorkflowDetailHeader', () => {
   it('should render', () => {
     const { getAllByText } = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
     expect(getAllByText('Test Workflow').length).toBeGreaterThan(0);
+  });
+
+  it('links to connector management from the overflow menu', async () => {
+    const result = renderWithProviders(<WorkflowDetailHeader {...defaultProps} />);
+
+    await openAppMenuOverflow();
+
+    expect(await result.findByTestId('workflowAddConnectorsLink')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+    );
+    expect(result.queryByText('Add integrations')).not.toBeInTheDocument();
   });
 
   it('navigates back to the workflows list with the stored list search params', () => {
@@ -585,7 +611,7 @@ describe('WorkflowDetailHeader', () => {
     });
   });
 
-  it('exposes the change history entry point on the workflow tab when a workflow id is present', () => {
+  it('exposes the change history entry point on the workflow tab when a workflow id is present', async () => {
     const changeHistoryModal = {
       isOpen: false,
       openModal: jest.fn(),
@@ -598,7 +624,7 @@ describe('WorkflowDetailHeader', () => {
     );
 
     // History lives in the overflow ("More") menu, so open it before locating the entry point.
-    fireEvent.click(getByTestId('app-menu-overflow-button'));
+    await openAppMenuOverflow();
 
     const historyItem = getByTestId('workflowDetailHistoryButton');
     expect(historyItem).toBeInTheDocument();

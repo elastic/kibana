@@ -57,6 +57,7 @@ export function getDeepLinks({
         defaultMessage: 'Executions',
       }),
       path: '/executions',
+      visibleIn: sideNavVisibleIn,
     });
   }
 

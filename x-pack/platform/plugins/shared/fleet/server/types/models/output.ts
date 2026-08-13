@@ -241,6 +241,18 @@ const LogstashUpdateSchema = {
 
 export const KafkaSchema = {
   ...BaseSchema,
+  // Kafka does not support proxies. proxy_id is accepted to avoid breaking existing preconfigured
+  // outputs but is silently cleared to null on save and never written into the compiled agent
+  // policy (#267281). Marked deprecated so API consumers are not misled.
+  proxy_id: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string()], {
+      meta: {
+        deprecated: true,
+        description:
+          'Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.',
+      },
+    })
+  ),
   type: schema.literal(outputType.Kafka),
   hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
     minSize: 1,
