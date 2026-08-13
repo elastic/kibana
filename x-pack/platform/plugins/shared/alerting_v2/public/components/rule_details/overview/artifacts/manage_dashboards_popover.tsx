@@ -296,8 +296,7 @@ export const ManageDashboardsPopover = ({
         data: { dashboardId },
       };
     });
-    const mappedDashboards = mapArtifacts(draftDashboardArtifacts) ?? [];
-    onSave([...otherArtifacts, ...mappedDashboards]);
+    onSave(mapArtifacts([...otherArtifacts, ...draftDashboardArtifacts]) ?? []);
   }, [existingDashboardArtifacts, onSave, otherArtifacts, selectedIds]);
 
   return (
@@ -306,7 +305,7 @@ export const ManageDashboardsPopover = ({
       isOpen={isOpen}
       closePopover={onClose}
       panelPaddingSize="none"
-      anchorPosition="downCenter"
+      anchorPosition="upCenter"
       ownFocus
       initialFocus="[data-test-subj='ruleDashboardArtifactsSearch']"
       aria-labelledby={popoverTitleId}

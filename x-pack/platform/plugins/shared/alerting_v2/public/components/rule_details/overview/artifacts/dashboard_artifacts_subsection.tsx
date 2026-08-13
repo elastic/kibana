@@ -31,6 +31,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MissingDashboard, RuleArtifactPayload } from '@kbn/alerting-v2-rule-form';
+import { mapArtifacts } from '@kbn/alerting-v2-rule-form';
 import { useUpdateRule } from '../../../../hooks/use_update_rule';
 import { UserCapabilities } from '../../../../services/user_capabilities';
 import { useRule } from '../../rule_context';
@@ -275,9 +276,10 @@ export const DashboardArtifactsSubsection: React.FC = () => {
       {
         id: rule.id,
         payload: {
-          artifacts: (rule.artifacts ?? []).filter(
-            (artifact) => artifact.id !== artifactIdPendingDelete
-          ),
+          artifacts:
+            mapArtifacts(
+              (rule.artifacts ?? []).filter((artifact) => artifact.id !== artifactIdPendingDelete)
+            ) ?? [],
         },
       },
       {
