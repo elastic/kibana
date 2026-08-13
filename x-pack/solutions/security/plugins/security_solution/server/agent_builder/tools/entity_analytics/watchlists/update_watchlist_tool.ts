@@ -72,7 +72,7 @@ Do NOT use this tool to add or remove entities — that is a separate action.`,
       title: 'Update Watchlist',
       readOnlyHint: false,
       destructiveHint: false,
-      idempotentHint: false,
+      idempotentHint: true,
       openWorldHint: false,
     },
     availability: {

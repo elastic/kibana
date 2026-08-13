@@ -59,7 +59,7 @@ const createAlertTriageTool = (): BuiltinSkillBoundedTool<typeof prioritizeAlert
     'score breakdowns. Use this as the first step for any alert queue prioritization request.',
   schema: prioritizeAlertsSchema,
   annotations: {
-    title: 'Alert Triage',
+    title: 'Triage Alerts Queue',
     readOnlyHint: true,
     destructiveHint: false,
     idempotentHint: true,

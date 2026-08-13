@@ -101,7 +101,7 @@ export const setAssetCriticalityTool = (
       title: 'Set Asset Criticality',
       readOnlyHint: false,
       destructiveHint: false,
-      idempotentHint: false,
+      idempotentHint: true,
       openWorldHint: false,
     },
     availability: {

@@ -264,7 +264,7 @@ export const pciComplianceTool = (
     },
     tags: ['security', 'compliance', 'pci', 'audit'],
     annotations: {
-      title: 'PCI Compliance Check',
+      title: 'Run PCI Compliance Checks',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
