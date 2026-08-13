@@ -104,4 +104,31 @@ spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, 
       await expect(page).toHaveURL(/discover/);
     }
   );
+
+  spaceTest(
+    'should round-trip selected columns via share URL',
+    async ({ page, pageObjects, scoutSpace }) => {
+      await scoutSpace.uiSettings.set({ 'state:storeInSessionStorage': false });
+      await page.reload();
+      await pageObjects.discover.waitUntilTabIsLoaded();
+
+      await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
+      await pageObjects.discover.waitUntilTabIsLoaded();
+
+      await expect
+        .poll(() => pageObjects.dataGrid.getColumnTitles())
+        .toEqual(['@timestamp', 'bytes']);
+
+      const sharedUrl = await pageObjects.discover.getSharedUrl();
+
+      await page.goto(sharedUrl);
+      await pageObjects.discover.waitUntilTabIsLoaded();
+
+      await expect
+        .poll(() => pageObjects.dataGrid.getColumnTitles())
+        .toEqual(['@timestamp', 'bytes']);
+
+      expect(decodeURIComponent(page.url())).toContain('columns:!(bytes)');
+    }
+  );
 });
