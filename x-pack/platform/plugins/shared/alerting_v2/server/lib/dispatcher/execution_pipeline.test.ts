@@ -7,7 +7,6 @@
 
 import { DispatcherPipeline } from './execution_pipeline';
 import type { DispatcherPipelineState } from './types';
-import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createDispatcherPipelineInput, createMockDispatcherStep } from './fixtures/test_utils';
 
 jest.mock('./with_dispatcher_span', () => ({
@@ -17,7 +16,6 @@ jest.mock('./with_dispatcher_span', () => ({
 describe('DispatcherPipeline', () => {
   describe('execute', () => {
     it('executes all steps in order when all continue', async () => {
-      const { loggerService } = createLoggerService();
       const executionOrder: string[] = [];
 
       const step1 = createMockDispatcherStep('step1', async () => {
@@ -35,7 +33,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline(loggerService, [step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3]);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -46,7 +44,6 @@ describe('DispatcherPipeline', () => {
     });
 
     it('stops execution when a step returns halt', async () => {
-      const { loggerService } = createLoggerService();
       const executionOrder: string[] = [];
 
       const step1 = createMockDispatcherStep('step1', async () => {
@@ -64,7 +61,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline(loggerService, [step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3]);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input);
@@ -76,7 +73,6 @@ describe('DispatcherPipeline', () => {
     });
 
     it('accumulates state across steps correctly', async () => {
-      const { loggerService } = createLoggerService();
       const statesReceived: DispatcherPipelineState[] = [];
 
       const step1 = createMockDispatcherStep('step1', async (state) => {
@@ -94,12 +90,12 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline(loggerService, [step1, step2, step3]);
+      const pipeline = new DispatcherPipeline([step1, step2, step3]);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input);
 
-      expect(statesReceived[0]).toEqual({ input });
+      expect(statesReceived[0]).toEqual({ input, logger: input.logger });
       expect(statesReceived[0].episodes).toBeUndefined();
 
       expect(statesReceived[1].input).toEqual(input);
@@ -115,8 +111,6 @@ describe('DispatcherPipeline', () => {
     });
 
     it('propagates errors from steps', async () => {
-      const { loggerService } = createLoggerService();
-
       const step1 = createMockDispatcherStep('step1', async () => {
         throw new Error('Step failed');
       });
@@ -125,7 +119,7 @@ describe('DispatcherPipeline', () => {
         return { type: 'continue' };
       });
 
-      const pipeline = new DispatcherPipeline(loggerService, [step1, step2]);
+      const pipeline = new DispatcherPipeline([step1, step2]);
       const input = createDispatcherPipelineInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step failed');
@@ -133,14 +127,13 @@ describe('DispatcherPipeline', () => {
     });
 
     it('returns completed result when no steps', async () => {
-      const { loggerService } = createLoggerService();
-      const pipeline = new DispatcherPipeline(loggerService, []);
+      const pipeline = new DispatcherPipeline([]);
       const input = createDispatcherPipelineInput();
 
       const result = await pipeline.execute(input);
 
       expect(result.completed).toBe(true);
-      expect(result.finalState).toEqual({ input });
+      expect(result.finalState).toEqual({ input, logger: input.logger });
     });
   });
 });

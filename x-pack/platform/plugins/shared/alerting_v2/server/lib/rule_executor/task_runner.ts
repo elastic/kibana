@@ -35,7 +35,7 @@ export class RuleExecutorTaskRunner {
 
     const result = await this.pipeline.execute(input);
 
-    return this.buildRunResult(result, taskInstance);
+    return this.buildRunResult(result, input.logger, taskInstance);
   }
 
   /**
@@ -48,6 +48,11 @@ export class RuleExecutorTaskRunner {
   ): RuleExecutionPipelineInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
     const scheduledAt = taskInstance.scheduledAt;
+    const logger = this.logger.forSubsystem('ruleExecutor').withLabels({
+      rule_id: params.ruleId,
+      space_id: params.spaceId,
+      task_id: taskInstance.id,
+    });
 
     return {
       ruleId: params.ruleId,
@@ -55,6 +60,7 @@ export class RuleExecutorTaskRunner {
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
       abortSignal: signal,
       executionUuid,
+      logger,
     };
   }
 
@@ -75,6 +81,7 @@ export class RuleExecutorTaskRunner {
    */
   private buildRunResult(
     result: RuleExecutionPipelineResult,
+    logger: LoggerServiceContract,
     taskInstance: TaskRunParams['taskInstance']
   ): RunResult {
     if (result.completed) {
@@ -83,7 +90,7 @@ export class RuleExecutorTaskRunner {
 
     if (result.haltReason === 'rule_deleted') {
       const params = taskInstance.params as RuleExecutorTaskParams;
-      this.logger.debug({
+      logger.debug({
         message: `Rule "${params.ruleId}" in the "${params.spaceId}" space no longer exists. Its corresponding task will be removed by Task Manager.`,
       });
       throwUnrecoverableError(new Error('Rule no longer exists'));

@@ -118,20 +118,18 @@ function buildDispatcherService(deps: {
   maintenanceWindowService: MaintenanceWindowServiceContract;
   eventLogService: EventLogServiceContract;
 }): DispatcherService {
-  const { loggerService } = createLoggerService();
-
-  const pipeline = new DispatcherPipeline(loggerService, [
+  const pipeline = new DispatcherPipeline([
     new FetchEpisodesStep(deps.queryService),
     new FetchSuppressionsStep(deps.queryService),
     new ApplySuppressionStep(),
-    new HydrateEpisodeDataStep(deps.queryService, loggerService),
+    new HydrateEpisodeDataStep(deps.queryService, createLoggerService().loggerService),
     new FetchRulesStep(deps.rulesSoService),
     new ApplyMaintenanceWindowStep(deps.maintenanceWindowService),
     new FetchPoliciesStep(deps.npSoService),
-    new EvaluateMatchersStep(loggerService),
+    new EvaluateMatchersStep(),
     new BuildGroupsStep(),
-    new ApplyThrottlingStep(deps.queryService, loggerService),
-    new DispatchStep(loggerService, deps.workflowsManagement),
+    new ApplyThrottlingStep(deps.queryService),
+    new DispatchStep(deps.workflowsManagement),
     new StoreActionsStep(deps.storageService),
     new StoreExecutionHistoryStep(deps.eventLogService),
   ]);
@@ -247,6 +245,7 @@ describe('DispatcherService', () => {
 
       const result = await dispatcherService.run({
         previousStartedAt,
+        logger: createLoggerService().loggerService,
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
@@ -368,6 +367,7 @@ describe('DispatcherService', () => {
 
       const result = await dispatcherService.run({
         previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        logger: createLoggerService().loggerService,
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
@@ -408,6 +408,7 @@ describe('DispatcherService', () => {
 
       const result = await dispatcherService.run({
         previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        logger: createLoggerService().loggerService,
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
@@ -612,6 +613,7 @@ describe('DispatcherService', () => {
 
       const result = await dispatcherService.run({
         previousStartedAt: new Date('2026-01-25T00:00:00.000Z'),
+        logger: createLoggerService().loggerService,
       });
 
       expect(result.startedAt).toBeInstanceOf(Date);
@@ -769,7 +771,10 @@ describe('DispatcherService', () => {
         errors: false,
       } as BulkResponse);
 
-      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+      await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        logger: createLoggerService().loggerService,
+      });
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
       const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
@@ -854,7 +859,10 @@ describe('DispatcherService', () => {
         errors: false,
       } as BulkResponse);
 
-      await dispatcherService.run({ previousStartedAt: new Date('2026-01-22T07:30:00.000Z') });
+      await dispatcherService.run({
+        previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
+        logger: createLoggerService().loggerService,
+      });
 
       const [{ operations }] = storageEsClient.bulk.mock.calls[0];
       const docs = (operations ?? []).filter((_, index) => index % 2 === 1) as AlertAction[];
@@ -881,7 +889,9 @@ describe('DispatcherService', () => {
               startedAt: new Date(),
               previousStartedAt: new Date(),
               executionUuid: 'unused-in-result',
+              logger: createLoggerService().loggerService,
             },
+            logger: createLoggerService().loggerService,
           },
         }),
       };
@@ -891,7 +901,10 @@ describe('DispatcherService', () => {
       const mockPipeline = buildMockPipeline();
       const service = new DispatcherService(mockPipeline);
 
-      await service.run({ previousStartedAt: new Date() });
+      await service.run({
+        previousStartedAt: new Date(),
+        logger: createLoggerService().loggerService,
+      });
 
       expect(mockPipeline.execute).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -906,8 +919,14 @@ describe('DispatcherService', () => {
       const mockPipeline = buildMockPipeline();
       const service = new DispatcherService(mockPipeline);
 
-      await service.run({ previousStartedAt: new Date() });
-      await service.run({ previousStartedAt: new Date() });
+      await service.run({
+        previousStartedAt: new Date(),
+        logger: createLoggerService().loggerService,
+      });
+      await service.run({
+        previousStartedAt: new Date(),
+        logger: createLoggerService().loggerService,
+      });
 
       const [firstCall] = mockPipeline.execute.mock.calls[0];
       const [secondCall] = mockPipeline.execute.mock.calls[1];

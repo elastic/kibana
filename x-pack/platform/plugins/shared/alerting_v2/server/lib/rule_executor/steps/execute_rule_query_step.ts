@@ -14,10 +14,6 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
@@ -33,7 +29,6 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   private readonly maxAlertsPerRun: number;
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
     @inject(PluginInitializer('config'))
@@ -47,6 +42,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
     return guardedExpandStep(streamState, ['rule'], async function* (state) {
       const { input, rule } = state;
+      const logger = state.logger.withLabels({ step: step.name });
 
       const effectiveQuery = getBreachEsqlQuery(rule.query);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
@@ -60,7 +56,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
       const boundedQuery = appendLimitToQuery(effectiveQuery, step.maxAlertsPerRun);
 
-      step.logger.debug({
+      logger.debug({
         message: 'Executing ES|QL query',
         labels: { rule_id: input.ruleId, step: step.name },
       });

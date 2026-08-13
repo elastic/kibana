@@ -55,13 +55,17 @@ describe('RuleExecutorTaskRunner', () => {
 
       await runner.run({ taskInstance, signal, executionUuid });
 
-      expect(pipeline.execute).toHaveBeenCalledWith({
-        ruleId: 'rule-1',
-        spaceId: 'default',
-        scheduledAt: taskInstance.scheduledAt?.toISOString(),
-        abortSignal: signal,
-        executionUuid,
-      });
+      expect(pipeline.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          spaceId: 'default',
+          scheduledAt: taskInstance.scheduledAt?.toISOString(),
+          abortSignal: signal,
+          executionUuid,
+        })
+      );
+      const executeArg = pipeline.execute.mock.calls[0][0];
+      expect(executeArg.logger).toBeDefined();
     });
 
     it('uses startedAt when scheduledAt is a string', async () => {

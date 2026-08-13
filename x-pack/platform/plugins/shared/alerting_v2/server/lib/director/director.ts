@@ -27,6 +27,7 @@ interface RunDirectorParams {
   rule: RuleResponse;
   alertEvents: readonly AlertEvent[];
   executionContext: ExecutionContext;
+  spaceId: string;
 }
 
 interface CalculateNextStateParams {
@@ -34,6 +35,7 @@ interface CalculateNextStateParams {
   currentAlertEvent: AlertEvent;
   previousAlertEvent?: LatestAlertEventState;
   strategy: ITransitionStrategy;
+  logger: LoggerServiceContract;
 }
 
 interface ResolveEpisodeIdParams {
@@ -68,21 +70,29 @@ export class DirectorService {
     rule,
     alertEvents,
     executionContext,
+    spaceId,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
       return { alertEvents: [], stats: { newEpisodeIds: [] } };
     }
 
+    const logger = this.logger.forSubsystem('director').withLabels({
+      rule_id: rule.id,
+      rule_kind: rule.kind,
+      space_id: spaceId,
+    });
+
     const strategy = this.strategyFactory.getStrategy(rule);
     executionContext.throwIfAborted();
-    return this.processAlertEvents(rule, alertEvents, strategy, executionContext);
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext, logger);
   }
 
   private async processAlertEvents(
     rule: RuleResponse,
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
-    executionContext: ExecutionContext
+    executionContext: ExecutionContext,
+    logger: LoggerServiceContract
   ): Promise<DirectorRunResult> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
@@ -104,6 +114,7 @@ export class DirectorService {
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
+          logger,
         });
 
         if (isNewEpisode && alertEvent.episode) {
@@ -142,6 +153,7 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
+    logger,
   }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
     // User lock: once a user hits `activate` on a group, the episode
     // stays `active` regardless of what the strategy computes, until
@@ -179,10 +191,11 @@ export class DirectorService {
     });
 
     if (currentStatus !== result.status) {
-      this.logger.debug({
+      logger.debug({
         message: `State Transition [${currentAlertEvent.group_hash}]: ${
           currentStatus ?? 'unknown'
         } -> ${result.status} (Episode: ${episodeId})`,
+        labels: { group_hash: currentAlertEvent.group_hash, episode_id: episodeId },
       });
     }
 

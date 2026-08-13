@@ -48,14 +48,13 @@ describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
 
   function createStep(maxAlertsPerRun?: number) {
-    const { loggerService, mockLogger: logger } = createLoggerService();
-    mockLogger = logger;
+    ({ loggerService, mockLogger } = createLoggerService());
     const mocks = createQueryService();
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
-      loggerService,
       mocks.queryService,
       createPluginConfigAccessor(maxAlertsPerRun)
     );
@@ -68,7 +67,10 @@ describe('ExecuteRuleQueryStep', () => {
   it('builds query payload and executes query', async () => {
     mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({
+      rule: createRuleResponse(),
+      logger: loggerService,
+    });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(results).toHaveLength(1);
