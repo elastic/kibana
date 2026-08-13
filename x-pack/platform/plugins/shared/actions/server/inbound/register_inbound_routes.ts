@@ -28,7 +28,7 @@ export interface RegisterInboundRoutesParams {
   router: IRouter<ActionsRequestHandlerContext>;
   inboundEventsEnabled: boolean;
   maxBodyBytes: number;
-  maxEmittedEvents: number;
+  maxEmitted: number;
   logger: Logger;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getStartServices: CoreSetup['getStartServices'];
@@ -40,7 +40,7 @@ export function registerInboundRoutes({
   router,
   inboundEventsEnabled,
   maxBodyBytes,
-  maxEmittedEvents,
+  maxEmitted,
   logger,
   emitConnectorEvents,
   getStartServices,
@@ -117,7 +117,7 @@ export function registerInboundRoutes({
           connectorId: request.params.connectorId,
           spaceId,
           inboundEventsEnabled,
-          maxEmittedEvents,
+          maxEmitted,
           emitConnectorEvents,
           logger,
           unsecuredSavedObjectsClient,

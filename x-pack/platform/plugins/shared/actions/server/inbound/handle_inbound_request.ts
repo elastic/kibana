@@ -39,7 +39,7 @@ export interface HandleInboundRequestParams {
   connectorId: string;
   spaceId: string;
   inboundEventsEnabled: boolean;
-  maxEmittedEvents: number;
+  maxEmitted: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   logger: Logger;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -58,7 +58,7 @@ export async function handleInboundRequest({
   connectorId,
   spaceId,
   inboundEventsEnabled,
-  maxEmittedEvents,
+  maxEmitted,
   emitConnectorEvents,
   logger,
   unsecuredSavedObjectsClient,
@@ -151,11 +151,11 @@ export async function handleInboundRequest({
       });
     }
 
-    if (result.events.length > maxEmittedEvents) {
+    if (result.events.length > maxEmitted) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
         outcome: 'handle_fail',
-        detail: `emitted_events=${result.events.length}_max=${maxEmittedEvents}`,
+        detail: `emitted_events=${result.events.length}_max=${maxEmitted}`,
       });
       return response.customError({
         statusCode: 500,

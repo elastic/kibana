@@ -12,10 +12,7 @@ import { z } from '@kbn/zod/v4';
 import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
-import {
-  INBOUND_EVENTS_DISABLED_MESSAGE,
-  INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT,
-} from './constants';
+import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { handleInboundRequest } from './handle_inbound_request';
 import {
@@ -99,7 +96,7 @@ describe('handleInboundRequest', () => {
 
   const run = async (overrides?: {
     enabled?: boolean;
-    maxEmittedEvents?: number;
+    maxEmitted?: number;
     typeId?: string;
     spaceId?: string;
     query?: Record<string, unknown>;
@@ -119,7 +116,7 @@ describe('handleInboundRequest', () => {
       connectorId,
       spaceId: overrides?.spaceId ?? spaceId,
       inboundEventsEnabled: overrides?.enabled ?? true,
-      maxEmittedEvents: overrides?.maxEmittedEvents ?? INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT,
+      maxEmitted: overrides?.maxEmitted ?? INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
       emitConnectorEvents: overrides?.emit ?? emitConnectorEvents,
       logger,
       unsecuredSavedObjectsClient,
@@ -437,14 +434,11 @@ describe('handleInboundRequest', () => {
 
   it('returns 500 when emitted event count exceeds the max', async () => {
     const eventId = buildEventId('.myConnector', 'received');
-    const events = Array.from(
-      { length: INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT + 1 },
-      (_, i) => ({
-        eventId,
-        correlationKey: `corr-${i}`,
-        payload: { body: {} },
-      })
-    );
+    const events = Array.from({ length: INBOUND_EVENTS_MAX_EMITTED_DEFAULT + 1 }, (_, i) => ({
+      eventId,
+      correlationKey: `corr-${i}`,
+      payload: { body: {} },
+    }));
     getConnectorSpecMock.mockReturnValue(
       createFakeSpec(jest.fn().mockResolvedValue({ type: 'emit', events })) as ReturnType<
         typeof getConnectorSpec
@@ -456,7 +450,7 @@ describe('handleInboundRequest', () => {
     expectOutcome('error', 'handle_fail');
   });
 
-  it('respects a configured maxEmittedEvents', async () => {
+  it('respects a configured maxEmitted', async () => {
     const eventId = buildEventId('.myConnector', 'received');
     const events = Array.from({ length: 3 }, (_, i) => ({
       eventId,
@@ -468,7 +462,7 @@ describe('handleInboundRequest', () => {
         typeof getConnectorSpec
       >
     );
-    const { response: res } = await run({ maxEmittedEvents: 2 });
+    const { response: res } = await run({ maxEmitted: 2 });
     expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(emitConnectorEvents).not.toHaveBeenCalled();
   });

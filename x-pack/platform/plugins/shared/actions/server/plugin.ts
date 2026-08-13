@@ -506,7 +506,7 @@ export class ActionsPlugin
       router: core.http.createRouter<ActionsRequestHandlerContext>(),
       inboundEventsEnabled: actionsConfigUtils.isInboundEventsEnabled(),
       maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-      maxEmittedEvents: actionsConfigUtils.getInboundEventsMaxEmittedEvents(),
+      maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
       logger: this.logger,
       getStartServices: core.getStartServices,
       getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',

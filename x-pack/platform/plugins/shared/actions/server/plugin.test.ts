@@ -77,7 +77,7 @@ function getConfig(overrides = {}) {
     inboundEvents: {
       enabled: false,
       maxBodyBytes: new ByteSizeValue(1024 * 1024),
-      maxEmittedEvents: 25,
+      maxEmitted: 25,
     },
     ...overrides,
   };
@@ -140,7 +140,7 @@ describe('Actions Plugin', () => {
         inboundEvents: {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
-          maxEmittedEvents: 25,
+          maxEmitted: 25,
         },
       });
       plugin = new ActionsPlugin(context);
@@ -565,7 +565,7 @@ describe('Actions Plugin', () => {
         inboundEvents: {
           enabled: false,
           maxBodyBytes: new ByteSizeValue(1024 * 1024),
-          maxEmittedEvents: 25,
+          maxEmitted: 25,
         },
       });
       plugin = new ActionsPlugin(context);

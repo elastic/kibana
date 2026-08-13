@@ -19,8 +19,8 @@ import {
 
 import { validateDuration } from './lib/parse_date';
 import {
-  INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT,
-  INBOUND_EVENTS_MAX_EMITTED_EVENTS_MAX,
+  INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+  INBOUND_EVENTS_MAX_EMITTED_LIMIT,
 } from './inbound/constants';
 
 export enum AllowedHosts {
@@ -280,10 +280,10 @@ export const configSchema = schema.object({
   inboundEvents: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
-    maxEmittedEvents: schema.number({
-      defaultValue: INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT,
+    maxEmitted: schema.number({
+      defaultValue: INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
       min: 1,
-      max: INBOUND_EVENTS_MAX_EMITTED_EVENTS_MAX,
+      max: INBOUND_EVENTS_MAX_EMITTED_LIMIT,
     }),
   }),
 });

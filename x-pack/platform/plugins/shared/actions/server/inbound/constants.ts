@@ -27,12 +27,12 @@ export const INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
 export const INBOUND_EVENTS_TOKEN_MAX_LENGTH = 128;
 
 /**
- * Default / schema default for `xpack.actions.inboundEvents.maxEmittedEvents`.
+ * Default / schema default for `xpack.actions.inboundEvents.maxEmitted`.
  */
-export const INBOUND_EVENTS_MAX_EMITTED_EVENTS_DEFAULT = 25;
+export const INBOUND_EVENTS_MAX_EMITTED_DEFAULT = 25;
 
-/** Hard ceiling for `xpack.actions.inboundEvents.maxEmittedEvents`. */
-export const INBOUND_EVENTS_MAX_EMITTED_EVENTS_MAX = 250;
+/** Hard ceiling for `xpack.actions.inboundEvents.maxEmitted`. */
+export const INBOUND_EVENTS_MAX_EMITTED_LIMIT = 250;
 
 export const INBOUND_EVENTS_SECURITY = {
   authc: {

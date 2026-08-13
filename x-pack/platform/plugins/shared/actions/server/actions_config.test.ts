@@ -54,7 +54,7 @@ const defaultActionsConfig: ActionsConfig = {
   inboundEvents: {
     enabled: false,
     maxBodyBytes: new ByteSizeValue(1024 * 1024),
-    maxEmittedEvents: 25,
+    maxEmitted: 25,
   },
 };
 
@@ -1038,28 +1038,28 @@ describe('getInboundEventsMaxBodyBytes()', () => {
       inboundEvents: {
         enabled: false,
         maxBodyBytes: new ByteSizeValue(512 * 1024),
-        maxEmittedEvents: 25,
+        maxEmitted: 25,
       },
     });
     expect(acu.getInboundEventsMaxBodyBytes()).toBe(512 * 1024);
   });
 });
 
-describe('getInboundEventsMaxEmittedEvents()', () => {
+describe('getInboundEventsMaxEmitted()', () => {
   test('returns 25 by default', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
-    expect(acu.getInboundEventsMaxEmittedEvents()).toBe(25);
+    expect(acu.getInboundEventsMaxEmitted()).toBe(25);
   });
 
-  test('returns configured maxEmittedEvents', () => {
+  test('returns configured maxEmitted', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
       inboundEvents: {
         ...defaultActionsConfig.inboundEvents,
-        maxEmittedEvents: 100,
+        maxEmitted: 100,
       },
     });
-    expect(acu.getInboundEventsMaxEmittedEvents()).toBe(100);
+    expect(acu.getInboundEventsMaxEmitted()).toBe(100);
   });
 });
 
