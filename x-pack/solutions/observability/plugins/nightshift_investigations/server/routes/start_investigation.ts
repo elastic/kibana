@@ -33,7 +33,10 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         id: z.string().min(1),
       }),
       concurrency_key: z.string().optional(),
-      context: z.record(z.unknown()).optional(),
+      context: z
+        .record(z.string().max(128), z.unknown())
+        .refine((v) => Object.keys(v).length <= 50, { message: 'context exceeds 50 key limit' })
+        .optional(),
     }),
   }),
   handler: async ({ request, params, getClient }) => {
