@@ -480,7 +480,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     expect(left.message).toContain('Shard allocation explain: explain unavailable: socket hang up');
   });
 
-  it('falls back to the primary explanation when the replica explain returns 400', async () => {
+  it('omits allocation explain when the replica explain returns 400', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.resolve({
         items: [
@@ -501,7 +501,6 @@ describe('bulkOverwriteTransformedDocuments', () => {
       shard: 0,
       primary: true,
       current_state: 'started',
-      allocate_explanation: 'a started primary with no replica shard to explain',
     } as estypes.ClusterAllocationExplainResponse);
     client.cluster.allocationExplain.mockRejectedValueOnce(
       new EsErrors.ResponseError(
@@ -531,8 +530,9 @@ describe('bulkOverwriteTransformedDocuments', () => {
     expect(Either.isLeft(result)).toBe(true);
     const left = (result as Either.Left<any>).left;
     expect(left.type).toEqual('unavailable_shards_exception');
-    expect(left.message).toContain('a started primary with no replica shard to explain');
-    expect(left.message).not.toContain('explain unavailable');
+    expect(left.message).toEqual(
+      '[new_index] Not enough active copies to meet shard count of [ALL]'
+    );
   });
 
   it('resolves with `left:unavailable_shards_exception` when mixed with version_conflict_engine_exception', async () => {

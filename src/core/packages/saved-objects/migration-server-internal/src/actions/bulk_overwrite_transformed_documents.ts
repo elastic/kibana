@@ -8,6 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import type * as TaskEither from 'fp-ts/TaskEither';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -127,22 +128,26 @@ export const bulkOverwriteTransformedDocuments =
     }
 
     if (errors.every(isUnavailableShardsException)) {
-      let allocationReason = '';
+      let allocationReason: Option.Option<string> = Option.none;
       if (fetchAllocationExplain) {
         try {
-          const explain = await explainShardAllocation(client, index);
-          allocationReason = formatAllocationExplanation(explain);
+          allocationReason = await explainShardAllocation(client, index);
         } catch (explainError) {
-          allocationReason = `explain unavailable: ${
-            explainError instanceof Error ? explainError.message : String(explainError)
-          }`;
+          allocationReason = Option.some(
+            `explain unavailable: ${
+              explainError instanceof Error ? explainError.message : String(explainError)
+            }`
+          );
         }
       }
+
+      const message = Option.isSome(allocationReason)
+        ? `[${index}] Not enough active copies to meet shard count of [ALL]. Shard allocation explain: ${allocationReason.value}`
+        : `[${index}] Not enough active copies to meet shard count of [ALL]`;
+
       return Either.left({
         type: 'unavailable_shards_exception' as const,
-        message: allocationReason
-          ? `[${index}] Not enough active copies to meet shard count of [ALL]. Shard allocation explain: ${allocationReason}`
-          : `[${index}] Not enough active copies to meet shard count of [ALL]`,
+        message,
       });
     }
 
@@ -152,26 +157,31 @@ export const bulkOverwriteTransformedDocuments =
 const explainShardAllocation = async (
   client: ElasticsearchClient,
   index: string
-): Promise<estypes.ClusterAllocationExplainResponse> => {
+): Promise<Option.Option<string>> => {
   const primaryExplain = await client.cluster.allocationExplain(
     { index, shard: 0, primary: true, master_timeout: '30s' },
     { maxRetries: 0 }
   );
+
   if (primaryExplain.current_state === 'started') {
     try {
-      return await client.cluster.allocationExplain(
+      const replicaExplain = await client.cluster.allocationExplain(
         { index, shard: 0, primary: false, master_timeout: '30s' },
         { maxRetries: 0 }
       );
+      return Option.some(formatAllocationExplanation(replicaExplain));
     } catch (error) {
-      if (!(error instanceof esErrors.ResponseError && error.statusCode === 400)) {
+      if (error instanceof esErrors.ResponseError && error.statusCode === 400) {
+        // Replica is gone from the routing table and the primary is already
+        // started: there is nothing left to explain.
+        return Option.none;
+      } else {
         throw error;
       }
-      // No replica shard to explain: it was removed after the bulk failed, so
-      // fall through and report the primary instead of losing the explanation.
     }
+  } else {
+    return Option.some(formatAllocationExplanation(primaryExplain));
   }
-  return primaryExplain;
 };
 
 const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainResponse): string => {
