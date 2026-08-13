@@ -157,7 +157,7 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
           }
         >
           {detectionSignals.map((signal, index) => {
-            const title = signal.metadata?.rule_name || SIGNAL_FALLBACK_TITLE;
+            const title = signal.metadata.rule_name || SIGNAL_FALLBACK_TITLE;
 
             return (
               <React.Fragment key={`${signal.stream_name ?? title}-${index}`}>
