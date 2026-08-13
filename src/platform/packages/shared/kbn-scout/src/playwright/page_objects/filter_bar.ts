@@ -52,13 +52,13 @@ export class FilterBar {
     await this.page.components.toast().closeAll();
     await this.page.testSubj.click('addFilter');
     await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
-    // Prefer EUI comboBox helpers over typeWithDelay: under load the operator combo can be
-    // "stable" while a character-by-character type still times out (overlay / remount race).
+    // Set field name
     await this.page.components
       .comboBox('filterFieldSuggestionList')
       .setSelectedOptions([options.field]);
     const operatorCombo = this.page.testSubj.locator('filterOperatorList');
     await operatorCombo.waitFor({ state: 'visible' });
+    // Set operator
     await this.page.waitForFunction(
       () =>
         !document
@@ -68,7 +68,9 @@ export class FilterBar {
     await this.page.components
       .comboBox('filterOperatorList')
       .setSelectedOptions([options.operator]);
+    // Set value
     await this.fillFilterValue(options.value);
+    // Save filter and wait for popover to close
     const popover = this.page.testSubj.locator('addFilterPopover');
     const saveButton = popover.getByTestId('saveFilter');
     await saveButton.waitFor({ state: 'visible' });
