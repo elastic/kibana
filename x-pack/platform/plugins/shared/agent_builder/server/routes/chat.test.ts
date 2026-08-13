@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
@@ -263,6 +263,85 @@ describe('callbackConversePayloadSchema', () => {
 });
 
 describe('registerChatRoutes', () => {
+  type CapturedHandler = (ctx: any, req: any, res: any) => Promise<any>;
+
+  const captureRouteHandler = (path: string) => {
+    const captured: { handler?: CapturedHandler } = {};
+    const router = {
+      versioned: {
+        post: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation((_versionConfig: unknown, handler: CapturedHandler) => {
+              if (config.path === path) {
+                captured.handler = handler;
+              }
+            }),
+        })),
+      },
+    };
+    return { router, captured };
+  };
+
+  const mockRouteContext = () => ({
+    core: Promise.resolve({}),
+    licensing: Promise.resolve({
+      license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+    }),
+    agentBuilder: Promise.resolve({
+      spaces: { getSpaceId: jest.fn().mockReturnValue('default') },
+    }),
+  });
+
+  const mockRouteResponse = () => ({
+    ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+    customError: jest.fn(({ body, statusCode }) => ({ status: statusCode, payload: body })),
+  });
+
+  it.each([
+    ['synchronous', `${publicApiPath}/converse`, {} as never],
+    [
+      'streaming',
+      `${publicApiPath}/converse/async`,
+      { getStartServices: jest.fn().mockResolvedValue([{}, { cloud: undefined }]) } as never,
+    ],
+  ])(
+    'passes the client abort signal from %s converse to the execution service',
+    async (_label, conversePath, coreSetup) => {
+      const executeAgent = jest.fn().mockResolvedValue({
+        executionId: 'execution-1',
+        events$: of(),
+      });
+      const aborted$ = new Subject<void>();
+      const { router, captured } = captureRouteHandler(conversePath);
+
+      registerChatRoutes({
+        router,
+        getInternalServices: jest.fn().mockReturnValue({
+          execution: { executeAgent },
+        }),
+        coreSetup,
+        pluginsSetup: {},
+        logger: loggingSystemMock.createLogger(),
+      } as never);
+
+      await captured.handler!(
+        mockRouteContext(),
+        {
+          body: { agent_id: 'agent-1', input: 'Hello' },
+          events: { aborted$ },
+        },
+        mockRouteResponse()
+      );
+
+      const abortSignal = executeAgent.mock.calls[0][0].abortSignal as AbortSignal;
+      expect(abortSignal).toEqual(expect.objectContaining({ aborted: false }));
+
+      aborted$.next();
+      expect(abortSignal.aborted).toBe(true);
+    }
+  );
+
   it('registers an internal callback converse route', () => {
     const postConfigs: Array<{ path: string; access?: string }> = [];
     const createVersionedRoute = () => ({
@@ -765,6 +844,11 @@ describe('registerChatRoutes', () => {
             agent_id: 'agent-1',
             input: 'Hello',
             configuration_overrides: { skill_ids: ['known-skill'] },
+          },
+          events: {
+            aborted$: {
+              subscribe: jest.fn(),
+            },
           },
         },
         response
