@@ -12936,18 +12936,42 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              bulkUpdateApiKeyRequest:
+                summary: Rotate API keys for two rules by ID
+                value:
+                  ids:
+                    - rule-1
+                    - rule-2
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_by_ids_request'
       responses:
         '200':
           content:
             application/json:
+              examples:
+                bulkUpdateApiKeyResponse:
+                  summary: Rotated API keys for both requested rules
+                  value:
+                    affected_count: 2
+                    errors: []
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
           description: Returns the result of the bulk update API key operation.
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Request body is missing required rule ids
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        ids:
+                          - Required
+                    error: Bad Request
+                    message: 'ids: Required'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -13398,12 +13422,25 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateApiKeyByQueryRequest:
+                summary: 'Rotate API keys for rules tagged production (dry-run by default, or set `force: true` to execute)'
+                value:
+                  filter: 'tags: production'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_by_query_request'
       responses:
         '200':
           content:
             application/json:
+              examples:
+                updateApiKeyByQueryDryRunResponse:
+                  summary: 'Dry-run preview of matching rules; set `force: true` on the request to execute'
+                  value:
+                    match_count: 2
+                    sample:
+                      - rule-1
+                      - rule-2
               schema:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_dry_run_response'
@@ -13412,6 +13449,17 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: By-query body omits filter, search, and match_all
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        '':
+                          - At least one of filter, search, or match_all must be provided.
+                    error: Bad Request
+                    message: At least one of filter, search, or match_all must be provided.
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -15017,6 +15065,20 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                invalidRequest:
+                  summary: Indicates an invalid schema or parameters.
+                  value:
+                    code: BAD_REQUEST
+                    details:
+                      errors:
+                        errors: []
+                        properties:
+                          eventId:
+                            errors:
+                              - 'Too small: expected string to have >=1 characters'
+                    error: Bad Request
+                    message: 'eventId: Too small: expected string to have >=1 characters'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the request failed schema validation.
