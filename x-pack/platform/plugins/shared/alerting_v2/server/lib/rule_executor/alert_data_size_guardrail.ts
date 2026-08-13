@@ -175,5 +175,14 @@ export const enforceAlertDataSize = ({
     }
   }
 
+  // Safety net: the estimator ignores JSON string escaping (`"`, `\`, control
+  // chars), so grouping values heavy with those can push the actual serialized
+  // size over the limit despite the budget-based clipping above. Drop fields
+  // from the end until the true byte count is within the limit.
+  const keys = Object.keys(data);
+  while (keys.length > 0 && Buffer.byteLength(JSON.stringify(data), 'utf8') > maxBytes) {
+    delete data[keys.pop()!];
+  }
+
   return { data, truncated: true };
 };
