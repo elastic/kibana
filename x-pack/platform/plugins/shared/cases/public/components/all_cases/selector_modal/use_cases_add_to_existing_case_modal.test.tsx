@@ -18,10 +18,8 @@ import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
-import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
 import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 
@@ -56,8 +54,6 @@ const TestComponent: React.FC<AddToExistingCaseModalProps> = (
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
-const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
@@ -71,8 +67,6 @@ describe('use cases add to existing case modal hook', () => {
     return (
       <CasesContext.Provider
         value={{
-          externalReferenceAttachmentTypeRegistry,
-          persistableStateAttachmentTypeRegistry,
           unifiedAttachmentTypeRegistry,
           owner: ['test'],
           permissions: allCasesPermissions(),

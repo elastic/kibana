@@ -177,6 +177,12 @@ Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong in
 - For code fixes: name the module, API, or behavior that looks wrong and why.
 - If you cannot justify a concrete fix, say what additional evidence would change the conclusion.
 
+### Fix guardrails
+
+Every fix you propose is held to the same guardrails as the fixer and verifier workflows that act on it:
+
+{{#import .github/workflows/shared/flaky-test-fix-guardrails.md}}
+
 ## Labels
 
 ### Classification label
@@ -324,6 +330,8 @@ State only _what to change_ — the "why" belongs in Root cause & evidence, so d
 **Recommend one fix.** Pick the best option and commit to it — don't lay out competing options, and never use a table of alternatives (a table makes them look equally good). If a genuine alternative is worth noting, add it as a single sentence _after_ the recommendation, clearly subordinate to it.
 
 **Anchor the fix to best practices.** Prefer the fix that brings the test in line with our best practices over a narrower patch that leaves the anti-pattern in place. When the fix maps to a best-practice rule, cite that rule as a section-scoped Markdown link (see below) so the developer learns the underlying guideline.
+
+**A recommended wait must name a real signal.** Before proposing "wait for X before acting", verify the signal exists and name it concretely (`data-test-subj`, attribute, or DOM state, with `file:line`). If nothing observable exposes the state (e.g. an async parse in a worker), say so and recommend exposing one via a small application-side change instead — an abstract "wait for readiness" that can't be implemented invites the implementer to retry the interaction until the outcome looks right, which our guardrails forbid.
 
 - **Single file:** name the `file:line` and the change, as a single sentence or a short diff. Do not paste surrounding code that already exists — link to it.
 - **Multiple files (one fix spanning several):** a short table of `file:line` → change, one row per file. This lists the parts of the _one_ recommended fix, not a menu of alternatives. No rationale column.
