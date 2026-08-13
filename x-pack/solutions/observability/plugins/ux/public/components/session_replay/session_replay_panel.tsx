@@ -107,7 +107,7 @@ const DURATION_OPTIONS: DurationOption[] = [
 const HeaderWithTip = ({ label, tip }: { label: string; tip: string }) => (
   <EuiToolTip content={tip}>
     <span tabIndex={0}>
-      {label} <EuiIcon type="questionInCircle" size="s" color="subdued" aria-hidden={true} />
+      {label} <EuiIcon type="question" size="s" color="subdued" aria-hidden={true} />
     </span>
   </EuiToolTip>
 );
