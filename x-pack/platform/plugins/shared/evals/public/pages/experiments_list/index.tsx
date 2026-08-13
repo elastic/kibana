@@ -68,7 +68,7 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
       button={
         <EuiToolTip content={i18n.ROW_DETAILS_ARIA} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesVertical"
+            iconType="ellipsis"
             color="text"
             aria-label={i18n.ROW_DETAILS_ARIA}
             onClick={(event: React.MouseEvent) => {
