@@ -604,7 +604,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 />
               }
               isInvalid={isInvalid}
-              hasEmptyLabelSpace={true}
               error={errorMessage}
             >
               <EuiInputPopover
