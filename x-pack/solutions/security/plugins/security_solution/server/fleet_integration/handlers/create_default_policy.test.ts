@@ -10,10 +10,14 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { LicenseService } from '../../../common/license';
+import { isEndpointPolicyValidForLicense } from '../../../common/license/policy_config';
 import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
-import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import {
+  policyFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures,
+} from '../../../common/endpoint/models/policy_config';
 import * as PolicyConfigHelpers from '../../../common/endpoint/models/policy_config_helpers';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type {
@@ -31,7 +35,11 @@ describe('Create Default Policy tests ', () => {
   const Platinum = licenseMock.createLicense({
     license: { type: 'platinum', mode: 'platinum', uid: '' },
   });
+  const Enterprise = licenseMock.createLicense({
+    license: { type: 'enterprise', mode: 'enterprise', uid: '' },
+  });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
+  const Basic = licenseMock.createLicense({ license: { type: 'basic', mode: 'basic', uid: '' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   let productFeaturesService: ProductFeaturesService;
@@ -231,17 +239,37 @@ describe('Create Default Policy tests ', () => {
       });
     });
 
-    it('Should return the default config when preset is EDR Complete', async () => {
+    it('Should return the default config without enterprise features when preset is EDR Complete on platinum', async () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = await createDefaultPolicyCallback(config);
       const license = 'platinum';
+      const isCloud = true;
+      const defaultPolicy = policyFactoryWithoutPaidEnterpriseFeatures(
+        policyFactory({
+          license,
+          cloud: isCloud,
+          isGlobalTelemetryEnabled: true,
+        })
+      );
+      // update defaultPolicy w/ platinum license & cloud info
+      defaultPolicy.meta.license = license;
+      defaultPolicy.meta.cloud = isCloud;
+      expect(policy).toMatchObject(defaultPolicy);
+    });
+
+    it('Should return the default config when preset is EDR Complete on enterprise', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const config = createEndpointConfig({ preset: 'EDRComplete' });
+      const policy = await createDefaultPolicyCallback(config);
+      const license = 'enterprise';
       const isCloud = true;
       const defaultPolicy = policyFactory({
         license,
         cloud: isCloud,
         isGlobalTelemetryEnabled: true,
       });
-      // update defaultPolicy w/ platinum license & cloud info
+      // update defaultPolicy w/ enterprise license & cloud info
       defaultPolicy.meta.license = license;
       defaultPolicy.meta.cloud = isCloud;
       expect(policy).toMatchObject(defaultPolicy);
@@ -332,6 +360,80 @@ describe('Create Default Policy tests ', () => {
       telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(undefined);
       const policyConfig = await createDefaultPolicyCallback();
       expect(policyConfig.global_telemetry_enabled).toBe(false);
+    });
+  });
+
+  describe('Device Control license gating', () => {
+    const edrCompleteConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'EDRComplete' },
+    };
+
+    it('should disable device control when license is platinum', async () => {
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expect(policy.windows.device_control?.enabled).toBe(false);
+      expect(policy.windows.popup.device_control?.enabled).toBe(false);
+      expect(policy.mac.device_control?.enabled).toBe(false);
+      expect(policy.mac.popup.device_control?.enabled).toBe(false);
+    });
+
+    it('should disable device control when license is below platinum', async () => {
+      licenseEmitter.next(Gold);
+
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expect(policy.windows.device_control?.enabled).toBe(false);
+      expect(policy.windows.popup.device_control?.enabled).toBe(false);
+      expect(policy.mac.device_control?.enabled).toBe(false);
+      expect(policy.mac.popup.device_control?.enabled).toBe(false);
+    });
+
+    it('should keep device control enabled when license is enterprise', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expect(policy.windows.device_control?.enabled).toBe(true);
+      expect(policy.mac.device_control?.enabled).toBe(true);
+    });
+  });
+
+  describe('License compliance invariant', () => {
+    type Preset = PolicyCreateEndpointConfig['endpointConfig']['preset'];
+
+    const tiers: Array<[tier: string, license: ILicense]> = [
+      ['basic', Basic],
+      ['gold', Gold],
+      ['platinum', Platinum],
+      ['enterprise', Enterprise],
+    ];
+    const presets: Preset[] = ['DataCollection', 'NGAV', 'EDREssential', 'EDRComplete'];
+
+    // Cross product, so a failure names the exact (tier, preset) pair.
+    const cases: Array<[tier: string, preset: Preset, license: ILicense]> = tiers.flatMap(
+      ([tier, license]) =>
+        presets.map((preset): [string, Preset, ILicense] => [tier, preset, license])
+    );
+
+    it.each(cases)(
+      'should create a policy that satisfies isEndpointPolicyValidForLicense on %s with the %s preset',
+      async (_tier, preset, license) => {
+        licenseEmitter.next(license);
+
+        const policy = await createDefaultPolicyCallback({
+          type: 'endpoint',
+          endpointConfig: { preset },
+        });
+
+        expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+      }
+    );
+
+    // Guards the invariant above against passing vacuously: the raw factory output
+    // (Device Control on) is what Platinum used to be created with, and it must fail.
+    it('should not consider a raw policyFactory() output valid for a platinum license', () => {
+      expect(isEndpointPolicyValidForLicense(policyFactory(), Platinum)).toBe(false);
     });
   });
 
