@@ -39,7 +39,6 @@ export const getStructuredAnswerPrompt = async (
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
     conversationTimestamp,
-    subagentRosterFallback: params.subagentRosterFallback,
   });
 
   return [

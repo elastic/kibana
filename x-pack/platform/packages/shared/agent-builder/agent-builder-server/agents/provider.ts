@@ -49,6 +49,18 @@ import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 
+/**
+ * Read/write conversation store contract exposed to agent handlers.
+ *
+ * Extension policy: only expose methods legitimately needed by handlers.
+ * Methods here are structurally satisfied by the plugin's internal
+ * `ConversationClient`, so adding more is backward-compatible.
+ */
+export interface ConversationClient {
+  /** True if a conversation with the given id exists in the current scope. */
+  exists(conversationId: string): Promise<boolean>;
+}
+
 export type AgentHandlerFn = (
   params: AgentHandlerParams,
   context: AgentHandlerContext
@@ -288,6 +300,11 @@ export interface AgentHandlerContext {
    * Sub-agent executor for spawning child agent executions.
    */
   subAgentExecutor: SubAgentExecutor;
+  /**
+   * Conversation store client scoped to the current user. Prefer this over
+   * issuing raw ES queries against the conversation index.
+   */
+  conversationClient: ConversationClient;
   /**
    * Optional analytics surface for emitting agent-runtime events such as
    * SkillInvoked. Provided by the plugin when telemetry is wired.

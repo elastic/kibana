@@ -8,15 +8,9 @@
 import type { SubagentRosterEntry } from '@kbn/agent-builder-common';
 
 /**
- * In-memory tracker for persistent sub-agents created / resolved during a
- * single round of the parent's execution. Seeded from the parent conversation's
- * `state.subagents` at round start; new creations are added mid-round. The
- * final snapshot is persisted back on the parent conversation via
- * `getConversationState()`.
- *
- * Purposes captured on creation live only in memory for the current round; on
- * replay they come from the most recent `SubagentRosterUpdatedStep` in the
- * conversation history (see `getPriorPurposes` in `graph.ts`).
+ * In-memory tracker for persistent sub-agents
+ * - seeded from the parent conversation's `state.subagents` at round start
+ * - new creations are added mid-round.
  */
 export class SubagentTracker {
   private readonly map: Record<string, string>;
@@ -55,9 +49,7 @@ export class SubagentTracker {
   }
 
   /**
-   * Number of persistent sub-agents created in this round so far. Callers can
-   * snapshot this before a tool batch and compare after to detect whether the
-   * batch produced any new creations without inspecting tool-result payloads.
+   * Number of persistent sub-agents created in this round so far.
    */
   creationCount(): number {
     return this.creations.length;
@@ -65,11 +57,6 @@ export class SubagentTracker {
 
   /**
    * Return the current full roster with purposes.
-   * - Purposes for entries created THIS round are taken from
-   *   `creations` (recorded via `register`).
-   * - Purposes for pre-existing entries fall back to `priorPurposes`
-   *   (typically sourced from the most recent SubagentRosterUpdatedStep
-   *   on the parent conversation).
    */
   activeRoster(priorPurposes: Record<string, string> = {}): SubagentRosterEntry[] {
     const thisRoundPurposes: Record<string, string | undefined> = {};

@@ -70,11 +70,6 @@ export interface ConversationToLangchainOptions {
    * prefix stays stable across rounds (prompt-cache friendly).
    */
   conversationTimestamp?: string;
-  /**
-   * Optional current roster of persistent sub-agents.
-   * Used to guarantee the parent LLM sees the active roster even after compaction
-   */
-  subagentRosterFallback?: Record<string, string>;
 }
 
 /**
@@ -89,8 +84,8 @@ export const convertPreviousRounds = async ({
   ignoreSteps = false,
   compactionSummary,
   conversationTimestamp,
-  subagentRosterFallback,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
+  const subagentRosterFallback = conversation.subagentRosterFallback;
   const messages: BaseMessage[] = [];
   const attachmentTypeInstructionsProvided = new Set<string>();
 

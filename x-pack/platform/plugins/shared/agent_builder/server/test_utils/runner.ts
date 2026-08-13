@@ -48,6 +48,7 @@ import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';
 import { createAgentsServiceStartMock } from './agents';
+import { createConversationServiceMock } from './conversations';
 import type { SkillRegistry, SkillServiceStart } from '../services/skills';
 import type { PluginsServiceStart } from '../services/plugins/plugin_service';
 
@@ -340,6 +341,9 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    conversationClient: {
+      exists: jest.fn().mockResolvedValue(false),
+    },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
@@ -427,6 +431,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
+    conversationService: createConversationServiceMock(),
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
@@ -473,6 +478,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
+    conversationService: createConversationServiceMock(),
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },

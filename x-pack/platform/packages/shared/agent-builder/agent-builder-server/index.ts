@@ -86,6 +86,7 @@ export type {
   ExperimentalFeatures,
   SubAgentExecutor,
   SubAgentExecution,
+  ConversationClient,
 } from './agents';
 export type {
   AgentBuilderHooks,

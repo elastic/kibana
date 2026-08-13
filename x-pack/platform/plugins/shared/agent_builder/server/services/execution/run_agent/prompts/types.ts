@@ -43,11 +43,6 @@ export interface PromptFactoryParams {
    */
   relevantSkillsEnabled: boolean;
   relevantSkills?: RelevantSkillSelection;
-  /**
-   * Current persistent-sub-agent roster (name → child conversation id) from
-   * the parent conversation's state.
-   */
-  subagentRosterFallback?: Record<string, string>;
 }
 
 export interface ResearchAgentPromptRuntimeParams {

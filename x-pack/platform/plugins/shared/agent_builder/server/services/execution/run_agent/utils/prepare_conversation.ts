@@ -40,6 +40,12 @@ export interface ProcessedConversation {
   attachmentStateManager: AttachmentStateManager;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
+  /**
+   * Persistent sub-agent roster (name → child conversation id) to re-inject
+   * alongside the compaction summary when older SubagentRosterUpdatedSteps
+   * have been summarized away. Populated only when compaction ran.
+   */
+  subagentRosterFallback?: Record<string, string>;
 }
 
 /**
