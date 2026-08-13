@@ -43,15 +43,10 @@ jest.mock('../../../hooks/use_apm_route_path', () => ({
 
 // Pass-through provider — neutralises the useFetcher(getApmIndexSettings) call that would
 // otherwise fire useKibana() against an undefined apmSourcesAccess service in jsdom.
-jest.mock(
-  '../../../context/apm_index_settings/apm_index_settings_context',
-  () => ({
-    ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => (
-      <>{children}</>
-    ),
-    ApmIndexSettingsContext: {},
-  })
-);
+jest.mock('../../../context/apm_index_settings/apm_index_settings_context', () => ({
+  ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  ApmIndexSettingsContext: {},
+}));
 
 // Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
 // (so we exercise the full tab-building logic without wiring up the template's own dependencies).
