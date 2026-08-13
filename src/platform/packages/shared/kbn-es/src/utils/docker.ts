@@ -41,6 +41,7 @@ import { initializeUiamContainers, runUiamContainer, getUiamContainers } from '.
 import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { readStringSecrets } from './read_string_secrets';
 import { waitForSecurityIndex } from './wait_for_security_index';
+import { waitForProjectState } from './wait_for_project_state';
 import { createCliError } from '../errors';
 import { shouldPreferCachedSnapshot } from './find_local_cached_snapshot';
 import type { EsClusterExecOptions } from '../cluster_exec_options';
@@ -1122,6 +1123,19 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
       log.info(`[runServerlessCluster] Waiting for security index (${elapsed()})...`);
       await waitForSecurityIndex({ client, log });
       log.info(`[runServerlessCluster] Security index ready (${elapsed()})`);
+    }
+    const esArgsList = Array.isArray(options.esArgs)
+      ? options.esArgs
+      : options.esArgs
+      ? [options.esArgs]
+      : [];
+    const cpsEnabled = esArgsList.some((arg) => arg.includes('serverless.cross_project.enabled'));
+    if (cpsEnabled) {
+      // In CPS mode ES rejects every search until it applies the origin project state, which lags
+      // behind cluster-green + the security index. Wait for it so the suite doesn't run too early.
+      log.info(`[runServerlessCluster] Waiting for CPS origin project state (${elapsed()})...`);
+      await waitForProjectState({ client, log });
+      log.info(`[runServerlessCluster] CPS origin project state ready (${elapsed()})`);
     }
   }
 
