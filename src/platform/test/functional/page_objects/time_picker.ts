@@ -79,8 +79,10 @@ export class TimePickerPageObject extends FtrService {
         ]);
         return newRendered || legacyRendered;
       });
-    } catch {
-      // Neither picker appeared — return false below
+    } catch (e) {
+      // Neither picker appeared within the timeout (e.g. a page with no time
+      // field renders no picker at all). Log and fall through to return false.
+      this.log.debug(`isNewDateRangePicker: no picker appeared within 30s: ${e}`);
     }
     const isNew = await this.testSubjects.exists('dateRangePickerControlButton', {
       timeout: 1000,
