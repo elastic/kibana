@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useCallback } from 'react';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import * as i18n from './translations';
@@ -49,13 +49,22 @@ export const NewTimelineButton = React.memo(({ timelineId }: NewTimelineButtonPr
     );
   }, [togglePopover]);
 
+  // Keep the click handlers stable via refs so `items` (and its context-menu DOM
+  // nodes) don't remount when `useCreateTimeline`'s callback identity changes as the
+  // default data view resolves asynchronously - a remount detaches the menu item
+  // mid-click. The refs always point at the latest callbacks, so behavior is unchanged.
+  const createNewTimelineRef = useRef(createNewTimeline);
+  createNewTimelineRef.current = createNewTimeline;
+  const createNewTimelineTemplateRef = useRef(createNewTimelineTemplate);
+  createNewTimelineTemplateRef.current = createNewTimelineTemplate;
+
   const handleCreateNewTimeline = useCallback(async () => {
-    await createNewTimeline();
-  }, [createNewTimeline]);
+    await createNewTimelineRef.current();
+  }, []);
 
   const handleCreateNewTimelineTemplate = useCallback(async () => {
-    await createNewTimelineTemplate();
-  }, [createNewTimelineTemplate]);
+    await createNewTimelineTemplateRef.current();
+  }, []);
 
   const items = useMemo(
     () => [
