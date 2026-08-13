@@ -188,7 +188,9 @@ export const JiraConnector: ConnectorSpec = {
           issueId: string;
         };
         const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.get(`${baseUrl}/rest/api/3/issue/${typedInput.issueId}`);
+        const response = await ctx.client.get(
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(typedInput.issueId)}`
+        );
         return response.data;
       },
     },
@@ -221,7 +223,7 @@ export const JiraConnector: ConnectorSpec = {
         };
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(
-          `${baseUrl}/rest/api/3/project/${typedInput.projectId}`
+          `${baseUrl}/rest/api/3/project/${encodeURIComponent(typedInput.projectId)}`
         );
         return response.data;
       },
@@ -325,7 +327,9 @@ export const JiraConnector: ConnectorSpec = {
         if (rest.parent !== undefined) {
           fields.parent = { key: rest.parent };
         }
-        await ctx.client.put(`${baseUrl}/rest/api/3/issue/${issueId}`, { fields });
+        await ctx.client.put(`${baseUrl}/rest/api/3/issue/${encodeURIComponent(issueId)}`, {
+          fields,
+        });
         return { updated: true, issueId };
       },
     },
@@ -339,7 +343,7 @@ export const JiraConnector: ConnectorSpec = {
       handler: async (ctx, input: AddCommentInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.post(
-          `${baseUrl}/rest/api/3/issue/${input.issueId}/comment`,
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}/comment`,
           { body: toAdf(input.body) }
         );
         return response.data;
@@ -354,9 +358,10 @@ export const JiraConnector: ConnectorSpec = {
       input: TransitionIssueInputSchema,
       handler: async (ctx, input: TransitionIssueInput) => {
         const baseUrl = buildBaseUrl(ctx);
-        await ctx.client.post(`${baseUrl}/rest/api/3/issue/${input.issueId}/transitions`, {
-          transition: { id: input.transitionId },
-        });
+        await ctx.client.post(
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}/transitions`,
+          { transition: { id: input.transitionId } }
+        );
         return { transitioned: true, issueId: input.issueId, transitionId: input.transitionId };
       },
     },
@@ -375,7 +380,7 @@ export const JiraConnector: ConnectorSpec = {
       handler: async (ctx, input: GetTransitionsInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(
-          `${baseUrl}/rest/api/3/issue/${input.issueId}/transitions`
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}/transitions`
         );
         return response.data;
       },
@@ -390,7 +395,9 @@ export const JiraConnector: ConnectorSpec = {
       handler: async (ctx, input: GetIssueTypesInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(
-          `${baseUrl}/rest/api/3/issue/createmeta/${input.projectKey}/issuetypes`
+          `${baseUrl}/rest/api/3/issue/createmeta/${encodeURIComponent(
+            input.projectKey
+          )}/issuetypes`
         );
         return response.data;
       },
@@ -406,7 +413,9 @@ export const JiraConnector: ConnectorSpec = {
       handler: async (ctx, input: GetCreateMetadataInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(
-          `${baseUrl}/rest/api/3/issue/createmeta/${input.projectKey}/issuetypes/${input.issueTypeId}`
+          `${baseUrl}/rest/api/3/issue/createmeta/${encodeURIComponent(
+            input.projectKey
+          )}/issuetypes/${encodeURIComponent(input.issueTypeId)}`
         );
         return response.data;
       },
@@ -420,9 +429,10 @@ export const JiraConnector: ConnectorSpec = {
       input: AssignIssueInputSchema,
       handler: async (ctx, input: AssignIssueInput) => {
         const baseUrl = buildBaseUrl(ctx);
-        await ctx.client.put(`${baseUrl}/rest/api/3/issue/${input.issueId}/assignee`, {
-          accountId: input.accountId,
-        });
+        await ctx.client.put(
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}/assignee`,
+          { accountId: input.accountId }
+        );
         return { assigned: true, issueId: input.issueId, accountId: input.accountId };
       },
     },
@@ -440,7 +450,7 @@ export const JiraConnector: ConnectorSpec = {
         const formData = new FormData();
         formData.append('file', new Blob([buffer]), input.filename);
         const response = await ctx.client.post(
-          `${baseUrl}/rest/api/3/issue/${input.issueId}/attachments`,
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}/attachments`,
           formData,
           { headers: { 'X-Atlassian-Token': 'no-check' } }
         );
@@ -463,7 +473,7 @@ export const JiraConnector: ConnectorSpec = {
       handler: async (ctx, input: GetAttachmentInput) => {
         const baseUrl = buildBaseUrl(ctx);
         const response = await ctx.client.get(
-          `${baseUrl}/rest/api/3/attachment/content/${input.attachmentId}`,
+          `${baseUrl}/rest/api/3/attachment/content/${encodeURIComponent(input.attachmentId)}`,
           { responseType: 'arraybuffer' }
         );
         return {
@@ -508,10 +518,13 @@ export const JiraConnector: ConnectorSpec = {
       input: DeleteIssueInputSchema,
       handler: async (ctx, input: DeleteIssueInput) => {
         const baseUrl = buildBaseUrl(ctx);
-        await ctx.client.delete(`${baseUrl}/rest/api/3/issue/${input.issueId}`, {
-          params:
-            input.deleteSubtasks !== undefined ? { deleteSubtasks: input.deleteSubtasks } : {},
-        });
+        await ctx.client.delete(
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}`,
+          {
+            params:
+              input.deleteSubtasks !== undefined ? { deleteSubtasks: input.deleteSubtasks } : {},
+          }
+        );
         return { deleted: true, issueId: input.issueId };
       },
     },
@@ -526,7 +539,7 @@ export const JiraConnector: ConnectorSpec = {
         const baseUrl = buildBaseUrl(ctx);
         // Jira REST v3 expects the body to be a bare JSON string (the accountId), not an object.
         await ctx.client.post(
-          `${baseUrl}/rest/api/3/issue/${input.issueId}/watchers`,
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}/watchers`,
           JSON.stringify(input.accountId),
           { headers: { 'Content-Type': 'application/json' } }
         );
@@ -542,9 +555,10 @@ export const JiraConnector: ConnectorSpec = {
       input: RemoveWatcherInputSchema,
       handler: async (ctx, input: RemoveWatcherInput) => {
         const baseUrl = buildBaseUrl(ctx);
-        await ctx.client.delete(`${baseUrl}/rest/api/3/issue/${input.issueId}/watchers`, {
-          params: { accountId: input.accountId },
-        });
+        await ctx.client.delete(
+          `${baseUrl}/rest/api/3/issue/${encodeURIComponent(input.issueId)}/watchers`,
+          { params: { accountId: input.accountId } }
+        );
         return { unwatched: true, issueId: input.issueId, accountId: input.accountId };
       },
     },
