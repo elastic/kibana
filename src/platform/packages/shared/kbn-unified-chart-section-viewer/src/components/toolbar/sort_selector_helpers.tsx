@@ -31,14 +31,21 @@ const directionLegend = i18n.translate('metricsExperience.sortSelector.direction
   defaultMessage: 'Sort direction',
 });
 
+const ascendingLabel = i18n.translate('metricsExperience.sortSelector.ascending', {
+  defaultMessage: 'Ascending',
+});
+
+const descendingLabel = i18n.translate('metricsExperience.sortSelector.descending', {
+  defaultMessage: 'Descending',
+});
+
 const directionOptions = [
   {
     id: METRICS_SORT_DIRECTION.asc,
     iconType: 'sortAscending',
     'data-test-subj': 'metricsExperienceSortDirectionAsc',
-    label: i18n.translate('metricsExperience.sortSelector.ascending', {
-      defaultMessage: 'Ascending',
-    }),
+    label: ascendingLabel,
+    toolTipContent: ascendingLabel,
     ...getEbtProps({
       action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
       element: CHARTS_TOOLBAR_EBT_ELEMENT,
@@ -49,9 +56,8 @@ const directionOptions = [
     id: METRICS_SORT_DIRECTION.desc,
     iconType: 'sortDescending',
     'data-test-subj': 'metricsExperienceSortDirectionDesc',
-    label: i18n.translate('metricsExperience.sortSelector.descending', {
-      defaultMessage: 'Descending',
-    }),
+    label: descendingLabel,
+    toolTipContent: descendingLabel,
     ...getEbtProps({
       action: EBT_CLICK_ACTIONS.SET_SORT_DIRECTION,
       element: CHARTS_TOOLBAR_EBT_ELEMENT,
