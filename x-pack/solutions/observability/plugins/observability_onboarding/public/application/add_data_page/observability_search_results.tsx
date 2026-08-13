@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
-import type { AvailablePackagesHookType, UseLocalSearchType } from '@kbn/fleet-plugin/public';
+import type {
+  AvailablePackagesHookType,
+  IntegrationCardItem,
+  UseLocalSearchType,
+} from '@kbn/fleet-plugin/public';
 import { AddDataSearchResults } from '../add_data_grid';
 import type { CollectionCardItem } from './collection_card';
+import { getCollectionGroupId, isCollectionCard } from './collection_card';
 import { createRenderResultCard } from './render_result_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
 
@@ -32,22 +37,64 @@ interface Props {
   searchTerm: string;
   /** Opens the collection chooser flyout, which the page hosts. */
   onOpenCollection: (card: CollectionCardItem) => void;
+  /** Group id of a chooser to reopen once the results contain its card. */
+  collectionToOpen?: string;
 }
 
 type RenderCard = ReturnType<typeof createRenderResultCard>;
+
+/**
+ * Reopens the chooser a member link came back from. It waits for the results
+ * because the card only exists once Fleet's packages have loaded, and stays
+ * silent when nothing matches (flag off, group gone, singleton degraded).
+ */
+const useReopenCollection = ({
+  collectionToOpen,
+  items,
+  onOpenCollection,
+}: {
+  collectionToOpen?: string;
+  items: IntegrationCardItem[];
+  onOpenCollection: (card: CollectionCardItem) => void;
+}) => {
+  // Fleet rebuilds `allCards` on every render, so opening has to be remembered:
+  // the page storing the card in state would otherwise re-trigger this forever.
+  const reopenedFor = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!collectionToOpen) {
+      // Chooser closed and the param dropped, so a later return can reopen it.
+      reopenedFor.current = undefined;
+      return;
+    }
+    if (reopenedFor.current === collectionToOpen) return;
+    const match = items.find(
+      (item): item is CollectionCardItem =>
+        isCollectionCard(item) && getCollectionGroupId(item) === collectionToOpen
+    );
+    if (!match) return;
+    reopenedFor.current = collectionToOpen;
+    onOpenCollection(match);
+  }, [collectionToOpen, items, onOpenCollection]);
+};
 
 const LoadedResults = ({
   searchTerm,
   fleetHooks,
   onRetry,
   renderCard,
+  collectionToOpen,
+  onOpenCollection,
 }: {
   searchTerm: string;
   fleetHooks: FleetHooks;
   onRetry: () => void;
   renderCard: RenderCard;
+  collectionToOpen?: string;
+  onOpenCollection: (card: CollectionCardItem) => void;
 }) => {
   const { items, isLoading, error } = useAddDataResultItems({ searchTerm, ...fleetHooks });
+  useReopenCollection({ collectionToOpen, items, onOpenCollection });
 
   return (
     <AddDataSearchResults
@@ -61,7 +108,11 @@ const LoadedResults = ({
   );
 };
 
-export const ObservabilitySearchResults = ({ searchTerm, onOpenCollection }: Props) => {
+export const ObservabilitySearchResults = ({
+  searchTerm,
+  onOpenCollection,
+  collectionToOpen,
+}: Props) => {
   const hookRef = useRef<FleetHooks | null>(null);
   const renderCard = useMemo(
     () => createRenderResultCard({ onOpenCollection }),
@@ -107,6 +158,8 @@ export const ObservabilitySearchResults = ({ searchTerm, onOpenCollection }: Pro
       fleetHooks={hookRef.current}
       onRetry={retry}
       renderCard={renderCard}
+      collectionToOpen={collectionToOpen}
+      onOpenCollection={onOpenCollection}
     />
   );
 };

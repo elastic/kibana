@@ -51,12 +51,47 @@ jest.mock('../shared/use_managed_otlp_service_availability', () => ({
 }));
 
 jest.mock('../add_data_page/observability_search_results', () => ({
-  ObservabilitySearchResults: () => <div data-test-subj="observabilitySearchResultsStub" />,
+  ObservabilitySearchResults: ({
+    collectionToOpen,
+    onOpenCollection,
+  }: {
+    collectionToOpen?: string;
+    onOpenCollection: (card: unknown) => void;
+  }) => (
+    <div data-test-subj="observabilitySearchResultsStub">
+      <div data-test-subj="collectionToOpen">{collectionToOpen ?? ''}</div>
+      <button
+        type="button"
+        data-test-subj="stubOpenCollection"
+        onClick={() => onOpenCollection({ id: 'collection:nginx', name: 'nginx' })}
+      >
+        open chooser
+      </button>
+    </div>
+  ),
+}));
+
+// The flyout's own contents are covered by its unit test; here only the page's
+// open/close wiring and its url bookkeeping matter.
+jest.mock('../add_data_page/collection_flyout', () => ({
+  CollectionFlyout: ({ card, onClose }: { card: { id: string }; onClose: () => void }) => (
+    <div data-test-subj="collectionFlyoutStub">
+      <div data-test-subj="flyoutCardId">{card.id}</div>
+      <button type="button" data-test-subj="stubCloseFlyout" onClick={onClose}>
+        close
+      </button>
+    </div>
+  ),
 }));
 
 const LocationDisplay = () => {
   const location = useLocation();
   return <div data-test-subj="locationPathname">{location.pathname}</div>;
+};
+
+const LocationSearchDisplay = () => {
+  const location = useLocation();
+  return <div data-test-subj="locationSearch">{location.search}</div>;
 };
 
 const createObservabilityServices = (
@@ -126,6 +161,27 @@ const renderLandingWithRouter = (enabled: boolean) => {
           <CompatRouter>
             <LandingPage />
             <LocationDisplay />
+          </CompatRouter>
+        </MemoryRouter>
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+};
+
+const renderLandingAtPathWithSearch = (initialPath: string) => {
+  const coreStart = coreMock.createStart();
+  coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
+    id === IS_ADD_DATA_PAGE_V2_ENABLED ? true : fallback
+  );
+  createCallApi(coreStart);
+  const services = createObservabilityServices(coreStart);
+  return render(
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <MemoryRouter initialEntries={[initialPath]}>
+          <CompatRouter>
+            <LandingPage />
+            <LocationSearchDisplay />
           </CompatRouter>
         </MemoryRouter>
       </KibanaContextProvider>
@@ -236,6 +292,27 @@ describe('LandingPage search (V2, Variant A)', () => {
     const searchBar = screen.getByTestId('observabilityOnboardingIntegrationsSearchFieldSearch');
     const heading = screen.getByRole('heading', { name: 'All integrations' });
     expect(searchBar.compareDocumentPosition(heading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+});
+
+describe('LandingPage collection chooser restore (V2)', () => {
+  it('hands the url collection to the results so the chooser can reopen', () => {
+    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    expect(screen.getByTestId('collectionToOpen')).toHaveTextContent('nginx');
+  });
+
+  // Without the strip, a refresh after closing would resurrect the chooser.
+  it('drops the collection param when the chooser closes, keeping the search', async () => {
+    const user = userEvent.setup();
+    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+
+    await user.click(screen.getByTestId('stubOpenCollection'));
+    expect(screen.getByTestId('flyoutCardId')).toHaveTextContent('collection:nginx');
+
+    await user.click(screen.getByTestId('stubCloseFlyout'));
+    expect(screen.queryByTestId('collectionFlyoutStub')).not.toBeInTheDocument();
+    expect(screen.getByTestId('locationSearch')).toHaveTextContent('?search=nginx');
+    expect(screen.getByTestId('locationSearch')).not.toHaveTextContent('collection');
   });
 });
 

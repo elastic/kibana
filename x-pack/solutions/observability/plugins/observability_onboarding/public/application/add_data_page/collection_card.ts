@@ -28,3 +28,6 @@ export type CollectionCardItem = GroupedIntegrationCardItem & {
  */
 export const isCollectionCard = (item: GroupedIntegrationCardItem): item is CollectionCardItem =>
   Boolean(item.isCollectionCard) && (item.groupMembers?.length ?? 0) >= 2;
+
+/** Fleet carries the `group` manifest id as the collection card's `name`. */
+export const getCollectionGroupId = (card: CollectionCardItem): string => card.name;

@@ -8,7 +8,8 @@
 import { EuiHorizontalRule, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { AddDataSearchBar, DocsLinksSection } from '../add_data_grid';
@@ -34,6 +35,19 @@ const AddDataPageV2 = () => {
   // Hosted here rather than inside the results, so surfaces other than a
   // search result card can open the same chooser.
   const [openCollection, setOpenCollection] = useState<CollectionCardItem | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Return state written by member links, so coming back from a member's detail
+  // page lands on the chooser it was picked from rather than a bare search.
+  const collectionToOpen = searchParams.get('collection') ?? undefined;
+
+  const closeCollection = useCallback(() => {
+    setOpenCollection(null);
+    if (!searchParams.has('collection')) return;
+    // Dropped on close so a refresh afterwards does not resurrect the chooser.
+    const next = new URLSearchParams(searchParams);
+    next.delete('collection');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   return (
     <EuiPageTemplate paddingSize="none" data-test-subj="addDataPageV2">
@@ -53,6 +67,7 @@ const AddDataPageV2 = () => {
             <ObservabilitySearchResults
               searchTerm={searchTerm}
               onOpenCollection={setOpenCollection}
+              collectionToOpen={collectionToOpen}
             />
           </>
         )}
@@ -62,9 +77,7 @@ const AddDataPageV2 = () => {
         <EuiHorizontalRule margin="xl" />
         <ObservabilityDocsLinksSection />
       </EuiPageTemplate.Section>
-      {openCollection && (
-        <CollectionFlyout card={openCollection} onClose={() => setOpenCollection(null)} />
-      )}
+      {openCollection && <CollectionFlyout card={openCollection} onClose={closeCollection} />}
     </EuiPageTemplate>
   );
 };

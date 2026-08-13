@@ -117,6 +117,38 @@ describe('useAddDataResultItems', () => {
     }
   });
 
+  // Return navigation happens across apps, so the flyout cannot be restored from
+  // component state. Only the member links carry the group id, so browsing the
+  // page never writes it into history.
+  it('points collection member return paths back at the open collection', () => {
+    const collection: GroupedIntegrationCardItem = {
+      ...makeCard({ id: 'collection:nginx', url: '/app/integrations/collection/nginx' }),
+      isCollectionCard: true,
+      groupMembers: [
+        makeCard({}),
+        makeCard({ id: 'epr:nginx_otel', name: 'nginx_otel', title: 'Nginx (OpenTelemetry)' }),
+      ],
+    };
+    const useAvailablePackages = mockPackages([collection]);
+
+    const { result } = renderHook(
+      () => useAddDataResultItems({ searchTerm: 'nginx', useAvailablePackages, useLocalSearch }),
+      { wrapper }
+    );
+
+    const [resultCard] = result.current.items;
+    if (!isCollectionCard(resultCard)) {
+      throw new Error('expected the collection card to survive the pipeline');
+    }
+    for (const memberUrl of resultCard.groupMembers.map(({ url }) => url)) {
+      expect(memberUrl).toContain(
+        `returnPath=${encodeURIComponent('?search=nginx&collection=nginx')}`
+      );
+    }
+    // The collection card itself is not a return target, so it stays clean.
+    expect(resultCard.url).not.toContain('collection%3Dnginx');
+  });
+
   it('surfaces the Fleet package loading error', () => {
     const useAvailablePackages = mockPackages([], new Error('registry down'));
 

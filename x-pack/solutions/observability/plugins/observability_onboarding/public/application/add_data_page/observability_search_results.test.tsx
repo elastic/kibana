@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
+import type { CollectionCardItem } from './collection_card';
 import { ObservabilitySearchResults } from './observability_search_results';
 
 const mockUseAvailablePackages = jest.fn();
@@ -28,7 +29,11 @@ jest.mock('@kbn/fleet-plugin/public', () => {
   };
 });
 
-const renderResults = (searchTerm = 'redis', onOpenCollection = jest.fn()) => {
+const renderResults = (
+  searchTerm = 'redis',
+  onOpenCollection = jest.fn(),
+  collectionToOpen?: string
+) => {
   render(
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
@@ -37,6 +42,7 @@ const renderResults = (searchTerm = 'redis', onOpenCollection = jest.fn()) => {
             <ObservabilitySearchResults
               searchTerm={searchTerm}
               onOpenCollection={onOpenCollection}
+              collectionToOpen={collectionToOpen}
             />
           </CompatRouter>
         </MemoryRouter>
@@ -65,6 +71,28 @@ const packagesResult = {
   ],
 };
 
+const nginxCollectionResult = () => ({
+  ...packagesResult,
+  allCards: [
+    {
+      id: 'collection:nginx',
+      name: 'nginx',
+      title: 'Nginx',
+      description: 'Choose from ECS-based or OTel-based collection.',
+      categories: ['observability'],
+      icons: [],
+      url: '/app/integrations/collection/nginx',
+      version: '',
+      integration: '',
+      isCollectionCard: true,
+      groupMembers: [
+        { ...packagesResult.allCards[0], id: 'epr:nginx', name: 'nginx', title: 'Nginx' },
+        { ...packagesResult.allCards[0], id: 'epr:nginx_otel', name: 'nginx_otel' },
+      ],
+    },
+  ],
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockAvailablePackagesHook.mockResolvedValue({
@@ -83,27 +111,7 @@ describe('ObservabilitySearchResults', () => {
 
   it('surfaces a collection card whose click opens the page-hosted chooser', async () => {
     const user = userEvent.setup();
-    mockUseAvailablePackages.mockReturnValue({
-      ...packagesResult,
-      allCards: [
-        {
-          id: 'collection:nginx',
-          name: 'nginx',
-          title: 'Nginx',
-          description: 'Choose from ECS-based or OTel-based collection.',
-          categories: ['observability'],
-          icons: [],
-          url: '/app/integrations/collection/nginx',
-          version: '',
-          integration: '',
-          isCollectionCard: true,
-          groupMembers: [
-            { ...packagesResult.allCards[0], id: 'epr:nginx', name: 'nginx', title: 'Nginx' },
-            { ...packagesResult.allCards[0], id: 'epr:nginx_otel', name: 'nginx_otel' },
-          ],
-        },
-      ],
-    });
+    mockUseAvailablePackages.mockReturnValue(nginxCollectionResult());
 
     const onOpenCollection = renderResults('nginx');
     const card = await screen.findByTestId('addDataResultCard-collection:nginx');
@@ -113,6 +121,69 @@ describe('ObservabilitySearchResults', () => {
     expect(onOpenCollection).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'collection:nginx' })
     );
+  });
+
+  // Returning from a member's detail page lands here with the group id in the
+  // url, which has to reopen the chooser the member was picked from.
+  it('reopens the chooser for the collection named in the url once results arrive', async () => {
+    mockUseAvailablePackages.mockReturnValue(nginxCollectionResult());
+
+    const onOpenCollection = renderResults('nginx', jest.fn(), 'nginx');
+
+    await screen.findByTestId('addDataResultCard-collection:nginx');
+    expect(onOpenCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'collection:nginx' })
+    );
+  });
+
+  // Fleet's hook rebuilds `allCards` on every render and the page keeps the
+  // opened card in state, so an unguarded reopen effect re-fires forever.
+  it('reopens the chooser once even though Fleet rebuilds its arrays each render', async () => {
+    mockUseAvailablePackages.mockImplementation(() => nginxCollectionResult());
+    const onOpenCollection = jest.fn();
+    const REOPEN_BUDGET = 5;
+
+    const PageHarness = () => {
+      const [openCard, setOpenCard] = React.useState<CollectionCardItem | null>(null);
+      const handleOpen = React.useCallback((card: CollectionCardItem) => {
+        onOpenCollection(card);
+        // Budgeted so a regression trips the assertion below instead of
+        // spinning the render loop until the suite times out.
+        if (onOpenCollection.mock.calls.length <= REOPEN_BUDGET) setOpenCard(card);
+      }, []);
+      return (
+        <>
+          <ObservabilitySearchResults
+            searchTerm="nginx"
+            onOpenCollection={handleOpen}
+            collectionToOpen="nginx"
+          />
+          <div data-test-subj="openCardId">{openCard?.id ?? ''}</div>
+        </>
+      );
+    };
+
+    render(
+      <I18nProvider>
+        <KibanaContextProvider services={coreMock.createStart()}>
+          <MemoryRouter initialEntries={['/']}>
+            <CompatRouter>
+              <PageHarness />
+            </CompatRouter>
+          </MemoryRouter>
+        </KibanaContextProvider>
+      </I18nProvider>
+    );
+
+    expect(await screen.findByTestId('openCardId')).toHaveTextContent('collection:nginx');
+    expect(onOpenCollection).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores a url collection the results do not contain', async () => {
+    const onOpenCollection = renderResults('redis', jest.fn(), 'nginx');
+
+    await screen.findByTestId('addDataResultCard-epr:redis');
+    expect(onOpenCollection).not.toHaveBeenCalled();
   });
 
   it('shows the error state when the Fleet module fails to load, and retries', async () => {
