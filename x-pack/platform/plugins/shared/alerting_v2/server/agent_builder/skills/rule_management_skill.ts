@@ -15,7 +15,6 @@ import {
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
 import {
-  generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
@@ -58,11 +57,6 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
         name: 'no-data-strategy',
         relativePath: './references',
         content: generateNoDataStrategyDoc(),
-      },
-      {
-        name: 'rule-schema',
-        relativePath: './references',
-        content: generateRuleSchemaDoc(),
       },
       {
         name: 'notifications-overview',
@@ -211,9 +205,6 @@ When the user wants alerts to recover only when a condition is met, to never rec
 
 ### No-Data Strategy
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
-
-### Rule Schema
-When composing or validating and a field is not in the operations tables (e.g. \`time_field\`, \`artifacts\`, nested query objects), consult the [rule-schema reference](./references/rule-schema.md).
 
 ### Notifications
 When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md) (includes **Notifications Require Alert Kind**). Do not compose action policies from this skill — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill after the rule is \`kind: alert\`.`,

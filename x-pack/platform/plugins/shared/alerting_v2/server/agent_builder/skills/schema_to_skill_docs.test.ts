@@ -11,7 +11,6 @@ import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispat
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
-  generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
@@ -177,30 +176,6 @@ describe('schema_to_skill_docs', () => {
       expect(() => generateOperationsDoc({ title: 'Missing Describe', schema })).toThrow(
         /missing \.describe\(\)/
       );
-    });
-  });
-
-  describe('generateRuleSchemaDoc', () => {
-    it('matches the snapshot', () => {
-      expect(generateRuleSchemaDoc()).toMatchSnapshot();
-    });
-
-    it('includes key field names from the schema', () => {
-      const doc = generateRuleSchemaDoc();
-      expect(doc).toContain('`kind`');
-      expect(doc).toContain('`metadata`');
-      expect(doc).toContain('`schedule`');
-      expect(doc).toContain('`query`');
-      expect(doc).toContain('`recovery_strategy`');
-      expect(doc).toContain('`no_data_strategy`');
-      expect(doc).toContain('`state_transition`');
-    });
-
-    it('does not contain stale field names', () => {
-      const doc = generateRuleSchemaDoc();
-      expect(doc).not.toContain('consecutive_breaches');
-      expect(doc).not.toContain('evaluation');
-      expect(doc).not.toContain('recovery_policy');
     });
   });
 

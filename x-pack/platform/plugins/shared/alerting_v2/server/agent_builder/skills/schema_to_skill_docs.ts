@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  createRuleDataBaseSchema,
   createActionPolicyDataSchema,
   alertEventSeveritySchema,
   ALERT_EPISODE_STATUS,
@@ -254,24 +253,6 @@ export const generateApiSchemaDoc = ({
 
   return sections.join('\n');
 };
-
-/**
- * Generates concise markdown documentation from the create-rule Zod schema.
- * Intended for embedding in the skill's `referencedContent`.
- */
-export const generateRuleSchemaDoc = (): string =>
-  generateApiSchemaDoc({
-    title: 'Rule API Schema Reference',
-    schema: createRuleDataBaseSchema,
-    extraSections: (jsonSchema) => {
-      const props = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
-      if (!props?.query) {
-        return undefined;
-      }
-      const queryVariants = formatVariantSchemas(props.query as JsonSchemaNode);
-      return queryVariants ? [{ heading: 'Query Formats', content: queryVariants }] : undefined;
-    },
-  });
 
 /**
  * Generates markdown for a discriminated-union tool operations schema

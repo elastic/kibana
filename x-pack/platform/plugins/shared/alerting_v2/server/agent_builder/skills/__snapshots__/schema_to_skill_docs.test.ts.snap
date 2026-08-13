@@ -284,49 +284,6 @@ Use \`validate\` as the last operation to confirm the rule is complete and ready
 | \`operation\` | \\"validate\\" | required |  |"
 `;
 
-exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
-"# Rule API Schema Reference
-
-## Top-Level Fields
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Rule kind: \\"alert\\" for stateful alerting with transitions, \\"signal\\" for stateless detection. (enum: alert \\\\| signal) |
-| \`metadata\` | object | required | Rule metadata. |
-| \`time_field\` | string | required | Time field used for the lookback window range filter. (min length: 1, max length: 128, default: \\"@timestamp\\") |
-| \`schedule\` | object | required | Execution schedule configuration. |
-| \`query\` | { format: \\"composed\\", ... } \\\\| { format: \\"standalone\\", ... } | required | Detection query configuration. |
-| \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional | How recovery is detected. \\"no_breach\\" recovers groups that stop breaching; \\"query\\" uses a custom recovery query; \\"none\\" disables recovery. (enum: no_breach \\\\| query \\\\| none) |
-| \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional | How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query. (enum: last_known_status \\\\| emit \\\\| recover \\\\| none) |
-| \`state_transition\` | object \\\\| null | optional |  |
-| \`grouping\` | object | optional | Grouping configuration. |
-| \`artifacts\` | object[] | optional | Artifacts attached to the rule, each shaped as \`{ id, type, data }\`. \`data\` carries type-specific fields: a \`runbook\` artifact requires \`data.content\` holding markdown, and a \`dashboard\` artifact requires \`data.dashboardId\` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in \`data\`. (max items: 100) |
-
-## Query Formats
-
-#### \`format: \\"composed\\"\`
-
-Composed query: a shared base with appendable breach and recovery segments.
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| \`format\` | \\"composed\\" | required |  |
-| \`base\` | string | required | Base ES\\\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |
-| \`breach\` | object | required | Breach detection configuration (required). |
-| \`recovery\` | object | optional | Recovery query segment. Required when recovery_strategy is \\"query\\". |
-
-#### \`format: \\"standalone\\"\`
-
-Standalone queries: independent full queries for breach, recovery, and no_data.
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| \`format\` | \\"standalone\\" | required |  |
-| \`breach\` | object | required | Breach detection configuration (required). |
-| \`recovery\` | object | optional | Recovery query. Required when recovery_strategy is \\"query\\". |
-| \`no_data\` | object | optional | No-data detection query. Required when no_data_strategy is not \\"none\\". |"
-`;
-
 exports[`schema_to_skill_docs generateSeverityDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Alert Event Severity
 

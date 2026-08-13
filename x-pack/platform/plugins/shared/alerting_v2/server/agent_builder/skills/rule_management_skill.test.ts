@@ -80,6 +80,7 @@ describe('createRuleManagementSkill', () => {
     );
     expect(refNames).not.toContain('concepts');
     expect(refNames).not.toContain('rule-operations-schema');
+    expect(refNames).not.toContain('rule-schema');
     expect(skill.content).toContain('# Rule Operations Schema Reference');
     expect(skill.content).toContain('`operation: "set_metadata"`');
     expect(skill.content).toContain('./references/rule-kind.md');
@@ -88,7 +89,7 @@ describe('createRuleManagementSkill', () => {
     expect(skill.content).toContain('./references/alert-event-severity.md');
     expect(skill.content).toContain('./references/recovery-strategy.md');
     expect(skill.content).toContain('./references/no-data-strategy.md');
-    expect(skill.content).toContain('./references/rule-schema.md');
+    expect(skill.content).not.toContain('./references/rule-schema.md');
     expect(skill.content).toContain('## When to Load References');
     expect(skill.content).not.toContain('## State Transition');
     expect(skill.content).toContain(
