@@ -41,6 +41,13 @@ export const manageRuleTool = ({
 }: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
+  annotations: {
+    title: 'Manage Rule',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   description: `Create or update an alerting V2 rule in the conversation.
 
 This tool only mutates the rule attachment shown in the conversation. It does
