@@ -121,7 +121,7 @@ const processFieldValue = (
   budget: ValueBudget
 ): unknown => {
   // CASE 1: a ES|QL complex column (histogram, aggregate_metric_double) arrives as a JSON string.
-  // We parse it back into an object so it can be explored.
+  // We parse it back into an object so it can be explored. Consumes only 1 value from the budget.
   const structured = parseEsqlStructuredValue(rawValue, ctx.columnsMeta?.[fieldName]?.esType);
   if (structured !== undefined) {
     budget.remaining -= 1;

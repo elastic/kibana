@@ -15,7 +15,7 @@ import type { DataSourceProfileProviderParams, RootContext } from '../../../prof
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider, isLogsDataSourceContext } from './profile';
-import { DataGridDensity } from '@kbn/unified-data-table';
+import { DataGridDensity, SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
@@ -201,7 +201,7 @@ describe('logsDataSourceProfileProvider', () => {
   });
 
   describe('getCellRenderers', () => {
-    it('should return cell renderers for log level fields', () => {
+    const getCellRenderers = (sourceDisplayMode: 'summary' | 'json' = 'summary') => {
       const toolkit = {
         ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
         actions: {
@@ -209,22 +209,39 @@ describe('logsDataSourceProfileProvider', () => {
           addFilter: jest.fn(),
         },
       };
-      const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(
+      const getCellRenderersAccessor = logsDataSourceProfileProvider.profile.getCellRenderers?.(
         () => ({}),
         { context: RESOLUTION_MATCH.context, toolkit }
       );
-      const getCellRenderersParams = {
+
+      return getCellRenderersAccessor?.({
         dataView: dataViewWithTimefieldMock,
         density: DataGridDensity.COMPACT,
         rowHeight: 0,
-      };
-      const cellRenderers = getCellRenderers?.(getCellRenderersParams);
+        sourceDisplayMode,
+      });
+    };
+
+    it('should return cell renderers for log level fields', () => {
+      const cellRenderers = getCellRenderers();
 
       expect(cellRenderers).toBeDefined();
       expect(cellRenderers?.['log.level']).toBeDefined();
       expect(cellRenderers?.['log.level.keyword']).toBeDefined();
       expect(cellRenderers?.log_level).toBeDefined();
       expect(cellRenderers?.['log_level.keyword']).toBeDefined();
+    });
+
+    it('should return a summary column renderer in summary mode', () => {
+      const cellRenderers = getCellRenderers('summary');
+
+      expect(cellRenderers?.[SOURCE_COLUMN]).toBeDefined();
+    });
+
+    it('should not override the source column renderer in JSON mode', () => {
+      const cellRenderers = getCellRenderers('json');
+
+      expect(cellRenderers?.[SOURCE_COLUMN]).toBeUndefined();
     });
   });
 
@@ -281,6 +298,7 @@ describe('logsDataSourceProfileProvider', () => {
       const config = columnConfiguration!._source({
         column: { id: '_source', displayAsText: 'Summary' },
         headerRowHeight: 1,
+        sourceDisplayMode: 'summary',
       });
 
       expect(config).toBeDefined();

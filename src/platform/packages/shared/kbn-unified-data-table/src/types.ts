@@ -53,9 +53,12 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
 
 export type CustomCellRenderer = Record<string, FunctionComponent<DataGridCellValueElementProps>>;
 
+export type SourceDisplayMode = 'summary' | 'json';
+
 export interface CustomGridColumnProps {
   column: EuiDataGridColumn;
   headerRowHeight?: number;
+  sourceDisplayMode: SourceDisplayMode;
 }
 
 export type CustomGridColumnsConfiguration = Record<
@@ -64,8 +67,6 @@ export type CustomGridColumnsConfiguration = Record<
 >;
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
-
-export type SourceDisplayMode = 'summary' | 'json';
 
 export type CustomBulkActions = Array<
   Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {

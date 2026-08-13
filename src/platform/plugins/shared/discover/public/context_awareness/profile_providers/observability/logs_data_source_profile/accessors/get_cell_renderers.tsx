@@ -37,5 +37,7 @@ export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRend
       }),
       {}
     ),
-    [SOURCE_COLUMN]: getSummaryColumn(params, toolkit),
+    ...(params.sourceDisplayMode === 'summary'
+      ? { [SOURCE_COLUMN]: getSummaryColumn(params, toolkit) }
+      : {}),
   });

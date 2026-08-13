@@ -124,12 +124,14 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
+      sourceDisplayMode: props.sourceDisplayMode ?? 'summary',
     });
   }, [
     getCellRenderersAccessor,
     props.dataView,
     props.services.storage,
     props.configRowHeight,
+    props.sourceDisplayMode,
     gridProps.dataGridDensityState,
     gridProps.rowHeightState,
   ]);

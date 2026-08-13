@@ -335,7 +335,11 @@ function buildEuiGridColumn({
   }
 
   if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
-    return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
+    return customGridColumnsConfiguration[column.id]({
+      column,
+      headerRowHeight,
+      sourceDisplayMode,
+    });
   }
 
   if (disableCellActions) {

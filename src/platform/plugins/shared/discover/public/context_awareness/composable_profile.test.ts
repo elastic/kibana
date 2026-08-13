@@ -17,6 +17,7 @@ const getCellRenderersParams = {
   dataView: dataViewWithTimefieldMock,
   density: DataGridDensity.COMPACT,
   rowHeight: 0,
+  sourceDisplayMode: 'summary' as const,
 };
 
 describe('getMergedAccessor', () => {

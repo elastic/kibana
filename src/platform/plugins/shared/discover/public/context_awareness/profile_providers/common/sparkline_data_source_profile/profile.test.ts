@@ -180,6 +180,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
+        sourceDisplayMode: 'summary',
       });
     };
 
@@ -208,6 +209,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
+        sourceDisplayMode: 'summary' as const,
       };
       const renderers = getCellRenderers(params);
       expect(renderers).toBe(prevRenderers);
@@ -229,6 +231,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
+        sourceDisplayMode: 'summary',
       });
       expect(renderers).toHaveProperty('existing_col', existingRenderer);
       expect(renderers).toHaveProperty('bytes_spark');
@@ -250,6 +253,7 @@ describe('sparklineDataSourceProfileProvider', () => {
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
+        sourceDisplayMode: 'summary',
       });
       expect(renderers.some_other_col).toBe(nonSparklineRenderer);
     });
