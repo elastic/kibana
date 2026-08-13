@@ -6,7 +6,9 @@
  */
 
 import type { DebugState } from '@elastic/charts';
+import { encode as encodeRison } from '@kbn/rison';
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { LOGSTASH_IN_RANGE_DATES } from '../../constants';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /** `LensApp` helpers needed by workspace navigation / formula reading. */
@@ -16,6 +18,11 @@ interface LensWorkspaceDeps {
   waitForVisualization: (chartTestSubj: string) => Promise<void>;
   getFormulaModelIndex: () => Promise<number>;
   getCodeEditorValue: (modelIndex: number) => Promise<string>;
+}
+
+export interface LensEditorTimeRange {
+  from: string;
+  to: string;
 }
 
 /**
@@ -77,6 +84,26 @@ export class LensWorkspace {
 
   async openFullEditor() {
     await this.page.gotoApp('lens');
+    await this.page.waitForURL((url) => url.hash.includes('_g='));
+    await this.deps.waitForLensApp();
+  }
+
+  /**
+   * Opens a fresh empty Lens editor with global `_g` already in the hash.
+   * Landing on `#/` without `_g` lets `syncGlobalQueryStateWithUrl` `history.replace`
+   * the timefilter defaults into the URL after mount, which remounts the editor and
+   * detaches open UI (e.g. the chart switcher) under Playwright.
+   *
+   * Defaults to {@link LOGSTASH_IN_RANGE_DATES}. Suites with a different window must
+   * pass `timeRange` — an existing `_g` is not overwritten from uiSettings.
+   */
+  async openEmptyEditor(timeRange: LensEditorTimeRange = LOGSTASH_IN_RANGE_DATES) {
+    const globalState = encodeRison({
+      filters: [],
+      refreshInterval: { pause: true, value: 60000 },
+      time: { from: timeRange.from, to: timeRange.to },
+    });
+    await this.page.gotoApp('lens', { hash: `/?_g=${globalState}` });
     await this.deps.waitForLensApp();
   }
 
@@ -92,6 +119,7 @@ export class LensWorkspace {
    */
   async openEditor(id: string, chartTestSubj: string) {
     await this.page.gotoApp('lens', { hash: `/edit/${id}` });
+    await this.page.waitForURL((url) => url.hash.includes('_g='));
     await this.deps.waitForVisualization(chartTestSubj);
   }
 
