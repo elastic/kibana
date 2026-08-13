@@ -108,6 +108,12 @@ export const compareCmd: Command<void> = {
       );
     }
 
+    try {
+      await evalsClient.assertSpacesExist();
+    } catch (error) {
+      throw createFlagError(error instanceof Error ? error.message : String(error));
+    }
+
     let firstExperimentId: string;
     let secondExperimentId: string;
     let baselineMetadata: BaselineExperiment | undefined;

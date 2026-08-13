@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
+import { z } from '@kbn/zod';
 import {
   API_VERSIONS,
   DeleteEvaluationDatasetResponse,
@@ -116,6 +117,13 @@ export interface BaselineExperiment {
 const EVALS_PLUGIN_DISABLED_MESSAGE =
   'Evaluations plugin is not enabled on the target Kibana. Ensure xpack.evals.enabled=true is set in the Kibana configuration.';
 
+const SPACES_URL = '/api/spaces/space';
+// Serverless turns away a public api call that doesn't say which version it
+// was written against.
+const SPACES_HEADERS = { 'elastic-api-version': '2023-10-31' };
+
+const SpacesResponse = z.array(z.object({ id: z.string() }));
+
 const getResponseData = (response: unknown): unknown => {
   if (typeof response === 'object' && response !== null && 'data' in response) {
     return (response as { data: unknown }).data;
@@ -176,19 +184,22 @@ const buildExperimentQuery = (options?: GetExperimentFilters) => ({
 const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
 export class EvalsClient {
+  /** The spaces this run writes to, in the order they were listed. */
+  private readonly spaceIds: string[];
   /** The space every request is sent to, when it isn't the default one. */
   private readonly homeSpaceId?: string;
 
   constructor(
     private readonly kbnClient: KbnClient,
     private readonly log: SomeDevLog,
-    { spaceIds }: { spaceIds?: string[] } = {}
+    { spaceIds = [] }: { spaceIds?: string[] } = {}
   ) {
+    this.spaceIds = spaceIds;
     // Runs in the space the datasets are written to, rather than writing to it
     // from the default space, so ids resolve and privileges are checked where
     // the data lands. The first space listed, so a run that widens an existing
     // dataset's spaces still works from the one already holding it.
-    const homeSpaceId = spaceIds?.[0] ?? DEFAULT_SPACE_ID;
+    const homeSpaceId = spaceIds[0] ?? DEFAULT_SPACE_ID;
     this.homeSpaceId = homeSpaceId === DEFAULT_SPACE_ID ? undefined : homeSpaceId;
   }
 
@@ -508,15 +519,57 @@ export class EvalsClient {
       });
     } catch (error: unknown) {
       if (getStatusCode(error) === 404) {
-        // Kibana answers 404 for a space that doesn't exist, before the request
-        // reaches the route that would name the bad id.
-        throw new Error(
-          this.homeSpaceId
-            ? `Evaluations API returned 404 for space "${this.homeSpaceId}". The space may not exist on the target Kibana; --space-ids must name existing spaces. ${EVALS_PLUGIN_DISABLED_MESSAGE}`
-            : EVALS_PLUGIN_DISABLED_MESSAGE
-        );
+        throw new Error(EVALS_PLUGIN_DISABLED_MESSAGE);
       }
       throw error;
+    }
+  }
+
+  /**
+   * Refuses a run aimed at a space that isn't there. Kibana only checks that a
+   * space exists when it serves a page, so requests prefixed with a mistyped
+   * one are answered as though it were real, and the run would write datasets
+   * and scores that no space can reach.
+   */
+  async assertSpacesExist(): Promise<void> {
+    if (this.spaceIds.length === 0) {
+      return;
+    }
+
+    const existingSpaceIds = await this.fetchSpaceIds();
+
+    // Nothing to check against. Stopping every run whose credentials can't read
+    // the space list would cost more than the mistyped id this catches.
+    if (!existingSpaceIds) {
+      this.log.warning(
+        'Could not read the spaces on the target Kibana, so --space-ids goes unverified.'
+      );
+      return;
+    }
+
+    const unknownSpaceIds = this.spaceIds.filter((spaceId) => !existingSpaceIds.has(spaceId));
+
+    if (unknownSpaceIds.length > 0) {
+      throw new Error(
+        `Unknown space id(s): ${unknownSpaceIds.join(
+          ', '
+        )}. --space-ids must name spaces that exist on the target Kibana.`
+      );
+    }
+  }
+
+  private async fetchSpaceIds(): Promise<Set<string> | undefined> {
+    try {
+      const response = await this.kbnClient.request({
+        path: SPACES_URL,
+        method: 'GET',
+        headers: SPACES_HEADERS,
+        retries: 0,
+      });
+
+      return new Set(SpacesResponse.parse(getResponseData(response)).map(({ id }) => id));
+    } catch (error) {
+      return undefined;
     }
   }
 }

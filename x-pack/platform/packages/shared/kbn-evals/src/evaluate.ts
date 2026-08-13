@@ -89,6 +89,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         spaceIds: getSpaceIdsFromEnv(),
       });
       await evalsClient.assertPluginEnabled();
+      await evalsClient.assertSpacesExist();
       await use(evalsClient);
     },
     { scope: 'worker' },

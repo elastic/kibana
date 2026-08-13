@@ -880,17 +880,71 @@ describe('EvalsClient', () => {
       expect(paths.length).toBeGreaterThan(8);
       expect(paths.filter((path) => !path.startsWith('/s/marketing/'))).toEqual([]);
     });
+  });
 
-    it('names the space when a prefixed request finds nothing there', async () => {
-      // Kibana 404s a request to a space that doesn't exist before it reaches
-      // the route that would name the bad id.
+  describe('assertSpacesExist', () => {
+    const clientFor = (spaceIds: string[], spaces: unknown) => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse(spaces));
+
+      return new EvalsClient(kbnClient, createLog(), { spaceIds });
+    };
+
+    it('refuses a run aimed at a space that does not exist', async () => {
+      // Kibana serves the api under /s/<anything>, so a typo would otherwise
+      // spend the run writing where nobody can read.
+      const client = clientFor(['markting'], [{ id: 'default' }, { id: 'marketing' }]);
+
+      await expect(client.assertSpacesExist()).rejects.toThrow(
+        'Unknown space id(s): markting. --space-ids must name spaces that exist on the target Kibana.'
+      );
+    });
+
+    it('names every space it could not find', async () => {
+      const client = clientFor(['marketing', 'sails', 'legl'], [{ id: 'marketing' }]);
+
+      await expect(client.assertSpacesExist()).rejects.toThrow('Unknown space id(s): sails, legl.');
+    });
+
+    it('lets a run through to the spaces it named', async () => {
+      const client = clientFor(['marketing', 'sales'], [{ id: 'marketing' }, { id: 'sales' }]);
+
+      await expect(client.assertSpacesExist()).resolves.toBeUndefined();
+    });
+
+    it('asks about the spaces outside any of them', async () => {
+      // Asking through /s/<typo> would answer for the space it is checking.
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse([{ id: 'marketing' }]));
+      const client = new EvalsClient(kbnClient, createLog(), { spaceIds: ['marketing'] });
+
+      await client.assertSpacesExist();
+
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({ path: '/api/spaces/space' })
+      );
+    });
+
+    it('says nothing when no spaces were asked for', async () => {
+      const kbnClient = createMockKbnClient();
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await expect(client.assertSpacesExist()).resolves.toBeUndefined();
+      expect(kbnClient.request).not.toHaveBeenCalled();
+    });
+
+    it('warns and continues when the spaces cannot be read', async () => {
+      // Credentials that cannot list spaces can't tell a missing one from a
+      // hidden one, and failing those runs would cost more than it saves.
       const kbnClient = createMockKbnClient();
       kbnClient.request.mockRejectedValue(
-        Object.assign(new Error('Not Found'), { response: { status: 404 } })
+        Object.assign(new Error('Forbidden'), { response: { status: 403 } })
       );
-      const client = new EvalsClient(kbnClient, createLog(), { spaceIds: ['markting'] });
+      const log = createLog();
+      const client = new EvalsClient(kbnClient, log, { spaceIds: ['marketing'] });
 
-      await expect(client.assertPluginEnabled()).rejects.toThrow(/space "markting"/);
+      await expect(client.assertSpacesExist()).resolves.toBeUndefined();
+      expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('--space-ids'));
     });
   });
 });
