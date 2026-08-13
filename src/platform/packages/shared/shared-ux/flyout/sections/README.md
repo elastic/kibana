@@ -85,8 +85,8 @@ import { FlyoutSection, FlyoutSubsection } from '@kbn/flyout-sections';
 
 ## Sibling dividers
 
-Consecutive sections, subsections, and accordions separate themselves with CSS using sibling
-selectors. No wrapper or manual spacing is needed.
+Consecutive sections (or consecutive accordions) separate themselves with CSS using
+`[data-flyout-section] + &` sibling selectors. No wrapper or manual spacing is needed.
 
 - Between **non-bordered** siblings: a thin horizontal rule with `size.m` margin above and
   below (matching `EuiHorizontalRule margin="m"`).
@@ -96,5 +96,17 @@ selectors. No wrapper or manual spacing is needed.
 For accordions the rule applies while the preceding accordion is **closed**; it is suppressed
 while it is open (the panel itself provides the visual separation).
 
-This is implemented via `& + &` and `&:not([data-bordered]) + &` / `&:not([data-open]) + &`
-CSS selectors in Emotion. No `showBottomDivider` prop is exposed.
+No `showBottomDivider` prop is exposed.
+
+### Mixing `FlyoutSection` and `FlyoutAccordion` as siblings
+
+**Not supported.** A flyout body should contain only `FlyoutSection` components or only
+`FlyoutAccordion` components — not both in the same container.
+
+Using `FlyoutSubsection` or arbitrary content nodes between sections or accordions is fine.
+The sibling selectors are keyed on the `data-flyout-section` attribute, so unstructured blocks
+in between simply break the selector chain without breaking layout.
+
+The CSS degrades gracefully — the margin and divider rules still fire via the shared
+`[data-flyout-section]` attribute — but the visual result is not guaranteed to match the
+design spec.

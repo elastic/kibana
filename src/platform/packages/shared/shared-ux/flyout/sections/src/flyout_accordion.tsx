@@ -23,11 +23,11 @@ import { renderTitleAction, renderTitleIcon, renderTitleWithIcon } from './title
 
 const getAccordionStyles = ({ euiTheme }: UseEuiTheme) => ({
   wrapper: css`
-    & + & {
+    [data-flyout-section] + & {
       margin-block-start: ${euiTheme.size.m};
     }
-    /* Closed preceding accordion: draw a rule above the following accordion. */
-    &:not([data-open]) + & {
+    /* Non-bordered/non-open preceding sibling: draw a rule above. */
+    [data-flyout-section]:not([data-bordered]):not([data-open]) + & {
       padding-block-start: ${euiTheme.size.m};
       border-block-start: ${euiTheme.border.thin};
     }
@@ -71,7 +71,7 @@ export const FlyoutAccordion = ({
   );
 
   return (
-    <div css={styles.wrapper} data-open={isOpen || undefined}>
+    <div css={styles.wrapper} data-flyout-section="accordion" data-open={isOpen || undefined}>
       <EuiAccordion
         id={accordionId}
         buttonContent={buttonContent}

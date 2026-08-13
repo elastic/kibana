@@ -23,11 +23,11 @@ import { renderTitleAction, renderTitleIcon, renderTitleWithIcon } from './title
 
 const getSectionStyles = ({ euiTheme }: UseEuiTheme) => ({
   section: css`
-    & + & {
+    [data-flyout-section] + & {
       margin-block-start: ${euiTheme.size.m};
     }
-    /* Non-bordered preceding sibling: draw a rule above the following section. */
-    &:not([data-bordered]) + & {
+    /* Non-bordered/non-open preceding sibling: draw a rule above. */
+    [data-flyout-section]:not([data-bordered]):not([data-open]) + & {
       padding-block-start: ${euiTheme.size.m};
       border-block-start: ${euiTheme.border.thin};
     }
@@ -69,6 +69,7 @@ export const FlyoutSection = ({
   return (
     <section
       css={styles.section}
+      data-flyout-section="section"
       data-bordered={hasBorder || undefined}
       data-test-subj={dataTestSubj}
     >
