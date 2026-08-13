@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import type { KIQueryGenerationEvaluator, QueryAttempt } from '../types';
-import { getQueriesFromOutput } from '../types';
-
-const getQueryAttempts = (output: unknown): QueryAttempt[] | undefined =>
-  output &&
-  typeof output === 'object' &&
-  !Array.isArray(output) &&
-  'query_attempts' in output &&
-  Array.isArray((output as { query_attempts: unknown }).query_attempts)
-    ? (output as { query_attempts: QueryAttempt[] }).query_attempts
-    : undefined;
+import type { KIQueryGenerationEvaluator } from '../types';
+import { getQueriesFromOutput, getQueryAttempts } from '../types';
 
 const getExistingQueries = (
   input: unknown
@@ -47,16 +38,25 @@ export const exactDuplicateAvoidanceEvaluator: KIQueryGenerationEvaluator = {
       };
     }
 
+    const attemptedQueryCount = attempts.length;
+    if (attemptedQueryCount === 0) {
+      return { score: null, explanation: 'No queries attempted, nothing to score' };
+    }
+
+    // `exactDuplicate` is decided independently of `status`, which is first-failure-wins and would
+    // hide a duplicate that also tripped the intent or feature_ids gate.
     const exactDuplicateAttemptCount = attempts.filter(
-      (attempt) => attempt.status === 'Duplicate'
+      (attempt) => attempt.exactDuplicate === true
     ).length;
     const acceptedCount = attempts.filter((attempt) => attempt.status === 'Added').length;
     const failedCount = attempts.filter((attempt) => attempt.status === 'Failed to add').length;
-    const attemptedQueryCount = attempts.length;
+    const rejectedAsDuplicateCount = attempts.filter(
+      (attempt) => attempt.status === 'Duplicate'
+    ).length;
 
     const acceptedQueries = getQueriesFromOutput(output);
 
-    const score = 1 - exactDuplicateAttemptCount / Math.max(1, attemptedQueryCount);
+    const score = 1 - exactDuplicateAttemptCount / attemptedQueryCount;
 
     return {
       score,
@@ -64,6 +64,9 @@ export const exactDuplicateAvoidanceEvaluator: KIQueryGenerationEvaluator = {
       metadata: {
         attemptedQueryCount,
         exactDuplicateAttemptCount,
+        // Duplicates the dedup gate actually rejected. Lower than exactDuplicateAttemptCount when
+        // an earlier gate claimed the attempt first.
+        rejectedAsDuplicateCount,
         acceptedCount,
         failedCount,
         acceptedQueryCountInOutput: acceptedQueries.length,

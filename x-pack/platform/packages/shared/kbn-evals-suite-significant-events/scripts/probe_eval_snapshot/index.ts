@@ -52,15 +52,30 @@ run(
     const datasetIds = getAllDatasetIds();
     const datasetId = String(flags.dataset || 'all');
 
+    if (datasetId === 'list') {
+      log.info(`Registered datasets: ${datasetIds.join(', ')}`);
+      return;
+    }
+
     const datasetsToProbe =
       datasetId === 'all'
         ? datasetIds
-        : datasetId === 'list'
-        ? (log.info(`Registered datasets: ${datasetIds.join(', ')}`), [])
-        : [datasetId];
+        : datasetId
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean);
+
+    const unknownIds = datasetsToProbe.filter((id) => !datasetIds.includes(id));
+    if (unknownIds.length > 0) {
+      throw new Error(
+        `Unknown dataset id(s): ${unknownIds.join(', ')}\nRegistered datasets: ${datasetIds.join(
+          ', '
+        )}`
+      );
+    }
 
     if (datasetsToProbe.length === 0) {
-      return;
+      throw new Error(`No dataset selected. Pass --dataset <id[,id]>, "all", or "list".`);
     }
 
     const scenario = String(flags.scenario || '');
@@ -100,8 +115,7 @@ run(
     for (const id of datasetsToProbe) {
       const datasetConfig = getDatasetById(id);
       if (!datasetConfig) {
-        log.warning(`Unknown dataset "${id}" — skipping`);
-        continue;
+        throw new Error(`Dataset "${id}" is registered but has no config`);
       }
 
       const gcs: GcsConfig = datasetConfig.gcs;
@@ -231,7 +245,8 @@ run(
       ],
       array: ['esql', 'mode'],
       help: `
-        --dataset         Dataset id to probe, comma-separated list, or "all" (default: all)
+        --dataset         Dataset id to probe, comma-separated list, "all", or "list"
+                          to print the registered ids (default: all)
         --scenario        (required) Scenario snapshot to replay for each dataset
         --mode            Inspection mode, repeatable: fields (sample-doc leaf keys),
                           mapping (duration-family mapping fields), patterns (top body.text)

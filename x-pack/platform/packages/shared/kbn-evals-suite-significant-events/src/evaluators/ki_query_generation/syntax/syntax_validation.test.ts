@@ -120,7 +120,7 @@ describe('syntax_validation evaluator', () => {
     expect(metadata.includesHitRate).toBe(false);
     expect(metadata.executionHitRate).toBeNull();
     expect(metadata.declaredProactiveCount).toBe(1);
-    expect(metadata.missingIntentCount).toBe(0);
+    expect(metadata.acceptedWithoutIntentCount).toBe(0);
     // Both remaining score components still score 1.
     expect(result.score).toBe(1);
   });
@@ -141,7 +141,7 @@ describe('syntax_validation evaluator', () => {
 
     const metadata = result.metadata as Record<string, unknown>;
     expect(metadata.proactiveMatchedCount).toBe(1);
-    expect(metadata.proactiveExcludedCount).toBe(1);
+    expect(metadata.declaredProactiveCount).toBe(1);
     expect(metadata.declaredProactiveRate).toBe(1);
     expect(metadata.executionHitRate).toBeNull();
   });
@@ -161,9 +161,65 @@ describe('syntax_validation evaluator', () => {
     });
 
     const metadata = result.metadata as Record<string, unknown>;
-    expect(metadata.missingIntentCount).toBe(1);
+    expect(metadata.acceptedWithoutIntentCount).toBe(1);
     expect(metadata.includesHitRate).toBe(false);
     expect(metadata.executionHitRate).toBeNull();
+  });
+
+  it('reports omitted intent from rejected attempts, which accepted queries cannot show', async () => {
+    const evaluator = createSyntaxValidationEvaluator(
+      createEsClient({
+        [MATCH_HIT]: { values: [[1]] },
+      })
+    );
+
+    const result = await evaluator.evaluate({
+      input: { sample_logs: [] },
+      output: {
+        queries: [query(MATCH_HIT, true)],
+        query_attempts: [
+          { title: 'a', esql: MATCH_HIT, status: 'Added' as const },
+          {
+            title: 'b',
+            esql: MATCH_HIT,
+            status: 'Failed to add' as const,
+            failureReason: 'missing_intent' as const,
+          },
+          {
+            title: 'c',
+            esql: MATCH_HIT,
+            status: 'Failed to add' as const,
+            failureReason: 'unknown_features' as const,
+          },
+        ],
+      } as Parameters<typeof evaluator.evaluate>[0]['output'],
+      expected: {},
+      metadata: null,
+    });
+
+    const metadata = result.metadata as Record<string, unknown>;
+    // Every accepted query declared intent, so the accepted-side counter stays 0...
+    expect(metadata.acceptedWithoutIntentCount).toBe(0);
+    // ...while the attempt-derived counter shows the model did omit it once.
+    expect(metadata.missingIntentAttemptCount).toBe(1);
+  });
+
+  it('reports missingIntentAttemptCount as null when attempts were not collected', async () => {
+    const evaluator = createSyntaxValidationEvaluator(
+      createEsClient({
+        [MATCH_HIT]: { values: [[1]] },
+      })
+    );
+
+    const result = await evaluator.evaluate({
+      input: { sample_logs: [] },
+      output: [query(MATCH_HIT, true)],
+      expected: {},
+      metadata: null,
+    });
+
+    const metadata = result.metadata as Record<string, unknown>;
+    expect(metadata.missingIntentAttemptCount).toBeNull();
   });
 
   it('keeps executionHitRate null and the score finite when every query is declared proactive', async () => {
@@ -310,7 +366,7 @@ describe('syntax_validation evaluator', () => {
     expect(result.score).toBeCloseTo((1 + 1 + 0) / 3, 5);
   });
 
-  it('marks intent as unknown and reports missingIntentCount when no declaration', async () => {
+  it('marks intent as unknown and reports acceptedWithoutIntentCount when no declaration', async () => {
     const evaluator = createSyntaxValidationEvaluator(
       createEsClient({
         [MATCH_MISS]: { values: [] },
@@ -325,7 +381,7 @@ describe('syntax_validation evaluator', () => {
     });
 
     const metadata = result.metadata as Record<string, unknown>;
-    expect(metadata.missingIntentCount).toBe(1);
+    expect(metadata.acceptedWithoutIntentCount).toBe(1);
     expect(metadata.declaredProactiveCount).toBe(0);
   });
 

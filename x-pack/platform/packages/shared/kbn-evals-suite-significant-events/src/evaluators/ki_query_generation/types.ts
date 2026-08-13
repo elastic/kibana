@@ -7,7 +7,7 @@
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { QueryAttempt, SignificantEventsToolUsage } from '@kbn/streams-ai';
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -34,13 +34,8 @@ export interface Query {
   expects_matches?: boolean;
 }
 
-/** Eval-only: a query attempt from add_queries, incl. rejected ones. */
-export interface QueryAttempt {
-  title: string;
-  esql: string;
-  status: 'Added' | 'Duplicate' | 'Failed to add';
-  replaces?: string;
-}
+/** Eval-only: a query attempt from add_queries, incl. rejected ones. Owned by `@kbn/streams-ai`. */
+export type { QueryAttempt };
 
 export interface KIQueryGenerationEvaluationExample {
   input: { sample_logs?: string[]; sample_docs?: Array<Record<string, unknown>> } & Record<
@@ -72,6 +67,19 @@ export const getQueriesFromOutput = (output: KIQueryGenerationOutput | undefined
   }
   return Array.isArray(output) ? output : output.queries ?? [];
 };
+
+/**
+ * Reads the attempt diagnostics a task returns when `collectQueryAttempts` is on.
+ * `undefined` means the task did not collect them, which is distinct from an empty run.
+ */
+export const getQueryAttempts = (output: unknown): QueryAttempt[] | undefined =>
+  output &&
+  typeof output === 'object' &&
+  !Array.isArray(output) &&
+  'query_attempts' in output &&
+  Array.isArray((output as { query_attempts: unknown }).query_attempts)
+    ? (output as { query_attempts: QueryAttempt[] }).query_attempts
+    : undefined;
 
 export type KIQueryGenerationEvaluator = Evaluator<
   KIQueryGenerationEvaluationExample,

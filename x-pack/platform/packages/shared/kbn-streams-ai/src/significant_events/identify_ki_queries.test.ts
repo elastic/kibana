@@ -195,6 +195,8 @@ interface HarnessOptions {
   collectQueryAttempts?: boolean;
   existingQueries?: ExistingQuerySummary[];
   maxExistingQueriesForContext?: number;
+  /** Overrides the stream, so tests can reproduce the eval's wildcard stream name. */
+  stream?: Streams.all.Definition;
   /** Each array of query payloads is issued as its own `add_queries` call. */
   scriptedAddQueries?: Array<Array<Record<string, unknown>>>;
   callGetStreamFeatures?: boolean;
@@ -243,7 +245,7 @@ const runIdentifyKIQueries = async (options: HarnessOptions = {}) => {
   });
 
   const result = await identifyKIQueries({
-    stream,
+    stream: options.stream ?? stream,
     esClient: createEsClient().esClient,
     getFeatures,
     inferenceClient,
@@ -461,7 +463,100 @@ describe('identifyKIQueries agent', () => {
       };
       expect(addQueriesResponse.response.queries[0].status).toBe('Duplicate');
       expect(result.queries).toHaveLength(0);
-      expect(result.queryAttempts?.[0]).toMatchObject({ status: 'Duplicate' });
+      expect(result.queryAttempts?.[0]).toMatchObject({
+        status: 'Duplicate',
+        exactDuplicate: true,
+      });
+    });
+
+    it('rejects a duplicate when the seed FROM differs from the stream sources', async () => {
+      // Mirrors the eval: the stream name is a wildcard and seeds are authored un-rewritten, so
+      // the candidate's FROM is rewritten to `logs*, logs*.*` while the seed says `logs`.
+      const wildcardStream = {
+        name: 'logs*',
+        description: 'A test stream',
+      } as Streams.all.Definition;
+
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        stream: wildcardStream,
+        requireQueryIntent: true,
+        collectQueryAttempts: true,
+        existingQueries: [
+          {
+            id: 'seed-jdbc',
+            title: 'JDBC connection failure',
+            type: 'match',
+            severity_score: 80,
+            description: 'Seeded, authored against the bare stream name',
+            esql: 'FROM logs | WHERE message == "dup"',
+          },
+        ],
+        scriptedAddQueries: [
+          [scriptedQuery('FROM logs | WHERE message == "dup"', { expects_matches: true })],
+        ],
+      });
+
+      const addQueriesResponse = addQueriesResponses[0] as {
+        response: { queries: Array<{ status: string }> };
+      };
+      expect(addQueriesResponse.response.queries[0].status).toBe('Duplicate');
+      expect(result.queries).toHaveLength(0);
+      expect(result.queryAttempts?.[0]).toMatchObject({
+        status: 'Duplicate',
+        exactDuplicate: true,
+      });
+    });
+
+    it('reports exactDuplicate even when an earlier gate rejects the attempt first', async () => {
+      // `status` is first-failure-wins, so a duplicate that also omits intent surfaces as
+      // 'Failed to add'. `exactDuplicate` must still identify it as a duplicate.
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        requireQueryIntent: true,
+        collectQueryAttempts: true,
+        existingQueries: [
+          {
+            id: 'seed-dup',
+            title: 'Seeded',
+            type: 'match',
+            severity_score: 50,
+            description: 'Seeded query',
+            esql: 'FROM logs, logs.* | WHERE message == "dup"',
+          },
+        ],
+        scriptedAddQueries: [
+          // No expects_matches, so the intent gate claims it before dedup runs.
+          [scriptedQuery('FROM logs | WHERE message == "dup"', { expects_matches: undefined })],
+        ],
+      });
+
+      const addQueriesResponse = addQueriesResponses[0] as {
+        response: { queries: Array<{ status: string }> };
+      };
+      expect(addQueriesResponse.response.queries[0].status).toBe('Failed to add');
+      expect(result.queries).toHaveLength(0);
+      expect(result.queryAttempts?.[0]).toMatchObject({
+        status: 'Failed to add',
+        failureReason: 'missing_intent',
+        exactDuplicate: true,
+      });
+    });
+
+    it('does not compute exactDuplicate when attempts are not collected', async () => {
+      const { result } = await runIdentifyKIQueries({
+        existingQueries: [
+          {
+            id: 'seed-dup',
+            title: 'Seeded',
+            type: 'match',
+            severity_score: 50,
+            description: 'Seeded query',
+            esql: 'FROM logs, logs.* | WHERE message == "dup"',
+          },
+        ],
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "dup"')]],
+      });
+
+      expect(result.queryAttempts).toBeUndefined();
     });
   });
 });
