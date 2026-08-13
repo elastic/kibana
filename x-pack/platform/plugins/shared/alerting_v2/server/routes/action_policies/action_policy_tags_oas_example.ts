@@ -10,20 +10,18 @@ import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
-export const ACTION_POLICY_TAGS_RESPONSE: ActionPolicyTagsResponse = [
-  'production',
-  'critical',
-  'hosts',
-];
+export const ACTION_POLICY_TAGS_RESPONSE: ActionPolicyTagsResponse = {
+  tags: ['production', 'critical', 'hosts'],
+};
 
 const INVALID_ACTION_POLICY_TAGS_QUERY_RESPONSE = invalidResponseExample({
   summary: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
-  message: 'search: Too small: expected string to have >=1 characters',
+  message: 'search: Too big: expected string to have <=256 characters',
   details: {
     errors: {
       errors: [],
       properties: {
-        search: { errors: ['Too small: expected string to have >=1 characters'] },
+        search: { errors: ['Too big: expected string to have <=256 characters'] },
       },
     },
   },
@@ -34,7 +32,7 @@ export const actionPolicyTagsOasExamples = (): AlertingOasOperationObject =>
     responses: {
       200: {
         name: 'actionPolicyTagsResponse',
-        summary: 'Suggested action policy tags',
+        summary: 'Action policy tags',
         value: ACTION_POLICY_TAGS_RESPONSE,
       },
       400: INVALID_ACTION_POLICY_TAGS_QUERY_RESPONSE,

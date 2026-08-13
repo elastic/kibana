@@ -25,15 +25,15 @@ import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions'
 @injectable()
 export class ActionPolicyTagsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
-  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/tags`;
+  static path = `${ALERTING_V2_ACTION_POLICY_API_PATH}/tags`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
     },
   };
   static routeOptions = {
-    summary: 'Get action policy tags suggestions',
-    description: 'Get suggestions for action policy tags based on an optional search query.',
+    summary: 'Get action policy tags',
+    description: 'Get unique tags used across action policies.',
     oasOperationObject: actionPolicyTagsOasExamples,
   } as const;
   static schemas = {
@@ -43,7 +43,7 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => actionPolicyTagsResponseSchema,
-        description: 'Returns suggested action policy tags.',
+        description: 'Returns the action policy tags.',
       },
       400: {
         body: () => errorResponseSchema,
@@ -52,7 +52,7 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
     },
   };
 
-  protected readonly routeName = 'action policy tags suggestions';
+  protected readonly routeName = 'get action policy tags';
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
@@ -66,7 +66,7 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const { search } = this.request.query ?? {};
-    const tags = await this.actionPolicyClient.getAllTags({ search });
-    return this.ctx.response.ok({ body: tags });
+    const tags = await this.actionPolicyClient.getTags({ search });
+    return this.ctx.response.ok({ body: { tags } });
   }
 }
