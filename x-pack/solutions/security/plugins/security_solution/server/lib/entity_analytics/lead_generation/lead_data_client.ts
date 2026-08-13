@@ -22,6 +22,7 @@ import { computeContentHash, computeEntityIdentityKey } from './content_hash';
 import type { CursorPayload } from './change_cursor';
 import { encodeCursor, decodeCursor } from './change_cursor';
 import { createLeadIndexService } from './indices/lead_index_service';
+import type { Lead as SynthesizedLead } from './types';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -54,8 +55,8 @@ interface PersistLeadsParams {
   readonly sourceType: LeadGenerationMode;
   readonly timestamp: string;
   readonly dedups: ReadonlyArray<{ readonly existingId: string }>;
-  readonly creates: readonly Lead[];
-  readonly versions: ReadonlyArray<{ readonly existingId: string; readonly lead: Lead }>;
+  readonly creates: readonly SynthesizedLead[];
+  readonly versions: ReadonlyArray<{ readonly existingId: string; readonly lead: SynthesizedLead }>;
 }
 
 interface FindLeadChangesParams {
@@ -161,8 +162,6 @@ interface EsLeadDoc {
   observations: EsObservationDoc[];
   execution_uuid: string;
   source_type: string;
-  created_at: string;
-  updated_at: string;
   version: number;
   content_hash: string;
   entity_identity_key: string;
@@ -185,12 +184,12 @@ interface LeadLookupSource {
 }
 
 const leadToEsDoc = (
-  lead: Lead,
+  lead: SynthesizedLead,
   executionId: string,
-  sourceType: LeadGenerationMode
+  sourceType: LeadGenerationMode,
+  timestamp: string
 ): EsLeadDoc => {
   const entityIdentityKey = computeEntityIdentityKey({ entities: lead.entities });
-  const timestamp = lead.timestamp;
   return {
     id: entityIdentityKey,
     title: lead.title,
@@ -202,7 +201,7 @@ const leadToEsDoc = (
     chat_recommendations: lead.chatRecommendations,
     timestamp,
     staleness: lead.staleness,
-    status: lead.status ?? 'active',
+    status: 'active',
     observations: lead.observations.map((obs) => ({
       entity_id: obs.entityId,
       module_id: obs.moduleId,
@@ -215,8 +214,6 @@ const leadToEsDoc = (
     })),
     execution_uuid: executionId,
     source_type: sourceType,
-    created_at: lead.createdAt ?? timestamp,
-    updated_at: lead.updatedAt ?? timestamp,
     version: 1,
     content_hash: computeContentHash({ observations: lead.observations }),
     entity_identity_key: entityIdentityKey,
@@ -252,25 +249,50 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
     executionUuid: (doc.execution_uuid as string) ?? '',
     sourceType: (doc.source_type as Lead['sourceType']) ?? 'adhoc',
     createdAt: (doc.created_at as string) ?? timestamp,
-    updatedAt: (doc.updated_at as string) ?? timestamp,
+    changedAt: (doc.changed_at as string) ?? timestamp,
+    version: (doc.version as number) ?? 1,
   };
 };
 
+/** ISO-8601 now on the ES node, assigned when the write is applied. */
+const PAINLESS_NOW_ISO = 'Instant.ofEpochMilli(System.currentTimeMillis()).toString()';
+
 /**
  * Painless body for lead update operations
+ * - Create (`ctx.op == 'create'` via scripted_upsert): insert from params; stamp
+ *   created_at and changed_at when ES applies the write
  * - Same content_hash + dismissed: noop (do not reopen)
- * - Same content_hash otherwise: refresh timestamp / reactivate (dedup / expire resurface)
- * - Different content_hash: replace evidence + narrative and bump version
- * - Never touches created_at
+ * - Same content_hash: refresh timestamp to indicate leads was seen again
+ * - Different content_hash: replace evidence + narrative, bump version and changed_at
+ * - Never touches created_at on updates
  */
 const LEAD_UPDATE_SCRIPT_SOURCE = `
-if (ctx._source.content_hash == params.content_hash) {
+def now = ${PAINLESS_NOW_ISO};
+if (ctx.op == 'create') {
+  ctx._source.id = params.id;
+  ctx._source.entity_identity_key = params.entity_identity_key;
+  ctx._source.observations = params.observations;
+  ctx._source.title = params.title;
+  ctx._source.byline = params.byline;
+  ctx._source.description = params.description;
+  ctx._source.tags = params.tags;
+  ctx._source.chat_recommendations = params.chat_recommendations;
+  ctx._source.entities = params.entities;
+  ctx._source.priority = params.priority;
+  ctx._source.staleness = params.staleness;
+  ctx._source.content_hash = params.content_hash;
+  ctx._source.execution_uuid = params.execution_uuid;
+  ctx._source.source_type = params.source_type;
+  ctx._source.status = params.status;
+  ctx._source.version = 1;
+  ctx._source.timestamp = params.timestamp;
+  ctx._source.created_at = now;
+  ctx._source.changed_at = now;
+} else if (ctx._source.content_hash == params.content_hash) {
   if (ctx._source.status == 'dismissed') {
     ctx.op = 'noop';
   } else {
     ctx._source.timestamp = params.timestamp;
-    ctx._source.status = 'active';
-    ctx._source.updated_at = params.timestamp;
     ctx._source.execution_uuid = params.execution_uuid;
     ctx._source.source_type = params.source_type;
   }
@@ -291,8 +313,22 @@ if (ctx._source.content_hash == params.content_hash) {
   ctx._source.source_type = params.source_type;
   ctx._source.status = params.status;
   ctx._source.version = (ctx._source.containsKey('version') ? (int) ctx._source.version : 0) + 1;
-  ctx._source.updated_at = params.timestamp;
+  ctx._source.changed_at = now;
   ctx._source.timestamp = params.timestamp;
+}
+`.trim();
+
+/**
+ * Dedup persist: refresh timestamp/metadata unless the lead was dismissed
+ * after classify (do not reopen). Re-evaluates status on retry_on_conflict.
+ */
+const LEAD_DEDUP_SCRIPT_SOURCE = `
+if (ctx._source.status == 'dismissed') {
+  ctx.op = 'noop';
+} else {
+  ctx._source.timestamp = params.timestamp;
+  ctx._source.execution_uuid = params.execution_uuid;
+  ctx._source.source_type = params.source_type;
 }
 `.trim();
 
@@ -352,9 +388,9 @@ export const createLeadDataClient = ({
 
   /**
    * Classify each candidate against existing leads
-   * - Dedup: active/expired lead with the same observations (expired resurfaces as active)
-   * - Version: active/expired with different observations, OR dismissed with new evidence
-   * - Skip: dismissed lead with the same observations (do not reopen)
+   * - Dedup: existing non-dismissed lead with the same signal set (moduleId:type:severity)
+   * - Version: existing lead with a different signal set (including dismissed with new evidence)
+   * - Skip: dismissed lead with the same signal set (do not reopen)
    * - Create: no matching lead for the entity
    */
   const classifyLeadCandidates = async <T extends LeadActionCandidate>(
@@ -402,9 +438,9 @@ export const createLeadDataClient = ({
 
   /**
    * Persist the leads to the Elasticsearch index
-   * - Dedup: refresh lead (same content, update timestamp and metadata)
-   * - Version / create: scripted update (create also passes upsert) so concurrent
-   *   writers share one `_id` without an application-level conflict retry
+   * - Dedup: scripted refresh (same content); noops if dismissed since classify
+   * - Version / create: scripted update (create also passes upsert + scripted_upsert)
+   *   so concurrent writers share one `_id` and changed_at is stamped at apply time
    */
   const persistLeads = async ({
     executionId,
@@ -431,7 +467,7 @@ export const createLeadDataClient = ({
 
       for (const { existingId } of dedups) {
         logger.debug(
-          `[LeadGeneration] Deduped lead ${existingId} (unchanged observations, ` +
+          `[LeadGeneration] Deduped lead ${existingId} (unchanged signal set, ` +
             `executionId=${executionId})`
         );
         bulkBody.push(
@@ -443,21 +479,23 @@ export const createLeadDataClient = ({
             },
           },
           {
-            doc: {
-              timestamp,
-              status: 'active',
-              updated_at: timestamp,
-              execution_uuid: executionId,
-              source_type: sourceType,
+            script: {
+              source: LEAD_DEDUP_SCRIPT_SOURCE,
+              lang: 'painless',
+              params: {
+                timestamp,
+                execution_uuid: executionId,
+                source_type: sourceType,
+              },
             },
           }
         );
       }
 
       for (const { existingId, lead } of versions) {
-        const doc = leadToEsDoc(lead, executionId, sourceType);
+        const doc = leadToEsDoc(lead, executionId, sourceType, timestamp);
         logger.debug(
-          `[LeadGeneration] Versioning lead ${existingId} (observations changed, ` +
+          `[LeadGeneration] Versioning lead ${existingId} (signal set changed, ` +
             `executionId=${executionId})`
         );
         bulkBody.push(
@@ -479,7 +517,7 @@ export const createLeadDataClient = ({
       }
 
       for (const lead of creates) {
-        const doc = leadToEsDoc(lead, executionId, sourceType);
+        const doc = leadToEsDoc(lead, executionId, sourceType, timestamp);
         logger.debug(`[LeadGeneration] Creating lead ${doc.id} (executionId=${executionId})`);
         // Upsert: insert if missing; if another writer won the race, script dedups or versions.
         bulkBody.push(
@@ -496,7 +534,8 @@ export const createLeadDataClient = ({
               lang: 'painless',
               params: doc,
             },
-            upsert: doc,
+            upsert: {},
+            scripted_upsert: true,
           }
         );
       }
@@ -596,24 +635,24 @@ export const createLeadDataClient = ({
 
     const buildCursor = (hit: estypes.SearchHit): string => {
       const sortVals = hit.sort;
-      const lastUpdatedAt =
+      const lastChangedAt =
         sortVals?.[0] != null
           ? Number(sortVals[0])
           : new Date(
-              ((hit._source as Record<string, unknown>)?.updated_at as string) ??
+              ((hit._source as Record<string, unknown>)?.changed_at as string) ??
                 new Date(now).toISOString()
             ).getTime();
       const lastDocId =
         sortVals?.[1] != null
           ? String(sortVals[1])
           : ((hit._source as Record<string, unknown>)?.id as string) ?? hit._id ?? '';
-      return encodeCursor(lastUpdatedAt, lastDocId);
+      return encodeCursor(lastChangedAt, lastDocId);
     };
 
     try {
-      // Without a cursor, returns leads updated in the last 7 days.
-      // With a cursor, returns all leads updated since the cursor, ignoring CHANGE_FEED_DEFAULT_LOOKBACK_MS.
-      const gteMs = cursorPayload ? cursorPayload.updatedAt : now - CHANGE_FEED_DEFAULT_LOOKBACK_MS;
+      // Without a cursor, returns leads changed in the last 7 days.
+      // With a cursor, returns all leads changed since the cursor, ignoring CHANGE_FEED_DEFAULT_LOOKBACK_MS.
+      const gteMs = cursorPayload ? cursorPayload.changedAt : now - CHANGE_FEED_DEFAULT_LOOKBACK_MS;
       const rangeFilter: Record<string, string> = {
         gte: new Date(gteMs).toISOString(),
         lte: new Date(now).toISOString(),
@@ -622,12 +661,12 @@ export const createLeadDataClient = ({
       const searchReq: estypes.SearchRequest = {
         index: indexName,
         size: perPage + 1,
-        sort: [{ updated_at: { order: 'asc' } }, { id: { order: 'asc' } }],
-        query: { range: { updated_at: rangeFilter } },
+        sort: [{ changed_at: { order: 'asc' } }, { id: { order: 'asc' } }],
+        query: { range: { changed_at: rangeFilter } },
         ignore_unavailable: true,
       };
       if (cursorPayload) {
-        searchReq.search_after = [cursorPayload.updatedAt, cursorPayload.docId];
+        searchReq.search_after = [cursorPayload.changedAt, cursorPayload.docId];
       }
 
       const resp = await esClient.search(searchReq);
@@ -640,7 +679,8 @@ export const createLeadDataClient = ({
         .filter((doc): doc is Record<string, unknown> => doc != null)
         .map(esDocToLead);
 
-      const cursor = pageHits.length > 0 ? buildCursor(pageHits[pageHits.length - 1]) : null;
+      const cursor =
+        pageHits.length > 0 ? buildCursor(pageHits[pageHits.length - 1]) : encodedCursor ?? null;
 
       return { changed, cursor, hasMore };
     } catch (e) {
@@ -648,7 +688,7 @@ export const createLeadDataClient = ({
       const errorMessage = e instanceof Error ? e.message : String(e);
       if (isEsIndexNotFoundException(e)) {
         logger.debug(`[LeadGeneration] Lead changes index not available: ${errorMessage}`);
-        return { changed: [], cursor: null, hasMore: false };
+        return { changed: [], cursor: encodedCursor ?? null, hasMore: false };
       }
       logger.error(`[LeadGeneration] Unable to fetch lead changes: ${errorMessage}`);
       throw e;
@@ -656,7 +696,7 @@ export const createLeadDataClient = ({
   };
 
   // -----------------------------------------------------------------------
-  // updateLead — partial update by doc id, bumps updated_at
+  // updateLead — partial update by doc id, bumps changed_at
   // -----------------------------------------------------------------------
   const updateLead = async (
     id: string,
@@ -670,9 +710,9 @@ export const createLeadDataClient = ({
         index: indexName,
         query: { ids: { values: [id] } },
         script: {
-          source: `ctx._source['status'] = params.status; ctx._source['updated_at'] = params.updatedAt;`,
+          source: `ctx._source['status'] = params.status; ctx._source['changed_at'] = ${PAINLESS_NOW_ISO};`,
           lang: 'painless',
-          params: { status: updates.status, updatedAt: new Date().toISOString() },
+          params: { status: updates.status },
         },
         refresh: true,
         conflicts: 'proceed',
@@ -693,7 +733,7 @@ export const createLeadDataClient = ({
   };
 
   // -----------------------------------------------------------------------
-  // bulkUpdateLeads — bulk status change via updateByQuery, bumps updated_at
+  // bulkUpdateLeads — bulk status change via updateByQuery, bumps changed_at
   // -----------------------------------------------------------------------
   const bulkUpdateLeads = async (
     ids: readonly string[],
@@ -705,9 +745,9 @@ export const createLeadDataClient = ({
       index: indexName,
       query: { ids: { values: [...ids] } },
       script: {
-        source: `ctx._source['status'] = params.status; ctx._source['updated_at'] = params.updatedAt;`,
+        source: `ctx._source['status'] = params.status; ctx._source['changed_at'] = ${PAINLESS_NOW_ISO};`,
         lang: 'painless',
-        params: { status: updates.status, updatedAt: new Date().toISOString() },
+        params: { status: updates.status },
       },
       refresh: true,
       conflicts: 'proceed',

@@ -32,7 +32,6 @@ export const getLeadChangesRoute = (
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
         },
       },
-      enableQueryVersion: true,
     })
     .addVersion(
       {

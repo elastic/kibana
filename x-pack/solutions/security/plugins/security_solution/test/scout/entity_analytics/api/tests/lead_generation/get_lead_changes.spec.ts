@@ -64,8 +64,8 @@ apiTest.describe(
         const withinWindow = new Date().toISOString();
         const outsideWindow = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
 
-        await seedLead(esClient, { entityName: 'alice', updatedAt: withinWindow });
-        await seedLead(esClient, { entityName: 'bob', updatedAt: outsideWindow });
+        await seedLead(esClient, { entityName: 'alice', changedAt: withinWindow });
+        await seedLead(esClient, { entityName: 'bob', changedAt: outsideWindow });
 
         const response = await apiClient.get(LEAD_GENERATION_ROUTES.GET_CHANGES, {
           headers: defaultHeaders,
@@ -122,9 +122,9 @@ apiTest.describe(
         const t2 = new Date(Date.now() - 2000).toISOString();
         const t3 = new Date(Date.now() - 1000).toISOString();
 
-        await seedLead(esClient, { entityName: 'alice', updatedAt: t1 });
-        await seedLead(esClient, { entityName: 'bob', updatedAt: t2 });
-        await seedLead(esClient, { entityName: 'carol', updatedAt: t3 });
+        await seedLead(esClient, { entityName: 'alice', changedAt: t1 });
+        await seedLead(esClient, { entityName: 'bob', changedAt: t2 });
+        await seedLead(esClient, { entityName: 'carol', changedAt: t3 });
 
         const page1 = await apiClient.get(`${LEAD_GENERATION_ROUTES.GET_CHANGES}?perPage=2`, {
           headers: defaultHeaders,
@@ -158,8 +158,8 @@ apiTest.describe(
       async ({ apiClient, esClient }) => {
         const earlier = new Date(Date.now() - 2000).toISOString();
 
-        await seedLead(esClient, { entityName: 'alice', updatedAt: earlier });
-        await seedLead(esClient, { entityName: 'bob', updatedAt: earlier });
+        await seedLead(esClient, { entityName: 'alice', changedAt: earlier });
+        await seedLead(esClient, { entityName: 'bob', changedAt: earlier });
 
         // First poll — establishes the cursor position.
         const firstPoll = await apiClient.get(LEAD_GENERATION_ROUTES.GET_CHANGES, {
@@ -183,6 +183,143 @@ apiTest.describe(
         expect(secondPoll).toHaveStatusCode(200);
         expect(secondPoll.body.changed).toHaveLength(1);
         expect(secondPoll.body.changed[0].entities[0].name).toBe('carol');
+      }
+    );
+
+    apiTest(
+      'returns a lead that was changed after the cursor, not leads that were only created before it',
+      async ({ apiClient, esClient }) => {
+        const earlier = new Date(Date.now() - 2000).toISOString();
+
+        await seedLead(esClient, { entityName: 'alice', changedAt: earlier });
+        await seedLead(esClient, { entityName: 'bob', changedAt: earlier });
+
+        const firstPoll = await apiClient.get(LEAD_GENERATION_ROUTES.GET_CHANGES, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
+
+        expect(firstPoll).toHaveStatusCode(200);
+        expect(firstPoll.body.changed).toHaveLength(2);
+        const cursor: string = firstPoll.body.cursor;
+
+        await seedLead(esClient, {
+          entityName: 'alice',
+          changedAt: new Date().toISOString(),
+        });
+
+        const secondPoll = await apiClient.get(
+          `${LEAD_GENERATION_ROUTES.GET_CHANGES}?cursor=${cursor}`,
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+
+        expect(secondPoll).toHaveStatusCode(200);
+        expect(secondPoll.body.changed).toHaveLength(1);
+        expect(secondPoll.body.changed[0].entities[0].name).toBe('alice');
+      }
+    );
+
+    apiTest(
+      'does not return a lead when only timestamp was refreshed after the cursor',
+      async ({ apiClient, esClient }) => {
+        const earlier = new Date(Date.now() - 2000).toISOString();
+
+        await seedLead(esClient, {
+          entityName: 'alice',
+          timestamp: earlier,
+          changedAt: earlier,
+        });
+
+        const firstPoll = await apiClient.get(LEAD_GENERATION_ROUTES.GET_CHANGES, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
+
+        expect(firstPoll).toHaveStatusCode(200);
+        expect(firstPoll.body.changed).toHaveLength(1);
+        const cursor: string = firstPoll.body.cursor;
+
+        // last-seen timestamp moves, change-feed clock does not.
+        await seedLead(esClient, {
+          entityName: 'alice',
+          timestamp: new Date().toISOString(),
+          changedAt: earlier,
+        });
+
+        const secondPoll = await apiClient.get(
+          `${LEAD_GENERATION_ROUTES.GET_CHANGES}?cursor=${cursor}`,
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+
+        expect(secondPoll).toHaveStatusCode(200);
+        expect(secondPoll.body.changed).toHaveLength(0);
+        expect(secondPoll.body.cursor).toBe(cursor);
+      }
+    );
+
+    apiTest(
+      'returns a lead dismissed after the cursor with status dismissed',
+      async ({ apiClient, esClient }) => {
+        const earlier = new Date(Date.now() - 2000).toISOString();
+
+        const { id: aliceId } = await seedLead(esClient, {
+          entityName: 'alice',
+          changedAt: earlier,
+        });
+        await seedLead(esClient, { entityName: 'bob', changedAt: earlier });
+
+        const firstPoll = await apiClient.get(LEAD_GENERATION_ROUTES.GET_CHANGES, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
+
+        expect(firstPoll).toHaveStatusCode(200);
+        expect(firstPoll.body.changed).toHaveLength(2);
+        const cursor: string = firstPoll.body.cursor;
+
+        const dismissResponse = await apiClient.post(LEAD_GENERATION_ROUTES.DISMISS(aliceId), {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {},
+        });
+        expect(dismissResponse).toHaveStatusCode(200);
+
+        const secondPoll = await apiClient.get(
+          `${LEAD_GENERATION_ROUTES.GET_CHANGES}?cursor=${cursor}`,
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+
+        expect(secondPoll).toHaveStatusCode(200);
+        expect(secondPoll.body.changed).toHaveLength(1);
+        expect(secondPoll.body.changed[0].id).toBe(aliceId);
+        expect(secondPoll.body.changed[0].status).toBe('dismissed');
+      }
+    );
+
+    apiTest(
+      'echoes the incoming cursor when polling and nothing has changed',
+      async ({ apiClient, esClient }) => {
+        await seedLead(esClient, { entityName: 'alice' });
+
+        const firstPoll = await apiClient.get(LEAD_GENERATION_ROUTES.GET_CHANGES, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
+
+        expect(firstPoll).toHaveStatusCode(200);
+        expect(firstPoll.body.changed).toHaveLength(1);
+        const cursor: string = firstPoll.body.cursor;
+        expect(typeof cursor).toBe('string');
+
+        const secondPoll = await apiClient.get(
+          `${LEAD_GENERATION_ROUTES.GET_CHANGES}?cursor=${cursor}`,
+          { headers: defaultHeaders, responseType: 'json' }
+        );
+
+        expect(secondPoll).toHaveStatusCode(200);
+        expect(secondPoll.body.changed).toHaveLength(0);
+        expect(secondPoll.body.hasMore).toBe(false);
+        expect(secondPoll.body.cursor).toBe(cursor);
       }
     );
 

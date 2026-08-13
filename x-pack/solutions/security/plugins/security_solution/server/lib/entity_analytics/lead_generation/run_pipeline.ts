@@ -17,7 +17,6 @@ import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
-import type { Lead as PersistedLead } from '../../../../common/entity_analytics/lead_generation/types';
 import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
 import { createLeadGenerationEngine } from './engine/lead_generation_engine';
 import type { LeadCandidate } from './engine/lead_generation_engine';
@@ -26,7 +25,7 @@ import { createLeadDataClient } from './lead_data_client';
 import type { LeadActionDecision } from './lead_data_client';
 import { computeEntityIdentityKey } from './content_hash';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import type { Lead, LeadEntity } from './types';
+import type { Lead as SynthesizedLead, LeadEntity } from './types';
 
 export interface RunPipelineParams {
   readonly listEntities: () => Promise<LeadEntity[]>;
@@ -43,26 +42,6 @@ export interface RunPipelineParams {
   readonly request?: KibanaRequest;
   readonly soClient?: SavedObjectsClientContract;
 }
-
-export interface RunPipelineResult {
-  readonly total: number;
-}
-
-const toPersistedLead = (
-  lead: Lead,
-  executionId: string,
-  sourceType: LeadGenerationMode,
-  runTimestamp: string
-): PersistedLead => ({
-  ...lead,
-  entities: lead.entities.map(({ type, name, id }) => ({ type, name, id })),
-  timestamp: runTimestamp,
-  status: 'active',
-  executionUuid: executionId,
-  sourceType,
-  createdAt: runTimestamp,
-  updatedAt: runTimestamp,
-});
 
 const shouldRunLLMSynthesis = (
   item: LeadActionDecision<LeadCandidate>
@@ -91,7 +70,7 @@ export const runLeadGenerationPipeline = async ({
   ml,
   request,
   soClient,
-}: RunPipelineParams): Promise<RunPipelineResult> => {
+}: RunPipelineParams): Promise<void> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
 
@@ -106,7 +85,7 @@ export const runLeadGenerationPipeline = async ({
     logger.info(
       `[LeadGeneration] No entities found — skipping generation (executionId=${executionId})`
     );
-    return { total: 0 };
+    return;
   }
 
   const engine = createLeadGenerationEngine({ logger });
@@ -128,7 +107,7 @@ export const runLeadGenerationPipeline = async ({
     } candidates)`
   );
   if (candidates.length === 0) {
-    return { total: 0 };
+    return;
   }
 
   const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
@@ -156,8 +135,8 @@ export const runLeadGenerationPipeline = async ({
   );
 
   const runTimestamp = new Date().toISOString();
-  const creates: PersistedLead[] = [];
-  const versions: Array<{ existingId: string; lead: PersistedLead }> = [];
+  const creates: SynthesizedLead[] = [];
+  const versions: Array<{ existingId: string; lead: SynthesizedLead }> = [];
   for (const { candidate, decision } of toSynthesize) {
     const synthesizedLead = synthesized.find(
       (lead) =>
@@ -167,13 +146,10 @@ export const runLeadGenerationPipeline = async ({
       logger.warn(
         `[LeadGeneration] Skipping persist; no synthesized lead for entity ${candidate.entityIdentityKey}`
       );
+    } else if (decision.type === 'version') {
+      versions.push({ existingId: decision.existingId, lead: synthesizedLead });
     } else {
-      const lead = toPersistedLead(synthesizedLead, executionId, sourceType, runTimestamp);
-      if (decision.type === 'version') {
-        versions.push({ existingId: decision.existingId, lead });
-      } else {
-        creates.push(lead);
-      }
+      creates.push(synthesizedLead);
     }
   }
 
@@ -207,11 +183,9 @@ export const runLeadGenerationPipeline = async ({
     }ms (executionId=${executionId})`
   );
 
-  const totalLeads = newLeads + revisedLeads + resurfacedLeads + skippedLeads;
-
   analytics?.reportEvent(LEAD_GENERATION_EXECUTION_EVENT.eventType, {
     spaceId,
-    leadsGenerated: totalLeads,
+    leadsGenerated: candidates.length,
     newLeads,
     revisedLeads,
     resurfacedLeads,
@@ -219,6 +193,4 @@ export const runLeadGenerationPipeline = async ({
     failedLeads,
     sourceType,
   });
-
-  return { total: totalLeads };
 };

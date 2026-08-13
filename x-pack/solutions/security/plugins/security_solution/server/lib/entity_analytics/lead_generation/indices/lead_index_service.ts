@@ -29,7 +29,7 @@ export const createLeadIndexService = ({ esClient, logger, spaceId }: LeadIndexS
     await createOrUpdateIndex({
       esClient,
       logger,
-      options: { 
+      options: {
         index: indexName,
         mappings,
         settings: { hidden: true, auto_expand_replicas: '0-1' },

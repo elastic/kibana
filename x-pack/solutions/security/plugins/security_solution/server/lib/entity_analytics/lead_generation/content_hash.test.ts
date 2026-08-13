@@ -10,8 +10,8 @@ import { computeContentHash, computeEntityIdentityKey } from './content_hash';
 const BASE_ENTITIES = [{ type: 'user', id: 'user:alice', name: 'alice' }];
 
 const BASE_OBSERVATIONS = [
-  { moduleId: 'risk_analysis', type: 'high_risk_score' },
-  { moduleId: 'alert_analysis', type: 'alert_spike' },
+  { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' as const },
+  { moduleId: 'alert_analysis', type: 'alert_spike', severity: 'medium' as const },
 ];
 
 describe('computeEntityIdentityKey', () => {
@@ -75,7 +75,7 @@ describe('computeContentHash', () => {
     expect(a).toBe(b);
   });
 
-  it('deduplicates repeated moduleId:type pairs', () => {
+  it('deduplicates repeated moduleId:type:severity triples', () => {
     const a = computeContentHash({ observations: BASE_OBSERVATIONS });
     const b = computeContentHash({
       observations: [...BASE_OBSERVATIONS, BASE_OBSERVATIONS[0]],
@@ -95,41 +95,52 @@ describe('computeContentHash', () => {
   it('produces different hashes for different observation types', () => {
     const a = computeContentHash({ observations: BASE_OBSERVATIONS });
     const b = computeContentHash({
-      observations: [{ moduleId: 'risk_analysis', type: 'lateral_movement' }],
+      observations: [{ moduleId: 'risk_analysis', type: 'lateral_movement', severity: 'high' }],
     });
     expect(a).not.toBe(b);
   });
 
   it('produces different hashes when the same type comes from a different module', () => {
     const a = computeContentHash({
-      observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score' }],
+      observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' }],
     });
     const b = computeContentHash({
-      observations: [{ moduleId: 'entity_profile', type: 'high_risk_score' }],
+      observations: [{ moduleId: 'entity_profile', type: 'high_risk_score', severity: 'high' }],
     });
     expect(a).not.toBe(b);
   });
 
   it('changes when a new moduleId:type is added (versioning signal)', () => {
     const hashV1 = computeContentHash({
-      observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score' }],
+      observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' }],
     });
     const hashV2 = computeContentHash({
       observations: [
-        { moduleId: 'risk_analysis', type: 'high_risk_score' },
-        { moduleId: 'alert_analysis', type: 'alert_spike' },
+        { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' },
+        { moduleId: 'alert_analysis', type: 'alert_spike', severity: 'medium' },
       ],
     });
     expect(hashV1).not.toBe(hashV2);
   });
 
-  it('ignores scores and LLM prose — only moduleId:type matter', () => {
+  it('changes when the same moduleId:type escalates in severity', () => {
+    const day1 = computeContentHash({
+      observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'low' }],
+    });
+    const day2 = computeContentHash({
+      observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'critical' }],
+    });
+    expect(day1).not.toBe(day2);
+  });
+
+  it('ignores scores and LLM prose — only moduleId:type:severity matter', () => {
     const a = computeContentHash({ observations: BASE_OBSERVATIONS });
     const b = computeContentHash({
       observations: [
         {
           moduleId: 'risk_analysis',
           type: 'high_risk_score',
+          severity: 'high',
           // @ts-expect-error — intentionally passing extra fields to prove they're ignored
           score: 99,
           description: 'LLM prose that changes every run',
@@ -137,8 +148,9 @@ describe('computeContentHash', () => {
         {
           moduleId: 'alert_analysis',
           type: 'alert_spike',
+          severity: 'medium',
           // @ts-expect-error — intentionally passing extra fields to prove they're ignored
-          severity: 'critical',
+          confidence: 0.1,
         },
       ],
     });

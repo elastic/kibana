@@ -81,6 +81,9 @@ describe('Lead generation Zod schemas', () => {
       ],
       executionUuid: '550e8400-e29b-41d4-a716-446655440000',
       sourceType: 'adhoc',
+      createdAt: '2026-02-17T10:00:00.000Z',
+      changedAt: '2026-02-17T10:00:00.000Z',
+      version: 1,
     };
 
     it('accepts a valid lead', () => {

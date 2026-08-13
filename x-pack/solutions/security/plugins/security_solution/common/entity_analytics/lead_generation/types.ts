@@ -75,7 +75,7 @@ export const leadSchema = z.object({
   /**
    * ISO-8601 timestamp of the last generation run that produced or re-observed this lead.
    * Updated on every run regardless of whether new observations were added.
-   * Distinct from `createdAt` (first insert) and `updatedAt` (last structural change or status change).
+   * Distinct from `createdAt` (first insert) and `changedAt` (lead content or status changed).
    */
   timestamp: z.string().datetime(),
   staleness: LeadStalenessEnum,
@@ -84,7 +84,8 @@ export const leadSchema = z.object({
   executionUuid: z.string().uuid(),
   sourceType: LeadSourceTypeEnum,
   createdAt: z.string(),
-  updatedAt: z.string(),
+  changedAt: z.string(),
+  version: z.number().int().min(1),
 });
 
 export type Lead = z.infer<typeof leadSchema>;

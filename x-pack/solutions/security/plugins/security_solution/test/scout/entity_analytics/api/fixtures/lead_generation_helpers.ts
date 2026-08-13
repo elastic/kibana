@@ -44,7 +44,7 @@ interface EsLeadDoc {
   execution_uuid: string;
   source_type: string;
   created_at: string;
-  updated_at: string;
+  changed_at: string;
   version: number;
   content_hash: string;
   entity_identity_key: string;
@@ -55,7 +55,7 @@ export interface SeedLeadOptions {
   readonly status?: 'active' | 'dismissed' | 'expired';
   readonly priority?: number;
   readonly timestamp?: string;
-  readonly updatedAt?: string;
+  readonly changedAt?: string;
   readonly sourceType?: 'adhoc' | 'scheduled';
   /**
    * Distinct entity name. Lead `_id` is the entity identity key, so seeding
@@ -80,7 +80,7 @@ export const seedLead = async (
     status = 'active',
     priority = 5,
     timestamp = new Date().toISOString(),
-    updatedAt = timestamp,
+    changedAt = timestamp,
     sourceType = 'adhoc',
     entityName = 'john.doe',
   } = options;
@@ -94,7 +94,7 @@ export const seedLead = async (
       moduleId: 'risk_analysis',
       type: 'high_risk_score',
       score: 85,
-      severity: 'high',
+      severity: 'high' as const,
       confidence: 0.9,
       description: 'Risk score norm 85 (>= 70 threshold)',
       metadata: {},
@@ -133,7 +133,7 @@ export const seedLead = async (
     execution_uuid: executionUuid,
     source_type: sourceType,
     created_at: timestamp,
-    updated_at: updatedAt,
+    changed_at: changedAt,
     version: 1,
     content_hash: contentHash,
     entity_identity_key: entityIdentityKey,

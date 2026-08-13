@@ -9,11 +9,11 @@ import { encodeCursor, decodeCursor } from './change_cursor';
 
 describe('change_cursor', () => {
   it('round-trips a cursor', () => {
-    const updatedAt = 1_700_000_000_000;
+    const changedAt = 1_700_000_000_000;
     const docId = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
-    const encoded = encodeCursor(updatedAt, docId);
+    const encoded = encodeCursor(changedAt, docId);
     const decoded = decodeCursor(encoded);
-    expect(decoded).toEqual({ version: 1, updatedAt, docId });
+    expect(decoded).toEqual({ version: 1, changedAt, docId });
   });
 
   it('round-trips a cursor with empty docId (no-hit sentinel)', () => {
@@ -33,19 +33,19 @@ describe('change_cursor', () => {
   });
 
   it('throws when version is wrong', () => {
-    const bad = Buffer.from(JSON.stringify({ version: 99, updatedAt: 123, docId: 'x' })).toString(
+    const bad = Buffer.from(JSON.stringify({ version: 99, changedAt: 123, docId: 'x' })).toString(
       'base64url'
     );
     expect(() => decodeCursor(bad)).toThrow('Invalid or unsupported cursor');
   });
 
-  it('throws when updatedAt is missing', () => {
+  it('throws when changedAt is missing', () => {
     const bad = Buffer.from(JSON.stringify({ version: 1, docId: 'x' })).toString('base64url');
     expect(() => decodeCursor(bad)).toThrow('Invalid or unsupported cursor');
   });
 
   it('throws when docId is missing', () => {
-    const bad = Buffer.from(JSON.stringify({ version: 1, updatedAt: 123 })).toString('base64url');
+    const bad = Buffer.from(JSON.stringify({ version: 1, changedAt: 123 })).toString('base64url');
     expect(() => decodeCursor(bad)).toThrow('Invalid or unsupported cursor');
   });
 });

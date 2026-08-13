@@ -2317,7 +2317,7 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
       type: 'long',
       _meta: {
         description:
-          'Total classified candidates in this run (newLeads + revisedLeads + resurfacedLeads + skippedLeads)',
+          'Number of prepared lead candidates in this run (after scoring and the maxLeads cap)',
       },
     },
     newLeads: {

@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+import type { ObservationSeverity } from './types';
 
 export const computeEntityIdentityKey = ({
   entities,
@@ -24,9 +25,11 @@ export const computeEntityIdentityKey = ({
 export const computeContentHash = ({
   observations,
 }: {
-  observations: ReadonlyArray<{ moduleId: string; type: string }>;
+  observations: ReadonlyArray<{ moduleId: string; type: string; severity: ObservationSeverity }>;
 }) => {
-  const distinctSignals = [...new Set(observations.map((o) => `${o.moduleId}:${o.type}`))].sort();
+  const distinctSignals = [
+    ...new Set(observations.map((o) => `${o.moduleId}:${o.type}:${o.severity}`)),
+  ].sort();
 
   return createHash('sha256')
     .update(JSON.stringify({ signals: distinctSignals }))

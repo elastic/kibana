@@ -45,7 +45,8 @@ const makeTestLead = (overrides: Partial<Lead> = {}): Lead => {
     ...overrides,
     timestamp,
     createdAt: overrides.createdAt ?? timestamp,
-    updatedAt: overrides.updatedAt ?? timestamp,
+    changedAt: overrides.changedAt ?? timestamp,
+    version: overrides.version ?? 1,
   };
 };
 
@@ -78,8 +79,8 @@ describe('listLeadsTool', () => {
       getStatus: mockGetStatus,
     });
     mockGetUserLeadPrivileges.mockResolvedValue({
-      adhoc: { has_read_permissions: true, has_write_permissions: true },
-      scheduled: { has_read_permissions: true, has_write_permissions: true },
+      has_read_permissions: true,
+      has_write_permissions: true,
       has_all_required: true,
       privileges: {},
     });
@@ -114,8 +115,8 @@ describe('listLeadsTool', () => {
 
     it('returns permission error when user lacks read permissions', async () => {
       mockGetUserLeadPrivileges.mockResolvedValue({
-        adhoc: { has_read_permissions: false, has_write_permissions: false },
-        scheduled: { has_read_permissions: false, has_write_permissions: false },
+        has_read_permissions: false,
+        has_write_permissions: false,
         has_all_required: false,
         privileges: {},
       });
@@ -250,8 +251,8 @@ describe('listLeadsTool', () => {
 
       it('reports success=false when the caller lacks read privilege', async () => {
         mockGetUserLeadPrivileges.mockResolvedValue({
-          adhoc: { has_read_permissions: false, has_write_permissions: false },
-          scheduled: { has_read_permissions: false, has_write_permissions: false },
+          has_read_permissions: false,
+          has_write_permissions: false,
           has_all_required: false,
           privileges: {},
         });

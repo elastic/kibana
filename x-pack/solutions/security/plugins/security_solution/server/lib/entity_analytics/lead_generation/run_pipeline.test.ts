@@ -65,10 +65,10 @@ describe('runLeadGenerationPipeline', () => {
     mockPersistLeads.mockResolvedValue(0);
   });
 
-  it('returns zero counts when no entities are found', async () => {
+  it('returns early when no entities are found', async () => {
     mockListEntities.mockResolvedValueOnce([]);
 
-    const result = await runLeadGenerationPipeline({
+    await runLeadGenerationPipeline({
       listEntities: mockListEntities,
       esClient,
       logger,
@@ -78,7 +78,6 @@ describe('runLeadGenerationPipeline', () => {
       chatModel: fakeChatModel,
     });
 
-    expect(result).toEqual({ total: 0 });
     expect(mockListEntities).toHaveBeenCalled();
     expect(mockPrepareLeadCandidates).not.toHaveBeenCalled();
     expect(mockSynthesizeLeads).not.toHaveBeenCalled();
@@ -123,7 +122,7 @@ describe('runLeadGenerationPipeline', () => {
       { candidate, decision: { type: 'dedup', existingId: 'existing-lead' } },
     ]);
 
-    const result = await runLeadGenerationPipeline({
+    await runLeadGenerationPipeline({
       listEntities: mockListEntities,
       esClient,
       logger,
@@ -134,7 +133,6 @@ describe('runLeadGenerationPipeline', () => {
       chatModel: fakeChatModel,
     });
 
-    expect(result).toEqual({ total: 1 });
     expect(mockSynthesizeLeads).toHaveBeenCalledWith([], expect.any(Object));
     expect(mockPersistLeads).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -188,7 +186,7 @@ describe('runLeadGenerationPipeline', () => {
     };
     mockSynthesizeLeads.mockResolvedValueOnce([mockLead]);
 
-    const result = await runLeadGenerationPipeline({
+    await runLeadGenerationPipeline({
       listEntities: mockListEntities,
       esClient,
       logger,
@@ -199,7 +197,6 @@ describe('runLeadGenerationPipeline', () => {
       chatModel: fakeChatModel,
     });
 
-    expect(result).toEqual({ total: 1 });
     expect(mockRegisterModule).toHaveBeenCalledTimes(5);
     expect(mockSynthesizeLeads).toHaveBeenCalledWith(
       [candidate],
@@ -212,15 +209,21 @@ describe('runLeadGenerationPipeline', () => {
         creates: [
           expect.objectContaining({
             id: mockLead.id,
-            status: 'active',
           }),
         ],
         versions: [],
         dedups: [],
       })
     );
-    expect(mockPersistLeads.mock.calls[0][0].creates[0]).not.toHaveProperty('contentHash');
-    expect(mockPersistLeads.mock.calls[0][0].creates[0]).not.toHaveProperty('entityIdentityKey');
+    const persisted = mockPersistLeads.mock.calls[0][0].creates[0];
+    expect(persisted).not.toHaveProperty('contentHash');
+    expect(persisted).not.toHaveProperty('entityIdentityKey');
+    expect(persisted).not.toHaveProperty('status');
+    expect(persisted).not.toHaveProperty('version');
+    expect(persisted).not.toHaveProperty('createdAt');
+    expect(persisted).not.toHaveProperty('changedAt');
+    expect(persisted).not.toHaveProperty('executionUuid');
+    expect(persisted).not.toHaveProperty('sourceType');
   });
 
   it('synthesizes and versions when content hash changed', async () => {
@@ -307,7 +310,7 @@ describe('runLeadGenerationPipeline', () => {
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
     mockClassifyLeadCandidates.mockResolvedValueOnce([{ candidate, decision: { type: 'skip' } }]);
 
-    const result = await runLeadGenerationPipeline({
+    await runLeadGenerationPipeline({
       listEntities: mockListEntities,
       esClient,
       logger,
@@ -317,7 +320,6 @@ describe('runLeadGenerationPipeline', () => {
       chatModel: fakeChatModel,
     });
 
-    expect(result).toEqual({ total: 1 });
     expect(mockSynthesizeLeads).toHaveBeenCalledWith([], expect.any(Object));
     expect(mockPersistLeads).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -328,7 +330,7 @@ describe('runLeadGenerationPipeline', () => {
     );
   });
 
-  it('reports telemetry from successful persist counts', async () => {
+  it('reports telemetry from prepared candidate count and persist buckets', async () => {
     const mockEntity = {
       record: {
         entity: { type: 'user', name: 'telemetry', id: 'euid-t' },
@@ -388,7 +390,7 @@ describe('runLeadGenerationPipeline', () => {
 
     const analytics = { reportEvent: jest.fn() };
 
-    const result = await runLeadGenerationPipeline({
+    await runLeadGenerationPipeline({
       listEntities: mockListEntities,
       esClient,
       logger,
@@ -399,7 +401,6 @@ describe('runLeadGenerationPipeline', () => {
       analytics: analytics as never,
     });
 
-    expect(result).toEqual({ total: 3 });
     expect(analytics.reportEvent).toHaveBeenCalledWith('lead_generation_execution', {
       spaceId: 'default',
       leadsGenerated: 3,
