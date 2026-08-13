@@ -42,7 +42,7 @@ export const manageRuleTool = ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
   annotations: {
-    title: 'Manage Rule',
+    title: 'Create/Update Alerting Rule',
     readOnlyHint: false,
     destructiveHint: true,
     idempotentHint: false,
