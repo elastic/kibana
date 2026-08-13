@@ -32,6 +32,9 @@ type QueryCase = Readonly<{
   sourceQuery: string;
   expectedQuery: string;
   expectedTimeField: string;
+  expectedMetricFields: string[];
+  metricFields?: string[];
+  groupByFields?: string[];
 }>;
 
 const tsQuery = `TS ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY TBUCKET(100)`;
@@ -43,18 +46,53 @@ const QUERY_CASES: QueryCase[] = [
     sourceQuery: tsQuery,
     expectedQuery: tsQuery,
     expectedTimeField: 'TBUCKET(100)',
+    expectedMetricFields: ['avg_bytes'],
   },
   {
     description: 'TS query with aliased TBUCKET',
     sourceQuery: aliasedTsQuery,
     expectedQuery: aliasedTsQuery,
     expectedTimeField: 'custom_time_bucket',
+    expectedMetricFields: ['avg_bytes'],
   },
   {
     description: 'regular source query',
     sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(bytes)`,
     expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
     expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+    expectedMetricFields: ['avg_bytes'],
+  },
+  {
+    description: 'raw query without STATS',
+    sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | KEEP bytes`,
+    expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | KEEP bytes | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+    expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+    expectedMetricFields: ['AVG(bytes)'],
+    metricFields: ['bytes'],
+  },
+  {
+    description: 'raw query with breakdown',
+    sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}`,
+    expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS AVG(bytes) BY request, BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+    expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+    expectedMetricFields: ['AVG(bytes)', 'request'],
+    metricFields: ['bytes'],
+    groupByFields: ['request'],
+  },
+  {
+    description: 'TS query without TBUCKET',
+    sourceQuery: `TS ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY request`,
+    expectedQuery: `TS ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY request, TBUCKET(75)`,
+    expectedTimeField: 'TBUCKET(75)',
+    expectedMetricFields: ['avg_bytes', 'request'],
+  },
+  {
+    description: 'raw query with multiple metric fields',
+    sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}`,
+    expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS AVG(bytes), AVG(phpmemory) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+    expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+    expectedMetricFields: ['AVG(bytes)', 'AVG(phpmemory)'],
+    metricFields: ['bytes', 'phpmemory'],
   },
 ];
 
@@ -73,7 +111,9 @@ apiTest.describe(
       apiTest(`executes ${queryCase.description}`, async ({ apiClient }) => {
         const generated = buildTrendlineQueryWithMetricFieldMap(
           queryCase.sourceQuery,
-          '@timestamp'
+          '@timestamp',
+          queryCase.metricFields,
+          queryCase.groupByFields
         );
         const usesTimeParams = generated.query.includes('?_tstart');
 
@@ -110,8 +150,10 @@ apiTest.describe(
         const columnNames = response.body.rawResponse.columns.map(
           ({ name }: { name: string }) => name
         );
-        expect(columnNames).toContain('avg_bytes');
-        expect(columnNames).toContain(queryCase.expectedTimeField);
+        expect(columnNames).toStrictEqual([
+          ...queryCase.expectedMetricFields,
+          queryCase.expectedTimeField,
+        ]);
         expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
       });
     }
