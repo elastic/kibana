@@ -13,7 +13,7 @@ import { StreamsAppPageTemplate } from '../components/streams_app_page_template'
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
 import { StreamManagementDefaultRedirect } from '../components/stream_management_default_redirect';
-import { StreamListView } from '../components/stream_list_view';
+import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsAppRedirect } from '../components/significant_events_app_redirect';
@@ -68,7 +68,7 @@ const streamsAppRoutes = {
     ),
     children: {
       '/': {
-        element: <StreamListView />,
+        element: <StreamsRootRedirect />,
         params: t.partial({
           query: timeRangeQueryParams,
         }),

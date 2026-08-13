@@ -31,7 +31,7 @@ export const useCreateRule = () => {
       );
       void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.tags());
+      queryClient.invalidateQueries(ruleKeys.allTags());
     },
     onError: (error: Error) => {
       toasts.addError(enrichHttpErrorMessage(error), {

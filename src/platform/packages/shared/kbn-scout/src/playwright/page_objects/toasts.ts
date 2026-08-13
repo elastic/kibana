@@ -14,7 +14,7 @@ import type { ScoutPage } from '../fixtures/scope/test';
 export class Toasts {
   private readonly toastList: EuiGlobalToastListObject;
   constructor(page: ScoutPage) {
-    this.toastList = new EuiGlobalToastListObject(page);
+    this.toastList = new EuiGlobalToastListObject(page, 'globalToastList');
   }
 
   /** Waits up to 10s for a toast to appear; throws when none does. */
@@ -65,5 +65,13 @@ export class Toasts {
    */
   async waitForToastWithText(text: string, timeout = 15_000): Promise<void> {
     await expect(this.toastList.toasts.filter({ hasText: text })).toBeVisible({ timeout });
+  }
+
+  /**
+   * Dismisses any visible toasts without waiting for one to appear.
+   * Use before clicks that toasts can intercept (e.g. top-nav Share).
+   */
+  async dismissAll() {
+    await this.toastList.closeAll();
   }
 }

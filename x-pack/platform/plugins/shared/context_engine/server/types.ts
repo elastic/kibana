@@ -7,6 +7,11 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { SignalsServiceApi } from './signals/service';
 
@@ -21,8 +26,11 @@ export interface ContextEnginePluginStart {
 
 export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface ContextEngineStartDependencies {
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
+  spaces?: SpacesPluginStart;
 }
