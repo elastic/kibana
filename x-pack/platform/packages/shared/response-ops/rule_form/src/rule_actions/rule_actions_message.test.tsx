@@ -157,7 +157,9 @@ describe('RuleActionsMessage', () => {
       return expect(screen.getByTestId('actionParamsFieldMock')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('test warning')).toBeInTheDocument();
+    expect(
+      screen.getByText('test warning', { ignore: 'script, style, [class*="euiScreenReaderOnly"]' })
+    ).toBeInTheDocument();
   });
 
   test('should render default action message for normal actions', async () => {
