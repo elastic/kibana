@@ -46,13 +46,16 @@ export const EmbeddableRenderer = <
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const [value, setValue] = useState<{
-    Component: React.FC;
-    componentApi: Api;
-    internalApi: PresentationPanelProps<Api>['componentInternalApi'];
-    Panel: React.ComponentType<PresentationPanelProps<Api>>;
-    phaseTracker: PhaseTracker;
-  } | undefined>();
+  const [value, setValue] = useState<
+    | {
+        Component: React.FC;
+        componentApi: Api;
+        internalApi: PresentationPanelProps<Api>['componentInternalApi'];
+        Panel: React.ComponentType<PresentationPanelProps<Api>>;
+        phaseTracker: PhaseTracker;
+      }
+    | undefined
+  >();
   const [error, setError] = useState<Error | undefined>();
 
   useEffect(() => {
@@ -105,7 +108,7 @@ export const EmbeddableRenderer = <
 
     return () => {
       canceled = true;
-    }
+    };
 
     // Ancestry chain is expected to use 'key' attribute to reset DOM and state
     // when unwrappedComponent needs to be re-loaded
@@ -133,7 +136,7 @@ export const EmbeddableRenderer = <
       />
     );
   }
-  
+
   return (
     <value.Panel
       Component={value.Component}
