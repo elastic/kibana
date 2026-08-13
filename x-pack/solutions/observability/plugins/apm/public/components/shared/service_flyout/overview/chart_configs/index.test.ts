@@ -145,6 +145,30 @@ describe('service flyout chart_configs', () => {
       expect(keyMetrics[1].titleAction).toBeUndefined();
     });
 
+    it('embeds the CPS project routing as a SET pre-statement in every chart query', () => {
+      (['ecs', 'otel'] as const).forEach((schema) => {
+        const { keyMetrics, infrastructureMetrics } = buildDefinitions({
+          schema,
+          projectRouting: '_alias:*',
+        });
+
+        [...keyMetrics, ...infrastructureMetrics].forEach(({ config }) => {
+          expect(config?.dataset.esql).toMatch(
+            /^SET project_routing="_alias:\*";\nSET unmapped_fields="nullify";\n/
+          );
+        });
+      });
+    });
+
+    it('omits the project routing SET when no routing is provided', () => {
+      const { keyMetrics, infrastructureMetrics } = buildDefinitions();
+
+      [...keyMetrics, ...infrastructureMetrics].forEach(({ config }) => {
+        expect(config?.dataset.esql).not.toContain('SET project_routing');
+        expect(config?.dataset.esql).toMatch(/^SET unmapped_fields="nullify";\n/);
+      });
+    });
+
     it('buckets every chart by a timestamp TBUCKET aliased to the date histogram x-axis', () => {
       const { keyMetrics, infrastructureMetrics } = buildDefinitions();
 
