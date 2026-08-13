@@ -16,9 +16,8 @@ import {
   EuiPopoverFooter,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { filterButtonStyles } from './single_selection_filter_popover';
-
-const MAX_TAGS_CAP = 20;
 
 export const TagsFilterPopover = ({
   options,
@@ -70,7 +69,7 @@ export const TagsFilterPopover = ({
   };
 
   const activeCount = value.length;
-  const showCapGuidance = options.length >= MAX_TAGS_CAP;
+  const showCapGuidance = options.length >= TAGS_RESPONSE_LIMIT;
 
   return (
     <EuiPopover
@@ -128,8 +127,8 @@ export const TagsFilterPopover = ({
         <EuiPopoverFooter paddingSize="s">
           <EuiText size="xs" color="subdued" data-test-subj="rulesListTagsFilterCapGuidance">
             {i18n.translate('xpack.alertingV2.rulesList.tagsFilter.capGuidance', {
-              defaultMessage: 'Showing first {cap} most-used — type to search',
-              values: { cap: MAX_TAGS_CAP },
+              defaultMessage: 'Showing first {cap} most-used, type to search',
+              values: { cap: TAGS_RESPONSE_LIMIT },
             })}
           </EuiText>
         </EuiPopoverFooter>
