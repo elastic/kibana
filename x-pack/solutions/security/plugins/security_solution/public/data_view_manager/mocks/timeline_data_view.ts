@@ -6,8 +6,8 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { SelectedDataView } from '../store/model';
-import { initDataView, initSourcererScope } from '../store/model';
+import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import { initDataView } from '../../sourcerer/store/model';
 import { mockBrowserFields, mockIndexFields } from '../../common/containers/source/mock';
 import {
   DEFAULT_DATA_VIEW_ID,
@@ -15,21 +15,15 @@ import {
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 
-export const mockPatterns = [
-  'auditbeat-*',
-  'endgame-*',
-  'filebeat-*',
-  'logs-*',
-  'packetbeat-*',
-  'winlogbeat-*',
-  'journalbeat-*',
-];
-
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
 );
 
-const mockDefaultDataView = {
+/**
+ * A data view spec used across the timeline unified components tests, passed as the `spec`
+ * argument when constructing a `DataView` (e.g. `new DataView({ spec: mockDataViewSpec })`).
+ */
+export const mockDataViewSpec = {
   ...initDataView,
   browserFields: mockBrowserFields,
   id: DEFAULT_DATA_VIEW_ID,
@@ -39,27 +33,23 @@ const mockDefaultDataView = {
   title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`, 'fakebeat-*'].join(','),
 };
 
-export const mockSourcererScope: SelectedDataView = {
-  ...initSourcererScope,
-  browserFields: {
-    ...mockBrowserFields,
-    _id: {
-      fields: {
-        _id: {
-          aggregatable: false,
-          esTypes: undefined,
-          format: undefined,
-          name: '_id',
-          searchable: true,
-          subType: undefined,
-          type: 'string',
-        },
+/**
+ * The default mock browser fields augmented with the `_id` field, used by timeline unified
+ * components tests when building column headers.
+ */
+export const mockBrowserFieldsWithId: BrowserFields = {
+  ...mockBrowserFields,
+  _id: {
+    fields: {
+      _id: {
+        aggregatable: false,
+        esTypes: undefined,
+        format: undefined,
+        name: '_id',
+        searchable: true,
+        subType: undefined,
+        type: 'string',
       },
     },
   },
-  sourcererDataView: mockDefaultDataView,
-  selectedPatterns: mockPatterns,
-  indicesExist: true,
-  loading: false,
-  dataViewId: mockDefaultDataView.id,
 };
