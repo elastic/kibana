@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import {
   getDashboardId,
@@ -32,12 +34,12 @@ import {
   resolveDashboardsByIds,
   searchRelatedDashboard,
   type Dashboard,
-  type MissingDashboard,
   type RuleArtifactPayload,
 } from '@kbn/alerting-v2-rule-form';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 const SELECTABLE_LIST_MAX_HEIGHT = 320;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export interface ManageDashboardsPopoverProps {
   isOpen: boolean;
@@ -81,10 +83,12 @@ export const ManageDashboardsPopover = ({
     [existingArtifacts]
   );
 
-  const [catalog, setCatalog] = useState<Dashboard[]>([]);
+  const [searchResults, setSearchResults] = useState<Dashboard[]>([]);
+  const [titleById, setTitleById] = useState<Map<string, string>>(new Map());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [missingDashboards, setMissingDashboards] = useState<MissingDashboard[]>([]);
+  const [searchValue, setSearchValue] = useState('');
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
   const popoverContentStyles = useMemo(
@@ -115,6 +119,47 @@ export const ManageDashboardsPopover = ({
     [euiTheme.size.base]
   );
 
+  const mergeTitles = useCallback((dashboards: Dashboard[]) => {
+    setTitleById((current) => {
+      const next = new Map(current);
+      for (const entry of dashboards) {
+        next.set(entry.id, entry.title);
+      }
+      return next;
+    });
+  }, []);
+
+  const searchRequestIdRef = useRef(0);
+
+  const loadSearchResults = useCallback(
+    async (search?: string) => {
+      const requestId = ++searchRequestIdRef.current;
+      setIsSearching(true);
+      try {
+        const results = await searchRelatedDashboard(dashboard, { search: search?.trim() });
+        if (requestId !== searchRequestIdRef.current) {
+          return;
+        }
+        setSearchResults(results);
+        mergeTitles(results);
+      } catch {
+        if (requestId !== searchRequestIdRef.current) {
+          return;
+        }
+        setSearchResults([]);
+      } finally {
+        if (requestId === searchRequestIdRef.current) {
+          setIsSearching(false);
+        }
+      }
+    },
+    [dashboard, mergeTitles]
+  );
+
+  const { run: debouncedLoadSearchResults } = useDebounceFn(loadSearchResults, {
+    wait: SEARCH_DEBOUNCE_MS,
+  });
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -126,7 +171,9 @@ export const ManageDashboardsPopover = ({
       return dashboardId ? [dashboardId] : [];
     });
     setSelectedIds(new Set(attachedIds));
-    setMissingDashboards([]);
+    setTitleById(new Map());
+    setSearchResults([]);
+    setSearchValue('');
     setLoadError(false);
     setIsLoadingOptions(true);
 
@@ -140,20 +187,11 @@ export const ManageDashboardsPopover = ({
           return;
         }
 
-        const byId = new Map<string, Dashboard>();
-        for (const entry of searchResult) {
-          byId.set(entry.id, entry);
-        }
-        for (const entry of resolveResult.resolved) {
-          byId.set(entry.id, entry);
-        }
-
-        setCatalog([...byId.values()]);
-        setMissingDashboards(resolveResult.missing);
+        mergeTitles([...resolveResult.resolved, ...searchResult]);
+        setSearchResults(searchResult);
       } catch {
         if (!ignore) {
-          setCatalog([]);
-          setMissingDashboards(attachedIds.map((id) => ({ id, notFound: false })));
+          setSearchResults([]);
           setLoadError(true);
         }
       } finally {
@@ -167,39 +205,36 @@ export const ManageDashboardsPopover = ({
     return () => {
       ignore = true;
     };
-  }, [dashboard, existingDashboardArtifacts, isOpen]);
+  }, [dashboard, existingDashboardArtifacts, isOpen, mergeTitles]);
 
   const options = useMemo((): EuiSelectableOption[] => {
     const attachedOptions: EuiSelectableOption[] = [];
     const otherOptions: EuiSelectableOption[] = [];
-    const catalogIds = new Set(catalog.map((entry) => entry.id));
 
-    for (const entry of catalog) {
-      const option: EuiSelectableOption = {
-        key: entry.id,
-        label: entry.title,
-        checked: selectedIds.has(entry.id) ? 'on' : undefined,
-        'data-test-subj': `ruleDashboardSelectableOption-${entry.id}`,
-      };
-      if (selectedIds.has(entry.id)) {
-        attachedOptions.push(option);
-      } else {
-        otherOptions.push(option);
-      }
+    for (const dashboardId of selectedIds) {
+      const knownTitle = titleById.get(dashboardId);
+      attachedOptions.push({
+        key: dashboardId,
+        label:
+          knownTitle ??
+          i18n.translate(
+            'xpack.alertingV2.ruleDetails.artifacts.dashboards.unknownDashboardOption',
+            { defaultMessage: 'Unknown dashboard ({id})', values: { id: dashboardId } }
+          ),
+        checked: 'on',
+        'data-test-subj': `ruleDashboardSelectableOption-${dashboardId}`,
+      });
     }
 
-    for (const missing of missingDashboards) {
-      if (catalogIds.has(missing.id) || !selectedIds.has(missing.id)) {
+    for (const entry of searchResults) {
+      if (selectedIds.has(entry.id)) {
         continue;
       }
-      attachedOptions.push({
-        key: missing.id,
-        label: i18n.translate(
-          'xpack.alertingV2.ruleDetails.artifacts.dashboards.unknownDashboardOption',
-          { defaultMessage: 'Unknown dashboard ({id})', values: { id: missing.id } }
-        ),
-        checked: 'on',
-        'data-test-subj': `ruleDashboardSelectableOption-${missing.id}`,
+      otherOptions.push({
+        key: entry.id,
+        label: entry.title,
+        checked: undefined,
+        'data-test-subj': `ruleDashboardSelectableOption-${entry.id}`,
       });
     }
 
@@ -216,17 +251,39 @@ export const ManageDashboardsPopover = ({
       nextOptions.push(...otherOptions);
     }
     return nextOptions;
-  }, [catalog, missingDashboards, selectedIds]);
+  }, [searchResults, selectedIds, titleById]);
 
-  const handleSelectionChange = useCallback((nextOptions: EuiSelectableOption[]) => {
-    setSelectedIds(
-      new Set(
-        nextOptions
-          .filter((option) => !option.isGroupLabel && option.checked === 'on' && option.key)
-          .map((option) => option.key as string)
-      )
-    );
-  }, []);
+  const handleSelectionChange = useCallback(
+    (
+      _nextOptions: EuiSelectableOption[],
+      _event: EuiSelectableOnChangeEvent,
+      changedOption: EuiSelectableOption
+    ) => {
+      if (!changedOption.key || changedOption.isGroupLabel) {
+        return;
+      }
+
+      const dashboardId = changedOption.key;
+      setSelectedIds((current) => {
+        const next = new Set(current);
+        if (changedOption.checked === 'on') {
+          next.add(dashboardId);
+        } else {
+          next.delete(dashboardId);
+        }
+        return next;
+      });
+    },
+    []
+  );
+
+  const handleSearchChange = useCallback(
+    (nextSearch: string) => {
+      setSearchValue(nextSearch);
+      debouncedLoadSearchResults(nextSearch);
+    },
+    [debouncedLoadSearchResults]
+  );
 
   const handleSave = useCallback(() => {
     const draftDashboardArtifacts: RuleArtifactPayload = [...selectedIds].map((dashboardId) => {
@@ -288,12 +345,16 @@ export const ManageDashboardsPopover = ({
               { defaultMessage: 'Attach related dashboards' }
             )}
             searchable
+            isPreFiltered
             searchProps={{
+              value: searchValue,
+              onChange: handleSearchChange,
               placeholder: i18n.translate(
                 'xpack.alertingV2.ruleDetails.artifacts.dashboards.searchPlaceholder',
                 { defaultMessage: 'Search Dashboard' }
               ),
               compressed: true,
+              isLoading: isSearching,
               'data-test-subj': 'ruleDashboardArtifactsSearch',
             }}
             options={options}

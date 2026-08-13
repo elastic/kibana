@@ -233,6 +233,39 @@ describe('DashboardArtifactsSubsection', () => {
     expect(screen.getByTestId('ruleDashboardArtifactsManagePopover')).toBeInTheDocument();
   });
 
+  it('re-queries dashboards on the server when searching in the manage popover', async () => {
+    mockSearchRelatedDashboard.mockImplementation(
+      async (_dashboard: unknown, params: { search?: string } = {}) => {
+        if (params.search?.includes('Zulu')) {
+          return [{ id: 'dash-z', title: 'Zulu Far Away' }];
+        }
+        return [{ id: 'dash-a', title: 'Alpha' }];
+      }
+    );
+
+    renderSubsection(baseRule);
+    fireEvent.click(screen.getByTestId('ruleDashboardArtifactsAddButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleDashboardSelectableOption-dash-a')).toBeInTheDocument();
+    });
+    expect(mockSearchRelatedDashboard).toHaveBeenCalledWith(mockDashboardService, {});
+
+    fireEvent.change(screen.getByTestId('ruleDashboardArtifactsSearch'), {
+      target: { value: 'Zulu' },
+    });
+
+    await waitFor(() => {
+      expect(mockSearchRelatedDashboard).toHaveBeenCalledWith(mockDashboardService, {
+        search: 'Zulu',
+      });
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleDashboardSelectableOption-dash-z')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('ruleDashboardSelectableOption-dash-a')).not.toBeInTheDocument();
+  });
+
   it('saves selected dashboards via updateRule and preserves other artifacts', async () => {
     mockSearchRelatedDashboard.mockResolvedValue([{ id: 'dash-new', title: 'New Dashboard' }]);
     const rule = {
