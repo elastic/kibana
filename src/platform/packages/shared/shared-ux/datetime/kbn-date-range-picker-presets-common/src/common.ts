@@ -79,17 +79,19 @@ export const migrateStoredPresets = (
   return DEFAULT_STORED_PRESETS;
 };
 
-/** Composes the displayed list: the user's own editable presets, then the locked quick ranges. */
+/**
+ * Composes the displayed list: the user's own editable presets, then
+ * the default quick ranges that get `isEditable=false`.
+ */
 export const mergePresets = (
   userPresets: readonly PresetItem[],
-  uiSettingsPresets: readonly PresetItem[]
+  defaultPresets: readonly PresetItem[]
 ): PresetItem[] => {
   const userKeys = new Set(userPresets.map(getPresetKey));
 
   return [
-    // The user's own presets keep the `isEditable` default; only the quick ranges are marked.
     ...userPresets,
-    ...uiSettingsPresets
+    ...defaultPresets
       .filter((preset) => !userKeys.has(getPresetKey(preset)))
       .map((preset) => ({ ...preset, isEditable: false })),
   ];
@@ -111,13 +113,13 @@ export type SavePresetOutcome =
  */
 export interface DateRangePickerPresetsService {
   /**
-   * Synchronous locked presets derived from the configured quick ranges. Shown
+   * Synchronous presets derived from the configured quick ranges. Shown
    * on their own when persistence is disabled.
    */
   getDefaultPresets(): PresetItem[];
 
   /**
-   * Presets to display: the user's own editable presets followed by the locked
+   * Presets to display: the user's own editable presets followed by the default
    * {@link getDefaultPresets}. Emits again whenever the stored value changes.
    */
   getPresets$(): Observable<PresetItem[]>;
