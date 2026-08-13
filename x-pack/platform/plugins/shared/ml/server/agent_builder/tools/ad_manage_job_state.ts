@@ -52,6 +52,13 @@ export const createAdManageJobStateTool = (
   tags: ['ml', 'anomaly-detection'],
   description:
     'Change ML job and datafeed state: open/close job, start/stop datafeed, revert to a model snapshot, or preview a datafeed.',
+  annotations: {
+    title: 'Manage AD Job State',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   experimental: true,
   schema,
   handler: async (
