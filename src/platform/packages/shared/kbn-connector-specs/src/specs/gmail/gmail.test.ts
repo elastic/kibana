@@ -402,6 +402,7 @@ describe('listMessages', () => {
 
     expect(mockClient.get).toHaveBeenCalledWith(`${GMAIL_API_BASE}/messages`, {
       params: { maxResults: 10 },
+      paramsSerializer: { indexes: null },
     });
     expect(result).toEqual({
       messages: mockResponse.data.messages,
@@ -422,6 +423,7 @@ describe('listMessages', () => {
 
     expect(mockClient.get).toHaveBeenCalledWith(`${GMAIL_API_BASE}/messages`, {
       params: { maxResults: 50, labelIds: ['INBOX', 'SENT'], pageToken: 'page-2' },
+      paramsSerializer: { indexes: null },
     });
   });
 

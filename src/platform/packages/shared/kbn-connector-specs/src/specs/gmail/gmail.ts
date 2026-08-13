@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { buildRawMessage, extractAddrSpec, findHeader } from './mime';
 import {
+  GMAIL_EMAIL_REGEX,
   GetAttachmentInputSchema,
   GetMessageInputSchema,
   ListLabelsInputSchema,
@@ -289,7 +290,7 @@ export const GmailConnector: ConnectorSpec = {
     getAttachment: {
       isTool: true,
       description:
-        'Retrieve one Gmail attachment by message ID and attachment ID. Call getMessage with format "full" first to get attachment IDs from payload.parts[].body.attachmentId (and parts[].filename for the file name).',
+        'Retrieve one Gmail attachment by message ID and attachment ID. Call getMessage with format "full" first to get attachment IDs from payload.parts[].body.attachmentId (and parts[].filename for the file name). WARNING: Attachment data is returned as base64url-encoded binary and may be large. Only call this action when you have a concrete plan to process the data (e.g. decode and index via an Elasticsearch attachment processor pipeline). Do not call it speculatively.',
       input: GetAttachmentInputSchema,
       handler: async (ctx, input) => {
         const typedInput: GetAttachmentInput = GetAttachmentInputSchema.parse(input);
@@ -320,7 +321,13 @@ export const GmailConnector: ConnectorSpec = {
         if (typedInput.pageToken) params.pageToken = typedInput.pageToken;
         if (typedInput.labelIds?.length) params.labelIds = typedInput.labelIds;
         try {
-          const response = await ctx.client.get(`${GMAIL_API_BASE}/messages`, { params });
+          // paramsSerializer: { indexes: null } serializes arrays as repeated keys
+          // (labelIds=INBOX&labelIds=SENT) rather than axios's default bracketed form
+          // (labelIds[]=INBOX), which Gmail rejects.
+          const response = await ctx.client.get(`${GMAIL_API_BASE}/messages`, {
+            params,
+            paramsSerializer: { indexes: null },
+          });
           return {
             messages: response.data.messages ?? [],
             nextPageToken: response.data.nextPageToken,
@@ -526,8 +533,7 @@ export const GmailConnector: ConnectorSpec = {
           }
           const addrSpec = extractAddrSpec(replyToHeader);
           // Validate the extracted address is a bare addr-spec we can safely use.
-          const EMAIL_REGEX = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/;
-          if (!EMAIL_REGEX.test(addrSpec)) {
+          if (!GMAIL_EMAIL_REGEX.test(addrSpec)) {
             throw new Error(
               `Could not parse a valid email address from the original message's From/Reply-To header ("${replyToHeader}"). Pass "to" explicitly.`
             );
