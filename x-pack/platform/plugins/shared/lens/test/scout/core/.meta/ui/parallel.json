@@ -147,45 +147,6 @@
       }
     },
     {
-      "id": "36fc1fc4383edec-ec0ed097095fb0e",
-      "title": "Lens chart creation creates and saves an XY area chart, then reopens it with the same configuration",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 25,
-        "column": 51
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-e2feb0cd547afef",
-      "title": "Lens chart creation preserves the split field when switching a saved XY chart to filters aggregation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 52,
-        "column": 60
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-42fc5ed07c9cb92",
-      "title": "Lens chart creation switches the first layer to a different data view",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 71,
-        "column": 15
-      }
-    },
-    {
       "id": "823e45959c149e9-2d55f331fb0e19b",
       "title": "Lens disable auto-apply toggles auto-apply and applies changes on demand",
       "expectedStatus": "passed",

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { getCombinedProperties } from './use_transform_config_data';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { PROJECT_ROUTING } from '@kbn/cps-utils';
-
 import {
+  getCombinedProperties,
   isProjectScopedSourceIndexUnavailableError,
   isSourceIndexUnavailableError,
-} from './transform_preview_errors';
+} from './use_transform_config_data';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 
 describe('getCombinedProperties', () => {
   test('extracts missing mappings from docs', () => {
@@ -83,7 +82,7 @@ describe('getCombinedProperties', () => {
   });
 });
 
-describe('transform preview errors', () => {
+describe('isSourceIndexUnavailableError', () => {
   const sourceIndexUnavailableError = {
     body: {
       message:
@@ -91,11 +90,11 @@ describe('transform preview errors', () => {
     },
   };
 
-  test('matches transform preview source index unavailable errors', () => {
+  test('matches transform preview source index status errors', () => {
     expect(isSourceIndexUnavailableError(sourceIndexUnavailableError)).toBe(true);
   });
 
-  test('does not match other transform preview errors', () => {
+  test('does not match other preview errors', () => {
     expect(
       isSourceIndexUnavailableError({
         body: {
