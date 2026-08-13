@@ -32,21 +32,18 @@ export const KibanaErrorBoundaryDepsProvider: FC<
  */
 export const KibanaErrorBoundaryProvider: FC<
   PropsWithChildren<KibanaErrorBoundaryProviderDeps>
-> = ({ children, analytics }) => {
+> = ({ children }) => {
   const parentContext = useContext(Context);
   const value: KibanaErrorBoundaryServices = useMemo(() => {
     if (parentContext) {
-      // Only use the parent context if it has the same analytics service
-      if (parentContext.errorService.getAnalyticsReference() === analytics) {
-        return parentContext;
-      }
+      return parentContext;
     }
 
     return {
       onClickRefresh: () => window.location.reload(),
-      errorService: new KibanaErrorService({ analytics }),
+      errorService: new KibanaErrorService(),
     };
-  }, [parentContext, analytics]);
+  }, [parentContext]);
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
 };

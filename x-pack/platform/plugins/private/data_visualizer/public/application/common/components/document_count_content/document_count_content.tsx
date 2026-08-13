@@ -15,10 +15,10 @@ import {
   EuiButtonIcon,
   EuiPanel,
   EuiSpacer,
-  EuiCallOut,
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
@@ -159,12 +159,7 @@ export const DocumentCountContent: FC<Props> = ({
             >
               <EuiPanel style={{ maxWidth: 400 }}>
                 <EuiFlexItem grow={true}>
-                  <EuiCallOut
-                    announceOnMount
-                    size="s"
-                    color={'primary'}
-                    title={calloutInfoMessage}
-                  />
+                  <KbnInfoCallout announceOnMount size="s" title={calloutInfoMessage} />
                 </EuiFlexItem>
                 <EuiSpacer size="m" />
 

@@ -16,6 +16,8 @@ import type {
   ConversationInternalState,
   ConversationRoundStatus,
   ConversationOrigin,
+  TimelineEvent,
+  ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
 import type { PersistentConversationRound } from './types';
 
@@ -33,6 +35,32 @@ const storageSettings = {
       created_at: types.date({}),
       updated_at: types.date({}),
       conversation_rounds: types.object({ dynamic: false, properties: {} }),
+      events: types.nested({
+        properties: {
+          id: types.keyword({}),
+          type: types.keyword({}),
+          created_at: types.date({}),
+          execution_id: types.keyword({}),
+          trigger_event_id: types.keyword({}),
+          actor: types.object({
+            dynamic: false,
+            properties: {
+              type: types.keyword({}),
+              id: types.keyword({}),
+            },
+          }),
+          data: types.object({ dynamic: false, properties: {} }),
+        },
+      }),
+      active_execution: types.object({
+        dynamic: false,
+        properties: {
+          execution_id: types.keyword({}),
+          trigger_event_id: types.keyword({}),
+          started_at: types.date({}),
+        },
+      }),
+      schema_version: types.long({}),
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
@@ -72,6 +100,9 @@ export interface ConversationProperties {
   created_at: string;
   updated_at: string;
   conversation_rounds: PersistentConversationRound[];
+  events?: TimelineEvent[];
+  active_execution?: ActiveExecution;
+  schema_version?: number;
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
   status?: ConversationRoundStatus;
