@@ -178,7 +178,6 @@ const handleConversationExecution = async ({
 
   const author = await deps.conversationService.getConversationRoundAuthor({
     request,
-    conversation,
     origin,
   });
 

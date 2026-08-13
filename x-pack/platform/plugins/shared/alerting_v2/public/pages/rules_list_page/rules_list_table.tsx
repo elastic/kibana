@@ -68,6 +68,7 @@ export interface RulesListTableProps {
   totalItemCount: number;
   page: number;
   perPage: number;
+  pageSizeOptions?: number[];
   search: string;
   hasActiveFilters: boolean;
   sortField?: RulesListTableSortField;
@@ -91,6 +92,7 @@ export interface RulesListTableProps {
   onBulkEnable: () => void;
   onBulkDisable: () => void;
   onBulkDelete: () => void;
+  onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
@@ -100,6 +102,7 @@ export interface RulesListTableProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  onUpdateApiKey: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
   /** Id of the rule whose enabled state is currently being toggled, if any. */
   togglingRuleId?: string;
@@ -110,11 +113,14 @@ export interface RulesListTableProps {
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
 }
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const RulesListTable: React.FC<RulesListTableProps> = ({
   items,
   totalItemCount,
   page,
   perPage,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   search,
   hasActiveFilters,
   sortField,
@@ -132,6 +138,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -139,6 +146,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  onUpdateApiKey,
   onRun,
   togglingRuleId,
   isBulkTogglingEnabled,
@@ -161,7 +169,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     pageIndex: page - 1,
     pageSize: perPage,
     totalItemCount,
-    pageSizeOptions: [10, 20, 50],
+    pageSizeOptions,
   };
 
   const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
@@ -405,6 +413,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                       onEdit={onEdit}
                       onClone={onClone}
                       onDelete={onDelete}
+                      onUpdateApiKey={onUpdateApiKey}
                       onRun={onRun}
                     />
                   </EuiFlexItem>
@@ -427,6 +436,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       onClone,
       onDelete,
       onToggleEnabled,
+      onUpdateApiKey,
       onRun,
       togglingRuleId,
       isBulkTogglingEnabled,
@@ -479,6 +489,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             onClearSelection={onClearSelection}
             onBulkEnable={onBulkEnable}
             onBulkDisable={onBulkDisable}
+            onBulkUpdateApiKey={onBulkUpdateApiKey}
             onBulkDelete={onBulkDelete}
           />
         ) : null}

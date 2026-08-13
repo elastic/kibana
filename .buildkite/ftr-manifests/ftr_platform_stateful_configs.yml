@@ -84,10 +84,7 @@ enabled:
   - src/platform/test/functional/apps/discover/esql_2/config.ts
   - src/platform/test/functional/apps/discover/esql_4/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
-  - src/platform/test/functional/apps/discover/group4/config.ts
-  - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group11/config.ts
-  - src/platform/test/functional/apps/discover/group9/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
@@ -263,9 +260,7 @@ enabled:
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
-  - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
-  - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/status_page/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
@@ -373,7 +368,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
-  - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts

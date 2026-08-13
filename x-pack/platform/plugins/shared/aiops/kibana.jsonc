@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/aiops-plugin",
   "owner": [
-    "@elastic/ml-ui"
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "shared",

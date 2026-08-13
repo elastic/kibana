@@ -325,6 +325,27 @@ export interface ResponseActionMemoryDumpOutputContent {
   path: string;
   /** The remaining free disk space in bytes (after creating memory dump) */
   disk_free_space: number;
+  /** Returned for `raw` memory dump. The size of the dump's memory */
+  total_memory_size?: number;
+  /** Returned for `raw` memory dump. The amount of bytes captured by the dump */
+  total_bytes_captured?: number;
+  /**
+   * Returned for `raw` memory dump.
+   * Calculated as `total_bytes_captured `/ (double) `total_memory_size` - tells the percentage
+   * of RAM successfully captured into a dump
+   */
+  success_ratio?: number;
+  /**
+   * Returned for `kernel` memory dump.
+   * If true, the dump was executed from the driver, which means it doesn't have the same restrictions
+   * as a dump executed from user mode (e.g. it will work on older systems and will contain user mode memory)
+   */
+  dump_executed_from_driver?: boolean;
+  /**
+   * Returned for `kernel` memory dump.
+   * Indicates if the user space memory was included in the dump
+   */
+  user_space_included?: boolean;
 }
 
 export type EndpointActionDataParameterTypes =

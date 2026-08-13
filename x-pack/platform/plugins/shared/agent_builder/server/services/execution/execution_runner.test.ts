@@ -294,9 +294,7 @@ describe('handleAgentExecution', () => {
 
       await lastValueFrom(events$.pipe(toArray()));
 
-      expect(getConversationRoundAuthor).toHaveBeenCalledWith(
-        expect.objectContaining({ conversation: expect.objectContaining({ id: 'conversation-1' }) })
-      );
+      expect(getConversationRoundAuthor).toHaveBeenCalledTimes(1);
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
     });
   });
@@ -428,7 +426,7 @@ describe('collectAndWriteEvents', () => {
     data: {
       conversation_id: 'conversation-1',
       title: 'Conversation',
-      access_control: { access_mode: ConversationAccessControlMode.Public },
+      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
     },
   };
 
