@@ -27,10 +27,10 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
         .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES))])
         .transform((v) => (Array.isArray(v) ? v : [v]))
         .optional(),
-      started_after: z.string().optional(),
-      started_before: z.string().optional(),
-      finished_after: z.string().optional(),
-      finished_before: z.string().optional(),
+      started_after: z.string().datetime({ offset: true }).optional(),
+      started_before: z.string().datetime({ offset: true }).optional(),
+      finished_after: z.string().datetime({ offset: true }).optional(),
+      finished_before: z.string().datetime({ offset: true }).optional(),
       sort_field: z.enum(['started_at', 'finished_at']).optional(),
       sort_order: z.enum(['asc', 'desc']).optional(),
       page: z.coerce.number().int().min(1).optional(),
