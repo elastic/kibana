@@ -340,7 +340,7 @@ class ConversationClientImpl implements ConversationClient {
       conversationId,
       access: 'owner',
     });
-    const rounds = document._source!.conversation_rounds ?? [];
+    const rounds = document._source!.rounds ?? document._source!.conversation_rounds ?? [];
     const roundIndex = rounds.findIndex((r) => r.id === roundId);
 
     if (roundIndex === -1) {
@@ -370,7 +370,7 @@ class ConversationClientImpl implements ConversationClient {
     try {
       await this.storage.getClient().index({
         id: conversationId,
-        document: { ...document._source!, conversation_rounds: updatedRounds },
+        document: { ...document._source!, rounds: undefined, conversation_rounds: updatedRounds },
         if_seq_no: document._seq_no,
         if_primary_term: document._primary_term,
       });

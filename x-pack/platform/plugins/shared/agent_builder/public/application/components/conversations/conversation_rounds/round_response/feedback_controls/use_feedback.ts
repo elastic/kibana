@@ -184,7 +184,7 @@ export const useFeedback = (
             )
             .catch(() => {
               addErrorToast({ title: labels.voteError });
-              resetTo();
+              resetTo(prev);
             })
             .finally(() => {
               isSubmittingRef.current = false;
@@ -258,7 +258,23 @@ export const useFeedback = (
 
   const closeModal = useCallback(() => {
     setModalOpen(false);
-  }, []);
+    if (voteRef.current === 'down' && conversationId) {
+      services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+        round_id: roundId,
+        conversation_id: conversationId,
+        vote: 'down',
+        chips: [],
+        trace_id: ebtContext?.traceId,
+        connector_id: ebtContext?.connectorId,
+        model: ebtContext?.model,
+        agent_id: ebtContext?.agentId,
+        tool_names: ebtContext?.toolNames,
+        input_tokens: ebtContext?.inputTokens,
+        output_tokens: ebtContext?.outputTokens,
+        llm_calls: ebtContext?.llmCalls,
+      });
+    }
+  }, [conversationId, ebtContext, roundId, services.analytics]);
 
   const dismissInvite = useCallback(() => setInviteVisible(false), []);
 
@@ -286,21 +302,23 @@ export const useFeedback = (
           submitted_at: new Date().toISOString(),
         });
 
-        services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
-          round_id: roundId,
-          conversation_id: conversationId,
-          vote: currentVote,
-          chips: chips as string[],
-          ...(comment.trim().length > 0 ? { comment: comment.trim() } : {}),
-          trace_id: ebtContext?.traceId,
-          connector_id: ebtContext?.connectorId,
-          model: ebtContext?.model,
-          agent_id: ebtContext?.agentId,
-          tool_names: ebtContext?.toolNames,
-          input_tokens: ebtContext?.inputTokens,
-          output_tokens: ebtContext?.outputTokens,
-          llm_calls: ebtContext?.llmCalls,
-        });
+        if (currentVote === 'down') {
+          services.analytics?.reportEvent(AGENT_BUILDER_EVENT_TYPES.FeedbackSubmitted, {
+            round_id: roundId,
+            conversation_id: conversationId,
+            vote: currentVote,
+            chips: chips as string[],
+            ...(comment.trim().length > 0 ? { comment: comment.trim() } : {}),
+            trace_id: ebtContext?.traceId,
+            connector_id: ebtContext?.connectorId,
+            model: ebtContext?.model,
+            agent_id: ebtContext?.agentId,
+            tool_names: ebtContext?.toolNames,
+            input_tokens: ebtContext?.inputTokens,
+            output_tokens: ebtContext?.outputTokens,
+            llm_calls: ebtContext?.llmCalls,
+          });
+        }
 
         setSubmittedPhase('visible');
 
