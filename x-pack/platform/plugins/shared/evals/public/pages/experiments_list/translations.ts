@@ -32,6 +32,12 @@ export const COLUMN_EVALUATOR_MODEL = i18n.translate(
   { defaultMessage: 'Evaluator Model' }
 );
 
+export const getEvaluatorModelsBadge = (count: number) =>
+  i18n.translate('xpack.evals.experimentsList.evaluatorModelsBadge', {
+    defaultMessage: '{count} models',
+    values: { count },
+  });
+
 export const COLUMN_REPS = i18n.translate('xpack.evals.experimentsList.columns.reps', {
   defaultMessage: 'Reps',
 });

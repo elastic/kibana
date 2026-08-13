@@ -7,7 +7,6 @@
 
 import { randomUUID } from 'crypto';
 import { z } from '@kbn/zod/v4';
-import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/evals-common';
 import {
   createServerStepDefinition,
@@ -24,6 +23,7 @@ import {
   startExperimentCommonDefinition,
   compareExperimentsCommonDefinition,
 } from '../../common/workflows/steps';
+import { resolveConnectorModel } from '../lib/resolve_connector_model';
 import type { EvalStepDeps } from './types';
 import {
   buildExampleScoreBody,
@@ -98,25 +98,13 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const request = context.contextManager.getFakeRequest();
       return inference.getClient({ request, bindTo: { connectorId } });
     },
-    resolveModel: async (connectorId: string): Promise<Model> => {
-      try {
-        const inference = await deps.getInferenceStart();
-        const request = context.contextManager.getFakeRequest();
-        const connector = await inference.getConnectorById(connectorId, request);
-        return {
-          id: getConnectorModel(connector) ?? connector.name,
-          family: getConnectorFamily(connector),
-          provider: getConnectorProvider(connector),
-        };
-      } catch (error) {
-        context.logger.debug(
-          `Could not resolve a model for connector "${connectorId}"; using the connector id as the model id: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        return { id: connectorId };
-      }
-    },
+    resolveModel: async (connectorId: string): Promise<Model> =>
+      resolveConnectorModel({
+        connectorId,
+        inference: await deps.getInferenceStart(),
+        request: context.contextManager.getFakeRequest(),
+        logger: context.logger,
+      }),
   });
 
   const resolveDatasetStep = createServerStepDefinition({

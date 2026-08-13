@@ -53,6 +53,9 @@ interface ExperimentBucket {
   evaluator_model_id?: TermsBucket;
   evaluator_model_family?: TermsBucket;
   evaluator_model_provider?: TermsBucket;
+  evaluator_models?: {
+    buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
+  };
   git_branch?: TermsBucket;
   git_commit_sha?: TermsBucket;
   total_repetitions?: { value?: number };
@@ -77,6 +80,11 @@ export interface ExperimentsListingResult {
     dataset_names: string[];
     task_model: { id: string; family: string | undefined; provider: string | undefined };
     evaluator_model: { id: string; family: string | undefined; provider: string | undefined };
+    evaluator_models: Array<{
+      id: string;
+      family: string | undefined;
+      provider: string | undefined;
+    }>;
     git_branch: string | null;
     git_commit_sha: string | null;
     total_repetitions: number;
@@ -167,7 +175,8 @@ export const buildDatasetExampleScoresQuery = (
 
 /**
  * Returns the aggregation tree for computing per-evaluator, per-dataset statistics
- * (mean, median, std_dev, min, max, count).
+ * (mean, median, std_dev, min, max, count) along with the model each evaluator
+ * judged with. Code evaluators have no model, so their buckets come back empty.
  */
 export const buildStatsAggregation = () => ({
   by_dataset: {
@@ -180,6 +189,9 @@ export const buildStatsAggregation = () => ({
         aggs: {
           score_stats: { extended_stats: { field: 'evaluator.score' } },
           score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
+          evaluator_model_id: { terms: { field: 'evaluator.model.id', size: 1 } },
+          evaluator_model_family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          evaluator_model_provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
         },
       },
     },
@@ -305,6 +317,16 @@ export const buildExperimentsListingAggregation = ({
       evaluator_model_id: { terms: { field: 'evaluator.model.id', size: 1 } },
       evaluator_model_family: { terms: { field: 'evaluator.model.family', size: 1 } },
       evaluator_model_provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+      // Every distinct judge model, so the listing can tell that an experiment's
+      // evaluators differ rather than reporting whichever one sorted first. Family and
+      // provider are nested so they stay correlated with their own model id.
+      evaluator_models: {
+        terms: { field: 'evaluator.model.id', size: 5 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      },
       git_branch: { terms: { field: 'metadata.git.branch', size: 1 } },
       git_commit_sha: { terms: { field: 'metadata.git.commit_sha', size: 1 } },
       total_repetitions: { max: { field: 'metadata.total_repetitions' } },
@@ -358,6 +380,15 @@ export const parseExperimentsListingResponse = (
         family: evalFamily,
         provider: evalProvider,
       },
+      evaluator_models: (bucket.evaluator_models?.buckets ?? []).map((modelBucket) => {
+        const family = firstBucket(modelBucket.family);
+        const provider = firstBucket(modelBucket.provider);
+        return {
+          id: buildModelDisplayId(modelBucket.key, family, provider),
+          family,
+          provider,
+        };
+      }),
       git_branch: firstBucket(bucket.git_branch) ?? null,
       git_commit_sha: firstBucket(bucket.git_commit_sha) ?? null,
       total_repetitions: bucket.total_repetitions?.value ?? 1,
@@ -392,6 +423,9 @@ interface StatsAggregations {
             count?: number;
           };
           score_median?: { values?: Record<string, number | null> };
+          evaluator_model_id?: TermsBucket;
+          evaluator_model_family?: TermsBucket;
+          evaluator_model_provider?: TermsBucket;
         }>;
       };
     }>;
@@ -403,6 +437,8 @@ export interface ExperimentDetailEvaluatorStat {
   dataset_name: string;
   evaluator_name: string;
   example_count: number;
+  /** Model this evaluator judged with; absent for code evaluators. */
+  evaluator_model?: { id: string; family: string | undefined; provider: string | undefined };
   stats: {
     mean: number;
     median: number;
@@ -432,12 +468,24 @@ export const parseStatsAggregationResponse = (
     return evaluatorBuckets.map((evaluatorBucket) => {
       const scoreStats = evaluatorBucket.score_stats;
       const median = evaluatorBucket.score_median?.values?.['50.0'];
+      const modelId = firstBucket(evaluatorBucket.evaluator_model_id);
+      const modelFamily = firstBucket(evaluatorBucket.evaluator_model_family);
+      const modelProvider = firstBucket(evaluatorBucket.evaluator_model_provider);
 
       return {
         dataset_id: datasetId,
         dataset_name: datasetName,
         evaluator_name: evaluatorBucket.key,
         example_count: exampleCount,
+        // Absent rather than 'unknown' when nothing matched, so code evaluators read as
+        // "no model" instead of an unidentified one.
+        ...((modelId || modelFamily || modelProvider) && {
+          evaluator_model: {
+            id: buildModelDisplayId(modelId, modelFamily, modelProvider),
+            family: modelFamily,
+            provider: modelProvider,
+          },
+        }),
         stats: {
           mean: scoreStats?.avg ?? 0,
           median: median ?? 0,

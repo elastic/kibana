@@ -112,7 +112,11 @@ export const EvaluatorInfo = lazySchema(() =>
     explanation: z.string().max(4096).nullable().optional(),
     metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     trace_id: z.string().max(256).nullable().optional(),
-    model: Model,
+    model: Model.optional(),
+    /**
+     * Whether the evaluator invoked a model. Absent on documents written before per-evaluator attribution was introduced.
+     */
+    kind: z.enum(['llm', 'code']).optional(),
   })
 );
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
@@ -173,6 +177,10 @@ export const EvaluatorStats = lazySchema(() =>
      * Number of unique examples evaluated in this dataset
      */
     example_count: z.number().int().min(0).optional().default(0),
+    /**
+     * Model this evaluator judged with. Absent for code evaluators, which invoke no model.
+     */
+    evaluator_model: Model.optional(),
     stats: z.object({
       mean: z.number(),
       median: z.number(),

@@ -50,11 +50,84 @@ const repetitionPaginationCss = css`
   }
 `;
 
+/**
+ * A multi-score evaluator namespaces its scores as `evaluator.score`, so the segment before
+ * the first dot names the evaluator and the remainder names the individual score.
+ */
+const splitScoreName = (scoreName: string): { evaluatorName: string; scoreLabel: string } => {
+  const separatorIndex = scoreName.indexOf('.');
+  if (separatorIndex < 0) {
+    return { evaluatorName: scoreName, scoreLabel: scoreName };
+  }
+  return {
+    evaluatorName: scoreName.slice(0, separatorIndex),
+    scoreLabel: scoreName.slice(separatorIndex + 1),
+  };
+};
+
+const collectModelIds = (scores: EvaluationExperimentDatasetExample['scores']): Set<string> =>
+  new Set(
+    scores
+      .map((scoreDoc) => scoreDoc.evaluator.model?.id)
+      .filter((modelId): modelId is string => Boolean(modelId))
+  );
+
+interface EvaluatorScoreGroup {
+  evaluatorName: string;
+  scores: EvaluationExperimentDatasetExample['scores'];
+  /** Only set when the group's scores agree on one judge, so the group can label itself once. */
+  sharedModelId?: string;
+}
+
+const groupScoresByEvaluator = (
+  scores: EvaluationExperimentDatasetExample['scores']
+): EvaluatorScoreGroup[] => {
+  const groupsByName = new Map<string, EvaluatorScoreGroup>();
+
+  for (const scoreDoc of scores) {
+    const { evaluatorName } = splitScoreName(scoreDoc.evaluator.name);
+    const group = groupsByName.get(evaluatorName);
+    if (group) {
+      group.scores.push(scoreDoc);
+      continue;
+    }
+    groupsByName.set(evaluatorName, { evaluatorName, scores: [scoreDoc] });
+  }
+
+  return Array.from(groupsByName.values()).map((group) => {
+    const [onlyModelId, ...otherModelIds] = collectModelIds(group.scores);
+    return otherModelIds.length === 0 && onlyModelId
+      ? { ...group, sharedModelId: onlyModelId }
+      : group;
+  });
+};
+
+const getScoreKey = (scoreDoc: EvaluationScoreDocument, exampleId: string): string =>
+  [
+    exampleId,
+    scoreDoc.evaluator.name,
+    scoreDoc.task.repetition_index,
+    scoreDoc.task.trace_id ?? 'no_trace',
+    scoreDoc['@timestamp'],
+  ].join(':');
+
+/**
+ * Deliberately not a badge: the badges alongside it are verdicts, and the judge is metadata
+ * about who produced them.
+ */
+const JudgeLabel: React.FC<{ modelId: string }> = ({ modelId }) => (
+  <EuiText size="xs" color="subdued">
+    <em>{i18n.getJudgedByLabel(modelId)}</em>
+  </EuiText>
+);
+
 const EvaluatorScoreAccordion: React.FC<{
   score: EvaluationScoreDocument;
   exampleId: string;
+  scoreLabel: string;
+  judgeModelId?: string;
   onTraceClick: (traceId: string) => void;
-}> = ({ score, exampleId, onTraceClick }) => {
+}> = ({ score, exampleId, scoreLabel, judgeModelId, onTraceClick }) => {
   const { evaluator } = score;
   const accordionId = [exampleId, evaluator.name, score.task.repetition_index].join('-');
 
@@ -67,12 +140,17 @@ const EvaluatorScoreAccordion: React.FC<{
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
-          <strong>{evaluator.name}:</strong> {formatScore(evaluator.score)}
+          <strong>{scoreLabel}:</strong> {formatScore(evaluator.score)}
         </EuiText>
       </EuiFlexItem>
       {evaluator.label && (
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow">{evaluator.label}</EuiBadge>
+        </EuiFlexItem>
+      )}
+      {judgeModelId && (
+        <EuiFlexItem grow={false}>
+          <JudgeLabel modelId={judgeModelId} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -130,6 +208,70 @@ const EvaluatorScoreAccordion: React.FC<{
         )}
       </div>
     </EuiAccordion>
+  );
+};
+
+const EvaluatorScoreGroupBlock: React.FC<{
+  group: EvaluatorScoreGroup;
+  exampleId: string;
+  showJudge: boolean;
+  onTraceClick: (traceId: string) => void;
+}> = ({ group, exampleId, showJudge, onTraceClick }) => {
+  const { euiTheme } = useEuiTheme();
+  const { evaluatorName, scores, sharedModelId } = group;
+
+  // A single-score evaluator needs no heading: the score already carries the evaluator name.
+  if (scores.length === 1) {
+    const [score] = scores;
+    return (
+      <EvaluatorScoreAccordion
+        score={score}
+        exampleId={exampleId}
+        scoreLabel={score.evaluator.name}
+        judgeModelId={showJudge ? score.evaluator.model?.id : undefined}
+        onTraceClick={onTraceClick}
+      />
+    );
+  }
+
+  return (
+    <div css={{ marginBottom: euiTheme.size.s }}>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <strong>{evaluatorName}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        {showJudge && sharedModelId && (
+          <EuiFlexItem grow={false}>
+            <JudgeLabel modelId={sharedModelId} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      {/* The rule marks where the evaluator's scores end, so the next top-level score is not
+          mistaken for one of them. */}
+      <div
+        css={{
+          marginLeft: euiTheme.size.xxs,
+          paddingLeft: euiTheme.size.s,
+          borderLeft: euiTheme.border.thin,
+        }}
+      >
+        {scores.map((score) => (
+          <EvaluatorScoreAccordion
+            key={getScoreKey(score, exampleId)}
+            score={score}
+            exampleId={exampleId}
+            scoreLabel={splitScoreName(score.evaluator.name).scoreLabel}
+            judgeModelId={
+              // The group heading already names a shared judge; only per-score judges are left.
+              showJudge && !sharedModelId ? score.evaluator.model?.id : undefined
+            }
+            onTraceClick={onTraceClick}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -261,6 +403,9 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
 
     return (
       <EuiCodeBlock
+        // Table cell content is a flex container, so without an explicit width the block
+        // shrink-wraps the JSON and pulls its copy/expand controls in with it.
+        css={{ width: '100%' }}
         overflowHeight={200}
         language="json"
         paddingSize="none"
@@ -272,15 +417,6 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
       </EuiCodeBlock>
     );
   };
-
-  const getScoreKey = (scoreDoc: EvaluationScoreDocument, exampleId: string): string =>
-    [
-      exampleId,
-      scoreDoc.evaluator.name,
-      scoreDoc.task.repetition_index,
-      scoreDoc.task.trace_id ?? 'no_trace',
-      scoreDoc['@timestamp'],
-    ].join(':');
 
   const itemIdToExpandedRowMap = useMemo<Record<string, ReactNode>>(() => {
     return rows.reduce<Record<string, ReactNode>>((acc, row) => {
@@ -328,7 +464,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_INPUT,
-      width: '30%',
+      width: '18%',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
@@ -352,19 +488,22 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
     {
       field: 'scoresByRepetition',
       name: i18n.COLUMN_EVALUATOR_SCORES,
-      width: '300px',
+      width: '30%',
       render: (
         _scoresByRepetition: ExampleScoreRow['scoresByRepetition'],
         row: ExampleScoreRow
       ) => {
         const scores = getScoresForSelectedRepetition(row);
+        // A judge only disambiguates when the cell holds more than one.
+        const showJudge = collectModelIds(scores).size > 1;
         return scores.length > 0 ? (
           <div>
-            {scores.map((scoreDoc) => (
-              <EvaluatorScoreAccordion
-                key={getScoreKey(scoreDoc, row.exampleId)}
-                score={scoreDoc}
+            {groupScoresByEvaluator(scores).map((group) => (
+              <EvaluatorScoreGroupBlock
+                key={`${row.exampleId}-${group.evaluatorName}`}
+                group={group}
                 exampleId={row.exampleId}
+                showJudge={showJudge}
                 onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
               />
             ))}

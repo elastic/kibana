@@ -9,7 +9,12 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { API_VERSIONS, EVALS_EVALUATE_URL, EvaluateRequestBody } from '@kbn/evals-common';
+import {
+  API_VERSIONS,
+  EVALS_EVALUATE_URL,
+  EvaluateRequestBody,
+  type EvaluateResponse,
+} from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -826,7 +831,13 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.payload.results).toEqual([
       {
         status: 'error',
-        evaluator: { name: 'groundedness', version: '1.0.0', kind: 'llm' },
+        // No `getConnectorById` on the mock, so the model degrades to the connector id.
+        evaluator: {
+          name: 'groundedness',
+          version: '1.0.0',
+          kind: 'llm',
+          model: { id: 'connector-1' },
+        },
         error: { message: 'Error: failed badly' },
       },
       expect.objectContaining({
@@ -834,6 +845,120 @@ describe('POST /internal/evals/_evaluate', () => {
         evaluator: expect.objectContaining({ name: 'latency' }),
         scores: [{ name: 'latency', score: 42 }],
       }),
+    ]);
+  });
+
+  it('reports the model resolved from each llm evaluator own connector, and none for code', async () => {
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const correctness = buildEvaluator({
+      name: 'correctness',
+      kind: 'llm',
+      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'correctness', score: 1 }] }),
+    });
+    const latency = buildEvaluator({
+      name: 'latency',
+      kind: 'code',
+      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'latency', score: 42 }] }),
+    });
+    const getConnectorById = jest.fn().mockImplementation(async (connectorId: string) => ({
+      connectorId,
+      name: connectorId,
+      type: connectorId === 'openai-connector' ? '.gen-ai' : '.bedrock',
+      config: {
+        defaultModel: connectorId === 'openai-connector' ? 'gpt-4o' : 'claude-sonnet-4',
+      },
+    }));
+
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness, correctness, latency]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getConnectorById,
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [
+            { name: 'groundedness', connector_id: 'openai-connector' },
+            { name: 'correctness', connector_id: 'bedrock-connector' },
+            { name: 'latency' },
+          ],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(
+      response.payload.results.map(
+        (result: EvaluateResponse['results'][number]) => result.evaluator
+      )
+    ).toEqual([
+      {
+        name: 'groundedness',
+        version: '1.0.0',
+        kind: 'llm',
+        model: { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+      },
+      {
+        name: 'correctness',
+        version: '1.0.0',
+        kind: 'llm',
+        model: { id: 'claude-sonnet-4', family: 'Claude', provider: 'Anthropic' },
+      },
+      { name: 'latency', version: '1.0.0', kind: 'code' },
+    ]);
+  });
+
+  it('resolves each connector once when several llm evaluators share it', async () => {
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const correctness = buildEvaluator({
+      name: 'correctness',
+      kind: 'llm',
+      evaluate: jest.fn().mockResolvedValue({ scores: [{ name: 'correctness', score: 1 }] }),
+    });
+    const getConnectorById = jest.fn().mockResolvedValue({
+      connectorId: 'shared-connector',
+      name: 'shared-connector',
+      type: '.gen-ai',
+      config: { defaultModel: 'gpt-4o' },
+    });
+
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness, correctness]),
+      inferenceStart: {
+        getClient: jest.fn().mockReturnValue({ prompt: jest.fn() }),
+        getConnectorById,
+      } as unknown as InferenceServerStart,
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: '0af7651916cd43dd8448eb211c80319c' }] },
+          evaluators: [
+            { name: 'groundedness', connector_id: 'shared-connector' },
+            { name: 'correctness', connector_id: 'shared-connector' },
+          ],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(getConnectorById).toHaveBeenCalledTimes(1);
+    expect(
+      response.payload.results.map(
+        (result: EvaluateResponse['results'][number]) => result.evaluator.model
+      )
+    ).toEqual([
+      { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+      { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
     ]);
   });
 

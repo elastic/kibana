@@ -265,17 +265,27 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
                   );
-                  return { evaluatorName: evaluator.name, result, evaluatorTraceId };
+                  return {
+                    evaluatorName: evaluator.name,
+                    result,
+                    evaluatorTraceId,
+                    kind: evaluator.kind,
+                    // Read after `evaluate` so evaluators that learn their model from
+                    // the `_evaluate` response have it by now.
+                    model: evaluator.getModel?.(),
+                  };
                 })
               );
 
-              for (const { evaluatorName, result, evaluatorTraceId } of results) {
+              for (const { evaluatorName, result, evaluatorTraceId, kind, model } of results) {
                 const evalRun = {
                   name: evaluatorName,
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
+                  kind,
+                  ...(model && { model }),
                 };
                 evaluationRuns.push(evalRun);
 

@@ -66,6 +66,14 @@ export const IngestScoresRequestBody = lazySchema(() =>
             explanation: z.string().max(4096).nullable().optional(),
             metadata: z.object({}).catchall(z.unknown()).optional(),
             trace_id: z.string().max(256).nullable().optional(),
+            /**
+             * Model this evaluator judged with. When omitted, the top-level `evaluator_model` is used unless `kind` is `code`.
+             */
+            model: Model.optional(),
+            /**
+             * Whether the evaluator invoked a model. `code` suppresses the top-level `evaluator_model` fallback so deterministic evaluators are not attributed a judge.
+             */
+            kind: z.enum(['llm', 'code']).optional(),
           }),
         })
       )

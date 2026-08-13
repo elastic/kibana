@@ -194,7 +194,7 @@ export const ExperimentsListPage: React.FC = () => {
         name: i18n.COLUMN_NAME,
         sortable: true,
         truncateText: true,
-        width: '200px',
+        width: '28%',
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
@@ -225,7 +225,7 @@ export const ExperimentsListPage: React.FC = () => {
       {
         field: 'experiment_count',
         name: i18n.COLUMN_EXPERIMENTS,
-        width: '150px',
+        width: '11%',
         render: (count: number | undefined) => {
           const c = count ?? 1;
           return (
@@ -239,19 +239,38 @@ export const ExperimentsListPage: React.FC = () => {
         field: 'timestamp',
         name: i18n.COLUMN_TIMESTAMP,
         sortable: true,
+        width: '15%',
         render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
       },
       {
         field: 'task_model',
         name: i18n.COLUMN_TASK_MODEL,
+        width: '19%',
         render: (model: EvaluationExperimentSummary['task_model']) =>
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
         field: 'evaluator_model',
         name: i18n.COLUMN_EVALUATOR_MODEL,
-        render: (model: EvaluationExperimentSummary['evaluator_model']) =>
-          model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
+        width: '19%',
+        render: (
+          model: EvaluationExperimentSummary['evaluator_model'],
+          item: EvaluationExperimentSummary
+        ) => {
+          // Evaluators can each judge with their own model, so a single badge would
+          // misattribute the rest.
+          const modelIds = item.evaluator_models?.map(({ id }) => id) ?? [];
+          if (modelIds.length > 1) {
+            return (
+              <EuiToolTip content={modelIds.join(', ')}>
+                <EuiBadge color="accent" tabIndex={0}>
+                  {i18n.getEvaluatorModelsBadge(modelIds.length)}
+                </EuiBadge>
+              </EuiToolTip>
+            );
+          }
+          return model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-';
+        },
       },
       {
         field: 'total_repetitions',

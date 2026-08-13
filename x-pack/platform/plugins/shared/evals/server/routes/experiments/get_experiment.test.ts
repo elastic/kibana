@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXPERIMENT_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXPERIMENT_URL, API_VERSIONS, type EvaluatorStats } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -126,6 +126,79 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
         count: 10,
       },
     });
+  });
+
+  it('reports the judge model per evaluator so mixed-judge experiments read correctly', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              task: { model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' } },
+              evaluator: { model: { id: 'claude-3', family: 'Claude', provider: 'Anthropic' } },
+              metadata: { total_repetitions: 1 },
+            },
+          },
+        ],
+      },
+    } as any);
+
+    evaluationScoreService.search.mockResolvedValueOnce({
+      aggregations: {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'dataset-1',
+              dataset_name: { buckets: [{ key: 'My Dataset' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'correctness',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
+                    evaluator_model_family: { buckets: [{ key: 'Claude' }] },
+                    evaluator_model_provider: { buckets: [{ key: 'Anthropic' }] },
+                  },
+                  {
+                    key: 'groundedness',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: { buckets: [{ key: 'gpt-4o' }] },
+                    evaluator_model_family: { buckets: [{ key: 'GPT' }] },
+                    evaluator_model_provider: { buckets: [{ key: 'OpenAI' }] },
+                  },
+                  {
+                    key: 'latency',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: { buckets: [] },
+                    evaluator_model_family: { buckets: [] },
+                    evaluator_model_provider: { buckets: [] },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(
+      response.payload.stats.map(
+        ({ evaluator_name: name, evaluator_model: model }: EvaluatorStats) => [name, model]
+      )
+    ).toEqual([
+      ['correctness', { id: 'claude-3', family: 'Claude', provider: 'Anthropic' }],
+      ['groundedness', { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' }],
+      ['latency', undefined],
+    ]);
   });
 
   it('returns 500 when ES throws', async () => {

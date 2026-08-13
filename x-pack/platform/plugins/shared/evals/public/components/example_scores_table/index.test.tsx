@@ -19,6 +19,7 @@ const buildScore = ({
   evaluatorExplanation,
   evaluatorMetadata,
   evaluatorTraceId,
+  evaluatorModelId = 'evaluator-model-1',
   repetitionIndex,
   exampleInput,
   taskOutput,
@@ -31,6 +32,7 @@ const buildScore = ({
   evaluatorExplanation?: string | null;
   evaluatorMetadata?: Record<string, unknown> | null;
   evaluatorTraceId?: string | null;
+  evaluatorModelId?: string;
   repetitionIndex: number;
   exampleInput?: Record<string, unknown> | null;
   taskOutput?: Record<string, unknown> | null;
@@ -62,12 +64,40 @@ const buildScore = ({
     metadata: evaluatorMetadata,
     trace_id: evaluatorTraceId,
     model: {
-      id: 'evaluator-model-1',
+      id: evaluatorModelId,
     },
   },
   metadata: {
     total_repetitions: 1,
   },
+});
+
+const buildMixedJudgeExample = (): EvaluationExperimentDatasetExample => ({
+  example_id: 'example-mixed-judges',
+  example_index: 0,
+  scores: [
+    buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'correctness.factuality',
+      evaluatorScore: 0.71,
+      evaluatorModelId: 'openai-gpt-5.6-luna',
+      repetitionIndex: 0,
+    }),
+    buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'correctness.relevance',
+      evaluatorScore: 0.5,
+      evaluatorModelId: 'openai-gpt-5.6-luna',
+      repetitionIndex: 0,
+    }),
+    buildScore({
+      timestamp: '2026-03-02T12:00:00.000Z',
+      evaluatorName: 'groundedness',
+      evaluatorScore: 1,
+      evaluatorModelId: 'google-gemini-3.5-flash',
+      repetitionIndex: 0,
+    }),
+  ],
 });
 
 describe('ExampleScoresTable', () => {
@@ -166,6 +196,114 @@ describe('ExampleScoresTable', () => {
       })
     ).not.toBeInTheDocument();
     expect(screen.getByText('example-id-single-repetition')).toBeInTheDocument();
+  });
+
+  describe('multi-score evaluators', () => {
+    it('groups sub-scores under the evaluator name instead of repeating it on each row', () => {
+      render(<ExampleScoresTable examples={[buildMixedJudgeExample()]} onTraceClick={jest.fn()} />);
+
+      expect(screen.getByText('correctness')).toBeInTheDocument();
+      expect(screen.getByText('factuality:')).toBeInTheDocument();
+      expect(screen.getByText('relevance:')).toBeInTheDocument();
+      expect(screen.queryByText('correctness.factuality:')).not.toBeInTheDocument();
+    });
+
+    it('keeps a single-score evaluator on one row without a heading', () => {
+      render(<ExampleScoresTable examples={[buildMixedJudgeExample()]} onTraceClick={jest.fn()} />);
+
+      expect(screen.getAllByText('groundedness:')).toHaveLength(1);
+      expect(screen.queryByText('groundedness')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('judge model', () => {
+    it('labels each evaluator once rather than every sub-score', () => {
+      render(<ExampleScoresTable examples={[buildMixedJudgeExample()]} onTraceClick={jest.fn()} />);
+
+      expect(screen.getAllByText('judged by openai-gpt-5.6-luna')).toHaveLength(1);
+      expect(screen.getAllByText('judged by google-gemini-3.5-flash')).toHaveLength(1);
+    });
+
+    it('stays quiet when every evaluator shares one judge', () => {
+      const example = buildMixedJudgeExample();
+      render(
+        <ExampleScoresTable
+          examples={[
+            {
+              ...example,
+              scores: example.scores.map((score) => ({
+                ...score,
+                evaluator: { ...score.evaluator, model: { id: 'openai-gpt-5.6-luna' } },
+              })),
+            },
+          ]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByText(/openai-gpt-5\.6-luna/)).not.toBeInTheDocument();
+    });
+
+    it('labels sub-scores individually when one evaluator mixes judges', () => {
+      const example = buildMixedJudgeExample();
+      const [factuality, relevance, groundedness] = example.scores;
+      render(
+        <ExampleScoresTable
+          examples={[
+            {
+              ...example,
+              scores: [
+                factuality,
+                {
+                  ...relevance,
+                  evaluator: { ...relevance.evaluator, model: { id: 'anthropic-claude-9' } },
+                },
+                groundedness,
+              ],
+            },
+          ]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('judged by openai-gpt-5.6-luna')).toBeInTheDocument();
+      expect(screen.getByText('judged by anthropic-claude-9')).toBeInTheDocument();
+      expect(screen.getByText('judged by google-gemini-3.5-flash')).toBeInTheDocument();
+    });
+
+    it('stays quiet for code evaluators that carry no judge', () => {
+      render(
+        <ExampleScoresTable
+          examples={[
+            {
+              example_id: 'example-code-only',
+              example_index: 0,
+              scores: [
+                buildScore({
+                  timestamp: '2026-03-02T12:00:00.000Z',
+                  evaluatorName: 'latency',
+                  evaluatorScore: 4.19,
+                  repetitionIndex: 0,
+                }),
+                buildScore({
+                  timestamp: '2026-03-02T12:00:00.000Z',
+                  evaluatorName: 'input_tokens',
+                  evaluatorScore: 32670,
+                  repetitionIndex: 0,
+                }),
+              ].map((score) => ({
+                ...score,
+                evaluator: { ...score.evaluator, model: undefined },
+              })),
+            },
+          ]}
+          onTraceClick={jest.fn()}
+        />
+      );
+
+      expect(screen.getByText('latency:')).toBeInTheDocument();
+      expect(screen.queryByText(/judged by/)).not.toBeInTheDocument();
+    });
   });
 
   it('renders evaluator label as a badge when present', () => {
