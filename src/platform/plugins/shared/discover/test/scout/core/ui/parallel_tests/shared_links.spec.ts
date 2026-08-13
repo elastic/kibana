@@ -8,8 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
-import { testData } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const EMPTY_SORT_SNAPSHOT_URL =
   '/app/discover?_t=1453775307251#/' +
@@ -128,7 +127,7 @@ spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, 
         .poll(() => pageObjects.dataGrid.getColumnTitles())
         .toEqual(['@timestamp', 'bytes']);
 
-      expect(decodeURIComponent(page.url())).toContain('columns:!(bytes)');
+      await expect.poll(() => decodeURIComponent(page.url())).toContain('columns:!(bytes)');
     }
   );
 });
