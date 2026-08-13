@@ -8,11 +8,12 @@
 import type { Logger } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { asSpaceId } from '@kbn/core-spaces-common';
-import type {
-  ConnectorEventEmitter,
-  PluginSetupContract as ActionsPluginSetupContract,
-} from '@kbn/actions-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+
+import type {
+  ActionsHubConnectorEventRegistry,
+  ConnectorEventEmitter,
+} from './actions_hub_contract';
 
 let emitFailureCount = 0;
 
@@ -27,7 +28,7 @@ export function resetConnectorEventEmitFailureCountForTests(): void {
 }
 
 /**
- * Registers the Phase 1 Workflows emitter on the Actions inbound hub.
+ * Registers the Phase 1 Workflows emitter on the Actions inbound hub registry.
  * Builds a momentary space-scoped fake request for getClient.
  */
 export function registerWorkflowsConnectorEventEmitter({
@@ -35,7 +36,7 @@ export function registerWorkflowsConnectorEventEmitter({
   getWorkflowsExtensionsStart,
   logger,
 }: {
-  actions: ActionsPluginSetupContract;
+  actions: ActionsHubConnectorEventRegistry;
   getWorkflowsExtensionsStart: () => Promise<WorkflowsExtensionsServerPluginStart | undefined>;
   logger: Logger;
 }): void {

@@ -6,12 +6,9 @@
  */
 
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
-export interface ConnectorEventsBridgeSetupDeps {
-  actions: ActionsPluginSetupContract;
-}
+export type ConnectorEventsBridgeSetupDeps = Record<string, never>;
 
 export interface ConnectorEventsBridgeStartDeps {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
