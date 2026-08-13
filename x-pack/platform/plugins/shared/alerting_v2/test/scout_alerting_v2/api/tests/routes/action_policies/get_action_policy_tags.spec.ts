@@ -105,7 +105,7 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
       });
 
       expect(noSearch).toHaveStatusCode(200);
-      expect(noSearch.body.tags).toEqual(expect.arrayContaining(['cpu', 'memory']));
+      expect(noSearch.body.tags).toStrictEqual(expect.arrayContaining(['cpu', 'memory']));
       expect(emptySearch).toHaveStatusCode(200);
       expect(emptySearch.body).toStrictEqual(noSearch.body);
     }
