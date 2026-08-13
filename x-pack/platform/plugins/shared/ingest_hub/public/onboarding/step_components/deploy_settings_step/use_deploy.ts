@@ -292,8 +292,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         const service = AWS_SERVICES_MAP.get(inst.serviceId);
         if (!service) return [];
         // TODO(follow-up): non-agentless duplicates are silently dropped here.
-        // ECF duplicate support is being decided (elastic/ingest-dev#9037);
-        // agent-based duplicate support is tracked in elastic/ingest-dev#9079.
+        // ECF and agent-based duplicate deploy support are tracked in separate follow-up issues.
         if (!service.deliveryMethods.some((dm) => dm.method === 'agentless' && dm.preferred)) {
           return [];
         }
@@ -353,9 +352,13 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         instancesToDeploy = agentlessInstances.filter(({ instance }) =>
           targets.includes(instance.instanceId)
         );
-        const retryStatuses = buildInstanceStatuses(targets, []);
+        // Use the ids actually present in agentlessInstances — a stale id in
+        // targets (e.g. from a removed duplicate) must not get set to 'instantiating'
+        // and then never resolved, which would strand the chip permanently mid-flight.
+        const deployedTargets = instancesToDeploy.map(({ instance }) => instance.instanceId);
+        const retryStatuses = buildInstanceStatuses(deployedTargets, []);
         const remainingFailed = deployAndDetectStep.failedInstances.filter(
-          (id) => !targets.includes(id)
+          (id) => !deployedTargets.includes(id)
         );
         setIsDeploying(true);
         updateDeployAndDetectStep({

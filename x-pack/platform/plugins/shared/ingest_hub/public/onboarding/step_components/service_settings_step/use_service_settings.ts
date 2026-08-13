@@ -87,7 +87,7 @@ function reconcileInstances(
 }
 
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep } = useOnboardingFlow();
+  const { servicesStep, removeDeployInstance } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<PersistedState>(
@@ -201,8 +201,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         instances: next,
         serviceVars: nextVars,
       });
+      // Prune deploy state so removed instances don't leave orphaned chips,
+      // stale failedInstances entries, or undismissable error callouts in step 4.
+      removeDeployInstance(instanceId);
     },
-    [persisted, setPersisted, instances]
+    [persisted, setPersisted, instances, removeDeployInstance]
   );
 
   const [searchQuery, setSearchQuery] = useState('');

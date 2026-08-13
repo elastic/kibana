@@ -58,6 +58,7 @@ interface OnboardingFlowState {
   setSelectedServiceIds: (ids: string[]) => void;
   deployAndDetectStep: DeployAndDetectStepState;
   updateDeployAndDetectStep: (update: Partial<DeployAndDetectStepState>) => void;
+  removeDeployInstance: (instanceId: string) => void;
   getLatestFailedInstances: () => string[];
   registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
   retryDeploy: (instanceIds?: string[]) => void;
@@ -152,6 +153,25 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedDeployAndDetectStep]
   );
 
+  const removeDeployInstance = useCallback(
+    (instanceId: string) => {
+      const prev = persistedDeployAndDetectStepRef.current;
+      const nextStatuses = { ...(prev?.serviceStatuses ?? {}) };
+      delete nextStatuses[instanceId];
+      const nextPolicyIds = { ...(prev?.policyIdsByInstance ?? {}) };
+      delete nextPolicyIds[instanceId];
+      setPersistedDeployAndDetectStep({
+        serviceStatuses: nextStatuses,
+        policyIdsByInstance: nextPolicyIds,
+        failedInstances: (prev?.failedInstances ?? []).filter((id) => id !== instanceId),
+        deployErrors: Object.fromEntries(
+          Object.entries(prev?.deployErrors ?? {}).filter(([id]) => id !== instanceId)
+        ),
+      });
+    },
+    [setPersistedDeployAndDetectStep]
+  );
+
   const getLatestFailedInstances = useCallback(
     () => persistedDeployAndDetectStepRef.current?.failedInstances ?? [],
     []
@@ -198,6 +218,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         setSelectedServiceIds,
         deployAndDetectStep,
         updateDeployAndDetectStep,
+        removeDeployInstance,
         getLatestFailedInstances,
         registerDeployHandler,
         retryDeploy,

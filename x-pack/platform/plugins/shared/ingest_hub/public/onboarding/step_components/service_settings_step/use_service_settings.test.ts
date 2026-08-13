@@ -24,7 +24,8 @@ beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => useState(initial));
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['cloudtrail'] },
-  } as ReturnType<typeof useOnboardingFlow>);
+    removeDeployInstance: jest.fn(),
+  } as unknown as ReturnType<typeof useOnboardingFlow>);
 });
 
 describe('useServiceSettings — addDuplicate instanceId generation', () => {
