@@ -55,6 +55,15 @@ export class SubagentTracker {
   }
 
   /**
+   * Number of persistent sub-agents created in this round so far. Callers can
+   * snapshot this before a tool batch and compare after to detect whether the
+   * batch produced any new creations without inspecting tool-result payloads.
+   */
+  creationCount(): number {
+    return this.creations.length;
+  }
+
+  /**
    * Return the current full roster with purposes.
    * - Purposes for entries created THIS round are taken from
    *   `creations` (recorded via `register`).

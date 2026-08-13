@@ -198,12 +198,6 @@ export const createSubagentTool = ({
             metadata: { agent_execution_id: executionId, internal: 'true' },
           });
 
-          const createdMarker = {
-            name: finalName,
-            purpose: description,
-            conversation_id: newChildId,
-          };
-
           if (run_in_background) {
             backgroundExecutionService?.registerExecution(executionId);
             return {
@@ -212,7 +206,6 @@ export const createSubagentTool = ({
                   agent_execution_id: executionId,
                   mode: SubagentExecutionMode.background,
                   status: 'queued',
-                  _subagent_created: createdMarker,
                 }),
               ],
             };
@@ -226,7 +219,6 @@ export const createSubagentTool = ({
                 mode: SubagentExecutionMode.foreground,
                 status: 'completed',
                 response,
-                _subagent_created: createdMarker,
               }),
             ],
           };

@@ -48,7 +48,6 @@ export const createSendMessageTool = ({
   abortSignal,
   subagentTracker,
 }: {
-  /** Agent id — accepted for signature symmetry with `run_subagent`, currently unused. */
   agentId: string;
   executionId: string;
   capabilities?: AgentCapabilities;

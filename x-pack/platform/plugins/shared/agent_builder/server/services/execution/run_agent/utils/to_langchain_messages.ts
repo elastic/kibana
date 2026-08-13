@@ -71,12 +71,8 @@ export interface ConversationToLangchainOptions {
    */
   conversationTimestamp?: string;
   /**
-   * Optional current roster of persistent sub-agents (from
-   * `conversation.state.subagents`). Used to guarantee the parent LLM sees
-   * the active roster even when compaction has removed the most recent
-   * `SubagentRosterUpdatedStep` from history. When surviving rounds already
-   * include a `SubagentRosterUpdatedStep`, the LLM's "latest wins" reasoning
-   * naturally lets that step supersede this synthesized notice.
+   * Optional current roster of persistent sub-agents.
+   * Used to guarantee the parent LLM sees the active roster even after compaction
    */
   subagentRosterFallback?: Record<string, string>;
 }
@@ -116,20 +112,15 @@ export const convertPreviousRounds = async ({
     const summaryText = serializeCompactionSummary(compactionSummary.structured_data);
     messages.push(createUserMessage('[Previous conversation context was compacted]'));
     messages.push(createAIMessage(summaryText));
-  }
 
-  // Compaction-resilient fallback: inject a synthesized "Active persistent
-  // sub-agents" notice up front when we know the roster (from conversation
-  // state). If any surviving round emits a real SubagentRosterUpdatedStep
-  // later, the LLM's "latest wins" reading naturally lets that step supersede
-  // this notice.
-  if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
-    const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
-      name,
-      conversation_id: id,
-      // purpose is unknown here — surviving SubagentRosterUpdatedStep entries carry it.
-    }));
-    messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
+    // Inject back subagent roaster notice after compaction
+    if (subagentRosterFallback && Object.keys(subagentRosterFallback).length > 0) {
+      const fallbackRoster = Object.entries(subagentRosterFallback).map(([name, id]) => ({
+        name,
+        conversation_id: id,
+      }));
+      messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
+    }
   }
 
   for (const round of rounds) {

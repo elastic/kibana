@@ -37,7 +37,6 @@ import {
   backgroundExecutionCompleteAction,
   subagentRosterUpdatedAction,
   isAgentErrorAction,
-  isExecuteToolAction,
   isHandoverAction,
   isStructuredAnswerAction,
   isToolCallAction,
@@ -78,25 +77,6 @@ export const createAgentGraph = ({
   subagentTracker?: SubagentTracker;
   roundId: string;
 }) => {
-  // Purpose lookup for entries created in prior rounds (persistent sub-agents
-  // whose purpose we don't have in this round's tracker). Sourced from the most
-  // recent SubagentRosterUpdatedStep across previous rounds.
-  const priorPurposes = (): Record<string, string> => {
-    for (let i = processedConversation.previousRounds.length - 1; i >= 0; i--) {
-      const step = processedConversation.previousRounds[i].steps
-        .slice()
-        .reverse()
-        .find(isSubagentRosterUpdatedStep);
-      if (step) {
-        return Object.fromEntries(
-          step.roster
-            .filter((e: SubagentRosterEntry) => e.purpose !== undefined)
-            .map((e: SubagentRosterEntry) => [e.name, e.purpose as string])
-        );
-      }
-    }
-    return {};
-  };
   const init = async () => {
     return {};
   };
@@ -213,18 +193,17 @@ export const createAgentGraph = ({
 
     lastAction.tool_calls.forEach((toolCall) => toolManager.recordToolUse(toolCall.toolName));
 
+    // Snapshot the tracker's creation counter before executing the batch.
+    const creationsBefore = subagentTracker?.creationCount() ?? 0;
+
     const toolCallMessage = createToolCallMessage(lastAction.tool_calls, lastAction.message);
     const toolNodeResult = await toolNode.invoke([toolCallMessage], {});
     const actions: ResearchAgentAction[] = processToolNodeResponse(toolNodeResult, {
       cycle: state.currentCycle,
     });
 
-    // If any tool call created a persistent sub-agent this batch, append a
-    // SubagentRosterUpdatedAction so the parent LLM sees the fresh roster
-    // inline (as an "Active persistent sub-agents" system-notice user message,
-    // mirroring how background completions are surfaced).
-    if (subagentTracker && batchHasPersistentCreation(actions)) {
-      const roster = subagentTracker.activeRoster(priorPurposes());
+    if (subagentTracker && subagentTracker.creationCount() > creationsBefore) {
+      const roster = subagentTracker.activeRoster(getPriorPurposes(processedConversation));
       actions.push(subagentRosterUpdatedAction(roster));
     }
 
@@ -355,33 +334,25 @@ export const createAgentGraph = ({
 };
 
 /**
- * True if any tool_result within the given ExecuteToolAction batch carries the
- * internal `_subagent_created` marker (encoded by the `run_subagent` handler on
- * the persistent-creation path). Used to decide whether to emit a roster
- * update.
+ * Purpose lookup for entries created in prior rounds (persistent sub-agents
+ * whose purpose isn't in this round's tracker). Sourced from the most recent
+ * SubagentRosterUpdatedStep across previous rounds.
  */
-const batchHasPersistentCreation = (actions: ResearchAgentAction[]): boolean => {
-  for (const action of actions) {
-    if (!isExecuteToolAction(action)) continue;
-    for (const result of action.tool_results) {
-      if (tryParseCreatedMarker(result.content)) return true;
+const getPriorPurposes = (processedConversation: ProcessedConversation): Record<string, string> => {
+  for (let i = processedConversation.previousRounds.length - 1; i >= 0; i--) {
+    const step = processedConversation.previousRounds[i].steps
+      .slice()
+      .reverse()
+      .find(isSubagentRosterUpdatedStep);
+    if (step) {
+      return Object.fromEntries(
+        step.roster
+          .filter((e: SubagentRosterEntry) => e.purpose !== undefined)
+          .map((e: SubagentRosterEntry) => [e.name, e.purpose as string])
+      );
     }
   }
-  return false;
-};
-
-const tryParseCreatedMarker = (content: string): boolean => {
-  try {
-    const obj = JSON.parse(content) as unknown;
-    if (typeof obj !== 'object' || obj === null) return false;
-    const results = (obj as { results?: Array<{ data?: Record<string, unknown> }> }).results;
-    if (!Array.isArray(results)) return false;
-    return results.some(
-      (r) => r?.data && typeof r.data === 'object' && '_subagent_created' in r.data
-    );
-  } catch {
-    return false;
-  }
+  return {};
 };
 
 const invalidState = (message: string) => {
