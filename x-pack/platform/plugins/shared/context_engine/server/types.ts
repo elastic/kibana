@@ -7,6 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -31,4 +32,5 @@ export interface ContextEngineSetupDependencies {
 export interface ContextEngineStartDependencies {
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
+  spaces?: SpacesPluginStart;
 }
