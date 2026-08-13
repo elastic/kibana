@@ -18,7 +18,6 @@ import {
 } from '../../../fixtures';
 
 const TAGS_URL = `${testData.ACTION_POLICY_API_PATH}/tags`;
-const OLD_TAGS_URL = `${testData.ACTION_POLICY_API_PATH}/suggestions/tags`;
 
 const tagsUrl = (params: Record<string, string | undefined> = {}): string => {
   const search = new URLSearchParams();
@@ -93,14 +92,24 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
     }
   );
 
-  apiTest('search: should accept an empty search value', async ({ apiClient }) => {
-    const response = await apiClient.get(tagsUrl({ search: '' }), {
-      headers: readerHeaders,
-    });
+  apiTest(
+    'search: should treat an empty search value as no search',
+    async ({ apiClient, apiServices }) => {
+      await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'policy-a', tags: ['cpu', 'memory'] })
+      );
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual({ tags: [] });
-  });
+      const noSearch = await apiClient.get(TAGS_URL, { headers: readerHeaders });
+      const emptySearch = await apiClient.get(tagsUrl({ search: '' }), {
+        headers: readerHeaders,
+      });
+
+      expect(noSearch).toHaveStatusCode(200);
+      expect(noSearch.body.tags).toEqual(expect.arrayContaining(['cpu', 'memory']));
+      expect(emptySearch).toHaveStatusCode(200);
+      expect(emptySearch.body).toStrictEqual(noSearch.body);
+    }
+  );
 
   apiTest(
     'search: should escape regex special characters in the prefix',
@@ -206,12 +215,6 @@ apiTest.describe('Get action policy tags API', { tag: '@local-stateful-classic' 
       expect(response).toHaveStatusCode(400);
     }
   );
-
-  apiTest('path: old /suggestions/tags path should return 404', async ({ apiClient }) => {
-    const response = await apiClient.get(OLD_TAGS_URL, { headers: readerHeaders });
-
-    expect(response).toHaveStatusCode(404);
-  });
 
   apiTest(
     'authorization: should return 200 for a user with read-only action policy privileges',

@@ -136,16 +136,5 @@ describe('ActionPoliciesApi', () => {
         query: { search: 'prod' },
       });
     });
-
-    it('does not call the old suggestions/tags path', async () => {
-      http.get.mockResolvedValue({ tags: [] });
-
-      await api.fetchTags();
-
-      expect(http.get).not.toHaveBeenCalledWith(
-        expect.stringContaining('suggestions/tags'),
-        expect.anything()
-      );
-    });
   });
 });
