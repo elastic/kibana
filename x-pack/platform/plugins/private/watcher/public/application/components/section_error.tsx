@@ -41,7 +41,7 @@ export const SectionError: React.FunctionComponent<Props> = ({ title, error, ...
   return (
     <KbnDangerCallout
       title={title}
-      text={<div data-test-subj="sectionErrorMessage">{message || errorString}</div>}
+      text={<span data-test-subj="sectionErrorMessage">{message || errorString}</span>}
       {...rest}
     >
       {cause && (

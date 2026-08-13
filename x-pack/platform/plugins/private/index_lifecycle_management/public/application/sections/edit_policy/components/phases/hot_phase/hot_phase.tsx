@@ -104,7 +104,7 @@ export const HotPhase: FunctionComponent = () => {
                   size="s"
                   title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
                   data-test-subj="rolloverSettingsRequired"
-                  text={<div>{i18nTexts.editPolicy.errors.rollOverConfigurationCallout.body}</div>}
+                  text={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.body}
                 />
                 <EuiSpacer size="s" />
               </>
