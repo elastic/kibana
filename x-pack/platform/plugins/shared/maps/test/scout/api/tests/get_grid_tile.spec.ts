@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 import { findFeature } from '../helpers/find_feature';
+import { plainPoints, plainProperties } from '../helpers/plain_feature';
 
 apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
@@ -99,12 +100,12 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(clusterFeature.type).toBe(1);
       expect(clusterFeature.extent).toBe(4096);
       expect(clusterFeature.id).toBeUndefined();
-      expect(clusterFeature.properties).toStrictEqual({
+      expect(plainProperties(clusterFeature.properties)).toStrictEqual({
         _count: 1,
         _key: '11/517/809',
         'avg_of_bytes.value': 9252,
       });
-      expect(clusterFeature.loadGeometry()).toStrictEqual([[{ x: 87, y: 667 }]]);
+      expect(plainPoints(clusterFeature.loadGeometry())).toStrictEqual([[{ x: 87, y: 667 }]]);
     }
   );
 
@@ -129,12 +130,12 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(clusterFeature.type).toBe(1);
       expect(clusterFeature.extent).toBe(4096);
       expect(clusterFeature.id).toBeUndefined();
-      expect(clusterFeature.properties).toStrictEqual({
+      expect(plainProperties(clusterFeature.properties)).toStrictEqual({
         _count: 1,
         _key: '11/517/809',
         'avg_of_bytes.value': 9252,
       });
-      expect(clusterFeature.loadGeometry()).toStrictEqual([[{ x: 87, y: 667 }]]);
+      expect(plainPoints(clusterFeature.loadGeometry())).toStrictEqual([[{ x: 87, y: 667 }]]);
     }
   );
 
@@ -159,12 +160,12 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(gridFeature.type).toBe(3);
       expect(gridFeature.extent).toBe(4096);
       expect(gridFeature.id).toBeUndefined();
-      expect(gridFeature.properties).toStrictEqual({
+      expect(plainProperties(gridFeature.properties)).toStrictEqual({
         _count: 1,
         _key: '11/517/809',
         'avg_of_bytes.value': 9252,
       });
-      expect(gridFeature.loadGeometry()).toStrictEqual([
+      expect(plainPoints(gridFeature.loadGeometry())).toStrictEqual([
         [
           { x: 80, y: 672 },
           { x: 80, y: 656 },
@@ -197,12 +198,12 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(gridFeature.type).toBe(3);
       expect(gridFeature.extent).toBe(4096);
       expect(gridFeature.id).toBeUndefined();
-      expect(gridFeature.properties).toStrictEqual({
+      expect(plainProperties(gridFeature.properties)).toStrictEqual({
         _count: 1,
         _key: '84264a3ffffffff',
         'avg_of_bytes.value': 9252,
       });
-      expect(gridFeature.loadGeometry()).toStrictEqual([
+      expect(plainPoints(gridFeature.loadGeometry())).toStrictEqual([
         [
           { x: 89, y: 710 },
           { x: 67, y: 696 },
@@ -244,13 +245,13 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(labelFeature.type).toBe(1);
       expect(labelFeature.extent).toBe(4096);
       expect(labelFeature.id).toBeUndefined();
-      expect(labelFeature.properties).toStrictEqual({
+      expect(plainProperties(labelFeature.properties)).toStrictEqual({
         _count: 1,
         _key: '84264a3ffffffff',
         'avg_of_bytes.value': 9252,
         _mvt_label_position: true,
       });
-      expect(labelFeature.loadGeometry()).toStrictEqual([[{ x: 89, y: 684 }]]);
+      expect(plainPoints(labelFeature.loadGeometry())).toStrictEqual([[{ x: 89, y: 684 }]]);
     }
   );
 
@@ -286,7 +287,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
     expect(metadataFeature.properties['hits.total.relation']).toBe('eq');
     expect(metadataFeature.properties['hits.total.value']).toBe(1);
 
-    expect(metadataFeature.loadGeometry()).toStrictEqual([
+    expect(plainPoints(metadataFeature.loadGeometry())).toStrictEqual([
       [
         { x: 0, y: 4096 },
         { x: 0, y: 0 },
