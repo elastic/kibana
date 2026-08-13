@@ -101,7 +101,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         width: ${euiTheme.size.xl};
         border-radius: ${euiTheme.border.radius.control};
         background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimary
+          ? euiTheme.components.buttons.backgroundText
           : euiTheme.colors.backgroundTransparent};
         z-index: 1;
       }
@@ -117,19 +117,15 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
 
       &:focus-visible .${iconWrapperClassName} {
         border: ${euiTheme.border.width.thick} solid
-          ${isHighlighted ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+          ${isHighlighted ? euiTheme.colors.textSubdued : euiTheme.colors.textParagraph};
       }
 
       &:hover .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryHover
-          : euiTheme.components.buttons.backgroundTextHover};
+        background-color: ${euiTheme.components.buttons.backgroundTextHover};
       }
 
       &:active .${iconWrapperClassName}::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryActive
-          : euiTheme.components.buttons.backgroundTextActive};
+        background-color: ${euiTheme.components.buttons.backgroundTextActive};
       }
     `;
 
