@@ -7,7 +7,7 @@
 
 import React, { type FC, useCallback, useMemo, useState } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { PROJECT_ROUTING, ProjectScopePickerFlyout, useFetchProjects } from '@kbn/cps-utils';
+import { PROJECT_ROUTING, ProjectScopePickerFlyoutContent, useFetchProjects } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 
 import { useAppDependencies } from '../../../app_dependencies';
@@ -65,7 +65,7 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   }, [onClose, setFormField, stagedProjectRouting]);
 
   return (
-    <ProjectScopePickerFlyout
+    <ProjectScopePickerFlyoutContent
       applyButtonLabel={i18n.translate(
         'xpack.transform.transformList.editFlyoutProjectScopeApplyButtonText',
         {
@@ -89,6 +89,7 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
       originProjectId={originProject?._id}
       projectRouting={stagedProjectRouting}
       title={changeProjectScopeTitle}
+      titleId="transformEditProjectScopeFlyoutTitle"
     />
   );
 };

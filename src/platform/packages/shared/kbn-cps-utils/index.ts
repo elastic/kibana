@@ -13,7 +13,10 @@ export type {
   ProjectPickerControlsState,
 } from './components/project_picker_content';
 export type { ProjectPickerProps as ProjectScopePickerProps } from './components/project_picker_update/project_picker';
-export type { ProjectPickerFlyoutProps as ProjectScopePickerFlyoutProps } from './components/project_picker_update/project_picker_flyout';
+export type {
+  ProjectPickerFlyoutProps as ProjectScopePickerFlyoutContentProps,
+  ProjectPickerFlyoutProps as ProjectScopePickerFlyoutProps,
+} from './components/project_picker_update/project_picker_flyout';
 export type { UseFetchProjectsResult } from './components/use_fetch_projects';
 export type {
   CPSProject,
@@ -25,7 +28,10 @@ export type {
 export type { ProjectRoutingValue } from '@kbn/cps-common';
 export { ProjectPicker, DisabledProjectPicker } from './components/project_picker';
 export { ProjectPicker as ProjectScopePicker } from './components/project_picker_update/project_picker';
-export { ProjectPickerFlyout as ProjectScopePickerFlyout } from './components/project_picker_update/project_picker_flyout';
+export {
+  ProjectPickerFlyout as ProjectScopePickerFlyout,
+  ProjectPickerFlyoutContent as ProjectScopePickerFlyoutContent,
+} from './components/project_picker_update/project_picker_flyout';
 export { ProjectPickerContent } from './components/project_picker_content';
 export { ProjectPickerContainer } from './components/project_picker_container';
 export { useFetchProjects } from './components/use_fetch_projects';

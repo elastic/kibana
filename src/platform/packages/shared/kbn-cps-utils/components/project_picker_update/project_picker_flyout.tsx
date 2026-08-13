@@ -60,10 +60,11 @@ export interface ProjectPickerFlyoutProps
   backButtonLabel?: string;
   discardButtonLabel?: ReactNode;
   isApplyDisabled?: boolean;
+  titleId?: string;
   title?: ReactNode;
 }
 
-export function ProjectPickerFlyout({
+export function ProjectPickerFlyoutContent({
   applyButtonLabel = defaultApplyButtonLabel,
   availableProjects,
   backButtonLabel = defaultBackButtonLabel,
@@ -76,9 +77,11 @@ export function ProjectPickerFlyout({
   onProjectRoutingChange,
   originProjectId,
   projectRouting,
+  titleId: titleIdProp,
   title = defaultTitle,
 }: ProjectPickerFlyoutProps) {
-  const titleId = useGeneratedHtmlId();
+  const generatedTitleId = useGeneratedHtmlId();
+  const titleId = titleIdProp ?? generatedTitleId;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -92,67 +95,75 @@ export function ProjectPickerFlyout({
         onProjectRoutingChange={onProjectRoutingChange}
         projectRouting={projectRouting}
       />
-      <EuiFlyout
-        aria-labelledby={titleId}
-        data-test-subj="projectPickerFlyout"
-        hideCloseButton
-        onClose={onClose}
-        size="m"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={backButtonLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  aria-label={backButtonLabel}
-                  color="text"
-                  data-test-subj="projectPickerFlyoutBackButton"
-                  iconType="arrowLeft"
-                  onClick={onClose}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h2 id={titleId}>{title}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ProjectPickerFrameHeaderActions showSpaceDefaultsBadge={false} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <ProjectPickerFrameBody scrollContainerRef={scrollContainerRef}>
-            <ProjectPickerList scrollContainerRef={scrollContainerRef} />
-          </ProjectPickerFrameBody>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <ProjectPickerFrameFooter />
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="projectPickerFlyoutDiscardButton"
-                flush="left"
-                onClick={onDiscardChanges}
-              >
-                {discardButtonLabel}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="projectPickerFlyoutApplyButton"
-                fill
-                isDisabled={isApplyDisabled}
-                onClick={onApplyChanges}
-              >
-                {applyButtonLabel}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={backButtonLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label={backButtonLabel}
+                color="text"
+                data-test-subj="projectPickerFlyoutBackButton"
+                iconType="arrowLeft"
+                onClick={onClose}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h2 id={titleId}>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ProjectPickerFrameHeaderActions showSpaceDefaultsBadge={false} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <ProjectPickerFrameBody scrollContainerRef={scrollContainerRef}>
+          <ProjectPickerList scrollContainerRef={scrollContainerRef} />
+        </ProjectPickerFrameBody>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <ProjectPickerFrameFooter />
+        <EuiHorizontalRule margin="m" />
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="projectPickerFlyoutDiscardButton"
+              flush="left"
+              onClick={onDiscardChanges}
+            >
+              {discardButtonLabel}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="projectPickerFlyoutApplyButton"
+              fill
+              isDisabled={isApplyDisabled}
+              onClick={onApplyChanges}
+            >
+              {applyButtonLabel}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </ProjectPickerStateProvider>
+  );
+}
+
+export function ProjectPickerFlyout(props: ProjectPickerFlyoutProps) {
+  const titleId = useGeneratedHtmlId();
+
+  return (
+    <EuiFlyout
+      aria-labelledby={titleId}
+      data-test-subj="projectPickerFlyout"
+      hideCloseButton
+      onClose={props.onClose}
+      size="m"
+    >
+      <ProjectPickerFlyoutContent {...props} titleId={titleId} />
+    </EuiFlyout>
   );
 }
