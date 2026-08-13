@@ -56,7 +56,7 @@ Each variant's `schema.json` is verified against the `sha256` recorded in
 
 ## What it checks
 
-Three layers run per file:
+Four layers run per file:
 
 1. **JSON Schema** — the document is validated with `ajv` (draft-07) against the
    `strict` or `template` variant. Plain workflows use `strict`; installable
@@ -66,7 +66,14 @@ Three layers run per file:
 2. **Semantic** — step-name uniqueness and execution-graph (DAG) validity, reusing
    Kibana's own `validateStepNameUniqueness` and `WorkflowGraph`. Runs only when
    the JSON Schema layer passed for that file.
-3. **LiquidJS syntax** — every `{{ }}` / `{% %}` scalar is parsed with the real
+3. **Package stock-step contract** — workflow assets below an Elastic package's
+   `kibana/workflow/` directory may use platform
+   control-flow/data/workflow steps and the stock `elasticsearch.*`, `kibana.*`,
+   and `github.*` connector families, but not steps registered by a product
+   plugin. The check descends through loops, conditionals, switch cases, parallel
+   branches, and fallback handlers. Ordinary authored workflows and workflow-library
+   templates are not restricted by this package-only contract.
+4. **LiquidJS syntax** — every `{{ }}` / `{% %}` scalar is parsed with the real
    LiquidJS engine. Runs unconditionally.
 
 The process exits non-zero if any file has an error. An empty folder logs a

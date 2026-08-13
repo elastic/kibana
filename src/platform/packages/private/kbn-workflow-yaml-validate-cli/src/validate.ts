@@ -10,6 +10,7 @@
 import { validateFile } from './validate_file';
 import { validateSemantics } from './validate_semantics';
 import { validateLiquid } from './validate_liquid';
+import { isPackageWorkflowPath, validateStockWorkflowSteps } from './validate_stock_steps';
 import type { SchemaValidateFn } from './create_schema_validator';
 import type { ValidationIssue, ValidationOutcome, VariantMode } from './types';
 import { isErrorIssue } from './types';
@@ -40,6 +41,9 @@ export const validateWorkflowYaml = async ({
 
   if (schemaResult.schemaPassed && schemaResult.body) {
     issues.push(...validateSemantics(schemaResult.body));
+    if (isPackageWorkflowPath(file)) {
+      issues.push(...validateStockWorkflowSteps(schemaResult.body));
+    }
   }
 
   issues.push(...validateLiquid(yaml, schemaResult.document));
