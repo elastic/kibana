@@ -73,16 +73,16 @@ const legacyStoredPresets = (presets: PresetItem[] | null): StoredPresets => ({
 });
 
 describe('DateRangePickerPresetsService', () => {
-  describe('getUiSettingsPresets', () => {
+  describe('getDefaultPresets', () => {
     it('maps the configured quick ranges to presets', () => {
       const { service } = setup();
-      expect(service.getUiSettingsPresets()).toEqual(quickRangePresets);
+      expect(service.getDefaultPresets()).toEqual(quickRangePresets);
     });
 
     it('returns an empty list when no quick ranges are configured', () => {
       const { core, service } = setup();
       core.uiSettings.get.mockReturnValue(undefined);
-      expect(service.getUiSettingsPresets()).toEqual([]);
+      expect(service.getDefaultPresets()).toEqual([]);
     });
   });
 

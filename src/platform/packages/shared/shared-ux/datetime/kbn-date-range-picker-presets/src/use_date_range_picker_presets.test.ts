@@ -19,12 +19,12 @@ import type {
 
 import { useDateRangePickerPresets } from './use_date_range_picker_presets';
 
-const uiSettingsPresets: PresetItem[] = [
+const defaultPresets: PresetItem[] = [
   { start: 'now/d', end: 'now/d', label: 'Today' },
   { start: 'now-15m', end: 'now', label: 'Last 15 minutes' },
 ];
 
-const lockedPresets: PresetItem[] = uiSettingsPresets.map((preset) => ({
+const lockedPresets: PresetItem[] = defaultPresets.map((preset) => ({
   ...preset,
   isEditable: false,
 }));
@@ -32,7 +32,7 @@ const lockedPresets: PresetItem[] = uiSettingsPresets.map((preset) => ({
 const createServiceMock = (
   overrides: Partial<jest.Mocked<DateRangePickerPresetsService>> = {}
 ): jest.Mocked<DateRangePickerPresetsService> => ({
-  getUiSettingsPresets: jest.fn(() => uiSettingsPresets),
+  getDefaultPresets: jest.fn(() => defaultPresets),
   getPresets$: jest.fn(() => of(lockedPresets)),
   canPersist: jest.fn(() => true),
   savePreset: jest.fn<Promise<SavePresetOutcome>, [PresetItem]>().mockResolvedValue('saved'),

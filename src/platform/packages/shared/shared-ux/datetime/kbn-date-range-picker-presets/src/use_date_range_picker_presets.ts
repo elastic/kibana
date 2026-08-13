@@ -46,8 +46,8 @@ export const useDateRangePickerPresets = ({
   persistenceEnabled,
   notifications,
 }: UseDateRangePickerPresetsArgs): UseDateRangePickerPresetsResult => {
-  const uiSettingsPresets = useMemo(() => service.getUiSettingsPresets(), [service]);
-  const lockedPresets = useMemo(() => mergePresets([], uiSettingsPresets), [uiSettingsPresets]);
+  const defaultPresets = useMemo(() => service.getDefaultPresets(), [service]);
+  const lockedPresets = useMemo(() => mergePresets([], defaultPresets), [defaultPresets]);
 
   const presets$ = useMemo(
     () => (persistenceEnabled ? service.getPresets$() : of(lockedPresets)),

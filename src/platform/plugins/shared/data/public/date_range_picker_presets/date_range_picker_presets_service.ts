@@ -57,7 +57,7 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
     this.uiSettings = uiSettings;
   }
 
-  public getUiSettingsPresets(): PresetItem[] {
+  public getDefaultPresets(): PresetItem[] {
     return mapQuickRanges(this.uiSettings.get<QuickRange[]>(TIMEPICKER_QUICK_RANGES_SETTING) ?? []);
   }
 
@@ -66,12 +66,9 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
       .get$<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS)
       .pipe(
         map((stored) => {
-          const uiSettingsPresets = this.getUiSettingsPresets();
+          const defaultPresets = this.getDefaultPresets();
 
-          return mergePresets(
-            migrateStoredPresets(stored, uiSettingsPresets).presets,
-            uiSettingsPresets
-          );
+          return mergePresets(migrateStoredPresets(stored, defaultPresets).presets, defaultPresets);
         })
       );
   }
@@ -83,7 +80,7 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
   public async savePreset(preset: PresetItem): Promise<SavePresetOutcome> {
     const presetKey = getPresetKey(preset);
     const base = await this.getStoredPresets();
-    const matchesExistingPreset = [...base, ...this.getUiSettingsPresets()].some(
+    const matchesExistingPreset = [...base, ...this.getDefaultPresets()].some(
       (item) => getPresetKey(item) === presetKey
     );
 
@@ -117,7 +114,7 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
       DEFAULT_STORED_PRESETS
     );
 
-    return migrateStoredPresets(stored, this.getUiSettingsPresets()).presets;
+    return migrateStoredPresets(stored, this.getDefaultPresets()).presets;
   }
 
   private async persist(presets: PresetItem[]): Promise<void> {

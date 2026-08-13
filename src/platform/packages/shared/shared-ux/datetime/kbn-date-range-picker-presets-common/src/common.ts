@@ -114,11 +114,11 @@ export interface DateRangePickerPresetsService {
    * Synchronous locked presets derived from the configured quick ranges. Shown
    * on their own when persistence is disabled.
    */
-  getUiSettingsPresets(): PresetItem[];
+  getDefaultPresets(): PresetItem[];
 
   /**
    * Presets to display: the user's own editable presets followed by the locked
-   * {@link getUiSettingsPresets}. Emits again whenever the stored value changes.
+   * {@link getDefaultPresets}. Emits again whenever the stored value changes.
    */
   getPresets$(): Observable<PresetItem[]>;
 
