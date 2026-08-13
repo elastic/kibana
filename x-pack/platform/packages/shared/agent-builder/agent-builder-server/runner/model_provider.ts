@@ -61,6 +61,13 @@ export interface ModelProvider {
    */
   getModelById: (options: { connectorId: string }) => Promise<ScopedModel>;
   /**
+   * Whether a dedicated fast-inference model is configured for this context — i.e. the fast model
+   * resolves to a different connector than the default. When false, `selectModel({ effortLevel: 'low' })`
+   * would fall back to the default (expensive) model, so callers that only want the fast path (e.g.
+   * relevant-skill selection) should skip it.
+   */
+  hasFastModel: () => Promise<boolean>;
+  /**
    * Returns the current usage stats for the model provider.
    */
   getUsageStats: () => ModelProviderStats;

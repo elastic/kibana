@@ -495,7 +495,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               title: 'detector',
               description: '',
               esql: {
-                query: `FROM logs.otel.branch_a,logs.otel.branch_a.* METADATA _id, _source | WHERE KQL("message:'ERROR'")`,
+                query: `FROM logs.otel.branch_a,logs.otel.branch_a.* | WHERE KQL("message:'ERROR'")`,
               },
             },
           },
@@ -837,8 +837,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     title: 'legacy query',
                     description: '',
                     esql: {
-                      query:
-                        'FROM logs.otel.branch_e METADATA _id, _source | WHERE KQL("message: ERROR")',
+                      query: 'FROM logs.otel.branch_e | WHERE KQL("message: ERROR")',
                     },
                   },
                 ],
@@ -995,7 +994,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     title: 'legacy query',
                     description: '',
                     esql: {
-                      query: 'FROM logs.otel METADATA _id, _source | WHERE KQL("message: ERROR")',
+                      query: 'FROM logs.otel | WHERE KQL("message: ERROR")',
                     },
                   },
                 ],

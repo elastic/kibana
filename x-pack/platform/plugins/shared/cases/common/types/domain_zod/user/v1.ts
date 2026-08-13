@@ -41,7 +41,23 @@ export const CaseUserProfileSchema = z.object({
 export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
 
 /**
+ * UID-only assignees for caller-supplied input (templates, imports). Identity
+ * fields are server-derived, so they must not be expressible on the input side.
+ */
+export const CaseUserProfilesSchema = z.array(CaseUserProfileSchema);
+export type CaseUserProfiles = z.infer<typeof CaseUserProfilesSchema>;
+
+export const CaseAssigneeSchema = z.object({
+  uid: z.string(),
+  username: z.string().nullable().optional(),
+  full_name: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+});
+
+export type CaseAssignee = z.infer<typeof CaseAssigneeSchema>;
+
+/**
  * Assignees
  */
-export const CaseAssigneesSchema = z.array(CaseUserProfileSchema);
+export const CaseAssigneesSchema = z.array(CaseAssigneeSchema);
 export type CaseAssignees = z.infer<typeof CaseAssigneesSchema>;

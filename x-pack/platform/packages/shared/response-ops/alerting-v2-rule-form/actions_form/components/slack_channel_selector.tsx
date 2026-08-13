@@ -24,10 +24,10 @@ export const SlackChannelSelector = ({
   params,
   onParamsChange,
 }: SlackChannelSelectorProps) => {
-  const [hasOpened, setHasOpened] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { data: channels = [], isFetching } = useFetchSlackChannels({
     connectorId,
-    enabled: hasOpened,
+    enabled: isOpen,
   });
 
   const options: Array<EuiComboBoxOptionOption<string>> = channels.map((channel) => ({
@@ -82,7 +82,8 @@ export const SlackChannelSelector = ({
         options={options}
         selectedOptions={selectedOptions}
         onChange={handleChange}
-        onFocus={() => setHasOpened(true)}
+        onFocus={() => setIsOpen(true)}
+        onBlur={() => setIsOpen(false)}
       />
     </EuiFormRow>
   );

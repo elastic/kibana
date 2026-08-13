@@ -18,9 +18,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
       await deleteSpacesAndUsers(getService);
     });
 
-    loadTestFile(require.resolve('./external_references'));
-    loadTestFile(require.resolve('./persistable_state'));
     loadTestFile(require.resolve('./endpoint'));
+    loadTestFile(require.resolve('./external_references'));
     loadTestFile(require.resolve('./osquery'));
+    loadTestFile(require.resolve('./lens'));
+    loadTestFile(require.resolve('./legacy_route_compat'));
   });
 };

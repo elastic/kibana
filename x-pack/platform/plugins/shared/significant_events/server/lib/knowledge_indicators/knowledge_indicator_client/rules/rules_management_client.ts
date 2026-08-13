@@ -10,6 +10,11 @@ export const STREAMS_RULE_STREAM_TAG_PREFIX = 'sigevents:stream:' as const;
 export const toStreamTag = (streamName: string): string =>
   `${STREAMS_RULE_STREAM_TAG_PREFIX}${streamName}`;
 
+export const streamNameFromTag = (tag: string): string | undefined =>
+  tag.startsWith(STREAMS_RULE_STREAM_TAG_PREFIX)
+    ? tag.slice(STREAMS_RULE_STREAM_TAG_PREFIX.length)
+    : undefined;
+
 /**
  * Narrow interface that decouples QueryClient from the Alerting v2 client.
  */
@@ -24,6 +29,12 @@ export interface IRulesManagementClient {
   bulkDeleteRules(ids: string[]): Promise<void>;
 
   findOwnedRuleIds(streamName: string): Promise<string[]>;
+
+  /**
+   * Distinct stream names owning at least one rule, so orphan-rule cleanup can
+   * reach streams whose rules outlived all of their knowledge indicators.
+   */
+  findStreamNamesWithOwnedRules(): Promise<string[]>;
 }
 
 /** Engine-independent Significant Events definition translated to Alerting v2 by the adapter. */

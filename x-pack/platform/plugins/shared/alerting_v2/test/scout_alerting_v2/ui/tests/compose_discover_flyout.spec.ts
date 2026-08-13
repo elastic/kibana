@@ -32,16 +32,23 @@ const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
  * kibana_sample_data_flights for standalone time-field resolution.
  */
 const TIMESTAMP_ONLY_INDEX = 'test-compose-discover-timestamp-only';
-const TIMESTAMP_ONLY_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier | WHERE count > 100`;
-/**
- * STATS with no WHERE — heuristic cannot isolate an alert condition, so Apply
- * commits alert + standalone (no_alert_condition).
- */
-const NO_ALERT_CONDITION_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier`;
+const TIMESTAMP_ONLY_BASE_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | STATS count = COUNT(*) BY Carrier`;
+const TIMESTAMP_ONLY_BREACH_SEGMENT = 'WHERE count > 100';
 const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carrier == "ES-Air" | LIMIT 10`;
 const BROKEN_TIME_FIELD_RULE_NAME = 'scout-compose-discover-broken-time-field';
 const CREATE_SIGNAL_TIMESTAMP_RULE_NAME = 'scout-compose-discover-standalone-time-field';
+const YAML_ONLY_STANDALONE_RULE_NAME = 'scout-compose-discover-yaml-only-standalone';
 const RUNBOOK_TEXT = 'Investigate failed transactions';
+/**
+ * Index with a valid `@timestamp` (so it auto-detects) plus a second date
+ * field — covers the truthy-guard path that the single-date-field indices
+ * above (`TEST_INDEX`, `TIMESTAMP_ONLY_INDEX`) never exercise. Regression
+ * coverage for #281806.
+ */
+const TWO_DATE_FIELDS_INDEX = 'test-compose-discover-two-date-fields';
+const TWO_DATE_FIELDS_BASE_QUERY = `FROM ${TWO_DATE_FIELDS_INDEX} | STATS count = COUNT(*)`;
+const TWO_DATE_FIELDS_UNIFIED_QUERY = `${TWO_DATE_FIELDS_BASE_QUERY} ${ALERT_SEGMENT}`;
+const TWO_DATE_FIELDS_RULE_NAME = 'scout-compose-discover-two-date-fields';
 
 test.describe(
   'ComposeDiscoverFlyout — create and edit flows',
@@ -86,6 +93,26 @@ test.describe(
         },
         refresh: 'wait_for',
       });
+      await esClient.indices.create(
+        {
+          index: TWO_DATE_FIELDS_INDEX,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              event: { properties: { ingested: { type: 'date' } } },
+            },
+          },
+        },
+        { ignore: [400] }
+      );
+      await esClient.index({
+        index: TWO_DATE_FIELDS_INDEX,
+        document: {
+          '@timestamp': new Date().toISOString(),
+          event: { ingested: new Date().toISOString() },
+        },
+        refresh: 'wait_for',
+      });
     });
 
     test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
@@ -98,6 +125,7 @@ test.describe(
       await apiServices.alertingV2.rules.cleanUp();
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TIMESTAMP_ONLY_INDEX }, { ignore: [404] });
+      await esClient.indices.delete({ index: TWO_DATE_FIELDS_INDEX }, { ignore: [404] });
     });
 
     test('create flow: open flyout, define query, step through, and submit', async ({
@@ -110,7 +138,9 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
 
-      await test.step('sandbox opens automatically in create mode', async () => {
+      await test.step('sandbox is closed by default; open the query editor', async () => {
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await pageObjects.composeDiscover.openSandbox();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
       });
 
@@ -139,8 +169,8 @@ test.describe(
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
-      await test.step('advance through Recovery Condition to the Details step', async () => {
-        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+      await test.step('advance through Outcome to the Details step', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.clickNext(); // Details
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
@@ -176,7 +206,7 @@ test.describe(
               });
               return items[0]?.artifacts?.some(
                 (artifact) =>
-                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.value === RUNBOOK_TEXT
+                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
               );
             },
             { timeout: 30_000 }
@@ -206,7 +236,7 @@ test.describe(
               {
                 id: 'runbook-id',
                 type: RUNBOOK_ARTIFACT_TYPE,
-                value: RUNBOOK_TEXT,
+                data: { content: RUNBOOK_TEXT },
               },
             ],
           })
@@ -226,8 +256,9 @@ test.describe(
 
       await test.step('rule name is pre-populated', async () => {
         // In edit mode, step 0 shows the alert condition with queryCommitted: true.
-        // Navigate to Details step to see the name input.
-        await pageObjects.composeDiscover.clickNext();
+        // Navigate through Outcome (read-only mode selector for signal rules) to Details.
+        await pageObjects.composeDiscover.clickNext(); // Outcome
+        await pageObjects.composeDiscover.clickNext(); // Details
         await expect(pageObjects.composeDiscover.ruleNameInput).toHaveValue(EDIT_RULE_NAME);
         await expect(pageObjects.composeDiscover.flyout.getByText(RUNBOOK_TEXT)).toBeVisible();
         await expect(pageObjects.composeDiscover.relatedDashboardsSelector).toBeVisible();
@@ -308,19 +339,20 @@ test.describe(
       });
     });
 
-    test('edit flow (sad path): broken standalone alert can select timestamp and save', async ({
+    test('edit flow (sad path): broken composed alert can select timestamp and save', async ({
       pageObjects,
       apiServices,
     }) => {
       let ruleId: string;
 
-      await test.step('seed a standalone alert with an invalid stored time field', async () => {
+      await test.step('seed a composed alert with an invalid stored time field', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             kind: 'alert',
             query: {
-              format: 'standalone',
-              breach: { query: TIMESTAMP_ONLY_QUERY },
+              format: 'composed',
+              base: TIMESTAMP_ONLY_BASE_QUERY,
+              breach: { segment: TIMESTAMP_ONLY_BREACH_SEGMENT },
             },
             // Intentionally wrong — index only has `timestamp`.
             time_field: '@timestamp',
@@ -338,22 +370,22 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
 
-      await test.step('sandbox opens in YAML mode and offers the real timestamp field', async () => {
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
-        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
-        await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
-        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
+      await test.step('opens in form mode; select the correct time field', async () => {
+        /*
+         * Composed alerts stay in the form. The stored @timestamp is not in the
+         * index options; wait for options to load then pick the correct field.
+         */
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeHidden();
+        await pageObjects.composeDiscover.selectTimeField('timestamp');
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
 
-      await test.step('apply and save persists timestamp', async () => {
-        await pageObjects.composeDiscover.clickApply();
-        // Apply updates YAML via React state — wait until the editor reflects it
-        // before Save, or YamlSubmit can persist the stale `@timestamp` value.
-        await expect(pageObjects.composeDiscover.flyout).toContainText('time_field: timestamp');
-        await expect(pageObjects.composeDiscover.flyout).not.toContainText(
-          "time_field: '@timestamp'"
-        );
-        await pageObjects.composeDiscover.clickYamlSubmit();
+      await test.step('proceed through steps, save, and verify persisted time field', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Outcome
+        await pageObjects.composeDiscover.clickNext(); // Details
+        await pageObjects.composeDiscover.clickNext(); // Actions
+        await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
 
         await expect
@@ -364,42 +396,89 @@ test.describe(
       });
     });
 
-    test('create flow (sad path): time field populates when base and alert condition cannot be determined', async ({
+    test('edit flow: alert + standalone opens YAML-only', async ({ pageObjects, apiServices }) => {
+      let ruleId: string;
+
+      await test.step('seed an alert + standalone rule via API', async () => {
+        const rule = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            kind: 'alert',
+            query: {
+              format: 'standalone',
+              breach: { query: `${TIMESTAMP_ONLY_BASE_QUERY} | ${TIMESTAMP_ONLY_BREACH_SEGMENT}` },
+            },
+            time_field: 'timestamp',
+            grouping: { fields: ['Carrier'] },
+            metadata: { name: YAML_ONLY_STANDALONE_RULE_NAME },
+          })
+        );
+        ruleId = rule.id;
+      });
+
+      await test.step('refresh the rules list and open the edit flyout', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+      });
+
+      await test.step('YAML save is the only submit path', async () => {
+        await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
+        await expect(pageObjects.composeDiscover.submitButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.nextButton).toBeHidden();
+      });
+    });
+
+    test('create flow: manually selected sandbox time field holds and persists (#281806)', async ({
       pageObjects,
+      apiServices,
     }) => {
-      await test.step('open create flyout in alert mode and apply a no-alert-condition query', async () => {
+      await test.step('open create flyout and type a query against an index with two date fields', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.setSandboxQuery(TWO_DATE_FIELDS_UNIFIED_QUERY);
+      });
 
-        // Create starts as composed + empty base. Typing fills base until Apply;
-        // a STATS-only pipeline then commits as alert + standalone.
-        await pageObjects.composeDiscover.setSandboxQuery(NO_ALERT_CONDITION_TIMESTAMP_QUERY);
+      await test.step('the auto-detected time field is @timestamp', async () => {
+        await pageObjects.composeDiscover.waitForTimeFieldOption(
+          pageObjects.composeDiscover.sandboxTimeFieldSelector,
+          'event.ingested'
+        );
+        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
+          '@timestamp'
+        );
+      });
+
+      await test.step('manually picking event.ingested in the sandbox holds through Apply, not reverted to @timestamp', async () => {
+        await pageObjects.composeDiscover.selectSandboxTimeField('event.ingested');
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('event.ingested');
       });
 
-      await test.step('summary shows no alert condition (standalone breach query)', async () => {
-        await expect(
-          pageObjects.composeDiscover.summarySection('no_alert_condition')
-        ).toBeVisible();
-        await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
-        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      await test.step('name the rule and submit', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Outcome
+        await pageObjects.composeDiscover.clickNext(); // Details
+        await pageObjects.composeDiscover.setRuleName(TWO_DATE_FIELDS_RULE_NAME);
+        await pageObjects.composeDiscover.clickNext(); // Actions
+        await pageObjects.composeDiscover.clickSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
       });
 
-      await test.step('form Time field still resolves from the standalone breach query', async () => {
-        // Regression: alert mode used to resolve only from composed `base`, so
-        // options stayed empty after Apply left format: standalone.
-        await pageObjects.composeDiscover.waitForTimeFieldOption(
-          pageObjects.composeDiscover.timeFieldSelector,
-          'timestamp'
-        );
-        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
-        await expect(pageObjects.composeDiscover.timeFieldSelector).not.toHaveAttribute(
-          'aria-invalid',
-          'true'
-        );
-        await expect(pageObjects.composeDiscover.timeFieldError).toBeHidden();
+      await test.step('the created rule persists event.ingested, not @timestamp', async () => {
+        await expect
+          .poll(
+            async () => {
+              const { items } = await apiServices.alertingV2.rules.find({
+                search: TWO_DATE_FIELDS_RULE_NAME,
+              });
+              return items[0]?.time_field;
+            },
+            { timeout: 30_000 }
+          )
+          .toBe('event.ingested');
       });
     });
 
@@ -407,24 +486,25 @@ test.describe(
       pageObjects,
       apiServices,
     }) => {
-      await test.step('open create flyout, commit a query, then switch to signal mode', async () => {
+      await test.step('open create flyout, commit a query, then switch to signal mode on Outcome', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
 
         // Signal mode always resolves time fields from breach.query (not the
         // alert-standalone bug). Kept as coverage for timestamp-only create +
-        // mode switch. ModeSelect stays disabled until a query is committed.
+        // mode switch on the Outcome step.
         await pageObjects.composeDiscover.setSandboxQuery(CREATE_SIGNAL_TIMESTAMP_QUERY);
         await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
         await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.selectMode('signal');
       });
 
       await test.step('name the rule and submit', async () => {
-        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
         await pageObjects.composeDiscover.clickNext(); // Details
         await pageObjects.composeDiscover.setRuleName(CREATE_SIGNAL_TIMESTAMP_RULE_NAME);
         await pageObjects.composeDiscover.clickSubmit();
@@ -455,8 +535,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
 
-      await test.step('close sandbox without applying', async () => {
-        await pageObjects.composeDiscover.sandboxCloseButton.click();
+      await test.step('sandbox is closed by default on create', async () => {
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
 
@@ -472,9 +551,9 @@ test.describe(
         await pageObjects.composeDiscover.clickApply();
       });
 
-      await test.step('Next is now enabled; advance through Recovery to the Details step', async () => {
+      await test.step('Next is now enabled; advance through Outcome to the Details step', async () => {
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
-        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.clickNext(); // Details
       });
 
@@ -500,8 +579,8 @@ test.describe(
         await expect(page.testSubj.locator('ruleNameInput')).toBeVisible();
       });
 
-      await test.step('Back returns through Recovery to the Alert Condition step', async () => {
-        await pageObjects.composeDiscover.backButton.click(); // Recovery Condition
+      await test.step('Back returns through Outcome to the Alert Condition step', async () => {
+        await pageObjects.composeDiscover.backButton.click(); // Outcome
         await pageObjects.composeDiscover.backButton.click(); // Alert Condition
         // Query was committed in alert mode (default) and split successfully, so the
         // read-only base + alert condition summary is shown.
@@ -513,8 +592,9 @@ test.describe(
     test('sandbox: Apply commits query, closing without Apply discards changes', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout (sandbox opens automatically)', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
       });
 
@@ -543,10 +623,10 @@ test.describe(
     test('alert condition validation: Apply without typing anything shows the empty callout and disables Next', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout (sandbox opens automatically)', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
       });
 
       await test.step('click Apply without typing anything', async () => {
@@ -561,13 +641,13 @@ test.describe(
       });
     });
 
-    test('alert condition validation: base-only query shows the no-alert-condition callout and disables Next', async ({
+    test('alert condition validation: base-only query shows the no-alert-condition callout and keeps Next enabled', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
       });
 
       await test.step('apply only a base query (no alert condition)', async () => {
@@ -585,18 +665,18 @@ test.describe(
         );
       });
 
-      await test.step('Next button is disabled', async () => {
-        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
+      await test.step('Next stays enabled — form progression is not gated on a condition', async () => {
+        await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
       });
     });
 
     test('alert condition validation: no callout when the query splits into base + alert condition', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
       });
 
       await test.step('apply a unified query with a base and alert condition', async () => {
@@ -609,23 +689,6 @@ test.describe(
         await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
         await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeHidden();
         await expect(pageObjects.composeDiscover.nextButton).toBeEnabled();
-      });
-    });
-
-    test('alert condition validation: a base-only query keeps the user on the Alert Condition step', async ({
-      page,
-      pageObjects,
-    }) => {
-      await test.step('open create flyout and apply only a base query', async () => {
-        await pageObjects.composeDiscover.openCreateFlyout();
-        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await pageObjects.composeDiscover.applySandboxBaseQueryOnly(BASE_QUERY);
-      });
-
-      await test.step('Next is disabled — verify we stay on Alert Condition step', async () => {
-        await expect(pageObjects.composeDiscover.nextButton).toBeDisabled();
-        await expect(pageObjects.composeDiscover.noAlertConditionCallout).toBeVisible();
-        await expect(page.testSubj.locator('ruleNameInput')).toBeHidden();
       });
     });
   }

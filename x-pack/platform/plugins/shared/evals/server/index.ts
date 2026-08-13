@@ -14,7 +14,27 @@ import type {
   EvalsStartDependencies,
 } from './types';
 
-export type { EvalsPluginSetup, EvalsPluginStart };
+export type {
+  EvalsPluginSetup,
+  EvalsPluginStart,
+  EvaluatorSummary,
+  ModelConnectorSummary,
+} from './types';
+
+export {
+  generateExperimentRun,
+  generateSavedWorkflowYaml,
+  experimentRequestToParams,
+} from './workflow_generator';
+
+export type {
+  GenerateExperimentParams,
+  GeneratedExperimentRun,
+  GeneratedExecution,
+  GeneratedSavedWorkflow,
+  WorkflowEvaluatorInput,
+  ExperimentRunMode,
+} from './workflow_generator';
 
 export const plugin: PluginInitializer<
   EvalsPluginSetup,

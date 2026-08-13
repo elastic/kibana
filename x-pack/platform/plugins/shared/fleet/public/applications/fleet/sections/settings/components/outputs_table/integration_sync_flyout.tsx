@@ -77,7 +77,7 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
         <EuiFlyoutBody>
           {syncedIntegrationsStatus?.error && (
             <EuiCallOut
-              // announceOnMount={false}
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.fleet.integrationSyncFlyout.errorTitle"

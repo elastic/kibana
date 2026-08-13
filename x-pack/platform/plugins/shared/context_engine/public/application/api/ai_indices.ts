@@ -7,9 +7,17 @@
 
 import { buildPath } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { AI_INDEX_API_VERSION, aiIndexByIdPath, aiIndexPath } from '../../../common/constants';
+import {
+  AI_INDEX_API_VERSION,
+  AI_INDEX_INTERNAL_API_VERSION,
+  aiIndexByIdPath,
+  aiIndexKiSummaryPath,
+  aiIndexPath,
+} from '../../../common/constants';
 import type {
   AiIndexProperties,
+  CreateAiIndexResponse,
+  GetAiIndexKiSummaryResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexResponse,
@@ -45,13 +53,44 @@ export const getAiIndex = (
     ...(signal ? { signal } : {}),
   });
 
+interface GetAiIndexKiSummaryArgs {
+  aiIndexId: string;
+  signal?: AbortSignal;
+}
+
+export const getAiIndexKiSummary = (
+  http: HttpStart,
+  { aiIndexId, signal }: GetAiIndexKiSummaryArgs
+): Promise<GetAiIndexKiSummaryResponse> =>
+  http.get<GetAiIndexKiSummaryResponse>(buildPath(aiIndexKiSummaryPath, { aiIndexId }), {
+    version: AI_INDEX_INTERNAL_API_VERSION,
+    ...(signal ? { signal } : {}),
+  });
+
+interface CreateAiIndexArgs {
+  aiIndexId: string;
+  properties: AiIndexProperties;
+}
+
+/**
+ * Creates a new AI index. Fails with a 409 if the id already exists.
+ */
+export const createAiIndex = (
+  http: HttpStart,
+  { aiIndexId, properties }: CreateAiIndexArgs
+): Promise<CreateAiIndexResponse> =>
+  http.post<CreateAiIndexResponse>(aiIndexPath, {
+    version: AI_INDEX_API_VERSION,
+    body: JSON.stringify({ id: aiIndexId, ...properties }),
+  });
+
 interface PutAiIndexArgs {
   aiIndexId: string;
   properties: AiIndexProperties;
 }
 
 /**
- * Upserts the full AI index record.
+ * Creates or fully replaces an AI index record.
  */
 export const putAiIndex = (
   http: HttpStart,

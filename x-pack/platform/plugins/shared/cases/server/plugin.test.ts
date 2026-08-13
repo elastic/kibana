@@ -31,6 +31,7 @@ import type { CasesServerSetupDependencies, CasesServerStartDependencies } from 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
     enabled: true,
+    assigneeIdentity: { enabled: true },
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
@@ -183,6 +184,9 @@ describe('Cases Plugin', () => {
               "resetPageDelayMs": 0,
               "resetTaskTimeoutMinutes": 60,
             },
+            "assigneeIdentity": Object {
+              "enabled": true,
+            },
             "attachments": Object {
               "enabled": true,
             },
@@ -304,8 +308,6 @@ describe('Cases Plugin', () => {
             },
           },
           "getCasesClientWithRequest": [Function],
-          "getExternalReferenceAttachmentTypeRegistry": [Function],
-          "getPersistableStateAttachmentTypeRegistry": [Function],
           "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);

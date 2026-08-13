@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AgentName, EventOutcome } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -30,16 +30,18 @@ export interface TopDependencySpansResponse {
 
 export const topDependencySpansRoute = defineRoute<TopDependencySpansResponse>()({
   endpoint: 'GET /internal/apm/dependencies/operations/spans',
-  params: z.object({
-    query: rangeSchema
-      .merge(environmentSchema)
-      .merge(kuerySchema)
-      .merge(z.object({ dependencyName: z.string(), spanName: z.string() }))
-      .merge(
-        z.object({
-          sampleRangeFrom: z.coerce.number().optional(),
-          sampleRangeTo: z.coerce.number().optional(),
-        })
-      ),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      query: rangeSchema
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(z.object({ dependencyName: z.string(), spanName: z.string() }))
+        .merge(
+          z.object({
+            sampleRangeFrom: z.coerce.number().optional(),
+            sampleRangeTo: z.coerce.number().optional(),
+          })
+        ),
+    })
+  ),
 });

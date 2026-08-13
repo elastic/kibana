@@ -80,7 +80,11 @@ export function getEndpointBodyCompleteComponents(endpoint: string) {
   if (!desc) {
     throw new Error("failed to resolve endpoint ['" + endpoint + "']");
   }
-  return desc.bodyAutocompleteRootComponents;
+  const components = desc.bodyAutocompleteRootComponents;
+  if (!components) {
+    throw new Error("failed to compile endpoint body ['" + endpoint + "']");
+  }
+  return components;
 }
 
 export function getTopLevelUrlCompleteComponents(method: string) {

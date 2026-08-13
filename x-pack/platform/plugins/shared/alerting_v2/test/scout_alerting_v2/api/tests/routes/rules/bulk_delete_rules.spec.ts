@@ -53,7 +53,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
     // Verify the side effect: only rule-c is left.
-    const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
     expect(remaining.items.map((rule) => rule.id)).toStrictEqual([ruleC.id]);
   });
 
@@ -75,7 +75,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
         error: { code: 'RULE_NOT_FOUND' },
       });
       // The existing rule should still have been deleted despite the error.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).not.toContain(rule.id);
     }
   );
@@ -86,6 +86,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
       body: { ids: [] },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject a body with no ids field', async ({ apiClient }) => {
@@ -94,6 +95,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
       body: {},
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject unknown fields (strict schema)', async ({ apiClient }) => {
@@ -102,6 +104,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
       body: { ids: ['some-id'], unknown: 'value' },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject ids longer than ID_MAX_LENGTH', async ({ apiClient }) => {
@@ -111,6 +114,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
       body: { ids: [tooLongId] },
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -122,6 +126,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
         body: { ids },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -155,7 +160,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
       });
       expect(response).toHaveStatusCode(403);
       // Verify the rule still exists after the failed call.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).toContain(rule.id);
     }
   );
@@ -172,7 +177,7 @@ apiTest.describe('Bulk delete rules by IDs API', { tag: '@local-stateful-classic
         body: { ids: [rule.id] },
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).toContain(rule.id);
     }
   );

@@ -9,6 +9,7 @@ import type { Case, CaseCustomField, User } from '../../../common/types/domain';
 import type {
   CasePostRequest,
   CasesFindResponse,
+  CasesSearchResponse,
   CaseResolveResponse,
   CasesBulkGetRequest,
   CasesPatchRequest,
@@ -78,7 +79,7 @@ export interface CasesSubClient {
    * Supports nested fields and attachment filtering.
    * Owner field is required.
    */
-  search(params: CasesSearchRequest): Promise<CasesFindResponse>;
+  search(params: CasesSearchRequest): Promise<CasesSearchResponse>;
   /**
    * Retrieves a single case with the specified ID.
    */

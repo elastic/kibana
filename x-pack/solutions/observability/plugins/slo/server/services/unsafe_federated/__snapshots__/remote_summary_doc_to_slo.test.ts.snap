@@ -33,6 +33,7 @@ Object {
       "unit": "m",
       "value": 1,
     },
+    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": Duration {
       "unit": "m",
@@ -85,6 +86,7 @@ Object {
       "unit": "m",
       "value": 1,
     },
+    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": Duration {
       "unit": "m",
@@ -137,6 +139,7 @@ Object {
       "unit": "m",
       "value": 1,
     },
+    "preventCrossProjectSearch": false,
     "preventInitialBackfill": false,
     "syncDelay": Duration {
       "unit": "m",
