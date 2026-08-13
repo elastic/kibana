@@ -41,6 +41,20 @@ const excludeFiles = (globs: string[]) => {
 };
 
 /**
+ * Strip the selected template tree (`classic/` or `di/`) so generated plugins
+ * still use `server/` and `public/` at the plugin root.
+ */
+const stripTemplateDir = (templateDir: 'classic' | 'di') =>
+  transformFileStream((file) => {
+    const prefix = `${templateDir}/`;
+    if (!file.relative.startsWith(prefix)) {
+      return;
+    }
+
+    file.path = Path.join(file.base, file.relative.slice(prefix.length));
+  });
+
+/**
  * Stream all the files from the template directory, ignoring
  * certain files based on the answers, process the .ejs templates
  * to the output files they represent, renaming the .ejs files to
@@ -55,6 +69,7 @@ export async function renderTemplates({
   answers: Answers;
 }) {
   const prettierConfig = await prettier.resolveConfig(process.cwd());
+  const useDi = !!answers.di;
 
   const defaultTemplateData = {
     name: answers.name,
@@ -80,8 +95,12 @@ export async function renderTemplates({
       encoding: false,
     }),
 
-    // exclude files from the template based on selected options, patterns
-    // are matched without the .ejs extension
+    // exclude the unused scaffold tree (paths still include classic/ or di/)
+    excludeFiles([useDi ? 'classic/**' : 'di/**']),
+
+    stripTemplateDir(useDi ? 'di' : 'classic'),
+
+    // exclude unused sides; patterns match paths without the .ejs extension
     excludeFiles(
       ([] as string[]).concat(answers.ui ? [] : 'public/**/*', answers.server ? [] : 'server/**/*')
     ),

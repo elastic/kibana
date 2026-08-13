@@ -34,6 +34,8 @@ export function runCli() {
         name,
         ui: typeof flags.ui === 'boolean' ? flags.ui : undefined,
         server: typeof flags.server === 'boolean' ? flags.server : undefined,
+        // --classic opts out of DI; otherwise leave undefined so the question default (true) applies
+        di: typeof flags.classic === 'boolean' ? !flags.classic : undefined,
       };
       const answers = flags.yes ? getDefaultAnswers(overrides) : await askQuestions(overrides);
 
@@ -60,10 +62,11 @@ export function runCli() {
       `,
       flags: {
         string: ['name'],
-        boolean: ['yes', 'ui', 'server'],
+        boolean: ['yes', 'ui', 'server', 'classic'],
         default: {
           ui: null,
           server: null,
+          classic: null,
         },
         alias: {
           y: 'yes',
@@ -75,6 +78,7 @@ export function runCli() {
           --name             Set the plugin name
           --ui               Generate a UI plugin
           --server           Generate a Server plugin
+          --classic          Generate a classic plugin() scaffold (dependency injection is the default)
         `,
       },
     }
