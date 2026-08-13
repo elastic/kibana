@@ -86,7 +86,5 @@ describe('image attachment type', () => {
       expect(getById).toHaveBeenCalledWith({ id: 'file-abc' });
       expect(base64).toBe(Buffer.from('hello').toString('base64'));
     });
-
   });
-
 });
