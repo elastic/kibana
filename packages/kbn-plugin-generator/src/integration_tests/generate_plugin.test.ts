@@ -72,6 +72,9 @@ it('generates a DI plugin by default', async () => {
   expect(serverIndex).toContain('export { pluginModule as module }');
   expect(publicIndex).toContain('export { pluginModule as module }');
   expect(exampleService).toContain('SavedObjectsClient');
+
+  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/classic'))).toBe(false);
+  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/di'))).toBe(false);
 });
 
 it('sets a default owner.name when generating with --yes', async () => {
@@ -126,6 +129,9 @@ it('generates a classic plugin with --classic', async () => {
 
   const serverIndex = Fs.readFileSync(Path.resolve(GENERATED_DIR, 'foo/server/index.ts'), 'utf8');
   expect(serverIndex).toContain('export async function plugin');
+
+  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/classic'))).toBe(false);
+  expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/di'))).toBe(false);
 });
 
 it('generates a DI plugin without UI', async () => {

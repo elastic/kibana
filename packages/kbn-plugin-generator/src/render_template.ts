@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { pipeline } from 'stream';
+import { pipeline, Transform } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
@@ -39,6 +39,22 @@ const excludeFiles = (globs: string[]) => {
     }
   });
 };
+
+/**
+ * vinyl-fs 4 still emits directories (nodir is ignored). transformFileStream
+ * passes them through, and dest would otherwise write empty classic/ and di/.
+ */
+const dropDirectories = () =>
+  new Transform({
+    objectMode: true,
+    transform(file, _, cb) {
+      if (file.isDirectory()) {
+        cb();
+      } else {
+        cb(undefined, file);
+      }
+    },
+  });
 
 /**
  * Strip the selected template tree (`classic/` or `di/`) so generated plugins
@@ -94,6 +110,9 @@ export async function renderTemplates({
       cwd: Path.resolve(__dirname, '../template'),
       encoding: false,
     }),
+
+    // drop empty classic/ or di/ trees into the generated plugin
+    dropDirectories(),
 
     // exclude the unused scaffold tree (paths still include classic/ or di/)
     excludeFiles([useDi ? 'classic/**' : 'di/**']),
