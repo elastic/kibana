@@ -9,7 +9,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -26,6 +25,7 @@ import type {
   NewPackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getFleetManagedIndexTemplates } from '../api/api';
 import type { RouteEntry } from '../../../../common/security_integrations/cribl/types';
 import {
@@ -297,7 +297,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       <>
         {missingReqPermissions && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount={false}
               size="s"
               title={i18n.translate(
@@ -306,15 +306,15 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
                   defaultMessage: 'Be sure you have the necessary privileges',
                 }
               )}
-              iconType="question"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutDescription"
-                  defaultMessage="To configure this integration, you must have `manage_index_templates` privileges and `manage_pipeline` or `manage_ingest_pipelines` privileges."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutDescription"
+                    defaultMessage="To configure this integration, you must have `manage_index_templates` privileges and `manage_pipeline` or `manage_ingest_pipelines` privileges."
+                  />
+                </p>
+              }
+            />
             <EuiSpacer size="l" />
           </>
         )}
