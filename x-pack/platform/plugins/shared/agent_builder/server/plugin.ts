@@ -9,6 +9,10 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import {
+  AGENT_BUILDER_IMAGE_FILE_KIND,
+  SUPPORTED_IMAGE_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -37,6 +41,8 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 export class AgentBuilderPlugin
   implements
@@ -67,6 +73,20 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+
+    setupDeps.files.registerFileKind({
+      id: AGENT_BUILDER_IMAGE_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+      http: {
+        create: { requiredPrivileges: ['agentBuilder'] },
+        download: { requiredPrivileges: ['agentBuilder'] },
+        getById: { requiredPrivileges: ['agentBuilder'] },
+        list: { requiredPrivileges: ['agentBuilder'] },
+        delete: { requiredPrivileges: ['agentBuilder'] },
+      },
+    });
+
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
       this.usageCounter = createAgentBuilderUsageCounter(setupDeps.usageCollection);
