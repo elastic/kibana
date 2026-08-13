@@ -112,10 +112,9 @@ export const nameColumn = ({
         onClick={(event) => {
           if (hasActiveModifierKey(event)) return;
           trackAction?.();
-          // The handler can take over opening the session (e.g. Discover restores
-          // it in a new tab) by preventing the default behavior.
           onBackgroundSearchOpened?.({ session, event });
           if (!event.defaultPrevented) {
+            // when the link was clicked on the Background management page  
             event.preventDefault();
             core.application.navigateToUrl(href);
           }
