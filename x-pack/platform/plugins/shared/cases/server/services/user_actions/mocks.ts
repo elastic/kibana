@@ -95,6 +95,24 @@ const originalCasesWithAssignee = [
   { ...createCaseSavedObjectResponse({ overrides: { assignees: [{ uid: '1' }] } }), id: '1' },
 ].map((so) => transformSavedObjectToExternalModel(so));
 
+const originalCasesWithEnrichedAssignee = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        assignees: [
+          {
+            uid: '1',
+            username: 'user_one',
+            full_name: 'User One',
+            email: 'user_one@example.com',
+          },
+        ],
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
 export const patchAssigneesCasesRequest = {
   cases: [
     {
@@ -130,6 +148,24 @@ export const patchAddRemoveAssigneesCasesRequest = {
         assignees: [{ uid: '2' }],
       },
       originalCase: originalCasesWithAssignee[0],
+    },
+  ],
+};
+
+/**
+ * Retains an identity-enriched assignee and adds a uid-only one. Used to assert that
+ * user-action diffs compare by uid (not deep equality), otherwise the retained assignee
+ * is incorrectly recorded as delete+add.
+ */
+export const patchAddAssigneeWithEnrichedOriginalRequest = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        assignees: [{ uid: '1' }, { uid: '2' }],
+      },
+      originalCase: originalCasesWithEnrichedAssignee[0],
     },
   ],
 };

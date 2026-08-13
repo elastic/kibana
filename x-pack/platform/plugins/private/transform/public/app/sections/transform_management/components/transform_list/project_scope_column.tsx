@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { EuiLink, EuiPopover, EuiPopoverTitle, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
   type ICPSManager,
@@ -134,6 +134,7 @@ const ProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeColumnPro
 
 export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeColumnProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
 
   if (cpsManager.getTotalProjectCount() <= 1) {
     return (
@@ -145,6 +146,7 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
 
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={
         <EuiLink
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
@@ -159,7 +161,9 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
       anchorPosition="downLeft"
       repositionOnScroll
     >
-      <EuiPopoverTitle paddingSize="s">{projectScopeLabel}</EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+        {projectScopeLabel}
+      </EuiPopoverTitle>
       <ProjectScopePopoverContent cpsManager={cpsManager} projectRouting={projectRouting} />
     </EuiPopover>
   );
