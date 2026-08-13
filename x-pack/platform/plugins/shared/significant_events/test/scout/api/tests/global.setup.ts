@@ -40,11 +40,18 @@ globalSetupHook(
     const deadline = Date.now() + AVAILABILITY_TIMEOUT_MS;
     let lastResponse: SignificantEventsAvailabilityResponse | undefined;
     while (Date.now() < deadline) {
-      const { data } = await kbnClient.request<SignificantEventsAvailabilityResponse>({
+      const { data, status } = await kbnClient.request<SignificantEventsAvailabilityResponse>({
         path: AVAILABILITY_PATH,
         method: 'GET',
         headers: COMMON_API_HEADERS,
+        ignoreErrors: [404],
       });
+      // A 404 means the plugin is unloaded for this deployment (e.g. Logs Essentials sets
+      // `xpack.significantEvents.enabled: false`), so there is no availability to wait for.
+      if (status === 404) {
+        log.debug('[setup] Significant events plugin not loaded (404); skipping availability gate');
+        return;
+      }
       lastResponse = data;
       if (data.available) {
         log.debug('[setup] Significant events availability confirmed');
