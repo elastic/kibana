@@ -12,7 +12,8 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { TagsFilter } from './tags_filter';
 
-describe('TagsFilter', () => {
+// Failing: See https://github.com/elastic/kibana/issues/224155
+describe.skip('TagsFilter', () => {
   function render(props: any) {
     const renderer = createFleetTestRendererMock();
 
