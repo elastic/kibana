@@ -1214,7 +1214,7 @@ describe('ConversationClient', () => {
 
       const { permissions } = await adminClient.get('conversation-1');
 
-      expect(permissions).toEqual({ rename: true, delete: true });
+      expect(permissions).toEqual({ rename: true, delete: true, update_access_control: false });
     });
 
     it('cannot rename or delete a private conversation owned by another user', async () => {
