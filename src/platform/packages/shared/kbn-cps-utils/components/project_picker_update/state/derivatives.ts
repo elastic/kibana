@@ -57,6 +57,31 @@ export const computeSelectedProjects = (
   return base.filter((id) => !state.excludedOverrides.includes(id));
 };
 
+export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
+  let routing = projectRoutingCodec.encode({
+    filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
+      if (entry.enabled) {
+        acc.push(entry.expression);
+      }
+      return acc;
+    }, [] as FilterExpressionValue[]),
+    excludedProjectIds: state.excludedOverrides,
+    selectedProjectIds: state.selectedProjectIds,
+    projectRoutingStrategy: state.projectRoutingStrategy,
+  });
+
+  // fallback that captures all projects but is however project routing strategy
+  // aware
+  routing ||=
+    state.projectRoutingStrategy === 'dynamic'
+      ? `${PROJECT_SELECTION_DIMENSION}:*`
+      : Array.from(state.availableProjects.keys())
+          .map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`)
+          .join(' AND ');
+
+  return routing;
+};
+
 /**
  * Derivatives are computed values that are derived from the state of the project picker.
  * Order is important here, when derivations depend on other derivations, they should be computed after the dependent derivations.
@@ -86,18 +111,7 @@ export const projectPickerDerivatives = [
   },
   {
     key: 'currentProjectRouting',
-    compute: (state: ProjectPickerState) =>
-      projectRoutingCodec.encode({
-        filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
-          if (entry.enabled) {
-            acc.push(entry.expression);
-          }
-          return acc;
-        }, [] as FilterExpressionValue[]),
-        excludedProjectIds: state.excludedOverrides,
-        selectedProjectIds: state.selectedProjectIds,
-        projectRoutingStrategy: state.projectRoutingStrategy,
-      }),
+    compute: (state: ProjectPickerState) => computeCurrentProjectRouting(state),
   },
   {
     key: 'isUsingSpaceDefaults',
