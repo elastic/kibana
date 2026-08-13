@@ -13,9 +13,10 @@ import {
   Action,
   type HealthDiagnosticQueryV1,
   type HealthDiagnosticQueryV2,
+  type HealthDiagnosticQueryV3,
 } from '../health_diagnostic_service.types';
 
-export type { HealthDiagnosticQueryV1, HealthDiagnosticQueryV2 };
+export type { HealthDiagnosticQueryV1, HealthDiagnosticQueryV2, HealthDiagnosticQueryV3 };
 import type { TelemetryConfigProvider } from '../../../../../common/telemetry_config/telemetry_config_provider';
 
 export const createMockLogger = (): jest.Mocked<Logger> =>
@@ -51,6 +52,7 @@ export const createMockTelemetryConfigProvider = (
 export const createMockQueryExecutor = (): jest.Mocked<CircuitBreakingQueryExecutorImpl> =>
   ({
     search: jest.fn(),
+    searchApi: jest.fn(),
   } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockDocument = (overrides = {}) => ({
@@ -83,6 +85,9 @@ export const createMockEsClient = () => {
     helpers: mockHelpers,
     cluster: { health: jest.fn() },
     nodes: { stats: jest.fn() },
+    transport: {
+      request: jest.fn(),
+    },
   };
 };
 
@@ -143,6 +148,22 @@ export const createMockQueryV2 = (
   ...overrides,
 });
 
+export const createMockApiQueryV3 = (
+  overrides: Partial<HealthDiagnosticQueryV3> = {}
+): HealthDiagnosticQueryV3 => ({
+  id: 'test-api-query',
+  name: 'test_api_query',
+  version: 3,
+  type: 'API',
+  api: '_transform/{transform_id}/_stats',
+  pathParams: { transform_id: '*' },
+  responsePath: 'transforms',
+  scheduleCron: '1h',
+  enabled: true,
+  filterlist: {},
+  ...overrides,
+});
+
 export const createMockPackageService = (
   packages: Array<{
     name: string;
@@ -153,6 +174,7 @@ export const createMockPackageService = (
 ) => ({
   asInternalUser: {
     getPackages: jest.fn().mockResolvedValue(packages),
+    getInstallation: jest.fn().mockResolvedValue(null),
   },
 });
 
