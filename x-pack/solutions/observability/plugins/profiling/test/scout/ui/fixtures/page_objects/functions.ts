@@ -115,10 +115,8 @@ export class FunctionsPage {
 
   // Settings methods
   async clickSettingsButton() {
-    await this.page
-      .getByTestId('headerAppActionMenu')
-      .getByRole('link', { name: 'Settings' })
-      .click();
+    await this.page.getByTestId('app-menu-overflow-button').click();
+    await this.page.getByTestId('app-menu-item-settings').click();
   }
 
   async getSettingsModal() {
