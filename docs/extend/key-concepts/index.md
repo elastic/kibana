@@ -14,7 +14,6 @@ How {{kib}} is composed of plugins, packages, and core, and the patterns that ho
 - [Anatomy of a plugin](./platform-architecture/anatomy-of-a-plugin.md)
 - [Scoped services and patterns](./platform-architecture/scoped-services.md)
 - [Routing, navigation, and URL](./platform-architecture/routing-navigation-and-url.md)
-- [API documentation](./platform-architecture/api-documentation.md)
 
 ## Security
 
