@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
@@ -19,7 +19,9 @@ import {
 import { RuleMigrationRetryFilter } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
+import { createSiemMigrationAvailability } from '../common/availability';
 import { hasSiemMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID } from './tool_ids';
@@ -53,14 +55,14 @@ const schema = StartRuleMigrationRequestBody.extend({
 export const startRuleMigrationTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  availability: ToolAvailabilityConfig
+  productFeaturesService: ProductFeaturesService
 ): BuiltinToolDefinition<typeof schema> => {
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
-    availability,
+    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     confirmation: { askUser: 'always' },
     description: `Start or reprocess a SIEM rule migration.
 

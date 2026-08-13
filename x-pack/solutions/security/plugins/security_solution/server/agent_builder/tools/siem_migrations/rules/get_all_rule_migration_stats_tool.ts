@@ -8,12 +8,14 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { GetAllStatsRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
+import { createSiemMigrationAvailability } from '../common/availability';
 import { createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID } from './tool_ids';
 
@@ -30,14 +32,14 @@ const schema = z.object({}).describe('No parameters. Lists stats for every rule 
 export const getAllRuleMigrationStatsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  availability: ToolAvailabilityConfig
+  productFeaturesService: ProductFeaturesService
 ): BuiltinToolDefinition<typeof schema> => {
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
     type: ToolType.builtin,
-    availability,
+    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     description: `List stats for every Automatic Rule Migration in the current space.
 
 Returns { total, migrations: [{ id, name, status, items: { total, pending, processing, completed, failed }, created_at, last_updated_at, vendor?, last_execution? }] }.

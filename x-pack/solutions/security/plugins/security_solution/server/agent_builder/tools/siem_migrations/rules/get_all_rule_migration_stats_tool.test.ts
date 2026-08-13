@@ -7,23 +7,22 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import {
   createToolTestMocks,
   createToolHandlerContext,
   setupMockCoreStartServices,
 } from '../../../__mocks__/test_helpers';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { getAllRuleMigrationStatsTool } from './get_all_rule_migration_stats_tool';
 import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 
-const mockAvailability: ToolAvailabilityConfig = {
-  cacheMode: 'space',
-  handler: async () => ({ status: 'available' as const }),
-};
+const mockProductFeaturesService = {
+  isEnabled: jest.fn().mockReturnValue(true),
+} as unknown as ProductFeaturesService;
 
 describe('getAllRuleMigrationStatsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getAllRuleMigrationStatsTool(mockCore, mockLogger, mockAvailability);
+  const tool = getAllRuleMigrationStatsTool(mockCore, mockLogger, mockProductFeaturesService);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {

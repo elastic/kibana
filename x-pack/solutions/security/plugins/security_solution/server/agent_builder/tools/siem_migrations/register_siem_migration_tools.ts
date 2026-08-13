@@ -9,7 +9,6 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../lib/product_features_service/product_features_service';
-import { createSiemMigrationAvailability } from './common/availability';
 import { getRuleMigrationTool } from './rules/get_rule_migration_tool';
 import { startRuleMigrationTool } from './rules/start_rule_migration_tool';
 import { getAllRuleMigrationStatsTool } from './rules/get_all_rule_migration_stats_tool';
@@ -23,12 +22,10 @@ export const registerSiemMigrationTools = (
   productFeaturesService: ProductFeaturesService,
   logger: Logger
 ) => {
-  const availability = createSiemMigrationAvailability(core, productFeaturesService, logger);
-
-  agentBuilder.tools.register(getRuleMigrationTool(core, logger, availability));
-  agentBuilder.tools.register(startRuleMigrationTool(core, logger, availability));
-  agentBuilder.tools.register(getAllRuleMigrationStatsTool(core, logger, availability));
-  agentBuilder.tools.register(getMigrationRulesTool(core, logger, availability));
-  agentBuilder.tools.register(getRuleMigrationStatsTool(core, logger, availability));
-  agentBuilder.tools.register(getRuleMigrationTranslationStatsTool(core, logger, availability));
+  agentBuilder.tools.register(getRuleMigrationTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(startRuleMigrationTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(getAllRuleMigrationStatsTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(getMigrationRulesTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(getRuleMigrationStatsTool(core, logger, productFeaturesService));
+  agentBuilder.tools.register(getRuleMigrationTranslationStatsTool(core, logger, productFeaturesService));
 };

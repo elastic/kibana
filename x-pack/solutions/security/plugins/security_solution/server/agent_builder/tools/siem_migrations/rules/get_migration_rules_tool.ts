@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
@@ -17,7 +17,9 @@ import {
   type GetRuleMigrationRulesResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
+import { createSiemMigrationAvailability } from '../common/availability';
 import { createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
 
@@ -72,14 +74,14 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
 export const getMigrationRulesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  availability: ToolAvailabilityConfig
+  productFeaturesService: ProductFeaturesService
 ): BuiltinToolDefinition<typeof schema> => {
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
     type: ToolType.builtin,
-    availability,
+    availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     description: `List the rules in a SIEM rule migration with their translation result and status.
 
 Supports filtering by translation result, installed/prebuilt, search term, or explicit ids.
