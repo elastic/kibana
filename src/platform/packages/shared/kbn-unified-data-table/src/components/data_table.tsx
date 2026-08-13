@@ -420,6 +420,10 @@ interface InternalUnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
+   * Whether to include the Summary column toggle in the custom toolbar's column control.
+   */
+  showSummaryColumnToggle?: boolean;
+  /**
    * Optional triggerId to retrieve the column cell actions that will override the default ones
    */
   cellActionsTriggerId?: string;
@@ -585,6 +589,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       services,
       renderCustomGridBody,
       renderCustomToolbar,
+      showSummaryColumnToggle = false,
       externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
       trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
       totalHits,
@@ -1249,16 +1254,17 @@ const InternalUnifiedDataTable = React.forwardRef<
       () =>
         renderCustomToolbar
           ? (toolbarProps) => {
-              const columnControl = toolbarProps.columnControl ? (
-                <ColumnControlWithSummary
-                  columnControl={toolbarProps.columnControl}
-                  showSummaryColumn={hasSummaryColumns}
-                  isSummaryColumnToggleDisabled={isSummaryOnlyColumn}
-                  onChangeShowSummaryColumn={onChangeShowSummaryColumn}
-                />
-              ) : (
-                toolbarProps.columnControl
-              );
+              const columnControl =
+                showSummaryColumnToggle && toolbarProps.columnControl ? (
+                  <ColumnControlWithSummary
+                    columnControl={toolbarProps.columnControl}
+                    showSummaryColumn={hasSummaryColumns}
+                    isSummaryColumnToggleDisabled={isSummaryOnlyColumn}
+                    onChangeShowSummaryColumn={onChangeShowSummaryColumn}
+                  />
+                ) : (
+                  toolbarProps.columnControl
+                );
 
               return renderCustomToolbar({
                 toolbarProps: {
@@ -1277,6 +1283,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           : undefined,
       [
         renderCustomToolbar,
+        showSummaryColumnToggle,
         additionalControls,
         inTableSearchControl,
         hasSummaryColumns,

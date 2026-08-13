@@ -1275,9 +1275,8 @@ describe('UnifiedDataTable', () => {
         // the default eui controls should be available for custom rendering
         expect(toolbarParams?.columnSortingControl).toBeTruthy();
         expect(toolbarParams?.keyboardShortcutsControl).toBeTruthy();
-        // Pin summary is injected into the Columns popover, not additionalControls
         expect(React.isValidElement(toolbarParams?.columnControl)).toBe(true);
-        expect((toolbarParams.columnControl as React.ReactElement).type).toBe(
+        expect((toolbarParams.columnControl as React.ReactElement).type).not.toBe(
           ColumnControlWithSummary
         );
         expect(gridParams?.additionalControls).toBeFalsy();
@@ -1901,6 +1900,7 @@ describe('UnifiedDataTable', () => {
           columns: [],
           showTimeCol: false,
           renderCustomToolbar,
+          showSummaryColumnToggle: true,
         });
 
         expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
@@ -1921,6 +1921,7 @@ describe('UnifiedDataTable', () => {
           columns: ['message'],
           showTimeCol: false,
           renderCustomToolbar,
+          showSummaryColumnToggle: true,
         });
 
         expect(screen.getByTestId('dataGridColumnSelectorButton')).toBeVisible();
