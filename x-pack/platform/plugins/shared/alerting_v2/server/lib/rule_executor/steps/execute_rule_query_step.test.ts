@@ -213,6 +213,26 @@ describe('ExecuteRuleQueryStep', () => {
     expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
   });
 
+  it('marks content-length-exceeded errors as TaskErrorSource.USER', async () => {
+    mockHelpersEsqlToArrowReader(
+      mockEsClient,
+      jest
+        .fn()
+        .mockRejectedValue(
+          new errors.RequestAbortedError(
+            'Response size exceeded the limit (content length: 52428800)'
+          )
+        )
+    );
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+
+    const error = await getStepError(step, state);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+  });
+
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {
     mockHelpersEsqlToArrowReader(
       mockEsClient,
