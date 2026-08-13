@@ -315,7 +315,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       {
         field: 'kind',
         name: (
-          <FormattedMessage id="xpack.alertingV2.rulesList.column.mode" defaultMessage="Mode" />
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.kind" defaultMessage="Outcome" />
         ),
         width: '10%',
         sortable: true,

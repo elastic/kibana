@@ -35,7 +35,7 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
   variant = 'full',
 }) => {
   const rule = useRule();
-  const isAlertMode = rule.kind === 'alert';
+  const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
   const recoveryCondition = getRecoverEsqlSegment(rule.query, rule.recovery_strategy);
@@ -80,13 +80,13 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
       'data-test-subj': 'alertingV2RuleDetailsLookback',
     },
     {
-      title: i18n.translate('xpack.alertingV2.ruleDetails.mode', {
-        defaultMessage: 'Mode',
+      title: i18n.translate('xpack.alertingV2.ruleDetails.kind', {
+        defaultMessage: 'Outcome',
       }),
       description: RULE_KIND_LABELS[rule.kind] ?? rule.kind,
-      'data-test-subj': 'alertingV2RuleDetailsMode',
+      'data-test-subj': 'alertingV2RuleDetailsKind',
     },
-    ...(isAlertMode && !isSummary
+    ...(isAlertKind && !isSummary
       ? [
           {
             title: i18n.translate('xpack.alertingV2.ruleDetails.alertDelay', {
