@@ -210,7 +210,7 @@ export const SignalRuleOverview: React.FC = () => {
     if (buckets.length === 0) {
       return (
         <EuiEmptyPrompt
-          iconType="visBarVerticalStacked"
+          iconType="chartBarVerticalStack"
           data-test-subj="signalOverviewEmpty"
           title={
             <h4>
