@@ -98,7 +98,6 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
 
   const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
     selectedItems,
-    searchResults: timelines,
     showExportAction: false,
     tableRef,
     timelineType: TimelineTypeEnum.default,

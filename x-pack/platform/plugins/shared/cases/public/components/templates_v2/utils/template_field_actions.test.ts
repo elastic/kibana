@@ -176,6 +176,16 @@ describe('insertTemplateField', () => {
     expect(again.yaml).toBe(linked.yaml);
   });
 
+  it('treats a $ref differing only in case as already linked', () => {
+    const linked = insertTemplateField(TEMPLATE, { $ref: 'Root_Cause' }, 1);
+    expect(linked.changed).toBe(true);
+
+    const again = insertTemplateField(linked.yaml, { $ref: 'root_cause' }, 1);
+    expect(again.changed).toBe(false);
+    expect(again.reason).toBe('exists');
+    expect(parseYaml(again.yaml).fields).toHaveLength(3);
+  });
+
   it('creates a fields block when none exists', () => {
     const noFields = `name: T\nseverity: low\n`;
     const result = insertTemplateField(noFields, buildFieldScaffold('INPUT_TEXT')!, 1);

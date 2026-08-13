@@ -80,8 +80,12 @@ export function buildBuiltInStepSchema(step: BaseStepDefinition): z.ZodType {
     }
   }
 
+  // Every step takes `if` except the `if` step, which branches on `condition`.
+  if (step.id !== 'if') {
+    Object.assign(props, StepWithIfConditionSchema.shape);
+  }
   if (step.category !== StepCategory.FlowControl) {
-    Object.assign(props, StepWithIfConditionSchema.shape, TimeoutPropSchema.shape);
+    Object.assign(props, TimeoutPropSchema.shape);
   }
 
   return z.object(props);

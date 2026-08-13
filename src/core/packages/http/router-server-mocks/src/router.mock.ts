@@ -133,12 +133,15 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
 
 function createFakeKibanaRequestMock({
   headers = { accept: 'something/html' },
+  spaceId,
 }: {
   headers?: Record<string, string>;
+  spaceId?: string;
 }): KibanaRequest {
   const fakeRequest = {
     headers,
     path: '/',
+    ...(spaceId ? { spaceId: asSpaceId(spaceId) } : {}),
   };
 
   return kibanaRequestFactory(fakeRequest);
