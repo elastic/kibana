@@ -133,13 +133,13 @@ spaceTest.describe(
             await breakdownPanel.getByTestId('indexPattern-dimension-remove').click();
 
             await expectMetricPanelHasNotCrashed(page);
-            await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+            await expect(lens.metric.trendline).toBeVisible();
             await waitForMetricTileCount(page, 1);
 
             await applyLensInlineEditorAndWaitClosed({ lens });
             await dashboard.waitForPanelsToLoad(1);
             await expectMetricPanelHasNotCrashed(page);
-            await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+            await expect(lens.metric.trendline).toBeVisible();
             await waitForMetricTileCount(page, 1);
           }
         );

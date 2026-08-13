@@ -73,7 +73,7 @@ spaceTest.describe(
       'enables and persists the trendline through the dimension editor',
       async ({ browserAuth, page, pageObjects }) => {
         const { dashboard, lens } = pageObjects;
-        const sparkline = page.locator('.echSingleMetricSparkline');
+        const sparkline = lens.metric.trendline;
 
         await spaceTest.step('open dashboard and verify no trendline initially', async () => {
           await browserAuth.loginAsPrivilegedUser();

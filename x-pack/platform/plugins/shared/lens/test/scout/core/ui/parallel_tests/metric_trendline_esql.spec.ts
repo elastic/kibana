@@ -62,7 +62,7 @@ spaceTest.describe(
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await expect(page.getByTestId('mtrVis')).toBeVisible();
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await expect(pageObjects.lens.metric.trendline).toBeVisible();
       }
     );
 
@@ -102,7 +102,7 @@ spaceTest.describe(
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await expect(page.getByTestId('mtrVis')).toBeVisible();
-        await expect(page.locator('.echSingleMetricSparkline')).toBeVisible();
+        await expect(pageObjects.lens.metric.trendline).toBeVisible();
       }
     );
   }
