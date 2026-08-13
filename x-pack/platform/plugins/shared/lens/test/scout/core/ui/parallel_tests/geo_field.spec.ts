@@ -28,8 +28,8 @@ spaceTest.describe('Lens visualize geo field', { tag: '@local-stateful-classic' 
     async ({ page, pageObjects }) => {
       const { lens, maps } = pageObjects;
 
-      await lens.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LOGSTASH);
-      await lens.dragFieldToGeoFieldWorkspace('geo.coordinates');
+      await lens.dragDrop.switchDataPanelIndexPattern(testData.DATA_VIEW_ID.LOGSTASH);
+      await lens.dragDrop.dragFieldToGeoFieldWorkspace('geo.coordinates');
 
       await maps.waitForLayersToLoad();
       await expect(maps.getLayerToggleButton('logstash-*')).toBeVisible();

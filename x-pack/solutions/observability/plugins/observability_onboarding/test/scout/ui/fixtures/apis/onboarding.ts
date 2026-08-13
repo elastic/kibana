@@ -7,11 +7,6 @@
 
 import type { KbnClient } from '@kbn/scout-oblt';
 
-export interface WiredStreamsStatus {
-  enabled: boolean | 'conflict';
-  can_manage: boolean;
-}
-
 export interface OnboardingApiService {
   updateInstallationStepStatus: (
     onboardingId: string,
@@ -19,9 +14,6 @@ export interface OnboardingApiService {
     status: string,
     payload?: object
   ) => Promise<void>;
-  enableWiredStreams: () => Promise<void>;
-  disableWiredStreams: () => Promise<void>;
-  getWiredStreamsStatus: () => Promise<WiredStreamsStatus>;
 }
 
 export const getOnboardingApiHelper = (kbnClient: KbnClient): OnboardingApiService => {
@@ -40,28 +32,6 @@ export const getOnboardingApiHelper = (kbnClient: KbnClient): OnboardingApiServi
           payload,
         },
       });
-    },
-
-    enableWiredStreams: async () => {
-      await kbnClient.request({
-        method: 'POST',
-        path: '/api/streams/_enable',
-      });
-    },
-
-    disableWiredStreams: async () => {
-      await kbnClient.request({
-        method: 'POST',
-        path: '/api/streams/_disable',
-      });
-    },
-
-    getWiredStreamsStatus: async (): Promise<WiredStreamsStatus> => {
-      const response = await kbnClient.request<WiredStreamsStatus>({
-        method: 'GET',
-        path: '/api/streams/_status',
-      });
-      return response.data;
     },
   };
 };
