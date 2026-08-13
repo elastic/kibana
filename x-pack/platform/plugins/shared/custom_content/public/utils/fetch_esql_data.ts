@@ -7,7 +7,7 @@
 
 import dateMath from '@kbn/datemath';
 import type { HttpStart } from '@kbn/core/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
@@ -20,7 +20,8 @@ export async function fetchEsqlData(
   esqlQuery: string,
   timeRange: TimeRange | undefined,
   signal: AbortSignal,
-  isApproximate?: boolean
+  isApproximate?: boolean,
+  projectRouting?: ProjectRouting
 ): Promise<EsqlDataResult> {
   let filter: unknown;
 
@@ -51,6 +52,7 @@ export async function fetchEsqlData(
     filter,
     timeRange,
     ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
+    ...(projectRouting !== undefined ? { projectRouting } : {}),
   });
 
   return response;

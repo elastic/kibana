@@ -59,6 +59,7 @@ const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   savedTemplate: undefined,
   colorMode: 'LIGHT' as const,
   isApproximate: false,
+  projectRouting: undefined,
   onTemplateChange: jest.fn(),
 };
 
@@ -179,7 +180,8 @@ describe('useCustomContentHtml', () => {
         esqlParams.esqlQuery,
         undefined,
         expect.any(AbortSignal),
-        false
+        false,
+        undefined
       );
       expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [], []);
       expect(result.current.html).toContain('rendered');
@@ -224,7 +226,8 @@ describe('useCustomContentHtml', () => {
         esqlParams.esqlQuery,
         undefined,
         expect.any(AbortSignal),
-        false
+        false,
+        undefined
       );
       expect(mockFillTemplate).toHaveBeenCalledWith(LIQUID_TEMPLATE, [], []);
       expect(result.current.html).toContain('rendered');
@@ -253,7 +256,8 @@ describe('useCustomContentHtml', () => {
         esqlParams.esqlQuery,
         timeRange,
         expect.any(AbortSignal),
-        false
+        false,
+        undefined
       );
     });
 
@@ -364,7 +368,8 @@ describe('useCustomContentHtml', () => {
         esqlParams.esqlQuery,
         { from: 'now-7d', to: 'now' },
         expect.any(AbortSignal),
-        false
+        false,
+        undefined
       );
     });
   });
@@ -415,6 +420,56 @@ describe('useCustomContentHtml', () => {
     });
   });
 
+  describe('projectRouting — project routing context', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+    const routing = 'my-project';
+
+    it('passes projectRouting to fetchEsqlData when provided', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, projectRouting: routing })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        false,
+        routing
+      );
+    });
+
+    it('re-fetches when projectRouting changes', async () => {
+      const { rerender } = renderHook(
+        ({ projectRouting }: { projectRouting: string | undefined }) =>
+          useCustomContentHtml({ ...esqlParams, projectRouting }),
+        { initialProps: { projectRouting: undefined as string | undefined } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ projectRouting: routing });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        false,
+        routing
+      );
+    });
+  });
+
   describe('isApproximate — approximation switch', () => {
     const esqlParams = {
       ...baseParams,
@@ -435,7 +490,8 @@ describe('useCustomContentHtml', () => {
         esqlParams.esqlQuery,
         undefined,
         expect.any(AbortSignal),
-        true
+        true,
+        undefined
       );
     });
 
@@ -457,7 +513,8 @@ describe('useCustomContentHtml', () => {
         esqlParams.esqlQuery,
         undefined,
         expect.any(AbortSignal),
-        true
+        true,
+        undefined
       );
     });
   });

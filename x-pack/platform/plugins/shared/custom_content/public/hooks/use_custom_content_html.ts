@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
+import type { TimeRange, ProjectRouting } from '@kbn/es-query';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
@@ -39,6 +39,7 @@ export interface UseCustomContentHtmlParams {
   savedTemplate: string | undefined;
   colorMode: EuiThemeColorModeStandard;
   isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
   onTemplateChange: (template: string) => void;
 }
 
@@ -58,6 +59,7 @@ export function useCustomContentHtml({
   savedTemplate,
   colorMode,
   isApproximate,
+  projectRouting,
   onTemplateChange,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [html, setHtml] = useState('');
@@ -122,7 +124,15 @@ export function useCustomContentHtml({
     if (template && esqlQuery) {
       setIsLoading(true);
       setError(undefined);
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal, isApproximate)
+      fetchEsqlData(
+        search,
+        core.http,
+        esqlQuery,
+        timeRange,
+        controller.signal,
+        isApproximate,
+        projectRouting
+      )
         .then((response) => fillTemplate(template, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
@@ -195,7 +205,8 @@ export function useCustomContentHtml({
             esqlQuery,
             timeRange,
             controller.signal,
-            isApproximate
+            isApproximate,
+            projectRouting
           );
         } catch (err) {
           if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError'))
@@ -273,7 +284,16 @@ export function useCustomContentHtml({
     return () => {
       controller.abort();
     };
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate, isApproximate]);
+  }, [
+    embeddableId,
+    prompt,
+    esqlQuery,
+    timeRange,
+    generationVersion,
+    savedTemplate,
+    isApproximate,
+    projectRouting,
+  ]);
 
   return { html, isLoading, error, isAiUnavailable };
 }
