@@ -330,10 +330,11 @@ export class DatePicker {
     // `onInputKeyDown` calls `applyRange`, which the query bar's `onChange`
     // forwards to `onSubmit`. No separate querySubmitButton click is needed.
     await input.press('Enter');
-    // `applyRange` sets `isEditing=false`, which unmounts the input and closes
-    // the popover. Wait for edit mode to end so a following open/read isn't
-    // racing that close.
+    // The input unmounts immediately, but the popover panel closes with an
+    // animation and stays visible a bit longer — wait for it too, so a
+    // following `openDateRangePickerPresetsPanel()` doesn't skip re-opening it.
     await input.waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('dateRangePickerPopoverPanel').waitFor({ state: 'hidden' });
   }
 
   async saveCurrentRangeAsPreset() {
@@ -352,6 +353,14 @@ export class DatePicker {
 
   getDateRangePreset(label: string) {
     return this.page.testSubj.locator(this.getDateRangePresetTestSubject(label));
+  }
+
+  /**
+   * Delete action for a preset. Only user-saved presets expose one; presets
+   * coming from the `timepicker:quickRanges` uiSetting are locked.
+   */
+  getDateRangePresetDeleteButton(label: string) {
+    return this.getDateRangePreset(label).getByTestId('dateRangePickerDeletePresetButton');
   }
 
   async deleteDateRangePreset(label: string) {

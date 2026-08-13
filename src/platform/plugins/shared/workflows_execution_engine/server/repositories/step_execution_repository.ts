@@ -14,6 +14,13 @@ import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExec
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
+/**
+ * Step documents share the workflow-execution document's concurrent-writer problem: the run's own
+ * periodic flush and `markNonTerminalStepsFailed` (cancel / task-recovery paths) can update the
+ * same step doc at once. See the matching note in `workflow_execution_repository.ts`.
+ */
+const UPDATE_RETRY_ON_CONFLICT = 3;
+
 export class StepExecutionRepository {
   constructor(private stepExecutionsDataClient: StepExecutionsDataClient) {}
 
@@ -126,6 +133,7 @@ export class StepExecutionRepository {
       items: stepExecutions.map((stepExecution) => ({
         operation: 'upsert',
         document: stepExecution as Partial<EsWorkflowStepExecution> & { id: string },
+        retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
       })),
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
     });

@@ -67,21 +67,23 @@ const getContextMenuItems = (
       },
     },
   ],
-  [
-    {
-      icon: 'controls',
-      label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
-        defaultMessage: 'Adjust space defaults',
-      }),
-    },
-    {
-      icon: 'gear',
-      label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
-        defaultMessage: 'Manage cross-project search',
-      }),
-      external: true,
-    },
-  ],
+  // TODO: These actions are not yet supported and only show placeholder labels.
+  // Hide these until they are supported.
+  // [
+  //   {
+  //     icon: 'controls',
+  //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
+  //       defaultMessage: 'Adjust space defaults',
+  //     }),
+  //   },
+  //   {
+  //     icon: 'gear',
+  //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
+  //       defaultMessage: 'Manage cross-project search',
+  //     }),
+  //     external: true,
+  //   },
+  // ],
 ];
 
 export function ProjectPickerFrameHeader() {

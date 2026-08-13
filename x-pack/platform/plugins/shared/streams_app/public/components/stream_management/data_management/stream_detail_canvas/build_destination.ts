@@ -15,9 +15,10 @@ import { DESTINATION_NODE_TYPE, type DestinationNode, type DestinationNodeData }
  * `build_graph.ts` stays a thin orchestrator.
  */
 
-/** A classic stream has processing when it carries at least one Streamlang step. */
+/** Native processing is shown on the canvas; Streamlang steps will be migrated later. */
 export const hasProcessing = (definition: Streams.ClassicStream.Definition): boolean =>
-  (definition.ingest.processing.steps?.length ?? 0) > 0;
+  'processors' in definition.ingest.processing &&
+  definition.ingest.processing.processors.length > 0;
 
 /** Stable React Flow node id for a stream's destination. */
 export const getDestinationNodeId = (definition: Streams.ClassicStream.Definition): string =>
@@ -26,6 +27,7 @@ export const getDestinationNodeId = (definition: Streams.ClassicStream.Definitio
 export const inferDestination = (
   definition: Streams.ClassicStream.Definition
 ): DestinationNodeData => ({
+  streamName: definition.name,
   title: definition.name,
   hasProcessing: hasProcessing(definition),
 });
