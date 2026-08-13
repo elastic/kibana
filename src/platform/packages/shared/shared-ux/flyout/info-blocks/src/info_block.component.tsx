@@ -56,7 +56,15 @@ export const InfoBlock: FunctionComponent<InfoBlockProps> = ({
       </EuiText>
       <EuiText size="s" color={color} css={styles.value} style={valueStyle}>
         {/* Values are often identifiers, where both ends carry meaning. */}
-        {isTextValue ? <EuiTextTruncate text={String(value)} truncation="middle" /> : value}
+        {isTextValue ? (
+          <EuiTextTruncate
+            data-test-subj="infoBlockValue"
+            text={String(value)}
+            truncation="middle"
+          />
+        ) : (
+          value
+        )}
       </EuiText>
     </div>
   );

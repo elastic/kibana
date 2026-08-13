@@ -23,6 +23,12 @@ import { InfoBlocks } from '@kbn/flyout-info-blocks';
 - Plain text values truncate to a single line in the middle via `EuiTextTruncate`, so both ends stay readable. Node values (badges, links, images) manage their own layout.
 - Each `InfoBlockItem` accepts an optional `size` (EUI font-scale key, e.g. `'xl'`) to enlarge a single value, and an optional `color` (EUI text color token, e.g. `'danger'`) to tint it.
 
+## Test subjects
+
+- `infoBlocks` on the container, overridable with `data-test-subj`.
+- `infoBlock` on each block, overridable per item with `data-test-subj`.
+- `infoBlockValue` on a plain text value's truncation wrapper. Node values render as given, so they carry no subject of their own.
+
 ```tsx
 import { InfoBlocks } from '@kbn/flyout-info-blocks';
 
