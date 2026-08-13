@@ -438,10 +438,77 @@ export const getAgentDataHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
+  const { pkgName, pkgVersion, previewData: returnDataPreview, policyId } = request.query;
+
+  // Standalone agentless mode: check data streams directly from the agent policy, with no
+  // Fleet agent enrollment. The policy's namespace scopes the query to prevent cross-policy hits.
+  if (policyId) {
+    if (!pkgName || !pkgVersion) {
+      return response.badRequest({
+        body: 'pkgName and pkgVersion are required when policyId is provided',
+      });
+    }
+
+    const fleetContext = await context.fleet;
+    const [agentPolicy] = await agentPolicyService.getByIds(
+      fleetContext.internalSoClient,
+      [policyId],
+      { withPackagePolicies: true, ignoreMissing: true }
+    );
+
+    if (!agentPolicy) {
+      return response.notFound({ body: `Agent policy ${policyId} not found` });
+    }
+
+    const matchingPackagePolicies = (agentPolicy.package_policies ?? []).filter(
+      (pp) => pp.package?.name === pkgName && pp.package?.version === pkgVersion
+    );
+
+    if (matchingPackagePolicies.length !== 1) {
+      return response.ok({
+        body: { items: [{ [policyId]: { data: false } }], dataPreview: [] },
+      });
+    }
+
+    const namespace = matchingPackagePolicies[0].namespace || agentPolicy.namespace;
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: coreContext.savedObjects.client,
+      prerelease: true,
+      pkgName,
+      pkgVersion,
+    });
+
+    const dataStreams = packageInfo.data_streams || [];
+    const namespacedPattern = dataStreams
+      .map((ds) =>
+        generateNamespaceTemplateIndexPattern(ds, namespace, isOtelDataStream(ds, packageInfo))
+      )
+      .join(',');
+
+    if (!namespacedPattern) {
+      return response.ok({
+        body: { items: [{ [policyId]: { data: false } }], dataPreview: [] },
+      });
+    }
+
+    const result = await AgentService.getIncomingDataByDataStreams({
+      esClient,
+      // policyId is used as the map key in the response; the actual ES query is identity-free.
+      agentId: policyId,
+      dataStreamPattern: namespacedPattern,
+      returnDataPreview,
+    });
+
+    return response.ok({ body: result });
+  }
+
+  if (!request.query.agentsIds) {
+    return response.badRequest({ body: 'Either agentsIds or policyId must be provided' });
+  }
+
   const agentsIds = isStringArray(request.query.agentsIds)
     ? request.query.agentsIds
     : [request.query.agentsIds];
-  const { pkgName, pkgVersion, previewData: returnDataPreview } = request.query;
 
   // If a package is specified, get data stream patterns for that package
   // and scope incoming data query to that pattern

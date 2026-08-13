@@ -43,6 +43,13 @@ export async function syncAgentlessDeployments(
     return;
   }
 
+  if (appContextService.getExperimentalFeatures().enableAgentlessStandaloneConfig) {
+    logger.info(
+      `[Agentless Deployment Sync] enableAgentlessStandaloneConfig is on — sync disabled for POC (sync job cannot reconstruct standalone credentials from stored state).`
+    );
+    return;
+  }
+
   logger.info(`[Agentless Deployment Sync] Starting sync process`);
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 

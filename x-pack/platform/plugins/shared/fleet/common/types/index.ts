@@ -52,6 +52,9 @@ export interface FleetConfigType {
     managedBulk?: {
       enabled: boolean;
     };
+    standaloneConfig?: {
+      outputApiKeyServiceToken?: string;
+    };
   };
   iacProvisioner?: {
     enabled: boolean;

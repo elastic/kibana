@@ -31,6 +31,7 @@ import {
   useGetPackageInfoByKeyQuery,
   useFleetStatus,
 } from '../../hooks';
+import { ExperimentalFeaturesService } from '../../services';
 import { getDashboardsCount, buildDashboardsListLink } from '../../services';
 import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
@@ -68,8 +69,14 @@ export const AgentlessEnrollmentFlyout = ({
   const { notifications } = core;
   const { spaceId = DEFAULT_SPACE_ID } = useFleetStatus();
 
+  const { enableAgentlessStandaloneConfig } = ExperimentalFeaturesService.get();
+
   const [confirmEnrollmentStatus, setConfirmEnrollmentStatus] = useState<EuiStepStatus>('loading');
-  const [confirmDataStatus, setConfirmDataStatus] = useState<EuiStepStatus>('disabled');
+  // In standalone mode the agent is not enrolled in Fleet, so skip step 1 and start polling
+  // for incoming data immediately.
+  const [confirmDataStatus, setConfirmDataStatus] = useState<EuiStepStatus>(
+    enableAgentlessStandaloneConfig ? 'loading' : 'disabled'
+  );
   const [viewDashboardsStatus, setViewDashboardsStatus] = useState<EuiStepStatus>('disabled');
   const [agentOnline, setAgentOnline] = useState(false);
 
@@ -101,7 +108,10 @@ export const AgentlessEnrollmentFlyout = ({
   // Derive step statuses from agent status; stop polling once the agent is online.
   // Once online, ignore subsequent poll results so transient errors or refetchOnWindowFocus
   // can't reset completed steps back to loading.
+  // Skipped in standalone mode: the agent never enrolls in Fleet so agentData stays undefined and
+  // would otherwise keep resetting confirmDataStatus to 'disabled'.
   useEffect(() => {
+    if (enableAgentlessStandaloneConfig) return;
     if (agentOnline) return;
     if (agentData) {
       if (agentData.status === 'online') {
@@ -119,7 +129,7 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentOnline, agentData]);
+  }, [enableAgentlessStandaloneConfig, agentOnline, agentData]);
 
   // Activate the "View dashboards" step as soon as data is confirmed
   useEffect(() => {
@@ -185,22 +195,28 @@ export const AgentlessEnrollmentFlyout = ({
       <EuiFlyoutBody>
         <EuiSteps
           steps={[
-            {
-              title: i18n.translate(
-                'xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle',
-                {
-                  defaultMessage: 'Confirm managed integration enrollment',
-                }
-              ),
-              children: (
-                <AgentlessStepConfirmEnrollment
-                  agent={agentData}
-                  agentPolicy={agentPolicy}
-                  integrationTitle={integrationTitle}
-                />
-              ),
-              status: confirmEnrollmentStatus,
-            },
+            // Step 1 is skipped in standalone mode: the agent is not enrolled in Fleet so it will
+            // never appear as "online" in the agents list and would block the flyout indefinitely.
+            ...(!enableAgentlessStandaloneConfig
+              ? [
+                  {
+                    title: i18n.translate(
+                      'xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle',
+                      {
+                        defaultMessage: 'Confirm managed integration enrollment',
+                      }
+                    ),
+                    children: (
+                      <AgentlessStepConfirmEnrollment
+                        agent={agentData}
+                        agentPolicy={agentPolicy}
+                        integrationTitle={integrationTitle}
+                      />
+                    ),
+                    status: confirmEnrollmentStatus,
+                  },
+                ]
+              : []),
             {
               title: isConnector
                 ? i18n.translate(
@@ -213,7 +229,8 @@ export const AgentlessEnrollmentFlyout = ({
                     defaultMessage: 'Confirm incoming data',
                   }),
               children:
-                agentData && confirmEnrollmentStatus === 'complete' ? (
+                enableAgentlessStandaloneConfig ||
+                (agentData && confirmEnrollmentStatus === 'complete') ? (
                   isConnector ? (
                     <AgentlessStepConfigureConnector
                       connectors={connectors}
@@ -224,7 +241,8 @@ export const AgentlessEnrollmentFlyout = ({
                     />
                   ) : (
                     <AgentlessStepConfirmData
-                      agent={agentData}
+                      agent={enableAgentlessStandaloneConfig ? undefined : agentData}
+                      policyId={enableAgentlessStandaloneConfig ? policyId : undefined}
                       packageName={packageInfo.name}
                       packageVersion={packageInfo.version}
                       policyTemplates={packageInfoData?.item?.policy_templates}

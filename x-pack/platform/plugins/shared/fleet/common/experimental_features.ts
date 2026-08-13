@@ -36,6 +36,7 @@ const _allowedExperimentalValues = {
   enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
   enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
   enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
+  enableAgentlessStandaloneConfig: true, // POC. When enabled, agentless deployments get an assembled standalone config (credentials as env var placeholders) instead of a fleet-server URL and enrollment token.
 };
 
 /**

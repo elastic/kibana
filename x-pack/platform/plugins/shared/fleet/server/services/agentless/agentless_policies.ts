@@ -65,6 +65,7 @@ import {
 } from '../../../common/services/agentless_policy_helper';
 import { agentlessAgentService } from '../agents/agentless_agent';
 import { createAndIntegrateCloudConnector } from '../cloud_connectors';
+import { collectSecretValuesById, buildStandaloneAgentlessConfig } from './standalone_config';
 
 import { prefixKueryFieldsWithSavedObjectType } from './kuery_utils';
 
@@ -362,9 +363,56 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       );
 
       this.logger.debug(`Deploy agentless policy ${agentPolicyId}`);
-      await agentPolicyService.deployPolicy(this.soClient, agentPolicyId, undefined, {
-        throwOnAgentlessError: true,
-      });
+
+      const { enableAgentlessStandaloneConfig } = appContextService.getExperimentalFeatures();
+
+      if (enableAgentlessStandaloneConfig) {
+        this.logger.debug(
+          `[Agentless Standalone] Assembling standalone config for policy ${agentPolicyId}`
+        );
+        const secretValuesById = collectSecretValuesById({
+          plaintextPackagePolicy: newPackagePolicy,
+          storedPackagePolicy: packagePolicy,
+          packageInfo: pkgInfo,
+        });
+
+        const standaloneAgentPolicy = await agentPolicyService.getFullAgentPolicy(
+          this.soClient,
+          agentPolicyId,
+          { standalone: true }
+        );
+
+        if (!standaloneAgentPolicy) {
+          throw new Error(`Could not retrieve full agent policy for ${agentPolicyId}`);
+        }
+
+        const outputApiKeyServiceToken =
+          appContextService.getConfig()?.agentless?.standaloneConfig?.outputApiKeyServiceToken;
+        if (!outputApiKeyServiceToken) {
+          this.logger.warn(
+            `[Agentless Standalone] No agentless.standaloneConfig.outputApiKeyServiceToken configured — the output API key will be minted as Kibana's own service account, which cannot write agent data streams or agentless-* state indices; the agent will get 403s`
+          );
+        }
+
+        const standaloneConfig = await buildStandaloneAgentlessConfig({
+          esClient: this.esClient,
+          policyId: agentPolicyId,
+          standaloneAgentPolicy,
+          secretValuesById,
+          outputApiKeyServiceToken,
+        });
+
+        await agentlessAgentService.createAgentlessAgent(
+          this.esClient,
+          this.soClient,
+          agentPolicy,
+          standaloneConfig
+        );
+      } else {
+        await agentPolicyService.deployPolicy(this.soClient, agentPolicyId, undefined, {
+          throwOnAgentlessError: true,
+        });
+      }
 
       return packagePolicyToAgentlessPolicy(packagePolicy);
     } catch (err) {

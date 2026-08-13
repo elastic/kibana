@@ -79,17 +79,20 @@ export const POLLING_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 
 /**
  * Hook for polling incoming data for the selected agent(s).
- * @param agentIds
- * @returns incomingData, isLoading
+ * Pass either `agentIds` (enrolled Fleet agents) or `policyId` (standalone agentless — no Fleet
+ * agent record exists). When `policyId` is used the server resolves data streams from the policy
+ * and queries ES without an agent identity filter.
  */
 export const usePollingIncomingData = ({
   agentIds,
+  policyId,
   pkgName,
   pkgVersion,
   previewData,
   stopPollingAfterPreviewLength = 0,
 }: {
-  agentIds: string[];
+  agentIds?: string[];
+  policyId?: string;
   pkgName?: string;
   pkgVersion?: string;
   previewData?: boolean;
@@ -125,12 +128,11 @@ export const usePollingIncomingData = ({
           setHasReachedTimeout(true);
         }
 
-        const { data } = await sendGetAgentIncomingData({
-          agentsIds: agentIds,
-          previewData,
-          pkgName,
-          pkgVersion,
-        });
+        const { data } = await sendGetAgentIncomingData(
+          policyId
+            ? { policyId, pkgName, pkgVersion, previewData }
+            : { agentsIds: agentIds ?? [], pkgName, pkgVersion, previewData }
+        );
         if (data?.items) {
           // filter out  agents that have `data = false` and keep polling
           const filtered = data?.items.filter((item) => {
@@ -168,6 +170,7 @@ export const usePollingIncomingData = ({
     };
   }, [
     agentIds,
+    policyId,
     result,
     previewData,
     stopPollingAfterPreviewLength,

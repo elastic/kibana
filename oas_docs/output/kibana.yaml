@@ -29157,12 +29157,18 @@ paths:
         - description: Agent IDs to check data for, as an array or comma-separated string
           in: query
           name: agentsIds
-          required: true
+          required: false
           schema:
             items:
               type: string
             maxItems: 10000
             type: array
+        - description: Agent policy ID. When provided, checks data streams for the policy without needing agent IDs (standalone agentless mode). Requires pkgName and pkgVersion.
+          in: query
+          name: policyId
+          required: false
+          schema:
+            type: string
         - description: Filter by integration package name
           in: query
           name: pkgName

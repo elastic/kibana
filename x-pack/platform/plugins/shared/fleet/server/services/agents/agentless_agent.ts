@@ -24,6 +24,7 @@ import {
   AgentlessAgentCreateOverProvisionedError,
   AgentlessAgentCreateFleetUnreachableError,
 } from '../../../common/errors';
+import type { StandaloneAgentlessConfig } from '../agentless/standalone_config';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy, FullAgentPolicy } from '../../types';
 import type {
@@ -90,7 +91,8 @@ export interface AgentlessAgentService {
   createAgentlessAgent(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    agentlessAgentPolicy: AgentPolicy
+    agentlessAgentPolicy: AgentPolicy,
+    standaloneConfig?: StandaloneAgentlessConfig
   ): Promise<AxiosResponse<AgentlessApiDeploymentResponse> | void>;
   deleteAgentlessAgent(agentlessPolicyId: string): Promise<AxiosResponse | void>;
 }
@@ -138,7 +140,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   public async createAgentlessAgent(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    agentlessAgentPolicy: AgentPolicy
+    agentlessAgentPolicy: AgentPolicy,
+    standaloneConfig?: StandaloneAgentlessConfig
   ) {
     const traceId = apm.currentTransaction?.traceparent;
     const errorMetadata: LogMeta = {
@@ -171,14 +174,24 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       );
     }
 
-    const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
-      esClient,
-      agentlessAgentPolicy
-    );
+    let fleetUrl: string | undefined;
+    let fleetToken: string | undefined;
 
-    logger.debug(
-      `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
-    );
+    if (standaloneConfig) {
+      logger.debug(
+        `[Agentless API] Creating agentless agent in standalone config mode for policy ${agentlessAgentPolicy.id} (no fleet-server enrollment)`
+      );
+    } else {
+      const result = await this.getFleetUrlAndTokenForAgentlessAgent(
+        esClient,
+        agentlessAgentPolicy
+      );
+      fleetUrl = result.fleetUrl;
+      fleetToken = result.fleetToken;
+      logger.debug(
+        `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
+      );
+    }
 
     if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
       logger.debug(
@@ -195,25 +208,33 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
     const secrets = this.getAgentlessSecrets();
-    const fullPolicy = await agentPolicyService.getFullAgentPolicy(
-      soClient,
-      agentlessAgentPolicy.id
-    );
+    const fullPolicy = standaloneConfig
+      ? standaloneConfig.config
+      : await agentPolicyService.getFullAgentPolicy(soClient, agentlessAgentPolicy.id);
     const policyDetails = await this.getPolicyDetails(soClient, fullPolicy);
+
+    const requestData: Record<string, unknown> = {
+      policy_id: agentlessAgentPolicy.id,
+      resources: agentlessAgentPolicy.agentless?.resources,
+      cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
+      labels,
+      secrets,
+      policy_details: policyDetails,
+      agent_policy: fullPolicy,
+    };
+
+    if (standaloneConfig) {
+      requestData.config_mode = 'standalone';
+      // integration_secrets must be redacted wherever the payload is logged — see createRequestConfigDebug.
+      requestData.integration_secrets = standaloneConfig.integrationSecrets;
+    } else {
+      requestData.fleet_url = fleetUrl;
+      requestData.fleet_token = fleetToken;
+    }
 
     const requestConfig: AxiosRequestConfig = {
       url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
-      data: {
-        policy_id: agentlessAgentPolicy.id,
-        fleet_url: fleetUrl,
-        fleet_token: fleetToken,
-        resources: agentlessAgentPolicy.agentless?.resources,
-        cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
-        labels,
-        secrets,
-        policy_details: policyDetails,
-        agent_policy: fullPolicy,
-      },
+      data: requestData,
       method: 'POST',
       ...this.getHeaders(tlsConfig, traceId),
     };
@@ -556,6 +577,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           requestConfig.data,
           'policy_id',
           'fleet_url',
+          'config_mode',
           'labels',
           'resources',
           'cloud_connectors',
@@ -563,6 +585,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         ),
         agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
+        integration_secrets: requestConfig.data.integration_secrets ? '[REDACTED]' : undefined,
       },
       httpsAgent: {
         ...requestConfig.httpsAgent,
