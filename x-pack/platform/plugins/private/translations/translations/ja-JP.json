@@ -12432,8 +12432,6 @@
     "xpack.agentBuilder.uiSettings.tracing.toolDetails.name": "トレースにツール呼び出しの詳細を含める",
     "xpack.agentBuilder.uiSettings.tracing.userPrompts.description": "ユーザーのメッセージはデフォルトでキャプチャされません。",
     "xpack.agentBuilder.uiSettings.tracing.userPrompts.name": "トレースにユーザープロンプトを含める",
-    "xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.description": "UIAM OAuthクライアント管理エンドポイントおよびAgent Builder MCP Clients UIの内部ゲートです。エンドユーザー向けではありません。",
-    "xpack.agentBuilder.uiSettings.uiamOAuthClientManagement.name": "UIAM OAuth クライアント管理",
     "xpack.agentBuilder.visualization.dashboardWriteControlsDisabledReason": "可視化を編集したり、それらをダッシュボードに保存したりするには、ダッシュボードの書き込み権限が必要です。",
     "xpack.agentBuilder.visualization.label": "可視化",
     "xpack.agentBuilder.visualization.lens.errorTitle": "可視化を表示できません",

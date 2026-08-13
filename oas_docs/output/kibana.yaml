@@ -58980,14 +58980,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -59526,14 +59525,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -60102,14 +60100,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -60650,14 +60647,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -61371,14 +61367,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -61917,14 +61912,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -62493,14 +62487,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -63041,14 +63034,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -63762,14 +63754,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -64308,14 +64299,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -64884,14 +64874,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -65432,14 +65421,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -68582,8 +68570,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -68709,8 +68697,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were disabled successfully.
@@ -68749,8 +68737,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were enabled successfully.
@@ -68789,8 +68777,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were resynced successfully.
@@ -68835,8 +68823,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: The stream was deleted successfully.
@@ -68873,8 +68861,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -69145,8 +69133,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -69450,8 +69438,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Query settings for the stream.
@@ -69668,8 +69656,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -69859,8 +69847,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: The query was removed successfully.
@@ -70027,8 +70015,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -70129,8 +70117,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -70311,8 +70299,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -70380,8 +70368,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -87554,13 +87542,12 @@ components:
           default: on_automatic
           description: The random sampler mode.
         random_sampler_probability:
-          anyOf:
-            - maximum: 0.5
-              minimum: 0.00001
-              type: number
-            - nullable: true
           default: null
           description: The probability to use for random sampling (between 0.00001 and 0.5).
+          maximum: 0.5
+          minimum: 0.00001
+          nullable: true
+          type: number
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -89197,20 +89184,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -89284,20 +89268,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -99342,20 +99323,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -99398,20 +99376,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -107829,15 +107804,15 @@ components:
               - type: string
               - type: number
               - type: boolean
-              - nullable: true
               - {}
+            nullable: true
           - items:
               anyOf:
                 - type: string
                 - type: number
                 - type: boolean
-                - nullable: true
                 - {}
+              nullable: true
             type: array
           - items: {}
             type: array
