@@ -210,7 +210,7 @@ export function DashboardRenderer({
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
-          if (dashboard && dashboard.internalApi.dashboardContainerRef$.value !== e) {
+          if (dashboard.internalApi.dashboardContainerRef$.value !== e) {
             dashboard.internalApi.setDashboardContainerRef(e);
           }
           dashboardContainerRef.current = e;
