@@ -74,7 +74,10 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
     });
   });
 
-  test('creates a rule and displays it in the rules list', async ({ page }) => {
+  test('creates a rule, redirects to details, and shows it in the list', async ({
+    page,
+    kbnClient,
+  }) => {
     const ruleName = `scout-create-flow-${Date.now()}`;
     createdRuleNames.push(ruleName);
 
@@ -88,42 +91,28 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
         if (!e.message.includes('Timeout')) throw e;
       });
 
-    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
-      `Created rule "${ruleName}"`
-    );
+    await test.step('shows a created-rule toast', async () => {
+      await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+        `Created rule "${ruleName}"`
+      );
+    });
 
-    await page.gotoApp('rules');
-    await expect(page.testSubj.locator('rulesList')).toBeVisible();
-    await page.testSubj.locator('ruleSearchField').fill(ruleName);
-    await expect(
-      page.testSubj
-        .locator('rulesList')
-        .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`)
-    ).toBeVisible();
-  });
+    await test.step('redirects to the rule details page', async () => {
+      await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible({ timeout: 15000 });
+      const ruleId = await findRuleIdByName(kbnClient, ruleName);
+      expect(ruleId).toBeDefined();
+      expect(page.url()).toContain(`/rule/${ruleId}`);
+    });
 
-  test('redirects to the rule details page after saving a new rule', async ({
-    page,
-    kbnClient,
-  }) => {
-    const ruleName = `scout-create-flow-redirect-${Date.now()}`;
-    createdRuleNames.push(ruleName);
-
-    await defineIndexThresholdRule(page, ruleName);
-    await page.testSubj.click('rulePageFooterSaveButton');
-
-    await page.testSubj
-      .locator('confirmModalConfirmButton')
-      .click({ timeout: 3000 })
-      .catch((e: Error) => {
-        if (!e.message.includes('Timeout')) throw e;
-      });
-
-    // After save Kibana redirects to the rule details page automatically.
-    await expect(page.testSubj.locator('appHeaderTitle')).toBeVisible({ timeout: 15000 });
-
-    const ruleId = await findRuleIdByName(kbnClient, ruleName);
-    expect(ruleId).toBeDefined();
-    expect(page.url()).toContain(`/rule/${ruleId}`);
+    await test.step('displays the rule in the rules list', async () => {
+      await page.gotoApp('rules');
+      await expect(page.testSubj.locator('rulesList')).toBeVisible();
+      await page.testSubj.locator('ruleSearchField').fill(ruleName);
+      await expect(
+        page.testSubj
+          .locator('rulesList')
+          .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`)
+      ).toBeVisible();
+    });
   });
 });

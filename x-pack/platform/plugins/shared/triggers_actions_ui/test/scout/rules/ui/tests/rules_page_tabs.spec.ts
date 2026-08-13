@@ -26,52 +26,40 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
     createdRuleId = response.data.id;
   });
 
-  test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('rules');
-    await page.waitForURL(RULES_URL_RE);
-  });
-
   test.afterAll(async ({ apiServices }) => {
     if (createdRuleId) {
       await apiServices.alerting.rules.delete(createdRuleId);
     }
   });
 
-  test('selects the Rules tab by default on load', async ({ page }) => {
-    expect(page.url()).toMatch(RULES_URL_RE);
-    expect(page.url()).not.toMatch(LOGS_URL_RE);
-    await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-  });
+  test('navigate to the Rules and Logs tabs', async ({ page, browserAuth }) => {
+    await test.step('navigates to the Rules page', async () => {
+      await browserAuth.loginAsAdmin();
+      await page.gotoApp('rules');
+      await page.waitForURL(RULES_URL_RE);
+    });
 
-  test('shows the Logs tab when the user has permission', async ({ page }) => {
-    await expect(page.testSubj.locator(LOGS_TAB_SUBJ)).toBeVisible();
-  });
+    await test.step('selects the Rules tab by default on load', async () => {
+      expect(page.url()).toMatch(RULES_URL_RE);
+      expect(page.url()).not.toMatch(LOGS_URL_RE);
+      await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
+    });
 
-  test('navigates to rules logs tab when clicking the Logs tab', async ({ page }) => {
-    await page.testSubj.click(LOGS_TAB_SUBJ);
-    await page.waitForURL(LOGS_URL_RE);
-    expect(page.url()).toMatch(LOGS_URL_RE);
-  });
+    await test.step('shows the Logs tab when the user has permission', async () => {
+      await expect(page.testSubj.locator(LOGS_TAB_SUBJ)).toBeVisible();
+    });
 
-  test('navigates back to rules list when clicking the Rules tab', async ({ page }) => {
-    await page.testSubj.click(LOGS_TAB_SUBJ);
-    await page.waitForURL(LOGS_URL_RE);
+    await test.step('navigates to the logs tab', async () => {
+      await page.testSubj.click(LOGS_TAB_SUBJ);
+      await page.waitForURL(LOGS_URL_RE);
+      expect(page.url()).toMatch(LOGS_URL_RE);
+    });
 
-    await page.testSubj.click(RULES_TAB_SUBJ);
-    await page.waitForURL(RULES_URL_RE);
-    expect(page.url()).not.toMatch(LOGS_URL_RE);
-    await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-  });
-
-  test('updates the URL correctly when switching back and forth between tabs', async ({ page }) => {
-    await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-
-    await page.testSubj.click(LOGS_TAB_SUBJ);
-    await page.waitForURL(LOGS_URL_RE);
-
-    await page.testSubj.click(RULES_TAB_SUBJ);
-    await page.waitForURL(RULES_URL_RE);
-    expect(page.url()).not.toMatch(LOGS_URL_RE);
+    await test.step('navigates back to the rules list', async () => {
+      await page.testSubj.click(RULES_TAB_SUBJ);
+      await page.waitForURL(RULES_URL_RE);
+      expect(page.url()).not.toMatch(LOGS_URL_RE);
+      await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
+    });
   });
 });

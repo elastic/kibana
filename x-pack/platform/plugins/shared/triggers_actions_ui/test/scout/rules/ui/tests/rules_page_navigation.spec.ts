@@ -21,27 +21,29 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
     createdRuleId = response.data.id;
   });
 
-  test.beforeEach(async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('rules');
-    await page.waitForURL(/\/app\/management\/insightsAndAlerting\/triggersActions/);
-  });
-
   test.afterAll(async ({ apiServices }) => {
     if (createdRuleId) {
       await apiServices.alerting.rules.delete(createdRuleId);
     }
   });
 
-  test('redirects to Stack Management rules page', async ({ page }) => {
-    expect(page.url()).toContain('/app/management/insightsAndAlerting/triggersActions');
-  });
+  test('loads the Stack Management rules page', async ({ page, browserAuth }) => {
+    await test.step('navigates to Rules page', async () => {
+      await browserAuth.loginAsAdmin();
+      await page.gotoApp('rules');
+      await page.waitForURL(/\/app\/management\/insightsAndAlerting\/triggersActions/);
+    });
 
-  test('loads with the correct page title', async ({ page }) => {
-    await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Rules');
-  });
+    await test.step('redirects to Stack Management rules page', async () => {
+      expect(page.url()).toContain('/app/management/insightsAndAlerting/triggersActions');
+    });
 
-  test('displays the rules list', async ({ page }) => {
-    await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
+    await test.step('loads with the correct page title', async () => {
+      await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Rules');
+    });
+
+    await test.step('displays the rules list', async () => {
+      await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
+    });
   });
 });
