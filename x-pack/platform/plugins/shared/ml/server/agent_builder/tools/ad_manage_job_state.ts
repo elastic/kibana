@@ -55,7 +55,7 @@ export const createAdManageJobStateTool = (
   annotations: {
     title: 'Manage Anomaly Detection Job State',
     readOnlyHint: false,
-    destructiveHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     openWorldHint: false,
   },
