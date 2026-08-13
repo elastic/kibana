@@ -453,6 +453,38 @@ describe('ConversationClient', () => {
         })
       ).rejects.toBe(error);
     });
+
+    it('serializes caller-supplied TOGGLE and NUMBER metadata to strings before indexing', async () => {
+      // Regression for: caller passes boolean/number, raw value lands in ES, and
+      // deserializeMetadataValue('true' === <boolean>) → wrong type on read-back.
+      const template: ConversationTemplate = {
+        id: 'tmpl-serialize',
+        version: 1,
+        name: 'Serialize test template',
+        description: '',
+        fields: {
+          flag: { input_type: 'TOGGLE', label: 'Flag', required: false },
+          count: { input_type: 'NUMBER', label: 'Count', required: false },
+        },
+      };
+      getTemplateMock.mockReturnValue(template);
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        template_id: 'tmpl-serialize',
+        metadata: { flag: true, count: 42 },
+      });
+
+      const { document: indexedDoc } = mockEsClient.index.mock.calls[0][0] as {
+        document: Record<string, unknown>;
+      };
+      // Values must be stored as strings so the flattened field stays string-only.
+      expect((indexedDoc.metadata as Record<string, unknown>).flag).toBe('true');
+      expect((indexedDoc.metadata as Record<string, unknown>).count).toBe('42');
+    });
   });
 
   describe('getByOrigin', () => {

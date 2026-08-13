@@ -271,7 +271,22 @@ class ConversationClientImpl implements ConversationClient {
         validateMetadataUpdate(template.id, template.fields, resolvedMetadata);
       }
       const templateMetadata = buildMetadataFromTemplate(template);
-      resolvedMetadata = { ...templateMetadata, ...(resolvedMetadata ?? {}) };
+      // Serialize caller-supplied values to string/string[] before merging, just as
+      // buildMetadataFromTemplate and patchMetadata do. Without this, a caller passing
+      // e.g. { recipients_notified: true } (TOGGLE) writes a raw boolean into the
+      // flattened field; deserializeMetadataValue then reads `true === 'true'` → false.
+      const serializedCallerMetadata = Object.fromEntries(
+        Object.entries(resolvedMetadata ?? {}).map(([key, value]) => {
+          const def = template.fields[key];
+          return [
+            key,
+            def
+              ? serializeMetadataValue(value as string | string[] | number | boolean, def.input_type)
+              : value,
+          ];
+        })
+      );
+      resolvedMetadata = { ...templateMetadata, ...serializedCallerMetadata };
       resolvedTemplateId = templateId;
       resolvedTemplateVersion = template.version;
     }
