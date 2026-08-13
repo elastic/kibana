@@ -128,7 +128,7 @@ export type MemoryStorageSettings = typeof memoryStorageSettings;
 export type MemoryType = 'episodic' | 'semantic' | 'procedural';
 export type MemoryCategory = 'profile' | 'preferences' | 'entities' | 'events' | 'trajectories';
 export type AuthorKind = 'profile_uid' | 'username';
-export type CallSource = 'mcp' | '1p' | 'workflow' | 'task';
+export type CallSource = 'agent' | 'user' | 'mcp' | 'unknown';
 export type MemoryScopeKind = 'user' | 'agent' | 'space';
 
 export interface MemoryDocument {

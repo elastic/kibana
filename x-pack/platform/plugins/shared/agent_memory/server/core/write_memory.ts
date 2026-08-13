@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataStreamClient } from '@kbn/data-streams';
-import type { MemoryCategory, MemoryType } from '../storage/memory_storage';
+import type { CallSource, MemoryCategory, MemoryType } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
 import type { MemoryHistoryRecord, agentMemoryHistoryMappings } from '../storage/history_stream';
 import type { ResolvedIdentity } from './resolve_identity';
@@ -26,7 +26,7 @@ export interface WriteMemoryParams {
   expires_at?: string;
   origin?: string;
   assurance?: string;
-  call_source?: string;
+  call_source?: CallSource;
   conversation_ids?: string[];
   trace_ids?: string[];
   space_id: string;
@@ -62,6 +62,10 @@ const contentHash = (description: string): string =>
  *
  * `search_embedding` carries `title + "\n\n" + description` so that the
  * semantic recall leg covers both the concise label and the full content.
+ *
+ * If a tombstoned doc is found (same content_hash + author + space), it is
+ * resurrected rather than duplicated — re-remembering forgotten content should
+ * restore the memory, not create a second copy.
  */
 export const writeMemory = async ({
   storage,
@@ -94,7 +98,8 @@ export const writeMemory = async ({
   const now = new Date().toISOString();
 
   // ── Find-or-create on content_hash + author + space ───────────────────────
-  // We search for an existing doc to allow in-place supersession (revision++).
+  // Search without the `deleted` filter so that re-remembering a tombstoned
+  // doc resurrects it in place instead of creating a duplicate (C13).
   const existing = await client.search({
     size: 1,
     track_total_hits: false,
@@ -104,7 +109,6 @@ export const writeMemory = async ({
           { term: { 'memory.content_hash': hash } },
           { term: { 'memory.provenance.author': identity.author } },
           { term: { space_id } },
-          { term: { deleted: false } },
         ],
       },
     },
@@ -118,15 +122,19 @@ export const writeMemory = async ({
     const prev = existingHit._source as MemoryDocument;
     const nextRevision = (prev.memory.revision ?? 0) + 1;
 
+    // Strip prior_document from the nested snapshot to prevent O(2^N)
+    // _source growth — each revision must contain only one level of history.
+    const { prior_document: _dropped, ...prevMemory } = prev.memory;
     const updated: MemoryDocument = {
       ...prev,
+      deleted: false,
       title,
       description,
       tags: tags ?? prev.tags,
       expires_at: expires_at ?? prev.expires_at,
       search_embedding: `${title}\n\n${description}`,
       memory: {
-        ...prev.memory,
+        ...prevMemory,
         type: type ?? prev.memory.type,
         category: category ?? prev.memory.category,
         entities: entities ?? prev.memory.entities,
@@ -136,16 +144,24 @@ export const writeMemory = async ({
         content_hash: hash,
         provenance: {
           ...prev.memory.provenance,
-          call_source: (call_source as MemoryDocument['memory']['provenance']['call_source']) ?? prev.memory.provenance.call_source,
+          call_source: call_source ?? prev.memory.provenance.call_source,
           conversation_ids: conversation_ids ?? prev.memory.provenance.conversation_ids,
           trace_ids: trace_ids ?? prev.memory.provenance.trace_ids,
         },
-        // Capture the previous revision body for D11 diff chain.
-        prior_document: { ...prev },
+        // One level of history — prev.memory no longer contains prior_document.
+        prior_document: prev,
       },
     };
 
-    await client.index({ id: existingHit._id, document: updated });
+    // OCC guard: reject if a concurrent write landed between our search and
+    // this index. Let the error propagate; the tool can surface it.
+    await client.index({
+      id: existingHit._id,
+      document: updated,
+      ...(existingHit._seq_no !== undefined && existingHit._primary_term !== undefined
+        ? { if_seq_no: existingHit._seq_no, if_primary_term: existingHit._primary_term }
+        : {}),
+    });
 
     await writeHistoryRecord(historyClient, {
       memory_id: existingHit._id!,
@@ -184,7 +200,7 @@ export const writeMemory = async ({
       provenance: {
         author: identity.author,
         author_kind: identity.author_kind,
-        call_source: call_source as MemoryDocument['memory']['provenance']['call_source'],
+        call_source,
         conversation_ids,
         trace_ids,
       },

@@ -53,8 +53,9 @@ const rememberSchema = z.object({
     .describe('Entity ids (people, assets, systems) this memory is about.'),
   expires_at: z
     .string()
+    .datetime()
     .optional()
-    .describe('ISO-8601 timestamp after which this memory should no longer be recalled.'),
+    .describe('ISO-8601 datetime after which this memory should no longer be recalled.'),
 });
 
 /**

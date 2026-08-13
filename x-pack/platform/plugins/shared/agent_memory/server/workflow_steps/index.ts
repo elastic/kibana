@@ -120,7 +120,7 @@ export const registerMemoryWorkflowSteps = (
         const { query, category, limit } = context.input;
         const security = getSecurityStart();
         const request = context.contextManager.getFakeRequest();
-        const spaceId = context.contextManager.getContext().spaceId;
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
 
         // ── Authz gate ──────────────────────────────────────────────────────
         const { hasAllRequested } = await security.authz
@@ -166,7 +166,7 @@ export const registerMemoryWorkflowSteps = (
           const { title, description, category, type, tags } = context.input;
           const security = getSecurityStart();
           const request = context.contextManager.getFakeRequest();
-          const spaceId = context.contextManager.getContext().spaceId;
+          const spaceId = context.contextManager.getContext().workflow.spaceId;
 
           // ── Authz gate ────────────────────────────────────────────────────
           const { hasAllRequested } = await security.authz
