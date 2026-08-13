@@ -126,7 +126,7 @@ describe('searchEventsToolHandler', () => {
     const result = await searchEventsToolHandler({
       eventClient: eventClient as never,
       params: {
-        rule_uuids: ['rule-uuid-1', 'rule-uuid-rejected'],
+        status: 'open',
         exclude_unconfirmed_signals: true,
         view: 'compact',
       },
@@ -134,9 +134,86 @@ describe('searchEventsToolHandler', () => {
 
     expect(result.events[0].signals).toEqual([
       expect.objectContaining({
-        rule_uuid: 'rule-uuid-1',
+        collected_at: '2026-07-20T08:00:00.000Z',
         confirmed: true,
+        description: 'Payment call failed',
+        esql_query: 'FROM logs.checkout',
+        rule_name: 'Payment failures',
+        rule_uuid: 'rule-uuid-1',
+        stream_name: 'logs.checkout',
       }),
+    ]);
+  });
+
+  it('preserves an event when its only requested rule match is unconfirmed', async () => {
+    // Keep the requested rule identity visible so discovery can reconcile an existing
+    // open episode to closed after a current recovery check. Other unconfirmed signals
+    // remain excluded.
+    const eventWithOnlyUnconfirmedMatch = {
+      ...event,
+      signals: [
+        {
+          stream_name: 'logs.checkout',
+          confirmed: false,
+          description: 'Unconfirmed signal',
+          collected_at: '2026-07-20T08:00:00.000Z',
+          metadata: { rule_uuid: 'unconfirmed-rule-uuid', rule_name: 'Unconfirmed rule' },
+          evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
+        },
+      ],
+    };
+    const eventClient = makeClient([eventWithOnlyUnconfirmedMatch]);
+
+    const result = await searchEventsToolHandler({
+      eventClient: eventClient as never,
+      params: {
+        rule_uuids: ['unconfirmed-rule-uuid'],
+        exclude_unconfirmed_signals: true,
+      },
+    });
+
+    expect(result.events).toHaveLength(1);
+    expect(result.returned).toBe(1);
+    expect(result.events[0].signals).toEqual([
+      expect.objectContaining({
+        rule_uuid: 'unconfirmed-rule-uuid',
+        confirmed: false,
+      }),
+    ]);
+  });
+
+  it('preserves a requested unconfirmed rule alongside confirmed event signals', async () => {
+    const eventWithMixedSignals = {
+      ...event,
+      signals: [
+        ...event.signals,
+        {
+          stream_name: 'logs.checkout',
+          confirmed: false,
+          description: 'Unconfirmed recovery signal',
+          collected_at: '2026-07-20T08:00:00.000Z',
+          metadata: {
+            rule_uuid: 'unconfirmed-rule-uuid',
+            rule_name: 'Unconfirmed rule',
+          },
+          evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
+        },
+      ],
+    };
+    const eventClient = makeClient([eventWithMixedSignals]);
+
+    const result = await searchEventsToolHandler({
+      eventClient: eventClient as never,
+      params: {
+        rule_uuids: ['unconfirmed-rule-uuid'],
+        exclude_unconfirmed_signals: true,
+      },
+    });
+
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0].signals).toEqual([
+      expect.objectContaining({ rule_uuid: 'rule-uuid-1', confirmed: true }),
+      expect.objectContaining({ rule_uuid: 'unconfirmed-rule-uuid', confirmed: false }),
     ]);
   });
 

@@ -68,7 +68,7 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
       button={
         <EuiToolTip content={i18n.ROW_DETAILS_ARIA} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             color="text"
             aria-label={i18n.ROW_DETAILS_ARIA}
             onClick={(event: React.MouseEvent) => {
@@ -364,7 +364,12 @@ export const ExperimentsListPage: React.FC = () => {
               content={canCompare ? undefined : i18n.COMPARE_SELECTION_HINT}
               position="top"
             >
-              <EuiButton iconType="diff" onClick={handleCompare} isDisabled={!canCompare} size="m">
+              <EuiButton
+                iconType="compare"
+                onClick={handleCompare}
+                isDisabled={!canCompare}
+                size="m"
+              >
                 {i18n.COMPARE_SELECTED_BUTTON}
               </EuiButton>
             </EuiToolTip>
@@ -373,7 +378,7 @@ export const ExperimentsListPage: React.FC = () => {
         {savedWorkflowsHref && (
           <EuiFlexItem grow={false}>
             <EuiButton
-              iconType="popout"
+              iconType="external"
               size="m"
               href={savedWorkflowsHref}
               data-test-subj="evalsViewExperimentWorkflowsButton"
@@ -385,7 +390,7 @@ export const ExperimentsListPage: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="m"
             onClick={() => setIsNewExperimentOpen(true)}
             data-test-subj="evalsNewExperimentButton"

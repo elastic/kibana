@@ -83,7 +83,7 @@ Call budget: up to four calls per batch — query search, feature search, one op
 For each detection:
    - Match with query KIs: `rule.id` equals `rule_uuid` **exactly** . Scan the **entire** query KI list.
    - Record `"<rule_uuid>: <query.id>"` (match) or `"<rule_uuid>: NO_MATCH"` (no match)
- 
+
 For each match retain **correlation context**:
 - **For `kind: "query"`**: `description` and `evidence[]` define the expected incident mechanism, `features[]` references identify feature KIs.
 - **For `kind: "feature"`**: `properties` are stable identity and topology facts. `evidence[]` supports hypotheses. `meta` contains diagnostic hints, not current-state proof. `title`, `subtype`, and `tags[]` and classify context.
@@ -132,19 +132,30 @@ Never retry completed checks or run a third wave. Note any checks skipped becaus
    - **Confirmed**: `"Found: dial tcp inventory-db:5432 connection refused. Impact: db-dependent requests blocked. Verdict: confirms."`
    - **Inconclusive (signature mismatch)**: `"Found: upstream API error, not a metrics export failure. Impact: unrelated to metrics export. Verdict: inconclusive."`
    - **Inconclusive (off-topic match)**: `"Found: different service/failure; substring match only. Verdict: inconclusive."`
+   - **Inconclusive (no match)**: `"Found: no match. Verdict: inconclusive."`
    - **Refutes (healthy rows)**: `"Found: healthy transaction log, no error signature. Impact: none. Verdict: refutes."`
-   - **Refutes (no match)**: `"Found: no match. Verdict: refutes."`
 
-   `result: found` means rows were returned — it does **not** mean the hypothesis is confirmed. Healthy or off-topic rows require `refutes` or `inconclusive` in the Verdict. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`. The calling agent sets `confirmed: false` when verified evidence does not support its final event grouping.
+   `result: found` means rows were returned — it does **not** mean the hypothesis is confirmed. Healthy or off-topic rows require `refutes` or `inconclusive` in the Verdict. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`.
 
-2. **Technology fetch (optional call):** for detections with a `confirms` verdict and a connectivity or protocol failure type (connection refused, dial timeout, i/o timeout, protocol error, etc.), inspect each already-fetched entity feature KI's `properties.technology` — that value is the technology KI's `id` . Collect all such IDs across those detections, deduplicate, and exclude any already fetched. If any remain, spend the Step 1 optional call on a single `platform_sig_events_ki_search` with `kind: ["feature"]`, `feature_ids: [<all collected>]`, `feature_types: ["technology"]`, using the union of those detections' stream names. Batch all IDs into one call. Skip if the set is empty.
+2. **Set `confirmed` from the verdict and result**:
+   - `confirmed: true` only for a `confirms` verdict backed by a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade.
+   - `confirmed: false` for a healthy, positive, non-confirming, or unrelated found row. A successful row never confirms a failure.
+   - Omit `confirmed` for empty or errored evidence. Empty or errored evidence cannot establish a mechanism, impact, or severity tier; retain the result so the calling discovery agent can apply its failure or recovery lens.
+   - When an off-topic found row contains a concrete non-benign error, keep `confirmed: false` for this rule but preserve the error signature in the signal description. The calling discovery agent must assess that observed error as a separate incident candidate; an off-topic verdict rejects the rule hypothesis, not the observed error.
+
+3. **Technology fetch (optional call):** for detections with a `confirms` verdict and a connectivity or protocol failure type (connection refused, dial timeout, i/o timeout, protocol error, etc.), inspect each already-fetched entity feature KI's `properties.technology` — that value is the technology KI's `id` . Collect all such IDs across those detections, deduplicate, and exclude any already fetched. If any remain, spend the Step 1 optional call on a single `platform_sig_events_ki_search` with `kind: ["feature"]`, `feature_ids: [<all collected>]`, `feature_types: ["technology"]`, using the union of those detections' stream names. Batch all IDs into one call. Skip if the set is empty.
 
 ---
 
 ### Step 5: Consolidate Causal Features and Blast Radius
 
-Derive `causal_features` and `blast_radius` together from one scoped topology per detection.
-Never duplicate a feature - it is either the cause (`causal_features`) or the affected party (`blast_radius`), never both.
+Derive `causal_features` and `blast_radius` together from the scoped topology and the complete cross-rule evidence ledger. Keep two decisions separate:
+
+- **Incident correlation**: first build a cross-rule evidence ledger. Connect detections when current rows, a matched query KI's description or `query.evidence[]`, or fetched topology establish one supported failure mechanism or propagation path. A shared mechanism may be
+  identified by one exact-query KI and corroborated by other current rows; it need not appear in every query KI or as a shared feature ID. Keep detections separate when the ledger does not support the same mechanism or propagation path.
+- **Topology fields** may contain only fetched feature KI IDs and explicitly fetched dependency edges. Never invent a `causal_features` or `blast_radius` entry for a database, host, or dependency mentioned only in prose evidence.
+
+Never duplicate a feature — it is either the cause (`causal_features`) or the affected party (`blast_radius`), never both. Assign each detection rule to one incident component only.
 
 Find the cause first. Every `blast_radius` entry must then map through an explicit relationship to that cause or its evidenced propagation path and be shown by current evidence to be affected.
 
@@ -152,15 +163,17 @@ Find the cause first. Every `blast_radius` entry must then map through an explic
 
 Identifies the evidence-supported main contributor features for the potential issue from Signal Verdict.
 
-1. **Scope candidates**: resolve the exact-match query KI's `query.features[]`.
+1. **Scope candidates**: resolve the exact-match query KI's `query.features[]` and correlate them with matching feature KIs fetched anywhere in this batch.
 2. **Resolve the feature KI**:
-   - Traverse each matched query KI's `query.features[]`, find feature KIs matching query KI's `query.feature[].id` with feature KI's `feature.id`. with `type: "entity"` or `type: "infrastructure`".
+   - Traverse each matched query KI's `query.features[]`; match each referenced ID to a fetched feature KI's `feature.id`, including `type: "entity"`, `type: "infrastructure"`, and `type: "dependency"`.
    - Scan `query.evidence[]` for additional insights.
-3. **Decide the `query.features[]` that best support the Signal Verdict root cause**
+3. **Decide the features that best support the Signal Verdict root cause**
    - **From `feature.type: "entity"`**: Signal Verdict names a specific service as the failing component → entity KI enters `causal_features`. Read `query.evidence[]`, `feature.meta`, and `feature.properties` holistically to scope the hypothesis.
    - **From `feature.type: "infrastructure"`**: Signal Verdict points to a shared infrastructure component (e.g. a node, cluster, or host) affecting one or multiple services, Read `query.evidence[]`, `feature.properties`, `feature.evidence[] holistically to scope the hypothesis.
-   - At least one entry from `query.features[]` must be in `causal_features`
-   - Every feature from `query.features[]` not promoted here is a blast_radius candidate — carry it forward to 5.2; never discard it.
+   - **Shared cause across rules**: when several exact-query KIs' evidence identifies the same dependency or infrastructure mechanism, promote one fetched shared feature KI as the causal feature when available. If it is not available, retain the affected service features as causal candidates and record the shared mechanism in the cross-rule evidence ledger; do not fabricate a shared feature ID.
+   - At least one resolved entry from `query.features[]` must be in `causal_features` when the query provides a resolved feature. If the query provides no resolved feature, use the strongest fetched service or infrastructure feature supported by the Signal Verdict.
+   - Every resolved feature from `query.features[]` not promoted here is a `blast_radius` entry
+     — carry it forward to 5.2; never discard it.
 
 Entry: `{ feature_id, name, stream_name? }`.
 
@@ -168,7 +181,8 @@ Entry: `{ feature_id, name, stream_name? }`.
 
 Topology edges affected by the potential issue, with evidenced propagation path. It is not general context surrounding the cause.
 
-Derive candidates separately per detection. Every feature from the matched query KI's `features[]` not promoted to `causal_features` belongs here by default — include it unless current evidence explicitly contradicts its involvement. For features outside `query.features[]`, the Signal Verdict must show the active condition affects this relationship; shared stream or topology adjacency alone is insufficient.
+Derive candidates per detection, then consolidate them across rules after the shared-mechanism ledger is complete. Every resolved feature from the matched query KI's `query.features[]` not promoted to `causal_features` belongs here by default — include it unless current evidence explicitly contradicts its involvement. For features outside `query.features[]`, the Signal Verdict must show the active condition affects this relationship; shared stream or topology adjacency alone is insufficient.
+A shared mechanism in `query.evidence[]` may connect detections for incident grouping, but it cannot create a topology entry without a fetched feature KI.
 
 1. **From `feature.type: "dependency"`**: include only when the edge connects the selected cause to an evidenced affected feature or propagation path, and current evidence shows the active condition affects this relationship. Preserve the fetched `source` → `target` edge when that evidence supports it, even when `target` is the causal_features. `query.evidence[]` and `feature.meta` are strong hypothesis seeds — read before querying. `meta.downstream_services`, query KI `evidence`, and service-reference properties may explain a relationship, but cannot create a `blast_radius` dependency entry without a qualifying dependency KI and current evidence of impact.
    Entry: `{ type: "dependency", feature_id, source, target, protocol?, stream_name? }`.

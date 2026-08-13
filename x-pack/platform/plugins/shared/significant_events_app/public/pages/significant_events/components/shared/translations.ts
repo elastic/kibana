@@ -168,9 +168,6 @@ export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  pending: i18n.translate('xpack.significantEventsApp.significantEvent.status.pending', {
-    defaultMessage: 'Pending',
-  }),
   open: i18n.translate('xpack.significantEventsApp.significantEvent.status.open', {
     defaultMessage: 'Open',
   }),

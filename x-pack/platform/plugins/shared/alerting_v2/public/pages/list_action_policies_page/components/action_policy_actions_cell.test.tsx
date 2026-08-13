@@ -42,8 +42,6 @@ const renderCell = (canWrite: boolean) =>
         onEdit={jest.fn()}
         onClone={jest.fn()}
         onDelete={jest.fn()}
-        onSnooze={jest.fn()}
-        onCancelSnooze={jest.fn()}
         onUpdateApiKey={jest.fn()}
       />
     </I18nProvider>

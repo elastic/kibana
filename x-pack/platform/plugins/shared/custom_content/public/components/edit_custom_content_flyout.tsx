@@ -217,7 +217,7 @@ export const EditCustomContentFlyout = ({
             >
               <EuiButtonIcon
                 css={copyButtonCss}
-                iconType="copyClipboard"
+                iconType="copy"
                 aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
                   defaultMessage: 'Copy template',
                 })}

@@ -101,6 +101,15 @@ describe('discoverSessionApiDataSchema', () => {
     expect(validated.description).toBe('');
   });
 
+  it('validates tag IDs', () => {
+    const validated = discoverSessionApiDataSchema.parse({
+      ...multiTabSessionData,
+      tags: ['tag-1', 'tag-2'],
+    });
+
+    expect(validated.tags).toEqual(['tag-1', 'tag-2']);
+  });
+
   it('applies schema defaults for a fully qualified representation', () => {
     const validated = discoverSessionApiDataSchema.parse({
       title: 'Defaults',
@@ -115,6 +124,7 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.sort).toEqual([]);
     expect(tab.filters).toEqual([]);
     expect(tab.view_mode).toBe('documents');
+    expect(validated.tags).toEqual([]);
     expect(tab.density).toBeUndefined();
     expect(tab.header_row_height).toBeUndefined();
     expect(tab.control_panels).toBeUndefined();

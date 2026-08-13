@@ -7,23 +7,12 @@
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import {
-  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
-} from '@kbn/apm-types/es_fields';
-import { castArray } from 'lodash';
 import { ERROR_ID, SPAN_ID, ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getFieldFromSource } from './get_field_from_source';
-
-// Fields stored under the OTel flattened `attributes` mapping (ignore_above: 1024)
-// whose values routinely exceed the limit. Values over the limit are silently
-// dropped from the index at ingest time — invisible to the fields API — but
-// survive in _source, so we fetch them there and merge as a fallback.
-const LONG_FIELDS_SOURCE_FALLBACK = [
-  ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
-  ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
-];
+import {
+  LONG_FIELDS_SOURCE_FALLBACK,
+  mergeLongFieldsFromSource,
+} from './merge_long_fields_from_source';
 
 export async function getEventMetadata({
   apmEventClient,
@@ -64,22 +53,8 @@ export async function getEventMetadata({
   });
 
   const hit = response.hits.hits[0];
-  const fields = { ...hit.fields };
 
-  for (const fieldName of LONG_FIELDS_SOURCE_FALLBACK) {
-    // Merge from _source when the indexed value is missing, or when ES flagged
-    // the field as ignored — with array values, elements under the ignore_above
-    // limit are indexed while longer ones are dropped, so `fields` can hold a
-    // partial array while _source has the complete value.
-    if (fields[fieldName] == null || hit._ignored?.includes(fieldName)) {
-      const sourceValue = getFieldFromSource(hit._source, fieldName);
-      if (sourceValue != null) {
-        fields[fieldName] = castArray(sourceValue);
-      }
-    }
-  }
-
-  return fields;
+  return mergeLongFieldsFromSource(hit);
 }
 
 function getFieldNames(processorEvent: ProcessorEvent) {

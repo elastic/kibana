@@ -37,10 +37,13 @@ describe('Fleet preconfigured outputs', () => {
       },
     });
 
-    esServer = await startES();
     if (kbnServer) {
       await kbnServer.stop();
     }
+    if (esServer) {
+      await esServer.stop();
+    }
+    esServer = await startES();
 
     const root = createRootWithCorePlugins(
       {
@@ -138,6 +141,76 @@ describe('Fleet preconfigured outputs', () => {
         );
         expect(defaultDataOutput!.id).not.toBe(defaultMonitoringOutput!.id);
         expect(defaultDataOutput!.attributes.is_default_monitoring).toBeFalsy();
+      });
+    });
+
+    describe('With a preconfigured Kafka output that has proxy_id set', () => {
+      // Regression test for #267281: Kibana must boot cleanly when a kibana.yml Kafka output
+      // specifies proxy_id, and the stored output must have proxy_id cleared to null.
+      const kafkaOutputConfig = [
+        {
+          name: 'Kafka with proxy',
+          type: 'kafka',
+          id: 'output-kafka-with-proxy',
+          is_default: false,
+          is_default_monitoring: false,
+          hosts: ['kafka:9092'],
+          topic: 'test',
+          auth_type: 'none',
+          proxy_id: 'non-existent-proxy',
+        },
+      ];
+
+      let versionAfterFirstBoot: string;
+
+      beforeAll(async () => {
+        await startServers(kafkaOutputConfig);
+      });
+
+      afterAll(async () => {
+        await stopServers();
+      });
+
+      it('should boot without errors and store the Kafka output with proxy_id cleared', async () => {
+        const outputs = await kbnServer.coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .find<OutputSOAttributes>({
+            type: 'ingest-outputs',
+            perPage: 10000,
+          });
+
+        const kafkaOutput = outputs.saved_objects.find(
+          (so) => so.attributes.output_id === 'output-kafka-with-proxy'
+        );
+
+        expect(kafkaOutput).toBeDefined();
+        expect(kafkaOutput!.attributes.type).toBe('kafka');
+        // proxy_id must be cleared — Kafka does not support proxies (#267281)
+        expect(kafkaOutput!.attributes.proxy_id).toBeNull();
+
+        // Capture version to detect spurious updates on the next boot
+        versionAfterFirstBoot = kafkaOutput!.version!;
+      });
+
+      it('should not trigger a repeated update on a second boot', async () => {
+        // Restart Kibana with the same config — the change-detection guard should see no diff
+        // on proxy_id for Kafka and not re-update the output.
+        await startServers(kafkaOutputConfig);
+
+        const outputs = await kbnServer.coreStart.savedObjects
+          .getUnsafeInternalClient()
+          .find<OutputSOAttributes>({
+            type: 'ingest-outputs',
+            perPage: 10000,
+          });
+
+        const kafkaOutput = outputs.saved_objects.find(
+          (so) => so.attributes.output_id === 'output-kafka-with-proxy'
+        );
+
+        expect(kafkaOutput).toBeDefined();
+        // Version must be unchanged — a different version means a spurious update occurred
+        expect(kafkaOutput!.version).toBe(versionAfterFirstBoot);
       });
     });
   });

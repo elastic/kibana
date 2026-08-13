@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -27,6 +26,7 @@ import {
   type SignificantEventStatus,
   type SignificantEventUpdate,
 } from '@kbn/significant-events-schema';
+import { EvidenceList, type EvidenceListProps } from './evidence_list';
 
 const FIELD_LABELS: Record<SignificantEventUpdate['field'], string> = {
   severity: i18n.translate('xpack.investigationOutput.update.field.severity', {
@@ -41,9 +41,6 @@ const FIELD_LABELS: Record<SignificantEventUpdate['field'], string> = {
 };
 
 const STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  pending: i18n.translate('xpack.investigationOutput.update.status.pending', {
-    defaultMessage: 'Pending',
-  }),
   open: i18n.translate('xpack.investigationOutput.update.status.open', { defaultMessage: 'Open' }),
   closed: i18n.translate('xpack.investigationOutput.update.status.closed', {
     defaultMessage: 'Closed',
@@ -68,7 +65,10 @@ const badgeLabels = (update: SignificantEventUpdate): { from: string; to: string
   }
 };
 
-const SignificantEventUpdateRow: React.FC<{ update: SignificantEventUpdate }> = ({ update }) => {
+const SignificantEventUpdateRow: React.FC<{
+  update: SignificantEventUpdate;
+  getQueryHref?: EvidenceListProps['getQueryHref'];
+}> = ({ update, getQueryHref }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'investigationSignificantEventUpdateEvidence' });
   const { field, from, to, reason, evidence } = update;
   const badges = badgeLabels(update);
@@ -128,23 +128,7 @@ const SignificantEventUpdateRow: React.FC<{ update: SignificantEventUpdate }> = 
           </EuiText>
         }
       >
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          {evidence.map((item, index) => (
-            <EuiFlexItem key={index} grow={false}>
-              <EuiText size="xs" color="subdued">
-                {item.description}
-              </EuiText>
-              {item.esql_query && (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" isCopyable>
-                    {item.esql_query}
-                  </EuiCodeBlock>
-                </>
-              )}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <EvidenceList evidence={evidence} getQueryHref={getQueryHref} />
       </EuiAccordion>
     </EuiFlexItem>
   );
@@ -155,9 +139,10 @@ const SignificantEventUpdateRow: React.FC<{ update: SignificantEventUpdate }> = 
  * (`significant_event_updates` in the investigation state). Intentionally minimal — the caller
  * decides when to render it (e.g. only once the investigation is complete).
  */
-export const SignificantEventUpdates: React.FC<{ updates: SignificantEventUpdate[] }> = ({
-  updates,
-}) => {
+export const SignificantEventUpdates: React.FC<{
+  updates: SignificantEventUpdate[];
+  getQueryHref?: EvidenceListProps['getQueryHref'];
+}> = ({ updates, getQueryHref }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -180,7 +165,11 @@ export const SignificantEventUpdates: React.FC<{ updates: SignificantEventUpdate
       <EuiSpacer size="s" />
       <EuiFlexGroup direction="column" gutterSize="m">
         {updates.map((update, index) => (
-          <SignificantEventUpdateRow key={`${update.field}-${index}`} update={update} />
+          <SignificantEventUpdateRow
+            key={`${update.field}-${index}`}
+            update={update}
+            getQueryHref={getQueryHref}
+          />
         ))}
       </EuiFlexGroup>
     </EuiPanel>

@@ -118,9 +118,12 @@
     "@kbn/datemath",
     "@kbn/controls-plugin",
     "@kbn/controls-schemas",
+    "@kbn/control-group-renderer",
+    "@kbn/controls-constants",
     "@kbn/app-header",
     "@kbn/deeplinks-workflows",
     "@kbn/core-chrome-app-menu-components",
+    "@kbn/mock-idp-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -31,6 +31,59 @@ export interface ToolUsageScore {
   explanation: string;
 }
 
+/** Require events_write and reject workflow-owned discovery stamping. */
+const scoreOutputTool = (
+  calledTools: Set<string>,
+  steps: ConverseStep[]
+): ToolUsageScore | null => {
+  if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
+    return {
+      score: 0,
+      label: `missing-${TOOL_ID_EVENTS_WRITE}`,
+      explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to persist the decision`,
+    };
+  }
+
+  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
+  if (!persistenceCalls.valid) {
+    return {
+      score: 0.75,
+      label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls`,
+      explanation: `${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
+    };
+  }
+  return null;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const didRuleSearchReturnNoCandidates = ({
+  params,
+  results,
+  toolId,
+}: ReturnType<typeof extractOrderedToolCalls>[number]): boolean =>
+  toolId === TOOL_ID_EVENT_SEARCH &&
+  Array.isArray(params.rule_uuids) &&
+  params.rule_uuids.length > 0 &&
+  results.some(
+    (result) =>
+      isRecord(result) &&
+      isRecord(result.data) &&
+      (result.data.total === 0 ||
+        (Array.isArray(result.data.events) && result.data.events.length === 0))
+  );
+
+const writesTopology = ({ params, toolId }: ReturnType<typeof extractOrderedToolCalls>[number]) =>
+  toolId === TOOL_ID_EVENTS_WRITE &&
+  Array.isArray(params.items) &&
+  params.items.some(
+    (item) =>
+      isRecord(item) &&
+      ((Array.isArray(item.causal_features) && item.causal_features.length > 0) ||
+        (Array.isArray(item.blast_radius) && item.blast_radius.length > 0))
+  );
+
 export const scoreToolUsage = ({
   steps,
   detectionCount,
@@ -50,21 +103,9 @@ export const scoreToolUsage = ({
         };
   }
 
-  if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
-    return {
-      score: 0,
-      label: `missing-${TOOL_ID_EVENTS_WRITE}`,
-      explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to emit at least one discovery`,
-    };
-  }
-
-  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
-  if (!persistenceCalls.valid) {
-    return {
-      score: 0.75,
-      label: 'multiple-events-write-calls',
-      explanation: `${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
-    };
+  const outputCheck = scoreOutputTool(calledTools, steps);
+  if (outputCheck) {
+    return outputCheck;
   }
 
   const orderedCalls = extractOrderedToolCalls(steps);
@@ -75,7 +116,7 @@ export const scoreToolUsage = ({
   if (!hasQueryKiSearch) {
     return {
       score: 0,
-      label: 'missing-query-ki-search',
+      label: `missing-${TOOL_ID_KI_SEARCH}`,
       explanation: `${TOOL_ID_KI_SEARCH} was not called — required to decide whether ES|QL is available`,
     };
   }
@@ -87,8 +128,24 @@ export const scoreToolUsage = ({
   if (hasUnfilteredEventSearch) {
     return {
       score: 0,
-      label: 'unfiltered-event-search',
+      label: `unfiltered-${TOOL_ID_EVENT_SEARCH}`,
       explanation: `${TOOL_ID_EVENT_SEARCH} was not called with exclude_unconfirmed_signals: true — required to exclude signals whose confirmed value is false`,
+    };
+  }
+
+  const ruleSearchFoundNoCandidates = orderedCalls.some(didRuleSearchReturnNoCandidates);
+  const hasTopologySearch = orderedCalls.some(
+    ({ params, toolId }) =>
+      toolId === TOOL_ID_EVENT_SEARCH &&
+      Array.isArray(params.topology_feature_ids) &&
+      params.topology_feature_ids.length > 0
+  );
+  if (ruleSearchFoundNoCandidates && orderedCalls.some(writesTopology) && !hasTopologySearch) {
+    return {
+      score: 0,
+      label: 'missing-topology-search',
+      explanation:
+        'A rule-filtered event search returned no candidates, but the agent wrote topology-bearing event data without running the required topology-filtered event search',
     };
   }
 
@@ -98,13 +155,14 @@ export const scoreToolUsage = ({
   // Graded score (0 / 1/3 / 2/3 / 1) keeps the per-tool signal for prompt tuning; a distinct label
   // per failure mode makes the miss attributable/aggregatable across an eval run (free-text
   // explanation is not). The label enumerates exactly which expected tools were skipped.
+  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
   return {
     score,
     label: missing.length === 0 ? 'correct' : `missing-${missing.join('-')}`,
     explanation:
       score === 1
         ? persistenceCalls.retriedPartialFailure
-          ? 'Correctly called all tools and retried only failed discovery items'
+          ? 'Correctly called all tools and retried only failed event items'
           : 'Correctly called all tools'
         : `Missing tools: ${missing.join(', ')}`,
   };

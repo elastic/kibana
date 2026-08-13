@@ -607,7 +607,6 @@ export const Rootly: ConnectorSpec = {
           }
         );
         return {
-          ok: true,
           message: `Successfully connected to Rootly (${response.data.data.length} severity level(s) visible).`,
         };
       } catch (error) {

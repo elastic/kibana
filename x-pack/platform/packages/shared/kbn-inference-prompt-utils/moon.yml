@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inference-prompt-utils'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/inference-prompt-utils'
   description: Moon project for @kbn/inference-prompt-utils
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/kbn-inference-prompt-utils
 dependsOn:
   - '@kbn/dev-cli-errors'

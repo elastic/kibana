@@ -52,7 +52,21 @@ describe('events_write tool', () => {
   });
 
   it('enforces the batch bounds', () => {
-    expect(eventsWriteSchema.safeParse({ items: [] }).success).toBe(false);
+    const missingItems = eventsWriteSchema.safeParse({});
+    const emptyItems = eventsWriteSchema.safeParse({ items: [] });
+
+    expect(missingItems.success).toBe(false);
+    expect(emptyItems.success).toBe(false);
+    if (!missingItems.success) {
+      expect(missingItems.error.issues[0].message).toBe(
+        'Invalid input: expected array, received undefined'
+      );
+    }
+    if (!emptyItems.success) {
+      expect(emptyItems.error.issues[0].message).toBe(
+        'Too small: expected array to have >=1 items'
+      );
+    }
     expect(
       eventsWriteSchema.safeParse({
         items: Array.from({ length: MAX_BULK_WRITE_ITEMS + 1 }, () => input),
@@ -62,6 +76,43 @@ describe('events_write tool', () => {
 
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
+  });
+
+  it('rejects duplicate detection rules across event items', () => {
+    const signal = {
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Found: error. Impact: requests failed. Verdict: confirms.',
+      confirmed: true,
+      metadata: {
+        rule_uuid: 'rule-1',
+        detection_id: 'detection-1',
+        change_point_type: 'spike' as const,
+        p_value: 0.01,
+      },
+    };
+
+    const result = eventsWriteSchema.safeParse({
+      items: [
+        { ...input, signals: [signal] },
+        { ...input, signals: [signal] },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.at(-1)?.message).toBe(
+        'Each detection rule UUID may appear in only one event item per write'
+      );
+    }
+  });
+
+  it('normalizes an empty event_id to an omitted event_id', () => {
+    const result = eventsWriteSchema.parse({
+      items: [{ ...input, event_id: '' }],
+    });
+
+    expect(result.items[0].event_id).toBeUndefined();
   });
 
   it('returns aligned results and tracks each item', async () => {

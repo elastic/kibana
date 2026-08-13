@@ -7,18 +7,14 @@
 
 import type { Direction } from '@elastic/eui';
 import { Ast, Query } from '@elastic/eui';
-import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import {
   getAncestors,
   getSegments,
   isDescendantOf,
-  isDslLifecycle,
-  isIlmLifecycle,
   isRootStreamDefinition,
   Streams,
 } from '@kbn/streams-schema';
-import { parseDurationInSeconds } from '../../../../util/parse_duration';
 
 const SORTABLE_FIELDS = ['nameSortKey'] as const;
 
@@ -26,8 +22,6 @@ export type SortableField = (typeof SORTABLE_FIELDS)[number];
 
 export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
-  documentsCount: number;
-  retentionMs: number;
   type: 'wired' | 'root' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
@@ -35,17 +29,10 @@ export interface EnrichedStream extends ListStreamDetail {
 export type TableRow = EnrichedStream & {
   level: number;
   rootNameSortKey: string;
-  rootDocumentsCount: number;
-  rootRetentionMs: number;
-  dataQuality: QualityIndicators;
 };
+
 export interface StreamTree extends ListStreamDetail {
   children: StreamTree[];
-}
-
-export function shouldComposeTree(sortField: SortableField) {
-  // Always allow tree mode for nameSortKey
-  return !sortField || sortField === 'nameSortKey';
 }
 
 // Builds an EUI Query from the free-text search bar input. The search bar runs in
@@ -61,7 +48,7 @@ export function parseSearchQuery(searchText: string): Query {
   }
 }
 
-// Returns all streams that match the query or are ancestors of a match
+/** Returns all streams that match the query or are ancestors of a match. */
 export function filterStreamsByQuery(
   streams: ListStreamDetail[],
   query: string
@@ -71,13 +58,10 @@ export function filterStreamsByQuery(
   const nameToStream = new Map<string, ListStreamDetail>();
   streams.forEach((s) => nameToStream.set(s.stream.name, s));
 
-  // Find all streams that match the query
   const matching = streams.filter((s) => s.stream.name.toLowerCase().includes(lowerQuery));
   const resultSet = new Map<string, ListStreamDetail>();
   for (const stream of matching) {
-    // Add the match
     resultSet.set(stream.stream.name, stream);
-    // Add all ancestors
     const ancestors = getAncestors(stream.stream.name);
     for (let i = 0; i < ancestors.length; ++i) {
       const ancestor = nameToStream.get(ancestors[i]);
@@ -89,16 +73,10 @@ export function filterStreamsByQuery(
   return Array.from(resultSet.values());
 }
 
-// Filters out rows that are children of collapsed streams
-export function filterCollapsedStreamRows(
-  rows: TableRow[],
-  collapsedStreams: Set<string>,
-  sortField: SortableField
-) {
-  if (!shouldComposeTree(sortField)) return rows;
+/** Filters out rows that are children of collapsed streams. */
+export function filterCollapsedStreamRows(rows: TableRow[], collapsedStreams: Set<string>) {
   const result: TableRow[] = [];
   for (const row of rows) {
-    // If any ancestor is collapsed, skip this row
     const ancestors = getAncestors(row.stream.name);
     let skip = false;
     for (let i = 0; i < ancestors.length; ++i) {
@@ -115,8 +93,7 @@ export function filterCollapsedStreamRows(
 export function buildStreamRows(
   enrichedStreams: EnrichedStream[],
   sortField: SortableField,
-  sortDirection: Direction,
-  qualityByStream: Record<string, QualityIndicators>
+  sortDirection: Direction
 ): TableRow[] {
   const isAscending = sortDirection === 'asc';
   const compare = (a: EnrichedStream, b: EnrichedStream): number => {
@@ -125,36 +102,23 @@ export function buildStreamRows(
     if (typeof av === 'string' && typeof bv === 'string') {
       return isAscending ? av.localeCompare(bv) : bv.localeCompare(av);
     }
-    if (typeof av === 'number' && typeof bv === 'number') {
-      return isAscending ? av - bv : bv - av;
-    }
     return 0;
   };
 
   const result: TableRow[] = [];
-  const pushNode = (
-    node: EnrichedStream,
-    level: number,
-    rootMeta: Pick<TableRow, 'rootNameSortKey' | 'rootDocumentsCount' | 'rootRetentionMs'>
-  ) => {
+  const pushNode = (node: EnrichedStream, level: number, rootNameSortKey: string) => {
     result.push({
       ...node,
       level,
-      ...rootMeta,
-      dataQuality: qualityByStream[node.stream.name] ?? 'good',
+      rootNameSortKey,
     });
     if (node.children) {
-      node.children.sort(compare).forEach((child) => pushNode(child, level + 1, rootMeta));
+      node.children.sort(compare).forEach((child) => pushNode(child, level + 1, rootNameSortKey));
     }
   };
 
   [...enrichedStreams].sort(compare).forEach((root) => {
-    const rootMeta = {
-      rootNameSortKey: root.nameSortKey,
-      rootDocumentsCount: root.documentsCount,
-      rootRetentionMs: root.retentionMs,
-    } as const;
-    pushNode(root, 0, rootMeta);
+    pushNode(root, 0, root.nameSortKey);
   });
 
   return result;
@@ -186,15 +150,6 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
 }
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
-  let retentionMs = 0;
-  const lc = node.effective_lifecycle!;
-  if (isDslLifecycle(lc)) {
-    retentionMs = lc.dsl.data_retention
-      ? parseDurationInSeconds(lc.dsl.data_retention) * 1000
-      : Number.POSITIVE_INFINITY;
-  } else if (isIlmLifecycle(lc)) {
-    retentionMs = Number.POSITIVE_INFINITY;
-  }
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`
@@ -207,8 +162,6 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     data_stream: node.data_stream,
     privileges: node.privileges,
     nameSortKey,
-    documentsCount: 0,
-    retentionMs,
     type: Streams.ClassicStream.Definition.is(node.stream)
       ? 'classic'
       : Streams.QueryStream.Definition.is(node.stream)

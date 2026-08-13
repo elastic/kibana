@@ -45,7 +45,7 @@ export const useUpdateSignificantEvent = ({
     },
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();

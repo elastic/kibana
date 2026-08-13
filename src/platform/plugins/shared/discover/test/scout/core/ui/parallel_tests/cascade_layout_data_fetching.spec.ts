@@ -51,7 +51,7 @@ spaceTest.describe(
 
         await spaceTest.step('expanding a group fetches its row data', async () => {
           expect(
-            await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+            await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
               discover.toggleCascadeLayoutRow(firstRowId)
             )
           ).toBeGreaterThan(0);
@@ -59,7 +59,7 @@ spaceTest.describe(
 
         await spaceTest.step('collapsing a group does not fetch', async () => {
           expect(
-            await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+            await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
               discover.toggleCascadeLayoutRow(firstRowId)
             )
           ).toBe(0);
@@ -67,7 +67,7 @@ spaceTest.describe(
 
         await spaceTest.step('expanding a different group fetches its row data', async () => {
           expect(
-            await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+            await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
               discover.toggleCascadeLayoutRow(secondRowId)
             )
           ).toBeGreaterThan(0);
@@ -75,7 +75,7 @@ spaceTest.describe(
 
         await spaceTest.step('collapsing the second group does not fetch', async () => {
           expect(
-            await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+            await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
               discover.toggleCascadeLayoutRow(secondRowId)
             )
           ).toBe(0);
@@ -85,7 +85,7 @@ spaceTest.describe(
           're-expanding the first (already-fetched) group does not refetch',
           async () => {
             expect(
-              await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+              await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
                 discover.toggleCascadeLayoutRow(firstRowId)
               )
             ).toBe(0);
@@ -104,12 +104,12 @@ spaceTest.describe(
 
         await spaceTest.step('expand and collapse a group in the first tab', async () => {
           expect(
-            await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+            await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
               discover.toggleCascadeLayoutRow(firstRowId)
             )
           ).toBeGreaterThan(0);
           expect(
-            await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+            await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
               discover.toggleCascadeLayoutRow(firstRowId)
             )
           ).toBe(0);
@@ -121,7 +121,7 @@ spaceTest.describe(
           const [secondTabRowId] = await discover.getCascadeLayoutVisibleRowIds();
 
           expect(
-            await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+            await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
               discover.toggleCascadeLayoutRow(secondTabRowId)
             )
           ).toBeGreaterThan(0);
@@ -134,7 +134,7 @@ spaceTest.describe(
             await discover.waitUntilTabIsLoaded();
 
             expect(
-              await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, () =>
+              await network.countMatchingRequests({ endpoint: ESQL_ASYNC_ENDPOINT }, () =>
                 discover.toggleCascadeLayoutRow(firstRowId)
               )
             ).toBe(0);
@@ -156,27 +156,30 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
         const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
 
-        await network.trackMatchingRequests(ESQL_ASYNC_ENDPOINT, async (getRequestCount) => {
-          // Click without waiting for expansion so the fetch starts before switching
-          // away and returning to this tab.
-          const initialRequest = page.waitForRequest((request) =>
-            request.url().includes(ESQL_ASYNC_ENDPOINT)
-          );
-          await discover.clickCascadeRowToggle(firstRowId);
-          await unifiedTabs.selectTab(1);
-          await initialRequest;
+        await network.trackMatchingRequests(
+          { endpoint: ESQL_ASYNC_ENDPOINT },
+          async (getRequestCount) => {
+            // Click without waiting for expansion so the fetch starts before switching
+            // away and returning to this tab.
+            const initialRequest = page.waitForRequest((request) =>
+              request.url().includes(ESQL_ASYNC_ENDPOINT)
+            );
+            await discover.clickCascadeRowToggle(firstRowId);
+            await unifiedTabs.selectTab(1);
+            await initialRequest;
 
-          const requestCountBeforeReturning = getRequestCount();
-          expect(requestCountBeforeReturning).toBeGreaterThan(0);
+            const requestCountBeforeReturning = getRequestCount();
+            expect(requestCountBeforeReturning).toBeGreaterThan(0);
 
-          await unifiedTabs.selectTab(0);
-          await discover.waitUntilTabIsLoaded();
+            await unifiedTabs.selectTab(0);
+            await discover.waitUntilTabIsLoaded();
 
-          expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).toBe(true);
-          await dataGrid.waitForDocTableRendered();
+            expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).toBe(true);
+            await dataGrid.waitForDocTableRendered();
 
-          expect(getRequestCount()).toBe(requestCountBeforeReturning);
-        });
+            expect(getRequestCount()).toBe(requestCountBeforeReturning);
+          }
+        );
       }
     );
   }
