@@ -20,7 +20,7 @@ import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ConversationQueue } from '../../components/conversation_queue';
 import { type BaseActionsProps } from '../../components/conversation_card/base_actions';
-import { BlastRadius } from '../../components/blast_radius';
+import { BlastRadius } from '../../components/filters/blast_radius';
 import { BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
