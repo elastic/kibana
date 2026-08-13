@@ -17,15 +17,23 @@ export interface IsDisabledResult {
   message: string;
 }
 
+const getLicenseArticle = (licenseName: string) =>
+  /^[aeiou]/i.test(licenseName) ? 'an' : 'a';
+
 const getLicenseCheckResult = (ruleType: RuleType) => {
+  const minimumLicenseRequired = upperFirst(ruleType.minimumLicenseRequired);
+  const licenseArticle = getLicenseArticle(minimumLicenseRequired);
+
   return {
     isEnabled: false,
     message: i18n.translate(
       'xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage',
       {
-        defaultMessage: 'This rule type requires a {minimumLicenseRequired} license.',
+        defaultMessage:
+          'This rule type requires {licenseArticle} {minimumLicenseRequired} license.',
         values: {
-          minimumLicenseRequired: upperFirst(ruleType.minimumLicenseRequired),
+          licenseArticle,
+          minimumLicenseRequired,
         },
       }
     ),

@@ -15,15 +15,23 @@ import type { ActionType } from '@kbn/actions-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../common/constants';
 
+const getLicenseArticle = (licenseName: string) =>
+  /^[aeiou]/i.test(licenseName) ? 'an' : 'a';
+
 export const getLicenseCheckResult = (actionType: ActionType) => {
+  const minimumLicenseRequired = upperFirst(actionType.minimumLicenseRequired);
+  const licenseArticle = getLicenseArticle(minimumLicenseRequired);
+
   return {
     isEnabled: false,
     message: i18n.translate(
       'alertsUIShared.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage',
       {
-        defaultMessage: 'This connector requires a {minimumLicenseRequired} license.',
+        defaultMessage:
+          'This connector requires {licenseArticle} {minimumLicenseRequired} license.',
         values: {
-          minimumLicenseRequired: upperFirst(actionType.minimumLicenseRequired),
+          licenseArticle,
+          minimumLicenseRequired,
         },
       }
     ),
@@ -33,9 +41,11 @@ export const getLicenseCheckResult = (actionType: ActionType) => {
         title={i18n.translate(
           'alertsUIShared.licenseCheck.actionTypeDisabledByLicenseMessageTitle',
           {
-            defaultMessage: 'This feature requires a {minimumLicenseRequired} license.',
+            defaultMessage:
+              'This feature requires {licenseArticle} {minimumLicenseRequired} license.',
             values: {
-              minimumLicenseRequired: upperFirst(actionType.minimumLicenseRequired),
+              licenseArticle,
+              minimumLicenseRequired,
             },
           }
         )}
