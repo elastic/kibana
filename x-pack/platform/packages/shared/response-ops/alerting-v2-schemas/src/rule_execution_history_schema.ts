@@ -83,19 +83,19 @@ export const ruleExecutionViewSchema = z
       id: z.string(),
       version: z.number().int().nullable(),
     }),
-    spaceId: z.string(),
-    startedAt: z.string(),
-    endedAt: z.string(),
+    space_id: z.string(),
+    started_at: z.string(),
+    ended_at: z.string(),
     timings: z.object({
       duration: z.number().int().nonnegative(),
-      scheduledDelay: z.number().int(),
+      scheduled_delay: z.number().int(),
     }),
     outcome: ruleExecutionOutcomeSchema,
     reason: z.string().nullable(),
     error: z
       .object({
         message: z.string(),
-        stackTrace: z.string().nullable(),
+        stack_trace: z.string().nullable(),
       })
       .nullable(),
   })
@@ -108,7 +108,7 @@ export const listRuleExecutionsResponseSchema = z
     items: z.array(ruleExecutionViewSchema),
     total: z.number().int().nonnegative(),
     page: z.number().int().min(1),
-    perPage: z.number().int().min(1),
+    per_page: z.number().int().min(1),
   })
   .meta({ id: 'alerting_rule_executions_response' });
 

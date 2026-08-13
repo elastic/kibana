@@ -58,13 +58,13 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
   'contextEngine:enabled': boolean;
-  'agentBuilder:uiamOAuthClientManagement': boolean;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
   'agentBuilder:tracing:includeRealIds': boolean;
   'agentBuilder:tracing:includeRealNames': boolean;
   'agentBuilder:tracing:includeSystemPrompt': boolean;
   'agentBuilder:tracing:includeToolDetails': boolean;
+  'agentBuilder:tracing:includeUserData': boolean;
   'agentBuilder:tracing:includeUserPrompts': boolean;
   'workflows:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
@@ -165,11 +165,6 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:linkColor': string;
   'banners:backgroundColor': string;
-  'labs:canvas:enable_ui': boolean;
-  'labs:canvas:byValueEmbeddable': boolean;
-  'labs:canvas:useDataService': boolean;
-  'labs:presentation:timeToPresent': boolean;
-  'labs:dashboard:enable_ui': boolean;
   'labs:dashboard:deferBelowFold': boolean;
   'discover:rowHeightOption': number;
   hideAnnouncements: boolean;
@@ -219,6 +214,9 @@ export interface UsageStats {
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize': number;
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': number;
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': number;
   'securitySolution:entityStoreEnableV2': boolean;
   'securitySolution:alertAnalysisWorkflowEnabled': boolean;
   'securitySolution:alertAnalysisWorkflowAutoCloseEnabled': boolean;

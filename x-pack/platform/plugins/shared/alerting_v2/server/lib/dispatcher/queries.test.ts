@@ -11,6 +11,7 @@ import {
   getDispatchableAlertEventsQuery,
   getAlertEpisodeSuppressionsQueries,
   getLastNotifiedTimestampsQueries,
+  getEpisodeDataQueries,
 } from './queries';
 import { createAlertEpisode } from './fixtures/test_utils';
 
@@ -59,35 +60,18 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(req.query).toContain('last_episode_status = LAST(episode_status, @timestamp)');
   });
 
-  it('fetches _source metadata', () => {
+  it('does not request _source metadata (keys-only scan)', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain('METADATA _source');
+    expect(req.query).not.toContain('METADATA _source');
     expect(req.query).not.toContain('_index');
   });
 
-  it('extracts data_json from _source using JSON_EXTRACT for rule-events rows', () => {
+  it('does not contain JSON_EXTRACT or data_json (data hydrated separately)', () => {
     const req = getDispatchableAlertEventsQuery();
 
-    expect(req.query).toContain('JSON_EXTRACT(_source, "$.data")');
-  });
-
-  it('drops _source after JSON_EXTRACT and before INLINE STATS to keep sub-plan buffers small', () => {
-    const req = getDispatchableAlertEventsQuery();
-
-    const extractIdx = req.query.indexOf('JSON_EXTRACT(_source');
-    const dropIdx = req.query.indexOf('DROP episode.id, rule.id, episode.status, _source');
-    const inlineStatsIdx = req.query.indexOf('INLINE STATS');
-
-    expect(extractIdx).toBeGreaterThan(-1);
-    expect(dropIdx).toBeGreaterThan(extractIdx);
-    expect(inlineStatsIdx).toBeGreaterThan(dropIdx);
-  });
-
-  it('aggregates data_json using LAST by timestamp', () => {
-    const req = getDispatchableAlertEventsQuery();
-
-    expect(req.query).toContain('data_json = LAST(data_json, @timestamp)');
+    expect(req.query).not.toContain('JSON_EXTRACT');
+    expect(req.query).not.toContain('data_json');
   });
 
   it('aggregates severity using LAST by timestamp scoped to rule-event rows', () => {
@@ -96,12 +80,13 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(req.query).toContain('severity = LAST(severity, @timestamp) WHERE type IS NOT NULL');
   });
 
-  it('keeps the expected output columns and renames episode_status', () => {
+  it('keeps the expected output columns without data_json and renames episode_status', () => {
     const req = getDispatchableAlertEventsQuery();
 
     expect(req.query).toContain(
-      'KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, data_json, severity'
+      'KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, severity'
     );
+    expect(req.query).not.toContain('data_json');
     expect(req.query).toContain('RENAME last_episode_status AS episode_status');
   });
 
@@ -146,6 +131,123 @@ describe('getDispatchableAlertEventsQuery', () => {
 
     expect(req.query).toContain('SORT last_event_timestamp ASC');
     expect(req.query).toContain('LIMIT 10000');
+  });
+});
+
+describe('getEpisodeDataQueries', () => {
+  const GTE = '2026-01-22T07:00:00.000Z';
+  const LTE = '2026-01-22T07:10:00.000Z';
+
+  it('returns an empty array for empty input', () => {
+    expect(getEpisodeDataQueries([], { gte: GTE, lte: LTE })).toEqual([]);
+  });
+
+  it('returns a valid ES|QL request for a single episode id', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+
+    expect(requests).toHaveLength(1);
+    expect(typeof requests[0].query).toBe('string');
+  });
+
+  it('queries only the alert events data stream', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+
+    expect(requests[0].query).toContain('.rule-events');
+    expect(requests[0].query).not.toContain('.alert-actions');
+  });
+
+  it('requests _source metadata for JSON_EXTRACT', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+
+    expect(requests[0].query).toContain('METADATA _source');
+  });
+
+  it('places WHERE before JSON_EXTRACT so _source is fetched only for matching rows', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+    const query = requests[0].query;
+
+    const whereIdx = query.indexOf('WHERE type ==');
+    const extractIdx = query.indexOf('JSON_EXTRACT(_source');
+
+    expect(whereIdx).toBeGreaterThan(-1);
+    expect(extractIdx).toBeGreaterThan(-1);
+    expect(whereIdx).toBeLessThan(extractIdx);
+  });
+
+  it('filters by type == "alert", episode.id IN (...), and timestamp range', () => {
+    const requests = getEpisodeDataQueries(['ep-1', 'ep-2'], { gte: GTE, lte: LTE });
+    const query = requests[0].query;
+
+    expect(query).toContain('type == "alert"');
+    expect(query).toContain('episode.id IN');
+    expect(query).toContain('"ep-1"');
+    expect(query).toContain('"ep-2"');
+    expect(query).toContain(`"${GTE}"`);
+    expect(query).toContain(`"${LTE}"`);
+  });
+
+  it('inlines range bounds as ::datetime literals', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+    const query = requests[0].query;
+
+    expect(query).toContain(`"${GTE}"::DATETIME`);
+    expect(query).toContain(`"${LTE}"::DATETIME`);
+  });
+
+  it('extracts data_json via JSON_EXTRACT(_source, "$.data")', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+
+    expect(requests[0].query).toContain('JSON_EXTRACT(_source, "$.data")');
+  });
+
+  it('drops _source before the STATS buffer', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+    const query = requests[0].query;
+
+    const dropIdx = query.indexOf('DROP _source');
+    const statsIdx = query.indexOf('STATS data_json');
+
+    expect(dropIdx).toBeGreaterThan(-1);
+    expect(statsIdx).toBeGreaterThan(-1);
+    expect(dropIdx).toBeLessThan(statsIdx);
+  });
+
+  it('aggregates data_json using LAST by timestamp grouped by episode_id', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+
+    expect(requests[0].query).toContain('LAST(data_json, @timestamp) BY episode_id');
+  });
+
+  it('keeps only episode_id and data_json', () => {
+    const requests = getEpisodeDataQueries(['ep-1'], { gte: GTE, lte: LTE });
+
+    expect(requests[0].query).toContain('KEEP episode_id, data_json');
+  });
+
+  it('splits into multiple requests when episode ids exceed the size budget', () => {
+    // 36-byte UUIDs + 6 bytes overhead = 42 bytes each; ~14_285 per 600 KB chunk.
+    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
+
+    const requests = getEpisodeDataQueries(longIds, { gte: GTE, lte: LTE });
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(request.query.length).toBeLessThan(1_000_000);
+    }
+    const concatenated = requests.map((r) => r.query).join('\n');
+    expect(concatenated).toContain(longIds[0]);
+    expect(concatenated).toContain(longIds[longIds.length - 1]);
+  });
+
+  it('applies the same gte/lte bounds on every chunk', () => {
+    const longIds = Array.from({ length: 200 }, (_, i) => 'x'.repeat(4_000) + `-${i}`);
+    const requests = getEpisodeDataQueries(longIds, { gte: GTE, lte: LTE });
+
+    expect(requests.length).toBeGreaterThanOrEqual(2);
+    for (const request of requests) {
+      expect(request.query).toContain(`"${GTE}"`);
+      expect(request.query).toContain(`"${LTE}"`);
+    }
   });
 });
 
