@@ -673,7 +673,7 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
 });
 
 describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () => {
-  it('adds a simple_query_string clause for EF_ALL_VALUES_FIELD when included in searchFields', () => {
+  it('adds a wildcard clause for EF_ALL_VALUES_FIELD when included in searchFields', () => {
     const result = constructSearchQuery({
       search: 'reason',
       searchFields: [...DEFAULT_CASE_SEARCH_FIELDS, ...DEFAULT_CASE_RUNTIME_FIELDS],
@@ -684,20 +684,19 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) =>
-        c?.simple_query_string != null &&
-        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
+      (c: estypes.QueryDslQueryContainer) => c?.wildcard?.[EF_ALL_VALUES_FIELD] != null
     );
     expect(runtimeClause).toEqual({
-      simple_query_string: {
-        query: 'reason',
-        fields: [EF_ALL_VALUES_FIELD],
-        default_operator: 'AND',
+      wildcard: {
+        [EF_ALL_VALUES_FIELD]: {
+          value: '* reason *',
+          case_insensitive: true,
+        },
       },
     });
   });
 
-  it('lowercases the search query to match the lowercased runtime field tokens', () => {
+  it('lowercases the search query to match the lowercased combined runtime value', () => {
     const result = constructSearchQuery({
       search: 'EMEA',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -708,13 +707,14 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
+      (c: estypes.QueryDslQueryContainer) => c?.wildcard?.[EF_ALL_VALUES_FIELD] != null
     );
     expect(runtimeClause).toEqual({
-      simple_query_string: {
-        query: 'emea',
-        fields: [EF_ALL_VALUES_FIELD],
-        default_operator: 'AND',
+      wildcard: {
+        [EF_ALL_VALUES_FIELD]: {
+          value: '* emea *',
+          case_insensitive: true,
+        },
       },
     });
   });
@@ -730,9 +730,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) =>
-        c?.simple_query_string != null &&
-        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
+      (c: estypes.QueryDslQueryContainer) => c?.wildcard?.[EF_ALL_VALUES_FIELD] != null
     );
     expect(runtimeClause).toBeUndefined();
   });
@@ -762,11 +760,12 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
         }),
         expect.objectContaining({ nested: expect.anything() }),
         expect.objectContaining({
-          simple_query_string: expect.objectContaining({
-            query: 'test',
-            fields: [EF_ALL_VALUES_FIELD],
-            default_operator: 'AND',
-          }),
+          wildcard: {
+            [EF_ALL_VALUES_FIELD]: {
+              value: '* test *',
+              case_insensitive: true,
+            },
+          },
         }),
       ])
     );
@@ -782,7 +781,7 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(result).toBeUndefined();
   });
 
-  it('uses simple_query_string with AND operator for multi-word search', () => {
+  it('ANDs wildcard clauses for multi-word extended-field search', () => {
     const result = constructSearchQuery({
       search: 'test text',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -793,18 +792,33 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
+      (c: estypes.QueryDslQueryContainer) => c?.bool?.filter != null
     );
     expect(runtimeClause).toEqual({
-      simple_query_string: {
-        query: 'test text',
-        fields: [EF_ALL_VALUES_FIELD],
-        default_operator: 'AND',
+      bool: {
+        filter: [
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '* test *',
+                case_insensitive: true,
+              },
+            },
+          },
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '* text *',
+                case_insensitive: true,
+              },
+            },
+          },
+        ],
       },
     });
   });
 
-  it('lowercases and passes extra whitespace through to simple_query_string (ES normalizes)', () => {
+  it('collapses extra whitespace before building extended-field word clauses', () => {
     const result = constructSearchQuery({
       search: '  Test   TEXT  ',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -815,18 +829,33 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
+      (c: estypes.QueryDslQueryContainer) => c?.bool?.filter != null
     );
     expect(runtimeClause).toEqual({
-      simple_query_string: {
-        query: '  test   text  ',
-        fields: [EF_ALL_VALUES_FIELD],
-        default_operator: 'AND',
+      bool: {
+        filter: [
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '* test *',
+                case_insensitive: true,
+              },
+            },
+          },
+          {
+            wildcard: {
+              [EF_ALL_VALUES_FIELD]: {
+                value: '* text *',
+                case_insensitive: true,
+              },
+            },
+          },
+        ],
       },
     });
   });
 
-  it('uses simple_query_string with AND for single-word search', () => {
+  it('builds a single wildcard clause for single-word search', () => {
     const result = constructSearchQuery({
       search: 'spy',
       searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
@@ -837,15 +866,14 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     expect(shouldClauses).toBeDefined();
 
     const runtimeClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) =>
-        c?.simple_query_string != null &&
-        (c.simple_query_string as { fields?: string[] }).fields?.[0] === EF_ALL_VALUES_FIELD
+      (c: estypes.QueryDslQueryContainer) => c?.wildcard?.[EF_ALL_VALUES_FIELD] != null
     );
     expect(runtimeClause).toEqual({
-      simple_query_string: {
-        query: 'spy',
-        fields: [EF_ALL_VALUES_FIELD],
-        default_operator: 'AND',
+      wildcard: {
+        [EF_ALL_VALUES_FIELD]: {
+          value: '* spy *',
+          case_insensitive: true,
+        },
       },
     });
   });

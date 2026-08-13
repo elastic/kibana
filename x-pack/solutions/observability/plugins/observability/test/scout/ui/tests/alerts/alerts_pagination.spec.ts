@@ -36,12 +36,12 @@ test.describe('Observability alerts - pagination', { tag: [...tags.stateful.clas
 
     await test.step('shows up to 10 rows per page', async () => {
       await alertsTablePage.setPageSize(10);
-      await expect.poll(() => alertsTablePage.dataGrid.getRowsCount()).toBeLessThanOrEqual(10);
+      await expect.poll(() => alertsTablePage.dataGrid.rows.count()).toBeLessThanOrEqual(10);
     });
 
     await test.step('shows up to 20 rows per page', async () => {
       await alertsTablePage.setPageSize(20);
-      await expect.poll(() => alertsTablePage.dataGrid.getRowsCount()).toBeLessThanOrEqual(20);
+      await expect.poll(() => alertsTablePage.dataGrid.rows.count()).toBeLessThanOrEqual(20);
     });
   });
 
@@ -68,17 +68,17 @@ test.describe('Observability alerts - pagination', { tag: [...tags.stateful.clas
 
     await test.step('jumps to a numbered page', async () => {
       await alertsTablePage.goToPage(2);
-      await expect.poll(() => alertsTablePage.dataGrid.getRowsCount()).toBe(PAGE_SIZE);
+      await expect(alertsTablePage.dataGrid.rows).toHaveCount(PAGE_SIZE);
     });
 
     await test.step('moves to the next page', async () => {
       await alertsTablePage.goToNextPage();
-      await expect.poll(() => alertsTablePage.dataGrid.getRowsCount()).toBe(PAGE_SIZE);
+      await expect(alertsTablePage.dataGrid.rows).toHaveCount(PAGE_SIZE);
     });
 
     await test.step('moves back to the previous page', async () => {
       await alertsTablePage.goToPrevPage();
-      await expect.poll(() => alertsTablePage.dataGrid.getRowsCount()).toBe(PAGE_SIZE);
+      await expect(alertsTablePage.dataGrid.rows).toHaveCount(PAGE_SIZE);
     });
   });
 });
