@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer, RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  RetrieverContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Parameters for the three-leg RRF retriever used in recall.
