@@ -25,41 +25,6 @@ import type { ProcessedConversationRound } from './prepare_conversation';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 /**
- * Convert already-answered ask_user_question steps into tool-call / tool-result
- * action pairs so they remain in the research agent's context on HITL resume.
- *
- * `convertPreviousRounds` intentionally skips the awaiting round (resume rebuilds
- * it via actions). `roundToActions` only covers tool-call steps, and
- * `pendingAskUserQuestionStepsToActions` only covers the current unanswered
- * prompt — without this, earlier answers in the same round disappear from the
- * model context and the agent often restarts clarifying questions.
- */
-export const answeredAskUserQuestionStepsToActions = ({
-  round,
-}: {
-  round: ConversationRound | ProcessedConversationRound;
-}): ResearchAgentAction[] => {
-  const actions: ResearchAgentAction[] = [];
-
-  const answeredSteps = round.steps
-    .filter(isAskUserQuestionStep)
-    .filter((step): step is AskUserQuestionStep & { answers: AskUserQuestionAnswer[] } => {
-      return step.answers !== undefined;
-    });
-
-  for (const step of answeredSteps) {
-    const { toolCallId, toolName, args, content, artifact } = materializeAskUserQuestionToolCall({
-      questions: step.questions,
-      answers: step.answers,
-    });
-    actions.push(toolCallAction({ toolCalls: [{ toolName, toolCallId, args }] }));
-    actions.push(executeToolAction({ toolResults: [{ toolCallId, content, artifact }] }));
-  }
-
-  return actions;
-};
-
-/**
  * Convert the pending ask_user_question step + corresponding response to list of actions + emit the event to be collected
  */
 export const pendingAskUserQuestionStepsToActions = ({

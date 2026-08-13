@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep, ReasoningStep, ToolCallStep } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  createAskUserQuestionStep,
+  type ConversationRound,
+  type ConversationRoundStep,
+  type ReasoningStep,
+  type ToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
-import type { ConversationRound } from '@kbn/agent-builder-common';
 import { roundToActions } from './round_to_actions';
 import { AgentActionType } from '../actions';
 import type { ToolCallAction, ExecuteToolAction } from '../actions';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 
 const makeToolCallStep = (
   toolCallId: string,
@@ -185,5 +192,72 @@ describe('roundToActions', () => {
     expect(pendingToolCall.message).toBe('group thought');
     expect(pendingToolCall.tool_calls).toHaveLength(1);
     expect(pendingToolCall.tool_calls[0].toolCallId).toBe('c2');
+  });
+
+  const sampleQuestion = {
+    question: 'Pick color',
+    options: [{ label: 'red' }, { label: 'blue' }],
+    multi_select: false,
+  };
+
+  it('emits already-answered ask_user_question steps as tool-call / tool-result pairs', () => {
+    const answered = createAskUserQuestionStep({
+      prompt_id: 's1',
+      questions: [sampleQuestion],
+      answers: [{ choice: [0] }],
+    });
+    const actions = roundToActions({ round: makeRound([answered]), toolIdMapping });
+
+    expect(actions).toHaveLength(2);
+    expect(actions[0].type).toBe(AgentActionType.ToolCall);
+    expect(actions[1].type).toBe(AgentActionType.ExecuteTool);
+
+    const expected = materializeAskUserQuestionToolCall({
+      questions: answered.questions,
+      answers: answered.answers!,
+    });
+    const toolCallAction = actions[0] as ToolCallAction;
+    expect(toolCallAction.tool_calls[0].args).toEqual({ questions: answered.questions });
+    const executeAction = actions[1] as ExecuteToolAction;
+    expect(JSON.parse(executeAction.tool_results[0].content as string)).toEqual(
+      JSON.parse(expected.content)
+    );
+  });
+
+  it('skips unanswered ask_user_question steps', () => {
+    const pending = createAskUserQuestionStep({
+      prompt_id: 's1',
+      questions: [sampleQuestion],
+    });
+    expect(roundToActions({ round: makeRound([pending]), toolIdMapping })).toEqual([]);
+  });
+
+  it('preserves step order when tool calls and answered asks are interleaved', () => {
+    const answered = createAskUserQuestionStep({
+      prompt_id: 's1',
+      questions: [sampleQuestion],
+      answers: [{ choice: [0] }],
+    });
+    const pending = createAskUserQuestionStep({
+      prompt_id: 's2',
+      questions: [sampleQuestion],
+    });
+    const steps: ConversationRoundStep[] = [
+      makeToolCallStep('c1', 'search', { results: [someResult] }),
+      answered,
+      makeToolCallStep('c2', 'lookup', { results: [someResult] }),
+      pending,
+    ];
+    const actions = roundToActions({ round: makeRound(steps), toolIdMapping });
+
+    // 2 tool-call groups × (toolCall + execute) + 1 answered ask pair; pending ask skipped
+    expect(actions).toHaveLength(6);
+
+    const firstToolCall = actions[0] as ToolCallAction;
+    const answeredAskCall = actions[2] as ToolCallAction;
+    const secondToolCall = actions[4] as ToolCallAction;
+    expect(firstToolCall.tool_calls[0].toolCallId).toBe('c1');
+    expect(answeredAskCall.tool_calls[0].args).toEqual({ questions: answered.questions });
+    expect(secondToolCall.tool_calls[0].toolCallId).toBe('c2');
   });
 });

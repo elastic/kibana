@@ -11,13 +11,14 @@ import type { ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ResearchAgentAction } from '../actions';
 import type { ProcessedConversationRound } from './prepare_conversation';
 import { roundToActions } from './round_to_actions';
-import {
-  answeredAskUserQuestionStepsToActions,
-  pendingAskUserQuestionStepsToActions,
-} from './pending_ask_user_question_steps_to_actions';
+import { pendingAskUserQuestionStepsToActions } from './pending_ask_user_question_steps_to_actions';
 
 /**
  * Build the action list from the current pending round, for execution resuming (after HITL interrupts).
+ *
+ * `roundToActions` walks the round in step order (tool-call groups and already-answered
+ * clarifying waves). `pendingAskUserQuestionStepsToActions` then appends the prompt
+ * currently being answered — the only step still missing from the round itself.
  */
 export const buildPendingRoundActions = ({
   round,
@@ -31,16 +32,13 @@ export const buildPendingRoundActions = ({
   eventEmitter: (event: ChatAgentEvent) => void;
 }): { actions: ResearchAgentAction[]; consumedPromptIds: string[] } => {
   const stepActions = roundToActions({ round, toolIdMapping });
-  const answeredAskActions = answeredAskUserQuestionStepsToActions({ round });
   const { actions: askActions, consumedPromptIds } = pendingAskUserQuestionStepsToActions({
     round,
     promptState,
     eventEmitter,
   });
   return {
-    // Tool calls first (load_skill, etc.), then earlier answered clarifying waves,
-    // then the prompt currently being answered — so prior Q&A is not dropped on resume.
-    actions: [...stepActions, ...answeredAskActions, ...askActions],
+    actions: [...stepActions, ...askActions],
     consumedPromptIds,
   };
 };
