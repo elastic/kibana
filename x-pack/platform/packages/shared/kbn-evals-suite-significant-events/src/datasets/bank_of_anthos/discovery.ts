@@ -32,7 +32,7 @@ const LEDGER_DB_CASCADE_EVENT_ID = 'transactionhistory__frontend-transactionhist
 const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   status: 'open',
   event_id: LEDGER_DB_CASCADE_EVENT_ID,
-  title: 'Ledger backends — customer transaction connectivity failure',
+  title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
     'Customer transaction flows are failing because ledger database and cache dependencies refuse connections.',
   summary:
@@ -298,14 +298,71 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
   causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
-const MISGROUPED_LEDGER_EVENT: Partial<SignificantEvent> = {
-  ...LEDGER_DB_CASCADE_EVENT,
+const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
   status: 'open',
-  event_id: 'ledger-db-disconnect__misgrouped-auth',
+  event_id: 'frontend__balancereader-connection-refused',
+  title: 'Balance reader — account balance lookup connectivity failure',
+  symptom_hypothesis:
+    'Account balance reads fail because the frontend cannot reach balancereader on its balance endpoint.',
+  summary:
+    'The frontend returns connection-refused errors to balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
+  severity: '60-high',
+  confidence: 0.68,
+  stream_names: ['logs'],
   signals: [
-    ...(LEDGER_DB_CASCADE_EVENT.signals ?? []),
-    ...(BENIGN_LOGIN_EVENT.signals ?? []),
-    ...(BENIGN_SIGNUP_EVENT.signals ?? []),
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: {
+        esql_query:
+          'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
+        result: 'found',
+      },
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'spike',
+        p_value: 0.0001,
+      },
+    },
+  ],
+  causal_features: [{ feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' }],
+  blast_radius: [
+    {
+      type: 'dependency',
+      feature_id: 'frontend-balancereader',
+      source: 'frontend',
+      target: 'balancereader',
+      stream_name: 'logs',
+    },
+  ],
+};
+
+/** Same confirmed impact as isolated balancereader failure, but weak detection metadata — severity must still follow grounding. */
+const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
+  ...BALANCE_READER_ISOLATED_EVENT,
+  event_id: 'frontend__balancereader-connection-refused-weak-detection',
+  confidence: 0.52,
+  signals: [
+    {
+      type: 'detection',
+      stream_name: 'logs',
+      confirmed: true,
+      description:
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+      evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
+      metadata: {
+        detection_id: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a-det-weak',
+        rule_name: 'Frontend → Balance Reader Connection Failures',
+        rule_uuid: '3c4bf4f9-9ed9-567f-be35-332eb79ee76a',
+        change_point_type: 'stationary',
+        p_value: 0.55,
+      },
+    },
   ],
 };
 
@@ -314,7 +371,11 @@ export const discovery: DatasetConfig['discovery'] = [
     input: {
       scenario_id: 'ledger-db-disconnect',
       stream_name: 'logs',
-      detections: toInputDetections([LEDGER_DB_CASCADE_EVENT]),
+      detections: toInputDetections([
+        LEDGER_DB_CASCADE_EVENT,
+        BENIGN_LOGIN_EVENT,
+        BENIGN_SIGNUP_EVENT,
+      ]),
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
@@ -332,7 +393,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]',
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
       expected_confirmed_rule_uuids: {
         [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
@@ -378,27 +439,9 @@ export const discovery: DatasetConfig['discovery'] = [
           text: 'Verifies key cascade signals via execute_esql during KI grounding and stamps confirmed: true from its own query results, rather than trusting pre-collected input evidence alone.',
           score: 2,
         },
-      ],
-    },
-    metadata: { difficulty: 'medium', failure_domain: 'ledger-db', failure_mode: 'cascade' },
-  },
-  {
-    input: {
-      scenario_id: 'ledger-db-disconnect-misgrouped-auth',
-      stream_name: 'logs',
-      detections: toInputDetections([MISGROUPED_LEDGER_EVENT]),
-    },
-    output: {
-      expected_ground_truth:
-        'misgrouped ledger event remains open/80-critical for the database cascade; unbacked authentication detections do not shape the event narrative',
-      expected_confirmed_rule_uuids: {
-        [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
-      },
-      expected_significant_events: [LEDGER_DB_CASCADE_EVENT],
-      criteria: [
         {
           id: 'reject-unrelated-auth-membership',
-          text: 'Omits Successful User Login and New User Account Created from the event because neither has a backed query KI; does not incorporate authentication activity into assessment_note.',
+          text: 'Omits Successful User Login and New User Account Created from the cascade event because neither has a backed query KI; does not incorporate authentication activity into assessment_note.',
           score: 3,
         },
         {
@@ -408,15 +451,48 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'open-confirmed-cascade',
-          text: 'Keeps the event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          text: 'Keeps the cascade event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          score: 2,
+        },
+      ],
+    },
+    metadata: { difficulty: 'hard', failure_domain: 'ledger-db', failure_mode: 'cascade' },
+  },
+  {
+    input: {
+      scenario_id: 'ledger-balancereader-weak-detection',
+      stream_name: 'logs',
+      detections: toInputDetections([BALANCE_READER_WEAK_DETECTION_EVENT]),
+    },
+    output: {
+      expected_ground_truth:
+        'open 60-high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
+      expected_confirmed_rule_uuids: {
+        [BALANCE_READER_WEAK_DETECTION_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
+      },
+      expected_significant_events: [BALANCE_READER_WEAK_DETECTION_EVENT],
+      criteria: [
+        {
+          id: 'weak-detection-strong-severity',
+          text: 'Sets severity=60-high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at 40-medium or 20-low.',
+          score: 3,
+        },
+        {
+          id: 'weak-detection-confidence-only',
+          text: 'May lower confidence because p_value is weak and change_point_type is stationary, but severity still reflects the confirmed failure impact.',
+          score: 2,
+        },
+        {
+          id: 'weak-detection-narrative-alignment',
+          text: 'Title, symptom_hypothesis, and summary state the confirmed connection failure and blocked balance lookups without hedging the event down to medium solely because detection metadata looks weak.',
           score: 2,
         },
       ],
     },
     metadata: {
       difficulty: 'hard',
-      failure_domain: 'ledger-db',
-      failure_mode: 'misgrouped-signal',
+      failure_domain: 'balancereader',
+      failure_mode: 'weak_detection_strong_evidence',
     },
     snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },
