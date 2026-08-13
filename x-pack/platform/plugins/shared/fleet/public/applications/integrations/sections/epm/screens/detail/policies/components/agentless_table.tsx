@@ -20,18 +20,8 @@ import type {
 } from '../../../../../../types';
 import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../../../../../../../common/constants';
 import type { usePagination } from '../../../../../../hooks';
-import {
-  useLink,
-  sendGetAgents,
-  useAuthz,
-  useStartServices,
-  useBulkGetAgentlessPolicyThroughput,
-  useDiscoverLocator,
-} from '../../../../../../hooks';
-import {
-  getAgentlessThroughputIndexPatterns,
-  buildPolicyBaseIdsWithFallbackKuery,
-} from '../../../../../../../../../common/services';
+import { useLink, sendGetAgents, useAuthz, useStartServices } from '../../../../../../hooks';
+import { buildPolicyBaseIdsWithFallbackKuery } from '../../../../../../../../../common/services';
 import { removeVersionSuffixFromPolicyId } from '../../../../../../../../../common/services/version_specific_policies_utils';
 import {
   Loading,
@@ -72,57 +62,6 @@ export const AgentlessPackagePoliciesTable = ({
   const [isAgentsLoading, setIsAgentsLoading] = useState<boolean>(false);
   const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
-
-  // Collect ids for non-connector policies only; connectors don't ingest via agents
-  const throughputPolicyIds = useMemo(
-    () =>
-      packagePolicies
-        .filter(({ packagePolicy }) => !isConnectorPolicy(packagePolicy))
-        .map(({ packagePolicy }) => packagePolicy.id),
-    [packagePolicies]
-  );
-  const { data: throughputData, isLoading: isThroughputLoading } =
-    useBulkGetAgentlessPolicyThroughput(throughputPolicyIds);
-  const throughputByPolicyId = useMemo(
-    () =>
-      (throughputData?.items ?? []).reduce<Record<string, AgentlessPolicyThroughput>>(
-        (acc, item) => {
-          acc[item.policyId] = item;
-          return acc;
-        },
-        {}
-      ),
-    [throughputData]
-  );
-
-  const hasNonConnectorPolicies = useMemo(
-    () => packagePolicies.some(({ packagePolicy }) => !isConnectorPolicy(packagePolicy)),
-    [packagePolicies]
-  );
-
-  const discoverLocator = useDiscoverLocator();
-  const getThroughputDiscoverParams = useCallback(
-    (packagePolicy: InMemoryPackagePolicy) => {
-      const indexPatterns = getAgentlessThroughputIndexPatterns(packagePolicy);
-      if (!discoverLocator || indexPatterns.length === 0) return undefined;
-      const title = indexPatterns.join(',');
-      const params = {
-        dataViewSpec: {
-          id: `fleet-agentless-throughput-${packagePolicy.id}`,
-          name: title,
-          title,
-          timeFieldName: 'event.ingested',
-        },
-        timeRange: { from: 'now-24h', to: 'now' },
-        query: { language: 'kuery', query: `agent.name: *${packagePolicy.id}*` },
-      };
-      return {
-        href: discoverLocator.getRedirectUrl(params),
-        navigate: () => discoverLocator.navigate(params),
-      };
-    },
-    [discoverLocator]
-  );
 
   // Kuery for all agents enrolled into the agent policies associated with the package policies.
   // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies.

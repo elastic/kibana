@@ -13,6 +13,18 @@ import { createIntegrationsTestRendererMock } from '../../../../../../../../mock
 
 import { AgentlessPackagePoliciesTable } from './agentless_table';
 
+const mockUseLocation = jest.fn().mockReturnValue({
+  pathname: '/',
+  search: '',
+  hash: '',
+  state: undefined,
+});
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => mockUseLocation(),
+}));
+
 jest.mock('../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../hooks'),
   useConfirmForceInstall: jest.fn(),
@@ -47,6 +59,12 @@ describe('AgentlessPackagePoliciesTable', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: undefined,
+    });
   });
 
   const defaultProps = {
@@ -153,7 +171,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     await act(async () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
-    expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
+    expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
   });
 
   it('opens flyout when openEnrollmentFlyout query param matches a package policy id', async () => {
@@ -166,7 +184,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
     await waitFor(() => {
-      expect(result.getByText('Confirm managed integration enrollment')).toBeInTheDocument();
+      expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
     });
   });
 
@@ -211,6 +229,6 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalled();
     });
-    expect(result.queryByText('Confirm managed integration enrollment')).not.toBeInTheDocument();
+    expect(result.queryByText('Confirm agentless enrollment')).not.toBeInTheDocument();
   });
 });
