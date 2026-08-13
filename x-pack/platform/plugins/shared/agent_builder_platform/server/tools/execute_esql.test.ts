@@ -168,6 +168,32 @@ describe('executeEsqlTool', () => {
       expect((query?.data as { esql: string }).esql).not.toContain('range');
     });
 
+    it('accepts a verbose filter that stays under the size limit', () => {
+      const filter = {
+        bool: {
+          should: Array.from({ length: 500 }, (_, i) => ({ term: { host: `server-${i}` } })),
+          minimum_should_match: 1,
+        },
+      };
+
+      expect(executeEsqlTool().schema.safeParse({ query: 'FROM logs', filter }).success).toBe(true);
+    });
+
+    it('rejects a filter that exceeds the size limit once serialized', () => {
+      const filter = {
+        bool: {
+          should: Array.from({ length: 5000 }, (_, i) => ({ term: { host: `server-${i}` } })),
+          minimum_should_match: 1,
+        },
+      };
+      expect(JSON.stringify(filter).length).toBeGreaterThan(100_000);
+
+      const result = executeEsqlTool().schema.safeParse({ query: 'FROM logs', filter });
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toContain('at most 100000 characters');
+    });
+
     it('propagates a rejected filter so the runner can convert it into an error result', async () => {
       const tool = executeEsqlTool();
       executeEsqlMock.mockRejectedValue(new Error('parsing_exception: unknown query [nope]'));

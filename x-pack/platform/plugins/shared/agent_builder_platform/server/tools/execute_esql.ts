@@ -19,6 +19,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
 
+/**
+ * Elasticsearch caps a request body at 100MB; this is a courtesy bound well under it. It has to be
+ * checked against the serialized filter, since `z.record`'s key schema bounds key names only and
+ * leaves the value side unbounded.
+ */
+const MAX_FILTER_LENGTH = 100_000;
+
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
   params: z
@@ -42,7 +49,10 @@ const executeEsqlToolSchema = z.object({
     .default(100)
     .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
   filter: z
-    .record(z.string().max(1024), z.unknown())
+    .record(z.string().max(MAX_FILTER_LENGTH), z.unknown())
+    .refine((filter) => JSON.stringify(filter).length <= MAX_FILTER_LENGTH, {
+      message: `Filters must be at most ${MAX_FILTER_LENGTH} characters once serialized for agent input`,
+    })
     .optional()
     .describe(
       '(Optional) An Elasticsearch Query DSL object combined with the query using AND, e.g. {"term": {"status": "open"}}. It can only narrow the results, never widen them. This is not a WHERE clause: it is pushed down to the data source, so it removes documents before any ES|QL command sees them, and it is parsed separately from the query text, so it cannot reference ?named parameters.'
