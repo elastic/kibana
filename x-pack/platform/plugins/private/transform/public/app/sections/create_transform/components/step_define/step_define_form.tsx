@@ -542,7 +542,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                           tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
-                            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
                             <EuiButtonIcon
                               onClick={copy}
                               iconType="copy"
