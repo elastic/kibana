@@ -32,11 +32,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
-import {
-  ALL_DATA_SOURCE_TYPES,
-  DATA_SOURCE_TYPES_TO_ICONS,
-  validateIndexNameRules,
-} from '../../common';
+import { validateIndexNameRules } from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
@@ -48,15 +44,15 @@ import {
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
-import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
+
 import {
   authenticationModeFromDataSource,
   dataSourceToFlyoutFormValues,
   emptyDataSourceFlyoutFormValues,
 } from './data_source_flyout_initial_values';
-import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { DataFederationKibanaServices } from '../types';
+import { DATA_SOURCES_DEFINITIONS } from './data_sources';
 
 export interface CreateDataSourceFlyoutProps {
   /** When set, the flyout opens in edit mode for this data source. */
@@ -83,9 +79,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   const dataFederationLinks = docLinks.links.dataFederation;
 
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
-  const enableGoogleCloudStorageDataSourceType =
-    featureFlags?.enableGoogleCloudStorageDataSourceType;
-  const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
   const isEditMode = initialDataSource !== undefined;
 
   const formDefaultValues = useMemo(
@@ -145,43 +138,26 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     control,
   });
 
-  const enabledDataSourceTypes = useMemo<readonly DataSourceType[]>(() => {
-    const typesToExclude = new Set<DataSourceType>();
-    if (!enableGoogleCloudStorageDataSourceType) {
-      typesToExclude.add('gcs');
-    }
-    if (!enableAzureDataSourceType) {
-      typesToExclude.add('azure');
-    }
+  const dataSourceTypeOptions = Object.values(DATA_SOURCES_DEFINITIONS)
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map((dataSource) => {
+      const display = dataSource.icon ? (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={dataSource.icon} size="m" aria-hidden={true} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{dataSource.label}</EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        dataSource.label
+      );
 
-    const filtered = ALL_DATA_SOURCE_TYPES.filter((t) => !typesToExclude.has(t));
-    return filtered;
-  }, [enableAzureDataSourceType, enableGoogleCloudStorageDataSourceType]);
-
-  const dataSourceTypeOptions = useMemo(() => {
-    return enabledDataSourceTypes
-      .map((value) => ({ value, label: getDataSourceTypeVerbose(value) }))
-      .sort((a, b) => a.label.localeCompare(b.label))
-      .map(({ value, label }) => {
-        const iconType = DATA_SOURCE_TYPES_TO_ICONS[value];
-        const display = iconType ? (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={iconType} size="m" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          label
-        );
-
-        return {
-          value,
-          inputDisplay: display,
-          dropdownDisplay: display,
-        };
-      });
-  }, [enabledDataSourceTypes]);
+      return {
+        value: dataSource.id,
+        inputDisplay: display,
+        dropdownDisplay: display,
+      };
+    });
 
   const [authenticationMode, setAuthenticationMode] = useState<CreateDataSourceAuthenticationMode>(
     () =>
@@ -233,6 +209,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   const flyoutTitle = isEditMode
     ? createDataSourceFlyoutStrings.editTitle()
     : createDataSourceFlyoutStrings.createTitle();
+
+  const FlyoutTypeSettings =
+    DATA_SOURCES_DEFINITIONS[dataSourceType]?.dataSourceRequiredSettingsComponent;
 
   return (
     <EuiFlyout
@@ -310,19 +289,19 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          {dataSourceType === 's3' && (
-            <CreateDataSourceFlyoutTypeSettingsS3Region
-              control={control}
-              unregister={unregister}
-              isRequired={!isEditMode}
-            />
-          )}
+          {/** required settings for the data source type */}
+          <FlyoutTypeSettings control={control} unregister={unregister} isRequired={!isEditMode} />
+
+          {/** optional / advanced settings for the data source type */}
           <CreateDataSourceFlyoutTypeSettingsBlock
             control={control}
             dataSourceType={dataSourceType}
             unregister={unregister}
           />
+
           <EuiHorizontalRule margin="m" />
+
+          {/** authentication settings for the data source type */}
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}

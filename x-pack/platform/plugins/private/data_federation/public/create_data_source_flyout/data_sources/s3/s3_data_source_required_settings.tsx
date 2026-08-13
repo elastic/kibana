@@ -16,18 +16,17 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import type { UseFormUnregister } from 'react-hook-form';
-import { type Control, useController } from 'react-hook-form';
-import type { CreateDataSourceFlyoutFormValues } from './types';
+import { type Control, type UseFormUnregister, useController } from 'react-hook-form';
+import type { CreateDataSourceFlyoutFormValues } from '../../types';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 import { FederatedIdentityClusterInfoFields } from './federated_identity_cluster_info_fields';
 
-export function CreateDataSourceFlyoutTypeSettingsS3Region({
+export function S3DataSourceRequiredSettings({
   control,
   unregister,
   isRequired,
 }: {
-  control: Control<CreateDataSourceFlyoutFormValues, any>;
+  control: Control<CreateDataSourceFlyoutFormValues>;
   unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
   isRequired: boolean;
 }) {
@@ -70,44 +69,6 @@ export function CreateDataSourceFlyoutTypeSettingsS3Region({
         onChange={(e) => regionField.onChange(e.target.value)}
         name={regionField.name}
         inputRef={regionField.ref}
-      />
-    </EuiFormRow>
-  );
-}
-
-export function CreateDataSourceFlyoutTypeSettingsS3({
-  control,
-  unregister,
-}: {
-  control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
-}) {
-  const { field: endpointField } = useController({
-    name: 'settings.endpoint',
-    control,
-  });
-
-  useEffect(() => {
-    return () => {
-      unregister('settings.endpoint');
-    };
-  }, [unregister]);
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.dataFederation.createFlyout.s3.fields.endpoint', {
-        defaultMessage: 'Endpoint',
-      })}
-      fullWidth
-    >
-      <EuiFieldText
-        data-test-subj="createDataSourceFlyoutS3Endpoint"
-        fullWidth
-        autoComplete="off"
-        value={endpointField.value}
-        onChange={(e) => endpointField.onChange(e.target.value)}
-        name={endpointField.name}
-        inputRef={endpointField.ref}
       />
     </EuiFormRow>
   );
@@ -285,7 +246,7 @@ export function CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity({
       <EuiButtonEmpty
         size="s"
         flush="left"
-        iconType={isAdvancedOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
+        iconType={isAdvancedOpen ? 'arrowDown' : 'arrowRight'}
         aria-expanded={isAdvancedOpen}
         aria-controls={advancedId}
         onClick={() => setIsAdvancedOpen((value) => !value)}

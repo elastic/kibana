@@ -18,8 +18,8 @@ import {
 
 import type { UseFormUnregister } from 'react-hook-form';
 import { type Control, useController } from 'react-hook-form';
-import type { CreateDataSourceFlyoutFormValues } from './types';
-import type { AzureAuthenticationMode } from './create_data_source_flyout_authentication';
+import type { CreateDataSourceFlyoutFormValues } from '../../types';
+import type { AzureAuthenticationMode } from '../../create_data_source_flyout_authentication';
 
 export function CreateDataSourceFlyoutTypeSettingsAzure({
   control,

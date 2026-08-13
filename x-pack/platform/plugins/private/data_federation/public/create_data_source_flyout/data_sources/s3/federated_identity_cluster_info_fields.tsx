@@ -27,7 +27,7 @@ function ReadOnlyFormRow({ label, value }: { label: string; value: string }) {
             {(copy) => (
               /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
               <EuiButtonIcon
-                iconType="copy"
+                iconType="copyClipboard"
                 display="empty"
                 onClick={copy}
                 aria-label={copyLabel}
