@@ -28,7 +28,19 @@ export interface RuleCreationExample {
     confidence: number;
   };
   output: {
+    /**
+     * Techniques the agent is expected to tag. F1 is computed against this set.
+     * Should contain only the technique(s) the prompt explicitly asks for.
+     */
     mitreIds: string[];
+    /**
+     * Techniques that are credited when present but never demanded and never
+     * penalised when absent. Use for parent techniques and laterally-related
+     * ones the prompt doesn't mention. Without this split, the F1 ceiling is
+     * structurally below 1.00 for any example where the prompt names a
+     * sub-technique but the dataset lists its parent too.
+     */
+    optionalMitreIds?: string[];
     language: 'esql';
     esqlQuery?: string;
     isBrokenFixture?: boolean;
@@ -52,7 +64,8 @@ export const goldenDataset: RuleCreationExample[] = [
       confidence: 0.85,
     },
     output: {
-      mitreIds: ['T1078', 'T1078.001'],
+      mitreIds: ['T1078.001'],
+      optionalMitreIds: ['T1078'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type == "linux"
@@ -80,7 +93,8 @@ export const goldenDataset: RuleCreationExample[] = [
       confidence: 0.9,
     },
     output: {
-      mitreIds: ['T1548', 'T1548.002', 'T1218'],
+      mitreIds: ['T1548.002'],
+      optionalMitreIds: ['T1548', 'T1218'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type == "windows"
@@ -107,7 +121,8 @@ export const goldenDataset: RuleCreationExample[] = [
       confidence: 0.75,
     },
     output: {
-      mitreIds: ['T1027', 'T1140', 'T1059.001'],
+      mitreIds: ['T1027'],
+      optionalMitreIds: ['T1140', 'T1059.001'],
       language: 'esql',
       esqlQuery: `FROM logs-windows.powershell_operational*
 | WHERE event.code == "4104"

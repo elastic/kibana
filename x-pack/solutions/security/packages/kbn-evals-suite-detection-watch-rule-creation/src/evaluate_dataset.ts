@@ -101,7 +101,18 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
     evaluate: async ({ output, expected }) => {
       const generatedTechniques = extractMitreTechniques(output.rule ?? {});
       const expectedTechniques = new Set(expected.mitreIds);
-      const metrics = calculateSetMetrics(generatedTechniques, expectedTechniques);
+      const optionalTechniques = new Set(expected.optionalMitreIds ?? []);
+
+      // Optional techniques are credited, never required: including one must not be punished as a
+      // false positive, and omitting one must not be punished as a miss. Dropping them from the
+      // generated set before scoring achieves both — without this split, the F1 ceiling is
+      // structurally below 1.00 for any example where the prompt names a sub-technique but the
+      // dataset also lists its parent (e.g. T1078.001 asked, T1078 in mitreIds = ceiling 0.75).
+      const scoredTechniques = new Set(
+        [...generatedTechniques].filter((t) => !optionalTechniques.has(t))
+      );
+
+      const metrics = calculateSetMetrics(scoredTechniques, expectedTechniques);
       const invalidFormat = [...generatedTechniques].filter((t) => !/^T\d{4}(\.\d{3})?$/.test(t));
       return {
         score: metrics.f1,
@@ -111,6 +122,7 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
           f1: metrics.f1,
           generated: Array.from(generatedTechniques),
           expected: Array.from(expectedTechniques),
+          optionalCredited: [...generatedTechniques].filter((t) => optionalTechniques.has(t)),
           invalidFormat,
         },
       };

@@ -40,7 +40,8 @@ export const hardCases: RuleCreationExample[] = [
       confidence: 0.8,
     },
     output: {
-      mitreIds: ['T1195', 'T1195.002', 'T1059', 'T1204', 'T1543'],
+      mitreIds: ['T1195.002'],
+      optionalMitreIds: ['T1195', 'T1059', 'T1204', 'T1543'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type IN ("linux", "macos")
@@ -71,7 +72,8 @@ export const hardCases: RuleCreationExample[] = [
       confidence: 0.9,
     },
     output: {
-      mitreIds: ['T1562', 'T1562.008'],
+      mitreIds: ['T1562.008'],
+      optionalMitreIds: ['T1562'],
       language: 'esql',
       esqlQuery: `FROM logs-aws.cloudtrail-*
 | WHERE event.provider == "route53resolver.amazonaws.com"
@@ -99,7 +101,8 @@ export const hardCases: RuleCreationExample[] = [
       confidence: 0.75,
     },
     output: {
-      mitreIds: ['T1609', 'T1611', 'T1059', 'T1053'],
+      mitreIds: ['T1609'],
+      optionalMitreIds: ['T1611', 'T1059', 'T1053'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type == "linux"
