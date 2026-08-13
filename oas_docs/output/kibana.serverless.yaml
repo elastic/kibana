@@ -62799,7 +62799,6 @@ paths:
                               items:
                                 $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                               type: array
-                            updated_at: {}
                           required:
                             - steps
                         settings:
@@ -62886,16 +62885,26 @@ paths:
                         lifecycle:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                         processing:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            steps:
-                              items:
-                                $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                              type: array
-                            updated_at: {}
-                          required:
-                            - steps
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                steps:
+                                  items:
+                                    $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                                  type: array
+                              required:
+                                - steps
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                processors:
+                                  items:
+                                    additionalProperties: {}
+                                    type: object
+                                  type: array
+                              required:
+                                - processors
                         settings:
                           additionalProperties: false
                           type: object
@@ -75560,16 +75569,26 @@ components:
                 lifecycle:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                 processing:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    steps:
-                      items:
-                        $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                      type: array
-                    updated_at: {}
-                  required:
-                    - steps
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        steps:
+                          items:
+                            $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                          type: array
+                      required:
+                        - steps
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        processors:
+                          items:
+                            additionalProperties: {}
+                            type: object
+                          type: array
+                      required:
+                        - processors
                 settings:
                   additionalProperties: false
                   type: object
@@ -100318,7 +100337,6 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                       type: array
-                    updated_at: {}
                   required:
                     - steps
                 settings:
@@ -119016,6 +119034,11 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
