@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { MLErrorObject } from '@kbn/ml-error-utils';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 export const ErrorMessageContent = ({
   fieldName,
@@ -18,12 +18,15 @@ export const ErrorMessageContent = ({
   error: MLErrorObject;
 }) => {
   return (
-    <EuiCallOut heading="p" color="danger" size="s">
-      <FormattedMessage
-        id="xpack.dataVisualizer.index.fieldStatisticsErrorMessage"
-        defaultMessage="Error getting statistics for field ''{fieldName}'' because {reason}"
-        values={{ fieldName, reason: error.message }}
-      />
-    </EuiCallOut>
+    <KbnDangerCallout
+      size="s"
+      title={
+        <FormattedMessage
+          id="xpack.dataVisualizer.index.fieldStatisticsErrorMessage"
+          defaultMessage="Error getting statistics for field ''{fieldName}'' because {reason}"
+          values={{ fieldName, reason: error.message }}
+        />
+      }
+    />
   );
 };
