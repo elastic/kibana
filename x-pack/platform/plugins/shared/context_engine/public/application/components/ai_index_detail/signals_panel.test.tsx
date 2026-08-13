@@ -22,8 +22,6 @@ import { buildSignal } from './signal_test_fixtures';
 jest.mock('../../hooks/use_feedback_loop_enabled', () => ({ useFeedbackLoopEnabled: jest.fn() }));
 jest.mock('../../hooks/use_signal_groups', () => ({ useSignalGroups: jest.fn() }));
 jest.mock('../../hooks/use_signals', () => ({ useSignals: jest.fn() }));
-// The agent selector's data hooks talk to react-query/http; stub them so the panel renders in
-// isolation. The selector's own behavior is covered in feedback_agent_selector.test.tsx.
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => ({ agents: [], isLoading: false, error: undefined }),
 }));
@@ -171,9 +169,7 @@ describe('SignalsPanel', () => {
     const opener = jest.fn();
     renderPanel({ chatOpener: opener });
 
-    // Selector is available so the user can pick an agent...
     expect(screen.getByTestId('contextSignalsFeedbackAgentSelect')).toBeInTheDocument();
-    // ...but until they do, Analyze is gated and an inline prompt explains why.
     expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeDisabled();
     expect(screen.getByTestId('contextSignalsFeedbackAgentPrompt')).toBeInTheDocument();
 
@@ -194,8 +190,6 @@ describe('SignalsPanel', () => {
   });
 
   it('does not render the agent selector or prompt for a managed index', () => {
-    // Managed indices are Elastic-managed and cannot have a feedback agent set (the PUT 409s), so
-    // the selector and its prompt are hidden rather than offering a dead-end control.
     renderPanel({ chatOpener: jest.fn(), index: { ...aiIndex, managed: true } });
 
     expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();

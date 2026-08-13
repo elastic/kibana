@@ -28,22 +28,15 @@ export interface AnalyzeAndImproveContext {
 /** Opens Agent Builder to analyze the given signals. */
 export type ChatOpener = (context: AnalyzeAndImproveContext) => void | Promise<void>;
 
-/**
- * Agent Builder `openChat` options for an "Analyze & improve" hand-off. Context Engine owns this
- * translation (attachments and per-index conversation scoping) so there is a single source of
- * truth for the wire contract.
- */
+/** Options passed to Agent Builder `openChat` for an Analyze & improve hand-off. */
 export interface AnalyzeChatOptions {
-  /** The AI index's configured feedback agent, or `undefined` when none is set. */
+  /** Feedback agent to open. */
   agentId?: string;
-  /** Always start a fresh conversation for the hand-off. */
+  /** When true, start a new conversation. */
   newConversation: boolean;
-  /** Per-index session so each AI index's analysis is its own conversation, not a shared one. */
+  /** Session tag for this AI index's conversation. */
   sessionTag: string;
-  /**
-   * Built-in attachments describing the index: a `text` summary that lists linked workflow IDs.
-   * Workflow YAML is not attached; the agent can fetch a definition by id.
-   */
+  /** Attachments passed to Agent Builder. */
   attachments: AttachmentInput[];
 }
 

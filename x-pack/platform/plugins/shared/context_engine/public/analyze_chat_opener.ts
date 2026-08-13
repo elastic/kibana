@@ -12,9 +12,8 @@ import { buildAnalyzeChat as defaultBuildAnalyzeChat } from './analyze_chat';
 import type { AnalyzeAndImproveContext, AnalyzeChatOptions, ChatOpener } from './types';
 
 /**
- * Builds the "Analyze & improve" opener that calls Agent Builder `openChat`. Returns `undefined`
- * when Agent Builder is absent or the user lacks `agentBuilder.show`, so the button stays hidden.
- * Runtime access (license + LLM connector) is checked at click time.
+ * Builds the Analyze & improve chat opener. Returns undefined when Agent Builder is unavailable
+ * or the user lacks the `agentBuilder.show` capability.
  */
 export const createAnalyzeChatOpener = ({
   coreStart,
@@ -46,7 +45,6 @@ export const createAnalyzeChatOpener = ({
       return;
     }
     const options = await buildAnalyzeChat(ctx);
-    // No configured feedback agent → nothing to open against (the button is gated on this too).
     if (!options.agentId) {
       return;
     }

@@ -32,17 +32,10 @@ const buildIndexSummary = (aiIndex: AiIndexHttpItem): string => {
   return lines.filter((line): line is string => Boolean(line)).join('\n');
 };
 
-/**
- * Builds the Agent Builder `openChat` options for an "Analyze & improve" hand-off: a single `text`
- * attachment summarizing the AI index and listing linked workflow IDs. Workflow YAML is not
- * attached; the agent can fetch a definition by id.
- */
+/** Builds Agent Builder `openChat` options for an Analyze & improve hand-off. */
 export const buildAnalyzeChat = ({ aiIndex }: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
   agentId: aiIndex.feedback_agent_id,
   newConversation: true,
-  // Per-index session so each AI index's analysis is its own conversation instead of colliding
-  // on Agent Builder's shared 'default' session for the agent (which would bleed one index's
-  // context into another's). `context.tag` is reserved for future group-scoped analysis.
   sessionTag: `context-engine-feedback:${aiIndex.id}`,
   attachments: [
     {

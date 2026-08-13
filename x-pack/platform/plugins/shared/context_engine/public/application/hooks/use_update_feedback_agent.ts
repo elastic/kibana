@@ -14,13 +14,7 @@ import { contextEngineQueryKeys } from './query_keys';
 import { toProperties } from './use_save_ai_index_field';
 import { useKibana } from './use_kibana';
 
-/**
- * Persists the AI index's `feedback_agent_id` via the create-or-replace (PUT) route, then
- * invalidates the AI-index detail query so the page reflects the new selection. The PUT replaces the
- * whole record, so the current properties are re-sent (via `toProperties`, which carries over every
- * unchanged field) with only `feedback_agent_id` changed. Failures surface an error toast — e.g. the
- * 409 returned for managed indices, which cannot have a feedback agent set.
- */
+/** Persists the AI index's `feedback_agent_id`. */
 export const useUpdateFeedbackAgent = (aiIndex: AiIndexHttpItem) => {
   const {
     services: { http, notifications },
@@ -34,8 +28,6 @@ export const useUpdateFeedbackAgent = (aiIndex: AiIndexHttpItem) => {
         properties: { ...toProperties(aiIndex), feedback_agent_id: feedbackAgentId },
       }),
     onSuccess: () =>
-      // `exact: true` refreshes only the detail query the selector reads from — without it, React
-      // Query's prefix match would also invalidate the ES-backed `ki_summary` child query.
       queryClient.invalidateQueries({
         queryKey: contextEngineQueryKeys.aiIndex.detail(aiIndex.id),
         exact: true,

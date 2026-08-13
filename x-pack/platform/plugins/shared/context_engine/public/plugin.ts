@@ -48,10 +48,6 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
-  /**
-   * Resolves the Agent Builder start contract via `core.plugins.onStart` (runtime dependency).
-   * `undefined` when Agent Builder is disabled for the running solution/tier.
-   */
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
     Promise.resolve(undefined);
 
@@ -106,16 +102,7 @@ export class ContextEnginePlugin
     return {};
   }
 
-  /**
-   * Resolves Agent Builder through `runtimePluginDependencies` so Context Engine can open the
-   * chat popup without a required/optional plugin edge (those participate in cycle detection).
-   * Matches the workflows_management ↔ agentBuilder pattern.
-   */
   private setupAgentBuilderStart(core: CoreSetup<ContextEngineStartDependencies>): void {
-    // `core.plugins.onStart` throws synchronously when the named plugin is not in the
-    // current build's dependency map — which happens when `agentBuilder` is disabled
-    // for the running solution/tier. The synchronous throw bypasses the promise `.catch`,
-    // so we wrap the call in try/catch and fall back to undefined.
     try {
       this.agentBuilderPromise = core.plugins
         .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')

@@ -19,11 +19,7 @@ interface FeedbackAgentSelectorProps {
 
 const UNSET_VALUE = '';
 
-/**
- * Selects the Agent Builder agent that runs this AI index's "Analyze & improve" (persisted as
- * `feedback_agent_id`). Populated from `GET /api/agent_builder/agents` (no Agent Builder plugin
- * dependency); a change is persisted via the AI-index PUT route, which refetches the index.
- */
+/** Select control for the AI index's Analyze & improve Agent Builder agent. */
 export const FeedbackAgentSelector = ({ aiIndex }: FeedbackAgentSelectorProps) => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const updateFeedbackAgent = useUpdateFeedbackAgent(aiIndex);
@@ -38,8 +34,6 @@ export const FeedbackAgentSelector = ({ aiIndex }: FeedbackAgentSelectorProps) =
     ...agents.map((agent) => ({ value: agent.id, text: agent.name || agent.id })),
   ];
 
-  // Surface a failed agents fetch so the user understands why the selector is empty, rather than it
-  // looking identical to "there are no agents".
   const errorMessage = error
     ? i18n.translate('xpack.contextEngine.aiIndexDetail.signals.feedbackAgent.loadError', {
         defaultMessage: 'Unable to load Agent Builder agents.',

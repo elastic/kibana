@@ -60,13 +60,10 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
 
   const loading = isLoading || isLoadingGroups;
 
-  // "Analyze & improve" is pure plumbing: it can only open a chat once Agent Builder is available
-  // AND the index has a feedback agent configured to open it against.
   const hasFeedbackAgent = Boolean(aiIndex?.feedback_agent_id);
 
   const handleAnalyze = () => {
     if (aiIndex) {
-      // `tag` is reserved for future group-scoped analysis; the panel-level action is index-wide.
       analyzeAndImprove(getChatOpener, { aiIndex, tag: undefined });
     }
   };
