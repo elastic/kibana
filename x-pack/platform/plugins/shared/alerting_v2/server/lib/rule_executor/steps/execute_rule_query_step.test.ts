@@ -47,9 +47,11 @@ const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN
 describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
 
   function createStep(maxAlertsPerRun?: number) {
-    const { loggerService } = createLoggerService();
+    const { loggerService, mockLogger: logger } = createLoggerService();
+    mockLogger = logger;
     const mocks = createQueryService();
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
@@ -73,6 +75,18 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].type).toBe('continue');
     expect(results[0].state.queryPayload).toBeDefined();
     expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      'Executing ES|QL query',
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          rule_id: state.input.ruleId,
+          step: 'execute_rule_query',
+        }),
+      })
+    );
+    const debugMessage = (mockLogger.debug as jest.Mock).mock.calls[0][0] as string;
+    expect(debugMessage).not.toContain('FROM');
+    expect(debugMessage).not.toContain('LIMIT');
   });
 
   it('passes correct parameters to ES client', async () => {

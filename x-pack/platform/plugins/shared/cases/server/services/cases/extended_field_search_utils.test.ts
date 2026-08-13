@@ -79,6 +79,57 @@ describe('resolveExtendedFieldFilters', () => {
     ]);
   });
 
+  it('ORs multiple values for the same label into one group', () => {
+    const result = resolveExtendedFieldFilters(
+      [
+        { label: 'Requires postmortem', value: 'true' },
+        { label: 'Requires postmortem', value: 'false' },
+      ],
+      [],
+      [
+        {
+          name: 'requires_postmortem',
+          label: 'Requires postmortem',
+          type: 'boolean',
+          control: 'TOGGLE',
+        },
+      ]
+    );
+
+    expect(result).toEqual([
+      [
+        {
+          storageKey: 'requires_postmortem_as_boolean',
+          value: 'true',
+          esType: 'boolean',
+          control: 'TOGGLE',
+          templateVersions: [],
+          isGlobal: true,
+        },
+        {
+          storageKey: 'requires_postmortem_as_boolean',
+          value: 'false',
+          esType: 'boolean',
+          control: 'TOGGLE',
+          templateVersions: [],
+          isGlobal: true,
+        },
+      ],
+    ]);
+
+    const clauses = buildExtendedFieldFilterClauses(result);
+    expect(clauses).toHaveLength(1);
+    expect(clauses[0]).toEqual({
+      bool: {
+        should: [
+          { term: { 'cases.extended_fields.requires_postmortem_as_boolean': 'true' } },
+          { term: { 'cases.extended_fields.requires_postmortem_as_boolean': 'false' } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
   it('is case-insensitive for label matching', () => {
     const result = resolveExtendedFieldFilters([{ label: 'PRIORITY', value: 'high' }], templates);
 
