@@ -94,6 +94,10 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   mergeStrategy: ConfigType['alertMergeStrategy'];
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  /** Timestamp fields mapped as date_nanos in at least one of the input indices */
+  dateNanosTimestampFields: string[];
+  /** Timestamp fields mapped as both date and date_nanos across the input indices */
+  mixedTimestampFields: string[];
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
