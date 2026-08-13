@@ -307,6 +307,44 @@ describe('DiscoverNoResults', () => {
       });
     });
 
+    describe('no data in the cluster', () => {
+      test('links to integrations instead of suggesting to adjust the search', async () => {
+        jest.spyOn(services.dataViews.hasData, 'hasESData').mockResolvedValueOnce(false);
+        services.core.application.capabilities = {
+          ...services.core.application.capabilities,
+          navLinks: { ...services.core.application.capabilities.navLinks, integrations: true },
+        };
+
+        const toolkit = getDiscoverInternalStateMock({ services });
+
+        await toolkit.initializeTabs();
+        await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+        renderWithKibanaRenderContext(
+          <DiscoverToolkitTestProvider toolkit={toolkit}>
+            <DiscoverNoResults
+              isTimeBased
+              onDisableFilters={() => {}}
+              dataView={stubDataView}
+              query={{ language: 'lucene', query: '' }}
+              filters={[]}
+            />
+          </DiscoverToolkitTestProvider>
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTestId('discoverNoEsDataMessage')).toBeVisible();
+        });
+
+        expect(screen.getByTestId('discoverNoEsDataBrowseIntegrations')).toBeVisible();
+        // The suggestions to adjust the search criteria are replaced by the message
+        expect(screen.getByTestId('discoverNoResults')).toBeVisible();
+        expect(screen.queryByTestId('discoverNoResultsTimefilter')).not.toBeInTheDocument();
+        // Searching the entire time range stays available
+        expect(screen.getByTestId('discoverNoResultsViewAllMatches')).toBeVisible();
+      });
+    });
+
     describe('filter/query', () => {
       test('shows "adjust search" message when having query', async () => {
         const result = await renderAndFindSubjects({

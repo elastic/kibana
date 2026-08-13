@@ -8,6 +8,7 @@
  */
 
 export * from './data_views';
+export * from './has_es_data';
 export * from './initialize_single_tab';
 export * from './tabs';
 export * from './open_discover_session';

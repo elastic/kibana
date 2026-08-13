@@ -151,30 +151,6 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ? urlAppState?.dataSource.dataViewId
       : persistedTabDataView?.id;
 
-    const tabHasInitialAdHocDataViewSpec =
-      dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
-    const peristedTabHasAdHocDataView = Boolean(
-      persistedTabDataView && !persistedTabDataView.isPersisted()
-    );
-
-    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
-    const profileDataViews = runtimeStateManager.adHocDataViews$
-      .getValue()
-      .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
-
-    const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
-    const canAccessWithoutPersistedDataView =
-      isEsqlMode ||
-      tabHasInitialAdHocDataViewSpec ||
-      peristedTabHasAdHocDataView ||
-      profileDataViewsExist ||
-      locationStateHasDataViewSpec;
-
-    if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
-      return { showNoDataPage: true };
-    }
-
     /**
      * Tab initialization
      */
@@ -344,7 +320,5 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     discoverTabLoadTracker.reportEvent();
-
-    return { showNoDataPage: false };
   }
 );

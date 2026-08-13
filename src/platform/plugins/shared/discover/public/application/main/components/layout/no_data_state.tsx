@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, useCallback, useEffect, useState } from 'react';
+import React, { lazy, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { ENABLE_ESQL, getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useHasESData } from '../../hooks/use_has_es_data';
 import {
   internalStateActions,
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../state_management/redux';
+import { INTEGRATIONS_BROWSE_PATH } from '../../../../constants';
 
 const importNoDataViews = () => import('@kbn/shared-ux-prompt-no-data-views');
 const NoDataViewsPromptKibanaProvider = withSuspense(
@@ -27,8 +29,6 @@ const NoDataViewsPromptKibanaProvider = withSuspense(
 const NoDataViewsPrompt = withSuspense(
   lazy(async () => ({ default: (await importNoDataViews()).NoDataViewsPrompt }))
 );
-
-const INTEGRATIONS_PATH = '/app/integrations/browse';
 
 /**
  * Shown in place of the document table when the tab has no data view, offering to create
@@ -73,7 +73,9 @@ export const NoDataState = ({
           onDataViewCreated={(dataView) => onDataViewCreated(dataView as DataView)}
           allowAdHocDataView
           onTryESQL={uiSettings.get(ENABLE_ESQL) ? onTryESQL : undefined}
-          addDataHref={canAddData ? core.http.basePath.prepend(INTEGRATIONS_PATH) : undefined}
+          addDataHref={
+            canAddData ? core.http.basePath.prepend(INTEGRATIONS_BROWSE_PATH) : undefined
+          }
           addDataDocLink={docLinks.links.kibana.guide}
           // Creating a data view is already offered by the data view picker of the search bar
           showCreateDataView={false}
@@ -88,26 +90,8 @@ export const NoDataState = ({
  * and the current user is allowed to browse integrations
  */
 const useCanAddData = () => {
-  const { core, dataViews } = useDiscoverServices();
-  const [hasESData, setHasESData] = useState<boolean | undefined>(undefined);
-
-  useEffect(() => {
-    let mounted = true;
-
-    dataViews.hasData
-      .hasESData()
-      // Don't suggest adding data if we can't tell whether there is any
-      .catch(() => true)
-      .then((nextHasESData) => {
-        if (mounted) {
-          setHasESData(nextHasESData);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [dataViews]);
+  const { core } = useDiscoverServices();
+  const hasESData = useHasESData();
 
   return hasESData === false && Boolean(core.application.capabilities.navLinks.integrations);
 };

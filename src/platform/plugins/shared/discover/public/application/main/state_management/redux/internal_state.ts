@@ -71,7 +71,7 @@ const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+  hasESData: undefined,
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
@@ -150,11 +150,8 @@ export const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
-    setInitializationState: (
-      state,
-      action: PayloadAction<DiscoverInternalState['initializationState']>
-    ) => {
-      state.initializationState = action.payload;
+    setHasESData: (state, action: PayloadAction<DiscoverInternalState['hasESData']>) => {
+      state.hasESData = action.payload;
     },
 
     setTabs: (
@@ -571,9 +568,7 @@ export const internalStateSlice = createSlice({
       withTab(state, action.meta.arg, (tab) => {
         if (tab.initializationState.initializationStatus !== TabInitializationStatus.Disconnected) {
           tab.initializationState = {
-            initializationStatus: action.payload.showNoDataPage
-              ? TabInitializationStatus.NoData
-              : TabInitializationStatus.Complete,
+            initializationStatus: TabInitializationStatus.Complete,
           };
         }
       })

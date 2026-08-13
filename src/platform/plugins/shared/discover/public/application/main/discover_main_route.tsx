@@ -20,7 +20,6 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import { DiscoverCustomizationContextProvider } from '../../customizations';
 import {
-  type DiscoverInternalState,
   internalStateActions,
   InternalStateProvider,
   RuntimeStateManagerProvider,
@@ -33,7 +32,6 @@ import type { SingleTabViewProps } from './components/single_tab_view';
 import {
   BrandedLoadingIndicator,
   InitializationError,
-  NoDataPage,
   SingleTabView,
   SingleTabViewWithAppMenu,
 } from './components/single_tab_view';
@@ -56,7 +54,7 @@ export interface MainRouteProps {
 
 type InitializeMainRoute = (
   rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
-) => Promise<DiscoverInternalState['initializationState']>;
+) => Promise<void>;
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
@@ -121,18 +119,9 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
         dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
-      // Discover no longer requires a data view to be present, so the no data page
-      // is never shown and the checks it relied on can be skipped
-      const initializationState: DiscoverInternalState['initializationState'] = {
-        hasESData: true,
-        hasUserDataView: true,
-      };
       const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
 
       dispatch(internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery));
-      dispatch(internalStateActions.setInitializationState(initializationState));
-
-      return initializationState;
     }
   );
 
@@ -243,20 +232,6 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
 
   if (error) {
     return <InitializationError error={error} />;
-  }
-
-  if (
-    !mainRouteInitializationState.value.hasESData &&
-    !mainRouteInitializationState.value.hasUserDataView
-  ) {
-    return (
-      <NoDataPage
-        {...mainRouteInitializationState.value}
-        onDataViewCreated={() => {
-          // This is unused if there is no ES data
-        }}
-      />
-    );
   }
 
   return (
