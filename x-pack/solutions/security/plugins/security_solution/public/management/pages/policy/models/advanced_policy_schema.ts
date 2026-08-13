@@ -2819,7 +2819,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.response_actions.upload.download_streams_count',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.upload.download_streams_count',
       {
@@ -2830,7 +2830,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.response_actions.upload.download_streams_count',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.upload.download_streams_count',
       {
@@ -2841,7 +2841,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.response_actions.upload.download_streams_count',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.upload.download_streams_count',
       {
@@ -2852,7 +2852,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.response_actions.runscript.download_streams_count',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.runscript.download_streams_count',
       {
@@ -2863,7 +2863,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.response_actions.runscript.download_streams_count',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.runscript.download_streams_count',
       {
@@ -2874,7 +2874,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.response_actions.runscript.download_streams_count',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.runscript.download_streams_count',
       {
@@ -2885,7 +2885,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.response_actions.upload.max_parallel_downloads',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.upload.max_parallel_downloads',
       {
@@ -2896,7 +2896,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.response_actions.upload.max_parallel_downloads',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.upload.max_parallel_downloads',
       {
@@ -2907,7 +2907,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.response_actions.upload.max_parallel_downloads',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.upload.max_parallel_downloads',
       {
@@ -2918,7 +2918,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.response_actions.runscript.max_parallel_downloads',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.response_actions.runscript.max_parallel_downloads',
       {
@@ -2929,7 +2929,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.response_actions.runscript.max_parallel_downloads',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.runscript.max_parallel_downloads',
       {
@@ -2940,7 +2940,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.response_actions.runscript.max_parallel_downloads',
-    first_supported_version: '9.4',
+    first_supported_version: '9.5',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.runscript.max_parallel_downloads',
       {

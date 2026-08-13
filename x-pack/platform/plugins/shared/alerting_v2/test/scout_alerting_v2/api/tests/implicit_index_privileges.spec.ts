@@ -23,9 +23,8 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { EsClient, KibanaRole } from '@kbn/scout';
-import { apiTest, buildAlertEvent, testData } from '../fixtures';
-
-const { ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM } = testData;
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { apiTest, buildAlertEvent } from '../fixtures';
 
 // The two index patterns the provider grants read on; also what a search must target so an
 // unauthorized identity resolves to "no index" (empty) rather than a 403.
@@ -156,12 +155,12 @@ const fetchRoleWithImplicit = async (
   esClient: EsClient,
   roleName: string
 ): Promise<{ indices?: ImplicitIndexEntry[] }> => {
-  // `include_implicit` rides along via `querystring` (not yet in the typed request params), and the
-  // implicit `indices[].implicitly_granted` / DLS `query` fields aren't in the typed response, so
-  // we reinterpret each entry as our own `ImplicitIndexEntry`.
+  // `include_implicit` is a typed request param; implicit `indices[].implicitly_granted` / DLS
+  // `query` fields still aren't fully reflected in the typed response, so we reinterpret each entry
+  // as our own `ImplicitIndexEntry`.
   const response = await esClient.security.getRole({
     name: roleName,
-    querystring: { include_implicit: true },
+    include_implicit: true,
   });
   const roles = response as unknown as Record<string, { indices?: ImplicitIndexEntry[] }>;
   return roles[roleName] ?? { indices: [] };

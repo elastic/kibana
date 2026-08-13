@@ -14,6 +14,8 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 
 import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
+import { ZodError } from '@kbn/zod';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../kibana_services';
 import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
@@ -63,13 +65,17 @@ export function transformPanelsOut(
         isDashboardAppRequest,
         useGASchemas
       );
-    } catch (e) {
+    } catch (err) {
+      let message = err.message;
+      if (err instanceof ZodError) {
+        message = stringifyZodError(err);
+      }
       warnings.push({
         type: 'dropped_panel',
         panel_type: panel.type,
         panel_config: panel.embeddableConfig,
         panel_references: panelReferences,
-        message: `Unable to transform panel config. Error: ${e.message}`,
+        message: `Unable to transform panel config. Error: ${message}`,
       });
       return;
     }

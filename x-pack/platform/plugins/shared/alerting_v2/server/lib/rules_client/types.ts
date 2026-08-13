@@ -17,6 +17,7 @@ import type {
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
+import type { RuleSavedObjectAttributes } from '../../saved_objects';
 
 /** Re-exported from the shared schemas package. */
 export type {
@@ -33,6 +34,14 @@ export type {
 };
 
 export type BulkOperationError = BulkResponse['errors'][number];
+
+/** An enabled rule whose executor task API key is a candidate for rotation. */
+export interface RotationCandidate {
+  id: string;
+  taskId: string;
+  attrs: RuleSavedObjectAttributes;
+  version?: string;
+}
 
 export interface CreateRuleParams {
   data: CreateRuleData;

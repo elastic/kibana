@@ -26,6 +26,7 @@ describe('discover session API transforms', () => {
   const apiData: DiscoverSessionApiData = {
     title: 'Session',
     description: 'Session description',
+    tags: ['tag-1', 'tag-2'],
     tabs: [
       {
         id: 'tab-classic',
@@ -102,8 +103,17 @@ describe('discover session API transforms', () => {
 
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
-      const transformed = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
+    });
+
+    it('extracts tag IDs from saved object references', () => {
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
+        { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+        { type: 'index-pattern', id: 'data-view-1', name: 'data-view-ref' },
+      ]);
+
+      expect(transformed.tags).toEqual(['tag-1']);
     });
 
     it('converts legacy flat tab sort to API sort objects', () => {
@@ -122,7 +132,7 @@ describe('discover session API transforms', () => {
         ),
       };
 
-      const transformed = transformDiscoverSessionOut(attributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(attributes);
       expect(transformed.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
     });
   });
@@ -258,6 +268,19 @@ describe('discover session API transforms', () => {
       });
       expect(references).toEqual([]);
     });
+
+    it('creates unique saved object references for tags', () => {
+      const { references } = transformDiscoverSessionIn({
+        ...discoverSessionApiData,
+        tags: ['tag-1', 'tag-1', 'tag-2'],
+      });
+
+      expect(references).toEqual([
+        { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+        { type: 'tag', id: 'tag-2', name: 'tag-ref-tag-2' },
+      ]);
+    });
+
     it('adds tab-prefixed references for data view reference tabs', () => {
       const { attributes, references } = transformDiscoverSessionIn(apiData);
 
@@ -446,15 +469,16 @@ describe('discover session API transforms', () => {
   describe('round-trip', () => {
     it('round-trips fixture API data through persistence', () => {
       const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(roundTripped).toEqual(discoverSessionApiData);
     });
 
     it('round-trips fixture saved object attributes through API', () => {
-      const apiDataFromStored = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: apiDataFromStored } =
+        transformDiscoverSessionOut(discoverSessionAttributes);
       const { attributes, references } = transformDiscoverSessionIn(apiDataFromStored);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(apiDataFromStored).toEqual(discoverSessionApiData);
       expect(roundTripped).toEqual(discoverSessionApiData);
@@ -463,7 +487,7 @@ describe('discover session API transforms', () => {
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {
       const reverted = transformDiscoverSessionIn(
-        transformDiscoverSessionOut(discoverSessionAttributes)
+        transformDiscoverSessionOut(discoverSessionAttributes).sessionState
       ).attributes;
       const expected = transformDiscoverSessionIn(discoverSessionApiData).attributes;
 
@@ -489,19 +513,15 @@ describe('discover session API transforms', () => {
 
   it('round-trips API data and preserves semantic values', () => {
     const { attributes, references } = transformDiscoverSessionIn(apiData);
-    const roundTripped = transformDiscoverSessionOut(attributes, references);
+    const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
     const reverted = transformDiscoverSessionIn(roundTripped);
 
     expect(roundTripped).toMatchObject(apiData);
     expect(roundTripped.tabs[0]).toMatchObject({
       column_order: [],
-      density: 'compact',
-      header_row_height: 3,
     });
     expect(roundTripped.tabs[1]).toMatchObject({
       column_order: [],
-      density: 'compact',
-      header_row_height: 3,
       control_panels: [
         {
           width: 'medium',
@@ -509,6 +529,15 @@ describe('discover session API transforms', () => {
         },
       ],
     });
+
+    expect(roundTripped.tabs[0].density).toBeUndefined();
+    expect(roundTripped.tabs[0].header_row_height).toBeUndefined();
+    expect(roundTripped.tabs[1].density).toBeUndefined();
+    expect(roundTripped.tabs[1].header_row_height).toBeUndefined();
+    expect(reverted.attributes.tabs[0].attributes.density).toBeUndefined();
+    expect(reverted.attributes.tabs[0].attributes.headerRowHeight).toBeUndefined();
+    expect(reverted.attributes.tabs[1].attributes.density).toBeUndefined();
+    expect(reverted.attributes.tabs[1].attributes.headerRowHeight).toBeUndefined();
     expect(reverted.attributes.tabs[0].attributes.visContext).toEqual({
       suggestionType: UnifiedHistogramSuggestionType.histogramForDataView,
       requestData: {
