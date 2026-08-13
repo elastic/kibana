@@ -28,7 +28,7 @@ export const createEmptyConversation = (
       id: 'unknown',
       username: 'unknown',
     },
-    permissions: { rename: true, delete: true },
+    permissions: { rename: true, delete: true, update_access_control: true },
     ...parts,
   };
 };
@@ -64,6 +64,8 @@ export const createConversationClientMock = (): ConversationClientMock => {
     upsertRound: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
+    appendEvents: jest.fn(),
+    getEvents: jest.fn(),
   };
 };
 

@@ -11,7 +11,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
@@ -19,6 +18,7 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
 import { getDataTestSubject } from '../../util/get_data_test_subject';
 import { RandomSamplerRangeSlider } from './random_sampler_range_slider';
@@ -158,7 +158,7 @@ export const SamplingMenu: FC<Props> = ({ randomSampler, reload, id }) => {
     >
       <EuiPanel style={{ maxWidth: 400 }}>
         <EuiFlexItem grow={true}>
-          <EuiCallOut size="s" color={'primary'} title={calloutInfoMessage} />
+          <KbnInfoCallout size="s" title={calloutInfoMessage} />
         </EuiFlexItem>
         <EuiSpacer size="m" />
 
