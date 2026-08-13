@@ -368,18 +368,18 @@ describe('checkNamespaceConflict', () => {
       template: { mappings: {}, settings: {}, aliases: {} },
     } as any);
     const logger = makeLogger();
-    const signal = new AbortController().signal;
+    const abortController = new AbortController();
 
     await checkNamespaceConflict({
       esClient,
       logger,
-      signal,
+      abortController,
       ...DEFAULT_ARGS,
     });
 
     expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledWith(
       { name: DEFAULT_ARGS.indexName },
-      { signal }
+      { signal: abortController.signal }
     );
   });
 });

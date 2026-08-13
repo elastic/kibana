@@ -183,7 +183,7 @@ export async function checkNamespaceConflict({
   namespace,
   logger,
   logContext,
-  signal,
+  abortController,
   allTemplates,
 }: {
   esClient: ElasticsearchClient;
@@ -194,7 +194,7 @@ export async function checkNamespaceConflict({
   namespace: string;
   logger: Logger;
   logContext: string;
-  signal?: AbortSignal;
+  abortController?: AbortController;
   /** Pre-fetched index template list. When provided the per-check GET /_index_template is skipped. */
   allTemplates?: IndexTemplateEntry[];
 }): Promise<NamespaceConflictWarning | null> {
@@ -208,7 +208,11 @@ export async function checkNamespaceConflict({
 
   try {
     const res = await retryTransientEsErrors(
-      () => esClient.indices.simulateIndexTemplate({ name: indexName }, { signal }),
+      () =>
+        esClient.indices.simulateIndexTemplate(
+          { name: indexName },
+          { signal: abortController?.signal }
+        ),
       { logger }
     );
 
@@ -232,7 +236,7 @@ export async function checkNamespaceConflict({
         esClient,
         nsTemplateName,
         logContext,
-        signal
+        abortController
       );
       if (existingNsTemplate) {
         // Fleet's own namespace template already exists and is winning over the base.
@@ -252,7 +256,7 @@ export async function checkNamespaceConflict({
     } else {
       try {
         const { index_templates } = await retryTransientEsErrors(
-          () => esClient.indices.getIndexTemplate({}, { signal }),
+          () => esClient.indices.getIndexTemplate({}, { signal: abortController?.signal }),
           { logger }
         );
         templateList = index_templates as IndexTemplateEntry[];
