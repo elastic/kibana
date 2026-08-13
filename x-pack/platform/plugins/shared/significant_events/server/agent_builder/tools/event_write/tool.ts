@@ -11,8 +11,11 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  significantEventSchema,
+  MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  significantEventSchema,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -61,7 +64,7 @@ export const eventsWriteItemSchema = significantEventSchema
           Deduplication window as an ES date math expression (e.g. "now-24h"). Mutually exclusive with event_id.
 
           Provide this to write a new event candidate without an explicit event_id.
-          
+
           If an active (status "open") event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is written with the caller-supplied status.
         `
       ),
@@ -76,16 +79,49 @@ export const eventsWriteItemSchema = significantEventSchema
     {
       message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
     }
+  )
+  .refine(
+    (item) =>
+      item.symptom_hypothesis === undefined ||
+      item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+    {
+      message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
+    }
+  )
+  .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
+    message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
+  })
+  .refine(
+    (item) =>
+      item.assessment_note === undefined ||
+      item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
+    {
+      message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
+    }
   );
 
 const eventsWriteItemsSchema = z
   .array(eventsWriteItemSchema)
   .min(1)
   .max(MAX_BULK_WRITE_ITEMS)
+  .refine(
+    (items) => {
+      const ruleUuids = items.flatMap((item) =>
+        (item.signals ?? [])
+          .filter((signal) => signal.type === 'detection')
+          .map((signal) => signal.metadata?.rule_uuid)
+          .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+      );
+      return new Set(ruleUuids).size === ruleUuids.length;
+    },
+    {
+      message: 'Each detection rule UUID may appear in only one event item per write',
+    }
+  )
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        "The significant event items to write. Provide a complete, non-empty array. Do not call this tool to plan or probe: `'{}'` and `'{ \"items\": [] }'` are invalid. For a new event, omit event_id; for a continuation, supply a non-empty existing event_id.",
+        "The significant event items to write. Provide a complete, non-empty array in one call with every batch detection assigned. Each detection rule_uuid may appear in only one item — duplicates reject the write. Do not call this tool to plan or probe: `'{}'` and `'{ \"items\": [] }'` are invalid. For a new event, omit event_id; for a continuation, supply a non-empty existing event_id.",
     })
   );
 

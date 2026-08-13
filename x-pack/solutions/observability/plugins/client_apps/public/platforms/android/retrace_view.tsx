@@ -143,7 +143,7 @@ export function RetraceView({ core }: RetraceViewProps) {
                 defaultMessage: 'Retrace failed',
               })}
               color="danger"
-              iconType="alert"
+              iconType="warning"
             >
               <p>{error}</p>
             </EuiCallOut>

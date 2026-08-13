@@ -130,6 +130,9 @@ describe('scoreToolUsage', () => {
       detectionCount: 1,
     });
     expect(result).toMatchObject({ score: 0.75, label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls` });
+    expect(result.explanation).toBe(
+      `${TOOL_ID_EVENTS_WRITE} was called 2 times without one justified partial-failure retry`
+    );
   });
 
   it('allows one retry after an event bulk item fails', () => {
@@ -212,5 +215,35 @@ describe('scoreToolUsageContinuation', () => {
     ]);
 
     expect(result.score).toBe(1);
+  });
+
+  it('still flags missing-topology-search when expectReuse is false (new event after closed seed)', () => {
+    const stepsWithTopologyWrite = [
+      toolCall(
+        TOOL_ID_EVENT_SEARCH,
+        { exclude_unconfirmed_signals: true, rule_uuids: ['rule-uuid-1'] },
+        [{ data: { total: 0, events: [] } }]
+      ),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
+
+    expect(scoreToolUsage({ steps: stepsWithTopologyWrite, detectionCount: 1 }).label).toBe(
+      'missing-topology-search'
+    );
+
+    const result = scoreToolUsageContinuation([
+      {
+        producedEventIds: ['event-new'],
+        expectReuse: false,
+        steps: stepsWithTopologyWrite,
+      },
+    ]);
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('cycle 1: missing-topology-search (0)');
   });
 });

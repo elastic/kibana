@@ -50,8 +50,9 @@ export async function changeAgentPrivilegeLevel(
   }
 
   // Fail fast if agent contains an integration that requires root privilege.
+  // Use policy_base_id — always the base policy id, matching the key used by findAllForAgentPolicy.
   const packagePolicies =
-    (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id || '')) || [];
+    (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_base_id ?? '')) || [];
   const packagesWithRootPrivilege = getPackagesWithRootPrivilege(packagePolicies);
   if (packagesWithRootPrivilege.length > 0) {
     throw new FleetUnauthorizedError(
