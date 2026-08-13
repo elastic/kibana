@@ -12,7 +12,6 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { HealthStatus } from '@kbn/alerting-types';
-import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
 import { getAlertingHealthStatus } from './get_health';
@@ -60,7 +59,6 @@ function registerAlertingHealthCheckTask(
     [HEALTH_TASK_TYPE]: {
       title: 'Alerting framework health check task',
       stateSchemaByVersion,
-      taskTypeGroup: TaskTypeGroup.Alerting,
       createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
     },
   });

@@ -13,7 +13,6 @@ import type {
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import {
@@ -99,7 +98,6 @@ export class UiamApiKeyProvisioningTask {
         title: 'UIAM API key provisioning task',
         timeout: TASK_TIMEOUT,
         stateSchemaByVersion,
-        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {

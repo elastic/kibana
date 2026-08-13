@@ -52,7 +52,6 @@ describe('AlertDeletionClient', () => {
         'alert-deletion': {
           title: 'Alert deletion task',
           maxAttempts: 1,
-          taskTypeGroup: 'alerting',
           createTaskRunner: expect.any(Function),
         },
       });

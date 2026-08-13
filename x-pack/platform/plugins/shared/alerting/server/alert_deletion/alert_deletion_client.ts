@@ -21,7 +21,6 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
-import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { GetAlertIndicesAlias } from '../lib';
 import type { RuleTypeRegistry } from '../types';
 import { getLastRun, previewTask, runTask, scheduleTask } from './lib';
@@ -79,7 +78,6 @@ export class AlertDeletionClient {
       [ALERT_DELETION_TASK_TYPE]: {
         title: 'Alert deletion task',
         maxAttempts: 1,
-        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: ({
           taskInstance,
           signal,

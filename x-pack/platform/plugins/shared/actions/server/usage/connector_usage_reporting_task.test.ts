@@ -137,7 +137,6 @@ describe('ConnectorUsageReportingTask', () => {
       [CONNECTOR_USAGE_REPORTING_TASK_TYPE]: {
         title: 'Connector usage reporting task',
         timeout: '1m',
-        taskTypeGroup: 'actions',
         createTaskRunner: expect.any(Function),
       },
     });
