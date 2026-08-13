@@ -6,7 +6,7 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardStateToAttachmentData,
@@ -110,7 +110,7 @@ export const createDashboardSmlType = ({
   },
 
   getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE }),
+    kibanaPermissions({ kiType: DASHBOARD_SAVED_OBJECT_TYPE }),
 
   toAttachment: async (item, context) => {
     try {

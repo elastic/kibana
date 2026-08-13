@@ -13,7 +13,6 @@ import {
   actionPolicyAttachmentDataSchema,
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
@@ -108,7 +107,7 @@ export const createActionPolicySmlType = ({
    */
   getPermissions: () => ({
     kibana: {
-      privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.actionPolicies.read}` }],
+      privileges: { name: `ai_index:${ACTION_POLICY_SML_TYPE}/get` },
     },
   }),
 

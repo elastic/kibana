@@ -1235,7 +1235,7 @@ Create a file in your plugin (e.g.
 
 ```typescript
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1248,7 +1248,7 @@ export const myAssetSmlType: SmlTypeDefinition = {
 
   // Yield pages of items to consider for indexing.
   // Called by the crawler with internal credentials.
-  async *list(context) {
+  async* list(context) {
     // Use createPointInTimeFinder for efficient pagination
     const finder = context.savedObjectsClient.createPointInTimeFinder({
       type: 'my-saved-object-type',

@@ -14,7 +14,6 @@ import {
   getBreachEsqlQuery,
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type { RulesClient } from '../../lib/rules_client';
@@ -94,7 +93,7 @@ export const createRuleSmlType = ({
    * gate the rules API checks before surfacing rule data.
    */
   getPermissions: () => ({
-    kibana: { privileges: [{ name: `api:${ALERTING_V2_API_PRIVILEGES.rules.read}` }] },
+    kibana: { privileges: { name: `ai_index:${RULE_SML_TYPE}/get` } },
   }),
 
   toAttachment: async (item, context) => {

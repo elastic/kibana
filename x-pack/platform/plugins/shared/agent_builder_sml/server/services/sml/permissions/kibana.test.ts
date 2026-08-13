@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { kibanaSavedObjectPermissions } from './kibana_saved_object';
+import { kibanaPermissions } from './kibana';
 
 describe('kibanaSavedObjectPermissions', () => {
   it('returns the standard `saved_object:<type>/get` privilege', () => {
-    expect(kibanaSavedObjectPermissions({ savedObjectType: 'lens' })).toEqual({
+    expect(kibanaPermissions({ kiType: 'lens' })).toEqual({
       kibana: { privileges: { name: 'saved_object:lens/get' } },
     });
   });
 
   it('builds the privilege from the supplied SO type id (dashboard vs lens vs custom)', () => {
     expect(
-      kibanaSavedObjectPermissions({ savedObjectType: 'dashboard' }).kibana.privileges
+      kibanaPermissions({ kiType: 'dashboard' }).kibana.privileges
     ).toEqual({ name: 'saved_object:dashboard/get' });
     expect(
-      kibanaSavedObjectPermissions({ savedObjectType: 'custom-type' }).kibana.privileges
+      kibanaPermissions({ kiType: 'custom-type' }).kibana.privileges
     ).toEqual({ name: 'saved_object:custom-type/get' });
   });
 
   it('returns a fresh object on each call so callers cannot share state', () => {
-    const first = kibanaSavedObjectPermissions({ savedObjectType: 'lens' });
-    const second = kibanaSavedObjectPermissions({ savedObjectType: 'lens' });
+    const first = kibanaPermissions({ kiType: 'lens' });
+    const second = kibanaPermissions({ kiType: 'lens' });
 
     expect(first).not.toBe(second);
     expect(first.kibana).not.toBe(second.kibana);
@@ -33,7 +33,7 @@ describe('kibanaSavedObjectPermissions', () => {
   });
 
   it('throws when savedObjectType is empty', () => {
-    expect(() => kibanaSavedObjectPermissions({ savedObjectType: '' })).toThrow(
+    expect(() => kibanaPermissions({ kiType: '' })).toThrow(
       'kibanaSavedObjectPermissions: savedObjectType is required'
     );
   });
