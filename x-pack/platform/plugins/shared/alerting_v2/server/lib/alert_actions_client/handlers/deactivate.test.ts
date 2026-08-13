@@ -13,7 +13,7 @@ import {
   alertEventType,
   type AlertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
-import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { buildAlertEventRecord, buildHandlerItem } from '../test_utils';
 import type { AlertEventRecord } from '../types';
 import { deactivateHandler } from './deactivate';
@@ -101,7 +101,7 @@ describe('deactivateHandler', () => {
         expect(Boom.isBoom(error)).toBe(true);
         expect(error.output.statusCode).toBe(400);
         expect(error.data).toMatchObject({
-          code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+          code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {
             group_hash: 'group-1',
             episode_id: 'episode-1',

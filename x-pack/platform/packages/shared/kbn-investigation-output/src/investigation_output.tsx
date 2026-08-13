@@ -36,6 +36,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   status,
   state,
   error,
+  getQueryHref,
 }) => {
   const hypotheses = state?.hypotheses ?? [];
   /**
@@ -135,7 +136,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
                   padding: ${euiTheme.size.s} ${euiTheme.size.m};
                 `}
               >
-                <HypothesisRow hypothesis={hypothesis} />
+                <HypothesisRow hypothesis={hypothesis} getQueryHref={getQueryHref} />
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -155,7 +156,10 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
       )}
 
       {status === 'complete' && state?.significant_event_updates?.length ? (
-        <SignificantEventUpdates updates={state.significant_event_updates} />
+        <SignificantEventUpdates
+          updates={state.significant_event_updates}
+          getQueryHref={getQueryHref}
+        />
       ) : null}
     </EuiPanel>
   );

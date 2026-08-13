@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isLiteral } from '@elastic/esql';
+import {
+  isBinaryExpression,
+  isFunctionExpression,
+  isLiteral,
+  isUnaryExpression,
+} from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
@@ -29,6 +34,23 @@ export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
+
+/** Returns the deepest function expression along the rightmost binary or prefix-unary path. */
+export function getRightmostOperator(expression: ESQLFunction): ESQLFunction {
+  let operator = expression;
+
+  while (isBinaryExpression(operator) || isUnaryExpression(operator)) {
+    const rightOperand = isBinaryExpression(operator) ? operator.args[1] : operator.args[0];
+
+    if (!isFunctionExpression(rightOperand)) {
+      break;
+    }
+
+    operator = rightOperand;
+  }
+
+  return operator;
+}
 
 /** Checks if operator is a NULL check (IS NULL, IS NOT NULL) */
 export function isNullCheckOperator(name: string) {

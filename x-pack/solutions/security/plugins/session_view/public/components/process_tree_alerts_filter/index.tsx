@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_ALERT_FILTER_VALUE } from '../../../common/constants';
 import type { ProcessEventAlertCategory, AlertTypeCount } from '../../../common';
 import { useStyles } from './styles';
-import { FILTER_MENU_OPTIONS, SELECTED_PROCESS } from './translations';
+import { FILTER_MENU_ARIA_LABEL, FILTER_MENU_OPTIONS, SELECTED_PROCESS } from './translations';
 
 export interface ProcessTreeAlertsFilterDeps {
   totalAlertsCount: number;
@@ -155,6 +155,7 @@ export const ProcessTreeAlertsFilter = ({
             data-test-subj="sessionView:sessionViewAlertDetailsFilterSelectorContainer"
           >
             <EuiPopover
+              aria-label={FILTER_MENU_ARIA_LABEL}
               button={alertEventCategoryFilterMenuButton}
               isOpen={isPopoverOpen}
               closePopover={closePopover}

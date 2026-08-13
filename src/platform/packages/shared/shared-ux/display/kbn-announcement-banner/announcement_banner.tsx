@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiBanner, type EuiBannerProps } from '@elastic/eui';
+import { type DataAttributeProps, EuiBanner, type EuiBannerProps } from '@elastic/eui';
 
 /**
  * Props for the primary action button. Rendered as an `EuiButton`.
@@ -16,7 +16,8 @@ import { EuiBanner, type EuiBannerProps } from '@elastic/eui';
  */
 export type AnnouncementBannerActionPrimaryProps = NonNullable<
   EuiBannerProps['actionProps']
->['primary'];
+>['primary'] &
+  DataAttributeProps;
 
 /**
  * Props for the secondary action button. Rendered as an `EuiButtonEmpty`.
@@ -26,9 +27,15 @@ export type AnnouncementBannerActionPrimaryProps = NonNullable<
  */
 export type AnnouncementBannerActionSecondaryProps = NonNullable<
   EuiBannerProps['actionProps']
->['secondary'];
+>['secondary'] &
+  DataAttributeProps;
 
-export type AnnouncementBannerProps = Omit<EuiBannerProps, 'announceOnMount'>;
+export type AnnouncementBannerProps = Omit<EuiBannerProps, 'announceOnMount' | 'actionProps'> & {
+  actionProps?: {
+    primary?: AnnouncementBannerActionPrimaryProps;
+    secondary?: AnnouncementBannerActionSecondaryProps;
+  };
+};
 
 /**
  * A banner-style announcement with optional media, actions and dismiss button.

@@ -13,7 +13,7 @@ type Severity = 'low' | 'medium' | 'high' | 'critical';
 
 export const SIGNIFICANT_EVENT_SEVERITY: Record<
   Severity,
-  { color: EuiBadgeProps['color']; label: string; defaultValue: number }
+  { color: EuiBadgeProps['color']; label: string }
 > = {
   low: {
     color: '#5a6d8c',
@@ -23,7 +23,6 @@ export const SIGNIFICANT_EVENT_SEVERITY: Record<
         defaultMessage: 'Low',
       }
     ),
-    defaultValue: 20,
   },
   medium: {
     color: '#facb3d',
@@ -33,7 +32,6 @@ export const SIGNIFICANT_EVENT_SEVERITY: Record<
         defaultMessage: 'Medium',
       }
     ),
-    defaultValue: 50,
   },
   high: {
     color: '#ed6723',
@@ -43,7 +41,6 @@ export const SIGNIFICANT_EVENT_SEVERITY: Record<
         defaultMessage: 'High',
       }
     ),
-    defaultValue: 70,
   },
   critical: {
     color: 'danger',
@@ -53,7 +50,6 @@ export const SIGNIFICANT_EVENT_SEVERITY: Record<
         defaultMessage: 'Critical',
       }
     ),
-    defaultValue: 90,
   },
 };
 

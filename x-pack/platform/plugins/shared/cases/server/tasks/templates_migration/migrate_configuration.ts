@@ -12,6 +12,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../common/constants';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
@@ -114,6 +115,9 @@ const migrateFieldDefinitions = async (
     existingFieldDefs,
     (so) => so.attributes.name
   );
+  let totalCount = existingFieldDefs.length;
+
+  const skippedKeys: string[] = [];
 
   for (const cf of legacyCustomFields) {
     const existingDef = existingByName.get(normalizeFieldDefinitionName(cf.key));
@@ -142,6 +146,10 @@ const migrateFieldDefinitions = async (
       refNamesByKey.set(cf.key, cf.key);
       libraryDefs.push(existingDef.attributes);
       reused++;
+    } else if (totalCount >= MAX_FIELD_DEFINITIONS_PER_OWNER) {
+      // Same cap the sub-client enforces at the API layer; the hook
+      // (ensureGlobalFieldDefinitions) applies the identical guard.
+      skippedKeys.push(cf.key);
     } else {
       try {
         const { yaml } = buildFieldDefinitionYaml(cf);
@@ -169,6 +177,7 @@ const migrateFieldDefinitions = async (
         // Insert into the index so intra-request duplicate custom-field keys (which the
         // API blocks but imported/legacy SOs may contain) only produce one SO.
         existingByName.set(normalizeFieldDefinitionName(cf.key), createdSo);
+        totalCount++;
         refNamesByKey.set(cf.key, cf.key);
         libraryDefs.push(attributes);
         created++;
@@ -180,6 +189,16 @@ const migrateFieldDefinitions = async (
         );
       }
     }
+  }
+
+  if (skippedKeys.length > 0) {
+    // Skipped keys are deliberately NOT added to refNamesByKey — buildTemplateYaml then
+    // omits them from migrated templates with its own per-key warning.
+    log.warn(
+      `[${executionId}] Reached the maximum of ${MAX_FIELD_DEFINITIONS_PER_OWNER} field ` +
+        `definitions for owner "${owner}" in namespace "${namespace}" — the following legacy ` +
+        `custom fields were not migrated: ${skippedKeys.join(', ')}`
+    );
   }
 
   return {

@@ -27,7 +27,7 @@ export const SortSelector = ({ sort, onChange, fullWidth = false }: SortSelector
   const [, direction] = sort;
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={fullWidth}>
         <ToolbarSelector
           data-test-subj="metricsExperienceSortSelector"
