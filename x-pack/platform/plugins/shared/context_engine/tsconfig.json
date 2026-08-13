@@ -51,11 +51,15 @@
     "@kbn/ui-callout",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/zod",
+    "@kbn/content-list",
+    "@kbn/content-list-provider",
+    "@kbn/content-list-provider-client",
+    "@kbn/content-management-table-list-view-common",
     "@kbn/shared-ux-ai-components",
     "@kbn/security-plugin",
+    "@kbn/zod",
     "@kbn/logging-mocks",
     "@kbn/es-types",
-    "@kbn/task-manager-plugin",
+    "@kbn/task-manager-plugin"
   ]
 }

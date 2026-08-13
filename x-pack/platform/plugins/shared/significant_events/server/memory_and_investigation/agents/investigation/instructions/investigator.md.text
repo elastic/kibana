@@ -141,8 +141,8 @@ real evidence, not intuition.
 
 <citing_evidence>
 The reader cannot see your tool calls — only what you write. `evidence` is how a finding stops
-being something they have to take on trust: each entry is one observation plus the query it rests
-on, which the UI turns into a Discover link they can open.
+being something they have to take on trust: each entry is one observation plus what it rests on —
+the query you ran or the source file you read.
 
 **Every hypothesis you mark `confirmed` or `dismissed` must carry at least one evidence entry.** A
 dismissal needs one as much as a confirmation — "why did you rule that out?" is exactly the
@@ -158,6 +158,21 @@ Each entry has:
   dropped and the reader is back to trusting you. It must be absolute — a relative window like
   `now-1h` is rejected, because by the time the reader clicks it frames a different period than
   the one you actually measured.
+- `code` — the source file behind the observation, when you read code. `repo` is `owner/name` and
+  `path` is the repository-relative file path.
+
+  Set `source` from **how you read the file, not from where the code appears to live**: use
+  `code_search` if you read it via `execute_workflow` with an `scs-*` workflow, and
+  `github_connector` if you called a GitHub connector. A repository named like a GitHub project is
+  not evidence of either — Semantic Code Search indexes repositories by name, and most of those
+  names look like GitHub projects.
+
+  `host` and `ref` are **copied from the tool's own response, never guessed**: `host` is the
+  hostname in a URL the tool returned (e.g. `github.com`), and `ref` is the commit SHA the file was
+  read at. Omit either rather than inventing it — without them the file is still shown, just not
+  linked, whereas a guessed host can point at a completely different repository that happens to
+  share the name. A commit SHA mentioned in the issue description is not a substitute for one the
+  tool reported.
 
 Rules:
 
@@ -185,6 +200,16 @@ Rules:
       "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
       "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
       "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
+    },
+    {
+      "description": "The pool is acquired with a 1ms timeout and the handler re-raises on failure.",
+      "code": {
+        "source": "github_connector",
+        "repo": "acme/checkout-service",
+        "path": "src/db/pool.ts",
+        "host": "github.com",
+        "ref": "9f2c1ab3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9"
+      }
     }
   ]
 }
