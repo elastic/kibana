@@ -107,6 +107,14 @@ describe('logging-site patterns', () => {
     expect(matchesAnyIdiom('Log::error("charge failed");')).toBe(true);
   });
 
+  it('matches dynamic-level calls where severity is a runtime argument', () => {
+    expect(matchesAnyIdiom('Logger.log(level, msg, error_code: code)')).toBe(true);
+    expect(matchesAnyIdiom('    logger.log($level, $e->getMessage(), $context);')).toBe(true);
+    expect(matchesAnyIdiom('$this->logger->log($level, $message);')).toBe(true);
+    // `log` must start an identifier, so a dialog/catalog chain does not match.
+    expect(matchesAnyIdiom('catalog.log(x)')).toBe(false);
+  });
+
   it('matches stdout/stderr emits that have no logging facade', () => {
     expect(matchesAnyIdiom('fprintf(stderr, "fatal: %s\\n", msg);')).toBe(true);
     expect(matchesAnyIdiom('println("started")')).toBe(true);
@@ -177,6 +185,16 @@ describe('isExcludedLoggingPath', () => {
     expect(isExcludedLoggingPath('.github/workflows/ci.yml')).toBe(true);
     expect(isExcludedLoggingPath('build.gradle')).toBe(true);
     expect(isExcludedLoggingPath('gradle/wrapper/x.properties')).toBe(true);
+  });
+
+  it('excludes prose files (documentation quotes logger calls it never runs)', () => {
+    expect(isExcludedLoggingPath('discovery/README.md')).toBe(true);
+    expect(isExcludedLoggingPath('docs/logging.mdx')).toBe(true);
+    expect(isExcludedLoggingPath('CHANGELOG.rst')).toBe(true);
+    expect(isExcludedLoggingPath('guide/index.adoc')).toBe(true);
+    expect(isExcludedLoggingPath('notes.txt')).toBe(true);
+    // A source file whose name merely contains the token is not prose.
+    expect(isExcludedLoggingPath('src/markdown_renderer.go')).toBe(false);
   });
 
   it('excludes shell scripts wholesale (terminal output, not service logs)', () => {

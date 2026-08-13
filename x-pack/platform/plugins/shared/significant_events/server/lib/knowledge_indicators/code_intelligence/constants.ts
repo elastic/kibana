@@ -177,6 +177,15 @@ export const EXCLUDED_PATH_SUFFIXES: readonly string[] = [
   '.zsh',
   '.ps1',
   '_test.go',
+  // Prose, not source. Documentation quotes logger calls in fenced code blocks
+  // (`discovery/README.md` in prometheus, `forum/README.md` in supabase/realtime
+  // both produced logging candidates), and those examples are never executed, so
+  // their strings can never appear in a log.
+  '.md',
+  '.mdx',
+  '.rst',
+  '.adoc',
+  '.txt',
 ] as const;
 
 /**
@@ -291,6 +300,15 @@ export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   // println("...") / println "..." — Groovy/Scala/Kotlin stdout (Java's
   // System.out.println is covered above).
   '.*println[ (].*',
+  // Logger.log(level, msg) / logger.log(level, ...) / $logger->log($level, ...) —
+  // DYNAMIC LEVEL: the severity is a runtime argument, not part of the method
+  // name, so none of the level-enumerating patterns above can see it. This is the
+  // shape a logging call collapses to once a helper takes `level` as a parameter.
+  // Measured: it is the ONLY real emission in `supabase/realtime`'s logging
+  // module (`.../realtime_channel/logging.ex:71`) and the single production hit in
+  // `laravel/framework` (`.../Exceptions/Handler.php:476`).
+  '(.*[^A-Za-z])?[lL]og(ger|ging)?[.]log[(].*',
+  '(.*[^A-Za-z])?[lL]og(ger)?->log[(].*',
 ] as const;
 
 /**
