@@ -9,7 +9,7 @@
     "server": true,
     "browser": true,
     "requiredPlugins": ["actions", "data", "features", "share", "esql", "triggersActionsUi", "taskManager"],
-    "optionalPlugins": ["console", "spaces", "workflowsManagement"],
+    "optionalPlugins": ["console", "spaces"],
     "requiredBundles": ["kibanaReact", "actions"]
   }
 }

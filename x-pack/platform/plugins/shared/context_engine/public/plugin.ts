@@ -20,36 +20,14 @@ import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
-import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder/constants';
 import type {
-  AnalyzeAndImproveContext,
-  AnalyzeChatOptions,
   ChatOpener,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
 } from './types';
-
-/**
- * Builds the Agent Builder `openChat` options for an "Analyze & improve" hand-off: the AI index's
- * configured feedback agent, a fresh per-index conversation, and the index attached by value.
- */
-const buildAnalyzeChat = ({ aiIndex }: AnalyzeAndImproveContext): AnalyzeChatOptions => ({
-  agentId: aiIndex.feedback_agent_id,
-  newConversation: true,
-  // Per-index session so each AI index's analysis is its own conversation instead of colliding on
-  // Agent Builder's shared 'default' session for the agent (which would bleed one index's context
-  // into another's). `context.tag` is reserved for future group-scoped analysis and unused here.
-  sessionTag: `context-engine-feedback:${aiIndex.id}`,
-  attachments: [
-    {
-      id: `${AI_INDEX_ATTACHMENT_TYPE}.${aiIndex.id}`,
-      type: AI_INDEX_ATTACHMENT_TYPE,
-      data: aiIndex,
-    },
-  ],
-});
+import { createBuildAnalyzeChat } from './analyze_chat';
 
 const APP_TITLE = i18n.translate('xpack.contextEngine.app.title', {
   defaultMessage: 'Context',
@@ -127,12 +105,12 @@ export class ContextEnginePlugin
     return {};
   }
 
-  start(_core: CoreStart): ContextEnginePluginStart {
+  start(core: CoreStart): ContextEnginePluginStart {
     return {
       registerChatOpener: (opener: ChatOpener) => {
         this.chatOpener = opener;
       },
-      buildAnalyzeChat,
+      buildAnalyzeChat: createBuildAnalyzeChat(core.http),
     };
   }
 

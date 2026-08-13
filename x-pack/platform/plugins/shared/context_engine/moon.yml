@@ -57,7 +57,6 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/logging-mocks'
   - '@kbn/zod'
-  - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
 tags:
   - plugin

@@ -10,7 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
 
 /**
@@ -26,13 +26,13 @@ export interface AnalyzeAndImproveContext {
 }
 
 /** Opens Agent Builder to analyze the given signals. Registered via {@link ContextEnginePluginStart.registerChatOpener}. */
-export type ChatOpener = (context: AnalyzeAndImproveContext) => void;
+export type ChatOpener = (context: AnalyzeAndImproveContext) => void | Promise<void>;
 
 /**
  * Agent Builder `openChat` options for an "Analyze & improve" hand-off, built by
  * {@link ContextEnginePluginStart.buildAnalyzeChat}. Context Engine owns this translation (the
- * attachment type/id and the per-index conversation scoping) so the `agent_builder_platform` bridge
- * stays pure forwarding and there is a single source of truth for the wire contract.
+ * attachments and the per-index conversation scoping) so the `agent_builder_platform` bridge stays
+ * pure forwarding and there is a single source of truth for the wire contract.
  */
 export interface AnalyzeChatOptions {
   /** The AI index's configured feedback agent, or `undefined` when none is set. */
@@ -41,8 +41,11 @@ export interface AnalyzeChatOptions {
   newConversation: boolean;
   /** Per-index session so each AI index's analysis is its own conversation, not a shared one. */
   sessionTag: string;
-  /** The AI index attached by value (grants only the read-only `get_ai_index_automations` tool). */
-  attachments: ConversationAttachment[];
+  /**
+   * Built-in attachments describing the index: a `text` summary plus one `workflow.yaml` attachment
+   * (by value) per linked workflow the current user can read.
+   */
+  attachments: AttachmentInput[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -58,9 +61,10 @@ export interface ContextEnginePluginStart {
    * Translates an "Analyze & improve" context into Agent Builder `openChat` options. The
    * `agent_builder_platform` bridge calls this and forwards the result to `openChat`, so the
    * attachment wire contract lives here (in Context Engine) rather than being duplicated in the
-   * bridge.
+   * bridge. Async because it fetches the linked workflows' YAML (as the current user) to attach
+   * them by value.
    */
-  buildAnalyzeChat: (context: AnalyzeAndImproveContext) => AnalyzeChatOptions;
+  buildAnalyzeChat: (context: AnalyzeAndImproveContext) => Promise<AnalyzeChatOptions>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

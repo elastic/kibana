@@ -16,15 +16,11 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   agentBuilderSml: AgentBuilderSmlPluginSetup;
   actions: ActionsPluginSetup;
-  // Optional: `agent_builder_platform` wires the Context Engine ↔ Agent Builder bridge (the server
-  // half) so `context_engine` never depends on `agentBuilder` (dependency inversion).
-  contextEngine?: ContextEnginePluginSetup;
 }
 
 export interface PluginStartDependencies {

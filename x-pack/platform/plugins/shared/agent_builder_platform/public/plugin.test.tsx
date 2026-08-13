@@ -19,15 +19,17 @@ type CtxOpener = (ctx: {
   tag?: string;
 }) => void | Promise<void>;
 
-const analyzeOptions = (ctx: { aiIndex: { id: string; feedback_agent_id?: string } }) => ({
+// Stand-in for Context Engine's async `buildAnalyzeChat`. The bridge only forwards its result to
+// `openChat`, so the concrete attachment shape here is irrelevant beyond being what gets forwarded.
+const analyzeOptions = async (ctx: { aiIndex: { id: string; feedback_agent_id?: string } }) => ({
   agentId: ctx.aiIndex.feedback_agent_id,
   newConversation: true,
   sessionTag: `context-engine-feedback:${ctx.aiIndex.id}`,
   attachments: [
     {
-      id: `platform.context_engine.ai_index.${ctx.aiIndex.id}`,
-      type: 'platform.context_engine.ai_index',
-      data: ctx.aiIndex,
+      id: `context-engine-ai-index:${ctx.aiIndex.id}`,
+      type: 'text',
+      data: { content: `AI index: ${ctx.aiIndex.id}` },
     },
   ],
 });
@@ -135,9 +137,9 @@ describe('AgentBuilderPlatformPlugin (browser bridge)', () => {
       sessionTag: 'context-engine-feedback:idx-1',
       attachments: [
         {
-          id: 'platform.context_engine.ai_index.idx-1',
-          type: 'platform.context_engine.ai_index',
-          data: aiIndex,
+          id: 'context-engine-ai-index:idx-1',
+          type: 'text',
+          data: { content: 'AI index: idx-1' },
         },
       ],
     });

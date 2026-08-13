@@ -55,7 +55,7 @@ export class AgentBuilderPlatformPlugin
           });
           return;
         }
-        const options = contextEngine.buildAnalyzeChat(ctx);
+        const options = await contextEngine.buildAnalyzeChat(ctx);
         // No configured feedback agent → nothing to open against (the button is gated on this too).
         if (!options.agentId) {
           return;
