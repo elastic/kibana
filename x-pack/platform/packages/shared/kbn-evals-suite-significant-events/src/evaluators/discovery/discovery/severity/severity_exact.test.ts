@@ -6,13 +6,13 @@
  */
 
 import type { Detection, SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
-import { severityFloorEvaluator } from './severity_floor';
+import { severityExactEvaluator } from './severity_exact';
 
 const evaluate = (
   events: Array<Partial<SignificantEvent>>,
   expectedEvents?: Array<Partial<SignificantEvent>>
 ) =>
-  severityFloorEvaluator.evaluate({
+  severityExactEvaluator.evaluate({
     input: { detections: [] as Detection[] },
     output: { significantEvents: events as SignificantEvent[], steps: [] },
     expected: {
@@ -35,7 +35,7 @@ const balanceReaderSignal: SignalEntry = {
   },
 };
 
-describe('severityFloorEvaluator', () => {
+describe('severityExactEvaluator', () => {
   it('is unavailable when no expected open severities are declared', async () => {
     const result = await evaluate(
       [{ status: 'open', severity: '80-critical', title: 'A' }],
@@ -44,15 +44,7 @@ describe('severityFloorEvaluator', () => {
     expect(result.score).toBeNull();
   });
 
-  it('scores 1.0 when actual severity meets the expected floor', async () => {
-    const result = await evaluate(
-      [{ status: 'open', severity: '80-critical', title: 'Ledger failure' }],
-      [{ status: 'open', severity: '60-high', title: 'Ledger failure' }]
-    );
-    expect(result.score).toBe(1);
-  });
-
-  it('scores 1.0 when actual severity exactly matches the floor', async () => {
+  it('scores 1.0 when actual severity exactly matches the expected tier', async () => {
     const result = await evaluate(
       [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }],
       [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }]
@@ -65,7 +57,7 @@ describe('severityFloorEvaluator', () => {
       [
         {
           status: 'open',
-          severity: '80-critical',
+          severity: '60-high',
           title: 'Balance and ledger processing — core transaction submission failures',
           signals: [balanceReaderSignal],
         },
@@ -82,7 +74,7 @@ describe('severityFloorEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  it('scores 0 when actual severity is below the expected floor', async () => {
+  it('scores 0 when actual severity is below the expected tier', async () => {
     const result = await evaluate(
       [
         {
@@ -105,7 +97,16 @@ describe('severityFloorEvaluator', () => {
     expect(result.explanation).toContain('under-severity');
   });
 
-  it('scores 0 when no open event matches expected rule ownership', async () => {
+  it('scores 0 when actual severity is above the expected tier (ceiling)', async () => {
+    const result = await evaluate(
+      [{ status: 'open', severity: '80-critical', title: 'Ledger failure' }],
+      [{ status: 'open', severity: '60-high', title: 'Ledger failure' }]
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('over-severity');
+  });
+
+  it('excludes unmatched expected events from the severity score', async () => {
     const result = await evaluate(
       [
         {
@@ -134,8 +135,26 @@ describe('severityFloorEvaluator', () => {
         },
       ]
     );
-    expect(result.score).toBe(0);
-    expect(result.explanation).toContain('rule_uuid');
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unmatched');
+    expect(result.explanation).toContain('unmatched');
+  });
+
+  it('scores only matched events when some expected events are unmatched', async () => {
+    const result = await evaluate(
+      [{ status: 'open', severity: '60-high', title: 'Matched outage' }],
+      [
+        { status: 'open', severity: '60-high', title: 'Matched outage' },
+        {
+          status: 'open',
+          severity: '80-critical',
+          title: 'Missing cascade',
+          signals: [balanceReaderSignal],
+        },
+      ]
+    );
+    expect(result.score).toBe(1);
+    expect(result.explanation).toContain('unmatched');
   });
 
   it('falls back to title matching when expected event has no rule_uuid signals', async () => {
@@ -144,5 +163,45 @@ describe('severityFloorEvaluator', () => {
       [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }]
     );
     expect(result.score).toBe(1);
+  });
+
+  it('scores 0 when matched event has invalid actual severity', async () => {
+    const result = await evaluate(
+      [
+        {
+          status: 'open',
+          severity: 'not-a-valid-tier' as unknown as SignificantEvent['severity'],
+          title: 'Balance reader connectivity failure',
+        },
+      ],
+      [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }]
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('invalid severity');
+  });
+
+  it('counts matched invalid actual severity as a scored miss', async () => {
+    const result = await evaluate(
+      [
+        {
+          status: 'open',
+          severity: 'not-a-valid-tier' as unknown as SignificantEvent['severity'],
+          title: 'Balance reader connectivity failure',
+          signals: [balanceReaderSignal],
+        },
+        { status: 'open', severity: '60-high', title: 'Ledger failure' },
+      ],
+      [
+        {
+          status: 'open',
+          severity: '60-high',
+          title: 'Balance reader connectivity failure',
+          signals: [balanceReaderSignal],
+        },
+        { status: 'open', severity: '60-high', title: 'Ledger failure' },
+      ]
+    );
+    expect(result.score).toBe(0.5);
+    expect(result.explanation).toContain('invalid severity');
   });
 });

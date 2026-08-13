@@ -31,7 +31,7 @@ import {
 import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
-import { severityFloorEvaluator } from './severity/severity_floor';
+import { severityExactEvaluator } from './severity/severity_exact';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
@@ -47,7 +47,7 @@ export const createDiscoveryEvaluators = (
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
     confirmationAlignmentEvaluator,
-    severityFloorEvaluator,
+    severityExactEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);

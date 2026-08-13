@@ -21,10 +21,6 @@ const expectedRuleUuids = (event: {
   ),
 ];
 
-const actualRuleUuids = (event: {
-  signals?: Array<{ metadata?: { rule_uuid?: string } }>;
-}): Set<string> => new Set(expectedRuleUuids(event));
-
 const coversExpectedRules = (
   actualEvent: { signals?: Array<{ metadata?: { rule_uuid?: string } }> },
   ruleUuids: string[]
@@ -32,7 +28,7 @@ const coversExpectedRules = (
   if (ruleUuids.length === 0) {
     return false;
   }
-  const actualUuids = actualRuleUuids(actualEvent);
+  const actualUuids = new Set(expectedRuleUuids(actualEvent));
   return ruleUuids.every((ruleUuid) => actualUuids.has(ruleUuid));
 };
 
@@ -67,11 +63,14 @@ const matchesExpectedEvent = (
 };
 
 /**
- * CODE evaluator: open events must meet or exceed the expected severity floor declared in
- * `expected_significant_events`.
+ * CODE evaluator: matched open events must equal the expected severity tier.
+ *
+ * - Unmatched expected events are excluded from the score (grouping owns that failure mode).
+ * - Under-escalation (actual below expected) and over-escalation (actual above expected) both fail.
+ * - Matched events with invalid actual severity count as scored misses.
  */
-export const severityFloorEvaluator: DiscoveryEvaluator = {
-  name: 'severity_floor',
+export const severityExactEvaluator: DiscoveryEvaluator = {
+  name: 'severity_exact',
   kind: 'CODE',
   evaluate: ({ output, expected }) => {
     const expectedEvents = expected?.expected_significant_events ?? [];
@@ -99,7 +98,8 @@ export const severityFloorEvaluator: DiscoveryEvaluator = {
     }
 
     let satisfied = 0;
-    let validDenominator = 0;
+    let scoredCount = 0;
+    let invalidExpectedCount = 0;
     const issues: string[] = [];
     const usedActualIndices = new Set<number>();
 
@@ -107,10 +107,10 @@ export const severityFloorEvaluator: DiscoveryEvaluator = {
       const expectedSeverity = expectedEvent.severity;
       const expectedRank = severityRank(expectedSeverity);
       if (expectedRank === undefined) {
+        invalidExpectedCount++;
         issues.push(`[${index}] expected severity "${expectedSeverity}" is not a known tier`);
         return;
       }
-      validDenominator++;
 
       const expectedRules = expectedRuleUuids(expectedEvent);
       const matchedActualIndex = openActualEvents.findIndex(
@@ -123,13 +123,15 @@ export const severityFloorEvaluator: DiscoveryEvaluator = {
           expectedRules.length > 0
             ? `rule_uuid(s) [${expectedRules.join(', ')}]`
             : `title "${expectedEvent.title ?? 'unknown'}"`;
-        issues.push(`[${index}] no open event matched expected ${matchHint}`);
+        issues.push(`[${index}] unmatched expected ${matchHint} — excluded from severity score`);
         return;
       }
       usedActualIndices.add(matchedActualIndex);
 
       const matchedActual = openActualEvents[matchedActualIndex];
       const actualRank = severityRank(matchedActual.severity);
+      scoredCount++;
+
       if (actualRank === undefined) {
         issues.push(
           `[${index}] matched event has invalid severity "${matchedActual.severity ?? 'missing'}"`
@@ -137,32 +139,45 @@ export const severityFloorEvaluator: DiscoveryEvaluator = {
         return;
       }
 
-      if (actualRank <= expectedRank) {
+      const matchedLabel = matchedActual.title ?? matchedActual.event_id ?? 'event';
+
+      if (actualRank === expectedRank) {
         satisfied++;
         return;
       }
 
-      const matchedLabel = matchedActual.title ?? matchedActual.event_id ?? 'event';
+      if (actualRank > expectedRank) {
+        issues.push(
+          `[${index}] under-severity for "${matchedLabel}": got ${matchedActual.severity}, expected ${expectedSeverity}`
+        );
+        return;
+      }
+
       issues.push(
-        `[${index}] under-severity for "${matchedLabel}": got ${matchedActual.severity}, expected >= ${expectedSeverity}`
+        `[${index}] over-severity for "${matchedLabel}": got ${matchedActual.severity}, expected ${expectedSeverity}`
       );
     });
 
-    if (validDenominator === 0) {
+    if (scoredCount === 0) {
+      const hasFixtureError = invalidExpectedCount > 0;
       return Promise.resolve({
         score: null,
-        label: 'fixture-error',
-        explanation: `No valid expected tiers found: ${issues.join('; ')}`,
+        label: hasFixtureError ? 'fixture-error' : 'unmatched',
+        explanation: hasFixtureError
+          ? `Fixture errors prevented severity scoring: ${issues.join('; ')}`
+          : `No expected open events matched an actual event for severity scoring: ${issues.join(
+              '; '
+            )}`,
       });
     }
 
-    const score = satisfied / validDenominator;
+    const score = satisfied / scoredCount;
     return Promise.resolve({
       score,
       explanation:
         issues.length > 0
           ? `${issues.join('; ')} (score=${score.toFixed(2)})`
-          : `All ${validDenominator} open event(s) met their severity floor`,
+          : `All ${scoredCount} matched open event(s) met their severity tier`,
     });
   },
 };

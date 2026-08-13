@@ -6,6 +6,7 @@
  */
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
+import { SEVERITY_CONTRACT_RULE } from '@kbn/significant-events-schema';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 
@@ -24,7 +25,7 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'critical_severity_requires_confirmed_impact',
-    text: 'Apply the `severity` field contract in order. `80-critical` requires site-wide impact, blocked paths across distinct core operations, a component that can no longer perform its primary function end-to-end, or confirmed sensitive-data exposure. A single endpoint or lookup path that blocks only that operation — even for every caller who reaches it — is `60-high`, not `80-critical`. Grade the direct signal evidence over a generic "degraded" phrase in the summary. Use `40-medium` or lower when grounding has not confirmed whether the operation fails versus only slows, or impact is minor and bounded.',
+    text: `Apply the \`severity\` field contract in order — do not invent alternate tier rules. Contract:\n\n${SEVERITY_CONTRACT_RULE.trim()}\n\nGrade the direct signal evidence over a generic "degraded" phrase in the summary.`,
   },
   {
     id: 'weak_signals_low_severity',

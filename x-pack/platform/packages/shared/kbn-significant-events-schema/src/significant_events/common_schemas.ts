@@ -191,8 +191,11 @@ export type SignalEntry = z.infer<typeof signalEntrySchema>;
 /** Canonical severity values in descending severity order (critical → low). */
 export const SEVERITY_OPTIONS = ['80-critical', '60-high', '40-medium', '20-low'] as const;
 
-/** Canonical sortable severity used by storage, APIs, and tools. */
-export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(dedent`
+/**
+ * Severity field contract — single source of truth for schema `.describe()` and eval judges.
+ * Order of `SEVERITY_OPTIONS` is part of this contract (most-severe first).
+ */
+export const SEVERITY_CONTRACT_RULE = dedent`
     Sortable severity keyword. Choose the tier from confirmed grounding rows: whether the affected operation fails, degrades, or still completes on the verified path, and how broad that impact is. A concrete non-benign error in a found off-topic row directly evidences its separate observed-error event even though the source rule signal remains \`confirmed: false\`; assess that event only from the row’s error signature and impact.
 
     Decide in order — stop at the first match:
@@ -206,7 +209,10 @@ export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(dedent`
     4. "20-low" for recovery, noise, false alarm, or non-issue.
 
     Tie-break: when two adjacent tiers both match the same grounding evidence, choose the lower only when rows leave whether the operation still completes on the affected path genuinely unresolved.
-  `);
+  `;
+
+/** Canonical sortable severity used by storage, APIs, and tools. */
+export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(SEVERITY_CONTRACT_RULE);
 
 export type Severity = z.infer<typeof severitySchema>;
 
