@@ -23427,9 +23427,9 @@ io-ts@2.2.22, io-ts@^2.2.22:
   integrity sha512-FHCCztTkHoV9mdBsHpocLpdTAfh956ZQcIkWQxxS0U5HT53vtrcuYdQneEJKH6xILaLNzXVl2Cvwtoy8XNN0AA==
 
 ip-address@^10.1.1, ip-address@^10.2.0:
-  version "10.2.1"
-  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.2.1.tgz#b8147b3dbc90d43b7c629c2d45a14ae8efc0e376"
-  integrity sha512-O81l1g31PlH55F7AChkGM3sdWZX+1KDLnhesJ/V9Ziug5nIOnEPaVb2jLWAo1TbCOSeZPeNbxX4v/ywTuKSn9A==
+  version "10.5.0"
+  resolved "https://registry.yarnpkg.com/ip-address/-/ip-address-10.5.0.tgz#fcd6d7dfe9e68416b7cb71afe9bc960b3e38c13b"
+  integrity sha512-R5SnVLJmgYYvf2F2ZgwSBnelz5G4q5AxIC277GDfUaNbrZKNANcBC7RHqYYePlszf4kBolVkJauG0ZjHHFh55g==
 
 ip-regex@^2.1.0:
   version "2.1.0"
