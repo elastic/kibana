@@ -151,6 +151,33 @@ describe('appendTimeBucketToEsqlQuery', () => {
       'FROM index | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
     );
   });
+
+  it('preserves an existing TBUCKET in the first STATS after TS', () => {
+    const query = 'TS metrics-* | STATS AVG(cpu) BY TBUCKET(100)';
+    expect(appendTimeBucketToEsqlQuery(query, '@timestamp')).toBe(query);
+  });
+
+  it('preserves an aliased TBUCKET without adding a regular BUCKET', () => {
+    const query = 'TS metrics-* | STATS AVG(cpu) BY time_bucket = TBUCKET(1 hour)';
+    const result = appendTimeBucketToEsqlQuery(query, '@timestamp');
+    expect(result).toBe(query);
+    expect(result).not.toContain('BUCKET(@timestamp');
+  });
+
+  it('adds TBUCKET to the first STATS after TS', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'TS metrics-* | STATS AVG(cpu) BY host',
+      '@timestamp'
+    );
+    expect(result).toBe('TS metrics-* | STATS AVG(cpu) BY host, TBUCKET(75)');
+    expect(result).not.toContain('BUCKET(@timestamp');
+  });
+
+  it('does not apply TS bucketing semantics to a later STATS command', () => {
+    const query =
+      'TS metrics-* | STATS total = AVG(cpu) BY TBUCKET(100) | STATS MAX(total) BY TBUCKET(100)';
+    expect(appendTimeBucketToEsqlQuery(query, '@timestamp')).toBe(query);
+  });
 });
 
 describe('buildTrendlineQueryWithMetricFieldMap', () => {
@@ -163,6 +190,7 @@ describe('buildTrendlineQueryWithMetricFieldMap', () => {
       'FROM index | KEEP bytes | STATS AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
     );
     expect(result.metricFieldMap.get('bytes')).toBe('AVG(bytes)');
+    expect(result.timeField).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
   });
 
   it('keeps breakdown fields in BY instead of aggregating them for a query without STATS', () => {
@@ -191,5 +219,38 @@ describe('buildTrendlineQueryWithMetricFieldMap', () => {
       'FROM index | STATS avg_bytes = AVG(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
     );
     expect(result.metricFieldMap.size).toBe(0);
+    expect(result.timeField).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+  });
+
+  it('returns an unaliased TBUCKET expression as the time result column', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap(
+      'TS metrics-* | STATS avg_cpu = AVG(cpu) BY TBUCKET(100)',
+      '@timestamp'
+    );
+
+    expect(result.query).toBe('TS metrics-* | STATS avg_cpu = AVG(cpu) BY TBUCKET(100)');
+    expect(result.timeField).toBe('TBUCKET(100)');
+  });
+
+  it('returns the user-defined TBUCKET alias as the time result column', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap(
+      'TS metrics-* | STATS avg_cpu = AVG(cpu) BY `Over time` = TBUCKET(1 hour)',
+      '@timestamp'
+    );
+
+    expect(result.query).toBe(
+      'TS metrics-* | STATS avg_cpu = AVG(cpu) BY `Over time` = TBUCKET(1 hour)'
+    );
+    expect(result.timeField).toBe('Over time');
+  });
+
+  it('returns the generated TBUCKET expression when TS has no existing time bucket', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap(
+      'TS metrics-* | STATS avg_cpu = AVG(cpu) BY host',
+      '@timestamp'
+    );
+
+    expect(result.query).toBe('TS metrics-* | STATS avg_cpu = AVG(cpu) BY host, TBUCKET(75)');
+    expect(result.timeField).toBe('TBUCKET(75)');
   });
 });

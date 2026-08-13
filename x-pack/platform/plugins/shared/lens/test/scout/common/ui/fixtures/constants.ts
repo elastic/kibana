@@ -14,6 +14,8 @@ export const ES_ARCHIVE_PATHS = {
   LONG_WINDOW_LOGSTASH: 'src/platform/test/functional/fixtures/es_archiver/long_window_logstash',
   KIBANA_SAMPLE_DATA_FLIGHTS:
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights',
+  KIBANA_SAMPLE_DATA_LOGS_TSDB:
+    'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
 } as const;
 
 export const DATA_VIEW_ID = {
@@ -45,6 +47,11 @@ export const XY_CHART = 'xyVisChart' as const;
 export const LOGSTASH_IN_RANGE_DATES = {
   from: 'Sep 19, 2015 @ 06:31:44.000',
   to: 'Sep 23, 2015 @ 18:31:44.000',
+} as const;
+
+export const LOGSTASH_TSDB_IN_RANGE_DATES = {
+  from: 'Apr 15, 2023 @ 00:00:00.000',
+  to: 'Jun 16, 2023 @ 00:00:00.000',
 } as const;
 
 export const MULTIPLE_DATA_VIEWS_TIME_RANGE = {
