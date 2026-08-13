@@ -41,6 +41,7 @@ describe('PUT /api/entity_analytics/monitoring/entity_source/{id} - updateMonito
   let logger: ReturnType<typeof loggerMock.create>;
 
   const mockUpdate = jest.fn();
+  const mockGet = jest.fn();
 
   beforeEach(() => {
     server = serverMock.create();
@@ -49,12 +50,14 @@ describe('PUT /api/entity_analytics/monitoring/entity_source/{id} - updateMonito
 
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
     mockUpdate.mockReset().mockImplementation(async (source) => ({ ...source }));
+    mockGet.mockReset().mockResolvedValue({ id: 'es-1', indexPattern: 'logs-*' });
     mockScheduleNow.mockReset();
     // Engine not running: happy path skips the scheduler.
     mockGetEngineStatus.mockReset().mockResolvedValue({ status: 'stopped' });
 
     (ctx.securitySolution.getMonitoringEntitySourceDataClient as jest.Mock).mockReturnValue({
       update: mockUpdate,
+      get: mockGet,
     });
     (ctx.securitySolution.getPrivilegeMonitoringDataClient as jest.Mock).mockReturnValue({
       getScopedSoClient: jest.fn(),
@@ -77,13 +80,25 @@ describe('PUT /api/entity_analytics/monitoring/entity_source/{id} - updateMonito
       body,
     });
 
-  it('returns 403 and does not update the source when the caller lacks index privileges', async () => {
+  it('returns 403 and does not update the source when the caller lacks privileges on the new indexPattern', async () => {
     mockValidateIndexPermissions.mockRejectedValue(Boom.forbidden('Insufficient index privileges'));
 
     const request = buildRequest({ indexPattern: 'logs-*' });
     const response = await server.inject(request, context);
 
     expect(response.status).toEqual(403);
+    expect(mockValidateIndexPermissions).toHaveBeenCalledWith(expect.anything(), 'logs-*');
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 and does not update when caller lacks privileges on the existing indexPattern', async () => {
+    mockValidateIndexPermissions.mockRejectedValue(Boom.forbidden('Insufficient index privileges'));
+
+    const request = buildRequest({ name: 'renamed-source' });
+    const response = await server.inject(request, context);
+
+    expect(response.status).toEqual(403);
+    expect(mockGet).toHaveBeenCalledWith('es-1');
     expect(mockValidateIndexPermissions).toHaveBeenCalledWith(expect.anything(), 'logs-*');
     expect(mockUpdate).not.toHaveBeenCalled();
   });
@@ -99,7 +114,19 @@ describe('PUT /api/entity_analytics/monitoring/entity_source/{id} - updateMonito
     );
   });
 
-  it('does not validate index permissions when no indexPattern is provided', async () => {
+  it('validates the existing indexPattern even when the update body omits it', async () => {
+    const request = buildRequest({ name: 'renamed-source' });
+    const response = await server.inject(request, context);
+
+    expect(response.status).toEqual(200);
+    expect(mockGet).toHaveBeenCalledWith('es-1');
+    expect(mockValidateIndexPermissions).toHaveBeenCalledWith(expect.anything(), 'logs-*');
+    expect(mockUpdate).toHaveBeenCalled();
+  });
+
+  it('skips validation when neither the update body nor the existing source has an indexPattern', async () => {
+    mockGet.mockResolvedValue({ id: 'es-1' });
+
     const request = buildRequest({ name: 'renamed-source' });
     const response = await server.inject(request, context);
 

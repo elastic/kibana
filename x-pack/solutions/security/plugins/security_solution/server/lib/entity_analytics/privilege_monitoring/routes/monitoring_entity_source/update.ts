@@ -65,15 +65,13 @@ export const updateMonitoringEntitySourceRoute = (
             const secSol = await context.securitySolution;
             const client = secSol.getMonitoringEntitySourceDataClient();
 
-            // The scheduled task reads the configured index under the stored engine API key,
-            // so verify the caller can actually read any index pattern they set here. Otherwise
-            // a user without ES read on the index could recover its data through the monitoring
-            // output (confused deputy).
-            if (request.body.indexPattern) {
-              const { elasticsearch } = await context.core;
+            const { elasticsearch } = await context.core;
+            const effectiveIndexPattern =
+              request.body.indexPattern ?? (await client.get(request.params.id))?.indexPattern;
+            if (effectiveIndexPattern) {
               await validateIndexPermissions(
                 elasticsearch.client.asCurrentUser,
-                request.body.indexPattern
+                effectiveIndexPattern
               );
             }
 
