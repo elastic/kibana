@@ -128,7 +128,9 @@ function TemplateWithContext({
     if (!analyzeDataMenuItem) {
       return undefined;
     }
-    return { items: [analyzeDataMenuItem] };
+    // Primary slot - demotes global Add data
+    // into the More overflow via mergeAppMenuConfigs.
+    return { primaryActionItem: analyzeDataMenuItem };
   }, [analyzeDataMenuItem]);
 
   const statusBadges = (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuPrimaryActionItem } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALL_VALUES_SELECTED, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
@@ -33,8 +33,8 @@ function getEnvironmentDefinition(environment: string) {
   }
 }
 
-/** Builds the Explore data AppMenu item for RUM/mobile service pages, or undefined. */
-export function useAnalyzeDataMenuItem(): AppMenuItemType | undefined {
+/** Builds the Explore data primary AppMenu action for RUM/mobile service pages, or undefined. */
+export function useAnalyzeDataMenuItem(): AppMenuPrimaryActionItem | undefined {
   const { agentName, serviceName } = useApmServiceContext();
   const { services } = useKibana();
 

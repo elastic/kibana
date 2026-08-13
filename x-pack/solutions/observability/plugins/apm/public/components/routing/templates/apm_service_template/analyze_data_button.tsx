@@ -16,8 +16,12 @@ export function AnalyzeDataButton() {
     return null;
   }
 
+  // AppMenu allows tooltipContent as string | (() => string); EuiToolTip wants ReactNode.
+  const tooltipContent =
+    typeof item.tooltipContent === 'function' ? item.tooltipContent() : item.tooltipContent;
+
   return (
-    <EuiToolTip position="top" content={item.tooltipContent}>
+    <EuiToolTip position="top" content={tooltipContent}>
       <EuiButtonEmpty data-test-subj={item.testId} href={item.href} iconType={item.iconType}>
         {item.label}
       </EuiButtonEmpty>

@@ -176,6 +176,32 @@ describe('ApmMainTemplate', () => {
     expect(mockRegisterAppMenu).not.toHaveBeenCalled();
   });
 
+  it('lets Explore data as primaryActionItem replace Add data on the title row', async () => {
+    mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
+
+    renderTemplate(
+      <ApmMainTemplate
+        header={{
+          title: 'elastic-co-frontend',
+          menu: {
+            primaryActionItem: {
+              id: 'exploreData',
+              label: 'Explore data',
+              href: '/explore',
+              iconType: 'chartBarVerticalStack',
+              testId: 'apmAnalyzeDataButtonExploreDataButton',
+            },
+          },
+        }}
+      >
+        <div>body</div>
+      </ApmMainTemplate>
+    );
+
+    expect(await screen.findByTestId('apmAnalyzeDataButtonExploreDataButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('apmAddDataHeaderLink')).not.toBeInTheDocument();
+  });
+
   it('lets page-local primaryActionItem replace Add data on the title row', async () => {
     mockUseApmAppMenuConfig.mockReturnValue(registeredMenu);
 
