@@ -16,3 +16,4 @@ export type {
 } from './types';
 export { KiVerifierRegistry } from './registry';
 export { KiVerificationService } from './service';
+export { pocVerifiers } from './poc_verifiers';
