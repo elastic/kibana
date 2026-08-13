@@ -55,7 +55,7 @@ const HEADER_TINT = '#F6F9FC';
 // empty rule (no rules to lose) as long as `borders` stays at its default.
 const SLOWER_ACCORDION_TRANSITION = css`
   .euiAccordion__childWrapper {
-    transition-duration: 750ms;
+    transition-duration: 1100ms;
   }
 `;
 
@@ -104,7 +104,7 @@ const FadeIn: React.FunctionComponent<{ children: React.ReactNode }> = ({ childr
       style={{
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'scale(1)' : 'scale(0.85)',
-        transition: 'opacity 500ms ease, transform 500ms ease',
+        transition: 'opacity 1000ms ease, transform 1000ms ease',
       }}
     >
       {children}
@@ -571,14 +571,16 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   const [secretAccessKey, setSecretAccessKey] = useState('');
   const [isIdentityNameTouched, setIsIdentityNameTouched] = useState(false);
   const [roleArn, setRoleArn] = useState('');
+  const [isRoleArnTouched, setIsRoleArnTouched] = useState(false);
 
   const isAccessKeyIdInvalid = isAccessKeyIdTouched && accessKeyId.trim().length === 0;
   const isIdentityNameInvalid = isIdentityNameTouched && identityName.trim().length === 0;
+  const isRoleArnInvalid = isRoleArnTouched && roleArn.trim().length === 0;
 
   const isValid =
     method === 'access_keys'
       ? accessKeyId.trim().length > 0 && secretAccessKey.trim().length > 0
-      : identityName.trim().length > 0;
+      : identityName.trim().length > 0 && roleArn.trim().length > 0;
 
   useEffect(() => {
     onValidityChange(isValid);
@@ -637,6 +639,7 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
           >
             <EuiFieldText
               fullWidth
+              placeholder="e.g.: AKIAIOSFODNN7EXAMPLE"
               value={accessKeyId}
               onChange={(e) => setAccessKeyId(e.target.value)}
               onBlur={() => setIsAccessKeyIdTouched(true)}
@@ -649,6 +652,7 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
             <EuiFieldPassword
               type="dual"
               fullWidth
+              placeholder="e.g.: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
               value={secretAccessKey}
               onChange={(e) => setSecretAccessKey(e.target.value)}
               aria-label="Secret access key"
@@ -667,6 +671,7 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
           >
             <EuiFieldText
               fullWidth
+              placeholder="e.g.: elastic-forwarder-prod"
               value={identityName}
               onChange={(e) => onIdentityNameChange(e.target.value)}
               onBlur={() => setIsIdentityNameTouched(true)}
@@ -708,11 +713,20 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
             </EuiText>
           </EuiAccordion>
           <EuiSpacer size="m" />
-          <EuiFormRow label="Role ARN" style={HALF_WIDTH} fullWidth>
+          <EuiFormRow
+            label="Role ARN"
+            isInvalid={isRoleArnInvalid}
+            error="Role ARN is required"
+            style={HALF_WIDTH}
+            fullWidth
+          >
             <EuiFieldText
               fullWidth
+              placeholder="arn:aws:iam::123456789012:role/elastic-forwarder"
               value={roleArn}
               onChange={(e) => setRoleArn(e.target.value)}
+              onBlur={() => setIsRoleArnTouched(true)}
+              isInvalid={isRoleArnInvalid}
               aria-label="Role ARN"
               data-test-subj="awsOnboardingManagedRoleArn"
             />
