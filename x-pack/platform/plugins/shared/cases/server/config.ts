@@ -19,10 +19,7 @@ export const ConfigSchema = schema.object({
    * `full_name`, `email`) on the cases saved object at write time.
    */
   assigneeIdentity: schema.object({
-    enabled: offeringBasedSchema({
-      serverless: schema.boolean({ defaultValue: false }),
-      traditional: schema.boolean({ defaultValue: true }),
-    }),
+    enabled: schema.boolean({ defaultValue: true }),
   }),
   analytics: schema.object({
     index: schema.object({
