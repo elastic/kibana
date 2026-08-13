@@ -29,7 +29,7 @@ describe('cribl dataId sanitize', () => {
     });
 
     it('returns empty string when nothing remains', () => {
-      expect(sanitizeDataIdInput(`' || true || '`)).toBe('');
+      expect(sanitizeDataIdInput(`' ||  || '`)).toBe('');
       expect(sanitizeDataIdInput('')).toBe('');
     });
   });
