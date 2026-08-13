@@ -291,7 +291,7 @@ export const createCasesClientMockArgs = () => {
     // the broad create/update suites keep asserting uid-only assignees.
     config: {
       ...ConfigSchema.validate({}),
-      assigneeIdentity: { enabled: false },
+      assigneeIdentity: { enabled: true },
     },
     casesEventBus: createCasesEventBusMock(),
     request: httpServerMock.createKibanaRequest(),
