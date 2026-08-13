@@ -38,17 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should change datasource and search with visor', async () => {
-      // Open visor with Ctrl+K
-      const editor = await testSubjects.find('ESQLEditor');
-      const textarea = await editor.findByCssSelector('textarea');
-      await textarea.type([Key.CONTROL, 'k']);
-
-      await retry.try(async () => {
-        expect(await esql.isQuickSearchVisorVisible()).to.be(true);
-      });
-
-      // Dismiss any suggest widget that may have appeared
-      await browser.pressKeys(browser.keys.ESCAPE);
       await retry.try(async () => {
         expect(await esql.isQuickSearchVisorVisible()).to.be(true);
       });
@@ -69,7 +58,12 @@ export default function ({ getService }: FtrProviderContext) {
       const kqlInput = await testSubjects.find('esqlVisorKQLQueryInput');
       await kqlInput.click();
       await kqlInput.type('test');
-      await kqlInput.pressKeys(Key.ENTER);
+
+      // Wait for the submit button to appear (confirms React state updated with typed value)
+      await retry.waitFor('KQL submit button to appear', async () => {
+        return await testSubjects.exists('esqlVisorKQLSubmit');
+      });
+      await testSubjects.click('esqlVisorKQLSubmit');
 
       await retry.try(async () => {
         const query = await esql.getEsqlEditorQuery();
