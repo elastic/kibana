@@ -16,11 +16,25 @@ export const bulkMarkApiKeysForInvalidation = async (
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<void> => {
   await withSpan({ name: 'bulkMarkApiKeysForInvalidation', type: 'rules' }, async () => {
-    if (apiKeys.length === 0) {
+    // Raw `essu_` values are user-created Cloud API keys stored as-is (no `base64(id:key)`
+    // encoding and no key id). They are never managed by alerting, and every invalidation
+    // call site is gated on `apiKeyCreatedByUser` — this filter is defense-in-depth so a
+    // future caller cannot enqueue an undecodable invalidation entry.
+    const decodableApiKeys = apiKeys.filter((key) => {
+      if (isUiamCredential(key)) {
+        logger.warn(
+          'Skipping invalidation for a user-created UIAM API key; user-created API keys are not managed by alerting.'
+        );
+        return false;
+      }
+      return true;
+    });
+
+    if (decodableApiKeys.length === 0) {
       return;
     }
 
-    const apiKeysToInvalidate = apiKeys.map((key) => {
+    const apiKeysToInvalidate = decodableApiKeys.map((key) => {
       let apiKeyId;
       let apiKeyValue;
 
@@ -47,7 +61,7 @@ export const bulkMarkApiKeysForInvalidation = async (
       await savedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       logger.error(
-        `Failed to bulk mark list of API keys [${apiKeys
+        `Failed to bulk mark list of API keys [${decodableApiKeys
           .map((key) => `"${key}"`)
           .join(', ')}] for invalidation: ${e.message}`,
         {

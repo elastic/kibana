@@ -57,7 +57,11 @@ const getApiKeyRuleProperties = (
   }
 
   const encodedApiKey = encodeApiKey(esApiKeyId, esApiKey);
-  const encodedUiamApiKey = encodeApiKey(uiamApiKeyId, uiamApiKey);
+  // Framework-granted UIAM keys are stored as `base64(id:key)`. User-created Cloud API
+  // keys are raw `essu_` credentials with no key id — store them as-is; alerting never
+  // invalidates them, so no id is needed.
+  const encodedUiamApiKey =
+    encodeApiKey(uiamApiKeyId, uiamApiKey) ?? (createdByUser && uiamApiKey ? uiamApiKey : null);
 
   return {
     apiKeyOwner: username,

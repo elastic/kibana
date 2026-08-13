@@ -160,7 +160,9 @@ export type CreateAPIKeyResult =
   | {
       apiKeysEnabled: true;
       result?: SecurityPluginGrantAPIKeyResult;
-      uiamResult?: SecurityPluginGrantAPIKeyResult;
+      // `id` is absent for user-created Cloud (UIAM) API keys, which are raw `essu_`
+      // credentials with no key id; alerting never invalidates them.
+      uiamResult?: Omit<SecurityPluginGrantAPIKeyResult, 'id'> & { id?: string };
     };
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }

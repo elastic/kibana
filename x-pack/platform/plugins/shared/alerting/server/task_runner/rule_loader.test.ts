@@ -309,6 +309,35 @@ describe('rule_loader', () => {
       expect(effectiveApiKey).toEqual('essu_uiam_api_key');
     });
 
+    test('returns a raw user-created UIAM API key as-is when config is set to uiam', async () => {
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        { uiamApiKey: 'essu_user_created_key' }
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
+      expect(effectiveApiKey).toEqual('essu_user_created_key');
+    });
+
+    test('falls back to the UIAM API key when config is set to es and the rule has no ES API key', async () => {
+      const esContext = { ...context, logger: mockLogger } as unknown as TaskRunnerContext;
+
+      const { fakeRequest, effectiveApiKey } = getFakeKibanaRequest(esContext, 'default', null, {
+        uiamApiKey: 'essu_user_created_key',
+      });
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
+      expect(effectiveApiKey).toEqual('essu_user_created_key');
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'ES API key is not provided to create a fake request, falling back to UIAM API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+    });
+
     test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {
       const uiamContext = {
         ...context,

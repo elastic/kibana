@@ -122,6 +122,47 @@ describe('apiKeyAsAlertAttributes', () => {
     });
   });
 
+  test('stores the raw UIAM API key as-is when it has no id and is created by the user', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_user_created_key',
+          },
+        },
+        'test',
+        true
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'essu_user_created_key',
+    });
+  });
+
+  test('does not store a UIAM API key without an id when it is not created by the user', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_framework_key_without_id',
+          },
+        },
+        'test',
+        false
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: false,
+    });
+  });
+
   test('does not create both API keys when createdByUser is true', () => {
     expect(() =>
       apiKeyAsRuleDomainProperties(

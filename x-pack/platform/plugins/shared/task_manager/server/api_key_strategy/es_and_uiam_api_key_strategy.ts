@@ -127,6 +127,32 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       return uiamOnlyResult;
     }
 
+    // A raw `essu_` credential on a non-clone request is a user-created Cloud API key
+    // (obtained from the Elastic Cloud UI). It carries no key id and has no Elasticsearch
+    // counterpart, so persist it as-is (UIAM-only) and leave lifecycle management (rotation,
+    // deletion) to the user — `apiKeyCreatedByUser: true` already short-circuits
+    // `getApiKeyIdsForInvalidation` for both credentials.
+    if (isUiamRequest && apiKeyCreatedByUser && opts?.onEsKey !== true) {
+      const credentials = getApiKeyFromRequest(request);
+      if (!credentials?.api_key) {
+        throw new Error('Could not extract API key from user request header.');
+      }
+
+      const userUiamResult = new Map<string, ApiKeySOFields>();
+      taskInstances.forEach((task) => {
+        userUiamResult.set(task.id!, {
+          uiamApiKey: credentials.api_key,
+          // User-created keys carry no key id. An empty `apiKeyId` satisfies the task SO
+          // schema (required across all model versions) and is already treated as "no id"
+          // by consumers (`classifyTaskForUiamProvisioning` skips it, and invalidation is
+          // skipped entirely for user-created keys).
+          userScope: toUserScope(''),
+        });
+      });
+
+      return userUiamResult;
+    }
+
     const esKeys = await createApiKey(taskInstances, request, security, opts, {
       user,
       apiKeyCreatedByUser,
@@ -174,11 +200,14 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
 
     if (apiKeyCreatedByUser) {
       const apiKeyResult = getApiKeyFromRequest(request);
-      if (apiKeyResult && isUiamCredential(apiKeyResult.api_key)) {
+      // Raw user-created UIAM keys (no id) are persisted UIAM-only in `grantApiKeys` and
+      // never reach this path; here only `base64(id:key)`-encoded UIAM credentials qualify.
+      const { id, api_key: apiKey } = apiKeyResult ?? {};
+      if (id && apiKey && isUiamCredential(apiKey)) {
         taskInstances.forEach((task) => {
           uiamKeyByTaskIdMap.set(task.id!, {
-            apiKey: apiKeyResult.api_key,
-            apiKeyId: apiKeyResult.id,
+            apiKey,
+            apiKeyId: id,
           });
         });
       }

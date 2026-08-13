@@ -321,6 +321,41 @@ describe('EsAndUiamApiKeyStrategy', () => {
       );
     });
 
+    test('persists a raw user-created UIAM API key as-is (UIAM-only, no id) without minting any keys', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy();
+      // User-created Cloud API keys are presented as the raw `essu_` secret, not `base64(id:key)`
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_user_created_key' },
+      });
+
+      hasApiKeyMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+        authentication_type: 'api_key',
+      });
+      getApiKeyFromRequestMock.mockReturnValue({ api_key: 'essu_user_created_key' });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      const fields = result.get('task-1');
+      // No keys are minted: the user's raw key is reused directly, UIAM-only.
+      expect(createApiKeyMock).not.toHaveBeenCalled();
+      expect(mockUiam.grant).not.toHaveBeenCalled();
+      expect(fields?.apiKey).toBeUndefined();
+      expect(fields?.uiamApiKey).toBe('essu_user_created_key');
+      // User-created keys carry no key id.
+      expect(fields?.userScope.apiKeyId).toBe('');
+      expect(fields?.userScope.uiamApiKeyId).toBeUndefined();
+      expect(fields?.userScope.apiKeyCreatedByUser).toBe(true);
+      // The user's key is the one used to build the fake request for execution...
+      expect(strategy.getApiKeyForFakeRequest(mockTaskInstance({ ...fields }))).toBe(
+        'essu_user_created_key'
+      );
+      // ...and it is never invalidated by task manager.
+      expect(strategy.getApiKeyIdsForInvalidation(mockTaskInstance({ ...fields }))).toEqual([]);
+    });
+
     test('grants both ES and UIAM keys when request has UIAM credential', async () => {
       const { strategy, coreStart, mockUiam } = createStrategy();
       const request = httpServerMock.createKibanaRequest({

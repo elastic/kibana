@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type {
   KibanaRequest,
   Logger,
@@ -493,15 +492,22 @@ export class RulesClientFactory {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
           // A raw UIAM credential (`essu_...`) means the request was authenticated with a
-          // user-created organization-level API key. Unlike framework-granted UIAM keys
-          // (encoded as `base64(id:key)`), it carries no key id, so it cannot be persisted on
-          // the rule for execution and invalidation bookkeeping.
+          // user-created Cloud API key (obtained from the Elastic Cloud UI). Unlike
+          // framework-granted UIAM keys (encoded as `base64(id:key)`), it carries no key id,
+          // so it is stored on the rule as-is and never invalidated by alerting — lifecycle
+          // management (rotation, deletion) remains the user's responsibility, and
+          // `apiKeyCreatedByUser` gates every invalidation path.
           if (isUiamCredential(authorizationHeader)) {
-            throw Boom.badRequest(
-              `Cannot use an organization-level API key to create or enable rule "${name}". ` +
-                `Organization-level API keys are not supported for rule operations; ` +
-                `use a project-scoped Elasticsearch API key instead.`
-            );
+            if (!this.shouldGrantUiam) {
+              throw new Error('UIAM API keys should only be used in serverless environments');
+            }
+            return {
+              apiKeysEnabled: true,
+              uiamResult: {
+                name: `uiam-${name}`,
+                api_key: authorizationHeader.credentials,
+              },
+            };
           }
 
           const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')

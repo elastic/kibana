@@ -13,7 +13,7 @@ import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ApiKeyType, type RunRuleParams, type TaskRunnerContext } from './types';
-import { ErrorWithReason, validateRuleTypeParams } from '../lib';
+import { ErrorWithReason, getUiamApiKeySecret, validateRuleTypeParams } from '../lib';
 import type { RawRule, RuleTypeRegistry, RuleTypeParamsValidator } from '../types';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { RuleTypeParams } from '../../common';
@@ -226,13 +226,25 @@ export function getFakeKibanaRequest(
         );
       }
     } else {
-      const [, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
+      const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
       requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
       effectiveApiKey = uiamApiKeyValue;
     }
   } else if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
     effectiveApiKey = apiKey;
+  } else if (uiamApiKey) {
+    // Rules created with a user-supplied Cloud (UIAM) API key — and UIAM-cloned rules —
+    // persist only a UIAM credential. Fall back to it when the strategy would otherwise
+    // use the ES key, mirroring `EsAndUiamApiKeyStrategy.getApiKeyForFakeRequest` in
+    // @kbn/task-manager-plugin, instead of yielding an unauthenticated request.
+    context.logger.debug(
+      'ES API key is not provided to create a fake request, falling back to UIAM API key.',
+      { tags: logTags }
+    );
+    const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
+    requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
+    effectiveApiKey = uiamApiKeyValue;
   }
 
   const fakeRawRequest: FakeRawRequest = {
