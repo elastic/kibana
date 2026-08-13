@@ -69,7 +69,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateDetails.summaryTab.notInUseTitle"
-                defaultMessage="This component template is not in use by any index templates."
+                defaultMessage="This component template is not in use by any index templates"
               />
             }
             data-test-subj="notInUseCallout"

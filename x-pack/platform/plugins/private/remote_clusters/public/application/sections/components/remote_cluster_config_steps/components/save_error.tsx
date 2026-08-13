@@ -14,7 +14,7 @@ interface Props {
 }
 export const SaveError: React.FC<Props> = ({ saveError }) => {
   const { message, cause } = saveError;
-  const text = cause && cause.length === 1 ? cause[0] : '';
+  const text = cause?.length === 1 ? cause[0] : undefined;
 
   const renderErrorBody = () => {
     if (!cause || !Array.isArray(cause)) return null;
