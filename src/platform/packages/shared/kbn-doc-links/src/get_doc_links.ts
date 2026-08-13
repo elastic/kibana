@@ -1100,6 +1100,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       context: `${ELASTIC_DOCS}solutions/search/rag/playground-context`,
       hiddenFields: `${ELASTIC_DOCS}solutions/search/rag/playground-query#playground-hidden-fields`,
     },
+    dataFederation: {
+      overview: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation`,
+      quickstart: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-quickstart`,
+      dataSources: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources`,
+      datasets: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets`,
+      datasetSettings: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets#dataset-settings`,
+      authentication: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#authentication`,
+      staticCredentials: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-static-credentials`,
+      federatedIdentity: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-federated-identity`,
+      querying: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-querying`,
+      security: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-security`,
+    },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,
       getStarted: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/get-started`,
