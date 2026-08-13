@@ -14,7 +14,6 @@ import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { of, Subject } from 'rxjs';
 import { ProjectPicker, type ProjectPickerProps } from './project_picker';
 import { ProjectPickerContent } from './project_picker_content';
 import type { CPSProject, ProjectsData } from '../types';
@@ -51,7 +50,6 @@ const mockProjectsData: ProjectsData = {
 
 describe('ProjectPicker', () => {
   const defaultProps: ProjectPickerProps = {
-    getActiveRouteProjects$: () => of(mockProjectsData),
     defaultProjectRoutingGetter: () => undefined,
     currentProjectRoutingGetter: () => '',
     onProjectRoutingChange: jest.fn(),
@@ -79,9 +77,8 @@ describe('ProjectPicker', () => {
   });
 
   it('should show a skeleton while projects are loading', async () => {
-    const projects$ = new Subject<ProjectsData | null>();
     await renderProjectPicker({
-      getActiveRouteProjects$: () => projects$.asObservable(),
+      fetchProjectsByRouting: jest.fn(() => new Promise(() => {})),
     });
 
     expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
@@ -90,11 +87,10 @@ describe('ProjectPicker', () => {
 
   it('should render nothing when there is no origin project', async () => {
     await renderProjectPicker({
-      getActiveRouteProjects$: () =>
-        of({
-          origin: null,
-          linkedProjects,
-        }),
+      fetchProjectsByRouting: jest.fn().mockResolvedValue({
+        origin: null,
+        linkedProjects,
+      }),
     });
 
     expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
@@ -103,11 +99,10 @@ describe('ProjectPicker', () => {
   it('should render nothing when there are no linked projects', async () => {
     await renderProjectPicker({
       totalProjectCount: 1,
-      getActiveRouteProjects$: () =>
-        of({
-          origin: originProject,
-          linkedProjects: [],
-        }),
+      fetchProjectsByRouting: jest.fn().mockResolvedValue({
+        origin: originProject,
+        linkedProjects: [],
+      }),
     });
 
     expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
@@ -136,7 +131,11 @@ describe('ProjectPicker', () => {
 
   it('does not call onProjectRoutingChange on mount when routing is already in sync', async () => {
     const onProjectRoutingChange = jest.fn();
-    await renderProjectPicker({ onProjectRoutingChange });
+    await renderProjectPicker({
+      onProjectRoutingChange,
+      currentProjectRoutingGetter: () => '_id:*',
+      defaultProjectRoutingGetter: () => '_id:*',
+    });
 
     expect(onProjectRoutingChange).not.toHaveBeenCalled();
   });
@@ -180,18 +179,18 @@ describe('ProjectPicker', () => {
     const linkedProjectSwitch = screen.getByTestId('projectPickerListItemSwitch-linked1');
     await userEvent.click(linkedProjectSwitch);
 
-    expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:* AND NOT _id:linked1');
+    expect(onProjectRoutingChange).toHaveBeenLastCalledWith('(_id:* AND NOT _id:linked1)');
     expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('2/3');
   });
 
   it('should render a disabled button when isDisabled is true', async () => {
-    const getActiveRouteProjects$ = jest.fn(() => of(mockProjectsData));
-    await renderProjectPicker({ isDisabled: true, getActiveRouteProjects$ });
+    const fetchProjectsByRouting = jest.fn().mockResolvedValue(mockProjectsData);
+    await renderProjectPicker({ isDisabled: true, fetchProjectsByRouting });
 
     const button = screen.getByTestId('cps-project-picker-button-disabled');
     expect(button).toBeDisabled();
     expect(screen.queryByTestId('cps-project-picker-button-label')).not.toBeInTheDocument();
-    expect(getActiveRouteProjects$).not.toHaveBeenCalled();
+    expect(fetchProjectsByRouting).not.toHaveBeenCalled();
   });
 
   it('should support keyboard navigation to open the popover', async () => {

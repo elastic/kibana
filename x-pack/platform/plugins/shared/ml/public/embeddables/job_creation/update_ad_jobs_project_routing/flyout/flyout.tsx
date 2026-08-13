@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -29,10 +29,8 @@ import {
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '@kbn/cps-utils';
-import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { extractErrorMessage, type ErrorType } from '@kbn/ml-error-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
-import { BehaviorSubject, from } from 'rxjs';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { showProjectRoutingChangeConfirmModal } from '../../../../application/jobs/components/project_routing_change_confirm';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../common/constants/cps';
@@ -93,16 +91,7 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
   const [selectedProjectRouting, setSelectedProjectRouting] = useState<string>(
     DEFAULT_ML_PROJECT_ROUTING
   );
-  const selectedProjectRouting$ = useRef(new BehaviorSubject<ProjectRouting>(undefined));
   const [hasInitializedProjectRouting, setHasInitializedProjectRouting] = useState(false);
-
-  useEffect(() => {
-    selectedProjectRouting$.current.next(selectedProjectRouting);
-  }, [selectedProjectRouting]);
-
-  const getProjects$ = useCallback(() => {
-    return from(cpsManager?.fetchProjects(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
-  }, [cpsManager]);
 
   const fetchProjectsByRouting = useCallback(
     (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
@@ -299,9 +288,8 @@ export const UpdateADJobsProjectRoutingFlyout: FC<Props> = ({
               }
             >
               <MlProjectPickerPanel
-                projectRouting$={selectedProjectRouting$.current}
+                projectRouting={selectedProjectRouting}
                 onProjectRoutingChange={onProjectRoutingChange}
-                getActiveRouteProjects$={getProjects$}
                 fetchProjectsByRouting={fetchProjectsByRouting}
                 defaultProjectRoutingGetter={defaultProjectRoutingGetter}
                 totalProjectCount={totalProjectCount}

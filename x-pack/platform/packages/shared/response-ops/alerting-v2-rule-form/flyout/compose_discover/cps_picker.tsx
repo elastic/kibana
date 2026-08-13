@@ -69,7 +69,7 @@ export const CpsPicker = () => {
       )}
     >
       <ProjectPickerContent
-        headerTitle={
+        customHeaderText={
           <>
             <FormattedMessage
               id="xpack.alertingV2.composeDiscover.querySandbox.cpsPickerTitle"

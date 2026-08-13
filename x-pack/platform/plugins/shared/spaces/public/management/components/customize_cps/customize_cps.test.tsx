@@ -198,7 +198,7 @@ describe('CustomizeCps', () => {
       expect(mockOnChange).toHaveBeenLastCalledWith({
         id: 'test-space',
         name: 'Test Space',
-        projectRouting: '_alias:* AND _id:* AND NOT _id:badce1234567890',
+        projectRouting: '_alias:* AND (_id:* AND NOT _id:badce1234567890)',
       });
 
       await user.click(await getProjectSwitchButton('badce1234567890'));

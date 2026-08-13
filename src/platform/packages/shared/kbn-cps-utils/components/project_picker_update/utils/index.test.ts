@@ -84,7 +84,7 @@ describe('parseDefaultProjectRouting', () => {
   });
 
   it('parses NOT _id exclusions', () => {
-    expect(parseDefaultProjectRouting('_id:* AND NOT _id:linked1', availableProjectIds)).toEqual({
+    expect(parseDefaultProjectRouting('(_id:* AND NOT _id:linked1)', availableProjectIds)).toEqual({
       filterExpressions: [],
       excludedOverrides: ['linked1'],
     });
@@ -100,7 +100,7 @@ describe('parseDefaultProjectRouting', () => {
   it('combines tag filters with NOT _id exclusions', () => {
     expect(
       parseDefaultProjectRouting(
-        '_type:security AND _id:* AND NOT _id:linked1',
+        '_type:security AND (_id:* AND NOT _id:linked1)',
         availableProjectIds
       )
     ).toEqual({
@@ -118,7 +118,7 @@ describe('parseDefaultProjectRouting', () => {
   it('parses compound NOT_EQUALS tag filters alongside _id clauses', () => {
     expect(
       parseDefaultProjectRouting(
-        '_type:* AND NOT _type:observability AND _id:* AND NOT _id:linked1',
+        '(_type:* AND NOT _type:observability) AND (_id:* AND NOT _id:linked1)',
         availableProjectIds
       )
     ).toEqual({
@@ -136,7 +136,25 @@ describe('parseDefaultProjectRouting', () => {
   it('parses grouped NOT ONE OF tag filters alongside _id clauses', () => {
     expect(
       parseDefaultProjectRouting(
-        'env:* AND NOT (env:prod OR env:staging) AND _id:* AND NOT _id:linked1',
+        '(env:* AND NOT (env:prod OR env:staging)) AND (_id:* AND NOT _id:linked1)',
+        availableProjectIds
+      )
+    ).toEqual({
+      filterExpressions: [
+        {
+          operator: FilterOperator.NOT_ONE_OF,
+          tagName: 'env',
+          tagValue: ['prod', 'staging'],
+        },
+      ],
+      excludedOverrides: ['linked1'],
+    });
+  });
+
+  it('parses unparenthesized legacy NOT_ONE_OF beside a selection group', () => {
+    expect(
+      parseDefaultProjectRouting(
+        'env:* AND NOT (env:prod OR env:staging) AND (_id:* AND NOT _id:linked1)',
         availableProjectIds
       )
     ).toEqual({
@@ -152,7 +170,7 @@ describe('parseDefaultProjectRouting', () => {
   });
 
   it('round-trips parsed defaults through encode in dynamic mode', () => {
-    const defaultProjectRouting = '_type:security AND _id:* AND NOT _id:linked1';
+    const defaultProjectRouting = '_type:security AND (_id:* AND NOT _id:linked1)';
     const parsed = parseDefaultProjectRouting(defaultProjectRouting, availableProjectIds);
 
     expect(

@@ -6,17 +6,15 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFormRow, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { isEsqlSavedSearch, type DiscoverSessionFinderAttributes } from '@kbn/discover-utils';
-import { BehaviorSubject, from } from 'rxjs';
 import { MlAppHeader, useAnomalyDetectionJobsBack } from '../../../../components/ml_app_header';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
@@ -59,12 +57,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
   const [projectRouting, setProjectRouting] = useState<string | undefined>(undefined);
-  const projectRouting$ = useRef(new BehaviorSubject<ProjectRouting>(undefined));
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
-
-  useEffect(() => {
-    projectRouting$.current.next(projectRouting);
-  }, [projectRouting]);
 
   useEffect(() => {
     if (cpsManager) {
@@ -72,10 +65,6 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
         prev === undefined ? cpsManager.getDefaultProjectRouting() ?? undefined : prev
       );
     }
-  }, [cpsManager]);
-
-  const getProjects$ = useCallback(() => {
-    return from(cpsManager?.fetchProjects(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
   }, [cpsManager]);
 
   const fetchProjectsByRouting = useCallback(
@@ -134,9 +123,8 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
               >
                 <MlProjectPickerPanel
                   onProjectRoutingChange={onProjectRoutingChange}
-                  getActiveRouteProjects$={getProjects$}
                   fetchProjectsByRouting={fetchProjectsByRouting}
-                  projectRouting$={projectRouting$.current}
+                  projectRouting={projectRouting}
                   defaultProjectRoutingGetter={defaultProjectRoutingGetter}
                   totalProjectCount={totalProjectCount}
                   projectRoutingValueTestSubj="mlIndexOrSearchProjectRoutingValue"

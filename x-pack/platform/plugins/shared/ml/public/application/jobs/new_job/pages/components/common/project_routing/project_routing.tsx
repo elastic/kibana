@@ -6,13 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import type { ProjectRouting } from '@kbn/es-query';
-import { PROJECT_ROUTING } from '@kbn/cps-utils';
-import { BehaviorSubject, from } from 'rxjs';
 import { useMlKibana } from '../../../../../../contexts/kibana';
 import { JobCreatorContext } from '../../job_creator_context';
 import type {
@@ -36,15 +34,6 @@ export const ProjectRoutingSelect: FC = () => {
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
   const [projectRouting, setProjectRouting] = useState(jobCreator.projectRouting);
-  const projectRouting$ = useRef(new BehaviorSubject<ProjectRouting>(undefined));
-
-  useEffect(() => {
-    projectRouting$.current.next(projectRouting || undefined);
-  }, [projectRouting]);
-
-  const getProjects$ = useCallback(() => {
-    return from(cpsManager?.fetchProjects(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
-  }, [cpsManager]);
 
   const fetchProjectsByRouting = useCallback(
     (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
@@ -72,14 +61,13 @@ export const ProjectRoutingSelect: FC = () => {
   return (
     <Description titleId={titleId}>
       <MlProjectPickerPanel
-        projectRouting$={projectRouting$.current}
+        projectRouting={projectRouting || undefined}
         onProjectRoutingChange={onProjectRoutingChange}
-        getActiveRouteProjects$={getProjects$}
         fetchProjectsByRouting={fetchProjectsByRouting}
         defaultProjectRoutingGetter={defaultProjectRoutingGetter}
         totalProjectCount={totalProjectCount}
         isReadonly={false}
-        disabled={projectRouting$?.current.value === undefined}
+        disabled={!projectRouting}
       />
     </Description>
   );

@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/core-http-browser'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/use-observable'
 tags:
   - shared-browser
   - package

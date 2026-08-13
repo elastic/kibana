@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, type ComponentProps, useMemo, useEffect } from 'react';
+import React, { useState, type ComponentProps, useMemo, useEffect, useCallback } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPopover, EuiTourStep, EuiButton, EuiSkeletonRectangle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
-  type Observable,
   of,
   concat,
   map,
@@ -22,8 +21,10 @@ import {
   switchMap,
   distinctUntilChanged,
   EMPTY,
+  from,
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
+import { PROJECT_ROUTING } from '..';
 import { useProjectPickerTour } from './use_project_picker_tour';
 import { strings } from './strings';
 import {
@@ -41,9 +42,9 @@ export interface ProjectPickerProps
       | 'onProjectRoutingChange'
       | 'currentProjectRoutingGetter'
       | 'fetchProjectsByRouting'
+      | 'projectRoutingStrategy'
     >,
     Pick<ComponentProps<typeof ProjectPickerFrame>, 'customHeaderContextMenuItems'> {
-  getActiveRouteProjects$: () => Observable<ProjectsData | null>;
   isReadonly?: boolean;
   isDisabled?: boolean;
   settingsComponent?: React.ReactNode;
@@ -54,12 +55,12 @@ export const ProjectPicker = ({
   onProjectRoutingChange,
   isReadonly = false,
   isDisabled = false,
-  getActiveRouteProjects$,
   defaultProjectRoutingGetter,
   currentProjectRoutingGetter,
   fetchProjectsByRouting,
   totalProjectCount,
   customHeaderContextMenuItems,
+  projectRoutingStrategy,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -71,6 +72,10 @@ export const ProjectPicker = ({
     isEnabled$.next(!isDisabled);
   }, [isDisabled, isEnabled$]);
 
+  const getAvailableProjects$ = useCallback(() => {
+    return from(fetchProjectsByRouting(PROJECT_ROUTING.ALL) ?? Promise.resolve(null));
+  }, [fetchProjectsByRouting]);
+
   const projectsState$ = useMemo(
     () =>
       isEnabled$.pipe(
@@ -81,14 +86,14 @@ export const ProjectPicker = ({
           }
           return concat(
             of({ isLoading: true, data: null as ProjectsData | null }),
-            getActiveRouteProjects$().pipe(
+            getAvailableProjects$().pipe(
               map((data) => ({ isLoading: false, data })),
               catchError(() => of({ isLoading: false, data: null }))
             )
           );
         })
       ),
-    [isEnabled$, getActiveRouteProjects$]
+    [isEnabled$, getAvailableProjects$]
   );
 
   const { isLoading, data: projects } = useObservable(projectsState$, {
@@ -145,6 +150,7 @@ export const ProjectPicker = ({
       onProjectRoutingChange={onProjectRoutingChange}
       fetchProjectsByRouting={fetchProjectsByRouting}
       controlsState={isReadonly ? 'disabled' : 'enabled'}
+      projectRoutingStrategy={projectRoutingStrategy}
     >
       <EuiPopover
         button={projectPickerPopoverTriggerButton}

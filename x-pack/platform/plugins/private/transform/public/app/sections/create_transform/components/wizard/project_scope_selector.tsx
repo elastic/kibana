@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiButton, EuiFormRow, EuiPopover, EuiText } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
@@ -123,7 +123,9 @@ export const ProjectScopeSelector = ({
   projectRouting,
 }: ProjectScopeSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const effectiveProjectRouting = projectRouting ?? cpsManager.getDefaultProjectRouting();
+  const effectiveProjectRouting = useRef(projectRouting ?? cpsManager.getDefaultProjectRouting());
+  effectiveProjectRouting.current = projectRouting ?? cpsManager.getDefaultProjectRouting();
+
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
     [cpsManager]
@@ -133,9 +135,14 @@ export const ProjectScopeSelector = ({
     PROJECT_ROUTING.ALL
   );
 
-  const availableProjects = useMemo(
-    () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
-    [linkedProjects, originProject]
+  const availableProjects = useMemo(() => {
+    const sortedLinkedProjects = linkedProjects.sort((a, b) => a._alias.localeCompare(b._alias));
+    return originProject ? [originProject, ...sortedLinkedProjects] : sortedLinkedProjects;
+  }, [linkedProjects, originProject]);
+
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
+    [cpsManager]
   );
 
   if (!isLoading && !error && linkedProjects.length === 0) {
@@ -148,7 +155,7 @@ export const ProjectScopeSelector = ({
     : getProjectScopeButtonLabel({
         availableProjects,
         originProjectId,
-        projectRouting: effectiveProjectRouting,
+        projectRouting: effectiveProjectRouting.current,
       });
 
   return (
@@ -184,10 +191,10 @@ export const ProjectScopeSelector = ({
         ) : (
           <ProjectScopePicker
             availableProjects={availableProjects}
-            onProjectRoutingChange={onProjectRoutingChange}
             originProjectId={originProjectId}
-              defaultProjectRoutingGetter={() => effectiveProjectRouting}
-              currentProjectRoutingGetter={() => effectiveProjectRouting}
+            onProjectRoutingChange={onProjectRoutingChange}
+            projectRouting={effectiveProjectRouting.current!}
+            fetchProjectsByRouting={fetchProjectsByRouting}
           />
         )}
       </EuiPopover>

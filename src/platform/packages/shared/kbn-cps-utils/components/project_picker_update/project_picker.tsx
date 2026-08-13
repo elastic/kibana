@@ -7,24 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, type ComponentProps } from 'react';
+import React, { useCallback, useRef, type ComponentProps } from 'react';
 import { ProjectPickerFrame, ProjectPickerList } from './blocks';
-import {
-  ProjectPickerStateProvider,
-  type ProjectPickerStateProviderProps,
-} from './state';
+import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from './state';
 
 export function ProjectPicker({
   availableProjects,
   controlsState,
   originProjectId,
+  projectRouting,
   onProjectRoutingChange,
-  defaultProjectRoutingGetter,
-  currentProjectRoutingGetter,
   fetchProjectsByRouting,
   projectRoutingStrategy,
-}: Omit<ProjectPickerStateProviderProps, 'children'>) {
+}: Omit<
+  ProjectPickerStateProviderProps,
+  'children' | 'currentProjectRoutingGetter' | 'defaultProjectRoutingGetter'
+> & { projectRouting: string }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const initialProjectRouting = useRef(projectRouting);
+  const currentProjectRouting = useRef(projectRouting);
+  currentProjectRouting.current = projectRouting;
+
+  const defaultProjectRoutingGetter = useCallback(() => initialProjectRouting.current, []);
+  const currentProjectRoutingGetter = useCallback(() => currentProjectRouting.current, []);
 
   return (
     <ProjectPickerStateProvider

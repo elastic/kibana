@@ -24,7 +24,6 @@ import type { ProjectsData } from '../types';
 import { useFetchProjects } from './use_fetch_projects';
 
 interface ProjectPickerContentBaseProps {
-  headerTitle?: React.ReactNode;
   projectRouting?: ProjectRouting;
   /**
    * Fetches projects matching a filter-only routing expression.
