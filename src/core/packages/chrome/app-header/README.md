@@ -8,8 +8,9 @@ Chrome Next uses one shared header view with two placement models:
 - Chrome-owned rendering, where the app registers `ChromeAppHeaderConfig` and Chrome renders the
   layout top-bar slot.
 
-Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
-the page cannot safely own the header placement yet.
+Prefer inline rendering when the page owns its header placement. Use Chrome-owned registration when
+Chrome must own the top-bar slot, including apps with sticky or shared top-nav constraints such as
+Discover, Dashboard, and Lens.
 
 ## Folder layout
 
@@ -271,7 +272,7 @@ different buckets while the migration is in progress:
 | Bucket | Preferred API | When to use |
 |---|---|---|
 | Inline-ready | `AppHeader` | The page can colocate header state with its React tree. |
-| Chrome-owned transitional | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot while the route keeps existing layout constraints. |
+| Chrome-owned | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot because the route has sticky, shared top-nav, or layout constraints. |
 | Fallback-only | Legacy Chrome state | Temporary safety net for routes that have not explicitly migrated. |
 
 ### Fallback-only
@@ -285,4 +286,13 @@ Chrome can still render a minimal app header as a fallback by deriving:
 
 This is a compatibility fallback, not a migration target. If breadcrumbs are missing, stale, or point
 to the wrong parent, the fallback back button inherits the same problem. Move routes in this bucket
-to explicit `AppHeader` or `ChromeAppHeaderRegistration` configuration.
+to `AppHeader`. Existing apps with approved Chrome-owned placement should provide explicit
+`ChromeAppHeaderRegistration` configuration instead of relying on fallback state.
+
+The legacy menu, badge, and breadcrumb-extension setters that feed this fallback are deprecated. Keep
+existing calls until their route migrates, but do not add new consumers.
+
+Do not use project breadcrumb overrides to configure app-header back navigation. The
+`ChromeSetBreadcrumbsParams.project` and serverless `setBreadcrumbs` paths remain only to protect
+fallback-only routes during migration and can be deprecated independently of `chrome.setBreadcrumbs`,
+which still owns visible breadcrumbs in classic Chrome.

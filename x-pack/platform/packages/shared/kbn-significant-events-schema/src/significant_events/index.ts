@@ -26,6 +26,7 @@ export {
 export type { KnowledgeIndicator } from '../queries';
 export {
   type SignificantEvent,
+  type SignificantEventResponse,
   type SignificantEventInvestigation,
   type SignificantEventStatus,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
@@ -35,11 +36,20 @@ export {
   significantEventStatusSchema,
 } from './events';
 export {
+  MAX_SHORT_STRING_LENGTH,
+  MAX_MEDIUM_STRING_LENGTH,
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_TITLE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
+  NO_RAW_SENSITIVE_VALUES_RULE,
+  SUMMARY_ROLE_RULE,
+  SYMPTOM_HYPOTHESIS_ROLE_RULE,
 } from './constants';
 export {
   INVESTIGATION_PROGRESS_UI_EVENT,
@@ -51,6 +61,7 @@ export {
   investigationStateSchema,
   type SignificantEventUpdate,
   type InvestigationEvidence,
+  type InvestigationEvidenceCode,
   type InvestigationHypothesis,
   type InvestigationState,
 } from './investigation_state';
@@ -61,4 +72,5 @@ export {
   SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS,
   significantEventsTuningConfigSchema,
   validateSignificantEventsTuningConfig,
+  resolveSignificantEventsTuningConfig,
 } from './tuning_config';
