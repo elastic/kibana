@@ -158,19 +158,17 @@ const explainShardAllocation = async (
     { maxRetries: 0 }
   );
   if (primaryExplain.current_state === 'started') {
-    const settingsResponse = await client.indices.getSettings({
-      index,
-      filter_path: ['*.settings.index.number_of_replicas'],
-    });
-    const numberOfReplicas = parseInt(
-      String(Object.values(settingsResponse)[0]?.settings?.index?.number_of_replicas ?? 0),
-      10
-    );
-    if (numberOfReplicas > 0) {
+    try {
       return await client.cluster.allocationExplain(
         { index, shard: 0, primary: false, master_timeout: '30s' },
         { maxRetries: 0 }
       );
+    } catch (error) {
+      if (!(error instanceof esErrors.ResponseError && error.statusCode === 400)) {
+        throw error;
+      }
+      // No replica shard to explain: it was removed after the bulk failed, so
+      // fall through and report the primary instead of losing the explanation.
     }
   }
   return primaryExplain;

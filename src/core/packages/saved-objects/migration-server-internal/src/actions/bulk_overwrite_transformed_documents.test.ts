@@ -292,9 +292,6 @@ describe('bulkOverwriteTransformedDocuments', () => {
       primary: true,
       current_state: 'started',
     } as estypes.ClusterAllocationExplainResponse);
-    client.indices.getSettings.mockResolvedValueOnce({
-      new_index: { settings: { index: { number_of_replicas: '1' } } },
-    });
     client.cluster.allocationExplain.mockResolvedValueOnce({
       index: 'new_index',
       shard: 0,
@@ -463,9 +460,6 @@ describe('bulkOverwriteTransformedDocuments', () => {
       primary: true,
       current_state: 'started',
     } as estypes.ClusterAllocationExplainResponse);
-    client.indices.getSettings.mockResolvedValueOnce({
-      new_index: { settings: { index: { number_of_replicas: '1' } } },
-    });
     client.cluster.allocationExplain.mockRejectedValueOnce(new Error('socket hang up'));
 
     const task = bulkOverwriteTransformedDocuments({
@@ -484,6 +478,61 @@ describe('bulkOverwriteTransformedDocuments', () => {
     expect(left.type).toEqual('unavailable_shards_exception');
     expect(left.message).toContain('new_index');
     expect(left.message).toContain('Shard allocation explain: explain unavailable: socket hang up');
+  });
+
+  it('falls back to the primary explanation when the replica explain returns 400', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({
+        items: [
+          {
+            index: {
+              error: {
+                type: 'unavailable_shards_exception',
+                reason:
+                  '[.kibana_9.0.1_001][0] Not enough active copies to meet shard count of [ALL]',
+              },
+            },
+          },
+        ],
+      })
+    );
+    client.cluster.allocationExplain.mockResolvedValueOnce({
+      index: 'new_index',
+      shard: 0,
+      primary: true,
+      current_state: 'started',
+      allocate_explanation: 'a started primary with no replica shard to explain',
+    } as estypes.ClusterAllocationExplainResponse);
+    client.cluster.allocationExplain.mockRejectedValueOnce(
+      new EsErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'illegal_argument_exception',
+              reason: 'unable to find any shards to explain',
+            },
+          },
+        })
+      )
+    );
+
+    const task = bulkOverwriteTransformedDocuments({
+      client,
+      index: 'new_index',
+      operations: [],
+      refresh: 'wait_for',
+      fetchAllocationExplain: true,
+    });
+
+    const result = await task();
+
+    expect(client.cluster.allocationExplain).toHaveBeenCalledTimes(2);
+    expect(Either.isLeft(result)).toBe(true);
+    const left = (result as Either.Left<any>).left;
+    expect(left.type).toEqual('unavailable_shards_exception');
+    expect(left.message).toContain('a started primary with no replica shard to explain');
+    expect(left.message).not.toContain('explain unavailable');
   });
 
   it('resolves with `left:unavailable_shards_exception` when mixed with version_conflict_engine_exception', async () => {
