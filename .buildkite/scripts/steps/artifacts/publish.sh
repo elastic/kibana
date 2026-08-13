@@ -115,7 +115,9 @@ EOF
   # Skipped for nightly snapshots and dry runs.
   if [[ "$RELEASE_BUILD" == "true" ]] && [[ ! "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
     echo "--- Publish workflow step schema to CDN"
-    .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh release
+    if ! .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh release; then
+      echo "^^^ Workflow step schema CDN publish failed; continuing so the release is not blocked."
+    fi
   fi
 
 else

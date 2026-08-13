@@ -150,12 +150,13 @@ publish time by `publish_schema.sh`. The output is otherwise deterministic
 (placeholder `buildHash` on a source Kibana, key-sorted and timestamp-free), so
 re-generation is a no-op unless the schema actually changed.
 
-The config runs as part of the regular Jest integration lane. Any drift is
-auto-committed back to the PR via a lightweight downstream step:
-`.buildkite/scripts/steps/workflow_step_schema/commit_generated.sh`, which
-`buildkite-agent artifact download`s the drifted tree uploaded by the integration
-shard and calls `check_for_changed_files`. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to
-write elsewhere (e.g. under the gitignored `target/`) when experimenting locally.
+The config runs exclusively via
+`.buildkite/scripts/steps/code_generation/workflow_step_schema_codegen.sh`,
+wired into the `Checks` pipeline step (`checks.sh`). It is excluded from the
+regular Jest integration lane via `.buildkite/disabled_jest_configs.json` to
+avoid a redundant double boot. Any drift is auto-committed back to the PR inline
+by `check_for_changed_files`. Set `WORKFLOW_SCHEMA_OUTPUT_DIR` to write
+elsewhere (e.g. under the gitignored `target/`) when experimenting locally.
 
 ### CDN layout
 
