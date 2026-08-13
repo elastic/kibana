@@ -33,6 +33,7 @@ interface HeaderContextMenuClickActionContext {
 export interface HeaderContextMenuItemProps
   extends Pick<EuiContextMenuItemProps, 'icon' | 'onClick' | 'href' | 'external' | 'disabled'> {
   label: string;
+  testSubj: string;
   isDisabled?: (props: HeaderContextMenuClickActionContext) => boolean;
 }
 
@@ -44,6 +45,7 @@ const getContextMenuItems = (
     label: i18n.translate('cpsUtils.projectPicker.frameHeader.clearProjectFilters', {
       defaultMessage: 'Clear project tag filters',
     }),
+    testSubj: 'projectPickerClearFiltersMenuItem',
     onClick: () => {
       actions.clearProjectFilters();
     },
@@ -60,6 +62,7 @@ const getContextMenuItems = (
     label: i18n.translate('cpsUtils.projectPicker.frameHeader.revertToSpaceDefaults', {
       defaultMessage: 'Revert to space defaults',
     }),
+    testSubj: 'projectPickerRevertToSpaceDefaultsMenuItem',
     onClick: () => {
       actions.revertToSpaceDefaults();
     },
@@ -146,6 +149,7 @@ export function ProjectPickerFrameHeaderActions({
                       icon={item.icon}
                       href={item.href}
                       external={item.external}
+                      data-test-subj={item.testSubj}
                       onClick={(event) => {
                         item.onClick?.(event);
                         closePopover();
