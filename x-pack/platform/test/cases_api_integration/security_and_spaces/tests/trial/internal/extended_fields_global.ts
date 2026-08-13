@@ -209,11 +209,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(buildFieldDef('risk_score', { required: true }))
           .expect(200);
 
-        const body = await createCase(
-          supertest,
-          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-          400
-        );
+        const { body } = await supertest
+          .post(`${CASES_URL}`)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'foo')
+          .send(getPostCaseRequest({ owner: 'securitySolutionFixture' }))
+          .expect(400);
 
         expect(body.message).to.contain('Field "risk_score" is required');
       });
