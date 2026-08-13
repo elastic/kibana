@@ -24,10 +24,8 @@ const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('../hooks/use_show_alerts_only_migration_message');
 
-// These sibling components pull in large Redux-connected subtrees (search bar,
-// drag-and-drop data providers) that are expensive to mount and are covered by
-// their own tests. Stubbing them keeps this suite fast and deterministic — the
-// real mounts pushed it past Jest's 5s timeout under CI load.
+// Stub the heavy search-bar and data-provider subtrees; mounting the real
+// unified-search + DataProviders trees intermittently blew the 5s Jest budget.
 jest.mock('../../../search_or_filter', () => ({
   StatefulSearchOrFilter: () => <div data-test-subj="mockStatefulSearchOrFilter" />,
 }));
@@ -40,7 +38,10 @@ describe('Header', () => {
   const mount = useMountAppended();
   const getWrapper = async (childrenComponent: JSX.Element) => {
     const wrapper = mount(childrenComponent);
-    await waitFor(() => wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists());
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toBe(true);
+    });
     return wrapper;
   };
   const props = {

@@ -33,12 +33,15 @@ import {
   obsSec,
 } from '../../../../common/lib/authentication/users';
 
-// Search enriches results with `extended_fields_labels` (populated only when the templates
-// flag is on), which the create response used as the expectation does not carry. Drop it so
-// these filter assertions compare the persisted case shape regardless of the flag state.
-const stripExtendedFieldLabels = (response: CasesFindResponse): CasesFindResponse => ({
+// Search enriches results with `extended_fields_labels` and `extended_fields_controls` (both
+// are populated server-side from field definitions when templates are enabled and the case
+// carries extended_fields). The create response used as the expectation does not carry either
+// field. Strip both so these filter assertions compare the persisted case shape only.
+const stripSearchEnrichedFields = (response: CasesFindResponse): CasesFindResponse => ({
   ...response,
-  cases: response.cases.map(({ extended_fields_labels, ...rest }) => rest),
+  cases: response.cases.map(
+    ({ extended_fields_labels, extended_fields_controls, ...rest }) => rest
+  ),
 });
 
 // Unlike the public find API, the internal search API also returns `mttr` so the cases list
@@ -121,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
           body: { customFields: { valid_key_2: [true] }, owner: 'securitySolutionFixture' },
         });
 
-        expect(stripExtendedFieldLabels(cases)).to.eql({
+        expect(stripSearchEnrichedFields(cases)).to.eql({
           ...searchCasesResp,
           total: 1,
           cases: [postedCase],
@@ -209,7 +212,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(stripExtendedFieldLabels(cases)).to.eql({
+        expect(stripSearchEnrichedFields(cases)).to.eql({
           ...searchCasesResp,
           total: 1,
           cases: [postedCase2],
@@ -322,7 +325,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(
-          stripExtendedFieldLabels(
+          stripSearchEnrichedFields(
             await searchCases({
               supertest,
               body: { customFields: { valid_key_2: [false] }, owner: 'securitySolutionFixture' },
@@ -336,7 +339,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(
-          stripExtendedFieldLabels(
+          stripSearchEnrichedFields(
             await searchCases({
               supertest,
               body: { customFields: { valid_obs_key_2: [false] }, owner: 'observabilityFixture' },
@@ -416,7 +419,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(stripExtendedFieldLabels(cases)).to.eql({
+        expect(stripSearchEnrichedFields(cases)).to.eql({
           ...searchCasesResp,
           total: 1,
           cases: [postedCase],
