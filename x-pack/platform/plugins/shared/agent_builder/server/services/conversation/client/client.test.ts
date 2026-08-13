@@ -463,8 +463,8 @@ describe('ConversationClient', () => {
         name: 'Serialize test template',
         description: '',
         fields: {
-          flag: { input_type: 'TOGGLE', label: 'Flag', required: false },
-          count: { input_type: 'NUMBER', label: 'Count', required: false },
+          flag: { input_type: 'TOGGLE', required: false },
+          count: { input_type: 'NUMBER', required: false },
         },
       };
       getTemplateMock.mockReturnValue(template);
