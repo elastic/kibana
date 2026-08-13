@@ -69236,7 +69236,6 @@ paths:
                               items:
                                 $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                               type: array
-                            updated_at: {}
                           required:
                             - steps
                         settings:
@@ -69323,16 +69322,26 @@ paths:
                         lifecycle:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                         processing:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            steps:
-                              items:
-                                $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                              type: array
-                            updated_at: {}
-                          required:
-                            - steps
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                steps:
+                                  items:
+                                    $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                                  type: array
+                              required:
+                                - steps
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                processors:
+                                  items:
+                                    additionalProperties: {}
+                                    type: object
+                                  type: array
+                              required:
+                                - processors
                         settings:
                           additionalProperties: false
                           type: object
@@ -89030,16 +89039,26 @@ components:
                 lifecycle:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                 processing:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    steps:
-                      items:
-                        $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                      type: array
-                    updated_at: {}
-                  required:
-                    - steps
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        steps:
+                          items:
+                            $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                          type: array
+                      required:
+                        - steps
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        processors:
+                          items:
+                            additionalProperties: {}
+                            type: object
+                          type: array
+                      required:
+                        - processors
                 settings:
                   additionalProperties: false
                   type: object
@@ -113788,7 +113807,6 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                       type: array
-                    updated_at: {}
                   required:
                     - steps
                 settings:
