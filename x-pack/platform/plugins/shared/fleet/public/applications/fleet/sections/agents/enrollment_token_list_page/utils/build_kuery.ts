@@ -9,11 +9,6 @@ export type ActiveFilter = 'active' | 'inactive' | 'all';
 
 const NOT_HIDDEN_KUERY = 'not hidden:true';
 
-// A token past its expiration date can no longer enroll an agent, but nothing writes
-// `active: false` back to its document, so expiry has to be part of the filter for the
-// list to agree with the status each row reports.
-const EXPIRED_KUERY = 'expire_at <= "now"';
-
 export function buildKuery(
   search: string,
   selectedPolicyIds: string[],
@@ -32,9 +27,9 @@ export function buildKuery(
   }
 
   if (activeFilter === 'active') {
-    parts.push(`(active:true and not (${EXPIRED_KUERY}))`);
+    parts.push('(active:true)');
   } else if (activeFilter === 'inactive') {
-    parts.push(`(active:false or ${EXPIRED_KUERY})`);
+    parts.push('(active:false)');
   }
 
   if (excludedPolicyIds.length > 0) {
