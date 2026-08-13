@@ -1119,7 +1119,7 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
@@ -1637,7 +1637,7 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
@@ -14051,8 +14051,8 @@ paths:
     get:
       tags:
         - Dashboards
-      summary: Get dashboards
-      operationId: get-dashboards-redirect
+      summary: Search dashboards
+      operationId: search-dashboards
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -14064,7 +14064,7 @@ paths:
       tags:
         - Dashboards
       summary: Create a dashboard
-      operationId: create-dashboard-redirect
+      operationId: create-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -14077,7 +14077,7 @@ paths:
       tags:
         - Dashboards
       summary: Get a dashboard
-      operationId: get-dashboard-redirect
+      operationId: get-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -14088,8 +14088,8 @@ paths:
     put:
       tags:
         - Dashboards
-      summary: Update a dashboard
-      operationId: update-dashboard-redirect
+      summary: Upsert a dashboard
+      operationId: upsert-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -14101,7 +14101,7 @@ paths:
       tags:
         - Dashboards
       summary: Delete a dashboard
-      operationId: delete-dashboard-redirect
+      operationId: delete-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -33428,6 +33428,12 @@ paths:
           required: false
           schema:
             type: number
+        - description: Return only actions whose start_time is in the future
+          in: query
+          name: scheduledOnly
+          required: false
+          schema:
+            type: boolean
         - description: Number of error details to include per action
           in: query
           name: errorSize
@@ -58955,14 +58961,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -59501,14 +59506,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -60077,14 +60081,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -60625,14 +60628,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -61346,14 +61348,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -61892,14 +61893,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -62468,14 +62468,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -63016,14 +63015,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -63737,14 +63735,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -64283,14 +64280,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -64859,14 +64855,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -65407,14 +65402,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -68548,8 +68542,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -68675,8 +68669,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were disabled successfully.
@@ -68715,8 +68709,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were enabled successfully.
@@ -68755,8 +68749,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were resynced successfully.
@@ -68801,8 +68795,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: The stream was deleted successfully.
@@ -68839,8 +68833,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -69111,8 +69105,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -69242,7 +69236,6 @@ paths:
                               items:
                                 $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                               type: array
-                            updated_at: {}
                           required:
                             - steps
                         settings:
@@ -69329,16 +69322,26 @@ paths:
                         lifecycle:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                         processing:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            steps:
-                              items:
-                                $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                              type: array
-                            updated_at: {}
-                          required:
-                            - steps
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                steps:
+                                  items:
+                                    $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                                  type: array
+                              required:
+                                - steps
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                processors:
+                                  items:
+                                    additionalProperties: {}
+                                    type: object
+                                  type: array
+                              required:
+                                - processors
                         settings:
                           additionalProperties: false
                           type: object
@@ -69416,8 +69419,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Query settings for the stream.
@@ -69634,8 +69637,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -69825,8 +69828,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: The query was removed successfully.
@@ -69993,8 +69996,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -70095,8 +70098,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -70277,8 +70280,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -70346,8 +70349,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -73485,8 +73488,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get visualizations
-      operationId: get-visualizations-redirect
+      summary: Search visualizations
+      operationId: search-visualizations
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -73497,8 +73500,8 @@ paths:
     post:
       tags:
         - Visualizations
-      summary: Create a visualization
-      operationId: create-visualization-redirect
+      summary: Create visualization
+      operationId: create-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -73510,8 +73513,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get a visualization
-      operationId: get-visualization-redirect
+      summary: Get visualization
+      operationId: get-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -73522,8 +73525,8 @@ paths:
     put:
       tags:
         - Visualizations
-      summary: Update a visualization
-      operationId: update-visualization-redirect
+      summary: Upsert visualization
+      operationId: upsert-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -73534,8 +73537,8 @@ paths:
     delete:
       tags:
         - Visualizations
-      summary: Delete a visualization
-      operationId: delete-visualization-redirect
+      summary: Delete visualization
+      operationId: delete-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -75216,7 +75219,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -75329,7 +75332,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -75923,7 +75926,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -87520,13 +87523,12 @@ components:
           default: on_automatic
           description: The random sampler mode.
         random_sampler_probability:
-          anyOf:
-            - maximum: 0.5
-              minimum: 0.00001
-              type: number
-            - nullable: true
           default: null
           description: The probability to use for random sampling (between 0.00001 and 0.5).
+          maximum: 0.5
+          minimum: 0.00001
+          nullable: true
+          type: number
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -89037,16 +89039,26 @@ components:
                 lifecycle:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                 processing:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    steps:
-                      items:
-                        $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                      type: array
-                    updated_at: {}
-                  required:
-                    - steps
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        steps:
+                          items:
+                            $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                          type: array
+                      required:
+                        - steps
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        processors:
+                          items:
+                            additionalProperties: {}
+                            type: object
+                          type: array
+                      required:
+                        - processors
                 settings:
                   additionalProperties: false
                   type: object
@@ -89163,20 +89175,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -89250,20 +89259,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -99308,20 +99314,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -99364,20 +99367,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -107795,15 +107795,15 @@ components:
               - type: string
               - type: number
               - type: boolean
-              - nullable: true
               - {}
+            nullable: true
           - items:
               anyOf:
                 - type: string
                 - type: number
                 - type: boolean
-                - nullable: true
                 - {}
+              nullable: true
             type: array
           - items: {}
             type: array
@@ -113807,7 +113807,6 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                       type: array
-                    updated_at: {}
                   required:
                     - steps
                 settings:
@@ -116322,6 +116321,14 @@ components:
       description: Area-specific rendering settings
       type: object
       properties:
+        fill:
+          default: solid
+          description: 'Area fill type: solid or gradient. Defaults to solid.'
+          enum:
+            - solid
+            - gradient
+          type: string
+          x-state: Added in 9.6.0
         fill_opacity:
           default: 0.3
           description: Area fill opacity (0-1 typical, max 2 for legacy)

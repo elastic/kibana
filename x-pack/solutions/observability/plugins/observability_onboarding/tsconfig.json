@@ -53,7 +53,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/dashboard-plugin",
     "@kbn/core-chrome-layout-constants",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": ["target/**/*"]
 }
