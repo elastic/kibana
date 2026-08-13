@@ -75,25 +75,6 @@ const getMultiMatchFilter = (
   };
 };
 
-function getExistFilter(spaceId: string): Filter {
-  return {
-    meta: {
-      index: getStaticDataViewId(spaceId),
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'exists',
-      key: 'transaction.marks.navigationTiming.fetchStart',
-      value: 'exists',
-    },
-    query: {
-      exists: {
-        field: 'transaction.marks.navigationTiming.fetchStart',
-      },
-    },
-  };
-}
-
 export const useMapFilters = (): Filter[] => {
   const { urlParams, uxUiFilters } = useLegacyUrlParams();
   const { spaceId } = useUxPluginContext();
@@ -114,7 +95,7 @@ export const useMapFilters = (): Filter[] => {
   } = uxUiFilters;
 
   return useMemo(() => {
-    const filters: Filter[] = [getExistFilter(spaceId)];
+    const filters: Filter[] = [];
     if (serviceName) {
       filters.push(getMatchFilter(SERVICE_NAME, serviceName, spaceId));
     }

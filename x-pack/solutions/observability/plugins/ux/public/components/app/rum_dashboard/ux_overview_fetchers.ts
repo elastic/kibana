@@ -29,6 +29,7 @@ import {
   hasRumDataWithServiceNameQuery,
   HAS_RUM_DATA_TIERS,
 } from '../../../services/data/has_rum_data_query';
+import { uxSearchIndex } from '../../../../common/otel_rum';
 
 export { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 
@@ -46,7 +47,7 @@ async function getCoreWebVitalsResponse({
   return await Promise.all([
     esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
       params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
+        index: uxSearchIndex(dataViewResponse.apmDataViewIndexPattern),
         ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
           serviceName: serviceName ? [serviceName] : undefined,
         }),
@@ -54,7 +55,7 @@ async function getCoreWebVitalsResponse({
     }),
     esQuery<ReturnType<typeof inpQuery>>(dataStartPlugin, {
       params: {
-        index: dataViewResponse.apmDataViewIndexPattern,
+        index: uxSearchIndex(dataViewResponse.apmDataViewIndexPattern),
         ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
           serviceName: serviceName ? [serviceName] : undefined,
         }),
@@ -96,11 +97,12 @@ export async function hasRumData(
     signal: null,
   });
 
+  const index = uxSearchIndex(dataViewResponse.apmDataViewIndexPattern);
   const runHasRumDataQuery = async (dataTiers?: DataTier[]): Promise<UXHasDataResponse> =>
     formatHasRumResult(
       await esQuery<ReturnType<typeof hasRumDataWithServiceNameQuery>>(params.dataStartPlugin, {
         params: {
-          index: dataViewResponse.apmDataViewIndexPattern,
+          index,
           ...hasRumDataWithServiceNameQuery({
             start: params?.absoluteTime?.start,
             end: params?.absoluteTime?.end,
@@ -108,7 +110,7 @@ export async function hasRumData(
           }),
         },
       }),
-      dataViewResponse.apmDataViewIndexPattern
+      index
     );
 
   // Return early only with both a hit and a service name. The service name comes from an

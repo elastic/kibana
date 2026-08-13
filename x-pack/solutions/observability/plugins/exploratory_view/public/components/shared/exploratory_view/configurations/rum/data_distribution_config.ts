@@ -13,20 +13,18 @@ import {
   ReportTypes,
   LABEL_FIELDS_FILTER,
 } from '../constants';
-import { buildPhraseFilter } from '../utils';
+import { buildKueryFilter, RUM_PAGE_LOAD_KQL } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
   FCP_FIELD,
   INP_FIELD,
   LCP_FIELD,
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TBT_FIELD,
   TRANSACTION_DURATION,
   TRANSACTION_TIME_TO_FIRST_BYTE,
-  TRANSACTION_TYPE,
   TRANSACTION_URL,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
@@ -100,10 +98,7 @@ export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfi
       { label: INP_LABEL, id: INP_FIELD, field: INP_FIELD },
       { label: CLS_LABEL, id: CLS_FIELD, field: CLS_FIELD },
     ],
-    baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
-    ],
+    baseFilters: [...buildKueryFilter(RUM_PAGE_LOAD_KQL, dataView)],
     labels: {
       ...FieldLabels,
       [SERVICE_NAME]: WEB_APPLICATION_LABEL,

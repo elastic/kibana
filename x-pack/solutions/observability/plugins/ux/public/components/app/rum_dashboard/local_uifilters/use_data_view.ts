@@ -7,18 +7,19 @@
 
 import { useContext, useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { uxSearchIndex } from '../../../../../common/otel_rum';
 import { CsmSharedContext } from '../csm_shared_context';
 
 export function useDataView() {
   const { dataView } = useContext(CsmSharedContext);
 
-  const [dataViewTitle, setDataViewTitle] = useLocalStorage('uxAppDataViewTitle', '');
+  const [storedTitle, setStoredTitle] = useLocalStorage('uxAppDataViewTitle', '');
 
   const updatedDataViewTitle = dataView?.title;
 
   useEffect(() => {
-    setDataViewTitle(updatedDataViewTitle);
-  }, [setDataViewTitle, updatedDataViewTitle]);
+    setStoredTitle(updatedDataViewTitle);
+  }, [setStoredTitle, updatedDataViewTitle]);
 
-  return { dataViewTitle, dataView };
+  return { dataViewTitle: uxSearchIndex(updatedDataViewTitle || storedTitle), dataView };
 }

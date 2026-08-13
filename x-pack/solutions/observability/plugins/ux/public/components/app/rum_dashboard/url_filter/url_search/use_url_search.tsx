@@ -49,17 +49,23 @@ export const useUrlSearch = ({ popoverIsOpen, query }: Props) => {
 
   const data = useMemo(() => {
     if (!asyncSearchResult) return asyncSearchResult;
-    const { urls, totalUrls } = asyncSearchResult.aggregations ?? {};
+    const { urls, otelUrls, totalUrls, otelTotalUrls } = asyncSearchResult.aggregations ?? {};
 
     const pkey = Number(uxQuery?.percentile ?? 0).toFixed(1);
+    const classicItems = (urls?.buckets ?? []).map((bucket) => ({
+      url: bucket.key as string,
+      count: bucket.doc_count,
+      pld: bucket.medianPLD.values[pkey] ?? 0,
+    }));
+    const otelItems = (otelUrls?.buckets ?? []).map((bucket) => ({
+      url: bucket.key as string,
+      count: bucket.doc_count,
+      pld: bucket.medianPLD.values[pkey] ?? 0,
+    }));
 
     return {
-      total: totalUrls?.value || 0,
-      items: (urls?.buckets ?? []).map((bucket) => ({
-        url: bucket.key as string,
-        count: bucket.doc_count,
-        pld: bucket.medianPLD.values[pkey] ?? 0,
-      })),
+      total: (totalUrls?.value || 0) + (otelTotalUrls?.value || 0),
+      items: classicItems.length > 0 ? classicItems : otelItems,
     };
   }, [asyncSearchResult, uxQuery?.percentile]);
 

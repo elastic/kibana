@@ -15,15 +15,13 @@ import {
   ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
-import { buildPhraseFilter, buildPhrasesFilter } from '../utils';
+import { buildKueryFilter, RUM_PAGE_LOAD_OR_EXIT_KQL } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
   INP_FIELD,
   LCP_FIELD,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
-  TRANSACTION_TYPE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
@@ -87,10 +85,7 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
       USER_AGENT_DEVICE,
       URL_FULL,
     ],
-    baseFilters: [
-      ...buildPhrasesFilter(TRANSACTION_TYPE, ['page-load', 'page-exit'], dataView),
-      ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
-    ],
+    baseFilters: [...buildKueryFilter(RUM_PAGE_LOAD_OR_EXIT_KQL, dataView)],
     labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
@@ -176,6 +171,5 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
-    query: { query: 'transaction.type: ("page-load" or "page-exit")', language: 'kuery' },
   };
 }

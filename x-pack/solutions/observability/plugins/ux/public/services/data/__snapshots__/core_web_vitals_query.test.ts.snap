@@ -86,7 +86,17 @@ Object {
       "aggs": Object {
         "byName": Object {
           "aggs": Object {
-            "ranks": Object {
+            "clsRanks": Object {
+              "percentile_ranks": Object {
+                "field": "attributes.browser.web_vital.value",
+                "keyed": false,
+                "values": Array [
+                  0.1,
+                  0.25,
+                ],
+              },
+            },
+            "lcpRanks": Object {
               "percentile_ranks": Object {
                 "field": "attributes.browser.web_vital.value",
                 "keyed": false,
@@ -120,45 +130,6 @@ Object {
   },
   "query": Object {
     "bool": Object {
-      "filter": Array [
-        Object {
-          "range": Object {
-            "@timestamp": Object {
-              "format": "epoch_millis",
-              "gte": 0,
-              "lte": 5000,
-            },
-          },
-        },
-        Object {
-          "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
-              Object {
-                "bool": Object {
-                  "filter": Array [
-                    Object {
-                      "term": Object {
-                        "transaction.type": "page-load",
-                      },
-                    },
-                    Object {
-                      "term": Object {
-                        "processor.event": "transaction",
-                      },
-                    },
-                  ],
-                },
-              },
-              Object {
-                "term": Object {
-                  "name": "documentLoad",
-                },
-              },
-            ],
-          },
-        },
-      ],
       "minimum_should_match": 1,
       "must_not": Array [],
       "should": Array [

@@ -15,9 +15,8 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { OTEL_WEB_VITAL_NAME, OTEL_WEB_VITAL_VALUE } from '../../../common/otel_rum';
 import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
-import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageLoadTransactionsProjection } from './projections';
-import { rumWebVitalLogsFilter } from './rum_otel_filters';
+import { rumUrlWildcardFilter, rumWebVitalLogsFilter } from './rum_otel_filters';
 import { rangeQuery } from './range_query';
 import { getEsFilter } from './get_es_filter';
 
@@ -59,8 +58,11 @@ interface CoreWebVitalsAggregations {
     byName?: {
       buckets?: Array<{
         key: string;
+        doc_count?: number;
         value?: PercentileAggregation;
         ranks?: PercentileRanksAggregation;
+        lcpRanks?: PercentileRanksAggregation;
+        clsRanks?: PercentileRanksAggregation;
       }>;
     };
   };
@@ -88,7 +90,10 @@ const otelRanks = (
   name: string
 ): Array<{ value?: number }> | undefined => {
   const bucket = byName?.byName?.buckets?.find((b) => String(b.key).toLowerCase() === name);
-  return bucket?.ranks?.values;
+  if (name === 'cls') {
+    return bucket?.clsRanks?.values ?? bucket?.ranks?.values;
+  }
+  return bucket?.lcpRanks?.values ?? bucket?.ranks?.values;
 };
 
 export function transformCoreWebVitalsResponse<T>(
@@ -107,11 +112,15 @@ export function transformCoreWebVitalsResponse<T>(
 
   const classicPages = classic?.coreVitalPages?.doc_count ?? classic?.doc_count ?? 0;
   const otelPages = otel?.doc_count ?? 0;
+  const hasClassicVitals =
+    classicPages > 0 &&
+    Boolean(
+      classic?.lcp?.values?.[pkey] ?? classic?.fcp?.values?.[pkey] ?? classic?.cls?.values?.[pkey]
+    );
+  const hasOtelVitals = otelPages > 0;
 
-  // Prefer classic when present; fall back to OTel vitals logs.
-  const useClassic = (classicPages ?? 0) > 0 || Boolean(classic?.lcp?.values?.[pkey]);
-
-  if (useClassic || !otel) {
+  // Prefer classic RUM vitals when they actually have values; otherwise EDOT Browser logs.
+  if (hasClassicVitals || !hasOtelVitals) {
     const lcp = classic?.lcp ?? aggs.lcp;
     const cls = classic?.cls ?? aggs.cls;
     const tbt = classic?.tbt ?? aggs.tbt;
@@ -138,9 +147,11 @@ export function transformCoreWebVitalsResponse<T>(
   const lcp = otelVital(otel, 'lcp', pkey);
   const fcp = otelVital(otel, 'fcp', pkey);
   const cls = otelVital(otel, 'cls', pkey);
+  const lcpPages =
+    otel?.byName?.buckets?.find((b) => String(b.key).toLowerCase() === 'lcp')?.doc_count ?? 0;
 
   return {
-    coreVitalPages: otelPages,
+    coreVitalPages: lcpPages || otelPages,
     cls: cls ?? null,
     lcp,
     tbt: 0, // not emitted by EDOT Browser
@@ -172,12 +183,14 @@ export function coreWebVitalsQuery(
   const otelFilters = [
     ...rangeQuery(start, end),
     rumWebVitalLogsFilter(),
+    ...(urlQuery ? [rumUrlWildcardFilter(urlQuery)] : []),
     ...getEsFilter(uiFilters ?? {}),
   ];
 
-  const params: ESSearchRequest = mergeProjection(projection, {
+  // Do not merge this query onto the page-load projection: lodash merge keeps
+  // projection.bool.filter, which ANDs documentLoad and drops web-vital logs.
+  const params: ESSearchRequest = {
     size: 0,
-    // Broaden parent query so both page-load traces and web-vital logs can match
     query: {
       bool: {
         should: [
@@ -261,11 +274,17 @@ export function coreWebVitalsQuery(
                   percents: [percentile],
                 },
               },
-              ranks: {
+              lcpRanks: {
                 percentile_ranks: {
                   field: OTEL_WEB_VITAL_VALUE,
-                  // LCP thresholds used for lcp; CLS buckets use same ranks agg per name
                   values: [2500, 4000],
+                  keyed: false,
+                },
+              },
+              clsRanks: {
+                percentile_ranks: {
+                  field: OTEL_WEB_VITAL_VALUE,
+                  values: [0.1, 0.25],
                   keyed: false,
                 },
               },
@@ -274,6 +293,6 @@ export function coreWebVitalsQuery(
         },
       },
     },
-  });
+  };
   return params;
 }

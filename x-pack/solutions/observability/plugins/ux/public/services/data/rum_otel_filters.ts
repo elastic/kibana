@@ -24,7 +24,10 @@ import {
   OTEL_SPAN_NAME,
   OTEL_URL_FULL,
   OTEL_WEB_VITAL_NAME,
+  RUM_PAGE_LOAD_KQL,
 } from '../../../common/otel_rum';
+
+export { RUM_PAGE_LOAD_KQL };
 import { TRANSACTION_PAGE_EXIT, TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 /** Classic APM RUM page-load OR EDOT Browser documentLoad span. */

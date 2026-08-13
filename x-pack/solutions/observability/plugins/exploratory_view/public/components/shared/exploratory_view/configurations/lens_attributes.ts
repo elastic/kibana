@@ -889,6 +889,16 @@ export class LensAttributes {
           baseFilters += kueryString;
         }
       }
+      const queryString = (qFilter.query as { query_string?: { query?: string } } | undefined)
+        ?.query_string?.query;
+      if (queryString) {
+        const kql = `(${queryString})`;
+        if (baseFilters.length > 0) {
+          baseFilters += ` and ${kql}`;
+        } else {
+          baseFilters += kql;
+        }
+      }
       const existFilter = filter as ExistsFilter;
 
       if (isExistsFilter(existFilter)) {

@@ -14,6 +14,7 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { MapToolTip } from './map_tooltip';
 import { useMapFilters } from './use_map_filters';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import { RUM_PAGE_LOAD_KQL } from '../../../../../common/otel_rum';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -73,7 +74,7 @@ export function EmbeddedMapComponent() {
             filters: mapFilters,
             isLayerTOCOpen: false,
             query: {
-              query: 'transaction.type : "page-load"',
+              query: RUM_PAGE_LOAD_KQL,
               language: 'kuery',
             },
             ...(start && {
