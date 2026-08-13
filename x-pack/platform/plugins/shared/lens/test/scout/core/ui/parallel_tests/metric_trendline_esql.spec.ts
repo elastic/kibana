@@ -72,7 +72,7 @@ spaceTest.describe(
         const dashboardId = await apiServices.dashboard.create(
           {
             title: 'ESQL TS metric trendline',
-            time_range: testData.LOGSTASH_TSDB_IN_RANGE_DATES,
+            time_range: testData.TSDB_IN_RANGE_DATES,
             panels: [
               {
                 type: 'vis',
@@ -82,8 +82,7 @@ spaceTest.describe(
                   title: 'ESQL TS average bytes with trend',
                   data_source: {
                     type: 'esql',
-                    query:
-                      'TS kibana_sample_data_logstsdb | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY TBUCKET(100)',
+                    query: `TS ${testData.KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY TBUCKET(100)`,
                   },
                   metrics: [
                     {
