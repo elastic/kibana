@@ -80,7 +80,11 @@ export const getEntityAttachment = () =>
                 <Suspense fallback={<EuiLoadingSpinner size="m" />}>
                   <ShowEntityButton
                     id={actionProps.savedObjectId}
-                    entityId={Array.isArray(actionProps.attachmentId) ? actionProps.attachmentId[0] : actionProps.attachmentId}
+                    entityId={
+                      Array.isArray(actionProps.attachmentId)
+                        ? actionProps.attachmentId[0]
+                        : actionProps.attachmentId
+                    }
                     entityName={metadata.entityName ?? ''}
                     entityType={metadata.entityType ?? ''}
                   />
