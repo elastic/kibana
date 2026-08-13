@@ -19,8 +19,8 @@ evaluate.describe(
           dataset: {
             name: 'agent builder: automatic-migration-summarize-vs-start',
             description:
-              'Validates that overview queries route to summarize-automatic-migration and ' +
-              'start/reprocess/resume queries route to start-automatic-migration, and that the ' +
+              'Validates that overview queries route to automatic-migration-rules-get-all-stats and ' +
+              'start/reprocess/resume queries route to automatic-migration-rules-start-migration, and that the ' +
               'two rule-migration siblings do not steal each other intents.',
             examples: [
               {
@@ -34,8 +34,8 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Migration Overview',
-                  expectedSkill: 'summarize-automatic-migration',
-                  shouldNotActivateSkill: 'start-automatic-migration',
+                  expectedSkill: 'automatic-migration-rules-get-all-stats',
+                  shouldNotActivateSkill: 'automatic-migration-rules-start-migration',
                 },
               },
               {
@@ -44,13 +44,13 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will activate the start-automatic-migration skill to start translating ' +
+                    'I will activate the automatic-migration-rules-start-migration skill to start translating ' +
                     'the Splunk rules, asking for a connector and confirmation first.',
                 },
                 metadata: {
                   query_intent: 'Start Rule Migration',
-                  expectedSkill: 'start-automatic-migration',
-                  shouldNotActivateSkill: 'summarize-automatic-migration',
+                  expectedSkill: 'automatic-migration-rules-start-migration',
+                  shouldNotActivateSkill: 'automatic-migration-rules-get-all-stats',
                 },
               },
             ],
@@ -68,7 +68,7 @@ evaluate.describe(
             description:
               'Automatic Migration covers both rules and dashboards as distinct features. The ' +
               'PR1 skills handle RULE migrations only. Validates that dashboard-migration intents ' +
-              'do NOT activate summarize-automatic-migration or start-automatic-migration, and ' +
+              'do NOT activate automatic-migration-rules-get-all-stats or automatic-migration-rules-start-migration, and ' +
               'includes a positive control so the dashboard-negative assertions are not just ' +
               '"nothing activates".',
             examples: [
@@ -85,8 +85,8 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Dashboard Migration',
                   shouldNotActivateSkills: [
-                    'summarize-automatic-migration',
-                    'start-automatic-migration',
+                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-start-migration',
                   ],
                 },
               },
@@ -98,12 +98,12 @@ evaluate.describe(
                 output: {
                   expected:
                     'Dashboard migration progress is not available through the rule-migration ' +
-                    'summarize skill. I will not activate summarize-automatic-migration for a ' +
+                    'summarize skill. I will not activate automatic-migration-rules-get-all-stats for a ' +
                     'dashboard migration.',
                 },
                 metadata: {
                   query_intent: 'Dashboard Migration',
-                  shouldNotActivateSkill: 'summarize-automatic-migration',
+                  shouldNotActivateSkill: 'automatic-migration-rules-get-all-stats',
                 },
               },
               {
@@ -117,7 +117,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Dashboard Migration',
-                  shouldNotActivateSkill: 'start-automatic-migration',
+                  shouldNotActivateSkill: 'automatic-migration-rules-start-migration',
                 },
               },
               {
@@ -126,12 +126,12 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'I will activate the start-automatic-migration skill to start translating ' +
+                    'I will activate the automatic-migration-rules-start-migration skill to start translating ' +
                     'the Splunk rules, asking for a connector and confirmation first.',
                 },
                 metadata: {
                   query_intent: 'Start Rule Migration (positive control)',
-                  expectedSkill: 'start-automatic-migration',
+                  expectedSkill: 'automatic-migration-rules-start-migration',
                 },
               },
             ],
@@ -163,7 +163,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Install Rules',
-                  shouldNotActivateSkill: 'start-automatic-migration',
+                  shouldNotActivateSkill: 'automatic-migration-rules-start-migration',
                 },
               },
               {
@@ -178,8 +178,8 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Delete Migration',
                   shouldNotActivateSkills: [
-                    'summarize-automatic-migration',
-                    'start-automatic-migration',
+                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-start-migration',
                   ],
                 },
               },
@@ -195,8 +195,8 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Platform Distractor',
                   shouldNotActivateSkills: [
-                    'summarize-automatic-migration',
-                    'start-automatic-migration',
+                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-start-migration',
                   ],
                 },
               },
@@ -212,8 +212,8 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Authoring Distractor',
                   shouldNotActivateSkills: [
-                    'summarize-automatic-migration',
-                    'start-automatic-migration',
+                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-start-migration',
                   ],
                 },
               },

@@ -22,9 +22,9 @@ import {
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
 } from './shared/content';
 
-export const startAutomaticMigrationSkill = defineSkillType({
-  id: 'start-automatic-migration',
-  name: 'start-automatic-migration',
+export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
+  id: 'automatic-migration-rules-start-migration',
+  name: 'automatic-migration-rules-start-migration',
   basePath: 'skills/security/siem_migrations',
   description:
     'Start, reprocess, or resume an Automatic Rule Migration translation run. Resolves the AI ' +

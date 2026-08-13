@@ -18,9 +18,9 @@ import {
   NAME_NEVER_ID_BLOCK,
 } from './shared/content';
 
-export const summarizeAutomaticMigrationSkill = defineSkillType({
-  id: 'summarize-automatic-migration',
-  name: 'summarize-automatic-migration',
+export const automaticMigrationRulesGetAllStatsSkill = defineSkillType({
+  id: 'automatic-migration-rules-get-all-stats',
+  name: 'automatic-migration-rules-get-all-stats',
   basePath: 'skills/security/siem_migrations',
   description:
     'Summarize Automatic Rule Migration progress: list every rule migration with its status and ' +

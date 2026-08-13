@@ -28,9 +28,9 @@ Automatic Rule Migration is split across sibling skills. This skill handles one 
 are available when the user's request shifts. Cross-references are advisory — naming a sibling
 does not auto-load its tools, the user must move to that workflow.
 
-- **summarize-automatic-migration** — Overview of all migrations: list every migration with its
+- **automatic-migration-rules-get-all-stats** — Overview of all migrations: list every migration with its
   status and rule counts. Use when the user asks "how are my migrations doing" or wants a summary.
-- **start-automatic-migration** — Start, reprocess, or resume a migration's translation run.
+- **automatic-migration-rules-start-migration** — Start, reprocess, or resume a migration's translation run.
   Resolves the AI connector, confirms the mutating action, and picks START vs REPROCESS vs RESUME.
 - **get-automatic-migration-resources** — Inspect the original (third-party) rules and integrations
   loaded into a migration, and what's still missing. Use when advising on migration readiness.

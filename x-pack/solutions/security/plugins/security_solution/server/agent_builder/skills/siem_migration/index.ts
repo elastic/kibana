@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { summarizeAutomaticMigrationSkill } from './summarize_automatic_migration_skill';
-export { startAutomaticMigrationSkill } from './start_automatic_migration_skill';
+export { automaticMigrationRulesGetAllStatsSkill } from './automatic_migration_rules_get_all_stats_skill';
+export { automaticMigrationRulesStartMigrationSkill } from './automatic_migration_rules_start_migration_skill';

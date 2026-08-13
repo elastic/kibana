@@ -60,7 +60,7 @@ export const startRuleMigrationTool = (
     type: ToolType.builtin,
     description: `
       Start or reprocess a SIEM rule migration. Mutating: confirms with the user and
-      resolves the connector via list_ai_connectors first. See the start-automatic-migration
+      resolves the connector via list_ai_connectors first. See the automatic-migration-rules-start-migration
       skill for the START vs REPROCESS vs RESUME decision policy.
 `,
     schema,
