@@ -31,7 +31,7 @@ async function runTask({
   signal,
   logger,
   core,
-}: RunContext & {
+}: Pick<RunContext, 'taskInstance' | 'fakeRequest' | 'signal'> & {
   logger: Logger;
   core: EntityStoreCoreSetup;
 }): Promise<RunResult> {
