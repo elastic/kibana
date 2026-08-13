@@ -8,9 +8,10 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { MetricVisualizationState } from '@kbn/lens-common';
+import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/lens-common';
 
 import { validator } from '../utils/validator';
+import { DEFAULT_LAYER_ID } from '../../constants';
 import type { MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
@@ -127,6 +128,106 @@ describe('Metric', () => {
         type: 'primary',
         background_chart: { type: 'trend' },
       });
+    });
+  });
+
+  describe('form-based trendline breakdown ordering', () => {
+    const TRENDLINE_LAYER_ID = `${DEFAULT_LAYER_ID}_trendline`;
+
+    const trendlineBreakdownConfig = {
+      type: 'metric',
+      title: 'Metric - Trendline with breakdown',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'average',
+          field: 'system.cpu',
+          background_chart: { type: 'trend' },
+        },
+        {
+          type: 'secondary',
+          operation: 'average',
+          field: 'bytes',
+        },
+      ],
+      breakdown_by: {
+        operation: 'terms',
+        fields: ['host.name'],
+        limit: 3,
+        columns: 3,
+        rank_by: { type: 'metric', metric_index: 0, direction: 'desc' },
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    } satisfies MetricConfig;
+
+    const getTermsColumn = (
+      lensState: ReturnType<LensConfigBuilder['fromAPIFormat']>,
+      layerId: string,
+      columnId: string
+    ): TermsIndexPatternColumn => {
+      const formBased = lensState.state.datasourceStates.formBased;
+      if (!formBased) {
+        throw new Error('expected a form-based datasource state');
+      }
+      return formBased.layers[layerId].columns[columnId] as TermsIndexPatternColumn;
+    };
+
+    it(`orders the trendline layer breakdown by the trendline layer's own metric column (rank_by primary)`, () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const lensState = builder.fromAPIFormat(trendlineBreakdownConfig);
+
+      // The main layer breakdown orders by the main metric column.
+      expect(
+        getTermsColumn(lensState, DEFAULT_LAYER_ID, 'metric_accessor_breakdown').params.orderBy
+      ).toEqual({ type: 'column', columnId: 'metric_accessor_metric' });
+
+      // The trendline layer breakdown must order by the trendline layer's own metric column,
+      // otherwise the runtime terms agg silently falls back to `_key` (alphabetical) ordering.
+      const trendlineBreakdown = getTermsColumn(
+        lensState,
+        TRENDLINE_LAYER_ID,
+        'metric_accessor_breakdown_trendline'
+      );
+      expect(trendlineBreakdown.params.orderBy).toEqual({
+        type: 'column',
+        columnId: 'metric_accessor_trendline',
+      });
+
+      // The referenced column must actually exist in the trendline layer.
+      const trendlineLayer = lensState.state.datasourceStates.formBased!.layers[TRENDLINE_LAYER_ID];
+      expect(trendlineLayer.columns).toHaveProperty('metric_accessor_trendline');
+    });
+
+    it('orders the trendline layer breakdown by the trendline secondary column (rank_by secondary)', () => {
+      const config = {
+        ...trendlineBreakdownConfig,
+        breakdown_by: {
+          ...trendlineBreakdownConfig.breakdown_by,
+          rank_by: { type: 'metric', metric_index: 1, direction: 'desc' },
+        },
+      } satisfies MetricConfig;
+
+      const builder = new LensConfigBuilder(undefined, true);
+      const lensState = builder.fromAPIFormat(config);
+
+      const trendlineBreakdown = getTermsColumn(
+        lensState,
+        TRENDLINE_LAYER_ID,
+        'metric_accessor_breakdown_trendline'
+      );
+      expect(trendlineBreakdown.params.orderBy).toEqual({
+        type: 'column',
+        columnId: 'metric_accessor_secondary_trendlineX0',
+      });
+
+      const trendlineLayer = lensState.state.datasourceStates.formBased!.layers[TRENDLINE_LAYER_ID];
+      expect(trendlineLayer.columns).toHaveProperty('metric_accessor_secondary_trendlineX0');
     });
   });
 

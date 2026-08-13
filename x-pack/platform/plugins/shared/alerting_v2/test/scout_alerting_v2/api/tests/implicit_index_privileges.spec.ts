@@ -155,12 +155,12 @@ const fetchRoleWithImplicit = async (
   esClient: EsClient,
   roleName: string
 ): Promise<{ indices?: ImplicitIndexEntry[] }> => {
-  // `include_implicit` rides along via `querystring` (not yet in the typed request params), and the
-  // implicit `indices[].implicitly_granted` / DLS `query` fields aren't in the typed response, so
-  // we reinterpret each entry as our own `ImplicitIndexEntry`.
+  // `include_implicit` is a typed request param; implicit `indices[].implicitly_granted` / DLS
+  // `query` fields still aren't fully reflected in the typed response, so we reinterpret each entry
+  // as our own `ImplicitIndexEntry`.
   const response = await esClient.security.getRole({
     name: roleName,
-    querystring: { include_implicit: true },
+    include_implicit: true,
   });
   const roles = response as unknown as Record<string, { indices?: ImplicitIndexEntry[] }>;
   return roles[roleName] ?? { indices: [] };

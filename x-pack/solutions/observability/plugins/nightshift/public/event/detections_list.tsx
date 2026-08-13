@@ -25,13 +25,12 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@kbn/react-query';
 import type {
-  Feature,
   LifecycleDetection,
   EventLifecycleResponse,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import { useFetchStreamFeaturesByStream } from '../hooks/use_fetch_stream_features';
+import { useImpactedServices } from '../hooks/use_impacted_services';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import {
   filterOccurrencesForDetection,
@@ -39,7 +38,7 @@ import {
   type OccurrencePoint,
 } from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
-import { getDetectionEntities } from './get_detection_entities';
+
 import { nightshiftBackgroundTransition } from '../common/transition';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
@@ -73,17 +72,16 @@ const parseTimestamp = (timestamp: string): number => {
 
 function DetectionCard({
   detection,
-  event,
   occurrences,
-  streamFeatures,
+  impactedServiceLabels,
   isLoadingOccurrences,
   isSelected = false,
   onClick,
 }: {
   detection: LifecycleDetection;
-  event: SignificantEvent;
   occurrences: OccurrencePoint[];
-  streamFeatures: Feature[];
+  /** Event-level: every card of the same event shows this identical list. */
+  impactedServiceLabels: string[];
   isLoadingOccurrences: boolean;
   isSelected?: boolean;
   onClick?: (detection: LifecycleDetection) => void;
@@ -91,15 +89,8 @@ function DetectionCard({
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
   const changePointLabel = getChangePointLabel(detection.change_point_type);
-  const entityLabels = useMemo(() => {
-    const entities = getDetectionEntities(event, detection, streamFeatures);
-    if (entities.length > 0) {
-      return entities.map((entity) => entity.label);
-    }
-    return detection.stream_name ? [detection.stream_name] : [];
-  }, [detection, event, streamFeatures]);
-  const visibleEntityLabels = entityLabels.slice(0, MAX_VISIBLE_ENTITY_PILLS);
-  const hiddenEntityCount = Math.max(entityLabels.length - visibleEntityLabels.length, 0);
+  const visibleEntityLabels = impactedServiceLabels.slice(0, MAX_VISIBLE_ENTITY_PILLS);
+  const hiddenEntityCount = Math.max(impactedServiceLabels.length - visibleEntityLabels.length, 0);
 
   const handleClick = () => {
     onClick?.(detection);
@@ -374,17 +365,8 @@ export function DetectionsList({
     [data]
   );
 
-  const streamNames = useMemo(
-    () => [
-      ...new Set(
-        detections
-          .map((detection) => detection.stream_name)
-          .filter((streamName): streamName is string => Boolean(streamName))
-      ),
-    ],
-    [detections]
-  );
-  const streamFeaturesByStream = useFetchStreamFeaturesByStream(streamNames);
+  const { services } = useImpactedServices(event);
+  const impactedServiceLabels = useMemo(() => services.map(({ name }) => name), [services]);
 
   // Only skeleton on first load — keep cached cards visible during background refetch.
   const isInitialLoading = isLoading && (data?.detections?.length ?? 0) === 0;
@@ -448,12 +430,11 @@ export function DetectionsList({
             <DetectionCard
               key={detection.detection_id}
               detection={detection}
-              event={event}
               occurrences={filterOccurrencesForDetection(
                 detection.rule_uuid ? occurrencesByRuleUuid?.get(detection.rule_uuid) ?? [] : [],
                 detection['@timestamp']
               )}
-              streamFeatures={streamFeaturesByStream.get(detection.stream_name ?? '') ?? []}
+              impactedServiceLabels={impactedServiceLabels}
               isLoadingOccurrences={isLoadingOccurrences && Boolean(detection.rule_uuid)}
               isSelected={detection.detection_id === selectedDetectionId}
               onClick={onDetectionClick}

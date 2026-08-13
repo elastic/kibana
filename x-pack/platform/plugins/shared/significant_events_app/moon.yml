@@ -28,7 +28,6 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/data-plugin'
-  - '@kbn/dataset-quality-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'

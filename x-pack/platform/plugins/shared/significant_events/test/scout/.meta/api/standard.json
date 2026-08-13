@@ -1,5 +1,5 @@
 {
-  "sha1": "8a0f024b3250b6c21f47169efee34979d9d0060b",
+  "sha1": "6c8f8228b72f3c6de48a2c53b70c59e80af65c3e",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -211,8 +211,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 76
+        "line": 36,
+        "column": 74
       }
     },
     {
@@ -227,8 +227,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 76
+        "line": 36,
+        "column": 74
       }
     },
     {
@@ -243,8 +243,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 76
+        "line": 36,
+        "column": 74
       }
     },
     {
@@ -259,8 +259,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
-        "line": 37,
-        "column": 76
+        "line": 36,
+        "column": 74
       }
     }
   ]

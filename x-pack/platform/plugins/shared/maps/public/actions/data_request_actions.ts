@@ -75,7 +75,7 @@ export type DataRequestContext = {
 };
 
 export function clearDataRequests(layer: ILayer) {
-  return (dispatch: Dispatch) => {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     layer.getInFlightRequestTokens().forEach((requestToken: symbol) => {
       dispatch(cancelRequest(requestToken));
     });
@@ -248,7 +248,10 @@ function startDataLoad(
   ) => {
     const layer = getLayerById(layerId, getState());
     if (layer) {
-      dispatch(cancelRequest(layer.getPrevRequestToken(dataId)));
+      const prevRequestToken = layer.getPrevRequestToken(dataId);
+      if (prevRequestToken) {
+        dispatch(cancelRequest(prevRequestToken));
+      }
     }
 
     const eventHandlers = getEventHandlers(getState());

@@ -25,7 +25,12 @@ const hostHash = buildGroupHash({
 });
 
 describe('detectDataPresence', () => {
-  const { loggerService } = createLoggerService();
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
+
+  beforeEach(() => {
+    ({ loggerService, mockLogger } = createLoggerService());
+  });
 
   function setup() {
     const scoped = createQueryService();
@@ -77,6 +82,31 @@ describe('detectDataPresence', () => {
 
     expect(scopedEsClient.esql.query).not.toHaveBeenCalled();
     expect(result).toEqual(new Set());
+  });
+
+  it('logs the data-presence query without the query text, filter, or params', async () => {
+    const { queryService, scopedEsClient } = setup();
+    scopedEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
+    );
+    const input = createRuleExecutionInput();
+
+    await detectDataPresence({
+      queryService,
+      rule: buildRule(),
+      input,
+      logger: loggerService,
+    });
+
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      'Executing data-presence query',
+      expect.objectContaining({
+        labels: expect.objectContaining({ rule_id: input.ruleId }),
+      })
+    );
+    const debugMessage = (mockLogger.debug as jest.Mock).mock.calls[0][0] as string;
+    expect(debugMessage).not.toContain('FROM metrics');
+    expect(debugMessage).not.toContain('host.name');
   });
 
   it('records the group hashes reported by the no-data query', async () => {

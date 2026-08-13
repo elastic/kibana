@@ -358,8 +358,13 @@ export function QueriesTable() {
     return (
       <EuiEmptyPrompt
         aria-live="polite"
-        titleSize="xs"
-        icon={<AssetImage type="significantEventsEmptyState" />}
+        color="plain"
+        css={css`
+          && {
+            max-width: 400px;
+          }
+        `}
+        icon={<AssetImage type="significantEventsEmptyState" size={140} />}
         title={
           <h2>
             {i18n.translate('xpack.significantEventsApp.queriesTable.emptyState.title', {
@@ -510,6 +515,7 @@ export function QueriesTable() {
       )}
       {selectedQuery && (
         <QueryDetailsFlyout
+          key={selectedQuery.query.id}
           item={selectedQuery}
           onClose={closeQueryFlyout}
           onDelete={(queryId, streamName) =>

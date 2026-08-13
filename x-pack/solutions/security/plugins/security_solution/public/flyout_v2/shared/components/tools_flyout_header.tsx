@@ -49,7 +49,7 @@ export interface ToolsFlyoutHeaderProps {
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
   ({ title, onTitleClick, label, iconType, badge, timestamp }) => {
     const { euiTheme } = useEuiTheme();
-    const showSourceContext = !!onTitleClick && !!label && !!iconType;
+    const showSourceContext = !!label && !!iconType;
 
     // When the flyout menu renders a back button, the header is pushed onto its own row and no
     // longer overlaps the close button, so we only reserve room for the close button otherwise.

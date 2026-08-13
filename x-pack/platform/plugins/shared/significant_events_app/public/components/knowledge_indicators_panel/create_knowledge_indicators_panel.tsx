@@ -38,18 +38,15 @@ export function createKnowledgeIndicatorsPanel({
   coreStart,
   pluginsStart,
   services,
-  isServerless,
 }: {
   coreStart: CoreStart;
   pluginsStart: SignificantEventsAppStartDependencies;
   services: SignificantEventsAppServices;
-  isServerless: boolean;
 }): KnowledgeIndicatorsPanelComponent {
   const context = {
     core: coreStart,
     dependencies: { start: pluginsStart },
     services,
-    isServerless,
   };
 
   return function KnowledgeIndicatorsPanelEmbedded({ streamName }: { streamName: string }) {

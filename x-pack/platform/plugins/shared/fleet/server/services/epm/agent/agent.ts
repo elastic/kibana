@@ -121,7 +121,10 @@ export function compileTemplate(
   compiledTemplate = compiledTemplate.replace(/'(?:[^']|'')*'|"(?:[^"\\]|\\.)*"/gs, (match) => {
     if (match[0] === "'") return match; // single-quoted scalar — no escaping needed
     return match.includes('\n')
-      ? match.replace(/\n+/g, (newlines) => '\\n'.repeat(newlines.length - 1))
+      ? match.replace(/\n+/g, (newlines) =>
+          // YAML 1.1 folds a single newline to a space; N≥2 consecutive → N-1 \n escapes.
+          newlines.length === 1 ? ' ' : '\\n'.repeat(newlines.length - 1)
+        )
       : match;
   });
 

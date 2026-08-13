@@ -1,5 +1,5 @@
 {
-  "sha1": "ff6b41e8d8893740d98e31db8b2426694fc0fee4",
+  "sha1": "7dfe612365be3b38c7cc5e723b67ab5aaa180ce7",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -242,8 +242,8 @@
       }
     },
     {
-      "id": "36d5b3c1e8655d5-f6bc7b4906887c3",
-      "title": "Homepage - Limited permissions user should only see Data Management in primary sidenav",
+      "id": "36d5b3c1e8655d5-5629a8d4290c357",
+      "title": "Homepage - Limited permissions user should only see expected primary sidenav items",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

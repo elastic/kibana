@@ -1,5 +1,5 @@
 {
-  "sha1": "56247f3169ab0b11f08ee709cec7a31b23cb96f1",
+  "sha1": "3085303e9281d4b9a17646eee53f8aeae17b5c93",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -20,8 +20,8 @@
       }
     },
     {
-      "id": "08c621ad2871856-a09fd1e365d7489",
-      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "id": "08c621ad2871856-913984dcecec931",
+      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-observability_complete",
@@ -43,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 157,
+        "line": 151,
         "column": 99
       }
     },
@@ -57,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 221,
-        "column": 10
+        "line": 211,
+        "column": 11
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 226,
-        "column": 18
+        "line": 217,
+        "column": 26
       }
     },
     {
@@ -175,8 +175,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 130,
-        "column": 20
+        "line": 126,
+        "column": 45
       }
     },
     {
@@ -189,8 +189,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 137,
-        "column": 25
+        "line": 132,
+        "column": 11
       }
     }
   ]

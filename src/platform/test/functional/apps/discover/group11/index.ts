@@ -21,7 +21,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_time_field_column'));
+    loadTestFile(require.resolve('./_share_url_state'));
     loadTestFile(require.resolve('./_unsaved_changes_modal'));
   });
 }

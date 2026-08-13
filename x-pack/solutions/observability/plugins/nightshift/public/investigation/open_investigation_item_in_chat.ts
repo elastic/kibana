@@ -18,7 +18,7 @@ export const buildBlindSpotChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
+  autoSendInitialMessage: false,
   initialMessage: i18n.translate('xpack.nightshift.investigation.blindSpotChatPrompt', {
     defaultMessage: 'Tell me about this blind spot: {title}',
     values: { title: blindSpot.title },
@@ -40,7 +40,7 @@ export const buildHypothesisChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
+  autoSendInitialMessage: false,
   initialMessage: i18n.translate('xpack.nightshift.investigation.hypothesisChatPrompt', {
     defaultMessage: 'Tell me about this hypothesis: {candidate}',
     values: { candidate: hypothesis.candidate },
@@ -62,7 +62,7 @@ export const buildRecommendationChatOptions = (
   attachmentId: string
 ): OpenSignificantEventChatOptions => ({
   newConversation: true,
-  autoSendInitialMessage: true,
+  autoSendInitialMessage: false,
   initialMessage: i18n.translate('xpack.nightshift.investigation.recommendationChatPrompt', {
     defaultMessage: 'Tell me about this recommendation: {title}',
     values: { title: recommendation.title },

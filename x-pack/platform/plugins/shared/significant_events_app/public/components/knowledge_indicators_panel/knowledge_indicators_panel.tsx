@@ -130,61 +130,68 @@ export function KnowledgeIndicatorsPanel({ streamName }: KnowledgeIndicatorsPane
     }
   );
 
-  const ariaLabel =
+  const viewAllAriaLabel =
     featuresIsLoading || queriesIsLoading
       ? i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabelLoading', {
-          defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
+          defaultMessage: 'View all knowledge indicators for {streamName}: loading counts',
           values: { streamName },
         })
       : i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabel', {
           defaultMessage:
-            'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
+            'View all knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
           values: { streamName, featuresCount, queriesCount: queriesCount ?? 0 },
         });
 
   return (
-    <EuiLink
-      href={href}
-      data-test-subj="significantEventsAppKnowledgeIndicatorsPanelLink"
-      aria-label={ariaLabel}
-      css={css`
-        text-decoration: none;
-
-        &:hover,
-        &:focus {
-          text-decoration: none;
-        }
-      `}
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj="significantEventsAppKnowledgeIndicatorsPanel"
     >
-      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-        <EuiTitle size="xs">
-          <h2>
-            {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.title', {
-              defaultMessage: 'Knowledge indicators',
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.title', {
+                defaultMessage: 'Knowledge indicators',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            href={href}
+            data-test-subj="significantEventsAppKnowledgeIndicatorsPanelLink"
+            aria-label={viewAllAriaLabel}
+          >
+            {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.viewAll', {
+              defaultMessage: 'View all',
             })}
-          </h2>
-        </EuiTitle>
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
 
-        <EuiFlexGroup gutterSize="l" responsive={false}>
-          <KnowledgeIndicatorCount
-            count={featuresError || featuresIsLoading ? undefined : featuresCount}
-            isLoading={featuresIsLoading}
-            isError={!!featuresError}
-            label={featuresLabel}
-            data-test-subj="significantEventsAppKnowledgeIndicatorsFeaturesCount"
-          />
-          <KnowledgeIndicatorCount
-            count={queriesError || queriesCount === undefined ? undefined : queriesCount}
-            isLoading={queriesIsLoading}
-            isFetching={queriesFetching}
-            isError={queriesError}
-            label={queriesLabel}
-            data-test-subj="significantEventsAppKnowledgeIndicatorsQueriesCount"
-          />
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiLink>
+      <EuiFlexGroup gutterSize="l" responsive={false}>
+        <KnowledgeIndicatorCount
+          count={featuresError || featuresIsLoading ? undefined : featuresCount}
+          isLoading={featuresIsLoading}
+          isError={!!featuresError}
+          label={featuresLabel}
+          data-test-subj="significantEventsAppKnowledgeIndicatorsFeaturesCount"
+        />
+        <KnowledgeIndicatorCount
+          count={queriesError || queriesCount === undefined ? undefined : queriesCount}
+          isLoading={queriesIsLoading}
+          isFetching={queriesFetching}
+          isError={queriesError}
+          label={queriesLabel}
+          data-test-subj="significantEventsAppKnowledgeIndicatorsQueriesCount"
+        />
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

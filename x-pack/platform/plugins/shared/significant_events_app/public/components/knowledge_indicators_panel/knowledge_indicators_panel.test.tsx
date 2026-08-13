@@ -94,16 +94,22 @@ describe('KnowledgeIndicatorsPanel', () => {
     ).toHaveTextContent('query');
   });
 
-  it('links to the knowledge indicators tab with the stream pre-filtered', () => {
+  it('renders a View all link to the knowledge indicators tab with the stream pre-filtered', () => {
     renderWithI18n(<KnowledgeIndicatorsPanel streamName={definition.stream.name} />);
 
     expect(link).toHaveBeenCalledWith('/{tab}', {
       path: { tab: 'knowledge_indicators' },
       query: { stream: definition.stream.name },
     });
-    expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
+    const viewAllLink = screen.getByTestId('significantEventsAppKnowledgeIndicatorsPanelLink');
+    expect(viewAllLink).toHaveTextContent('View all');
+    expect(viewAllLink).toHaveAttribute(
       'href',
       '/app/significant_events/knowledge_indicators?stream=logs'
+    );
+    expect(viewAllLink).toHaveAttribute(
+      'aria-label',
+      `View all knowledge indicators for ${definition.stream.name}: 2 features, 8 queries`
     );
   });
 
@@ -125,7 +131,7 @@ describe('KnowledgeIndicatorsPanel', () => {
     expect(screen.getAllByTestId('knowledgeIndicatorsCountLoading')).toHaveLength(2);
     expect(screen.getByTestId('significantEventsAppKnowledgeIndicatorsPanelLink')).toHaveAttribute(
       'aria-label',
-      `View knowledge indicators for ${definition.stream.name}: loading counts`
+      `View all knowledge indicators for ${definition.stream.name}: loading counts`
     );
   });
 

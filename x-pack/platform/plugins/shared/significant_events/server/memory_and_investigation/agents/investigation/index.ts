@@ -26,7 +26,7 @@ export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID =
 
 export const investigationAgentType = {
   id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-  name: 'Streams Investigator',
+  name: 'Nightshift Investigator',
   description:
     'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
     'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',

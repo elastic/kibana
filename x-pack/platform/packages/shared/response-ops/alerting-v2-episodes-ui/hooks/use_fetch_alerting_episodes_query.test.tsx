@@ -14,7 +14,7 @@ import { useFetchAlertingEpisodesQuery } from './use_fetch_alerting_episodes_que
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
 jest.mock('../apis/fetch_alerting_episodes');

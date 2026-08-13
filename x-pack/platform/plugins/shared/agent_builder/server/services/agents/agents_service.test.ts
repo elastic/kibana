@@ -15,7 +15,8 @@ import {
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-server/allow_lists';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAiIndexId, chatAgentTypeId } from '@kbn/agent-builder-common';
+import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
 import type { AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
@@ -192,6 +193,26 @@ describe('AgentsService', () => {
       createSystemClientMock.mockReturnValue({ ensureAgent });
       started = service.start(createStartDeps());
       request = httpServerMock.createKibanaRequest();
+    });
+
+    describe('#resolveAgentConfiguration', () => {
+      const resolve = (configuration: AgentConfiguration) =>
+        started.resolveAgentConfiguration({
+          agent: { type: chatAgentTypeId, configuration } as AgentDefinition,
+          request,
+        });
+
+      it('grants the default AI index to chat agents that have none', async () => {
+        const resolved = await resolve({ tools: [], ai_indices: [] });
+
+        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId]);
+      });
+
+      it("unions the default AI index with the agent's own", async () => {
+        const resolved = await resolve({ tools: [], ai_indices: ['custom-index'] });
+
+        expect(resolved.ai_indices).toEqual([agentBuilderDefaultAiIndexId, 'custom-index']);
+      });
     });
 
     describe('#ensure', () => {
