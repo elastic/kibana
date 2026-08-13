@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import {
+  getDashboardId,
   resolveDashboardsByIds,
   type Dashboard,
   type MissingDashboard,
@@ -34,7 +35,11 @@ export const useDashboardArtifacts = (
   );
 
   const dashboardIds = useMemo(
-    () => dashboardArtifacts.map((artifact) => artifact.value),
+    () =>
+      dashboardArtifacts.flatMap((artifact) => {
+        const dashboardId = getDashboardId(artifact);
+        return dashboardId ? [dashboardId] : [];
+      }),
     [dashboardArtifacts]
   );
 
@@ -104,11 +109,14 @@ export const useDashboardArtifacts = (
   }, [dashboard, dashboardIds]);
 
   const artifactIdByDashboardId = useMemo(() => {
-    // Keyed by dashboard saved-object id (`artifact.value`). Duplicate values collapse
+    // Keyed by dashboard saved-object id (`data.dashboardId`). Duplicate values collapse
     // to the last artifact id — deleting removes one artifact at a time.
     const map = new Map<string, string>();
     for (const artifact of dashboardArtifacts) {
-      map.set(artifact.value, artifact.id);
+      const dashboardId = getDashboardId(artifact);
+      if (dashboardId) {
+        map.set(dashboardId, artifact.id);
+      }
     }
     return map;
   }, [dashboardArtifacts]);

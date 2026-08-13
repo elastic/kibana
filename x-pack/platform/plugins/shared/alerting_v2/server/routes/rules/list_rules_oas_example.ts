@@ -6,9 +6,9 @@
  */
 
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
-import { buildOasOperation, invalidResponseExample } from '../oas_utils';
+import { buildOasOperation } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
-import { RULE_RESPONSE } from './rule_oas_shared_examples';
+import { INVALID_QUERY_PARAMETERS_RESPONSE, RULE_RESPONSE } from './rule_oas_shared_examples';
 
 export const LIST_RULES_RESPONSE: FindRulesResponse = {
   items: [RULE_RESPONSE],
@@ -16,12 +16,6 @@ export const LIST_RULES_RESPONSE: FindRulesResponse = {
   page: 1,
   perPage: 20,
 };
-
-const INVALID_LIST_RULES_RESPONSE = invalidResponseExample({
-  summary: 'List query uses an invalid page number',
-  message: 'page: Number must be greater than or equal to 1',
-  details: { errors: { page: ['Number must be greater than or equal to 1'] } },
-});
 
 export const listRulesOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
@@ -31,6 +25,6 @@ export const listRulesOasExamples = (): AlertingOasOperationObject =>
         summary: 'Paginated list containing one matching rule',
         value: LIST_RULES_RESPONSE,
       },
-      400: INVALID_LIST_RULES_RESPONSE,
+      400: INVALID_QUERY_PARAMETERS_RESPONSE,
     },
   });
