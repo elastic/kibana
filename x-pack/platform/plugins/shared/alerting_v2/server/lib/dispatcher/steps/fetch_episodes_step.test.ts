@@ -57,22 +57,15 @@ describe('FetchEpisodesStep', () => {
     const { windowStart, windowEnd } = state.input;
     await step.execute(state);
 
-    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      expect.objectContaining({
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: windowStart.toISOString(),
-            },
-          },
+    const request = mockEsClient.esql.query.mock.calls[0][0];
+    expect(request.filter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: windowStart.toISOString(),
         },
-      }),
-      expect.any(Object)
-    );
-
-    const { query, filter } = mockEsClient.esql.query.mock.calls[0][0];
-    expect(filter.range['@timestamp']).not.toHaveProperty('lte');
-    expect(query).toContain(
+      },
+    });
+    expect(request.query).toContain(
       `type IS NULL OR @timestamp >= "${windowStart.toISOString()}"::DATETIME AND @timestamp <= "${windowEnd.toISOString()}"::DATETIME`
     );
   });
