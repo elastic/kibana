@@ -1944,5 +1944,35 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    it(
+      'should preserve the time column width when toggling the Summary column',
+      async () => {
+        await renderDataTable({
+          columns: ['message'],
+          settings: {
+            columns: {
+              '@timestamp': { width: 50 },
+            },
+          },
+          renderCustomToolbar,
+          showSummaryColumnToggle: true,
+        });
+
+        const getTimeColumnHeader = () => screen.getByTestId('dataGridHeaderCell-@timestamp');
+        expect(getTimeColumnHeader()).toHaveStyle({ width: '50px' });
+
+        await userEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
+        await waitForEuiPopoverOpen();
+
+        const toggle = screen.getByTestId('columnSelectorShowSummaryColumn');
+        await userEvent.click(toggle);
+        expect(getTimeColumnHeader()).toHaveStyle({ width: '50px' });
+
+        await userEvent.click(toggle);
+        expect(getTimeColumnHeader()).toHaveStyle({ width: '50px' });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 });

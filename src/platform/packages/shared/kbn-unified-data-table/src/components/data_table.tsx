@@ -740,15 +740,12 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const onChangeShowSummaryColumn = useCallback(
       (show: boolean) => {
-        const withoutSource = columns.filter((col) => col !== SOURCE_COLUMN);
-        if (show) {
-          // Append on the right; do not insert beside timestamp
-          onSetColumns([...withoutSource, SOURCE_COLUMN], true);
-        } else {
-          onSetColumns(withoutSource, true);
-        }
+        const withoutSource = visibleColumns.filter((column) => column !== SOURCE_COLUMN);
+        const nextColumns = show ? [...withoutSource, SOURCE_COLUMN] : withoutSource;
+
+        onSetColumns(nextColumns, !shouldPrependTimeFieldColumn(nextColumns));
       },
-      [columns, onSetColumns]
+      [onSetColumns, shouldPrependTimeFieldColumn, visibleColumns]
     );
 
     /**
