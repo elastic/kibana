@@ -70,9 +70,7 @@ const convertBaseFromEs = (document: Document) => {
     ...(document._source.parent_conversation_id
       ? {
           parent_conversation_id: document._source.parent_conversation_id,
-          // Backfill: older sub-agent children may lack the relation field.
-          // The only relation that existed before this field was `subagent`,
-          // so default missing values to that.
+          // Backfill: only relation that existed before this field was `subagent`
           parent_conversation_relation:
             (document._source.parent_conversation_relation as ConversationParentRelation) ??
             ConversationParentRelation.subagent,
