@@ -90,10 +90,7 @@ network:
     - github.com
     - api.github.com
     - openrouter.ai
-    # Allow citing elastic.co docs (e.g. test best-practice guidelines) in PR
-    # descriptions/comments without the safe-output sanitizer redacting the links.
     - elastic.co
-    - www.elastic.co
 sandbox:
   agent: awf
 
