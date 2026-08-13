@@ -118,19 +118,7 @@ export type CausalFeature = z.infer<typeof causalFeatureSchema>;
 
 /** Query-based verification attached to a signal when the agent ran an ES|QL check. */
 export const signalEvidenceSchema = z.object({
-  esql_query: z
-    .string()
-    .max(MAX_TEXT_LENGTH)
-    .refine((v) => !/\|\s*KEEP\s+@timestamp\b/i.test(v), {
-      message: 'esql_query must not contain the grounding projection tail (KEEP @timestamp ...)',
-    })
-    .refine((v) => !/\bNOW\s*\(\s*\)/i.test(v), {
-      message:
-        'esql_query must not contain NOW() — replace with an absolute ISO-8601 timestamp for the window that was evaluated',
-    })
-    .describe(
-      'The ES|QL query that verified this signal: time-scoped with absolute timestamps; must not include the grounding `| KEEP @timestamp` projection tail or `NOW()`.'
-    ),
+  esql_query: z.string().max(MAX_TEXT_LENGTH).describe('The ES|QL query that verified this signal'),
   result: z
     .enum(['found', 'empty', 'error'])
     .describe(
@@ -252,7 +240,7 @@ export const significantEventBaseSchema = z.object({
       Choose the most specific stable affected scope supported by evidence or KI context: operation, unique service/entity, flow, then domain. For multi-service findings, stop at flow or domain. Never use a generic stream name.
       The observed condition names the stable rule-specific behavior, failure, degradation, or exposure — not its current lifecycle state.
       Preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, current-cycle details, and state or tense words (e.g. "continues", "detected", "active", "resolved").
-      
+
       Example: "Auth service — login endpoint connection refused".
     `
     ),
