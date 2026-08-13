@@ -213,7 +213,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed endpoint attachment')).toBeInTheDocument();
     });
 
-    it('falls back to the common label for a registered type without a removal object', async () => {
+    it('falls back to the attachment displayName for a registered type without a removal object', async () => {
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
@@ -246,7 +246,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed attachment')).toBeInTheDocument();
+      expect(screen.getByText('removed endpoint')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting a unified value attachment', async () => {

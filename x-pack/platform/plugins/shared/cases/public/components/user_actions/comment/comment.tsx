@@ -81,7 +81,9 @@ const getDeleteLabelFromRegistry = ({
   const attachmentType = registry.get(attachmentTypeId);
   const attachmentLabel = attachmentType.getAttachmentRemovalObject?.(props).event ?? null;
 
-  return attachmentLabel != null ? attachmentLabel : registeredAttachmentCommonLabel;
+  return attachmentLabel != null
+    ? attachmentLabel
+    : `${i18n.REMOVED_FIELD} ${attachmentType.displayName.toLowerCase()}`;
 };
 
 const getDeleteCommentUserAction = ({
