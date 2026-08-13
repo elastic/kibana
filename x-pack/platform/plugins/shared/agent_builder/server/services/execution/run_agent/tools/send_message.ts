@@ -16,25 +16,13 @@ import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server'
 import type { SubagentTracker } from '../subagent_tracker';
 
 const schema = z.object({
-  to: z
-    .string()
-    .describe(
-      'Name of the persistent sub-agent to talk to (as chosen when it was ' +
-        'created via run_subagent). \n\n' +
-        'In future iterations this parameter will also accept "parent" (for a ' +
-        'sub-agent to reply to its parent) and other special values (e.g. "all" ' +
-        'for broadcast). For now, must resolve to a persistent sub-agent in the ' +
-        "current conversation's active roster. \n\n" +
-        'If no sub-agent with the given name exists, this call will fail with a ' +
-        'clear error — use run_subagent to create one first.'
-    ),
-  prompt: z.string().describe('The message body for this exchange.'),
+  to: z.string().describe('Name of the persistent sub-agent to talk to.'),
+  prompt: z.string().describe('The message to send.'),
   run_in_background: z
     .boolean()
     .optional()
     .describe(
-      'Set to true to fire this message off and continue with other work; you will ' +
-        'be notified when the sub-agent finishes replying.'
+      'Set to true to fire this message off and continue with other work; you will be notified when the sub-agent finishes replying.'
     ),
   effort: z
     .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
@@ -44,10 +32,8 @@ const schema = z.object({
 
 const toolDescription = `Send a message to an existing persistent sub-agent.
 
-Use this to follow up with a persistent sub-agent you (or another agent) previously
-created via \`run_subagent({ mode: "persistent", name: "..." })\`. A new round in
-the sub-agent's conversation is started for each call; the sub-agent sees the full
-history of your prior exchanges with it.
+Use this to follow up with a persistent sub-agent you (or another agent) previously created via \`run_subagent({ mode: "persistent", name: "..." })\`.
+The sub-agent sees the full history of your prior exchanges with it.
 
 - The recipient must resolve to a persistent sub-agent in the current conversation's
   active roster (see "Active persistent sub-agents" system notices in the message

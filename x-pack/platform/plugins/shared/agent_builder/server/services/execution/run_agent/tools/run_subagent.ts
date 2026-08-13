@@ -32,26 +32,13 @@ const schema = z.object({
     .enum([SubagentMode.oneshot, SubagentMode.persistent])
     .optional()
     .describe(
-      `Whether the sub-agent is a one-off (oneshot, default) or persistent — kept
-as a named session you can talk to again later via the send_message tool.
-Only use "persistent" when you expect to follow up with the same sub-agent
-across multiple invocations (either later in this round or in a future round).`
+      '"oneshot" (default) to create a one-off sub-agent or "persistent" to create a named session you can address later via send_message.'
     ),
   name: z
     .string()
     .optional()
     .describe(
-      `Identifier for a persistent sub-agent (ignored when mode is "oneshot").
-Defaults to "subagent".
-
-This name is how you will address the sub-agent later via send_message.
-Pick a short, meaningful name that reflects its role (e.g. "researcher",
-"code-reviewer", "planner"). Names are scoped to the current conversation.
-
-IMPORTANT: run_subagent ONLY creates. Calling it with a name that is
-ALREADY in use will fail — use send_message to talk to an existing
-sub-agent. The current active roster is surfaced to you via
-"Active persistent sub-agents" system notices in the message history.`
+      'For persistent agents - unique Identifier for the sub-agent. Defaults to "subagent".'
     ),
   run_in_background: z
     .boolean()
@@ -94,7 +81,8 @@ Brief the agent like a smart colleague who just walked into the room — it hasn
 
 ## Persistent sub-agents
 
-- \`mode: "persistent"\` creates a named, long-running sub-agent you can address later with the \`send_message\` tool.
+- \`mode: "persistent"\` creates a named, long-running sub-agent you can address later with the \`send_message\` tool. Only use "persistent" when you expect to follow up with the same sub-agent across multiple invocations (either later in this round or in a future round).
+- Pick a short, meaningful \`name\` that reflects the sub-agent's role (e.g. \`researcher\`, \`code-reviewer\`, \`planner\`). Names are scoped to the current conversation.
 - \`run_subagent\` only ever creates. If a persistent sub-agent with the same name already exists, this call will fail — use \`send_message\` to talk to it.
 - The current active roster is surfaced to you in "Active persistent sub-agents" system notices; check there before choosing a name.
 
