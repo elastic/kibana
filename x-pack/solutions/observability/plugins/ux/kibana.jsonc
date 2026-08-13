@@ -45,5 +45,11 @@
       "observability",
       "maps"
     ]
+  },
+  "build": {
+    "noParse": [
+      // Vendored EDOT replay IIFE — babel would wrap it in CJS and break <script src>.
+      "public/assets/elastic_otel_browser_replay.min.js"
+    ]
   }
 }
