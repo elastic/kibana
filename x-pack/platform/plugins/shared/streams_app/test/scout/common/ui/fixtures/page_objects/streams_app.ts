@@ -207,8 +207,8 @@ export class StreamsApp {
       .filter({ hasText: streamName });
   }
 
-  getCanvasProcessingGlyph(streamName: string) {
-    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingGlyph');
+  getCanvasProcessingButton(streamName: string) {
+    return this.getCanvasDestinationNode(streamName).getByTestId('streamsCanvasProcessingButton');
   }
 
   getCanvasNodeByAriaLabel(ariaLabel: string) {
