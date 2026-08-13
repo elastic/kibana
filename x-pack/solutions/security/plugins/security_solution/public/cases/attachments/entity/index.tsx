@@ -8,6 +8,7 @@
 import type {
   CaseAttachmentsWithoutOwner,
   CommonAttachmentTabViewProps,
+  UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import { AttachmentActionType, SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
@@ -17,7 +18,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/entity_icon_by_type';
-import type { UnifiedReferenceAttachmentViewProps } from '@kbn/cases-plugin/public';
 import type { EntityAttachmentMetadata } from '../../../../common/cases/attachments/entity';
 import { EntityAttachmentPayloadSchema } from '../../../../common/cases/attachments/entity';
 import { ENTITY_STORE_INDEX_PATTERN } from '../../../../common/entity_analytics/entity_store/constants';
