@@ -383,9 +383,12 @@ class ConversationClientImpl implements ConversationClient {
 
     if (options.afterEventId) {
       const index = events.findIndex((event) => event.id === options.afterEventId);
-      if (index >= 0) {
-        events = events.slice(index + 1);
+      if (index < 0) {
+        throw createBadRequestError(
+          `afterEventId "${options.afterEventId}" was not found in conversation ${conversationId}`
+        );
       }
+      events = events.slice(index + 1);
     }
 
     if (options.limit != null) {

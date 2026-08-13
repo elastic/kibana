@@ -164,6 +164,12 @@ describe('ConversationClient timeline events', () => {
       expect(events.map((e) => e.id)).toEqual(['e2']);
     });
 
+    it('throws on an unknown afterEventId instead of returning the whole timeline', async () => {
+      await expect(client.getEvents('conv-1', { afterEventId: 'nope' })).rejects.toThrow(
+        /afterEventId "nope" was not found/
+      );
+    });
+
     it('defaults to an empty timeline when the events field is absent', async () => {
       const doc = makeDoc();
       delete (doc._source as { events?: unknown }).events;
