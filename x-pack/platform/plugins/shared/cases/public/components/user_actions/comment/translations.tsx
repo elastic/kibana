@@ -46,3 +46,12 @@ export const DELETE_REGISTERED_ATTACHMENT = i18n.translate(
     defaultMessage: 'Deleted attachment',
   }
 );
+
+export const getDeleteRegisteredAttachmentTitle = (displayName: string) =>
+  i18n.translate(
+    'xpack.cases.userActions.attachments.registeredAttachment.successToasterTitleWithType',
+    {
+      defaultMessage: 'Deleted {displayName}',
+      values: { displayName },
+    }
+  );

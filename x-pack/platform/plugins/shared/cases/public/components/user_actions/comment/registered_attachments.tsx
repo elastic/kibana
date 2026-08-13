@@ -32,6 +32,7 @@ import {
   ATTACHMENT_NOT_REGISTERED_ERROR,
   DEFAULT_EVENT_ATTACHMENT_TITLE,
   DELETE_REGISTERED_ATTACHMENT,
+  getDeleteRegisteredAttachmentTitle,
 } from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
@@ -133,7 +134,8 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
     const deleteSuccessTitle =
-      attachmentViewObject.deleteSuccessTitle ?? DELETE_REGISTERED_ATTACHMENT;
+      attachmentViewObject.deleteSuccessTitle ??
+      getDeleteRegisteredAttachmentTitle(attachmentType.displayName);
 
     const renderer = getAttachmentRenderer(userAction.id);
     const actions = attachmentViewObject.getActions?.(props) ?? [];
