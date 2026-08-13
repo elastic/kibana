@@ -13,6 +13,12 @@ import type { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
+import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
+import {
+  buildOsqueryPolicyKuery,
+  getOsqueryAgentPolicyIds,
+} from '../lib/get_osquery_agent_policy_ids';
+import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const RESOLVE_AGENT_IDS_TOOL_ID = osqueryTool('resolve_agent_ids');
 
@@ -27,7 +33,23 @@ interface ResolvedAgent {
   hostname: string;
   agent_id: string | null;
   status: string | null;
+  osquery_capable: boolean;
 }
+
+interface FleetAgentLike {
+  id: string;
+  status?: string;
+  enrolled_at?: string;
+  policy_id?: string;
+  local_metadata?: { host?: { hostname?: string; name?: string } };
+}
+
+/**
+ * Fleet KQL is quoted-string based, so a hostname containing `"` or `\` breaks
+ * out of its literal and produces a malformed query.
+ */
+const escapeKueryValue = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 /**
  * Resolves host names to Elastic Agent IDs via the Fleet AgentService (the same
@@ -42,11 +64,16 @@ interface ResolvedAgent {
  * A host can have MULTIPLE agent enrollments over its lifetime (reinstall,
  * agent upgrade, re-enrollment after a broken install) — Fleet keeps the old
  * (offline/uninstalled) records around alongside the current one, all
- * matching the same `local_metadata.host.hostname`. Picking the first match
- * with no ordering previously returned a stale agent id nondeterministically,
- * which silently broke every downstream `run_live_query`/`get_endpoint_status`
- * call against that "resolved" but dead agent. Always prefer an `online`
- * agent, and within ties prefer the most recently enrolled one.
+ * matching the same `local_metadata.host.hostname`. Each hostname is therefore
+ * resolved with its OWN paged query: a page shared across hostnames is ordered
+ * by enrollment time before the online preference is applied client-side, so a
+ * batch of newer stale enrollments can push the older online agent off the page
+ * entirely. Within a hostname, prefer an `online` agent, then the most recently
+ * enrolled.
+ *
+ * Resolution is additionally constrained to agents enrolled in an
+ * osquery-capable agent policy, so it cannot hand back an Elastic Agent that
+ * has no osquery integration to execute the downstream live query.
  */
 export const resolveAgentIdsTool = (
   osqueryContext: OsqueryAppContext,
@@ -58,12 +85,17 @@ export const resolveAgentIdsTool = (
     "Resolve host names to Elastic Agent IDs for use with osquery.run_live_query's agent_ids parameter. " +
     'Use this instead of querying the .fleet-agents index directly via ES|QL or search — that index requires ' +
     'ES-level privileges most roles do not have and will fail with a security_exception. ' +
-    'Returns one entry per requested hostname; agent_id is null if no enrolled agent matched.',
+    'Only returns agents enrolled in an Osquery-capable agent policy. ' +
+    'Returns one entry per requested hostname; agent_id is null if no enrolled Osquery-capable agent matched.',
   schema: resolveAgentIdsSchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
-  handler: async (input, { request, spaceId }) => {
+  handler: async (input, { request }) => {
     const { hostnames } = input;
     const agentService = osqueryContext.service.getAgentService();
+
+    if (!(await hasOsqueryToolPrivilege(osqueryContext, request, 'read'))) {
+      return unauthorizedToolResult('read');
+    }
 
     if (!agentService) {
       return {
@@ -79,28 +111,88 @@ export const resolveAgentIdsTool = (
 
     try {
       const space = await osqueryContext.service.getActiveSpace(request);
-      const kuery = hostnames
-        .map((h) => `local_metadata.host.hostname:"${h}" or local_metadata.host.name:"${h}"`)
-        .join(' or ');
+      const spaceId = space?.id ?? DEFAULT_SPACE_ID;
+      const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+        osqueryContext,
+        request
+      );
 
-      const { agents } = await agentService
-        .asInternalScopedUser(space?.id ?? DEFAULT_SPACE_ID)
-        .listAgents({
-          kuery: `(${kuery})`,
-          perPage: hostnames.length * 5,
-          showInactive: false,
-        });
+      const { agentPolicyIds, lookupFailed } = await getOsqueryAgentPolicyIds(
+        spaceScopedClient,
+        osqueryContext
+      );
 
-      const resolved: ResolvedAgent[] = hostnames.map((hostname) => {
-        const matches = agents.filter(
-          (a) =>
-            a.local_metadata?.host?.hostname === hostname ||
-            a.local_metadata?.host?.name === hostname
+      if (lookupFailed) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message:
+                  'Could not determine which agent policies include the Osquery integration, so agent resolution was not attempted. Retry, or verify Fleet is healthy.',
+              },
+            },
+          ],
+        };
+      }
+
+      if (agentPolicyIds.length === 0) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                resolved: hostnames.map((hostname) => ({
+                  hostname,
+                  agent_id: null,
+                  status: null,
+                  osquery_capable: false,
+                })),
+                guidance:
+                  'No agent policy in this space includes the Osquery integration, so no host can run a live query. Add the Osquery Manager integration to the relevant agent policy first.',
+              },
+            },
+          ],
+        };
+      }
+
+      const policyKuery = buildOsqueryPolicyKuery(agentPolicyIds);
+      const scopedAgentClient = agentService.asInternalScopedUser(spaceId);
+
+      const listAllMatchingAgents = async (kuery: string): Promise<FleetAgentLike[]> => {
+        const perPage = 50;
+        const agents: FleetAgentLike[] = [];
+
+        for (let page = 1; ; page++) {
+          const response = await scopedAgentClient.listAgents({
+            kuery,
+            page,
+            perPage,
+            showInactive: false,
+          });
+          const pageAgents = response.agents as FleetAgentLike[];
+          agents.push(...pageAgents);
+
+          if (pageAgents.length < perPage) {
+            return agents;
+          }
+        }
+      };
+
+      const resolveHostname = async (hostname: string): Promise<ResolvedAgent> => {
+        const escaped = escapeKueryValue(hostname);
+        const hostKuery = `(local_metadata.host.hostname:"${escaped}" or local_metadata.host.name:"${escaped}")`;
+
+        const agents = await listAllMatchingAgents(`${hostKuery} and (${policyKuery})`);
+
+        const matches = (agents as FleetAgentLike[]).filter(
+          (agent) =>
+            agent.local_metadata?.host?.hostname === hostname ||
+            agent.local_metadata?.host?.name === hostname
         );
 
-        // Prefer the currently online agent; among ties (or if none are
-        // online) prefer the most recently enrolled — see the multi-
-        // enrollment note above.
         const best = [...matches].sort((a, b) => {
           const aOnline = a.status === 'online' ? 1 : 0;
           const bOnline = b.status === 'online' ? 1 : 0;
@@ -113,9 +205,11 @@ export const resolveAgentIdsTool = (
           hostname,
           agent_id: best?.id ?? null,
           status: best?.status ?? null,
+          osquery_capable: Boolean(best),
         };
-      });
+      };
 
+      const resolved = await Promise.all(hostnames.map(resolveHostname));
       const unresolved = resolved.filter((r) => !r.agent_id).map((r) => r.hostname);
 
       return {
@@ -126,9 +220,9 @@ export const resolveAgentIdsTool = (
             data: {
               resolved,
               ...(unresolved.length > 0 && {
-                guidance: `No enrolled agent found for: ${unresolved.join(
+                guidance: `No enrolled Osquery-capable agent found for: ${unresolved.join(
                   ', '
-                )}. Confirm the host is enrolled in Fleet before retrying.`,
+                )}. Confirm the host is enrolled in Fleet and its agent policy includes the Osquery integration before retrying.`,
               }),
             },
           },

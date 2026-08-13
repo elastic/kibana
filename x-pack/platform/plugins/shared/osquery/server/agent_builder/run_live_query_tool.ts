@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { osqueryTool, agentBuilderToolsAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { createActionHandler } from '../handlers';
@@ -19,6 +20,7 @@ import type { StartPlugins } from '../types';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 import { validateReadOnlyQuery } from './validate_read_only_query';
 import { pollActionResponses } from './poll_action_responses';
+import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const RUN_LIVE_QUERY_TOOL_ID = osqueryTool('run_live_query');
 
@@ -61,6 +63,57 @@ export const runLiveQueryTool = (
   handler: async (input, { request }) => {
     const { query, agent_ids: agentIds, timeout } = input;
 
+    if (!(await hasOsqueryToolPrivilege(osqueryContext, request, 'writeLiveQueries'))) {
+      return unauthorizedToolResult('writeLiveQueries');
+    }
+
+    const packageService = osqueryContext.service.getPackageService();
+    const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+      osqueryContext,
+      request
+    );
+
+    // SchemaService catalog = extensible allowlist (FR-005)
+    let allowedTables: Set<string>;
+    try {
+      const schemaResponse = await schemaService.getSchema(
+        'osquery',
+        packageService,
+        spaceScopedClient
+      );
+      const tables = schemaResponse.data as OsqueryTable[];
+      allowedTables = new Set(tables.map((t) => t.name.toLowerCase()));
+    } catch (e) {
+      logger.warn(`Failed to load Osquery schema for allowlist: ${e}`);
+
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: {
+              message: `Cannot enforce read-only allowlist — schema catalog unavailable: ${
+                e instanceof Error ? e.message : String(e)
+              }`,
+            },
+          },
+        ],
+      };
+    }
+
+    const validationError = validateReadOnlyQuery(query, allowedTables);
+    if (validationError) {
+      return {
+        results: [
+          {
+            tool_result_id: getToolResultId(),
+            type: ToolResultType.error,
+            data: { message: validationError },
+          },
+        ],
+      };
+    }
+
     const createActionParams: CreateLiveQueryRequestBodySchema = {
       query,
       agent_ids: agentIds,
@@ -85,12 +138,37 @@ export const runLiveQueryTool = (
         space,
       });
 
-      const actionId = result.response.action_id as string;
+      // The parent action id is a container: Fleet responses and result
+      // documents are keyed on the per-query child action id. Polling or
+      // returning the parent leaves a successful query looking permanently
+      // pending with no rows.
+      const parentActionId = result.response.action_id as string;
+      const queries = (result.response.queries ?? []) as Array<{ action_id?: string }>;
+      const queryActionId = queries[0]?.action_id;
+
+      if (!queryActionId) {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message:
+                  'Live query was created but Fleet returned no query action id, so results cannot be retrieved.',
+                parent_action_id: parentActionId,
+              },
+            },
+          ],
+        };
+      }
+
       const agentCount = result.response.agents?.length ?? result.fleetActionsCount;
 
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const pollResult = await pollActionResponses(esClient, actionId, {
+      const pollResult = await pollActionResponses(esClient, queryActionId, {
         budgetMs: POLL_BUDGET_MS,
+        spaceId: space?.id ?? DEFAULT_SPACE_ID,
+        expectedAgentCount: agentCount,
         maxRows: MAX_RESULT_ROWS,
         logger,
       });
@@ -111,6 +189,10 @@ export const runLiveQueryTool = (
               action_id: result.response.action_id,
               agent_count: result.response.agents?.length ?? result.fleetActionsCount,
               status: 'dispatched',
+              action_id: queryActionId,
+              parent_action_id: parentActionId,
+              agent_count: agentCount,
+              status,
               query,
               timeout_seconds: timeout ?? 60,
               guidance:
@@ -118,9 +200,9 @@ export const runLiveQueryTool = (
               responded_agents: responded,
               row_count: rows.length,
               rows: rows.slice(0, MAX_RESULT_ROWS),
-              ...(status === 'dispatched' && {
+              ...(status !== 'completed' && {
                 guidance:
-                  'Agents have not responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
+                  'Not every agent has responded within the initial poll budget. Call osquery.get_live_query_results with this action_id to wait longer and return rows for chat display.',
               }),
             },
           },

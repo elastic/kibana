@@ -15,6 +15,7 @@ import { packSavedObjectType } from '../../common/types';
 import type { PackSavedObject } from '../common/types';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
+import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const LIST_PACKS_TOOL_ID = osqueryTool('list_packs');
 
@@ -39,7 +40,11 @@ export const listPacksTool = (
   schema: listPacksSchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
   handler: async (input, { request }) => {
-    const { search, enabled: _enabled, page, page_size: pageSize } = input;
+    const { search, enabled, page, page_size: pageSize } = input;
+
+    if (!(await hasOsqueryToolPrivilege(osqueryContext, request, 'readPacks'))) {
+      return unauthorizedToolResult('readPacks');
+    }
 
     const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
       osqueryContext,
@@ -53,6 +58,11 @@ export const listPacksTool = (
         perPage: pageSize,
         sortField: 'updated_at',
         sortOrder: 'desc',
+        // `enabled` is advertised in the schema, so it has to reach the query —
+        // otherwise the agent filters and silently gets the unfiltered list.
+        ...(enabled !== undefined && {
+          filter: `${packSavedObjectType}.attributes.enabled: ${enabled}`,
+        }),
         ...(search && {
           search,
           searchFields: ['name', 'description'],

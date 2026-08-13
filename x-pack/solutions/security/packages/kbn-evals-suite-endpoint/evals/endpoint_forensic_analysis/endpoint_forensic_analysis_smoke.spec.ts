@@ -17,6 +17,12 @@ const FORENSIC_ESQL_TRAJECTORY = [
   'platform.core.execute_esql',
 ] as const;
 
+const OSQUERY_FALLBACK_TRAJECTORY = [
+  'osquery.check_integration',
+  'platform.core.generate_esql',
+  'platform.core.execute_esql',
+] as const;
+
 evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
     await waitForEndpointPackage(kbnClient, esClient, log);
@@ -143,6 +149,40 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
       },
     });
   });
+
+  evaluate(
+    'capability detection — Osquery not installed, falls back to ES|QL',
+    async ({ evaluateForensicDataset }) => {
+      await evaluateForensicDataset({
+        dataset: {
+          name: 'security: endpoint-forensic-analysis-osquery-capability-no-osquery',
+          description:
+            'Capability detection: agent checks Osquery integration, finds it NOT installed, routes to ES|QL fallback.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Show me all processes on WKSTN-RECV01 that have open sockets to external IPs — use whatever data source is available.',
+              },
+              output: {
+                criteria: [
+                  'Checks whether Osquery integration is available before attempting an Osquery query',
+                  'Routes to ES|QL / Defend telemetry when Osquery is not installed (graceful degradation)',
+                  'Does NOT attempt osquery.run_live_query when the integration is absent',
+                  'Returns a structured answer with the data source it actually used cited',
+                ],
+                tool_sequence: [...OSQUERY_FALLBACK_TRAJECTORY],
+              },
+              metadata: {
+                golden_id: 'ef-016-capability-no-osquery-fallback',
+                row_type: 'happy',
+              },
+            },
+          ],
+        },
+      });
+    }
+  );
 
   evaluate('distractor weather', async ({ evaluateForensicDataset }) => {
     await evaluateForensicDataset({

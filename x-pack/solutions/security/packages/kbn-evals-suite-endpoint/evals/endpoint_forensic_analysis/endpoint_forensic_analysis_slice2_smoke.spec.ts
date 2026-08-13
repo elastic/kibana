@@ -9,7 +9,15 @@ import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
 import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
+<<<<<<<< HEAD:x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals/endpoint_forensic_analysis/endpoint_forensic_analysis_slice2_smoke.spec.ts
 import { cleanupSeededData } from '../../src/data_generators/cleanup';
+========
+import { cleanupForensicData } from '../../src/data_generators/cleanup';
+import {
+  assertOsqueryLiveQuerySupported,
+  getOsqueryLiveQueryReadiness,
+} from '../../src/data_generators/osquery_readiness';
+>>>>>>>> 05abfda22dc9b (fix(osquery): address forensic agent builder review gaps):x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_osquery/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_live_state.spec.ts
 
 /**
  * Slice 2 Osquery tool sequences (minimum-sufficient per golden-dataset reconciliation).
@@ -24,9 +32,9 @@ const OSQUERY_CHECK_INTEGRATION = 'osquery.check_integration' as const;
 const OSQUERY_LIST_SAVED_QUERIES = 'osquery.list_saved_queries' as const;
 const OSQUERY_LIST_PACKS = 'osquery.list_packs' as const;
 const OSQUERY_GET_TABLE_SCHEMA = 'osquery.get_table_schema' as const;
+const OSQUERY_RESOLVE_AGENT_IDS = 'osquery.resolve_agent_ids' as const;
 const OSQUERY_RUN_LIVE_QUERY = 'osquery.run_live_query' as const;
-const PLATFORM_GENERATE_ESQL = 'platform.core.generate_esql' as const;
-const PLATFORM_EXECUTE_ESQL = 'platform.core.execute_esql' as const;
+const OSQUERY_GET_LIVE_QUERY_RESULTS = 'osquery.get_live_query_results' as const;
 
 evaluate.describe(
   'Endpoint Forensic Analysis — slice 2 Osquery smoke',
@@ -37,10 +45,29 @@ evaluate.describe(
       await cleanupSeededData({ esClient, internalEsClient });
       await seedForensicTimeline({ esClient }, log);
 
+<<<<<<<< HEAD:x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals/endpoint_forensic_analysis/endpoint_forensic_analysis_slice2_smoke.spec.ts
       try {
         await chatClient.converse({ message: 'hello' });
       } catch (e) {
         log.warning(`Warmup failed: ${e}`);
+========
+        // Defend documents alone do not make a live query executable — surface
+        // whether an Osquery-capable, online agent actually exists.
+        const readiness = await getOsqueryLiveQueryReadiness(kbnClient, log);
+        assertOsqueryLiveQuerySupported(
+          readiness,
+          'Endpoint Forensic Analysis — Osquery live state'
+        );
+
+        try {
+          await agentBuilderClient.converse({
+            agentId: agentBuilderDefaultAgentId,
+            input: 'hello',
+          });
+        } catch (e) {
+          log.warning(`Warmup failed: ${e}`);
+        }
+>>>>>>>> 05abfda22dc9b (fix(osquery): address forensic agent builder review gaps):x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_osquery/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_live_state.spec.ts
       }
     });
 
@@ -49,6 +76,7 @@ evaluate.describe(
     });
 
     evaluate(
+<<<<<<<< HEAD:x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals/endpoint_forensic_analysis/endpoint_forensic_analysis_slice2_smoke.spec.ts
       'capability detection — Osquery not installed, falls back to ES|QL',
       async ({ evaluateForensicDataset }) => {
         await evaluateForensicDataset({
@@ -87,6 +115,8 @@ evaluate.describe(
     );
 
     evaluate(
+========
+>>>>>>>> 05abfda22dc9b (fix(osquery): address forensic agent builder review gaps):x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_osquery/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_live_state.spec.ts
       'capability detection — both installed, Osquery preferred for live state',
       async ({ evaluateForensicDataset }) => {
         await evaluateForensicDataset({
@@ -112,7 +142,9 @@ evaluate.describe(
                     OSQUERY_CHECK_INTEGRATION,
                     OSQUERY_LIST_SAVED_QUERIES,
                     OSQUERY_GET_TABLE_SCHEMA,
+                    OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
+                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -150,7 +182,9 @@ evaluate.describe(
                   tool_sequence: [
                     OSQUERY_CHECK_INTEGRATION,
                     OSQUERY_LIST_PACKS,
+                    OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
+                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -187,7 +221,9 @@ evaluate.describe(
                   tool_sequence: [
                     OSQUERY_CHECK_INTEGRATION,
                     OSQUERY_LIST_SAVED_QUERIES,
+                    OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
+                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -233,10 +269,37 @@ evaluate.describe(
                   row_type: 'happy',
                 },
               },
+<<<<<<<< HEAD:x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals/endpoint_forensic_analysis/endpoint_forensic_analysis_slice2_smoke.spec.ts
             ],
           },
         });
       }
     );
+========
+              output: {
+                criteria: [
+                  'Authors a custom read-only Osquery query (processes, authenticode, etc.)',
+                  'Does not use Osquery tables that execute commands or mutate state',
+                  'Surfaces query text and host id in the response',
+                ],
+                tool_sequence: [
+                  OSQUERY_CHECK_INTEGRATION,
+                  OSQUERY_LIST_SAVED_QUERIES,
+                  OSQUERY_GET_TABLE_SCHEMA,
+                  OSQUERY_RESOLVE_AGENT_IDS,
+                  OSQUERY_RUN_LIVE_QUERY,
+                  OSQUERY_GET_LIVE_QUERY_RESULTS,
+                ],
+              },
+              metadata: {
+                golden_id: 'ef-011-osquery-custom-unsigned-dll',
+                row_type: 'happy',
+              },
+            },
+          ],
+        },
+      });
+    });
+>>>>>>>> 05abfda22dc9b (fix(osquery): address forensic agent builder review gaps):x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_osquery/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_live_state.spec.ts
   }
 );
