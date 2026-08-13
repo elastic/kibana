@@ -92,6 +92,7 @@ export const CONTEXT_STEP_ID = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_ID = 'context:tieBreakerFields';
 export const DEFAULT_COLUMNS_ID = 'defaultColumns';
 export const ENABLE_ESQL_ID = 'enableESQL';
+export const DISCOVER_DEFAULT_ESQL_QUERY_ID = 'discover:defaultEsqlQuery';
 export const DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID = 'discover:maxDocFieldsDisplayed';
 export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwitch';
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';
