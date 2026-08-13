@@ -6,6 +6,7 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import type { StreamQuery } from '@kbn/significant-events-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 
@@ -27,6 +28,11 @@ interface QueriesApi {
   }: {
     queryIds: string[];
     streamName: string;
+  }) => Promise<void>;
+  setQueryDurability: (args: {
+    query: StreamQuery;
+    streamName: string;
+    expiresAt: string | undefined;
   }) => Promise<void>;
   abort: () => void;
 }
@@ -72,6 +78,33 @@ export function useQueriesApi(): QueriesApi {
             params: {
               body: {
                 queryIds,
+              },
+            },
+          }
+        );
+      },
+      setQueryDurability: async ({
+        query,
+        streamName,
+        expiresAt,
+      }: {
+        query: StreamQuery;
+        streamName: string;
+        expiresAt: string | undefined;
+      }) => {
+        await significantEventsRepositoryClient.fetch(
+          'PUT /api/streams/{name}/queries/{queryId} 2023-10-31',
+          {
+            signal: null,
+            params: {
+              path: { name: streamName, queryId: query.id },
+              body: {
+                title: query.title,
+                esql: query.esql,
+                severity_score: query.severity_score,
+                evidence: query.evidence,
+                description: query.description,
+                expires_at: expiresAt,
               },
             },
           }
