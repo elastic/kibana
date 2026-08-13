@@ -67,9 +67,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           metadata: { managed: true },
           role_descriptors: {
             otlp_writer: {
-              applications: [
-                { application: 'apm', resources: ['*'], privileges: ['event:write'] },
-              ],
+              applications: [{ application: 'apm', resources: ['*'], privileges: ['event:write'] }],
             },
           },
         });
