@@ -20,7 +20,6 @@ import {
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
   generateSeverityDoc,
-  generateStateTransitionDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
 } from './schema_to_skill_docs';
@@ -145,8 +144,6 @@ ${generateRuleOperationsDoc()}
   with the Elasticsearch error message. Inspect the error, fix the query, and retry.
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
-
-${generateStateTransitionDoc()}
 
 ## Final Validation
 

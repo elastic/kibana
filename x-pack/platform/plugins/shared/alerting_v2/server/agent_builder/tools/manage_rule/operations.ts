@@ -101,7 +101,7 @@ export const setStateTransitionOperationSchema = stateTransitionSchema
   .omit({ pending_operator: true, recovering_operator: true })
   .extend({ operation: z.literal('set_state_transition') })
   .describe(
-    'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.'
+    'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
   );
 
 export const validateOperationSchema = z

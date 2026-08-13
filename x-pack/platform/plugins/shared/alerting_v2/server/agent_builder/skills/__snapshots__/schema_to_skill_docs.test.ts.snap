@@ -265,7 +265,7 @@ Use \`set_grouping\` to split alerts by entity (host, service, etc.) so each gro
 
 #### \`operation: \\"set_state_transition\\"\`
 
-Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
+Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on \`kind: alert\` rules.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -345,19 +345,6 @@ Severity is set by adding a \`severity\` column to the breach query via \`EVAL\`
   \`| EVAL severity = \\"critical\\"\`
 - **Conditional severity** — severity varies per group based on data:
   \`| EVAL severity = CASE(cpu > 0.95, \\"critical\\", cpu > 0.8, \\"high\\", \\"medium\\")\`"
-`;
-
-exports[`schema_to_skill_docs generateStateTransitionDoc matches the reviewed skill-doc snapshot 1`] = `
-"## State Transition
-
-Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
-
-- \`pending_count\` — Consecutive breaches before transitioning to active.
-- \`pending_timeframe\` — Time window for pending evaluation, e.g. 5m, 15m.
-- \`recovering_count\` — Consecutive recoveries before transitioning to inactive.
-- \`recovering_timeframe\` — Time window for recovering evaluation, e.g. 5m, 15m.
-
-State transition is only allowed on \`kind: alert\` rules ([rule-kind reference](./references/rule-kind.md)). Episode statuses are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md)."
 `;
 
 exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `

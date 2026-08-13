@@ -15,7 +15,6 @@ import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
-  generateStateTransitionDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
   generateSeverityDoc,
@@ -230,7 +229,7 @@ describe('schema_to_skill_docs', () => {
     it('describes each operation in terms of the user goal it solves', () => {
       const doc = generateRuleOperationsDoc();
       expect(doc).toContain(
-        'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.'
+        'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
       );
       expect(doc).toContain('Use `set_kind` to choose whether the rule notifies');
       expect(doc).not.toContain('Episode state transition thresholds (alert-only).');
@@ -307,12 +306,6 @@ describe('schema_to_skill_docs', () => {
   describe('generateEpisodeLifecycleDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateEpisodeLifecycleDoc()).toMatchSnapshot();
-    });
-  });
-
-  describe('generateStateTransitionDoc', () => {
-    it('matches the reviewed skill-doc snapshot', () => {
-      expect(generateStateTransitionDoc()).toMatchSnapshot();
     });
   });
 

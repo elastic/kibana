@@ -471,41 +471,6 @@ export const generateRuleKindDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the State Transition section with heading, field list from schema, and constraints. */
-export const generateStateTransitionDoc = (): string => {
-  const fields = getStateTransitionFields();
-  const jsonSchema = zodToJsonSchema(setStateTransitionOperationSchema) as JsonSchemaNode;
-  const properties = (jsonSchema.properties ?? {}) as JsonSchemaNode;
-  const operationDescription =
-    typeof jsonSchema.description === 'string' ? jsonSchema.description.trim() : '';
-  if (!operationDescription) {
-    throw new SchemaTranslationError(
-      'setStateTransitionOperationSchema is missing a top-level .describe() — add one explaining the user goal'
-    );
-  }
-
-  const bullets = fields.map((f) => {
-    const prop = properties[f] as JsonSchemaNode | undefined;
-    const description = prop?.description as string | undefined;
-    if (!description) {
-      throw new SchemaTranslationError(
-        `setStateTransitionOperationSchema field \`${f}\` is missing a .describe() — add one to the Zod schema`
-      );
-    }
-    return `- \`${f}\` — ${description}`;
-  });
-
-  return [
-    '## State Transition',
-    '',
-    operationDescription,
-    '',
-    ...bullets,
-    '',
-    'State transition is only allowed on `kind: alert` rules ([rule-kind reference](./references/rule-kind.md)). Episode statuses are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md).',
-  ].join('\n');
-};
-
 /** Generates the Episode Lifecycle section with heading, prose, and status table. */
 export const generateEpisodeLifecycleDoc = (): string => {
   const table = generateEnumTable({
