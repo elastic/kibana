@@ -34,7 +34,10 @@ export const triggerInvestigationStepDefinition = (getClient: GetClient) =>
     }),
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
-      const client = getClient(request);
+      // getFakeRequest() does not carry space info, so the space ID must be extracted from the
+      // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
+      const spaceId = context.contextManager.getContext().workflow.spaceId;
+      const client = getClient(request, spaceId);
       const result = await client.start({
         subject: {
           type: context.input.subject_type,
