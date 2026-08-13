@@ -76,6 +76,8 @@ export interface PackageSpecManifest {
   };
   workflows?: {
     default_enabled?: boolean | string[];
+    /** Workflow file dependencies. Each value must be installed before its key. */
+    dependencies?: Record<string, string[]>;
   };
   asset_tags?: PackageSpecTags[];
   discovery?: {

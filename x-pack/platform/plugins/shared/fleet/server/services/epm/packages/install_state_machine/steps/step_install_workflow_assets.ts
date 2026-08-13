@@ -148,6 +148,56 @@ export const substituteFleetAgentIds = (
   return result;
 };
 
+interface WorkflowEntry {
+  fileName: string;
+  yaml: string;
+}
+
+const normalizeWorkflowFileName = (fileName: string): string =>
+  fileName.endsWith('.yaml') || fileName.endsWith('.yml') ? fileName : `${fileName}.yaml`;
+
+/**
+ * Order package workflow assets so every declared dependency is installed before
+ * its dependent. Reject invalid graphs before creating any saved object.
+ */
+export const orderWorkflowEntriesByDependencies = (
+  entries: WorkflowEntry[],
+  dependencies: Record<string, string[]> = {}
+): WorkflowEntry[] => {
+  const byName = new Map(entries.map((entry) => [entry.fileName, entry]));
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const ordered: WorkflowEntry[] = [];
+
+  const visit = (fileName: string, chain: string[]): void => {
+    if (visited.has(fileName)) return;
+    if (visiting.has(fileName)) {
+      throw new Error(`Workflow dependency cycle: ${[...chain, fileName].join(' -> ')}`);
+    }
+    const entry = byName.get(fileName);
+    if (!entry) {
+      throw new Error(`Workflow dependency references missing asset "${fileName}"`);
+    }
+
+    visiting.add(fileName);
+    for (const dependency of dependencies[fileName] ?? []) {
+      visit(normalizeWorkflowFileName(dependency), [...chain, fileName]);
+    }
+    visiting.delete(fileName);
+    visited.add(fileName);
+    ordered.push(entry);
+  };
+
+  for (const dependencyOwner of Object.keys(dependencies)) {
+    const normalizedOwner = normalizeWorkflowFileName(dependencyOwner);
+    if (!byName.has(normalizedOwner)) {
+      throw new Error(`Workflow dependencies declared for missing asset "${normalizedOwner}"`);
+    }
+  }
+  entries.forEach(({ fileName }) => visit(fileName, []));
+  return ordered;
+};
+
 export async function stepInstallWorkflowAssets(
   context: Pick<
     InstallContext,
@@ -176,7 +226,7 @@ export async function stepInstallWorkflowAssets(
   }
 
   await withPackageSpan(`Install package workflows for ${pkgName}`, async () => {
-    const workflowEntries: Array<{ fileName: string; yaml: string }> = [];
+    const workflowEntries: WorkflowEntry[] = [];
 
     await packageInstallContext.archiveIterator.traverseEntries(
       async (entry) => {
@@ -203,8 +253,13 @@ export async function stepInstallWorkflowAssets(
 
     const assetRefs: KibanaAssetReference[] = [];
 
-    await pMap(
+    const orderedWorkflowEntries = orderWorkflowEntriesByDependencies(
       workflowEntries,
+      packageInfo.workflows?.dependencies
+    );
+
+    await pMap(
+      orderedWorkflowEntries,
       async ({ fileName, yaml }) => {
         const workflowId = getFleetPackageWorkflowId({ pkgName, spaceId, fileName });
         const { yaml: substitutedYaml, unresolved } = substituteWorkflowConnectorIdsWithUnresolved(
@@ -272,7 +327,9 @@ export async function stepInstallWorkflowAssets(
           type: KibanaSavedObjectType.workflow,
         });
       },
-      { concurrency: 3 }
+      // Dependency order is load-bearing: enabling a downstream scheduled workflow
+      // before its prerequisites are installed can produce empty or partial results.
+      { concurrency: 1 }
     );
 
     await saveKibanaAssetsRefs(

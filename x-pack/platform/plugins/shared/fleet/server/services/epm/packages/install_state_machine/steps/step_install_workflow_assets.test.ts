@@ -20,6 +20,7 @@ import { saveKibanaAssetsRefs } from '../../install';
 import {
   stepInstallWorkflowAssets,
   getFleetPackageWorkflowId,
+  orderWorkflowEntriesByDependencies,
   resolveWorkflowEnabledIntent,
   substituteWorkflowConnectorIds,
 } from './step_install_workflow_assets';
@@ -39,6 +40,57 @@ const mockLogger = {
   isLevelEnabled: jest.fn(),
   get: jest.fn(),
 };
+
+describe('orderWorkflowEntriesByDependencies', () => {
+  const entry = (fileName: string) => ({ fileName, yaml: `name: ${fileName}` });
+
+  it('installs transitive dependencies before their dependents', () => {
+    const ordered = orderWorkflowEntriesByDependencies(
+      [entry('enrich.yaml'), entry('catalog.yaml'), entry('cross-link.yaml')],
+      {
+        'enrich.yaml': ['cross-link'],
+        'cross-link.yaml': ['catalog.yaml'],
+      }
+    );
+
+    expect(ordered.map(({ fileName }) => fileName)).toEqual([
+      'catalog.yaml',
+      'cross-link.yaml',
+      'enrich.yaml',
+    ]);
+  });
+
+  it('preserves archive order for independent workflows', () => {
+    const ordered = orderWorkflowEntriesByDependencies([entry('b.yaml'), entry('a.yaml')]);
+
+    expect(ordered.map(({ fileName }) => fileName)).toEqual(['b.yaml', 'a.yaml']);
+  });
+
+  it('rejects a dependency on a missing workflow', () => {
+    expect(() =>
+      orderWorkflowEntriesByDependencies([entry('enrich.yaml')], {
+        'enrich.yaml': ['missing.yaml'],
+      })
+    ).toThrow('missing asset "missing.yaml"');
+  });
+
+  it('rejects dependency cycles with the cycle chain', () => {
+    expect(() =>
+      orderWorkflowEntriesByDependencies([entry('a.yaml'), entry('b.yaml')], {
+        'a.yaml': ['b.yaml'],
+        'b.yaml': ['a.yaml'],
+      })
+    ).toThrow('a.yaml -> b.yaml -> a.yaml');
+  });
+
+  it('rejects dependency declarations for missing owners', () => {
+    expect(() =>
+      orderWorkflowEntriesByDependencies([entry('catalog.yaml')], {
+        'enrich.yaml': ['catalog.yaml'],
+      })
+    ).toThrow('dependencies declared for missing asset "enrich.yaml"');
+  });
+});
 
 describe('getFleetPackageWorkflowId', () => {
   it('normalizes package names with underscores for workflow id validation', () => {
@@ -407,6 +459,50 @@ describe('stepInstallWorkflowAssets', () => {
       ),
     },
     ...overrides,
+  });
+
+  it('installs dependency workflows before dependents even when archive order is reversed', async () => {
+    const upstreamFile = 'catalog.yaml';
+    const downstreamFile = 'enrich.yaml';
+    const context = createContext({
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+          workflows: {
+            default_enabled: true,
+            dependencies: { [downstreamFile]: [upstreamFile] },
+          },
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${downstreamFile}`,
+              Buffer.from('name: enrich\nenabled: false\nsteps: []'),
+            ],
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${upstreamFile}`,
+              Buffer.from('name: catalog\nenabled: false\nsteps: []'),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ id: 'fleet-default-test-package-catalog' }),
+      spaceId,
+      expect.anything()
+    );
+    expect(workflowsManagementSetupMock.management.createWorkflow).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ id: 'fleet-default-test-package-enrich' }),
+      spaceId,
+      expect.anything()
+    );
   });
 
   it('creates workflow assets when request context is missing', async () => {
