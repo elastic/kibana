@@ -605,6 +605,12 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
+  // Column ids of the metric columns as they live inside the trendline layer. They differ from the
+  // main layer ids, so any reference into the trendline layer (e.g. a terms breakdown `orderBy`)
+  // must use these to resolve to a column that actually exists in that layer.
+  const trendlineMetricColumnId = `${ACCESSOR}_trendline`;
+  const trendlineSecondaryColumnId = `${getAccessorName('secondary')}_trendlineX0`;
+
   if (trendLineLayer) {
     trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
   }
@@ -624,25 +630,36 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
         drop_partial_intervals: false,
       })
     );
-    addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
+    addLayerColumn(trendLineLayer, trendlineMetricColumnId, newPrimaryColumns);
   }
 
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
-    const breakdownColumn = fromBucketLensApiToLensState(
-      layer.breakdown_by as LensApiBucketOperations,
-      [
-        ...newPrimaryColumns.map((col) => ({ column: col, id: getAccessorName('metric') })),
-        ...(newSecondaryColumns ?? []).map((col) => ({
-          column: col,
-          id: getAccessorName('secondary'),
-        })),
-      ]
+    const breakdownApiColumn = layer.breakdown_by as LensApiBucketOperations;
+
+    // A metric `rank_by.metric_index` resolves against this list, so the metric ids must match the
+    // ids of the metric columns in the layer the breakdown belongs to (main vs. trendline). Each
+    // call returns a fresh column so the two layers never share one mutable object.
+    const buildBreakdownColumn = (metricId: string, secondaryId: string) =>
+      fromBucketLensApiToLensState(breakdownApiColumn, [
+        ...newPrimaryColumns.map((column) => ({ column, id: metricId })),
+        ...(newSecondaryColumns ?? []).map((column) => ({ column, id: secondaryId })),
+      ]);
+
+    addLayerColumn(
+      defaultLayer,
+      columnName,
+      buildBreakdownColumn(getAccessorName('metric'), getAccessorName('secondary')),
+      true
     );
-    addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
 
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, breakdownColumn, true);
+      addLayerColumn(
+        trendLineLayer,
+        `${columnName}_trendline`,
+        buildBreakdownColumn(trendlineMetricColumnId, trendlineSecondaryColumnId),
+        true
+      );
     }
   }
 
@@ -650,7 +667,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
     const columnName = getAccessorName('secondary');
     addLayerColumn(defaultLayer, columnName, newSecondaryColumns);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newSecondaryColumns, false, 'X0');
+      addLayerColumn(trendLineLayer, trendlineSecondaryColumnId, newSecondaryColumns);
     }
   }
 
@@ -660,7 +677,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newColumn, false, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendlineX0`, newColumn, false);
     }
   }
 

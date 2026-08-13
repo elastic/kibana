@@ -8,9 +8,6 @@
 import {
   EuiButtonIcon,
   EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiToolTip,
   type EuiContextMenuPanelDescriptor,
@@ -21,8 +18,6 @@ import { css } from '@emotion/react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { ActionPolicySnoozeForm, formatSnoozeDate } from './action_policy_snooze_form';
-import { isSnoozed } from './is_snoozed';
 
 interface Props {
   policy: ActionPolicyResponse;
@@ -33,8 +28,6 @@ interface Props {
   onEnable?: (id: string) => void;
   onDisable?: (id: string) => void;
   isStateLoading?: boolean;
-  onSnooze: (id: string, snoozedUntil: string) => void;
-  onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
   isDisabled?: boolean;
   'data-test-subj'?: string;
@@ -49,8 +42,6 @@ export const ActionPolicyActionsMenu = ({
   onEnable,
   onDisable,
   isStateLoading = false,
-  onSnooze,
-  onCancelSnooze,
   onUpdateApiKey,
   isDisabled = false,
   'data-test-subj': dataTestSubj,
@@ -62,28 +53,7 @@ export const ActionPolicyActionsMenu = ({
   const togglePopover = () => setIsPopoverOpen((prev) => !prev);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const snoozed = isSnoozed(policy.snoozedUntil);
-
-  const snoozeItem = policy.enabled
-    ? [
-        {
-          name: snoozed
-            ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.snoozedUntil', {
-                defaultMessage: 'Snoozed until {date}',
-                values: { date: formatSnoozeDate(policy.snoozedUntil!) },
-              })
-            : i18n.translate('xpack.alertingV2.actionPoliciesList.action.snooze', {
-                defaultMessage: 'Snooze',
-              }),
-          icon: 'bellSlash',
-          panel: 1,
-        },
-      ]
-    : [];
-
   const primaryItems = [
-    ...snoozeItem,
-    ...(snoozeItem.length > 0 ? [{ isSeparator: true as const }] : []),
     ...(onViewDetails
       ? [
           {
@@ -170,52 +140,7 @@ export const ActionPolicyActionsMenu = ({
     },
   ];
 
-  const panels: EuiContextMenuPanelDescriptor[] = [
-    { id: 0, items: primaryItems },
-    {
-      id: 1,
-      title: (
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              type="bellSlash"
-              aria-label={i18n.translate(
-                'xpack.alertingV2.actionPoliciesList.action.snoozeNotifications.ariaLabel',
-                { defaultMessage: 'Snooze notifications' }
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.alertingV2.actionPoliciesList.action.snoozeNotifications', {
-              defaultMessage: 'Snooze notifications',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      width: 320,
-      content: (
-        <div
-          css={css`
-            padding: ${euiTheme.size.m};
-            padding-top: ${euiTheme.size.s};
-          `}
-        >
-          <ActionPolicySnoozeForm
-            isSnoozed={snoozed}
-            showTitle={false}
-            onApplySnooze={(snoozedUntil) => {
-              onSnooze(policy.id, snoozedUntil);
-              closePopover();
-            }}
-            onCancelSnooze={() => {
-              onCancelSnooze(policy.id);
-              closePopover();
-            }}
-          />
-        </div>
-      ),
-    },
-  ];
+  const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items: primaryItems }];
 
   return (
     <EuiPopover
@@ -228,7 +153,7 @@ export const ActionPolicyActionsMenu = ({
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             color="text"
             aria-label={i18n.translate('xpack.alertingV2.actionPoliciesList.action.more', {
               defaultMessage: 'More actions',

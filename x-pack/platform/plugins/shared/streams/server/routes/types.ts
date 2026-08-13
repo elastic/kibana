@@ -34,7 +34,7 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   attachmentClient: AttachmentClient;
   streamsClient: StreamsClient;
-  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClientContract>;
+  getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
   inferenceClient: InferenceClient;
   contentClient: ContentClient;
   licensing: LicensingPluginStart;
