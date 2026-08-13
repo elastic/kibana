@@ -152,6 +152,32 @@ describe('AbuseIPDBConnector', () => {
         ipAddress: '1.2.3.4',
         abuseConfidenceScore: 100,
       });
+      const body = mockClient.post.mock.calls[0][1] as URLSearchParams;
+      expect(body.get('comment')).toBe('Malicious activity detected');
+    });
+
+    it('should omit comment from the request body when unset', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { data: { ipAddress: '1.2.3.4', abuseConfidenceScore: 50 } },
+      });
+
+      await AbuseIPDBConnector.actions.reportIp.handler(mockContext, {
+        ip: '1.2.3.4',
+        categories: [18],
+      });
+
+      const body = mockClient.post.mock.calls[0][1] as URLSearchParams;
+      expect(body.has('comment')).toBe(false);
+    });
+
+    it('should reject an empty comment string at the schema boundary', () => {
+      expect(() =>
+        AbuseIPDBConnector.actions.reportIp.input.parse({
+          ip: '1.2.3.4',
+          categories: [18],
+          comment: '',
+        })
+      ).toThrow();
     });
   });
 
@@ -276,10 +302,10 @@ describe('AbuseIPDBConnector', () => {
 
     it('should default confidenceMinimum to 100 and limit to 10 when unset', async () => {
       mockClient.get.mockResolvedValue({
-        data: { meta: { generatedAt: '2024-06-01T00:00:00+00:00' }, data: [] },
+        data: { meta: {}, data: [] },
       });
 
-      await AbuseIPDBConnector.actions.getBlacklist.handler(mockContext, {});
+      const result = await AbuseIPDBConnector.actions.getBlacklist.handler(mockContext, {});
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.abuseipdb.com/api/v2/blacklist', {
         params: {
@@ -287,6 +313,18 @@ describe('AbuseIPDBConnector', () => {
           limit: 10,
         },
       });
+      expect(result).toEqual({ generatedAt: null, ips: [] });
+    });
+
+    it('should coerce workflow string inputs for confidenceMinimum and limit', () => {
+      const parsed = AbuseIPDBConnector.actions.getBlacklist.input.safeParse({
+        confidenceMinimum: '90',
+        limit: '10',
+      });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data).toEqual({ confidenceMinimum: 90, limit: 10 });
+      }
     });
   });
 

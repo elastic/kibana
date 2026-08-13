@@ -20,6 +20,8 @@ const ABUSEIPDB_API = 'https://api.abuseipdb.com/api/v2';
 /** AbuseIPDB accepts IPv4 and IPv6 on check/report endpoints. */
 const IpAddressSchema = z.union([z.ipv4(), z.ipv6()]);
 
+const MaxAgeInDaysSchema = z.coerce.number().int().min(1).max(365);
+
 const MAX_BLACKLIST_LIMIT = 10_000;
 const MAX_REPORT_CATEGORIES = 30;
 const MAX_COMMENT_LENGTH = 1024;
@@ -49,12 +51,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
           ipAddress: IpAddressSchema.describe(
             'IPv4 or IPv6 address to check. Example: 8.8.8.8 or 2001:4860:4860::8888.'
           ),
-          maxAgeInDays: z
-            .number()
-            .int()
-            .min(1)
-            .max(365)
-            .optional()
+          maxAgeInDays: MaxAgeInDaysSchema.optional()
             .default(90)
             .describe('Only consider reports from the last N days (1-365). Defaults to 90.'),
         })
@@ -86,7 +83,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
         z.object({
           ip: IpAddressSchema.describe('IPv4 or IPv6 address to report.'),
           categories: z
-            .array(z.number().int().min(1).max(99))
+            .array(z.coerce.number().int().min(1).max(99))
             .min(1)
             .max(MAX_REPORT_CATEGORIES)
             .describe(
@@ -94,6 +91,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             ),
           comment: z
             .string()
+            .min(1)
             .max(MAX_COMMENT_LENGTH)
             .optional()
             .describe('Optional comment describing the observed abuse (max 1024 characters).'),
@@ -105,7 +103,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
           new URLSearchParams({
             ip: input.ip,
             categories: input.categories.join(','),
-            ...(input.comment ? { comment: input.comment } : {}),
+            ...(input.comment !== undefined ? { comment: input.comment } : {}),
           }),
           {
             headers: {
@@ -163,12 +161,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             .min(1)
             .max(64)
             .describe('Network in CIDR notation. Example: 198.51.100.0/24.'),
-          maxAgeInDays: z
-            .number()
-            .int()
-            .min(1)
-            .max(365)
-            .optional()
+          maxAgeInDays: MaxAgeInDaysSchema.optional()
             .default(30)
             .describe('Only consider reports from the last N days (1-365). Defaults to 30.'),
         })
@@ -194,7 +187,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
         'Fetch the AbuseIPDB blacklist feed of most-reported IPs at or above a confidence threshold. Use for blocklist generation and enrichment feeds. Prefer confidenceMinimum 75-100 for denial-of-service style blocking.',
       input: lazySchema(() =>
         z.object({
-          confidenceMinimum: z
+          confidenceMinimum: z.coerce
             .number()
             .int()
             .min(25)
@@ -204,7 +197,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
             .describe(
               'Minimum abuse confidence score (25-100). Defaults to 100. AbuseIPDB recommends 75-100 for most deny-list uses.'
             ),
-          limit: z
+          limit: z.coerce
             .number()
             .int()
             .min(1)
@@ -224,7 +217,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
           },
         });
         return {
-          generatedAt: response.data.meta?.generatedAt,
+          generatedAt: response.data.meta?.generatedAt ?? null,
           ips: response.data.data ?? [],
         };
       },

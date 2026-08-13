@@ -32,13 +32,13 @@ Check IP
     - **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 90).
 
 Report IP
-:   Report an abusive IP address to AbuseIPDB.  
+:   Report an IP address to AbuseIPDB.  
     - **IP** (required): IPv4 or IPv6 address to report.  
     - **Categories** (required): Array of abuse category IDs (1-30 entries).  
-    - **Comment** (optional): Additional details about the abuse (max 1024 characters).  
+    - **Comment** (optional): Additional details about the observed activity (max 1024 characters).  
 
 Get IP Info
-:   Get detailed (verbose) information about an IP address including geolocation, whitelist flag, and domain.  
+:   Get detailed (verbose) information about an IP address including geolocation, allowlist status (`isWhitelisted`), and domain.  
     - **IP Address** (required): IPv4 or IPv6 address to look up.  
 
 Bulk Check
@@ -47,7 +47,7 @@ Bulk Check
     - **Max Age in Days** (optional): Maximum age of reports in days (1-365, default 30).  
 
 Get Blacklist
-:   Fetch the most-reported IPs from the AbuseIPDB blacklist feed for blocklist generation or enrichment. Prefer a high confidence minimum (75-100) for deny-list use.  
+:   Fetch the most-reported IPs from the AbuseIPDB `/blacklist` endpoint for blocklist generation or enrichment. Prefer a high confidence minimum (75-100) for deny-list use.  
     - **Confidence Minimum** (optional): Minimum abuse confidence score (25-100, default 100).  
     - **Limit** (optional): Maximum number of IPs to return (1-10000, default 10). Defaults low so workflow execution outputs stay small; raise explicitly for larger feeds. AbuseIPDB may truncate further based on subscription tier.  
 
