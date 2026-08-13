@@ -134,7 +134,7 @@ describe('getTransformOut', () => {
     expect(result.title).toEqual('Attributes title');
   });
 
-  it('down-converts GA duration units when GA schemas are disabled', () => {
+  it('emits GA duration units', () => {
     const builder = new LensConfigBuilder(undefined, true);
     const toAPIFormatSpy = jest.spyOn(builder, 'toAPIFormat').mockReturnValue({
       title: 'Attributes title',
@@ -153,37 +153,7 @@ describe('getTransformOut', () => {
       references: [],
     };
 
-    const result = transformOut(storedState, [], undefined, undefined, false);
-
-    expect(getDurationFormat(result)).toEqual({
-      type: 'duration',
-      from: 'minutes',
-      to: 'humanize',
-    });
-
-    toAPIFormatSpy.mockRestore();
-  });
-
-  it('preserves GA duration units when GA schemas are active', () => {
-    const builder = new LensConfigBuilder(undefined, true);
-    const toAPIFormatSpy = jest.spyOn(builder, 'toAPIFormat').mockReturnValue({
-      title: 'Attributes title',
-      description: '',
-      type: 'metric',
-      layers: [
-        {
-          metrics: [{ format: { type: 'duration', from: 'min', to: 'auto-approximate' } }],
-        },
-      ],
-    } as unknown as ReturnType<LensConfigBuilder['toAPIFormat']>);
-    const transformOut = getTransformOut(builder, transformDrilldownsOut, true);
-
-    const storedState: LensByValueSerializedState = {
-      attributes: simpleMetricAttributes,
-      references: [],
-    };
-
-    const result = transformOut(storedState, [], undefined, undefined, true);
+    const result = transformOut(storedState, []);
 
     expect(getDurationFormat(result)).toEqual({
       type: 'duration',
