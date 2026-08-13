@@ -32,6 +32,13 @@ All scroll methods accept `behavior?: ScrollBehavior` option for 'auto' (instant
 ### Utility Methods
 - `isAtBottomOfPage(container?): boolean` - Check if scrolled to bottom (with 1px tolerance)
 
+## Application breakpoints
+
+`useCurrentChromeApplicationBreakpoint()` observes the content width of the Chrome application area
+and returns the corresponding EUI breakpoint. It returns `undefined` when the application container
+is unavailable. `useIsWithinChromeApplicationBreakpoints()` checks the current breakpoint against a
+given set.
+
 ## See also
 
 - [Layout overview](../layout_overview.mdx) - Architecture and data flow

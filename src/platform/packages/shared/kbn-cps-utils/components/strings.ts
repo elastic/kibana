@@ -10,14 +10,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const strings = {
-  allButtonLabel: () =>
-    i18n.translate('cpsUtils.projectPicker.allButtonLabel', {
+  get allButtonLabel() {
+    return i18n.translate('cpsUtils.projectPicker.allButtonLabel', {
       defaultMessage: 'All',
-    }),
-  getProjectPickerButtonAriaLabel: () =>
-    i18n.translate('cpsUtils.projectPicker.projectPickerButtonLabel', {
+    });
+  },
+  get projectPickerButtonAriaLabel() {
+    return i18n.translate('cpsUtils.projectPicker.projectPickerButtonLabel', {
       defaultMessage: 'Cross-project search project picker',
-    }),
+    });
+  },
   getProjectPickerButtonLabel: (numberOfProjects: number, totalProjects: number) =>
     i18n.translate('cpsUtils.projectPicker.originProjectTooltip', {
       defaultMessage:

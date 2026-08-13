@@ -18,6 +18,8 @@ import { serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { snExternalServiceConfig } from './config';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ServiceNowITSMIncident } from '@kbn/connector-schemas/servicenow_itsm';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios', () => ({
@@ -1450,7 +1452,7 @@ describe('ServiceNow service', () => {
       });
 
       test('it should throw an error when there is an import set api error', async () => {
-        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
+        requestMock.mockImplementation(() => ({ status: 200, data: getImportSetAPIError() }));
         await expect(
           service.createIncident({
             incident: {
@@ -1459,8 +1461,23 @@ describe('ServiceNow service', () => {
             } as ServiceNowITSMIncident,
           })
         ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred while importing the incident'
+          '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred while importing the incident [status=200] [method=post] [endpoint=import_set]'
         );
+      });
+
+      test('tags Import Set body errors as user errors', async () => {
+        requestMock.mockImplementation(() => ({ status: 200, data: getImportSetAPIError() }));
+        try {
+          await service.createIncident({
+            incident: {
+              short_description: 'title',
+              description: 'desc',
+            } as ServiceNowITSMIncident,
+          });
+          throw new Error('expected createIncident to throw');
+        } catch (err) {
+          expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        }
       });
 
       test('throws error for additional_fields on deprecated connectors', async () => {
@@ -1521,15 +1538,28 @@ describe('ServiceNow service', () => {
       });
 
       test('it should throw an error when there is an import set api error', async () => {
-        requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
+        requestMock.mockImplementation(() => ({ status: 200, data: getImportSetAPIError() }));
         await expect(
           service.updateIncident({
             incidentId: '1',
             incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
           })
         ).rejects.toThrow(
-          '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred while importing the incident'
+          '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred while importing the incident [status=200] [method=post] [endpoint=import_set]'
         );
+      });
+
+      test('tags Import Set body errors as user errors', async () => {
+        requestMock.mockImplementation(() => ({ status: 200, data: getImportSetAPIError() }));
+        try {
+          await service.updateIncident({
+            incidentId: '1',
+            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+          });
+          throw new Error('expected updateIncident to throw');
+        } catch (err) {
+          expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+        }
       });
 
       test('it should throw an error for additional_fields on deprecated connectors', async () => {

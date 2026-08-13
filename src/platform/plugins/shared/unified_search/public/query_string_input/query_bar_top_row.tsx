@@ -73,6 +73,7 @@ import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types'
 import { shallowEqual } from '../utils/shallow_equal';
 import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
+import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
 /** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
 const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
@@ -163,7 +164,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onChange: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onSubmit: (
+    payload: { dateRange: TimeRange; query?: Query | QT },
+    trigger?: QuerySubmitTrigger
+  ) => void;
   onSendToBackground: (payload: { dateRange: TimeRange; query?: Query | QT }) => Promise<void>;
   onCancel?: () => void;
   onDraftChange?: (draft: UnifiedSearchDraft | undefined) => void;
@@ -357,7 +361,7 @@ export const QueryBarTopRow = React.memo(
     const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
     const [dateRangePickerSettings, setDateRangePickerSettings] = useState<DateRangePickerSettings>(
       {
-        roundRelativeTime: true,
+        roundRelativeTime: false,
         timePrecision: 'none',
       }
     );
@@ -516,12 +520,15 @@ export const QueryBarTopRow = React.memo(
     });
 
     const onSubmit = useCallback(
-      ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
+      (
+        { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
+        trigger?: QuerySubmitTrigger
+      ) => {
         if (timeHistory) {
           timeHistory.add(dateRange);
         }
 
-        propsOnSubmit({ query, dateRange });
+        propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
     );
@@ -532,10 +539,13 @@ export const QueryBarTopRow = React.memo(
           persistedLog.add(queryRef.current.query);
         }
         event.preventDefault();
-        onSubmit({
-          query: queryRef.current,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query: queryRef.current,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [persistedLog, onSubmit]
     );
@@ -605,7 +615,7 @@ export const QueryBarTopRow = React.memo(
         };
 
         if (isQuickSelection) {
-          onSubmit(retVal);
+          onSubmit(retVal, QuerySubmitTrigger.TIME_FILTER);
         } else {
           propsOnChange(retVal);
         }
@@ -627,10 +637,13 @@ export const QueryBarTopRow = React.memo(
       ({ start, end, isInvalid }: DateRangePickerOnChangeProps) => {
         setIsDateRangeInvalid(isInvalid);
         if (!isInvalid) {
-          onSubmit({
-            query: queryRef.current,
-            dateRange: { from: start, to: end },
-          });
+          onSubmit(
+            {
+              query: queryRef.current,
+              dateRange: { from: start, to: end },
+            },
+            QuerySubmitTrigger.TIME_FILTER
+          );
         }
       },
       [onSubmit]
@@ -665,12 +678,23 @@ export const QueryBarTopRow = React.memo(
       return () => subscription.unsubscribe();
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
 
+    // Visualize-style consumers request auto-refresh-only mode via
+    // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
+    // only the auto-refresh play/pause button operable.
+    const isAutoRefreshOnly = showAutoRefreshOnly && !showDatePicker;
+
     const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
       () =>
         propsOnRefreshChange
-          ? { ...dateRangePickerSettings, autoRefresh }
+          ? {
+              ...dateRangePickerSettings,
+              // In auto-refresh-only mode the settings panel (the only place to
+              // enable auto-refresh) is unreachable behind readOnly, so force the
+              // play/pause button visible; paused state still follows props.
+              autoRefresh: isAutoRefreshOnly ? { ...autoRefresh, isEnabled: true } : autoRefresh,
+            }
           : dateRangePickerSettings,
-      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange]
+      [dateRangePickerSettings, autoRefresh, propsOnRefreshChange, isAutoRefreshOnly]
     );
 
     const onDateRangePickerSettingsChange = useCallback(
@@ -708,10 +732,13 @@ export const QueryBarTopRow = React.memo(
 
     const onInputSubmit = useCallback(
       (query: Query) => {
-        onSubmit({
-          query,
-          dateRange: dateRangeRef.current,
-        });
+        onSubmit(
+          {
+            query,
+            dateRange: dateRangeRef.current,
+          },
+          QuerySubmitTrigger.QUERY_BAR_SUBMIT
+        );
       },
       [onSubmit]
     );
@@ -859,28 +886,24 @@ export const QueryBarTopRow = React.memo(
       } else {
         const noTimeFieldNameDisabled =
           typeof isDisabled === 'object' && isDisabled.display !== undefined;
-        // Visualize-style consumers request auto-refresh-only mode via
-        // `showAutoRefreshOnly` + `!showDatePicker`. The legacy picker rendered a
-        // read-only date display while still letting users operate the auto-refresh
-        // controls. The new picker has no read-only mode, so we disable it here —
-        // but that also removes access to auto-refresh, a temporary regression.
-        // TODO: add a `readOnly` prop to the new picker so auto-refresh stays
-        // operable, and use it instead of `disabled` for this case.
-        const autoRefreshOnlyDisabled = Boolean(showAutoRefreshOnly && !showDatePicker);
-        const pickerDisabled =
-          Boolean(props.isDisabled) || noTimeFieldNameDisabled || autoRefreshOnlyDisabled;
+        // In auto-refresh-only mode (`isAutoRefreshOnly`) the picker renders
+        // readOnly — like the legacy picker's read-only date display, no time
+        // filtering is possible but the auto-refresh play/pause button (which
+        // ignores `readOnly`, unlike `disabled`) stays operable.
+        const pickerDisabled = Boolean(props.isDisabled) || noTimeFieldNameDisabled;
         datePicker = (
           <>
-            {(noTimeFieldNameDisabled || autoRefreshOnlyDisabled) && (
-              // Hidden sibling so FTR tests can detect the disabled state via
-              // testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'), matching
-              // the span the legacy picker renders inside its isDisabled.display node.
+            {(noTimeFieldNameDisabled || isAutoRefreshOnly) && (
+              // Hidden sibling so FTR tests can detect that the time filter is off
+              // via testSubjects.existOrFail('kbnQueryBar-datePicker-disabled'),
+              // matching the span the legacy picker renders inside its
+              // isDisabled.display node.
               <span data-test-subj="kbnQueryBar-datePicker-disabled" style={{ display: 'none' }} />
             )}
             <DateRangePicker
               className="kbnQueryBar__datePicker"
               value={
-                noTimeFieldNameDisabled || autoRefreshOnlyDisabled
+                noTimeFieldNameDisabled || isAutoRefreshOnly
                   ? strings.getDisabledDatePickerLabel()
                   : dateRangeValue
               }
@@ -888,6 +911,7 @@ export const QueryBarTopRow = React.memo(
               onInputChange={onDateRangeInputChange}
               isInvalid={isDateRangeInvalid}
               disabled={pickerDisabled}
+              readOnly={isAutoRefreshOnly}
               width="auto"
               compressed
               collapsed={isMobile || isQueryInputFocused}

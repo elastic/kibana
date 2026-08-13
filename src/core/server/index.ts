@@ -238,6 +238,12 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  HttpSelfFetchHeaders,
+  HttpSelfFetchOptions,
+  HttpSelfFetchQuery,
+  HttpSelfResponse,
+  HttpSelfScopedClient,
+  HttpSelfService,
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
@@ -262,6 +268,9 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
+  PluginAppenderConfigType,
+  OtelAppenderPluginConfig,
+  OtelAttributesTransform,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
 export type { Ecs, EcsEvent } from '@elastic/ecs';

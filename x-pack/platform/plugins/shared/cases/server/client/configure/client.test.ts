@@ -26,6 +26,7 @@ import {
   createMockConnectorType,
   createMockConnectorFindResult,
 } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { ConfigSchema } from '../../config';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -1211,6 +1212,196 @@ describe('client', () => {
           );
         });
       });
+
+      describe('global field definitions', () => {
+        beforeEach(() => {
+          // Reset config so mutations in one test don't leak into the next.
+          clientArgs.config = ConfigSchema.validate({});
+        });
+
+        const baseGetResult = {
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+            owner: 'securitySolutionFixture',
+            templates: [],
+          },
+          version: 'test-version',
+        };
+
+        const basePatchResult = {
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          namespaces: ['default'],
+          references: [],
+          attributes: {
+            customFields: [
+              {
+                key: 'my_text',
+                label: 'My Text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+            templates: [],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            updated_at: '2019-11-25T21:54:48.952Z',
+            updated_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            observableTypes: [],
+          },
+        };
+
+        it('does not call fieldDefinitionsService when templates flag is disabled', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.getFieldDefinitions
+          ).not.toHaveBeenCalled();
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).not.toHaveBeenCalled();
+        });
+
+        it('creates a global field definition for a new custom field when templates flag is enabled', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [],
+            total: 0,
+          });
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockResolvedValue(
+            {} as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({
+              name: 'my_text',
+              owner: 'securitySolutionFixture',
+              isGlobal: true,
+            })
+          );
+        });
+
+        it('does not create a field definition when a def with the same name already exists', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [
+              {
+                fieldDefinitionId: 'fd-1',
+                name: 'my_text',
+                owner: 'securitySolutionFixture',
+                definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+                isGlobal: true,
+              },
+            ],
+            total: 1,
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).not.toHaveBeenCalled();
+        });
+
+        it('still resolves when createFieldDefinition fails (error isolation)', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+            fieldDefinitions: [],
+            total: 0,
+          });
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValue(
+            new Error('SO write error')
+          );
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                customFields: [
+                  {
+                    key: 'my_text',
+                    label: 'My Text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).resolves.not.toThrow();
+        });
+      });
     });
   });
 
@@ -1615,6 +1806,149 @@ describe('client', () => {
             'Failed to create case configuration: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
+      });
+    });
+
+    describe('global field definitions', () => {
+      beforeEach(() => {
+        // Reset config so mutations in one test don't leak into the next.
+        clientArgs.config = ConfigSchema.validate({});
+      });
+
+      const validPostResult = {
+        id: 'test-id',
+        type: 'cases-configure',
+        version: 'test-version',
+        attributes: {
+          connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+          closure_type: 'close-by-user',
+          owner: 'securitySolutionFixture',
+          customFields: [
+            { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+          ],
+          templates: [],
+          observableTypes: [],
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
+          updated_at: null,
+          updated_by: null,
+        },
+      };
+
+      beforeEach(() => {
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [],
+        } as never);
+        // @ts-ignore: partial SO shape is sufficient for the test
+        clientArgs.services.caseConfigureService.post.mockResolvedValue(validPostResult as never);
+      });
+
+      it('does not call fieldDefinitionsService when templates flag is disabled', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitions
+        ).not.toHaveBeenCalled();
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).not.toHaveBeenCalled();
+      });
+
+      it('creates a global field definition for a new custom field when templates flag is enabled', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [],
+          total: 0,
+        });
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockResolvedValue(
+          {} as never
+        );
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'my_text',
+            owner: 'securitySolutionFixture',
+            isGlobal: true,
+          })
+        );
+      });
+
+      it('does not create a field definition when one with the same name already exists', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [
+            {
+              fieldDefinitionId: 'fd-1',
+              name: 'my_text',
+              owner: 'securitySolutionFixture',
+              definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+              isGlobal: true,
+            },
+          ],
+          total: 1,
+        });
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).not.toHaveBeenCalled();
+      });
+
+      it('still resolves when createFieldDefinition fails (error isolation)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+          fieldDefinitions: [],
+          total: 0,
+        });
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValue(
+          new Error('SO write error')
+        );
+
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).resolves.not.toThrow();
       });
     });
   });

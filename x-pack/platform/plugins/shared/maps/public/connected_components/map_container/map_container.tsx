@@ -8,22 +8,23 @@
 import '../../_index.scss';
 import React, { Component } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import type { Observable } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
-import { isScreenshotMode } from '../../kibana_services';
+import { getIsDarkMode, getTheme, isScreenshotMode } from '../../kibana_services';
 import type { RawValue } from '../../../common/constants';
 import { RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
@@ -41,6 +42,7 @@ export interface Props {
   onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   isMapLoading: boolean;
   cancelAllInFlightRequests: () => void;
+  reload: () => void;
   exitFullScreen: () => void;
   flyoutDisplay: FLYOUT_STATE;
   isFullScreen: boolean;
@@ -71,9 +73,86 @@ interface State {
 
 const mapWrapperStyles = css({ position: 'relative' });
 
+// SVG paths for the zoom in/out controls, based off of the EUI glyphs plusInCircleFilled and
+// minusInCircleFilled. Rendered as a background-image so the fill color can be applied reactively.
+const ZOOM_IN_ICON_PATH =
+  'M8,7 L8,3.5 C8,3.22385763 7.77614237,3 7.5,3 C7.22385763,3 7,3.22385763 7,3.5 L7,7 L3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L7,8 L7,11.5 C7,11.7761424 7.22385763,12 7.5,12 C7.77614237,12 8,11.7761424 8,11.5 L8,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L8,7 Z M7.5,15 C3.35786438,15 0,11.6421356 0,7.5 C0,3.35786438 3.35786438,0 7.5,0 C11.6421356,0 15,3.35786438 15,7.5 C15,11.6421356 11.6421356,15 7.5,15 Z';
+const ZOOM_OUT_ICON_PATH =
+  'M7.5,0 C11.6355882,0 15,3.36441176 15,7.5 C15,11.6355882 11.6355882,15 7.5,15 C3.36441176,15 0,11.6355882 0,7.5 C0,3.36441176 3.36441176,0 7.5,0 Z M3.5,7 C3.22385763,7 3,7.22385763 3,7.5 C3,7.77614237 3.22385763,8 3.5,8 L11.5,8 C11.7761424,8 12,7.77614237 12,7.5 C12,7.22385763 11.7761424,7 11.5,7 L3.5,7 Z';
+
+const zoomIconBackgroundImage = (path: string, color: string) =>
+  `url("data:image/svg+xml,${encodeURIComponent(
+    `<svg width='15px' height='15px' viewBox='0 0 15 15' version='1.1' xmlns='http://www.w3.org/2000/svg'><path fill='${color}' d='${path}' /></svg>`
+  )}") !important`;
+
+/**
+ * Applies theme-dependent colors to the imperatively-rendered MapLibre navigation control (zoom
+ * buttons). These controls live outside React, so they are styled through a Global stylesheet that
+ * reads the color mode via `useEuiTheme`, allowing them to follow reload-less light/dark switches.
+ */
+function MapControlsThemeStyles() {
+  const { euiTheme } = useEuiTheme();
+  const iconColor = euiTheme.colors.textParagraph;
+  return (
+    <Global
+      styles={css({
+        '.mapContainer': {
+          '.maplibregl-ctrl-group:not(:empty)': {
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
+          },
+          '.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon': {
+            backgroundImage: zoomIconBackgroundImage(ZOOM_IN_ICON_PATH, iconColor),
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+          },
+          '.maplibregl-ctrl-zoom-out .maplibregl-ctrl-icon': {
+            backgroundImage: zoomIconBackgroundImage(ZOOM_OUT_ICON_PATH, iconColor),
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+          },
+        },
+        // The layer table-of-contents entries live in the right-side overlay
+        // (a sibling of `.mapContainer`), so their divider and state background
+        // colors are themed here to react to reload-less light/dark switches.
+        '.mapWidgetOverlay .mapTocEntry': {
+          borderBottomColor: euiTheme.border.color,
+        },
+        '.mapWidgetOverlay .mapTocEntry-isSelected': {
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        },
+        '.mapWidgetOverlay .mapTocEntry-isDraggingOver': {
+          backgroundColor: euiTheme.colors.emptyShade,
+        },
+        '.mapWidgetOverlay .mapTocEntry-isCombineLayer': {
+          backgroundColor: euiTheme.colors.backgroundBaseSuccess,
+        },
+        '.mapWidgetOverlay .mapTocEntry-isInEditingMode': {
+          backgroundColor: `${euiTheme.colors.backgroundBasePrimary} !important`,
+        },
+        '.mapWidgetOverlay .mapLayerControl': {
+          borderTopColor: euiTheme.border.color,
+        },
+        '.mapWidgetOverlay .mapLayerControl__addLayerButton.euiButton-isDisabled': {
+          backgroundColor: `${euiTheme.colors.lightShade} !important`,
+        },
+        '.mapWidgetOverlay .mapLayerToc-droppable-isCombining': {
+          backgroundColor: `${euiTheme.colors.emptyShade} !important`,
+        },
+        '.mapWidgetOverlay .mapTocEntry__detailsToggleButton': {
+          backgroundColor: euiTheme.colors.emptyShade,
+          borderColor: euiTheme.border.color,
+          color: euiTheme.colors.textParagraph,
+        },
+      })}
+    />
+  );
+}
+
 export class MapContainer extends Component<Props, State> {
   private _isMounted: boolean = false;
   private _isInitalLoadRenderTimerStarted: boolean = false;
+  private _prevIsDarkMode: boolean = getIsDarkMode();
+  private _themeSubscription?: Subscription;
 
   state: State = {
     isInitialLoadRenderTimeoutComplete: false,
@@ -86,6 +165,16 @@ export class MapContainer extends Component<Props, State> {
     this._isMounted = true;
     this._loadShowFitToBoundsButton();
     this._loadShowTimesliderButton();
+    // Re-sync layers when the color mode changes so theme-dependent layers,
+    // such as the EMS basemap, re-fetch their light/dark styling. Layers whose
+    // data does not depend on the color mode are skipped via '_canSkipSync'.
+    this._themeSubscription = getTheme().theme$.subscribe(({ darkMode }) => {
+      if (darkMode === this._prevIsDarkMode) {
+        return;
+      }
+      this._prevIsDarkMode = darkMode;
+      this.props.reload();
+    });
   }
 
   componentDidUpdate() {
@@ -103,6 +192,7 @@ export class MapContainer extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
+    this._themeSubscription?.unsubscribe();
     this.props.cancelAllInFlightRequests();
   }
 
@@ -180,16 +270,13 @@ export class MapContainer extends Component<Props, State> {
           data-title={this.props.title}
           data-description={this.props.description}
         >
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
               defaultMessage: 'Unable to initialize map',
             })}
-            color="danger"
-            iconType="cross"
-          >
-            <p>{mapInitError}</p>
-          </EuiCallOut>
+            text={mapInitError}
+          />
         </div>
       );
     }
@@ -214,6 +301,7 @@ export class MapContainer extends Component<Props, State> {
           css={mapWrapperStyles}
           style={{ backgroundColor: this.props.settings.backgroundColor }}
         >
+          <MapControlsThemeStyles />
           <MBMap
             addFilters={addFilters}
             getFilterActions={getFilterActions}

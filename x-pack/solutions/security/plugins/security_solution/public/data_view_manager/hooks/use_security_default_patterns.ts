@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { sharedStateSelector } from '../redux/selectors';
 
 interface UseSecurityDefaultPatternsResult {

@@ -13,7 +13,7 @@ import classnames from 'classnames';
 import throttle from 'lodash/throttle';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type YAML from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
@@ -80,6 +80,7 @@ import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -193,8 +194,7 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
-  const isManagedWorkflow = workflow?.managed === true;
-  const isReadOnlyYaml = isExecutionYaml || isManagedWorkflow;
+  const isReadOnlyYaml = useWorkflowEditorReadOnly();
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
@@ -340,25 +340,13 @@ export const WorkflowYAMLEditor = ({
   }, [validationErrors, dispatch]);
 
   // Agent Builder integration for AI-assisted editing
-  const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
+  const { isAgentBuilderAvailable } = useAgentBuilderIntegration({
     editorRef,
     isEditorMounted,
     workflowId: workflow?.id,
     workflowName: workflow?.name ?? workflowDefinition?.name,
     validationErrors,
   });
-
-  const hasAutoOpenedAgentChatRef = useRef(false);
-  const openAgentChatRef = useRef(openAgentChat);
-  openAgentChatRef.current = openAgentChat;
-
-  useEffect(() => {
-    if (!isEditorMounted || !isAgentBuilderAvailable || hasAutoOpenedAgentChatRef.current) {
-      return;
-    }
-    hasAutoOpenedAgentChatRef.current = true;
-    openAgentChatRef.current();
-  }, [isEditorMounted, isAgentBuilderAvailable]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
@@ -685,21 +673,21 @@ export const WorkflowYAMLEditor = ({
         label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
           defaultMessage: 'Collapse all',
         }),
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
       },
       {
         id: 'unfoldAll',
         label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
           defaultMessage: 'Expand all',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
       },
       {
         id: 'find',
         label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
           defaultMessage: 'Find and Replace',
         }),
-        iconType: 'search',
+        iconType: 'magnify',
       },
     ];
     if (isVisualEditorEnabled && onToggleEditorMode) {

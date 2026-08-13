@@ -20,7 +20,7 @@ export const useFetchQueryRuleset = (rulesetId: string, enabled = true) => {
     queryKey: [QUERY_RULES_QUERY_RULESET_FETCH_KEY, rulesetId],
     queryFn: async () => {
       return await http.get<QueryRulesQueryRuleset>(
-        `/internal/search_query_rules/ruleset/${rulesetId}`
+        `/internal/search_query_rules/ruleset/${encodeURIComponent(rulesetId)}`
       );
     },
     retry: false,

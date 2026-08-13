@@ -84,9 +84,20 @@ import type {
   SiemReadinessEventTypes,
   SiemReadinessTelemetryEventsMap,
 } from './events/siem_readiness/types';
+import type { FlyoutV2EventTypes, FlyoutV2TelemetryEventsMap } from './events/flyout_v2/types';
+// Stub: AttackDiscoveryEventTypes + AttackDiscoveryTelemetryEventsMap added
+// in PR3 (purely-additive) so consumers can pass the enum to
+// `telemetryService.reportEvent`. The full telemetry event schema is added
+// in PR5. The map currently allows any payload shape (`Record<string,
+// unknown>`); PR5 tightens it to the real per-event schema. FF-off safe.
+import type {
+  AttackDiscoveryEventTypes,
+  AttackDiscoveryTelemetryEventsMap,
+} from './events/attack_discovery/types';
 
 export * from './events/rule_creation/types';
 export * from './events/app/types';
+export * from './events/attack_discovery/types';
 export * from './events/attacks/types';
 export * from './events/attack_discovery_schedules/types';
 export * from './events/alerts_grouping/types';
@@ -99,6 +110,7 @@ export * from './events/event_log/types';
 export * from './events/preview_rule/types';
 export * from './events/notes/types';
 export * from './events/rule_deprecation/types';
+export * from './events/flyout_v2/types';
 export * from '@kbn/agent-builder-common/telemetry';
 
 export interface TelemetryServiceSetupParams {
@@ -148,10 +160,14 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Ru
   ? AgentBuilderTelemetryEventsMap[T]
   : T extends AttacksEventTypes
   ? AttacksTelemetryEventsMap[T]
+  : T extends AttackDiscoveryEventTypes
+  ? AttackDiscoveryTelemetryEventsMap[T]
   : T extends AttackDiscoverySchedulesEventTypes
   ? AttackDiscoverySchedulesTelemetryEventsMap[T]
   : T extends SiemReadinessEventTypes
   ? SiemReadinessTelemetryEventsMap[T]
+  : T extends FlyoutV2EventTypes
+  ? FlyoutV2TelemetryEventsMap[T]
   : never;
 
 export type TelemetryEventTypes =
@@ -176,5 +192,7 @@ export type TelemetryEventTypes =
   | TrialCompanionEventTypes
   | AgentBuilderEventTypes
   | AttacksEventTypes
+  | AttackDiscoveryEventTypes
   | AttackDiscoverySchedulesEventTypes
-  | SiemReadinessEventTypes;
+  | SiemReadinessEventTypes
+  | FlyoutV2EventTypes;

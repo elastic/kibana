@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { ML_PARTITION_FIELDS, ML_ANOMALY_RESULT_TYPE } from './constants';
 import type { MlKibanaUrlConfig } from './custom_urls';
 import type { criteriaFieldSchema, influencerSchema } from './schemas';
@@ -458,6 +458,6 @@ export type MlAnomalyResultType =
 
 export type AnomalyDateFunction = 'time_of_day' | 'time_of_week';
 
-export type CriteriaField = TypeOf<typeof criteriaFieldSchema>;
+export type CriteriaField = z.output<typeof criteriaFieldSchema>;
 
-export type Influencer = TypeOf<typeof influencerSchema>;
+export type Influencer = z.output<typeof influencerSchema>;

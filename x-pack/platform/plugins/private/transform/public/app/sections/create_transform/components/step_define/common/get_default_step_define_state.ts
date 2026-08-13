@@ -34,5 +34,6 @@ export function getDefaultStepDefineState(searchItems: SearchItems): StepDefineE
     runtimeMappings: undefined,
     runtimeMappingsUpdated: false,
     isRuntimeMappingsEditorEnabled: false,
+    projectRouting: undefined,
   };
 }

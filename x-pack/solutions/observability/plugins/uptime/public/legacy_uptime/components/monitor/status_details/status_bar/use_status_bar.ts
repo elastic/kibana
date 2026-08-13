@@ -6,7 +6,7 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { UptimeRefreshContext } from '../../../../contexts';
 import { useGetUrlParams, useMonitorId } from '../../../../hooks';
 import { monitorLocationsSelector, monitorStatusSelector } from '../../../../state/selectors';

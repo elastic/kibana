@@ -15,7 +15,8 @@ import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { LONG_EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { getLongRunningCancellationWorkflowYaml } from '../../fixtures/workflows';
 
-test.describe('Workflow execution - Cancellation', { tag: [...tags.stateful.classic] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/281015
+test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });

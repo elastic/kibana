@@ -7,11 +7,15 @@
 
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   convertSOQueriesToPack,
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
   fetchAllPackagePolicies,
+  groupAgentPolicyIdsByPackagePolicy,
+  resolveSharedPackagePolicyShard,
+  DEFAULT_PACK_SHARD,
   validatePackScheduleFields,
   validateRruleConfig,
   isValidRfc3339,
@@ -21,6 +25,7 @@ import {
   resolvePreservedQueries,
   hasQueries,
   START_DATE_EPOCH_FALLBACK,
+  convergePerQueryIntervals,
 } from './utils';
 
 const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
@@ -189,20 +194,48 @@ describe('Pack utils', () => {
       expect(out.queries.q1).not.toHaveProperty('interval');
     });
 
-    test('per-query interval override (same mode, different value) — emitted on the query', () => {
+    // Regression guard for #279946: a stale bare per-query interval (no
+    // schedule_type marker) must not shadow default_native_schedule; only an
+    // explicit flyout override does. Values 80/100 under 120 keep divergence visible.
+    test('stale marker-less per-query interval — NOT emitted, query inherits pack default', () => {
       const out = convertSOQueriesToPackConfig(
         [
-          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 60 },
-          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 120 },
+          { id: 'q1', name: 'q1', query: 'SELECT 1', interval: 80 },
+          { id: 'q2', name: 'q2', query: 'SELECT 2', interval: 100 },
         ],
         {
-          packSchedule: { schedule_type: 'interval', interval: 60 },
+          packSchedule: { schedule_type: 'interval', interval: 120 },
           isRruleFeatureEnabled: true,
         }
       );
-      expect(out.default_native_schedule).toEqual({ interval: 60 });
+      expect(out.default_native_schedule).toEqual({ interval: 120 });
+      // q1 has a stale interval (80) without schedule_type — must NOT reach the wire.
       expect(out.queries.q1).not.toHaveProperty('interval');
-      expect(out.queries.q2.interval).toBe(120);
+      // q2 has a stale interval (100) without schedule_type — also must NOT be emitted.
+      expect(out.queries.q2).not.toHaveProperty('interval');
+    });
+
+    test('explicit per-query interval override (schedule_type: interval) — emitted on the query', () => {
+      const out = convertSOQueriesToPackConfig(
+        [
+          { id: 'q1', name: 'q1', query: 'SELECT 1' },
+          {
+            id: 'q2',
+            name: 'q2',
+            query: 'SELECT 2',
+            schedule_type: 'interval' as const,
+            interval: 80,
+          },
+        ],
+        {
+          packSchedule: { schedule_type: 'interval', interval: 120 },
+          isRruleFeatureEnabled: true,
+        }
+      );
+      expect(out.default_native_schedule).toEqual({ interval: 120 });
+      expect(out.queries.q1).not.toHaveProperty('interval');
+      // q2 has an explicit flyout override — must reach the wire.
+      expect(out.queries.q2.interval).toBe(80);
     });
 
     test('legacy pack (no schedule_type) — per-query interval only, no default_*_schedule', () => {
@@ -691,6 +724,23 @@ describe('Pack utils', () => {
       ).toEqual({ query: 'SELECT 1', interval: 30, schedule_type: 'interval' });
     });
 
+    // strip is only responsible for cross-mode fields; a bare interval is left
+    // alone (convergePerQueryIntervals drops stale prebuilt-pack copies separately).
+    test('interval mode — bare interval and explicit override both pass through', () => {
+      expect(stripPriorModePerQueryFields({ query: 'SELECT 1', interval: 80 }, 'interval')).toEqual(
+        {
+          query: 'SELECT 1',
+          interval: 80,
+        }
+      );
+      expect(
+        stripPriorModePerQueryFields(
+          { query: 'SELECT 1', interval: 80, schedule_type: 'interval' },
+          'interval'
+        )
+      ).toEqual({ query: 'SELECT 1', interval: 80, schedule_type: 'interval' });
+    });
+
     test('mode cleared — drops both override flavours and interval', () => {
       expect(
         stripPriorModePerQueryFields(
@@ -712,6 +762,49 @@ describe('Pack utils', () => {
       expect(stripPriorModePerQueryFields({ query: 'SELECT 1' }, undefined)).toEqual({
         query: 'SELECT 1',
       });
+    });
+  });
+
+  describe('convergePerQueryIntervals', () => {
+    test('drops marker-less bare interval in interval-mode pack', () => {
+      const result = convergePerQueryIntervals(
+        { q1: { query: 'SELECT 1', interval: 80 } },
+        'interval'
+      );
+      expect(result.q1).not.toHaveProperty('interval');
+    });
+
+    test('preserves explicit schedule_type: interval override', () => {
+      const result = convergePerQueryIntervals(
+        { q1: { query: 'SELECT 1', interval: 100, schedule_type: 'interval' } },
+        'interval'
+      );
+      expect(result.q1).toMatchObject({ interval: 100, schedule_type: 'interval' });
+    });
+
+    test('leaves rrule-override query untouched in interval-mode pack', () => {
+      const rruleQuery = {
+        query: 'SELECT 1',
+        schedule_type: 'rrule' as const,
+        rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-01-01T00:00:00.000Z' },
+      };
+      const result = convergePerQueryIntervals({ q1: rruleQuery }, 'interval');
+      expect(result.q1).toEqual(rruleQuery);
+    });
+
+    test('no-op in legacy mode (packScheduleType undefined)', () => {
+      const queries = { q1: { query: 'SELECT 1', interval: 80 } };
+      expect(convergePerQueryIntervals(queries, undefined)).toBe(queries);
+    });
+
+    test('no-op in rrule-mode pack', () => {
+      const queries = { q1: { query: 'SELECT 1', interval: 80 } };
+      expect(convergePerQueryIntervals(queries, 'rrule')).toBe(queries);
+    });
+
+    test('query without interval is untouched', () => {
+      const result = convergePerQueryIntervals({ q1: { query: 'SELECT 1' } }, 'interval');
+      expect(result.q1).toEqual({ query: 'SELECT 1' });
     });
   });
 
@@ -1524,5 +1617,95 @@ describe('hasQueries (shared mint/reconcile emptiness predicate)', () => {
       expect(mintGuardSkips).toBe(!nonEmpty);
       expect(reconcileIncludes).toBe(nonEmpty);
     }
+  });
+});
+
+// Fixes the duplicate-schedule race (elastic/kibana#269475): a Fleet package
+// policy's `policy_ids` can span multiple of a pack's agent policies, so
+// resolving per-agent-policy-id and writing without deduping issues
+// concurrent updates against the same package-policy id from a stale base.
+describe('groupAgentPolicyIdsByPackagePolicy (dedup write targets)', () => {
+  const packagePolicy = (id: string, policyIds: string[]): PackagePolicy =>
+    ({ id, policy_ids: policyIds } as PackagePolicy);
+
+  it('groups two agent policy ids that resolve to the same package policy into one entry', () => {
+    const sharedPolicy = packagePolicy('pp-shared', ['agent-a', 'agent-b']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-b'], [sharedPolicy]);
+
+    expect(groups.size).toBe(1);
+    const target = groups.get('pp-shared');
+    expect(target?.packagePolicy).toBe(sharedPolicy);
+    expect(target?.agentPolicyIds).toEqual(['agent-a', 'agent-b']);
+  });
+
+  it('keeps distinct package policies as separate entries (regression: common 1:1 case)', () => {
+    const policyA = packagePolicy('pp-a', ['agent-a']);
+    const policyB = packagePolicy('pp-b', ['agent-b']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-b'], [policyA, policyB]);
+
+    expect(groups.size).toBe(2);
+    expect(groups.get('pp-a')?.agentPolicyIds).toEqual(['agent-a']);
+    expect(groups.get('pp-b')?.agentPolicyIds).toEqual(['agent-b']);
+  });
+
+  it('skips an agent policy id that resolves to no package policy', () => {
+    const policyA = packagePolicy('pp-a', ['agent-a']);
+
+    const groups = groupAgentPolicyIdsByPackagePolicy(['agent-a', 'agent-unknown'], [policyA]);
+
+    expect(groups.size).toBe(1);
+    expect(groups.has('pp-a')).toBe(true);
+  });
+
+  it('returns an empty map for an empty agent-policy-id list', () => {
+    const groups = groupAgentPolicyIdsByPackagePolicy([], [packagePolicy('pp-a', ['agent-a'])]);
+
+    expect(groups.size).toBe(0);
+  });
+});
+
+describe('resolveSharedPackagePolicyShard (deterministic shard for a shared package policy)', () => {
+  it('returns the single agent policy shard unchanged for 1:1 targeting (no behavior change)', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': 42 })).toBe(42);
+  });
+
+  it('falls back to DEFAULT_PACK_SHARD when no shard is set', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], {})).toBe(DEFAULT_PACK_SHARD);
+  });
+
+  it('preserves a single negative shard (no clamping to 0 — parity with the pre-dedup path)', () => {
+    expect(resolveSharedPackagePolicyShard(['agent-a'], { 'agent-a': -5 })).toBe(-5);
+  });
+
+  it('returns DEFAULT_PACK_SHARD for an empty agent-policy-id list', () => {
+    expect(resolveSharedPackagePolicyShard([], { 'agent-a': 25 })).toBe(DEFAULT_PACK_SHARD);
+  });
+
+  it('returns the shared shard value when every targeting agent policy agrees', () => {
+    expect(
+      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 30, 'agent-b': 30 })
+    ).toBe(30);
+  });
+
+  it('resolves differing shards deterministically via the max rule', () => {
+    expect(
+      resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 25, 'agent-b': 75 })
+    ).toBe(75);
+  });
+
+  it('is independent of agent-policy-id ordering (repeat operations agree)', () => {
+    const shards = { 'agent-a': 25, 'agent-b': 75, 'agent-c': 50 };
+    const forward = resolveSharedPackagePolicyShard(['agent-a', 'agent-b', 'agent-c'], shards);
+    const reversed = resolveSharedPackagePolicyShard(['agent-c', 'agent-b', 'agent-a'], shards);
+
+    expect(forward).toBe(75);
+    expect(reversed).toBe(forward);
+  });
+
+  it('mixes explicit and default-shard agent policies using the max rule', () => {
+    // agent-b has no explicit shard (defaults to 100), which wins over agent-a's 40.
+    expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 40 })).toBe(100);
   });
 });

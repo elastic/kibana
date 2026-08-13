@@ -40,12 +40,14 @@ import {
   AgentPolicySchemaV4,
   AgentPolicySchemaV5,
   AgentPolicySchemaV6,
+  AgentPolicySchemaV7,
   EpmPackagesSchemaV6,
   EpmPackagesSchemaV7,
   EpmPackagesSchemaV8,
   EpmPackagesSchemaV9,
   EpmPackagesSchemaV10,
   EpmPackagesSchemaV11,
+  EpmPackagesSchemaV12,
   SettingsSchemaV5,
   SettingsSchemaV6,
   SettingsSchemaV7,
@@ -130,6 +132,7 @@ import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
 import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_disable_browser_input';
+import { bumpProfilingSymbolizerPolicy } from './model_versions/bump_profiling_symbolizer_policy';
 
 /*
  * Saved object types and mappings
@@ -506,6 +509,18 @@ export const getSavedObjectTypes = (
             create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -633,6 +648,18 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
             create: AgentPolicySchemaV6.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+          schemas: {
+            forwardCompatibility: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
+            create: AgentPolicySchemaV7.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -1204,6 +1231,18 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '25': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: bumpProfilingSymbolizerPolicy,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1376,6 +1415,18 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '11': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: bumpProfilingSymbolizerPolicy,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -1464,6 +1515,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1609,6 +1661,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: EpmPackagesSchemaV11.extends({}, { unknowns: 'ignore' }),
             create: EpmPackagesSchemaV11,
+          },
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                installed_kibana_version: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: EpmPackagesSchemaV12.extends({}, { unknowns: 'ignore' }),
+            create: EpmPackagesSchemaV12,
           },
         },
       },

@@ -1,0 +1,201 @@
+version: "1"
+name: Index-selection KIs (with ES|QL access patterns)
+description: >
+  Profile each source index (mapping + 20 samples) into a per-index Knowledge Indicator
+  that carries parameterized ES|QL access patterns, written into an AI Index.
+enabled: true
+tags:
+  - index-selection
+  - knowledge-indicators
+consts:
+  target_index: .ai-index-idx-ki-example
+  indices:
+    - raw-cases-all
+    - raw-articles-all
+    - raw-issues-all
+triggers:
+  - type: manual
+steps:
+  - name: ensure_target_index
+    type: elasticsearch.indices.create
+    with:
+      index: "{{ consts.target_index }}"
+      mappings:
+        dynamic: strict
+        properties:
+          id: { type: keyword }
+          type: { type: keyword }
+          title:
+            type: text
+            fields:
+              semantic: { type: semantic_text }
+          content:
+            type: text
+            fields:
+              semantic: { type: semantic_text }
+          description:
+            type: text
+            fields:
+              semantic: { type: semantic_text }
+          tags:
+            type: keyword
+          attributes:
+            type: flattened
+          discovery_labels:
+            type: nested
+            properties:
+              value: { type: search_as_you_type }
+              kind: { type: keyword }
+          ingestion_method: { type: keyword }
+    on-failure:
+      continue: true
+  - name: loop_indices
+    type: foreach
+    foreach: "{{ consts.indices | json }}"
+    steps:
+      - name: get_mapping
+        type: elasticsearch.request
+        with:
+          method: GET
+          path: /{{ foreach.item }}/_mapping
+      - name: sample_docs
+        type: elasticsearch.search
+        with:
+          index: "{{ foreach.item }}"
+          query:
+            match_all: {}
+          size: 20
+      - name: profile_index
+        type: ai.prompt
+        connector-id: YOUR_AI_CONNECTOR_ID
+        with:
+          prompt: |
+            You are a data steward building an INDEX PROFILE for an AI data catalog.
+            Downstream, an AI agent uses the profile to decide which index to query,
+            and uses the access patterns to reach live data with minimal ES|QL authoring.
+
+            You are given the index name, its Elasticsearch mapping, and sample documents.
+
+            Rules:
+            - Ground everything ONLY in the provided mapping and samples. Never invent fields.
+            - Do NOT copy literal PII (names, emails, tokens, org names) into the output;
+              refer to such fields by name and generalized shape instead.
+            - For each authoritative question-class, produce one access pattern:
+              * esql_template uses named ?param placeholders for the parts that vary.
+              * esql_example is the SAME query with realistic (non-PII) example values and a
+                small LIMIT so it runs cheaply.
+              * params lists every placeholder: { name, type, example }.
+              * returns describes the output columns.
+            - Prefer access patterns that read LIVE data — never materialize volatile facts
+              (status, counts, dates) in the KI content itself.
+
+            ES|QL correctness (every esql_template AND esql_example must be valid ES|QL):
+            - Start with `FROM <index>`; use `|` between commands; use real field names only.
+            - DATE/DATETIME literals must be strict ISO-8601, e.g. "2024-01-01T00:00:00.000Z".
+              NEVER "2024-01-01 00:00:00" (space instead of T fails with verification_exception).
+              For relative ranges prefer `WHERE @timestamp >= NOW() - 30 days`.
+            - Quote string literals with double quotes; do not quote numbers or booleans.
+            - Give each ?param a correct type (keyword, long, double, date, boolean) and a
+              matching, correctly-formatted example (ISO-8601 for date params).
+            - Keep esql_example runnable and cheap: end it with a small `| LIMIT n`.
+
+            Index name: {{ foreach.item }}
+            Elasticsearch mapping (JSON): {{ steps.get_mapping.output | json }}
+            Sample documents (JSON): {{ steps.sample_docs.output.hits.hits | map: '_source' | json }}
+          schema:
+            type: object
+            properties:
+              display_name:
+                type: string
+                description: Concise human-readable name for this index (<= 8 words).
+              purpose:
+                type: string
+                description: >
+                  2-4 sentences on what this index stores and its role.
+                  Primary semantic surface for routing.
+              answers_questions:
+                type: array
+                items: { type: string }
+                description: 3-7 representative questions this index can authoritatively answer.
+              does_not_contain:
+                type: array
+                items: { type: string }
+                description: 1-4 things that live in a DIFFERENT index, to prevent mis-routing.
+              key_fields:
+                type: array
+                items: { type: string }
+                description: 3-10 query-relevant fields as "field_name — what it is".
+              joins:
+                type: array
+                items: { type: string }
+                description: Shared keys linking to other indices as "field -> target_index".
+              when_to_use:
+                type: string
+                description: One crisp routing heuristic (<= 30 words).
+              access_patterns:
+                type: array
+                description: >
+                  One entry per authoritative question-class. Each is a parameterized
+                  ES|QL query the agent fills in at ask-time.
+                items:
+                  type: object
+                  properties:
+                    question_type: { type: string }
+                    esql_template:
+                      type: string
+                      description: >
+                        Runnable ES|QL using named ?param placeholders. Real index + field names only.
+                    esql_example:
+                      type: string
+                      description: >
+                        Same query with example values substituted and a small LIMIT so it runs as-is.
+                    params:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name: { type: string }
+                          type: { type: string }
+                          example: { type: string }
+                    returns: { type: string }
+            required:
+              - display_name
+              - purpose
+              - answers_questions
+              - key_fields
+              - when_to_use
+              - access_patterns
+        timeout: 120s
+      - name: sink_index_ki
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.target_index }}"
+          id: "{{ foreach.item }}"
+          refresh: wait_for
+          document:
+            type: ki
+            title: "{{ steps.profile_index.output.content.display_name | default: foreach.item }}"
+            ingestion_method: manual
+            tags:
+              - index-selection
+            attributes:
+              key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"
+              when_to_use: "{{ steps.profile_index.output.content.when_to_use }}"
+              joins: "{{ steps.profile_index.output.content.joins | join: ', ' }}"
+            content: |
+              Backing index: {{ foreach.item }}. {{ steps.profile_index.output.content.purpose }}
+              Questions answered: {{ steps.profile_index.output.content.answers_questions | join: " | " }}
+              When to use: {{ steps.profile_index.output.content.when_to_use }}
+              Key fields: {{ steps.profile_index.output.content.key_fields | join: ", " }}
+              Joins: {{ steps.profile_index.output.content.joins | join: ", " }}
+
+              Access patterns:
+              {% for pattern in steps.profile_index.output.content.access_patterns %}
+              Q: {{ pattern.question_type }}
+              ESQL: {{ pattern.esql_template }}
+              Example: {{ pattern.esql_example }}
+              {% endfor %}
+            description: |
+              Index profile: {{ steps.profile_index.output.content.display_name }}. Does NOT contain: {{ steps.profile_index.output.content.does_not_contain | join: "; " }}. Key fields: {{ steps.profile_index.output.content.key_fields | join: "; " }}. Joins: {{ steps.profile_index.output.content.joins | join: "; " }}.
+    iteration-on-failure:
+      continue: true

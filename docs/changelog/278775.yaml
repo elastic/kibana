@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/278775
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix SIEM migrations link visibility for migration privileges"
+description: "The SIEM migrations navigation link respects migrations privileges so users with the correct access can open Automatic Migrations."

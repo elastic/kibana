@@ -100,7 +100,33 @@ describe('getColumns', () => {
 
       await userEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
 
-      expect(mockOnShowAlert).toHaveBeenCalledWith('alert-id-1', 'test-index');
+      expect(mockOnShowAlert).toHaveBeenCalledWith('alert-id-1', 'test-index', 'Alert');
+    });
+
+    it('includes the rule name in the title when the row has ALERT_RULE_NAME', async () => {
+      const rowWithRule = {
+        id: 'alert-id-1',
+        index: 'test-index',
+        'kibana.alert.rule.name': 'My Detection Rule',
+      };
+      const [previewColumn] = getColumns({
+        scopeId,
+        dataTestSubj,
+        onShowAlert: mockOnShowAlert,
+      });
+      const { render: renderCell } = previewColumn as {
+        render: (row: Record<string, unknown>) => React.ReactElement;
+      };
+
+      renderColumn(renderCell(rowWithRule));
+
+      await userEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
+
+      expect(mockOnShowAlert).toHaveBeenCalledWith(
+        'alert-id-1',
+        'test-index',
+        'Alert: My Detection Rule'
+      );
     });
   });
 

@@ -14,6 +14,7 @@ import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 
 const LOGS_STREAM_NAME = 'logs';
+const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -79,35 +80,51 @@ async function deleteStaleSnapshotLoaderIndices(esClient: Client, log: ToolingLo
   }
 }
 
+export interface CleanSignificantEventsDataStreamsOptions {
+  /** When false, only clears `.significant_events-events` and leaves the replayed logs stream intact. */
+  includeLogs?: boolean;
+}
+
 export async function cleanSignificantEventsDataStreams(
   esClient: Client,
-  log: ToolingLog
+  log: ToolingLog,
+  { includeLogs = true }: CleanSignificantEventsDataStreamsOptions = {}
 ): Promise<void> {
-  const [deleteDataStreamResult, deleteIndexResult] = await Promise.allSettled([
-    esClient.indices.deleteDataStream({ name: LOGS_STREAM_NAME }),
-    esClient.indices.delete({ index: LOGS_STREAM_NAME, ignore_unavailable: true }),
-  ]);
+  if (includeLogs) {
+    const [deleteDataStreamResult, deleteIndexResult] = await Promise.allSettled([
+      esClient.indices.deleteDataStream({ name: LOGS_STREAM_NAME }),
+      esClient.indices.delete({ index: LOGS_STREAM_NAME, ignore_unavailable: true }),
+    ]);
 
-  if (
-    deleteDataStreamResult.status === 'rejected' &&
-    !isNotFoundError(deleteDataStreamResult.reason)
-  ) {
-    log.debug(
-      `Failed to delete ${LOGS_STREAM_NAME} data stream: ${getErrorMessage(
-        deleteDataStreamResult.reason
-      )}`
-    );
+    if (
+      deleteDataStreamResult.status === 'rejected' &&
+      !isNotFoundError(deleteDataStreamResult.reason)
+    ) {
+      log.debug(
+        `Failed to delete ${LOGS_STREAM_NAME} data stream: ${getErrorMessage(
+          deleteDataStreamResult.reason
+        )}`
+      );
+    }
+
+    if (
+      deleteIndexResult.status === 'rejected' &&
+      !isNotFoundError(deleteIndexResult.reason) &&
+      !isDataStreamDeleteConflict(deleteIndexResult.reason)
+    ) {
+      log.debug(
+        `Failed to delete ${LOGS_STREAM_NAME} index: ${getErrorMessage(deleteIndexResult.reason)}`
+      );
+    }
+
+    await deleteLogsIndexTemplate(esClient, log);
   }
 
-  if (
-    deleteIndexResult.status === 'rejected' &&
-    !isNotFoundError(deleteIndexResult.reason) &&
-    !isDataStreamDeleteConflict(deleteIndexResult.reason)
-  ) {
-    log.debug(
-      `Failed to delete ${LOGS_STREAM_NAME} index: ${getErrorMessage(deleteIndexResult.reason)}`
-    );
-  }
-
-  await deleteLogsIndexTemplate(esClient, log);
+  await esClient
+    .deleteByQuery({
+      index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+      query: { match_all: {} },
+      refresh: true,
+    })
+    .catch(() => {});
 }

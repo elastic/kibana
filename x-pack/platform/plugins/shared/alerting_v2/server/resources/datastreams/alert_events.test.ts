@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRuleEventDocument } from './alert_events';
+import { alertEventSchema, buildRuleEventDocument } from './alert_events';
 
 describe('buildRuleEventDocument', () => {
   const baseParams = {
@@ -69,5 +69,39 @@ describe('buildRuleEventDocument', () => {
     expect(buildRuleEventDocument(baseParams)).not.toHaveProperty('severity');
 
     expect(buildRuleEventDocument({ ...baseParams, severity: 'high' }).severity).toBe('high');
+  });
+});
+
+describe('alertEventSchema', () => {
+  it('validates an external event document with no rule and a vendor source', () => {
+    const externalEvent = {
+      '@timestamp': '2026-07-01T12:00:00.000Z',
+      group_hash: 'pd-group-hash',
+      data: { 'pd.incident.id': 'PD-123' },
+      status: 'breached' as const,
+      source: 'pagerduty',
+      type: 'alert' as const,
+      space_id: 'default',
+      episode: { id: 'pd-episode-1', status: 'active' as const },
+    };
+
+    const result = alertEventSchema.safeParse(externalEvent);
+    expect(result.success).toBe(true);
+  });
+
+  it('validates an internal event document with a rule object', () => {
+    const internalEvent = {
+      '@timestamp': '2026-07-01T12:00:00.000Z',
+      rule: { id: 'rule-1', version: 3 },
+      group_hash: 'rule-group-hash',
+      data: {},
+      status: 'breached' as const,
+      source: 'internal',
+      type: 'alert' as const,
+      space_id: 'default',
+    };
+
+    const result = alertEventSchema.safeParse(internalEvent);
+    expect(result.success).toBe(true);
   });
 });

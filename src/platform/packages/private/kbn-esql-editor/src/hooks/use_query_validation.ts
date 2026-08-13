@@ -114,7 +114,19 @@ export const useQueryValidation = ({
     [esqlCallbacks, code, editorModel]
   );
 
+  const isFirstCacheEffectRunRef = useRef(true);
   useEffect(() => {
+    const isFirstRun = isFirstCacheEffectRunRef.current;
+    isFirstCacheEffectRunRef.current = false;
+
+    // On the very first render with no query in flight, skip the parseMessages() call —
+    // the debounced validation (skipFirstRender: false) already runs a full parse pass,
+    // so a second one here would duplicate every callback (getSources, getColumnsFor, etc.).
+    // If a query is already loading at mount we fall through so the entry is still recorded.
+    if (isFirstRun && !isQueryLoading && !isLoading) {
+      return;
+    }
+
     const setQueryToTheCache = async () => {
       if (editorRef?.current) {
         try {

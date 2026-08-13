@@ -16,7 +16,7 @@ import useToggle from 'react-use/lib/useToggle';
 import { labels } from './translations';
 import { McpClientDetailsField } from './mcp_client_details_field';
 
-export type McpClientDetailsPresentation = 'modal' | 'flyout';
+export type McpClientDetailsPresentation = 'modal' | 'flyout' | 'popover';
 export type McpClientDetailsData = OAuthClient & { client_secret?: string };
 
 const hasClientSecret = (
@@ -108,7 +108,7 @@ export const McpClientDetailsContent = ({
               disableScreenReaderOutput
             >
               <EuiButtonIcon
-                iconType={isSecretVisible ? 'eyeClosed' : 'eye'}
+                iconType={isSecretVisible ? 'eyeSlash' : 'eye'}
                 color="text"
                 aria-label={labels.details.modal.toggleSecretVisibility}
                 onClick={toggleSecretVisibility}

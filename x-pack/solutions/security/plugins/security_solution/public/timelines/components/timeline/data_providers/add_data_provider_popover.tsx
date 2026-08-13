@@ -18,7 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import type { BrowserFields } from '../../../../common/containers/source';
 import { DataProviderTypeEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
@@ -203,6 +203,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
   return (
     <EuiPopover
       id="addFieldsPopover"
+      aria-label={ADD_FIELD_LABEL}
       button={button}
       isOpen={isAddFilterPopoverOpen}
       closePopover={handleClosePopover}

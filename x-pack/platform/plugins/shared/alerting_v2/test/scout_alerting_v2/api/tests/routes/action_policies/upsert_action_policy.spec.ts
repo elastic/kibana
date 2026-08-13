@@ -198,6 +198,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing description', async ({ apiClient }) => {
@@ -210,6 +211,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
@@ -219,6 +221,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects empty destinations array', async ({ apiClient }) => {
@@ -228,6 +231,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects name over the maximum length', async ({ apiClient }) => {
@@ -237,6 +241,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects destination with unknown type', async ({ apiClient }) => {
@@ -251,7 +256,24 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
+
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-unknown-field'), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: {
+          ...buildCreateActionPolicyData(),
+          unknownField: 'x',
+        },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
@@ -263,6 +285,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
@@ -275,6 +298,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('authorization: 201 with full alerting_v2 privileges (write)', async ({ apiClient }) => {

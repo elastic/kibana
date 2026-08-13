@@ -7,28 +7,25 @@
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type { IHttpFetchError, IToasts } from '@kbn/core/public';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
-import { RulesApi, type BulkOperationParams } from '../services/rules_api';
+import { RulesApi, type BulkResponse } from '../services/rules_api';
+import type { BulkSelection } from './use_bulk_select';
+import { addBulkMutationDangerToast } from './bulk_mutation_toasts';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesContentList } from './invalidate_rules_content_list';
 
-const getHttpFetchErrorMessage = (error: unknown): string | undefined => {
-  const httpError = error as IHttpFetchError<{ message?: string }>;
-  return httpError.body?.message;
-};
-
-const addBulkMutationDangerToast = (
-  toasts: Pick<IToasts, 'addDanger'>,
-  title: string,
-  error: unknown
-) => {
-  const serverMessage = getHttpFetchErrorMessage(error);
-  if (serverMessage) {
-    toasts.addDanger({ title, text: serverMessage });
-  } else {
-    toasts.addDanger(title);
+/**
+ * Dispatches the mutation to the by-ID or by-query endpoint based on the
+ * discriminant in {@link BulkSelection}. The by-query endpoint defaults to
+ * dry-run mode; explicit user action from the UI passes `force: true` so we
+ * always execute rather than preview.
+ */
+const dispatchBulkDelete = (rulesApi: RulesApi, params: BulkSelection): Promise<BulkResponse> => {
+  if (params.mode === 'by_ids') {
+    return rulesApi.bulkDeleteRules({ ids: params.ids });
   }
+  const { mode: _mode, ...query } = params;
+  return rulesApi.deleteRulesByQuery({ ...query, force: true });
 };
 
 export const useBulkDeleteRules = () => {
@@ -37,18 +34,8 @@ export const useBulkDeleteRules = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: BulkOperationParams) => rulesApi.bulkDeleteRules(params),
+    mutationFn: (params: BulkSelection) => dispatchBulkDelete(rulesApi, params),
     onSuccess: (data) => {
-      if (data.truncated) {
-        toasts.addWarning(
-          i18n.translate('xpack.alertingV2.hooks.useBulkDeleteRules.truncatedFilterMessage', {
-            defaultMessage: 'Successfully deleted the first {maxRules, number} rules.',
-            values: {
-              maxRules: BULK_FILTER_MAX_RULES,
-            },
-          })
-        );
-      }
       if (data.errors.length > 0) {
         toasts.addWarning(
           i18n.translate('xpack.alertingV2.hooks.useBulkDeleteRules.partialSuccessMessage', {
@@ -57,15 +44,18 @@ export const useBulkDeleteRules = () => {
             values: { errorCount: data.errors.length },
           })
         );
-      } else if (!data.truncated) {
+      } else {
         toasts.addSuccess(
           i18n.translate('xpack.alertingV2.hooks.useBulkDeleteRules.successMessage', {
-            defaultMessage: 'Rules deleted successfully',
+            defaultMessage:
+              '{affectedCount, plural, one {# rule} other {# rules}} deleted successfully',
+            values: { affectedCount: data.affected_count },
           })
         );
       }
+      void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.tags());
+      queryClient.invalidateQueries(ruleKeys.allTags());
     },
     onError: (error) => {
       addBulkMutationDangerToast(

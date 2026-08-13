@@ -297,6 +297,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
     });
 
+    it('should preserve column headers when saved search is added to dashboard', async () => {
+      await addSearchEmbeddableToDashboard();
+      await retry.try(async () => {
+        expect(await dataGrid.getHeaderFields()).to.eql([
+          '@timestamp',
+          'agent',
+          'bytes',
+          'clientip',
+        ]);
+      });
+    });
+
     describe('edit session round-trip', () => {
       before(async () => {
         await kibanaServer.importExport.load(

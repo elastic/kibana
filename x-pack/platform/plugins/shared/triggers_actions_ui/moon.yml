@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/core-ui-settings-common'
   - '@kbn/licensing-plugin'
   - '@kbn/expressions-plugin'
-  - '@kbn/core-saved-objects-api-server'
   - '@kbn/serverless'
   - '@kbn/field-formats-plugin'
   - '@kbn/triggers-actions-ui-types'
@@ -108,6 +107,9 @@ dependsOn:
   - '@kbn/lens-common'
   - '@kbn/inspector-plugin'
   - '@kbn/connector-specs'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

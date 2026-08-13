@@ -16,6 +16,7 @@ import { AnomalySeverityIcon } from './anomaly_severity_icon';
 export interface AnomalyChartInfo {
   severity: ML_ANOMALY_SEVERITY;
   score: number;
+  timestamp?: number;
 }
 
 export type AnomalySeverityBadgeProps = AnomalyChartInfo;

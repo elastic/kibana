@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const VIEW_SELECT_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.topN.viewSelectAriaLabel',
+  {
+    defaultMessage: 'Select view',
+  }
+);
+
 export const CLOSE = i18n.translate('xpack.securitySolution.topN.closeButtonLabel', {
   defaultMessage: 'Close',
 });

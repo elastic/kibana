@@ -14,10 +14,11 @@ import type { DashboardApi } from '../../dashboard_api/types';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../services/kibana_services';
 
-export function openSettingsFlyout(dashboardApi: DashboardApi) {
+export function openSettingsFlyout(dashboardApi: DashboardApi, returnFocus?: () => void) {
   openLazyFlyout({
     core: coreServices,
     parentApi: dashboardApi,
+    returnFocus,
     loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
       const { DashboardSettingsFlyout } = await import('./settings_flyout');
       return (
@@ -28,7 +29,6 @@ export function openSettingsFlyout(dashboardApi: DashboardApi) {
     },
     flyoutProps: {
       'data-test-subj': 'dashboardSettingsFlyout',
-      triggerId: 'dashboardSettingsButton',
     },
   });
 }

@@ -75,7 +75,7 @@ export const useEditSkill = ({
   const handleSuccess = useCallback<EditSkillSuccessCallback>(
     (response, variables, context) => {
       addSuccessToast({
-        title: labels.skills.editSkillSuccessToast(response.id),
+        title: labels.skills.editSkillSuccessToast(response.name),
       });
       onSuccess?.(response, variables, context);
     },

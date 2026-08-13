@@ -41,7 +41,7 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
 
   spaceTest(
     'save as copy creates a numbered clone with the same panels',
-    async ({ pageObjects, page }) => {
+    async ({ pageObjects }) => {
       await pageObjects.dashboard.openDashboardWithId(fewPanelsDashboardId);
       await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBeGreaterThan(1);
 
@@ -50,7 +50,7 @@ spaceTest.describe('Dashboard clone', { tag: tags.deploymentAgnostic }, () => {
       await pageObjects.dashboard.ensureEditMode();
       await pageObjects.dashboard.saveDashboardAsCopy();
 
-      await expect(page.testSubj.locator('breadcrumb last')).toContainText(
+      await expect(pageObjects.dashboard.getAppTitle()).toContainText(
         `${FEW_PANELS_DASHBOARD_TITLE} (1)`
       );
       await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(sourcePanelTitles.length);

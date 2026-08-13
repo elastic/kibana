@@ -7,15 +7,16 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getGrantedRightsEsqlCount } from './esql_query';
 import { KeyInsightsTile } from '../common/key_insights_tile';
 
-export const GrantedRightsTile: React.FC<{ spaceId: string; dataViewSpec: DataViewSpec }> = ({
-  spaceId,
-  dataViewSpec,
-}) => {
+export const GrantedRightsTile: React.FC<{
+  spaceId: string;
+  indexPattern: string;
+  fields: DataViewFieldMap;
+}> = ({ spaceId, indexPattern, fields }) => {
   return (
     <KeyInsightsTile
       title={i18n.translate('xpack.securitySolution.privmon.grantedRights.title', {
@@ -24,7 +25,7 @@ export const GrantedRightsTile: React.FC<{ spaceId: string; dataViewSpec: DataVi
       label={i18n.translate('xpack.securitySolution.privmon.grantedRights.label', {
         defaultMessage: 'Granted rights',
       })}
-      getEsqlQuery={(namespace) => getGrantedRightsEsqlCount(namespace, dataViewSpec)}
+      getEsqlQuery={(namespace) => getGrantedRightsEsqlCount(namespace, indexPattern, fields)}
       id="privileged-user-monitoring-granted-rights"
       spaceId={spaceId}
       inspectTitle={

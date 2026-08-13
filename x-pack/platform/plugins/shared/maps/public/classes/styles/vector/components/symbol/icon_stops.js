@@ -9,7 +9,14 @@ import React from 'react';
 import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { OTHER_CATEGORY_LABEL } from '../../style_util';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
 import { getMakiSymbol, PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
@@ -101,31 +108,35 @@ export function IconStops({
 
       let deleteButton;
       if (iconStops.length > 2 && index !== 0) {
+        const deleteLabel = i18n.translate('xpack.maps.styles.iconStops.deleteButtonLabel', {
+          defaultMessage: 'Delete',
+        });
         deleteButton = (
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            aria-label={i18n.translate('xpack.maps.styles.iconStops.deleteButtonAriaLabel', {
-              defaultMessage: 'Delete',
-            })}
-            title={i18n.translate('xpack.maps.styles.iconStops.deleteButtonLabel', {
-              defaultMessage: 'Delete',
-            })}
-            onClick={onRemove}
-          />
+          <EuiToolTip content={deleteLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              aria-label={deleteLabel}
+              onClick={onRemove}
+            />
+          </EuiToolTip>
         );
       }
 
+      const addLabel = i18n.translate('xpack.maps.styles.iconStops.addButtonAriaLabel', {
+        defaultMessage: 'Add row',
+      });
       const iconStopButtons = (
         <div>
           {deleteButton}
-          <EuiButtonIcon
-            iconType="plusCircle"
-            color="primary"
-            aria-label="Add"
-            title="Add"
-            onClick={onAdd}
-          />
+          <EuiToolTip content={addLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="plusCircle"
+              color="primary"
+              aria-label={addLabel}
+              onClick={onAdd}
+            />
+          </EuiToolTip>
         </div>
       );
 
