@@ -113,7 +113,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
       <EuiPopover
         aria-label={i18n.BULK_ACTIONS_ARIA_LABEL}
         isOpen={isActionsPopoverOpen}
-        anchorPosition="upCenter"
+        anchorPosition="upLeft"
         panelPaddingSize="none"
         button={
           <EuiButtonEmpty
