@@ -176,7 +176,7 @@ export const createUpdateStreamTool = ({
     title: 'Update Stream',
     readOnlyHint: false,
     destructiveHint: false,
-    idempotentHint: false,
+    idempotentHint: true,
     openWorldHint: false,
   },
   schema: updateStreamSchema,
