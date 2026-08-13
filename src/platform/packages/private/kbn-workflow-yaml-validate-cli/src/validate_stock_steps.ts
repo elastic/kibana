@@ -12,7 +12,7 @@ import type { ValidationIssue } from './types';
 
 const STOCK_STEP_TYPES = new Set(builtInStepDefinitions.map(({ id }) => id));
 
-const STOCK_CONNECTOR_PREFIXES = ['elasticsearch.', 'kibana.', 'github.'] as const;
+const STOCK_CONNECTOR_PREFIXES = ['data.', 'elasticsearch.', 'kibana.', 'github.'] as const;
 
 /**
  * Step types owned by the Workflows platform. Package assets must stay within
