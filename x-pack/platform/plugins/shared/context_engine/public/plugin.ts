@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
@@ -20,14 +21,13 @@ import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
+import { createAnalyzeChatOpener } from './analyze_chat_opener';
 import type {
-  ChatOpener,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
   ContextEngineStartDependencies,
 } from './types';
-import { createBuildAnalyzeChat } from './analyze_chat';
 
 const APP_TITLE = i18n.translate('xpack.contextEngine.app.title', {
   defaultMessage: 'Context',
@@ -49,19 +49,18 @@ export class ContextEnginePlugin
     >
 {
   /**
-   * The registered "Analyze & improve" chat opener, or `undefined` until one is registered. A
-   * getter over this field is threaded into the app so the button reacts to an opener registered
-   * after mount, rather than a value snapshotted once at mount time.
+   * Resolves the Agent Builder start contract via `core.plugins.onStart` (runtime dependency).
+   * `undefined` when Agent Builder is disabled for the running solution/tier.
    */
-  private chatOpener?: ChatOpener;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
+    Promise.resolve(undefined);
 
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
+    this.setupAgentBuilderStart(core);
     const startServices = core.getStartServices();
-    // Captured in a closure so `mount` (where `this` is the app config) can read the opener
-    // registered on `start`.
-    const getChatOpener = () => this.chatOpener;
+    const getAgentBuilder = () => this.agentBuilderPromise;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -91,13 +90,15 @@ export class ContextEnginePlugin
       async mount(params: AppMountParameters) {
         const { mountApp } = await import('./application');
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const agentBuilder = await getAgentBuilder();
+        const chatOpener = createAnalyzeChatOpener({ coreStart, agentBuilder });
         coreStart.chrome.docTitle.change(APP_TITLE);
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
-          getChatOpener,
+          getChatOpener: () => chatOpener,
         });
       },
     });
@@ -105,13 +106,28 @@ export class ContextEnginePlugin
     return {};
   }
 
-  start(core: CoreStart): ContextEnginePluginStart {
-    return {
-      registerChatOpener: (opener: ChatOpener) => {
-        this.chatOpener = opener;
-      },
-      buildAnalyzeChat: createBuildAnalyzeChat(core.http),
-    };
+  /**
+   * Resolves Agent Builder through `runtimePluginDependencies` so Context Engine can open the
+   * chat popup without a required/optional plugin edge (those participate in cycle detection).
+   * Matches the workflows_management ↔ agentBuilder pattern.
+   */
+  private setupAgentBuilderStart(core: CoreSetup<ContextEngineStartDependencies>): void {
+    // `core.plugins.onStart` throws synchronously when the named plugin is not in the
+    // current build's dependency map — which happens when `agentBuilder` is disabled
+    // for the running solution/tier. The synchronous throw bypasses the promise `.catch`,
+    // so we wrap the call in try/catch and fall back to undefined.
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
+    }
+  }
+
+  start(_core: CoreStart): ContextEnginePluginStart {
+    return {};
   }
 
   stop() {}

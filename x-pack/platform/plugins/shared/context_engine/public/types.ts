@@ -25,14 +25,13 @@ export interface AnalyzeAndImproveContext {
   tag?: string;
 }
 
-/** Opens Agent Builder to analyze the given signals. Registered via {@link ContextEnginePluginStart.registerChatOpener}. */
+/** Opens Agent Builder to analyze the given signals. */
 export type ChatOpener = (context: AnalyzeAndImproveContext) => void | Promise<void>;
 
 /**
- * Agent Builder `openChat` options for an "Analyze & improve" hand-off, built by
- * {@link ContextEnginePluginStart.buildAnalyzeChat}. Context Engine owns this translation (the
- * attachments and the per-index conversation scoping) so the `agent_builder_platform` bridge stays
- * pure forwarding and there is a single source of truth for the wire contract.
+ * Agent Builder `openChat` options for an "Analyze & improve" hand-off. Context Engine owns this
+ * translation (attachments and per-index conversation scoping) so there is a single source of
+ * truth for the wire contract.
  */
 export interface AnalyzeChatOptions {
   /** The AI index's configured feedback agent, or `undefined` when none is set. */
@@ -51,21 +50,8 @@ export interface AnalyzeChatOptions {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginSetup {}
 
-export interface ContextEnginePluginStart {
-  /**
-   * Registers the opener used by the "Analyze & improve" button. Until an opener is registered
-   * the button is hidden.
-   */
-  registerChatOpener: (opener: ChatOpener) => void;
-  /**
-   * Translates an "Analyze & improve" context into Agent Builder `openChat` options. The
-   * `agent_builder_platform` bridge calls this and forwards the result to `openChat`, so the
-   * attachment wire contract lives here (in Context Engine) rather than being duplicated in the
-   * bridge. Async because it fetches the linked workflows' YAML (as the current user) to attach
-   * them by value.
-   */
-  buildAnalyzeChat: (context: AnalyzeAndImproveContext) => Promise<AnalyzeChatOptions>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContextEnginePluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineSetupDependencies {}

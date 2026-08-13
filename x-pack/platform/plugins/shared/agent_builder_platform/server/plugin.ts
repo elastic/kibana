@@ -48,7 +48,6 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
-
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;

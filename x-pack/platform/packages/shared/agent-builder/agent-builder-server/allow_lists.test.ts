@@ -15,7 +15,6 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('security.alert')).toBe(true);
     expect(isAllowedBuiltinAttachment('security.entity_graph')).toBe(true);
     expect(isAllowedBuiltinAttachment('observability.service-map')).toBe(true);
-    expect(isAllowedBuiltinAttachment('workflow.yaml')).toBe(true);
   });
 
   it('returns false for unlisted attachment type ids', () => {

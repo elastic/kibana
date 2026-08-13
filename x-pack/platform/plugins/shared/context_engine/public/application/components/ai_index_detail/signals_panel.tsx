@@ -37,7 +37,7 @@ interface SignalsPanelProps {
 /**
  * Read-only Signals panel. Shows a preaggregated grouped-by-tag list of "issue" cards; clicking a
  * group opens a flyout with its member signals (each drilling into a trace waterfall). A panel-level
- * "Analyze & improve" button opens Agent Builder over all signals once a chat opener is registered.
+ * "Analyze & improve" button opens Agent Builder over all signals once Agent Builder is available.
  */
 export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   const {
@@ -60,8 +60,8 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
 
   const loading = isLoading || isLoadingGroups;
 
-  // "Analyze & improve" is pure plumbing: it can only open a chat once a chat opener is registered
-  // (the Agent Builder bridge) AND the index has a feedback agent configured to open it against.
+  // "Analyze & improve" is pure plumbing: it can only open a chat once Agent Builder is available
+  // AND the index has a feedback agent configured to open it against.
   const hasFeedbackAgent = Boolean(aiIndex?.feedback_agent_id);
 
   const handleAnalyze = () => {

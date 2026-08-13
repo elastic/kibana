@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/logging-mocks'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
 tags:
   - plugin
   - prod
