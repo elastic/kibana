@@ -38,6 +38,7 @@ export interface UseCustomContentHtmlParams {
   generationVersion: number;
   savedTemplate: string | undefined;
   colorMode: EuiThemeColorModeStandard;
+  isApproximate: boolean;
   onTemplateChange: (template: string) => void;
 }
 
@@ -56,6 +57,7 @@ export function useCustomContentHtml({
   generationVersion,
   savedTemplate,
   colorMode,
+  isApproximate,
   onTemplateChange,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [html, setHtml] = useState('');
@@ -120,7 +122,7 @@ export function useCustomContentHtml({
     if (template && esqlQuery) {
       setIsLoading(true);
       setError(undefined);
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
+      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal, isApproximate)
         .then((response) => fillTemplate(template, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
@@ -192,7 +194,8 @@ export function useCustomContentHtml({
             core.http,
             esqlQuery,
             timeRange,
-            controller.signal
+            controller.signal,
+            isApproximate
           );
         } catch (err) {
           if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError'))
@@ -270,7 +273,7 @@ export function useCustomContentHtml({
     return () => {
       controller.abort();
     };
-  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate]);
+  }, [embeddableId, prompt, esqlQuery, timeRange, generationVersion, savedTemplate, isApproximate]);
 
   return { html, isLoading, error, isAiUnavailable };
 }

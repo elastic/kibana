@@ -58,6 +58,7 @@ const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   generationVersion: 0,
   savedTemplate: undefined,
   colorMode: 'LIGHT' as const,
+  isApproximate: false,
   onTemplateChange: jest.fn(),
 };
 
@@ -177,7 +178,8 @@ describe('useCustomContentHtml', () => {
         mockHttp,
         esqlParams.esqlQuery,
         undefined,
-        expect.any(AbortSignal)
+        expect.any(AbortSignal),
+        false
       );
       expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [], []);
       expect(result.current.html).toContain('rendered');
@@ -221,7 +223,8 @@ describe('useCustomContentHtml', () => {
         mockHttp,
         esqlParams.esqlQuery,
         undefined,
-        expect.any(AbortSignal)
+        expect.any(AbortSignal),
+        false
       );
       expect(mockFillTemplate).toHaveBeenCalledWith(LIQUID_TEMPLATE, [], []);
       expect(result.current.html).toContain('rendered');
@@ -249,7 +252,8 @@ describe('useCustomContentHtml', () => {
         mockHttp,
         esqlParams.esqlQuery,
         timeRange,
-        expect.any(AbortSignal)
+        expect.any(AbortSignal),
+        false
       );
     });
 
@@ -359,7 +363,8 @@ describe('useCustomContentHtml', () => {
         mockHttp,
         esqlParams.esqlQuery,
         { from: 'now-7d', to: 'now' },
-        expect.any(AbortSignal)
+        expect.any(AbortSignal),
+        false
       );
     });
   });
@@ -407,6 +412,53 @@ describe('useCustomContentHtml', () => {
 
       rerender({ version: 1 });
       await waitFor(() => expect(streamGenerate).toHaveBeenCalledTimes(2));
+    });
+  });
+
+  describe('isApproximate — approximation switch', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+
+    it('passes isApproximate=true to fetchEsqlData when the switch is on', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, isApproximate: true })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        true
+      );
+    });
+
+    it('re-fetches when isApproximate toggles on an ES|QL panel with a stored template', async () => {
+      const { rerender } = renderHook(
+        ({ isApproximate }: { isApproximate: boolean }) =>
+          useCustomContentHtml({ ...esqlParams, isApproximate }),
+        { initialProps: { isApproximate: false } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ isApproximate: true });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        true
+      );
     });
   });
 });

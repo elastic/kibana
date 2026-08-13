@@ -19,6 +19,7 @@ interface CustomContentComponentProps {
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
+  isApproximate: boolean;
   onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
 }
@@ -45,6 +46,7 @@ export const CustomContentComponent = ({
   timeRange,
   generationVersion,
   savedTemplate,
+  isApproximate,
   onTemplateChange,
   onErrorChange,
 }: CustomContentComponentProps) => {
@@ -57,6 +59,7 @@ export const CustomContentComponent = ({
     generationVersion,
     savedTemplate,
     colorMode,
+    isApproximate,
     onTemplateChange,
   });
 

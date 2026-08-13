@@ -19,7 +19,8 @@ export async function fetchEsqlData(
   http: HttpStart,
   esqlQuery: string,
   timeRange: TimeRange | undefined,
-  signal: AbortSignal
+  signal: AbortSignal,
+  isApproximate?: boolean
 ): Promise<EsqlDataResult> {
   let filter: unknown;
 
@@ -49,6 +50,7 @@ export async function fetchEsqlData(
     signal,
     filter,
     timeRange,
+    ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
   });
 
   return response;

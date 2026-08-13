@@ -9,7 +9,11 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
-import type { HasTypeDisplayName, HasEditCapabilities } from '@kbn/presentation-publishing';
+import type {
+  HasTypeDisplayName,
+  HasEditCapabilities,
+  PublishesEsqlUsage,
+} from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
   titleComparators,
@@ -17,11 +21,12 @@ import {
   useBatchedPublishingSubjects,
   apiPublishesReload,
   apiPublishesTimeRange,
+  fetch$,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
-import { BehaviorSubject, EMPTY, map, merge, skip, switchMap } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, EMPTY, map, merge, skip, switchMap } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
@@ -42,7 +47,8 @@ const EditCustomContentFlyout = lazy(() =>
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
-  HasEditCapabilities;
+  HasEditCapabilities &
+  PublishesEsqlUsage;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -55,6 +61,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
+    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
+    const isApproximate$ = new BehaviorSubject<boolean>(false);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -105,6 +113,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       ...titleManager.api,
       serializeState,
+      usesEsql$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
@@ -115,16 +124,28 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       isEditingEnabled: () => true,
     });
 
+    const esqlUsageSubscription = esqlQuery$
+      .pipe(map(Boolean), distinctUntilChanged())
+      .subscribe((usesEsql) => usesEsql$.next(usesEsql));
+
+    const approximateSubscription = fetch$(api)
+      .pipe(
+        map(({ isApproximate }) => isApproximate),
+        distinctUntilChanged()
+      )
+      .subscribe((isApproximate) => isApproximate$.next(isApproximate));
+
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
-        const [prompt, esqlQuery, savedTemplate, isFlyoutOpen, panelTitle] =
+        const [prompt, esqlQuery, savedTemplate, isFlyoutOpen, panelTitle, isApproximate] =
           useBatchedPublishingSubjects(
             prompt$,
             esqlQuery$,
             template$,
             isFlyoutOpen$,
-            titleManager.api.title$
+            titleManager.api.title$,
+            isApproximate$
           );
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
@@ -132,6 +153,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             ? parentApi.timeRange$.getValue() ?? undefined
             : undefined
         );
+
+        useEffect(() => {
+          return () => {
+            esqlUsageSubscription.unsubscribe();
+            approximateSubscription.unsubscribe();
+          };
+        }, []);
 
         useEffect(() => {
           if (!apiPublishesReload(parentApi)) return;
@@ -210,6 +238,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               timeRange={timeRange}
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}
+              isApproximate={isApproximate}
               onTemplateChange={onTemplateChange}
             />
             {isFlyoutOpen && (
