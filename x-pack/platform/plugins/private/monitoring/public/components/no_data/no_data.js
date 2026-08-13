@@ -24,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
+import { AutoOpsPromotionCallout, AutoOpsEnabledCallout } from '@kbn/autoops-promotion-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toggleSetupMode } from '../../lib/setup_mode';
 import { CheckingSettings } from './checking_settings';
@@ -61,6 +61,10 @@ export function NoData(props) {
     !Legacy.shims.isAirGapped &&
     !cloudConnectStatus.isLoading &&
     !cloudConnectStatus.isCloudConnectAutoopsEnabled &&
+    !hideAnnouncements;
+  const shouldShowAutoOpsEnabledBanner =
+    !Legacy.shims.isAirGapped &&
+    cloudConnectStatus.isCloudConnectAutoopsEnabled &&
     !hideAnnouncements;
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e) => {
@@ -149,6 +153,16 @@ export function NoData(props) {
               <EuiSpacer size="m" />
             </>
           )}
+          {shouldShowAutoOpsEnabledBanner && (
+            <>
+              <AutoOpsEnabledCallout
+                autoOpsUrl={cloudConnectStatus.autoOpsServiceUrl}
+                docsUrl={cloudConnectStatus.autoOpsDocsUrl}
+                style={{ margin: `0 ${euiTheme.size.l}` }}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <EuiPageTemplate.EmptyPrompt
             icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
             body={
@@ -198,6 +212,16 @@ export function NoData(props) {
               cloudConnectUrl={cloudConnectUrl}
               onConnectClick={handleConnectClick}
               hasCloudConnectPermission={hasCloudConnectPermission}
+              style={{ margin: `0 ${euiTheme.size.l}` }}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {shouldShowAutoOpsEnabledBanner && (
+          <>
+            <AutoOpsEnabledCallout
+              autoOpsUrl={cloudConnectStatus.autoOpsServiceUrl}
+              docsUrl={cloudConnectStatus.autoOpsDocsUrl}
               style={{ margin: `0 ${euiTheme.size.l}` }}
             />
             <EuiSpacer size="m" />
