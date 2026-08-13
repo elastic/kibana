@@ -107,6 +107,10 @@ export interface OpenInNewTabParams {
    * The time range to open in the new tab
    */
   timeRange?: TimeRange;
+  /**
+   * Whether the new tab should use approximate ES|QL execution
+   */
+  isApproximate?: boolean;
 }
 
 /**

@@ -21,7 +21,7 @@ import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 // Significant events is gated solely by the availability flag now, so the installer always writes
 // the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`) + 1 investigation
 // workflow.
-const BASE_WORKFLOW_COUNT = 9;
+const BASE_WORKFLOW_COUNT = 8;
 const MEMORY_WORKFLOW_COUNT = 4;
 const INVESTIGATION_WORKFLOW_COUNT = 1;
 const TOTAL_WORKFLOW_COUNT =

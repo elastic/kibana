@@ -300,22 +300,12 @@ export const AwsLambdaConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', { MaxItems: '1' });
-        return {
-          ok: true,
-          message: 'Successfully connected to AWS Lambda API',
-        };
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        return {
-          ok: false,
-          message: `Failed to connect: ${errorMessage}`,
-        };
-      }
+      await callLambdaApi(ctx, 'GET', '/2015-03-31/functions/', { MaxItems: '1' });
+      return {};
     },
     description: i18n.translate('connectorSpecs.awsLambda.test.description', {
       defaultMessage: 'Verifies AWS Lambda API credentials',
     }),
+    enabled: true,
   },
 };

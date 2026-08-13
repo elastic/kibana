@@ -1,5 +1,5 @@
 {
-  "sha1": "3ea6222bcbb5955215fc653150c12b339c24da69",
+  "sha1": "5b6d12f7c354d8240c08e88c96d70b88dad11808",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,8 +15,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 59,
+        "column": 72
       }
     },
     {
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 92,
+        "column": 18
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout_cps_local/api/tests/cps_logs_extraction.spec.ts",
-        "line": 146,
-        "column": 12
+        "line": 137,
+        "column": 36
       }
     }
   ]
