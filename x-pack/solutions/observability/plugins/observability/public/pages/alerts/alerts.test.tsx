@@ -17,6 +17,8 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -141,6 +143,14 @@ jest.mock('../../hooks/use_get_available_rules_with_descriptions');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public');
 
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks'),
+  useGetRuleTypesPermissions: jest.fn(() => ({
+    authorizedToReadAnyRules: true,
+    authorizedToReadRuleType: () => true,
+  })),
+}));
+
 const ruleDescriptions = [
   {
     id: 'observability.rules.custom_threshold',
@@ -163,7 +173,9 @@ function AllTheProviders({ children }: { children: any }) {
   return (
     <ThemeProvider>
       <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <MockAppHeaderProvider>
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </MockAppHeaderProvider>
       </IntlProvider>
     </ThemeProvider>
   );
@@ -220,7 +232,7 @@ describe('AlertsPage with all capabilities', () => {
   it('should render an alerts page template', async () => {
     const wrapper = await setup();
     await waitFor(() => {
-      expect(wrapper.getByText('Alerts')).toBeInTheDocument();
+      expect(wrapper.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
     });
   });
 

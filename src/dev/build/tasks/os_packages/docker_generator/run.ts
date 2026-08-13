@@ -15,7 +15,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { write, copyAll, mkdirp, exec } from '../../../lib';
-import type { Config, Build, Solution } from '../../../lib';
+import type { Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
@@ -39,7 +39,6 @@ export async function runDockerGenerator(
     serverless?: boolean;
     dockerBuildDate?: string;
     fips?: boolean;
-    solution?: Solution;
   }
 ) {
   let baseImageName = '';
@@ -52,18 +51,17 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:e59b9c13d32a840b2f3111d561470ce2902476fb2bad9e472e8092ac10f9c733';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:ce1e3ed54cd5acf812617dfdac35038655309bf4f62f0821fd48bafdf695349f';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.solution) imageFlavor += `-${flags.solution.artifact}`;
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:e4cb92038b58c8c881962a17ec0b9970857a801c0a52f75550258f92f1e93ca1';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:278de9601862fec07772cc560eb77402e2a36edbbe5de64940ed354507aae9ec';
   }
 
   // General docker var config
@@ -78,10 +76,8 @@ export async function runDockerGenerator(
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   let artifactVariant = '';
-  let artifactSolution = '';
   if (flags.serverless) artifactVariant = '-serverless';
-  if (flags.solution) artifactSolution = `-${flags.solution.artifact}`;
-  const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
+  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const tarExt = config.getTarZstd() ? 'tar.zst' : 'tar.gz';
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.${tarExt}`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';

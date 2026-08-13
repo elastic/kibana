@@ -21,7 +21,6 @@ import type {
 import {
   getVirtualVersionMap,
   type IndexMappingMeta,
-  type IndexTypesMap,
   type MigrationResult,
   type SavedObjectsMigrationConfigType,
   type SavedObjectsTypeMappingDefinitions,
@@ -31,12 +30,8 @@ import { pick } from 'lodash';
 import type { Histogram } from '@opentelemetry/api';
 import type { DocumentMigrator } from './document_migrator';
 import { buildActiveMappings, createIndexMap } from './core';
-import {
-  createWaitGroupMap,
-  getIndicesInvolvedInRelocation,
-  indexMapToIndexTypesMap,
-} from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
+import { LOW_MEMORY_BATCH_SIZE, isMemoryConstrained } from './low_memory';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 import type { IndexDetails } from './core/get_index_details';
 import { extractVersionFromKibanaIndexAliases, getIndexDetails } from './core/get_index_details';
@@ -48,8 +43,6 @@ export interface RunV2MigrationOpts {
   kibanaIndexPrefix: string;
   /** The SO type registry to use for the migration */
   typeRegistry: ISavedObjectTypeRegistry;
-  /** The map of indices => types to use as a default / baseline state */
-  defaultIndexTypesMap: IndexTypesMap;
   /** A map that holds [last md5 used => modelVersion] for each of the SO types */
   hashToVersionMap: Record<string, string>;
   /** Logger to use for migration output */
@@ -128,56 +121,33 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
       options.logger.debug(`migrationVersion: ${migrationVersion} saved object type: ${type}`);
     });
 
-  // build a indexTypesMap from the info present in the typeRegistry, e.g.:
-  // {
-  //   '.kibana': ['typeA', 'typeB', ...]
-  //   '.kibana_task_manager': ['task', ...]
-  //   '.kibana_cases': ['typeC', 'typeD', ...]
-  //   ...
-  // }
-  const indexTypesMap = indexMapToIndexTypesMap(indexMap);
-
-  // compare indexTypesMap with the one present (or not) in the .kibana index meta
-  // and check if some SO types have been moved to different indices
-  const indicesWithRelocatingTypes = indexDetails
-    ? // the .kibana index exists, we might have to relocate some SO to different indices
-      getIndicesInvolvedInRelocation(
-        indexDetails?.mappings?._meta?.indexTypesMap ?? options.defaultIndexTypesMap,
-        indexTypesMap
-      )
-    : // this is a fresh deployment, no indices involved in a relocation
-      [];
-
-  // we create synchronization objects (synchronization points) for each of the
-  // migrators involved in relocations, aka each of the migrators that will:
-  // A) reindex some documents TO other indices
-  // B) receive some documents FROM other indices
-  // C) both
-  const readyToReindexWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
-  const doneReindexingWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
-  const updateAliasesWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
-
-  // build a list of all migrators that must be started
-  const migratorIndices = new Set(Object.keys(indexMap));
-  // the types in indices involved in relocation might not have mappings in the current mappings anymore
-  // but if their SOs must be relocated to another index, we still need a migrator to do the job
-  indicesWithRelocatingTypes.forEach((index) => migratorIndices.add(index));
-
   // we will store model versions instead of hashes (to be FIPS compliant)
   const appVersions = getVirtualVersionMap({
     types: options.typeRegistry.getAllTypes(),
     useModelVersionsOnly: true,
   });
 
-  const migrators = Array.from(migratorIndices).map((indexName, i) => {
+  // On memory-constrained instances, migrations are prone to OOM/timeout while
+  // replaying bulk writes. Back off by running index migrators sequentially and
+  // reducing the batch size, trading a longer migration for a lower memory
+  // footprint.
+  const memoryConstrained = isMemoryConstrained();
+  const migrationConfig: SavedObjectsMigrationConfigType = memoryConstrained
+    ? {
+        ...options.migrationConfig,
+        batchSize: Math.min(options.migrationConfig.batchSize, LOW_MEMORY_BATCH_SIZE),
+      }
+    : options.migrationConfig;
+
+  if (memoryConstrained) {
+    options.logger.info(
+      'Kibana is running below the recommended minimum of 2GB of memory. Upgrade migrations will still complete, but will take longer. We recommend running Kibana with at least 2GB of memory.'
+    );
+  }
+
+  const migrators = Array.from(new Set(Object.keys(indexMap))).map((indexName, i) => {
     return {
       migrate: (): Promise<MigrationResult> => {
-        const readyToReindex = readyToReindexWaitGroupMap[indexName];
-        const doneReindexing = doneReindexingWaitGroupMap[indexName];
-        const updateRelocationAliases = updateAliasesWaitGroupMap[indexName];
-        // check if this migrator's index is involved in some document redistribution
-        const mustRelocateDocuments = indicesWithRelocatingTypes.includes(indexName);
-
         // a migrator's index might no longer have any associated types to it
         const typeDefinitions = indexMap[indexName]?.typeMappings ?? {};
 
@@ -186,24 +156,17 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
         const mappingVersions = pick(appVersions, indexTypes);
 
         const _meta: IndexMappingMeta = {
-          indexTypesMap,
           mappingVersions,
         };
 
         return runResilientMigrator({
           client: options.elasticsearchClient,
           kibanaVersion: options.kibanaVersion,
-          mustRelocateDocuments,
           indexTypes,
-          indexTypesMap,
           hashToVersionMap: options.hashToVersionMap,
           waitForMigrationCompletion: options.waitForMigrationCompletion,
           targetIndexMappings: buildActiveMappings(typeDefinitions, _meta),
           logger: options.logger,
-          preMigrationScript: indexMap[indexName]?.script,
-          readyToReindex,
-          doneReindexing,
-          updateRelocationAliases,
           transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
             migrateRawDocsSafely({
               serializer: options.serializer,
@@ -218,7 +181,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
             includeDeferred: false,
           }),
           indexPrefix: indexName,
-          migrationsConfig: options.migrationConfig,
+          migrationsConfig: migrationConfig,
           typeRegistry: options.typeRegistry,
           docLinks: options.docLinks,
           esCapabilities: options.esCapabilities,
@@ -228,24 +191,34 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
     };
   });
 
-  return Promise.all(
-    migrators.map(async (migrator) => {
-      const startTime = performance.now();
-      try {
-        const result = await migrator.migrate();
-        const duration = performance.now() - startTime;
-        options.meter.record(duration, {
-          'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
-        });
-        return result;
-      } catch (error) {
-        const duration = performance.now() - startTime;
-        options.meter.record(duration, {
-          'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
-          'error.type': error.message, // Ideally, we had codes for each error instead.
-        });
-        throw error;
-      }
-    })
-  );
+  const runMigrator = async (migrator: (typeof migrators)[number]): Promise<MigrationResult> => {
+    const startTime = performance.now();
+    try {
+      const result = await migrator.migrate();
+      const duration = performance.now() - startTime;
+      options.meter.record(duration, {
+        'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
+      });
+      return result;
+    } catch (error) {
+      const duration = performance.now() - startTime;
+      options.meter.record(duration, {
+        'kibana.saved_objects.migrations.migrator': migrator.indexPrefix,
+        'error.type': error.message, // Ideally, we had codes for each error instead.
+      });
+      throw error;
+    }
+  };
+
+  if (memoryConstrained) {
+    // Run migrators one at a time so that only a single index migration holds
+    // documents in memory at any given time.
+    const results: MigrationResult[] = [];
+    for (const migrator of migrators) {
+      results.push(await runMigrator(migrator));
+    }
+    return results;
+  }
+
+  return Promise.all(migrators.map(runMigrator));
 };

@@ -9,17 +9,16 @@
 
 import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
-import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
+import type { ConsoleParsedRequestsProvider, ParsedRequest } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
-import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { normalizeUrl } from '../../../lib/utils';
+import { getKibanaApiDocLinks } from '../../../lib/kb';
 import { sendRequest } from '../../hooks';
 import type { Actions } from '../../stores/request';
 
@@ -30,23 +29,26 @@ import {
   getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLinkFromAutocomplete,
+  getKibanaApiDocLink,
   getLineTokens,
   getMethodCompletionItems,
   getRequestEndLineNumber,
   getRequestStartLineNumber,
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
+  isRequestLineStart,
   replaceRequestVariables,
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
+  getTripleQuoteContext,
 } from './utils';
+import type { TripleQuoteContext } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
-import { StorageQuotaError } from '../../components/storage_quota_error';
 import type { ContextValue } from '../../contexts';
-import { containsComments, indentData } from './utils/requests_utils';
+import { containsComments, removeCommentsFromData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
@@ -62,7 +64,8 @@ export class MonacoEditorActionsProvider {
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void,
     private highlightedLinesClassName: string,
-    customParsedRequestsProvider?: ConsoleParsedRequestsProvider
+    customParsedRequestsProvider?: ConsoleParsedRequestsProvider,
+    private setSelectedRequestsCount?: (count: number) => void
   ) {
     // Use custom provider if provided, otherwise fallback to default
     this.parsedRequestsProvider =
@@ -127,6 +130,7 @@ export class MonacoEditorActionsProvider {
     this.setEditorActionsCss({
       visibility: 'hidden',
     });
+    this.setSelectedRequestsCount?.(0);
   }
 
   private updateEditorActions(lineNumber?: number) {
@@ -156,6 +160,8 @@ export class MonacoEditorActionsProvider {
   private async highlightRequests(highlightedLinesClassName: string): Promise<void> {
     // get the requests in the selected range
     const parsedRequests = await this.getSelectedParsedRequests();
+    // Expose the selected-request count so tests can wait for the async parse/selection to settle.
+    this.setSelectedRequestsCount?.(parsedRequests.length);
     // if any requests are selected, highlight the lines and update the position of actions buttons
     if (parsedRequests.length > 0) {
       // display the actions buttons on the 1st line of the 1st selected request
@@ -186,7 +192,9 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  private async getSelectedParsedRequests(): Promise<AdjustedParsedRequest[]> {
+  private async getSelectedParsedRequests(
+    parsedRequests?: ParsedRequest[]
+  ): Promise<AdjustedParsedRequest[]> {
     const model = this.editor.getModel();
 
     if (!model) {
@@ -198,24 +206,25 @@ export class MonacoEditorActionsProvider {
       return Promise.resolve([]);
     }
     const { startLineNumber, endLineNumber } = selection;
-    return this.getRequestsBetweenLines(model, startLineNumber, endLineNumber);
+    return this.getRequestsBetweenLines(model, startLineNumber, endLineNumber, parsedRequests);
   }
 
   private async getRequestsBetweenLines(
     model: monaco.editor.ITextModel,
     startLineNumber: number,
-    endLineNumber: number
+    endLineNumber: number,
+    parsedRequests?: ParsedRequest[]
   ): Promise<AdjustedParsedRequest[]> {
     if (!model) {
       return [];
     }
-    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    const requests = parsedRequests ?? (await this.parsedRequestsProvider.getRequests());
     const selectedRequests: AdjustedParsedRequest[] = [];
-    for (const [index, parsedRequest] of parsedRequests.entries()) {
+    for (const [index, parsedRequest] of requests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
       const requestEndLineNumber = getRequestEndLineNumber({
         parsedRequest,
-        nextRequest: parsedRequests.at(index + 1),
+        nextRequest: requests.at(index + 1),
         model,
         startLineNumber,
       });
@@ -274,8 +283,10 @@ export class MonacoEditorActionsProvider {
       if (requestTextFromEditor && requestTextFromEditor.data.length > 0) {
         requestTextFromEditor.data = requestTextFromEditor.data.map((dataString) => {
           if (containsComments(dataString)) {
-            // parse and stringify to remove comments
-            dataString = indentData(dataString);
+            // Comments must be removed before the request is sent since the body is
+            // flattened into a single line and a line comment would otherwise
+            // comment out the rest of the body (see https://github.com/elastic/kibana/issues/277160)
+            dataString = removeCommentsFromData(dataString);
           }
           return collapseLiteralStrings(dataString);
         });
@@ -306,10 +317,12 @@ export class MonacoEditorActionsProvider {
         autocompleteInfo,
         esHostService,
       },
-      ...startServices
     } = context;
     const { toasts } = notifications;
     try {
+      // Update request state immediately so the UI can reflect progress
+      // even if parsing / sending the request is slow.
+      dispatch({ type: 'setRequestInFlight', payload: true });
       const allRequests = await this.getRequests();
       const selectedRequests = await this.getSelectedParsedRequests();
       if (selectedRequests.length) {
@@ -328,6 +341,7 @@ export class MonacoEditorActionsProvider {
               },
             })
           );
+          dispatch({ type: 'setRequestInFlight', payload: false });
           return;
         }
       }
@@ -349,14 +363,17 @@ export class MonacoEditorActionsProvider {
             defaultMessage: 'The selected request is not valid.',
           })
         );
+        dispatch({ type: 'setRequestInFlight', payload: false });
         return;
       } else if (!requests.length) {
-        toasts.add(
-          i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
+        toasts.add({
+          title: i18n.translate('console.notification.monaco.error.noRequestSelectedTitle', {
             defaultMessage:
               'No request selected. Select a request by placing the cursor inside it.',
-          })
-        );
+          }),
+          color: 'primary',
+        });
+        dispatch({ type: 'setRequestInFlight', payload: false });
         return;
       }
 
@@ -421,19 +438,26 @@ export class MonacoEditorActionsProvider {
                     'Request history is full. Clear the console history or disable saving new requests.',
                 }
               ),
-              text: toMountPoint(
-                StorageQuotaError({
-                  onClearHistory: () => {
+              actionProps: {
+                secondary: {
+                  onClick: () => {
                     history.clearHistory();
                     notifications.toasts.remove(toast);
                   },
-                  onDisableSavingToHistory: () => {
+                  children: i18n.translate('console.notification.clearHistory', {
+                    defaultMessage: 'Clear history',
+                  }),
+                },
+                primary: {
+                  onClick: () => {
                     settings.setIsHistoryEnabled(false);
                     notifications.toasts.remove(toast);
                   },
-                }),
-                startServices
-              ),
+                  children: i18n.translate('console.notification.disableSavingToHistory', {
+                    defaultMessage: 'Disable saving',
+                  }),
+                },
+              },
             });
           } else {
             // Best effort, but still notify the user.
@@ -479,12 +503,33 @@ export class MonacoEditorActionsProvider {
     }
   }
 
-  public async getDocumentationLink(docLinkVersion: string): Promise<string | null> {
+  public async getDocumentationLink(
+    docLinkVersion: string,
+    kibanaApiReferenceLink?: string
+  ): Promise<string | null> {
     const requests = await this.getRequests();
     if (requests.length < 1) {
       return null;
     }
     const request = requests[0];
+
+    // Kibana requests (kbn:) aren't matched by the Elasticsearch autocomplete
+    // definitions, so we resolve their documentation separately: try to deep
+    // link to the specific operation, falling back to the general Kibana API
+    // reference instead of showing "Documentation page is not yet available
+    // for this API".
+    if (request.url.startsWith(KIBANA_API_PREFIX)) {
+      if (!kibanaApiReferenceLink) {
+        return null;
+      }
+      const operationLink = getKibanaApiDocLink(
+        request.method,
+        request.url,
+        getKibanaApiDocLinks(),
+        kibanaApiReferenceLink
+      );
+      return operationLink ?? kibanaApiReferenceLink;
+    }
 
     return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }
@@ -530,9 +575,16 @@ export class MonacoEditorActionsProvider {
     const currentRequests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
     const currentRequest = currentRequests.at(0);
 
-    // if there is no request, suggest method
+    // if there is no request, only suggest method when the line could plausibly
+    // be the start of a new request (empty or starting with letters). A line
+    // that starts with `"`, `{`, `[`, etc. is body-like content and must not
+    // trigger method suggestions.
+    // https://github.com/elastic/kibana/issues/186767
     if (!currentRequest) {
-      return AutocompleteType.METHOD;
+      if (isRequestLineStart(model.getLineContent(lineNumber))) {
+        return AutocompleteType.METHOD;
+      }
+      return null;
     }
 
     // if on the 1st line of the request, suggest method, url or url_params depending on the content
@@ -545,9 +597,17 @@ export class MonacoEditorActionsProvider {
         endLineNumber: lineNumber,
         endColumn: column,
       });
+      const fullLineContent = model.getLineContent(lineNumber);
       const lineTokens = getLineTokens(lineContent);
-      // if there is 1 or fewer tokens, suggest method
+      // if there is 1 or fewer tokens, suggest method — but only when the
+      // full line could plausibly start a request. The parser produces a
+      // partial request (`startOffset` only) on lines that begin with `"`, `{`,
+      // `[`, etc., so this branch is reached even for body-like content.
+      // https://github.com/elastic/kibana/issues/186767
       if (lineTokens.length <= 1) {
+        if (!isRequestLineStart(fullLineContent)) {
+          return null;
+        }
         return AutocompleteType.METHOD;
       }
       // if there are 2 tokens, look at the 2nd one and suggest path or url_params
@@ -571,6 +631,19 @@ export class MonacoEditorActionsProvider {
     position: monaco.Position,
     context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
+    // A triple-quoted string holds raw content (e.g. a Painless script), so Console has nothing
+    // to suggest inside one. `triggerSuggestions` already suppresses its own auto-trigger there,
+    // but this provider is also invoked directly (manual Ctrl+Space, Monaco trigger characters),
+    // so the same guard must apply here. ES|QL query values are handled by the language provider
+    // before it delegates to this one.
+    const { insideTripleQuotes, insideEsqlQuery } = await this.isPositionInsideTripleQuotesAndQuery(
+      model,
+      position
+    );
+    if (insideTripleQuotes && !insideEsqlQuery) {
+      return { suggestions: [] };
+    }
+
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -822,36 +895,33 @@ export class MonacoEditorActionsProvider {
   private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
-    const selectedRequests = await this.getSelectedParsedRequests();
+  ): Promise<TripleQuoteContext> {
+    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    const requestsAtPosition = await this.getRequestsBetweenLines(
+      model,
+      position.lineNumber,
+      position.lineNumber,
+      parsedRequests
+    );
+    return getTripleQuoteContext(model, position, requestsAtPosition, parsedRequests);
+  }
 
-    for (const request of selectedRequests) {
-      if (
-        request.startLineNumber <= position.lineNumber &&
-        request.endLineNumber >= position.lineNumber
-      ) {
-        const requestContentBefore = model.getValueInRange({
-          startLineNumber: request.startLineNumber,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-
-        const { insideTripleQuotes, insideEsqlQuery } =
-          checkForTripleQuotesAndEsqlQuery(requestContentBefore);
-        return {
-          insideTripleQuotes,
-          insideEsqlQuery,
-        };
-      }
-      if (request.startLineNumber > position.lineNumber) {
-        // Stop iteration once we pass the cursor position
-        return { insideTripleQuotes: false, insideEsqlQuery: false };
-      }
-    }
-
-    // Return false if the position is not inside a request
-    return { insideTripleQuotes: false, insideEsqlQuery: false };
+  /**
+   * True when the editor moved on (model swapped, content edited, or cursor moved) since the
+   * given snapshot was taken, so an async answer computed for it must not be acted upon.
+   */
+  private hasEditorStateChanged(
+    model: monaco.editor.ITextModel,
+    modelVersionId: number,
+    position: monaco.Position
+  ): boolean {
+    const currentPosition = this.editor.getPosition();
+    return (
+      this.editor.getModel() !== model ||
+      model.getVersionId() !== modelVersionId ||
+      !currentPosition ||
+      !monaco.Position.equals(currentPosition, position)
+    );
   }
 
   private triggerSuggestions() {
@@ -860,6 +930,7 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
+    const modelVersionId = model.getVersionId();
 
     // Don't trigger (and visually open) the suggestions widget inside comments.
     // Even when our completion provider returns 0 results, Monaco can still surface
@@ -870,6 +941,10 @@ export class MonacoEditorActionsProvider {
 
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
       ({ insideTripleQuotes, insideEsqlQuery }) => {
+        if (this.hasEditorStateChanged(model, modelVersionId, position)) {
+          return;
+        }
+
         if (insideTripleQuotes && !insideEsqlQuery) {
           // Don't trigger autocomplete suggestions inside scripts and strings
           return;

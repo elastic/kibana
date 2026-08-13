@@ -11,7 +11,6 @@ import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { generatePrebuiltRulesPackageZipFile } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
-import { LOGGING_CONFIG } from '../../../../configs/constants';
 
 const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_large_fleet_prebuilt_rules_package`;
 
@@ -37,10 +36,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
          */
         `--xpack.fleet.isAirGapped=true`,
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
-        `--logging.loggers=${JSON.stringify([
-          ...LOGGING_CONFIG,
-          { name: 'elasticsearch.query', level: 'debug' },
-        ])}`,
       ],
     },
     junit: {

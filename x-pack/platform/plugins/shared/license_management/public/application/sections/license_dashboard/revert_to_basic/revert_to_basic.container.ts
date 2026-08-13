@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 
 import { RevertToBasic as PresentationComponent } from './revert_to_basic';
 import {

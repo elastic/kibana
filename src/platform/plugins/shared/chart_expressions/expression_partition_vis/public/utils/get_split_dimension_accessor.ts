@@ -30,7 +30,7 @@ export const getSplitDimensionAccessor = (
       return;
     }
 
-    const f = formatter.convert(v);
+    const f = formatter.convertToText(v);
     return f;
   };
 

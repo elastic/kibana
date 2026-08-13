@@ -13,13 +13,13 @@ import type { Environment } from './environment_rt';
 export const ENVIRONMENT_ALL_VALUE = 'ENVIRONMENT_ALL' as const;
 export const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
 
-export const allOptionText = i18n.translate('xpack.apm.filter.environment.allLabel', {
+export const allOptionText = i18n.translate('apmTypes.filter.environment.allLabel', {
   defaultMessage: 'All',
 });
 
 export function getEnvironmentLabel(environment: string): string {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+    return i18n.translate('apmTypes.filter.environment.notDefinedLabel', {
       defaultMessage: 'Not defined',
     });
   }

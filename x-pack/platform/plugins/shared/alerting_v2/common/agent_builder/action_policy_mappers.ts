@@ -12,12 +12,11 @@ import type { ActionPolicyAttachmentData, CreateActionPolicyData } from '@kbn/al
  * filling in required defaults for missing fields. Used by both the canvas
  * save/update flow and the server-side validation operation.
  */
-export const buildActionPolicyPayload = (
+export const attachmentDataToActionPolicyPayload = (
   data: Partial<ActionPolicyAttachmentData>
 ): CreateActionPolicyData => ({
   name: data.name ?? '',
   description: data.description ?? '',
-  type: data.type ?? 'global',
   destinations: data.destinations ?? [],
   ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
   ...(data.groupBy !== undefined ? { groupBy: data.groupBy ?? undefined } : {}),

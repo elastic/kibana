@@ -6,8 +6,8 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
-import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';

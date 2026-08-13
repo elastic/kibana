@@ -6,8 +6,9 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { test } from '../fixtures';
+import { test, testData } from '../fixtures';
+
+const { DYNAMIC_SETTINGS_DEFAULTS } = testData;
 
 test.describe('Uptime missing mappings', { tag: ['@local-stateful-classic'] }, () => {
   const testIndex = 'heartbeat-missing-mappings-test';

@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import { waitFor, renderHook } from '@testing-library/react';
-import { useUserInfo, ManageUserInfo } from '.';
+import { renderHook, waitFor } from '@testing-library/react';
+import { ManageUserInfo, useUserInfo } from '.';
 import type { Capabilities } from '@kbn/core/public';
 
 import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
-import { sourcererSelectors } from '../../../common/store';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 
 jest.mock('../../../common/lib/kibana');
@@ -34,9 +33,6 @@ describe('useUserInfo', () => {
         },
       },
     });
-
-    jest.spyOn(sourcererSelectors, 'signalIndexName').mockReturnValue(null);
-    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
   it('returns default state', async () => {
     const { result } = renderHook(() => useUserInfo(), {

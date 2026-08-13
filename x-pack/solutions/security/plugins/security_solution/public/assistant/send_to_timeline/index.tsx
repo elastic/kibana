@@ -9,13 +9,11 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { PageScope } from '../../data_view_manager/constants';
 import { extractTimelineCapabilities } from '../../common/utils/timeline_capabilities';
-import { sourcererSelectors } from '../../common/store';
-import { sourcererActions } from '../../common/store/actions';
 import { inputsActions } from '../../common/store/inputs';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import type { TimeRange } from '../../common/store/inputs/model';
@@ -35,11 +33,12 @@ import {
 } from '../../timelines/store/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDiscoverState } from '../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSignalIndexName } from '../../data_view_manager/hooks/use_signal_index_name';
+import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
+import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -64,22 +63,17 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
 
-  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(PageScope.timeline);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const { dataView: experimentalDataView } = useDataView(PageScope.timeline);
-
-  const timelineDataViewId = newDataViewPickerEnabled
-    ? experimentalDataView.id ?? null
-    : oldTimelineDataViewId;
+  const timelineDataViewId = experimentalDataView.id ?? null;
 
   const { setDiscoverAppState } = useDiscoverState();
   const {
     application: { capabilities },
   } = useKibana().services;
   const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
-  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
-  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
+  const signalIndexName = useSignalIndexName();
+  const { id: defaultDataViewId } = useSecurityDefaultPatterns();
+  const setSelectedDataView = useSelectDataView();
 
   const configureAndOpenTimeline = useCallback(async () => {
     // Hide the assistant overlay so timeline can be seen (noop if using assistant in timeline)
@@ -239,13 +233,11 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
       // Only show detection alerts
       // (This is required so the timeline event count matches the prevalence count)
       if (!keepDataView) {
-        dispatch(
-          sourcererActions.setSelectedDataView({
-            id: PageScope.timeline,
-            selectedDataViewId: defaultDataView.id,
-            selectedPatterns: [signalIndexName || ''],
-          })
-        );
+        setSelectedDataView({
+          scope: PageScope.timeline,
+          id: defaultDataViewId,
+          fallbackPatterns: [signalIndexName || ''],
+        });
       }
       // Unlock the time range from the global time range
       dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
@@ -258,7 +250,8 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
     dispatch,
     discoverStateContainer,
     timelineDataViewId,
-    defaultDataView.id,
+    defaultDataViewId,
+    setSelectedDataView,
     signalIndexName,
     setDiscoverAppState,
     defaultDiscoverAppState,

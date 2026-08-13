@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { deriveQueryType, QUERY_TYPE_STATS } from '@kbn/streams-schema';
+import { deriveQueryType } from '@kbn/streams-schema';
+import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { KIQueryGenerationEvaluator } from '../types';
 import { getQueriesFromOutput } from '../types';
 
@@ -57,7 +58,7 @@ export const queryTypeDistributionEvaluator: KIQueryGenerationEvaluator = {
         issues.length > 0
           ? `${issues.join('; ')} (${typeCounts.match} match, ${typeCounts.stats} stats)`
           : `Both query types present: ${typeCounts.match} match, ${typeCounts.stats} stats`,
-      details: typeCounts,
+      metadata: typeCounts,
     };
   },
 };

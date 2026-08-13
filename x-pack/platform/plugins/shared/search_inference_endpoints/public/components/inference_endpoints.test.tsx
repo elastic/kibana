@@ -11,6 +11,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 import { InferenceEndpoints } from './inference_endpoints';
@@ -37,6 +39,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         application: {
           capabilities: {
             cloudConnect: { show: true, configure: true },
+            searchInferenceEndpoints: { show: true, manage: true },
           },
           navigateToApp: jest.fn(),
         },
@@ -44,6 +47,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     })),
   };
 });
+
+const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
 const { useQueryInferenceEndpoints } = jest.requireMock('../hooks/use_inference_endpoints');
 
@@ -95,11 +100,13 @@ const onlyElasticEndpoints: InferenceAPIConfigResponse[] = [
 
 const renderComponent = () => {
   return render(
-    <EuiThemeProvider>
-      <I18nProvider>
-        <InferenceEndpoints />
-      </I18nProvider>
-    </EuiThemeProvider>
+    <MockChromeContextProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <InferenceEndpoints />
+        </I18nProvider>
+      </EuiThemeProvider>
+    </MockChromeContextProvider>
   );
 };
 
@@ -147,7 +154,7 @@ describe('InferenceEndpoints', () => {
 
     renderComponent();
 
-    expect(screen.getByTestId('externalInferenceHeader')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.queryByTestId('externalInferenceEmptyPrompt')).not.toBeInTheDocument();
   });
 
@@ -222,10 +229,12 @@ describe('InferenceEndpoints', () => {
 
     renderComponent();
 
-    expect(screen.getByText('External Inference')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'External Inference'
+    );
   });
 
-  it('shows only API documentation link in header', () => {
+  it('shows only the External Inference header (not EIS-specific elements)', () => {
     useQueryInferenceEndpoints.mockReturnValue({
       data: mixedEndpoints,
       isLoading: false,
@@ -234,8 +243,52 @@ describe('InferenceEndpoints', () => {
 
     renderComponent();
 
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.queryByTestId('eis-documentation')).not.toBeInTheDocument();
     expect(screen.queryByTestId('view-your-models')).not.toBeInTheDocument();
-    expect(screen.getByTestId('api-documentation')).toBeInTheDocument();
+  });
+
+  describe('read-only mode (manage: false)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: { isCloudEnabled: false },
+          application: {
+            capabilities: {
+              cloudConnect: { show: true, configure: true },
+              searchInferenceEndpoints: { show: true, manage: false },
+            },
+            navigateToApp: jest.fn(),
+          },
+        },
+      });
+    });
+
+    it('hides the Add endpoint button in the header when third-party endpoints exist', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: mixedEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+      expect(screen.queryByTestId('add-inference-endpoint-header-button')).not.toBeInTheDocument();
+    });
+
+    it('hides the Add endpoint button in the empty prompt', () => {
+      useQueryInferenceEndpoints.mockReturnValue({
+        data: onlyElasticEndpoints,
+        isLoading: false,
+        refetch: mockRefetch,
+      });
+
+      renderComponent();
+
+      expect(screen.queryByTestId('addEndpointButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('externalInferenceEmptyPrompt')).toBeInTheDocument();
+      expect(screen.getByTestId('viewDocumentationLink')).toBeInTheDocument();
+    });
   });
 });

@@ -6,33 +6,46 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type {
   OptionsListESQLControlState,
   OptionsListSearchTechnique,
 } from '@kbn/controls-schemas';
+import type { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesESQLVariable, QueryESQLControl, StaticESQLControl } from '@kbn/esql-types';
 import type {
+  CanCancelRequests,
+  CanIndicateRelatedSiblings,
   HasEditCapabilities,
   HasType,
   HasUniqueId,
   PublishesDataLoading,
+  PublishesESQLQuery,
+  PublishesRelatedPanels,
   PublishesUnsavedChanges,
   PublishingSubject,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
+import type { initializeLabelManager } from '../control_labels';
 import type { TemporaryState } from '../data_controls/options_list_control/temporay_state_manager';
 import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../types';
-import type { initializeLabelManager } from '../control_labels';
 
 export type ESQLControlApi<State> = DefaultEmbeddableApi<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl
 > &
+  CanCancelRequests &
   PublishesESQLVariable &
+  PublishesESQLQuery &
   PublishesUnsavedChanges &
+  PublishesRelatedPanels &
   HasEditCapabilities &
   PublishesDataLoading &
-  ReturnType<typeof initializeLabelManager>['api'];
+  PublishesTooltipLabel &
+  CanIndicateRelatedSiblings &
+  ReturnType<typeof initializeLabelManager>['api'] &
+  SupportsJsonExport;
 
 export type ESQLOptionsListRuntimeState = Omit<OptionsListESQLControlState, 'available_options'> &
   Pick<StaticESQLControl, 'available_options'>; // both types have `available_options` during runtime
@@ -46,16 +59,17 @@ export type ESQLOptionsListComponentState = Pick<
    * being impacted by default embeddable title handling, we switch to `label` for the implementation
    */
   label: string;
-} & Omit<TemporaryState<string>, 'requestSize'>;
+} & Omit<TemporaryState<string>, 'requestSize' | 'isPartial'>;
 
 export type ESQLOptionsListComponentApi = HasType &
   HasUniqueId &
+  PublishesTooltipLabel &
   OptionsListPublishesOptions<string> &
   SubjectsOf<ESQLOptionsListComponentState> &
   SettersOf<
     Omit<
       TemporaryState<string>,
-      'availableOptions' | 'requestSize' | 'searchStringValid' | 'totalCardinality'
+      'availableOptions' | 'requestSize' | 'searchStringValid' | 'totalCardinality' | 'isPartial'
     >
   > &
   OptionsListSelectionsApi & {

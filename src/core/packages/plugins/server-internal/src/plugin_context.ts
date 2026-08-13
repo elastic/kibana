@@ -315,6 +315,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
     security: {
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
+      acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
@@ -383,6 +384,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      selfClient: deps.http.selfClient,
       staticAssets: {
         prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>

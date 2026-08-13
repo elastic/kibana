@@ -10,6 +10,7 @@ import type { CreateCompositeSLOForm } from './types';
 
 export const MAX_WIDTH = 900;
 export const MAX_COMPOSITE_MEMBERS = 25;
+export const MIN_COMPOSITE_MEMBERS = 2;
 
 export const COMPOSITE_ROLLING_TIMEWINDOW_OPTIONS = [
   {

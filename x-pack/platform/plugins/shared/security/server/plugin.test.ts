@@ -104,6 +104,9 @@ describe('Security Plugin', () => {
               "alerting": AlertingActions {
                 "prefix": "alerting:",
               },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
+              },
               "api": ApiActions {
                 "prefix": "api:",
               },
@@ -209,6 +212,9 @@ describe('Security Plugin', () => {
               "alerting": AlertingActions {
                 "prefix": "alerting:",
               },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
+              },
               "api": ApiActions {
                 "prefix": "api:",
               },
@@ -239,6 +245,7 @@ describe('Security Plugin', () => {
           "userProfiles": Object {
             "bulkGet": [Function],
             "getCurrent": [Function],
+            "getCurrentProfileId": [Function],
             "suggest": [Function],
           },
         }

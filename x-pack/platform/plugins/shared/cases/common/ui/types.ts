@@ -42,7 +42,7 @@ import type {
 } from '../types/domain';
 import type {
   CasePatchRequest,
-  CasesFindResponse,
+  CasesSearchResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -77,6 +77,9 @@ export interface CasesUiConfigType {
   attachments?: {
     enabled: boolean;
   };
+  chat?: {
+    enabled: boolean;
+  };
   markdownPlugins: {
     lens: boolean;
   };
@@ -92,6 +95,11 @@ export interface CasesUiConfigType {
   };
   templates: {
     enabled: boolean;
+  };
+  casesRedesign: {
+    list: boolean;
+    details: boolean;
+    settings: boolean;
   };
 }
 
@@ -136,7 +144,10 @@ export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & {
 export type ObservableUI = CaseUI['observables'][0];
 
 export type CasesUI = CaseUI[];
-export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
+// Derived from the internal `_search` response superset (not the public `_find` response) so the
+// list UI type carries the optional `mttr` the metrics bar reads. The public `_find` path simply
+// leaves `mttr` undefined.
+export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesSearchResponse>, 'cases'> & {
   cases: CasesUI;
 };
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;

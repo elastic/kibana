@@ -29,6 +29,7 @@ import type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
 } from '../../types';
+import type { NamespaceConflictWarning } from '../../../common/types/rest_spec/epm';
 import type {
   BulkUpgradePackagesRequest,
   BulkOperationPackagesResponse,
@@ -43,6 +44,7 @@ import type {
   BulkRollbackPackagesRequest,
   RollbackAvailableCheckResponse,
   BulkRollbackAvailableCheckResponse,
+  GetIlmPoliciesResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -319,6 +321,20 @@ export const useGetEpmDatastreams = () => {
   );
 };
 
+export const useGetIlmPoliciesQuery = (options?: { enabled?: boolean }) => {
+  return useQuery<GetIlmPoliciesResponse, RequestError>({
+    queryKey: ['get-ilm-policies'],
+    queryFn: () =>
+      sendRequestForRq<GetIlmPoliciesResponse>({
+        path: epmRouteService.getIlmPoliciesPath(),
+        method: 'get',
+        version: API_VERSIONS.internal.v1,
+      }),
+    enabled: options?.enabled,
+    refetchOnWindowFocus: false,
+  });
+};
+
 export const sendGetFileByPath = (filePath: string) => {
   return sendRequest<string>({
     path: epmRouteService.getFilePath(filePath),
@@ -503,6 +519,27 @@ export const useUpdatePackageMutation = () => {
       queryClient.invalidateQueries([pkgName]);
       queryClient.invalidateQueries(['get-packages']);
     },
+  });
+};
+
+interface NamespacePreflightCheckArgs {
+  pkgName: string;
+  namespaces: string[];
+}
+
+interface NamespacePreflightCheckResponse {
+  warnings: NamespaceConflictWarning[];
+}
+
+export const useNamespacePreflightCheckMutation = () => {
+  return useMutation<NamespacePreflightCheckResponse, RequestError, NamespacePreflightCheckArgs>({
+    mutationFn: ({ pkgName, namespaces }: NamespacePreflightCheckArgs) =>
+      sendRequestForRq<NamespacePreflightCheckResponse>({
+        path: epmRouteService.getNamespacePreflightCheckPath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.internal.v1,
+        body: { namespaces },
+      }),
   });
 };
 

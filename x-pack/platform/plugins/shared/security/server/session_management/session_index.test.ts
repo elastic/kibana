@@ -54,7 +54,9 @@ describe('Session index', () => {
       runAt: new Date(),
       status: TaskStatus.Idle,
     },
-    abortController: new AbortController(),
+    signal: new AbortController().signal,
+    executionUuid: 'test-execution-uuid',
+    setCustomTaskRunEventFields: jest.fn(),
   };
 
   const createSessionIndexOptions = (
@@ -1151,7 +1153,9 @@ describe('Session index', () => {
           ...mockRunContext.taskInstance,
           state: { shardMissingCounter: 9 },
         },
-        abortController: new AbortController(),
+        signal: new AbortController().signal,
+        executionUuid: 'test-execution-uuid',
+        setCustomTaskRunEventFields: jest.fn(),
       };
 
       await expect(sessionIndex.cleanUp(runContext)).resolves.toEqual({

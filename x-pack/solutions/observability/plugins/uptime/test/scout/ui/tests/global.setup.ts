@@ -19,5 +19,8 @@ globalSetupHook(
 
     log.debug('[setup] loading full heartbeat data...');
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FULL_HEARTBEAT);
+
+    log.debug('[setup] loading browser data...');
+    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BROWSER);
   }
 );

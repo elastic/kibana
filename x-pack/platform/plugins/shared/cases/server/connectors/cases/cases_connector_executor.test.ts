@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
 import {
+  CASE_EXTENDED_FIELDS,
   CASE_RULES_SAVED_OBJECT,
   MAX_OPEN_CASES_DEFAULT_MAXIMUM,
   MAX_ALERTS_PER_CASE,
@@ -89,6 +90,7 @@ describe('CasesConnectorExecutor', () => {
     reopenClosedCases,
     maximumCasesToOpen: 5,
     templateId: null,
+    templateVersion: null,
   };
 
   beforeEach(() => {
@@ -119,6 +121,16 @@ describe('CasesConnectorExecutor', () => {
     casesClientMock.cases.bulkUpdate.mockResolvedValue([]);
     casesClientMock.attachments.bulkCreate.mockResolvedValue(cases[0]);
     casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
+    casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+      fieldDefinitions: [],
+      total: 0,
+    });
+    casesClientMock.templates.getAllTemplates.mockResolvedValue({
+      templates: [],
+      page: 1,
+      perPage: 10000,
+      total: 0,
+    });
 
     getCasesClient.mockReturnValue(casesClientMock);
 
@@ -128,6 +140,7 @@ describe('CasesConnectorExecutor', () => {
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
       spaceId: 'default',
+      isTemplatesEnabled: true,
     });
 
     dateMathMock.parse.mockImplementation(() => moment('2023-10-09T10:23:42.769Z'));
@@ -1219,6 +1232,559 @@ describe('CasesConnectorExecutor', () => {
                 ],
               }
             `);
+          });
+        });
+
+        describe('Templates v2', () => {
+          const v2TemplateSO = {
+            id: 'tmpl-v2-id',
+            type: 'cases-templates',
+            references: [],
+            attributes: {
+              templateId: 'tmpl-v2-id',
+              name: 'V2 Template',
+              owner: 'cases',
+              definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+tags:
+  - v2-tag
+severity: medium
+category: "Phishing"
+fields: []
+`,
+              templateVersion: 1,
+              deletedAt: null,
+              isEnabled: true,
+              isLatest: true,
+            },
+          };
+
+          beforeEach(() => {
+            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(v2TemplateSO);
+          });
+
+          it('creates a new case using v2 template fields when templateVersion is set', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.description).toBe('Created from v2 template');
+            expect(createdCase.tags).toContain('v2-tag');
+            expect(createdCase.severity).toBe('medium');
+            expect(createdCase.category).toBe('Phishing');
+            expect(createdCase.connector.type).toBe('.none');
+            expect(createdCase.customFields).toEqual([]);
+          });
+
+          it('does not use the v2 template name as the title, letting the Oracle-generated title win', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            expect(bulkCreateCall.cases[0].title).not.toBe('V2 Template');
+            expect(bulkCreateCall.cases[0].title).toBe(
+              'Test rule - Grouping by A & 0.0.0.1 (Auto-created)'
+            );
+          });
+
+          it('uses the explicit groupedAlerts title over the Oracle-generated title when provided', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+              groupedAlerts: [{ alerts: params.alerts, grouping: {}, title: 'Explicit title' }],
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            expect(bulkCreateCall.cases[0].title).toBe('Explicit title');
+          });
+
+          it('sets the template reference on the created case', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.template).toEqual({ id: 'tmpl-v2-id', version: 1 });
+          });
+
+          it('does not gate the v1 path on the templates feature flag but does not set a template reference', async () => {
+            const connectorExecutorWithTemplatesDisabled = new CasesConnectorExecutor({
+              logger: mockLogger,
+              casesOracleService: new CasesOracleServiceMock(),
+              casesService: new CasesServiceMock(),
+              casesClient: casesClientMock,
+              spaceId: 'default',
+              isTemplatesEnabled: false,
+            });
+
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutorWithTemplatesDisabled.execute({
+              ...params,
+              templateId: null,
+              templateVersion: null,
+            });
+
+            expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            expect(bulkCreateCall.cases[0].template).toBeUndefined();
+          });
+
+          it('does not use the v2 template path when isTemplatesEnabled is false, even if templateVersion and templateId are set', async () => {
+            const connectorExecutorWithTemplatesDisabled = new CasesConnectorExecutor({
+              logger: mockLogger,
+              casesOracleService: new CasesOracleServiceMock(),
+              casesService: new CasesServiceMock(),
+              casesClient: casesClientMock,
+              spaceId: 'default',
+              isTemplatesEnabled: false,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutorWithTemplatesDisabled.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            // Falls back to the v1 path defaults instead of throwing when the SO type is unregistered
+            expect(createdCase.description).toContain('Test rule');
+            expect(createdCase.template).toBeUndefined();
+          });
+
+          it('falls back to default fields when v2 template is not found, logs warn', async () => {
+            casesClientMock.templates.getTemplate = jest.fn().mockResolvedValue(undefined);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            // falls back to generated description
+            expect(bulkCreateCall.cases[0].description).toContain('Test rule');
+          });
+
+          it('does not call templates.getTemplate when templateVersion is null (v1 path)', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: null,
+              templateVersion: null,
+            });
+
+            expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+          });
+
+          it('populates required custom fields with defaults on the v2 path', async () => {
+            casesClientMock.configure.get = jest.fn().mockResolvedValue([
+              {
+                owner: params.owner,
+                customFields: [
+                  {
+                    key: 'req-text-key',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'Required text',
+                    required: true,
+                    defaultValue: 'default-text',
+                  },
+                  {
+                    key: 'req-toggle-key',
+                    type: CustomFieldTypes.TOGGLE,
+                    label: 'Required toggle',
+                    required: true,
+                    defaultValue: null,
+                  },
+                ],
+                templates: [],
+              },
+            ]);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.customFields).toEqual([
+              { key: 'req-text-key', type: CustomFieldTypes.TEXT, value: 'default-text' },
+              { key: 'req-toggle-key', type: CustomFieldTypes.TOGGLE, value: false },
+            ]);
+          });
+
+          it('populates extended_fields from inline template field defaults on the v2 path', async () => {
+            const v2TemplateWithInlineFields = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+description: "Created from v2 template"
+fields:
+  - name: my_text
+    type: keyword
+    control: INPUT_TEXT
+    label: My text
+    metadata:
+      default: "hello world"
+  - name: my_number
+    type: long
+    control: INPUT_NUMBER
+    label: My number
+    metadata:
+      default: 42
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithInlineFields);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+              my_text_as_keyword: 'hello world',
+              my_number_as_long: '42',
+            });
+          });
+
+          it('populates extended_fields by resolving $ref fields from the library on the v2 path', async () => {
+            const v2TemplateWithRefField = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+fields:
+  - $ref: "library-field"
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithRefField);
+
+            casesClientMock.fieldDefinitions.getFieldDefinitions.mockResolvedValue({
+              fieldDefinitions: [
+                {
+                  fieldDefinitionId: 'fd-1',
+                  name: 'library-field',
+                  owner: params.owner,
+                  definition: `
+name: library_field
+type: keyword
+control: INPUT_TEXT
+label: Library field
+metadata:
+  default: "from-library"
+`,
+                },
+              ],
+              total: 1,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+              library_field_as_keyword: 'from-library',
+            });
+          });
+
+          it('does not set extended_fields when the template has no fields', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+          });
+
+          it('uses v2 template when creating cases from closed cases (createNewCasesOutOfClosedCases path)', async () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [{ ...cases[0], status: CaseStatuses.closed }, cases[1]],
+              errors: [],
+            });
+
+            mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+              reopenClosedCases: false,
+            });
+
+            expect(casesClientMock.templates.getTemplate).toHaveBeenCalledWith(
+              'tmpl-v2-id',
+              '1',
+              expect.any(Object)
+            );
+
+            const bulkCreateCall = casesClientMock.cases.bulkCreate.mock.calls[0][0];
+            const createdCase = bulkCreateCall.cases[0];
+
+            expect(createdCase.description).toBe('Created from v2 template');
+            expect(createdCase.severity).toBe('medium');
+          });
+
+          describe('Legacy template key bridge (v1 -> v2)', () => {
+            const migratedV2Template = {
+              templateId: 'migrated-v2-id',
+              name: 'TestTemplateOne',
+              owner: params.owner,
+              templateVersion: 3,
+              deletedAt: null,
+              legacyKey: 'legacy-template-key',
+              fieldSearchMatches: false,
+              definition: `
+name: "TestTemplateOne"
+description: "Migrated from v1"
+severity: medium
+fields:
+  - name: my_text
+    type: keyword
+    control: INPUT_TEXT
+    label: My text
+    metadata:
+      default: "bridged value"
+`,
+            };
+
+            beforeEach(() => {
+              casesClientMock.configure.get = jest.fn().mockResolvedValue([
+                {
+                  owner: params.owner,
+                  customFields: [],
+                  templates: [
+                    { key: 'legacy-template-key', name: 'TestTemplateOne', caseFields: null },
+                  ],
+                },
+              ]);
+
+              casesClientMock.cases.bulkGet.mockResolvedValue({
+                cases: [],
+                errors: [
+                  { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+                ],
+              });
+            });
+
+            it('bridges a stored legacy template key to the migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [migratedV2Template],
+                page: 1,
+                perPage: 10000,
+                total: 1,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              // Legacy keys are bridged by name via getAllTemplates, not the id+version getTemplate lookup.
+              expect(casesClientMock.templates.getTemplate).not.toHaveBeenCalled();
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.description).toBe('Migrated from v1');
+              expect(createdCase.severity).toBe('medium');
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toEqual({
+                my_text_as_keyword: 'bridged value',
+              });
+            });
+
+            it('resolves the correct migrated template by legacyKey when two v1 templates shared a name', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [
+                  {
+                    ...migratedV2Template,
+                    templateId: 'migrated-v2-id-other',
+                    legacyKey: 'some-other-key',
+                    definition: `
+name: "TestTemplateOne"
+description: "Wrong sibling"
+fields: []
+`,
+                  },
+                  migratedV2Template,
+                ],
+                page: 1,
+                perPage: 10000,
+                total: 2,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toEqual({ id: 'migrated-v2-id', version: 3 });
+              expect(createdCase.description).toBe('Migrated from v1');
+            });
+
+            it('falls back to the v1 path when the legacy key has no migrated v2 template', async () => {
+              casesClientMock.templates.getAllTemplates.mockResolvedValue({
+                templates: [],
+                page: 1,
+                perPage: 10000,
+                total: 0,
+              });
+
+              await connectorExecutor.execute({
+                ...params,
+                templateId: 'legacy-template-key',
+                templateVersion: null,
+              });
+
+              const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+
+              expect(createdCase.template).toBeUndefined();
+              expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
           });
         });
 
@@ -3175,6 +3741,7 @@ describe('CasesConnectorExecutor', () => {
       reopenClosedCases,
       maximumCasesToOpen: 5,
       templateId: null,
+      templateVersion: null,
       autoPushCase: null,
     };
 

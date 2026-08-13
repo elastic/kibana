@@ -18,13 +18,14 @@ import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
-import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useCompositeSloEnabled } from '../../hooks/use_composite_slo_enabled';
+import { useHasSlos } from '../../hooks/use_has_slos';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LoadingPage } from '../loading_page';
-import { CompositeSloList } from './components/composite_slo_list';
+import { CompositeSloList } from './components/composite_slo/composite_slo_list';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloList } from './components/slo_list';
 import { SloListSearchBar } from './components/slo_list_search_bar';
@@ -54,12 +55,12 @@ export function SlosPage() {
     http: { basePath },
     serverless,
   } = useKibana().services;
-  const { ObservabilityPageTemplate, experimentalFeatures } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const { data: permissions } = usePermissions();
   const history = useHistory();
   const location = useLocation();
-  const isCompositeSloEnabled = experimentalFeatures?.compositeSlo?.enabled ?? false;
+  const isCompositeSloEnabled = useCompositeSloEnabled();
   const isCompositePath = location.pathname === SLOS_COMPOSITE_PATH;
   const selectedTabId: TabId = isCompositePath && isCompositeSloEnabled ? 'compositeSlos' : 'slos';
 
@@ -70,11 +71,7 @@ export function SlosPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCompositePath, isCompositeSloEnabled]);
 
-  const {
-    data: { total } = { total: 0 },
-    isLoading,
-    isError,
-  } = useFetchSloDefinitions({ perPage: 0 });
+  const { hasSlos, isLoading, isError } = useHasSlos();
 
   useBreadcrumbs(
     [
@@ -90,14 +87,14 @@ export function SlosPage() {
   );
 
   useEffect(() => {
-    if ((!isLoading && total === 0) || hasAtLeast('platinum') === false || isError) {
+    if ((!isLoading && !hasSlos) || hasAtLeast('platinum') === false || isError) {
       history.replace(SLOS_WELCOME_PATH);
     }
 
     if (permissions?.hasAllReadRequested === false) {
       history.replace(SLOS_WELCOME_PATH);
     }
-  }, [history, basePath, hasAtLeast, isError, isLoading, total, permissions]);
+  }, [history, basePath, hasAtLeast, isError, isLoading, hasSlos, permissions]);
 
   if (isLoading) {
     return <LoadingPage dataTestSubj="sloListPageLoading" />;

@@ -53,4 +53,36 @@ describe('TelemetryService', () => {
       {}
     );
   });
+
+  it('should report metrics callout date range selection event with the properties', async () => {
+    telemetry.reportMetricsCalloutDateRangeSelected({
+      calloutType: 'overlap',
+      selectedInstrumentationType: 'classic_apm',
+    });
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.METRICS_CALLOUT_DATE_RANGE_SELECTED,
+      {
+        calloutType: 'overlap',
+        selectedInstrumentationType: 'classic_apm',
+      }
+    );
+  });
+
+  it('should report metrics callout loaded event with the properties', async () => {
+    telemetry.reportMetricsCalloutLoaded({
+      calloutType: 'non_overlap',
+      shownInstrumentationType: 'otel_native',
+    });
+
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.METRICS_CALLOUT_LOADED,
+      {
+        calloutType: 'non_overlap',
+        shownInstrumentationType: 'otel_native',
+      }
+    );
+  });
 });

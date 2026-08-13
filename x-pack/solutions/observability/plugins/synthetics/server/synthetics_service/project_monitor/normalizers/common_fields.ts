@@ -10,6 +10,8 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { resolveMaintenanceWindowsOrThrow } from '../../maintenance_windows/resolve_maintenance_windows';
 import { hasNoParams } from '../../formatters/param_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import type {
@@ -40,6 +42,7 @@ export interface NormalizedProjectProps {
   projectId: string;
   namespace: string;
   version: string;
+  maintenanceWindows?: MaintenanceWindow[];
 }
 
 export interface Error {
@@ -60,6 +63,7 @@ export const getNormalizeCommonFields = ({
   monitor,
   projectId,
   namespace,
+  maintenanceWindows = [],
 }: NormalizedProjectProps): { errors: Error[]; normalizedFields: Partial<CommonFields> } => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
   const errors = [];
@@ -103,8 +107,10 @@ export const getNormalizeCommonFields = ({
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
-    [ConfigKey.MAINTENANCE_WINDOWS]:
-      monitor.maintenanceWindows || defaultFields[ConfigKey.MAINTENANCE_WINDOWS],
+    [ConfigKey.MAINTENANCE_WINDOWS]: resolveMaintenanceWindowsOrThrow(
+      monitor.maintenanceWindows,
+      maintenanceWindows
+    ),
     [ConfigKey.KIBANA_SPACES]: monitor.spaces || defaultFields[ConfigKey.KIBANA_SPACES],
     ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
       [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],
@@ -141,13 +147,17 @@ const ONLY_ONE_ATTEMPT = 1;
 
 export const getMaxAttempts = (retestOnFailure?: boolean, maxAttempts?: number) => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
-  if (!retestOnFailure && maxAttempts) {
-    return maxAttempts;
-  }
-  if (retestOnFailure) {
+  // An explicit `retest_on_failure` always wins. On update the merged payload
+  // still carries the previous `max_attempts`, so checking `maxAttempts` first
+  // would ignore a request that sets `retest_on_failure: false` (see #243891).
+  if (retestOnFailure === true) {
     return defaultFields[ConfigKey.MAX_ATTEMPTS];
-  } else if (retestOnFailure === false) {
+  }
+  if (retestOnFailure === false) {
     return ONLY_ONE_ATTEMPT;
+  }
+  if (maxAttempts) {
+    return maxAttempts;
   }
   return defaultFields[ConfigKey.MAX_ATTEMPTS];
 };

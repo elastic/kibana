@@ -13,6 +13,10 @@ on:
         description: Triggering comment id for dispatched follow-up runs
         required: false
         type: string
+      comment_type:
+        description: Triggering comment event type for dispatched follow-up runs
+        required: false
+        type: string
   bots:
     - github-actions[bot]
     - kibanamachine
@@ -81,6 +85,7 @@ env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
+  REVIEWER_COMMENT_TYPE: ${{ github.event.inputs.comment_type }}
 tools:
   github:
     toolsets: [default]
@@ -110,6 +115,7 @@ steps:
       path: /tmp/gh-aw/agent
 safe-outputs:
   footer: true
+  report-failure-as-issue: false
   noop:
     report-as-issue: false
   create-pull-request-review-comment:
@@ -119,6 +125,7 @@ safe-outputs:
     max: 1
     target: ${{ env.PR_NUMBER }}
     allowed-events: [COMMENT]
+    footer: if-body
   add-comment:
     max: 1
     target: ${{ env.PR_NUMBER }}
@@ -126,15 +133,20 @@ safe-outputs:
   reply-to-pull-request-review-comment:
     max: 10
     target: ${{ env.PR_NUMBER }}
-# Codex engine does not expose workflow env vars like PR_NUMBER and REVIEWER_COMMENT_ID to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
+  resolve-pull-request-review-thread:
+    max: 10
+    github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+# Codex engine does not expose workflow env vars like PR_NUMBER, REVIEWER_COMMENT_ID, and REVIEWER_COMMENT_TYPE to shell tools through -c `include_only [...]`, so render this follow-up context directly in the prompt.
 ---
 
 # Codex PR Reviewer
 
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
-- Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Comment Dispatcher.
+- Run in follow-up response mode when `workflow_dispatch` includes a comment id and event type from the Reviewer Comment Dispatcher.
+- This reviewer's own gh-aw workflow id is `reviewer-codex`. Use it as "this reviewer's own workflow id" when matching review threads to resolve.
 
 For dispatched follow-up runs, use this context:
 - PR number: `${{ github.event.inputs.pr_number }}`
 - Comment id: `${{ github.event.inputs.comment_id }}`
+- Comment event type: `${{ github.event.inputs.comment_type }}`

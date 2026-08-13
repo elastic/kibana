@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
@@ -57,6 +58,7 @@ export const SessionViewDisplayOptions = ({
   const [isOptionDropdownOpen, setOptionDropdownOpen] = useState(false);
   const styles = useStyles();
   const tooltipRef = useRef<EuiToolTipRef>(null);
+  const popoverTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (tooltipRef.current) {
@@ -119,14 +121,16 @@ export const SessionViewDisplayOptions = ({
 
   const OptionButton = (
     <EuiFlexItem grow={false}>
-      <EuiButtonIcon
-        iconType="eye"
-        display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
-        onClick={toggleOptionButton}
-        size="m"
-        aria-label="Session view display option"
-        data-test-subj="sessionView:sessionViewOptionButton"
-      />
+      <EuiToolTip content="Session view display option" disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="eye"
+          display={displayOptions.verboseMode || displayOptions.timestamp ? 'fill' : 'empty'}
+          onClick={toggleOptionButton}
+          size="m"
+          aria-label="Session view display option"
+          data-test-subj="sessionView:sessionViewOptionButton"
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   );
 
@@ -147,6 +151,7 @@ export const SessionViewDisplayOptions = ({
 
   const popOver = (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       button={OptionButton}
       isOpen={isOptionDropdownOpen}
       closePopover={closeOptionButton}
@@ -154,7 +159,7 @@ export const SessionViewDisplayOptions = ({
       <EuiSelectable options={optionsList} onChange={handleSelect}>
         {(list) => (
           <div css={styles.selectable}>
-            <EuiPopoverTitle>
+            <EuiPopoverTitle id={popoverTitleId}>
               <FormattedMessage
                 defaultMessage="Display options"
                 id="xpack.sessionView.sessionViewToggle.sessionViewToggleTitle"

@@ -22,6 +22,7 @@ import {
   EuiInlineEditText,
   EuiPanel,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -157,7 +158,7 @@ export const ColumnCard = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <div {...(dragHandleProps ?? {})} aria-label="Drag handle">
-            <EuiIcon type="grab" size="s" aria-hidden={true} />
+            <EuiIcon type="dragVertical" size="s" aria-hidden={true} />
           </div>
         </EuiFlexItem>
 
@@ -173,23 +174,27 @@ export const ColumnCard = ({
 
         {hasProps && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-              size="xs"
-              aria-label={isExpanded ? 'Collapse' : 'Expand'}
-              onClick={() => setIsExpanded(!isExpanded)}
-            />
+            <EuiToolTip content={isExpanded ? 'Collapse' : 'Expand'} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                size="xs"
+                aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                onClick={() => setIsExpanded(!isExpanded)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
 
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            size="xs"
-            color="danger"
-            aria-label={`Remove ${label}`}
-            onClick={() => onRemove(column.instanceId)}
-          />
+          <EuiToolTip content={`Remove ${label}`} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              size="xs"
+              color="danger"
+              aria-label={`Remove ${label}`}
+              onClick={() => onRemove(column.instanceId)}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -262,7 +267,7 @@ export const DraggableCard = ({ label, dragHandleProps, onRemove }: DraggableCar
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <div {...(dragHandleProps ?? {})} aria-label="Drag handle">
-          <EuiIcon type="grab" size="s" aria-hidden={true} />
+          <EuiIcon type="dragVertical" size="s" aria-hidden={true} />
         </div>
       </EuiFlexItem>
 
@@ -271,13 +276,15 @@ export const DraggableCard = ({ label, dragHandleProps, onRemove }: DraggableCar
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="cross"
-          size="xs"
-          color="danger"
-          aria-label={`Remove ${label}`}
-          onClick={onRemove}
-        />
+        <EuiToolTip content={`Remove ${label}`} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="cross"
+            size="xs"
+            color="danger"
+            aria-label={`Remove ${label}`}
+            onClick={onRemove}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

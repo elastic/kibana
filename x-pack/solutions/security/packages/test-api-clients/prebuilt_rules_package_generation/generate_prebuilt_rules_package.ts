@@ -6,7 +6,7 @@
  */
 
 import archiver from 'archiver';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import semver from 'semver';
 import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
@@ -75,9 +75,9 @@ function createPackageManifest(packageName: string, packageSemver: string): Buff
     format_version: '3.0.0',
   };
 
-  const yamlContent = dump(packageManifest, {
-    noRefs: true,
-    skipInvalid: true,
+  const yamlContent = stringify(packageManifest, {
+    aliasDuplicateObjects: false,
+    strict: false,
   });
 
   return Buffer.from(yamlContent, 'utf8');

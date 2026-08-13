@@ -159,6 +159,20 @@ describe('createChatCompleteApi', () => {
     });
   });
 
+  it('forwards `maxContentLength` down to `inferenceAdapter.chatComplete`', async () => {
+    await chatComplete({
+      connectorId: 'connectorId',
+      messages: [{ role: MessageRole.User, content: 'question' }],
+      maxContentLength: 10 * 1024 * 1024,
+      maxRetries: 0,
+    });
+
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(1);
+    expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 })
+    );
+  });
+
   it('throws if the connector is not compatible', async () => {
     getInferenceAdapterMock.mockReturnValue(undefined);
 
@@ -512,6 +526,12 @@ describe('createChatCompleteApi', () => {
         esClient: mockEsClient,
       });
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executor: mockEndpointExecutor,
+          endpointModelId: 'gpt-4o',
+        })
+      );
       expect(getInferenceAdapterMock).not.toHaveBeenCalled();
     });
 
@@ -603,6 +623,7 @@ describe('createChatCompleteApi', () => {
           executor: mockEndpointExecutor,
           temperature: 0.5,
           modelName: 'gpt-4o-mini',
+          endpointModelId: 'gpt-4o',
           logger,
         })
       );

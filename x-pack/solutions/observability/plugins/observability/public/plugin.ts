@@ -59,7 +59,6 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -77,6 +76,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -88,7 +88,6 @@ import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
-  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -140,9 +139,9 @@ export interface ObservabilityPublicPluginsSetup {
   uiActions: UiActionsSetup;
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
-  presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
   cases?: CasesPublicSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -179,7 +178,6 @@ export interface ObservabilityPublicPluginsStart {
   serverless?: ServerlessPluginStart;
   uiSettings: IUiSettingsClient;
   uiActions: UiActionsStart;
-  presentationUtil?: PresentationUtilPluginStart;
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
@@ -218,18 +216,8 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
-    },
-    {
-      id: 'nightshift',
-      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
-        defaultMessage: 'Nightshift',
-      }),
-      order: 8002,
-      path: NIGHTSHIFT_PATH,
-      visibleIn: [],
-      keywords: ['nightshift', 'significant events'],
     },
   ];
 
@@ -258,13 +246,13 @@ export class Plugin
           extend: {
             [CasesDeepLinkId.cases]: {
               order: 8003,
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesConfigure]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
           },
         })
@@ -360,8 +348,8 @@ export class Plugin
         'experience',
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
-        ? ['home', 'kibanaOverview']
-        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+        ? ['projectSideNav', 'home', 'kibanaOverview']
+        : ['globalSearch', 'classicSideNav', 'projectSideNav', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);
@@ -546,7 +534,6 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
-
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,

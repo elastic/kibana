@@ -6,15 +6,17 @@
  */
 
 import moment from 'moment';
-import { set } from '@kbn/safer-lodash-set';
 import { inject, injectable } from 'inversify';
 import type {
   AlertEpisode,
-  AlertEpisodeData,
   DispatcherStep,
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
+import type {
+  AlertEpisodeStatus,
+  AlertEventSeverity,
+} from '../../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from '../constants';
@@ -22,11 +24,13 @@ import { getDispatchableAlertEventsQuery } from '../queries';
 
 interface RawAlertEpisode {
   last_event_timestamp: string;
-  rule_id: string;
+  rule_id: string | null;
+  source: string;
+  space_id: string;
   group_hash: string;
   episode_id: string;
-  episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
-  data_json: string | null;
+  episode_status: AlertEpisodeStatus;
+  severity: AlertEventSeverity | null;
 }
 
 @injectable()
@@ -66,24 +70,8 @@ export class FetchEpisodesStep implements DispatcherStep {
 }
 
 export function parseAlertEpisodes(raw: RawAlertEpisode[]): AlertEpisode[] {
-  return raw.map(({ data_json, ...rest }) => ({
+  return raw.map(({ severity, ...rest }) => ({
     ...rest,
-    ...(data_json ? { data: parseDataJson(data_json) } : {}),
+    ...(severity ? { severity } : {}),
   }));
-}
-
-export function parseDataJson(json: string): AlertEpisodeData {
-  try {
-    const parsed = JSON.parse(json);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
-    const result: AlertEpisodeData = {};
-    for (const [key, value] of Object.entries(parsed)) {
-      if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-        set(result, key.split('.'), value);
-      }
-    }
-    return result;
-  } catch {
-    return {};
-  }
 }

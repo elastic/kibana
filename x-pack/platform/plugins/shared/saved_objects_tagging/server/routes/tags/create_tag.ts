@@ -13,6 +13,13 @@ export const registerCreateTagRoute = (router: TagsPluginRouter) => {
   router.post(
     {
       path: '/api/saved_objects_tagging/tags/create',
+      options: {
+        deprecated: {
+          documentationUrl: 'https://www.elastic.co/docs/api/doc/kibana/group/endpoint-tags',
+          severity: 'warning',
+          reason: { type: 'migrate', newApiMethod: 'POST', newApiPath: '/api/tags' },
+        },
+      },
       security: {
         authz: {
           enabled: false,
@@ -22,9 +29,9 @@ export const registerCreateTagRoute = (router: TagsPluginRouter) => {
       },
       validate: {
         body: schema.object({
-          name: schema.string(),
-          description: schema.string(),
-          color: schema.string(),
+          name: schema.string({ minLength: 1, maxLength: 256 }),
+          description: schema.string({ maxLength: 2048 }),
+          color: schema.string({ minLength: 1, maxLength: 256 }),
         }),
       },
     },

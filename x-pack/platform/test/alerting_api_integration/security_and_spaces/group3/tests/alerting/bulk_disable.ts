@@ -44,6 +44,7 @@ const getDefaultRules = (response: any) => ({
   scheduled_task_id: response.body.rules[0].scheduled_task_id,
   execution_status: response.body.rules[0].execution_status,
   monitoring: response.body.rules[0].monitoring,
+  is_snoozed_until: response.body.rules[0].is_snoozed_until,
   revision: 0,
   ...(response.body.rules[0].next_run ? { next_run: response.body.rules[0].next_run } : {}),
   ...(response.body.rules[0].last_run ? { last_run: response.body.rules[0].last_run } : {}),
@@ -97,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -147,7 +148,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -218,7 +219,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -279,7 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -335,7 +336,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -399,7 +400,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);

@@ -6,17 +6,18 @@
  */
 
 import React, { createContext, useCallback, useContext, useState } from 'react';
+import {
+  McpClientDetails,
+  type McpClientDetailsData,
+  type McpClientDetailsPresentation,
+} from '@kbn/agent-builder-browser';
 import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
 import { RevokeMcpClientModal } from '../components/mcp_clients/revoke_mcp_client_modal';
-import { McpClientDetails } from '../components/mcp_clients/mcp_client_details';
-import type {
-  McpClientDetailsData,
-  McpClientDetailsPresentation,
-} from '../components/mcp_clients/mcp_client_details_content';
 
 export interface McpClientsActionsContextType {
   createMcpClient: () => void;
+  editMcpClient: (clientId: string) => void;
   revokeMcpClient: (clientId: string, clientName: string, connectionCount: number) => void;
   viewClientDetails: (
     clientDetails: McpClientDetailsData,
@@ -47,6 +48,13 @@ export const McpClientsProvider = ({ children }: { children: React.ReactNode }) 
     navigateToAgentBuilderUrl(appPaths.manage.mcpClientCreate);
   }, [navigateToAgentBuilderUrl]);
 
+  const editMcpClient = useCallback(
+    (clientId: string) => {
+      navigateToAgentBuilderUrl(appPaths.manage.mcpClientEdit({ clientId }));
+    },
+    [navigateToAgentBuilderUrl]
+  );
+
   const revokeMcpClient = useCallback(
     (clientId: string, clientName: string, connectionCount: number) => {
       setRevokeState({ clientId, clientName, connectionCount });
@@ -71,7 +79,7 @@ export const McpClientsProvider = ({ children }: { children: React.ReactNode }) 
 
   return (
     <McpClientsActionsContext.Provider
-      value={{ createMcpClient, revokeMcpClient, viewClientDetails }}
+      value={{ createMcpClient, editMcpClient, revokeMcpClient, viewClientDetails }}
     >
       {children}
       {revokeState && (

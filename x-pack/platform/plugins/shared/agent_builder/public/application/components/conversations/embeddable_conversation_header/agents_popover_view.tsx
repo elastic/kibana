@@ -19,6 +19,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
@@ -110,10 +112,15 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="text"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               size="s"
               flush="left"
               onClick={onBack}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.BACK_TO_CONVERSATIONS,
+                detail: 'conversation',
+              })}
             >
               {labels.availableAgents}
             </EuiButtonEmpty>
@@ -121,13 +128,18 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               color="text"
               fill={false}
               href={agentDetailsHref}
               target="_blank"
               data-test-subj="agentBuilderEmbeddableAgentDetailsButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.EMBEDDABLE_AGENT_DETAILS,
+                detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+              })}
             >
               {labels.agentDetails}
             </EuiButton>
@@ -144,6 +156,10 @@ export const AgentsPopoverView: React.FC<AgentsPopoverViewProps> = ({
           overflow-y: auto;
           min-height: 0;
         `}
+        {...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.inappChat.AGENT_SWITCH,
+        })}
       >
         <EuiSelectable
           aria-label={labels.selectAgent}

@@ -12,6 +12,7 @@ import { Command, getCurrentTaskInput } from '@langchain/langgraph';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { MAX_STRING_LENGTH } from '../../../common';
 import { TASK_TOOL_DESCRIPTION } from '../prompts';
 import { AutomaticImportAgentState } from '../state';
 import type { AutomaticImportAgentStateType } from '../state';
@@ -293,7 +294,10 @@ export const createTaskTool = (params: TaskToolParams) => {
       }
 
       try {
-        const result = await subAgent.invoke(modifiedState);
+        const result = await subAgent.invoke(modifiedState, {
+          callbacks: config?.callbacks,
+          signal: config?.signal,
+        });
 
         return new Command({
           update: {
@@ -326,9 +330,13 @@ export const createTaskTool = (params: TaskToolParams) => {
         subagents.map((a) => `- ${a.name}: ${a.description}`).join('\n')
       ),
       schema: z.object({
-        description: z.string().describe('The task to execute with the selected agent'),
+        description: z
+          .string()
+          .max(MAX_STRING_LENGTH.description)
+          .describe('The task to execute with the selected agent'),
         subagent_name: z
           .string()
+          .max(MAX_STRING_LENGTH.name)
           .describe(
             `Name of the agent to use. Available: ${subagents.map((a) => a.name).join(', ')}`
           ),

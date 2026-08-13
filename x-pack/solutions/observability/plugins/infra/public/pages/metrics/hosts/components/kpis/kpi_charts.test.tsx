@@ -6,66 +6,83 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KpiCharts } from './kpi_charts';
-import * as useUnifiedSearchHooks from '../../hooks/use_unified_search';
-import * as useHostCountHooks from '../../hooks/use_host_count';
-import * as useAfterLoadedStateHooks from '../../hooks/use_after_loaded_state';
-import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
-import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
+import type { HostsKpis } from '../../hooks/use_hosts_kpis_esql';
 
-jest.mock('../../hooks/use_hosts_view', () => ({
-  ...jest.requireActual('../../hooks/use_hosts_view'),
-  useHostsViewContext: jest.fn(),
+const mockUseHostsKpis = jest.fn();
+const mockUseHostCountContext = jest.fn();
+const mockUseUnifiedSearchContext = jest.fn();
+
+jest.mock('../../hooks/use_hosts_kpis_esql', () => ({
+  useHostsKpisEsql: () => mockUseHostsKpis(),
 }));
-jest.mock('../../hooks/use_unified_search');
-jest.mock('../../hooks/use_host_count');
-jest.mock('../../hooks/use_after_loaded_state');
-jest.mock('../../../../../hooks/use_reload_request_time');
-jest.mock('../../../../../containers/metrics_source');
-jest.mock('../../../../../components/asset_details', () => ({
-  HostKpiCharts: ({ error, loading, hasData }: any) => {
-    // Real component logic: if (!loading && (!hasData || error)) show ChartPlaceholder
-    // Otherwise show Kpi charts
-    if (!loading && (!hasData || error)) {
-      const HOST_KPI_CHARTS_COUNT = 4;
-      return (
-        <>
-          {Array.from({ length: HOST_KPI_CHARTS_COUNT }).map((_, index) => (
-            <div key={index} data-test-subj="chartPlaceholder">
-              {error ? <div>{error.message}</div> : <div>No results found</div>}
-            </div>
-          ))}
-        </>
-      );
-    }
-    return <div data-test-subj="hostKpiCharts">HostKpiCharts</div>;
+jest.mock('../../hooks/use_host_count', () => ({
+  useHostCountContext: () => mockUseHostCountContext(),
+}));
+jest.mock('../../hooks/use_unified_search', () => ({
+  useUnifiedSearchContext: () => mockUseUnifiedSearchContext(),
+}));
+
+// Must be a stable singleton: `KpiCharts` passes `inventoryModel.metrics` into
+// a `useAsync` dep array, so a fresh object per call would loop re-renders.
+// Disk usage is schema-dependent (ECS `max(...)` vs semconv `1 - sum/sum`).
+const mockInventoryModel = {
+  metrics: {
+    getFormulas: async (args?: { schema?: string }) =>
+      new Map([
+        ['cpuUsage', { format: 'percent', value: 'avg(cpu)' }],
+        ['normalizedLoad1m', { format: 'number', value: 'avg(load)' }],
+        ['memoryUsage', { format: 'percent', value: 'avg(mem)' }],
+        [
+          'diskUsage',
+          args?.schema === 'ecs'
+            ? { format: 'percent', value: 'max(system.filesystem.used.pct)' }
+            : { format: 'percent', value: '1 - sum(free) / sum(total)' },
+        ],
+      ]),
   },
+};
+jest.mock('@kbn/metrics-data-access-plugin/common', () => ({
+  findInventoryModel: () => mockInventoryModel,
+  CPU_USAGE_LABEL: 'CPU Usage',
+  MEMORY_USAGE_LABEL: 'Memory Usage',
+  NORMALIZED_LOAD_LABEL: 'Normalized Load',
+  DISK_USAGE_LABEL: 'Disk Usage',
 }));
 
-// Import after mocking
-import { useHostsViewContext } from '../../hooks/use_hosts_view';
+jest.mock('../../../../../components/lens', () => ({
+  TooltipContent: () => <div data-test-subj="tooltip" />,
+}));
 
-const mockUseHostsViewContext = useHostsViewContext as jest.MockedFunction<
-  typeof useHostsViewContext
->;
-const mockUseUnifiedSearchContext =
-  useUnifiedSearchHooks.useUnifiedSearchContext as jest.MockedFunction<
-    typeof useUnifiedSearchHooks.useUnifiedSearchContext
-  >;
-const mockUseHostCountContext = useHostCountHooks.useHostCountContext as jest.MockedFunction<
-  typeof useHostCountHooks.useHostCountContext
->;
-const mockUseAfterLoadedState = useAfterLoadedStateHooks.useAfterLoadedState as jest.MockedFunction<
-  typeof useAfterLoadedStateHooks.useAfterLoadedState
->;
-const mockUseReloadRequestTimeContext = useReloadRequestTimeContext as jest.MockedFunction<
-  typeof useReloadRequestTimeContext
->;
-const mockUseMetricsDataViewContext = useMetricsDataViewContext as jest.MockedFunction<
-  typeof useMetricsDataViewContext
->;
+jest.mock('../chart/metric_chart_wrapper', () => ({
+  MetricChartWrapper: ({
+    id,
+    value,
+    valueFormatter,
+    subtitle,
+  }: {
+    id: string;
+    value: number | null;
+    valueFormatter?: (value: number) => string;
+    subtitle: string;
+  }) => (
+    <div
+      data-test-subj={id}
+      data-value={String(value)}
+      data-formatted={value == null ? '' : valueFormatter?.(value)}
+      data-subtitle={subtitle}
+    />
+  ),
+}));
+
+const KPIS: HostsKpis = {
+  cpuUsage: 0.4567,
+  normalizedLoad1m: 1.234,
+  memoryUsage: 0.5,
+  diskUsage: null,
+};
 
 const renderKpiCharts = () =>
   render(
@@ -78,119 +95,113 @@ describe('KpiCharts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Default mock implementations
+    mockUseHostsKpis.mockReturnValue({ kpis: KPIS, loading: false, error: null });
+    mockUseHostCountContext.mockReturnValue({ loading: false, count: 10 });
     mockUseUnifiedSearchContext.mockReturnValue({
-      searchCriteria: {
-        dateRange: { from: 'now-15m', to: 'now' },
-        filters: [],
-        panelFilters: [],
-        query: { query: '', language: 'kuery' },
-        limit: 100,
-        preferredSchema: 'ecs',
-      },
-    } as unknown as ReturnType<typeof useUnifiedSearchHooks.useUnifiedSearchContext>);
+      searchCriteria: { preferredSchema: 'semconv', limit: 100 },
+    });
+  });
 
-    mockUseReloadRequestTimeContext.mockReturnValue({
-      reloadRequestTime: 0,
-      updateReloadRequestTime: jest.fn(),
+  it('renders the four KPI tiles from the ES|QL KPI query', async () => {
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('hostsViewKPI-normalizedLoad1m')).toBeInTheDocument();
+    expect(screen.getByTestId('hostsViewKPI-memoryUsage')).toBeInTheDocument();
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toBeInTheDocument();
+  });
+
+  it('formats percent tiles with one decimal and passes null values through untouched', async () => {
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+        'data-formatted',
+        '45.7%'
+      );
+    });
+    expect(screen.getByTestId('hostsViewKPI-normalizedLoad1m')).toHaveAttribute(
+      'data-formatted',
+      '1.2'
+    );
+    // Null is forwarded as-is so the tile renders "N/A" rather than `0%`.
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-value', 'null');
+  });
+
+  it('shows only the bare aggregation label when the fleet is within the limit', async () => {
+    // count (10) <= limit (100): not truncated, so no "(of N hosts)" suffix.
+    mockUseHostCountContext.mockReturnValue({ loading: false, count: 10 });
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: { preferredSchema: 'semconv', limit: 100 },
     });
 
-    mockUseHostCountContext.mockReturnValue({
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+        'data-subtitle',
+        'Average'
+      );
+    });
+    // semconv disk ratio (no max/avg) stays blank when not truncated.
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-subtitle', '');
+  });
+
+  it('discloses the limit only when the fleet exceeds it (mirrors main)', async () => {
+    // count (250) > limit (100): truncated, so suffix shows the limit.
+    mockUseHostCountContext.mockReturnValue({ loading: false, count: 250 });
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: { preferredSchema: 'semconv', limit: 100 },
+    });
+
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+        'data-subtitle',
+        'Average (of 100 hosts)'
+      );
+    });
+    // semconv disk ratio (no max/avg) stays blank even when truncated.
+    expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute('data-subtitle', '');
+  });
+
+  it('subtitles the ECS disk tile "Max (of N hosts)" when truncated (mirrors its `max(...)` formula)', async () => {
+    mockUseHostCountContext.mockReturnValue({ loading: false, count: 250 });
+    mockUseUnifiedSearchContext.mockReturnValue({
+      searchCriteria: { preferredSchema: 'ecs', limit: 100 },
+    });
+
+    renderKpiCharts();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-diskUsage')).toHaveAttribute(
+        'data-subtitle',
+        'Max (of 100 hosts)'
+      );
+    });
+    expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+      'data-subtitle',
+      'Average (of 100 hosts)'
+    );
+  });
+
+  it('surfaces a distinct subtitle when the KPI query fails', async () => {
+    mockUseHostsKpis.mockReturnValue({
+      kpis: { cpuUsage: null, normalizedLoad1m: null, memoryUsage: null, diskUsage: null },
       loading: false,
-      count: 10,
-    } as ReturnType<typeof useHostCountHooks.useHostCountContext>);
-
-    mockUseMetricsDataViewContext.mockReturnValue({
-      metricsView: {
-        dataViewReference: {
-          id: 'test-data-view',
-          getFieldByName: jest.fn().mockReturnValue({ name: 'host.name', type: 'string' }),
-        },
-      },
-    } as unknown as ReturnType<typeof useMetricsDataViewContext>);
-
-    mockUseAfterLoadedState.mockReturnValue({
-      afterLoadedState: {
-        dateRange: { from: 'now-15m', to: 'now' },
-        filters: [],
-        query: undefined,
-        reloadRequestTime: 0,
-        getSubtitle: jest.fn(),
-      },
-    } as unknown as ReturnType<typeof useAfterLoadedStateHooks.useAfterLoadedState>);
-  });
-
-  describe('when there is an error', () => {
-    it('should render ChartPlaceholder with error state', () => {
-      mockUseHostsViewContext.mockReturnValue({
-        hostNodes: [],
-        loading: false,
-        error: { message: 'API error' },
-      } as unknown as ReturnType<typeof useHostsViewContext>);
-
-      renderKpiCharts();
-
-      // ChartPlaceholder renders 4 length placeholder panels
-      expect(screen.getAllByText('API error')).toHaveLength(4);
-      expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
+      error: new Error('boom'),
     });
 
-    it('should render ChartPlaceholder when error exists even with hosts', () => {
-      mockUseHostsViewContext.mockReturnValue({
-        hostNodes: [{ name: 'host-1' }, { name: 'host-2' }],
-        loading: false,
-        error: { message: 'API error' },
-      } as unknown as ReturnType<typeof useHostsViewContext>);
+    renderKpiCharts();
 
-      renderKpiCharts();
-
-      expect(screen.getAllByText('API error')).toHaveLength(4);
-      expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('when there is no data', () => {
-    it('should render ChartPlaceholder when not loading and no hosts', () => {
-      mockUseHostsViewContext.mockReturnValue({
-        hostNodes: [],
-        loading: false,
-        error: undefined,
-      });
-
-      renderKpiCharts();
-
-      expect(screen.getAllByText('No results found')).toHaveLength(4);
-      expect(screen.queryByTestId('hostKpiCharts')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('when loading', () => {
-    it('should render HostKpiCharts when loading even with no hosts', () => {
-      mockUseHostsViewContext.mockReturnValue({
-        hostNodes: [],
-        loading: true,
-        error: undefined,
-      });
-
-      renderKpiCharts();
-
-      expect(screen.getByTestId('hostKpiCharts')).toBeInTheDocument();
-      expect(screen.queryByText('No results found')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('when data is available', () => {
-    it('should render HostKpiCharts when hosts are loaded successfully', () => {
-      mockUseHostsViewContext.mockReturnValue({
-        hostNodes: [{ name: 'host-1' }, { name: 'host-2' }],
-        loading: false,
-        error: undefined,
-      } as unknown as ReturnType<typeof useHostsViewContext>);
-
-      renderKpiCharts();
-
-      expect(screen.getByTestId('hostKpiCharts')).toBeInTheDocument();
-      expect(screen.queryByText('No results found')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('hostsViewKPI-cpuUsage')).toHaveAttribute(
+        'data-subtitle',
+        'Unable to load'
+      );
     });
   });
 });

@@ -28,6 +28,7 @@ import {
   FleetError,
 } from '../errors';
 import { SO_SEARCH_LIMIT } from '../../common';
+import { validateFleetSavedObjectId } from '../../common/services';
 
 import {
   deleteDownloadSourceSecrets,
@@ -91,10 +92,6 @@ class DownloadSourceService {
         id
       );
 
-    if (soResponse.error) {
-      throw new FleetError(soResponse.error.message);
-    }
-
     return savedObjectToDownloadSource(soResponse);
   }
 
@@ -140,6 +137,8 @@ class DownloadSourceService {
   ): Promise<DownloadSource> {
     const logger = appContextService.getLogger();
     logger.debug(`Creating new download source`);
+
+    validateFleetSavedObjectId(options?.id);
 
     const data: DownloadSourceSOAttributes = {
       ...omit(downloadSource, ['ssl', 'auth', 'secrets']),
@@ -422,16 +421,12 @@ class DownloadSourceService {
       }
     }
 
-    const soResponse = await this.soClient.update<DownloadSourceSOAttributes>(
+    await this.soClient.update<DownloadSourceSOAttributes>(
       DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
       id,
       updateData
     );
-    if (soResponse.error) {
-      throw new FleetError(soResponse.error.message);
-    } else {
-      logger.debug(`Updated download source ${id}`);
-    }
+    logger.debug(`Updated download source ${id}`);
   }
 
   public async delete(id: string) {

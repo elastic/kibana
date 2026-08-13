@@ -23,6 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { PhaseName } from '@kbn/streams-schema';
+import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import { isEqual } from 'lodash';
 import { FormProvider, useForm, useFormState, useWatch } from 'react-hook-form';
 import type { EditDeletePhaseFlyoutProps, EditDeletePhaseFlyoutValue } from './types';
@@ -53,6 +54,7 @@ export const EditDeletePhaseFlyout = ({
   defaultRetentionPeriod,
   maximumRetentionPeriod,
   showRestoreDefaultButton = Boolean(defaultRetentionPeriod),
+  allowRemoveDeletePhase = true,
   onChange,
   onChangeDebounceMs = 250,
   onSave,
@@ -63,8 +65,8 @@ export const EditDeletePhaseFlyout = ({
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'streamsEditDeletePhaseFlyoutForm' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditDeletePhaseFlyout';
-  const { flyoutBodyStyles, footerStyles, headerStyles, sectionStyles } =
-    useEditDeletePhaseFlyoutStyles();
+  const { footerStyles, headerStyles, sectionStyles } = useEditDeletePhaseFlyoutStyles();
+  const { focusProps } = usePushFlyoutFocus();
 
   const schema = useMemo(
     () => getEditDeletePhaseFlyoutFormSchema({ maximumRetentionPeriod }),
@@ -86,9 +88,10 @@ export const EditDeletePhaseFlyout = ({
 
   const { errors, isSubmitting, isDirty } = useFormState({ control: methods.control });
   useEffect(() => {
-    // Ensure invalid initial values (e.g. unparseable retention strings) surface immediately.
+    // Surface invalid initial values immediately, and re-validate when the maximum retention
+    // resolves after mount (e.g. a stream configured above the max outside Streams).
     void methods.trigger();
-  }, [methods]);
+  }, [methods, maximumRetentionPeriod]);
   const initialMappedValue = useMemo(
     () => mapFormValuesToDeletePhase(defaultValues),
     [defaultValues]
@@ -191,12 +194,13 @@ export const EditDeletePhaseFlyout = ({
   }, [currentMappedValue, errors, isDirty, scheduleOnChangeEmit]);
 
   const hasFormErrors = Object.keys(errors).length > 0;
-  const isApplyDisabled = hasFormErrors || !hasChanges || isSubmitting;
+  const isAddingDeletePhase = initialValue.deletePhaseEnabled === false;
+  const isApplyDisabled = hasFormErrors || isSubmitting;
   const disabledApplyTooltip = isSubmitting
     ? editDeletePhaseFlyoutI18n.applySubmittingDisabledTooltip
     : hasFormErrors
     ? editDeletePhaseFlyoutI18n.applyDisabledTooltip
-    : editDeletePhaseFlyoutI18n.applyUnchangedDisabledTooltip;
+    : undefined;
   const maximumRetentionHelpText = maximumRetentionPeriod
     ? getMaximumRetentionMessage(maximumRetentionPeriod)
     : undefined;
@@ -232,6 +236,7 @@ export const EditDeletePhaseFlyout = ({
   const applyButton = (
     <EuiButton
       fill
+      size="s"
       type="submit"
       form={formId}
       isLoading={Boolean(isSaving) || isSubmitting}
@@ -245,12 +250,14 @@ export const EditDeletePhaseFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size="s"
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
+      role="region"
       data-test-subj={dataTestSubj}
+      {...focusProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
@@ -267,13 +274,17 @@ export const EditDeletePhaseFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody css={flyoutBodyStyles}>
+      <EuiFlyoutBody>
         <FormProvider {...methods}>
           <form
             id={formId}
-            onSubmit={methods.handleSubmit((data) =>
-              onSave(serializeFormValuesToDeletePhase(data))
-            )}
+            onSubmit={methods.handleSubmit((data) => {
+              if (!isAddingDeletePhase && !hasChanges) {
+                onClose();
+                return;
+              }
+              return onSave(serializeFormValuesToDeletePhase(data));
+            })}
             noValidate
           >
             <EuiPanel hasShadow={false} hasBorder={false} paddingSize="none" css={sectionStyles}>
@@ -284,7 +295,7 @@ export const EditDeletePhaseFlyout = ({
               />
             </EuiPanel>
 
-            {!maximumRetentionPeriod ? (
+            {allowRemoveDeletePhase && !maximumRetentionPeriod ? (
               <>
                 <EuiHorizontalRule margin="none" />
 
@@ -324,12 +335,13 @@ export const EditDeletePhaseFlyout = ({
               data-test-subj={`${dataTestSubj}CancelButton`}
               onClick={onClose}
               flush="left"
+              size="s"
             >
               {editDeletePhaseFlyoutI18n.cancelButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isApplyDisabled ? (
+            {disabledApplyTooltip ? (
               <EuiToolTip content={disabledApplyTooltip}>{applyButton}</EuiToolTip>
             ) : (
               applyButton

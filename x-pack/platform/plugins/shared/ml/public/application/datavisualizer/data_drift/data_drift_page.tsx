@@ -7,17 +7,22 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataDriftSpec } from '@kbn/data-visualizer-plugin/public';
+
+import { MlDataSourcePicker } from '@kbn/aiops-components';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
-import { MlPageHeader } from '../../components/page_header';
-import { PageTitle } from '../../components/page_title';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 
 export const DataDriftPage: FC = () => {
-  const {
-    services: { dataVisualizer },
-  } = useMlKibana();
+  const { services } = useMlKibana();
+  const { dataVisualizer } = services;
+  const dataVisualizerBack = useDataVisualizerBack();
 
   const [DataDriftView, setDataDriftView] = useState<DataDriftSpec | null>(null);
 
@@ -30,21 +35,52 @@ export const DataDriftPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
+  const dataSourcePicker = (
+    <MlDataSourcePicker
+      currentDataView={dataView ?? null}
+      services={services}
+      DataViewPickerComponent={DataViewPicker}
+      SavedObjectFinderComponent={SavedObjectFinder}
+    />
+  );
+
   return (
     <>
-      <MlPageHeader>
-        <PageTitle
-          title={
-            <FormattedMessage
-              id="xpack.ml.dataDruiftWithDocCount.pageHeader"
-              defaultMessage="Data drift"
-            />
-          }
-        />
-      </MlPageHeader>
+      <MlAppHeader
+        title={i18n.translate('xpack.ml.dataDrift.pageHeader', {
+          defaultMessage: 'Data drift',
+        })}
+        back={dataVisualizerBack}
+      />
       {dataView && DataDriftView ? (
-        <DataDriftView dataView={dataView} savedSearch={savedSearch} />
-      ) : null}
+        <DataDriftView
+          key={savedSearch?.id ?? dataView.id ?? dataView.getIndexPattern()}
+          dataView={dataView}
+          savedSearch={savedSearch}
+        />
+      ) : dataView ? null : (
+        <>
+          {dataSourcePicker}
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.common.noDataViewTitle"
+                  defaultMessage="No data view selected"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.common.noDataViewBody"
+                  defaultMessage="Select a data view or Discover session to get started."
+                />
+              </p>
+            }
+          />
+        </>
+      )}
     </>
   );
 };

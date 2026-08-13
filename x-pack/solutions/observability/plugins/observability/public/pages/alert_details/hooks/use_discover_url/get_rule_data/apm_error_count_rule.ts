@@ -20,6 +20,7 @@ import {
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import type { TopAlert } from '../../../../../typings/alerts';
+import { getEnvironmentKqlFilter } from './get_environment_kql_filter';
 
 const ERROR_COUNT_GROUP_BY_FIELDS = [
   SERVICE_NAME,
@@ -39,9 +40,9 @@ const apmErrorCountAlertFieldsToKqlQuery = (alert: TopAlert): string => {
     return acc;
   }, []);
 
-  const environment = fields[SERVICE_ENVIRONMENT];
-  if (environment && environment !== 'ENVIRONMENT_ALL') {
-    filters.push(`${escapeKuery(SERVICE_ENVIRONMENT)}:"${escapeQuotes(environment)}"`);
+  const environmentFilter = getEnvironmentKqlFilter(fields[SERVICE_ENVIRONMENT]);
+  if (environmentFilter) {
+    filters.push(environmentFilter);
   }
 
   filters.push(`${escapeKuery(PROCESSOR_EVENT)}:"${escapeQuotes(ProcessorEvent.error)}"`);

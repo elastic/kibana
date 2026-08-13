@@ -94,7 +94,7 @@ Tests then import `apiTest` from the local fixtures: `import { apiTest } from '.
 - Use either `--config` or `--testFiles` (they are mutually exclusive).
 - Run by config: `node scripts/scout.js run-tests --arch stateful --domain classic --config <module-root>/test/scout*/api/playwright.config.ts` (or `.../api/parallel.playwright.config.ts` for parallel API runs)
 - Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/api/tests/my.spec.ts`
-- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `npx playwright test --config <...> --project local --grep <tag>`.
+- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `node scripts/playwright test --config <...> --project local --grep <tag>`.
 - `run-tests` auto-detects custom config sets from `.../test/scout_<name>/...` paths.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <name>` when your tests require a custom config set.
 - Debug: `SCOUT_LOG_LEVEL=debug`

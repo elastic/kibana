@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -25,11 +26,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
 import { isGlobalPrivilegeDefinition } from '@kbn/security-role-management-model';
 import { constants, type PrivilegeFormCalculator } from '@kbn/security-ui-components';
-import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
 import { copyRole } from '../../../../../../../common/model';
+import type { DisplaySpace } from '../display_space';
 
 const SPACES_DISPLAY_COUNT = 4;
 
@@ -38,7 +39,7 @@ interface Props {
   privilegeCalculator: PrivilegeFormCalculator;
   onChange: (role: Role) => void;
   onEdit: (privilegeIndex: number) => void;
-  displaySpaces: Space[];
+  displaySpaces: DisplaySpace[];
   disabled?: boolean;
 }
 
@@ -46,7 +47,7 @@ interface State {
   expandedSpacesGroups: number[];
 }
 
-type TableSpace = Space &
+type TableSpace = DisplaySpace &
   Partial<{
     deleted: boolean;
   }>;
@@ -79,14 +80,14 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, privilegeIndex) => {
       const spaces = spacePrivs.spaces.map(
-        (spaceId) =>
+        (spaceId): TableSpace =>
           displaySpaces.find((space) => space.id === spaceId) || {
             id: spaceId,
             name: spaceId,
             disabledFeatures: [],
             deleted: true,
           }
-      ) as Space[];
+      );
 
       return {
         spaces,
@@ -187,7 +188,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             ? '*'
             : basePrivilege;
 
-          let icon = <EuiIcon type="empty" size="s" />;
+          let icon = <EuiIcon type="empty" size="s" aria-hidden={true} />;
           if (privilegeCalculator.hasSupersededInheritedPrivileges(record.privilegeIndex)) {
             icon = (
               <span data-test-subj="spaceTablePrivilegeSupersededWarning">
@@ -224,38 +225,60 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           {
             render: (record: TableRow) => {
               return (
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
                     {
                       defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
                       values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
-                  color={'primary'}
-                  iconType={'pencil'}
-                  onClick={() => this.props.onEdit(record.privilegeIndex)}
-                  data-test-subj={`privilegeEditAction-${record.privilegeIndex}`}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.security.management.editRole.spacePrivilegeTable.editPrivilegesLabel',
+                      {
+                        defaultMessage: `Edit privileges for the following spaces: {spaceNames}.`,
+                        values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
+                      }
+                    )}
+                    color={'primary'}
+                    iconType={'pencil'}
+                    onClick={() => this.props.onEdit(record.privilegeIndex)}
+                    data-test-subj={`privilegeEditAction-${record.privilegeIndex}`}
+                  />
+                </EuiToolTip>
               );
             },
           },
           {
             render: (record: TableRow) => {
               return (
-                <EuiButtonIcon
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
                     {
                       defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
                       values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
                     }
                   )}
-                  color={'danger'}
-                  iconType={'trash'}
-                  onClick={() => this.onDeleteSpacePrivilege(record)}
-                  data-test-subj={`privilegeDeleteAction-${record.privilegeIndex}`}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.security.management.editRole.spacePrivilegeTable.deletePrivilegesLabel',
+                      {
+                        defaultMessage: `Delete privileges for the following spaces: {spaceNames}.`,
+                        values: { spaceNames: record.spaces.map((s) => s.name).join(', ') },
+                      }
+                    )}
+                    color={'danger'}
+                    iconType={'trash'}
+                    onClick={() => this.onDeleteSpacePrivilege(record)}
+                    data-test-subj={`privilegeDeleteAction-${record.privilegeIndex}`}
+                  />
+                </EuiToolTip>
               );
             },
           },

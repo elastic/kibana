@@ -58,6 +58,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledWith({
@@ -73,6 +74,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         logger,
         getStartServices,
         kibanaVersion: '8.0.0',
+        hasEncryptionKey: true,
       })
     ).resolves.not.toThrow();
   });
@@ -86,6 +88,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockTaskManagerStart.ensureScheduled).toHaveBeenCalledWith(
@@ -106,6 +109,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(logger.error).toHaveBeenCalledWith(
@@ -122,6 +126,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       logger,
       getStartServices,
       kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
     });
 
     expect(mockTaskManagerStart.ensureScheduled).not.toHaveBeenCalled();
@@ -133,7 +138,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })({ abortController: mockAbortController });
+      })({ signal: mockAbortController.signal });
 
       await migrationTask.run();
 
@@ -153,7 +158,7 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
         getStartServices,
         logger,
         auditLogger,
-      })({ abortController: mockAbortController });
+      })({ signal: mockAbortController.signal });
 
       await migrationTask.run();
 
@@ -163,17 +168,15 @@ describe('scheduleAssetCriticalityEcsCompliancyMigration', () => {
       );
     });
 
-    it('should abort request and log when the task is cancelled', async () => {
+    it('should log when the task is cancelled', async () => {
       const migrationTask = createMigrationTask({
         getStartServices,
         logger,
         auditLogger,
-      })({ abortController: mockAbortController });
+      })({ signal: mockAbortController.signal });
 
       await migrationTask.run();
       await migrationTask.cancel();
-
-      expect(mockAbortController.abort).toHaveBeenCalled();
 
       expect(logger.debug).toHaveBeenCalledWith(
         'Task cancelled: "security-solution-ea-asset-criticality-ecs-migration"'

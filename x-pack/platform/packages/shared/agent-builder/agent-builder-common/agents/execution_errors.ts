@@ -20,6 +20,8 @@ export enum AgentExecutionErrorCode {
   invalidState = 'invalid_state',
   /** connector returned an HTTP error (4xx, 5xx) - status propagated to client */
   connectorError = 'connector_error',
+  /** agent did not produce a final answer within its cycle budget */
+  cycleLimitExceeded = 'cycle_limit_exceeded',
 }
 
 export interface ToolNotFoundErrorMeta {
@@ -50,6 +52,7 @@ interface ExecutionErrorMetaMap {
   [AgentExecutionErrorCode.invalidState]: {};
   [AgentExecutionErrorCode.emptyResponse]: {};
   [AgentExecutionErrorCode.connectorError]: ConnectorErrorMeta;
+  [AgentExecutionErrorCode.cycleLimitExceeded]: {};
 }
 
 export type ExecutionErrorMetaOf<ErrCode extends AgentExecutionErrorCode> =

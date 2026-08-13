@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// development env setup includes babel/register after the env is initialized
+// development env setup includes a require hook after the env is initialized
 require('./setup_env');
 
 // restore < Node 16 default DNS lookup behavior
@@ -24,6 +24,6 @@ if (!process.env.NODE_DISABLE_COMPILE_CACHE) {
   }
 }
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 require('@kbn/security-hardening');

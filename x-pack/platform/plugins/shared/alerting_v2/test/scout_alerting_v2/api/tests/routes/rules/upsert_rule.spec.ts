@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
-  NO_ACCESS_ROLE,
-  READ_ROLE,
   getRuleUrl,
+  NO_ACCESS_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -25,7 +25,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
@@ -50,14 +50,15 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.id).toBe(id);
-      expect(response.body.metadata).toStrictEqual(body.metadata);
+      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
       expect(response.body.kind).toBe(body.kind);
       expect(response.body.schedule).toStrictEqual(body.schedule);
-      expect(response.body.evaluation).toStrictEqual(body.evaluation);
+      expect(response.body.query).toStrictEqual(body.query);
 
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.id).toBe(id);
       expect(persisted.metadata.name).toBe('created-via-upsert');
+      expect(persisted.metadata.version).toBe(1);
     }
   );
 
@@ -79,10 +80,12 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      // Body is replaced wholesale.
-      expect(response.body.metadata).toStrictEqual(replacementBody.metadata);
+      expect(response.body.metadata).toStrictEqual({
+        ...replacementBody.metadata,
+        version: created.metadata.version + 1,
+      });
       expect(response.body.schedule).toStrictEqual(replacementBody.schedule);
-      expect(response.body.evaluation).toStrictEqual(replacementBody.evaluation);
+      expect(response.body.query).toStrictEqual(replacementBody.query);
       // createdAt / createdBy / enabled are preserved across an upsert-replace.
       expect(response.body.createdAt).toBe(created.createdAt);
       expect(response.body.createdBy).toBe(created.createdBy);
@@ -130,10 +133,16 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | LIMIT 10' },
+          },
           metadata: { name: 'alert-rule' },
         }),
       });
       expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('IMMUTABLE_FIELDS_CHANGED');
       // Verify the rule was not modified.
       const stored = await apiServices.alertingV2.rules.get(id);
       expect(stored.kind).toBe(created.kind);
@@ -149,6 +158,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData(),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -160,6 +170,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: invalidBody,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject body with missing metadata', async ({ apiClient }) => {
@@ -169,6 +180,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject body with empty metadata.name', async ({ apiClient }) => {
@@ -177,6 +189,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: buildCreateRuleData({ metadata: { name: '' } }),
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -187,6 +200,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ metadata: { name: 'a'.repeat(MAX_NAME_LENGTH + 1) } }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -203,6 +217,19 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: invalidBody,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'validation: should reject body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getRuleUrl('any-id'), {
+        headers: writerHeaders,
+        body: { ...buildCreateRuleData(), unknownField: 'nope' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -219,6 +246,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -232,6 +260,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -243,19 +272,20 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ schedule: { every: '1s' } }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
-  apiTest(
-    'validation: should reject body with empty evaluation.query.base',
-    async ({ apiClient }) => {
-      const response = await apiClient.put(getRuleUrl('any-id'), {
-        headers: writerHeaders,
-        body: buildCreateRuleData({ evaluation: { query: { base: '' } } }),
-      });
-      expect(response).toHaveStatusCode(400);
-    }
-  );
+  apiTest('validation: should reject body with empty query.breach', async ({ apiClient }) => {
+    const response = await apiClient.put(getRuleUrl('any-id'), {
+      headers: writerHeaders,
+      body: buildCreateRuleData({
+        query: { format: 'standalone', breach: { query: '' } },
+      }),
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
 
   apiTest(
     'authorization: should return 201 for a user with full alerting_v2 privileges',
@@ -272,7 +302,9 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   apiTest(
     'authorization: should return 403 for a user with read-only alerting_v2 privileges',
     async ({ apiClient, apiServices, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_READ_ROLE
+      );
       const id = 'reader-cannot-upsert';
       const response = await apiClient.put(getRuleUrl(id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
@@ -280,7 +312,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(403);
       // Verify no rule was created.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).not.toContain(id);
     }
   );
@@ -295,7 +327,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ metadata: { name: 'attempted' } }),
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).not.toContain(id);
     }
   );

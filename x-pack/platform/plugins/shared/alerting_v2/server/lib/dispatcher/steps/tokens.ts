@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { DispatcherStep } from '../types';
 
 /**
  * Token for multi-injecting the ordered dispatcher execution steps.
  * Binding order defines execution order.
  */
-export const DispatcherExecutionStepsToken = Symbol.for(
+export const DispatcherExecutionStepsToken = createToken<DispatcherStep>(
   'alerting_v2.DispatcherExecutionSteps'
-) as ServiceIdentifier<DispatcherStep>;
+);

@@ -6,43 +6,26 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { MigrationSource } from '../../../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export const CopyExportedSentinelQuery = React.memo(() => {
+  const { copyExportQuery } = useRuleMigrationVendorCopy(MigrationSource.SENTINEL);
+
   return (
-    <EuiText>
-      <FormattedMessage
-        id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.description"
-        defaultMessage="In the Microsoft Azure portal, navigate to Microsoft Sentinel and open your workspace. Go to {analyticsRules}, select the rules you want to migrate, and click {export}. Choose {armTemplate} as the export format. The downloaded JSON file contains your Analytics Rules and can be uploaded here."
-        values={{
-          analyticsRules: (
-            <b>
-              <FormattedMessage
-                id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.analyticsRules"
-                defaultMessage="Analytics rules"
-              />
-            </b>
-          ),
-          export: (
-            <b>
-              <FormattedMessage
-                id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.export"
-                defaultMessage="Export"
-              />
-            </b>
-          ),
-          armTemplate: (
-            <b>
-              <FormattedMessage
-                id="xpack.securitySolution.siemMigrations.copyExportedSentinelQuery.armTemplate"
-                defaultMessage="ARM template"
-              />
-            </b>
-          ),
-        }}
-      />
-    </EuiText>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiText>{copyExportQuery.description}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiCallOut
+          title={copyExportQuery.details?.rulesTypeSupportCallout}
+          size="s"
+          iconType="pin"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 

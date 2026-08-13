@@ -10,7 +10,10 @@
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { ForEachContextSchema } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
-import type { EnterForeachNodeConfiguration } from '@kbn/workflows/graph';
+import type {
+  EnterForeachNodeConfiguration,
+  EnterParallelNodeConfiguration,
+} from '@kbn/workflows/graph';
 import {
   getDetailedTypeDescription,
   getZodTypeName,
@@ -23,9 +26,21 @@ import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
 export function getForeachStateSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
-  foreachStep: EnterForeachNodeConfiguration
+  // Both `foreach` and `parallel` enter-node configurations expose the same
+  // `foreach` source (parallel fans out over it), and only that field is read
+  // here — accept either so callers don't need an unsafe cast.
+  foreachStep: EnterForeachNodeConfiguration | EnterParallelNodeConfiguration
 ) {
   let itemSchema: z.ZodType = z.unknown();
+
+  // A static `parallel` step (named `branches`) has no `foreach` source, so there
+  // is no per-item context to derive — fall back to a permissive item schema.
+  if (foreachStep.foreach === undefined) {
+    return ForEachContextSchema.extend({
+      item: itemSchema,
+      items: z.array(itemSchema),
+    });
+  }
 
   try {
     if (Array.isArray(foreachStep.foreach)) {
@@ -99,6 +114,55 @@ const extractForeachItemSchemaFromJson = (foreachParam: string): z.ZodType => {
 
 const ENTRIES_FILTER = 'entries';
 
+/** ZodUnknown descriptions returned by {@link getForeachItemSchema} for non-throwing cases. */
+export const FOREACH_ITEM_SCHEMA_DESC = {
+  UNRESOLVED_PATH: 'Unable to parse foreach parameter',
+  RUNTIME_JSON: 'Unable to determine foreach item type',
+  RUNTIME_TYPE: 'Collection type cannot be determined statically, it will be resolved at runtime',
+} as const;
+
+export interface ForeachCollectionDiagnostic {
+  message: string;
+  severity: 'error' | 'warning';
+}
+
+/**
+ * Maps a {@link getForeachItemSchema} result to a collection-path diagnostic when the schema is ZodUnknown.
+ */
+export function getForeachCollectionDiagnostic(
+  itemSchema: z.ZodType,
+  propertyPath: string
+): ForeachCollectionDiagnostic | null {
+  if (!(itemSchema instanceof z.ZodUnknown)) {
+    return null;
+  }
+
+  const description = itemSchema.description;
+  if (description === FOREACH_ITEM_SCHEMA_DESC.UNRESOLVED_PATH) {
+    return {
+      message: `Collection ${propertyPath} is invalid`,
+      severity: 'error',
+    };
+  }
+  if (
+    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON ||
+    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
+  ) {
+    return {
+      message: description,
+      severity: 'warning',
+    };
+  }
+  if (description) {
+    return { message: description, severity: 'error' };
+  }
+
+  return {
+    message: `Unable to validate collection ${propertyPath}`,
+    severity: 'warning',
+  };
+}
+
 export function getForeachItemSchema(
   stepContextSchema: typeof DynamicStepContextSchema,
   foreachParam: string
@@ -110,7 +174,7 @@ export function getForeachItemSchema(
   // If we have a valid variable path syntax (e.g., {{some.path}})
   if (parsedPath && !parsedPath.errors && iterateOverPath) {
     // eslint-disable-next-line prefer-const -- we need this constant to have references in json schema
-    let itemSchema: z.ZodType = z.unknown().describe('Unable to parse foreach parameter');
+    let itemSchema: z.ZodType = z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.UNRESOLVED_PATH);
     const { schema: iterableSchema } = getSchemaAtPath(stepContextSchema, iterateOverPath);
     if (!iterableSchema) {
       // if we cannot resolve the path in the schema, we return an unknown schema
@@ -130,19 +194,21 @@ export function getForeachItemSchema(
       );
     } else if (iterableSchema instanceof z.ZodString) {
       // If the resolved path is a string, we return a string schema and will tell the user we will try to parse it as JSON in runtime
-      return z.unknown().describe('Unable to determine foreach item type');
+      return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON);
+    } else if (iterableSchema instanceof z.ZodUnknown || iterableSchema instanceof z.ZodAny) {
+      // The type isn't statically inferable (e.g. an output shape we don't model),
+      // so we can't prove it isn't iterable — leave it to runtime.
+      return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
     } else if (iterableSchema instanceof z.ZodUnion) {
       const arrayOption = iterableSchema.options.find((option) => option instanceof z.ZodArray);
       if (arrayOption && arrayOption instanceof z.ZodArray) {
         return arrayOption.element as z.ZodType;
-      } else {
-        throw new InvalidForeachParameterError(
-          `Expected array in union for foreach iteration, but no array type was found. Union options: [${iterableSchema.options
-            .map((opt) => getZodTypeName(opt as z.ZodType))
-            .join(', ')}]`,
-          InvalidForeachParameterErrorCodes.INVALID_UNION
-        );
       }
+      // A union means the type was never narrowed to a single branch. Elasticsearch
+      // result cells, for instance, are all typed by a primitive-only union even
+      // when the underlying field is multivalued, so a missing array branch is not
+      // proof that the collection isn't iterable — leave it to runtime.
+      return z.unknown().describe(FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE);
     } else if (iterableSchema instanceof z.ZodObject && hasEntriesFilter) {
       return z.object({ key: z.string(), value: z.unknown() });
     } else {

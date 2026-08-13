@@ -24,7 +24,7 @@ node scripts/scout.js start-server --arch stateful --domain classic
 Run evaluations using the following base command:
 
 ```bash
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+EVAL_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
   --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
@@ -33,8 +33,8 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
 
 **Environment Variables:**
 
-- **`EVALUATION_CONNECTOR_ID`** (required): Connector ID for the LLM judge
-- **`EVALUATION_REPETITIONS`**: Number of times to repeatedly evaluate each example (e.g., `3`)
+- **`EVAL_CONNECTOR_ID`** (required): Connector ID for the LLM judge
+- **`EVAL_REPETITIONS`**: Number of times to repeatedly evaluate each example (e.g., `3`)
 - **`USE_QUALITATIVE_EVALUATORS`**: Enable additional evaluators for Correctness (Factuality, Relevance, Sequence Accuracy) and Groundedness (Hallucination) (defaults to `false`)
 - **`SCENARIO_REPORTING`**: Enable scenario-grouped reporting that aggregates datasets by scenario prefix (defaults to `false`)
 
@@ -47,10 +47,10 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
 
 ```bash
 # Running alerts scenarios
-EVALUATION_REPETITIONS=3 \
+EVAL_REPETITIONS=3 \
 USE_QUALITATIVE_EVALUATORS=true \
 SCENARIO_REPORTING=true \
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
+EVAL_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
   --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
     evals/alerts/alerts.spec.ts \
@@ -63,7 +63,7 @@ The evaluation suite supports running evaluations against both the Obs AI Assist
 
 #### Client Selection
 
-Use the `EVALUATION_CLIENT` environment variable to specify which client to use:
+Use the `EVAL_CLIENT` environment variable to specify which client to use:
 
 - `obs_ai_assistant` (default): Uses the Obs AI Assistant API
 - `agent_builder`: Uses the Agent Builder API
@@ -104,9 +104,9 @@ Create `.scout/servers/local.json` with the following content:
 **3. Run evaluations**
 
 ```bash
-EVALUATION_REPETITIONS=1 \
-EVALUATION_CLIENT="agent_builder" \
-EVALUATION_CONNECTOR_ID="your-connector-id" \
+EVAL_REPETITIONS=1 \
+EVAL_CLIENT="agent_builder" \
+EVAL_CONNECTOR_ID="your-connector-id" \
   node scripts/playwright test \
   --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
     evals/esql/esql.spec.ts \
@@ -130,7 +130,7 @@ The evaluation framework supports two reporting modes:
 
 #### Retrieving Evaluation Scores from Elasticsearch
 
-Evaluation results are stored in the .kibana-evaluations data stream on the Elasticsearch cluster your Scout configuration points to (defaulting to http://localhost:9220). For on-demand analysis, you can query this data stream using the Kibana instance at http://localhost:5620.
+Evaluation results are stored in the .evaluation-scores data stream on the Elasticsearch cluster your Scout configuration points to (defaulting to http://localhost:9220). For on-demand analysis, you can query this data stream using the Kibana instance at http://localhost:5620.
 
 ##### Useful Queries
 
@@ -142,7 +142,7 @@ Evaluation results are stored in the .kibana-evaluations data stream on the Elas
 POST /_query?format=txt
 {
   "query": """
-FROM .kibana-evaluations
+FROM .evaluation-scores
 | WHERE run_id == "${run_id}"
 | EVAL mean_dataset_score = MV_AVG(evaluator.scores)
 | STATS
@@ -164,7 +164,7 @@ FROM .kibana-evaluations
 POST /_query?format=txt
 {
   "query": """
-FROM .kibana-evaluations
+FROM .evaluation-scores
 | WHERE run_id == "${run_id}"
 | DISSECT dataset.name "%{scenario}: %{rest}"
 | EVAL mean_dataset_score = MV_AVG(evaluator.scores)
@@ -187,7 +187,7 @@ FROM .kibana-evaluations
 POST /_query?format=txt
 {
   "query": """
-FROM .kibana-evaluations
+FROM .evaluation-scores
 | WHERE run_id == "${run_id}"
 | DISSECT dataset.name "%{scenario}: %{rest}"
 | EVAL mean_dataset_score = MV_AVG(evaluator.scores)

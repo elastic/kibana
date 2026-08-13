@@ -17,21 +17,21 @@ import { SOURCES_TYPES } from '@kbn/esql-types';
 import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
-import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
+import { isAsExpression, isSource, Walker, LeafPrinter, Parser } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
 import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '../../registry/constants';
 import { findFinalWord, withAutoSuggest } from './autocomplete/helpers';
-import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
 import { computePrefixRange } from '../../../language/autocomplete/utils/prefix_range';
+import { COORDINATOR_LOOKUP_JOIN_PREFIX } from '../constants';
 
-const removeSourceNameQuotes = (sourceName: string) =>
+export const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
 
 // Function to clean a single index string from failure stores
-const cleanIndex = (inputIndex: string): string => {
+export const cleanIndex = (inputIndex: string): string => {
   let cleaned = inputIndex.trim();
 
   // Remove '::data' suffix
@@ -57,6 +57,19 @@ export function shouldBeQuotedSource(text: string) {
 function getSafeInsertSourceText(text: string) {
   return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
+
+const buildDocumentation = (
+  description?: string,
+  links?: Array<{ label: string; url: string }>
+): { value: string } | undefined => {
+  const linkParts = links?.length ? links.map(({ label, url }) => `[${label}](${url})`) : [];
+  const parts = [
+    ...linkParts,
+    ...(description && linkParts.length > 0 ? [''] : []),
+    ...(description ? [description] : []),
+  ];
+  return parts.length > 0 ? { value: parts.join('\n') } : undefined;
+};
 
 export const buildSourcesDefinitions = (
   sources: Array<{
@@ -103,16 +116,6 @@ export const buildSourcesDefinitions = (
       };
     }
 
-    // Build markdown documentation from description and links (shown in detail popup)
-    const linkParts = links?.length ? links.map(({ label, url }) => `[${label}](${url})`) : [];
-    const parts = [
-      ...linkParts,
-      ...(description && linkParts.length > 0 ? [''] : []),
-      ...(description ? [description] : []),
-    ];
-
-    const documentation = parts.length > 0 ? { value: parts.join('\n') } : undefined;
-
     // Map type to Monaco CompletionItemKind for visual differentiation
     const kindByType = new Map<string, ISuggestionItem['kind']>([
       [SOURCES_TYPES.WIRED_STREAM, 'Folder'],
@@ -137,7 +140,7 @@ export const buildSourcesDefinitions = (
               type: type ?? SOURCES_TYPES.INDEX,
             },
           }),
-      documentation,
+      documentation: buildDocumentation(description, links),
       ...(command && { command }),
     });
   });
@@ -152,15 +155,16 @@ export const buildViewsDefinitions = (
 ): ISuggestionItem[] =>
   views
     .filter(({ name }) => !alreadyUsed.includes(name))
-    .map(({ name }) => {
-      const text = getSafeInsertSourceText(name);
+    .map(({ name, description, links, type }) => {
       return withAutoSuggest({
         label: name,
-        text,
+        text: getSafeInsertSourceText(name),
         kind: 'Issue',
         detail: i18n.translate('kbn-esql-language.esql.autocomplete.viewDefinition', {
-          defaultMessage: 'View',
+          defaultMessage: '{type}',
+          values: { type: type ?? 'View' },
         }),
+        documentation: buildDocumentation(description, links),
       });
     });
 
@@ -221,10 +225,7 @@ export function getSourcesFromCommands(
 ) {
   const sourceCommand = commands.find(({ name }) => name === 'from' || name === 'ts');
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  // the marker gets added in queries like "FROM "
-  return args.filter(
-    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
-  );
+  return args.filter((arg) => arg.sourceType === sourceType && arg.name !== '');
 }
 
 /**
@@ -406,9 +407,15 @@ export const getLookupJoinSource = (command: ESQLAstJoinCommand): string | undef
     type: 'source',
   });
 
-  if (sourceNode) {
-    return LeafPrinter.print(sourceNode);
+  if (!isSource(sourceNode)) {
+    return undefined;
   }
+
+  const isCoordinatorTarget = sourceNode.prefix?.valueUnquoted === COORDINATOR_LOOKUP_JOIN_PREFIX;
+  // FROM does not support the _coordinator prefix used by LOOKUP JOIN.
+  const sourceToPrint = isCoordinatorTarget && sourceNode.index ? sourceNode.index : sourceNode;
+
+  return LeafPrinter.print(sourceToPrint);
 };
 
 export function getIndexSourcesFromQuery(query: string): string[] {

@@ -25,7 +25,6 @@ import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import {
   type IKibanaMigrator,
   type IndexMapping,
-  type IndexTypesMap,
   type ISavedObjectTypeRegistryInternal,
   type KibanaMigratorStatus,
   type MigrateDocumentOptions,
@@ -44,7 +43,6 @@ import { runV2Migration } from './run_v2_migration';
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistryInternal;
-  defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
   soMigrationsConfig: SavedObjectsMigrationConfigType;
   kibanaIndex: string;
@@ -68,7 +66,6 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly log: Logger;
   private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistryInternal;
-  private readonly defaultIndexTypesMap: IndexTypesMap;
   private readonly hashToVersionMap: Record<string, string>;
   private readonly serializer: SavedObjectsSerializer;
   private migrationResult?: Promise<MigrationResult[]>;
@@ -100,7 +97,6 @@ export class KibanaMigrator implements IKibanaMigrator {
     client,
     typeRegistry,
     kibanaIndex,
-    defaultIndexTypesMap,
     hashToVersionMap,
     soMigrationsConfig,
     kibanaVersion,
@@ -115,7 +111,6 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.kibanaIndex = kibanaIndex;
     this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
-    this.defaultIndexTypesMap = defaultIndexTypesMap;
     this.hashToVersionMap = hashToVersionMap;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     // build mappings.properties for all types, all indices
@@ -208,7 +203,6 @@ export class KibanaMigrator implements IKibanaMigrator {
           kibanaVersion: this.kibanaVersion,
           kibanaIndexPrefix: this.kibanaIndex,
           typeRegistry: this.typeRegistry,
-          defaultIndexTypesMap: this.defaultIndexTypesMap,
           hashToVersionMap: this.hashToVersionMap,
           logger,
           documentMigrator: this.documentMigrator,

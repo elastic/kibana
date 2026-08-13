@@ -164,10 +164,10 @@ export function AiAssistantSelectionPage() {
                 justifyContent="center"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="xxl" type="logoObservability" />
+                  <EuiIcon size="xxl" type="logoObservability" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                  <EuiIcon size="xxl" type="logoEnterpriseSearch" aria-hidden={true} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -241,7 +241,7 @@ export function AiAssistantSelectionPage() {
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="xxl" type="logoSecurity" />}
+            icon={<EuiIcon size="xxl" type="logoSecurity" aria-hidden={true} />}
             isDisabled={!isSecurityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',

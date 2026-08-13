@@ -9,8 +9,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { z } from '@kbn/zod';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
@@ -23,7 +25,8 @@ import { TransformPanelsInError, TransformPanelInError } from './transform_panel
 
 export function transformPanelsIn(
   widgets: Required<DashboardState>['panels'],
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
@@ -41,7 +44,11 @@ export function transformPanelsIn(
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
         try {
-          const { storedPanel, references } = transformPanelIn(panel, isDashboardAppRequest);
+          const { storedPanel, references } = transformPanelIn(
+            panel,
+            isDashboardAppRequest,
+            useGASchemas
+          );
           panels.push({
             ...storedPanel,
             gridData: { ...storedPanel.gridData, sectionId: idx },
@@ -54,7 +61,11 @@ export function transformPanelsIn(
     } else {
       // widget is a panel
       try {
-        const { storedPanel, references } = transformPanelIn(widget, isDashboardAppRequest);
+        const { storedPanel, references } = transformPanelIn(
+          widget,
+          isDashboardAppRequest,
+          useGASchemas
+        );
         panels.push(storedPanel);
         panelReferences.push(...references);
       } catch (e) {
@@ -74,7 +85,8 @@ export function transformPanelsIn(
 
 function transformPanelIn(
   panel: DashboardPanel,
-  isDashboardAppRequest: boolean
+  isDashboardAppRequest: boolean,
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
@@ -94,10 +106,10 @@ function transformPanelIn(
   // Instead, panel.config must be validated in the handler
   const panelSchema = transforms?.schema;
   if (isDashboardAppRequest && panelSchema) {
-    try {
-      panelSchema.validate(config);
-    } catch (error) {
-      throw new Error(`Validation error: ${error.message}`);
+    const result = panelSchema.safeParse(config);
+    if (!result.success) {
+      const message = z.prettifyError(result.error);
+      throw new Error(`Validation error: ${message}`);
     }
   }
 
@@ -105,8 +117,8 @@ function transformPanelIn(
   let references: undefined | SavedObjectReference[];
   try {
     if (transforms?.transformIn) {
-      const transformed = transforms.transformIn(config);
-      transformedPanelConfig = transformed.state;
+      const transformed = transforms.transformIn(config, useGASchemas);
+      transformedPanelConfig = transformed.state as Record<string, unknown>;
       references = transformed.references;
     }
   } catch (transformInError) {

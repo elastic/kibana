@@ -7,19 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum TypeStatus {
-  Added = 'added',
-  Removed = 'removed',
-  Moved = 'moved',
-  Untouched = 'untouched',
-}
-
-export interface TypeStatusDetails {
-  currentIndex?: string;
-  targetIndex?: string;
-  status: TypeStatus;
-}
-
 // ensure plugins don't try to convert SO namespaceTypes after 8.0.0
 // see https://github.com/elastic/kibana/issues/147344
 export const ALLOWED_CONVERT_VERSION = '8.0.0';

@@ -116,7 +116,7 @@ describe('get color', () => {
 
     dataMock.fieldFormats = {
       deserialize: jest.fn(() => ({
-        convert: jest.fn((s: RangeProps) => {
+        convertToText: jest.fn((s: RangeProps) => {
           return `≥ ${s.gte} and < ${s.lt}`;
         }),
       })),

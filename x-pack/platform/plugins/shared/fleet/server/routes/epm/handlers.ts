@@ -9,8 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import { type HttpResponseOptions } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { omit, pick } from 'lodash';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common';
@@ -67,6 +66,7 @@ import type {
   GetKnowledgeBaseRequestSchema,
   DeletePackageResponseSchema,
   ReviewUpgradeRequestSchema,
+  NamespacePreflightCheckRequestSchema,
 } from '../../types';
 import { KibanaSavedObjectType } from '../../types';
 import {
@@ -113,7 +113,12 @@ import {
   rollbackInstallation,
 } from '../../services/epm/packages/rollback';
 import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
+import {
+  runNamespacePreflightCheck,
+  runAndLogNamespacePreflightCheck,
+} from '../../services/epm/packages/namespace_datastream_templates';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
+import { scheduleSyncIlmPolicyTask } from '../../tasks/sync_ilm_policy_task';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
   ReauthorizeTransformRequestSchema,
@@ -338,8 +343,12 @@ export const updatePackageHandler: FleetRequestHandler<
 
   // Gate both added and removed namespaces on the current space's allowed_namespace_prefixes.
   const requestedList = request.body.namespace_customization_enabled_for;
-  if (requestedList) {
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
+  const requestedSettings = request.body.namespace_customization_settings;
+  let installation: Awaited<ReturnType<typeof getInstallation>> | undefined;
+  if (requestedList || requestedSettings) {
+    installation = await getInstallation({ savedObjectsClient, pkgName });
+  }
+  if (requestedList && installation !== undefined) {
     const currentList = installation?.namespace_customization_enabled_for ?? [];
     const added = requestedList.filter((ns) => !currentList.includes(ns));
     const removed = currentList.filter((ns) => !requestedList.includes(ns));
@@ -356,12 +365,72 @@ export const updatePackageHandler: FleetRequestHandler<
       }
     }
   }
+  if (requestedSettings) {
+    // The effective opted-in list is the incoming one (if also being updated) or the current one.
+    const effectiveOptInList =
+      requestedList ?? installation?.namespace_customization_enabled_for ?? [];
+    const notOptedIn = Object.keys(requestedSettings).filter(
+      (ns) => !effectiveOptInList.includes(ns)
+    );
+    if (notOptedIn.length > 0) {
+      throw new PolicyNamespaceValidationError(
+        `Cannot set ILM policy for namespace(s) not opted in for namespace customization: ${notOptedIn.join(
+          ', '
+        )}`
+      );
+    }
 
-  const { packageInfo, namespaceCustomizationDiff } = await updatePackage({
+    // Reject ILM policies that don't exist: a component template pointing at a
+    // non-existent lifecycle is silently broken (ES accepts it, but rollover never applies).
+    const requestedIlmPolicies = [
+      ...new Set(
+        Object.values(requestedSettings)
+          .map((settings) => settings.ilm_policy)
+          .filter((ilmPolicy): ilmPolicy is string => !!ilmPolicy)
+      ),
+    ];
+    if (requestedIlmPolicies.length > 0) {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      // Enforce the manage_ilm privilege on the write path. Without this the privilege
+      // gate would be UI-only: the route is authorized with integration-install privileges
+      // and syncIlmPolicy runs as the Fleet internal user, so a caller lacking manage_ilm
+      // could otherwise assign an ILM policy to every backing index by calling the API directly.
+      const { has_all_requested: hasManageIlm } = await esClient.security.hasPrivileges({
+        cluster: ['manage_ilm'],
+      });
+      if (!hasManageIlm) {
+        throw new FleetUnauthorizedError(
+          'The manage_ilm cluster privilege is required to assign an ILM policy.'
+        );
+      }
+      const existingLifecycles = await esClient.ilm.getLifecycle();
+      const missing = requestedIlmPolicies.filter((ilmPolicy) => !existingLifecycles[ilmPolicy]);
+      if (missing.length > 0) {
+        throw new PolicyNamespaceValidationError(
+          `The following ILM policies do not exist: ${missing.join(', ')}`
+        );
+      }
+    }
+  }
+
+  const { packageInfo, namespaceCustomizationDiff, ilmPolicyChanges } = await updatePackage({
     savedObjectsClient,
     pkgName,
     ...request.body,
   });
+
+  let warnings: UpdatePackageResponse['warnings'];
+  if (namespaceCustomizationDiff.addedNamespaces.length > 0) {
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const detected = await runAndLogNamespacePreflightCheck({
+      esClient,
+      soClient: savedObjectsClient,
+      packageName: pkgName,
+      namespaces: namespaceCustomizationDiff.addedNamespaces,
+      handlerName: 'updatePackageHandler',
+    });
+    if (detected.length > 0) warnings = detected;
+  }
 
   if (
     namespaceCustomizationDiff.addedNamespaces.length > 0 ||
@@ -375,11 +444,40 @@ export const updatePackageHandler: FleetRequestHandler<
     });
   }
 
+  for (const { namespace } of ilmPolicyChanges) {
+    await scheduleSyncIlmPolicyTask(getTaskManagerStart(), {
+      spaceId,
+      packageName: pkgName,
+      namespace,
+    });
+  }
+
   const body: UpdatePackageResponse = {
     item: packageInfo,
+    ...(warnings && { warnings }),
   };
 
   return response.ok({ body });
+};
+
+export const namespacePreflightCheckHandler: FleetRequestHandler<
+  TypeOf<typeof NamespacePreflightCheckRequestSchema.params>,
+  unknown,
+  TypeOf<typeof NamespacePreflightCheckRequestSchema.body>
+> = async (context, request, response) => {
+  const savedObjectsClient = (await context.fleet).internalSoClient;
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const { pkgName } = request.params;
+  const { namespaces } = request.body;
+
+  const warnings = await runNamespacePreflightCheck({
+    esClient,
+    soClient: savedObjectsClient,
+    packageName: pkgName,
+    namespaces,
+  });
+
+  return response.ok({ body: { warnings } });
 };
 
 export const reviewUpgradeHandler: FleetRequestHandler<
@@ -439,6 +537,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     esClient,
     spaceId,
     force: request.body?.force,
+    allowOutdatedVersion: request.body?.allow_outdated_version,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     request,
@@ -577,6 +676,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
+    allowOutdatedVersion: request.body.allow_outdated_version,
     request,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
@@ -788,7 +888,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
       additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,
-      installed_es: attributes.installed_es,
+      installed_es: attributes.installed_es ?? [],
       install_status: attributes.install_status,
       install_source: attributes.install_source,
       name: attributes.name,
@@ -804,6 +904,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       pending_upgrade_review: attributes.pending_upgrade_review,
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
+      namespace_customization_settings: attributes.namespace_customization_settings,
     };
 
     return {

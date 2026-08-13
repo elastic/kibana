@@ -23,15 +23,16 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiComboBox,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
   EuiIcon,
+  EuiSpacer,
   EuiSuperSelect,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import sqliteParser from '@appland/sql-parser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -291,11 +292,11 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   },
   {
     value: 'value',
-    inputDisplay: <EuiIcon type="user" size="m" />,
+    inputDisplay: <EuiIcon type="user" size="m" aria-hidden={true} />,
     dropdownDisplay: (
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="user" size="m" />
+          <EuiIcon type="user" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" className="eui-textNoWrap">
@@ -546,17 +547,17 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           {Prepend}
         </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
-          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-          {/* @ts-ignore*/}
           <EuiComboBox
             css={resultComboBoxCss}
-            error={resultFieldState.error?.message}
             // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
             inputRef={(ref: HTMLInputElement) => {
               inputRef.current = ref;
             }}
             fullWidth
-            selectedOptions={selectedOptions}
+            // local state tracks OsquerySchemaOption directly; EUI expects the wrapped option type
+            selectedOptions={
+              selectedOptions as unknown as Array<EuiComboBoxOptionOption<OsquerySchemaOption>>
+            }
             onChange={handleKeyChange}
             onCreateOption={handleCreateOption}
             renderOption={renderOsqueryOption}
@@ -571,7 +572,10 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             )}
             {...euiFieldProps}
             data-test-subj="osqueryColumnValueSelect"
-            options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
+            options={
+              ((resultTypeField.value === 'field' && euiFieldProps.options) ||
+                EMPTY_ARRAY) as unknown as Array<EuiComboBoxOptionOption<OsquerySchemaOption>>
+            }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -666,17 +670,27 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
               <EuiFlexItem grow={false}>
                 <div css={buttonWrapperCss}>
                   {!isLastItem && (
-                    <EuiButtonIcon
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
                         {
                           defaultMessage: 'Delete ECS mapping row',
                         }
                       )}
-                      iconType="trash"
-                      color="danger"
-                      onClick={handleDeleteClick}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.osquery.pack.queryFlyoutForm.deleteECSMappingRowButtonAriaLabel',
+                          {
+                            defaultMessage: 'Delete ECS mapping row',
+                          }
+                        )}
+                        iconType="trash"
+                        color="danger"
+                        onClick={handleDeleteClick}
+                      />
+                    </EuiToolTip>
                   )}
                 </div>
               </EuiFlexItem>

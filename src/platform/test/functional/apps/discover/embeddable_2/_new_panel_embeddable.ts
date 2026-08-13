@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Integration test across multiple apps.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -15,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
@@ -26,14 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
   ]);
 
-  describe('add new discover panel embeddable', () => {
+  describe('add new discover panel from dashboard', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -70,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
           discover
             .getSavedSearchTitle()
-            .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing New Discover session')),
+            .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('New Discover session')),
           testSubjects
             .exists('unifiedTabs_tabsBar', { timeout: 1000 })
             .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
@@ -133,25 +130,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.verifyNoRenderErrors();
 
         expect(await discover.getAllSavedSearchDocumentCount()).to.eql([]);
-      });
-    });
-
-    describe('Save Discover Table Button', () => {
-      it('can save to a new Dashboard from Discover', async () => {
-        await discover.navigateToApp();
-        await discover.clickNewSearchButton();
-        await header.waitUntilLoadingHasFinished();
-        await discover.waitUntilSearchingHasFinished();
-
-        await queryBar.setQuery('test');
-        await queryBar.submitQuery();
-        await discover.waitUntilTabIsLoaded();
-
-        await discover.clickSaveDiscoverTableToDashboard('By-Value Table');
-
-        await dashboard.waitForRenderComplete();
-        await dashboard.verifyNoRenderErrors();
-        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
       });
     });
   });

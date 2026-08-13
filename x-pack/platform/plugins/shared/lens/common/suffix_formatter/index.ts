@@ -54,7 +54,7 @@ export function getSuffixFormatter(getFormatFactory: () => FormatFactory): Field
       const formattedValue = getFormatFactory()({
         id: nestedFormatter,
         params: nestedParams,
-      }).convert(val);
+      }).convertToText(val);
 
       // do not add suffixes to empty strings
       if (formattedValue === '') {

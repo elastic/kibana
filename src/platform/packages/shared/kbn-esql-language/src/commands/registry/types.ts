@@ -222,10 +222,10 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
-  subquerySupport?: boolean;
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
+  isTimeseriesSource?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -340,4 +340,13 @@ export enum UnmappedFieldsStrategy {
   DEFAULT = 'DEFAULT',
   NULLIFY = 'NULLIFY',
   LOAD = 'LOAD',
+  LOAD_ALL = 'LOAD_ALL',
+}
+const UNMAPPED_FIELD_STRATEGIES = new Set<string>(Object.values(UnmappedFieldsStrategy));
+
+export function isUnmappedFieldsStrategy(
+  value: string | undefined
+): value is UnmappedFieldsStrategy {
+  if (!value) return false;
+  return UNMAPPED_FIELD_STRATEGIES.has(value);
 }

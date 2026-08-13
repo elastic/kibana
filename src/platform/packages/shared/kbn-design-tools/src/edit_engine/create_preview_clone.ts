@@ -7,16 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../lib/constants';
+import {
+  DEVTOOL_HIDDEN_ATTR,
+  DEVTOOL_MANAGED_ATTR,
+  DEVTOOL_CLONE_HIDDEN_ATTR,
+} from '../lib/constants';
 import {
   copyCanvasContent,
   copyStylesDeep,
   deduplicateSvgIds,
-  setImportant,
   roundRect,
   widenForTruncation,
 } from './clone_element';
 import { isLiveElement } from './managed_element';
+import { setImportant } from '../lib/dom/set_important';
 
 interface PreviewCloneResult {
   clone: HTMLElement;
@@ -111,11 +115,14 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   setImportant(clone, 'opacity', '1');
 
   // Strip devtool markers from the clone root.
-  // Children with DEVTOOL_HIDDEN_ATTR remain hidden. They were soft-deleted
-  // by the user and the preview should reflect the current editing state.
+  // Children with DEVTOOL_HIDDEN_ATTR or data-clone-hidden remain hidden.
+  // They were soft-deleted by the user and the preview should reflect the
+  // current editing state.
   // Collect hidden subtree roots first so descendants are not accidentally
   // made visible (CSS visibility:visible on a child overrides the parent).
-  const hiddenRoots = clone.querySelectorAll<HTMLElement>(`[${DEVTOOL_HIDDEN_ATTR}]`);
+  const hiddenRoots = clone.querySelectorAll<HTMLElement>(
+    `[${DEVTOOL_HIDDEN_ATTR}], [${DEVTOOL_CLONE_HIDDEN_ATTR}]`
+  );
   const insideHidden = new Set<Element>();
   for (const root of hiddenRoots) {
     for (const desc of root.querySelectorAll('*')) {
@@ -126,9 +133,11 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   clone.removeAttribute(DEVTOOL_HIDDEN_ATTR);
   clone.removeAttribute(DEVTOOL_MANAGED_ATTR);
   for (const child of clone.querySelectorAll<HTMLElement>('*')) {
-    const isHidden = child.hasAttribute(DEVTOOL_HIDDEN_ATTR);
+    const isHidden =
+      child.hasAttribute(DEVTOOL_HIDDEN_ATTR) || child.hasAttribute(DEVTOOL_CLONE_HIDDEN_ATTR);
     child.removeAttribute(DEVTOOL_MANAGED_ATTR);
     child.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+    child.removeAttribute(DEVTOOL_CLONE_HIDDEN_ATTR);
     const isVisibleChild = !isHidden && !insideHidden.has(child);
     if (isVisibleChild) {
       if (child.style.visibility === 'hidden') child.style.visibility = 'visible';

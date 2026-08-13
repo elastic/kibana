@@ -8,8 +8,16 @@
  */
 
 import { TRUNCATION_CLASSES, MAX_TREE_DEPTH } from '../lib/constants';
+import { setImportant } from '../lib/dom/set_important';
+import { hasComputedTruncation } from './text_layout_helpers';
 
-const TRUNCATION_RE = /truncat|textbreak/i;
+const EMOTION_TRUNCATION_LABEL_RE = /--(truncatedstyles|textbreakwordstyles|textbreakallstyles)$/i;
+
+const isTruncationClassName = (className: string): boolean => {
+  const lower = className.toLowerCase();
+  if (TRUNCATION_CLASSES.some((known) => known.toLowerCase() === lower)) return true;
+  return EMOTION_TRUNCATION_LABEL_RE.test(className);
+};
 
 /**
  * Check whether a single element has text truncation applied — either via
@@ -27,11 +35,9 @@ const TRUNCATION_RE = /truncat|textbreak/i;
  * @returns `true` when the element has text truncation.
  */
 export const isTruncated = (el: Element): boolean => {
-  if (Array.from(el.classList).some((c) => TRUNCATION_RE.test(c))) return true;
+  if (Array.from(el.classList).some(isTruncationClassName)) return true;
   if (el.isConnected && el instanceof HTMLElement) {
-    const style = getComputedStyle(el);
-    if (style.textOverflow === 'ellipsis') return true;
-    if (style.webkitLineClamp !== 'none' && style.webkitLineClamp !== '') return true;
+    if (hasComputedTruncation(el)) return true;
   }
   return false;
 };
@@ -58,21 +64,43 @@ export const isTruncatedDeep = (el: Element, depth = 0): boolean => {
 };
 
 /**
- * Strip EUI truncation utility classes from a clone element. These classes
- * use `!important` and would override inline dimensions set during cloning.
- * Emotion truncation classes are left intact because removing them would
- * discard other bundled styles.
+ * Strip truncation classes from a clone element and neutralize truncation
+ * CSS properties inline.
+ *
+ * EUI truncation utility classes use `!important` and would override inline
+ * dimensions set during cloning. Emotion or arbitrary class names may still
+ * apply truncation styles without matching `TRUNCATION_CLASSES`, so this
+ * helper also neutralizes known truncation properties inline when truncation
+ * is detected on either `clone` or `source`.
  *
  * @param clone - The cloned element to strip truncation classes from.
+ * @param source - Optional source element for computed-style truncation checks.
  * @returns `true` when the element has any truncation (EUI or Emotion).
  */
-export const stripTruncationClasses = (clone: Element): boolean => {
+export const stripTruncationClasses = (clone: Element, source?: Element): boolean => {
   let stripped = false;
-  for (const cls of TRUNCATION_CLASSES) {
-    if (clone.classList.contains(cls)) {
+  for (const cls of Array.from(clone.classList)) {
+    if (isTruncationClassName(cls)) {
       clone.classList.remove(cls);
       stripped = true;
     }
   }
-  return stripped || isTruncated(clone);
+
+  const sourceTruncated = !!source && isTruncated(source);
+  const cloneTruncated = isTruncated(clone);
+  const hasTruncation = stripped || sourceTruncated || cloneTruncated;
+  const computedTruncation =
+    source instanceof HTMLElement && source.isConnected ? hasComputedTruncation(source) : false;
+
+  if (hasTruncation && clone instanceof HTMLElement) {
+    setImportant(clone, 'text-overflow', 'clip');
+    setImportant(clone, '-webkit-line-clamp', 'unset');
+    setImportant(clone, 'line-clamp', 'none');
+    setImportant(clone, '-webkit-box-orient', 'initial');
+    if (computedTruncation || stripped) {
+      setImportant(clone, 'overflow', 'visible');
+    }
+  }
+
+  return hasTruncation;
 };

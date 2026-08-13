@@ -22,7 +22,7 @@ import type { AlertAction } from '../../../../server/resources/datastreams/alert
 import { LOOKBACK_WINDOW_MINUTES } from '../../../../server/lib/dispatcher/constants';
 import type { AlertActionsFilter } from '../../common/services';
 import type { AlertingApiServicesFixture } from '../fixtures';
-import { apiTest, buildCreateRuleData, testData } from '../fixtures';
+import { apiTest, buildCreateRuleData, buildExternalAlertEvent, testData } from '../fixtures';
 
 const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
 
@@ -61,6 +61,7 @@ const TEST_RULE_IDS = [
   'rule-006',
   'rule-007',
   'rule-008',
+  'rule-009',
   'rule-matcher',
   'rule-groupby',
   'rule-mw',
@@ -71,7 +72,7 @@ const relativeTime = (secondsAgo: number, base: number = Date.now()): string =>
   new Date(base - secondsAgo * 1000).toISOString();
 
 interface BuildAlertEventInput {
-  ruleId: AlertEvent['rule']['id'];
+  ruleId: NonNullable<AlertEvent['rule']>['id'];
   groupHash: AlertEvent['group_hash'];
   episodeId: NonNullable<AlertEvent['episode']>['id'];
   episodeStatus: NonNullable<AlertEvent['episode']>['status'];
@@ -131,7 +132,7 @@ const buildAlertAction = ({
 });
 
 /**
- * Polls `apiServices.alertingV2.alertActions.find(...)` until the count matches
+ * Polls `apiServices.alertingV2.alertActionsEvents.find(...)` until the count matches
  * `expected`, then waits for one more dispatcher tick to surface any extras
  * a regression might produce, and finally asserts the count is exactly
  * `expected`. Use this when a test asserts an exact number of side-effect
@@ -142,10 +143,10 @@ const expectStableCount = async (
   expected: number,
   filter: AlertActionsFilter
 ): Promise<AlertAction[]> => {
-  await apiServices.alertingV2.alertActions.waitForAtLeast(expected, filter);
+  await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(expected, filter);
   await apiServices.alertingV2.dispatcher.waitForDispatcherTick();
 
-  const actions = await apiServices.alertingV2.alertActions.find(filter);
+  const actions = await apiServices.alertingV2.alertActionsEvents.find(filter);
 
   expect(actions).toHaveLength(expected);
 
@@ -158,7 +159,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.actionPolicies.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
 
     for (const ruleId of TEST_RULE_IDS) {
       await apiServices.alertingV2.rules.upsert(
@@ -170,10 +171,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           // existing index is the cheapest no-op: it parses, runs
           // successfully, and returns zero rows even if the executor task
           // fires before the bulkDisable below lands.
-          evaluation: {
-            query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
           },
-          recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 0, recovering_count: 0 },
         })
       );
@@ -209,11 +210,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_GROUPBY_ID);
 
     await apiServices.alertingV2.actionPolicies.upsert(SINGLE_RULE_POLICY_ID, {
-      name: 'Single-rule policy bound to rule-001',
+      name: 'Rule-scoped policy bound to rule-001',
       description: 'Must filter to its linked rule only',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      type: 'single_rule',
-      ruleId: 'rule-001',
+      matcher: 'rule.id: "rule-001"',
     });
 
     await apiServices.alertingV2.actionPolicies.disable(SINGLE_RULE_POLICY_ID);
@@ -236,7 +236,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
 
@@ -259,7 +259,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -275,7 +275,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // surface stray actions.
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.find();
+      const actions = await apiServices.alertingV2.alertActionsEvents.find();
       expect(actions).toHaveLength(0);
     }
   );
@@ -373,7 +373,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // Each dispatch produces one fire per episode and one notified per
       // action group; with `per_episode` grouping (the default for np-1) the
       // notified action carries both `action_group_id` and `episode_status`.
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -503,14 +503,14 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       ];
 
       await apiServices.alertingV2.ruleEvents.seed(initialEvents);
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
 
       // Capture the latest fire timestamp so we can scope the post-seed
       // assertion to events strictly newer than the initial dispatch run.
-      const initialFires = await apiServices.alertingV2.alertActions.find({
+      const initialFires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -536,7 +536,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       await expect
         .poll(
           async () => {
-            const actions = await apiServices.alertingV2.alertActions.find({
+            const actions = await apiServices.alertingV2.alertActionsEvents.find({
               ruleId: 'rule-1',
               actionTypes: ['fire'],
             });
@@ -620,9 +620,10 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: eventTs(165),
         }),
-        // rule-004: two series, 4 events each
+        // rule-004: three series, 4 events each
         ...buildSeriesEvents('rule-004', 'rule-004-series-1', 'rule-004-series-1-episode-1', 180),
         ...buildSeriesEvents('rule-004', 'rule-004-series-2', 'rule-004-series-2-episode-1', 180),
+        ...buildSeriesEvents('rule-004', 'rule-004-series-3', 'rule-004-series-3-episode-1', 180),
         // rule-005: two series, 4 events each
         ...buildSeriesEvents('rule-005', 'rule-005-series-1', 'rule-005-series-1-episode-1', 180),
         ...buildSeriesEvents('rule-005', 'rule-005-series-2', 'rule-005-series-2-episode-1', 180),
@@ -633,7 +634,13 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // User actions:
       //  - rule-001 ack then unack → suppression cancelled → fire
       //  - rule-002 ack only → suppress
-      //  - rule-004 series-1+2 snoozed → suppress (no episode_id, expires far in future)
+      //  - rule-004 series-1 snoozed with a future expiry, series-2 snoozed
+      //    indefinitely (no expiry), series-3 has an expired snooze followed
+      //    by an indefinite one → all three suppress (no episode_id). The
+      //    indefinite snooze guards against the suppression query dropping
+      //    null-expiry rows (ES|QL null comparison); series-3 guards against
+      //    the latest-snooze aggregation skipping the null expiry and picking
+      //    up the older, expired one.
       //  - rule-005 series-1 deactivated → suppress; series-2 unaffected → fire
       const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
       const userActions: AlertAction[] = [
@@ -675,7 +682,24 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           actionType: 'snooze',
           lastSeriesEventTimestamp: eventTs(180),
           timestamp: actionTs(178),
-          expiry: futureExpiry,
+          // No expiry: an indefinite snooze. Must still suppress.
+        }),
+        buildAlertAction({
+          ruleId: 'rule-004',
+          groupHash: 'rule-004-series-3',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(180),
+          timestamp: actionTs(178),
+          // Expired long before the events: superseded by the snooze below.
+          expiry: new Date('2020-01-01T00:00:00.000Z').toISOString(),
+        }),
+        buildAlertAction({
+          ruleId: 'rule-004',
+          groupHash: 'rule-004-series-3',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(180),
+          timestamp: actionTs(176),
+          // No expiry: the latest snooze intent is indefinite. Must suppress.
         }),
         buildAlertAction({
           ruleId: 'rule-005',
@@ -686,7 +710,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           timestamp: actionTs(173),
         }),
       ];
-      await apiServices.alertingV2.alertActions.seed(userActions);
+      await apiServices.alertingV2.alertActionsEvents.seed(userActions);
 
       // Wait until the dispatcher has produced the full set:
       //  - rule-001:                fire     (ack/unack net = no suppress)
@@ -696,23 +720,24 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       //  - rule-003 series-2 ep2:   fire     (latest active)
       //  - rule-004 series-1:       suppress (snoozed)
       //  - rule-004 series-2:       suppress (snoozed)
+      //  - rule-004 series-3:       suppress (snoozed)
       //  - rule-005 series-1:       suppress (deactivated)
       //  - rule-005 series-2:       fire
-      // Total: 5 fire + 4 suppress = 9.
-      await apiServices.alertingV2.alertActions.waitForAtLeast(9, {
+      // Total: 5 fire + 5 suppress = 10.
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(10, {
         actionTypes: ['fire', 'suppress'],
       });
 
       // Filter out the user actions seeded above (ack/unack/snooze/deactivate)
       // so the assertions only see dispatcher-generated fire/suppress actions.
-      const dispatched = await apiServices.alertingV2.alertActions.find({
+      const dispatched = await apiServices.alertingV2.alertActionsEvents.find({
         actionTypes: ['fire', 'suppress'],
       });
 
       const fireActions = dispatched.filter((action) => action.action_type === 'fire');
       const suppressActions = dispatched.filter((action) => action.action_type === 'suppress');
       expect(fireActions).toHaveLength(5);
-      expect(suppressActions).toHaveLength(4);
+      expect(suppressActions).toHaveLength(5);
 
       // rule-001: fire (ack/unack cancels suppression). The fire action's
       // `reason` proves it was dispatched (not suppressed by the prior ack).
@@ -746,9 +771,14 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       const rule003Fires = fireActions.filter((action) => action.rule_id === 'rule-003');
       expect(rule003Fires).toHaveLength(3);
 
-      // rule-004: both series suppress (snoozed with null episode_id and
-      // expiry far in the future). Snoozes are series-scoped, so both series
-      // are suppressed with `reason: 'snooze'`.
+      // rule-004: all three series suppress (snoozed with null episode_id).
+      // series-1 has a future expiry; series-2 has no expiry (indefinite
+      // snooze) — a regression guard, since the suppression query previously
+      // dropped null-expiry rows and let indefinite snoozes fire; series-3
+      // has an expired snooze superseded by an indefinite one — a regression
+      // guard for the latest-snooze aggregation resurrecting the expired
+      // expiry. Snoozes are series-scoped, so all three series are suppressed
+      // with `reason: 'snooze'`.
       expect(dispatched).toStrictEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -760,6 +790,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           expect.objectContaining({
             rule_id: 'rule-004',
             group_hash: 'rule-004-series-2',
+            action_type: 'suppress',
+            reason: 'snooze',
+          }),
+          expect.objectContaining({
+            rule_id: 'rule-004',
+            group_hash: 'rule-004-series-3',
             action_type: 'suppress',
             reason: 'snooze',
           }),
@@ -823,13 +859,22 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: eventTs(60),
         }),
+        buildAlertEvent({
+          ruleId: 'rule-009',
+          groupHash: 'rule-009-series-1',
+          episodeId: 'rule-009-series-1-episode-1',
+          episodeStatus: 'active',
+          status: 'breached',
+          timestamp: eventTs(60),
+        }),
       ];
       await apiServices.alertingV2.ruleEvents.seed(events);
 
       const futureExpiry = new Date(baseTime + 24 * 60 * 60 * 1000).toISOString();
-      // `expiry` for the expired-snooze must be strictly before the event's
-      // `@timestamp`. The dispatcher's suppression ESQL drops snooze rows
-      // whose `expiry` is at or before the batch's MIN episode timestamp.
+      // `expiry` for the expired-snoozes must be strictly before the event's
+      // `@timestamp`. The dispatcher's suppression ESQL classifies snooze rows
+      // whose `expiry` is at or before the batch's MIN episode timestamp as
+      // expired.
       const pastExpiry = new Date('2020-01-01T00:00:00.000Z').toISOString();
       const userActions: AlertAction[] = [
         // rule-006: snooze then unsnooze → last snooze action = "unsnooze" → fire
@@ -875,19 +920,39 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           lastSeriesEventTimestamp: eventTs(60),
           timestamp: actionTs(30),
         }),
+        // rule-009: indefinite snooze superseded by a snooze that has since
+        // expired → the latest snooze intent is expired → fire. Guards
+        // against expired snoozes being dropped before LAST(), which would
+        // resurrect the older indefinite snooze and suppress forever.
+        buildAlertAction({
+          ruleId: 'rule-009',
+          groupHash: 'rule-009-series-1',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(60),
+          timestamp: actionTs(50),
+          // No expiry: indefinite snooze, superseded below.
+        }),
+        buildAlertAction({
+          ruleId: 'rule-009',
+          groupHash: 'rule-009-series-1',
+          actionType: 'snooze',
+          lastSeriesEventTimestamp: eventTs(60),
+          timestamp: actionTs(30),
+          expiry: pastExpiry,
+        }),
       ];
-      await apiServices.alertingV2.alertActions.seed(userActions);
+      await apiServices.alertingV2.alertActionsEvents.seed(userActions);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(4, {
         actionTypes: ['fire'],
       });
 
-      const dispatched = await apiServices.alertingV2.alertActions.find({
+      const dispatched = await apiServices.alertingV2.alertActionsEvents.find({
         actionTypes: ['fire', 'suppress'],
       });
 
       // Each rule must produce exactly one fire and zero suppress.
-      for (const ruleId of ['rule-006', 'rule-007', 'rule-008']) {
+      for (const ruleId of ['rule-006', 'rule-007', 'rule-008', 'rule-009']) {
         const fires = dispatched.filter(
           (action) => action.rule_id === ruleId && action.action_type === 'fire'
         );
@@ -946,12 +1011,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-matcher',
         actionTypes: ['fire', 'unmatched'],
       });
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-matcher',
         actionTypes: ['fire', 'unmatched'],
       });
@@ -1045,7 +1110,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
       }
 
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
@@ -1151,7 +1216,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(fires).toHaveLength(3);
 
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1197,12 +1262,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
 
-      const initialFires = await apiServices.alertingV2.alertActions.find({
+      const initialFires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -1224,12 +1289,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(4, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(4, {
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
 
-      const finalFires = await apiServices.alertingV2.alertActions.find({
+      const finalFires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -1281,7 +1346,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(fires).toHaveLength(3);
 
-      const notifiedActions = await apiServices.alertingV2.alertActions.find({
+      const notifiedActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1345,7 +1410,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       expect(fires).toHaveLength(4);
 
-      const notified = await apiServices.alertingV2.alertActions.find({
+      const notified = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-groupby',
         actionTypes: ['notified'],
       });
@@ -1417,12 +1482,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         }),
       ]);
 
-      await apiServices.alertingV2.alertActions.waitForAtLeast(3, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(3, {
         ruleId: 'rule-mw',
         actionTypes: ['suppress'],
       });
 
-      const suppressActions = await apiServices.alertingV2.alertActions.find({
+      const suppressActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-mw',
         actionTypes: ['suppress'],
       });
@@ -1442,7 +1507,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       // A fire action for `rule-mw` would mean the MW gate let an episode
       // through, defeating the purpose of the maintenance window.
-      const fires = await apiServices.alertingV2.alertActions.find({
+      const fires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-mw',
         actionTypes: ['fire'],
       });
@@ -1452,12 +1517,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'single_rule policy / dispatches only for the linked rule and skips unrelated rules',
+    'rule-scoped policy / dispatches only for the linked rule and skips unrelated rules',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.enable(SINGLE_RULE_POLICY_ID);
 
       await apiServices.alertingV2.ruleEvents.seed([
-        // Linked rule: matched by np-1 (catch-all) AND by the single-rule policy.
+        // Linked rule: matched by np-1 (catch-all) AND by the rule-scoped policy.
         buildAlertEvent({
           ruleId: 'rule-001',
           groupHash: 'rule-001-single-series',
@@ -1466,7 +1531,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           status: 'breached',
           timestamp: relativeTime(20),
         }),
-        // Unrelated rule: matched by np-1; the single-rule policy MUST NOT match.
+        // Unrelated rule: matched by np-1; the rule-scoped policy MUST NOT match.
         buildAlertEvent({
           ruleId: 'rule-002',
           groupHash: 'rule-002-single-series',
@@ -1490,7 +1555,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       );
 
       // rule-002 must produce exactly one fire (np-1 only). A second fire
-      // here would mean the single-rule filter leaked across rules.
+      // here would mean the rule-scoped matcher leaked across rules.
       const rule002Fires = await expectStableCount(apiServices, 1, {
         ruleId: 'rule-002',
         actionTypes: ['fire'],
@@ -1535,7 +1600,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
       // Two notified records (one per action group / policy), under the
       // default per_episode grouping mode.
-      const notified = await apiServices.alertingV2.alertActions.find({
+      const notified = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1549,7 +1614,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       );
 
       // No suppress / unmatched leakage from a multi-policy match.
-      const otherActions = await apiServices.alertingV2.alertActions.find({
+      const otherActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['suppress', 'unmatched'],
       });
@@ -1578,7 +1643,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       // regression that re-reads stale events a chance to surface.
       await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
 
-      const actions = await apiServices.alertingV2.alertActions.find({ ruleId: 'rule-1' });
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({ ruleId: 'rule-1' });
       expect(actions).toHaveLength(0);
     }
   );
@@ -1616,7 +1681,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         action_type: 'unmatched',
       });
 
-      const fires = await apiServices.alertingV2.alertActions.find({
+      const fires = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['fire'],
       });
@@ -1656,7 +1721,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         reason: `dispatched by policy ${MISSING_WORKFLOW_POLICY_ID}`,
       });
 
-      const notified = await apiServices.alertingV2.alertActions.find({
+      const notified = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['notified'],
       });
@@ -1714,7 +1779,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       ]);
 
       // StoreActionsStep writes a throttled-policy suppress record.
-      await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+      await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
         ruleId: 'rule-1',
         actionTypes: ['suppress'],
       });
@@ -1726,7 +1791,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
       expect(stableFires).toHaveLength(1);
 
-      const suppress = await apiServices.alertingV2.alertActions.find({
+      const suppress = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-1',
         actionTypes: ['suppress'],
       });
@@ -1772,12 +1837,57 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
 
       // No fire / suppress leaked through.
-      const otherActions = await apiServices.alertingV2.alertActions.find({
+      const otherActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId: 'rule-matcher',
         actionTypes: ['fire', 'suppress'],
       });
 
       expect(otherActions).toHaveLength(0);
+    }
+  );
+
+  apiTest(
+    'dispatches external alerts (source-based episodes with no rule_id)',
+    async ({ apiServices }) => {
+      // 1. Build and seed an external episode (no rule)
+      const externalEvent = buildExternalAlertEvent({
+        '@timestamp': new Date().toISOString(),
+        source: 'pagerduty',
+        group_hash: 'pd-group-1',
+        episode: { id: 'pd-ep-1', status: 'active' },
+        space_id: 'default',
+        status: 'breached',
+        type: 'alert',
+      });
+      await apiServices.alertingV2.ruleEvents.seed([externalEvent]);
+
+      // 2. Wait for the dispatcher to process it (two ticks to avoid races)
+      await apiServices.alertingV2.dispatcher.waitForDispatcherTick({ ticks: 2 });
+
+      // 3. Assert fire actions — filter by source since there is no rule_id
+      const fireActions = await expectStableCount(apiServices, 1, {
+        source: 'pagerduty',
+        actionTypes: ['fire'],
+      });
+      expect(fireActions[0]).toMatchObject({
+        source: 'pagerduty',
+        group_hash: 'pd-group-1',
+        space_id: 'default',
+        actor: 'system',
+        action_type: 'fire',
+      });
+
+      // 4. Assert notified actions
+      const notifiedActions = await expectStableCount(apiServices, 1, {
+        source: 'pagerduty',
+        actionTypes: ['notified'],
+      });
+      expect(notifiedActions[0]).toMatchObject({
+        source: 'pagerduty',
+        space_id: 'default',
+        actor: 'system',
+        action_type: 'notified',
+      });
     }
   );
 });

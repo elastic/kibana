@@ -26,21 +26,23 @@ import type {
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
-  SavedObjectsUpdateResponse,
   ElasticsearchClient,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
-import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import {
+  isSavedObjectErrorResult,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
+} from '@kbn/core/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import type { IBasePath, ExecutionContextStart } from '@kbn/core/server';
+import type { ExecutionContextStart } from '@kbn/core/server';
 
-import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
 import type { ExecutionContextRunner } from './lib/execution_context';
@@ -81,12 +83,10 @@ export interface StoreOpts {
   adHocTaskCounter: AdHocTaskCounter;
   allowReadingInvalidState: boolean;
   logger: Logger;
-  requestTimeouts: RequestTimeoutsConfig;
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
   esoClient?: EncryptedSavedObjectsClient;
   getIsSecurityEnabled: () => boolean;
-  basePath: IBasePath;
   executionContext: ExecutionContextStart;
   apiKeyStrategy: ApiKeyStrategy;
 }
@@ -104,14 +104,6 @@ export interface AggregationOpts {
   query?: estypes.QueryDslQueryContainer;
   runtime_mappings?: estypes.MappingRuntimeFields;
   size?: number;
-}
-
-export interface UpdateByQuerySearchOpts extends SearchOpts {
-  script?: estypes.Script;
-}
-
-export interface UpdateByQueryOpts extends SearchOpts {
-  max_docs?: number;
 }
 
 export interface FetchResult {
@@ -133,12 +125,6 @@ export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
 
-export interface UpdateByQueryResult {
-  updated: number;
-  version_conflicts: number;
-  total: number;
-}
-
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
  * interface into the index.
@@ -157,12 +143,10 @@ export class TaskStore {
   private _invalidationSoClient?: SavedObjectsClientContract;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
-  private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
   private getIsSecurityEnabled: () => boolean;
   private logger: Logger;
-  private basePath: IBasePath;
   private executionContextRunner: ExecutionContextRunner;
   private apiKeyStrategy: ApiKeyStrategy;
 
@@ -199,12 +183,10 @@ export class TaskStore {
       definitions: opts.definitions,
       allowReadingInvalidState: opts.allowReadingInvalidState,
     });
-    this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
     this.getIsSecurityEnabled = opts.getIsSecurityEnabled;
     this.logger = opts.logger;
-    this.basePath = opts.basePath;
     this.apiKeyStrategy = opts.apiKeyStrategy;
     this.executionContextRunner = getExecutionContextRunner(opts.executionContext, {
       name: 'taskStore',
@@ -313,13 +295,10 @@ export class TaskStore {
     }
 
     try {
-      return await this.apiKeyStrategy.grantApiKeys(
-        taskInstances,
-        request,
-        this.security,
-        this.basePath,
-        options?.onEsKey === true ? { onEsKey: true } : undefined
-      );
+      return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
+        ...(options?.onEsKey === true ? { onEsKey: true } : {}),
+        ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+      });
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -590,6 +569,9 @@ export class TaskStore {
     }
 
     return savedObjects.saved_objects.map((so) => {
+      if (isSavedObjectErrorResult(so)) {
+        throw so.error;
+      }
       const taskInstance = savedObjectToConcreteTaskInstance(so);
       return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
     });
@@ -719,7 +701,9 @@ export class TaskStore {
       new Map()
     );
 
-    let updatedSavedObjects: Array<SavedObjectsUpdateResponse<SerializedConcreteTaskInstance>>;
+    let updatedSavedObjects: Awaited<
+      ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
+    >['saved_objects'];
     try {
       ({ saved_objects: updatedSavedObjects } =
         await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
@@ -735,7 +719,7 @@ export class TaskStore {
 
     const allInvalidationTargets: InvalidationTarget[] = [];
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
-      if (updatedSavedObject.error !== undefined) {
+      if (isSavedObjectErrorResult(updatedSavedObject)) {
         return asErr({
           type: 'task',
           id: updatedSavedObject.id,
@@ -988,7 +972,7 @@ export class TaskStore {
 
     const tasks: ConcreteTaskInstance[] = [];
     result.saved_objects.forEach((task) => {
-      if (!task.error) {
+      if (!isSavedObjectErrorResult(task)) {
         tasks.push(savedObjectToConcreteTaskInstance(task));
       }
     });
@@ -998,7 +982,7 @@ export class TaskStore {
     tasksWithDecryptedApiKeys.forEach((task) => taskMap.set(task.id, task));
 
     return result.saved_objects.map((task) => {
-      if (task.error) {
+      if (isSavedObjectErrorResult(task)) {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       return asOk(taskMap.get(task.id));
@@ -1243,55 +1227,6 @@ export class TaskStore {
     return body;
   }
 
-  public async updateByQuery(
-    opts: UpdateByQuerySearchOpts = {},
-    updateByQueryOpts: UpdateByQueryOpts = {}
-  ): Promise<UpdateByQueryResult> {
-    return this.executionContextRunner.run(() => this._updateByQuery(opts, updateByQueryOpts), {
-      id: 'update-by-query',
-    });
-  }
-
-  private async _updateByQuery(
-    opts: UpdateByQuerySearchOpts = {},
-    { max_docs: max_docs }: UpdateByQueryOpts = {}
-  ): Promise<UpdateByQueryResult> {
-    const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
-    const { sort, ...rest } = opts;
-    try {
-      const { total, updated, version_conflicts } = await this.esClient.updateByQuery(
-        {
-          index: this.index,
-          ignore_unavailable: true,
-          refresh: true,
-          conflicts: 'proceed',
-          ...rest,
-          max_docs,
-          query,
-          // @ts-expect-error According to the docs, sort should be a comma-separated list of fields and goes in the querystring.
-          // However, this one is using a "body" format?
-          body: { sort },
-        },
-        { requestTimeout: this.requestTimeouts.update_by_query, retryOnTimeout: false }
-      );
-
-      const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
-        updated,
-        version_conflicts,
-        max_docs
-      );
-
-      return {
-        total: total || 0,
-        updated: updated || 0,
-        version_conflicts: conflictsCorrectedForContinuation,
-      };
-    } catch (e) {
-      this.errors$.next(e);
-      throw e;
-    }
-  }
-
   public async getDocVersions(esIds: string[]): Promise<Map<string, ConcreteTaskInstanceVersion>> {
     return this.executionContextRunner.run(() => this._getDocVersions(esIds), {
       id: 'get-doc-versions',
@@ -1308,25 +1243,6 @@ export class TaskStore {
     }
     return result;
   }
-}
-
-/**
- * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
- * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671
- * In order to correct for that happening, we only count `version_conflicts` if we haven't updated as
- * many docs as we could have.
- * This is still no more than an estimation, as there might have been less docuemnt to update that the
- * `max_docs`, but we bias in favour of over zealous `version_conflicts` as that's the best indicator we
- * have for an unhealthy cluster distribution of Task Manager polling intervals
- */
-
-export function correctVersionConflictsForContinuation(
-  updated: estypes.ReindexResponse['updated'],
-  versionConflicts: estypes.ReindexResponse['version_conflicts'],
-  maxDocs?: number
-): number {
-  // @ts-expect-error estypes.ReindexResponse['updated'] and estypes.ReindexResponse['version_conflicts'] can be undefined
-  return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
 /**

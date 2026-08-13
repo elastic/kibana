@@ -19,6 +19,9 @@ import { getColumns, TIMESTAMP_DATE_FORMAT } from './get_columns';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => false,
+}));
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -97,7 +100,33 @@ describe('getColumns', () => {
 
       await userEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
 
-      expect(mockOnShowAlert).toHaveBeenCalledWith('alert-id-1', 'test-index');
+      expect(mockOnShowAlert).toHaveBeenCalledWith('alert-id-1', 'test-index', 'Alert');
+    });
+
+    it('includes the rule name in the title when the row has ALERT_RULE_NAME', async () => {
+      const rowWithRule = {
+        id: 'alert-id-1',
+        index: 'test-index',
+        'kibana.alert.rule.name': 'My Detection Rule',
+      };
+      const [previewColumn] = getColumns({
+        scopeId,
+        dataTestSubj,
+        onShowAlert: mockOnShowAlert,
+      });
+      const { render: renderCell } = previewColumn as {
+        render: (row: Record<string, unknown>) => React.ReactElement;
+      };
+
+      renderColumn(renderCell(rowWithRule));
+
+      await userEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
+
+      expect(mockOnShowAlert).toHaveBeenCalledWith(
+        'alert-id-1',
+        'test-index',
+        'Alert: My Detection Rule'
+      );
     });
   });
 
@@ -152,7 +181,7 @@ describe('getColumns', () => {
       expect(screen.getByTestId(`${dataTestSubj}RulePreview`)).toBeInTheDocument();
     });
 
-    it('renders rule name as a ChildLink when useLegacyExpandableFlyout is false', () => {
+    it('renders rule name as an OpenFlyoutLink when useLegacyExpandableFlyout is false', () => {
       const [, , ruleColumn] = getColumns({
         scopeId,
         dataTestSubj,

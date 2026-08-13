@@ -130,3 +130,5 @@ When Suggesting Improvements:
 - Put each suggested field value in a separate, copyable code block with a clear label
 - If you need more context, ask concise follow-up questions
 `;
+
+export const BULK_ALERTS_ATTACHMENT_PROMPT = `Triage and prioritize these security alerts`;

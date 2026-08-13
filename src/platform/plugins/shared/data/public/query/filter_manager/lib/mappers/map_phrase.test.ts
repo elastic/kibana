@@ -59,7 +59,7 @@ describe('filter manager utilities', () => {
 
     test('with formatter', () => {
       const filter = { meta: { value: 'hello' } } as PhraseFilter;
-      const formatter = { convert: (val) => `formatted ${val}` } as FieldFormat;
+      const formatter = { convertToText: (val) => `formatted ${val}` } as FieldFormat;
       const result = getPhraseDisplayValue(filter, formatter);
       expect(result).toMatchInlineSnapshot(`"formatted hello"`);
     });

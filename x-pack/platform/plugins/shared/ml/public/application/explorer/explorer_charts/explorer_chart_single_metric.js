@@ -193,7 +193,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .append('text')
         .text((d) => {
           if (fieldFormat !== undefined) {
-            return fieldFormat.convert(d, 'text');
+            return fieldFormat.convertToText(d);
           } else {
             return lineChartYScale.tickFormat()(d);
           }
@@ -332,7 +332,7 @@ export class ExplorerChartSingleMetric extends React.Component {
         .tickPadding(10);
 
       if (fieldFormat !== undefined) {
-        yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
+        yAxis.tickFormat((d) => fieldFormat.convertToText(d));
       }
 
       const axes = lineChartGroup.append('g');

@@ -40,7 +40,6 @@ type PanelProps = Pick<
   | 'showShadow'
   | 'showBorder'
   | 'showBadges'
-  | 'showNotifications'
   | 'hideLoader'
   | 'hideHeader'
   | 'hideInspector'
@@ -88,6 +87,7 @@ export function LensRenderer({
   const searchSessionId$ = useObservableVariable(searchSessionId);
   const hideTitle$ = useObservableVariable(hidePanelTitles);
   const esqlVariables$ = useObservableVariable(props.esqlVariables);
+  const isApproximate$ = useObservableVariable(props.isApproximate);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -153,7 +153,6 @@ export function LensRenderer({
   const panelProps: PanelProps = useMemo(() => {
     return {
       hideInspector: !showInspector,
-      showNotifications: false,
       showShadow: false,
       showBadges: false,
       titleHighlight,
@@ -187,6 +186,7 @@ export function LensRenderer({
           getSerializedStateForChild: () => transformToApiConfig(initialStateRef.current),
           forceDSL,
           esqlVariables$,
+          isApproximate$,
           hideTitle$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
         } satisfies LensParentApi)

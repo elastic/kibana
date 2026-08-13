@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { EntityMaintainerTaskStatus } from '../../../tasks/entity_maintainers/types';
+import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import { ENTITY_STORE_STATUS } from '../../../domain/constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { getMissingPrivileges } from '../utils/get_missing_privileges';
+import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
 import type { AssetManagerClient } from '../../../domain/asset_manager';
 import { initMaintainersBodySchema } from './utils/validator';
 
@@ -35,7 +36,7 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
         version: API_VERSIONS.internal.v2,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(initMaintainersBodySchema),
+            body: buildStrictRouteValidationWithZod(initMaintainersBodySchema),
           },
         },
       },
@@ -50,7 +51,15 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
           return validationError;
         }
 
-        await entityMaintainersClient.init(req, { autoStart: req.body?.autoStart });
+        const { status: entityStoreStatus } = await assetManagerClient.getStatus(false);
+        const maintainersStatus =
+          entityStoreStatus === ENTITY_STORE_STATUS.RUNNING
+            ? EntityMaintainerTaskStatus.STARTED
+            : EntityMaintainerTaskStatus.STOPPED;
+        await entityMaintainersClient.init(req, {
+          autoStart: req.body?.autoStart,
+          maintainersStatus,
+        });
 
         return res.ok({ body: { ok: true } });
       })
@@ -68,15 +77,8 @@ async function validateInitMaintainersRequest(
   req: KibanaRequest,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse | null> {
-  const privileges = await assetManagerClient.getPrivileges(req);
-  if (!privileges.hasAllRequested) {
-    return res.forbidden({
-      body: {
-        attributes: getMissingPrivileges(privileges),
-        message: `User '${privileges.username}' has insufficient privileges`,
-      },
-    });
-  }
+  const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
+  if (forbidden) return forbidden;
 
   const { status } = await assetManagerClient.getStatus(false);
   if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {

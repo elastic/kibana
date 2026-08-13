@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: Compare Evaluation Experiments API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/compare:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: CompareExperiments
+      description: Compare two evaluation experiments using paired t-tests
+      summary: Compare two evaluation experiments
+      tags:
+        - Evals API
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [experiment, execution]
+            default: experiment
+          description: Comparison type — compare individual experiments or suite executions
+        - name: baseline_id
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Baseline experiment or execution ID (depends on type)
+        - name: target_id
+          in: query
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+          description: Target experiment or execution ID (depends on type)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PairedTTestResult'
+                  pairing:
+                    type: object
+                    properties:
+                      totalPairs:
+                        type: integer
+                      skippedMissingPairs:
+                        type: integer
+                      skippedNullScores:
+                        type: integer
+                      truncatedA:
+                        type: boolean
+                        description: Whether Experiment A scores were truncated due to size limits
+                      truncatedB:
+                        type: boolean
+                        description: Whether Experiment B scores were truncated due to size limits
+                    required:
+                      - totalPairs
+                      - skippedMissingPairs
+                      - skippedNullScores
+                      - truncatedA
+                      - truncatedB
+                required:
+                  - results
+                  - pairing
+
+components:
+  schemas:
+    PairedTTestResult:
+      type: object
+      properties:
+        datasetId:
+          type: string
+          maxLength: 1024
+        datasetName:
+          type: string
+          maxLength: 256
+        evaluatorName:
+          type: string
+          maxLength: 256
+        sampleSize:
+          type: integer
+        meanA:
+          type: number
+        meanB:
+          type: number
+        pValue:
+          type: number
+          nullable: true
+      required:
+        - datasetId
+        - datasetName
+        - evaluatorName
+        - sampleSize
+        - meanA
+        - meanB
+        - pValue

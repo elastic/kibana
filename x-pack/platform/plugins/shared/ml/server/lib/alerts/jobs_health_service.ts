@@ -47,6 +47,7 @@ import {
   jobAuditMessagesProvider,
   type JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
+import type { ServerlessInfo } from '../../types';
 
 export interface TestResult {
   name: string;
@@ -76,8 +77,8 @@ export function jobsHealthServiceProvider(
     const dateFormat = fieldFormatsRegistry.deserialize({ id: 'date' });
     const bytesFormat = fieldFormatsRegistry.deserialize({ id: 'bytes' });
 
-    const dateFormatter = dateFormat.convert.bind(dateFormat);
-    const bytesFormatter = bytesFormat.convert.bind(bytesFormat);
+    const dateFormatter = (v: unknown) => dateFormat.convertToText(v);
+    const bytesFormatter = (v: unknown) => bytesFormat.convertToText(v);
 
     return {
       dateFormatter,
@@ -553,7 +554,7 @@ export function jobsHealthServiceProvider(
 
 export type JobsHealthService = ReturnType<typeof jobsHealthServiceProvider>;
 
-export function getJobsHealthServiceProvider(getGuards: GetGuards) {
+export function getJobsHealthServiceProvider(getGuards: GetGuards, serverless: ServerlessInfo) {
   return {
     jobsHealthServiceProvider(
       savedObjectsClient: SavedObjectsClientContract,
@@ -571,8 +572,8 @@ export function getJobsHealthServiceProvider(getGuards: GetGuards) {
               jobsHealthServiceProvider(
                 mlClient,
                 datafeedsProvider(scopedClient, mlClient),
-                annotationServiceProvider(scopedClient),
-                jobAuditMessagesProvider(scopedClient, mlClient),
+                annotationServiceProvider(scopedClient, mlClient, serverless),
+                jobAuditMessagesProvider(scopedClient, mlClient, serverless),
                 getFieldsFormatRegistry,
                 logger
               ).getTestsResults(...args)

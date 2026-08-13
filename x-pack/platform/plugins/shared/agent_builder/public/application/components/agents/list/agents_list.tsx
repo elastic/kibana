@@ -22,27 +22,84 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { canCurrentUserEditAgent, type AgentDefinition } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
+import moment from 'moment';
 import React, { useMemo } from 'react';
+import type { ListAgentResponseItem } from '../../../../../common/http_api/agents';
+import { resolveOwnerLabel } from '../../../utils/owner';
+import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
-import { AgentVisibilityBadge } from './agent_visibility_badge';
+import { AgentAccessControlModeBadge } from './agent_access_control_mode_badge';
+import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
+import { AccessFlyout } from '../access/access_flyout';
+import { accessSummaryManageButton } from '../access/access_i18n';
+
+const renderOwnerCell = (
+  owner: { id?: string; username?: string } | undefined,
+  date?: string,
+  profileMap?: Map<string, string>,
+  dateFormat?: string
+) => {
+  const label = resolveOwnerLabel(owner, profileMap);
+  const relativeDate = date ? moment(date).fromNow() : undefined;
+
+  if (!label && !relativeDate) {
+    return (
+      <EuiText size="s" color="subdued">
+        —
+      </EuiText>
+    );
+  }
+
+  if (!label) {
+    return (
+      <EuiText size="s" color="subdued">
+        {relativeDate}
+      </EuiText>
+    );
+  }
+
+  if (!relativeDate) {
+    return label;
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={moment(date).format(dateFormat ?? 'LL LT')}>
+          <EuiText size="xs" color="subdued" tabIndex={0}>
+            {relativeDate}
+          </EuiText>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
-  visibility: i18n.translate('xpack.agentBuilder.agents.visibilityColumn', {
-    defaultMessage: 'Visibility',
+  accessControlMode: i18n.translate('xpack.agentBuilder.agents.accessControlModeColumn', {
+    defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
+  createdBy: i18n.translate('xpack.agentBuilder.agents.createdByColumn', {
+    defaultMessage: 'Created by',
+  }),
+  lastUpdatedBy: i18n.translate('xpack.agentBuilder.agents.lastUpdatedByColumn', {
+    defaultMessage: 'Last updated by',
+  }),
 };
 
 const actionLabels = {
@@ -62,42 +119,40 @@ const actionLabels = {
   deleteDescription: i18n.translate('xpack.agentBuilder.agents.actions.deleteDescription', {
     defaultMessage: 'Delete agent',
   }),
-  checkingPermissions: i18n.translate('xpack.agentBuilder.agents.actions.checkingPermissions', {
-    defaultMessage: 'Checking permissions…',
-  }),
 };
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
+  const profileMap = useOwnerProfiles(agents ?? []);
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
-  const { manageAgents, isAdmin } = useUiPrivileges();
-  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
+  const { manageAgents } = useUiPrivileges();
+  const {
+    services: { settings },
+  } = useKibana();
+  const dateFormat = settings?.client.get<string>('dateFormat');
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
+  const [aclAgent, setAclAgent] = React.useState<ListAgentResponseItem | null>(null);
 
-  const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
-    const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
+  const canManageAgentAccess = React.useCallback((agent: ListAgentResponseItem) => {
+    return agent.permissions.update_access_control;
+  }, []);
+
+  const columns: Array<EuiBasicTableColumn<ListAgentResponseItem>> = useMemo(() => {
+    const agentAvatar: EuiTableComputedColumnType<ListAgentResponseItem> = {
       width: '48px',
       align: 'center',
       render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
-    const canEditAgent = (agent: AgentDefinition) =>
-      canCurrentUserEditAgent({
-        agent,
-        manageAgents,
-        currentUser,
-        isAdmin,
-        isCurrentUserLoading,
-      });
+    const canEditAgent = (agent: ListAgentResponseItem) => agent.permissions.update_agent;
 
-    const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
+    const agentNameAndDescription: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
       field: 'name',
       name: columnNames.name,
-      render: (name: string, agent: AgentDefinition) => {
+      render: (name: string, agent: ListAgentResponseItem) => {
         const canEdit = canEditAgent(agent);
-        const showCheckingTooltip = !canEdit && isCurrentUserLoading;
         const nameContent = !canEdit ? (
           <EuiText data-test-subj="agentBuilderAgentsListName" size="m">
             {name}
@@ -106,6 +161,11 @@ export const AgentsList: React.FC = () => {
           <EuiLink
             data-test-subj="agentBuilderAgentsListName"
             href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_EDIT,
+              detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+            })}
           >
             <EuiText size="m">{name}</EuiText>
           </EuiLink>
@@ -113,13 +173,14 @@ export const AgentsList: React.FC = () => {
         return (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              {showCheckingTooltip ? (
-                <EuiToolTip content={actionLabels.checkingPermissions} position="top">
-                  <span tabIndex={0}>{nameContent}</span>
-                </EuiToolTip>
-              ) : (
-                nameContent
-              )}
+              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s" wrap>
+                <EuiFlexItem grow={false}>{nameContent}</EuiFlexItem>
+                {isPreconfiguredAgentType(agent.type) && (
+                  <EuiFlexItem grow={false}>
+                    <AgentTypeBadge agentType={agent.type} />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="s">
@@ -132,7 +193,7 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListNameAndDescription',
     };
 
-    const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
+    const agentLabels: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
       width: '25%',
       field: 'labels',
       name: columnNames.labels,
@@ -146,14 +207,32 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
 
-    const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
+    const agentAccessControlMode: EuiTableComputedColumnType<ListAgentResponseItem> = {
       width: '135px',
-      name: columnNames.visibility,
-      render: (agent) => <AgentVisibilityBadge agent={agent} />,
-      'data-test-subj': 'agentBuilderAgentsListVisibility',
+      name: columnNames.accessControlMode,
+      render: (agent) => <AgentAccessControlModeBadge agent={agent} />,
+      'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
-    const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
+    const agentCreatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '12%',
+      field: 'created_by',
+      name: columnNames.createdBy,
+      render: (createdBy: ListAgentResponseItem['created_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(createdBy, agent.created_at, profileMap, dateFormat),
+      'data-test-subj': 'agentBuilderAgentsListCreatedBy',
+    };
+
+    const agentLastUpdatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '12%',
+      field: 'updated_by',
+      name: columnNames.lastUpdatedBy,
+      render: (updatedBy: ListAgentResponseItem['updated_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(updatedBy, agent.updated_at, profileMap, dateFormat),
+      'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
+    };
+
+    const agentActions: EuiTableActionsColumnType<ListAgentResponseItem> = {
       width: '120px',
       actions: [
         {
@@ -190,6 +269,16 @@ export const AgentsList: React.FC = () => {
           available: () => manageAgents,
         },
         {
+          type: 'icon',
+          icon: 'lockOpen',
+          name: accessSummaryManageButton,
+          description: accessSummaryManageButton,
+          'data-test-subj': (agent) => `agentBuilderAgentsListManageAccess-${agent.id}`,
+          showOnHover: true,
+          onClick: (agent) => setAclAgent(agent),
+          available: canManageAgentAccess,
+        },
+        {
           // Have to use a custom action to display the danger color
           // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
           render: (agent) => {
@@ -203,6 +292,11 @@ export const AgentsList: React.FC = () => {
                       deleteAgent({ agent });
                     }}
                     color="danger"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_DELETE,
+                      detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                    })}
                   >
                     {actionLabels.delete}
                   </EuiLink>
@@ -215,14 +309,22 @@ export const AgentsList: React.FC = () => {
       ],
     };
 
-    return [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions];
+    return [
+      agentAvatar,
+      agentNameAndDescription,
+      agentAccessControlMode,
+      agentLabels,
+      agentCreatedBy,
+      agentLastUpdatedBy,
+      agentActions,
+    ];
   }, [
     createAgentBuilderUrl,
-    currentUser,
     deleteAgent,
-    isAdmin,
-    isCurrentUserLoading,
     manageAgents,
+    canManageAgentAccess,
+    profileMap,
+    dateFormat,
   ]);
 
   const errorMessage = useMemo(
@@ -246,45 +348,51 @@ export const AgentsList: React.FC = () => {
   }, [agents]);
 
   return (
-    <EuiInMemoryTable
-      data-test-subj="agentBuilderAgentsListTable"
-      rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
-      items={agents}
-      itemId={(agent) => agent.id}
-      columns={columns}
-      sorting={true}
-      search={{
-        box: { incremental: true },
-        filters: [
-          {
-            type: 'field_value_selection',
-            name: 'Labels',
-            multiSelect: 'and',
-            options: labelOptions,
-            field: 'labels',
-            operator: 'exact',
-            autoSortOptions: false,
-          },
-        ],
-      }}
-      pagination={{
-        pageIndex,
-        pageSize,
-        pageSizeOptions: [10, 25, 50, 100],
-        showPerPageOptions: true,
-      }}
-      onTableChange={({ page }: CriteriaWithPagination<AgentDefinition>) => {
-        if (page) {
-          setPageIndex(page.index);
-          if (page.size !== pageSize) {
-            setPageSize(page.size);
-            setPageIndex(0);
+    <>
+      <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.agentBuilder.agents.tableCaption', {
+          defaultMessage: 'Agents',
+        })}
+        data-test-subj="agentBuilderAgentsListTable"
+        rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
+        items={agents}
+        itemId={(agent) => agent.id}
+        columns={columns}
+        sorting={true}
+        search={{
+          box: { incremental: true },
+          filters: [
+            {
+              type: 'field_value_selection',
+              name: 'Labels',
+              multiSelect: 'and',
+              options: labelOptions,
+              field: 'labels',
+              operator: 'exact',
+              autoSortOptions: false,
+            },
+          ],
+        }}
+        pagination={{
+          pageIndex,
+          pageSize,
+          pageSizeOptions: [10, 25, 50, 100],
+          showPerPageOptions: true,
+        }}
+        onTableChange={({ page }: CriteriaWithPagination<ListAgentResponseItem>) => {
+          if (page) {
+            setPageIndex(page.index);
+            if (page.size !== pageSize) {
+              setPageSize(page.size);
+              setPageIndex(0);
+            }
           }
-        }
-      }}
-      loading={isLoading}
-      error={errorMessage}
-      responsiveBreakpoint={false}
-    />
+        }}
+        loading={isLoading}
+        error={errorMessage}
+        responsiveBreakpoint={false}
+      />
+      {aclAgent && <AccessFlyout agent={aclAgent} onClose={() => setAclAgent(null)} />}
+    </>
   );
 };

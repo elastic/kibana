@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/276849
+issues:
+- https://github.com/elastic/kibana/issues/276660
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+title: Fix token expired errors in Lens visualizations
+description: Lens now retries streamed Elasticsearch requests after authentication tokens expire instead of failing with a token expired error.

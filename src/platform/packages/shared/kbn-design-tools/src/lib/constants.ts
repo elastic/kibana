@@ -49,6 +49,9 @@ export const DEVTOOL_LIBRARY_ID_ATTR = 'data-devtool-library-id';
 /** Marks an original element hidden by the edit overlay. Stores the original inline transform. */
 export const DEVTOOL_HIDDEN_ATTR = 'data-devtool-hidden';
 
+/** Marks a managed clone descendant that must remain hidden in clone/preview trees. */
+export const DEVTOOL_CLONE_HIDDEN_ATTR = 'data-clone-hidden';
+
 /** Marks an element that should be excluded from measurement/selection. */
 export const DEVTOOL_IGNORE_ATTR = 'data-devtool-ignore';
 
@@ -93,6 +96,15 @@ export const NON_DELETABLE_TAGS = ['BODY', 'HTML'];
 
 /** EUI truncation classes that use !important and must be stripped from clones. */
 export const TRUNCATION_CLASSES = ['eui-textTruncate', 'eui-textBreakWord', 'eui-textBreakAll'];
+
+/** EUI Card root class. */
+export const EUI_CARD_ROOT_CLASS = 'euiCard';
+
+/** EUI Card image wrapper class whose width and offsets depend on card padding. */
+export const EUI_CARD_IMAGE_CLASS = 'euiCard__image';
+
+/** EUI Card icon class used when an icon overlays the card image. */
+export const EUI_CARD_ICON_CLASS = 'euiCard__icon';
 
 /** Class name substrings for purely structural components (e.g. euiSpacer). */
 export const IGNORED_CLASS_LABELS = ['euiSpacer'];
@@ -229,6 +241,43 @@ export const INHERITED_CSS_PROPS = [
   '-webkit-text-stroke-width',
   '-webkit-text-stroke-color',
   'text-rendering',
+];
+
+/**
+ * Non-inherited layout styles that are often supplied by scoped component CSS.
+ * These are copied into preview clones because the clone may no longer sit
+ * under the ancestor class that scoped the original selector.
+ */
+export const CLONE_LAYOUT_CSS_PROPS = [
+  'display',
+  'align-content',
+  'align-items',
+  'align-self',
+  'justify-content',
+  'justify-items',
+  'justify-self',
+  'place-content',
+  'place-items',
+  'place-self',
+  'flex-direction',
+  'flex-wrap',
+  'flex-grow',
+  'flex-shrink',
+  'flex-basis',
+  'gap',
+  'row-gap',
+  'column-gap',
+  'padding-top',
+  'padding-right',
+  'padding-bottom',
+  'padding-left',
+  'border-top-left-radius',
+  'border-top-right-radius',
+  'border-bottom-right-radius',
+  'border-bottom-left-radius',
+  'overflow',
+  'overflow-x',
+  'overflow-y',
 ];
 
 /**

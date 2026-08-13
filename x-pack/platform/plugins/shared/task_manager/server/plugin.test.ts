@@ -43,6 +43,9 @@ const pluginInitializerContextParams = {
     active_nodes_lookback: '30s',
     interval: 10000,
   },
+  execution_control: {
+    poll_interval: 5000,
+  },
   kibanas_per_partition: 2,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {
@@ -166,6 +169,28 @@ describe('TaskManagerPlugin', () => {
       });
 
       expect(TaskPollingLifecycle as jest.Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
+    });
+
+    test('passes the fake request enricher obtained at setup to TaskPollingLifecycle', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+
+      const coreSetup = coreMock.createSetup();
+      const enricher = jest.fn();
+      (coreSetup.security.acquireFakeRequestEnricher as jest.Mock).mockReturnValue(enricher);
+
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreSetup, { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
+      });
+
+      expect(coreSetup.security.acquireFakeRequestEnricher).toHaveBeenCalledTimes(1);
+      const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
+      expect(pollingLifecycleOpts.enrichFakeRequest).toBe(enricher);
     });
   });
 

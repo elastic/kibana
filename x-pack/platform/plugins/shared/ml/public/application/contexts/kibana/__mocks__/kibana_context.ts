@@ -40,6 +40,9 @@ export const kibanaContextMock = {
     application: {
       navigateToApp: jest.fn(),
       navigateToUrl: jest.fn(),
+      getUrlForApp: jest.fn((appId: string, options?: { path?: string }) => {
+        return `/app/${appId}${options?.path ?? ''}`;
+      }),
       capabilities: {
         ml: {
           canCreateJob: true,

@@ -476,10 +476,22 @@ describe('IndexPattern', () => {
         })
       ).toEqual(
         expect.objectContaining({
-          convert: expect.any(Function),
-          getConverterFor: expect.any(Function),
+          convertToText: expect.any(Function),
         })
       );
+    });
+
+    test('should derive a scalar formatter from defaultFormatter', () => {
+      expect(
+        indexPattern.getFormatterForField({
+          name: 'durationSeconds',
+          type: 'number',
+          esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
+          defaultFormatter: 's',
+        })
+      ).toBeInstanceOf(MockFieldFormatter);
     });
   });
 

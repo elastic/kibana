@@ -20,7 +20,9 @@ export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) =
     getNormalizedInputs(template).some((input) => input.type === OTEL_COLLECTOR_INPUT_TYPE)
   );
 
-export const packagePolicyHasOtelInputs = (packagePolicyInputs: PackagePolicyInput[] | undefined) =>
+export const packagePolicyHasOtelInputs = (
+  packagePolicyInputs: Array<Pick<PackagePolicyInput, 'type' | 'enabled'>> | undefined
+) =>
   (packagePolicyInputs || []).some(
     (input) => input.type === OTEL_COLLECTOR_INPUT_TYPE && input.enabled
   );

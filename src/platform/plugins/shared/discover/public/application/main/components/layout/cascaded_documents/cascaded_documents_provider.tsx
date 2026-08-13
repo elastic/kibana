@@ -36,6 +36,7 @@ export interface CascadedDocumentsContext
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
+  isApproximate: boolean;
   viewModeToggle: ReactElement | undefined;
   expandedDoc$: BehaviorSubject<DataTableRecord | undefined>;
   expandedDocOwner$: BehaviorSubject<string | undefined>;
@@ -49,7 +50,7 @@ export interface CascadedDocumentsContext
   setDataGridUiState: (nodeId: string, uiState: Partial<UnifiedDataTableRestorableState>) => void;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
-  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
+  openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => Promise<void>;
 }
 
 const cascadedDocumentsContext = createContext<CascadedDocumentsContext | undefined>(undefined);

@@ -187,21 +187,23 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
       const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
-        <EuiButtonIcon
-          color={isMovingThisProcessor ? 'primary' : 'text'}
-          iconType={icon}
-          data-test-subj={dataTestSubj}
-          size="s"
-          isDisabled={disabled}
-          aria-label={label}
-          onClick={() => {
-            if (isMovingThisProcessor) {
-              onCancelMove();
-            } else {
-              onMove();
-            }
-          }}
-        />
+        <EuiToolTip content={label} disableScreenReaderOutput>
+          <EuiButtonIcon
+            color={isMovingThisProcessor ? 'primary' : 'text'}
+            iconType={icon}
+            data-test-subj={dataTestSubj}
+            size="s"
+            isDisabled={disabled}
+            aria-label={label}
+            onClick={() => {
+              if (isMovingThisProcessor) {
+                onCancelMove();
+              } else {
+                onMove();
+              }
+            }}
+          />
+        </EuiToolTip>
       );
       return (
         <div css={styles.moveButton}>

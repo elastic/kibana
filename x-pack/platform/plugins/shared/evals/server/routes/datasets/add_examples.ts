@@ -85,10 +85,8 @@ export const registerAddExamplesRoute = ({
 
           const { datasetId } = request.params;
           const { examples } = request.body;
-          const coreContext = await context.core;
           const evalsContext = await context.evals;
-          const esClient = coreContext.elasticsearch.client.asCurrentUser;
-          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const datasetClient = evalsContext.datasetService.getClient();
 
           const exists = await datasetClient.datasetExists(datasetId);
           if (!exists) {
@@ -120,7 +118,8 @@ export const registerAddExamplesRoute = ({
             });
           }
 
-          logger.error(`Failed to add evaluation dataset examples: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to add evaluation dataset examples: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to add evaluation dataset examples' },
