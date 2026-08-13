@@ -78,7 +78,7 @@ describe('sanitizeToolSchemasForVertex', () => {
             operations: {
               type: 'array',
               items: {
-                oneOf: [
+                anyOf: [
                   {
                     type: 'object',
                     properties: {

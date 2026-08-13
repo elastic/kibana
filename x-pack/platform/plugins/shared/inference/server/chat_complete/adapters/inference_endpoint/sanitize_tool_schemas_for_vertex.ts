@@ -47,7 +47,6 @@ const VERTEX_SCHEMA_FIELDS = new Set([
   'pattern',
   'example',
   'anyOf',
-  'oneOf',
   'additionalProperties',
 ]);
 
@@ -71,9 +70,10 @@ interface SchemaPart {
 /**
  * Rebuilds a tool schema keeping only the fields Vertex AI accepts, so that
  * JSON Schema keywords zod v4 (or user-provided tool schemas) emit never reach
- * Vertex's parser. Two conversions preserve the intent of dropped fields:
- * `const: 'x'` becomes `enum: ['x']`, and a `null` branch in `anyOf` (zod's
- * representation of nullable values) becomes `nullable: true`.
+ * Vertex's parser. Conversions preserve the intent of dropped fields:
+ * `const: 'x'` becomes `enum: ['x']`, `oneOf` branches become `anyOf`, and a
+ * `null` branch in `anyOf` (zod's representation of nullable values) becomes
+ * `nullable: true`.
  */
 const toVertexSchema = <T extends ToolSchemaType>(schemaPart: T): T => {
   const source = schemaPart as SchemaPart;
@@ -89,6 +89,10 @@ const toVertexSchema = <T extends ToolSchemaType>(schemaPart: T): T => {
     schema.enum = [source.const];
   }
 
+  if (source.oneOf) {
+    schema.anyOf = [...(schema.anyOf ?? []), ...source.oneOf];
+  }
+
   if (schema.properties) {
     schema.properties = mapValues(schema.properties, toVertexSchema);
   }
@@ -97,9 +101,6 @@ const toVertexSchema = <T extends ToolSchemaType>(schemaPart: T): T => {
   }
   if (typeof schema.additionalProperties === 'object') {
     schema.additionalProperties = toVertexSchema(schema.additionalProperties);
-  }
-  if (schema.oneOf) {
-    schema.oneOf = schema.oneOf.map(toVertexSchema);
   }
   if (schema.anyOf) {
     const branches = schema.anyOf.map(toVertexSchema);
