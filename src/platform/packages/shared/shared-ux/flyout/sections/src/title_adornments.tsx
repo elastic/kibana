@@ -30,8 +30,18 @@ export const renderTitleWithIcon = (titleNode: ReactNode, iconNode: ReactNode): 
   </EuiFlexGroup>
 );
 
-export const renderTitleAction = (action: FlyoutSectionAction): ReactNode => (
-  <EuiLink href={action.href} onClick={action.onClick} data-test-subj={action['data-test-subj']}>
-    {action.label}
-  </EuiLink>
-);
+export const renderTitleAction = (action: FlyoutSectionAction): ReactNode => {
+  const { label, 'data-test-subj': dts } = action;
+  if (action.href !== undefined) {
+    return (
+      <EuiLink href={action.href} target={action.target} rel={action.rel} data-test-subj={dts}>
+        {label}
+      </EuiLink>
+    );
+  }
+  return (
+    <EuiLink onClick={action.onClick} data-test-subj={dts}>
+      {label}
+    </EuiLink>
+  );
+};

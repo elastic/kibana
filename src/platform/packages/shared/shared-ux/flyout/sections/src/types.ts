@@ -10,12 +10,26 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 
-export interface FlyoutSectionAction {
+type FlyoutSectionActionBase = {
   label: ReactNode;
-  onClick?: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
-  href?: string;
   'data-test-subj'?: string;
-}
+};
+
+type FlyoutSectionLinkAction = FlyoutSectionActionBase & {
+  href: string;
+  target?: string;
+  rel?: string;
+  onClick?: never;
+};
+
+type FlyoutSectionButtonAction = FlyoutSectionActionBase & {
+  onClick: MouseEventHandler<HTMLAnchorElement | HTMLButtonElement>;
+  href?: never;
+  target?: never;
+  rel?: never;
+};
+
+export type FlyoutSectionAction = FlyoutSectionLinkAction | FlyoutSectionButtonAction;
 
 export interface FlyoutSectionProps {
   /** Section title */
