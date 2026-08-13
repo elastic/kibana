@@ -60,6 +60,11 @@ export interface FeedbackEbtContext {
   traceId?: string;
   connectorId?: string;
   model?: string;
+  agentId?: string;
+  toolNames?: string[];
+  inputTokens?: number;
+  outputTokens?: number;
+  llmCalls?: number;
 }
 
 const SUBMITTED_VISIBLE_MS = 2500;
@@ -210,6 +215,11 @@ export const useFeedback = (
                 trace_id: ebtContext?.traceId,
                 connector_id: ebtContext?.connectorId,
                 model: ebtContext?.model,
+                agent_id: ebtContext?.agentId,
+                tool_names: ebtContext?.toolNames,
+                input_tokens: ebtContext?.inputTokens,
+                output_tokens: ebtContext?.outputTokens,
+                llm_calls: ebtContext?.llmCalls,
               });
             })
             .catch(() => {
@@ -285,6 +295,11 @@ export const useFeedback = (
           trace_id: ebtContext?.traceId,
           connector_id: ebtContext?.connectorId,
           model: ebtContext?.model,
+          agent_id: ebtContext?.agentId,
+          tool_names: ebtContext?.toolNames,
+          input_tokens: ebtContext?.inputTokens,
+          output_tokens: ebtContext?.outputTokens,
+          llm_calls: ebtContext?.llmCalls,
         });
 
         setSubmittedPhase('visible');

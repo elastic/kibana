@@ -10,11 +10,16 @@ import { css } from '@emotion/react';
 import copy from 'copy-to-clipboard';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_UI_EBT, ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  AGENT_BUILDER_UI_EBT,
+  ConversationRoundStatus,
+  isToolCallStep,
+} from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
+import { useAgentId } from '../../../../hooks/use_conversation';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
@@ -59,6 +64,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
   const { services } = useKibana();
   const isExperimentalEnabled = useExperimentalFeatures();
   const isTracingEnabled = useTracingEnabled();
+  const agentId = useAgentId();
 
   const handleCopy = useCallback(() => {
     const isSuccess = copy(content);
@@ -87,8 +93,22 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
       traceId,
       connectorId: rawRound?.model_usage?.connector_id,
       model: rawRound?.model_usage?.model,
+      agentId: agentId ?? undefined,
+      toolNames: rawRound?.steps?.filter(isToolCallStep).map((s) => s.tool_id),
+      inputTokens: rawRound?.model_usage?.input_tokens,
+      outputTokens: rawRound?.model_usage?.output_tokens,
+      llmCalls: rawRound?.model_usage?.llm_calls,
     }),
-    [traceId, rawRound?.model_usage?.connector_id, rawRound?.model_usage?.model]
+    [
+      traceId,
+      agentId,
+      rawRound?.model_usage?.connector_id,
+      rawRound?.model_usage?.model,
+      rawRound?.model_usage?.input_tokens,
+      rawRound?.model_usage?.output_tokens,
+      rawRound?.model_usage?.llm_calls,
+      rawRound?.steps,
+    ]
   );
 
   const feedback = useFeedback(rawRound?.id ?? '', rawRound?.feedback, ebtContext);

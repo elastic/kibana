@@ -324,6 +324,16 @@ export interface ReportFeedbackSubmittedParams {
   connector_id?: string;
   /** Model identifier */
   model?: string;
+  /** Agent ID */
+  agent_id?: string;
+  /** Tool IDs called during the round */
+  tool_names?: string[];
+  /** Total input tokens used */
+  input_tokens?: number;
+  /** Total output tokens generated */
+  output_tokens?: number;
+  /** Number of LLM API calls made during the round */
+  llm_calls?: number;
 }
 
 export interface AgentBuilderTelemetryEventsMap {
@@ -1411,6 +1421,30 @@ const FEEDBACK_SUBMITTED_EVENT: AgentBuilderTelemetryEvent = {
     model: {
       type: 'keyword',
       _meta: { description: 'Model identifier', optional: true },
+    },
+    agent_id: {
+      type: 'keyword',
+      _meta: { description: 'Agent ID', optional: true },
+    },
+    tool_names: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Tool ID called during the round' },
+      },
+      _meta: { description: 'IDs of tools called during the round', optional: true },
+    },
+    input_tokens: {
+      type: 'long',
+      _meta: { description: 'Total input tokens used', optional: true },
+    },
+    output_tokens: {
+      type: 'long',
+      _meta: { description: 'Total output tokens generated', optional: true },
+    },
+    llm_calls: {
+      type: 'long',
+      _meta: { description: 'Number of LLM API calls made during the round', optional: true },
     },
   },
 };
