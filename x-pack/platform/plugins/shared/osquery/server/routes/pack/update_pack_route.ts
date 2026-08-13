@@ -45,6 +45,7 @@ import {
   stripPerQueryRruleFields,
   stripPriorModePerQueryFields,
   resolvePreservedQueries,
+  convergePerQueryIntervals,
 } from './utils';
 
 import { convertShardsToArray, convertShardsToObject } from '../utils';
@@ -235,11 +236,15 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             }) as Record<string, PackQueryInput>)
           : undefined;
 
+        const convergedQueries = queries
+          ? convergePerQueryIntervals(queries, resolved.scheduleType)
+          : queries;
+
         const scheduleErr = validatePackScheduleFields({
           packScheduleType: resolved.scheduleType ?? undefined,
           packInterval: resolved.interval ?? undefined,
           packRrule: resolved.rrule_schedule ?? undefined,
-          queries: queries as Record<string, PackQueryInput> | undefined,
+          queries: convergedQueries as Record<string, PackQueryInput> | undefined,
         });
         if (scheduleErr) {
           return response.badRequest({ body: { message: scheduleErr } });
@@ -361,7 +366,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             enabled,
             name,
             description: description || '',
-            queries: queries && convertPackQueriesToSO(queries),
+            queries: convergedQueries && convertPackQueriesToSO(convergedQueries),
             updated_at: moment().toISOString(),
             updated_by: username,
             updated_by_profile_uid: profileUid,
