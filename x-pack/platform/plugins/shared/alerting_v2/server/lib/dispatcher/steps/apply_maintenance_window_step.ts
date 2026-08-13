@@ -17,6 +17,7 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   Rule,
+  RuleId,
 } from '../types';
 import { createMatcherContext } from './utils/matcher_context';
 
@@ -36,7 +37,7 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatchable = [], suppressed = [], rules = new Map() } = state;
+    const { dispatchable = [], suppressed = [], rules = new Map<RuleId, Rule>() } = state;
     if (dispatchable.length === 0) {
       return { type: 'continue' };
     }
@@ -51,9 +52,15 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
     const newlySuppressed: Array<AlertEpisode & { reason: string }> = [];
 
     for (const episode of dispatchable) {
-      const rule = rules.get(episode.rule_id);
-      const candidates = rule && windowsBySpace.get(rule.spaceId);
-      if (!rule || !candidates) {
+      const rule = episode.rule_id ? rules.get(episode.rule_id) : undefined;
+      // Internal episodes whose rule is absent bypass MW so that the evaluate_matchers guard
+      // (not MW suppression) is the reason they never dispatch — preserving pre-PR behavior.
+      if (episode.rule_id != null && rule == null) {
+        newDispatchable.push(episode);
+        continue;
+      }
+      const candidates = windowsBySpace.get(episode.space_id);
+      if (!candidates) {
         newDispatchable.push(episode);
         continue;
       }
@@ -86,7 +93,7 @@ const maintenanceWindowReason = (id: string) => `${MAINTENANCE_WINDOW_REASON_PRE
 function findMatchingMaintenanceWindow(
   candidates: readonly ActiveMaintenanceWindow[],
   episode: AlertEpisode,
-  rule: Rule
+  rule?: Rule
 ): ActiveMaintenanceWindow | undefined {
   const eventTime = Date.parse(episode.last_event_timestamp);
   if (Number.isNaN(eventTime)) return undefined;

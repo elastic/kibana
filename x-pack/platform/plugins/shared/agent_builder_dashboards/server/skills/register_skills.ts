@@ -6,8 +6,11 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardManagementSkill } from './dashboard_management_skill';
+import { createDashboardManagementSkill } from './dashboard_management_skill';
 
-export const registerSkills = (agentBuilder: AgentBuilderPluginSetup): void => {
-  agentBuilder.skills.register(dashboardManagementSkill);
+export const registerSkills = (
+  agentBuilder: AgentBuilderPluginSetup,
+  getCustomContentEnabled: () => Promise<boolean>
+): void => {
+  agentBuilder.skills.register(createDashboardManagementSkill(getCustomContentEnabled));
 };

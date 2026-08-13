@@ -90,7 +90,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
 
   const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(experimentalDataView);
   const dataViewId = experimentalDataView.id ?? null;
   const dataViewLoading = useMemo(() => status !== 'ready', [status]);
   const runtimeMappings = useMemo(
@@ -325,7 +325,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

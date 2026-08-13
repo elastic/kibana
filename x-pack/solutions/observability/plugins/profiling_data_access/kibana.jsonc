@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/profiling-data-access-plugin",
   "owner": [
-    "@elastic/obs-presentation-team"
+    "@elastic/obs-signals-logs-team"
   ],
   "group": "observability",
   "visibility": "private",

@@ -18,8 +18,7 @@ import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramServices,
 } from '@kbn/unified-histogram/types';
-import type { MetricsGridSettings } from '@kbn/unified-chart-section-viewer';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/unified-chart-section-viewer';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import { createChartSection } from './chart_section';
 import type { ChartSectionConfiguration } from '../../../../types';
 import { DataSourceCategory } from '../../../../profiles';
@@ -56,11 +55,6 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
   UnifiedMetricsExperienceGrid: (props: UnifiedGridProps) => {
     unifiedGridProps = props;
     return null;
-  },
-  METRICS_GRID_SETTINGS_DEFAULTS: {
-    counterAggregation: 'sum',
-    gaugeAggregation: 'avg',
-    histogramPercentile: 'p95',
   },
 }));
 
@@ -190,7 +184,7 @@ describe('MetricsExperienceGridWrapper', () => {
     (useAppStateSelector as jest.Mock).mockImplementation((selector) =>
       selector({ breakdownField: 'host.name' })
     );
-    (useInternalStateDispatch as jest.Mock).mockReturnValue(mockDispatch);
+    jest.mocked(useInternalStateDispatch).mockReturnValue(mockDispatch);
     (useCurrentTabAction as jest.Mock).mockReturnValue(mockUpdateAppStateAction);
     mockDispatch.mockClear();
     mockUpdateAppStateAction.mockClear();

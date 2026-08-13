@@ -13,7 +13,7 @@ import type {
   ToolAvailabilityContext,
   ToolAvailabilityResult,
   ToolReturnSummarizerFn,
-  ToolConfirmationPolicy,
+  BuiltInToolConfirmationPolicy,
 } from './builtin';
 import type { LlmDescriptionHandler } from '../runner';
 
@@ -61,7 +61,7 @@ export interface InternalToolDefinition<
   /**
    * Tool call policy to control tool call confirmation behavior
    */
-  confirmation?: ToolConfirmationPolicy;
+  confirmation?: BuiltInToolConfirmationPolicy;
 }
 
 export type InternalToolAvailabilityHandler = (

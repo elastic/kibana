@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+export { AutomationRow } from './automation_row';
 export { AutomationsPanel } from './automations_panel';
 export { DescriptionPanel } from './description_panel';
+export { KnowledgeIndicatorsPanel } from './knowledge_indicators_panel';
+export { SignalsPanel } from './signals_panel';
 export { SourcesPanel } from './sources_panel';
-export { SourceRow } from './source_row';

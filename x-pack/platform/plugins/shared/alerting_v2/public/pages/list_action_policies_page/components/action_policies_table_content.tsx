@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { ActionPolicyBulkAction, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { Query } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +27,7 @@ import {
 } from '@kbn/content-list-provider';
 import { filter } from '@kbn/content-list-toolbar';
 import { ActionPolicyDetailsFlyout } from '../../../components/action_policy/details_flyout/action_policy_details_flyout';
-import { ActionPolicySnoozePopover } from '../../../components/action_policy/action_policy_snooze_popover';
+import { ActionPolicySnoozeButton } from '../../../components/action_policy/action_policy_snooze_button';
 import type { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
 import { useBulkGetUserProfiles } from '../../../hooks/use_bulk_get_user_profiles';
 import { useFetchTags } from '../../../hooks/use_fetch_tags';
@@ -160,7 +160,11 @@ export const ActionPoliciesTableContent = ({
         scrollableInline
         responsiveBreakpoint={false}
       >
-        <Column.Name showDescription onClick={(item) => setPolicyToViewId(toPolicy(item).id)} />
+        <Column.Name
+          showDescription
+          onClick={(item) => setPolicyToViewId(toPolicy(item).id)}
+          maxWidth="400px"
+        />
         <DestinationsColumn />
         <Column
           id="tags"
@@ -185,7 +189,6 @@ export const ActionPoliciesTableContent = ({
         <Column
           id="updatedBy"
           name={UPDATED_BY_COLUMN_NAME}
-          width="150px"
           render={(item) => {
             const { updatedBy } = toPolicy(item);
             if (!updatedBy) return null;
@@ -248,12 +251,12 @@ export const ActionPoliciesTableContent = ({
           name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.notify', {
             defaultMessage: 'Notify',
           })}
-          width="50px"
+          width="60px"
           render={(item) => {
             const policy = toPolicy(item);
             if (!policy.enabled || !canWrite) return null;
             return (
-              <ActionPolicySnoozePopover
+              <ActionPolicySnoozeButton
                 policy={policy}
                 onSnooze={onSnooze}
                 onCancelSnooze={onCancelSnooze}
@@ -261,6 +264,7 @@ export const ActionPoliciesTableContent = ({
                   (isSnoozing && snoozeVariables?.id === policy.id) ||
                   (isUnsnoozing && unsnoozeVariables === policy.id)
                 }
+                isDisabled={isBulkActionInProgress}
               />
             );
           }}
@@ -270,6 +274,7 @@ export const ActionPoliciesTableContent = ({
           name={i18n.translate('xpack.alertingV2.actionPoliciesList.column.actions', {
             defaultMessage: 'Actions',
           })}
+          width="80px"
           render={(item) => {
             const policy = toPolicy(item);
             return (
@@ -280,8 +285,6 @@ export const ActionPoliciesTableContent = ({
                 onEdit={onEdit}
                 onClone={onClone}
                 onDelete={onDelete}
-                onSnooze={onSnooze}
-                onCancelSnooze={onCancelSnooze}
                 onUpdateApiKey={onUpdateApiKey}
                 isDisabled={isBulkActionInProgress}
               />
@@ -319,6 +322,10 @@ export const ActionPoliciesTableContent = ({
             (isEnabling && enableVariables === policyToView.id) ||
             (isDisabling && disableVariables === policyToView.id)
           }
+          isSnoozeLoading={
+            (isSnoozing && snoozeVariables?.id === policyToView.id) ||
+            (isUnsnoozing && unsnoozeVariables === policyToView.id)
+          }
         />
       )}
     </>
@@ -346,6 +353,7 @@ const RefetchConnector = ({ onReady }: { onReady: (refetch: () => void) => void 
 
 const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsProps) => {
   const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
+  const { refetch } = useContentListState();
 
   if (selectedCount === 0) return null;
 
@@ -356,11 +364,18 @@ const ConnectedBulkActions = ({ bulkAction, isLoading }: ConnectedBulkActionsPro
     snoozedUntil?: string
   ) => {
     const ids = selectedPolicies.map((p) => p.id);
-    const actions: ActionPolicyBulkAction[] =
-      action === 'snooze' && snoozedUntil
-        ? ids.map((id) => ({ id, action: 'snooze', snoozedUntil }))
-        : ids.map((id) => ({ id, action } as ActionPolicyBulkAction));
-    bulkAction({ actions }, { onSuccess: clearSelection });
+    // The list is fetched through the content list data source, so invalidating
+    // the policy query keys is not enough to reflect the new state.
+    const onSuccess = () => {
+      clearSelection();
+      refetch();
+    };
+
+    if (action === 'snooze' && snoozedUntil) {
+      bulkAction({ action, ids, snoozedUntil }, { onSuccess });
+    } else if (action !== 'snooze') {
+      bulkAction({ action, ids }, { onSuccess });
+    }
   };
 
   return (
@@ -421,6 +436,7 @@ const EnabledFilterComponent = ({
       <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
     )}
     singleSelection
+    hideSearch
     data-test-subj="actionPoliciesEnabledFilter"
   />
 );

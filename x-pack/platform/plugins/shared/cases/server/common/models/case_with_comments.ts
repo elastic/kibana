@@ -13,6 +13,7 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
@@ -711,7 +712,7 @@ export class CaseCommentModel {
       });
 
       const savedObjectsWithoutErrors = newlyCreatedAttachments.saved_objects.filter(
-        (attachment) => attachment.error == null
+        (attachment) => !isSavedObjectErrorResult(attachment)
       );
 
       const attachmentsWithoutErrors = attachments.flatMap((attachment) => {
