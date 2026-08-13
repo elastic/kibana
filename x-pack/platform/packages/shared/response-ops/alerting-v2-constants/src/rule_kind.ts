@@ -12,7 +12,7 @@ type RuleKind = 'alert' | 'signal';
 /** EUI icon names for Alerting V2 rule kind badges. */
 export const RULE_KIND_ICONS = {
   alert: 'bell',
-  signal: 'stats',
+  signal: 'chartBarVertical',
 } as const satisfies Record<RuleKind, string>;
 
 export const RULE_KIND_LABELS: Record<RuleKind, string> = {
