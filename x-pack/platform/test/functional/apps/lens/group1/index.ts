@@ -64,16 +64,16 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     const loadSmokescreenTestFiles = () => {
-      loadTestFile(require.resolve('./layers'));
       loadTestFile(require.resolve('./dimension_editor'));
       loadTestFile(require.resolve('./chart_style_settings'));
     };
 
     if (config.get('esTestCluster.ccs')) {
       loadSmokescreenTestFiles();
-      // Chart switching moved to Scout for the non-CCS run (see
-      // x-pack/platform/plugins/shared/lens/test/scout/smokescreen). It stays here for CCS
+      // Layers and chart switching moved to Scout for the non-CCS run (see
+      // x-pack/platform/plugins/shared/lens/test/scout/smokescreen). They stay here for CCS
       // because Scout cannot target a real remote cluster yet.
+      loadTestFile(require.resolve('./layers'));
       loadTestFile(require.resolve('./chart_switching'));
     } else {
       // total run time ~16 min
