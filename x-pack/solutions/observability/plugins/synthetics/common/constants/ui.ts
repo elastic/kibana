@@ -34,6 +34,8 @@ export const SYNTHETICS_SETTINGS_ROUTE = '/settings/:tabId';
 
 export const CERTIFICATES_ROUTE = '/certificates';
 
+export const SYNTHETICS_APP_BASE_PATH = '/app/synthetics';
+
 export const SYNTHETICS_STEP_DETAIL_ROUTE =
   '/monitor/:monitorId/test-run/:checkGroupId/step/:stepIndex';
 
