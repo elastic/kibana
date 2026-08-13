@@ -24,6 +24,7 @@
     "@kbn/es-types",
     "@kbn/datemath",
     "@kbn/search-types",
+    "@kbn/custom-content-common",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",

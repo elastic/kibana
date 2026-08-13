@@ -193,6 +193,14 @@ const baseCreateBodyFields = {
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
   artifacts: schema.maybe(artifactsSchemaV1),
+  template_id: schema.maybe(
+    schema.string({
+      maxLength: 1024,
+      meta: {
+        description: 'The identifier for the rule template this rule was created from, when known.',
+      },
+    })
+  ),
 };
 
 export { createRuleParamsExamplesV1 };

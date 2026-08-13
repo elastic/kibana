@@ -22,6 +22,7 @@ import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
 import { generateConfigSchema } from './generate_config_schema';
+import { createConnectorNetworkSettings } from './create_connector_network_settings';
 
 const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] => {
   if (spec.actions?.[TEST_CONNECTOR_SUB_ACTION]) {
@@ -32,7 +33,7 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
 
   const baseActions = spec.actions ?? {};
 
-  if (!spec.test?.enabled) {
+  if (!spec.test.enabled) {
     return baseActions;
   }
 
@@ -50,8 +51,9 @@ export const createConnectorTypeFromSpec = (
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
+  const networkSettings = createConnectorNetworkSettings(configUtils);
 
-  const hasTest = Boolean(spec.test?.enabled);
+  const hasTest = Boolean(spec.test.enabled);
   const hasActions = Boolean(spec.actions);
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
@@ -60,6 +62,9 @@ export const createConnectorTypeFromSpec = (
     ? generateExecutorFunction({
         actions: executableActions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
+        getCredential: actions.getCredential,
+        getClientLeasePool: actions.getClientLeasePool,
+        networkSettings,
       })
     : undefined;
 
@@ -82,6 +87,6 @@ export const createConnectorTypeFromSpec = (
     source: ACTION_TYPE_SOURCES.spec,
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
-    isTestable: Boolean(spec.test?.enabled),
+    isTestable: Boolean(spec.test.enabled),
   };
 };
