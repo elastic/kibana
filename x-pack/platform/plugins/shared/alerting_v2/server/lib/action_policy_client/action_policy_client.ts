@@ -671,8 +671,8 @@ export class ActionPolicyClient {
     return sortFieldMap[sortField];
   }
 
-  public async getAllTags(params?: { search?: string }): Promise<string[]> {
-    return this.actionPolicySavedObjectService.getDistinctTags({
+  public async getTags(params?: { search?: string }): Promise<string[]> {
+    return this.actionPolicySavedObjectService.findTags({
       search: params?.search,
     });
   }
