@@ -8,11 +8,6 @@
 import { expect } from '@kbn/scout/ui';
 import { getImportedSavedObjectId, spaceTest, testData } from '../fixtures';
 
-const MAX_BYTES_LABEL = 'Maximum of bytes';
-const MAX_BYTES_VALUE = '19,986';
-const AVERAGE_OF_BYTES = 'Average of bytes';
-const TOP_VALUES_OF_IP = 'Top 3 values of ip';
-
 // Every chart switch passes an explicit `search` label: the switcher list is virtualized, and
 // its filter keeps whatever was typed last, so filtering makes the target option deterministic.
 
@@ -51,17 +46,17 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
       const { lens } = pageObjects;
 
       await lens.workspace.openEditor(artistMetricId, 'legacyMtrVis');
-      await expect(lens.metric.legacyMetricLabel).toHaveText(MAX_BYTES_LABEL);
-      await expect(lens.metric.legacyMetricValue).toHaveText(MAX_BYTES_VALUE);
+      await expect(lens.metric.legacyMetricLabel).toHaveText(testData.MAX_BYTES_LABEL);
+      await expect(lens.metric.legacyMetricValue).toHaveText(testData.MAX_BYTES_VALUE);
 
       await lens.switchToVisualization('lnsDatatable', { search: 'table' });
       // EUI data grid appends expand/filter glyphs to cell text, so match on a substring.
-      await expect(lens.datatable.getCellLocator(0, 0)).toContainText(MAX_BYTES_VALUE);
-      expect(await lens.datatable.getHeaderText(0)).toBe(MAX_BYTES_LABEL);
+      await expect(lens.datatable.getCellLocator(0, 0)).toContainText(testData.MAX_BYTES_VALUE);
+      expect(await lens.datatable.getHeaderText(0)).toBe(testData.MAX_BYTES_LABEL);
 
       await lens.switchToVisualization('lnsLegacyMetric', { search: 'legacy' });
-      await expect(lens.metric.legacyMetricLabel).toHaveText(MAX_BYTES_LABEL);
-      await expect(lens.metric.legacyMetricValue).toHaveText(MAX_BYTES_VALUE);
+      await expect(lens.metric.legacyMetricLabel).toHaveText(testData.MAX_BYTES_LABEL);
+      await expect(lens.metric.legacyMetricValue).toHaveText(testData.MAX_BYTES_VALUE);
     }
   );
 
@@ -82,10 +77,10 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
         await expect(lens.workspace.chartTitle).toHaveText(testData.LENS_BASIC_TITLES.XY_VIS);
         await expect(
           lens.dimensions.getDimensionTriggersLocator('lnsPie_sliceByDimensionPanel')
-        ).toHaveText(TOP_VALUES_OF_IP);
+        ).toHaveText(testData.TOP_VALUES_OF_IP);
         await expect(
           lens.dimensions.getDimensionTriggersLocator('lnsPie_sizeByDimensionPanel')
-        ).toHaveText(AVERAGE_OF_BYTES);
+        ).toHaveText(testData.AVERAGE_OF_BYTES);
       });
 
       await spaceTest.step('switch to bar, which maps the config without warning', async () => {
@@ -98,10 +93,10 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
         await expect(lens.workspace.chartTitle).toHaveText(testData.LENS_BASIC_TITLES.XY_VIS);
         await expect(
           lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
-        ).toHaveText(TOP_VALUES_OF_IP);
+        ).toHaveText(testData.TOP_VALUES_OF_IP);
         await expect(
           lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')
-        ).toHaveText(AVERAGE_OF_BYTES);
+        ).toHaveText(testData.AVERAGE_OF_BYTES);
       });
     }
   );
@@ -121,11 +116,11 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
         '@timestamp'
       );
       await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
-        AVERAGE_OF_BYTES
+        testData.AVERAGE_OF_BYTES
       );
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
-      ).toHaveText(TOP_VALUES_OF_IP);
+      ).toHaveText(testData.TOP_VALUES_OF_IP);
     }
   );
 
@@ -147,7 +142,7 @@ spaceTest.describe('Lens chart switching', { tag: '@local-stateful-classic' }, (
       ).toHaveText(['Top 7 values of geo.dest', 'Top 3 values of geo.src']);
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsPie_sizeByDimensionPanel')
-      ).toHaveText(AVERAGE_OF_BYTES);
+      ).toHaveText(testData.AVERAGE_OF_BYTES);
     }
   );
 });

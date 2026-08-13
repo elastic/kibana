@@ -6,9 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
-
-const AVERAGE_OF_BYTES = 'Average of bytes';
+import { createLogstashLensEditorSuiteSetup, spaceTest, testData } from '../fixtures';
 
 // Every chart switch passes an explicit `search` label: the switcher list is virtualized, and
 // its filter keeps whatever was typed last, so filtering makes the target option deterministic.
@@ -55,7 +53,7 @@ spaceTest.describe('Lens chart switching from scratch', { tag: '@local-stateful-
 
     // Verify the date_histogram and average aggregations transferred correctly after the switch.
     expect(await lens.datatable.getHeaderText(0)).toBe('@timestamp per 3 hours');
-    expect(await lens.datatable.getHeaderText(1)).toBe(AVERAGE_OF_BYTES);
+    expect(await lens.datatable.getHeaderText(1)).toBe(testData.AVERAGE_OF_BYTES);
     // Confirm the datatable has populated rows (aggregation produced results).
     await expect(lens.datatable.getCellLocator(0, 0)).not.toBeEmpty();
     await expect(lens.datatable.getCellLocator(0, 1)).not.toBeEmpty();
@@ -95,7 +93,7 @@ spaceTest.describe('Lens chart switching from scratch', { tag: '@local-stateful-
       '@timestamp'
     );
     await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
-      AVERAGE_OF_BYTES
+      testData.AVERAGE_OF_BYTES
     );
   });
 });
