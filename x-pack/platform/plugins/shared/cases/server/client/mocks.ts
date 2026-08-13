@@ -287,8 +287,7 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
-    // Assignee-identity population is opt-in per test; keep it off by default so
-    // the broad create/update suites keep asserting uid-only assignees.
+    // Assignee-identity population is on by default
     config: {
       ...ConfigSchema.validate({}),
       assigneeIdentity: { enabled: true },
