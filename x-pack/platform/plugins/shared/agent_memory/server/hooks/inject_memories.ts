@@ -12,6 +12,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import { SpanStatusCode } from '@opentelemetry/api';
+import { estimateTokens } from '@kbn/agent-builder-genai-utils';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
@@ -28,6 +31,14 @@ const HOOK_RECALL_LIMIT = 5;
  * Must be ≤ 1500 ms to stay within agent-round latency budget (§6.4).
  */
 const HOOK_TIMEOUT_MS = 1_500;
+
+const MEMORY_HOOK_SPAN_NAME = 'agent_memory.before_agent.recall';
+
+const EMPTY_RECALL_ATTRIBUTES = {
+  'agent_memory.recall.memory_count': 0,
+  'agent_memory.injection.characters': 0,
+  'agent_memory.injection.estimated_tokens_per_llm_call': 0,
+} as const;
 
 /**
  * Replaces `---` in user-provided content to prevent delimiter injection.
@@ -115,55 +126,84 @@ export const registerMemoryHook = ({
       [HookLifecycle.beforeAgent]: {
         mode: HookExecutionMode.blocking,
         timeout: HOOK_TIMEOUT_MS,
-        handler: async (context) => {
-          const { request, nextInput } = context;
-          const security = getSecurity();
-          const spaceId = getSpaceId(request);
+        handler: (context) =>
+          withActiveInferenceSpan(
+            MEMORY_HOOK_SPAN_NAME,
+            { attributes: EMPTY_RECALL_ATTRIBUTES },
+            async (span) => {
+              const { request, nextInput } = context;
+              const security = getSecurity();
+              const spaceId = getSpaceId(request);
 
-          // ── Authz check — fail open if user lacks read privilege ──────────
-          try {
-            const { hasAllRequested } = await security.authz
-              .checkPrivilegesWithRequest(request)
-              .atSpace(spaceId, {
-                kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.read)],
-              });
-            if (!hasAllRequested) return {};
-          } catch {
-            return {};
-          }
+              // ── Authz check — fail open if user lacks read privilege ──────────
+              try {
+                const { hasAllRequested } = await security.authz
+                  .checkPrivilegesWithRequest(request)
+                  .atSpace(spaceId, {
+                    kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.read)],
+                  });
+                if (!hasAllRequested) {
+                  span?.setAttribute('agent_memory.recall.outcome', 'skipped_no_privilege');
+                  return {};
+                }
+              } catch {
+                span?.setAttribute('agent_memory.recall.outcome', 'skipped_authz_error');
+                return {};
+              }
 
-          // ── Identity check — fail open if no user context ─────────────────
-          const identity = resolveIdentity({ request, security: getCoreSecurity() });
-          if (!identity) return {};
+              // ── Identity check — fail open if no user context ─────────────────
+              const identity = resolveIdentity({ request, security: getCoreSecurity() });
+              if (!identity) {
+                span?.setAttribute('agent_memory.recall.outcome', 'skipped_no_identity');
+                return {};
+              }
 
-          // ── Build query from user message (trimmed for cost) ──────────────
-          const query = nextInput.message.slice(0, MAX_QUERY_LENGTH);
-          if (!query.trim()) return {};
+              // ── Build query from user message (trimmed for cost) ───────────────
+              const query = nextInput.message.slice(0, MAX_QUERY_LENGTH);
+              if (!query.trim()) {
+                span?.setAttribute('agent_memory.recall.outcome', 'skipped_empty_query');
+                return {};
+              }
 
-          // ── Recall + render — any error fails open ────────────────────────
-          let block: string;
-          try {
-            const result = await recallMemory({
-              storage: getStorage(getCurrentUserEsClient(request)),
-              params: { query, limit: HOOK_RECALL_LIMIT, space_id: spaceId, identity },
-              logger,
-            });
-            if (!result.memories.length) return {};
-            block = renderUntrustedBlock(result.memories);
-          } catch (err) {
-            logger.warn(`Memory hook recall failed (fail open): ${(err as Error).message}`);
-            return {};
-          }
+              // ── Recall + render — any error fails open ─────────────────────────
+              let block: string;
+              try {
+                const result = await recallMemory({
+                  storage: getStorage(getCurrentUserEsClient(request)),
+                  params: { query, limit: HOOK_RECALL_LIMIT, space_id: spaceId, identity },
+                  logger,
+                });
+                if (!result.memories.length) {
+                  span?.setAttribute('agent_memory.recall.outcome', 'no_memories');
+                  return {};
+                }
+                block = renderUntrustedBlock(result.memories);
+                span?.setAttributes({
+                  'agent_memory.recall.outcome': 'injected',
+                  'agent_memory.recall.memory_count': result.memories.length,
+                  'agent_memory.recall.memory_ids': result.memories.map(({ id }) => id),
+                  'agent_memory.injection.characters': block.length,
+                  'agent_memory.injection.estimated_tokens_per_llm_call': estimateTokens(block),
+                });
+              } catch (err) {
+                logger.warn(`Memory hook recall failed (fail open): ${(err as Error).message}`);
+                span?.setAttribute('agent_memory.recall.outcome', 'error');
+                span?.recordException(new Error('Memory recall failed'));
+                span?.setStatus({ code: SpanStatusCode.ERROR });
+                span?.end();
+                return {};
+              }
 
-          // ── Inject with untrusted label (G5) ──────────────────────────────
-          const existingContext = nextInput.attachment_context;
-          return {
-            nextInput: {
-              ...nextInput,
-              attachment_context: existingContext ? `${block}\n\n${existingContext}` : block,
-            },
-          };
-        },
+              // ── Inject with untrusted label (G5) ───────────────────────────────
+              const existingContext = nextInput.attachment_context;
+              return {
+                nextInput: {
+                  ...nextInput,
+                  attachment_context: existingContext ? `${block}\n\n${existingContext}` : block,
+                },
+              };
+            }
+          ),
       },
     },
   });

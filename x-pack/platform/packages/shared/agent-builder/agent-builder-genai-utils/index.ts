@@ -19,6 +19,7 @@ export {
   type IndexFieldsResult,
   type IndexFieldType,
   type MappingField,
+  estimateTokens,
 } from './tools/utils';
 export {
   getDocumentById,
