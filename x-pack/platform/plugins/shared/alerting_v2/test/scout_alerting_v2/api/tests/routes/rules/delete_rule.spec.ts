@@ -45,7 +45,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
     expect(response).toHaveStatusCode(204);
     expect(response.body).toStrictEqual({});
 
-    const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
     expect(remaining.items.map((rule) => rule.id)).not.toContain(created.id);
     expect(remaining.total).toBe(0);
   });
@@ -64,6 +64,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       headers: writerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -93,7 +94,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(403);
       // Verify the rule is still present after the failed delete.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).toContain(created.id);
     }
   );
@@ -109,7 +110,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).toContain(created.id);
     }
   );
