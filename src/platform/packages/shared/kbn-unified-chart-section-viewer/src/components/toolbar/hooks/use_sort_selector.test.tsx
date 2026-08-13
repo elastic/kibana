@@ -90,4 +90,30 @@ describe('useSortSelector', () => {
 
     expect(selected?.checked).toBe('on');
   });
+
+  it('emits stable telemetry attributes for sort options', () => {
+    const { result } = renderSortSelector([
+      METRICS_SORT_BY.alphabetically,
+      METRICS_SORT_DIRECTION.asc,
+    ]);
+
+    const ebtProps = result.current.options.map((option) => {
+      const attrs = option as {
+        'data-ebt-action'?: string;
+        'data-ebt-element'?: string;
+        'data-ebt-detail'?: string;
+      };
+      return {
+        action: attrs['data-ebt-action'],
+        element: attrs['data-ebt-element'],
+        detail: attrs['data-ebt-detail'],
+      };
+    });
+
+    // These are telemetry values - changing them breaks historical analysis.
+    expect(ebtProps).toEqual([
+      { action: 'setSortOption', element: 'chartsToolbar', detail: 'alphabetically' },
+      { action: 'setSortOption', element: 'chartsToolbar', detail: 'recency' },
+    ]);
+  });
 });
