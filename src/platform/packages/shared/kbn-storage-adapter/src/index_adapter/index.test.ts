@@ -77,6 +77,8 @@ const createMockEsClient = () => {
         },
       }),
       create: jest.fn().mockResolvedValue({}),
+      delete: jest.fn().mockResolvedValue({ acknowledged: true }),
+      deleteIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
       exists: jest.fn().mockResolvedValue(true),
       simulateIndexTemplate: jest.fn().mockResolvedValue({
         template: { mappings: {} },
@@ -240,6 +242,62 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
         }),
       })
     );
+  });
+
+  it('uses a separate index management client for template operations', async () => {
+    const indexManagementClient = createMockEsClient();
+    (esClient.indices.get as jest.Mock).mockResolvedValueOnce({
+      'test_index-000001': {
+        mappings: { _meta: { version: 'outdated' } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+    await client.clean();
+
+    expect(indexManagementClient.indices.putIndexTemplate).toHaveBeenCalled();
+    expect(indexManagementClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+    expect(indexManagementClient.indices.getIndexTemplate).toHaveBeenCalled();
+    expect(indexManagementClient.indices.deleteIndexTemplate).toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.putMapping).toHaveBeenCalled();
+    expect(esClient.indices.delete).toHaveBeenCalledWith({ index: 'test_index-000001' });
+    expect(esClient.index).toHaveBeenCalled();
+    expect(indexManagementClient.indices.get).not.toHaveBeenCalled();
+    expect(indexManagementClient.indices.getAlias).not.toHaveBeenCalled();
+    expect(indexManagementClient.indices.create).not.toHaveBeenCalled();
+    expect(indexManagementClient.indices.putMapping).not.toHaveBeenCalled();
+    expect(indexManagementClient.indices.delete).not.toHaveBeenCalled();
+    expect(indexManagementClient.index).not.toHaveBeenCalled();
+    expect(indexManagementClient.bulk).not.toHaveBeenCalled();
+    expect(indexManagementClient.search).not.toHaveBeenCalled();
+    expect(indexManagementClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('uses the primary client to create the backing index', async () => {
+    const indexManagementClient = createMockEsClient();
+    (esClient.indices.getAlias as jest.Mock).mockResolvedValue({});
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: 'test_index-000001' });
+    expect(esClient.index).toHaveBeenCalled();
+    expect(indexManagementClient.indices.create).not.toHaveBeenCalled();
+    expect(indexManagementClient.index).not.toHaveBeenCalled();
   });
 
   it('forwards priority to the index template when set', async () => {
