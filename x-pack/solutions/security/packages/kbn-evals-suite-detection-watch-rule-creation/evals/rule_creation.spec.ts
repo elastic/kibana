@@ -32,11 +32,12 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
   evaluate(
     'generates a valid ES|QL detection rule for the stated gap',
-    async ({ executorClient, evaluators, ruleCreationClient, log }) => {
+    async ({ executorClient, evaluators, ruleCreationClient, esClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
         executorClient,
+        esClient,
         log,
       });
 
@@ -53,11 +54,12 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
   evaluate(
     'handles complex and multi-technique detection gaps',
-    async ({ executorClient, evaluators, ruleCreationClient, log }) => {
+    async ({ executorClient, evaluators, ruleCreationClient, esClient, log }) => {
       const evaluateDataset = createEvaluateDataset({
         ruleCreationClient,
         evaluators,
         executorClient,
+        esClient,
         log,
       });
 

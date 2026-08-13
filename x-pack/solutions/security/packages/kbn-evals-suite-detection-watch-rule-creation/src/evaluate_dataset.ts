@@ -15,6 +15,7 @@ import type {
   EvalsExecutorClient,
   Evaluator,
 } from '@kbn/evals';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { RuleCreationExample } from '../datasets/rule_creation_golden';
 import type { RuleCreationClient, RuleCreationResult } from './rule_creation_client';
@@ -183,6 +184,26 @@ export const createLookbackGapEvaluator = (): RuleEvaluator =>
     },
   });
 
+export const createQueryExecutabilityEvaluator = (esClient: EsClient): RuleEvaluator =>
+  skipNoRule({
+    name: 'Query Executability',
+    kind: 'CODE',
+    evaluate: async ({ output }) => {
+      const { query } = output.rule ?? {};
+      if (!query) return { score: 0, metadata: { error: 'No query generated' } };
+      try {
+        const result = await esClient.esql.query({ query });
+        const rowCount = result.values?.length ?? 0;
+        return { score: 1, metadata: { rowCount } };
+      } catch (err) {
+        // ES throws on unknown fields, index patterns that resolve to nothing, or type errors —
+        // all of which indicate the agent hallucinated something the seeded data can't satisfy.
+        const error = err instanceof Error ? err.message : String(err);
+        return { score: 0, metadata: { error } };
+      }
+    },
+  });
+
 // ---------------------------------------------------------------------------
 // LLM evaluators
 // ---------------------------------------------------------------------------
@@ -231,11 +252,13 @@ export const createEvaluateDataset =
     ruleCreationClient,
     evaluators,
     executorClient,
+    esClient,
     log,
   }: {
     ruleCreationClient: RuleCreationClient;
     evaluators: DefaultEvaluators;
     executorClient: EvalsExecutorClient;
+    esClient: EsClient;
     log: ToolingLog;
   }) =>
   async ({ dataset }: { dataset: EvaluationDataset<RuleCreationExample> }): Promise<void> => {
@@ -248,6 +271,7 @@ export const createEvaluateDataset =
       createRiskScoreValidityEvaluator(),
       createIntervalFormatEvaluator(),
       createLookbackGapEvaluator(),
+      createQueryExecutabilityEvaluator(esClient),
       createGapAddressedEvaluator(evaluators),
     ];
 
