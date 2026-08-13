@@ -31,7 +31,6 @@ import { useParams } from '@kbn/typed-react-router-config';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { PageVisit, RumSessionDetail, SessionAction } from '../../../common/session_replay';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
-import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { fetchSessionDetail } from '../../services/rest/session_replay_api';
 import { UserCell, WebVitalBadges, formatDurationMs, formatTime } from './session_ui';
 
@@ -506,9 +505,6 @@ export function SessionDetailPage() {
   const { http, observabilityShared } = useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
   const history = useHistory();
-  const {
-    urlParams: { rangeFrom, rangeTo },
-  } = useLegacyUrlParams();
 
   const [detail, setDetail] = useState<RumSessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -560,12 +556,7 @@ export function SessionDetailPage() {
     setLoading(true);
     setError(null);
     try {
-      const result = await fetchSessionDetail({
-        http,
-        sessionId,
-        rangeFrom: typeof rangeFrom === 'string' ? rangeFrom : undefined,
-        rangeTo: typeof rangeTo === 'string' ? rangeTo : undefined,
-      });
+      const result = await fetchSessionDetail({ http, sessionId });
       setDetail(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -573,7 +564,7 @@ export function SessionDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [http, sessionId, rangeFrom, rangeTo]);
+  }, [http, sessionId]);
 
   useEffect(() => {
     loadDetail();

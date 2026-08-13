@@ -46,13 +46,13 @@ export const getSessionRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/session_replay/sessions/{sessionId}',
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
+  // A session id uniquely identifies the session, so the detail lookup is not
+  // time-scoped (a session outside the caller's selected range must still load).
   params: t.type({
     path: t.type({ sessionId: t.string }),
-    query: t.partial({ rangeFrom: t.string, rangeTo: t.string }),
   }),
   handler: async ({ context, params }): Promise<RumSessionDetail> => {
     const { sessionId } = params.path;
-    const { rangeFrom = 'now-7d', rangeTo = 'now' } = params.query;
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
 
@@ -62,7 +62,6 @@ export const getSessionRoute = createUxServerRoute({
         minimum_should_match: 1,
       },
     };
-    const timeFilter = { range: { '@timestamp': { gte: rangeFrom, lte: rangeTo } } };
 
     const [rumResult, replayResult] = await Promise.all([
       client.search({
@@ -71,7 +70,7 @@ export const getSessionRoute = createUxServerRoute({
         allow_no_indices: true,
         size: 2000,
         sort: [{ '@timestamp': 'asc' as const }],
-        query: { bool: { filter: [timeFilter], must: [sessionMatch] } },
+        query: { bool: { must: [sessionMatch] } },
         _source: ['name', 'event_name', '@timestamp', 'attributes', 'resource.attributes'],
       }),
       client.count({

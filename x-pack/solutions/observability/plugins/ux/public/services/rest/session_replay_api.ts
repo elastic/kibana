@@ -75,22 +75,12 @@ export const fetchSessionReplaySessions = async ({
 export const fetchSessionDetail = async ({
   http,
   sessionId,
-  rangeFrom,
-  rangeTo,
 }: {
   http: HttpStart;
   sessionId: string;
-  rangeFrom?: string;
-  rangeTo?: string;
 }): Promise<RumSessionDetail> => {
   return http.get<RumSessionDetail>(
-    `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}`,
-    {
-      query: {
-        ...(rangeFrom ? { rangeFrom } : {}),
-        ...(rangeTo ? { rangeTo } : {}),
-      },
-    }
+    `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}`
   );
 };
 
