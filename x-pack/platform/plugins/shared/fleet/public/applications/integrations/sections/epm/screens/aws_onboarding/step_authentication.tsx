@@ -1264,6 +1264,7 @@ export const StepAuthentication: React.FunctionComponent<{
               <EuiFieldPassword
                 type="dual"
                 fullWidth
+                placeholder="e.g.: AKIAIOSFODNN7EXAMPLE"
                 value={agentAccessKeyId}
                 onChange={(e) => setAgentAccessKeyId(e.target.value)}
                 aria-label="Access Key ID"
@@ -1274,6 +1275,7 @@ export const StepAuthentication: React.FunctionComponent<{
               <EuiFieldPassword
                 type="dual"
                 fullWidth
+                placeholder="e.g.: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
                 value={agentSecretAccessKey}
                 onChange={(e) => setAgentSecretAccessKey(e.target.value)}
                 aria-label="Secret Access Key"
