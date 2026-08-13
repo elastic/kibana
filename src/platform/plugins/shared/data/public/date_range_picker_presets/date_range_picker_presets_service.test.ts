@@ -40,7 +40,6 @@ const setup = () => {
   const service = new DateRangePickerPresetsService({
     userStorage: core.userStorage,
     uiSettings: core.uiSettings,
-    userProfile: core.userProfile,
   });
 
   return { core, service };
@@ -79,30 +78,35 @@ describe('DateRangePickerPresetsService', () => {
     });
   });
 
-  describe('getCanWrite$', () => {
-    it('is true when the user has a profile', async () => {
+  describe('canPersist', () => {
+    it('delegates to userStorage.isAvailable()', () => {
       const { core, service } = setup();
-      // A non-null profile is all that matters; shape is irrelevant here.
-      (core.userProfile.getUserProfile$ as jest.Mock).mockReturnValue(of({}));
+      core.userStorage.isAvailable.mockReturnValue(true);
 
-      expect(await firstValueFrom(service.getCanWrite$())).toBe(true);
+      expect(service.canPersist()).toBe(true);
+      expect(core.userStorage.isAvailable).toHaveBeenCalled();
     });
 
-    it('is false when there is no profile', async () => {
+    it('is false when userStorage reports it is unavailable (e.g. no profile)', () => {
       const { core, service } = setup();
-      core.userProfile.getUserProfile$.mockReturnValue(of(null));
+      core.userStorage.isAvailable.mockReturnValue(false);
 
-      expect(await firstValueFrom(service.getCanWrite$())).toBe(false);
+      expect(service.canPersist()).toBe(false);
     });
   });
 
   describe('savePreset', () => {
     it('persists a new preset appended to the stored presets', async () => {
       const { core, service } = setup();
-      core.userStorage.peek.mockReturnValue(storedPresets([]));
+      core.userStorage.get.mockResolvedValue(storedPresets([]));
       const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
 
       await expect(service.savePreset(preset)).resolves.toBe('saved');
+      // Reads the resolved value as the write base, then persists.
+      expect(core.userStorage.get).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        DEFAULT_STORED_PRESETS
+      );
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([preset])
@@ -111,7 +115,7 @@ describe('DateRangePickerPresetsService', () => {
 
     it('does not persist a preset that duplicates an existing start/end', async () => {
       const { core, service } = setup();
-      core.userStorage.peek.mockReturnValue(storedPresets([{ start: 'now-1h', end: 'now' }]));
+      core.userStorage.get.mockResolvedValue(storedPresets([{ start: 'now-1h', end: 'now' }]));
 
       await expect(
         service.savePreset({ start: 'now-1h', end: 'now', label: 'ignored' })
@@ -125,7 +129,7 @@ describe('DateRangePickerPresetsService', () => {
         start: `now-${i}m`,
         end: 'now',
       }));
-      core.userStorage.peek.mockReturnValue(storedPresets(full));
+      core.userStorage.get.mockResolvedValue(storedPresets(full));
 
       await expect(service.savePreset({ start: 'now-999d', end: 'now' })).resolves.toBe(
         'limit-reached'
@@ -135,7 +139,7 @@ describe('DateRangePickerPresetsService', () => {
 
     it('uses the default presets as the base when nothing is stored yet', async () => {
       const { core, service } = setup();
-      core.userStorage.peek.mockReturnValue(DEFAULT_STORED_PRESETS);
+      core.userStorage.get.mockResolvedValue(DEFAULT_STORED_PRESETS);
       const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
 
       await expect(service.savePreset(preset)).resolves.toBe('saved');
@@ -144,12 +148,36 @@ describe('DateRangePickerPresetsService', () => {
         storedPresets([...quickRangePresets, preset])
       );
     });
+
+    it('reads the resolved (not unhydrated peek) value as the mutation base', async () => {
+      const { core, service } = setup();
+      const existing = storedPresets([{ start: 'now-1h', end: 'now', label: 'Existing' }]);
+      let resolveGet: (value: StoredPresets) => void;
+      core.userStorage.get.mockReturnValue(
+        new Promise((resolve) => {
+          resolveGet = resolve;
+        })
+      );
+
+      const savePromise = service.savePreset({ start: 'now-2h', end: 'now', label: 'New' });
+      resolveGet!(existing);
+
+      await expect(savePromise).resolves.toBe('saved');
+      expect(core.userStorage.peek).not.toHaveBeenCalled();
+      expect(core.userStorage.set).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        storedPresets([
+          { start: 'now-1h', end: 'now', label: 'Existing' },
+          { start: 'now-2h', end: 'now', label: 'New' },
+        ])
+      );
+    });
   });
 
   describe('deletePreset', () => {
     it('removes the preset matching the given start/end', async () => {
       const { core, service } = setup();
-      core.userStorage.peek.mockReturnValue(
+      core.userStorage.get.mockResolvedValue(
         storedPresets([
           { start: 'now-1h', end: 'now', label: 'Last hour' },
           { start: 'now-2h', end: 'now' },
@@ -157,10 +185,23 @@ describe('DateRangePickerPresetsService', () => {
       );
 
       await service.deletePreset({ start: 'now-1h', end: 'now' });
+      // Reads the resolved value as the write base, then persists.
+      expect(core.userStorage.get).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        DEFAULT_STORED_PRESETS
+      );
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([{ start: 'now-2h', end: 'now' }])
       );
+    });
+
+    it('no-ops when nothing matches the given start/end', async () => {
+      const { core, service } = setup();
+      core.userStorage.get.mockResolvedValue(storedPresets([{ start: 'now-1h', end: 'now' }]));
+
+      await service.deletePreset({ start: 'now-999d', end: 'now' });
+      expect(core.userStorage.set).not.toHaveBeenCalled();
     });
   });
 });

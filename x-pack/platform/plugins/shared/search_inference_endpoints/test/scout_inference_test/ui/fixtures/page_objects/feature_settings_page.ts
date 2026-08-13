@@ -11,7 +11,6 @@ export class FeatureSettingsPage {
   // Header
   readonly pageHeader: Locator;
   readonly saveButton: Locator;
-  readonly apiDocumentationLink: Locator;
 
   // Content
   readonly content: Locator;
@@ -56,9 +55,8 @@ export class FeatureSettingsPage {
 
   constructor(private readonly page: ScoutPage) {
     // Header
-    this.pageHeader = this.page.testSubj.locator('modelSettingsPageHeader');
+    this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
     this.saveButton = this.page.testSubj.locator('save-settings-button');
-    this.apiDocumentationLink = this.page.testSubj.locator('settings-api-documentation');
 
     // Content
     this.content = this.page.testSubj.locator('modelSettingsContent');
@@ -112,7 +110,7 @@ export class FeatureSettingsPage {
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/model_settings');
-    await this.page.testSubj.waitForSelector('modelSettingsPageHeader', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('appHeaderTitle', { state: 'visible' });
   }
 
   public async gotoEmptyState() {

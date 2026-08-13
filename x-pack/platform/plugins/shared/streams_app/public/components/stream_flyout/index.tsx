@@ -40,6 +40,10 @@ import { ViewInDiscoverButton } from './discover_button';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
+import {
+  useCanvasEvents,
+  useCanvasUrlRef,
+} from '../stream_management/data_management/stream_detail_canvas/state_management';
 
 const TABS = [
   {
@@ -79,8 +83,9 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { push } = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const { flyoutTab } = useCanvasUrlRef();
+  const { selectTab } = useCanvasEvents();
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
-  const [selectedTab, selectTab] = useState('overview');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const headerId = useGeneratedHtmlId();
   const abortController = useAbortController();
@@ -116,21 +121,21 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
     () =>
       TABS.map(({ id, label }) => (
         <EuiTab
-          isSelected={id === selectedTab}
-          onClick={() => selectTab(id)}
+          isSelected={id === flyoutTab}
           key={id}
+          onClick={() => selectTab(id)}
           data-test-subj={`streamsCanvasFlyoutTab-${id}`}
         >
           {label}
         </EuiTab>
       )),
-    [selectedTab]
+    [selectTab, flyoutTab]
   );
 
-  const page = useMemo(
-    () => TAB_PAGES[selectedTab]({ name, onClose }),
-    [name, selectedTab, onClose]
-  );
+  const page = useCallback(() => {
+    const tab = (flyoutTab != null && TAB_PAGES[flyoutTab]) || TAB_PAGES.overview;
+    return tab({ name, onClose });
+  }, [name, flyoutTab, onClose]);
   const badges = [];
 
   if (loading) {
@@ -274,7 +279,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
               <EuiLoadingSpinner data-test-subj="streamsCanvasFlyout-loading" size="xxl" />
             </EuiFlexGroup>
           ) : (
-            page
+            page()
           )}
         </div>
         {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (

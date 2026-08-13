@@ -15,6 +15,7 @@
 
 export {
   API_VERSIONS,
+  CONVERSATION_CATEGORY_COLORS,
   INTERNAL_API_ACCESS,
   PND_APP_ID,
   PND_APP_PATH,
@@ -48,6 +49,8 @@ export {
   buildInvestigationUrl,
   buildWatchUrl,
 } from './constants';
+
+export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 
 export {
   AutonomyLevel,

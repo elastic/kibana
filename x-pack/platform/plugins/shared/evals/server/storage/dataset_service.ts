@@ -32,6 +32,7 @@ export class DatasetService {
     return new DatasetClient({
       datasetsStorageAdapter,
       examplesStorageAdapter,
+      logger: this.logger,
     });
   }
 

@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiTitle,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { PND_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
@@ -87,14 +88,16 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="menuLeft"
-            aria-label={i18n.SUBNAV_COLLAPSE}
-            color="text"
-            display="base"
-            data-test-subj="pndWatchesSubnavCollapse"
-            onClick={onCollapse}
-          />
+          <EuiToolTip content={i18n.SUBNAV_COLLAPSE} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="menuLeft"
+              aria-label={i18n.SUBNAV_COLLAPSE}
+              color="text"
+              display="base"
+              data-test-subj="pndWatchesSubnavCollapse"
+              onClick={onCollapse}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup
@@ -147,7 +150,7 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
                   }
                 `}
               >
-                <EuiIcon type={item.icon} size="m" />
+                <EuiIcon type={item.icon} size="m" aria-hidden={true} />
                 <span>{item.label}</span>
               </button>
             </EuiFlexItem>

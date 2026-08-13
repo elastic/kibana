@@ -13,6 +13,7 @@ import {
   setMetaDocMigrationCompleteMock,
   setMetaMappingMigrationCompleteMock,
 } from './next.test.mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { nextActionMap, type ActionMap } from './next';
 import {
   createContextMock,
@@ -36,7 +37,7 @@ describe('actions', () => {
     jest.clearAllMocks();
 
     context = createContextMock();
-    actionMap = nextActionMap(context);
+    actionMap = nextActionMap(context, loggerMock.create());
   });
 
   describe('SET_DOC_MIGRATION_STARTED', () => {

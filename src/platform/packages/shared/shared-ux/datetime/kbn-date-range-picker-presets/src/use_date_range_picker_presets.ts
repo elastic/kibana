@@ -54,11 +54,10 @@ export const useDateRangePickerPresets = ({
   );
   const presets = useObservable(presets$, defaultPresets);
 
-  const canWrite$ = useMemo(
-    () => (persistenceEnabled ? service.getCanWrite$() : of(false)),
+  const canWrite = useMemo(
+    () => persistenceEnabled && service.canPersist(),
     [persistenceEnabled, service]
   );
-  const canWrite = useObservable(canWrite$, false);
 
   const notifyPersistFailure = useCallback(() => {
     notifications.toasts.addDanger(

@@ -57,4 +57,18 @@ const arrayOrSingleSchema = <T extends z.ZodType>(item: T, max: number) =>
     .union([item, z.array(item).min(1).max(max)])
     .transform((value): Array<z.output<T>> => (Array.isArray(value) ? value : [value]));
 
-export { durationSchema, tagsSchema, optionalWithDescription, arrayOrSingleSchema };
+/**
+ * Bounded integer schema for HTTP query parameters. Query values arrive as
+ * strings, so a numeric string is converted to a number before validation while
+ * real numbers (programmatic callers, unit tests) pass through untouched.
+ *
+ * @example
+ *   page: queryIntSchema({ min: 1, max: MAX }).default(1).describe('Page number.')
+ */
+const queryIntSchema = ({ min, max }: { min: number; max: number }) =>
+  z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() !== '' ? Number(value) : value),
+    z.number().int().min(min).max(max)
+  );
+
+export { durationSchema, tagsSchema, optionalWithDescription, arrayOrSingleSchema, queryIntSchema };

@@ -9,7 +9,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -24,12 +23,13 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AiButton } from '@kbn/shared-ux-ai-components';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { validateInstallFormValues } from '@kbn/workflows-library';
 import type { InstallFormField, TemplateBody } from '@kbn/workflows-library';
 import { InstallForm } from './install_form';
 import { useWorkflowsCapabilities } from '../../../hooks/use_workflows_capabilities';
 import type { WorkflowsCreateRouteState } from '../../../navigation';
-import { useInstallTemplate } from '../../hooks/use_install_template';
+import { type InstallSource, useInstallTemplate } from '../../hooks/use_install_template';
 
 export interface TemplateInstallSectionProps {
   template: TemplateBody;
@@ -44,6 +44,12 @@ export interface TemplateInstallSectionProps {
    * editor, so what the user sees is what they remix.
    */
   previewYaml: string;
+  /**
+   * Where the template came from. `'catalog'` (default) installs by slug (the
+   * server re-fetches the trusted template); `'custom'` installs the template's
+   * own raw YAML (e.g. an uploaded file with no catalog slug).
+   */
+  installMode?: 'catalog' | 'custom';
 }
 
 const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =>
@@ -64,7 +70,12 @@ const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =
  * a toast and navigates to the created workflow's editor page.
  */
 export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
-  function TemplateInstallSection({ template, onPreviewValuesChange, previewYaml }) {
+  function TemplateInstallSection({
+    template,
+    onPreviewValuesChange,
+    previewYaml,
+    installMode = 'catalog',
+  }) {
     const { euiTheme } = useEuiTheme();
     const { application, notifications } = useKibana<{
       application: ApplicationStart;
@@ -120,31 +131,36 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       [onPreviewValuesChange, values]
     );
 
-    const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(
-      template.metadata.slug,
-      {
-        onSuccess: ({ workflowId }) => {
-          notifications.toasts.addSuccess(
-            i18n.translate('workflows.library.install.successToast', {
-              defaultMessage: 'Workflow created from "{name}"',
-              values: { name: template.metadata.name },
-            })
-          );
-          void application.navigateToApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
-        },
-        onError: (error) => {
-          const attributes = error.body?.attributes as
-            | { errors?: Array<{ field: string; reason: string }> }
-            | undefined;
-          if (attributes?.errors?.length) {
-            setServerErrors(
-              Object.fromEntries(attributes.errors.map(({ field, reason }) => [field, reason]))
-            );
-          }
-          setInstallError(error.body?.message ?? error.message);
-        },
-      }
+    const installSource = useMemo<InstallSource>(
+      () =>
+        installMode === 'custom'
+          ? { type: 'custom', yaml: template.raw }
+          : { type: 'catalog', slug: template.metadata.slug },
+      [installMode, template.raw, template.metadata.slug]
     );
+
+    const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(installSource, {
+      onSuccess: ({ workflowId }) => {
+        notifications.toasts.addSuccess(
+          i18n.translate('workflows.library.install.successToast', {
+            defaultMessage: 'Workflow created from "{name}"',
+            values: { name: template.metadata.name },
+          })
+        );
+        void application.navigateToApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
+      },
+      onError: (error) => {
+        const attributes = error.body?.attributes as
+          | { errors?: Array<{ field: string; reason: string }> }
+          | undefined;
+        if (attributes?.errors?.length) {
+          setServerErrors(
+            Object.fromEntries(attributes.errors.map(({ field, reason }) => [field, reason]))
+          );
+        }
+        setInstallError(error.body?.message ?? error.message);
+      },
+    });
 
     const handleInstall = useCallback(() => {
       setInstallError(undefined);
@@ -219,10 +235,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
         >
           {installError ? (
             <>
-              <EuiCallOut
-                announceOnMount
-                color="danger"
-                iconType="warning"
+              <KbnDangerCallout
                 size="s"
                 title={i18n.translate('workflows.library.install.errorTitle', {
                   defaultMessage: 'The template could not be installed',
@@ -230,7 +243,7 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
                 data-test-subj="workflowLibraryTemplateInstallError"
               >
                 {installError}
-              </EuiCallOut>
+              </KbnDangerCallout>
               <EuiSpacer size="s" />
             </>
           ) : null}

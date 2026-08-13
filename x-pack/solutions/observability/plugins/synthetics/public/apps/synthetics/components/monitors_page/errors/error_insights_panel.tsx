@@ -448,7 +448,7 @@ const TagBreakdownCard = ({
                 .map((t) => `${t.tag}: ${t.downChecks}`)
                 .join(', ')}
             >
-              <EuiBadge color="hollow">
+              <EuiBadge color="hollow" tabIndex={0}>
                 +{tags.length - MAX_VISIBLE_TAGS}{' '}
                 {i18n.translate('xpack.synthetics.tagBreakdownCard.moreBadgeLabel', {
                   defaultMessage: 'more',

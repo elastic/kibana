@@ -82,7 +82,7 @@ const UnGroupedCardView = ({
 
   return (
     <>
-      <div style={{ height: listHeight }}>
+      <div style={{ height: listHeight, paddingLeft: 5 }}>
         {loaded && monitorsSortedByStatus.length ? (
           <EuiAutoSizer>
             {({ width }: EuiAutoSize) => (
@@ -120,7 +120,7 @@ const UnGroupedCardView = ({
                           <EuiFlexGroup
                             data-test-subj={`overview-grid-row-${listIndex}`}
                             gutterSize="m"
-                            css={{ ...style, marginLeft: 5 }}
+                            css={{ ...style }}
                           >
                             {listData[listIndex].map((_, idx) => (
                               <EuiFlexItem

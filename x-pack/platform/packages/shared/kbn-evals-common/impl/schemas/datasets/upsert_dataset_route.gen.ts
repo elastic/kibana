@@ -16,6 +16,8 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
+
 export const UpsertDatasetExamplePayload = lazySchema(() =>
   z.object({
     input: z.object({}).catchall(z.unknown()).optional(),
@@ -27,8 +29,10 @@ export type UpsertDatasetExamplePayload = z.infer<typeof UpsertDatasetExamplePay
 
 export const UpsertEvaluationDatasetRequestBody = lazySchema(() =>
   z.object({
-    name: z.string(),
-    description: z.string(),
+    name: z.string().min(1).max(256),
+    description: z.string().max(2048),
+    tags: DatasetTags.optional(),
+    maturity: DatasetMaturity.optional(),
     examples: z.array(UpsertDatasetExamplePayload),
   })
 );

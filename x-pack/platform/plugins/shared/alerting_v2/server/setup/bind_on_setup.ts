@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
+import { OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerSavedObjects } from '../saved_objects';
 import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
+import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { registerStepDefinitions } from '../lib/workflow_extensions/register_step_definitions';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
@@ -32,8 +33,6 @@ import { alertingAdvancedSettings } from '../settings/advanced_settings';
  */
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
-    const logger = container.get(Logger);
-
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
     registerSavedObjects({
@@ -43,7 +42,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
           'encryptedSavedObjects'
         )
       ),
-      logger,
+      logger: container.get(LoggerServiceToken).forSubsystem('savedObjects'),
     });
 
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));

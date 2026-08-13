@@ -96,6 +96,7 @@ export class KnowledgeIndicatorClient {
     streams: string | string[],
     options?: {
       type?: string[];
+      excludedType?: string[];
       id?: string[];
       featureIds?: string[];
       minConfidence?: number;

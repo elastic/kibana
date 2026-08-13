@@ -27,7 +27,6 @@ import { mapQuickRanges, TIMEPICKER_QUICK_RANGES_SETTING, type QuickRange } from
 export interface DateRangePickerPresetsServiceDeps {
   userStorage: CoreStart['userStorage'];
   uiSettings: CoreStart['uiSettings'];
-  userProfile: CoreStart['userProfile'];
 }
 
 const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
@@ -47,12 +46,10 @@ const toPresetItem = ({ start, end, label }: PresetItem): PresetItem => ({
 export class DateRangePickerPresetsService implements IDateRangePickerPresetsService {
   private readonly userStorage: CoreStart['userStorage'];
   private readonly uiSettings: CoreStart['uiSettings'];
-  private readonly userProfile: CoreStart['userProfile'];
 
-  constructor({ userStorage, uiSettings, userProfile }: DateRangePickerPresetsServiceDeps) {
+  constructor({ userStorage, uiSettings }: DateRangePickerPresetsServiceDeps) {
     this.userStorage = userStorage;
     this.uiSettings = uiSettings;
-    this.userProfile = userProfile;
   }
 
   public getDefaultPresets(): PresetItem[] {
@@ -65,55 +62,49 @@ export class DateRangePickerPresetsService implements IDateRangePickerPresetsSer
       .pipe(map((stored) => normalize(stored).presets ?? this.getDefaultPresets()));
   }
 
-  public getCanWrite$(): Observable<boolean> {
-    return this.userProfile.getUserProfile$().pipe(map((profile) => Boolean(profile)));
+  public canPersist(): boolean {
+    return this.userStorage.isAvailable();
   }
 
   public async savePreset(preset: PresetItem): Promise<SavePresetOutcome> {
-    const base = this.getMutationBase();
     const presetKey = getPresetKey(preset);
+    const base = await this.getStoredPresets();
 
-    if (base.some((item) => getPresetKey(item) === presetKey)) {
-      return 'duplicate';
-    }
+    if (base.some((item) => getPresetKey(item) === presetKey)) return 'duplicate';
+    if (base.length >= MAX_PRESETS) return 'limit-reached';
 
-    if (base.length >= MAX_PRESETS) {
-      return 'limit-reached';
-    }
+    await this.userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
+      version: 1,
+      presets: [...base, preset].map(toPresetItem),
+    });
 
-    await this.persist([...base, preset]);
     return 'saved';
   }
 
   public async deletePreset(preset: PresetItem): Promise<void> {
     const presetKey = getPresetKey(preset);
-    const next = this.getMutationBase().filter((item) => getPresetKey(item) !== presetKey);
-    await this.persist(next);
+    const base = await this.getStoredPresets();
+    const next = base.filter((item) => getPresetKey(item) !== presetKey);
+
+    // Nothing matched — skip the write.
+    if (next.length === base.length) return;
+
+    await this.userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
+      version: 1,
+      presets: next.map(toPresetItem),
+    });
   }
 
   /**
-   * Current presets used as the base for a mutation, read synchronously from
-   * the local cache via `peek`.
-   *
-   * NOTE: with the `preload: false` key, `peek` returns the unseeded default
-   * until the lazy fetch triggered by `getPresets$` hydrates the cache — so a
-   * save issued before hydration can overwrite previously stored presets. A
-   * robust fix needs a core "value ready" signal (tracked with the
-   * `userStorage.isAvailable` follow-up); centralising writes here makes that a
-   * one-spot change.
+   * Resolved read for use as a write base. This key is `preload: false`, so
+   * `get()` (never `peek()`) is required — an unhydrated read would persist the
+   * defaults over whatever the user already had stored.
    */
-  private getMutationBase(): PresetItem[] {
-    const cached = normalize(
-      this.userStorage.peek<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, DEFAULT_STORED_PRESETS)
+  private async getStoredPresets(): Promise<PresetItem[]> {
+    const stored = await this.userStorage.get<StoredPresets>(
+      DATE_RANGE_PICKER_PRESETS_KEY,
+      DEFAULT_STORED_PRESETS
     );
-
-    return cached.presets ?? this.getDefaultPresets();
-  }
-
-  private async persist(presets: PresetItem[]): Promise<void> {
-    await this.userStorage.set<StoredPresets>(DATE_RANGE_PICKER_PRESETS_KEY, {
-      version: 1,
-      presets: presets.map(toPresetItem),
-    });
+    return normalize(stored).presets ?? this.getDefaultPresets();
   }
 }

@@ -34,6 +34,8 @@ const ebtAction = {
     DELETE_CONVERSATION: 'delete_conversation',
     MARK_AS_READ: 'mark_as_read',
     MARK_AS_UNREAD: 'mark_as_unread',
+    PIN_CONVERSATION: 'pin_conversation',
+    UNPIN_CONVERSATION: 'unpin_conversation',
   },
   agentCustomization: {
     ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
@@ -67,6 +69,9 @@ const ebtAction = {
     MCP_CLIENT_CREATE_OPEN: 'mcp_client_create_open',
     MCP_CLIENT_CREATE_SUBMIT: 'mcp_client_create_submit',
     MCP_CLIENT_CREATE_CANCEL: 'mcp_client_create_cancel',
+    MCP_CLIENT_EDIT_OPEN: 'mcp_client_edit_open',
+    MCP_CLIENT_EDIT_SUBMIT: 'mcp_client_edit_submit',
+    MCP_CLIENT_EDIT_CANCEL: 'mcp_client_edit_cancel',
     MCP_CLIENT_VIEW_DETAILS: 'mcp_client_view_details',
     MCP_CLIENT_COPY_SECRET: 'mcp_client_copy_secret',
     MCP_CLIENT_REVOKE_OPEN: 'mcp_client_revoke_open',

@@ -84,10 +84,12 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       );
     }
 
-    const { name, description, examples } = upstreamDataset;
+    const { name, description, tags, maturity, examples } = upstreamDataset;
     return {
       name,
       description,
+      tags,
+      maturity,
       examples,
     };
   }

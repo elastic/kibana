@@ -47,7 +47,7 @@ export const createNavigationTree = (
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
         link: 'inbox' as AppDeepLinkId,
-        icon: 'email',
+        icon: 'mail',
       },
       // PND body (nodes omitted when xpack.pnd.enabled is false)
       {

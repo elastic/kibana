@@ -421,6 +421,8 @@ describe('KibanaEvalsClient', () => {
     expect(upsertDataset).toHaveBeenCalledWith({
       name: 'external-dataset',
       description: 'resolved from ES',
+      tags: undefined,
+      maturity: undefined,
       examples: [{ input: { q: 'resolved' }, output: { expected: 'answer' } }],
     });
     expect(task).toHaveBeenCalledTimes(1);

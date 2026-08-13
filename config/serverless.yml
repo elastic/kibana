@@ -1,4 +1,6 @@
-# Common serverless config
+# Common serverless config: settings here apply to every serverless project type.
+# Do not add project-specific settings; those belong in the corresponding
+# serverless.<project>.yml file (e.g. serverless.es.yml, serverless.oblt.yml).
 
 interactiveSetup.enabled: false
 newsfeed.enabled: false
@@ -171,6 +173,8 @@ xpack.cloud_integrations.data_migration.enabled: false
 
 # Other disabled plugins
 xpack.canvas.enabled: false
+# Significant Events is re-enabled only for Observability Complete
+xpack.significantEvents.enabled: false
 advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes

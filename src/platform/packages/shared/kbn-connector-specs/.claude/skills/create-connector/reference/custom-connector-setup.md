@@ -47,6 +47,28 @@ action you plan to implement, find the vendor's official API reference and confi
 - **Array/list query parameters**: how does the API expect repeated values encoded — `?id=1&id=2`,
   `?id[]=1&id[]=2`, or a comma-joined string? Axios's default array serialization (`id[]=1&id[]=2`) is
   not universal; check the docs and, if needed, set a custom `paramsSerializer`.
+- **Query string vs. request body for optional modifier params**: for a `POST`/`PATCH` action whose only
+  required input is a path segment (an ID) but that also accepts optional modifiers (`scope`, `filters`,
+  `all_X` flags, an expiry timestamp), check the vendor's docs for whether those modifiers are read from
+  the query string or the JSON body — do not assume, and do not infer it from a similar sibling action in
+  the same file. Two actions that look like a natural pair (e.g. a resource's mute/unmute, or enable/
+  disable) can each independently get this wrong; comparing them to each other won't surface the mistake
+  if both share it. A wrong transport here doesn't error — the vendor accepts the request and silently
+  ignores the misplaced param, so the bug only shows up if a test or live-testing pass actually sets that
+  optional param to a non-default value.
+  - **Verify against the vendor's own docs page, not a derived source.** A vendor's official client
+    library's internal request-building code, or a third-party/community OpenAPI mirror, is not sufficient
+    evidence on its own for this specific question — both can encode the same wrong assumption the handler
+    does, or be independently wrong, and neither will tell you so. Find the actual parameter table on the
+    vendor's own API reference page for that endpoint (look for an explicit "Query String(s)" vs. "Request
+    Body"/"Body Data" heading) and treat that as authoritative over anything else. If the live docs page is
+    a heavy client-rendered SPA that a scraping/fetch tool can't render properly (parameter tables missing
+    from the extracted text), don't fall back to a lower-confidence secondary source — try an archived
+    static snapshot of the same page (e.g. via the Wayback Machine) or, if still unresolved, live-test the
+    specific optional param against a real account before merging. Getting this backwards is easy to miss
+    because the "fixed" code still looks more correct than the original — it changed something on purpose,
+    based on evidence that seemed reasonable — so a subsequent reviewer has to independently re-derive the
+    right answer rather than just trusting that a change already went through this reasoning correctly.
 - **Per-action auth scopes**: list every scope/permission each action actually requires (not just the
   minimum to authenticate), especially for destructive or admin actions (delete, bulk update) or actions
   that hit a different API sub-resource (e.g. an alert/rule endpoint vs. the main resource). Once you have
@@ -76,6 +98,50 @@ action you plan to implement, find the vendor's official API reference and confi
 
 Cross-reference this research against the fields you're about to add `.describe()` text for — the
 description should state the *verified* format/constraint, not an assumed one.
+
+### Verify GraphQL Schemas via Introspection
+
+If the vendor's API is GraphQL (NerdGraph, a custom GraphQL backend, etc.), do **not** trust a docs example,
+a blog post, or general familiarity with the vendor to get input type names, field selections, and
+enum/mutation argument shapes right — even docs pages sometimes show inconsistent or outdated examples, and
+it's easy to write a plausible-sounding type name (e.g. guessing an `XyzFilterInput`/`XyzTimeWindowInput`
+suffix pattern, or assuming a field exists on a response type because a similar field exists elsewhere)
+that simply doesn't exist in the real schema. This class of bug compiles fine and passes unit tests that
+mock the HTTP client, then fails with `Unknown type "..."` or `Cannot query field "..." on type "..."` the
+first time a real request hits the live API — a `build-connector` chat test or manual verification pass is
+usually the first time anyone would catch it.
+
+Before finalizing any query/mutation string, verify every referenced type and field against the schema
+itself using standard GraphQL introspection (`__schema`, `__type`), run through the connector's own
+authenticated client so you're checking against the exact account/schema version you'll actually call:
+
+1. Find the root query/mutation type name if you don't already know it:
+   ```graphql
+   { __schema { queryType { name } mutationType { name } } }
+   ```
+   (Don't assume it's literally `Query`/`Mutation` — some APIs name these differently, e.g. NerdGraph's
+   mutation root is `RootMutationType`.)
+2. List a root type's fields and their argument/return types to confirm a query or mutation exists with the
+   name and shape you expect:
+   ```graphql
+   { __type(name: "RootMutationType") { fields { name args { name type { name kind ofType { name kind } } } type { name kind ofType { name kind } } } } }
+   ```
+3. Drill into a specific input or output type's fields before relying on them:
+   ```graphql
+   { __type(name: "SomeFilterInput") { inputFields { name type { name kind ofType { name kind } } } } }
+   { __type(name: "SomeResponseType") { fields { name type { name kind ofType { name kind } } } } }
+   ```
+
+The simplest way to run these during development: temporarily add a throwaway action to the connector spec
+(e.g. `debugIntrospect`, `isTool: false`) whose handler sends one of the queries above through the same
+`graphqlRequest`/client helper the real actions use, call it once Kibana has hot-reloaded via the Actions
+`_execute` API, read the result, then **delete the debug action before committing** — it must never ship.
+Repeat for each type/field you're unsure about; each round only needs a single narrow query, so this is
+fast even across several iterations.
+
+Do this proactively for every hardcoded query/mutation string before live-testing, not only after a request
+fails — the cost of one introspection round-trip is far lower than a failed live test plus a fix-and-retest
+cycle.
 
 ## Implement the Connector Spec
 

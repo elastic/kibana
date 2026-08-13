@@ -11,8 +11,7 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import type { Conversation, ConversationRoundAuthor } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
@@ -25,7 +24,6 @@ export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
-    conversation: Conversation;
     origin?: ExecutionConversationOrigin;
   }): Promise<ConversationRoundAuthor | undefined>;
 }
@@ -63,37 +61,30 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   /**
-   * Returns the author of a conversation round.
-   * Only public conversation rounds have an author; private conversations are single-owner
-   * (captured by conversation.user). External origins (e.g. Slack) provide their own author and
-   * take precedence; otherwise the author is the authenticated Kibana user that initiated the
-   * round, including rounds from an external origin that omits `author`.
+   * Returns the author of a conversation round: the origin's own author if it provides one,
+   * otherwise the authenticated Kibana user's profile id. Every round is attributed, whatever the
+   * conversation's access mode, since authorship cannot be reconstructed once a conversation is
+   * shared. No author is assigned when the user has no profile id (e.g. some API key callers) —
+   * the username is not a stable identifier and must not be stored as one.
    */
   async getConversationRoundAuthor({
     request,
-    conversation,
     origin,
   }: {
     request: KibanaRequest;
-    conversation: Conversation;
     origin?: ExecutionConversationOrigin;
   }): Promise<ConversationRoundAuthor | undefined> {
-    if (conversation.access_control?.access_mode !== ConversationAccessControlMode.Public) {
-      return undefined;
-    }
-
     if (origin?.author) {
       return origin.author;
     }
 
     const user = await this.getCurrentUser({ request });
-    const id = user.id ?? user.username;
 
-    if (!id) {
+    if (user.id === undefined) {
       return undefined;
     }
 
-    return { id, ...(user.username ? { username: user.username } : {}) };
+    return { id: user.id, username: user.username };
   }
 
   private async getCurrentUser({ request }: { request: KibanaRequest }) {

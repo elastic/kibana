@@ -191,6 +191,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               {validating === true ? (
                 <>
                   <EuiLoadingSpinner />
+                  &nbsp;
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.datafeedStep.dataView.step2.validatingText"
                     defaultMessage="Checking data view and job compatibility"

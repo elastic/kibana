@@ -80,6 +80,8 @@ export const registerListDatasetsRoute = ({
             page,
             per_page: perPage,
             search,
+            tags,
+            maturity,
             sort_field: sortField,
             sort_order: sortOrder,
           } = request.query;
@@ -89,6 +91,8 @@ export const registerListDatasetsRoute = ({
             page,
             perPage,
             search,
+            tags,
+            maturity,
             sortField,
             sortOrder,
           });
@@ -104,7 +108,8 @@ export const registerListDatasetsRoute = ({
               body: { message: error.message },
             });
           }
-          logger.error(`Failed to list evaluation datasets: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to list evaluation datasets: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to list evaluation datasets' },

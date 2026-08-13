@@ -7,7 +7,7 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme, EuiToolTip } from '@elastic/eui';
 import { PndWatchesNav, type WatchesSectionId } from './pnd_watches_nav';
 import * as i18n from '../translations';
 
@@ -46,14 +46,16 @@ export const WatchesSubnavExpandControl: React.FC = () => {
   }
 
   return (
-    <EuiButtonIcon
-      iconType="menuRight"
-      aria-label={i18n.SUBNAV_EXPAND}
-      color="text"
-      display="base"
-      data-test-subj="pndWatchesSubnavExpand"
-      onClick={expand}
-    />
+    <EuiToolTip content={i18n.SUBNAV_EXPAND} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="menuRight"
+        aria-label={i18n.SUBNAV_EXPAND}
+        color="text"
+        display="base"
+        data-test-subj="pndWatchesSubnavExpand"
+        onClick={expand}
+      />
+    </EuiToolTip>
   );
 };
 

@@ -33,6 +33,8 @@ export interface TimelineInput {
 export interface TimelineApiService {
   createTimeline: (input?: Partial<TimelineInput>) => Promise<string>;
   createTimelineTemplate: (input?: Partial<TimelineInput>) => Promise<string>;
+  /** Total count of saved timelines for a given type. */
+  getCount: (timelineType?: 'default' | 'template') => Promise<number>;
   deleteAll: () => Promise<void>;
 }
 
@@ -123,6 +125,16 @@ export const getTimelineApiService = ({
         });
 
         return response.data.savedObjectId;
+      });
+    },
+
+    getCount: async (timelineType = 'default') => {
+      return measurePerformanceAsync(log, 'security.timeline.getCount', async () => {
+        const response = await kbnClient.request<{ totalCount: number }>({
+          method: 'GET',
+          path: `${basePath}${TIMELINES_URL}?page_size=1&page_index=1&timeline_type=${timelineType}`,
+        });
+        return response.data?.totalCount ?? 0;
       });
     },
 

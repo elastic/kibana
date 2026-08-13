@@ -132,10 +132,10 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
   evaluate(
     'smoke tests: trace-based evaluators',
     async ({ executorClient, agentBuilderClient, evaluatorClient }) => {
-      const connectorId = process.env.SMOKE_TEST_EVALUATION_CONNECTOR_ID;
+      const connectorId = process.env.SMOKE_TEST_EVAL_CONNECTOR_ID;
       evaluate.skip(
         !connectorId,
-        'Set SMOKE_TEST_EVALUATION_CONNECTOR_ID to run the trace-based evaluator smoke test'
+        'Set SMOKE_TEST_EVAL_CONNECTOR_ID to run the trace-based evaluator smoke test'
       );
 
       const result = await executorClient.runExperiment(
