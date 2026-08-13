@@ -239,12 +239,26 @@ describe('buildPackageInputs', () => {
 
 // ─── collectDeployResults ────────────────────────────────────────────────────
 
+/** Build a minimal DeployGroup for use in collectDeployResults tests. */
+function makeGroup(instanceIds: string[], isDuplicateGroup = false) {
+  const svc = makeService();
+  return {
+    groupId: isDuplicateGroup ? instanceIds[0] : svc.packageName,
+    instanceIds,
+    members: instanceIds.map((id) => ({
+      instance: { instanceId: id, serviceId: id, name: id, isDuplicate: isDuplicateGroup },
+      service: svc,
+    })),
+    isDuplicateGroup,
+  };
+}
+
 describe('collectDeployResults', () => {
   it('extracts policyId from fulfilled result', () => {
     const results = [{ status: 'fulfilled' as const, value: { policyId: 'policy-abc' } }];
     const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
       results,
-      ['inst-1']
+      [makeGroup(['inst-1'])]
     );
     expect(policyIdsByInstance['inst-1']).toBe('policy-abc');
     expect(failedInstances).toHaveLength(0);
@@ -255,7 +269,7 @@ describe('collectDeployResults', () => {
     const results = [{ status: 'fulfilled' as const, value: {} }];
     const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
       results,
-      ['inst-1']
+      [makeGroup(['inst-1'])]
     );
     expect(policyIdsByInstance).not.toHaveProperty('inst-1');
     expect(failedInstances).toHaveLength(0);
@@ -266,7 +280,7 @@ describe('collectDeployResults', () => {
     const results = [{ status: 'rejected' as const, reason: new Error('Network failure') }];
     const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
       results,
-      ['inst-1']
+      [makeGroup(['inst-1'])]
     );
     expect(failedInstances).toContain('inst-1');
     expect(policyIdsByInstance).not.toHaveProperty('inst-1');
@@ -275,7 +289,7 @@ describe('collectDeployResults', () => {
 
   it('captures error message from plain object rejection', () => {
     const results = [{ status: 'rejected' as const, reason: { message: 'Server error' } }];
-    const { errorsByInstance } = collectDeployResults(results, ['inst-1']);
+    const { errorsByInstance } = collectDeployResults(results, [makeGroup(['inst-1'])]);
     expect(errorsByInstance['inst-1']).toBe('Server error');
   });
 
@@ -286,12 +300,34 @@ describe('collectDeployResults', () => {
     ];
     const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
       results,
-      ['inst-a', 'inst-b']
+      [makeGroup(['inst-a']), makeGroup(['inst-b'])]
     );
     expect(policyIdsByInstance['inst-a']).toBe('p1');
     expect(failedInstances).toContain('inst-b');
     expect(errorsByInstance['inst-b']).toBe('fail');
     expect(errorsByInstance).not.toHaveProperty('inst-a');
+  });
+
+  it('fans a bundled group policyId out to all instance ids in the group', () => {
+    const results = [{ status: 'fulfilled' as const, value: { policyId: 'shared-policy' } }];
+    const { policyIdsByInstance, failedInstances } = collectDeployResults(results, [
+      makeGroup(['inst-a', 'inst-b', 'inst-c']),
+    ]);
+    expect(policyIdsByInstance['inst-a']).toBe('shared-policy');
+    expect(policyIdsByInstance['inst-b']).toBe('shared-policy');
+    expect(policyIdsByInstance['inst-c']).toBe('shared-policy');
+    expect(failedInstances).toHaveLength(0);
+  });
+
+  it('marks all bundled group instance ids as failed when the call is rejected', () => {
+    const results = [{ status: 'rejected' as const, reason: new Error('Bundle failed') }];
+    const { failedInstances, errorsByInstance } = collectDeployResults(results, [
+      makeGroup(['inst-a', 'inst-b']),
+    ]);
+    expect(failedInstances).toContain('inst-a');
+    expect(failedInstances).toContain('inst-b');
+    expect(errorsByInstance['inst-a']).toBe('Bundle failed');
+    expect(errorsByInstance['inst-b']).toBe('Bundle failed');
   });
 });
 
@@ -550,8 +586,9 @@ describe('useDeploy', () => {
   });
 
   it('deploys only untracked instances — does not redeploy already-running ones', async () => {
-    // ec2_metrics already deployed; lambda is a new selection.
-    // With Option A each instance is its own policy call, so only lambda is deployed.
+    // ec2_metrics is already deployed; lambda is a new selection.
+    // Both are in the 'aws' package so they are normally bundled into one group.
+    // The group is selected because lambda has no status yet, producing one API call.
     setupMocks({
       selectedServiceIds: ['ec2_metrics', 'lambda'],
       deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
@@ -563,14 +600,14 @@ describe('useDeploy', () => {
       await result.current.handleDeploy();
     });
 
-    // Only one API call for lambda (ec2_metrics is already tracked)
+    // One API call for the bundled 'aws' group (includes lambda)
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
   it('deploys duplicate instances as separate agentless policy calls', async () => {
-    // Two instances of the same service (ec2_metrics is agentless in the real matrix) —
-    // each must get its own policy call.
+    // Original goes into a bundled group (1 call); duplicate gets its own call (1 call).
+    // Total: 2 sendCreateAgentlessPolicy calls.
     const instances = [
       {
         instanceId: 'ec2_metrics',
