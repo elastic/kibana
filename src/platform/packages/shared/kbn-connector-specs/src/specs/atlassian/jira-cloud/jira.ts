@@ -71,6 +71,9 @@ const buildBaseUrl = (ctx: ActionContext): string => {
   return `https://${subdomain}.atlassian.net`;
 };
 
+const issueTypeField = (issueType: string) =>
+  /^\d+$/.test(issueType) ? { id: issueType } : { name: issueType };
+
 export const JiraConnector: ConnectorSpec = {
   metadata: {
     id: '.jira-cloud',
@@ -268,9 +271,7 @@ export const JiraConnector: ConnectorSpec = {
           summary: input.summary,
         };
         if (input.issueType !== undefined) {
-          fields.issuetype = /^\d+$/.test(input.issueType)
-            ? { id: input.issueType }
-            : { name: input.issueType };
+          fields.issuetype = issueTypeField(input.issueType);
         }
         if (input.description !== undefined) {
           fields.description = toAdf(input.description);
@@ -310,9 +311,7 @@ export const JiraConnector: ConnectorSpec = {
           fields.description = toAdf(rest.description);
         }
         if (rest.issueType !== undefined) {
-          fields.issuetype = /^\d+$/.test(rest.issueType)
-            ? { id: rest.issueType }
-            : { name: rest.issueType };
+          fields.issuetype = issueTypeField(rest.issueType);
         }
         if (rest.priority !== undefined) {
           fields.priority = { name: rest.priority };
@@ -446,6 +445,9 @@ export const JiraConnector: ConnectorSpec = {
       input: AddAttachmentInputSchema,
       handler: async (ctx, input: AddAttachmentInput) => {
         const baseUrl = buildBaseUrl(ctx);
+        if (!/^[A-Za-z0-9+/]*={0,2}$/.test(input.file)) {
+          throw new Error('file must be valid base64-encoded content');
+        }
         const buffer = Buffer.from(input.file, 'base64');
         const formData = new FormData();
         formData.append('file', new Blob([buffer]), input.filename);

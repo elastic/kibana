@@ -22,7 +22,7 @@
 export const toAdf = (text: string) => ({
   version: 1,
   type: 'doc',
-  content: text.split('\n').map((line) => ({
+  content: text.split(/\r?\n/).map((line) => ({
     type: 'paragraph',
     content: line === '' ? [] : [{ type: 'text', text: line }],
   })),

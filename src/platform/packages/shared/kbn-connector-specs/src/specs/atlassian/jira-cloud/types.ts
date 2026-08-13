@@ -133,7 +133,7 @@ export const CreateIssueInputSchema = lazySchema(() =>
       .string()
       .max(100)
       .describe('Project key (e.g. PROJ). Use getProjects to discover keys.'),
-    summary: z.string().max(255).describe('Issue title / summary line.'),
+    summary: z.string().min(1).max(255).describe('Issue title / summary line.'),
     issueType: z
       .string()
       .max(255)
@@ -181,7 +181,7 @@ export const UpdateIssueInputSchema = lazySchema(() =>
         .string()
         .max(200)
         .describe('Issue key (e.g. PROJ-123) or numeric issue ID to update.'),
-      summary: z.string().max(255).optional().describe('New summary / title for the issue.'),
+      summary: z.string().min(1).max(255).optional().describe('New summary / title for the issue.'),
       description: z
         .string()
         .max(32768)
@@ -231,6 +231,7 @@ export const AddCommentInputSchema = lazySchema(() =>
       .describe('Issue key (e.g. PROJ-123) or numeric issue ID to comment on.'),
     body: z
       .string()
+      .min(1)
       .max(32768)
       .describe('Comment text in plain text. Newlines become separate paragraphs.'),
   })
