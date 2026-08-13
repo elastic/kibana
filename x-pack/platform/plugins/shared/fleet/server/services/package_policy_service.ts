@@ -186,7 +186,8 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
     },
-    currentVersion?: string
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy>;
 
   delete(
