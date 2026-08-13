@@ -101,7 +101,7 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
     <>
       <EuiCallOut
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
         title={i18n.CALLOUT_TITLE}
         data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_TEST_ID}
         onDismiss={onDismiss}
