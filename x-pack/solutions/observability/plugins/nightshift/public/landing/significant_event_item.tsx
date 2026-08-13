@@ -133,16 +133,13 @@ export function SignificantEventItem({
               {onChatClick && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.observability.nightshift.event.openInChatTooltip',
-                      {
-                        defaultMessage: 'Open in chat',
-                      }
-                    )}
+                    content={i18n.translate('xpack.nightshift.event.openInChatTooltip', {
+                      defaultMessage: 'Open in chat',
+                    })}
                   >
                     <AiButtonIcon
                       aria-label={i18n.translate(
-                        'xpack.observability.nightshift.event.openInChatButtonAriaLabel',
+                        'xpack.nightshift.event.openInChatButtonAriaLabel',
                         {
                           defaultMessage: 'Open {eventTitle} in chat',
                           values: { eventTitle: event.title },
@@ -181,17 +178,14 @@ export function SignificantEventItem({
               {onCloseClick && event.status === 'open' && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.observability.nightshift.event.closeEventTooltip',
-                      {
-                        defaultMessage: 'Close significant event',
-                      }
-                    )}
+                    content={i18n.translate('xpack.nightshift.event.closeEventTooltip', {
+                      defaultMessage: 'Close significant event',
+                    })}
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
                       aria-label={i18n.translate(
-                        'xpack.observability.nightshift.event.closeEventButtonAriaLabel',
+                        'xpack.nightshift.event.closeEventButtonAriaLabel',
                         {
                           defaultMessage: 'Close {eventTitle}',
                           values: { eventTitle: event.title },

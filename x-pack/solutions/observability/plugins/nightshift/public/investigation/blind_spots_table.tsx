@@ -18,12 +18,9 @@ import { formatBlindSpotMarkdown, type BlindSpotItem } from './investigation_pre
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { nightshiftBackgroundTransition } from '../common/transition';
 
-const blindSpotChatTooltip = i18n.translate(
-  'xpack.observability.nightshift.investigation.blindSpotChatTooltip',
-  {
-    defaultMessage: 'Ask agent about this blind spot',
-  }
-);
+const blindSpotChatTooltip = i18n.translate('xpack.nightshift.investigation.blindSpotChatTooltip', {
+  defaultMessage: 'Ask agent about this blind spot',
+});
 
 export interface BlindSpotsTableProps {
   items: BlindSpotItem[];
@@ -63,7 +60,7 @@ export function BlindSpotsTable({
           >
             <EuiTitle size="xxs">
               <h4>
-                {i18n.translate('xpack.observability.nightshift.investigation.blindSpotsTitle', {
+                {i18n.translate('xpack.nightshift.investigation.blindSpotsTitle', {
                   defaultMessage: 'Blind spots',
                 })}
               </h4>

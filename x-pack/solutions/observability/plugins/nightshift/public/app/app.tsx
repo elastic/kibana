@@ -29,7 +29,9 @@ import {
   getResolvedEvents,
 } from '../event/significant_event_status';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchStreamFeatures } from '../hooks/use_fetch_stream_features';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
+import { getImpactedServiceStreamNames } from '../common/impacted_services';
 import {
   buildBlastRadiusChips,
   filterEventsByBlastRadiusChip,
@@ -193,8 +195,21 @@ export function NightshiftApp(): React.ReactElement {
     [needsActionEvents, resolvedEvents]
   );
 
-  // Blast radius pills come from each event's `blast_radius[]` (stream_names only when absent).
-  const blastRadius = useMemo(() => buildBlastRadiusChips(needsActionEvents), [needsActionEvents]);
+  // Chips cover every event on the page, resolved included, so filtering by a service that only
+  // appears in resolved events is still reachable.
+  const {
+    features,
+    failedStreamNames: blastRadiusFailedStreamNames,
+    isInitialLoading: isLoadingBlastRadius,
+    isError: isBlastRadiusError,
+    refetch: refetchBlastRadius,
+  } = useFetchStreamFeatures(
+    useMemo(() => getImpactedServiceStreamNames(shownEvents), [shownEvents])
+  );
+  const blastRadius = useMemo(
+    () => buildBlastRadiusChips(shownEvents, { features }),
+    [shownEvents, features]
+  );
 
   const activeBlastRadiusChip = blastRadius.some(({ key }) => key === selectedBlastRadiusKey)
     ? selectedBlastRadiusKey
@@ -215,12 +230,12 @@ export function NightshiftApp(): React.ReactElement {
   );
 
   const visibleNeedsActionEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip),
-    [needsActionEvents, activeBlastRadiusChip]
+    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip, { features }),
+    [needsActionEvents, activeBlastRadiusChip, features]
   );
   const visibleResolvedEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip),
-    [resolvedEvents, activeBlastRadiusChip]
+    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip, { features }),
+    [resolvedEvents, activeBlastRadiusChip, features]
   );
 
   const selectedEventVisible = useMemo(() => {
@@ -358,12 +373,12 @@ export function NightshiftApp(): React.ReactElement {
         color="warning"
         iconType="warning"
         size="s"
-        title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
+        title={i18n.translate('xpack.nightshift.eventNotFoundTitle', {
           defaultMessage: 'Significant Event not found',
         })}
       >
         <EuiText size="s">
-          {i18n.translate('xpack.observability.nightshift.eventNotFoundDescription', {
+          {i18n.translate('xpack.nightshift.eventNotFoundDescription', {
             defaultMessage:
               'The event in this link is no longer in the current results. The URL has been cleared.',
           })}
@@ -439,7 +454,7 @@ export function NightshiftApp(): React.ReactElement {
                 color="warning"
                 iconType="warning"
                 size="s"
-                title={i18n.translate('xpack.observability.nightshift.refreshWarningTitle', {
+                title={i18n.translate('xpack.nightshift.refreshWarningTitle', {
                   defaultMessage: 'Showing the last loaded results; refreshing failed.',
                 })}
               >
@@ -451,7 +466,7 @@ export function NightshiftApp(): React.ReactElement {
                   onClick={() => refetch()}
                   size="s"
                 >
-                  {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+                  {i18n.translate('xpack.nightshift.retryButtonText', {
                     defaultMessage: 'Retry',
                   })}
                 </EuiButtonEmpty>
@@ -470,6 +485,10 @@ export function NightshiftApp(): React.ReactElement {
 
           <BlastRadiusEntities
             entities={blastRadius}
+            failedStreamNames={blastRadiusFailedStreamNames}
+            isError={isBlastRadiusError}
+            isLoading={isLoadingBlastRadius}
+            onRetry={refetchBlastRadius}
             onSelect={handleBlastRadiusSelect}
             selectedEntityKey={activeBlastRadiusChip}
           />
@@ -493,7 +512,7 @@ export function NightshiftApp(): React.ReactElement {
                     }
                     sectionRef={needsActionSectionRef}
                     statusColor="danger"
-                    title={i18n.translate('xpack.observability.nightshift.list.needActionTitle', {
+                    title={i18n.translate('xpack.nightshift.list.needActionTitle', {
                       defaultMessage: 'Need Action',
                     })}
                   />
@@ -511,7 +530,7 @@ export function NightshiftApp(): React.ReactElement {
                   }
                   sectionRef={resolvedSectionRef}
                   statusColor="success"
-                  title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
+                  title={i18n.translate('xpack.nightshift.list.resolvedTitle', {
                     defaultMessage: 'Resolved',
                   })}
                 />
@@ -570,7 +589,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
       color="danger"
       iconType="warning"
       announceOnMount
-      title={i18n.translate('xpack.observability.nightshift.loadingErrorTitle', {
+      title={i18n.translate('xpack.nightshift.loadingErrorTitle', {
         defaultMessage: 'Unable to load significant events',
       })}
       css={css`
@@ -584,7 +603,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
         onClick={onRetry}
         size="s"
       >
-        {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+        {i18n.translate('xpack.nightshift.retryButtonText', {
           defaultMessage: 'Retry',
         })}
       </EuiButton>

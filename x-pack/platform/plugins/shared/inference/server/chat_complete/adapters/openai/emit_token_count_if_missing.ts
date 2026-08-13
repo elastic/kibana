@@ -63,7 +63,10 @@ export function emitTokenCountEstimateIfMissing({
               try {
                 subscriber.next(manuallyCountTokens(request, chunks));
               } catch (err) {
-                logger?.warn(`Failed to manually count tokens, skipping token count event: ${err}`);
+                // Intentionally broad: token counting must never crash the chat stream.
+                logger?.warn('Failed to manually count tokens, skipping token count event', {
+                  error: err,
+                });
               }
             }
             subscriber.complete();

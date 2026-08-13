@@ -45,15 +45,15 @@ export const GetProjectTracesRequestQuery = lazySchema(() =>
     /**
      * Start of time range (ISO 8601)
      */
-    from: z.string().optional(),
+    from: z.string().max(64).optional(),
     /**
      * End of time range (ISO 8601)
      */
-    to: z.string().optional(),
+    to: z.string().max(64).optional(),
     /**
      * Filter traces by input, output, or prompt ID content
      */
-    name: z.string().optional(),
+    name: z.string().max(256).optional(),
     sort_field: z.enum(['start_time', 'duration', 'name']).optional().default('start_time'),
     sort_order: z.enum(['asc', 'desc']).optional().default('desc'),
     page: z.coerce.number().int().min(1).optional().default(1),
@@ -65,7 +65,7 @@ export type GetProjectTracesRequestQueryInput = z.input<typeof GetProjectTracesR
 
 export const GetProjectTracesRequestParams = lazySchema(() =>
   z.object({
-    projectName: z.string(),
+    projectName: z.string().max(256),
   })
 );
 export type GetProjectTracesRequestParams = z.infer<typeof GetProjectTracesRequestParams>;

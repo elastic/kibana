@@ -133,6 +133,30 @@ describe('FieldDefinitionsService', () => {
       expect(result.fieldDefinitions[0].name).toBe('my_field');
     });
 
+    it('orders global fields by their persisted display order', async () => {
+      const secondField = makeFieldDefinitionSO({
+        name: 'second',
+        isGlobal: true,
+        displayOrder: 1,
+      });
+      const firstField = makeFieldDefinitionSO({
+        fieldDefinitionId: 'fd-2',
+        name: 'first',
+        isGlobal: true,
+        displayOrder: 0,
+      });
+      soClient.find.mockResolvedValue({
+        saved_objects: [secondField, firstField],
+        total: 2,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitions('securitySolution', { isGlobal: true });
+
+      expect(result.fieldDefinitions.map(({ name }) => name)).toEqual(['first', 'second']);
+    });
+
     it('returns all definitions when isGlobal is false (no filtering)', async () => {
       const fd1 = makeFieldDefinitionSO({ isGlobal: true });
       const fd2 = makeFieldDefinitionSO({ name: 'non_global', isGlobal: false });
@@ -252,6 +276,30 @@ describe('FieldDefinitionsService', () => {
 
       const [, attributes, options] = soClient.create.mock.calls[0];
       expect((attributes as FieldDefinition).fieldDefinitionId).toBe(options!.id);
+    });
+
+    it('appends a new global field after the existing global fields', async () => {
+      const existingField = makeFieldDefinitionSO({ isGlobal: true, displayOrder: 0 });
+      soClient.find.mockResolvedValue({
+        saved_objects: [existingField],
+        total: 1,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+      soClient.create.mockResolvedValue(makeFieldDefinitionSO({ isGlobal: true, displayOrder: 1 }));
+
+      await service.createFieldDefinition({
+        name: 'my_field',
+        owner: 'securitySolution',
+        definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        isGlobal: true,
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        expect.objectContaining({ displayOrder: 1, isGlobal: true }),
+        expect.anything()
+      );
     });
 
     it('refreshes the analytics v2 data view after creating', async () => {

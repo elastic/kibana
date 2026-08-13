@@ -46,13 +46,13 @@ export function createPlaywrightEvalsConfig({
   // gets the connectors from either the env variable or kibana.yml/kibana.dev.yml
   const connectors = getAvailableConnectors();
 
-  const evaluationConnectorId = process.env.EVALUATION_CONNECTOR_ID
-    ? String(process.env.EVALUATION_CONNECTOR_ID)
+  const evaluationConnectorId = process.env.EVAL_CONNECTOR_ID
+    ? String(process.env.EVAL_CONNECTOR_ID)
     : undefined;
 
   if (!evaluationConnectorId) {
     throw new Error(
-      `process.env.EVALUATION_CONNECTOR_ID is required. Pick one from ${connectors
+      `process.env.EVAL_CONNECTOR_ID is required. Pick one from ${connectors
         .map((connector) => connector.id)
         .join(', ')}`
     );
@@ -72,7 +72,7 @@ export function createPlaywrightEvalsConfig({
 
   // Priority of determining repetition number: env variable, config parameter, default
   const experimentRepetitions =
-    parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
+    parseInt(process.env.EVAL_REPETITIONS || '', 10) || repetitions || 1;
 
   // Pass through Scout's setup AND teardown hook projects unchanged. Scout's `setup-local`
   // references its teardown via Playwright's `teardown` field; dropping the `teardown-local`
@@ -118,6 +118,9 @@ export function createPlaywrightEvalsConfig({
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
+    // Playwright's default also matches `*.test.ts`, which would load Jest unit tests colocated
+    // with the specs and fail on `describe is not defined`. Evals are always `*.spec.ts`.
+    testMatch: '**/*.spec.ts',
     // Playwright 1.61 on Node >=23.5 registers a synchronous `module.registerHooks` load hook
     // that transforms all first-party TypeScript (anything not in node_modules) with its own
     // bundled Babel. Workspace `@kbn/*` symlinks resolve to real paths outside node_modules, so

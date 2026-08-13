@@ -16,3 +16,6 @@ export interface EbtClickAttrs {
 
 /** For components that define `action` internally and expose the rest to consumers. */
 export type EbtClickAttrsWithoutAction = Omit<EbtClickAttrs, 'action'>;
+
+/** For components that define everything but the host `element` internally. */
+export type EbtClickAttrsElementOnly = Pick<EbtClickAttrs, 'element'>;

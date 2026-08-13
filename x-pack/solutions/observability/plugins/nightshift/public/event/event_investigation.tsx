@@ -63,7 +63,7 @@ export function EventInvestigation({
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate('xpack.observability.nightshift.flyout.investigationTitle', {
+              {i18n.translate('xpack.nightshift.flyout.investigationTitle', {
                 defaultMessage: 'Investigation',
               })}
             </h3>
@@ -82,7 +82,7 @@ export function EventInvestigation({
                 detail: status,
               })}
             >
-              {i18n.translate('xpack.observability.nightshift.flyout.investigationShowDetails', {
+              {i18n.translate('xpack.nightshift.flyout.investigationShowDetails', {
                 defaultMessage: 'Show details',
               })}
             </EuiButtonEmpty>
@@ -95,7 +95,7 @@ export function EventInvestigation({
       {!investigation ? (
         <EuiText size="s" color="subdued" data-test-subj="nightshiftInvestigationEmptyState">
           <p>
-            {i18n.translate('xpack.observability.nightshift.flyout.investigationEmptyDescription', {
+            {i18n.translate('xpack.nightshift.flyout.investigationEmptyDescription', {
               defaultMessage: 'No investigation yet.',
             })}
           </p>
@@ -106,22 +106,16 @@ export function EventInvestigation({
           color="warning"
           iconType="warning"
           size="s"
-          title={i18n.translate(
-            'xpack.observability.nightshift.flyout.investigationMissingWorkflowTitle',
-            {
-              defaultMessage: 'Investigation unavailable',
-            }
-          )}
+          title={i18n.translate('xpack.nightshift.flyout.investigationMissingWorkflowTitle', {
+            defaultMessage: 'Investigation unavailable',
+          })}
           data-test-subj="nightshiftInvestigationMissingWorkflowCallout"
         >
           <EuiText size="s">
-            {i18n.translate(
-              'xpack.observability.nightshift.flyout.investigationMissingWorkflowDescription',
-              {
-                defaultMessage:
-                  'This investigation is missing workflow details and cannot be loaded.',
-              }
-            )}
+            {i18n.translate('xpack.nightshift.flyout.investigationMissingWorkflowDescription', {
+              defaultMessage:
+                'This investigation is missing workflow details and cannot be loaded.',
+            })}
           </EuiText>
         </EuiCallOut>
       ) : (

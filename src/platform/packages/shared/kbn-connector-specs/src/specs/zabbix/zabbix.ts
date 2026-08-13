@@ -514,7 +514,6 @@ export const Zabbix: ConnectorSpec = {
         limit: 1,
       });
       return {
-        ok: true,
         message: `Successfully connected to Zabbix (${
           Array.isArray(hosts) ? hosts.length : 0
         } host(s) visible).`,

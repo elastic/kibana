@@ -145,7 +145,7 @@ export function FieldValueSelection({
       style={width ? { width } : {}}
       size="m"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
       data-test-subj={dataTestSubj ?? 'fieldValueSelectionBtn'}
@@ -167,7 +167,7 @@ export function FieldValueSelection({
       })}
       isSelected={isPopoverOpen || forceOpen}
       hasActiveFilters={numOfFilters > 0}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       numActiveFilters={numOfFilters}
       numFilters={options.length}
       onClick={onButtonClick}

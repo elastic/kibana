@@ -86,7 +86,78 @@ describe('createExtendedFieldsUserActionBuilder', () => {
     expect(screen.getByText('set My Field to yo')).toBeInTheDocument();
   });
 
-  it('renders generic label when multiple fields are updated at once', () => {
+  it('formats a user picker value using the control resolved from extendedFieldsControls', () => {
+    // Reproduces the reported bug: without a control type, the raw JSON-stringified
+    // `{ uid, name }[]` payload value was shown verbatim instead of the parsed name(s).
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: {
+        extendedFields: {
+          usersAsKeyword: JSON.stringify([
+            { uid: 'u-1', name: 'Bobby "Bob" Thorton' },
+            { uid: 'u-2', name: 'jdoe' },
+          ]),
+        },
+      },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      caseData: {
+        ...builderArgs.caseData,
+        extendedFieldsLabels: { users_as_keyword: 'Users' },
+        extendedFieldsControls: { users_as_keyword: 'USER_PICKER' },
+      },
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set Users to Bobby "Bob" Thorton, jdoe')).toBeInTheDocument();
+  });
+
+  it('falls back to the raw string when extendedFieldsControls is undefined', () => {
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: { extendedFields: { riskScoreAsKeyword: 'high' } },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      caseData: { ...builderArgs.caseData, extendedFieldsControls: undefined },
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
+  });
+
+  it('falls back to the raw string when extendedFieldsControls is defined but the specific key is absent', () => {
+    // extendedFieldsControls is present (covers other keys) but does NOT contain `riskScoreAsKeyword`.
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: { extendedFields: { riskScoreAsKeyword: 'high' } },
+    });
+
+    const builder = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      caseData: {
+        ...builderArgs.caseData,
+        extendedFieldsControls: { severity_as_keyword: 'SELECT_BASIC' },
+      },
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
+
+    expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
+  });
+
+  it('renders one row per field when several are updated at once', () => {
     const userAction = getUserAction('extended_fields', UserActionActions.update, {
       type: 'extended_fields',
       payload: {
@@ -105,6 +176,32 @@ describe('createExtendedFieldsUserActionBuilder', () => {
     const createdUserAction = builder.build();
     renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-    expect(screen.getByText('updated template fields')).toBeInTheDocument();
+    // A section save writes every changed field in one request, but the history reads as "what
+    // changed" — one line per field, the same as editing a field on its own. Sorted by label.
+    expect(createdUserAction).toHaveLength(2);
+    expect(screen.getByText('set Affected Systems to web-server')).toBeInTheDocument();
+    expect(screen.getByText('set Risk Score to high')).toBeInTheDocument();
+    expect(screen.queryByText('updated template fields')).not.toBeInTheDocument();
+  });
+
+  it('keeps a single copy link across the rows of one multi-field update', () => {
+    const userAction = getUserAction('extended_fields', UserActionActions.update, {
+      type: 'extended_fields',
+      payload: {
+        extendedFields: {
+          riskScoreAsKeyword: 'high',
+          affectedSystemsAsKeyword: 'web-server',
+        },
+      },
+    });
+
+    const createdUserAction = createExtendedFieldsUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    }).build();
+
+    // One user action behind the rows means one permalink; repeating it would duplicate DOM ids.
+    expect(createdUserAction[0].actions).toBeDefined();
+    expect(createdUserAction[1].actions).toBeUndefined();
   });
 });

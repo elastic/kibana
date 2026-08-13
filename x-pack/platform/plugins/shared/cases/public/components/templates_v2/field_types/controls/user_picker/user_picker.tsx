@@ -29,7 +29,10 @@ import type { SelectedUser } from './utils';
 import { toSelectedUsers } from './utils';
 import { UserPickerCombobox } from './user_picker_combobox';
 
-type UserPickerProps = z.infer<typeof UserPickerFieldSchema> & ConditionRenderProps;
+type UserPickerProps = z.infer<typeof UserPickerFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const UserPicker: React.FC<UserPickerProps> = ({
   label,
@@ -41,6 +44,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -86,7 +90,8 @@ export const UserPicker: React.FC<UserPickerProps> = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller

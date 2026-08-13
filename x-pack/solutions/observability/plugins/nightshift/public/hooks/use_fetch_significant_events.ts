@@ -7,16 +7,16 @@
 
 import moment from 'moment';
 import { useQuery, type QueryClient, type UseQueryResult } from '@kbn/react-query';
-import type { HttpSetup } from '@kbn/core/public';
+import type { SignificantEventsRepositoryClient } from '@kbn/significant-events-plugin/public';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
 import { hasRunningInvestigations } from '../event/significant_event_status';
 
 /**
- * The significant-events events endpoint returns a paginated envelope. We mirror the
- * shape locally instead of importing it from another plugin so the Observability
- * bundle does not couple to Streams' public contract for a value it only reads.
+ * The paginated envelope the events endpoint returns, flattened across the pages we
+ * fetch. Declared locally because the cache also holds client-side investigation
+ * completions that the server response does not carry yet.
  */
 export interface NightshiftSignificantEventsQueryData {
   hits: SignificantEvent[];
@@ -85,12 +85,12 @@ const applyPendingInvestigationCompletions = (hits: SignificantEvent[]): Signifi
 };
 
 const fetchSignificantEvents = async ({
-  http,
+  significantEventsRepositoryClient,
   signal,
   from,
   to,
 }: {
-  http: HttpSetup;
+  significantEventsRepositoryClient: SignificantEventsRepositoryClient;
   signal: AbortSignal | undefined;
   from: string;
   to: string;
@@ -100,17 +100,19 @@ const fetchSignificantEvents = async ({
   let total = 0;
 
   while (page <= MAX_FETCH_PAGES) {
-    const response = await http.get<NightshiftSignificantEventsQueryData>(
-      '/internal/significant_events/events',
+    const response = await significantEventsRepositoryClient.fetch(
+      'GET /internal/significant_events/events',
       {
-        query: {
-          page,
-          perPage: NIGHTSHIFT_EVENTS_PAGE_SIZE,
-          from,
-          to,
-          severity: [...NIGHTSHIFT_LANDING_SEVERITIES],
+        params: {
+          query: {
+            page,
+            perPage: NIGHTSHIFT_EVENTS_PAGE_SIZE,
+            from,
+            to,
+            severity: [...NIGHTSHIFT_LANDING_SEVERITIES],
+          },
         },
-        signal,
+        signal: signal ?? null,
       }
     );
 
@@ -136,7 +138,9 @@ export const useFetchSignificantEvents = (): UseQueryResult<
   NightshiftSignificantEventsQueryData,
   Error
 > => {
-  const { http } = useKibana().services;
+  const {
+    significantEvents: { significantEventsRepositoryClient },
+  } = useKibana().services;
 
   return useQuery<NightshiftSignificantEventsQueryData, Error>({
     queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
@@ -144,7 +148,7 @@ export const useFetchSignificantEvents = (): UseQueryResult<
       const from = moment().subtract(NIGHTSHIFT_LOOKBACK_DAYS, 'days').toISOString();
       const to = moment().toISOString();
 
-      return fetchSignificantEvents({ http, signal, from, to });
+      return fetchSignificantEvents({ significantEventsRepositoryClient, signal, from, to });
     },
     refetchInterval: (data) =>
       data?.hits && hasRunningInvestigations(data.hits)

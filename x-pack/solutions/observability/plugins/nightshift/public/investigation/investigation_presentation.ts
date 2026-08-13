@@ -42,12 +42,12 @@ export const formatInvestigationDuration = (
   );
 
   if (minutes < 1) {
-    return i18n.translate('xpack.observability.nightshift.investigation.durationUnderOneMinute', {
+    return i18n.translate('xpack.nightshift.investigation.durationUnderOneMinute', {
       defaultMessage: '< 1 min',
     });
   }
 
-  return i18n.translate('xpack.observability.nightshift.investigation.durationMinutes', {
+  return i18n.translate('xpack.nightshift.investigation.durationMinutes', {
     defaultMessage: '{minutes} min',
     values: { minutes },
   });
@@ -66,20 +66,20 @@ export const getInvestigationTimeLabel = ({
   const duration = formatInvestigationDuration(startedAt, endedAt ?? Date.now());
 
   if (isRunning) {
-    return i18n.translate('xpack.observability.nightshift.investigation.sinceTimeDuration', {
+    return i18n.translate('xpack.nightshift.investigation.sinceTimeDuration', {
       defaultMessage: 'Since {time} ({duration})',
       values: { time, duration },
     });
   }
 
-  return i18n.translate('xpack.observability.nightshift.investigation.completedTimeDuration', {
+  return i18n.translate('xpack.nightshift.investigation.completedTimeDuration', {
     defaultMessage: '{time} ({duration})',
     values: { time, duration },
   });
 };
 
 export const getInvestigationCompleteStatusLabel = (): string =>
-  i18n.translate('xpack.observability.nightshift.investigation.statusComplete', {
+  i18n.translate('xpack.nightshift.investigation.statusComplete', {
     defaultMessage: 'Complete',
   });
 
@@ -310,19 +310,19 @@ export const sortInvestigationHypotheses = (
 export const getHypothesisStatusLabel = (status: InvestigationHypothesis['status']): string => {
   switch (status) {
     case 'investigating':
-      return i18n.translate('xpack.observability.nightshift.investigation.hypothesisChecking', {
+      return i18n.translate('xpack.nightshift.investigation.hypothesisChecking', {
         defaultMessage: 'Checking',
       });
     case 'confirmed':
-      return i18n.translate('xpack.observability.nightshift.investigation.hypothesisConfirmed', {
+      return i18n.translate('xpack.nightshift.investigation.hypothesisConfirmed', {
         defaultMessage: 'Confirmed',
       });
     case 'dismissed':
-      return i18n.translate('xpack.observability.nightshift.investigation.hypothesisRejected', {
+      return i18n.translate('xpack.nightshift.investigation.hypothesisRejected', {
         defaultMessage: 'Rejected',
       });
     default:
-      return i18n.translate('xpack.observability.nightshift.investigation.hypothesisUnknown', {
+      return i18n.translate('xpack.nightshift.investigation.hypothesisUnknown', {
         defaultMessage: 'Unknown',
       });
   }

@@ -20,7 +20,7 @@ export const formatChatAttachmentDescription = (
   attachmentType: NightshiftChatAttachmentType,
   name: string
 ): string =>
-  i18n.translate('xpack.observability.nightshift.chatAttachment.description', {
+  i18n.translate('xpack.nightshift.chatAttachment.description', {
     defaultMessage: '[{attachmentType}] {name}',
     values: { attachmentType, name },
   });
