@@ -15,7 +15,6 @@
     "typings/@elastic/opentelemetry-node": "'opentelemetry-node' should be snake_case",
     "typings/@hello-pangea": "'@hello-pangea' should be snake_case",
     "typings/@opentelemetry/semantic-conventions": "'semantic-conventions' should be snake_case",
-    "typings/@types/js-yaml": "'js-yaml' should be snake_case",
     "typings/@typescript-eslint": "'@typescript-eslint' should be snake_case",
     "x-pack": "'x-pack' should be snake_case",
     "x-pack/packages/ai-infra": "'ai-infra' should be snake_case",
