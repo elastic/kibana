@@ -16,7 +16,7 @@ export interface ConnectorEventEmitParams {
 
 /**
  * Sink for connector events produced by the inbound hub.
- * A single emitter is registered (workflows bridge in Phase 1).
+ * A single emitter is registered (Phase 1 consumer: `connectorEventsBridge`).
  */
 export interface ConnectorEventEmitter {
   emit(params: ConnectorEventEmitParams): Promise<void>;
