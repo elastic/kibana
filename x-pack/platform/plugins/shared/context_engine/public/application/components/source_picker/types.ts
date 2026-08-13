@@ -5,25 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
 export type SourceType = 'esql' | 'connector';
-
-/**
- * Human-readable label for a source type, shown in the source type tag.
- */
-export const getSourceTypeLabel = (type: SourceType): string => {
-  switch (type) {
-    case 'esql':
-      return i18n.translate('xpack.contextEngine.sourceType.esql', {
-        defaultMessage: 'ES|QL',
-      });
-    case 'connector':
-      return i18n.translate('xpack.contextEngine.sourceType.connector', {
-        defaultMessage: 'Connector',
-      });
-  }
-};
 
 export interface SelectedSource {
   type: SourceType;

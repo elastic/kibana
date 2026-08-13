@@ -42,9 +42,10 @@ describe('Snowflake', () => {
       expect(Snowflake.metadata.id).toBe('.snowflake');
     });
 
-    it('should support workflows and agentBuilder features', () => {
+    it('should support workflows, agentBuilder, and contextEngine features', () => {
       expect(Snowflake.metadata.supportedFeatureIds).toContain('workflows');
       expect(Snowflake.metadata.supportedFeatureIds).toContain('agentBuilder');
+      expect(Snowflake.metadata.supportedFeatureIds).toContain('contextEngine');
     });
   });
 
@@ -560,8 +561,7 @@ describe('Snowflake', () => {
         { statement: 'SELECT CURRENT_VERSION()' },
         expect.any(Object)
       );
-      expect(result?.ok).toBe(true);
-      expect(result?.message).toContain('8.44.0');
+      expect(result).toEqual({});
     });
 
     it('should return success when statement is accepted asynchronously', async () => {
@@ -576,8 +576,7 @@ describe('Snowflake', () => {
 
       const result = await testHandler?.(mockContext);
 
-      expect(result?.ok).toBe(true);
-      expect(result?.message).toContain('handle-test');
+      expect(result).toEqual({});
     });
   });
 

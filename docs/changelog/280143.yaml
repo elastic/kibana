@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/280143
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+areas:
+- Alerting and reporting
+title: Apply case template defaults automatically when creating cases via API
+description: When you create a case with a template through the Cases API, the server applies the template's severity, category, tags, assignees, settings, connector, and extended field defaults. Values you send in the request still take precedence.

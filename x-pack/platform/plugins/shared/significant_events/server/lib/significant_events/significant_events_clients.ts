@@ -10,28 +10,24 @@ import { DataStreamClient } from '@kbn/data-streams';
 import type { AnyDataStreamDefinition } from '@kbn/data-streams';
 import { DetectionService, detectionsDataStream } from './detections';
 import type { DetectionClient } from './detections';
-import { DiscoveryService, discoveriesDataStream } from './discoveries';
-import type { DiscoveryClient } from './discoveries';
 import { EventService, eventsDataStream } from './events';
 import type { EventClient } from './events';
+import type { TriggerEmitter } from '../../workflows/triggers/emit';
 import { memoriesDataStream } from '../../memory_and_investigation/lib/memory';
 import { memoryHistoryDataStream } from '../../memory_and_investigation/lib/memory/history_data_stream';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
-  discovery: DiscoveryService;
   event: EventService;
 }
 
 export interface SignificantEventsClients {
   getDetectionClient: () => DetectionClient;
-  getDiscoveryClient: () => DiscoveryClient;
   getEventClient: () => EventClient;
 }
 
 const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
   detectionsDataStream,
-  discoveriesDataStream,
   eventsDataStream,
   memoriesDataStream,
   memoryHistoryDataStream,
@@ -40,7 +36,6 @@ const SIGNIFICANT_EVENTS_DATA_STREAMS: AnyDataStreamDefinition[] = [
 export function createSignificantEventsServices(): SignificantEventsServices {
   return {
     detection: new DetectionService(),
-    discovery: new DiscoveryService(),
     event: new EventService(),
   };
 }
@@ -49,15 +44,16 @@ export function createSignificantEventsClients({
   services,
   esClient,
   space,
+  triggerEmitter,
 }: {
   services: SignificantEventsServices;
   esClient: ElasticsearchClient;
   space: string;
+  triggerEmitter?: TriggerEmitter;
 }): SignificantEventsClients {
   return {
     getDetectionClient: () => services.detection.getClient({ esClient, space }),
-    getDiscoveryClient: () => services.discovery.getClient({ esClient, space }),
-    getEventClient: () => services.event.getClient({ esClient, space }),
+    getEventClient: () => services.event.getClient({ esClient, space, triggerEmitter }),
   };
 }
 

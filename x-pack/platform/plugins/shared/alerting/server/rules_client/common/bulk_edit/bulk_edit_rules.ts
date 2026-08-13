@@ -10,9 +10,10 @@ import { nodeBuilder, type KueryNode } from '@kbn/es-query';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RuleParams } from '../../../application/rule/types';
 import type { RulesClientContext } from '../../types';
-import { type RuleAuditAction } from '../audit_events';
+import { ruleAuditEvent, type RuleAuditAction } from '../audit_events';
 import { ReadOperations, type WriteOperations } from '../../../authorization';
 import type { RawRule, SanitizedRule } from '../../../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { buildKueryNodeFilter } from '../build_kuery_node_filter';
 import { checkAuthorizationAndGetTotal } from '../../lib/check_authorization_and_get_total';
 import { getAuthorizationFilter } from '../../lib/get_authorization_filter';
@@ -118,6 +119,15 @@ export async function bulkEditRules<Params extends RuleParams>(
       }),
     finalFilter
   );
+
+  for (const { id, attributes } of results) {
+    context.auditLogger?.log(
+      ruleAuditEvent({
+        action: options.auditAction,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
+      })
+    );
+  }
 
   if (apiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(

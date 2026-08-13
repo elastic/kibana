@@ -145,6 +145,7 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
               beforeMessage={LABELS.COPY_TOOLTIP}
               afterMessage={LABELS.COPIED_TOOLTIP}
               textToCopy={`${inferenceUri}${config.inferenceId ?? ''}`}
+              tooltipProps={{ disableScreenReaderOutput: true }}
             >
               {(copy) => (
                 <EuiButtonIcon

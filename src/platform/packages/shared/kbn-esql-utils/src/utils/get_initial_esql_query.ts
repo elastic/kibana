@@ -25,13 +25,11 @@ const getFinalWhereClause = (
 };
 
 /**
- * Builds an ES|QL query for the provided dataView
- * If there is @timestamp field in the index, we don't add the WHERE clause
- * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName
- * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command
- * @param dataView
- * @param query
- * @param filters - DSL filters to convert to ES|QL WHERE clauses
+ * Builds an ES|QL query for the provided dataView.
+ * If there is @timestamp field in the index, we don't add the WHERE clause.
+ * If there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName.
+ * If the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command.
+ * When a timeFieldName exists, a SORT DESC clause on the dataView timeFieldName is appended.
  */
 export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?: Filter[]): string {
   const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
@@ -53,6 +51,7 @@ export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?:
     filtersExpression || undefined
   );
   const sourceCommand = dataView.isTSDBMode() ? 'TS' : 'FROM';
+  const sortClause = timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
 
-  return `${sourceCommand} ${dataView.getIndexPattern()}${whereClause}`;
+  return `${sourceCommand} ${dataView.getIndexPattern()}${sortClause}${whereClause}`;
 }
