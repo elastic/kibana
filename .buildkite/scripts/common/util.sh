@@ -298,6 +298,8 @@ upload_tmp_artifact() {
     fi
   done
 
+  rm -rf "${TMPDIR:-/tmp}"/gcloud-upload-*
+
   if [[ "$failures" -gt 0 ]]; then
     echo "GCS upload of ${artifact_name} failed for ${failures}/${#GCS_CI_ARTIFACT_REGIONS[@]} bucket(s); same-region downloads will fall back to the buildkite artifact." >&2
   fi
@@ -307,8 +309,12 @@ upload_tmp_artifact() {
 
 upload_tmp_artifact_to_region() {
   local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  local config_dir
 
-  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+  config_dir="$(mktemp -d -t gcloud-upload-XXXXXX)"
+  cp -a "${CLOUDSDK_CONFIG:-$HOME/.config/gcloud}/." "$config_dir/"
+
+  retry 3 5 env "CLOUDSDK_CONFIG=$config_dir" gcloud storage cp \
     "$local_path" \
     "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
 }
