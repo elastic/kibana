@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { securityTool } from '../constants';
+import { securityTool } from '../../constants';
 
 /**
  * Tool ids for the SIEM Migration agent builder tools.

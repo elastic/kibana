@@ -11,12 +11,13 @@ import {
   createToolTestMocks,
   createToolHandlerContext,
   setupMockCoreStartServices,
-} from '../../__mocks__/test_helpers';
-import { getRuleMigrationTool } from './get_rule_migration_tool';
+} from '../../../__mocks__/test_helpers';
+import { getAllRuleMigrationStatsTool } from './get_all_rule_migration_stats_tool';
+import { SIEM_RULE_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 
-describe('getRuleMigrationTool', () => {
+describe('getAllRuleMigrationStatsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getRuleMigrationTool(mockCore, mockLogger);
+  const tool = getAllRuleMigrationStatsTool(mockCore, mockLogger);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
@@ -28,46 +29,47 @@ describe('getRuleMigrationTool', () => {
     });
   });
 
-  it('returns the migration body on a 200', async () => {
-    const migration = { migration_id: 'abc', name: 'My migration' };
+  it('returns the migrations array on a 200', async () => {
+    const migrations = [
+      { migration_id: 'abc', status: 'running' },
+      { migration_id: 'def', status: 'finished' },
+    ];
     mockFetch.mockResolvedValueOnce({
-      fetchOptions: { path: '/internal/siem_migrations/rules/abc' },
+      fetchOptions: { path: SIEM_RULE_MIGRATIONS_ALL_STATS_PATH },
       request: new Request('http://localhost/x'),
       response: new Response(null, { status: 200 }),
-      body: migration,
+      body: migrations,
     });
 
     const result = (await tool.handler(
-      { migration_id: 'abc' },
+      {},
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
     expect(mockFetch).toHaveBeenCalledWith(
-      '/internal/siem_migrations/rules/abc',
-      expect.objectContaining({ method: 'GET', access: 'internal' })
+      SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
+      expect.objectContaining({ method: 'GET', access: 'internal', version: '1' })
     );
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toEqual(migration);
+    expect(result.results[0].data).toEqual({ total: 2, migrations });
   });
 
-  it('returns an error result when the migration is not found', async () => {
-    const error = new Error('Not Found') as Error & {
+  it('returns an error result when the endpoint fails', async () => {
+    const error = new Error('Bad Request') as Error & {
       response?: Response;
       body?: unknown;
     };
     error.name = 'HttpSelfFetchError';
-    error.response = new Response(null, { status: 404 });
-    error.body = { message: 'Migration not found' };
+    error.response = new Response(null, { status: 400 });
+    error.body = { message: 'Invalid license' };
     mockFetch.mockRejectedValueOnce(error);
 
     const result = (await tool.handler(
-      { migration_id: 'missing' },
+      {},
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
     expect(result.results[0].type).toBe(ToolResultType.error);
-    expect((result.results[0].data as { message: string }).message).toContain(
-      'Migration not found'
-    );
+    expect((result.results[0].data as { message: string }).message).toContain('Invalid license');
   });
 });

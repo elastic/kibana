@@ -11,7 +11,7 @@ import {
   createToolTestMocks,
   createToolHandlerContext,
   setupMockCoreStartServices,
-} from '../../__mocks__/test_helpers';
+} from '../../../__mocks__/test_helpers';
 import { getMigrationRulesTool } from './get_migration_rules_tool';
 
 describe('getMigrationRulesTool', () => {

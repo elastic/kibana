@@ -12,12 +12,12 @@ import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../lib/product_features_service/product_features_service';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { getRuleMigrationTool } from './get_rule_migration_tool';
-import { startRuleMigrationTool } from './start_rule_migration_tool';
-import { getAllRuleMigrationStatsTool } from './get_all_rule_migration_stats_tool';
-import { getMigrationRulesTool } from './get_migration_rules_tool';
-import { getRuleMigrationStatsTool } from './get_rule_migration_stats_tool';
-import { getRuleMigrationTranslationStatsTool } from './get_rule_migration_translation_stats_tool';
+import { getRuleMigrationTool } from './rules/get_rule_migration_tool';
+import { startRuleMigrationTool } from './rules/start_rule_migration_tool';
+import { getAllRuleMigrationStatsTool } from './rules/get_all_rule_migration_stats_tool';
+import { getMigrationRulesTool } from './rules/get_migration_rules_tool';
+import { getRuleMigrationStatsTool } from './rules/get_rule_migration_stats_tool';
+import { getRuleMigrationTranslationStatsTool } from './rules/get_rule_migration_translation_stats_tool';
 
 /**
  * Shared availability handler for SIEM migration tools. Environment/space-level gates only

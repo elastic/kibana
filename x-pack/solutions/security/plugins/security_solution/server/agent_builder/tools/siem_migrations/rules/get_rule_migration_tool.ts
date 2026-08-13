@@ -10,11 +10,11 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
-import { NonEmptyString } from '../../../../common/api/model/primitives.gen';
-import type { GetRuleMigrationResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { createSiemMigrationClient, type SiemMigrationClient } from './self_client';
+import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
+import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
+import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import { createSiemMigrationClient, type SiemMigrationClient } from '../common/self_client';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
 const schema = z.object({

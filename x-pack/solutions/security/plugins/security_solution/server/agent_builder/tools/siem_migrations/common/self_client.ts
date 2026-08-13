@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { HttpSelfFetchQuery, KibanaRequest } from '@kbn/core-http-server';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 
 /**
  * A normalized response from a self-client call to an internal SIEM migration endpoint.

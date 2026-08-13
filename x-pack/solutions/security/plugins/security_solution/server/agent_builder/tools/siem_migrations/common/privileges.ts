@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 
 /**
  * Runtime, per-request privilege check for mutating Automatic Migration actions.

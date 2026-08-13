@@ -7,7 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { createToolTestMocks, createToolHandlerContext } from '../../__mocks__/test_helpers';
+import { createToolTestMocks, createToolHandlerContext } from '../../../__mocks__/test_helpers';
 import { coreMock } from '@kbn/core/server/mocks';
 import { startRuleMigrationTool } from './start_rule_migration_tool';
 

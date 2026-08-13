@@ -11,16 +11,16 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
-import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   StartRuleMigrationRequestBody,
   type StartRuleMigrationResponse,
-} from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { RuleMigrationRetryFilter } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { NonEmptyString } from '../../../../common/api/model/primitives.gen';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { createSiemMigrationClient, type SiemMigrationClient } from './self_client';
-import { assertMigrationPrivilege } from './privileges';
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { RuleMigrationRetryFilter } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
+import { createSiemMigrationClient, type SiemMigrationClient } from '../common/self_client';
+import { assertMigrationPrivilege } from '../common/privileges';
 import { SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
 // Reuse the endpoint's request body schema and add the path param, so the tool input
