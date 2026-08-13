@@ -1,5 +1,5 @@
 {
-  "sha1": "dd1fc42920f50b971f6c7415b6a37e1922f4b032",
+  "sha1": "6843a029fa35c3c9780b968ad9a6c2001261ed26",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -209,6 +209,22 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
         "line": 53,
         "column": 25
+      }
+    },
+    {
+      "id": "098a1448dd39b16-63bffa83f24f2ab",
+      "title": "Agent Builder — edit agent from overview page edits the prompt from the overview flyout without a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/edit_agent_overview.spec.ts",
+        "line": 40,
+        "column": 28
       }
     },
     {

@@ -48,7 +48,7 @@ apiTest.describe(
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.perPage).toBe(0);
+      expect(response.body.per_page).toBe(0);
       expect(response.body.items).toStrictEqual([]);
     });
 
@@ -58,7 +58,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(200);
-      expect(response.body.perPage).toBe(EXECUTION_HISTORY_MAX_PER_PAGE);
+      expect(response.body.per_page).toBe(EXECUTION_HISTORY_MAX_PER_PAGE);
     });
 
     apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
