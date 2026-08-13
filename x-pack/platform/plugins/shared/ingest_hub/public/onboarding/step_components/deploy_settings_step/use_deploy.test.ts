@@ -634,6 +634,45 @@ describe('useDeploy', () => {
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(2);
   });
 
+  it('does not redeploy an already-running duplicate on a second Deploy click', async () => {
+    // Simulates navigating back to step 3 after a duplicate was already deployed.
+    // The duplicate's instanceId is already in serviceStatuses — it must not get a second policy.
+    const instances = [
+      {
+        instanceId: 'ec2_metrics',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics',
+        isDuplicate: false,
+      },
+      {
+        instanceId: 'ec2_metrics__dup-1',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics [Duplicate]',
+        isDuplicate: true,
+      },
+    ];
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      instances,
+      deployAndDetectStep: {
+        serviceStatuses: {
+          ec2_metrics: 'receiving',
+          'ec2_metrics__dup-1': 'receiving',
+        },
+      },
+    });
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useDeploy({ onContinue }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // Both already deployed — no new API calls, just navigate.
+    expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
   it('includes non-agentless services as gray instantiating chips without deploying them', async () => {
     // ec2_metrics is agentless; ec2_logs is cloud_forwarder (per updated service matrix)
     setupMocks({ selectedServiceIds: ['ec2_metrics', 'ec2_logs'] });

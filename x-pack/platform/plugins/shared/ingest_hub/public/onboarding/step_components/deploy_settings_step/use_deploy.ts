@@ -82,12 +82,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       let groupsToDeploy: DeployGroup[];
 
       if (isInitialDeploy) {
-        // For bundled groups, restrict members to those not already tracked — an already-running
-        // original must not be re-included in a new policy when a sibling is added later.
-        // Duplicate groups are always single-member so this only affects originals in practice.
+        // Restrict each group to members not already tracked — an already-deployed instance
+        // must not get a second policy on a subsequent Deploy click (e.g. after navigating back).
         groupsToDeploy = deployGroups
           .map((group) => {
-            if (group.isDuplicateGroup) return group;
             const untrackedMembers = group.members.filter(
               ({ instance }) => !(instance.instanceId in deployAndDetectStep.serviceStatuses)
             );
