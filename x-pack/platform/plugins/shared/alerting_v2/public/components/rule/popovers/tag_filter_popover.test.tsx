@@ -14,6 +14,9 @@ const TAGS = ['production', 'staging', 'critical'];
 const defaultProps = {
   options: TAGS,
   value: [] as string[],
+  isLoading: false,
+  search: '',
+  onSearchChange: jest.fn(),
   onChange: jest.fn(),
 };
 
@@ -51,7 +54,16 @@ describe('TagsFilterPopover', () => {
 
   it('calls onChange with multiple tags when multiple options are selected', () => {
     const onChange = jest.fn();
-    render(<TagsFilterPopover options={TAGS} value={['production']} onChange={onChange} />);
+    render(
+      <TagsFilterPopover
+        options={TAGS}
+        value={['production']}
+        isLoading={false}
+        search=""
+        onSearchChange={jest.fn()}
+        onChange={onChange}
+      />
+    );
 
     fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
     fireEvent.click(screen.getByText('staging'));
@@ -62,7 +74,14 @@ describe('TagsFilterPopover', () => {
   it('calls onChange without the deselected tag when an active option is clicked', () => {
     const onChange = jest.fn();
     render(
-      <TagsFilterPopover options={TAGS} value={['production', 'staging']} onChange={onChange} />
+      <TagsFilterPopover
+        options={TAGS}
+        value={['production', 'staging']}
+        isLoading={false}
+        search=""
+        onSearchChange={jest.fn()}
+        onChange={onChange}
+      />
     );
 
     fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
@@ -73,7 +92,14 @@ describe('TagsFilterPopover', () => {
 
   it('shows active filter count when tags are selected', () => {
     render(
-      <TagsFilterPopover options={TAGS} value={['production', 'critical']} onChange={jest.fn()} />
+      <TagsFilterPopover
+        options={TAGS}
+        value={['production', 'critical']}
+        isLoading={false}
+        search=""
+        onSearchChange={jest.fn()}
+        onChange={jest.fn()}
+      />
     );
 
     expect(screen.getByText('2')).toBeInTheDocument();
@@ -91,7 +117,16 @@ describe('TagsFilterPopover', () => {
 
     fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
 
-    expect(screen.getByRole('searchbox')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTagsFilterSearch')).toBeInTheDocument();
+  });
+
+  it('renders a controlled search input', () => {
+    render(<TagsFilterPopover {...defaultProps} search="prod" />);
+
+    fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+
+    // The controlled search value should be reflected in the input
+    expect(screen.getByTestId('rulesListTagsFilterSearch')).toBeInTheDocument();
   });
 
   it('renders option data-test-subj attributes', () => {
@@ -102,5 +137,73 @@ describe('TagsFilterPopover', () => {
     expect(screen.getByTestId('rulesListTagsFilterOption-production')).toBeInTheDocument();
     expect(screen.getByTestId('rulesListTagsFilterOption-staging')).toBeInTheDocument();
     expect(screen.getByTestId('rulesListTagsFilterOption-critical')).toBeInTheDocument();
+  });
+
+  it('does not show cap guidance when fewer than 20 tags are returned', () => {
+    render(<TagsFilterPopover {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+
+    expect(screen.queryByTestId('rulesListTagsFilterCapGuidance')).not.toBeInTheDocument();
+  });
+
+  it('shows cap guidance when exactly 20 tags are returned', () => {
+    const twentyTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
+    render(
+      <TagsFilterPopover
+        options={twentyTags}
+        value={[]}
+        isLoading={false}
+        search=""
+        onSearchChange={jest.fn()}
+        onChange={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+
+    expect(screen.getByTestId('rulesListTagsFilterCapGuidance')).toBeInTheDocument();
+    expect(screen.getByText(/Showing first 20 most-used/)).toBeInTheDocument();
+  });
+
+  it('prepends synthetic checked options for selected tags absent from the current api response', () => {
+    const onChange = jest.fn();
+    // 'selected-but-absent' is selected but not in the options array
+    render(
+      <TagsFilterPopover
+        options={['production', 'staging']}
+        value={['selected-but-absent', 'production']}
+        isLoading={false}
+        search=""
+        onSearchChange={jest.fn()}
+        onChange={onChange}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+
+    // The absent selected tag should appear as an option
+    expect(screen.getByTestId('rulesListTagsFilterOption-selected-but-absent')).toBeInTheDocument();
+  });
+
+  it('preserves absent selected tags in subsequent selection changes', () => {
+    const onChange = jest.fn();
+    render(
+      <TagsFilterPopover
+        options={['production', 'staging']}
+        value={['orphan']}
+        isLoading={false}
+        search=""
+        onSearchChange={jest.fn()}
+        onChange={onChange}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
+    // Click 'production' to also select it
+    fireEvent.click(screen.getByText('production'));
+
+    // orphan should remain in the selection
+    expect(onChange).toHaveBeenCalledWith(expect.arrayContaining(['orphan', 'production']));
   });
 });

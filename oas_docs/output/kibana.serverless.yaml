@@ -302,6 +302,7 @@ tags:
     name: Security Timeline API
     x-displayName: Security timeline
   - name: significant_events
+    x-displayName: Significant Events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -1047,7 +1048,7 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
@@ -1066,6 +1067,14 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    ai_indices:
+                      description: Array of AI indices to associate with the agent.
+                      items:
+                        description: AI indices to associate with the agent.
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1557,7 +1566,7 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.'
                       enum:
                         - public
                         - shared
@@ -1576,6 +1585,14 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    ai_indices:
+                      description: Array of AI indices to associate with the agent.
+                      items:
+                        description: AI indices to associate with the agent.
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     connector_ids:
                       description: Array of connector IDs to associate with the agent.
                       items:
@@ -1978,6 +1995,9 @@ paths:
                       - agent_id: elastic-ai-agent
                         created_at: '2025-09-19T17:45:39.554Z'
                         id: bcc176c5-38f6-40be-be0c-898e34fa1480
+                        permissions:
+                          delete: true
+                          rename: true
                         title: General Greeting
                         updated_at: '2025-09-19T17:45:39.554Z'
                         user:
@@ -2079,6 +2099,9 @@ paths:
                     agent_id: elastic-ai-agent
                     created_at: '2025-09-19T17:45:39.554Z'
                     id: bcc176c5-38f6-40be-be0c-898e34fa1480
+                    permissions:
+                      delete: true
+                      rename: true
                     rounds:
                       - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
                         input:
@@ -11365,8 +11388,8 @@ paths:
     get:
       tags:
         - Dashboards
-      summary: Get dashboards
-      operationId: get-dashboards-redirect
+      summary: Search dashboards
+      operationId: search-dashboards
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11378,7 +11401,7 @@ paths:
       tags:
         - Dashboards
       summary: Create a dashboard
-      operationId: create-dashboard-redirect
+      operationId: create-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11391,7 +11414,7 @@ paths:
       tags:
         - Dashboards
       summary: Get a dashboard
-      operationId: get-dashboard-redirect
+      operationId: get-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11402,8 +11425,8 @@ paths:
     put:
       tags:
         - Dashboards
-      summary: Update a dashboard
-      operationId: update-dashboard-redirect
+      summary: Upsert a dashboard
+      operationId: upsert-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11415,7 +11438,7 @@ paths:
       tags:
         - Dashboards
       summary: Delete a dashboard
-      operationId: delete-dashboard-redirect
+      operationId: delete-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -17705,6 +17728,16 @@ paths:
         content:
           application/json:
             examples:
+              ElasticDefend:
+                summary: Cancel a response action on an Elastic Defend host
+                value:
+                  agent_type: endpoint
+                  comment: Cancelling action due to change in requirements
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    force: true
+                    id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
               MicrosoftDefenderEndpoint:
                 summary: Cancel a response action on a Microsoft Defender for Endpoint host
                 value:
@@ -20536,7 +20569,7 @@ paths:
           name: product_name
   /api/exception_lists:
     delete:
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -20544,6 +20577,10 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Delete an exception list using the `id` or `list_id` field.
+
+        Before deleting an exception list that is linked to detection rules, remove or unlink the
+        exception list from those rules. Deleting a linked exception list can leave rules referencing
+        an exception list that no longer exists.
       operationId: DeleteExceptionList
       parameters:
         - description: Exception list's identifier. Either `id` or `list_id` must be specified.
@@ -29746,6 +29783,12 @@ paths:
           required: false
           schema:
             type: number
+        - description: Return only actions whose start_time is in the future
+          in: query
+          name: scheduledOnly
+          required: false
+          schema:
+            type: boolean
         - description: Number of error details to include per action
           in: query
           name: errorSize
@@ -34459,6 +34502,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, delete the package even if it has active package policies
           in: query
@@ -34531,6 +34575,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, returns the package even if the signature cannot be verified
           in: query
@@ -34638,6 +34683,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, allow installing prerelease versions
           in: query
@@ -34753,6 +34799,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -42394,7 +42441,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -42469,7 +42517,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -53161,14 +53210,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -53707,14 +53755,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -54283,14 +54330,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -54831,14 +54877,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -55552,14 +55597,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -56098,14 +56142,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -56674,14 +56717,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -57222,14 +57264,13 @@ paths:
                         business_unit:
                           type: string
                         criticality:
-                          anyOf:
-                            - enum:
-                                - low_impact
-                                - medium_impact
-                                - high_impact
-                                - extreme_impact
-                              type: string
-                            - nullable: true
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
+                          nullable: true
+                          type: string
                         environment:
                           type: string
                         id:
@@ -57943,14 +57984,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -58489,14 +58529,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -59065,14 +59104,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -59613,14 +59651,13 @@ paths:
                                   business_unit:
                                     type: string
                                   criticality:
-                                    anyOf:
-                                      - enum:
-                                          - low_impact
-                                          - medium_impact
-                                          - high_impact
-                                          - extreme_impact
-                                        type: string
-                                      - nullable: true
+                                    enum:
+                                      - low_impact
+                                      - medium_impact
+                                      - high_impact
+                                      - extreme_impact
+                                    nullable: true
+                                    type: string
                                   environment:
                                     type: string
                                   id:
@@ -62068,8 +62105,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -62195,8 +62232,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were disabled successfully.
@@ -62235,8 +62272,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were enabled successfully.
@@ -62275,8 +62312,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Streams were resynced successfully.
@@ -62321,8 +62358,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: The stream was deleted successfully.
@@ -62359,8 +62396,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -62631,8 +62668,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -62762,7 +62799,6 @@ paths:
                               items:
                                 $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                               type: array
-                            updated_at: {}
                           required:
                             - steps
                         settings:
@@ -62849,16 +62885,26 @@ paths:
                         lifecycle:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                         processing:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            steps:
-                              items:
-                                $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                              type: array
-                            updated_at: {}
-                          required:
-                            - steps
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                steps:
+                                  items:
+                                    $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                                  type: array
+                              required:
+                                - steps
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                processors:
+                                  items:
+                                    additionalProperties: {}
+                                    type: object
+                                  type: array
+                              required:
+                                - processors
                         settings:
                           additionalProperties: false
                           type: object
@@ -62936,8 +62982,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: Query settings for the stream.
@@ -63154,8 +63200,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -63345,8 +63391,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           description: The query was removed successfully.
@@ -63513,8 +63559,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -63615,8 +63661,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -63797,8 +63843,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -63866,8 +63912,8 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties: {}
-                - nullable: true
                 - {}
+              nullable: true
       responses:
         '200':
           content:
@@ -65416,8 +65462,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get visualizations
-      operationId: get-visualizations-redirect
+      summary: Search visualizations
+      operationId: search-visualizations
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -65428,8 +65474,8 @@ paths:
     post:
       tags:
         - Visualizations
-      summary: Create a visualization
-      operationId: create-visualization-redirect
+      summary: Create visualization
+      operationId: create-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -65441,8 +65487,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get a visualization
-      operationId: get-visualization-redirect
+      summary: Get visualization
+      operationId: get-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -65453,8 +65499,8 @@ paths:
     put:
       tags:
         - Visualizations
-      summary: Update a visualization
-      operationId: update-visualization-redirect
+      summary: Upsert visualization
+      operationId: upsert-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -65465,8 +65511,8 @@ paths:
     delete:
       tags:
         - Visualizations
-      summary: Delete a visualization
-      operationId: delete-visualization-redirect
+      summary: Delete visualization
+      operationId: delete-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -67147,7 +67193,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -67260,7 +67306,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -67854,7 +67900,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -68306,6 +68352,202 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeInput=true
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/workflows/workflow/executions:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/workflow/executions</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Search across all workflow executions.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+      operationId: get-workflows-workflow-executions
+      parameters:
+        - description: KQL query string to filter executions.
+          in: query
+          name: kql
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+        - description: Filter by execution status.
+          in: query
+          name: statuses
+          required: false
+          schema:
+            items:
+              enum:
+                - pending
+                - waiting
+                - waiting_for_input
+                - waiting_for_child
+                - running
+                - queued
+                - completed
+                - failed
+                - cancelled
+                - timed_out
+                - skipped
+              type: string
+            maxItems: 11
+            type: array
+        - description: Filter by execution type.
+          in: query
+          name: executionTypes
+          required: false
+          schema:
+            items:
+              enum:
+                - test
+                - production
+              type: string
+            maxItems: 2
+            type: array
+        - description: Filter by the user who triggered the execution.
+          in: query
+          name: executedBy
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+        - description: Filter by evaluated concurrency group key.
+          in: query
+          name: concurrencyGroupKey
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by startedAt.
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by startedAt.
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            type: string
+        - description: Datemath lower bound for filtering executions by finishedAt.
+          in: query
+          name: finishedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by finishedAt.
+          in: query
+          name: finishedBefore
+          required: false
+          schema:
+            type: string
+        - description: Field to collapse execution results by.
+          in: query
+          name: collapse
+          required: false
+          schema:
+            enum:
+              - concurrencyGroupKey
+              - status
+              - executedBy
+              - triggeredBy
+            type: string
+        - description: 'Field to sort by. One of: startedAt, duration, workflowId, triggeredBy.'
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - startedAt
+              - duration
+              - workflowId
+              - triggeredBy
+            type: string
+        - description: Sort direction.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
+        - description: Page number.
+          in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: number
+        - description: Number of results to return.
+          in: query
+          name: size
+          required: false
+          schema:
+            maximum: 100
+            minimum: 1
+            type: number
+        - description: Whether to track total hit count.
+          in: query
+          name: trackTotalHits
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchExecutionsResponseExample:
+                  description: Example paginated list of workflow-level executions
+                  value:
+                    page: 1
+                    results:
+                      - duration: 3000
+                        error: null
+                        executedBy: elastic
+                        finishedAt: '2025-11-20T12:00:03.000Z'
+                        id: exec-a1b2c3d4-e5f6-7890
+                        isTestRun: false
+                        managed: false
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:00.000Z'
+                        status: completed
+                        tags:
+                          - reporting
+                        triggeredBy: manual
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowName: Example Workflow
+                    size: 25
+                    total: 1
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                searchExecutionsBadRequestExample:
+                  description: Example response when the kql parameter contains invalid syntax
+                  value:
+                    message: 'Invalid KQL: Expected AND, OR, or end of input but "f" found.'
+          description: Indicates a bad request, such as invalid KQL syntax
+      summary: Search workflow executions
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/workflows/workflow/executions?page=1&size=25&trackTotalHits=true&kql=startedAt%20%3E%3D%20%22now-15m%22&sortField=startedAt&sortOrder=desc" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/workflows/workflow/executions?from=0&size=25&trackTotalHits=true&kql=startedAt >= "now-15m"&sortField=startedAt&sortOrder=desc
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -73811,13 +74053,12 @@ components:
           default: on_automatic
           description: The random sampler mode.
         random_sampler_probability:
-          anyOf:
-            - maximum: 0.5
-              minimum: 0.00001
-              type: number
-            - nullable: true
           default: null
           description: The probability to use for random sampling (between 0.00001 and 0.5).
+          maximum: 0.5
+          minimum: 0.00001
+          nullable: true
+          type: number
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -74000,6 +74241,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -74155,6 +74400,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -74406,6 +74655,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -74555,6 +74808,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -74949,6 +75206,53 @@ components:
                 type: array
               success:
                 type: boolean
+              warnings:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    baseTemplateName:
+                      maxLength: 1000
+                      type: string
+                    conflictingTemplates:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          conflictType:
+                            enum:
+                              - overrides_fleet
+                              - blocked_by_same_priority
+                              - overridden_by_fleet
+                            type: string
+                          name:
+                            maxLength: 1000
+                            type: string
+                          priority:
+                            type: number
+                        required:
+                          - name
+                          - priority
+                          - conflictType
+                      maxItems: 100
+                      type: array
+                    dataStreamName:
+                      maxLength: 1000
+                      type: string
+                    namespace:
+                      maxLength: 255
+                      type: string
+                    nsTemplateName:
+                      maxLength: 1000
+                      type: string
+                  required:
+                    - dataStreamName
+                    - namespace
+                    - baseTemplateName
+                    - nsTemplateName
+                    - conflictingTemplates
+                maxItems: 100
+                type: array
             required:
               - name
               - success
@@ -75265,16 +75569,26 @@ components:
                 lifecycle:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                 processing:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    steps:
-                      items:
-                        $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                      type: array
-                    updated_at: {}
-                  required:
-                    - steps
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        steps:
+                          items:
+                            $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                          type: array
+                      required:
+                        - steps
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        processors:
+                          items:
+                            additionalProperties: {}
+                            type: object
+                          type: array
+                      required:
+                        - processors
                 settings:
                   additionalProperties: false
                   type: object
@@ -75391,20 +75705,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -75478,20 +75789,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -77030,6 +77338,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -78673,6 +78985,12 @@ components:
       additionalProperties: false
       description: Duration format between time units.
       properties:
+        compact:
+          description: When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.
+          type: boolean
+        decimals:
+          description: Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.
+          type: number
         from:
           description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
           enum:
@@ -79054,6 +79372,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -80427,6 +80749,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -81652,8 +81978,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -81834,6 +82159,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -83448,7 +83777,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -83486,8 +83814,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           filters:
                             default: []
                             description: List of filters to apply to the data in the tab.
@@ -83503,8 +83830,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           query:
                             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
                           row_height:
@@ -83515,16 +83841,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
@@ -83570,7 +83893,6 @@ components:
                         type: object
                         properties:
                           column_order:
-                            default: []
                             description: Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.
                             items:
                               description: Field name of a column in display order.
@@ -83601,8 +83923,7 @@ components:
                               - enum:
                                   - normal
                                 type: string
-                            default: compact
-                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Data grid density. Choose "compact", "expanded", or "normal" for row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
                           header_row_height:
                             anyOf:
                               - maximum: 5
@@ -83611,8 +83932,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
-                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, defaults to Discover or embeddable defaults (e.g. user preference / local storage).
+                            description: Header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
                           row_height:
                             anyOf:
                               - maximum: 20
@@ -83621,16 +83941,13 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            default: 3
                             description: Data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".
                           rows_per_page:
-                            default: 100
                             description: The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage".
                             maximum: 10000
                             minimum: 1
                             type: number
                           sample_size:
-                            default: 500
                             description: The number of documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".
                             maximum: 10000
                             minimum: 10
@@ -85527,20 +85844,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -85583,20 +85897,17 @@ components:
                 description: The color to use for this step.
                 type: string
               gte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The lower bound of range from which this color applies (inclusive).
+                nullable: true
+                type: number
               lt:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (exclusive).
+                nullable: true
+                type: number
               lte:
-                anyOf:
-                  - type: number
-                  - nullable: true
                 description: The upper bound of range to which this color applies (inclusive).
+                nullable: true
+                type: number
             required:
               - color
           maxItems: 100
@@ -86180,6 +86491,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -87399,6 +87714,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -87663,6 +87982,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88171,6 +88494,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88286,6 +88613,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88401,6 +88732,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88516,6 +88851,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88631,6 +88970,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88746,6 +89089,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88861,6 +89208,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -88976,6 +89327,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -89091,6 +89446,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -89206,6 +89565,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -89319,6 +89682,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -89432,6 +89799,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -89547,6 +89918,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -89665,6 +90040,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -90395,7 +90774,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -90538,7 +90917,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -90573,6 +90952,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -90686,7 +91067,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -90771,7 +91152,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -90961,6 +91342,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -91661,6 +92046,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -91718,7 +92107,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -91861,7 +92250,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -91896,6 +92285,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -92009,7 +92400,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -92094,7 +92485,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -93934,15 +94325,15 @@ components:
               - type: string
               - type: number
               - type: boolean
-              - nullable: true
               - {}
+            nullable: true
           - items:
               anyOf:
                 - type: string
                 - type: number
                 - type: boolean
-                - nullable: true
                 - {}
+              nullable: true
             type: array
           - items: {}
             type: array
@@ -95750,6 +96141,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -97236,11 +97631,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -97260,11 +97660,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -97623,6 +98028,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -98302,7 +98711,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -98439,7 +98848,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -98474,6 +98883,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -98584,7 +98995,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -98663,7 +99074,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -99076,6 +99487,53 @@ components:
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_get_package_info'
+        warnings:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              baseTemplateName:
+                maxLength: 1000
+                type: string
+              conflictingTemplates:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    conflictType:
+                      enum:
+                        - overrides_fleet
+                        - blocked_by_same_priority
+                        - overridden_by_fleet
+                      type: string
+                    name:
+                      maxLength: 1000
+                      type: string
+                    priority:
+                      type: number
+                  required:
+                    - name
+                    - priority
+                    - conflictType
+                maxItems: 100
+                type: array
+              dataStreamName:
+                maxLength: 1000
+                type: string
+              namespace:
+                maxLength: 255
+                type: string
+              nsTemplateName:
+                maxLength: 1000
+                type: string
+            required:
+              - dataStreamName
+              - namespace
+              - baseTemplateName
+              - nsTemplateName
+              - conflictingTemplates
+          maxItems: 100
+          type: array
       required:
         - item
       title: update_package_response
@@ -99879,7 +100337,6 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                       type: array
-                    updated_at: {}
                   required:
                     - steps
                 settings:
@@ -100108,6 +100565,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -100261,7 +100722,7 @@ components:
                     docsCountPercentage:
                       default: null
                       maximum: 100
-                      minimum: 1
+                      minimum: 0
                       nullable: true
                       type: number
                     enabled:
@@ -100318,6 +100779,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -100494,6 +100959,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -100645,6 +101114,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -100757,6 +101230,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -100933,6 +101410,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -101044,6 +101525,10 @@ components:
           items:
             type: string
           type: array
+        template_id:
+          description: The identifier for the rule template this rule was created from, when known.
+          maxLength: 1024
+          type: string
         throttle:
           description: Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how frequently rule actions are triggered. You cannot specify the throttle interval at both the rule and action level. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
@@ -102366,6 +102851,14 @@ components:
       description: Area-specific rendering settings
       type: object
       properties:
+        fill:
+          default: solid
+          description: 'Area fill type: solid or gradient. Defaults to solid.'
+          enum:
+            - solid
+            - gradient
+          type: string
+          x-state: ''
         fill_opacity:
           default: 0.3
           description: Area fill opacity (0-1 typical, max 2 for legacy)
@@ -112204,15 +112697,9 @@ components:
         - type: object
           properties:
             parameters:
-              type: object
-              properties:
-                id:
-                  description: ID of the response action to cancel
-                  example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
-                  minLength: 1
-                  type: string
-              required:
-                - id
+              oneOf:
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_ElasticDefendCancelParameters'
+                - $ref: '#/components/schemas/Security_Endpoint_Management_API_MDECancelParameters'
           required:
             - parameters
     Security_Endpoint_Management_API_CloudFileScriptParameters:
@@ -112318,6 +112805,23 @@ components:
           example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
           format: uri-reference
           type: string
+    Security_Endpoint_Management_API_ElasticDefendCancelParameters:
+      description: Elastic Defend agent type
+      properties:
+        force:
+          description: Forcefully cancel the response action even when it is already running
+          example: true
+          type: boolean
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: ElasticDefendCancelParameters
+      type: object
     Security_Endpoint_Management_API_EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -113038,6 +113542,19 @@ components:
       example: "united.endpoint.host.os.name : 'Windows'"
       maxLength: 30000
       type: string
+    Security_Endpoint_Management_API_MDECancelParameters:
+      description: Microsoft Defender for Endpoint agent type
+      properties:
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: MDECancelParameters
+      type: object
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
       example:
