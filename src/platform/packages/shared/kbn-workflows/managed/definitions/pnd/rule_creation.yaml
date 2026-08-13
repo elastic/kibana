@@ -161,20 +161,24 @@ steps:
 
         Review the draft: /app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }}
 
-  # Decided once so the create and hand-off branches stay exact complements. Grouping an
-  # `or` chain with parentheses is a tokenization error in these expressions.
+
   - name: classify_preview
     type: data.set
     with:
       conclusive: >-
         ${{ steps.preview_creation.output.succeeded == true
           and steps.preview_creation.output.is_aborted == false }}
+      note: >-
+        {%- if steps.review_creation.output.response.approved == true and (steps.preview_creation.output.succeeded != true or steps.preview_creation.output.is_aborted == true) -%}
+        Preview was inconclusive.
+        {%- if steps.preview_creation.output.error_text != '' %} Preview errors:
+        {{ steps.preview_creation.output.error_text }}{% endif -%}
+        {%- endif -%}
 
   - name: create_rule
     type: kibana.request
     if: >-
-      ${{ steps.review_creation.output.response.approved == true
-        and steps.classify_preview.output.conclusive == true }}
+      ${{ steps.review_creation.output.response.approved == true }}
     with:
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
@@ -197,14 +201,6 @@ steps:
         tags: "${{ steps.draft_creation.output.structured_output.tags }}"
         enabled: false
         building_block_type: default
-
-  - name: record_inconclusive_creation
-    type: data.set
-    if: >-
-      ${{ steps.review_creation.output.response.approved == true
-        and steps.classify_preview.output.conclusive == false }}
-    with:
-      note: The rule was not created because its preview was inconclusive.
 
   - name: emit_result
     type: workflow.output
