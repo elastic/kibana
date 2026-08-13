@@ -12,16 +12,16 @@ import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
   INBOUND_EVENTS_SECURITY,
-} from './constants';
-import { registerInboundRoutes } from './register_inbound_routes';
+} from '../../inbound/constants';
+import { inboundEventsRoute } from './inbound_events';
 
-describe('registerInboundRoutes', () => {
+describe('inboundEventsRoute', () => {
   it('registers a public versioned POST route', () => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();
     (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
 
-    registerInboundRoutes({
+    inboundEventsRoute({
       router,
       inboundEventsEnabled: false,
       maxBodyBytes: 1024 * 1024,

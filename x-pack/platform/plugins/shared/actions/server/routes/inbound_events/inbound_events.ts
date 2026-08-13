@@ -7,24 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { CoreSetup, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 
-import { CONNECTOR_ID_MAX_LENGTH } from '../../common';
-import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import type { ActionsRequestHandlerContext, InMemoryConnector } from '../types';
+import { CONNECTOR_ID_MAX_LENGTH } from '../../../common';
+import type { ActionsRequestHandlerContext, InMemoryConnector } from '../../types';
 import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
   INBOUND_EVENTS_SECURITY,
   INBOUND_EVENTS_TOKEN_MAX_LENGTH,
-} from './constants';
-import { handleInboundRequest } from './handle_inbound_request';
-import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
+} from '../../inbound/constants';
+import { handleInboundRequest } from '../../inbound/handle_inbound_request';
+import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from '../../inbound/types';
 
-export interface RegisterInboundRoutesParams {
+export interface InboundEventsRouteParams {
   router: IRouter<ActionsRequestHandlerContext>;
   inboundEventsEnabled: boolean;
   maxBodyBytes: number;
@@ -36,7 +32,7 @@ export interface RegisterInboundRoutesParams {
   inMemoryConnectors: InMemoryConnector[];
 }
 
-export function registerInboundRoutes({
+export function inboundEventsRoute({
   router,
   inboundEventsEnabled,
   maxBodyBytes,
@@ -46,7 +42,7 @@ export function registerInboundRoutes({
   getStartServices,
   getSpaceId,
   inMemoryConnectors,
-}: RegisterInboundRoutesParams): void {
+}: InboundEventsRouteParams): void {
   router.versioned
     .post({
       path: INBOUND_EVENTS_API_PATH,
@@ -95,34 +91,19 @@ export function registerInboundRoutes({
           },
         },
       },
-      async (_context, request, response) => {
-        const [coreStart] = await getStartServices();
-        const spaceId = getSpaceId(request);
-        const internalRequest = kibanaRequestFactory({
-          headers: {},
-          spaceId: asSpaceId(spaceId),
-        });
-        const unsecuredSavedObjectsClient = coreStart.savedObjects.getScopedClient(
-          internalRequest,
-          {
-            excludedExtensions: [SECURITY_EXTENSION_ID],
-            includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
-          }
-        );
-
-        return handleInboundRequest({
+      async (_context, request, response) =>
+        handleInboundRequest({
           request,
           response,
           typeId: request.params.typeId,
           connectorId: request.params.connectorId,
-          spaceId,
+          spaceId: getSpaceId(request),
           inboundEventsEnabled,
           maxEmitted,
           emitConnectorEvents,
           logger,
-          unsecuredSavedObjectsClient,
+          getStartServices,
           inMemoryConnectors,
-        });
-      }
+        })
     );
 }

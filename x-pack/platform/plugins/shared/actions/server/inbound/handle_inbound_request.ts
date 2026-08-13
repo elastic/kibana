@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KibanaRequest,
-  KibanaResponseFactory,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import {
   getConnectorSpec,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -23,6 +18,7 @@ import {
   INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
 } from './constants';
+import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 import { loadInboundConnector } from './load_inbound_connector';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
@@ -42,7 +38,7 @@ export interface HandleInboundRequestParams {
   maxEmitted: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   logger: Logger;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  getStartServices: CoreSetup['getStartServices'];
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -61,7 +57,7 @@ export async function handleInboundRequest({
   maxEmitted,
   emitConnectorEvents,
   logger,
-  unsecuredSavedObjectsClient,
+  getStartServices,
   inMemoryConnectors,
 }: HandleInboundRequestParams) {
   const connectorTypeId = normalizeConnectorTypeId(typeId);
@@ -88,6 +84,11 @@ export async function handleInboundRequest({
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'no_spec' });
     return response.notFound();
   }
+
+  const unsecuredSavedObjectsClient = await createUnsecuredInboundSavedObjectsClient({
+    getStartServices,
+    spaceId,
+  });
 
   const connector = await loadInboundConnector({
     connectorId,

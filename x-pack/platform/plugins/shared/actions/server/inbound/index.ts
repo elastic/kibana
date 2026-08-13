@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { registerInboundRoutes } from './register_inbound_routes';
-export type { RegisterInboundRoutesParams } from './register_inbound_routes';
 export { dispatchConnectorEvents } from './dispatch_connector_events';
 export { computeIngestTokenHash } from './compute_ingest_token_hash';
 export type {

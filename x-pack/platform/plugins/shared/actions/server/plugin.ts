@@ -80,11 +80,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import {
-  dispatchConnectorEvents,
-  registerInboundRoutes,
-  type ConnectorEventEmitter,
-} from './inbound';
+import { dispatchConnectorEvents, type ConnectorEventEmitter } from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -492,31 +488,28 @@ export class ActionsPlugin
     });
 
     // Routes
+    const router = core.http.createRouter<ActionsRequestHandlerContext>();
     defineRoutes({
-      router: core.http.createRouter<ActionsRequestHandlerContext>(),
+      router,
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
       logger: this.logger,
       core,
       oauthRateLimiter,
-    });
-
-    registerInboundRoutes({
-      router: core.http.createRouter<ActionsRequestHandlerContext>(),
-      inboundEventsEnabled: actionsConfigUtils.isInboundEventsEnabled(),
-      maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-      maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
-      logger: this.logger,
-      getStartServices: core.getStartServices,
-      getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-      inMemoryConnectors: this.inMemoryConnectors,
-      emitConnectorEvents: (params) =>
-        dispatchConnectorEvents({
-          emitter: this.connectorEventEmitter,
-          params,
-          logger: this.logger,
-        }),
+      inboundEvents: {
+        enabled: actionsConfigUtils.isInboundEventsEnabled(),
+        maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
+        maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+        getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
+        inMemoryConnectors: this.inMemoryConnectors,
+        emitConnectorEvents: (params) =>
+          dispatchConnectorEvents({
+            emitter: this.connectorEventEmitter,
+            params,
+            logger: this.logger,
+          }),
+      },
     });
 
     return {
