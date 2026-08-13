@@ -30,7 +30,6 @@ export const RULE_KIND_TOOLTIPS: Record<RuleKind, string> = {
       'Tracks a problem across state changes and can notify your team or trigger automated actions when the state changes.',
   }),
   signal: i18n.translate('xpack.alertingV2.ruleKind.signal.tooltip', {
-    defaultMessage:
-      'Records each match as a data point without lifecycle tracking or notifications.',
+    defaultMessage: 'Records each match as an event without lifecycle tracking or notifications.',
   }),
 };
