@@ -320,9 +320,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   private async deleteWithCascade(conversationId: string, visited: Set<string>): Promise<boolean> {
-    // Guard against cycles / self-referential loops (should be impossible in prod
-    // where child ids are always distinct, but keeps behavior robust and simplifies
-    // test mocking where a broad search mock might return unexpected hits).
+    // Guard against cycles / self-referential loops
     if (visited.has(conversationId)) {
       return true;
     }
@@ -330,9 +328,7 @@ class ConversationClientImpl implements ConversationClient {
 
     await this.getDocumentWithAccess({ conversationId, access: 'delete' });
 
-    // Cascade — find children (persistent sub-agent conversations), recursively
-    // delete them (best-effort). Failures are logged and the parent delete still
-    // proceeds so the user's intent isn't blocked by an orphaned child.
+    // Cascade — find children (persistent sub-agent conversations), recursively delete them (best-effort)
     const childIds = (await this.findChildConversationIds(conversationId)).filter(
       (id) => id !== conversationId && !visited.has(id)
     );
