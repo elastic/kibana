@@ -9,9 +9,11 @@
 /**
  * Generate `KIBANA_TESTING_AI_CONNECTORS` payload for @kbn/evals from OpenRouter.
  *
- * Generates OpenAI-compatible `.gen-ai` connectors only for the models requested
- * via `--models` / `EVAL_MODEL_GROUPS`. Each model is validated against
- * `GET {baseUrl}/models`. EIS (`eis/*`) entries are skipped (handled separately).
+ * This script:
+ * - fetches available models via GET {baseUrl}/models
+ * - emits a `.gen-ai` connector per requested model (`--models` / `EVAL_MODEL_GROUPS`)
+ * - when none are requested, emits every catalog model that advertises tool calling
+ * - skips EIS (`eis/*`) entries (handled separately)
  *
  * Auth: OpenRouter API key via Authorization Bearer.
  */
@@ -19,7 +21,6 @@
 const { slugifyId } = require('./slugify_id');
 
 const DEFAULT_BASE_URL = 'https://openrouter.ai/api/v1';
-const OPENROUTER_CONNECTOR_PREFIX = 'openrouter-';
 
 function parseArgs(argv, { defaults = {} } = {}) {
   const out = { ...defaults };
@@ -77,13 +78,6 @@ function parseModelList(raw) {
     .filter(Boolean);
 }
 
-function connectorIdForModel(modelId) {
-  return `${OPENROUTER_CONNECTOR_PREFIX}${slugifyId(modelId)}`;
-}
-
-/**
- * Drop empties and EIS groups; keep native OpenRouter ids and openrouter-* connector ids.
- */
 function filterRequestedModels(models) {
   return models.filter((m) => {
     if (!m) return false;
@@ -117,13 +111,10 @@ async function httpJson(url, apiKey) {
   }
 }
 
-/**
- * @returns {Promise<Map<string, string>>} map of model id → model id, plus connector id → model id
- */
-async function fetchAvailableModels(baseUrl, apiKey) {
-  const response = await httpJson(`${baseUrl}/models`, apiKey);
+async function fetchAvailableModels(baseUrl, apiKey, httpJsonFn = httpJson) {
+  const response = await httpJsonFn(`${baseUrl}/models`, apiKey);
   const entries = response && Array.isArray(response.data) ? response.data : [];
-  /** @type {Map<string, string>} */
+  /** @type {Map<string, object>} */
   const byId = new Map();
   /** @type {Map<string, string>} */
   const byConnectorId = new Map();
@@ -132,33 +123,102 @@ async function fetchAvailableModels(baseUrl, apiKey) {
     const id = entry && typeof entry === 'object' ? entry.id : undefined;
     if (typeof id !== 'string' || !id.trim()) continue;
     const modelId = id.trim();
-    byId.set(modelId, modelId);
-    byConnectorId.set(connectorIdForModel(modelId), modelId);
+    const connectorId = `openrouter-${slugifyId(modelId)}`;
+    byId.set(modelId, entry);
+    byConnectorId.set(connectorId, modelId);
   }
 
   return { byId, byConnectorId };
 }
 
-/**
- * Resolve a requested token (native model id or openrouter-* connector id) to a native OpenRouter model id.
- */
 function resolveModelId(requested, { byId, byConnectorId }) {
   if (byId.has(requested)) {
-    return byId.get(requested);
+    return requested;
   }
-  if (requested.startsWith(OPENROUTER_CONNECTOR_PREFIX) && byConnectorId.has(requested)) {
+  if (byConnectorId.has(requested)) {
     return byConnectorId.get(requested);
+  }
+  if (requested.startsWith('openrouter/')) {
+    return byConnectorId.get(`openrouter-${slugifyId(requested.slice('openrouter/'.length))}`);
   }
   return undefined;
 }
 
-function buildConnector(modelId, baseUrl, apiKey) {
-  const connectorId = connectorIdForModel(modelId);
-  const chatUrl = `${baseUrl}/chat/completions`;
+function supportsToolCalling(entry) {
+  const params =
+    entry && Array.isArray(entry.supported_parameters) ? entry.supported_parameters : [];
+  return params.includes('tools');
+}
 
-  return {
-    connectorId,
-    connector: {
+/**
+ * @param {{
+ *   baseUrl: string,
+ *   apiKey: string,
+ *   modelsRaw?: string,
+ *   httpJsonFn?: (url: string, apiKey: string) => Promise<object>,
+ * }} options
+ * @returns {Promise<Record<string, object>>}
+ */
+async function generateOpenrouterConnectors({
+  baseUrl,
+  apiKey,
+  modelsRaw = '',
+  httpJsonFn = httpJson,
+}) {
+  const rawList = parseModelList(modelsRaw);
+  const deprecated = rawList.filter(
+    (token) => token.startsWith('llm-gateway/') || token.startsWith('litellm-')
+  );
+  if (deprecated.length > 0) {
+    throw new Error(
+      'LiteLLM model ids are deprecated: ' +
+        deprecated.join(', ') +
+        '. Use `openrouter/<provider>-<model>` instead (e.g. openrouter/openai-gpt-5.4).'
+    );
+  }
+
+  const requested = filterRequestedModels(rawList);
+  const available = await fetchAvailableModels(baseUrl, apiKey, httpJsonFn);
+
+  if (requested.length === 0 && rawList.length > 0) {
+    return {};
+  }
+
+  const missing = [];
+  const resolved = [];
+
+  if (requested.length === 0) {
+    for (const [modelId, entry] of available.byId) {
+      if (supportsToolCalling(entry)) {
+        resolved.push(modelId);
+      }
+    }
+  } else {
+    for (const token of requested) {
+      const modelId = resolveModelId(token, available);
+      if (!modelId) {
+        missing.push(token);
+        continue;
+      }
+      if (!supportsToolCalling(available.byId.get(modelId))) {
+        continue;
+      }
+      resolved.push(modelId);
+    }
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      `OpenRouter model(s) not found via GET ${baseUrl}/models:\n` +
+        missing.map((m) => `  - ${m}`).join('\n')
+    );
+  }
+
+  const chatUrl = `${baseUrl}/chat/completions`;
+  const connectors = {};
+  for (const modelId of resolved) {
+    const connectorId = `openrouter-${slugifyId(modelId)}`;
+    connectors[connectorId] = {
       name: `OpenRouter ${modelId}`,
       actionTypeId: '.gen-ai',
       config: {
@@ -170,8 +230,9 @@ function buildConnector(modelId, baseUrl, apiKey) {
       secrets: {
         apiKey,
       },
-    },
-  };
+    };
+  }
+  return connectors;
 }
 
 async function main() {
@@ -191,37 +252,16 @@ async function main() {
   }
 
   const modelsRaw = getArg(argv, 'models') || process.env.EVAL_MODEL_GROUPS || '';
-  const requested = filterRequestedModels(parseModelList(modelsRaw));
-  if (requested.length === 0) {
-    die(
-      'No OpenRouter models requested. Pass --models or set EVAL_MODEL_GROUPS with non-eis model ids (e.g. openai/gpt-4o).'
-    );
-  }
 
-  const available = await fetchAvailableModels(baseUrl, apiKey);
-  const missing = [];
-  const resolved = [];
-
-  for (const token of requested) {
-    const modelId = resolveModelId(token, available);
-    if (!modelId) {
-      missing.push(token);
-      continue;
-    }
-    resolved.push(modelId);
-  }
-
-  if (missing.length > 0) {
-    die(
-      `OpenRouter model(s) not found via GET ${baseUrl}/models:\n` +
-        missing.map((m) => `  - ${m}`).join('\n')
-    );
-  }
-
-  const connectors = {};
-  for (const modelId of resolved) {
-    const { connectorId, connector } = buildConnector(modelId, baseUrl, apiKey);
-    connectors[connectorId] = connector;
+  let connectors;
+  try {
+    connectors = await generateOpenrouterConnectors({
+      baseUrl,
+      apiKey,
+      modelsRaw,
+    });
+  } catch (e) {
+    die(e && e.message ? e.message : String(e));
   }
 
   const format = String(argv.format || 'base64').toLowerCase();
@@ -238,6 +278,14 @@ async function main() {
   process.stdout.write(`${Buffer.from(json, 'utf-8').toString('base64')}\n`);
 }
 
-main().catch((e) => {
-  die(e && e.stack ? e.stack : String(e));
-});
+if (require.main === module) {
+  main().catch((e) => {
+    die(e && e.stack ? e.stack : String(e));
+  });
+}
+
+module.exports = {
+  parseModelList,
+  filterRequestedModels,
+  generateOpenrouterConnectors,
+};
