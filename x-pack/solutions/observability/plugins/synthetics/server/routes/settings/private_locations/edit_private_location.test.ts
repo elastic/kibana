@@ -64,10 +64,7 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     const result = await editPrivateLocationRoute().handler(routeContext);
 
-    expect(edit).toHaveBeenCalledWith(
-      'loc-1',
-      expect.objectContaining({ isAgentSharding: true })
-    );
+    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: true }));
     expect(result).toEqual(expect.objectContaining({ isAgentSharding: true }));
   });
 
@@ -77,10 +74,7 @@ describe('editPrivateLocationRoute isAgentSharding', () => {
 
     const result = await editPrivateLocationRoute().handler(routeContext);
 
-    expect(edit).toHaveBeenCalledWith(
-      'loc-1',
-      expect.objectContaining({ isAgentSharding: false })
-    );
+    expect(edit).toHaveBeenCalledWith('loc-1', expect.objectContaining({ isAgentSharding: false }));
     expect(result).not.toHaveProperty('isAgentSharding');
   });
 

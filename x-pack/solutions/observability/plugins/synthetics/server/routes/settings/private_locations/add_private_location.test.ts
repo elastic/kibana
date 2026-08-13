@@ -209,8 +209,6 @@ describe('PrivateLocationSchema isAgentSharding', () => {
   });
 
   it('rejects a non-boolean flag', () => {
-    expect(() =>
-      PrivateLocationSchema.validate({ ...base, isAgentSharding: 'yes' })
-    ).toThrow();
+    expect(() => PrivateLocationSchema.validate({ ...base, isAgentSharding: 'yes' })).toThrow();
   });
 });

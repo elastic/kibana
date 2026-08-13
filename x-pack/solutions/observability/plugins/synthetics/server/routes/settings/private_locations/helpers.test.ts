@@ -121,9 +121,7 @@ describe('toClientContract', () => {
       ],
     });
 
-    expect(scalable).toEqual(
-      expect.objectContaining({ id: 'loc-1', isAgentSharding: true })
-    );
+    expect(scalable).toEqual(expect.objectContaining({ id: 'loc-1', isAgentSharding: true }));
     expect(classic).toEqual(expect.objectContaining({ id: 'loc-2' }));
     expect(classic).not.toHaveProperty('isAgentSharding');
   });
@@ -287,9 +285,9 @@ describe('isAgentSharding contract mappers', () => {
   });
 
   it('omits isAgentSharding: false so classic and explicitly-off look the same', () => {
-    expect(
-      toSavedObjectContract({ ...baseLocation, isAgentSharding: false })
-    ).not.toHaveProperty('isAgentSharding');
+    expect(toSavedObjectContract({ ...baseLocation, isAgentSharding: false })).not.toHaveProperty(
+      'isAgentSharding'
+    );
     expect(
       toClientContract({
         attributes: { ...baseLocation, isAgentSharding: false },

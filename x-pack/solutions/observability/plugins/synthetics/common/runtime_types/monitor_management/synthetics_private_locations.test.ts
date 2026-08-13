@@ -28,8 +28,8 @@ describe('PrivateLocationCodec isAgentSharding', () => {
   });
 
   it('rejects a non-boolean flag', () => {
-    expect(
-      isRight(PrivateLocationCodec.decode({ ...classic, isAgentSharding: 'yes' }))
-    ).toBe(false);
+    expect(isRight(PrivateLocationCodec.decode({ ...classic, isAgentSharding: 'yes' }))).toBe(
+      false
+    );
   });
 });

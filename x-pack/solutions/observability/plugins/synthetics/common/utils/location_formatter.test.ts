@@ -31,8 +31,8 @@ describe('formatLocation', () => {
   });
 
   it('omits isAgentSharding: false', () => {
-    expect(
-      formatLocation({ ...privateLocation, isAgentSharding: false })
-    ).not.toHaveProperty('isAgentSharding');
+    expect(formatLocation({ ...privateLocation, isAgentSharding: false })).not.toHaveProperty(
+      'isAgentSharding'
+    );
   });
 });
