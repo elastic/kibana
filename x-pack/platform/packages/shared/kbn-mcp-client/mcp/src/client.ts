@@ -37,11 +37,6 @@ function formatConnectionErrorMessage(error: unknown): string {
   return message;
 }
 
-/**
- * McpClient is a wrapper around the MCP client SDK.
- * It provides a simple interface for connecting to an MCP client,
- * listing tools, and calling tools.
- */
 export class McpClient {
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
@@ -90,21 +85,14 @@ export class McpClient {
     );
   }
 
-  /**
-   * Public getter for the connection status.
-   */
   isConnected(): boolean {
     return this.connected;
   }
 
-  /**
-   * Connect to the MCP client and return the connected status and capabilities.
-   */
   async connect(): Promise<{ connected: boolean; capabilities?: ServerCapabilities }> {
     if (!this.connected) {
       this.logger.debug(`Attempting to connect to MCP server ${this.name}, ${this.version}`);
       try {
-        // connect() performs the initialization handshake with the MCP server as per MCP protocol
         await this.client.connect(this.transport);
         this.connected = true;
         this.logger.debug(`Connected to MCP server ${this.name}, ${this.version}`);
@@ -128,9 +116,6 @@ export class McpClient {
     };
   }
 
-  /**
-   * Disconnect from the MCP client and return the disconnected status.
-   */
   async disconnect(): Promise<void> {
     if (this.connected) {
       this.logger.debug(`Attempting to disconnect from MCP server ${this.name}, ${this.version}`);
@@ -148,9 +133,6 @@ export class McpClient {
     }
   }
 
-  /**
-   * List the tools available on the MCP client.
-   */
   async listTools(): Promise<ListToolsResponse> {
     if (!this.connected) {
       throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);
@@ -187,12 +169,7 @@ export class McpClient {
     return tools;
   }
 
-  /**
-   * Call a tool on the MCP client.
-   * This method returns text content, plus resource links and embedded resources.
-   * It does not support other content types such as images and audio.
-   * @param {CallToolParams} params - The parameters for the tool call.
-   */
+  /** Returns text, resource links, and embedded resources. Images and audio are dropped. */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
     if (!this.connected) {
       throw new Error(`MCP client not connected to ${this.name}, ${this.version}`);

@@ -82,7 +82,6 @@ export function createSseGatedFetch(resource: McpFetchResource): FetchLike {
       return response;
     }
 
-    // For non-GET requests, wait for the SSE gate (if one was created by a prior 202).
     const gate = gates.get(sessionId);
     if (gate) {
       const races: Array<Promise<void>> = [

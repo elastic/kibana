@@ -50,15 +50,6 @@ const matchesErrorOrCause = (
   return cause !== undefined && predicate(cause);
 };
 
-/**
- * Factory for the registered client type behind `ctx.getClient('mcp')`.
- *
- * Build applies `ctx.networkSettings` (allowlist, TLS, proxy, timeout, body size) through an
- * MCP fetch resource, then connects `@kbn/mcp-client` with Streamable HTTP.
- *
- * `isUserError` classifies unauthorized / forbidden failures as user errors so the executor can
- * surface them as non-retryable USER errors rather than FRAMEWORK errors.
- */
 export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpec<McpClient> => ({
   id: 'mcp',
 

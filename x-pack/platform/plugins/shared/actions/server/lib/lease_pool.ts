@@ -64,7 +64,6 @@ export class LeasePool<TClient> {
     return promise;
   }
 
-  /** Drops this entry if it is still this promise, then terminates the client. */
   async invalidate(key: string, promise: Promise<TClient>): Promise<void> {
     const entry = this.cache.peek(key);
     if (entry === undefined || entry.promise !== promise) {
@@ -75,10 +74,7 @@ export class LeasePool<TClient> {
     await this.terminateEntry(entry, key);
   }
 
-  /**
-   * Evicts all entries for a connector. Await termination so connector deletion and OAuth
-   * disconnect can remove credentials afterward.
-   */
+  /** Await termination so connector deletion and OAuth disconnect can remove credentials afterward. */
   async evict(connectorId: string): Promise<void> {
     const prefix = `${encodeURIComponent(connectorId)}:`;
     const keysToEvict = [...this.cache.keys()].filter((key) => key.startsWith(prefix));
