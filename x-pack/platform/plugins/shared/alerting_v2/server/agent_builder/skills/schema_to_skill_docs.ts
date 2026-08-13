@@ -217,7 +217,11 @@ function formatVariantSchemas(jsonSchema: unknown): string {
 
     const fields = jsonSchemaToFieldTable(variant);
     if (fields.length > 0) {
-      sections.push(`#### ${label}\n\n${formatFieldTable(fields)}`);
+      const description =
+        typeof variant.description === 'string' && variant.description.trim().length > 0
+          ? `${variant.description}\n\n`
+          : '';
+      sections.push(`#### ${label}\n\n${description}${formatFieldTable(fields)}`);
     }
   }
   return sections.join('\n\n');
@@ -287,16 +291,23 @@ export const generateRuleSchemaDoc = (): string =>
  */
 export const generateOperationsDoc = ({
   title,
-  source,
   schema,
 }: {
   title: string;
-  source: string;
   schema: z.ZodType;
 }): string => {
-  const variants = formatVariantSchemas(zodToJsonSchema(schema));
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined;
+  const missing = (variants ?? []).filter(
+    (variant) => typeof variant.description !== 'string' || variant.description.trim().length === 0
+  );
+  if (missing.length > 0) {
+    throw new SchemaTranslationError(
+      `${title}: operation variant(s) missing .describe() — add one explaining the field being operated on`
+    );
+  }
 
-  return [`# ${title}`, '', `Auto-generated from ${source}.`, '', variants].join('\n');
+  return [`# ${title}`, '', formatVariantSchemas(jsonSchema)].join('\n');
 };
 
 /**
@@ -305,7 +316,6 @@ export const generateOperationsDoc = ({
 export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Rule Operations Schema Reference',
-    source: 'the `manage_rule` tool Zod schemas',
     schema: ruleOperationSchema,
   });
 
@@ -655,7 +665,6 @@ export const generateActionPolicySchemaDoc = (): string =>
 export const generateActionPolicyOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Action Policy Operations Schema Reference',
-    source: 'the `manage_action_policy` tool Zod schemas',
     schema: actionPolicyOperationSchema,
   });
 

@@ -80,10 +80,6 @@ export const ALERTING_ERROR_CODES = {
    */
   RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
-  // ────────────────────── Rule templates ─────────────────────
-  /** A rule template with the given identifier does not exist. */
-  RULE_TEMPLATE_NOT_FOUND: 'RULE_TEMPLATE_NOT_FOUND',
-
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
   ACTION_POLICY_NOT_FOUND: 'ACTION_POLICY_NOT_FOUND',
@@ -435,13 +431,6 @@ export const ALERTING_LOG_CODES = {
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
 
-  // ──────────────── Rule templates (graceful degradation) ────────────────
-  /**
-   * A stored rule template failed schema validation. Find omits it from the
-   * page; get maps it to not-found. Operator should investigate package drift.
-   */
-  RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
-
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_episode` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
@@ -464,7 +453,7 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
-  /** Skill schema docs could not be generated; skill registration aborted (error). */
+  /** Skill schema docs could not be generated; Kibana start is aborted. */
   AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED: 'AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED',
   /** Agent Builder skill registration failed (error); skills unavailable until fixed. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',

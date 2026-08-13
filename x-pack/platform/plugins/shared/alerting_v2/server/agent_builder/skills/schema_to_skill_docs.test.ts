@@ -134,30 +134,49 @@ describe('schema_to_skill_docs', () => {
 
   describe('generateOperationsDoc', () => {
     const exampleOperationSchema = z.discriminatedUnion('operation', [
-      z.object({
-        operation: z.literal('set_name'),
-        name: z.string().min(1).max(64).describe('Display name.'),
-      }),
-      z.object({
-        operation: z.literal('validate'),
-      }),
+      z
+        .object({
+          operation: z.literal('set_name'),
+          name: z.string().min(1).max(64).describe('Display name.'),
+        })
+        .describe('Display name of the resource.'),
+      z
+        .object({
+          operation: z.literal('validate'),
+        })
+        .describe('Validates the accumulated resource against the API request schema.'),
     ]);
 
-    it('renders title, source line, and discriminated operation variants', () => {
+    it('renders title and discriminated operation variants', () => {
       const doc = generateOperationsDoc({
         title: 'Example Operations Schema Reference',
-        source: 'the example tool Zod schemas',
         schema: exampleOperationSchema,
       });
 
       expect(doc).toContain('# Example Operations Schema Reference');
-      expect(doc).toContain('Auto-generated from the example tool Zod schemas.');
       expect(doc).toContain('#### `operation: "set_name"`');
+      expect(doc).toContain('Display name of the resource.');
       expect(doc).toContain('#### `operation: "validate"`');
       expect(doc).toContain(
         '| `name` | string | required | Display name. (min length: 1, max length: 64) |'
       );
       expect(doc).toContain('| `operation` | "set_name" | required |');
+      expect(doc).toMatch(
+        /#### `operation: "set_name"`\n\nDisplay name of the resource.\n\n\| Field \|/
+      );
+    });
+
+    it('throws when an operation variant is missing a top-level describe', () => {
+      const schema = z.discriminatedUnion('operation', [
+        z.object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        }),
+      ]);
+
+      expect(() => generateOperationsDoc({ title: 'Missing Describe', schema })).toThrow(
+        /missing \.describe\(\)/
+      );
     });
   });
 
@@ -205,6 +224,14 @@ describe('schema_to_skill_docs', () => {
       const doc = generateRuleOperationsDoc();
       expect(doc).toContain('pending_count');
       expect(doc).toContain('recovering_count');
+    });
+
+    it('describes each operation in terms of the user goal it solves', () => {
+      const doc = generateRuleOperationsDoc();
+      expect(doc).toContain(
+        'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
+      );
+      expect(doc).toContain('Use `set_kind` to choose whether the rule notifies');
     });
   });
 

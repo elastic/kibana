@@ -81,12 +81,12 @@ describe('registerSkills', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs SchemaTranslationError at error with skill_id and continues registering the other skill', () => {
+  it('logs SchemaTranslationError at error with skill_id and rethrows so Kibana start fails', () => {
     createRuleManagementSkillMock.mockImplementation(() => {
       throw new SchemaTranslationError('schema boom');
     });
 
-    registerSkills(agentBuilder, deps());
+    expect(() => registerSkills(agentBuilder, deps())).toThrow(SchemaTranslationError);
 
     expect(logger.error).toHaveBeenCalledWith({
       message: 'Failed to generate agent builder skill schema docs',
@@ -94,11 +94,8 @@ describe('registerSkills', () => {
       labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
       error: expect.any(SchemaTranslationError),
     });
-    expect(agentBuilder.skills.register).toHaveBeenCalledTimes(1);
-    expect(agentBuilder.skills.register).toHaveBeenCalledWith(actionPolicySkill);
-
-    const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-    expect(debugMessage()).toBe('Agent builder skills partially registered');
+    expect(agentBuilder.skills.register).not.toHaveBeenCalled();
+    expect(logger.debug).not.toHaveBeenCalled();
   });
 
   it('logs unexpected register failures at error with skill_id and continues', () => {
@@ -127,7 +124,7 @@ describe('registerSkills', () => {
       throw new Error('rule failed');
     });
     createActionPolicyManagementSkillMock.mockImplementation(() => {
-      throw new SchemaTranslationError('policy schema failed');
+      throw new Error('policy failed');
     });
 
     registerSkills(agentBuilder, deps());
@@ -142,7 +139,7 @@ describe('registerSkills', () => {
     );
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED,
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
         labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
       })
     );
