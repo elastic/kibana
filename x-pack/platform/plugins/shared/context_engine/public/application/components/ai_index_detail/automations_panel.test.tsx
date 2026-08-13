@@ -155,32 +155,29 @@ describe('AutomationsPanel', () => {
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
   });
 
-  it('shows the create control instead of the empty prompt when editing with no automations', () => {
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true }));
-
+  it('shows the create control when not editing', () => {
     renderPanel();
 
-    expect(screen.queryByTestId('contextAiIndexAutomationsEmpty')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
   });
 
   it('opens the created workflow in the Workflows app', async () => {
     const createAndAttach = jest.fn().mockResolvedValue('wf-created');
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true, createAndAttach }));
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
 
     const { services } = renderPanel();
     fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-        path: '/wf-created',
+        path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
       });
     });
   });
 
   it('stays on the page when the automation could not be created', async () => {
     const createAndAttach = jest.fn().mockResolvedValue(undefined);
-    mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true, createAndAttach }));
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
 
     const { services } = renderPanel();
     fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
@@ -225,12 +222,14 @@ describe('AutomationsPanel', () => {
     const { rerender } = renderPanel();
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAutomationButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextSaveAutomationsButton')).not.toBeInTheDocument();
 
     mockUseAutomationsEditor.mockReturnValue(editorResult({ isEditing: true }));
     rerender();
 
     expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextCreateAutomationButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('contextSaveAutomationsButton')).toBeInTheDocument();
     expect(screen.getByTestId('contextCancelEditingAutomationsButton')).toBeInTheDocument();
   });
@@ -286,7 +285,6 @@ describe('AutomationsPanel', () => {
     );
     mockUseAutomationsEditor.mockReturnValue(
       editorResult({
-        isEditing: true,
         automations,
         workflowIds: automations.map(({ value }) => value),
       })
