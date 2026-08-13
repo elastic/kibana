@@ -36,6 +36,8 @@ import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import type { PluginConfig } from '../../../config';
 
+const EMPTY_BATCH: AlertEventsBatch = { alertEvents: [], truncatedEventsCount: 0 };
+
 /**
  * End-of-stream classifier for active groups that are **absent from the
  * full-run breach set**.
@@ -136,14 +138,14 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     const { rule, input } = state;
 
     if (rule?.kind !== 'alert') {
-      return { alertEvents: [], truncatedEventsCount: 0 };
+      return EMPTY_BATCH;
     }
 
     const recoveryEnabled = rule.recovery_strategy != null && rule.recovery_strategy !== 'none';
     const noDataEnabled = getNoDataEsqlQuery(rule.query, rule.no_data_strategy) != null;
 
     if (!recoveryEnabled && !noDataEnabled) {
-      return { alertEvents: [], truncatedEventsCount: 0 };
+      return EMPTY_BATCH;
     }
 
     const activeGroups = await fetchActiveAlertGroupHashes(
@@ -153,7 +155,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     );
 
     if (activeGroups.length === 0) {
-      return { alertEvents: [], truncatedEventsCount: 0 };
+      return EMPTY_BATCH;
     }
 
     // Data presence — one query for the whole run.
@@ -175,7 +177,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           breachedGroupHashes,
           dataPresentGroupHashes,
         })
-      : { alertEvents: [], truncatedEventsCount: 0 };
+      : EMPTY_BATCH;
 
     // No-data — classify active groups absent from breach AND not recovered above.
     const recoveredGroupHashes = new Set(recoveryEvents.map((event) => event.group_hash));
