@@ -9,6 +9,7 @@ import React, { useCallback, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { type Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
+import type { BaseActionsProps } from './base_actions';
 import { ConversationsActionsGroup } from './actions_group';
 import { ConversationMetaInfo } from './conversation_meta_info';
 
@@ -17,7 +18,7 @@ const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
 export const ConversationCard = memo<{
   investigation: Investigation;
   hasBorder: boolean;
-  onClickAction: (action: 'case' | 'dismiss' | 'assign') => void;
+  onClickAction: BaseActionsProps['onClickAction'];
 }>(({ investigation, hasBorder, onClickAction }) => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();

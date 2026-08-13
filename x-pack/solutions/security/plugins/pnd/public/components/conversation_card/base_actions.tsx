@@ -10,21 +10,64 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiHorizontalRule,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { type Investigation } from '@kbn/pnd-common';
 
+interface ActionConfig {
+  key: string;
+  icon: string;
+  name: string;
+  onClick: () => void;
+  /** Inserts a horizontal rule before this item */
+  separator?: boolean;
+}
+
+const useContextMenuItems = (
+  actions: ActionConfig[],
+  onClose: () => void
+): React.ReactElement[] => {
+  const { euiTheme } = useEuiTheme();
+  return useMemo(
+    () =>
+      actions.flatMap(({ key, icon, name, onClick, separator }) => {
+        const item = (
+          <EuiContextMenuItem
+            style={{
+              padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+            }}
+            key={key}
+            icon={icon}
+            onClick={(ev) => {
+              ev.stopPropagation();
+              onClose();
+              onClick();
+            }}
+          >
+            {name}
+          </EuiContextMenuItem>
+        );
+        return separator
+          ? [<EuiHorizontalRule key={`${key}-separator`} margin="none" />, item]
+          : [item];
+      }),
+    [actions, euiTheme.size.xs, euiTheme.size.m, onClose]
+  );
+};
+
+type CardActionType = 'case' | 'dismiss' | 'assign';
 export interface BaseActionsProps {
-  onOpenParentInChat: () => void;
-  onOpenCase: () => void;
-  onAssign: () => void;
-  onDismiss: () => void;
+  investigation: Investigation;
+  onClickAction: (action: CardActionType, conversationId: Investigation['recordId']) => void;
   'data-test-subj'?: string;
 }
 
 export const BaseActions = memo<BaseActionsProps>(
-  ({ onOpenParentInChat, onOpenCase, onAssign, onDismiss, 'data-test-subj': dataTestSubj }) => {
+  ({ investigation, onClickAction, 'data-test-subj': dataTestSubj }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const handleClose = useCallback(() => setIsOpen(false), []);
@@ -52,59 +95,38 @@ export const BaseActions = memo<BaseActionsProps>(
       </EuiToolTip>
     );
 
-    const items = useMemo(
+    const actionConfigs = useMemo<ActionConfig[]>(
       () => [
-        <EuiContextMenuItem
-          key="openChat"
-          icon="productAgent"
-          onClick={() => {
-            handleClose();
-            onOpenParentInChat();
-          }}
-        >
-          {i18n.translate('xpack.pnd.baseActions.openChat', {
-            defaultMessage: 'Open parent investigation in chat',
-          })}
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          key="openCase"
-          icon="document"
-          onClick={() => {
-            handleClose();
-            onOpenCase();
-          }}
-        >
-          {i18n.translate('xpack.pnd.baseActions.openCase', {
+        {
+          key: 'openCase',
+          icon: 'document',
+          name: i18n.translate('xpack.pnd.baseActions.openCase', {
             defaultMessage: 'Open a case',
-          })}
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          key="assign"
-          icon="user"
-          onClick={() => {
-            handleClose();
-            onAssign();
-          }}
-        >
-          {i18n.translate('xpack.pnd.baseActions.assign', {
+          }),
+          onClick: () => onClickAction('case', investigation.recordId),
+        },
+        {
+          key: 'assign',
+          icon: 'user',
+          name: i18n.translate('xpack.pnd.baseActions.assign', {
             defaultMessage: 'Assign',
-          })}
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          key="dismiss"
-          icon="trash"
-          onClick={() => {
-            handleClose();
-            onDismiss();
-          }}
-        >
-          {i18n.translate('xpack.pnd.baseActions.dismiss', {
+          }),
+          onClick: () => onClickAction('assign', investigation.recordId),
+          separator: true,
+        },
+        {
+          key: 'dismiss',
+          icon: 'trash',
+          name: i18n.translate('xpack.pnd.baseActions.dismiss', {
             defaultMessage: 'Dismiss',
-          })}
-        </EuiContextMenuItem>,
+          }),
+          onClick: () => onClickAction('dismiss', investigation.recordId),
+        },
       ],
-      [handleClose, onAssign, onDismiss, onOpenCase, onOpenParentInChat]
+      [investigation.recordId, onClickAction]
     );
+
+    const items = useContextMenuItems(actionConfigs, handleClose);
 
     return (
       <EuiPopover
@@ -119,6 +141,9 @@ export const BaseActions = memo<BaseActionsProps>(
         })}
       >
         <EuiContextMenuPanel
+          css={`
+            padding: 0;
+          `}
           items={items}
           data-test-subj={dataTestSubj ? `${dataTestSubj}-panel` : undefined}
         />

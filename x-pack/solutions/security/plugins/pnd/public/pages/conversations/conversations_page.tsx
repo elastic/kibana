@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import {
   CONVERSATION_QUEUE_CATEGORIES,
   type Investigation,
@@ -25,7 +19,9 @@ import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ConversationQueue } from '../../components/conversation_queue';
+import { type BaseActionsProps } from '../../components/conversation_card/base_actions';
 import { BlastRadius } from '../../components/blast_radius';
+import { BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -36,6 +32,18 @@ export const ConversationsPage: React.FC = () => {
   const { data, isLoading, error } = useInvestigations();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   usePndDocTitle(QUEUE_PAGE_INFO.pageTitle);
+
+  const [modalState, setModalState] = useState<{
+    type: 'case' | 'dismiss' | 'assign' | null;
+    recordId: Investigation['recordId'] | null;
+  }>({ type: null, recordId: null });
+
+  const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
+    (action, recordId) => {
+      setModalState({ type: action, recordId });
+    },
+    [setModalState]
+  );
 
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
@@ -89,6 +97,40 @@ export const ConversationsPage: React.FC = () => {
         max-width: 960px;
       `}
     >
+      {modalState.type === 'assign' && modalState.recordId && (
+        <BaseActionModal
+          title={MODAL_TRANSLATIONS.assign.title}
+          recordId={modalState.recordId}
+          onClose={() => setModalState({ type: null, recordId: null })}
+          rationalePlaceholder={MODAL_TRANSLATIONS.assign.rationalePlaceholder}
+          primaryAction={{
+            color: 'primary',
+            label: MODAL_TRANSLATIONS.assign.actionButtonLabel,
+            onClick: () => {
+              setModalState({ type: null, recordId: null });
+            },
+          }}
+        >
+          {'dropdown goes here'}
+        </BaseActionModal>
+      )}
+
+      {modalState.type === 'dismiss' && modalState.recordId && (
+        <BaseActionModal
+          title={MODAL_TRANSLATIONS.dismiss.title}
+          recordId={modalState.recordId}
+          onClose={() => setModalState({ type: null, recordId: null })}
+          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
+          primaryAction={{
+            color: 'danger',
+            label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
+            onClick: () => {
+              setModalState({ type: null, recordId: null });
+            },
+          }}
+        />
+      )}
+
       <EuiFlexGroup gutterSize="l" direction="column" wrap>
         <EuiFlexItem grow={false}>
           <PndPageHeader
@@ -137,6 +179,7 @@ export const ConversationsPage: React.FC = () => {
                   briefingType={group.id as RecommendedAction}
                   briefingList={group.items}
                   isFiltered={filteredQueueItems.length !== sortedConversations.length}
+                  onClickAction={onClickAction}
                 />
               </EuiFlexItem>
             ))

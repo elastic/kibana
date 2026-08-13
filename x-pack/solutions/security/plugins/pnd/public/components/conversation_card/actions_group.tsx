@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { type Investigation, type RecommendedAction } from '@kbn/pnd-common';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
-import { BaseActions } from './base_actions';
+import { BaseActions, type BaseActionsProps } from './base_actions';
 
 const ACTION_ICONS_MAP: Record<RecommendedAction, 'gear' | 'lock' | 'flag' | 'external'> = {
   contain: 'lock',
@@ -47,6 +47,7 @@ interface ConversationsActionsGroupProps {
   investigation: Investigation;
   onOpen: () => void;
   onOpenChat: () => void;
+  onClickAction: BaseActionsProps['onClickAction'];
 }
 
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
@@ -114,11 +115,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <BaseActions
-            investigation={investigation}
-            onOpen={onOpen}
-            onOpenChat={onOpenChat}
-          />
+          <BaseActions investigation={investigation} onClickAction={onClickAction} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

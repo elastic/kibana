@@ -24,6 +24,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { BaseActionsProps } from '../conversation_card/base_actions';
 import { EMPTY_CONVERSATION_QUEUE } from './translations';
 import { ConversationCard } from '../conversation_card';
 
@@ -31,6 +32,7 @@ interface ConversationQueueProps {
   briefingId: string;
   briefingType: RecommendedAction;
   briefingList: Investigation[];
+  onClickAction: BaseActionsProps['onClickAction'];
   isFiltered?: boolean;
 }
 
@@ -51,7 +53,7 @@ const StyledAccordion = styled(EuiAccordion)`
 `;
 
 export const ConversationQueue = memo<ConversationQueueProps>(
-  ({ briefingId, briefingType, briefingList, isFiltered = false }) => {
+  ({ briefingId, briefingType, briefingList, isFiltered = false, onClickAction }) => {
     const { euiTheme } = useEuiTheme();
     const buttonContent = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -87,7 +89,6 @@ export const ConversationQueue = memo<ConversationQueueProps>(
         borderRadius="none"
         css={{
           cursor: 'pointer',
-          marginBottom: euiTheme.size.xl,
           borderRadius: euiTheme.size.s,
         }}
         paddingSize="none"
@@ -113,6 +114,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
                   <ConversationCard
                     investigation={investigation}
                     hasBorder={i < briefingList.length - 1}
+                    onClickAction={onClickAction}
                   />
                 </EuiFlexItem>
               ))}
