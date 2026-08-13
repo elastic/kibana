@@ -98,7 +98,7 @@ const asDisplayValue = (value: unknown): string => {
   }
   if (Array.isArray(value)) {
     const joined = value.filter((entry) => entry != null).join(', ');
-    return joined.length ? joined : '-';
+    return joined.length ? joined : '—';
   }
   return String(value);
 };
@@ -347,6 +347,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
                   fill
                   href={alertDetailsHref}
                   target="_blank"
+                  rel="noopener noreferrer"
                   iconType="eye"
                   data-test-subj="alertEpisodeV1DetailsViewDetailsButton"
                 >
