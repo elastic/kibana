@@ -232,6 +232,20 @@ export const runConfigInit = async (
     set(example, field.jsonPath, value.trim() || '');
   }
 
+  const openrouterApiKey = getNestedValue(example, 'openrouter.apiKey');
+  if (typeof openrouterApiKey === 'string' && openrouterApiKey.includes('REPLACE_ME')) {
+    const { value } = await inquirer.prompt<{ value: string }>({
+      type: 'password',
+      name: 'value',
+      message: 'OpenRouter API key:',
+      mask: '*',
+    });
+    if (value.trim()) {
+      set(example, 'openrouter.apiKey', value.trim());
+    }
+  }
+
+  // Legacy LiteLLM prompts kept for configs that still include the optional litellm block.
   const litellmVirtualKey = getNestedValue(example, 'litellm.virtualKey');
   if (typeof litellmVirtualKey === 'string' && litellmVirtualKey.includes('REPLACE_ME')) {
     const { value } = await inquirer.prompt<{ value: string }>({

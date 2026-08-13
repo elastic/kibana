@@ -20,9 +20,10 @@ const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 /**
  * Vault-backed config used by @kbn/evals CI and local development.
  *
- * This is intentionally minimal: we store only the LiteLLM key + base URL,
- * and credentials for the centralized Elasticsearch cluster where eval results
- * are exported.
+ * This is intentionally minimal: we store OpenRouter credentials (preferred) and
+ * optionally legacy LiteLLM credentials for backwards compatibility, plus
+ * credentials for the centralized Elasticsearch cluster where eval results are
+ * exported.
  */
 
 export const KBN_EVALS_VAULT_ENV_VAR = 'KIBANA_EVALS_CI_CONFIG';
@@ -56,31 +57,40 @@ const configSchema = schema.object(
     creation_date: schema.maybe(schema.string()),
     refresh_interval: schema.maybe(schema.string()),
 
-    litellm: schema.object(
-      {
-        baseUrl: schema.string({ minLength: 1 }),
-        /**
-         * LiteLLM *virtual key* (sk-...) used to call the proxy (and to query team metadata).
-         * This should not be the proxy master key.
-         */
-        virtualKey: schema.string({ minLength: 1 }),
-        /**
-         * Optional team id used by CI to discover models for connector generation.
-         * If omitted, CI may use a baked-in default.
-         */
-        teamId: schema.maybe(schema.string({ minLength: 1 })),
-        /**
-         * Optional, human-readable team name (not used for auth).
-         */
-        teamName: schema.maybe(schema.string({ minLength: 1 })),
-      },
-      { unknowns: 'allow' }
+    // Legacy LiteLLM block — optional for backwards compatibility during OpenRouter migration.
+    litellm: schema.maybe(
+      schema.object(
+        {
+          baseUrl: schema.string({ minLength: 1 }),
+          /**
+           * LiteLLM *virtual key* (sk-...) used to call the proxy (and to query team metadata).
+           * This should not be the proxy master key.
+           */
+          virtualKey: schema.string({ minLength: 1 }),
+          /**
+           * Optional team id used by CI to discover models for connector generation.
+           * If omitted, CI may use a baked-in default.
+           */
+          teamId: schema.maybe(schema.string({ minLength: 1 })),
+          /**
+           * Optional, human-readable team name (not used for auth).
+           */
+          teamName: schema.maybe(schema.string({ minLength: 1 })),
+        },
+        { unknowns: 'allow' }
+      )
     ),
 
     openrouter: schema.maybe(
       schema.object(
         {
-          baseUrl: schema.string({ minLength: 1 }),
+          baseUrl: schema.string({
+            minLength: 1,
+            defaultValue: 'https://openrouter.ai/api/v1',
+          }),
+          /**
+           * OpenRouter API key used for non-EIS model evals and triage.
+           */
           apiKey: schema.string({ minLength: 1 }),
         },
         { unknowns: 'allow' }
@@ -127,7 +137,15 @@ const configSchema = schema.object(
 export type KbnEvalsConfig = ReturnType<typeof configSchema.validate>;
 
 export const validateKbnEvalsConfig = (config: unknown): KbnEvalsConfig => {
-  return configSchema.validate(config);
+  const validated = configSchema.validate(config);
+  const hasOpenrouter = Boolean(validated.openrouter?.apiKey);
+  const hasLitellm = Boolean(validated.litellm?.virtualKey);
+  if (!hasOpenrouter && !hasLitellm) {
+    throw new Error(
+      'Invalid kbn-evals config: provide `openrouter: { baseUrl, apiKey }` (preferred) or legacy `litellm: { baseUrl, virtualKey }` (see `scripts/vault/config.example.json`).'
+    );
+  }
+  return validated;
 };
 
 const ensureLocalConfigFileExists = (filePath: string) => {

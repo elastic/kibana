@@ -206,16 +206,37 @@ function validateConfigShape(config) {
     die('Invalid kbn-evals CI config: root must be a JSON object');
   }
 
-  // Required
-  assertNonEmptyString(config, 'litellm.baseUrl');
-  assertNonEmptyString(config, 'litellm.virtualKey');
+  const hasOpenrouter = config.openrouter != null;
+  const hasLitellm = config.litellm != null;
+
+  if (!hasOpenrouter && !hasLitellm) {
+    die(
+      'Invalid kbn-evals CI config: provide `openrouter: { baseUrl, apiKey }` (preferred) or legacy `litellm: { baseUrl, virtualKey }` (see `scripts/vault/config.example.json`).'
+    );
+  }
+
+  if (hasOpenrouter) {
+    if (typeof config.openrouter !== 'object' || Array.isArray(config.openrouter)) {
+      die('Invalid kbn-evals CI config: "openrouter" must be an object when provided');
+    }
+    assertNonEmptyString(config, 'openrouter.apiKey');
+    assertOptionalNonEmptyString(config, 'openrouter.baseUrl');
+  }
+
+  // Legacy LiteLLM — optional for backwards compatibility.
+  if (hasLitellm) {
+    if (typeof config.litellm !== 'object' || Array.isArray(config.litellm)) {
+      die('Invalid kbn-evals CI config: "litellm" must be an object when provided');
+    }
+    assertNonEmptyString(config, 'litellm.baseUrl');
+    assertNonEmptyString(config, 'litellm.virtualKey');
+    assertOptionalNonEmptyString(config, 'litellm.teamId');
+    assertOptionalNonEmptyString(config, 'litellm.teamName');
+  }
+
   assertNonEmptyString(config, 'evaluationConnectorId');
   assertNonEmptyString(config, 'evaluationsEs.url');
   assertNonEmptyString(config, 'evaluationsEs.apiKey');
-
-  // Optional
-  assertOptionalNonEmptyString(config, 'litellm.teamId');
-  assertOptionalNonEmptyString(config, 'litellm.teamName');
 
   validateEvaluationsKbn(config);
   validateGcsCredentials(config);
