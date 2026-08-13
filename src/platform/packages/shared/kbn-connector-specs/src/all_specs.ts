@@ -44,7 +44,7 @@ export * from './specs/google_cloud_storage/google_cloud_storage';
 export * from './specs/sharepoint_server/sharepoint_server';
 export * from './specs/microsoft_teams/microsoft_teams';
 export * from './specs/monday_com/monday_com';
-export * from './specs/mcp_v2/mcp_v2';
+export * from './specs/mcp/mcp_v2';
 export * from './specs/outlook/outlook';
 export * from './specs/tavily/tavily';
 export * from './specs/pagerduty/pagerduty';
