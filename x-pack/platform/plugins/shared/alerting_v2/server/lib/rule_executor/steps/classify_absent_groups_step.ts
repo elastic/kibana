@@ -7,6 +7,9 @@
 
 import { inject, injectable } from 'inversify';
 import { getNoDataEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { PluginInitializer } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfig } from '../../../config';
 import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
 import {
   buildContinuedBreachAlertEvents,
@@ -62,12 +65,19 @@ import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   public readonly name = 'classify_absent_groups';
 
+  private readonly maxQueryResponseSize: number;
+
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
-    private readonly scopedQueryService: QueryServiceContract
-  ) {}
+    private readonly scopedQueryService: QueryServiceContract,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+  ) {
+    this.maxQueryResponseSize =
+      pluginConfigAccessor.get<PluginConfig>().rules.run.query.maxResponseSize;
+  }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return forwardThenFinalize(streamState, {
@@ -134,6 +144,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           rule,
           input,
           logger: this.logger,
+          maxResponseSize: this.maxQueryResponseSize,
         })
       : undefined;
 
@@ -188,6 +199,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
         input,
         activeGroupHashes: activeGroups,
         breachedGroupHashes,
+        maxResponseSize: this.maxQueryResponseSize,
       });
     }
 

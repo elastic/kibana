@@ -372,6 +372,13 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /**
+   * An ES|QL query response exceeded the configured
+   * `xpack.alerting_v2.rules.run.query.maxResponseSize` limit. The rule
+   * execution is attributed to the rule owner (`TaskErrorSource.USER`) so they
+   * can narrow the query or adjust the limit.
+   */
+  RULE_EXECUTION_QUERY_RESPONSE_TOO_LARGE: 'RULE_EXECUTION_QUERY_RESPONSE_TOO_LARGE',
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
