@@ -48,7 +48,9 @@ export const rewriteCardUrl = <T extends IntegrationCardItem>(
   url: card.url.indexOf('/app/integrations') >= 0 ? addPathParamToUrl(card.url, params) : card.url,
 });
 
-export function useCardUrlRewrite({ category, search }: OnboardingReturnState) {
+// Collection ids belong to the members inside a collection card, which the
+// callers rewrite themselves with `rewriteCardUrl`.
+export function useCardUrlRewrite({ category, search }: Omit<OnboardingReturnState, 'collection'>) {
   return useCallback(
     <T extends IntegrationCardItem>(card: T) => rewriteCardUrl(card, { category, search }),
     [category, search]
