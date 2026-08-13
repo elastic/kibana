@@ -88,8 +88,8 @@ function toComputedFeature(
  * Generates all computed features by running every registered generator.
  *
  * Best-effort: a rejected generator is logged and skipped so one failure doesn't
- * lose the others. `undefined` results (provider absent, no match) are skipped too.
- * Throws only when *every* generator rejects — a total failure, not a partial one.
+ * lose the others; `undefined` results (skips) are dropped too. Throws only when
+ * failures leave zero features — a skip is not a failure.
  */
 export async function generateAllComputedFeatures(
   options: ComputedFeatureGeneratorOptions
@@ -99,23 +99,23 @@ export async function generateAllComputedFeatures(
     allGenerators.map((generator) => generator.generate(options))
   );
 
+  const rejectedReasons: unknown[] = [];
   const features = results.flatMap((result, index) => {
-    const generator = allGenerators[index];
     if (result.status === 'rejected') {
+      rejectedReasons.push(result.reason);
       options.logger.warn(
-        `Computed feature generator "${generator.type}" failed: ${result.reason}`
+        `Computed feature generator "${allGenerators[index].type}" failed: ${result.reason}`
       );
       return [];
     }
     if (result.value === undefined) {
       return [];
     }
-    return [toComputedFeature(generator, result.value, options.stream.name)];
+    return [toComputedFeature(allGenerators[index], result.value, options.stream.name)];
   });
 
-  if (results.length > 0 && results.every((result) => result.status === 'rejected')) {
-    const reasons = results.map((result) => (result as PromiseRejectedResult).reason).join('; ');
-    throw new Error(`All computed feature generators failed: ${reasons}`);
+  if (features.length === 0 && rejectedReasons.length > 0) {
+    throw new Error(`All computed feature generators failed: ${rejectedReasons.join('; ')}`);
   }
 
   return features;

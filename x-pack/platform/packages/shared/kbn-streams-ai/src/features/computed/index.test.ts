@@ -41,20 +41,33 @@ describe('generateAllComputedFeatures', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(errorLogsGenerator.type));
   });
 
-  // Total failure must surface as a throw, not an empty result.
-  it('throws when every generator rejects', async () => {
+  // A skipped generator (undefined) must not mask a total failure of the rest.
+  it('throws when failures leave no features, alongside a skipped generator', async () => {
+    [
+      datasetAnalysisGenerator,
+      logSamplesGenerator,
+      logPatternsGenerator,
+      errorLogsGenerator,
+    ].forEach((generator) =>
+      jest.spyOn(generator, 'generate').mockRejectedValue(new Error('boom'))
+    );
+    jest.spyOn(codeAnalysisGenerator, 'generate').mockResolvedValue(undefined);
+
+    await expect(generateAllComputedFeatures(options)).rejects.toThrow(
+      'All computed feature generators failed'
+    );
+  });
+
+  // Nothing produced with no failures is legitimate, not an error.
+  it('returns empty without throwing when all generators skip and none fail', async () => {
     [
       datasetAnalysisGenerator,
       logSamplesGenerator,
       logPatternsGenerator,
       errorLogsGenerator,
       codeAnalysisGenerator,
-    ].forEach((generator) =>
-      jest.spyOn(generator, 'generate').mockRejectedValue(new Error('boom'))
-    );
+    ].forEach((generator) => jest.spyOn(generator, 'generate').mockResolvedValue(undefined));
 
-    await expect(generateAllComputedFeatures(options)).rejects.toThrow(
-      'All computed feature generators failed'
-    );
+    await expect(generateAllComputedFeatures(options)).resolves.toEqual([]);
   });
 });
