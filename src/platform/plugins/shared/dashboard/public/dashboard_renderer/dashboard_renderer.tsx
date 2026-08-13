@@ -174,11 +174,9 @@ export function DashboardRenderer({
 
   const isDashboardViewportLoading = !dashboardApi && !error;
 
-  const viewportClasses = classNames(
-    'dashboardViewport',
-    { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': isDashboardViewportLoading }
-  );
+  const viewportClasses = classNames('dashboardViewport', {
+    'dashboardViewport--loading': isDashboardViewportLoading,
+  });
 
   const loadingSpinner = showPlainSpinner ? (
     <EuiLoadingSpinner size="xxl" />
@@ -208,7 +206,6 @@ export function DashboardRenderer({
 
     return dashboardApi && dashboardInternalApi ? (
       <div
-        className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
