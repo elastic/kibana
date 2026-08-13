@@ -98,6 +98,8 @@ export const LICENSE_OVERRIDES = {
   '@elastic/esql-promql-grammar': ['Elastic License 2.0'],
   '@elastic/esql-types': ['Elastic License 2.0'],
   '@elastic/esql': ['Elastic License 2.0'],
+  '@elastic/esql-ast': ['Elastic License 2.0'],
+  '@elastic/esql-traversal': ['Elastic License 2.0'],
   '@elastic/esql-definitions': ['Elastic License 2.0'],
   '@elastic/pretty-printer': ['Elastic License 2.0'],
   '@elastic/eui': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
