@@ -554,7 +554,7 @@ describe('SyntheticsPrivateLocation', () => {
       expect(policy?.condition).toBe(UNASSIGNED_CONDITION);
     });
 
-    it('clears an old condition for a classic location', async () => {
+    it('preserves the classic payload when no scalable-location condition exists', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
 
       const policy = await syntheticsPrivateLocation.generateNewPolicy(
@@ -566,7 +566,25 @@ describe('SyntheticsPrivateLocation', () => {
         [],
         undefined,
         undefined,
-        { agentIds: ['agent-a'] },
+        { agentIds: ['agent-a'] }
+      );
+
+      expect(policy?.condition).toBeUndefined();
+    });
+
+    it('clears a scalable-location condition when the location switches back to classic', async () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      const policy = await syntheticsPrivateLocation.generateNewPolicy(
+        testConfig,
+        mockPrivateLocation,
+        testMonitorPolicy,
+        'default',
+        {},
+        [],
+        undefined,
+        undefined,
+        undefined,
         agentIdCondition('agent-a')
       );
 

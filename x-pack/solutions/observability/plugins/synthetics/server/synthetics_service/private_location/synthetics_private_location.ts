@@ -236,9 +236,13 @@ export class SyntheticsPrivateLocation {
           newPolicy.condition = UNASSIGNED_CONDITION;
         }
       } else {
-        // Clear a prior scalable-location pin if the location switches back to
-        // the classic execution model.
-        newPolicy.condition = null;
+        // Preserve the classic payload exactly as it was unless this edit is
+        // explicitly turning off a previously stamped scalable-location pin.
+        // In particular, package-policy creation must omit `condition`; an
+        // explicit `null` changes the Fleet policy and breaks classic callers.
+        if (existingCondition !== undefined) {
+          newPolicy.condition = null;
+        }
       }
       if (testRunId) {
         newPolicy.name =
