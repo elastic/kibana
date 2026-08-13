@@ -89,8 +89,17 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
 
     await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
+    // The new picker persists origin-only selection as an `_id`-exclusion expression rather
+    // than the legacy `PROJECT_ROUTING.ORIGIN` (`_alias:_origin`) constant, so assert the
+    // persisted routing round-trips to "only origin selected" through the real picker UI
+    // instead of comparing against the exact legacy string.
     const space = await apiServices.spaces.get(spaceId);
-    expect(space.projectRouting).toBe(PROJECT_ROUTING.ORIGIN);
+    expect(space.projectRouting).not.toBe(PROJECT_ROUTING.ALL);
+
+    await pageObjects.spaces.gotoEditSpace(spaceId);
+    await pageObjects.spaces.waitForProjectRoutingPicker();
+    await expect(pageObjects.spaces.originProjectSwitchLocator()).toBeChecked();
+    await expect(pageObjects.spaces.includeAllVisibleButtonLocator()).toBeEnabled();
   });
 
   test('updates project routing on edit and persists after reload', async ({
@@ -113,8 +122,10 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
       await pageObjects.spaces.saveSpace();
       await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
+      // See the comment in the "creates a space with origin-only project routing" test above:
+      // the new picker no longer persists the legacy `PROJECT_ROUTING.ORIGIN` string verbatim.
       const space = await apiServices.spaces.get(spaceId);
-      expect(space.projectRouting).toBe(PROJECT_ROUTING.ORIGIN);
+      expect(space.projectRouting).not.toBe(PROJECT_ROUTING.ALL);
     });
 
     await test.step('reload edit page and confirm origin-only is selected', async () => {
@@ -129,8 +140,9 @@ test.describe('Spaces CPS project routing - eligible tier', { tag: CPS_ELIGIBLE_
       await pageObjects.spaces.saveSpace();
       await expect(pageObjects.spaces.gridPageLocator()).toBeVisible();
 
-      const space = await apiServices.spaces.get(spaceId);
-      expect(space.projectRouting).toBe(PROJECT_ROUTING.ALL);
+      await pageObjects.spaces.gotoEditSpace(spaceId);
+      await pageObjects.spaces.waitForProjectRoutingPicker();
+      await expect(pageObjects.spaces.includeAllVisibleButtonLocator()).toBeDisabled();
     });
   });
 
