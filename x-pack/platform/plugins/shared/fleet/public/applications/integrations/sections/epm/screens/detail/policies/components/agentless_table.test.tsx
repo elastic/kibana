@@ -174,10 +174,10 @@ describe('AgentlessPackagePoliciesTable', () => {
     expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
   });
 
-  it('opens flyout when openEnrollmentFlyout query param matches a package policy id', async () => {
+  it('opens flyout when openEnrollmentFlyout query param matches an agent policy id', async () => {
     mockUseLocation.mockReturnValue({
       pathname: '/',
-      search: '?openEnrollmentFlyout=packagePolicy1',
+      search: '?openEnrollmentFlyout=policy1',
       hash: '',
       state: undefined,
     });
