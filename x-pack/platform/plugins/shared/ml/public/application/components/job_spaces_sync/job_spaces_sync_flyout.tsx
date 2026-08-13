@@ -125,12 +125,6 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
           <KbnInfoCallout
             title={
               <FormattedMessage
-                id="xpack.ml.management.syncSavedObjectsFlyout.calloutTitle"
-                defaultMessage="Saved objects might be out of sync"
-              />
-            }
-            text={
-              <FormattedMessage
                 id="xpack.ml.management.syncSavedObjectsFlyout.description"
                 defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs or trained models in Elasticsearch."
               />
