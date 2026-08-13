@@ -138,6 +138,13 @@ export function createSearchKnowledgeIndicatorsTool({
       - Find relevant KIs via semantic text using \`search_text\`
       - Retrieve queries-only KIs with \`kind: ['query']\`
     `,
+    annotations: {
+      title: 'Search Knowledge Indicators',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: searchKnowledgeIndicatorsSchema,
     tags: ['streams', 'significant-events'],
     availability: {
