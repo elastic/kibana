@@ -13,7 +13,6 @@ import { createFetchResource, type McpFetchResource } from './fetch_resource';
 import { createSseGatedFetch } from './sse_fetch';
 
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
-const MAX_CAUSE_DEPTH = 5;
 const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
 
 /**
@@ -39,24 +38,16 @@ const getErrorCode = (err: unknown): string | undefined => {
   return typeof err.code === 'string' ? err.code : undefined;
 };
 
-const walkCauseChain = (err: unknown, predicate: (current: unknown) => boolean): boolean => {
-  let current: unknown = err;
-  const seen = new Set<unknown>();
-
-  for (let depth = 0; depth < MAX_CAUSE_DEPTH && current != null; depth++) {
-    if (seen.has(current)) {
-      return false;
-    }
-    seen.add(current);
-
-    if (predicate(current)) {
-      return true;
-    }
-
-    current = current instanceof Error ? current.cause : undefined;
+const matchesErrorOrCause = (
+  err: unknown,
+  predicate: (current: unknown) => boolean
+): boolean => {
+  if (predicate(err)) {
+    return true;
   }
-
-  return false;
+  // Undici's fetch throws TypeError("fetch failed") and puts UND_ERR_* on cause.
+  const cause = err instanceof Error ? err.cause : undefined;
+  return cause !== undefined && predicate(cause);
 };
 
 /**
@@ -136,7 +127,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
   },
 
   isUserError(err: unknown): boolean {
-    return walkCauseChain(err, (current) => {
+    return matchesErrorOrCause(err, (current) => {
       if (current instanceof UnauthorizedError) {
         return true;
       }
@@ -148,7 +139,7 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
   },
 
   shouldInvalidateOnError(err: unknown): boolean {
-    return walkCauseChain(err, (current) => {
+    return matchesErrorOrCause(err, (current) => {
       if (current instanceof UnauthorizedError) {
         return true;
       }

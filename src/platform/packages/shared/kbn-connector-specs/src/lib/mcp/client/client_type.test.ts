@@ -321,10 +321,16 @@ describe('createMcpClientType', () => {
       expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
     });
 
-    it('returns true when a terminal error is nested in a bounded cause chain', () => {
+    it('returns true when a terminal undici code is on cause (fetch failed)', () => {
+      const cause = Object.assign(new Error('closed'), { code: 'UND_ERR_CLOSED' });
+      const err = new TypeError('fetch failed', { cause });
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
+    });
+
+    it('returns false when the terminal error is nested deeper than cause', () => {
       const nested = Object.assign(new Error('closed'), { code: 'UND_ERR_CLOSED' });
       const err = new Error('wrapped', { cause: new Error('mid', { cause: nested }) });
-      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(false);
     });
   });
 });
