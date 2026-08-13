@@ -20,6 +20,7 @@ export {
   getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsql,
+  getHostScopedUserEuidEsql,
 } from './esql';
 export {
   applyFieldEvaluations,

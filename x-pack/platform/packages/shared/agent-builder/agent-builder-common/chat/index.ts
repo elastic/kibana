@@ -7,8 +7,12 @@
 
 export {
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  normalizeConversationAccessControl,
   type ConversationAccessControl,
+  type ConversationAccessControlEntry,
+  type ConversationAccessControlPrincipalType,
 } from './access_control';
 export {
   ConversationRoundStatus,

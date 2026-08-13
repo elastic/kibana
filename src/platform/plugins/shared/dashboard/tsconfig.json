@@ -108,14 +108,13 @@
     "@kbn/cps",
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
+    "@kbn/as-code-export-flyout-component",
     "@kbn/scout",
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/cps-utils",
-    "@kbn/code-editor-mock",
-    "@kbn/code-editor",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-utils",
     "@kbn/as-code-shared-transforms",
@@ -130,6 +129,7 @@
     "@kbn/app-header",
     "@kbn/core-chrome-browser-hooks",
     "@kbn/ui-callout",
+    "@kbn/zod-helpers",
   ],
   "exclude": [
     "target/**/*"

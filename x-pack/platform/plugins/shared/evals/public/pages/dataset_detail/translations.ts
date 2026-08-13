@@ -57,10 +57,14 @@ export const METADATA_UPDATED_AT_LABEL = i18n.translate(
   }
 );
 
-export const EDIT_DESCRIPTION_BUTTON = i18n.translate(
-  'xpack.evals.datasetDetail.editDescriptionButton',
+export const EDIT_DATASET_BUTTON = i18n.translate('xpack.evals.datasetDetail.editDatasetButton', {
+  defaultMessage: 'Edit dataset details',
+});
+
+export const EDIT_DATASET_MODAL_TITLE = i18n.translate(
+  'xpack.evals.datasetDetail.editDatasetModalTitle',
   {
-    defaultMessage: 'Edit description',
+    defaultMessage: 'Edit dataset details',
   }
 );
 
@@ -168,13 +172,6 @@ export const MODAL_SAVE_BUTTON = i18n.translate('xpack.evals.datasetDetail.modal
 export const MODAL_DELETE_BUTTON = i18n.translate('xpack.evals.datasetDetail.modalDeleteButton', {
   defaultMessage: 'Delete',
 });
-
-export const EDIT_DESCRIPTION_MODAL_TITLE = i18n.translate(
-  'xpack.evals.datasetDetail.editDescriptionModalTitle',
-  {
-    defaultMessage: 'Edit dataset description',
-  }
-);
 
 export const ADD_EXAMPLE_MODAL_TITLE = i18n.translate(
   'xpack.evals.datasetDetail.addExampleModalTitle',

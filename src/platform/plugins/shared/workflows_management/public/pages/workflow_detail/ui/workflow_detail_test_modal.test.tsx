@@ -255,6 +255,7 @@ describe('WorkflowDetailTestModal', () => {
         },
       });
       (selectWorkflowDefinition as unknown as jest.Mock).mockReturnValue(undefined);
+      (selectEditorYaml as unknown as jest.Mock).mockReturnValue('name: invalid-workflow');
 
       renderModal();
       expect(addWarningSpy).toHaveBeenCalledWith(

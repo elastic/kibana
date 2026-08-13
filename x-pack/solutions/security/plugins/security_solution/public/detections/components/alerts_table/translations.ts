@@ -360,6 +360,13 @@ export const INSUFFICIENT_PRIVILEGES = i18n.translate(
   }
 );
 
+export const REMOTE_DOCUMENT_ACTIONS_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.remoteDocumentActionsUnavailable',
+  {
+    defaultMessage: 'Unavailable for remote documents',
+  }
+);
+
 export const WORKFLOW_START_SUCCESS_TOAST = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.start.success.toast',
   {

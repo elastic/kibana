@@ -28,6 +28,7 @@ import {
   type SelectableEntry,
 } from '@kbn/shared-ux-toolbar-selector';
 import {
+  CHARTS_TOOLBAR_EBT_ELEMENT,
   EBT_CLICK_ACTIONS,
   getEbtProps,
   NONE_EBT_DETAIL,
@@ -35,11 +36,10 @@ import {
   useEcsFieldNames,
 } from '@kbn/ebt-click';
 import type { UnifiedHistogramBreakdownContext } from '../../types';
-import { EBT_BREAKDOWN_SELECTOR_ELEMENT } from './ebt_constants';
 
 const BREAKDOWN_EBT_BASE = {
   action: EBT_CLICK_ACTIONS.SET_BREAKDOWN,
-  element: EBT_BREAKDOWN_SELECTOR_ELEMENT,
+  element: CHARTS_TOOLBAR_EBT_ELEMENT,
 } as const;
 
 export interface BreakdownFieldSelectorProps {
