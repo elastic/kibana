@@ -1095,10 +1095,8 @@ describe('ConversationClient', () => {
 
       await client.updateRoundFeedback('conversation-1', 'round-1', { vote: null });
 
-      const persistedRounds =
-        mockEsClient.index.mock.calls[0][0].document.conversation_rounds as Array<
-          Record<string, unknown>
-        >;
+      const persistedRounds = mockEsClient.index.mock.calls[0][0].document
+        .conversation_rounds as Array<Record<string, unknown>>;
       expect(persistedRounds[0]).not.toHaveProperty('feedback');
     });
 
