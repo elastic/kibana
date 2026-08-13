@@ -12,7 +12,7 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
-import { maintainerIdParamsSchema, runMaintainerQuerySchema } from './utils/validator';
+import { maintainerIdExists, maintainerIdParamsSchema, runMaintainerQuerySchema } from './utils/validator';
 
 const RUN_MAINTAINER_SYNC_SOCKET_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -53,6 +53,10 @@ export function registerRunMaintainer(router: EntityStorePluginRouter) {
 
         const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
         if (forbidden) return forbidden;
+
+        if (!maintainerIdExists(id)) {
+          return res.notFound({ body: { message: `Entity maintainer not found: ${id}` } });
+        }
 
         if (sync) {
           await entityMaintainersClient.runSync(id, req);

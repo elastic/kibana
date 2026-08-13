@@ -12,7 +12,7 @@ import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
-import { maintainerIdParamsSchema } from './utils/validator';
+import { maintainerIdExists, maintainerIdParamsSchema } from './utils/validator';
 
 export function registerStartMaintainer(router: EntityStorePluginRouter) {
   router.versioned
@@ -44,6 +44,10 @@ export function registerStartMaintainer(router: EntityStorePluginRouter) {
 
         const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
         if (forbidden) return forbidden;
+
+        if (!maintainerIdExists(id)) {
+          return res.notFound({ body: { message: `Entity maintainer not found: ${id}` } });
+        }
 
         await entityMaintainersClient.start(id, req);
 
