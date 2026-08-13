@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
 import type { SharedBulkItem } from '../../lib/shared_bulk';
 import { sharedBulk } from '../../lib/shared_bulk';
@@ -28,7 +29,6 @@ import type {
   ScriptUpdateRequest,
   ScriptUpdateResponse,
 } from '../../types';
-import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 
 const notImplemented = (method: string): never => {
   throw new Error(`DataStreamExecutionsDataAccess.${method} is not implemented`);
@@ -42,7 +42,7 @@ export interface DataStreamExecutionsDataAccessDeps<TExecution extends { id: str
   dateField: keyof TExecution;
   logger: Logger;
 }
-  
+
 export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   implements DataClient<TExecution>
 {
@@ -80,7 +80,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
-    return await retryTransientEsErrors(
+    return retryTransientEsErrors(
       () =>
         this.deps.esClient.count({
           index: this.deps.dataStreamName,
@@ -180,7 +180,7 @@ export class DataStreamExecutionsDataAccess<TExecution extends { id: string }>
         ...item,
         document: {
           ...item.document,
-          ...(timestampValue ? { ['@timestamp']: timestampValue } : {}),
+          ...(timestampValue ? { '@timestamp': timestampValue } : {}),
         },
       };
     });
