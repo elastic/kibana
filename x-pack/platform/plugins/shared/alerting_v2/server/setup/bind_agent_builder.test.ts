@@ -10,7 +10,6 @@ import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
 import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
@@ -62,9 +61,15 @@ const registerSkillsMock = registerSkills as jest.MockedFunction<typeof register
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
 type AgentBuilderSmlSetup = NonNullable<AlertingServerSetupDependencies['agentBuilderSml']>;
 
-const ruleAttachment = { id: 'rule-attachment' } as AttachmentTypeDefinition;
-const actionPolicyAttachment = { id: 'action-policy-attachment' } as AttachmentTypeDefinition;
-const episodeAttachment = { id: 'episode-attachment' } as AttachmentTypeDefinition;
+const ruleAttachment = { id: 'rule-attachment' } as unknown as ReturnType<
+  typeof createRuleAttachmentType
+>;
+const actionPolicyAttachment = { id: 'action-policy-attachment' } as unknown as ReturnType<
+  typeof createActionPolicyAttachmentType
+>;
+const episodeAttachment = { id: 'episode-attachment' } as unknown as ReturnType<
+  typeof createEpisodeAttachmentType
+>;
 const ruleSmlType = { id: 'rule-sml' };
 const actionPolicySmlType = { id: 'action-policy-sml' };
 
