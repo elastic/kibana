@@ -14,7 +14,7 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
 } from './constants';
 import { DataStreamExecutionsDataAccess } from './data_stream_executions_data_access';
-import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../..';
+import { WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/workflow_executions_mappings';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS } from '../../mappings/step_executions_mappings';
 import type {
   CreateDataClientDeps,
