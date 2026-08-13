@@ -58,6 +58,7 @@ describe('migrateLegacySecurityAssets', () => {
     get: () => logger,
     debug: jest.fn(),
     info: jest.fn(),
+    warn: jest.fn(),
     error: jest.fn(),
   } as any;
 
@@ -415,5 +416,24 @@ describe('migrateLegacySecurityAssets', () => {
     await ensureLegacyCompatibilityAliases({ esClient, logger, namespace });
 
     expect(esClient.indices.updateAliases).not.toHaveBeenCalled();
+  });
+
+  it('ensureLegacyCompatibilityAliases warns and does not throw when updateAliases is unauthorized', async () => {
+    const newIndex = getLatestEntitiesIndexName(namespace);
+    const newMetadata = `.entities.v2.metadata.${namespace}`;
+    mockConcrete([newIndex, newMetadata]);
+    esClient.indices.updateAliases.mockRejectedValue(
+      new Error(
+        'security_exception: action [indices:admin/aliases] is unauthorized for service account [elastic/kibana]'
+      )
+    );
+
+    await expect(
+      ensureLegacyCompatibilityAliases({ esClient, logger, namespace })
+    ).resolves.toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Could not add legacy compatibility alias')
+    );
   });
 });

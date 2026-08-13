@@ -664,6 +664,7 @@ export class AssetManagerClient {
 
     await installSharedElasticsearchAssets({
       esClient: this.esClient,
+      migrationEsClient: this.internalEsClient,
       logger: this.logger,
       namespace: this.namespace,
     });

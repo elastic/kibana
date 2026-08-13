@@ -630,8 +630,13 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
 
     expect(result).toBe(true);
     expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
+    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledWith(
+      expect.objectContaining({
+        migrationEsClient: expect.anything(),
+      })
+    );
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.latest.security_default-00001')
+      expect.stringContaining('.entities.v2.latest.default-00001')
     );
   });
 
@@ -643,7 +648,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     expect(result).toBe(true);
     expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.updates.security_default')
+      expect.stringContaining('.entities.v2.updates.default')
     );
   });
 
@@ -655,7 +660,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     expect(result).toBe(true);
     expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.metadata.security_default')
+      expect.stringContaining('.entities.v2.metadata.default')
     );
   });
 

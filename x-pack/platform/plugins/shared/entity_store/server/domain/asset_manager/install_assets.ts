@@ -52,9 +52,11 @@ interface SharedElasticsearchAssetOptions {
 
 interface InstallSharedElasticsearchAssetOptions extends SharedElasticsearchAssetOptions {
   /**
-   * Client used for legacy→neutral migration and compatibility aliases. Prefer the
-   * Kibana internal user (like v1 cleanup) so upgrade/migration is not gated on the
-   * requesting user's `manage` privileges on entity indices.
+   * Client used for legacy→neutral migration (reindex/delete). Prefer the Kibana
+   * internal user (like v1 cleanup) so upgrade/migration is not gated on the
+   * requesting user's `manage` privileges on entity indices. Compatibility aliases
+   * still use `esClient` — the service account lacks `indices:admin/aliases` on
+   * caller-created indices in serverless.
    */
   migrationEsClient: ElasticsearchClient;
 }
@@ -93,8 +95,11 @@ export async function installSharedElasticsearchAssets({
 
     // Bridge custom / predefined roles still granting `.entities.v2.*.security_*`
     // until elasticsearch-controller and ES reserved roles ship neutral patterns.
+    // Use the requesting user (esClient), not the Kibana service account: on serverless
+    // `elastic/kibana` is not granted `indices:admin/aliases` / `manage` on these
+    // indices (they were just created by the caller), which otherwise 500s install.
     await ensureLegacyCompatibilityAliases({
-      esClient: migrationEsClient,
+      esClient,
       logger,
       namespace,
     });

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getErrorMessage } from '../../../common';
 import {
   ENTITY_LATEST,
   ENTITY_METADATA,
@@ -245,6 +246,10 @@ export async function migrateLegacySecurityAssets({
  *
  * Ordering: an alias cannot share a name with a live index or data stream, so this
  * must run only after legacy concrete assets have been deleted (or never existed).
+ *
+ * Best-effort: alias failures are logged and swallowed. Install must not 500 when the
+ * caller (or Kibana SA on the upgrade path) lacks `indices:admin/aliases` — neutral
+ * assets already work for roles granted on `.entities.v2.*.{ns}`.
  */
 export async function ensureLegacyCompatibilityAliases({
   esClient,
@@ -258,19 +263,25 @@ export async function ensureLegacyCompatibilityAliases({
   const newMetadata = getMetadataEntitiesDataStreamName(namespace);
   const legacyMetadataAlias = getLegacyMetadataDataStreamName(namespace);
 
-  if (
-    (await isConcreteIndexOrDataStream(esClient, newIndex)) &&
-    !(await isConcreteIndexOrDataStream(esClient, legacyLatestConcrete)) &&
-    !(await isConcreteIndexOrDataStream(esClient, legacyLatestAlias))
-  ) {
-    await addAliasIfMissing(esClient, newIndex, legacyLatestAlias, log);
-  }
+  try {
+    if (
+      (await isConcreteIndexOrDataStream(esClient, newIndex)) &&
+      !(await isConcreteIndexOrDataStream(esClient, legacyLatestConcrete)) &&
+      !(await isConcreteIndexOrDataStream(esClient, legacyLatestAlias))
+    ) {
+      await addAliasIfMissing(esClient, newIndex, legacyLatestAlias, log);
+    }
 
-  if (
-    (await isConcreteIndexOrDataStream(esClient, newMetadata)) &&
-    !(await isConcreteIndexOrDataStream(esClient, legacyMetadataAlias))
-  ) {
-    await addAliasIfMissing(esClient, newMetadata, legacyMetadataAlias, log);
+    if (
+      (await isConcreteIndexOrDataStream(esClient, newMetadata)) &&
+      !(await isConcreteIndexOrDataStream(esClient, legacyMetadataAlias))
+    ) {
+      await addAliasIfMissing(esClient, newMetadata, legacyMetadataAlias, log);
+    }
+  } catch (error) {
+    log.warn(
+      `Could not ensure legacy compatibility aliases in ${namespace}: ${getErrorMessage(error)}`
+    );
   }
 }
 
@@ -290,10 +301,17 @@ async function addAliasIfMissing(
     // Alias does not exist yet (404).
   }
 
-  await esClient.indices.updateAliases({
-    actions: [{ add: { index, alias } }],
-  });
-  logger.info(`Added legacy compatibility alias ${alias} → ${index}`);
+  try {
+    await esClient.indices.updateAliases({
+      actions: [{ add: { index, alias } }],
+    });
+    logger.info(`Added legacy compatibility alias ${alias} → ${index}`);
+  } catch (error) {
+    // Serverless Kibana SA often lacks indices:admin/aliases on these indices.
+    logger.warn(
+      `Could not add legacy compatibility alias ${alias} → ${index}: ${getErrorMessage(error)}`
+    );
+  }
 }
 
 async function migrateLatestIndex({
