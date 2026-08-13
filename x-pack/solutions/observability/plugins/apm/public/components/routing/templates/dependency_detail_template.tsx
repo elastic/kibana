@@ -27,7 +27,16 @@ interface Props {
 export function DependencyDetailTemplate({ children }: Props) {
   const {
     query,
-    query: { dependencyName, rangeFrom, rangeTo, refreshInterval, refreshPaused, environment, kuery, comparisonEnabled },
+    query: {
+      dependencyName,
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+      environment,
+      kuery,
+      comparisonEnabled,
+    },
   } = useApmParams('/dependencies');
 
   const router = useApmRouter();
