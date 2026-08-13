@@ -260,33 +260,36 @@ describe('registerProfileProviders', () => {
           dataView: createStubIndexPattern({ spec: { title: CUSTOM_TRACES_INDEX_PATTERN } }),
         },
       ],
-    ])('resolves the traces profile for a custom traces-shaped pattern in %s', async (_, params) => {
-      const { dataSourceProfileServiceMock, profileProviderServices, rootContext } =
-        await setupObservabilityProfileStack();
-      const apmSourcesAccess = {
-        getApmIndices: jest.fn().mockResolvedValue({
-          transaction: CUSTOM_TRACES_INDEX_PATTERN,
-          span: CUSTOM_TRACES_INDEX_PATTERN,
-          error: '',
-          metric: '',
-          onboarding: '',
-          sourcemap: '',
-        }),
-        getApmIndexSettings: jest.fn(),
-        saveApmIndices: jest.fn(),
-      } as ApmSourceAccessPluginStart;
-      const configuredApmContextService = await createApmContextService({
-        apmSourcesAccess,
-      });
-      profileProviderServices.apmContextService.tracesService =
-        configuredApmContextService.tracesService;
-      const dataSourceContext = await dataSourceProfileServiceMock.resolve({
-        rootContext,
-        ...params,
-      });
+    ])(
+      'resolves the traces profile for a custom traces-shaped pattern in %s',
+      async (_, params) => {
+        const { dataSourceProfileServiceMock, profileProviderServices, rootContext } =
+          await setupObservabilityProfileStack();
+        const apmSourcesAccess = {
+          getApmIndices: jest.fn().mockResolvedValue({
+            transaction: CUSTOM_TRACES_INDEX_PATTERN,
+            span: CUSTOM_TRACES_INDEX_PATTERN,
+            error: '',
+            metric: '',
+            onboarding: '',
+            sourcemap: '',
+          }),
+          getApmIndexSettings: jest.fn(),
+          saveApmIndices: jest.fn(),
+        } as ApmSourceAccessPluginStart;
+        const configuredApmContextService = await createApmContextService({
+          apmSourcesAccess,
+        });
+        profileProviderServices.apmContextService.tracesService =
+          configuredApmContextService.tracesService;
+        const dataSourceContext = await dataSourceProfileServiceMock.resolve({
+          rootContext,
+          ...params,
+        });
 
-      expect(dataSourceContext.profileId).toBe(OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID);
-    });
+        expect(dataSourceContext.profileId).toBe(OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID);
+      }
+    );
 
     describe.each(LOG_PROFILE_CASES)('%s', (profileId, indexPattern) => {
       it.each([
