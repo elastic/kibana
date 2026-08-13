@@ -849,7 +849,8 @@ export class CasesConnectorExecutor {
       tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
-      settings: v2Template.settings ?? { ...DEFAULT_CASE_SETTINGS },
+      // Template settings keys are individually optional; merge so syncAlerts is always set for CaseSettingsRt.
+      settings: { ...DEFAULT_CASE_SETTINGS, ...v2Template.settings },
       ...(v2Template.assignees ? { assignees: v2Template.assignees } : {}),
       owner: params.owner,
       customFields: builtCustomFields,

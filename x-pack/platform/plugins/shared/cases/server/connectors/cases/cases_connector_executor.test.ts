@@ -1366,6 +1366,43 @@ fields: []
             expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
           });
 
+          it('merges partial template settings over defaults so syncAlerts is always set', async () => {
+            const v2TemplateWithPartialSettings = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+settings:
+  extractObservables: true
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithPartialSettings);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.settings).toEqual({
+              syncAlerts: false,
+              extractObservables: true,
+            });
+          });
+
           it('falls back to .none when the template connector cannot be resolved', async () => {
             const v2TemplateWithDeletedConnector = {
               ...v2TemplateSO,
@@ -1437,6 +1474,7 @@ fields: []
               deletedAt: null,
               isEnabled: true,
               isLatest: true,
+              fieldSearchMatches: false,
             };
             casesClientMock.templates.getAllTemplates.mockResolvedValue({
               templates: [migratedV2Template],
