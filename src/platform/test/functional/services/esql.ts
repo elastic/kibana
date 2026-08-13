@@ -196,8 +196,10 @@ export class ESQLService extends FtrService {
 
   public async isQuickSearchVisorVisible() {
     const visorContainer = await this.testSubjects.find('ESQLEditor-quick-search-visor');
-    const inertAttr = await visorContainer.getAttribute('inert');
-    return inertAttr === null;
+    return await this.browser.execute(
+      'return !arguments[0].hasAttribute("inert");',
+      visorContainer._webElement
+    );
   }
 
   public async triggerSuggestions(editorSubjId = 'ESQLEditor') {
