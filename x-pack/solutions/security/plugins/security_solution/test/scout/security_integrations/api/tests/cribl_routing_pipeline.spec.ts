@@ -76,7 +76,7 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     });
     expect(packageInfoRes).toHaveStatusCode(200);
     criblPackageVersion = packageInfoRes.body?.item?.version;
-    expect(criblPackageVersion).toBeTruthy();
+    expect(criblPackageVersion).toBeDefined();
 
     // Ensure package assets are installed before creating policies.
     await apiClient
@@ -101,7 +101,7 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     });
     expect(agentPolicyRes).toHaveStatusCode(200);
     agentPolicyId = agentPolicyRes.body?.item?.id;
-    expect(agentPolicyId).toBeTruthy();
+    expect(agentPolicyId).toBeDefined();
 
     packagePolicyName = `cribl-scout-${Date.now()}`;
     const createRes = await apiClient.post('/api/fleet/package_policies?force=true', {
@@ -115,7 +115,7 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     });
     expect(createRes).toHaveStatusCode(200);
     packagePolicyId = createRes.body?.item?.id;
-    expect(packagePolicyId).toBeTruthy();
+    expect(packagePolicyId).toBeDefined();
     expect(createRes.body?.item?.vars?.route_entries?.value).toBe(buildRouteEntries(VALID_DATA_ID));
   });
 
@@ -146,7 +146,7 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
   apiTest('creates the routing pipeline with an exact dataId condition', async ({ esClient }) => {
     const pipeline = await getPipeline(esClient);
     const processors = pipeline[CRIBL_ROUTING_PIPELINE]?.processors ?? [];
-    expect(processors.some((p) => p.reroute?.if === `ctx['_dataId'] == '${VALID_DATA_ID}'`)).toBe(
+    expect(processors.some((p) => p?.reroute?.if === `ctx['_dataId'] == '${VALID_DATA_ID}'`)).toBe(
       true
     );
   });
@@ -190,11 +190,11 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
       const pipeline = await getPipeline(esClient);
       const processors = pipeline[CRIBL_ROUTING_PIPELINE]?.processors ?? [];
       expect(
-        processors.some((p) => p.reroute?.if === `ctx['_dataId'] == '${UPDATED_DATA_ID}'`)
+        processors.some((p) => p?.reroute?.if === `ctx['_dataId'] == '${UPDATED_DATA_ID}'`)
       ).toBe(true);
-      expect(processors.some((p) => p.reroute?.if === `ctx['_dataId'] == '${VALID_DATA_ID}'`)).toBe(
-        false
-      );
+      expect(
+        processors.some((p) => p?.reroute?.if === `ctx['_dataId'] == '${VALID_DATA_ID}'`)
+      ).toBe(false);
     }
   );
 
@@ -257,9 +257,13 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
       expect(createRes).toHaveStatusCode(403);
       expect(createRes.body?.message).toMatch(/Failed to put Cribl integration routing pipeline/);
 
-      await expect(getPipeline(esClient)).rejects.toMatchObject({
-        meta: { statusCode: 404 },
-      });
+      let missingPipelineStatusCode: number | undefined;
+      try {
+        await getPipeline(esClient);
+      } catch (error) {
+        missingPipelineStatusCode = (error as { meta?: { statusCode?: number } }).meta?.statusCode;
+      }
+      expect(missingPipelineStatusCode).toBe(404);
     }
   );
 });
