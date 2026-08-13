@@ -14,6 +14,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
+import type { GroupedIntegrationCardItem } from './collection_card';
+import { isCollectionCard } from './collection_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
 
 // The real Fleet matcher, loaded the same way production does.
@@ -87,6 +89,32 @@ describe('useAddDataResultItems', () => {
     );
 
     expect(result.current.items.map(({ id }) => id)).toEqual(['epr:docker']);
+  });
+
+  it('rewrites collection member urls alongside the top-level cards', () => {
+    const collection: GroupedIntegrationCardItem = {
+      ...makeCard({ id: 'collection:nginx', url: '/app/integrations/collection/nginx' }),
+      isCollectionCard: true,
+      groupMembers: [
+        makeCard({}),
+        makeCard({ id: 'epr:nginx_otel', name: 'nginx_otel', title: 'Nginx (OpenTelemetry)' }),
+      ],
+    };
+    const useAvailablePackages = mockPackages([collection]);
+
+    const { result } = renderHook(
+      () => useAddDataResultItems({ searchTerm: 'nginx', useAvailablePackages, useLocalSearch }),
+      { wrapper }
+    );
+
+    const [resultCard] = result.current.items;
+    if (!isCollectionCard(resultCard)) {
+      throw new Error('expected the collection card to survive the pipeline');
+    }
+    expect(resultCard.groupMembers).toHaveLength(2);
+    for (const memberUrl of resultCard.groupMembers.map(({ url }) => url)) {
+      expect(memberUrl).toContain('returnAppId=');
+    }
   });
 
   it('surfaces the Fleet package loading error', () => {

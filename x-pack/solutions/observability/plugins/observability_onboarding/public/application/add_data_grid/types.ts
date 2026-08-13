@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEventHandler, ReactElement } from 'react';
+import type { MouseEventHandler, ReactElement, ReactNode } from 'react';
 
 /**
  * Host-built view-model for a curated tile. `icon` is a ReactElement, not a
@@ -20,6 +20,8 @@ export interface CuratedTile {
   /** Anchor `target`, for example `_blank` for external destinations. */
   target?: string;
   onClick?: MouseEventHandler;
+  /** Optional badge rendered in the top-right corner, e.g. a collection's variant count. */
+  badge?: ReactNode;
   'data-test-subj'?: string;
 }
 

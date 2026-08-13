@@ -8,10 +8,12 @@
 import { EuiHorizontalRule, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import React, { useState } from 'react';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { AddDataSearchBar, DocsLinksSection } from '../add_data_grid';
+import type { CollectionCardItem } from '../add_data_page/collection_card';
+import { CollectionFlyout } from '../add_data_page/collection_flyout';
 import { ObservabilityIntegrationsSection } from '../add_data_page/integrations_section';
 import { useObservabilityDocsLinks } from '../add_data_page/observability_docs_links';
 import { ObservabilitySearchResults } from '../add_data_page/observability_search_results';
@@ -29,6 +31,9 @@ const ObservabilityDocsLinksSection = () => {
 const AddDataPageV2 = () => {
   const [searchValue, setSearchValue] = useAddDataSearchUrlSync();
   const searchTerm = searchValue.trim();
+  // Hosted here rather than inside the results, so surfaces other than a
+  // search result card can open the same chooser.
+  const [openCollection, setOpenCollection] = useState<CollectionCardItem | null>(null);
 
   return (
     <EuiPageTemplate paddingSize="none" data-test-subj="addDataPageV2">
@@ -45,7 +50,10 @@ const AddDataPageV2 = () => {
         {searchTerm !== '' && (
           <>
             <EuiSpacer size="l" />
-            <ObservabilitySearchResults searchTerm={searchTerm} />
+            <ObservabilitySearchResults
+              searchTerm={searchTerm}
+              onOpenCollection={setOpenCollection}
+            />
           </>
         )}
         <EuiHorizontalRule margin="xl" />
@@ -54,6 +62,9 @@ const AddDataPageV2 = () => {
         <EuiHorizontalRule margin="xl" />
         <ObservabilityDocsLinksSection />
       </EuiPageTemplate.Section>
+      {openCollection && (
+        <CollectionFlyout card={openCollection} onClose={() => setOpenCollection(null)} />
+      )}
     </EuiPageTemplate>
   );
 };

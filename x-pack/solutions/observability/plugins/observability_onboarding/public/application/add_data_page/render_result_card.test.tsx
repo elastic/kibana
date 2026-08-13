@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { matchers } from '@emotion/jest';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { renderResultCard } from './render_result_card';
+import type { CollectionCardItem } from './collection_card';
+import { createRenderResultCard } from './render_result_card';
 
 expect.extend(matchers);
 
@@ -30,9 +33,26 @@ const item: IntegrationCardItem = {
   categories: ['observability'],
 };
 
-describe('renderResultCard', () => {
+const collectionItem: CollectionCardItem = {
+  ...item,
+  id: 'collection:nginx',
+  description: 'Choose from ECS-based or OTel-based collection.',
+  url: '/app/integrations/collection/nginx',
+  isCollectionCard: true,
+  groupMembers: [
+    item,
+    { ...item, id: 'epr:nginx_otel', name: 'nginx_otel', title: 'Nginx (OpenTelemetry)' },
+  ],
+};
+
+const renderCard = (target: IntegrationCardItem, onOpenCollection = jest.fn()) => {
+  render(<I18nProvider>{createRenderResultCard({ onOpenCollection })(target)}</I18nProvider>);
+  return onOpenCollection;
+};
+
+describe('createRenderResultCard', () => {
   it('renders the item as a grid tile card', () => {
-    render(<>{renderResultCard(item)}</>);
+    renderCard(item);
     const card = screen.getByTestId('addDataResultCard-epr:nginx');
     expect(card).toBeInTheDocument();
     expect(screen.getByText('Nginx')).toBeInTheDocument();
@@ -48,22 +68,46 @@ describe('renderResultCard', () => {
   });
 
   it('reserves the same two description lines as the curated grid tiles', () => {
-    render(<>{renderResultCard(item)}</>);
+    renderCard(item);
     expect(
       screen.getByText('Collect logs and metrics from Nginx servers with Elastic Agent.')
     ).toHaveStyleRule('-webkit-line-clamp', '2');
   });
 
   it('opens external item urls in a new tab, matching PackageCard', () => {
-    const externalItem: IntegrationCardItem = {
-      ...item,
-      id: 'placeholder.esf',
-      url: 'https://ela.st/example-content-pack',
-    };
-
-    render(<>{renderResultCard(externalItem)}</>);
-
+    renderCard({ ...item, id: 'placeholder.esf', url: 'https://ela.st/example-content-pack' });
     const card = screen.getByTestId('addDataResultCard-placeholder.esf');
     expect(card.querySelector('a')).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders a collection card with a variant count badge that opens the chooser', async () => {
+    const user = userEvent.setup();
+    const onOpenCollection = renderCard(collectionItem);
+
+    const card = screen.getByTestId('addDataResultCard-collection:nginx');
+    expect(card).toHaveTextContent('2 variants');
+    // The chooser opens in place, so the card must not also navigate.
+    expect(card.querySelector('a')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('Nginx'));
+    expect(onOpenCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'collection:nginx' })
+    );
+  });
+
+  it('renders a singleton collection as a plain card, mirroring Fleet degradation', () => {
+    const singleton: CollectionCardItem = {
+      ...collectionItem,
+      groupMembers: [item],
+      url: '/app/integrations/detail/nginx-1.0.0/overview',
+    };
+    renderCard(singleton);
+
+    const card = screen.getByTestId('addDataResultCard-collection:nginx');
+    expect(card.querySelector('a')).toHaveAttribute(
+      'href',
+      '/app/integrations/detail/nginx-1.0.0/overview'
+    );
+    expect(card).not.toHaveTextContent('variant');
   });
 });

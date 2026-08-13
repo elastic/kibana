@@ -28,18 +28,23 @@ jest.mock('@kbn/fleet-plugin/public', () => {
   };
 });
 
-const renderResults = (searchTerm = 'redis') =>
+const renderResults = (searchTerm = 'redis', onOpenCollection = jest.fn()) => {
   render(
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
           <CompatRouter>
-            <ObservabilitySearchResults searchTerm={searchTerm} />
+            <ObservabilitySearchResults
+              searchTerm={searchTerm}
+              onOpenCollection={onOpenCollection}
+            />
           </CompatRouter>
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
   );
+  return onOpenCollection;
+};
 
 const packagesResult = {
   isLoading: false,
@@ -74,6 +79,40 @@ describe('ObservabilitySearchResults', () => {
     expect(screen.getByTestId('addDataSearchResultsLoading')).toBeInTheDocument();
     expect(await screen.findByTestId('addDataResultCard-epr:redis')).toHaveTextContent('Redis');
     expect(screen.getByTestId('addDataSearchResultsCount')).toBeInTheDocument();
+  });
+
+  it('surfaces a collection card whose click opens the page-hosted chooser', async () => {
+    const user = userEvent.setup();
+    mockUseAvailablePackages.mockReturnValue({
+      ...packagesResult,
+      allCards: [
+        {
+          id: 'collection:nginx',
+          name: 'nginx',
+          title: 'Nginx',
+          description: 'Choose from ECS-based or OTel-based collection.',
+          categories: ['observability'],
+          icons: [],
+          url: '/app/integrations/collection/nginx',
+          version: '',
+          integration: '',
+          isCollectionCard: true,
+          groupMembers: [
+            { ...packagesResult.allCards[0], id: 'epr:nginx', name: 'nginx', title: 'Nginx' },
+            { ...packagesResult.allCards[0], id: 'epr:nginx_otel', name: 'nginx_otel' },
+          ],
+        },
+      ],
+    });
+
+    const onOpenCollection = renderResults('nginx');
+    const card = await screen.findByTestId('addDataResultCard-collection:nginx');
+    expect(card).toHaveTextContent('2 variants');
+
+    await user.click(screen.getByText('Nginx'));
+    expect(onOpenCollection).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'collection:nginx' })
+    );
   });
 
   it('shows the error state when the Fleet module fails to load, and retries', async () => {

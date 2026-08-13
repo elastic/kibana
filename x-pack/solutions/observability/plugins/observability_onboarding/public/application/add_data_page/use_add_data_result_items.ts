@@ -12,16 +12,18 @@ import type {
   UseLocalSearchType,
 } from '@kbn/fleet-plugin/public';
 import { useCardUrlRewrite } from '../package_list_search_form/use_card_url_rewrite';
+import { isCollectionCard } from './collection_card';
 
 const ALLOWED_CATEGORIES = new Set(['observability', 'os_system']);
 
 /**
  * The o11y item pipeline feeding AddDataSearchResults: category filter, text
  * match (Fleet's own `useLocalSearch`, so results agree with the Integrations
- * app by construction), return-path URL rewrite. The curated tiles are not
- * mirrored in: they stay visible below the results, so mirroring only produced
- * duplicates of the EPR cards. Both Fleet hooks arrive as arguments because
- * the caller loads the module async.
+ * app by construction), return-path URL rewrite. A collection card's member
+ * links are what actually navigate, so they get the same rewrite as top-level
+ * cards. The curated tiles are not mirrored in: they stay visible below the
+ * results, so mirroring only produced duplicates of the EPR cards. Both Fleet
+ * hooks arrive as arguments because the caller loads the module async.
  */
 export function useAddDataResultItems({
   searchTerm,
@@ -58,7 +60,12 @@ export function useAddDataResultItems({
     const results = matchedIds
       ? categoryFiltered.filter(({ id }) => matchedIds.has(id))
       : categoryFiltered;
-    return results.map(rewriteUrl);
+    return results.map((card) => {
+      const rewritten = rewriteUrl(card);
+      return isCollectionCard(rewritten)
+        ? { ...rewritten, groupMembers: rewritten.groupMembers.map(rewriteUrl) }
+        : rewritten;
+    });
   }, [categoryFiltered, localSearch, searchTerm, rewriteUrl]);
 
   return { items, isLoading, error: eprPackageLoadingError ?? undefined };

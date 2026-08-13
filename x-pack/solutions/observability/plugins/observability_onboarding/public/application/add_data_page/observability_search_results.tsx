@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import type { AvailablePackagesHookType, UseLocalSearchType } from '@kbn/fleet-plugin/public';
 import { AddDataSearchResults } from '../add_data_grid';
-import { renderResultCard } from './render_result_card';
+import type { CollectionCardItem } from './collection_card';
+import { createRenderResultCard } from './render_result_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
 
 interface FleetHooks {
@@ -29,13 +30,23 @@ const fetchFleetHooks = (): Promise<FleetHooks> =>
 
 interface Props {
   searchTerm: string;
+  /** Opens the collection chooser flyout, which the page hosts. */
+  onOpenCollection: (card: CollectionCardItem) => void;
 }
+
+type RenderCard = ReturnType<typeof createRenderResultCard>;
 
 const LoadedResults = ({
   searchTerm,
   fleetHooks,
   onRetry,
-}: Props & { fleetHooks: FleetHooks; onRetry: () => void }) => {
+  renderCard,
+}: {
+  searchTerm: string;
+  fleetHooks: FleetHooks;
+  onRetry: () => void;
+  renderCard: RenderCard;
+}) => {
   const { items, isLoading, error } = useAddDataResultItems({ searchTerm, ...fleetHooks });
 
   return (
@@ -45,13 +56,17 @@ const LoadedResults = ({
       isLoading={isLoading}
       isError={Boolean(error)}
       onRetry={onRetry}
-      renderCard={renderResultCard}
+      renderCard={renderCard}
     />
   );
 };
 
-export const ObservabilitySearchResults = ({ searchTerm }: Props) => {
+export const ObservabilitySearchResults = ({ searchTerm, onOpenCollection }: Props) => {
   const hookRef = useRef<FleetHooks | null>(null);
+  const renderCard = useMemo(
+    () => createRenderResultCard({ onOpenCollection }),
+    [onOpenCollection]
+  );
 
   const {
     error: errorLoading,
@@ -75,21 +90,23 @@ export const ObservabilitySearchResults = ({ searchTerm }: Props) => {
         isLoading={false}
         isError
         onRetry={retry}
-        renderCard={renderResultCard}
+        renderCard={renderCard}
       />
     );
   }
 
   if (asyncLoading || hookRef.current === null) {
     return (
-      <AddDataSearchResults
-        searchTerm={searchTerm}
-        items={[]}
-        isLoading
-        renderCard={renderResultCard}
-      />
+      <AddDataSearchResults searchTerm={searchTerm} items={[]} isLoading renderCard={renderCard} />
     );
   }
 
-  return <LoadedResults searchTerm={searchTerm} fleetHooks={hookRef.current} onRetry={retry} />;
+  return (
+    <LoadedResults
+      searchTerm={searchTerm}
+      fleetHooks={hookRef.current}
+      onRetry={retry}
+      renderCard={renderCard}
+    />
+  );
 };
