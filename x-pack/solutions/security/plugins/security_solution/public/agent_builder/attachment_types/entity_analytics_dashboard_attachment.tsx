@@ -576,7 +576,7 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
                 defaultMessage: 'Open Entity Analytics in Security',
               }
             ),
-            icon: 'popout',
+            icon: 'external',
             type: ActionButtonType.SECONDARY,
             handler: () => {
               closeCanvas?.();

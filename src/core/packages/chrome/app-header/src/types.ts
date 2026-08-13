@@ -12,8 +12,12 @@ import type {
   AppHeaderBadge as CoreAppHeaderBadge,
   AppHeaderBadgeItem as CoreAppHeaderBadgeItem,
   AppHeaderConfig as CoreAppHeaderConfig,
+  ChromeAppHeaderConfig as CoreChromeAppHeaderConfig,
   AppHeaderDescription as CoreAppHeaderDescription,
   AppHeaderEditableTitle as CoreAppHeaderEditableTitle,
+  AppHeaderFavoriteAction as CoreAppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus as CoreAppHeaderFavoriteStatus,
+  AppHeaderShareAction as CoreAppHeaderShareAction,
   AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
   AppHeaderMetadataItem as CoreAppHeaderMetadataItem,
@@ -34,8 +38,12 @@ export type AppHeaderBack = CoreAppHeaderBack;
 export type AppHeaderBadge = CoreAppHeaderBadge;
 export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
+export type ChromeAppHeaderConfig = CoreChromeAppHeaderConfig;
 export type AppHeaderDescription = CoreAppHeaderDescription;
 export type AppHeaderEditableTitle = CoreAppHeaderEditableTitle;
+export type AppHeaderFavoriteAction = CoreAppHeaderFavoriteAction;
+export type AppHeaderFavoriteStatus = CoreAppHeaderFavoriteStatus;
+export type AppHeaderShareAction = CoreAppHeaderShareAction;
 export type AppHeaderMetadataButtonItem = CoreAppHeaderMetadataButtonItem;
 export type AppHeaderMetadataHealthItem = CoreAppHeaderMetadataHealthItem;
 export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;

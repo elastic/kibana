@@ -122,18 +122,19 @@ export const useAutomationsEditor = ({
     await persist(state.draft);
   }, [persist, state]);
 
-  // Creating a workflow navigates away, so the draft is persisted before leaving.
+  // Creating a workflow navigates away, so automations are persisted before leaving.
   const createAndAttach = useCallback(async () => {
-    if (!aiIndex || state.status !== 'editing') {
+    if (!aiIndex) {
       return undefined;
     }
+    const currentAutomations = state.status === 'editing' ? state.draft : savedAutomations ?? [];
     const workflowId = await createWorkflow(buildStarterWorkflowYaml(aiIndex.id));
     if (!workflowId) {
       return undefined;
     }
-    const saved = await persist([...state.draft, { type: 'workflow', value: workflowId }]);
+    const saved = await persist([...currentAutomations, { type: 'workflow', value: workflowId }]);
     return saved ? workflowId : undefined;
-  }, [aiIndex, createWorkflow, persist, state]);
+  }, [aiIndex, createWorkflow, persist, savedAutomations, state]);
 
   return {
     isEditing: state.status === 'editing',

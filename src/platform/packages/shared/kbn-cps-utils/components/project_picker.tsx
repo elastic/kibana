@@ -19,13 +19,13 @@ import {
   EuiButtonEmpty,
   EuiPopoverTitle,
   EuiTitle,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { UseFetchProjectsResult } from './use_fetch_projects';
 import { ProjectPickerContent } from './project_picker_content';
 import { useProjectPickerTour } from './use_project_picker_tour';
@@ -137,12 +137,11 @@ export const ProjectPicker = ({
           </EuiFlexGroup>
         </EuiPopoverTitle>
         {isReadonly && (
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount={false}
             size="s"
             css={styles.callout}
             title={strings.getProjectPickerReadonlyCallout()}
-            iconType="info"
           />
         )}
         <ProjectPickerContent
@@ -160,13 +159,19 @@ export const ProjectPickerSkeleton = () => (
   <EuiSkeletonRectangle width={48} height={24} borderRadius="m" />
 );
 
-export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount: number }) => {
+export const DisabledProjectPicker = ({
+  totalProjectCount,
+  customTooltipContent,
+}: {
+  totalProjectCount: number;
+  customTooltipContent?: string;
+}) => {
   const styles = useMemoCss(projectPickerStyles);
   if (totalProjectCount <= 1) {
     return null;
   }
   return (
-    <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
+    <EuiToolTip content={customTooltipContent ?? strings.getProjectPickerDisabledTooltip()}>
       <EuiButtonIcon
         css={styles.disabledButton}
         aria-label={strings.projectPickerButtonAriaLabel}

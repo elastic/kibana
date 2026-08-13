@@ -26,9 +26,14 @@ import {
   validateCaseExtendedFields,
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
+import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
-import { normalizeCreateCaseRequest } from './utils';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
+import {
+  buildExtendedFieldsDefaults,
+  mergeCustomFieldsIntoExtendedFields,
+  pickExtendedFieldsDifferingFromDefaults,
+} from '../../../common/utils/template_fields';
 import {
   applyTemplateDefaultsToCreateRequest,
   ensureTemplateVersionIsPinned,
@@ -91,8 +96,8 @@ export const create = async (
     // gets validated.
     let resolvedTemplateFields;
     // Captured when a template is expanded so the activity log can record which template (with its
-    // point-in-time name) the case was created from and the initial extended_fields it applied —
-    // the create_case user action itself does not carry either field.
+    // point-in-time name) the case was created from. Field values that differ from defaults are
+    // audited separately; the create_case user action itself does not carry template or fields.
     let appliedTemplateName: string | undefined;
     // Resolved lazily and reused: template expansion needs it to decide whether to apply template
     // assignees, and the license-enforcement block below needs it again — resolve at most once.
@@ -137,8 +142,52 @@ export const create = async (
       }
     }
 
+    // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
+    // before submission, so UI-created cases persist them — but API and workflow-step callers
+    // only send the fields they know about, which left every global field empty on non-UI cases.
+    // Merge the defaults here with the same precedence the UI create form produces: template
+    // defaults, then global defaults (the global definition is authoritative on a storage-key
+    // collision — see resolveApplicableFields), then caller-sent values (caller always wins).
+    // Runs AFTER template expansion so the collision order holds, and BEFORE extended_fields
+    // validation so the merged map is what gets validated.
+    //
+    // Captured before injection: when the map exists only because defaults were injected, the
+    // validation below must run with partial (update) semantics. Full create-time validation
+    // enforces `required` on absent fields, and enforcing it here would 400 requests that
+    // succeeded before defaults injection existed — e.g. every legacy customFields-only create
+    // in a space whose required v1 custom fields are mirrored into required global definitions.
+    const hadExtendedFieldsBeforeDefaults = query.extended_fields !== undefined;
+    let globalFields: InlineField[] | undefined;
+    // Hoisted for create-time Activity filtering: compare persisted fields against the same
+    // template ∪ global default baseline used for injection (global wins on key collision).
+    let globalFieldsDefaults: Record<string, string> = {};
+    if (clientArgs.config.templates.enabled) {
+      globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      globalFieldsDefaults = Object.fromEntries(
+        // A field without a default produces '' — writing that adds no information and, for a
+        // required field, would immediately fail its own validation. Only inject real defaults.
+        Object.entries(buildExtendedFieldsDefaults(globalFields)).filter(
+          ([, value]) => value !== ''
+        )
+      );
+      if (Object.keys(globalFieldsDefaults).length > 0) {
+        query = {
+          ...query,
+          extended_fields: {
+            ...(query.extended_fields ?? {}),
+            ...globalFieldsDefaults,
+            // The caller's original extended_fields, NOT query.extended_fields — template
+            // expansion already merged template defaults into the latter, and those must not
+            // shadow a global default on a storage-key collision.
+            ...(rawQuery.extended_fields ?? {}),
+          },
+        };
+      }
+    }
+
     if (query.extended_fields) {
-      const globalFields = await resolveGlobalFields(query.owner, fieldDefinitionsService);
+      globalFields =
+        globalFields ?? (await resolveGlobalFields(query.owner, fieldDefinitionsService));
       await validateCaseExtendedFields({
         extendedFields: query.extended_fields,
         templateId: query.template?.id,
@@ -146,6 +195,10 @@ export const create = async (
         templatesService,
         fieldDefinitionsService,
         owner: query.owner,
+        // Injection-only maps get partial semantics: validate the injected values, but do not
+        // enforce `required` on fields the caller never sent — that keeps creates that
+        // succeeded before defaults injection succeeding after it (see comment above).
+        partial: !hadExtendedFieldsBeforeDefaults,
         preResolvedTemplateFields: resolvedTemplateFields,
       });
     }
@@ -189,11 +242,26 @@ export const create = async (
         undefined; // return type includes null when input is null; CasePostRequest.extended_fields is never null
     }
 
+    const attributes = transformNewCase({
+      user,
+      newCase: normalizedCase,
+    });
+
+    // Server-derived assignee identity: resolve profile uids to username /
+    // full_name / email so downstream consumers (e.g. cases-as-data analytics)
+    // can read human-readable assignees. Gated until the MV10 mapping is rolled
+    // out fleet-wide (off by default on serverless).
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      attributes.assignees =
+        (await populateAssigneesIdentity(
+          clientArgs.securityStartPlugin,
+          logger,
+          attributes.assignees
+        )) ?? [];
+    }
+
     const newCase = await caseService.createCase({
-      attributes: transformNewCase({
-        user,
-        newCase: normalizedCase,
-      }),
+      attributes,
       id: savedObjectID,
       refresh: false,
     });
@@ -216,11 +284,12 @@ export const create = async (
 
     // The create_case user action payload does not carry `template` or `extended_fields`
     // (CreateCaseUserActionRt strips them), so a case created from a template would otherwise leave
-    // no trace in the activity log of which template it came from or its initial template fields.
-    // Emit the dedicated template + extended_fields user actions so the audit trail matches the
-    // persisted case. Gated on the flag so it only runs on the template-expansion path: flag-off
-    // creation with a caller-pinned template stays byte-for-byte as it was before this PR (no extra
-    // activity-log entries), and expansion always stamps a concrete version so the guard holds.
+    // no trace in the activity log of which template it came from or which fields the caller
+    // changed from defaults. Emit the dedicated template user action always, and an
+    // extended_fields user action only for values that differ from resolved defaults. Gated on
+    // the flag so it only runs on the template-expansion path: flag-off creation with a
+    // caller-pinned template stays byte-for-byte as it was before this PR (no extra activity-log
+    // entries), and expansion always stamps a concrete version so the guard holds.
     if (
       clientArgs.config.templates.enabled &&
       query.template?.id &&
@@ -243,14 +312,23 @@ export const create = async (
         },
       ];
 
-      // Record the initial extended_fields exactly as persisted on the case SO (the template ×
-      // caller merge, plus any customFields mirror), so the activity log reflects the stored values.
-      const persistedExtendedFields = normalizedCase.extended_fields;
-      if (persistedExtendedFields && Object.keys(persistedExtendedFields).length > 0) {
+      // Activity records only values that differ from resolved template + global defaults — not
+      // the full persisted map (which still stamps empty/default keys on the case SO). Same
+      // baseline precedence as injection above: template defaults, then global (global wins).
+      const persistedExtendedFields = normalizedCase.extended_fields ?? {};
+      const resolvedExtendedFieldDefaults = {
+        ...buildExtendedFieldsDefaults(resolvedTemplateFields ?? []),
+        ...globalFieldsDefaults,
+      };
+      const activityExtendedFields = pickExtendedFieldsDifferingFromDefaults(
+        persistedExtendedFields,
+        resolvedExtendedFieldDefaults
+      );
+      if (Object.keys(activityExtendedFields).length > 0) {
         templateUserActions.push({
           ...common,
           type: UserActionTypes.extended_fields,
-          payload: { extended_fields: persistedExtendedFields },
+          payload: { extended_fields: activityExtendedFields },
         });
       }
 

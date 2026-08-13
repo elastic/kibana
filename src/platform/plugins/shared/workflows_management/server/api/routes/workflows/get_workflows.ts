@@ -22,9 +22,8 @@ import {
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   canReadManagedWorkflowExecutions,
-  hasWorkflowReadPrivilege,
   resolveAuthorizedManagedFilter,
-  WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
+  WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -91,7 +90,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
     .get({
       path: '/api/workflows',
       access: 'public',
-      security: WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
+      security: WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
       summary: 'Get workflows',
       description: 'Retrieve a paginated list of workflows with optional filtering.',
       options: {
@@ -109,9 +108,6 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
-          if (!hasWorkflowReadPrivilege(request)) {
-            return response.forbidden();
-          }
           const managedFilter = resolveAuthorizedManagedFilter(request, request.query.managed);
           const params = prepareParams({ ...request.query, managed: managedFilter });
           const spaceId = spaces.getSpaceId(request);

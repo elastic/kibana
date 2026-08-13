@@ -102,6 +102,9 @@ export const FrequencySelector = ({
   const basePrefix = idPrefix ?? generatedIdPrefix;
   const frequencyIdPrefix = `${basePrefix}-option`;
   const weekdayIdPrefix = `${basePrefix}-weekday`;
+  // Instance-scoped as well: radios sharing a `name` form one exclusive set, so a
+  // static name would let two selectors on the same page deselect each other.
+  const frequencyGroupName = `${basePrefix}-frequency`;
 
   // `EuiRadioGroup` / `EuiCheckboxGroup` hard-code `flex-direction: column` and
   // expose no horizontal prop, so overriding their flex via the `css` prop is
@@ -240,6 +243,7 @@ export const FrequencySelector = ({
       <EuiFlexItem>
         <EuiFormRow label={FREQUENCY_LABEL} fullWidth>
           <EuiRadioGroup
+            name={frequencyGroupName}
             css={horizontalGroupCss}
             options={frequencyOptions.map(({ id, label, mode }) => ({
               id,

@@ -22,7 +22,7 @@ import {
  * - create / update / delete a watchlist
  * - add / remove entities by an explicit id list
  * - the create-and-populate headline flow (create_watchlist → add_entities_to_watchlist)
- * - the query-then-add flow (list_watchlists → search_entities → add_entities_to_watchlist)
+ * - the query-then-add flow (get_watchlist_id → search_entities → add_entities_to_watchlist)
  */
 
 const SEEDED_USER_EUIDS = ['user:jsmith123', 'user:rjones456', 'user:alice', 'user:bob'];
@@ -93,6 +93,39 @@ evaluate.describe(
       await deleteEntityEngines({ supertest, log });
     });
 
+    evaluate('manage watchlists: enumerate', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'entity-analytics-v2: enumerate watchlists',
+          description:
+            'Questions that enumerate the watchlists configured in the space route to security.list_watchlists',
+          examples: [
+            {
+              input: {
+                question: 'What watchlists do we have configured?',
+              },
+              output: {
+                criteria: [
+                  'List the watchlists configured in the current space, including the name and id for each watchlist, or clearly state that no watchlists are configured.',
+                  'Include the watchlist description when present.',
+                  'Do not fabricate watchlist data.',
+                ],
+                toolCalls: [
+                  {
+                    id: 'security.list_watchlists',
+                    criteria: [
+                      'The tool is called to enumerate watchlists. nameContains should be omitted (the user did not name a specific watchlist).',
+                    ],
+                  },
+                ],
+              },
+              metadata: { query_intent: 'Factual' },
+            },
+          ],
+        },
+      });
+    });
+
     evaluate('manage watchlists: create / update / delete flows', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
@@ -149,21 +182,21 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Resolve the watchlist "Privileged Users" to its id via security.list_watchlists first, then call security.update_watchlist with the new name.',
+                  'Resolve the watchlist "Privileged Users" to its id via security.get_watchlist_id first, then call security.update_watchlist with the new name.',
                   'Surface the confirmation step before applying the change.',
                   'Do not fabricate an id.',
                 ],
                 toolCalls: [
                   {
-                    id: 'security.list_watchlists',
+                    id: 'security.get_watchlist_id',
                     criteria: [
-                      'The tool is called with a nameContains parameter matching "Privileged Users" (or a distinctive substring like "privileged") to resolve the watchlist id.',
+                      'The tool is called with an identifier of "Privileged Users" to resolve the watchlist id.',
                     ],
                   },
                   {
                     id: 'security.update_watchlist',
                     criteria: [
-                      'The tool is called with the watchlistId resolved from list_watchlists and a name parameter of "Senior Privileged Users". No description or riskModifier should be set (the user only asked to rename).',
+                      'The tool is called with the watchlistId resolved from get_watchlist_id and a name parameter of "Senior Privileged Users". No description or riskModifier should be set (the user only asked to rename).',
                     ],
                   },
                 ],
@@ -176,21 +209,21 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Resolve "Compromised Accounts" to its id via security.list_watchlists, then call security.delete_watchlist.',
+                  'Resolve "Compromised Accounts" to its id via security.get_watchlist_id, then call security.delete_watchlist.',
                   'Surface the confirmation step and warn the user that the action cannot be undone.',
                   'Do not claim the deletion succeeded without first confirming with the user.',
                 ],
                 toolCalls: [
                   {
-                    id: 'security.list_watchlists',
+                    id: 'security.get_watchlist_id',
                     criteria: [
-                      'The tool is called with a nameContains parameter matching "Compromised Accounts" to resolve the watchlist id.',
+                      'The tool is called with an identifier of "Compromised Accounts" to resolve the watchlist id.',
                     ],
                   },
                   {
                     id: 'security.delete_watchlist',
                     criteria: [
-                      'The tool is called with the watchlistId resolved from list_watchlists.',
+                      'The tool is called with the watchlistId resolved from get_watchlist_id.',
                     ],
                   },
                 ],
@@ -216,20 +249,20 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Resolve "Privileged Users" to its id via security.list_watchlists, then call security.add_entities_to_watchlist with the resolved id and both entity ids.',
+                  'Resolve "Privileged Users" to its id via security.get_watchlist_id, then call security.add_entities_to_watchlist with the resolved id and both entity ids.',
                   'Surface the confirmation step.',
                 ],
                 toolCalls: [
                   {
-                    id: 'security.list_watchlists',
+                    id: 'security.get_watchlist_id',
                     criteria: [
-                      'The tool is called with a nameContains parameter matching "Privileged Users" to resolve the watchlist id.',
+                      'The tool is called with an identifier of "Privileged Users" to resolve the watchlist id.',
                     ],
                   },
                   {
                     id: 'security.add_entities_to_watchlist',
                     criteria: [
-                      'The tool is called with the watchlistId resolved from list_watchlists, and entityIds containing exactly ["user:jsmith123", "user:rjones456"] (order not significant).',
+                      'The tool is called with the watchlistId resolved from get_watchlist_id, and entityIds containing exactly ["user:jsmith123", "user:rjones456"] (order not significant).',
                     ],
                   },
                 ],
@@ -269,15 +302,15 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Resolve "Privileged Users" via security.list_watchlists, run security.search_entities to find critical-risk users, then call security.add_entities_to_watchlist with the entity ids from the search results.',
+                  'Resolve "Privileged Users" via security.get_watchlist_id, run security.search_entities to find critical-risk users, then call security.add_entities_to_watchlist with the entity ids from the search results.',
                   'Surface the confirmation step before adding.',
                   'In prose, indicate this is a one-time add (a persistent entity source is configured in the UI, not here).',
                 ],
                 toolCalls: [
                   {
-                    id: 'security.list_watchlists',
+                    id: 'security.get_watchlist_id',
                     criteria: [
-                      'The tool is called with a nameContains parameter matching "Privileged Users" to resolve the watchlist id.',
+                      'The tool is called with an identifier of "Privileged Users" to resolve the watchlist id.',
                     ],
                   },
                   {
@@ -289,7 +322,7 @@ evaluate.describe(
                   {
                     id: 'security.add_entities_to_watchlist',
                     criteria: [
-                      'The tool is called with the watchlistId from list_watchlists and entityIds populated from the entity.id values returned by search_entities (not fabricated).',
+                      'The tool is called with the watchlistId from get_watchlist_id and entityIds populated from the entity.id values returned by search_entities (not fabricated).',
                     ],
                   },
                 ],
@@ -302,20 +335,20 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Resolve "Privileged Users" via security.list_watchlists, then call security.remove_entities_from_watchlist with that id and user:jsmith123.',
+                  'Resolve "Privileged Users" via security.get_watchlist_id, then call security.remove_entities_from_watchlist with that id and user:jsmith123.',
                   'Surface the confirmation step. If the entity is reported as not_found with the "Entity not manually assigned" message, the agent should explain that the entity was added via an entity source and cannot be removed by this tool — directing the user to reconfigure the source in the UI.',
                 ],
                 toolCalls: [
                   {
-                    id: 'security.list_watchlists',
+                    id: 'security.get_watchlist_id',
                     criteria: [
-                      'The tool is called with a nameContains parameter matching "Privileged Users" to resolve the watchlist id.',
+                      'The tool is called with an identifier of "Privileged Users" to resolve the watchlist id.',
                     ],
                   },
                   {
                     id: 'security.remove_entities_from_watchlist',
                     criteria: [
-                      'The tool is called with the watchlistId resolved from list_watchlists and entityIds containing exactly ["user:jsmith123"].',
+                      'The tool is called with the watchlistId resolved from get_watchlist_id and entityIds containing exactly ["user:jsmith123"].',
                     ],
                   },
                 ],

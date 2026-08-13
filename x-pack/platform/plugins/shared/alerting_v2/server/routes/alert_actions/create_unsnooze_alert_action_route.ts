@@ -9,10 +9,13 @@ import {
   ALERT_EPISODE_ACTION_TYPE,
   createUnsnoozeAlertActionBodySchema,
 } from '@kbn/alerting-v2-schemas';
+import { createUnsnoozeAlertActionOasExamples } from './create_unsnooze_alert_action_oas_example';
 import { createAlertActionRouteForType } from './create_alert_action_route_for_type';
 
 export const CreateUnsnoozeAlertActionRoute = createAlertActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
   pathSuffix: '_unsnooze',
+  summary: 'Unsnooze an alert',
   bodySchema: createUnsnoozeAlertActionBodySchema,
+  oasOperationObject: createUnsnoozeAlertActionOasExamples,
 });

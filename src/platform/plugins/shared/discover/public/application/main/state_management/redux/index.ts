@@ -19,12 +19,12 @@ export {
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
-  type DefaultProfileStateField,
-  type DefaultProfileStateFields,
-  type DefaultProfileState,
-  type ProfileStateSnapshot,
+  type ProfileAppStateDefaultField,
+  type ProfileAppStateDefaultFields,
+  type ProfileAppStateDefaults,
+  type ProfileAppStateSnapshot,
   type UpdateESQLQueryActionPayload,
-  DEFAULT_PROFILE_STATE_FIELDS,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabInitializationStatus,
   TabsBarVisibility,
 } from './types';
@@ -46,7 +46,7 @@ export const internalStateActions = {
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
     'setProfileState',
-    'syncProfileStateSnapshot'
+    'syncProfileAppStateSnapshot'
   ),
   ...actions,
   syncLocallyPersistedTabState,

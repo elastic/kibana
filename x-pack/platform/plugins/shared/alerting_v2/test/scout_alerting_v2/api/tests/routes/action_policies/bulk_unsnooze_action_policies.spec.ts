@@ -92,6 +92,7 @@ apiTest.describe('Bulk unsnooze action policies API', { tag: '@local-stateful-cl
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -103,6 +104,7 @@ apiTest.describe('Bulk unsnooze action policies API', { tag: '@local-stateful-cl
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -113,6 +115,7 @@ apiTest.describe('Bulk unsnooze action policies API', { tag: '@local-stateful-cl
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects an id over the maximum length', async ({ apiClient }) => {
@@ -122,6 +125,7 @@ apiTest.describe('Bulk unsnooze action policies API', { tag: '@local-stateful-cl
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects more than the maximum number of ids', async ({ apiClient }) => {
@@ -133,6 +137,7 @@ apiTest.describe('Bulk unsnooze action policies API', { tag: '@local-stateful-cl
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(

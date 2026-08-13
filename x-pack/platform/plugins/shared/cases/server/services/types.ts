@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject, SavedObjectsCreateOptions } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { PartialField } from '../types';
 
 export type RefreshSetting = NonNullable<SavedObjectsCreateOptions['refresh']>;
@@ -14,4 +15,6 @@ export interface IndexRefresh {
   refresh?: SavedObjectsCreateOptions['refresh'];
 }
 
-export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
+export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
+  error?: SavedObjectError;
+};
