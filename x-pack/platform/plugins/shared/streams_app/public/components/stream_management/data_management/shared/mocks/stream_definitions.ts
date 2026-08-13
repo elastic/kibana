@@ -67,7 +67,9 @@ export const createClassicStreamDefinition = (
     ingest: {
       ...stream.ingest,
       processing: {
-        steps: withProcessing ? [{ action: 'set', to: 'test_field', value: 'test_value' }] : [],
+        ...(withProcessing
+          ? { processors: [{ set: { field: 'test_field', value: 'test_value' } }] }
+          : { steps: [] }),
         updated_at: stream.ingest.processing.updated_at,
       },
     },
