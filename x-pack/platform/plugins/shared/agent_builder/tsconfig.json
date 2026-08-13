@@ -144,6 +144,5 @@
     "@kbn/storybook",
     "@kbn/context-engine-plugin",
     "@kbn/files-plugin",
-    "@kbn/shared-ux-file-types",
   ]
 }
