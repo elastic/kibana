@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -47,6 +48,30 @@ import { MANAGED_INTEGRATION_EXAMPLES, type AwsServiceEntry } from './aws_servic
 // design reference (Step 14.svg / Deploy & Detect mockups).
 const HEADER_TINT = '#F6F9FC';
 
+// EUI's own accordion open/close transition has no prop to slow down — it's
+// baked into the .euiAccordion__childWrapper class — so this overrides its
+// duration for a more deliberate, less snappy collapse/expand. Safe to set
+// directly on EuiAccordion's own `css` prop: its default root style is an
+// empty rule (no rules to lose) as long as `borders` stays at its default.
+const SLOWER_ACCORDION_TRANSITION = css`
+  .euiAccordion__childWrapper {
+    transition-duration: 450ms;
+  }
+`;
+
+// EuiSteps pads every step's content by size.xxl (40px) for the connecting
+// line down to the next step. Wrapping the whole EuiSteps in a negative
+// margin does NOT remove this — it only stops that padding from adding
+// extra height further out; the 40px gap is still rendered *inside* the
+// last step's own content box, between its content and its edge. This
+// targets that padding directly, on the last step only (earlier steps keep
+// theirs, for the connector line).
+const NO_TRAILING_STEP_PADDING = css`
+  .euiStep:last-of-type .euiStep__content {
+    padding-block-end: 0;
+  }
+`;
+
 export type DeploymentMethod = 'agent' | 'managed';
 
 export const DEPLOYMENT_METHOD_META: Record<
@@ -87,11 +112,16 @@ const AccordionCard: React.FunctionComponent<{
     <EuiPanel
       hasBorder
       paddingSize="l"
-      style={{ overflow: 'hidden' }}
+      // Collapsed cards should show only the shaded header, flush with the
+      // panel's rounded bottom corner — the panel's own bottom padding is
+      // otherwise still there (nothing pushes against it) and reads as a
+      // stray strip of white space.
+      style={{ overflow: 'hidden', paddingBottom: isOpen ? undefined : 0 }}
       data-test-subj={rest['data-test-subj']}
     >
       <EuiAccordion
         id={id}
+        css={SLOWER_ACCORDION_TRANSITION}
         arrowDisplay="none"
         forceState={isOpen ? 'open' : 'closed'}
         onToggle={onToggle}
@@ -144,10 +174,14 @@ const AccordionCard: React.FunctionComponent<{
 
 // Enforces "only one card open at a time" across an ordered pair of cards:
 // the first starts open, the second closed. When the currently-open card's
-// completeness flips to true, the accordion waits briefly before advancing
-// to the next incomplete card — an instant swap would feel like the UI
-// yanking control away rather than the user finishing a step. Any card can
-// still be clicked open/closed manually at any time.
+// completeness flips to true AND the other card still has work left, the
+// accordion waits briefly before collapsing this one and advancing to the
+// next — an instant swap would feel like the UI yanking control away rather
+// than the user finishing a step. If the other card is already done (this
+// was the last one to finish), there's nothing left to advance to, so the
+// card is simply left open showing "Done" — collapsing it would just hide
+// the very content the user is still looking at. Any card can still be
+// clicked open/closed manually at any time.
 function useSequentialAccordion(ids: [string, string], completions: [boolean, boolean]) {
   const ADVANCE_DELAY_MS = 900;
   const [activeId, setActiveId] = useState<string | null>(ids[0]);
@@ -161,10 +195,12 @@ function useSequentialAccordion(ids: [string, string], completions: [boolean, bo
       !prevCompletionsRef.current[activeIndex] &&
       completions[activeIndex]
     ) {
-      timerRef.current = window.setTimeout(() => {
-        const nextIndex = activeIndex === 0 ? 1 : 0;
-        setActiveId(completions[nextIndex] ? null : ids[nextIndex]);
-      }, ADVANCE_DELAY_MS);
+      const nextIndex = activeIndex === 0 ? 1 : 0;
+      if (!completions[nextIndex]) {
+        timerRef.current = window.setTimeout(() => {
+          setActiveId(ids[nextIndex]);
+        }, ADVANCE_DELAY_MS);
+      }
     }
     prevCompletionsRef.current = completions;
     return () => {
@@ -668,24 +704,32 @@ const WhereToAddCard: React.FunctionComponent<{
   onCompleteChange: (isComplete: boolean) => void;
 }> = ({ services, isEnrolled, onEnrolled, receivedCount, isOpen, onToggle, onCompleteChange }) => {
   const [hostMode, setHostMode] = useState<HostMode>('new_hosts');
+  // Selecting "New hosts" only reveals the confirmation CTA — the install/
+  // enrollment flow below it doesn't start until the user explicitly
+  // commits, so they still get a real chance to pick "Existing hosts"
+  // instead before anything runs automatically.
+  const [isNewHostsConfirmed, setIsNewHostsConfirmed] = useState(false);
   const [platform, setPlatform] = useState('linux');
   const enrollTimer = useRef<number | null>(null);
   const servicesCount = services.length;
   const allReceived = servicesCount > 0 && receivedCount >= servicesCount;
   const isComplete = hostMode === 'new_hosts' && isEnrolled && allReceived;
-  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     onCompleteChange(isComplete);
   }, [isComplete, onCompleteChange]);
 
   useEffect(() => {
-    if (isEnrolled || hostMode !== 'new_hosts') return;
+    if (hostMode !== 'new_hosts') setIsNewHostsConfirmed(false);
+  }, [hostMode]);
+
+  useEffect(() => {
+    if (isEnrolled || hostMode !== 'new_hosts' || !isNewHostsConfirmed) return;
     enrollTimer.current = window.setTimeout(onEnrolled, 8000);
     return () => {
       if (enrollTimer.current) window.clearTimeout(enrollTimer.current);
     };
-  }, [isEnrolled, hostMode, onEnrolled]);
+  }, [isEnrolled, hostMode, isNewHostsConfirmed, onEnrolled]);
 
   return (
     <AccordionCard
@@ -721,11 +765,16 @@ const WhereToAddCard: React.FunctionComponent<{
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          {/* EuiSteps pads every step's content by size.xxl for the
-              connecting line to the next step — for the last step that
-              padding has nothing to connect to and just reads as a big
-              trailing gap, so cancel it here. */}
-          <div style={{ marginBottom: `-${euiTheme.size.xxl}` }}>
+
+          {!isNewHostsConfirmed ? (
+            <EuiButton
+              onClick={() => setIsNewHostsConfirmed(true)}
+              data-test-subj="awsOnboardingConfirmNewHosts"
+            >
+              Confirm new hosts
+            </EuiButton>
+          ) : (
+          <div css={NO_TRAILING_STEP_PADDING}>
             <EuiSteps
               titleSize="xs"
               steps={[
@@ -866,6 +915,7 @@ const WhereToAddCard: React.FunctionComponent<{
               ]}
             />
           </div>
+          )}
         </>
       ) : (
         <>
