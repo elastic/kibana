@@ -324,7 +324,7 @@ Use the PR itself as the state store — there is no separate state file or hidd
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | `flaky-fix-check:started`      | A flaky test runner check has been triggered; verification is in progress.                                           |
 | `flaky-fix-check:passed`       | The targeted test held across the run(s); the fix is confirmed.                                                      |
-| `flaky-fix-check:failed`       | The targeted test still failed after the run budget — the fix did not hold.                                          |
+| `flaky-fix-check:failed`       | The targeted test still failed after the run budget (the fix did not hold), or the patch violates the Fix guardrails and no compliant revision could be derived. |
 | `flaky-fix-check:inconclusive` | The run budget was exhausted without a clear verdict (e.g. only unrelated failures, or the failure couldn't be attributed). |
 | `flaky-fix-check:skipped`      | The flaky test runner isn't used — either it can't verify this fix (Jest-only change, or no FTR/Scout config) or the fix is deterministic, so the required CI pass is sufficient signal. |
 
@@ -374,14 +374,16 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-2. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
+2. **Screen the patch against the Fix guardrails.** Check `pr-diff.txt` against the [Fix guardrails](#fix-guardrails) before spending any runs: a guardrail-violating fix — e.g. a retry or error-tolerance loop anywhere (test, framework, or application code), or a framework internal newly exposed to enable the fix — must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Derive a compliant fix, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot derive a compliant fix, add `flaky-fix-check:failed`, post a failed comment naming the violated guardrail, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
+
+3. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
 
    - **Runner-supported test.** The `/flaky` runner accepts only **FTR** and **Scout** configs. If the fix touches only a **Jest** test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), it can't help: the fixer already verifies Jest fixes by local repetition.
    - **A fix repeated runs can actually validate.** The required CI already catches deterministic failures; extra runs add signal only when one pass isn't a reliable verdict: when the test still has a timing/ordering/concurrency element after the fix. Trigger a run only when the fix *mitigates* a non-deterministic cause (a race, a wait/timeout, ordering, shared-state timing) whose stability is confirmed by holding across many runs.
 
    When both gates hold, resolve the config(s) (next step).
 
-3. **Resolve config paths**:
+4. **Resolve config paths**:
 
    - **Reuse first:** if a previous `/flaky` comment on the PR already names the config(s) — e.g. an earlier iteration recorded them in `pr-issue-comments.json` — reuse those exact config paths so runs stay consistent, and skip the file-tree walk below (only add a config if your latest change touches files under a different one).
    - **FTR:** walk up from each changed test file to the nearest leaf `config*.ts` (skip `*.base.ts`); verify it actually runs the file via `testFiles` / `loadTestFile` (directly or via glob). If none is found by walking up, search for the config that includes the file.
@@ -389,7 +391,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) asking a human to identify the config, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
    - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
-4. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
+5. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
 
    ```
    /flaky <type>:<path>:30 [<type>:<path>:30 ...]
@@ -399,7 +401,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
    The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object): skip it for a routine first run rather than restate which test you're exercising. When you do post it, use the rationale heading from [Update comment](#update-comment).
 
-5. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
+6. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
 
 ---
 

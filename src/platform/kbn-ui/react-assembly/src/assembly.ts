@@ -12,7 +12,6 @@ import type { FC, ReactNode } from 'react';
 import type { ParsedItem, ParsedPart } from './parsing';
 import { parseDeclarativeChildren } from './parsing';
 import { createDeclarativeComponent, tagDeclarativeComponent } from './factory';
-import type { SkeletonOutput } from './skeleton';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dev-mode warning helper
@@ -78,7 +77,8 @@ const warnOnPassthroughComponents = (
 export interface PartFactory<
   TPresetMap extends object = Record<string, unknown>,
   TOutput = ReactNode,
-  TContext = void
+  TContext = void,
+  TSkeleton = never
 > {
   /**
    * Create a preset component. The props type is inferred from the
@@ -105,7 +105,7 @@ export interface PartFactory<
   createPreset: <K extends keyof TPresetMap & string>(definition: {
     name: K;
     resolve?: (attributes: TPresetMap[K], context: TContext) => TOutput | undefined;
-    skeleton?: (attributes: TPresetMap[K], context: TContext) => SkeletonOutput | undefined;
+    skeleton?: (attributes: TPresetMap[K], context: TContext) => TSkeleton | undefined;
   }) => FC<TPresetMap[K]>;
 
   /**
@@ -135,7 +135,7 @@ export interface PartFactory<
    * @param context - Context passed through to the skeleton callback.
    * @returns The skeleton shape descriptor, or `undefined`.
    */
-  resolveSkeleton: (part: ParsedPart, context: TContext) => SkeletonOutput | undefined;
+  resolveSkeleton: (part: ParsedPart, context: TContext) => TSkeleton | undefined;
 
   /**
    * Parse React children and filter to this part type.
@@ -170,7 +170,7 @@ export interface PartFactory<
    */
   createComponent: <P>(options?: {
     resolve?: (attributes: P, context: TContext) => TOutput | undefined;
-    skeleton?: (attributes: P, context: TContext) => SkeletonOutput | undefined;
+    skeleton?: (attributes: P, context: TContext) => TSkeleton | undefined;
   }) => FC<P>;
 
   /**
@@ -234,10 +234,11 @@ export interface AssemblyFactory<TName extends string = string> {
   definePart: <
     TPresetMap extends object = Record<string, unknown>,
     TOutput = ReactNode,
-    TContext = void
+    TContext = void,
+    TSkeleton = never
   >(partDefinition: {
     name: string;
-  }) => PartFactory<TPresetMap, TOutput, TContext>;
+  }) => PartFactory<TPresetMap, TOutput, TContext, TSkeleton>;
 
   /**
    * Parse React children for declarative components in this assembly.
@@ -324,10 +325,11 @@ export const defineAssembly = <const TName extends string>(config: {
   definePart: <
     TPresetMap extends object = Record<string, unknown>,
     TOutput = ReactNode,
-    TContext = void
+    TContext = void,
+    TSkeleton = never
   >(partDefinition: {
     name: string;
-  }): PartFactory<TPresetMap, TOutput, TContext> => {
+  }): PartFactory<TPresetMap, TOutput, TContext, TSkeleton> => {
     // Internal map of preset name → resolve callback. The cast from
     // `TPresetMap[K]` to `Record<string, unknown>` is safe by construction:
     // the preset's attributes type is guaranteed to match by the generic.
@@ -340,7 +342,7 @@ export const defineAssembly = <const TName extends string>(config: {
     // omit `skeleton` when inference is good enough for them.
     const skeletonResolvers = new Map<
       string,
-      (attributes: Record<string, unknown>, context: TContext) => SkeletonOutput | undefined
+      (attributes: Record<string, unknown>, context: TContext) => TSkeleton | undefined
     >();
 
     // Per-component resolver map: each `createComponent` call registers its
@@ -355,14 +357,14 @@ export const defineAssembly = <const TName extends string>(config: {
 
     const componentSkeletonResolvers = new WeakMap<
       (...args: unknown[]) => unknown,
-      (attributes: Record<string, unknown>, context: TContext) => SkeletonOutput | undefined
+      (attributes: Record<string, unknown>, context: TContext) => TSkeleton | undefined
     >();
 
     return {
       createPreset: <K extends keyof TPresetMap & string>(definition: {
         name: K;
         resolve?: (attributes: TPresetMap[K], context: TContext) => TOutput | undefined;
-        skeleton?: (attributes: TPresetMap[K], context: TContext) => SkeletonOutput | undefined;
+        skeleton?: (attributes: TPresetMap[K], context: TContext) => TSkeleton | undefined;
       }): FC<TPresetMap[K]> => {
         if (definition.resolve) {
           resolvers.set(
@@ -380,7 +382,7 @@ export const defineAssembly = <const TName extends string>(config: {
             definition.skeleton as (
               attributes: Record<string, unknown>,
               context: TContext
-            ) => SkeletonOutput | undefined
+            ) => TSkeleton | undefined
           );
         }
 
@@ -422,7 +424,7 @@ export const defineAssembly = <const TName extends string>(config: {
         return undefined;
       },
 
-      resolveSkeleton: (part: ParsedPart, context: TContext): SkeletonOutput | undefined => {
+      resolveSkeleton: (part: ParsedPart, context: TContext): TSkeleton | undefined => {
         // Preset skeleton resolvers take priority.
         const resolver = part.preset ? skeletonResolvers.get(part.preset) : undefined;
         if (resolver) {
@@ -455,7 +457,7 @@ export const defineAssembly = <const TName extends string>(config: {
 
       createComponent: <P>(options?: {
         resolve?: (attributes: P, context: TContext) => TOutput | undefined;
-        skeleton?: (attributes: P, context: TContext) => SkeletonOutput | undefined;
+        skeleton?: (attributes: P, context: TContext) => TSkeleton | undefined;
       }): FC<P> => {
         // Each call produces a unique component function. Resolvers are keyed
         // to that function so that multiple `createComponent` calls for the
@@ -482,7 +484,7 @@ export const defineAssembly = <const TName extends string>(config: {
             options.skeleton as (
               attributes: Record<string, unknown>,
               context: TContext
-            ) => SkeletonOutput | undefined
+            ) => TSkeleton | undefined
           );
         }
 
