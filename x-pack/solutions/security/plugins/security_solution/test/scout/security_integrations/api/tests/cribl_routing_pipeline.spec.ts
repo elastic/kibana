@@ -55,6 +55,8 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     description: '',
     namespace: 'default',
     // Simplified package-policy API: inputs is an object map and vars are plain values.
+    // `force` belongs in the request body (query `force` is rejected by the schema).
+    force: true,
     inputs: {},
     vars: {
       route_entries: buildRouteEntries(params.dataId),
@@ -104,7 +106,7 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     expect(agentPolicyId).toBeDefined();
 
     packagePolicyName = `cribl-scout-${Date.now()}`;
-    const createRes = await apiClient.post('/api/fleet/package_policies?force=true', {
+    const createRes = await apiClient.post('/api/fleet/package_policies', {
       headers: adminHeaders,
       responseType: 'json',
       body: createCriblPackagePolicyBody({
@@ -244,7 +246,7 @@ apiTest.describe('Cribl routing pipeline', { tag: [...tags.stateful.classic] }, 
     async ({ apiClient, esClient, log }) => {
       await deletePipelineIfExists(esClient, log);
 
-      const createRes = await apiClient.post('/api/fleet/package_policies?force=true', {
+      const createRes = await apiClient.post('/api/fleet/package_policies', {
         headers: fleetNoPipelineHeaders,
         responseType: 'json',
         body: createCriblPackagePolicyBody({
