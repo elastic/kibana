@@ -247,10 +247,36 @@ export const buildStandaloneAgentlessConfig = async ({
   // doesn't use it. Remove it from the config now that we've minted the key from it.
   delete config.output_permissions;
 
-  // Create the ES output API key scoped to exactly the index privileges this policy needs.
-  // output_permissions[outputId] is computed by storedPackagePoliciesToAgentPermissions() in
-  // full_agent_policy.ts and has the same shape as createApiKey's role_descriptors — a
-  // Record<roleName, SecurityRoleDescriptor> covering every data stream written by the integration.
+  integrationSecrets[OUTPUT_API_KEY_ENV_VAR] = await mintOutputApiKey({
+    esClient,
+    policyId,
+    standaloneAgentPolicy,
+    outputApiKeyServiceToken,
+  });
+
+  assertConfigIsDeliverable(config, integrationSecrets);
+
+  return { config, integrationSecrets };
+};
+
+/**
+ * Creates the ES output API key scoped to exactly the index privileges this policy needs, and
+ * returns it in `id:key` form. output_permissions[outputId] is computed by
+ * storedPackagePoliciesToAgentPermissions() in full_agent_policy.ts and has the same shape as
+ * createApiKey's role_descriptors — a Record<roleName, SecurityRoleDescriptor> covering every
+ * data stream written by the integration.
+ */
+export const mintOutputApiKey = async ({
+  esClient,
+  policyId,
+  standaloneAgentPolicy,
+  outputApiKeyServiceToken,
+}: {
+  esClient: ElasticsearchClient;
+  policyId: string;
+  standaloneAgentPolicy: FullAgentPolicy;
+  outputApiKeyServiceToken?: string;
+}): Promise<string> => {
   const outputId = Object.keys(standaloneAgentPolicy.outputs)[0];
   const roleDescriptors = standaloneAgentPolicy.output_permissions?.[outputId];
   if (!roleDescriptors || Object.keys(roleDescriptors).length === 0) {
@@ -271,9 +297,5 @@ export const buildStandaloneAgentlessConfig = async ({
       ? { headers: { authorization: `Bearer ${outputApiKeyServiceToken}` } }
       : {}
   );
-  integrationSecrets[OUTPUT_API_KEY_ENV_VAR] = `${outputApiKey.id}:${outputApiKey.api_key}`;
-
-  assertConfigIsDeliverable(config, integrationSecrets);
-
-  return { config, integrationSecrets };
+  return `${outputApiKey.id}:${outputApiKey.api_key}`;
 };

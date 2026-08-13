@@ -43,9 +43,11 @@ export async function syncAgentlessDeployments(
     return;
   }
 
-  if (appContextService.getExperimentalFeatures().enableAgentlessStandaloneConfig) {
+  const { enableAgentlessStandaloneConfig, enableAgentlessAssembledConfig } =
+    appContextService.getExperimentalFeatures();
+  if (enableAgentlessStandaloneConfig || enableAgentlessAssembledConfig) {
     logger.info(
-      `[Agentless Deployment Sync] enableAgentlessStandaloneConfig is on — sync disabled for POC (sync job cannot reconstruct standalone credentials from stored state).`
+      `[Agentless Deployment Sync] standalone/assembled config POC is on — sync disabled (sync job cannot reconstruct standalone credentials from stored state).`
     );
     return;
   }

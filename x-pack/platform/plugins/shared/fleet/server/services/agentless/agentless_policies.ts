@@ -64,7 +64,9 @@ import {
   getAgentlessGlobalDataTags,
 } from '../../../common/services/agentless_policy_helper';
 import { agentlessAgentService } from '../agents/agentless_agent';
+import type { AgentlessDeliveryConfig } from '../agents/agentless_agent';
 import { createAndIntegrateCloudConnector } from '../cloud_connectors';
+import { buildAssembledParamsConfig } from './assembled_params';
 import { collectSecretValuesById, buildStandaloneAgentlessConfig } from './standalone_config';
 
 import { prefixKueryFieldsWithSavedObjectType } from './kuery_utils';
@@ -364,18 +366,19 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
       this.logger.debug(`Deploy agentless policy ${agentPolicyId}`);
 
-      const { enableAgentlessStandaloneConfig } = appContextService.getExperimentalFeatures();
+      const { enableAgentlessStandaloneConfig, enableAgentlessAssembledConfig } =
+        appContextService.getExperimentalFeatures();
 
-      if (enableAgentlessStandaloneConfig) {
-        this.logger.debug(
-          `[Agentless Standalone] Assembling standalone config for policy ${agentPolicyId}`
-        );
+      if (enableAgentlessStandaloneConfig || enableAgentlessAssembledConfig) {
         const secretValuesById = collectSecretValuesById({
           plaintextPackagePolicy: newPackagePolicy,
           storedPackagePolicy: packagePolicy,
           packageInfo: pkgInfo,
         });
 
+        // Computed in both modes. For standalone it is the config that ships; for
+        // standalone_params (scenario 2) it stays internal — API key scoping, output hosts and
+        // global data tags are read from it, but only the user's parameters cross the wire.
         const standaloneAgentPolicy = await agentPolicyService.getFullAgentPolicy(
           this.soClient,
           agentPolicyId,
@@ -394,19 +397,43 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
           );
         }
 
-        const standaloneConfig = await buildStandaloneAgentlessConfig({
-          esClient: this.esClient,
-          policyId: agentPolicyId,
-          standaloneAgentPolicy,
-          secretValuesById,
-          outputApiKeyServiceToken,
-        });
+        let deliveryConfig: AgentlessDeliveryConfig;
+        if (enableAgentlessAssembledConfig) {
+          this.logger.debug(
+            `[Agentless Assembled] Building integration params for policy ${agentPolicyId} (agentless-api assembles the config)`
+          );
+          const assembledParamsConfig = await buildAssembledParamsConfig({
+            esClient: this.esClient,
+            policyId: agentPolicyId,
+            packagePolicy,
+            standaloneAgentPolicy,
+            secretValuesById,
+            outputApiKeyServiceToken,
+          });
+          deliveryConfig = {
+            configMode: 'standalone_params',
+            ...assembledParamsConfig,
+            internalFullPolicy: standaloneAgentPolicy,
+          };
+        } else {
+          this.logger.debug(
+            `[Agentless Standalone] Assembling standalone config for policy ${agentPolicyId}`
+          );
+          const standaloneConfig = await buildStandaloneAgentlessConfig({
+            esClient: this.esClient,
+            policyId: agentPolicyId,
+            standaloneAgentPolicy,
+            secretValuesById,
+            outputApiKeyServiceToken,
+          });
+          deliveryConfig = { configMode: 'standalone', ...standaloneConfig };
+        }
 
         await agentlessAgentService.createAgentlessAgent(
           this.esClient,
           this.soClient,
           agentPolicy,
-          standaloneConfig
+          deliveryConfig
         );
       } else {
         await agentPolicyService.deployPolicy(this.soClient, agentPolicyId, undefined, {

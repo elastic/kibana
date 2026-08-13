@@ -37,6 +37,7 @@ const _allowedExperimentalValues = {
   enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
   enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
   enableAgentlessStandaloneConfig: true, // POC. When enabled, agentless deployments get an assembled standalone config (credentials as env var placeholders) instead of a fleet-server URL and enrollment token.
+  enableAgentlessAssembledConfig: true, // POC (scenario 2). When enabled (takes precedence over enableAgentlessStandaloneConfig for deployment creation), Kibana sends only the user's integration parameters + credentials; agentless-api fetches the package from EPR and assembles the config itself.
 };
 
 /**

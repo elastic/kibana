@@ -24,6 +24,7 @@ import {
   AgentlessAgentCreateOverProvisionedError,
   AgentlessAgentCreateFleetUnreachableError,
 } from '../../../common/errors';
+import type { AssembledParamsAgentlessConfig } from '../agentless/assembled_params';
 import type { StandaloneAgentlessConfig } from '../agentless/standalone_config';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy, FullAgentPolicy } from '../../types';
@@ -83,6 +84,18 @@ interface AgentlessAgentErrorHandlingMessages {
   };
 }
 
+/**
+ * POC: how the deployment gets its agent configuration when Fleet is out of the picture.
+ * `standalone` ships the Kibana-assembled config; `standalone_params` ships only the user's
+ * integration parameters and lets agentless-api assemble the config itself (scenario 2).
+ */
+export type AgentlessDeliveryConfig =
+  | ({ configMode: 'standalone' } & StandaloneAgentlessConfig)
+  | ({ configMode: 'standalone_params' } & AssembledParamsAgentlessConfig & {
+        /** Internally computed policy, used only for policy details — never shipped. */
+        internalFullPolicy: FullAgentPolicy;
+      });
+
 export interface AgentlessAgentService {
   listAgentlessDeployments(opts?: {
     perPage?: number;
@@ -92,7 +105,7 @@ export interface AgentlessAgentService {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentlessAgentPolicy: AgentPolicy,
-    standaloneConfig?: StandaloneAgentlessConfig
+    deliveryConfig?: AgentlessDeliveryConfig
   ): Promise<AxiosResponse<AgentlessApiDeploymentResponse> | void>;
   deleteAgentlessAgent(agentlessPolicyId: string): Promise<AxiosResponse | void>;
 }
@@ -141,7 +154,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentlessAgentPolicy: AgentPolicy,
-    standaloneConfig?: StandaloneAgentlessConfig
+    deliveryConfig?: AgentlessDeliveryConfig
   ) {
     const traceId = apm.currentTransaction?.traceparent;
     const errorMetadata: LogMeta = {
@@ -177,9 +190,9 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     let fleetUrl: string | undefined;
     let fleetToken: string | undefined;
 
-    if (standaloneConfig) {
+    if (deliveryConfig) {
       logger.debug(
-        `[Agentless API] Creating agentless agent in standalone config mode for policy ${agentlessAgentPolicy.id} (no fleet-server enrollment)`
+        `[Agentless API] Creating agentless agent in ${deliveryConfig.configMode} config mode for policy ${agentlessAgentPolicy.id} (no fleet-server enrollment)`
       );
     } else {
       const result = await this.getFleetUrlAndTokenForAgentlessAgent(
@@ -208,9 +221,11 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const tlsConfig = this.createTlsConfig(agentlessConfig);
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
     const secrets = this.getAgentlessSecrets();
-    const fullPolicy = standaloneConfig
-      ? standaloneConfig.config
-      : await agentPolicyService.getFullAgentPolicy(soClient, agentlessAgentPolicy.id);
+    const fullPolicy = !deliveryConfig
+      ? await agentPolicyService.getFullAgentPolicy(soClient, agentlessAgentPolicy.id)
+      : deliveryConfig.configMode === 'standalone'
+      ? deliveryConfig.config
+      : deliveryConfig.internalFullPolicy;
     const policyDetails = await this.getPolicyDetails(soClient, fullPolicy);
 
     const requestData: Record<string, unknown> = {
@@ -220,14 +235,20 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       labels,
       secrets,
       policy_details: policyDetails,
-      agent_policy: fullPolicy,
     };
 
-    if (standaloneConfig) {
+    if (deliveryConfig?.configMode === 'standalone') {
       requestData.config_mode = 'standalone';
+      requestData.agent_policy = deliveryConfig.config;
       // integration_secrets must be redacted wherever the payload is logged — see createRequestConfigDebug.
-      requestData.integration_secrets = standaloneConfig.integrationSecrets;
+      requestData.integration_secrets = deliveryConfig.integrationSecrets;
+    } else if (deliveryConfig?.configMode === 'standalone_params') {
+      // Scenario 2: no assembled config crosses the wire — only the user's parameters.
+      requestData.config_mode = 'standalone_params';
+      requestData.integration_params = deliveryConfig.integrationParams;
+      requestData.integration_secrets = deliveryConfig.integrationSecrets;
     } else {
+      requestData.agent_policy = fullPolicy;
       requestData.fleet_url = fleetUrl;
       requestData.fleet_token = fleetToken;
     }
@@ -578,6 +599,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           'policy_id',
           'fleet_url',
           'config_mode',
+          // Safe to log: secret values are placeholders here; plaintext travels in integration_secrets.
+          'integration_params',
           'labels',
           'resources',
           'cloud_connectors',
@@ -585,7 +608,8 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         ),
         agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
-        integration_secrets: requestConfig.data.integration_secrets ? '[REDACTED]' : undefined,
+        // DELETE requests carry no body.
+        integration_secrets: requestConfig.data?.integration_secrets ? '[REDACTED]' : undefined,
       },
       httpsAgent: {
         ...requestConfig.httpsAgent,
