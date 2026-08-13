@@ -531,31 +531,6 @@ evaluate.describe(
                             ...event,
                             '@timestamp': event['@timestamp'] ?? new Date().toISOString(),
                             event_uuid: eventUuid,
-                            ...(i === 0 && run.seedUnconfirmedDetection
-                              ? {
-                                  signals: [
-                                    ...(event.signals ?? []).map((signal) => ({
-                                      ...signal,
-                                      verdict: 'confirms' as const,
-                                    })),
-                                    {
-                                      type: 'detection' as const,
-                                      stream_name: run.seedUnconfirmedDetection.stream_name,
-                                      verdict: 'refutes' as const,
-                                      description:
-                                        'The agent found no evidence that this signal supports the event.',
-                                      metadata: {
-                                        detection_id: run.seedUnconfirmedDetection.detection_id,
-                                        rule_name: run.seedUnconfirmedDetection.rule_name,
-                                        rule_uuid: run.seedUnconfirmedDetection.rule_uuid,
-                                        change_point_type:
-                                          run.seedUnconfirmedDetection.change_point_type,
-                                        p_value: run.seedUnconfirmedDetection.p_value,
-                                      },
-                                    },
-                                  ],
-                                }
-                              : {}),
                             ...(run.stripSeedTopology
                               ? { causal_features: [], blast_radius: [] }
                               : {}),
