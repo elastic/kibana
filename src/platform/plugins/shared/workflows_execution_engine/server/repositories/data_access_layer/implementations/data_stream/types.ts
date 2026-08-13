@@ -8,13 +8,12 @@
  */
 
 import type { IDataStreamClient } from '@kbn/data-streams';
-import type { GetFieldsOf } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
 import {
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from '../../mappings';
-import type { MappingsDefinition } from '@kbn/es-mappings';
-import { mappings } from '@kbn/es-mappings';
 import { STEP_USAGE_MAPPING_PROPS } from '../../mappings/common';
 
 // The shared STEP_USAGE_MAPPING in common.ts uses `type: 'nested'`, which is not in
