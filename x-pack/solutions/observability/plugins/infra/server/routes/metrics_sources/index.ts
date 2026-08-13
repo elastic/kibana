@@ -83,7 +83,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     },
     async (requestContext, request, response) => {
       const { sourceId } = request.params;
-      const includeStatus = Boolean(request.query.includeStatus);
+      const { includeStatus } = request.query;
       const soClient = (await requestContext.core).savedObjects.client;
 
       try {
