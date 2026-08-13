@@ -84,7 +84,6 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/datemath'
   - '@kbn/ui-theme'
-  - '@kbn/ui-callout'
   - '@kbn/securitysolution-list-api'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'

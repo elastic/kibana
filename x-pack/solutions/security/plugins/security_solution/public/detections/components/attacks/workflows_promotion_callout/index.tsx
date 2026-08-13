@@ -6,8 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
@@ -106,8 +112,8 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
 
   return (
     <>
-      <KbnInfoCallout
-        size="m"
+      <EuiCallOut
+        color="primary"
         title={i18n.CALLOUT_TITLE}
         data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_TEST_ID}
         onDismiss={onDismiss}
@@ -115,39 +121,49 @@ const WorkflowsPromotionCalloutComponent: React.FC = () => {
           'aria-label': i18n.CALLOUT_DISMISS_ARIA_LABEL,
           'data-test-subj': WORKFLOWS_PROMOTION_CALLOUT_DISMISS_TEST_ID,
         }}
-        text={
-          canSaveAdvancedSettings ? (
-            <p>{i18n.CALLOUT_DESCRIPTION}</p>
-          ) : (
-            <p data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_MISSING_PRIVILEGES_TEST_ID}>
-              {i18n.CALLOUT_MISSING_PRIVILEGES_DESCRIPTION}
-            </p>
-          )
-        }
-        // When rendered wide enough, EUI places the action to the right of the
-        // text and vertically centers it; it stacks below on narrow widths.
-        actionProps={
-          canSaveAdvancedSettings
-            ? {
-                primary: {
-                  children: i18n.CALLOUT_ENABLE_BUTTON,
-                  onClick: onEnable,
-                  isLoading: isEnabling,
-                  'data-test-subj': WORKFLOWS_PROMOTION_CALLOUT_ENABLE_TEST_ID,
-                },
-              }
-            : {
-                primary: {
-                  children: i18n.CALLOUT_LEARN_MORE,
-                  href: docLinks.links.siem.runAttackDiscoveryInWorkflow,
-                  target: '_blank',
-                  rel: 'noopener',
-                  onClick: onLearnMore,
-                  'data-test-subj': WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID,
-                },
-              }
-        }
-      />
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem>
+            {canSaveAdvancedSettings ? (
+              <EuiText size="s">
+                <p>{i18n.CALLOUT_DESCRIPTION}</p>
+              </EuiText>
+            ) : (
+              <EuiText
+                size="s"
+                data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_MISSING_PRIVILEGES_TEST_ID}
+              >
+                <p>{i18n.CALLOUT_MISSING_PRIVILEGES_DESCRIPTION}</p>
+              </EuiText>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {canSaveAdvancedSettings ? (
+              <EuiButton
+                color="primary"
+                size="s"
+                onClick={onEnable}
+                isLoading={isEnabling}
+                data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_ENABLE_TEST_ID}
+              >
+                {i18n.CALLOUT_ENABLE_BUTTON}
+              </EuiButton>
+            ) : (
+              <EuiButton
+                color="primary"
+                size="s"
+                href={docLinks.links.siem.runAttackDiscoveryInWorkflow}
+                target="_blank"
+                rel="noopener"
+                onClick={onLearnMore}
+                data-test-subj={WORKFLOWS_PROMOTION_CALLOUT_LEARN_MORE_TEST_ID}
+              >
+                {i18n.CALLOUT_LEARN_MORE}
+              </EuiButton>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiCallOut>
       <EuiSpacer size="l" />
     </>
   );
