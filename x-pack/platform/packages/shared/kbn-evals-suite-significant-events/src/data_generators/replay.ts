@@ -18,6 +18,7 @@ export {
   replaySignificantEventsSnapshot,
   cleanSignificantEventsDataStreams,
 } from './replay_logs_snapshot';
+export type { CleanSignificantEventsDataStreamsOptions } from './replay_logs_snapshot';
 
 export type { ReplayStats } from './replay_into_managed_stream';
 export {

@@ -28,8 +28,10 @@ import {
   continuationStabilityEvaluator,
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
+import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
+import { severityExactEvaluator } from './severity/severity_exact';
 import { createStatusCorrectnessEvaluator } from './status/status_correctness';
 
 /**
@@ -45,6 +47,7 @@ export const createDiscoveryEvaluators = (
     createExecuteEsqlGroundingEvaluator(),
     confirmedEvidencesEvaluator,
     confirmationAlignmentEvaluator,
+    severityExactEvaluator,
   ];
 
   const base = selectEvaluators(codeEvaluators);
@@ -76,5 +79,6 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
   selectEvaluators([
     continuationStabilityEvaluator,
     continuationRoutingEvaluator,
+    continuationSeverityStabilityEvaluator,
     continuationTrajectoryEvaluator,
   ]);
