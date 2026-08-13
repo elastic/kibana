@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import {
   formValuesToYamlObject,
   parseYamlToFormValues,
@@ -142,7 +142,7 @@ describe('yaml_form_utils', () => {
 
   describe('parseYamlToFormValues', () => {
     it('parses valid YAML to FormValues', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: {
           name: 'Test Rule',
@@ -203,7 +203,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('ignores invalid artifacts entries', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with mixed artifacts' },
         evaluation: { query: { base: 'FROM logs-*' } },
         artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }, { id: 1 }, 'bad'],
@@ -236,7 +236,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns error for invalid kind value', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'invalid',
         metadata: { name: 'Test' },
         evaluation: { query: { base: 'FROM logs-*' } },
@@ -249,7 +249,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns error for missing name', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: {},
         evaluation: { query: { base: 'FROM logs-*' } },
@@ -262,7 +262,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns error for empty name', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: '   ' },
         evaluation: { query: { base: 'FROM logs-*' } },
@@ -275,7 +275,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns error for missing query', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'Test' },
         evaluation: { query: {} },
@@ -288,7 +288,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('returns error for invalid ES|QL query', () => {
-      const yaml = dump({
+      const yaml = stringify({
         kind: 'alert',
         metadata: { name: 'Test' },
         evaluation: { query: { base: 'INVALID query' } },
@@ -301,7 +301,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('uses default values for missing optional fields', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Minimal Rule' },
         evaluation: { query: { base: 'FROM logs-*' } },
       });
@@ -320,7 +320,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('defaults enabled to true when not specified', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Test' },
         evaluation: { query: { base: 'FROM logs-*' } },
       });
@@ -331,7 +331,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('respects enabled: false', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Test', enabled: false },
         evaluation: { query: { base: 'FROM logs-*' } },
       });
@@ -342,7 +342,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('trims whitespace from name', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: '  Test Rule  ' },
         evaluation: { query: { base: 'FROM logs-*' } },
       });
@@ -353,7 +353,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('derives breaches alert delay mode from state_transition with pending_count', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with breaches' },
         evaluation: { query: { base: 'FROM logs-*' } },
         state_transition: { pending_count: 3 },
@@ -373,7 +373,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('derives duration alert delay mode from state_transition with pending_timeframe', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with duration' },
         evaluation: { query: { base: 'FROM logs-*' } },
         state_transition: { pending_timeframe: '10m' },
@@ -387,7 +387,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('derives both delay modes from state_transition with pending and recovering fields', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'Rule with both' },
         evaluation: { query: { base: 'FROM logs-*' } },
         state_transition: {
@@ -410,7 +410,7 @@ describe('yaml_form_utils', () => {
     });
 
     it('defaults both modes to immediate when no state_transition is present', () => {
-      const yaml = dump({
+      const yaml = stringify({
         metadata: { name: 'No delay' },
         evaluation: { query: { base: 'FROM logs-*' } },
       });

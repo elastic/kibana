@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "9.4.5",
+  "version": "9.4.6",
   "branch": "9.4",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -2180,6 +2180,7 @@
     "ts-morph": "15.1.0",
     "tsd": "0.33.0",
     "typescript": "6.0.3",
+    "typescript-7": "npm:typescript@7.0.2",
     "val-loader": "6.0.0",
     "vinyl-fs": "4.0.0",
     "vscode-languageserver-textdocument": "1.0.12",

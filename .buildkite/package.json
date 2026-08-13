@@ -40,6 +40,9 @@
   },
   "imports": {
     "#pipeline-utils": "./pipeline-utils/index.ts",
-    "#pipeline-utils/*": "./pipeline-utils/*"
+    "#pipeline-utils/*": [
+      "./pipeline-utils/*.ts",
+      "./pipeline-utils/*/index.ts"
+    ]
   }
 }
