@@ -48,9 +48,11 @@ export const getRuleMigrationStatsTool = (
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     type: ToolType.builtin,
     availability,
-    description: `Get task-progress stats for a single SIEM rule migration: status (ready/running/stopped/\
-interrupted/finished) and per-state rule counts (pending/processing/completed/failed). \
-Use this to inspect one migration progress. Read-only.`,
+    description: `Get task-progress stats for a single SIEM rule migration.
+
+Returns status (ready/running/stopped/interrupted/finished) and per-state rule counts (pending/processing/completed/failed).
+
+Use this to inspect one migration's progress. Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {

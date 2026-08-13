@@ -26,10 +26,9 @@ export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
   id: 'automatic-migration-rules-start-migration',
   name: 'automatic-migration-rules-start-migration',
   basePath: 'skills/security/siem_migrations',
-  description:
-    'Start, reprocess, or resume an Automatic Rule Migration translation run. Resolves the AI ' +
-    'connector, confirms the mutating action with the user, and picks the right request body ' +
-    '(START vs REPROCESS vs RESUME) from the rule migration state.',
+  description: `Start, reprocess, or resume an Automatic Rule Migration translation run.
+
+Resolves the AI connector, confirms the mutating action with the user, and picks the right request body (START vs REPROCESS vs RESUME) from the rule migration state.`,
   content: `
 # Start / Reprocess / Resume an Automatic Rule Migration
 

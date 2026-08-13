@@ -22,12 +22,11 @@ export const automaticMigrationRulesGetAllStatsSkill = defineSkillType({
   id: 'automatic-migration-rules-get-all-stats',
   name: 'automatic-migration-rules-get-all-stats',
   basePath: 'skills/security/siem_migrations',
-  description:
-    'Summarize Automatic Rule Migration progress: list every rule migration with its status and ' +
-    'rule counts, or drill into one rule migration task progress and translation stats. Use when ' +
-    'the user asks "how are my rule migrations doing", wants an overview, or asks about a ' +
-    'specific rule migration by name. Read-only. (Automatic Migration also covers dashboards; ' +
-    'this skill handles rule migrations only.)',
+  description: `Summarize Automatic Rule Migration progress: list every rule migration with its status and rule counts, or drill into one migration's task progress and translation stats.
+
+Use when the user asks "how are my rule migrations doing", wants an overview, or asks about a specific rule migration by name.
+
+Read-only. Automatic Migration also covers dashboards — this skill handles rule migrations only.`,
   content: `
 # Summarize an Automatic Migration
 

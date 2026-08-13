@@ -60,24 +60,24 @@ export const getRuleMigrationTranslationStatsTool = (
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     type: ToolType.builtin,
     availability,
-    description: `
-    Description
-      Get translation stats for a single Automatic Rule Migration by id.
-      Translation Stats represent the status of each rule within a migration. 1 Migration can contain N number of rules and this tool gives the summary of the translation status of those rules.
+    description: `Get translation stats for a single Automatic Rule Migration by id.
 
-    Returns
-      { id, rules: { total, success: { total, result: { full, partial, untranslatable },
-      installable, prebuilt, missing_index }, failed } }. \`result.full\` = fully translated (Ready to install);
-      \`result.partial\` = partially translated (review needed); \`result.untranslatable\` = could not
-      be translated; \`installable\` = successfully translated and installable; \`prebuilt\` = matched
-      an Elastic prebuilt rule; \`missing_index\` = query has a placeholder for a missing index
-      pattern; \`failed\` = translation errored.
+A migration can contain N rules — this tool summarizes the translation status of those rules.
 
-      A migration with zero rule items returns the same
-      shape with all counts 0 (the route returns 204 No Content, normalized here to a stable
-      shape). Use this to decide whether translated rules are ready to install, and to surface
-      partial/untranslatable/failed rules for review. Read-only.,
-`,
+Returns { id, rules: { total, success: { total, result: { full, partial, untranslatable }, installable, prebuilt, missing_index }, failed } }.
+
+Field meanings:
+- \`result.full\` = fully translated (ready to install)
+- \`result.partial\` = partially translated (review needed)
+- \`result.untranslatable\` = could not be translated
+- \`installable\` = successfully translated and installable
+- \`prebuilt\` = matched an Elastic prebuilt rule
+- \`missing_index\` = query has a placeholder for a missing index pattern
+- \`failed\` = translation errored
+
+A migration with zero rule items returns the same shape with all counts 0 (204 No Content normalized to a stable shape).
+
+Use this to decide whether translated rules are ready to install, and to surface partial/untranslatable/failed rules for review. Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {
