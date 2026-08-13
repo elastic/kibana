@@ -105,7 +105,7 @@ export const TypeFilter = React.memo<TypeFilterProps>(
         button={
           <EuiFilterButton
             data-test-subj="user-actions-filter-bar-type-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             onClick={togglePopover}
             isSelected={isPopoverOpen}
             hasActiveFilters={type !== 'all'}

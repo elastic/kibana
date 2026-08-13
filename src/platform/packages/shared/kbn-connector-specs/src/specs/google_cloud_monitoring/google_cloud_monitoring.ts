@@ -606,7 +606,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
           `${MONITORING_API_BASE}/projects/${encodeURIComponent(projectId)}/alertPolicies`,
           { params: { pageSize: 1 } }
         );
-        return { ok: true, message: 'Successfully connected to the Cloud Monitoring API' };
+        return { message: 'Successfully connected to the Cloud Monitoring API' };
       } catch (error) {
         throwMonitoringError(error);
       }

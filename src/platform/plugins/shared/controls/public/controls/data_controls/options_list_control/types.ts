@@ -17,12 +17,14 @@ import type {
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   HasType,
   HasUniqueId,
   PublishesRelatedPanels,
   PublishesUnsavedChanges,
   PublishingSubject,
   SupportsJsonExport,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 
@@ -33,6 +35,7 @@ import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
+  CanCancelRequests &
   DataControlApi &
   PublishesUnsavedChanges &
   PublishesRelatedPanels & {
@@ -71,6 +74,7 @@ export type DSLOptionsListComponentApi = HasType &
   DSLOptionsListComponentStateSetters &
   OptionsListSelectionsApi & {
     loadMoreSubject: Subject<void>;
+    viewMode$: PublishingSubject<ViewMode>;
   };
 
 export interface OptionsListCustomStrings {

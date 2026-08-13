@@ -79,7 +79,8 @@
     "@kbn/kql",
     "@kbn/entity-store",
     "@kbn/logging-mocks",
-    "@kbn/core-spaces-common"
+    "@kbn/core-spaces-common",
+    "@kbn/app-header"
   ],
   "exclude": ["target/**/*"]
 }

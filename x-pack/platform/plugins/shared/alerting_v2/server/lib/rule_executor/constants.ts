@@ -14,3 +14,5 @@
  * not every transpiler in the repo supports.
  */
 export const ALERTING_RULE_EXECUTOR_TASK_TYPE = 'alerting_v2:rule_executor' as const;
+
+export const DEFAULT_ALERTING_RULE_EXECUTOR_TASK_TIMEOUT = '5m';

@@ -20,13 +20,13 @@ import {
   OBSERVABILITY_GET_TRACES_TOOL_ID,
 } from '../../../agent_builder/agents/discovery/constants';
 
-export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'significant_events.investigation';
+export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID = 'significant-events.investigation';
 export const SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID =
   'platform.sig_events.investigation-type';
 
 export const investigationAgentType = {
   id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-  name: 'Streams Investigator',
+  name: 'Nightshift Investigator',
   description:
     'Investigates an observability issue by querying available signals (logs, traces, metrics), ' +
     'reasoning about causality direction, and producing a contributing-factors conclusion with supporting evidence.',

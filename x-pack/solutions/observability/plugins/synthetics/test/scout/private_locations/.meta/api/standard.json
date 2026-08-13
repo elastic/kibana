@@ -1,0 +1,820 @@
+{
+  "sha1": "59d02d42d2783494cd619cf77e891c8b86cd7337",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "97cf5412d0075bd-18c2dd00dd61551",
+      "title": "PrivateLocationAddMonitor lists the added private location as a valid service location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
+        "line": 66,
+        "column": 21
+      }
+    },
+    {
+      "id": "97cf5412d0075bd-78a0c980e32dfdf",
+      "title": "PrivateLocationAddMonitor rejects browser timeout below 30s in private locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
+        "line": 81,
+        "column": 17
+      }
+    },
+    {
+      "id": "97cf5412d0075bd-60a8e53468d1fd5",
+      "title": "PrivateLocationAddMonitor allows browser timeout at 30s in private locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
+        "line": 100,
+        "column": 36
+      }
+    },
+    {
+      "id": "97cf5412d0075bd-98f03cbcecf9393",
+      "title": "PrivateLocationAddMonitor handles spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/add_monitor_private_location.spec.ts",
+        "line": 118,
+        "column": 36
+      }
+    },
+    {
+      "id": "067302327d2a1e9-7a831ee3ac2ae98",
+      "title": "AutoUpgradePolicies handles auto upgrading policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/auto_upgrade_policies.spec.ts",
+        "line": 71,
+        "column": 51
+      }
+    },
+    {
+      "id": "a5c3f83be276d2a-6771baf1db2b03d",
+      "title": "CleanUpExtraPackagePolicies cleans up orphaned package policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/clean_up_extra_package_policies.spec.ts",
+        "line": 49,
+        "column": 13
+      }
+    },
+    {
+      "id": "da272c25075079a-dcb58efc3190b29",
+      "title": "PrivateLocationCreateMonitor handles auto upgrading policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/create_monitor_private_location.spec.ts",
+        "line": 84,
+        "column": 51
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-d91974948018b77",
+      "title": "EditPrivateLocationAPI successfully edits a private location label with no monitors assigned",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 106,
+        "column": 50
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-e86d979cbf531a0",
+      "title": "EditPrivateLocationAPI editing the label propagates to the assigned monitor and Fleet package policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 110,
+        "column": 47
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-8f141bbaa2a98f7",
+      "title": "EditPrivateLocationAPI returns 404 when editing a non-existent private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 142,
+        "column": 17
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-3f806923861c4b9",
+      "title": "EditPrivateLocationAPI returns 400 when editing with an empty label",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 156,
+        "column": 31
+      }
+    },
+    {
+      "id": "af9f3e8d40999e9-d3e96aae0057fea",
+      "title": "EditPrivateLocationAPI editing the label in one space propagates across all spaces using the location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/edit_private_location.spec.ts",
+        "line": 165,
+        "column": 25
+      }
+    },
+    {
+      "id": "d0afc42b785c752-21ed7b6b4ae59d6",
+      "title": "GetPrivateLocationMonitors lists the private location in available service locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "d0afc42b785c752-ffd2cf685ca3fa7",
+      "title": "GetPrivateLocationMonitors returns the monitor count for a private location across modern and legacy monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/get_private_location_monitors.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-a4b7c528dcb161b",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should create a legacy monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 159,
+        "column": 64
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-2f1ca2256ab3253",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should create a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 169,
+        "column": 69
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-9344a15f13d8844",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should edit a legacy monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 184,
+        "column": 9
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-fec4e9d9acd883f",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should edit a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 201,
+        "column": 9
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-11cd631426e3eff",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should delete a legacy monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 216,
+        "column": 21
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-293d4ee31454b1d",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should delete a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 226,
+        "column": 45
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-13a63e676466bad",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should allow editing spaces of a legacy monitor (convert to multi-space type)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 238,
+        "column": 29
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-ec5add54e3e0e66",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should allow editing spaces of a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 272,
+        "column": 9
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-ffc16fe41a6db43",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should delete a monitor after editing spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 314,
+        "column": 53
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-33c0e450c49728c",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should filter all monitors (showFromAllSpaces)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 342,
+        "column": 15
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-3dd92b1986e208c",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should find both legacy and multi-space monitors by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 372,
+        "column": 32
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-6d3b3c8ffb89780",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should throw error if spaces list does not include the calling space on create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 406,
+        "column": 18
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-a9c323cec92cfe0",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Public location should throw error if spaces list does not include the calling space on edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 426,
+        "column": 84
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-f8b07fcaebbdece",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should create a legacy monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 159,
+        "column": 64
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-b76f4e842b8cdec",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should create a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 169,
+        "column": 69
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-3f5f58b4a8e756a",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should edit a legacy monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 184,
+        "column": 9
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-73237c62602a7a1",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should edit a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 201,
+        "column": 9
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-a9580012c6ccdae",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should delete a legacy monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 216,
+        "column": 21
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-17a7cc0e7cfbf72",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should delete a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 226,
+        "column": 45
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-d6ff9acab97cd34",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should allow editing spaces of a legacy monitor (convert to multi-space type)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 238,
+        "column": 29
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-cbc8c3b242e958f",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should allow editing spaces of a multi-space monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 272,
+        "column": 9
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-047e5f5005aab54",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should delete a monitor after editing spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 314,
+        "column": 53
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-52be09ddd1e9eb6",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should filter all monitors (showFromAllSpaces)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 342,
+        "column": 15
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-a89d9b9c5d22f9f",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should find both legacy and multi-space monitors by name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 372,
+        "column": 32
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-81cd702a11191bf",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should throw error if spaces list does not include the calling space on create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 406,
+        "column": 18
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-5d50d88510b78c0",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should throw error if spaces list does not include the calling space on edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 426,
+        "column": 84
+      }
+    },
+    {
+      "id": "c33f07a3f6ee206-faddcc65f6e3823",
+      "title": "LegacyAndMultiSpaceMonitorAPI - Private location should throw error if a private location is not shared to all monitor spaces on edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/fixtures/legacy_multispace_shared.ts",
+        "line": 460,
+        "column": 34
+      }
+    },
+    {
+      "id": "a4060127e236200-dc7e79e42d27695",
+      "title": "MigrateLegacyPolicies should migrate legacy policy to new format when monitor is edited",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
+        "line": 116,
+        "column": 60
+      }
+    },
+    {
+      "id": "a4060127e236200-40bc91621830fbc",
+      "title": "MigrateLegacyPolicies should handle multiple legacy policies for same monitor in different spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
+        "line": 136,
+        "column": 90
+      }
+    },
+    {
+      "id": "a4060127e236200-da8712f879964f0",
+      "title": "MigrateLegacyPolicies should clean up legacy policy from a space the monitor is no longer in",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
+        "line": 171,
+        "column": 20
+      }
+    },
+    {
+      "id": "a4060127e236200-5f43457895d6833",
+      "title": "MigrateLegacyPolicies should clean up orphaned legacy policies via cleanup endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
+        "line": 209,
+        "column": 9
+      }
+    },
+    {
+      "id": "a4060127e236200-80232182fc1d771",
+      "title": "MigrateLegacyPolicies should migrate legacy policies to new format when cleanup runs",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
+        "line": 247,
+        "column": 6
+      }
+    },
+    {
+      "id": "a4060127e236200-f9c488c7a5fd94a",
+      "title": "MigrateLegacyPolicies should clean up legacy policies from spaces with no monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
+        "line": 214,
+        "column": 27
+      }
+    },
+    {
+      "id": "a4060127e236200-75d0e4ce0b90e60",
+      "title": "MigrateLegacyPolicies creates new monitors with new format policy ID (without spaceId)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
+        "line": 275,
+        "column": 20
+      }
+    },
+    {
+      "id": "2f677958929dd78-932aa7702808a94",
+      "title": "PrivateLocationAPI adds a test private location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 179,
+        "column": 53
+      }
+    },
+    {
+      "id": "2f677958929dd78-704fa61e30dc844",
+      "title": "PrivateLocationAPI lists all locations and migrates the legacy singleton to the new saved object type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 188,
+        "column": 23
+      }
+    },
+    {
+      "id": "2f677958929dd78-294a4f16ed590b0",
+      "title": "PrivateLocationAPI cannot create private location if privileges are missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 200,
+        "column": 9
+      }
+    },
+    {
+      "id": "2f677958929dd78-b965e92881063c2",
+      "title": "PrivateLocationAPI can create private location if privileges are added",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 207,
+        "column": 25
+      }
+    },
+    {
+      "id": "2f677958929dd78-15abfe3133ee616",
+      "title": "PrivateLocationAPI can delete private location if privileges are added",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 211,
+        "column": 25
+      }
+    },
+    {
+      "id": "2f677958929dd78-11189e4220ea213",
+      "title": "PrivateLocationAPI can create private location in multiple spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 235,
+        "column": 11
+      }
+    },
+    {
+      "id": "2f677958929dd78-05f2ef726486406",
+      "title": "PrivateLocationAPI creates private location in agent policy spaces if no spaces are defined for the location",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 242,
+        "column": 17
+      }
+    },
+    {
+      "id": "2f677958929dd78-66ce325bb79d787",
+      "title": "PrivateLocationAPI creates private location in agent policy spaces if locations spaces is an empty array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 259,
+        "column": 19
+      }
+    },
+    {
+      "id": "2f677958929dd78-bc8e9a016226cbc",
+      "title": "PrivateLocationAPI validation errors works in multiple spaces as well",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 273,
+        "column": 19
+      }
+    },
+    {
+      "id": "2f677958929dd78-259211799f44323",
+      "title": "PrivateLocationAPI cannot create private location in multiple spaces if the agent policy does not belong to those spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 298,
+        "column": 29
+      }
+    },
+    {
+      "id": "2f677958929dd78-714a766f78fe874",
+      "title": "PrivateLocationAPI can create private location in any space if agent policy has \"*\" space id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/private_location_apis.spec.ts",
+        "line": 310,
+        "column": 9
+      }
+    }
+  ]
+}
