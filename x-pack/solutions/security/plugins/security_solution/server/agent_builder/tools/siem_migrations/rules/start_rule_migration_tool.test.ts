@@ -7,9 +7,15 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import { createToolTestMocks, createToolHandlerContext } from '../../../__mocks__/test_helpers';
 import { coreMock } from '@kbn/core/server/mocks';
 import { startRuleMigrationTool } from './start_rule_migration_tool';
+
+const mockAvailability: ToolAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: async () => ({ status: 'available' as const }),
+};
 
 describe('startRuleMigrationTool', () => {
   const { mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -17,7 +23,7 @@ describe('startRuleMigrationTool', () => {
   let mockFetch: jest.Mock;
   let checkPrivileges: jest.Mock;
 
-  const tool = () => startRuleMigrationTool(mockCore, mockLogger);
+  const tool = () => startRuleMigrationTool(mockCore, mockLogger, mockAvailability);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,7 +49,7 @@ describe('startRuleMigrationTool', () => {
     ]);
   });
 
-  it('forwards the start body to the endpoint on a successful privilege check', async () => {
+  it('should forward the start body to the endpoint on a successful privilege check', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/start' },
       request: new Request('http://localhost/x'),
@@ -70,7 +76,7 @@ describe('startRuleMigrationTool', () => {
     expect(result.results[0].data).toEqual({ started: true });
   });
 
-  it('omits migration_id from the forwarded body', async () => {
+  it('should omit migration_id from the forwarded body', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/start' },
       request: new Request('http://localhost/x'),
@@ -88,7 +94,7 @@ describe('startRuleMigrationTool', () => {
     expect(body).not.toHaveProperty('migration_id');
   });
 
-  it('returns an error result without calling the endpoint when privileges are missing', async () => {
+  it('should return an error result without calling the endpoint when privileges are missing', async () => {
     checkPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
 
     const result = (await tool().handler(
@@ -103,7 +109,7 @@ describe('startRuleMigrationTool', () => {
     );
   });
 
-  it('surfaces an endpoint failure as an error result', async () => {
+  it('should surface an endpoint failure as an error result', async () => {
     const error = new Error('Bad Request') as Error & {
       response?: Response;
       body?: unknown;

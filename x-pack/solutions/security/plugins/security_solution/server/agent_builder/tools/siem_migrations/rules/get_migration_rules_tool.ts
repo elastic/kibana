@@ -6,24 +6,28 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../common/siem_migrations/constants';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
-import type { GetRuleMigrationRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  GetRuleMigrationRulesRequestQuery,
+  type GetRuleMigrationRulesResponse,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
+import { createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID } from './tool_ids';
 
-// Reuse the endpoint's request shapes, bounding the unbounded query inputs (repo rule: prevent
+// Extend the OpenAPI-generated query schema, bounding the unbounded inputs (repo rule: prevent
 // unbounded-input DoS). `page` is ZERO-BASED — the route computes `from: page * size`
 // (api/rules/get.ts), so `page=0` is the first page. `ids` is redefined as a plain array
 // (the route validates arrays; the API model's `ArrayFromString` string-split preprocess is
-// dropped — a deliberate divergence called out in the plan).
-const schema = z.object({
+// dropped — a deliberate divergence called out in the plan). Booleans and sort fields come
+// from the gen type unchanged.
+const schema = GetRuleMigrationRulesRequestQuery.extend({
   migration_id: NonEmptyString.describe('The id of the rule migration whose rules to retrieve.'),
   page: z.coerce
     .number()
@@ -38,17 +42,8 @@ const schema = z.object({
     .max(200)
     .default(50)
     .describe('Number of rules per page (1-200).'),
-  sort_field: NonEmptyString.optional(),
-  sort_direction: z.enum(['asc', 'desc']).optional(),
   search_term: z.string().max(500).optional(),
   ids: z.array(NonEmptyString).max(200).optional(),
-  is_prebuilt: BooleanFromString.optional(),
-  is_installed: BooleanFromString.optional(),
-  is_fully_translated: BooleanFromString.optional(),
-  is_partially_translated: BooleanFromString.optional(),
-  is_untranslatable: BooleanFromString.optional(),
-  is_failed: BooleanFromString.optional(),
-  is_missing_index: BooleanFromString.optional(),
 });
 
 const buildPath = (migrationId: string): string =>
@@ -65,9 +60,10 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
   },
   elastic_rule: rule.elastic_rule
     ? {
-      title: rule.elastic_rule.title,
-      prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
-    }
+        title: rule.elastic_rule.title,
+        prebuilt_rule_id: rule.elastic_rule.prebuilt_rule_id,
+        integration_ids: rule.elastic_rule.integration_ids,
+      }
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,
@@ -75,18 +71,19 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
 
 export const getMigrationRulesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
+  logger: Logger,
+  availability: ToolAvailabilityConfig
 ): BuiltinToolDefinition<typeof schema> => {
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
     type: ToolType.builtin,
-    description:
-      'List the rules in a SIEM rule migration with their translation result and status. ' +
-      'Supports filtering (by translation result, installed/prebuilt, search term, or explicit ids) ' +
-      'and pagination (page is zero-based). Returns projected fields only (id, titles, prebuilt ' +
-      'rule id, translation result, status) — not full rule bodies. Read-only.',
+    availability,
+    description: `List the rules in a SIEM rule migration with their translation result and status. \
+Supports filtering (by translation result, installed/prebuilt, search term, or explicit ids) \
+and pagination (page is zero-based). Returns projected fields only (id, titles, prebuilt \
+rule id, translation result, status) — not full rule bodies. Read-only.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {
@@ -106,23 +103,10 @@ export const getMigrationRulesTool = (
       );
 
       if (!response.ok) {
-        const bodyMessage =
-          response.body && typeof response.body === 'object' && 'message' in response.body
-            ? String((response.body as { message: unknown }).message)
-            : undefined;
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message:
-                  bodyMessage ??
-                  `Failed to get migration rules for "${migrationId}" (HTTP ${response.status}): ${response.message}`,
-              },
-            },
-          ],
-        };
+        return createToolErrorResult(
+          response,
+          `Failed to get migration rules for "${migrationId}"`
+        );
       }
 
       return {

@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -14,9 +15,14 @@ import {
 } from '../../../__mocks__/test_helpers';
 import { getMigrationRulesTool } from './get_migration_rules_tool';
 
+const mockAvailability: ToolAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: async () => ({ status: 'available' as const }),
+};
+
 describe('getMigrationRulesTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getMigrationRulesTool(mockCore, mockLogger);
+  const tool = getMigrationRulesTool(mockCore, mockLogger, mockAvailability);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
@@ -28,7 +34,7 @@ describe('getMigrationRulesTool', () => {
     });
   });
 
-  it('projects rules to id + titles + translation result + status on a 200', async () => {
+  it('should project rules to id + titles + translation result + status on a 200', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
       request: new Request('http://localhost/x'),
@@ -77,7 +83,11 @@ describe('getMigrationRulesTool', () => {
     expect(data.data[0]).toEqual({
       id: 'rule-1',
       original_rule: { title: 'Splunk rule', vendor: 'splunk' },
-      elastic_rule: { title: 'Elastic rule', prebuilt_rule_id: 'pre-1' },
+      elastic_rule: {
+        title: 'Elastic rule',
+        prebuilt_rule_id: 'pre-1',
+        integration_ids: undefined,
+      },
       translation_result: 'full',
       status: 'completed',
     });
@@ -90,7 +100,7 @@ describe('getMigrationRulesTool', () => {
     });
   });
 
-  it('applies default sort (elastic_rule.title asc) when no sort is provided', async () => {
+  it('should apply default sort (elastic_rule.title asc) when no sort is provided', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
       request: new Request('http://localhost/x'),
@@ -114,7 +124,7 @@ describe('getMigrationRulesTool', () => {
     );
   });
 
-  it('passes filters and pagination through in the query', async () => {
+  it('should pass filters and pagination through in the query', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/rules' },
       request: new Request('http://localhost/x'),
@@ -150,7 +160,7 @@ describe('getMigrationRulesTool', () => {
     );
   });
 
-  it('returns an error result when the call fails', async () => {
+  it('should return an error result when the call fails', async () => {
     const error = new Error('Not Found') as Error & {
       response?: Response;
       body?: unknown;

@@ -18,7 +18,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../pl
  *
  * Returns `true` when the current user holds ALL of the given Kibana privileges.
  */
-export const assertMigrationPrivilege = async (
+export const hasSiemMigrationPrivileges = async (
   core: SecuritySolutionPluginCoreSetupDependencies,
   request: KibanaRequest,
   privileges: string[]

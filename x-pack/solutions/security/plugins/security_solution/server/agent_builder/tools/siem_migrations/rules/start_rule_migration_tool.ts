@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
@@ -20,7 +20,8 @@ import { RuleMigrationRetryFilter } from '../../../../../common/siem_migrations/
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
-import { assertMigrationPrivilege } from '../common/privileges';
+import { hasSiemMigrationPrivileges } from '../common/privileges';
+import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
 // Reuse the endpoint's request body schema and add the path param, so the tool input
@@ -51,13 +52,16 @@ const schema = StartRuleMigrationRequestBody.extend({
 
 export const startRuleMigrationTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
+  logger: Logger,
+  availability: ToolAvailabilityConfig
 ): BuiltinToolDefinition<typeof schema> => {
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
+    availability,
+    confirmation: { askUser: 'always' },
     description: `
       Start or reprocess a SIEM rule migration. Mutating: confirms with the user and
       resolves the connector via list_ai_connectors first. See the automatic-migration-rules-start-migration
@@ -68,23 +72,12 @@ export const startRuleMigrationTool = (
     handler: async (input, { request }) => {
       const { migration_id: migrationId, ...body } = input;
 
-      const hasPrivilege = await assertMigrationPrivilege(core, request, [
+      const hasPrivilege = await hasSiemMigrationPrivileges(core, request, [
         `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
       ]);
 
       if (!hasPrivilege) {
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message:
-                  'The current user does not have the "Automatic Migration: All" privilege required to start a rule migration. Ask the user to grant Security > Automatic Migration: All.',
-              },
-            },
-          ],
-        };
+        return createMissingPrivilegeError('start a rule migration');
       }
 
       const path = SIEM_RULE_MIGRATION_START_PATH.replace(
@@ -97,23 +90,10 @@ export const startRuleMigrationTool = (
       });
 
       if (!response.ok) {
-        const bodyMessage =
-          response.body && typeof response.body === 'object' && 'message' in response.body
-            ? String((response.body as { message: unknown }).message)
-            : undefined;
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message:
-                  bodyMessage ??
-                  `Failed to start rule migration "${migrationId}" (HTTP ${response.status}): ${response.message}`,
-              },
-            },
-          ],
-        };
+        return createToolErrorResult(
+          response,
+          `Failed to start rule migration "${migrationId}"`
+        );
       }
 
       return {

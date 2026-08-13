@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -14,9 +15,14 @@ import {
 } from '../../../__mocks__/test_helpers';
 import { getRuleMigrationStatsTool } from './get_rule_migration_stats_tool';
 
+const mockAvailability: ToolAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: async () => ({ status: 'available' as const }),
+};
+
 describe('getRuleMigrationStatsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getRuleMigrationStatsTool(mockCore, mockLogger);
+  const tool = getRuleMigrationStatsTool(mockCore, mockLogger, mockAvailability);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
@@ -28,7 +34,7 @@ describe('getRuleMigrationStatsTool', () => {
     });
   });
 
-  it('returns the stats body on a 200', async () => {
+  it('should return the stats body on a 200', async () => {
     const stats = {
       id: 'abc',
       name: 'My migration',
@@ -57,7 +63,7 @@ describe('getRuleMigrationStatsTool', () => {
     expect(result.results[0].data).toEqual(stats);
   });
 
-  it('normalizes a 204 (no items) to an explicit empty zero-shape', async () => {
+  it('should normalize a 204 (no items) to an explicit empty zero-shape', async () => {
     // 204 No Content → body is null/undefined. The tool must return a readable empty shape
     // so the skill/state-matrix zero-checks (items.pending === 0) always have a shape.
     mockFetch.mockResolvedValueOnce({
@@ -89,7 +95,7 @@ describe('getRuleMigrationStatsTool', () => {
     });
   });
 
-  it('returns an error result when the call fails', async () => {
+  it('should return an error result when the call fails', async () => {
     const error = new Error('Forbidden') as Error & {
       response?: Response;
       body?: unknown;

@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -14,9 +15,14 @@ import {
 } from '../../../__mocks__/test_helpers';
 import { getRuleMigrationTool } from './get_rule_migration_tool';
 
+const mockAvailability: ToolAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: async () => ({ status: 'available' as const }),
+};
+
 describe('getRuleMigrationTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getRuleMigrationTool(mockCore, mockLogger);
+  const tool = getRuleMigrationTool(mockCore, mockLogger, mockAvailability);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
@@ -28,7 +34,7 @@ describe('getRuleMigrationTool', () => {
     });
   });
 
-  it('returns the migration body on a 200', async () => {
+  it('should return the migration body on a 200', async () => {
     const migration = { migration_id: 'abc', name: 'My migration' };
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc' },
@@ -50,7 +56,7 @@ describe('getRuleMigrationTool', () => {
     expect(result.results[0].data).toEqual(migration);
   });
 
-  it('returns an error result when the migration is not found', async () => {
+  it('should return an error result when the migration is not found', async () => {
     const error = new Error('Not Found') as Error & {
       response?: Response;
       body?: unknown;

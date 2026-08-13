@@ -7,6 +7,7 @@
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type { ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -14,9 +15,14 @@ import {
 } from '../../../__mocks__/test_helpers';
 import { getRuleMigrationTranslationStatsTool } from './get_rule_migration_translation_stats_tool';
 
+const mockAvailability: ToolAvailabilityConfig = {
+  cacheMode: 'space',
+  handler: async () => ({ status: 'available' as const }),
+};
+
 describe('getRuleMigrationTranslationStatsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getRuleMigrationTranslationStatsTool(mockCore, mockLogger);
+  const tool = getRuleMigrationTranslationStatsTool(mockCore, mockLogger, mockAvailability);
   let mockFetch: jest.Mock;
 
   beforeEach(() => {
@@ -28,7 +34,7 @@ describe('getRuleMigrationTranslationStatsTool', () => {
     });
   });
 
-  it('returns the translation stats body on a 200', async () => {
+  it('should return the translation stats body on a 200', async () => {
     const stats = {
       id: 'abc',
       rules: {
@@ -63,7 +69,7 @@ describe('getRuleMigrationTranslationStatsTool', () => {
     expect(result.results[0].data).toEqual(stats);
   });
 
-  it('normalizes a 204 (no items) to an explicit empty zero-shape', async () => {
+  it('should normalize a 204 (no items) to an explicit empty zero-shape', async () => {
     mockFetch.mockResolvedValueOnce({
       fetchOptions: { path: '/internal/siem_migrations/rules/abc/translation_stats' },
       request: new Request('http://localhost/x'),
@@ -92,7 +98,7 @@ describe('getRuleMigrationTranslationStatsTool', () => {
     });
   });
 
-  it('returns an error result when the call fails', async () => {
+  it('should return an error result when the call fails', async () => {
     const error = new Error('Not Found') as Error & {
       response?: Response;
       body?: unknown;

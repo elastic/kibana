@@ -8,13 +8,14 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import { createSelfClient, type SelfClient } from '../../../../common/self_client/self_client';
+import { createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID } from './tool_ids';
 
 const schema = z.object({
@@ -50,13 +51,15 @@ const emptyTranslationStats = (migrationId: string): GetRuleMigrationTranslation
 
 export const getRuleMigrationTranslationStatsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
+  logger: Logger,
+  availability: ToolAvailabilityConfig
 ): BuiltinToolDefinition<typeof schema> => {
   const callSelfClient: SelfClient = createSelfClient({ core, logger });
 
   return {
     id: SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     type: ToolType.builtin,
+    availability,
     description: `
     Description
       Get translation stats for a single Automatic Rule Migration by id.
@@ -85,23 +88,10 @@ export const getRuleMigrationTranslationStatsTool = (
       );
 
       if (!response.ok) {
-        const bodyMessage =
-          response.body && typeof response.body === 'object' && 'message' in response.body
-            ? String((response.body as { message: unknown }).message)
-            : undefined;
-        return {
-          results: [
-            {
-              tool_result_id: getToolResultId(),
-              type: ToolResultType.error,
-              data: {
-                message:
-                  bodyMessage ??
-                  `Failed to get rule migration translation stats for "${migrationId}" (HTTP ${response.status}): ${response.message}`,
-              },
-            },
-          ],
-        };
+        return createToolErrorResult(
+          response,
+          `Failed to get rule migration translation stats for "${migrationId}"`
+        );
       }
 
       // 204 No Content → normalize to empty shape (zero rule items).
