@@ -1179,4 +1179,82 @@ describe('bulkCreateRules', () => {
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalled();
     });
   });
+
+  describe('telemetry', () => {
+    test('emits alerting_rule_created for each successfully created rule', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
+      );
+
+      await rulesClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }, { data: baseRule({ name: 'b' }) }],
+      });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledTimes(2);
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({
+          rule_id: 'mock-id-1',
+          rule_type_id: '123',
+          enabled: false,
+          consumer: 'siem',
+          producer: 'alerts',
+        })
+      );
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({ rule_id: 'mock-id-2' })
+      );
+    });
+
+    test('includes template_id when provided on the item', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }])
+      );
+
+      await rulesClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }), templateId: 'my-template' }],
+      });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({ template_id: 'my-template' })
+      );
+    });
+
+    test('does not emit for rules whose SO creation failed', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([
+          { id: 'mock-id-1' },
+          { id: 'mock-id-2', error: { message: 'Conflict', statusCode: 409 } },
+        ])
+      );
+
+      await rulesClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }, { data: baseRule({ name: 'b' }) }],
+      });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledTimes(1);
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({ rule_id: 'mock-id-1' })
+      );
+    });
+
+    test('does not fail bulk create when reportEvent throws', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }])
+      );
+      (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('telemetry failure');
+      });
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }],
+      });
+
+      expect(result.errors).toEqual([]);
+      expect(result.successfulIds).toEqual(['mock-id-1']);
+    });
+  });
 });
