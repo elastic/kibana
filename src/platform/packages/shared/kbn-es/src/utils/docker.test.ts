@@ -50,6 +50,9 @@ import {
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
 import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
+import { createStripAnsiSerializer } from '@kbn/jest-serializers';
+
+expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 /**
  * This is set to 'true' on CI, and it causes some docker behaviours to differ.
@@ -325,8 +328,8 @@ describe('verifyDockerInstalled()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mVerifying Docker is installed.[22m",
-        "   │ [34minfo[39m Docker Version 123",
+        " info Verifying Docker is installed.",
+        "   │ info Docker Version 123",
       ]
     `);
   });
@@ -363,8 +366,8 @@ describe('maybeCreateDockerNetwork()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
-        "   │ [34minfo[39m Created new network.",
+        " info Checking status of elastic Docker network.",
+        "   │ info Created new network.",
       ]
     `);
   });
@@ -378,8 +381,8 @@ describe('maybeCreateDockerNetwork()', () => {
 
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m [1mChecking status of elastic Docker network.[22m",
-        "   │ [34minfo[39m Using existing network.",
+        " info Checking status of elastic Docker network.",
+        "   │ info Using existing network.",
       ]
     `);
   });

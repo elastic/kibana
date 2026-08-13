@@ -36,7 +36,7 @@ test('returns config with local paths', () => {
 });
 
 test('copies file', () => {
-  extractConfigFiles(['path=/data/foo.yml'], '/es');
+  extractConfigFiles(['path=/data/foo.yml'], '/es/config');
 
   expect(fs.readFileSync.mock.calls[0][0]).toEqual('/data/foo.yml');
   expect(fs.writeFileSync.mock.calls[0][0]).toEqual('/es/config/foo.yml');

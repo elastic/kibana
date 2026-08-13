@@ -186,7 +186,7 @@ describe('#installSource()', () => {
       () =>
         new Promise((resolve) => {
           resolveInstallSource = () => {
-            resolve({ installPath: 'foo', disableEsTmpDir: false });
+            resolve({ installPath: 'foo', disableEsTmpDir: false, configPath: undefined });
           };
         })
     );
@@ -202,7 +202,11 @@ describe('#installSource()', () => {
   });
 
   test('passes through all options+log to installSource()', async () => {
-    installSourceMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: false });
+    installSourceMock.mockResolvedValue({
+      installPath: 'foo',
+      disableEsTmpDir: false,
+      configPath: undefined,
+    });
     const options: InstallSourceOptions = {
       sourcePath: 'bar',
       license: 'trial',
@@ -236,7 +240,7 @@ describe('#installSnapshot()', () => {
       () =>
         new Promise((resolve) => {
           resolveInstallSnapshot = () => {
-            resolve({ installPath: 'foo', disableEsTmpDir: false });
+            resolve({ installPath: 'foo', disableEsTmpDir: false, configPath: undefined });
           };
         })
     );
@@ -252,7 +256,11 @@ describe('#installSnapshot()', () => {
   });
 
   test('passes through all options+log to installSnapshot()', async () => {
-    installSnapshotMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: false });
+    installSnapshotMock.mockResolvedValue({
+      installPath: 'foo',
+      disableEsTmpDir: false,
+      configPath: undefined,
+    });
     const options: InstallSnapshotOptions = {
       version: '8.10.0',
       license: 'trial',
@@ -287,7 +295,7 @@ describe('#installArchive()', () => {
       () =>
         new Promise((resolve) => {
           resolveInstallArchive = () => {
-            resolve({ installPath: 'foo', disableEsTmpDir: false });
+            resolve({ installPath: 'foo', disableEsTmpDir: false, configPath: undefined });
           };
         })
     );
@@ -303,7 +311,11 @@ describe('#installArchive()', () => {
   });
 
   test('passes through all options+log to installArchive()', async () => {
-    installArchiveMock.mockResolvedValue({ installPath: 'foo', disableEsTmpDir: true });
+    installArchiveMock.mockResolvedValue({
+      installPath: 'foo',
+      disableEsTmpDir: true,
+      configPath: undefined,
+    });
     const options: InstallArchiveOptions = {
       license: 'trial',
       password: 'changeme',

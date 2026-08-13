@@ -21,7 +21,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import treeKill from 'tree-kill';
 import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
-import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
+import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN, ES_CONFIG_DIRNAME } from './paths';
 import type { DockerOptions, ServerlessOptions } from './utils';
 import {
   extractConfigFiles,
@@ -137,9 +137,12 @@ export class Cluster {
   async installSource(options: InstallSourceOptions) {
     this.log.info(chalk.bold('Installing from source'));
     return await this.log.indent(4, async () => {
-      const { installPath, disableEsTmpDir } = await installSource({ log: this.log, ...options });
+      const { installPath, disableEsTmpDir, configPath } = await installSource({
+        log: this.log,
+        ...options,
+      });
 
-      return { installPath, disableEsTmpDir };
+      return { installPath, disableEsTmpDir, configPath };
     });
   }
 
@@ -164,12 +167,12 @@ export class Cluster {
   async installSnapshot(options: InstallSnapshotOptions) {
     this.log.info(chalk.bold('Installing from snapshot'));
     return await this.log.indent(4, async () => {
-      const { installPath, disableEsTmpDir } = await installSnapshot({
+      const { installPath, disableEsTmpDir, configPath } = await installSnapshot({
         log: this.log,
         ...options,
       });
 
-      return { installPath, disableEsTmpDir };
+      return { installPath, disableEsTmpDir, configPath };
     });
   }
 
@@ -179,24 +182,23 @@ export class Cluster {
   async installArchive(archivePath: string, options?: InstallArchiveOptions) {
     this.log.info(chalk.bold('Installing from an archive'));
     return await this.log.indent(4, async () => {
-      const { installPath, disableEsTmpDir } = await installArchive(archivePath, {
+      const { installPath, disableEsTmpDir, configPath } = await installArchive(archivePath, {
         log: this.log,
         ...(options || {}),
       });
 
-      return { installPath, disableEsTmpDir };
+      return { installPath, disableEsTmpDir, configPath };
     });
   }
 
   /**
    * Unpacks a tar or zip file containing the data directory for an ES cluster.
    */
-  async extractDataDirectory(installPath: string, archivePath: string, extractDirName = 'data') {
+  async extractDataDirectory(extractPath: string, archivePath: string) {
     this.log.info(chalk.bold(`Extracting data directory`));
     await this.log.indent(4, async () => {
       // stripComponents=1 excludes the root directory as that is how our archives are
       // structured. This works in our favor as we can explicitly extract into the data dir
-      const extractPath = path.resolve(installPath, extractDirName);
       this.log.info(`Data archive: ${archivePath}`);
       this.log.info(`Extract path: ${extractPath}`);
 
@@ -226,9 +228,13 @@ export class Cluster {
 
   async configureKeystoreWithSecureSettingsFiles(
     installPath: string,
-    secureSettingsFiles: string[][]
+    secureSettingsFiles: string[][],
+    configPath?: string
   ) {
-    const env = { JAVA_HOME: '' };
+    const env = {
+      JAVA_HOME: '',
+      ...(configPath ? { ES_PATH_CONF: configPath } : {}),
+    };
     for (const [secureSettingName, secureSettingFile] of secureSettingsFiles) {
       this.log.info(
         `setting secure setting %s to %s`,
@@ -372,6 +378,8 @@ export class Cluster {
       readyTimeout,
       writeLogsToPath,
       disableEsTmpDir,
+      esTmpDir,
+      configPath,
       ...options
     } = opts;
 
@@ -425,10 +433,12 @@ export class Cluster {
       }
     }
 
+    const esConfigPath = configPath ?? path.resolve(installPath, ES_CONFIG_DIRNAME);
+
     const args = parseSettings(
       extractConfigFiles(
         Array.from(esArgs).map((e) => e.join('=')),
-        installPath,
+        esConfigPath,
         { log: this.log }
       ),
       {
@@ -448,12 +458,14 @@ export class Cluster {
     this.process = execa(ES_BIN, args, {
       cwd: installPath,
       env: {
-        ...(installPath && !disableEsTmpDir
-          ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') }
-          : {}),
         ...process.env,
         JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
         ES_JAVA_OPTS: esJavaOpts,
+        // After process.env so a stale value can't redirect ES to another run's paths
+        ...(installPath && !disableEsTmpDir
+          ? { ES_TMPDIR: esTmpDir ?? path.resolve(installPath, 'ES_TMPDIR') }
+          : {}),
+        ...(configPath ? { ES_PATH_CONF: configPath } : {}),
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });

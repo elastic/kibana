@@ -15,7 +15,7 @@ import globby from 'globby';
 import createArchiver from 'archiver';
 import Fs from 'fs';
 import { pipeline } from 'stream/promises';
-import { Cluster } from '@kbn/es';
+import { Cluster, getEsInstallPath } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -238,15 +238,30 @@ export function createTestEsCluster<
   // Use 'trial' license if FIPS mode is enabled, otherwise use the provided license or default to 'basic'
   const testLicense: ArtifactLicense = getFips() === 1 ? 'trial' : license ? license : 'basic';
 
+  // Keeping run state out of the distribution lets every cluster share one install.
+  const runtimePath = Path.resolve(basePath, 'runtime', clusterName);
+
   const config = {
     version: esVersion,
-    installPath: Path.resolve(basePath, clusterName),
+    installPath: getEsInstallPath(basePath, esFrom === 'source' ? 'source' : esVersion),
+    runtimePath,
+    configPath: Path.resolve(runtimePath, 'config'),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
     license: testLicense,
     password,
     basePath,
     esArgs,
     resources: files,
+  };
+
+  const nodeRuntimePaths = (nodeName: string) => {
+    const root = Path.resolve(config.runtimePath, 'nodes', nodeName);
+    return {
+      root,
+      data: Path.resolve(root, 'data'),
+      logs: Path.resolve(root, 'logs'),
+      tmp: Path.resolve(root, 'tmp'),
+    };
   };
 
   return new (class TestCluster {
@@ -274,20 +289,26 @@ export function createTestEsCluster<
     async start() {
       let installPath: string;
       let disableEsTmpDir: boolean;
+      // Stays unset for an absolute `esFrom` path, which uses its own config directory
+      let configPath: string | undefined;
+
+      await del(config.runtimePath, { force: true });
 
       // We only install once using the first node. If the cluster has
       // multiple nodes, they'll all share the same ESinstallation.
       const firstNode = this.nodes[0];
       if (esFrom === 'source') {
-        ({ installPath, disableEsTmpDir } = await firstNode.installSource({
+        ({ installPath, disableEsTmpDir, configPath } = await firstNode.installSource({
           sourcePath: config.sourcePath,
           license: config.license,
           password: config.password,
           basePath: config.basePath,
+          installPath: config.installPath,
           esArgs: config.esArgs,
+          configPath: config.configPath,
         }));
       } else if (esFrom === 'snapshot') {
-        ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
+        ({ installPath, disableEsTmpDir, configPath } = await firstNode.installSnapshot(config));
       } else if (esFrom === 'docker') {
         await firstNode.runDocker({
           snapshot: true,
@@ -330,7 +351,7 @@ export function createTestEsCluster<
 
       if (secureFiles?.length) {
         const pairs = secureFiles.map((kv) => kv.split('=').map((v) => v.trim()));
-        await firstNode.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
+        await firstNode.configureKeystoreWithSecureSettingsFiles(installPath, pairs, configPath);
       }
 
       // Collect promises so we can run them in parallel
@@ -340,18 +361,22 @@ export function createTestEsCluster<
       for (let i = 0; i < this.nodes.length; i++) {
         const node = nodes[i];
         const nodePort = this.ports[i];
-        const overriddenArgs = [`node.name=${node.name}`, `http.port=${nodePort}`];
+        const runtimePaths = nodeRuntimePaths(node.name);
+        const overriddenArgs = [
+          `node.name=${node.name}`,
+          `http.port=${nodePort}`,
+          `path.data=${runtimePaths.data}`,
+          `path.logs=${runtimePaths.logs}`,
+        ];
+
+        Fs.mkdirSync(runtimePaths.data, { recursive: true });
+        Fs.mkdirSync(runtimePaths.logs, { recursive: true });
+        Fs.mkdirSync(runtimePaths.tmp, { recursive: true });
 
         const archive = node.dataArchive || dataArchive;
         if (archive) {
           extractDirectoryPromises.push(async () => {
-            const nodeDataDirectory = node.dataArchive ? `data-${node.name}` : 'data';
-            overriddenArgs.push(`path.data=${Path.resolve(installPath, nodeDataDirectory)}`);
-            return await this.nodes[i].extractDataDirectory(
-              installPath,
-              archive,
-              nodeDataDirectory
-            );
+            return await this.nodes[i].extractDataDirectory(runtimePaths.data, archive);
           });
         }
 
@@ -360,7 +385,8 @@ export function createTestEsCluster<
           return this.nodes[i].start(installPath, {
             password: config.password,
             esArgs: assignArgs(esArgs, overriddenArgs),
-            esJavaOpts,
+            // The default HeapDumpPath (`data`) resolves against the shared install dir
+            esJavaOpts: `${esJavaOpts ?? ''} -XX:HeapDumpPath=${runtimePaths.root}`.trim(),
             esStdoutLogLevel,
             // If we have multiple nodes, we shouldn't try setting up the native realm
             // right away or wait for ES to be green, the cluster isn't ready. So we only
@@ -370,6 +396,8 @@ export function createTestEsCluster<
             onEarlyExit,
             writeLogsToPath,
             disableEsTmpDir,
+            esTmpDir: runtimePaths.tmp,
+            configPath,
           });
         });
       }
@@ -408,36 +436,49 @@ export function createTestEsCluster<
     }
 
     async captureDebugFiles() {
-      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
-        cwd: config.installPath,
-        absolute: true,
-      });
+      const uuid = uuidv4();
+      const archiveDirname = `es_debug_${uuid}`;
+      const searchRoots = [
+        { root: config.installPath, dirname: archiveDirname },
+        { root: config.runtimePath, dirname: Path.join(archiveDirname, 'runtime') },
+      ].filter(({ root }) => Fs.existsSync(root));
+
+      const debugFiles = (
+        await Promise.all(
+          searchRoots.map(({ root }) =>
+            globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+              cwd: root,
+              absolute: true,
+            })
+          )
+        )
+      ).flat();
 
       if (!debugFiles.length) {
         log.info('[es] no debug files found, assuming es did not write any');
         return;
       }
 
-      const uuid = uuidv4();
       const debugPath = Path.resolve(REPO_ROOT, `data/es_debug_${uuid}.tar.gz`);
       log.error(`[es] debug files found, archiving install to ${debugPath}`);
       const archiver = createArchiver('tar', { gzip: true });
       const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
 
-      const archiveDirname = `es_debug_${uuid}`;
-      for (const name of Fs.readdirSync(config.installPath)) {
-        if (name === 'modules' || name === 'jdk') {
-          // drop these large and unnecessary directories
-          continue;
-        }
+      for (const { root, dirname } of searchRoots) {
+        for (const name of Fs.readdirSync(root)) {
+          if (name === 'modules' || name === 'jdk') {
+            // drop these large and unnecessary directories
+            continue;
+          }
 
-        const src = Path.resolve(config.installPath, name);
-        const dest = Path.join(archiveDirname, name);
-        const stat = Fs.statSync(src);
-        if (stat.isDirectory()) {
-          archiver.directory(src, dest);
-        } else {
-          archiver.file(src, { name: dest });
+          const src = Path.resolve(root, name);
+          const dest = Path.join(dirname, name);
+          const stat = Fs.statSync(src);
+          if (stat.isDirectory()) {
+            archiver.directory(src, dest);
+          } else {
+            archiver.file(src, { name: dest });
+          }
         }
       }
 
@@ -461,7 +502,7 @@ export function createTestEsCluster<
       );
 
       await this.captureDebugFiles();
-      await del(config.installPath, { force: true });
+      await del(config.runtimePath, { force: true });
       log.info('[es] cleanup complete');
       this.handleStopResults(results);
     }

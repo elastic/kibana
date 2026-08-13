@@ -14,6 +14,7 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import * as tar from 'tar';
+import execa from 'execa';
 import type { ZipFile, Entry } from 'yauzl';
 import Yauzl from 'yauzl';
 import * as Rx from 'rxjs';
@@ -25,6 +26,18 @@ const strComplete = (obs: Rx.Observable<unknown>) =>
   });
 
 const asyncPipeline = promisify(pipeline);
+
+let systemTar: Promise<boolean> | undefined;
+
+const hasSystemTar = () => {
+  if (!systemTar) {
+    systemTar = execa('tar', ['--version'])
+      .then(({ stdout }) => /GNU tar|bsdtar/i.test(stdout))
+      .catch(() => false);
+  }
+
+  return systemTar;
+};
 
 interface Options {
   /**
@@ -63,6 +76,17 @@ export async function extract({
   await Fs.mkdir(targetDir, { recursive: true });
 
   if (archivePath.endsWith('.tar') || archivePath.endsWith('.tar.gz')) {
+    if (await hasSystemTar()) {
+      await execa('tar', [
+        '-xf',
+        archivePath,
+        '-C',
+        targetDir,
+        `--strip-components=${stripComponents}`,
+      ]);
+      return;
+    }
+
     return await tar.extract({
       file: archivePath,
       cwd: targetDir,

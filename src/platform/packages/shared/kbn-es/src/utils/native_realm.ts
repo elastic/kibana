@@ -19,7 +19,6 @@ export const SYSTEM_INDICES_SUPERUSER =
 export const SYSTEM_INDICES_SUPERUSER_PASSWORD = process.env.TEST_ES_PASS || 'changeme';
 
 interface RetryOpts {
-  attempt?: number;
   maxAttempts?: number;
 }
 
@@ -118,20 +117,21 @@ export class NativeRealm {
   }
 
   private async _autoRetry<T>(opts: RetryOpts, fn: (attempt: number) => Promise<T>): Promise<T> {
-    const { attempt = 1, maxAttempts = 3 } = opts;
+    const { maxAttempts = 15 } = opts;
 
-    try {
-      return await fn(attempt);
-    } catch (error) {
-      if (attempt >= maxAttempts) {
-        throw error;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await fn(attempt);
+      } catch (error) {
+        if (attempt >= maxAttempts) {
+          throw error;
+        }
+
+        if (attempt === 1) {
+          this._log.warning(`assuming ES isn't initialized completely, retrying`);
+        }
+        await new Promise((resolve) => setTimeout(resolve, Math.min(attempt * 100, 500)));
       }
-
-      const sec = 1.5 * attempt;
-      this._log.warning(`assuming ES isn't initialized completely, trying again in ${sec} seconds`);
-      await new Promise((resolve) => setTimeout(resolve, sec * 1000));
-
-      return await this._autoRetry({ ...opts, attempt: attempt + 1 }, fn);
     }
   }
 

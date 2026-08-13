@@ -22,7 +22,12 @@ export const BASE_PATH = resolve(tempDir, 'kbn-es');
 export const GRADLE_BIN = maybeUseBat('./gradlew');
 export const ES_BIN = maybeUseBat('bin/elasticsearch');
 export const ES_PLUGIN_BIN = maybeUseBat('bin/elasticsearch-plugin');
-export const ES_CONFIG = 'config/elasticsearch.yml';
+export const ES_CONFIG_DIRNAME = 'config';
+export const ES_CONFIG_FILENAME = 'elasticsearch.yml';
+
+/** Shared immutable install path used by test and CI cache callers */
+export const getEsInstallPath = (basePath: string, version: string) =>
+  resolve(basePath, 'installs', version);
 
 export const ES_KEYSTORE_BIN = maybeUseBat('./bin/elasticsearch-keystore');
 

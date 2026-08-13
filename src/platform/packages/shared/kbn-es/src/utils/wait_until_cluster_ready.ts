@@ -74,8 +74,8 @@ export async function waitUntilClusterReady({
         );
       }
 
-      const waitSec = attempt * 1.5;
-      await new Promise((resolve) => setTimeout(resolve, waitSec * 1000));
+      const waitMs = Math.min(attempt * 100, 2000);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
   }
 }

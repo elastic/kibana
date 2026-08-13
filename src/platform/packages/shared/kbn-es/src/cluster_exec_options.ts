@@ -29,4 +29,8 @@ export interface EsClusterExecOptions {
   esStdoutLogLevel?: 'all' | 'info' | 'warn' | 'error' | 'silent';
   /** Disable creating a temp directory, allowing ES to write to OS's /tmp directory */
   disableEsTmpDir?: boolean;
+  /** Path to use as `ES_TMPDIR`. Ignored when `disableEsTmpDir` is set */
+  esTmpDir?: string;
+  /** Path to this run's config directory, passed to ES as `ES_PATH_CONF` */
+  configPath?: string;
 }

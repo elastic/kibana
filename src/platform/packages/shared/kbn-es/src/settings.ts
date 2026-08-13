@@ -31,6 +31,20 @@ export enum SettingsFilter {
 }
 
 /**
+ * Defaults `esArgs` to single-node discovery, which skips the multi-second cluster
+ * bootstrap wait, unless the caller configured discovery themselves.
+ */
+export function defaultToSingleNodeDiscovery(esArgs: string | string[] = []): string[] {
+  const args = typeof esArgs === 'string' ? [esArgs] : esArgs;
+  const hasDiscoverySetting = args.some((arg) => {
+    const [settingName] = arg.split('=');
+    return settingName.startsWith('discovery.') || settingName === 'cluster.initial_master_nodes';
+  });
+
+  return hasDiscoverySetting ? args : ['discovery.type=single-node', ...args];
+}
+
+/**
  * Accepts an array of `esSettingName=esSettingValue` strings and parses them into an array of
  * [esSettingName, esSettingValue] tuples optionally filter out secure or non-secure settings.
  * @param rawSettingNameValuePairs Array of strings to parse

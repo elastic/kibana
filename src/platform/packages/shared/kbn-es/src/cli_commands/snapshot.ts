@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
+import path from 'path';
+
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
+import { getEsInstallPath } from '../paths';
+import { defaultToSingleNodeDiscovery } from '../settings';
 import { parseTimeoutToMs } from '../utils';
 import { configureMockIdpSamlRealm } from '../utils/configure_mock_idp_saml_realm';
 import { createCliError } from '../errors';
@@ -36,6 +41,7 @@ export const snapshot: Command = {
       --password.[user] Sets password for native realm user [default: ${password}]
       -E                Additional key=value settings to pass to Elasticsearch
       --download-only   Download the snapshot but don't actually start it
+      --install-only    Download and extract the snapshot but don't actually start it
       --port            The port to bind to on 127.0.0.1 [default: 9200]
       --kill            Kill running ES Docker containers before starting
       --ssl             Sets up SSL on Elasticsearch
@@ -76,7 +82,7 @@ export const snapshot: Command = {
       },
 
       string: ['version', 'ready-timeout', 'es-log-level'],
-      boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill', 'eis'],
+      boolean: ['download-only', 'install-only', 'use-cached', 'skip-ready-check', 'kill', 'eis'],
 
       default: defaults,
     });
@@ -95,9 +101,9 @@ export const snapshot: Command = {
         : [];
       options.esArgs = [EIS_ES_ARG, ...eisUserEsArgs];
 
-      // Skip key resolution for download-only runs — the key is only needed
+      // Skip key resolution when ES will not start — the key is only needed
       // when starting ES and setting up CCM.
-      if (!options['download-only']) {
+      if (!options['download-only'] && !options['install-only']) {
         eisApiKey = await resolveCcmApiKey(log);
       }
     }
@@ -116,6 +122,23 @@ export const snapshot: Command = {
         log,
         useCached: options.useCached,
       });
+    } else if (options['install-only']) {
+      const throwawayConfigPath = path.resolve(options.basePath, '.install-only-config');
+
+      try {
+        await cluster.installSnapshot({
+          version: options.version,
+          license: options.license,
+          basePath: options.basePath,
+          installPath: getEsInstallPath(options.basePath, options.version),
+          configPath: throwawayConfigPath,
+          log,
+          useCached: options.useCached,
+          password: options.password,
+        });
+      } finally {
+        fs.rmSync(throwawayConfigPath, { recursive: true, force: true });
+      }
     } else {
       // Collect user-provided esArgs
       const userEsArgs: string[] = Array.isArray(options.esArgs)
@@ -129,7 +152,7 @@ export const snapshot: Command = {
         license: options.license,
         log,
       });
-      options.esArgs = samlEsArgs;
+      options.esArgs = defaultToSingleNodeDiscovery(samlEsArgs);
 
       const installStartTime = Date.now();
       const { installPath } = await cluster.installSnapshot({
@@ -144,7 +167,7 @@ export const snapshot: Command = {
       });
 
       if (options.dataArchive) {
-        await cluster.extractDataDirectory(installPath, options.dataArchive);
+        await cluster.extractDataDirectory(path.resolve(installPath, 'data'), options.dataArchive);
       }
       if (options.plugins) {
         await cluster.installPlugins(installPath, options.plugins, options.esJavaOpts);

@@ -72,6 +72,7 @@ export async function installSnapshot({
   esArgs,
   useCached = false,
   resources,
+  configPath,
 }: InstallSnapshotOptions) {
   const { downloadPath } = await downloadSnapshot({
     license,
@@ -90,5 +91,6 @@ export async function installSnapshot({
     log,
     esArgs,
     resources,
+    configPath,
   });
 }
