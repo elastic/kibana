@@ -76,12 +76,28 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
         );
         const agentPolicyIds = uniq(flatMap(supportedPackagePolicyIds, 'policy_ids'));
 
+        // No osquery-enabled policies: return empty result rather than unscoped query
+        if (!agentPolicyIds.length) {
+          return response.ok({
+            body: {
+              total: 0,
+              groups: { platforms: [], overlap: 0, policies: [] },
+              agents: [],
+            },
+          });
+        }
+
         const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, agentPolicyIds);
+
+        // Build the mandatory scope clause from the server's own policy list (not client-supplied).
+        // This moves scoping server-side, keeping the client URL size constant regardless of
+        // policy count, and preventing HTTP 414/431 at large policy counts (#266739).
+        const policyScope = buildPolicyIdKuery(agentPolicyIds);
 
         // FIND agents by policy_name
         const policyNamePattern = /policy_name:([^ ]+)/;
-        let kuery = query.kuery;
-        const policyName: string | undefined = kuery.match(policyNamePattern)?.[1];
+        const searchKuery = query.kuery ?? '';
+        const policyName: string | undefined = searchKuery.match(policyNamePattern)?.[1];
 
         const foundPolicyByName = policyName
           ? agentPolicies?.filter((policy) =>
@@ -89,13 +105,23 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
             )
           : [];
 
+        // Compose kuery explicitly instead of slicing strings, to avoid truncating non-parenthesized input.
+        // Shape: (<search terms> or <policy-name matches>) and <policy scope>
+        // Each part is omitted cleanly when empty.
+        let composedKuery: string;
+
         if (foundPolicyByName?.length) {
-          kuery =
-            // remove the ) from the end of the kuery
-            kuery.slice(0, -1) +
-            ' or ' +
-            buildPolicyIdKuery(foundPolicyByName.map((p) => p.id)) +
-            ')';
+          const policyNameScope = buildPolicyIdKuery(foundPolicyByName.map((p) => p.id));
+          // Include both the raw search clause (which may contain policy_name:x and other terms)
+          // and the resolved policy-id matches for version-suffixed agents
+          const searchClause = searchKuery
+            ? `(${searchKuery} or ${policyNameScope})`
+            : policyNameScope;
+          composedKuery = `${searchClause} and ${policyScope}`;
+        } else if (searchKuery) {
+          composedKuery = `(${searchKuery}) and ${policyScope}`;
+        } else {
+          composedKuery = policyScope;
         }
 
         const agentPolicyById = mapKeys(agentPolicies, 'id');
@@ -113,7 +139,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
               getStatusSummary: query.getStatusSummary,
               pitId: query.pitId,
               searchAfter: query.searchAfter,
-              kuery,
+              kuery: composedKuery,
               showAgentless: query.showAgentless,
               showInactive: query.showInactive,
               aggregations: {

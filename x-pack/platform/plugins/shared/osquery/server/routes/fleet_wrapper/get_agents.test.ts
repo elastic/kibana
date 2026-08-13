@@ -7,6 +7,7 @@
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
+import { fromKueryExpression } from '@kbn/es-query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getAgentsRoute } from './get_agents';
 
@@ -96,19 +97,91 @@ describe('getAgentsRoute', () => {
     });
   });
 
-  it('expands a policy_name search to match version-suffixed policy ids', async () => {
+  it('applies osquery policy scope from server-side list even when kuery contains no policy_id', async () => {
     const mockResponse = httpServerMock.createResponseFactory();
-    // trailing space before ")" mirrors the client kuery shape from use_all_agents.ts
-    await routeHandler(
-      {} as never,
-      createMockRequest('(policy_name:prod )') as never,
-      mockResponse
-    );
+    await routeHandler({} as never, createMockRequest('') as never, mockResponse);
 
     expect(mockListAgents).toHaveBeenCalledWith(
       expect.objectContaining({
-        kuery: expect.stringContaining('policy_id:("policy-1" or policy-1#*)'),
+        kuery: expect.stringContaining('policy_id:('),
       })
     );
+    const receivedKuery: string = mockListAgents.mock.calls[0][0].kuery;
+    expect(() => fromKueryExpression(receivedKuery)).not.toThrow();
+  });
+
+  it('expands a policy_name search to match version-suffixed policy ids and still applies scope', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler({} as never, createMockRequest('policy_name:prod') as never, mockResponse);
+
+    const receivedKuery: string = mockListAgents.mock.calls[0][0].kuery;
+    expect(receivedKuery).toContain('policy_id:("policy-1" or policy-1#*)');
+    expect(receivedKuery).toContain('policy_name:prod');
+    expect(() => fromKueryExpression(receivedKuery)).not.toThrow();
+  });
+
+  it('returns empty result when no osquery policies exist', async () => {
+    mockPackagePolicyService.list.mockResolvedValue({ items: [] });
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler({} as never, createMockRequest('') as never, mockResponse);
+
+    expect(mockListAgents).not.toHaveBeenCalled();
+    expect(mockResponse.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({ total: 0, agents: [] }),
+    });
+  });
+
+  it('excludes pre-0.6.0 package versions from the policy scope', async () => {
+    mockPackagePolicyService.list.mockResolvedValue({
+      items: [
+        { package: { version: '0.5.0' }, policy_ids: ['old-policy'] },
+        { package: { version: '1.0.0' }, policy_ids: ['new-policy'] },
+      ],
+    });
+    mockAgentPolicyService.getByIds.mockResolvedValue([{ id: 'new-policy', name: 'New' }]);
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler({} as never, createMockRequest('') as never, mockResponse);
+
+    const receivedKuery: string = mockListAgents.mock.calls[0][0].kuery;
+    expect(receivedKuery).not.toContain('old-policy');
+    expect(receivedKuery).toContain('new-policy');
+  });
+
+  it('handles empty kuery without truncating characters and produces valid scoped KQL', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler({} as never, createMockRequest('') as never, mockResponse);
+
+    const receivedKuery: string = mockListAgents.mock.calls[0][0].kuery;
+    // Should be just the scope, no truncation artifacts
+    expect(receivedKuery).toMatch(/^policy_id:\(/);
+  });
+
+  it('handles kuery that does not end in ) without truncating characters', async () => {
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest('local_metadata.host.hostname.keyword:*myhost*') as never,
+      mockResponse
+    );
+
+    const receivedKuery: string = mockListAgents.mock.calls[0][0].kuery;
+    // No character should have been sliced off from the search term
+    expect(receivedKuery).toContain('local_metadata.host.hostname.keyword:*myhost*');
+    expect(receivedKuery).toContain('policy_id:(');
+    expect(() => fromKueryExpression(receivedKuery)).not.toThrow();
+  });
+
+  it('handles policy_name search matching nothing and still applies scope', async () => {
+    mockAgentPolicyService.getByIds.mockResolvedValue([{ id: 'policy-1', name: 'Production' }]);
+    const mockResponse = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      createMockRequest('policy_name:nonexistent') as never,
+      mockResponse
+    );
+
+    const receivedKuery: string = mockListAgents.mock.calls[0][0].kuery;
+    expect(receivedKuery).toContain('policy_id:(');
+    expect(receivedKuery).toContain('policy_name:nonexistent');
   });
 });
