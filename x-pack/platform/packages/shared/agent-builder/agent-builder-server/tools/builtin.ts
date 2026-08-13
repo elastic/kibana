@@ -20,8 +20,8 @@ import type { IndexSearchToolDefinition } from '@kbn/agent-builder-common/tools/
 import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/types/workflow';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
-import type { ToolHandlerContext, ToolHandlerFn } from './handler';
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
+import type { ToolHandlerContext, ToolHandlerFn } from './handler';
 
 /**
  * MCP tool annotations for builtin tools exposed via the Agent Builder MCP server.
