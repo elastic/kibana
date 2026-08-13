@@ -6,6 +6,7 @@
  */
 
 import { resolveSrv } from 'node:dns/promises';
+import { getNodeSSLOptions } from '@kbn/actions-utils';
 import type { ConnectorNetworkSettings } from '@kbn/connector-specs';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { AllowlistDeniedError } from './connector_network_errors';
@@ -36,4 +37,6 @@ export const createConnectorNetworkSettings = (
   getProxySettings: () => configUtils.getProxySettings(),
   getCustomHostSettings: (url) => configUtils.getCustomHostSettings(url),
   getResponseSettings: () => configUtils.getResponseSettings(),
+  getTlsOptions: (logger, verificationMode, sslOverrides) =>
+    getNodeSSLOptions(logger, verificationMode, sslOverrides),
 });

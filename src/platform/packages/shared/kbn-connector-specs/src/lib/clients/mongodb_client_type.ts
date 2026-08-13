@@ -9,8 +9,7 @@
 
 import type { MongoClient } from 'mongodb';
 import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
-import { getNodeSSLOptions } from '@kbn/actions-utils';
-import type { BuildContext, ClientTypeSpec } from './client_type_spec';
+import type { BuildContext, ClientTypeSpec, TlsConnectionOptions } from './client_type_spec';
 import { loadConnectionString } from './load_connection_string';
 import { parseBasicAuthHeader } from './parse_basic_auth_header';
 
@@ -109,10 +108,7 @@ const toCustomHostSettingsUrl = ({ hostname, port }: HostTarget): string =>
  * getCustomAgents/configureAxiosInstanceWithSsl — otherwise an admin-configured trust store or
  * verification mode is silently ignored and the driver connects with its own defaults.
  */
-const resolveTlsOptions = (
-  ctx: BuildContext,
-  targets: HostTarget[]
-): ReturnType<typeof getNodeSSLOptions> => {
+const resolveTlsOptions = (ctx: BuildContext, targets: HostTarget[]): TlsConnectionOptions => {
   const sslSettings = ctx.networkSettings.getSslSettings();
   const customHostSsl = targets
     .map(
@@ -120,7 +116,7 @@ const resolveTlsOptions = (
     )
     .find((ssl) => ssl != null);
 
-  const tlsOptions = getNodeSSLOptions(
+  const tlsOptions = ctx.networkSettings.getTlsOptions(
     ctx.logger,
     customHostSsl?.verificationMode ?? sslSettings.verificationMode,
     sslSettings

@@ -7,13 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
+import type {
+  CustomHostSettings,
+  ProxySettings,
+  SSLSettings,
+  getNodeSSLOptions,
+} from '@kbn/actions-utils';
 import type { Logger } from '@kbn/logging';
 
 export interface ConnectorResponseSettings {
   timeout: number;
   maxContentLength: number;
 }
+
+export type TlsConnectionOptions = ReturnType<typeof getNodeSSLOptions>;
 
 /**
  * The Kibana `xpack.actions.*` outbound-network settings, handed to a client type unchanged.
@@ -45,6 +52,18 @@ export interface ConnectorNetworkSettings {
   getProxySettings(): ProxySettings | undefined;
   getCustomHostSettings(url: string): CustomHostSettings | undefined;
   getResponseSettings(): ConnectorResponseSettings;
+  /**
+   * Builds Node TLS connection options (ca, rejectUnauthorized, etc.) via `getNodeSSLOptions`.
+   * Routed through here for the same reason `resolveSrvHosts` is: even a type-safe *value*
+   * import of `getNodeSSLOptions` in an isomorphic client type would pull `@kbn/actions-utils`'s
+   * Node-only proxy-agent code into this package's bundle, since its single entry point
+   * co-exports `getCustomAgents` (which imports `https`/`http-proxy-agent`/`https-proxy-agent`).
+   */
+  getTlsOptions(
+    logger: Logger,
+    verificationMode: string | undefined,
+    sslOverrides: SSLSettings
+  ): TlsConnectionOptions;
 }
 
 export interface CredentialAccessor {

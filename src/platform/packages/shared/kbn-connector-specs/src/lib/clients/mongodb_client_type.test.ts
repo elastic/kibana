@@ -24,6 +24,7 @@ jest.mock('mongodb', () => ({
 }));
 
 import { MongoClient, MongoServerError } from 'mongodb';
+import { getNodeSSLOptions } from '@kbn/actions-utils';
 import type { Logger } from '@kbn/logging';
 import { mongodbClientType } from './mongodb_client_type';
 import { clientTypes } from '.';
@@ -53,6 +54,9 @@ const makeBuildContext = (overrides: Partial<BuildContext> = {}): BuildContext =
     getProxySettings: jest.fn().mockReturnValue(undefined),
     getCustomHostSettings: jest.fn().mockReturnValue(undefined),
     getResponseSettings: jest.fn(),
+    getTlsOptions: jest.fn((logger, verificationMode, sslOverrides) =>
+      getNodeSSLOptions(logger, verificationMode, sslOverrides)
+    ),
   },
   credential: {
     getAuthHeaders: jest.fn().mockResolvedValue({

@@ -9,12 +9,18 @@ jest.mock('node:dns/promises', () => ({
   resolveSrv: jest.fn(),
 }));
 
+jest.mock('@kbn/actions-utils', () => ({
+  getNodeSSLOptions: jest.fn(),
+}));
+
 import { resolveSrv } from 'node:dns/promises';
+import { getNodeSSLOptions } from '@kbn/actions-utils';
 import { createConnectorNetworkSettings } from './create_connector_network_settings';
 import { AllowlistDeniedError } from './connector_network_errors';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 
 const mockResolveSrv = resolveSrv as jest.Mock;
+const mockGetNodeSSLOptions = getNodeSSLOptions as jest.Mock;
 
 describe('createConnectorNetworkSettings', () => {
   const mockConfigUtils = {
@@ -39,6 +45,7 @@ describe('createConnectorNetworkSettings', () => {
       'getProxySettings',
       'getResponseSettings',
       'getSslSettings',
+      'getTlsOptions',
       'resolveSrvHosts',
     ]);
   });
@@ -165,5 +172,18 @@ describe('createConnectorNetworkSettings', () => {
     expect(network.getResponseSettings()).toBe(firstValue);
     expect(network.getResponseSettings()).toBe(secondValue);
     expect(mockConfigUtils.getResponseSettings).toHaveBeenCalledTimes(2);
+  });
+
+  it('delegates getTlsOptions to getNodeSSLOptions', () => {
+    const logger = { warn: jest.fn() } as unknown as Parameters<typeof getNodeSSLOptions>[0];
+    const sslOverrides = { verificationMode: 'full' as const };
+    const tlsOptions = { rejectUnauthorized: true };
+    mockGetNodeSSLOptions.mockReturnValue(tlsOptions);
+    const network = createConnectorNetworkSettings(mockConfigUtils);
+
+    const result = network.getTlsOptions(logger, 'full', sslOverrides);
+
+    expect(mockGetNodeSSLOptions).toHaveBeenCalledWith(logger, 'full', sslOverrides);
+    expect(result).toBe(tlsOptions);
   });
 });

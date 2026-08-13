@@ -72,6 +72,7 @@ describe('generateExecutorFunction', () => {
       getProxySettings: jest.fn(),
       getCustomHostSettings: jest.fn(),
       getResponseSettings: jest.fn(),
+      getTlsOptions: jest.fn(),
     };
   });
 
