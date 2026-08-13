@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod/v4';
 import {
   getStreamSamplingSource,
@@ -61,6 +61,7 @@ import {
   buildLanguageHistogram,
   detectOtelInstrumentationForRoots,
   classifyServices,
+  readLoggingProfile,
   type ServiceCandidateRoot,
   type IacSignal,
   type LanguageCount,
@@ -691,6 +692,44 @@ const trimToUndefined = (value: string | null | undefined): string | undefined =
   return trimmed ? trimmed : undefined;
 };
 
+/**
+ * Loads the persisted {@link LoggingProfile} greps for a repository + commit
+ * (scoped to the request space) and returns the regex strings to union into
+ * {@link discoverLoggingSites} alongside the built-in idioms. Returns `[]` when
+ * no profile exists or the profile was validated against a different commit —
+ * the workflow's gated `ai.agent` step re-investigates and persists a fresh
+ * profile before this is called again. Never throws: a failed read degrades to
+ * idiom-only recall rather than aborting discovery.
+ */
+const readProfileGreps = async ({
+  kiClient,
+  spaceId,
+  repository,
+  gitSha,
+  logger,
+}: {
+  kiClient: KnowledgeIndicatorClient;
+  spaceId: string;
+  repository: string;
+  gitSha: string;
+  logger: Pick<Logger, 'debug'>;
+}): Promise<string[]> => {
+  try {
+    const profile = await readLoggingProfile({ kiClient, spaceId, repository, commit: gitSha });
+    if (!profile) {
+      return [];
+    }
+    return profile.greps.map((grep) => grep.regex);
+  } catch (error) {
+    logger.debug(
+      `code_intelligence: logging profile read failed for "${repository}" @ ${gitSha}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return [];
+  }
+};
+
 const nonEmptyStrings = (values: string[] | null | undefined): string[] | undefined => {
   const cleaned = (values ?? []).map((value) => value.trim()).filter((value) => value.length > 0);
   return cleaned.length > 0 ? cleaned : undefined;
@@ -767,7 +806,15 @@ const identifyOtelSignalsRoute = createServerRoute({
       signalCounts: otelSignalCountsSchema,
     }),
   }),
-  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    getSpaceId,
+    server,
+    logger,
+    maintenanceService,
+  }) => {
     const scopedClients = await getScopedClients({ request });
     const { scopedClusterClient, streamDataEsClient, licensing, inferenceClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing });
@@ -784,6 +831,13 @@ const identifyOtelSignalsRoute = createServerRoute({
     );
 
     const runTemplateFallback = async () => {
+      const profileGreps = await readProfileGreps({
+        kiClient,
+        spaceId: await getSpaceId(request),
+        repository,
+        gitSha,
+        logger: routeLogger,
+      });
       const candidates = await discoverLoggingSites({
         esClient: sourceEsClient,
         repository,
@@ -791,6 +845,7 @@ const identifyOtelSignalsRoute = createServerRoute({
         serviceRoot,
         language,
         logger: routeLogger,
+        profileGreps,
       });
       const connectorId = await resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,
@@ -1046,6 +1101,13 @@ const identifyServiceRoute = createServerRoute({
     // grep + classification for them only produces a result that is discarded.
     let loggingChunks: Awaited<ReturnType<typeof classifyLoggingSites>> = [];
     if (!hasOtel) {
+      const profileGreps = await readProfileGreps({
+        kiClient,
+        spaceId,
+        repository,
+        gitSha,
+        logger: routeLogger,
+      });
       const candidates = await discoverLoggingSites({
         esClient,
         repository,
@@ -1053,6 +1115,7 @@ const identifyServiceRoute = createServerRoute({
         serviceRoot: service.serviceRoot,
         language: service.language,
         logger: routeLogger,
+        profileGreps,
       });
       const classifierConnectorId = await resolveConnectorForFeature({
         searchInferenceEndpoints: server.searchInferenceEndpoints,

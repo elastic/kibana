@@ -193,3 +193,37 @@ export interface LogSignature {
   staticSegments: string[];
   location?: string;
 }
+
+/**
+ * One validated grep in a {@link LoggingProfile}. The regex matches the call sites
+ * of a repository-defined house logging wrapper; `expect_call_sites` is the hit
+ * count `validate_queries` reported on the indexed commit (the drift baseline).
+ */
+export interface LoggingProfileGrep {
+  /** Lucene RLIKE regex; whole-value anchored (wrap in `.*`). */
+  regex: string;
+  /**
+   * Validated hit count on the indexed commit. Must be greater than zero (INV-001)
+   * and its ratio to the repo total must be under the over-capture ceiling (INV-006).
+   */
+  expect_call_sites: number;
+  /** The `path:line` the agent based this grep on (the wrapper's defining location). */
+  evidence: { path: string; line: number };
+}
+
+/**
+ * A persisted logging profile for a repository + commit: the repo-specific idiom
+ * greps an agent generated and validated against the indexed commit. Stored as a
+ * `code_analysis` feature with subtype `logging_profile` on the repository feature
+ * stream, reusing the same persistence path as the other code-feature subtypes.
+ */
+export interface LoggingProfile {
+  /** Repository as `"org/repo"`. */
+  repository: string;
+  /** Immutable commit SHA the greps were validated against. */
+  commit: string;
+  /** Validated greps (each with a non-zero `expect_call_sites`). */
+  greps: LoggingProfileGrep[];
+  /** Generation timestamp (ISO 8601). */
+  generated_at: string;
+}

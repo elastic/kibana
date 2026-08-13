@@ -544,3 +544,237 @@ describe('discoverLoggingSites', () => {
     }
   });
 });
+
+describe('discoverLoggingSites — logging profile lane', () => {
+  // A profile grep that matches a line the idioms do NOT (a house wrapper call).
+  const PROFILE_REGEX = '.*log_error[(].*';
+
+  const setupProfileHit = (
+    esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
+    profilePath: string,
+    profileLine: number,
+    profileContent: string,
+    idiomHits: Array<[string, number, string]> = []
+  ) => {
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[profileLine, profileContent]] };
+      }
+      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
+      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
+      if (regex === PROFILE_REGEX) {
+        return { columns: COLUMNS, values: [row(profilePath, profileLine, profileContent)] };
+      }
+      // Idiom greps return whatever the test asked for (default: nothing).
+      if (idiomHits.length > 0) {
+        return {
+          columns: COLUMNS,
+          values: idiomHits.map(([p, l, c]) => row(p, l, c)),
+        };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+  };
+
+  it('unions profile greps with idiom hits (INV-004: strict superset)', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    // Idiom hit at src/Main.java:10; profile hit at lib/realtime/logs.ex:21.
+    setupProfileHit(esClient, 'lib/realtime/logs.ex', 21, 'log_error("charge failed", err)', [
+      ['src/Main.java', 10, 'logger.info("started")'],
+    ]);
+
+    const withProfile = await discoverLoggingSites({
+      esClient,
+      repository: 'supabase/realtime',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      profileGreps: [PROFILE_REGEX],
+    });
+    const withoutProfile = await discoverLoggingSites({
+      esClient,
+      repository: 'supabase/realtime',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+    });
+
+    const withLocs = new Set(withProfile.map((c) => c.location));
+    const withoutLocs = new Set(withoutProfile.map((c) => c.location));
+    // INV-004: profile greps are additive — strict superset.
+    expect(withLocs.size).toBeGreaterThan(withoutLocs.size);
+    for (const loc of withoutLocs) {
+      expect(withLocs).toContain(loc);
+    }
+    expect(withLocs).toContain('lib/realtime/logs.ex:21');
+  });
+
+  it('profile greps pass through isExcludedLoggingPath (INV-005: excluded path)', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    // Profile hit in a test file (excluded) and a production file (kept).
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[5, 'log_error("boom")']] };
+      }
+      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
+      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
+      if (regex === PROFILE_REGEX) {
+        return {
+          columns: COLUMNS,
+          values: [
+            row('src/Main.test.ts', 5, 'log_error("boom")'), // excluded test path
+            row('src/service.ex', 5, 'log_error("boom")'), // kept
+          ],
+        };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'supabase/realtime',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      profileGreps: [PROFILE_REGEX],
+    });
+
+    const locs = candidates.map((c) => c.location);
+    expect(locs).toContain('src/service.ex:5');
+    // INV-005: the excluded test path never becomes a candidate.
+    expect(locs).not.toContain('src/Main.test.ts:5');
+  });
+
+  it('profile greps pass through isNonEmittingLine (INV-005: comment line)', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    // Profile hit on a comment line (non-emitting) and a real emission.
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return {
+          columns: WINDOW_COLUMNS,
+          values: [
+            [10, '// log_error("commented out")'],
+            [20, 'log_error("real emission", err)'],
+          ],
+        };
+      }
+      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
+      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
+      if (regex === PROFILE_REGEX) {
+        return {
+          columns: COLUMNS,
+          values: [
+            row('src/service.ex', 10, '// log_error("commented out")'),
+            row('src/service.ex', 20, 'log_error("real emission", err)'),
+          ],
+        };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'supabase/realtime',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      profileGreps: [PROFILE_REGEX],
+    });
+
+    const locs = candidates.map((c) => c.location);
+    // INV-005: the comment line never becomes a candidate.
+    expect(locs).toContain('src/service.ex:20');
+    expect(locs).not.toContain('src/service.ex:10');
+  });
+
+  it('profile greps share the maxCandidates ceiling with idioms', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    // Idiom lane produces one hit (filling the maxCandidates:1 ceiling), so the
+    // profile grep is skipped. The profile regex would also match, but it never
+    // runs because the shared ceiling was reached by the idiom lane first.
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[1, 'log_error("boom")']] };
+      }
+      const params = (req as { params?: Array<Record<string, unknown>> }).params ?? [];
+      const regex = String(params.find((p) => 'regex' in p)?.regex ?? '');
+      if (regex === PROFILE_REGEX) {
+        return {
+          columns: COLUMNS,
+          values: [row('src/a.ex', 1, 'log_error("boom")')],
+        };
+      }
+      // An idiom pattern matches the production line, filling the ceiling.
+      return {
+        columns: COLUMNS,
+        values: [row('src/Main.java', 10, 'logger.info("started")')],
+      };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'supabase/realtime',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      maxCandidates: 1,
+      profileGreps: [PROFILE_REGEX],
+    });
+
+    const grepCalls = esClient.esql.query.mock.calls.filter(([{ query }]) => !isWindowQuery(query));
+    const profileGrepRan = grepCalls.some(([{ params }]) =>
+      (params as Array<Record<string, unknown>>).some(
+        (p) => 'regex' in p && p.regex === PROFILE_REGEX
+      )
+    );
+    // The idiom lane filled the ceiling, so the profile grep was skipped.
+    expect(profileGrepRan).toBe(false);
+    expect(candidates).toHaveLength(1);
+  });
+
+  it('useLoggingProfile: false issues no profile greps', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
+
+    await discoverLoggingSites({
+      esClient,
+      repository: 'supabase/realtime',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      profileGreps: [PROFILE_REGEX],
+      useLoggingProfile: false,
+    });
+
+    const grepRegexes = esClient.esql.query.mock.calls
+      .filter(([{ query }]) => !isWindowQuery(query))
+      .flatMap(([{ params }]) =>
+        (params as Array<Record<string, unknown>>).filter((p) => 'regex' in p).map((p) => p.regex)
+      );
+    // Only idiom patterns ran; the profile regex was NOT issued.
+    expect(grepRegexes).toEqual([...LOGGER_IDIOM_PATTERNS]);
+    expect(grepRegexes).not.toContain(PROFILE_REGEX);
+  });
+
+  it('defaults to useLoggingProfile: true', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
+
+    await discoverLoggingSites({
+      esClient,
+      repository: 'supabase/realtime',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: loggerMock.create(),
+      profileGreps: [PROFILE_REGEX],
+    });
+
+    const grepRegexes = esClient.esql.query.mock.calls
+      .filter(([{ query }]) => !isWindowQuery(query))
+      .flatMap(([{ params }]) =>
+        (params as Array<Record<string, unknown>>).filter((p) => 'regex' in p).map((p) => p.regex)
+      );
+    // Profile regex ran after the idiom patterns.
+    expect(grepRegexes).toEqual([...LOGGER_IDIOM_PATTERNS, PROFILE_REGEX]);
+  });
+});

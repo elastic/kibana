@@ -76,6 +76,10 @@ import {
   installDiscoveryAgents,
   registerSignificantEventsDiscoveryAgentTypes,
 } from './agent_builder/agents/discovery';
+import {
+  installLoggingWrappersAgents,
+  registerSignificantEventsLoggingWrappersAgentTypes,
+} from './agent_builder/agents/logging_wrappers';
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
@@ -265,6 +269,7 @@ export class SignificantEventsPlugin
     if (plugins.agentBuilder) {
       registerInvestigationAgentType(plugins.agentBuilder);
       registerSignificantEventsDiscoveryAgentTypes({ agentBuilder: plugins.agentBuilder });
+      registerSignificantEventsLoggingWrappersAgentTypes({ agentBuilder: plugins.agentBuilder });
       void core
         .getStartServices()
         .then(async () => {
@@ -450,6 +455,7 @@ export class SignificantEventsPlugin
       void Promise.all([
         installInvestigationAgent({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
         installDiscoveryAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
+        installLoggingWrappersAgents({ agentBuilder, spaceId: DEFAULT_SPACE_ID, availability }),
       ]).catch((error: unknown) => {
         this.logManagedResourceError('significant events agents', error);
       });

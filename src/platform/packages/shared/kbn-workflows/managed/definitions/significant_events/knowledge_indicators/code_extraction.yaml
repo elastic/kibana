@@ -67,6 +67,113 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
+          # -----------------------------------------------------------------
+          # Logging profile lane (Tasks 4, 7). The profile is keyed by
+          # repository + commit, so it is checked per iteration; the gate
+          # (INV-003) ensures the agent runs at most once per repository +
+          # commit — after the first iteration persists a profile, later
+          # iterations for the same repo see `needs_refresh: false` and skip.
+          # A failed drift recount never requests refresh (INV-002): the
+          # profile is kept and the failure is reported on the check output.
+          # -----------------------------------------------------------------
+          - name: check_logging_profile
+            type: kibana.request
+            with:
+              method: POST
+              path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_check_logging_profile'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+              body:
+                repository: '{{ foreach.item.repository }}'
+                gitSha: '{{ foreach.item.gitSha }}'
+                runId: '{{ execution.id }}'
+            on-failure:
+              continue: true
+
+          - name: needs_logging_profile
+            type: if
+            condition: '${{ steps.check_logging_profile.error == null and steps.check_logging_profile.output.needs_refresh == true }}'
+            steps:
+              - name: run_logging_wrappers_agent
+                type: ai.agent
+                # The agent-id literal must stay in sync with
+                # SIGNIFICANT_EVENTS_LOGGING_WRAPPERS_AGENT_ID in
+                # server/agent_builder/agents/logging_wrappers/logging_wrappers.ts
+                # (YAML cannot import a TS constant).
+                agent-id: 'significant-events.logging-wrappers'
+                # Billing attribution: code-intelligence inference feature.
+                connector-id-by-feature: 'significant_events_code_intelligence'
+                plugin-id: 'significant_events_code_intelligence'
+                aggregate-by: 'significant_events'
+                create-conversation: false
+                with:
+                  message: |
+                    Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}`.
+
+                    Find the functions/macros this repository defines so other code can log without naming a logger, then write and validate Lucene RLIKE greps that match their call sites. Iterate with the `platform.sig_events.logging_queries_validate` tool until every returned grep reports `pass: true`. Return an empty `greps` list when the repository has no house wrapper (a correct and common answer).
+                  # Scope the agent to its read-only Sourcerer code tools plus the
+                  # validate_logging_queries builtin (configuration_overrides replaces
+                  # the stored tool set for this execution only).
+                  configuration_overrides:
+                    enable_elastic_capabilities: false
+                    tools:
+                      - tool_ids:
+                          - sourcerer.code.grep
+                          - sourcerer.files.cat
+                          - sourcerer.files.ls
+                          - platform.sig_events.logging_queries_validate
+                  # Lets a live run be located via findExecutions to follow tool
+                  # calls and reasoning before this step returns.
+                  metadata:
+                    workflow_execution_id: "{{ execution.id }}"
+                  schema:
+                    type: object
+                    properties:
+                      greps:
+                        type: array
+                        description: >-
+                          Validated Lucene RLIKE greps matching this repository's
+                          house logging-wrapper call sites. Empty when the repository
+                          has no house wrapper.
+                        items:
+                          type: object
+                          properties:
+                            regex:
+                              type: string
+                              description: 'Lucene RLIKE, whole-value anchored (wrap in .*). A literal paren is [()].'
+                            expect_call_sites:
+                              type: integer
+                              description: 'Validated hit count on the indexed commit (the drift baseline).'
+                            evidence:
+                              type: object
+                              properties:
+                                path:
+                                  type: string
+                                  description: 'Repository-relative file path the grep was written to match.'
+                                line:
+                                  type: integer
+                                  description: 'Line number in that file the grep was written to match.'
+                              required: [path, line]
+                          required: [regex, expect_call_sites, evidence]
+                    required: [greps]
+                on-failure:
+                  continue: true
+
+              - name: persist_logging_profile
+                type: kibana.request
+                with:
+                  method: POST
+                  path: '/s/{{ workflow.spaceId }}/internal/streams/code_intelligence/_persist_logging_profile'
+                  headers:
+                    x-elastic-internal-origin: 'kibana'
+                  body:
+                    repository: '{{ foreach.item.repository }}'
+                    gitSha: '{{ foreach.item.gitSha }}'
+                    runId: '{{ execution.id }}'
+                    greps: '${{ steps.run_logging_wrappers_agent.output.structured_output.greps }}'
+                on-failure:
+                  continue: true
+
           - name: identify_service
             type: kibana.request
             with:

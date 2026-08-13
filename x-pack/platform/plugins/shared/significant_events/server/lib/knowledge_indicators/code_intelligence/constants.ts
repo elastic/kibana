@@ -26,10 +26,26 @@ export const CODE_INTELLIGENCE_AGENT_ID = 'sourcerer' as const;
 export const CODE_FEATURE_SUBTYPE_REPO_TYPE = 'repo_type' as const;
 export const CODE_FEATURE_SUBTYPE_LANGUAGE = 'language' as const;
 export const CODE_FEATURE_SUBTYPE_SERVICE_NAME = 'service_name' as const;
+/**
+ * Code-derived Feature KI subtype carrying a validated `logging_profile` — the
+ * repo-specific idiom greps an agent generated for a repository + commit. Reuses
+ * the `code_analysis` feature type (no schema enum / UI filter changes) and is
+ * discriminated by this subtype, exactly like the other code-feature subtypes.
+ */
+export const CODE_FEATURE_SUBTYPE_LOGGING_PROFILE = 'logging_profile' as const;
 
 /** `meta` keys used to carry code provenance + change-detection state. */
 export const CODE_FEATURE_META_REPOSITORY = 'repository' as const;
 export const CODE_FEATURE_META_CHANGE_FINGERPRINT = 'change_fingerprint' as const;
+/**
+ * `meta` key carrying the immutable commit a `logging_profile` was validated
+ * against, so drift detection (Task 7) can compare the stored count to a fresh
+ * count on the same commit without re-reading the feature body.
+ */
+export const CODE_FEATURE_META_LOGGING_PROFILE_COMMIT = 'logging_profile_commit' as const;
+/** `meta` key carrying the generation timestamp of a `logging_profile`. */
+export const CODE_FEATURE_META_LOGGING_PROFILE_GENERATED_AT =
+  'logging_profile_generated_at' as const;
 
 /**
  * Languages that mark a repository (or part of it) as Infrastructure as Code.
@@ -400,6 +416,27 @@ export const isNonEmittingLine = (line: string): boolean => {
 export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*,sourcerer-v2-refs*' as const;
 
 export const SOURCERER_FILES_INDEX = 'sourcerer-v1-files*,sourcerer-v2-files*' as const;
+
+/**
+ * Over-capture ceiling for a validated logging-profile grep: a grep whose
+ * validated hit ratio (hits / repo_total_lines) meets or exceeds this fraction
+ * is rejected at persistence (INV-006) and by the `validate_logging_queries`
+ * tool. `.*log.*` measured at 1.6% of a 108K-line repo is the canonical bad
+ * grep; a real wrapper grep lands well under 1%. Shared here so the tool
+ * (`agent_builder/tools/validate_logging_queries`) and the persistence layer
+ * (`logging_profile.ts`) reference one definition without a cross-layer import.
+ */
+export const OVER_CAPTURE_CEILING = 0.01;
+
+/**
+ * Drift ratio for {@link detectLoggingProfileDrift}: a stored grep's recount is
+ * flagged for refresh when it drops to zero OR falls by more than this fraction
+ * of its stored `expect_call_sites` (e.g. `0.5` = a >50% drop). A failed count
+ * query is NEVER treated as a drop (INV-002) — the profile is kept and the
+ * failure recorded. Shared here so the drift detector and the task-4 gate
+ * reference one definition.
+ */
+export const LOGGING_PROFILE_DRIFT_RATIO = 0.5;
 
 /**
  * File-extension (lowercase, no dot) -> programming/markup language, used to

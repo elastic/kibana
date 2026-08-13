@@ -210,6 +210,20 @@ export interface DiscoverLoggingSitesOptions {
    * what the window fetch and the LLM classifier actually pay for.
    */
   maxCandidates?: number;
+  /**
+   * Repo-specific idiom greps from a persisted {@link LoggingProfile} (the
+   * `regex` of each profile grep). When present and {@link useLoggingProfile}
+   * is true (the default), they run alongside {@link LOGGER_IDIOM_PATTERNS} and
+   * their hits merge into the same candidate set under the same filters. Profile
+   * greps are additive: they may add candidate locations; they may never remove
+   * or replace an idiom hit (INV-004).
+   */
+  profileGreps?: string[];
+  /**
+   * Whether to run {@link profileGreps}. Defaults to `true`; a caller can disable
+   * the profile lane (e.g. to compare idiom-only recall) by passing `false`.
+   */
+  useLoggingProfile?: boolean;
 }
 
 /**
@@ -234,6 +248,8 @@ export async function discoverLoggingSites({
   logger,
   perPatternLimit = 500,
   maxCandidates = 3000,
+  profileGreps = [],
+  useLoggingProfile = true,
 }: DiscoverLoggingSitesOptions): Promise<LoggingCandidate[]> {
   const { org, repo } = splitRepository(repository);
   const gitCommit = gitSha || '*';
@@ -243,6 +259,8 @@ export async function discoverLoggingSites({
   const locations = new Set<string>();
   let patternErrors = 0;
   let excludedPaths = 0;
+
+  const profileGrepsToRun = useLoggingProfile ? profileGreps : [];
 
   const runGrep = async (regex: string) => {
     try {
@@ -282,16 +300,30 @@ export async function discoverLoggingSites({
     }
   };
 
-  for (const regex of LOGGER_IDIOM_PATTERNS) {
-    if (locations.size >= maxCandidates) {
-      logger.warn(
-        `logging_sites: "${repository}" @ "${root}" reached the ${maxCandidates}-candidate ceiling; ` +
-          `remaining idiom pattern(s) skipped. Discovery is biased toward the patterns that ran first.`
-      );
-      break;
+  const runGrepsUnderCeiling = async (regexes: readonly string[]): Promise<number> => {
+    let ran = 0;
+    for (const regex of regexes) {
+      if (locations.size >= maxCandidates) {
+        logger.warn(
+          `logging_sites: "${repository}" @ "${root}" reached the ${maxCandidates}-candidate ceiling; ` +
+            `remaining pattern(s) skipped. Discovery is biased toward the patterns that ran first.`
+        );
+        break;
+      }
+      await runGrep(regex);
+      ran += 1;
     }
-    await runGrep(regex);
-  }
+    return ran;
+  };
+
+  // Run the idiom lane first; profile greps run after and are additive (INV-004).
+  await runGrepsUnderCeiling(LOGGER_IDIOM_PATTERNS);
+
+  // Track how many locations the idiom lane produced so the profile lane can
+  // report its incremental contribution (additive — INV-004).
+  const idiomLocations = locations.size;
+  const profileRan = await runGrepsUnderCeiling(profileGrepsToRun);
+  const profileContributed = locations.size - idiomLocations;
 
   // Fetch +/-1 windows for all hits (batched per file).
   const hitsByFile = new Map<string, Set<number>>();
@@ -342,7 +374,10 @@ export async function discoverLoggingSites({
     `logging_sites: discovered ${candidates.length} candidate line(s) for "${repository}" @ "${root}"` +
       (excludedPaths > 0 ? ` (${excludedPaths} test/build path hit(s) excluded)` : '') +
       (nonEmitting > 0 ? ` (${nonEmitting} non-emitting line(s) dropped)` : '') +
-      (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '')
+      (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '') +
+      (profileGrepsToRun.length > 0
+        ? ` (${profileRan}/${profileGrepsToRun.length} profile grep(s) ran, contributed ${profileContributed} location(s))`
+        : '')
   );
   return candidates;
 }

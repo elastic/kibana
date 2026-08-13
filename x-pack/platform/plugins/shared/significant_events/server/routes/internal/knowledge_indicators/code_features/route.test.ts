@@ -302,6 +302,7 @@ describe('Code Intelligence routes', () => {
           streamsClient: { listStreams: jest.fn().mockResolvedValue([]) },
           getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
         }),
+        getSpaceId: jest.fn().mockResolvedValue('default'),
         server: {},
         logger: { get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn() }) },
         maintenanceService: createMaintenanceService(),

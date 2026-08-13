@@ -62,6 +62,17 @@ export {
   type CodeGrepOptions,
   type DiscoverLoggingSitesOptions,
 } from './discover_logging_sites';
+export {
+  readLoggingProfile,
+  writeLoggingProfile,
+  detectLoggingProfileDrift,
+  LoggingProfileValidationError,
+  type ReadLoggingProfileOptions,
+  type WriteLoggingProfileOptions,
+  type DetectLoggingProfileDriftOptions,
+  type DriftDetectionResult,
+  type GrepDriftResult,
+} from './logging_profile';
 export { classifyLoggingSites, type ClassifyLoggingSitesOptions } from './classify_logging_sites';
 export {
   listIndexedRepos,
@@ -106,6 +117,8 @@ export type {
   LanguageCount,
   LoggingChunk,
   LoggingCandidate,
+  LoggingProfile,
+  LoggingProfileGrep,
   LogSignature,
   IacSignal,
   IacKind,

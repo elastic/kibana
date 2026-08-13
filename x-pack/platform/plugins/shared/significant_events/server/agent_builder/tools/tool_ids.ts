@@ -19,3 +19,11 @@ export const SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID =
 export const SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID = platformSignificantEventsTools.searchEvent;
 export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
   platformSignificantEventsTools.attachInvestigation;
+
+/**
+ * Builtin tool that validates candidate Lucene RLIKE greps against the indexed source
+ * for a repository + commit. Not part of {@link platformSignificantEventsTools} (it is
+ * local to this plugin's code-intelligence lane), so the id is a literal here.
+ */
+export const SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID =
+  'platform.sig_events.logging_queries_validate';
