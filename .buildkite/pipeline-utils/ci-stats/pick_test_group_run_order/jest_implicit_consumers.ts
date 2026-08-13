@@ -25,7 +25,6 @@ interface ImplicitConsumerRule {
 }
 
 const ENCRYPTED_SAVED_OBJECTS_PLUGIN = '@kbn/encrypted-saved-objects-plugin';
-const WORKFLOW_STEP_SCHEMA_CLI = '@kbn/workflow-step-schema-cli';
 
 const IMPLICIT_JEST_CONSUMERS: readonly ImplicitConsumerRule[] = [
   {
@@ -46,22 +45,6 @@ const IMPLICIT_JEST_CONSUMERS: readonly ImplicitConsumerRule[] = [
       'Plugin generator changes must re-run kbn-plugin-helpers generate/build integration tests.',
     patterns: ['packages/kbn-plugin-generator/**/*'],
     consumers: ['@kbn/plugin-helpers'],
-  },
-  {
-    reason:
-      'Changes to connector-type registrations, the workflows management plugin, or the ' +
-      'workflows packages may alter the composed JSON Schema; regenerate the committed artifact.',
-    patterns: [
-      // Connector type registration surface (the two main locations)
-      'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{ts,tsx}',
-      'x-pack/platform/plugins/shared/stack_connectors/server/connector_types_from_spec/**/*.{ts,tsx}',
-      '**/server/connector_types/**/*.{ts,tsx}',
-      // Workflows management plugin (owns the /api/workflows/schema route and schema composition)
-      'src/platform/plugins/shared/workflows_management/**/*.{ts,tsx}',
-      // Shared workflows packages (step/trigger definitions, schema helpers)
-      'src/platform/packages/shared/kbn-workflows*/**/*.{ts,tsx}',
-    ],
-    consumers: [WORKFLOW_STEP_SCHEMA_CLI],
   },
 ];
 

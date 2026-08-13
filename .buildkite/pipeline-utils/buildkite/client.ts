@@ -97,7 +97,6 @@ export interface BuildkiteCommandStep {
   timeout_in_minutes?: number;
   key?: string;
   depends_on?: string | string[];
-  allow_dependency_failure?: boolean;
   retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
 }

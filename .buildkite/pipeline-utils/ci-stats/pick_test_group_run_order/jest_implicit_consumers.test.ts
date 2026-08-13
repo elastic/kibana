@@ -40,36 +40,3 @@ describe('expandJestImplicitConsumers', () => {
     expect(expanded.has('@kbn/encrypted-saved-objects-plugin')).toBe(false);
   });
 });
-
-describe('expandJestImplicitConsumers — workflow-step-schema-cli', () => {
-  it('adds workflow-step-schema-cli when a connector type registration changes', () => {
-    const affected = new Set(['@kbn/stack-connectors-plugin']);
-    const changedFiles = [
-      'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/email/index.ts',
-    ];
-
-    const expanded = expandJestImplicitConsumers(affected, changedFiles);
-
-    expect(expanded.has('@kbn/workflow-step-schema-cli')).toBe(true);
-  });
-
-  it('adds workflow-step-schema-cli when the workflows management plugin changes', () => {
-    const affected = new Set(['@kbn/workflows-management-plugin']);
-    const changedFiles = [
-      'src/platform/plugins/shared/workflows_management/server/api/routes/workflows/get_schema.ts',
-    ];
-
-    const expanded = expandJestImplicitConsumers(affected, changedFiles);
-
-    expect(expanded.has('@kbn/workflow-step-schema-cli')).toBe(true);
-  });
-
-  it('does not add workflow-step-schema-cli for unrelated changes', () => {
-    const affected = new Set(['@kbn/fleet-plugin']);
-    const changedFiles = ['x-pack/platform/plugins/shared/fleet/server/routes/foo.ts'];
-
-    const expanded = expandJestImplicitConsumers(affected, changedFiles);
-
-    expect(expanded.has('@kbn/workflow-step-schema-cli')).toBe(false);
-  });
-});

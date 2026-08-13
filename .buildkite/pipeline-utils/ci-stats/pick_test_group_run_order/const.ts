@@ -113,17 +113,7 @@ export const STEP_KEYS = {
   JEST_UNIT: 'jest',
   JEST_INTEGRATION: 'jest-integration',
   FTR_GROUP: 'ftr-configs',
-  WORKFLOW_SCHEMA_COMMIT: 'workflow-step-schema-commit',
 } as const;
-
-/**
- * Repo-relative path of the workflow step-schema generation config. When this
- * config survives into `jestIntegrationConfigs` (i.e. it was not filtered out
- * by selective testing) a downstream commit step is emitted so any artifact
- * drift is auto-committed back to the PR.
- */
-export const WORKFLOW_SCHEMA_CONFIG_PATH =
-  'src/platform/packages/private/kbn-workflow-step-schema-cli/integration_tests/jest.integration.config.js';
 
 /** PR label that prevents selective testing. */
 export const PREVENT_SELECTIVE_TESTS_LABEL = 'ci:prevent-selective-testing';
