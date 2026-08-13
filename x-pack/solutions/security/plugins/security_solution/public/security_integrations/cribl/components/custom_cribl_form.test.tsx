@@ -89,7 +89,7 @@ describe('<CustomCriblForm />', () => {
     });
   });
 
-  it('strips disallowed characters from dataId input', async () => {
+  it('rejects invalid dataId input without rewriting it', async () => {
     (getFleetManagedIndexTemplates as jest.Mock).mockReturnValue({
       indexTemplates: datastreamOpts,
       permissionsError: false,
@@ -105,7 +105,8 @@ describe('<CustomCriblForm />', () => {
       expect(dataId).toBeInTheDocument();
     });
 
-    await userEvent.type(dataId, `evil' || true || '`);
+    const invalidDataId = `evil' || true || '`;
+    await userEvent.type(dataId, invalidDataId);
 
     const datastreamComboBox = getByTestId('comboBoxSearchInput');
     await userEvent.type(datastreamComboBox, datastreamOpts[0]);
@@ -119,12 +120,12 @@ describe('<CustomCriblForm />', () => {
     ourOption.click();
 
     expect(onChange).toHaveBeenLastCalledWith({
-      isValid: true,
+      isValid: false,
       updatedPolicy: {
         ...mockPackagePolicy,
         vars: {
           route_entries: {
-            value: '[{"dataId":"eviltrue","datastream":"logs-destination1.cloud"}]',
+            value: `[{"dataId":"${invalidDataId}","datastream":"logs-destination1.cloud"}]`,
           },
         },
       },
