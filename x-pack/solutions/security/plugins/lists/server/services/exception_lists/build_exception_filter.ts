@@ -362,7 +362,7 @@ export const buildExceptionFilter = async <
       },
     },
   };
-  unprocessedExceptions.concat(unprocessableExceptionItems);
+  unprocessedExceptions.push(...unprocessableExceptionItems);
   return { filter: exceptionFilter, unprocessedExceptions };
 };
 
