@@ -21,7 +21,7 @@ pageLoadAssetSize:
   charts: 1188
   clientApps: 1017
   cloud: 8477
-  cloudConnect: 4998
+  cloudConnect: 5575
   cloudDataMigration: 1755
   cloudDefend: 3060
   cloudExperiments: 67356
@@ -144,7 +144,7 @@ pageLoadAssetSize:
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
-  pnd: 3034
+  pnd: 4501
   presentationUtil: 669
   productDocBase: 4218
   productIntercept: 4738
