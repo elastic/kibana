@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowEqual, useSelector } from 'react-redux';
+import { shallowEqual, useSelector } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
 import type { State } from '../store';
 

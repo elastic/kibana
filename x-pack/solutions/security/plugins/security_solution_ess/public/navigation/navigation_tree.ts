@@ -47,13 +47,16 @@ export const createNavigationTree = (
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
         link: 'inbox' as AppDeepLinkId,
-        icon: 'email',
+        icon: 'mail',
       },
+      // PND body (nodes omitted when xpack.pnd.enabled is false)
+      ...defaultNavigationTree.pnd(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
+      ...defaultNavigationTree.pndSecondary(),
       defaultNavigationTree.rules(),
       services.uiSettings.get(
         ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -213,7 +216,6 @@ export const createNavigationTree = (
                       link: 'cloud_connect' as const,
                     },
                   ]),
-              { link: 'monitoring' },
             ],
           },
           ...getAlertingV2ManagementNavPanel(services),

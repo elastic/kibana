@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { createReducer } from '@reduxjs/toolkit';
+import { createReducer } from 'redux-toolkit-v1';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import type { MonitorOverviewState } from './models';
 import { overviewViews } from './models';
 import { isPageStateSlotEqual } from '../utils/page_state_equality';
 import { getInitialShowFromAllSpaces } from '../utils/get_initial_show_from_all_spaces';
+import { getInitialIncludeHeartbeatMonitors } from '../utils/get_initial_include_heartbeat_monitors';
 import { getInitialShowLastRun } from '../utils/get_initial_show_last_run';
 
 import {
@@ -31,6 +32,7 @@ const initialState: MonitorOverviewState = {
     sortOrder: 'asc',
     sortField: 'status',
     showFromAllSpaces: getInitialShowFromAllSpaces(),
+    includeHeartbeatMonitors: getInitialIncludeHeartbeatMonitors(),
     // Seed the date-range window so the very first overview fetch is already
     // scoped to the picker's default; `useSyncOverviewDateRange` keeps it in
     // step with the URL afterwards. The overview uses its own (narrower) default

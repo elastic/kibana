@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
 import type { DocumentProfileProvider } from '../../../profiles';
 import { DocumentType, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-import { SECURITY_PROFILE_ID } from '../constants';
+import { SECURITY_PROFILE_ID, SIGNAL_RULE_NAME_FIELD_NAME } from '../constants';
 import * as i18n from '../translations';
 import type { SecurityProfileProviderFactory } from '../types';
 import { AlertEventOverviewLazy } from '../components';
@@ -28,8 +29,14 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
         const isAlert = isAlertDocument(params.record);
         const isEvent = isEventDocument(params.record);
 
+        const ruleName = isAlert
+          ? (getFieldValue(params.record, SIGNAL_RULE_NAME_FIELD_NAME) as string | undefined)
+          : undefined;
+        const title = ruleName ? i18n.alertFlyoutTitle(ruleName) : prevDocViewer.title;
+
         return {
           ...prevDocViewer,
+          title,
           docViewsRegistry: (registry) => {
             if (isAlert || isEvent) {
               registry.add({

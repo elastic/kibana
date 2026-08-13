@@ -7,7 +7,6 @@
 
 import { Streams, streamMatchesIndexPatterns } from '@kbn/streams-schema';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
-import { minimatch } from 'minimatch';
 import { isTerminalStatus } from '@kbn/workflows';
 import { parseStreamNameFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
 
@@ -20,25 +19,24 @@ export interface StreamClassificationResult {
   alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }>;
   candidates: StreamCandidate[];
   upToDate: StreamCandidate[];
-  excluded: string[];
   unsupported: string[];
-  excludePatterns: string[];
 }
 
-export const parseExcludePatterns = (raw: string | undefined): string[] =>
-  (raw ?? '')
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-const matchesExcludePatterns = (name: string, patterns: string[]): boolean =>
-  patterns.some((pattern) => minimatch(name, pattern));
+/**
+ * A stream type supported by continuous knowledge indicator onboarding.
+ */
+export const isSupportedStream = (stream: Streams.all.Definition): boolean =>
+  Streams.WiredStream.Definition.is(stream) ||
+  Streams.ClassicStream.Definition.is(stream) ||
+  Streams.QueryStream.Definition.is(stream);
 
 /**
  * Selects the streams eligible for continuous knowledge indicator onboarding.
- * Query streams are always included, gated only by the query-streams feature flag;
- * all other stream types are eligible only when their name matches the configured
- * significant events index patterns.
+ *
+ * Query streams are selected when the query-streams feature flag is enabled; every
+ * other supported type is selected when its name matches the configured significant
+ * events index patterns. This mirrors the discovery Streams list, so onboarding and
+ * the list stay aligned by construction.
  */
 export const filterEligibleStreams = ({
   allStreams,
@@ -57,41 +55,30 @@ export const filterEligibleStreams = ({
   });
 
 /**
- * Classifies streams into buckets (excluded, already-running, candidates, up-to-date)
+ * Classifies streams into buckets (already-running, candidates, up-to-date, unsupported)
  * by examining the latest onboarding workflow execution for each stream
  * and comparing the finish time against the configured extraction interval.
+ * Stream selection has already happened in `filterEligibleStreams`; this only drops
+ * unsupported types and buckets the rest by execution recency.
  */
 export const classifyStreams = ({
   allStreams,
   executions,
-  excludedStreamPatterns,
   intervalHours,
 }: {
   allStreams: Streams.all.Definition[];
   executions: WorkflowExecutionListItemDto[];
-  excludedStreamPatterns: string;
   intervalHours: number;
 }): StreamClassificationResult => {
-  const excludePatterns = parseExcludePatterns(excludedStreamPatterns);
-
-  const excluded: string[] = [];
   const unsupported: string[] = [];
   const eligibleNames = new Set<string>();
   for (const stream of allStreams) {
     const { name } = stream;
-    const isSupported =
-      Streams.WiredStream.Definition.is(stream) ||
-      Streams.ClassicStream.Definition.is(stream) ||
-      Streams.QueryStream.Definition.is(stream);
-    if (!isSupported) {
+    if (!isSupportedStream(stream)) {
       unsupported.push(name);
       continue;
     }
-    if (matchesExcludePatterns(name, excludePatterns)) {
-      excluded.push(name);
-    } else {
-      eligibleNames.add(name);
-    }
+    eligibleNames.add(name);
   }
 
   // Group executions by stream name (from concurrency key), keeping only the latest per stream
@@ -146,8 +133,6 @@ export const classifyStreams = ({
     alreadyRunning,
     candidates: allCandidates,
     upToDate,
-    excluded,
     unsupported,
-    excludePatterns,
   };
 };

@@ -40,6 +40,12 @@ export const useAnomalySummary = ({
   return useQuery(
     [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityId, resolvedBody],
     ({ signal }) => fetchAnomalySummary({ entityType, entityId, body: resolvedBody, signal }),
-    { enabled: enabled && !!entityId, keepPreviousData: true, refetchOnWindowFocus: false }
+    {
+      enabled: enabled && !!entityId,
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      retry: (failureCount, error) =>
+        failureCount < 3 && (error as { response?: { status?: number } })?.response?.status !== 400,
+    }
   );
 };

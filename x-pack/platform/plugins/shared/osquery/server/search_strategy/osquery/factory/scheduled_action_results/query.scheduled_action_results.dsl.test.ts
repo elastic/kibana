@@ -39,7 +39,7 @@ describe('buildScheduledActionResultsQuery', () => {
   it('queries the action responses data stream index', () => {
     const result = buildScheduledActionResultsQuery(defaultOptions);
 
-    expect(result.index).toContain('logs-osquery_manager.action.responses');
+    expect(result.index).toContain('logs-osquery_manager.action.responses*');
   });
 
   it('includes aggregations for success/error counts and rows', () => {
@@ -142,6 +142,23 @@ describe('buildScheduledActionResultsQuery', () => {
     expect(mustFilters).toContainEqual(defaultSpaceClause);
   });
 
+  it('uses a strict default-space term in aggregations when matchMissingSpaceId is false', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      spaceId: 'default',
+      matchMissingSpaceId: false,
+    });
+
+    const aggs = result.aggs as Record<string, Record<string, unknown>>;
+    const globalAggs = aggs.aggs as Record<string, Record<string, unknown>>;
+    const innerAggs = globalAggs.aggs as Record<string, Record<string, unknown>>;
+    const responsesBySchedule = innerAggs.responses_by_schedule as Record<string, unknown>;
+    const mustFilters = (responsesBySchedule.filter as { bool: { must: unknown[] } }).bool.must;
+
+    expect(mustFilters).toContainEqual({ term: { space_id: 'default' } });
+    expect(JSON.stringify(mustFilters)).not.toContain('exists');
+  });
+
   it('does not scope the top-level query (centralized in the search strategy)', () => {
     const result = buildScheduledActionResultsQuery(defaultOptions);
     const filterQuery = result.query as Record<string, Record<string, TermFilter[]>>;
@@ -167,14 +184,40 @@ describe('buildScheduledActionResultsQuery', () => {
   it('prefixes index with *: when ccsEnabled is true', () => {
     const result = buildScheduledActionResultsQuery({ ...defaultOptions, ccsEnabled: true });
 
-    expect(result.index).toBe(
-      'logs-osquery_manager.action.responses*,*:logs-osquery_manager.action.responses*'
-    );
+    expect(result.index).toEqual([
+      'logs-osquery_manager.action.responses*',
+      '*:logs-osquery_manager.action.responses*',
+    ]);
   });
 
   it('does not prefix index when ccsEnabled is false', () => {
     const result = buildScheduledActionResultsQuery({ ...defaultOptions, ccsEnabled: false });
 
-    expect(result.index).toBe('logs-osquery_manager.action.responses*');
+    expect(result.index).toEqual(['logs-osquery_manager.action.responses*']);
+  });
+
+  it('scopes the index to resolved integration namespaces', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      integrationNamespaces: ['team.a', 'team.b'],
+    });
+
+    expect(result.index).toEqual([
+      'logs-osquery_manager.action.responses-team.a',
+      'logs-osquery_manager.action.responses-team.b',
+    ]);
+  });
+
+  it('applies CCS prefixing to namespace-scoped indices', () => {
+    const result = buildScheduledActionResultsQuery({
+      ...defaultOptions,
+      integrationNamespaces: ['team.a'],
+      ccsEnabled: true,
+    });
+
+    expect(result.index).toEqual([
+      'logs-osquery_manager.action.responses-team.a',
+      '*:logs-osquery_manager.action.responses-team.a',
+    ]);
   });
 });

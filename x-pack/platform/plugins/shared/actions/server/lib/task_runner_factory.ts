@@ -7,7 +7,7 @@
 
 import { pick } from 'lodash';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -72,7 +72,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance, abortController, executionUuid }: RunContext) {
+  public create({ taskInstance, signal, executionUuid }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -123,7 +123,7 @@ export class TaskRunnerFactory {
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
             ...getSource(references, source),
-            signal: abortController.signal,
+            signal,
           });
         } catch (e) {
           const errorSource =
@@ -220,7 +220,7 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string) {
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    spaceId: asSpaceId(spaceId),
+    spaceId: brandSpaceId(spaceId),
   };
 
   return kibanaRequestFactory(fakeRawRequest);

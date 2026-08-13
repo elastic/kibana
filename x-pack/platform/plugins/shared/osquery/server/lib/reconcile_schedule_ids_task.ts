@@ -76,7 +76,7 @@ export const runReconcileTask = async ({
   coreStart,
   osqueryContext,
   logger,
-  abortController,
+  signal,
   isRruleFeatureEnabled,
   taskState,
   now = new Date(),
@@ -84,7 +84,7 @@ export const runReconcileTask = async ({
   coreStart: CoreStart | null;
   osqueryContext: OsqueryAppContextService;
   logger: Logger;
-  abortController?: AbortController;
+  signal?: AbortSignal;
   isRruleFeatureEnabled: boolean;
   taskState?: ReconcileTaskState;
   now?: Date;
@@ -97,7 +97,7 @@ export const runReconcileTask = async ({
     coreStart,
     osqueryContext,
     logger,
-    abortController,
+    signal,
     isRruleFeatureEnabled,
   });
 

@@ -1,5 +1,9 @@
 {
-  "sha1": "3d4c040cdeb99b4a25e208e9210750aeb17fbcc3",
+  "sha1": "3ec42fded9f2299ae5d153f4710fa29b9fad624b",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "a75a608aae95791-ac29b1ca2fd493b",
@@ -778,6 +782,48 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_viewer.spec.ts",
         "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "252c3b4ba53b90e-53cf2c7c880e8b9",
+      "title": "Osquery search strategy handles the legacy strategy identifier",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/search_strategy.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "252c3b4ba53b90e-238dc0960c0f100",
+      "title": "Osquery search strategy handles action results for a limited role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/search_strategy.spec.ts",
+        "line": 95,
+        "column": 12
+      }
+    },
+    {
+      "id": "252c3b4ba53b90e-cc6825be0d63ce0",
+      "title": "Osquery search strategy returns action results for a reader",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/search_strategy.spec.ts",
+        "line": 110,
         "column": 12
       }
     },

@@ -10,10 +10,10 @@ import { renderHook } from '@testing-library/react';
 import { useOverviewTrendsRequests } from './use_overview_trends_requests';
 import { WrappedHelper } from '../../../utils/testing';
 import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
-import * as reduxHooks from 'react-redux';
+import * as reduxHooks from 'react-redux-v7';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
   useSelector: jest.fn(),
 }));

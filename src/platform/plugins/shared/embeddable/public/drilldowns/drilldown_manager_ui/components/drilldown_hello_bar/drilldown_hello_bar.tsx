@@ -8,18 +8,8 @@
  */
 
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextColor,
-  EuiText,
-  EuiLink,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiIcon,
-} from '@elastic/eui';
-import { txtHideHelpButtonLabel, txtHelpText, txtViewDocsLinkLabel } from './i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
+import { txtHelpTitle, txtHelpText, txtViewDocsLinkLabel, txtHideHelpButtonLabel } from './i18n';
 
 export interface DrilldownHelloBarProps {
   docsLink?: string;
@@ -30,32 +20,25 @@ export const WELCOME_MESSAGE_TEST_SUBJ = 'drilldownsWelcomeMessage';
 
 export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, onHideClick }) => {
   return (
-    <EuiCallOut data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}>
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="question" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiText size={'s'}>
-            <EuiTextColor color="subdued">{txtHelpText}</EuiTextColor>
-          </EuiText>
-          {docsLink && (
-            <>
-              <EuiSpacer size={'xs'} />
-              <EuiLink href={docsLink} target="_blank" external>
-                {txtViewDocsLinkLabel}
-              </EuiLink>
-            </>
-          )}
-        </EuiFlexItem>
-        {!!onHideClick && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="xs" onClick={onHideClick}>
-              {txtHideHelpButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiCallOut>
+    <KbnInfoCallout
+      title={txtHelpTitle}
+      text={txtHelpText}
+      actionProps={
+        docsLink
+          ? {
+              primary: {
+                href: docsLink,
+                target: '_blank',
+                children: txtViewDocsLinkLabel,
+              },
+            }
+          : undefined
+      }
+      onDismiss={onHideClick}
+      dismissButtonProps={{
+        'aria-label': txtHideHelpButtonLabel,
+      }}
+      data-test-subj={WELCOME_MESSAGE_TEST_SUBJ}
+    />
   );
 };

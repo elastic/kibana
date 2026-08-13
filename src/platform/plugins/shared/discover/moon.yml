@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/discover-contextual-components'
   - '@kbn/logs-data-access-plugin'
   - '@kbn/apm-sources-access-plugin'
+  - '@kbn/apm-ui-shared'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/discover-shared-plugin'
   - '@kbn/response-ops-rule-form'
@@ -160,6 +161,8 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/use-observable'
   - '@kbn/core-security-server'
+  - '@kbn/core-http-server'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

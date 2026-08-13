@@ -25,6 +25,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import type { PluginConfig } from '../../../config';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
@@ -46,9 +47,11 @@ const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN
 describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
 
   function createStep(maxAlertsPerRun?: number) {
-    const { loggerService } = createLoggerService();
+    const { loggerService, mockLogger: logger } = createLoggerService();
+    mockLogger = logger;
     const mocks = createQueryService();
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
@@ -72,6 +75,18 @@ describe('ExecuteRuleQueryStep', () => {
     expect(results[0].type).toBe('continue');
     expect(results[0].state.queryPayload).toBeDefined();
     expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      'Executing ES|QL query',
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          rule_id: state.input.ruleId,
+          step: 'execute_rule_query',
+        }),
+      })
+    );
+    const debugMessage = (mockLogger.debug as jest.Mock).mock.calls[0][0] as string;
+    expect(debugMessage).not.toContain('FROM');
+    expect(debugMessage).not.toContain('LIMIT');
   });
 
   it('passes correct parameters to ES client', async () => {
@@ -252,5 +267,44 @@ describe('ExecuteRuleQueryStep', () => {
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
+  });
+
+  it('emits rowsReturnedByQuery per batch equal to the batch row count', async () => {
+    mockHelpersEsqlArrowBatches(mockEsClient, [
+      { numRows: 2, rows: [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }] },
+      { numRows: 1, rows: [{ 'host.name': 'host-c' }] },
+    ]);
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results).toHaveLength(2);
+    expect(results[0].type).toBe('continue');
+
+    // @ts-expect-error: meta is present on the result
+    expect(results[0].meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+    });
+
+    expect(results[1].type).toBe('continue');
+
+    // @ts-expect-error: meta is present on the result
+    expect(results[1].meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+    });
+  });
+
+  it('emits rowsReturnedByQuery = 0 when the query returns no rows', async () => {
+    mockHelpersEsqlArrowBatches(mockEsClient, []);
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 0,
+    });
   });
 });

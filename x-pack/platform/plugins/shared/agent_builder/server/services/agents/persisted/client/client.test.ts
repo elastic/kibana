@@ -6,10 +6,11 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { isAgentNotFoundError } from '@kbn/agent-builder-common';
 import { buildReadAccessFilter } from '../../access_control';
 import { getUserFromRequest, isAdminFromRequest } from '../../../utils';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
-import { createClient, type AgentClient } from './client';
+import { createClient, createSystemClient, type AgentClient } from './client';
 
 const testSpace = 'default';
 const mockUser = { id: 'user-1', username: 'test-user' };
@@ -262,6 +263,188 @@ describe('AgentClient', () => {
 
         expect(mockEsClient.index).toHaveBeenCalledTimes(1);
       });
+    });
+  });
+
+  describe('ensureDefaultAgent', () => {
+    const profile = {
+      id: 'agent-1',
+      name: 'Agent 1',
+      description: 'desc',
+      configuration: { tools: [] },
+    };
+
+    const conflictError = Object.assign(new Error('version_conflict_engine_exception'), {
+      statusCode: 409,
+    });
+
+    const buildDoc = () => ({
+      _id: 'agent-1',
+      _source: {
+        id: 'agent-1',
+        name: 'Agent 1',
+        type: 'chat',
+        space: testSpace,
+        description: 'desc',
+        created_by_name: 'system',
+        access_control: { access_mode: 'public', entries: [] },
+        config: { tools: [] },
+        created_at: '2020-01-01T00:00:00.000Z',
+        updated_at: '2020-01-01T00:00:00.000Z',
+      },
+    });
+
+    const emptyHits = { hits: { hits: [] } };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('creates and returns the default agent', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce(emptyHits)
+        .mockResolvedValue({ hits: { hits: [buildDoc()] } });
+      mockEsClient.index.mockResolvedValue({});
+
+      await expect(client.ensureDefaultAgent(profile as never)).resolves.toMatchObject({
+        id: 'agent-1',
+      });
+    });
+
+    it('retries the read until a concurrently created agent becomes searchable', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce(emptyHits) // existence pre-check
+        .mockResolvedValueOnce(emptyHits) // read-back before the winner's refresh
+        .mockResolvedValueOnce(emptyHits)
+        .mockResolvedValue({ hits: { hits: [buildDoc()] } });
+      mockEsClient.index.mockRejectedValue(conflictError);
+
+      const promise = client.ensureDefaultAgent(profile as never);
+      await jest.advanceTimersByTimeAsync(1000);
+
+      await expect(promise).resolves.toMatchObject({ id: 'agent-1' });
+      expect(mockEsClient.search).toHaveBeenCalledTimes(4);
+    });
+
+    it('rejects with not found when the agent never becomes searchable', async () => {
+      mockEsClient.search.mockResolvedValue(emptyHits);
+      mockEsClient.index.mockRejectedValue(conflictError);
+
+      const promise = client.ensureDefaultAgent(profile as never);
+      promise.catch(() => {
+        // prevent unhandled rejection while timers advance
+      });
+      await jest.advanceTimersByTimeAsync(10_000);
+
+      const error = await promise.catch((e) => e);
+      expect(isAgentNotFoundError(error)).toBe(true);
+    });
+
+    it('does not retry the read on non-not-found errors', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce(emptyHits)
+        .mockRejectedValue(new Error('search failure'));
+      mockEsClient.index.mockRejectedValue(conflictError);
+
+      await expect(client.ensureDefaultAgent(profile as never)).rejects.toThrow('search failure');
+      expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+    });
+  });
+});
+
+describe('SystemAgentClient', () => {
+  const profile = {
+    id: 'platform.sig_events.test-agent',
+    type: 'platform.test.type',
+    name: 'System agent',
+    description: 'Installed at startup',
+    configuration: { tools: [], connector_ids: [] },
+  };
+
+  const buildDoc = (type = profile.type) => ({
+    _id: `default_${profile.id}`,
+    _source: {
+      id: profile.id,
+      name: profile.name,
+      type,
+      space: testSpace,
+      description: profile.description,
+      created_by_name: 'system',
+      access_control: { access_mode: 'public', entries: [] },
+      config: profile.configuration,
+      created_at: '2020-01-01T00:00:00.000Z',
+      updated_at: '2020-01-01T00:00:00.000Z',
+    },
+  });
+
+  const createSystemAgentClient = () =>
+    createSystemClient({
+      space: testSpace,
+      logger: loggerMock.create(),
+      elasticsearch: { client: { asInternalUser: {} } } as never,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('creates a system-owned agent without a request', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+    await createSystemAgentClient().ensureAgent(profile);
+
+    expect(mockEsClient.index).toHaveBeenCalledWith({
+      id: `${testSpace}_${profile.id}`,
+      op_type: 'create',
+      document: expect.objectContaining({
+        id: profile.id,
+        type: profile.type,
+        space: testSpace,
+        created_by_name: 'system',
+      }),
+    });
+  });
+
+  it('preserves an existing agent', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
+
+    await createSystemAgentClient().ensureAgent(profile);
+
+    expect(mockEsClient.index).not.toHaveBeenCalled();
+  });
+
+  it('rejects an existing agent with a different type', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc('chat')] } });
+
+    await expect(createSystemAgentClient().ensureAgent(profile)).rejects.toThrow(
+      'the id is already used by an agent of type "chat"'
+    );
+  });
+
+  describe('concurrent creation', () => {
+    const conflictError = Object.assign(new Error('version_conflict_engine_exception'), {
+      statusCode: 409,
+    });
+
+    it('treats a concurrent create by another caller as success', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+      mockEsClient.index.mockRejectedValue(conflictError);
+
+      await expect(createSystemAgentClient().ensureAgent(profile)).resolves.toBeUndefined();
+      expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('rethrows non-conflict index errors', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+      mockEsClient.index.mockRejectedValue(new Error('mapping failure'));
+
+      await expect(createSystemAgentClient().ensureAgent(profile)).rejects.toThrow(
+        'mapping failure'
+      );
     });
   });
 });

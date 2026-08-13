@@ -128,4 +128,26 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(args.systemPrompt).toContain('MEMORY_SNIPPET');
     expect(args.systemPrompt).toContain('SCS_GROUNDING_SNIPPET');
   });
+
+  it('forwards Significant Event context tools and appends the prompt snippet', async () => {
+    const kiExtractionContextTools = {
+      tools: {
+        significant_event_search: {
+          description: 'search events',
+          schema: { type: 'object' as const, properties: {} },
+        },
+      },
+      callbacks: { significant_event_search: jest.fn() },
+      promptSnippet: 'SIGEVENT_CONTEXT_SNIPPET',
+    };
+
+    await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      buildDeps({ kiExtractionContextTools })
+    );
+
+    const args = generateSignificantEventsMock.mock.calls[0][0];
+    expect(Object.keys(args.additionalTools ?? {})).toEqual(['significant_event_search']);
+    expect(args.systemPrompt).toContain('SIGEVENT_CONTEXT_SNIPPET');
+  });
 });

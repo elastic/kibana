@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { AlertingCallout, MISSING_RULES_PRIVILEGES_LABEL } from './alerting_callout';
 import { getDynamicSettingsAction } from '../../../state/settings/actions';

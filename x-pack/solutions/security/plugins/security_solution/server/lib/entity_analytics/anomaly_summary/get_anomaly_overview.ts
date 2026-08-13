@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
@@ -43,6 +43,7 @@ interface OverviewAggs {
 interface GetEntityAnomalyOverviewParams {
   entityId: string;
   entityType: EntityType;
+  entityRecord: Entity;
   fromMs?: number;
   toMs?: number;
   scoreRanges?: AnomalyScoreRange[];
@@ -80,6 +81,7 @@ interface AnomalyOverview {
 export const getEntityAnomalyOverview = async ({
   entityId,
   entityType,
+  entityRecord,
   fromMs,
   toMs,
   scoreRanges,
@@ -125,6 +127,14 @@ export const getEntityAnomalyOverview = async ({
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
+  const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+  if (!entityFilter) {
+    logger.warn(
+      `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+    );
+    return empty;
+  }
+
   let aggs: OverviewAggs | undefined;
   let rawHits: RawAnomalyRecord[] = [];
   let totalAnomaliesCount = 0;
@@ -134,9 +144,6 @@ export const getEntityAnomalyOverview = async ({
       {
         size: NUM_RECENT_ANOMALIES,
         track_total_hits: true,
-        runtime_mappings: {
-          entity_id: euid.painless.getEuidRuntimeMapping(entityType),
-        },
         query: {
           bool: {
             filter: [
@@ -144,7 +151,7 @@ export const getEntityAnomalyOverview = async ({
               { term: { is_interim: false } },
               buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
-              { term: { entity_id: entityId } },
+              entityFilter,
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
             ],
           },
@@ -195,12 +202,20 @@ export const getEntityAnomalyOverview = async ({
   const anomalyByTimeBucket: AnomalyOverviewEntry[] = (aggs?.by_time?.buckets ?? [])
     .filter((b) => b.doc_count > 0 && b.max_score.value !== null)
     .map((b) => {
-      const bucketJobIds = b.jobs.buckets.map((j) => j.key);
+      const jobsBucket = b?.jobs?.buckets ?? [];
+      const bucketJobIds = jobsBucket.map((j) => j.key);
       const tactics = [...new Set(bucketJobIds.flatMap((id) => tacticsByJob.get(id) ?? []))];
+      const tacticCounts = jobsBucket.reduce<Record<string, number>>((acc, { key, doc_count }) => {
+        for (const tactic of tacticsByJob.get(key) ?? []) {
+          acc[tactic] = (acc[tactic] ?? 0) + doc_count;
+        }
+        return acc;
+      }, {});
       return {
         timestamp: new Date(b.key).toISOString(),
         maxScore: b.max_score.value as number,
         threatTactics: tactics,
+        tacticCounts,
       };
     });
 

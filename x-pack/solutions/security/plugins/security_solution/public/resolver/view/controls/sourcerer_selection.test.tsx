@@ -24,9 +24,9 @@ jest.mock('react-router-dom', () => {
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('react-redux', () => {
+jest.mock('react-redux-v7', () => {
   return {
-    ...jest.requireActual('react-redux'),
+    ...jest.requireActual('react-redux-v7'),
     useDispatch: jest.fn(),
   };
 });

@@ -137,7 +137,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
               })
         }
         back="/app/management/data/index_management/component_templates"
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
       />
 
       <EuiPageSection restrictWidth style={{ width: '100%' }} paddingSize="none">

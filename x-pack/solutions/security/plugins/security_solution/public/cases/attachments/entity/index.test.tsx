@@ -57,7 +57,7 @@ describe('Entity attachment', () => {
     it.each([
       ['user', 'user'],
       ['host', 'storage'],
-      ['service', 'node'],
+      ['service', 'vectorTriangle'],
       ['generic', 'globe'],
     ])('uses the %s entity icon', (entityType, expectedIcon) => {
       expect(getIconType({ entityName: 'foo', entityType } as Props['metadata'])).toBe(

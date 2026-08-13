@@ -12,9 +12,9 @@ import { installInvestigationWorkflow } from '../../../memory_and_investigation/
 
 export interface ManagedWorkflowsInstaller {
   /**
-   * Installs the full current managed-workflow set (base workflows, plus the memory and
-   * investigation workflows when their flags are enabled) and closes the reconciliation window
-   * exactly once. Resolves when this install completes and rejects if it fails.
+   * Installs the full managed-workflow set (base, memory, and investigation workflows) and closes
+   * the reconciliation window exactly once. Resolves when this install completes and rejects if it
+   * fails.
    */
   install: () => Promise<void>;
 }
@@ -22,8 +22,6 @@ export interface ManagedWorkflowsInstaller {
 export interface CreateManagedWorkflowsInstallerOptions {
   getClient: () => Promise<PluginScopedManagedWorkflowsApi>;
   isAvailable: () => Promise<boolean>;
-  isMemoryEnabled: () => Promise<boolean>;
-  isInvestigationEnabled: () => Promise<boolean>;
   logger: Logger;
 }
 
@@ -39,8 +37,6 @@ export interface CreateManagedWorkflowsInstallerOptions {
 export const createManagedWorkflowsInstaller = ({
   getClient,
   isAvailable,
-  isMemoryEnabled,
-  isInvestigationEnabled,
   logger,
 }: CreateManagedWorkflowsInstallerOptions): ManagedWorkflowsInstaller => {
   let queue: Promise<void> = Promise.resolve();
@@ -49,21 +45,15 @@ export const createManagedWorkflowsInstaller = ({
   const runInstall = async (): Promise<void> => {
     if (!(await isAvailable())) {
       logger.debug(
-        'significant_events: availability flag disabled, skipping managed workflow installation'
+        'significantEvents: availability flag disabled, skipping managed workflow installation'
       );
       return;
     }
 
     const client = await getClient();
 
-    await installWorkflows({
-      client,
-      isSignificantEventsMemoryEnabled: await isMemoryEnabled(),
-    });
-
-    if (await isInvestigationEnabled()) {
-      await installInvestigationWorkflow({ client });
-    }
+    await installWorkflows({ client });
+    await installInvestigationWorkflow({ client });
 
     // Log success only after the whole sequence (including reconciliation) has actually landed, and
     // only once at INFO. Re-installs on later flag flips are routine, so keep them at debug.

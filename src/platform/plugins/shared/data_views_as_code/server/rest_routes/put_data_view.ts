@@ -7,30 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
-import { getDataViewsAsCodeService, handleErrors, withDataViewsAsCodeEnabled } from './utils';
+import { getDataViewsAsCodeService, requestHandler } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
-import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
+import type { RegisterRouteArgs } from './types';
 
 const UPDATE_DATA_VIEW_AS_CODE_PATH = BASE_PATH + '/{id}';
 
-export const registerPutDataViewAsCodeRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>
-) =>
+export const registerPutDataViewAsCodeRoute = ({
+  router,
+  getStartServices,
+  ...args
+}: RegisterRouteArgs) =>
   router.versioned
     .put({
       path: UPDATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'public',
+      access: 'internal',
       description: 'Update a data view by id',
-      options: {
-        availability: {
-          stability: 'tech_preview',
-          since: '9.5.0',
-        },
-      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -80,19 +74,13 @@ export const registerPutDataViewAsCodeRoute = (
           },
         },
       },
-      withDataViewsAsCodeEnabled(
-        handleErrors(async (ctx, req, res) => {
-          const id = req.params.id;
-          const dataViewsAsCodeService = await getDataViewsAsCodeService(
-            ctx,
-            getStartServices,
-            req
-          );
-          const response = await dataViewsAsCodeService.upsert(id, req.body);
+      requestHandler(args, async (ctx, req, res) => {
+        const id = req.params.id;
+        const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
+        const response = await dataViewsAsCodeService.upsert(id, req.body);
 
-          return response.action === 'created'
-            ? res.created({ body: response.body })
-            : res.ok({ body: response.body });
-        })
-      )
+        return response.action === 'created'
+          ? res.created({ body: response.body })
+          : res.ok({ body: response.body });
+      })
     );

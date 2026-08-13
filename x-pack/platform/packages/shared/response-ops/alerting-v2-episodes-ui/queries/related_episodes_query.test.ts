@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ALERT_EVENTS_DATA_STREAM, TIME_FIELD } from '../constants';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  DEFAULT_TIME_FIELD as TIME_FIELD,
+} from '@kbn/alerting-v2-constants';
 import {
   buildRelatedBaseQuery,
   finishRelatedEpisodesQuery,

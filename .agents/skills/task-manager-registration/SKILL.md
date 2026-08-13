@@ -32,7 +32,7 @@ taskManager.registerTaskDefinitions({
     paramsSchema: schema.object({ /* ... */ }),
     stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (s) => s } },
     createTaskRunner: (context) => {
-      const { taskInstance, abortController } = context;
+      const { taskInstance, signal } = context;
       return {
         run: async () => { /* ... */ },
         cancel: async () => { /* cleanup */ }, // optional, see §3
@@ -66,34 +66,34 @@ The validator only checks the format (`{number}{m|s|h|d}`); it does NOT check th
 { timeout: '1h' }              // for a task that always finishes in seconds
 ```
 
-## 2. `abortController` — actually use it
+## 2. `signal` — actually use it
 
-**Rule:** `createTaskRunner` MUST destructure `abortController` from `RunContext` and propagate `abortController.signal` to every cancellable operation: ES client calls, `fetch`/HTTP requests, child loops, and any `setTimeout`/`setInterval` based polling.
+**Rule:** `createTaskRunner` MUST destructure `signal` (an `AbortSignal`) from `RunContext` and propagate it to every cancellable operation: ES client calls, `fetch`/HTTP requests, child loops, and any `setTimeout`/`setInterval` based polling.
 
-The `abortController` is **signal-only**: Task Manager signals it on timeout or shutdown but never reads `.signal` itself. The signal is the only channel Task Manager has to ask a task to stop — it is the task code's responsibility to comply by passing it to I/O and checking `signal.aborted` in loops. Ignoring it lets in-flight work run past the timeout, hold ES connections open, and block clean shutdown.
+`RunContext` hands the task a `signal` directly — Task Manager owns the underlying `AbortController` internally and never exposes it. Task Manager aborts the signal on timeout or shutdown but never reads `signal.aborted` itself. The signal is the only channel Task Manager has to ask a task to stop — it is the task code's responsibility to comply by passing it to I/O and checking `signal.aborted` in loops. Ignoring it lets in-flight work run past the timeout, hold ES connections open, and block clean shutdown.
 
-**A task cannot exit by signalling its own controller.** Calling `abortController.abort()` from inside `run()` does nothing useful — Task Manager never reads the signal. To exit early, return from the top-level task function, or throw an error (Task Manager catches it; classify with the helpers in §4).
+**A task cannot make itself exit via the signal.** To exit early, return from the top-level task function, or throw an error (Task Manager catches it; classify with the helpers in §4).
 
 ### Pass the signal to ES clients
 
 ```ts
 const result = await esClient.search(
   { index, query, size },
-  { signal: abortController.signal }
+  { signal }
 );
 ```
 
 ### Pass the signal to HTTP
 
 ```ts
-await fetch(url, { signal: abortController.signal });
+await fetch(url, { signal });
 ```
 
 ### Bail out of loops
 
 ```ts
 for (const item of items) {
-  if (abortController.signal.aborted) return { state };
+  if (signal.aborted) return { state };
   await processItem(item);
 }
 ```
@@ -101,18 +101,20 @@ for (const item of items) {
 ### Or use a `throwIfAborted` helper
 
 ```ts
-const throwIfAborted = (ac: AbortController) => {
-  if (ac.signal.aborted) throw new Error('Task aborted');
+const throwIfAborted = (sig: AbortSignal) => {
+  if (sig.aborted) throw new Error('Task aborted');
 };
 
 for (const batch of batches) {
-  throwIfAborted(abortController);
-  await processBatch(batch, { signal: abortController.signal });
+  throwIfAborted(signal);
+  await processBatch(batch, { signal });
 }
 ```
 
+Throwing is the simpler option, but when `run()` throws, Task Manager persists the state as it was *before* the run (`task_running/task_runner.ts`) — progress the run made is lost. Prefer the `return { state }` form above when a partial run is worth checkpointing.
+
 ```ts
-// Anti-pattern: ignore the abortController entirely
+// Anti-pattern: ignore the signal entirely
 createTaskRunner: ({ taskInstance }) => ({
   run: async () => {
     for (const id of bigList) {
@@ -132,7 +134,7 @@ When present, `cancel()` is invoked by Task Manager **on timeout only** — when
 Do **not** add an empty `cancel: async () => {}` just to satisfy the type. If there is nothing to clean up, omit the field entirely.
 
 ```ts
-createTaskRunner: ({ abortController }) => {
+createTaskRunner: () => {
   const subscription = stream$.subscribe(/* ... */);
   return {
     run: async () => { /* ... */ },
@@ -257,12 +259,13 @@ If the task is fully stateless (every run starts from scratch), return `{ state:
 
 **Rule:** Pick `cost` based on the task's actual resource footprint, not its perceived importance. Pick `priority` only when the task should preempt or yield to others; the default (`Normal`) is correct for most tasks.
 
-`TaskCost` values are integers used by the capacity pool: `Tiny = 1`, `Normal = 2`, `ExtraLarge = 10`. Capacity is finite; an over-costed task starves its neighbours, an under-costed task gets starved by them.
+`TaskCost` values are integers used by the capacity pool: `Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`. Capacity is finite; an over-costed task starves its neighbours, an under-costed task gets starved by them.
 
 | Cost | Assumed memory budget | When to pick |
 |---|---|---|
 | `TaskCost.Tiny` | < 25 MB | Sub-second, no ES query — heartbeats, gauge reporting, light scheduling |
 | `TaskCost.Normal` | < 50 MB | Default. A handful of ES queries, modest CPU |
+| `TaskCost.Large` | < 100 MB | Between `Normal` and `ExtraLarge` — a batched job with a moderate footprint |
 | `TaskCost.ExtraLarge` | < 250 MB | Heavy aggregations, large bulk reads/writes, long-running scans |
 
 The memory budgets are the assumption capacity planning is built on; if the task's real footprint exceeds the budget for its tier, bump the cost rather than relying on the smaller tier's slot.
@@ -277,8 +280,8 @@ The memory budgets are the assumption capacity planning is built on; if the task
 
 These are distinct enums for distinct contexts — confusing them is a recurring review finding (see [PR #260373](https://github.com/elastic/kibana/pull/260373)):
 
-- **`TaskCost`** — integer enum (`Tiny = 1`, `Normal = 2`, `ExtraLarge = 10`). Use for the **task type definition's** `cost` field and for the **per-instance `cost` override** in `TaskInstance.cost` *when the value is set in code* against the `TaskInstance` type. This is the value the capacity pool reads.
-- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to `TaskCost` with `getTaskCostFromInstance(...)` before comparing or feeding it back to capacity logic.
+- **`TaskCost`** — integer enum (`Tiny = 1`, `Normal = 2`, `Large = 4`, `ExtraLarge = 10`). Use for the **task type definition's** `cost` field and for the **per-instance `cost` override** in `TaskInstance.cost` *when the value is set in code* against the `TaskInstance` type. This is the value the capacity pool reads.
+- **`InstanceTaskCost`** — string enum (`'tiny'`, `'normal'`, `'large'`, `'extralarge'`). Use whenever cost travels through a **schema or saved-object attribute**: task params, persisted state, anything serialized. Convert to the numeric `TaskCost` with `getTaskCostFromInstance(...)` (exported from `@kbn/task-manager-plugin/server`) before comparing or feeding it back to capacity logic.
 
 ```ts
 import { TaskCost, InstanceTaskCost, getTaskCostFromInstance } from '@kbn/task-manager-plugin/server';
@@ -291,6 +294,7 @@ const paramsSchema = schema.object({
   cost: schema.oneOf([
     schema.literal(InstanceTaskCost.Tiny),
     schema.literal(InstanceTaskCost.Normal),
+    schema.literal(InstanceTaskCost.Large),
     schema.literal(InstanceTaskCost.ExtraLarge),
   ]),
 });
@@ -375,7 +379,7 @@ The assertion is a hard-coded sorted list of every registered task type, not a s
 | Field / API | Rule | Default if omitted | When wrong |
 |---|---|---|---|
 | `timeout` | Set explicitly to expected duration + margin | `'5m'` | Times out healthy work, or holds slot for an hour after a wedge |
-| `abortController` | Pass `.signal` to ES, HTTP, loops; check in tight loops | n/a | Task runs past timeout; blocks shutdown |
+| `signal` | Pass it to ES, HTTP, loops; check `signal.aborted` in tight loops | n/a | Task runs past timeout; blocks shutdown |
 | `cancel()` | Implement when the task allocates resources beyond `signal`'s reach | none | Resource leak on cancel |
 | `throwUnrecoverableError` | For permanent failures | n/a | Useless retries on permanent failures |
 | `throwRetryableError` | For transient failures | n/a | Task dies on the first transient blip |
@@ -400,10 +404,10 @@ When registering a new task type:
    - [ ] `stateSchemaByVersion` exists if `run()` returns non-empty `state`
 
 2. **Runner**
-   - [ ] `createTaskRunner` destructures `abortController` from `RunContext`
-   - [ ] `abortController.signal` is passed to every ES client call
-   - [ ] `abortController.signal` is passed to every `fetch`/HTTP call
-   - [ ] Tight loops check `abortController.signal.aborted` (or a `throwIfAborted` helper)
+   - [ ] `createTaskRunner` destructures `signal` from `RunContext`
+   - [ ] `signal` is passed to every ES client call
+   - [ ] `signal` is passed to every `fetch`/HTTP call
+   - [ ] Tight loops check `signal.aborted` (or a `throwIfAborted` helper)
    - [ ] `cancel()` is implemented if the task allocates resources outside the signal's reach
 
 3. **Errors**
@@ -414,7 +418,7 @@ When registering a new task type:
 4. **Cost type discipline**
    - [ ] `TaskCost` is used for `definition.cost` and in-code `TaskInstance.cost`
    - [ ] `InstanceTaskCost` is used in any persisted/serialised cost field
-   - [ ] `getTaskCostFromInstance(...)` converts before comparing to `TaskCost`
+   - [ ] The string cost is converted with `getTaskCostFromInstance(...)` before comparing to `TaskCost`
 
 5. **Scheduling**
    - [ ] Recurring tasks scheduled on plugin start use `ensureScheduled` with a stable `id`
@@ -430,7 +434,7 @@ When registering a new task type:
 When reviewing a PR that adds or modifies a task:
 
 - [ ] Each definition field listed above is set deliberately, not by default
-- [ ] `abortController.signal` is propagated through the entire `run()` call chain — search the diff for new ES/HTTP calls without `signal:` and reject
+- [ ] `signal` is propagated through the entire `run()` call chain — search the diff for new ES/HTTP calls without `signal:` and reject
 - [ ] Errors are classified — search the diff for `throw new Error` inside `run()` and challenge each one
 - [ ] If `cost` or `priority` differs from `Normal`, the PR description justifies the choice
 - [ ] If `stateSchemaByVersion` is added or modified, `up` migrations are pure and idempotent and cover every shape change
@@ -442,8 +446,8 @@ When reviewing a PR that adds or modifies a task:
 
 | Plugin | File | Notable pattern |
 |---|---|---|
-| Fleet | `x-pack/platform/plugins/shared/fleet/server/tasks/automatic_agent_upgrade_task.ts` | `abortController` threaded through call chain with a `throwIfAborted` helper in loops |
-| Entity Store | `x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/index.ts` | Abort signal listener; passes `abortController` through downstream services |
+| Fleet | `x-pack/platform/plugins/shared/fleet/server/tasks/automatic_agent_upgrade_task.ts` | `signal` threaded through call chain with a `throwIfAborted` helper in loops |
+| Entity Store | `x-pack/solutions/security/plugins/entity_store/server/tasks/entity_maintainers/index.ts` | Destructures `signal` from `RunContext`; threads it through downstream services |
 | Alerting | `x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts` | `stateSchemaByVersion`; telemetry on success/failure |
 | SLO | `x-pack/solutions/observability/plugins/slo/server/services/tasks/health_scan_task/health_scan_task.ts` | `maxAttempts: 1`; config-gated execution; typed `RunContext` |
 | Synthetics | `x-pack/solutions/observability/plugins/synthetics/server/tasks/sync_private_locations_monitors_task.ts` | Preserves existing schedule in `ensureScheduled`; dynamic schedule from task result |

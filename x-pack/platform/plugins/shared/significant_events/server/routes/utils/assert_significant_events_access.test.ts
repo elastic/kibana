@@ -10,13 +10,15 @@ import { MissingDependencyError } from '../../lib/errors/missing_dependency_erro
 import {
   assertSignificantEventsAccess,
   getSignificantEventsAvailability,
+  isSignificantEventsAvailable,
 } from './assert_significant_events_access';
 
 interface ContextOverrides {
   featureFlagAvailable?: boolean;
+  /** The serverless project type. Omit for a classic deployment, which has none. */
+  projectType?: string;
   tierAvailable?: boolean;
   hasEnterpriseLicense?: boolean;
-  uiSettingEnabled?: boolean;
   workflowsExtensionsPlugin?: boolean;
   workflowsManagementPlugin?: boolean;
   inferencePlugin?: boolean;
@@ -26,9 +28,9 @@ interface ContextOverrides {
 const buildArgs = (overrides: ContextOverrides = {}) => {
   const {
     featureFlagAvailable = true,
+    projectType,
     tierAvailable = true,
     hasEnterpriseLicense = true,
-    uiSettingEnabled = true,
     workflowsExtensionsPlugin = true,
     workflowsManagementPlugin = true,
     inferencePlugin = true,
@@ -40,6 +42,7 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
       featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(featureFlagAvailable) },
       pricing: { isFeatureAvailable: jest.fn().mockReturnValue(tierAvailable) },
     },
+    cloud: projectType && { isServerlessEnabled: true, serverless: { projectType } },
     workflowsExtensions: workflowsExtensionsPlugin ? {} : undefined,
     workflowsManagement: workflowsManagementPlugin ? {} : undefined,
     searchInferenceEndpoints: inferencePlugin ? {} : undefined,
@@ -52,12 +55,9 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
       .mockResolvedValue({ hasAtLeast: jest.fn().mockReturnValue(hasEnterpriseLicense) }),
   };
 
-  const uiSettingsClient = { get: jest.fn().mockResolvedValue(uiSettingEnabled) };
-
   return {
     server,
     licensing,
-    uiSettingsClient,
   } as unknown as Parameters<typeof assertSignificantEventsAccess>[0];
 };
 
@@ -86,6 +86,18 @@ describe('assertSignificantEventsAccess', () => {
     );
   });
 
+  it('throws a FeatureNotEnabledError (403) in a non-Observability serverless project', async () => {
+    await expect(
+      assertSignificantEventsAccess(buildArgs({ projectType: 'security' }))
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+  });
+
+  it('resolves in an Observability serverless project', async () => {
+    await expect(
+      assertSignificantEventsAccess(buildArgs({ projectType: 'observability' }))
+    ).resolves.toBeUndefined();
+  });
+
   it('throws a FeatureNotEnabledError (403) when the pricing tier is unavailable', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ tierAvailable: false }))
@@ -95,12 +107,6 @@ describe('assertSignificantEventsAccess', () => {
   it('throws a FeatureNotEnabledError (403) when the license is insufficient', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ hasEnterpriseLicense: false }))
-    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
-  });
-
-  it('throws a FeatureNotEnabledError (403) when the UI setting is disabled', async () => {
-    await expect(
-      assertSignificantEventsAccess(buildArgs({ uiSettingEnabled: false }))
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
@@ -162,5 +168,23 @@ describe('getSignificantEventsAvailability', () => {
         buildArgs({ tierAvailable: false, hasEnterpriseLicense: false })
       )
     ).resolves.toEqual({ available: false, reason: 'pricing_tier' });
+  });
+
+  it('returns project_type before pricing_tier, which cannot express it on its own', async () => {
+    await expect(
+      getSignificantEventsAvailability(buildArgs({ projectType: 'search', tierAvailable: false }))
+    ).resolves.toEqual({ available: false, reason: 'project_type' });
+  });
+});
+
+describe('isSignificantEventsAvailable', () => {
+  it('is true when every requirement is met', async () => {
+    await expect(isSignificantEventsAvailable(buildArgs())).resolves.toBe(true);
+  });
+
+  it('is false when a requirement is unmet', async () => {
+    await expect(
+      isSignificantEventsAvailable(buildArgs({ projectType: 'security' }))
+    ).resolves.toBe(false);
   });
 });

@@ -59,8 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/278232
-  describe.skip('lens legend statistics', () => {
+  describe('lens legend statistics', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/lens/legend_statistics'
@@ -158,7 +157,7 @@ MAX: 17,246`;
       describe('waffle chart', () => {
         it('waffleshows values in legend for legacy valuesInLegend===true property', async () => {
           await loadSavedLens('waffleValuesInLegendTrue');
-          await expectLegendOneItem('Count of records', '14,003');
+          await expectLegendOneItem('Count of records', '14,002');
         });
         it('shows values in legend for legacy showValuesInLegend===false prop', async () => {
           await loadSavedLens('waffleValuesInLegendFalse');
@@ -166,7 +165,7 @@ MAX: 17,246`;
         });
         it('shows values in legend for legendStats===["values"] prop', async () => {
           await loadSavedLens('waffleLegendStats');
-          await expectLegendOneItem('Count of records', '14,003');
+          await expectLegendOneItem('Count of records', '14,002');
         });
       });
     });

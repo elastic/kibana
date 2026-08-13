@@ -57,7 +57,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
   const {
     core,
     url,
-    config: { isServerless },
+    config: { isServerless, enableIndexMode },
   } = useAppContext();
   const dlmTiersLayoutEnabled = !isServerless;
   const { data: failureStoreSettings, error: failureStoreSettingsError } =
@@ -318,7 +318,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
             )}
 
             {/* Index mode */}
-            {indexMode && (
+            {indexMode && enableIndexMode && (
               <>
                 <EuiDescriptionListTitle>
                   <FormattedMessage

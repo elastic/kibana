@@ -7,10 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -21,24 +18,6 @@ import {
   type SmlAttachHttpResultItem,
 } from '../../../common/http_api/sml';
 import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
-import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-
-const mergeAttachmentsById = (
-  latestAttachments: VersionedAttachment[],
-  stateManagerAttachments: VersionedAttachment[]
-) => {
-  const mergedAttachments = new Map<string, VersionedAttachment>();
-
-  for (const attachment of stateManagerAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  for (const attachment of latestAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  return Array.from(mergedAttachments.values());
-};
 
 export function registerInternalSmlRoutes({
   router,
@@ -134,26 +113,14 @@ export function registerInternalSmlRoutes({
           })
         );
 
-        // Update the conversation with the new attachments
         if (resultItems.some((r) => r.success)) {
-          const latestConversation = await conversationClient.get(conversationId);
-          const newRefs = stateManager.getAccessedRefs();
-
-          const lastRoundIndex = latestConversation.rounds.length - 1;
-          const updatedRounds = applyAttachmentRefsToRounds(
-            latestConversation.rounds,
-            new Map([[lastRoundIndex, newRefs]])
-          );
-          // Merge attachments to prevent duplication or overwriting older attachments
-          const mergedAttachments = mergeAttachmentsById(
-            latestConversation.attachments ?? [],
-            stateManager.getAll()
-          );
-
-          await conversationClient.update({
+          await conversationClient.addAttachmentsToLastRound({
             id: conversationId,
-            attachments: mergedAttachments,
-            rounds: updatedRounds,
+            refs: stateManager.getAccessedRefs(),
+            attachments: {
+              snapshot: conversationForAttach.attachments ?? [],
+              produced: stateManager.getAll(),
+            },
           });
         }
 

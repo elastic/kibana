@@ -6,7 +6,7 @@
  */
 import { useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import * as selectors from '../store/selectors';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { useFormattedDate } from './panels/use_formatted_date';

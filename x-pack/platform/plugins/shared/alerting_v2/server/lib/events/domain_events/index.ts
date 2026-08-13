@@ -22,10 +22,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ServiceIdentifier } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { EventBus } from '../event_bus';
 import type { AlertActionEvent } from '../alert_action_event_publisher/events';
 import type { RuleEvent } from '../rule_event_publisher/events';
+import type { RuleExecutorEvent } from '../rule_executor_event_publisher/events';
 
 export type {
   AlertActionEvent,
@@ -75,6 +76,18 @@ export {
   RULE_UPDATED_EVENT_TYPE,
 } from '../rule_event_publisher/events';
 
+export type {
+  RuleExecutorEvent,
+  RuleExecutionSucceededEvent,
+  RuleExecutionSucceededPayload,
+  RuleExecutionFailedEvent,
+  RuleExecutionFailedPayload,
+} from '../rule_executor_event_publisher/events';
+export {
+  RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+  RULE_EXECUTION_FAILED_EVENT_TYPE,
+} from '../rule_executor_event_publisher/events';
+
 /**
  * Discriminated union of every domain event the alerting framework publishes
  * on its event bus.
@@ -83,7 +96,7 @@ export {
  * (and its own envelope shape if it diverges). Extend this union by adding
  * each subdomain's sub-union here.
  */
-export type AlertingDomainEvent = AlertActionEvent | RuleEvent;
+export type AlertingDomainEvent = AlertActionEvent | RuleEvent | RuleExecutorEvent;
 
 /**
  * Publisher-side context threaded through every alerting bus publish call.
@@ -132,6 +145,6 @@ export interface AlertingPublisherContext {
  *
  * Publishers get the same narrowing on `publish(event, { request })`.
  */
-export const AlertingDomainEventBusToken = Symbol.for(
-  'alerting_v2.AlertingDomainEventBus'
-) as ServiceIdentifier<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
+export const AlertingDomainEventBusToken = createToken<
+  EventBus<AlertingDomainEvent, AlertingPublisherContext>
+>('alerting_v2.AlertingDomainEventBus');

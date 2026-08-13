@@ -12,7 +12,7 @@ export const ATTACH_BUTTON_LABEL = i18n.translate('xpack.cases.caseView.attach.b
 });
 
 export const ATTACH_MENU_FILE = i18n.translate('xpack.cases.caseView.attach.menu.file', {
-  defaultMessage: 'Upload file',
+  defaultMessage: 'File',
 });
 
 export const ATTACH_MENU_TIMELINE = i18n.translate('xpack.cases.caseView.attach.menu.timeline', {
@@ -59,3 +59,17 @@ export const AUTHOR = i18n.translate('xpack.cases.authorFilter.buttonLabel', {
 export const CLEAR_FILTERS = i18n.translate('xpack.cases.caseViewFilters.clearFilters', {
   defaultMessage: 'Clear filters',
 });
+
+export const COLLAPSE_ALL_ATTACHMENTS = i18n.translate(
+  'xpack.cases.caseView.attachments.collapseAll',
+  { defaultMessage: 'Collapse all' }
+);
+
+export const EXPAND_ALL_ATTACHMENTS = i18n.translate('xpack.cases.caseView.attachments.expandAll', {
+  defaultMessage: 'Expand all',
+});
+
+export const NO_COLLAPSIBLE_ATTACHMENTS = i18n.translate(
+  'xpack.cases.caseView.attachments.noCollapsibleAttachments',
+  { defaultMessage: 'No collapsible attachments available' }
+);

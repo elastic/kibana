@@ -188,7 +188,28 @@ function combineUrl(basePath: string, path?: string): string {
   if (!path) return basePath;
   const url = new URL(basePath);
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  url.pathname = url.pathname.replace(/\/$/, '') + normalizedPath;
+  const queryIndex = normalizedPath.indexOf('?');
+  const pathname = queryIndex === -1 ? normalizedPath : normalizedPath.slice(0, queryIndex);
+  const pathQuery = queryIndex === -1 ? undefined : normalizedPath.slice(queryIndex + 1);
+  const baseQueryKeys = new Set(url.searchParams.keys());
+
+  // Keep the query out of URL.pathname, which would encode its `?` delimiter as `%3F`.
+  url.pathname = url.pathname.replace(/\/$/, '') + pathname;
+  if (pathQuery) {
+    const filteredPathQuery = pathQuery
+      .split('&')
+      .filter((queryPart) => {
+        const [key] = new URLSearchParams(queryPart).keys();
+        return key === undefined || !baseQueryKeys.has(key);
+      })
+      .join('&');
+
+    if (filteredPathQuery) {
+      const baseQuery = url.search.slice(1);
+      url.search = baseQuery ? `?${baseQuery}&${filteredPathQuery}` : `?${filteredPathQuery}`;
+    }
+  }
+
   return url.toString();
 }
 
@@ -197,11 +218,24 @@ function appendQueryString(baseUrl: string, query?: Record<string, string>): str
     return baseUrl;
   }
   const url = new URL(baseUrl);
+  const existingQueryKeys = new Set(url.searchParams.keys());
+  const appendedQuery = new URLSearchParams();
+
   for (const [key, value] of Object.entries(query)) {
-    if (!url.searchParams.has(key)) {
-      url.searchParams.set(key, value);
+    if (!existingQueryKeys.has(key)) {
+      appendedQuery.set(key, value);
     }
   }
+
+  const appendedQueryString = appendedQuery.toString();
+  if (appendedQueryString) {
+    // Avoid reserializing existing parameters, which would normalize their raw encoding.
+    const existingQuery = url.search.slice(1);
+    url.search = existingQuery
+      ? `?${existingQuery}&${appendedQueryString}`
+      : `?${appendedQueryString}`;
+  }
+
   return url.toString();
 }
 

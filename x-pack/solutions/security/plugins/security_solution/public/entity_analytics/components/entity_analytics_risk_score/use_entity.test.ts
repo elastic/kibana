@@ -9,8 +9,8 @@ import { renderHook } from '@testing-library/react';
 import { useEntityInfo } from './use_entity';
 import { EntityType } from '../../../../common/entity_analytics/types';
 
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   return {
     ...actual,
     useDispatch: jest.fn(),

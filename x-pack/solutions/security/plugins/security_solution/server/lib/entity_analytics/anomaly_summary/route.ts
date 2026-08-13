@@ -29,10 +29,10 @@ import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
 
-const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-
 const getStartOfDayOneYearAgo = (): number => {
-  const d = new Date(Date.now() - ONE_YEAR_MS);
+  const d = new Date();
+  d.setUTCFullYear(d.getUTCFullYear() - 1);
+  d.setUTCDate(d.getUTCDate() - 1); // one extra day tolerance for timezone offsets
   d.setUTCHours(0, 0, 0, 0);
   return d.getTime();
 };
@@ -132,12 +132,12 @@ export const registerAnomalySummaryRoutes = ({
           const soClient = core.savedObjects.client;
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
-          const entityExists = await checkEntityExists({
+          const entityRecord = await checkEntityExists({
             crudClient: entityStoreCrudClient,
             entityId,
             entityType,
           });
-          if (!entityExists) {
+          if (!entityRecord) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
@@ -165,6 +165,7 @@ export const registerAnomalySummaryRoutes = ({
           const overview = await getEntityAnomalyOverview({
             entityId,
             entityType,
+            entityRecord,
             fromMs: from,
             toMs: to,
             scoreRanges,
@@ -249,12 +250,12 @@ export const registerAnomalySummaryRoutes = ({
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
 
-          const entityExists = await checkEntityExists({
+          const entityRecord = await checkEntityExists({
             crudClient: entityStoreCrudClient,
             entityId,
             entityType,
           });
-          if (!entityExists) {
+          if (!entityRecord) {
             return siemResponse.error({
               statusCode: 404,
               body: `Entity "${entityId}" not found`,
@@ -278,6 +279,7 @@ export const registerAnomalySummaryRoutes = ({
           const { anomalies, total } = await getEntityAnomalies({
             entityId,
             entityType,
+            entityRecord,
             esClient,
             fromMs: from,
             toMs: to,

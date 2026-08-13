@@ -1,5 +1,9 @@
 {
-  "sha1": "2703c746f3a24c6b95ba0d7d2cf610543f244df9",
+  "sha1": "c3e26507ae6fb22b8e220d00bdba14090b1a3e6a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "8f22242c1e56e76-a28d1b90026924d",
@@ -236,8 +240,8 @@
       }
     },
     {
-      "id": "e6c0509cae8ad9c-fa3c254b6d43397",
-      "title": "Suggestions API - non time based returns 404 if index is not found",
+      "id": "e6c0509cae8ad9c-44b2a7acab35982",
+      "title": "Suggestions API - non time based returns no suggestions if index is not found",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -283,7 +287,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 105,
+        "line": 106,
         "column": 10
       }
     },
@@ -309,7 +313,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 115,
+        "line": 116,
         "column": 10
       }
     }

@@ -27,6 +27,7 @@ import type {
 } from '../../../../common/custom_threshold_rule/types';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({
@@ -45,7 +46,7 @@ const initialRuleState: TestRuleState = {
 };
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
-const MOCKED_SPACE_ID = 'mocked-space-id';
+const MOCKED_SPACE_ID = asSpaceId('mocked-space-id');
 
 const logger = {
   trace: fakeLogger,
@@ -4728,7 +4729,7 @@ describe('The custom threshold alert type', () => {
       const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
         executor({
           ...mockOptions,
-          spaceId: '',
+          spaceId: DEFAULT_SPACE_ID,
           services,
           params: {
             ...mockOptions.params,
