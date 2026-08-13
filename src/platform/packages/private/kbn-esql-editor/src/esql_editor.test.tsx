@@ -191,6 +191,12 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
   });
 
+  it('should render the visor in non-inline mode always visible', async () => {
+    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(getByTestId('ESQLEditor-quick-search-visor')).toBeInTheDocument();
+    expect(getByTestId('ESQLEditor-quick-search-visor')).not.toHaveAttribute('inert');
+  });
+
   it('should render the visor in inline mode by default', async () => {
     const newProps = {
       ...props,
@@ -236,13 +242,10 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor-quick-search-visor')).not.toHaveAttribute('inert');
   });
 
-  it('should hide the visor in inline mode if hideQuickSearch is true', async () => {
-    const newProps = {
-      ...props,
-      editorIsInline: true,
-      hideQuickSearch: true,
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+  it('should hide the visor if hideQuickSearch is true', async () => {
+    const { queryByTestId } = renderWithI18n(
+      renderESQLEditorComponent({ ...props, hideQuickSearch: true })
+    );
     expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
