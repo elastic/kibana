@@ -10,6 +10,7 @@
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   buildTrendlineQueryWithMetricFieldMap,
+  queryHasTsSourceCommand,
   LENS_METRIC_DEFAULT_COLOR_STEPS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
@@ -35,6 +36,7 @@ import {
   DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from './metric/defaults';
 import { DEFAULT_LAYER_ID } from '../../constants';
+import { LENS_DEFAULT_TIME_FIELD } from '../constants';
 import {
   addLayerColumn,
   buildDataSourceState,
@@ -750,7 +752,9 @@ function buildEsqlTrendlineLayer(
   const dataSource = 'data_source' in config ? config.data_source : undefined;
   if (!dataSource || dataSource.type !== 'esql') return undefined;
 
-  const timeField = mainLayer.timeField;
+  const timeField =
+    mainLayer.timeField ??
+    (queryHasTsSourceCommand(dataSource.query) ? LENS_DEFAULT_TIME_FIELD : undefined);
   if (!timeField) return undefined;
 
   const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));

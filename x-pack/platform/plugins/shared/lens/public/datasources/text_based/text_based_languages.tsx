@@ -470,13 +470,13 @@ export function getTextBasedDatasource({
         const shouldUpdateTimeField = toLayer.columns.some(
           (column) =>
             trendlineTimeField &&
-            column.meta.type === 'date' &&
+            column.meta?.type === 'date' &&
             !linkedTargetColumnIds.has(column.columnId) &&
             column.fieldName !== trendlineTimeField
         );
         let updatedColumns = shouldUpdateTimeField
           ? toLayer.columns.map((column) =>
-              column.meta.type === 'date' && !linkedTargetColumnIds.has(column.columnId)
+              column.meta?.type === 'date' && !linkedTargetColumnIds.has(column.columnId)
                 ? { ...column, fieldName: trendlineTimeField ?? column.fieldName }
                 : column
             )

@@ -578,13 +578,19 @@ describe('Textbased Data Source', () => {
         },
       } as unknown as TextBasedPrivateState;
 
-      const newState = TextBasedDatasource.initializeDimension(
+      const { initializeDimension } = TextBasedDatasource;
+      if (!initializeDimension) {
+        throw new Error('Expected text-based datasource to initialize dimensions');
+      }
+
+      const newState = initializeDimension(
         state,
         'trendline',
         {},
         {
           columnId: 'trendline-time-accessor',
           groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
+          visualizationGroups: [],
           autoTimeField: true,
         }
       );

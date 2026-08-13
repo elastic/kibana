@@ -68,6 +68,12 @@ export const queryHasStatsCommand = (esqlQuery: string): boolean => {
   return root.commands.some((c) => c.name === 'stats');
 };
 
+/** Returns true when the ES|QL query uses the TS source command. */
+export const queryHasTsSourceCommand = (esqlQuery: string): boolean => {
+  const { root } = Parser.parse(esqlQuery);
+  return root.commands.some((command) => command.name === 'ts');
+};
+
 /**
  * Checks whether a BY option already contains a BUCKET() call on the given time field.
  */
