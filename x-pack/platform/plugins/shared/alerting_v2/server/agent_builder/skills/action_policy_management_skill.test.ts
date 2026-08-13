@@ -80,9 +80,7 @@ describe('createActionPolicyManagementSkill', () => {
       (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
     );
 
-    expect(byName['action-policy-matchers']).toContain(
-      'Auto-generated from `MATCHER_CONTEXT_FIELDS`'
-    );
+    expect(byName['action-policy-matchers']).toContain('# Matcher Context Fields');
     expect(byName['action-policy-matchers']).toContain('`episode_status`');
     expect(byName['action-policy-matchers']).toContain('`rule.id`');
 
@@ -92,7 +90,7 @@ describe('createActionPolicyManagementSkill', () => {
       'action-policy-throttle-grouping-compatibility.md'
     );
     expect(byName['action-policy-throttle-grouping-compatibility']).toContain(
-      'Auto-generated from compatibility sets'
+      '# Throttle / Grouping Compatibility'
     );
     expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_episode`');
   });

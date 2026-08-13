@@ -61,14 +61,13 @@ describe('schema_to_skill_docs', () => {
       enabled: z.boolean().optional().describe('Whether the resource is enabled.'),
     });
 
-    it('renders title, default source line, and top-level field table', () => {
+    it('renders title and top-level field table', () => {
       const doc = generateApiSchemaDoc({
         title: 'Example API Schema Reference',
         schema: exampleApiSchema,
       });
 
       expect(doc).toContain('# Example API Schema Reference');
-      expect(doc).toContain('Auto-generated from `@kbn/alerting-v2-schemas`.');
       expect(doc).toContain('## Top-Level Fields');
       expect(doc).toContain(
         '| `name` | string | required | Display name. (min length: 1, max length: 64) |'
@@ -145,15 +144,13 @@ describe('schema_to_skill_docs', () => {
       }),
     ]);
 
-    it('renders title, source line, and discriminated operation variants', () => {
+    it('renders title and discriminated operation variants', () => {
       const doc = generateOperationsDoc({
         title: 'Example Operations Schema Reference',
-        source: 'the example tool Zod schemas',
         schema: exampleOperationSchema,
       });
 
       expect(doc).toContain('# Example Operations Schema Reference');
-      expect(doc).toContain('Auto-generated from the example tool Zod schemas.');
       expect(doc).toContain('#### `operation: "set_name"`');
       expect(doc).toContain('#### `operation: "validate"`');
       expect(doc).toContain(
@@ -312,10 +309,9 @@ describe('schema_to_skill_docs', () => {
       expect(generateGroupingModesDoc()).toMatchSnapshot();
     });
 
-    it('is a standalone reference with auto-generated attribution', () => {
+    it('is a standalone reference that links to throttle compatibility', () => {
       const doc = generateGroupingModesDoc();
       expect(doc).toContain('# Grouping Modes');
-      expect(doc).toContain('Auto-generated from');
       expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
     });
   });
@@ -356,10 +352,9 @@ describe('schema_to_skill_docs', () => {
       expect(generateThrottleGroupingCompatibilityDoc()).toMatchSnapshot();
     });
 
-    it('is a standalone reference with compatibility sets', () => {
+    it('is a standalone reference covering grouping modes and interval strategies', () => {
       const doc = generateThrottleGroupingCompatibilityDoc();
       expect(doc).toContain('# Throttle / Grouping Compatibility');
-      expect(doc).toContain('Auto-generated from compatibility sets');
       expect(doc).toContain('`per_episode`');
     });
   });

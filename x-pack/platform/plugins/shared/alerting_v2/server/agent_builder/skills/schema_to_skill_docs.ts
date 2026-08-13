@@ -224,36 +224,23 @@ function formatVariantSchemas(jsonSchema: unknown): string {
   return sections.join('\n\n');
 }
 
-const DEFAULT_API_SCHEMA_SOURCE =
-  '`@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.';
-
 /**
  * Generates markdown for a create/update API Zod schema (top-level field table,
  * plus optional extra sections such as query format variants).
  */
 export const generateApiSchemaDoc = ({
   title,
-  source = DEFAULT_API_SCHEMA_SOURCE,
   schema,
   extraSections,
 }: {
   title: string;
-  source?: string;
   schema: z.ZodType;
   extraSections?: (jsonSchema: unknown) => Array<{ heading: string; content: string }> | undefined;
 }): string => {
   const jsonSchema = zodToJsonSchema(schema);
   const fieldTable = formatFieldTable(jsonSchemaToFieldTable(jsonSchema));
 
-  const sections = [
-    `# ${title}`,
-    '',
-    `Auto-generated from ${source}`,
-    '',
-    '## Top-Level Fields',
-    '',
-    fieldTable,
-  ];
+  const sections = [`# ${title}`, '', '## Top-Level Fields', '', fieldTable];
 
   for (const extra of extraSections?.(jsonSchema) ?? []) {
     if (extra.content) {
@@ -288,16 +275,14 @@ export const generateRuleSchemaDoc = (): string =>
  */
 export const generateOperationsDoc = ({
   title,
-  source,
   schema,
 }: {
   title: string;
-  source: string;
   schema: z.ZodType;
 }): string => {
   const variants = formatVariantSchemas(zodToJsonSchema(schema));
 
-  return [`# ${title}`, '', `Auto-generated from ${source}.`, '', variants].join('\n');
+  return [`# ${title}`, '', variants].join('\n');
 };
 
 /**
@@ -306,7 +291,6 @@ export const generateOperationsDoc = ({
 export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Rule Operations Schema Reference',
-    source: 'the `manage_rule` tool Zod schemas',
     schema: ruleOperationSchema,
   });
 
@@ -412,8 +396,6 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
 
   return [
     '# Throttle / Grouping Compatibility',
-    '',
-    'Auto-generated from compatibility sets in `@kbn/alerting-v2-schemas`.',
     '',
     'The throttle strategy must be compatible with the grouping mode:',
     `- For \`${perEpisodeMode}\`: ${formatStrategySet(PER_EPISODE_STRATEGIES)}.`,
@@ -635,8 +617,6 @@ export const generateMatcherContextDoc = (): string => {
   return [
     '# Matcher Context Fields',
     '',
-    'Auto-generated from `MATCHER_CONTEXT_FIELDS` in `@kbn/alerting-v2-schemas`.',
-    '',
     "When the dispatcher evaluates a policy's KQL matcher, these fields are available:",
     '',
     '| Field | Type | Description |',
@@ -662,8 +642,6 @@ export const generateGroupingModesDoc = (): string => {
   return [
     '# Grouping Modes',
     '',
-    'Auto-generated from `groupingMode` on the `manage_action_policy` tool Zod schemas.',
-    '',
     list,
     '',
     'Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
@@ -687,8 +665,6 @@ export const generateThrottleStrategiesDoc = (): string => {
   return [
     '# Throttle Strategies',
     '',
-    'Auto-generated from `strategy` on the `manage_action_policy` tool Zod schemas.',
-    '',
     list,
     '',
     'Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
@@ -710,7 +686,6 @@ export const generateActionPolicySchemaDoc = (): string =>
 export const generateActionPolicyOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Action Policy Operations Schema Reference',
-    source: 'the `manage_action_policy` tool Zod schemas',
     schema: actionPolicyOperationSchema,
   });
 
