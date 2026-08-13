@@ -12,7 +12,16 @@ import {
   generateOperationsDoc,
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
+  generateRuleKindDoc,
+  generateEpisodeLifecycleDoc,
+  generateStateTransitionDoc,
+  generateRecoveryStrategyDoc,
+  generateNoDataStrategyDoc,
+  generateSeverityDoc,
   generateActionPolicySchemaDoc,
+  generateGroupingModesDoc,
+  generateThrottleStrategiesDoc,
+  generateThrottleGroupingCompatibilityDoc,
   getSeverityValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
@@ -257,6 +266,60 @@ describe('schema_to_skill_docs', () => {
       // z.literal('set_metadata') → { const: "set_metadata" } → Type column "set_metadata"
       expect(doc).toContain('| `operation` | "set_metadata" | required |');
       expect(doc).not.toMatch(/\| `operation` \| string \|/);
+    });
+  });
+
+  describe('generateRuleKindDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateRuleKindDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateEpisodeLifecycleDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateEpisodeLifecycleDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateStateTransitionDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateStateTransitionDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateRecoveryStrategyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateRecoveryStrategyDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateNoDataStrategyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateNoDataStrategyDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateSeverityDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateSeverityDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateGroupingModesDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateGroupingModesDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateThrottleStrategiesDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateThrottleStrategiesDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateThrottleGroupingCompatibilityDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateThrottleGroupingCompatibilityDoc()).toMatchSnapshot();
     });
   });
 

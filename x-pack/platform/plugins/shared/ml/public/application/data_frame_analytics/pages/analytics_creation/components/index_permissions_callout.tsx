@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../../contexts/kibana';
@@ -39,31 +40,30 @@ export const IndexPermissionsCallout: FC<{ indexName: string; docsType: 'start' 
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={i18n.translate('xpack.ml.dataframe.analytics.create.permissionsCalloutTitle', {
           defaultMessage: 'Indices permissions required',
         })}
-        iconType="warning"
-        color="warning"
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage"
-            defaultMessage="You don't have the required permissions on the {indexName} index. Refer to the {docLink} for more information on requirements."
-            values={{
-              indexName,
-              docLink: (
-                <EuiLink href={docsLink} target="_blank">
-                  <FormattedMessage
-                    id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage.docsLink"
-                    defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiCallOut>
+        text={
+          <p>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage"
+              defaultMessage="You don't have the required permissions on the {indexName} index. Refer to the {docLink} for more information on requirements."
+              values={{
+                indexName,
+                docLink: (
+                  <EuiLink href={docsLink} target="_blank">
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.create.indicesPermissionsMessage.docsLink"
+                      defaultMessage="documentation"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        }
+      />
       <EuiSpacer />
     </>
   );
