@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
-
-import { apiTest, AUDIT_LOG_PATH, tags } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+
+import { scanAuditLog, waitForAuditEvent } from '../helpers/audit_log';
 
 // `index-pattern` is a standard, non-hidden type creatable through the public
 // saved objects HTTP API, and its attributes are plain strings — convenient for
@@ -41,43 +41,37 @@ interface AuditEvent {
 }
 
 /**
- * Reads the audit log once and returns the diff of the post-write (`outcome: success`)
- * event for a mutation, or `undefined` if none is present. Only that event carries
- * `kibana.diff`; the pre-write event for the same operation does not, so filtering on
- * `diff` presence uniquely selects the event we care about. Useful both for polling and
- * for asserting the ABSENCE of a diff (e.g. excluded types).
+ * Matches a mutation's result (`outcome: success`) audit event: it is the only event
+ * for the operation, and it carries `kibana.diff` (unless the type is excluded from
+ * diff generation), so filtering on diff presence selects it directly.
  */
-const scanForDiff = (action: string, id: string): SavedObjectDiff | undefined => {
-  let events: AuditEvent[];
-  try {
-    events = readFileSync(AUDIT_LOG_PATH, 'utf8')
-      .split('\n')
-      .filter(Boolean)
-      .map((line) => JSON.parse(line) as AuditEvent);
-  } catch {
-    return undefined; // audit log file not created yet
-  }
-  return events
-    .reverse()
-    .find(
-      (ev) =>
-        ev.event?.action === action && ev.kibana?.saved_object?.id === id && ev.kibana?.diff != null
-    )?.kibana?.diff;
-};
+const isDiffEvent =
+  (action: string, id: string) =>
+  (event: Record<string, unknown>): boolean => {
+    const ev = event as AuditEvent;
+    return (
+      ev.event?.action === action && ev.kibana?.saved_object?.id === id && ev.kibana?.diff != null
+    );
+  };
+
+/**
+ * Reads the audit log once and returns the diff of a mutation's result event, or
+ * `undefined` if none is present. Useful for asserting the ABSENCE of a diff
+ * (e.g. excluded types).
+ */
+const scanForDiff = (action: string, id: string): SavedObjectDiff | undefined =>
+  (scanAuditLog(isDiffEvent(action, id)) as AuditEvent | undefined)?.kibana?.diff;
 
 /** Polls the audit log until the diff-bearing event for a mutation appears. */
-const waitForDiffEvent = async (
-  action: string,
-  id: string,
-  timeoutMs = 15_000
-): Promise<SavedObjectDiff> => {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const diff = scanForDiff(action, id);
-    if (diff) return diff;
-    await new Promise((resolve) => setTimeout(resolve, 300));
+const waitForDiffEvent = async (action: string, id: string): Promise<SavedObjectDiff> => {
+  const event = (await waitForAuditEvent(isDiffEvent(action, id), {
+    description: `${action} diff event for ${id}`,
+  })) as AuditEvent;
+  const diff = event.kibana?.diff;
+  if (!diff) {
+    throw new Error(`Audit event for ${action} ${id} unexpectedly carries no kibana.diff`);
   }
-  throw new Error(`Timed out waiting for ${action} diff event for ${TYPE}:${id}`);
+  return diff;
 };
 
 const opAt = (diff: SavedObjectDiff, path: string) => diff.ops.find((op) => op.path === path);
@@ -87,6 +81,35 @@ apiTest.describe(
   'Audit log — saved object diffs (ECS file appender)',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
+    // Objects registered here are torn down after each test so re-runs don't
+    // accumulate state on shared or long-lived stacks. Tests that delete their
+    // own objects (the delete/bulk-delete cases) don't need to register them.
+    const savedObjectsToCleanUp: Array<{ type: string; id: string }> = [];
+    const connectorsToCleanUp: string[] = [];
+
+    apiTest.afterEach(async ({ apiClient, samlAuth }) => {
+      if (!savedObjectsToCleanUp.length && !connectorsToCleanUp.length) {
+        return;
+      }
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const headers = { ...cookieHeader, ...KBN_HEADERS };
+      if (savedObjectsToCleanUp.length) {
+        await apiClient.post('api/saved_objects/_bulk_delete', {
+          headers,
+          body: savedObjectsToCleanUp.splice(0),
+          responseType: 'json',
+        });
+      }
+      // `action` is a hidden type, not deletable through the saved objects API;
+      // the connector API removes it (and its ESO payload) properly.
+      for (const connectorId of connectorsToCleanUp.splice(0)) {
+        await apiClient.delete(`api/actions/connector/${connectorId}`, {
+          headers,
+          responseType: 'json',
+        });
+      }
+    });
+
     apiTest('create emits add ops with an empty "before"', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const id = `so-diff-create-${Date.now()}`;
@@ -97,6 +120,7 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(res).toHaveStatusCode(200);
+      savedObjectsToCleanUp.push({ type: TYPE, id });
 
       const diff = await waitForDiffEvent('saved_object_create', id);
       expect(diff.format).toBe('json_patch_extended');
@@ -116,6 +140,7 @@ apiTest.describe(
           body: { attributes: { title: 'old', timeFieldName: 'ts' } },
           responseType: 'json',
         });
+        savedObjectsToCleanUp.push({ type: TYPE, id });
 
         // Partial update: only `title` changes; `timeFieldName` is untouched.
         const res = await apiClient.put(`api/saved_objects/${TYPE}/${id}`, {
@@ -236,6 +261,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(res).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: TYPE, id });
 
         const diff = await waitForDiffEvent('saved_object_create', id);
         expect(opAt(diff, '/title')).toMatchObject({ op: 'add', value: 'small' });
@@ -264,6 +290,7 @@ apiTest.describe(
           { headers, body: { attributes: { title: 'excluded' } }, responseType: 'json' }
         );
         expect(excludedRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: EXCLUDED_TYPE, id: excludedId });
 
         const controlRes = await apiClient.post(`api/saved_objects/${TYPE}/${controlId}`, {
           headers,
@@ -271,6 +298,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(controlRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: TYPE, id: controlId });
 
         // Once the control's diff event is present, the earlier excluded-type create has
         // been processed too — so if it were going to emit a diff, it already would have.
@@ -326,6 +354,7 @@ apiTest.describe(
       });
       expect(res).toHaveStatusCode(200);
       expect(res.body.success).toBe(true);
+      connectorsToCleanUp.push(id);
 
       const diff = await waitForDiffEvent('saved_object_create', id);
       // The encrypted `secrets` attribute is masked (ESO attrs are ciphertext + redacted)...
