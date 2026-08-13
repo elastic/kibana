@@ -244,7 +244,7 @@ timeout-minutes: 90
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
 - an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
-- you cannot identify a credible fix; or
+- you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
 - the fix has to target a version branch (see "Fixes that must target a version branch").
 
 Whatever the outcome, always finish by leaving one concise comment on the issue (see "Outcome comment").
