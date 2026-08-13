@@ -45,8 +45,9 @@ const toReindexResult = (response: ReindexResponse): ReindexResult => ({
  * unaccounted for. Callers must not delete the source until this succeeds.
  *
  * `conflicts: 'proceed'` can leave `versionConflicts` (and `updated` for index
- * destinations) on retry into a partial destination — those are accounted for,
- * not treated as data loss.
+ * destinations) on retry into a partial destination, or when `op_type: 'create'`
+ * skips docs already written concurrently into the destination — those are
+ * accounted for, not treated as data loss.
  */
 export const assertReindexSucceeded = (result: ReindexResult, context: string): void => {
   if (result.failures.length > 0) {

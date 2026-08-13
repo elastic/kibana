@@ -313,11 +313,17 @@ async function migrateLatestIndex({
   // reindex before the legacy source is deleted below: createIndex is idempotent and
   // reindex uses conflicts: 'proceed', so a partial neutral index from an interrupted
   // run is fully repopulated rather than left empty.
+  //
+  // op_type: 'create' is required on the background upgrade path: extract/CRUD tasks
+  // may already be writing to the neutral index while this copy runs. Default
+  // `index` would overwrite those newer docs with stale legacy values; `create`
+  // turns destination hits into version conflicts (accounted by assertReindexSucceeded)
+  // so concurrent writes are preserved.
   await createIndex(esClient, newIndex, { throwIfExists: false });
   logger.debug(`Ensured neutral latest index ${newIndex}`);
   const reindexResult = await reindex(esClient, {
     source: { index: legacyIndex },
-    dest: { index: newIndex },
+    dest: { index: newIndex, op_type: 'create' },
     waitForTask: {
       logger,
       minTimeout: REINDEX_POLL_MIN_INTERVAL_MS,

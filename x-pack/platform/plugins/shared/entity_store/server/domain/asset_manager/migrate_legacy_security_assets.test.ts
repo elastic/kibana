@@ -199,7 +199,7 @@ describe('migrateLegacySecurityAssets', () => {
       esClient,
       expect.objectContaining({
         source: { index: legacyIndex },
-        dest: { index: newIndex },
+        dest: { index: newIndex, op_type: 'create' },
         waitForTask: expect.objectContaining({ forever: true }),
       })
     );
@@ -234,8 +234,32 @@ describe('migrateLegacySecurityAssets', () => {
       esClient,
       expect.objectContaining({
         source: { index: legacyIndex },
-        dest: { index: newIndex },
+        dest: { index: newIndex, op_type: 'create' },
         waitForTask: expect.objectContaining({ forever: true }),
+      })
+    );
+    expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyIndex);
+  });
+
+  it('treats version conflicts as success when latest reindex uses op_type create', async () => {
+    const legacyIndex = getLegacySecurityLatestEntitiesIndexName(namespace);
+    mockConcrete([legacyIndex]);
+    // Concurrent extract/CRUD already wrote some of the same _ids into the neutral
+    // index; create conflicts must not block delete of the legacy source.
+    mockReindex.mockResolvedValue({
+      created: 2,
+      updated: 0,
+      versionConflicts: 3,
+      total: 5,
+      failures: [],
+    });
+
+    await migrateLegacySecurityAssets({ esClient, logger, namespace });
+
+    expect(mockReindex).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({
+        dest: { index: getLatestEntitiesIndexName(namespace), op_type: 'create' },
       })
     );
     expect(mockDeleteIndex).toHaveBeenCalledWith(esClient, legacyIndex);
