@@ -28,11 +28,13 @@ import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useBulkUpdateRuleApiKey } from '../../hooks/use_bulk_update_rule_api_key';
 import { useRunRule } from '../../hooks/use_run_rule';
 import { paths } from '../../constants';
 import { DeleteConfirmationModal } from '../rule/modals/delete_confirmation_modal';
 import { useRuleChangeHistoryModal } from '../rule/modals/change_history';
 import { getRuleDetailMenu } from './get_rule_detail_menu';
+import { UpdateApiKeyConfirmationModal } from '../rule/modals/update_api_key_confirmation_modal';
 import { RuleKindBadge } from './rule_summary_header';
 import { RuleOverviewSection } from './overview';
 import { RuleSidebar } from './sidebar/rule_sidebar';
@@ -78,13 +80,19 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const history = useHistory();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled, isLoading: isToggling } = useToggleRuleEnabled();
+  const { mutate: updateRuleApiKey, isLoading: isUpdatingApiKey } = useBulkUpdateRuleApiKey();
   const { mutate: runRule } = useRunRule();
   const { flyout, openEditFlyout, openCloneFlyout } = useComposeDiscoverFlyout();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
+  const [showUpdateApiKeyConfirmation, setShowUpdateApiKeyConfirmation] = React.useState(false);
 
   const showDeleteConfirmationModal = React.useCallback(() => {
     setShowDeleteConfirmation(true);
+  }, []);
+
+  const showUpdateApiKeyConfirmationModal = React.useCallback(() => {
+    setShowUpdateApiKeyConfirmation(true);
   }, []);
 
   const handleRuleDelete = () => {
@@ -96,6 +104,13 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           history.push('/');
         },
       }
+    );
+  };
+
+  const handleUpdateApiKey = () => {
+    updateRuleApiKey(
+      { mode: 'by_ids', ids: [rule.id] },
+      { onSettled: () => setShowUpdateApiKeyConfirmation(false) }
     );
   };
 
@@ -165,6 +180,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         onToggleEnabled: handleToggleEnabled,
         isToggleLoading: isToggling,
         onClone,
+        onUpdateApiKey: showUpdateApiKeyConfirmationModal,
         onDelete: showDeleteConfirmationModal,
         onRun: handleRunRule,
         onViewChangeHistory,
@@ -179,6 +195,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
       showDeleteConfirmationModal,
       handleRunRule,
       onViewChangeHistory,
+      showUpdateApiKeyConfirmationModal,
     ]
   );
 
@@ -287,6 +304,14 @@ export const RuleDetailPage: React.FunctionComponent = () => {
           onCancel={() => setShowDeleteConfirmation(false)}
           ruleName={rule.metadata?.name ?? ''}
           isLoading={isDeleting}
+        />
+      )}
+      {showUpdateApiKeyConfirmation && (
+        <UpdateApiKeyConfirmationModal
+          onConfirm={handleUpdateApiKey}
+          onCancel={() => setShowUpdateApiKeyConfirmation(false)}
+          ruleName={rule.metadata?.name ?? ''}
+          isLoading={isUpdatingApiKey}
         />
       )}
       {flyout}

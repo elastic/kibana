@@ -92,6 +92,7 @@ export interface RulesListTableProps {
   onBulkEnable: () => void;
   onBulkDisable: () => void;
   onBulkDelete: () => void;
+  onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
@@ -101,6 +102,7 @@ export interface RulesListTableProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
+  onUpdateApiKey: (rule: RuleApiResponse) => void;
   onRun: (rule: RuleApiResponse) => void;
   /** When provided, adds View change history to each row actions menu. */
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
@@ -138,6 +140,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
   onNavigateToDetails,
   onExpand,
   onQuickEdit,
@@ -145,6 +148,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  onUpdateApiKey,
   onRun,
   onViewChangeHistory,
   togglingRuleId,
@@ -420,6 +424,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                       onEdit={onEdit}
                       onClone={onClone}
                       onDelete={onDelete}
+                      onUpdateApiKey={onUpdateApiKey}
                       onRun={onRun}
                       onViewChangeHistory={onViewChangeHistory}
                     />
@@ -443,6 +448,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     onClone,
     onDelete,
     onToggleEnabled,
+    onUpdateApiKey,
     onRun,
     onViewChangeHistory,
     togglingRuleId,
@@ -495,6 +501,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             onClearSelection={onClearSelection}
             onBulkEnable={onBulkEnable}
             onBulkDisable={onBulkDisable}
+            onBulkUpdateApiKey={onBulkUpdateApiKey}
             onBulkDelete={onBulkDelete}
           />
         ) : null}

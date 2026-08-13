@@ -60,6 +60,11 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
 }));
 
+const mockUpdateRuleApiKey = jest.fn();
+jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
+  useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateRuleApiKey, isLoading: false }),
+}));
+
 const mockRunRule = jest.fn();
 jest.mock('../../hooks/use_run_rule', () => ({
   useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
@@ -324,6 +329,48 @@ describe('RuleDetailPage', () => {
     expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
   });
 
+  it('opens the update API key confirmation from the overflow menu', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsUpdateApiKeyButton'));
+    expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+  });
+
+  it('calls the update API key mutation with the rule id on confirm', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsUpdateApiKeyButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    expect(mockUpdateRuleApiKey).toHaveBeenCalledWith(
+      { mode: 'by_ids', ids: ['rule-1'] },
+      expect.objectContaining({ onSettled: expect.any(Function) })
+    );
+
+    // The modal closes once the mutation settles.
+    const [, options] = mockUpdateRuleApiKey.mock.calls[0];
+    options.onSettled();
+    await waitFor(() =>
+      expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument()
+    );
+  });
+
+  it('closes the update API key modal when cancel is clicked', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    fireEvent.click(await screen.findByTestId('ruleDetailsUpdateApiKeyButton'));
+    fireEvent.click(screen.getByText('Cancel'));
+    expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument();
+    expect(mockUpdateRuleApiKey).not.toHaveBeenCalled();
+  });
+
+  it('disables the update API key action for a disabled rule', async () => {
+    renderPage({ ...baseRule, enabled: false });
+    await openAppMenuOverflow();
+    // The action is shown but disabled — a disabled rule has no key to rotate.
+    expect(await screen.findByTestId('ruleDetailsUpdateApiKeyButton')).toBeDisabled();
+  });
+
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCanWriteRules = false;
@@ -335,6 +382,7 @@ describe('RuleDetailPage', () => {
       expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsEnabledSwitch')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsCloneButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ruleDetailsUpdateApiKeyButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ruleDetailsDeleteButton')).not.toBeInTheDocument();
     });
 
