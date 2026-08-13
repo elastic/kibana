@@ -15,7 +15,6 @@ import type { LoggerServiceContract } from '../../lib/services/logger_service/lo
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 import { createRuleManagementSkill } from './rule_management_skill';
 import { registerSkills } from './register_skills';
-import { SchemaTranslationError } from './schema_to_skill_docs';
 
 jest.mock('./rule_management_skill', () => ({
   createRuleManagementSkill: jest.fn(),
@@ -55,6 +54,8 @@ describe('registerSkills', () => {
   beforeEach(() => {
     agentBuilder = agentBuilderMocks.createSetup();
     logger = createLogger();
+    createRuleManagementSkillMock.mockReset();
+    createActionPolicyManagementSkillMock.mockReset();
     createRuleManagementSkillMock.mockReturnValue(ruleSkill);
     createActionPolicyManagementSkillMock.mockReturnValue(actionPolicySkill);
   });
@@ -81,31 +82,14 @@ describe('registerSkills', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs SchemaTranslationError at error with skill_id and rethrows so Kibana start fails', () => {
-    createRuleManagementSkillMock.mockImplementation(() => {
-      throw new SchemaTranslationError('schema boom');
-    });
-
-    expect(() => registerSkills(agentBuilder, deps())).toThrow(SchemaTranslationError);
-
-    expect(logger.error).toHaveBeenCalledWith({
-      message: 'Failed to generate agent builder skill schema docs',
-      code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED,
-      labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
-      error: expect.any(SchemaTranslationError),
-    });
-    expect(agentBuilder.skills.register).not.toHaveBeenCalled();
-    expect(logger.debug).not.toHaveBeenCalled();
-  });
-
-  it('logs unexpected register failures at error with skill_id and continues', () => {
+  it('logs register failures at error with skill_id and rethrows so Kibana start fails', () => {
     agentBuilder.skills.register.mockImplementation((skill) => {
       if (skill.id === ACTION_POLICY_MANAGEMENT_SKILL_ID) {
         throw new Error('register boom');
       }
     });
 
-    registerSkills(agentBuilder, deps());
+    expect(() => registerSkills(agentBuilder, deps())).toThrow('register boom');
 
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith({
@@ -114,12 +98,10 @@ describe('registerSkills', () => {
       labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
       error: expect.any(Error),
     });
-
-    const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-    expect(debugMessage()).toBe('Agent builder skills partially registered');
+    expect(logger.debug).not.toHaveBeenCalled();
   });
 
-  it('does not log success debug when every skill fails', () => {
+  it('does not register later skills or log success after the first failure', () => {
     createRuleManagementSkillMock.mockImplementation(() => {
       throw new Error('rule failed');
     });
@@ -127,20 +109,15 @@ describe('registerSkills', () => {
       throw new Error('policy failed');
     });
 
-    registerSkills(agentBuilder, deps());
+    expect(() => registerSkills(agentBuilder, deps())).toThrow('rule failed');
 
     expect(agentBuilder.skills.register).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledTimes(2);
+    expect(createActionPolicyManagementSkillMock).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
         labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
-      })
-    );
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.objectContaining({
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
-        labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
       })
     );
     expect(logger.debug).not.toHaveBeenCalled();

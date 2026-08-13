@@ -14,7 +14,6 @@ import { createActionPolicyAttachmentType } from '../agent_builder/attachments/a
 import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { registerSkills } from '../agent_builder/skills/register_skills';
-import { SchemaTranslationError } from '../agent_builder/skills/schema_to_skill_docs';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
@@ -246,13 +245,13 @@ describe('bindAgentBuilder', () => {
       );
     });
 
-    it('propagates SchemaTranslationError so Kibana start fails', () => {
+    it('propagates registerSkills errors so Kibana start fails', () => {
       bindAgentBuilderPlugin();
       registerSkillsMock.mockImplementation(() => {
-        throw new SchemaTranslationError('schema boom');
+        throw new Error('register boom');
       });
 
-      expect(() => runOnStart()).toThrow(SchemaTranslationError);
+      expect(() => runOnStart()).toThrow('register boom');
     });
   });
 });

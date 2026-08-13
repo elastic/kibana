@@ -15,15 +15,12 @@ import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 import { createRuleManagementSkill } from './rule_management_skill';
-import { SchemaTranslationError } from './schema_to_skill_docs';
 
 export type RegisterSkillsDeps = ManageRuleToolDeps & ManageActionPolicyToolDeps;
 
 /**
- * Registers Alerting v2 Agent Builder skills. Unexpected register failures are
- * logged and skipped so one skill cannot block the other. Schema-doc generation
- * failures ({@link SchemaTranslationError}) abort Kibana start — the generated
- * skill content is part of the plugin contract and cannot run degraded.
+ * Registers Alerting v2 Agent Builder skills. Any failure is logged and
+ * rethrown so Kibana start aborts — skills cannot run in a degraded state.
  */
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -41,37 +38,21 @@ export const registerSkills = (
     },
   ] as const;
 
-  let registered = 0;
   for (const { id, create } of skills) {
     try {
       agentBuilder.skills.register(create());
-      registered++;
     } catch (e) {
-      if (e instanceof SchemaTranslationError) {
-        logger.error({
-          message: 'Failed to generate agent builder skill schema docs',
-          code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED,
-          labels: { skill_id: id },
-          error: e,
-        });
-        throw e;
-      }
       logger.error({
         message: 'Failed to register agent builder skill',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
         labels: { skill_id: id },
         error: e,
       });
+      throw e;
     }
   }
 
-  if (registered === skills.length) {
-    logger.debug({
-      message: () => 'Agent builder skills and attachments registered',
-    });
-  } else if (registered > 0) {
-    logger.debug({
-      message: () => 'Agent builder skills partially registered',
-    });
-  }
+  logger.debug({
+    message: () => 'Agent builder skills and attachments registered',
+  });
 };
