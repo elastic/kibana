@@ -12,15 +12,20 @@ import type { CuratedTile } from '../types';
 
 export interface CuratedTileCardProps {
   tile: CuratedTile;
-  /** Clamp the description to N lines. Unset renders the full text. */
-  descriptionLineCount?: number;
 }
 
-const clampStyle = (lines: number) => css`
+const TITLE_LINES = 1;
+const DESCRIPTION_LINES = 2;
+
+// Reserving the block as well as clamping it keeps short copy from shrinking a
+// tile, so every tile is the same height whether it comes from the curated
+// grid or from a search result.
+const reservedLinesStyle = (lines: number) => css`
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: ${lines};
   overflow: hidden;
+  block-size: calc(${lines} * 1lh);
 `;
 
 // EuiCard's own paddingSize scale tops out at 16px below the design's 24px
@@ -34,6 +39,10 @@ const tileOverrideStyle = css`
     padding: 12px;
   }
 
+  .euiCard__title {
+    ${reservedLinesStyle(TITLE_LINES)}
+  }
+
   /* EUI doesn't expose a standalone .euiCard__description class, its name is
    * only a label suffix baked into the generated hash class. */
   [class*='euiCard__description'] {
@@ -41,7 +50,7 @@ const tileOverrideStyle = css`
   }
 `;
 
-export const CuratedTileCard = ({ tile, descriptionLineCount }: CuratedTileCardProps) => (
+export const CuratedTileCard = ({ tile }: CuratedTileCardProps) => (
   <div css={tileOverrideStyle}>
     <EuiCard
       layout="horizontal"
@@ -51,10 +60,7 @@ export const CuratedTileCard = ({ tile, descriptionLineCount }: CuratedTileCardP
       icon={tile.icon}
       title={tile.title}
       description={
-        <EuiTextColor
-          color="subdued"
-          css={descriptionLineCount ? clampStyle(descriptionLineCount) : undefined}
-        >
+        <EuiTextColor color="subdued" css={reservedLinesStyle(DESCRIPTION_LINES)}>
           {tile.description}
         </EuiTextColor>
       }

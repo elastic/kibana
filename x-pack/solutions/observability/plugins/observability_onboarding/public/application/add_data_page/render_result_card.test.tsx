@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { matchers } from '@emotion/jest';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { renderResultCard } from './render_result_card';
+
+expect.extend(matchers);
 
 // Type-only import above survives this mock: types are erased at runtime.
 jest.mock('@kbn/fleet-plugin/public', () => ({
@@ -42,6 +45,13 @@ describe('renderResultCard', () => {
       '/app/integrations/detail/nginx-1.0.0/overview'
     );
     expect(card.querySelector('a')).not.toHaveAttribute('target');
+  });
+
+  it('reserves the same two description lines as the curated grid tiles', () => {
+    render(<>{renderResultCard(item)}</>);
+    expect(
+      screen.getByText('Collect logs and metrics from Nginx servers with Elastic Agent.')
+    ).toHaveStyleRule('-webkit-line-clamp', '2');
   });
 
   it('opens external item urls in a new tab, matching PackageCard', () => {

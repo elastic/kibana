@@ -28,6 +28,5 @@ export const renderResultCard = (item: IntegrationCardItem): React.ReactNode => 
       onClick: item.onCardClick,
       'data-test-subj': `addDataResultCard-${item.id}`,
     }}
-    descriptionLineCount={1}
   />
 );

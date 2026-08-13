@@ -41,39 +41,31 @@ describe('CuratedTileCard', () => {
     expect(onClick).toHaveBeenCalled();
   });
 
-  it('clamps the description to the requested line count', () => {
+  it('reserves two description lines so a short description still fills the tile', () => {
     render(
       <CuratedTileCard
         tile={{
-          id: 'clamped',
-          title: 'Clamped',
-          description: 'A long description that should clamp.',
+          id: 'short',
+          title: 'Short',
+          description: 'One line.',
           icon: <span />,
         }}
-        descriptionLineCount={1}
       />
     );
-    expect(screen.getByText('A long description that should clamp.')).toHaveStyleRule(
-      '-webkit-line-clamp',
-      '1'
-    );
+    const description = screen.getByText('One line.');
+    expect(description).toHaveStyleRule('-webkit-line-clamp', '2');
+    expect(description).toHaveStyleRule('block-size', 'calc(2 * 1lh)');
   });
 
-  it('applies no clamp when the prop is unset', () => {
-    render(
+  it('holds the title to a single line so a long name cannot grow the tile', () => {
+    const { container } = render(
       <CuratedTileCard
-        tile={{
-          id: 'unclamped',
-          title: 'Unclamped',
-          description: 'A description rendered in full.',
-          icon: <span />,
-        }}
+        tile={{ ...baseTile, title: 'Nginx Ingress Controller OpenTelemetry Logs' }}
       />
     );
-    expect(screen.getByText('A description rendered in full.')).not.toHaveStyleRule(
-      '-webkit-line-clamp',
-      expect.any(String)
-    );
+    const wrapper = container.firstChild;
+    expect(wrapper).toHaveStyleRule('-webkit-line-clamp', '1', { target: '.euiCard__title' });
+    expect(wrapper).toHaveStyleRule('block-size', 'calc(1 * 1lh)', { target: '.euiCard__title' });
   });
 
   it('matches the design spec for card padding and the title-description gap', () => {
