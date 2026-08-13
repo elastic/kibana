@@ -14,13 +14,19 @@ import {
   listPolicyExecutionHistoryRequestSchema,
   listPolicyExecutionHistoryResponseSchema,
   type ListPolicyExecutionHistoryRequest,
+  type ListPolicyExecutionHistoryResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
-import type { ListExecutionHistoryArgs } from '../../lib/action_policy_execution_history_client';
+import type {
+  ListExecutionHistoryArgs,
+  ListExecutionHistoryResult,
+} from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { listActionPolicyExecutionsOasExamples } from './list_action_policy_executions_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 
 export const toListExecutionHistoryArgs = ({
@@ -45,6 +51,24 @@ export const toListExecutionHistoryArgs = ({
   };
 };
 
+export const toListExecutionHistoryResponse = ({
+  items,
+  page,
+  perPage,
+  totalEvents,
+  searchMatches,
+  ...rest
+}: ListExecutionHistoryResult): Complete<ListPolicyExecutionHistoryResponse> => {
+  assertAllFieldsMapped(rest);
+  return {
+    items,
+    page,
+    per_page: perPage,
+    total_events: totalEvents,
+    search_matches: searchMatches,
+  };
+};
+
 @injectable()
 export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   static method = 'get' as const;
@@ -58,6 +82,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
     summary: 'List action policy executions',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',
+    oasOperationObject: listActionPolicyExecutionsOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -70,7 +95,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid query parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -97,6 +122,6 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
       ...toListExecutionHistoryArgs(this.request.query ?? {}),
     });
 
-    return this.ctx.response.ok({ body: result });
+    return this.ctx.response.ok({ body: toListExecutionHistoryResponse(result) });
   }
 }

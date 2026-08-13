@@ -27,6 +27,8 @@ import {
   stopHistorySnapshotTask,
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
+import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
+import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
   EngineDescriptorTypeName,
@@ -60,7 +62,6 @@ import type { LogsExtractionClient } from '../logs_extraction';
 import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
 import {
   type TelemetryReporter,
   ENTITY_STORE_DELETION_EVENT,
@@ -160,10 +161,14 @@ export class AssetManagerClient {
         }),
       ]);
 
-      // Phase 2: Initialize engines and start background tasks.
-      await Promise.all([
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
+      // Phase 2: Initialize engines. Descriptors must exist before namespace-scoped TM
+      // schedules are created — those tasks self-delete when they find zero engines,
+      // so scheduling them in parallel with initEntity can tear down a freshly
+      // scheduled status task mid-install.
+      await Promise.all(entityTypes.map((type) => this.initEntity(request, type, logsExtraction)));
 
+      // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
+      await Promise.all([
         scheduleHistorySnapshotTasks({
           logger: this.logger,
           taskManager: this.taskManager,
@@ -177,14 +182,6 @@ export class AssetManagerClient {
           taskManager: this.taskManager,
           namespace: this.namespace,
           request,
-        }),
-
-        // Stored scripts are managed assets with no granular ES privilege (only `manage`/`all`),
-        // so create them as the internal user rather than forcing the enabling user to hold
-        // broad cluster `manage`.
-        installEuidStoredScripts({
-          esClient: this.internalEsClient,
-          logger: this.logger,
         }),
       ]);
     } catch (error) {
@@ -248,38 +245,14 @@ export class AssetManagerClient {
         this.remoteLogExtractionStateClient.delete(type),
       ]);
 
-      // The ES indices/data streams and the EUID stored scripts are shared across all
-      // entity types in the namespace (their names carry the namespace, not the type).
-      // Only remove them once no engine remains — otherwise the surviving engines lose
-      // the read/write targets and scripts their extraction queries still depend on.
+      // The ES indices/data streams are shared across all entity types in the namespace
+      // (their names carry the namespace, not the type). Only remove them once no engine
+      // remains — otherwise the surviving engines lose the read/write targets their
+      // extraction queries still depend on.
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
-        this.logger.debug(`Removing shared assets because last engine was uninstalled`);
-        await Promise.all([
-          uninstallElasticsearchAssets({
-            esClient: this.esClient,
-            logger: this.logger.get(type),
-            namespace: this.namespace,
-          }),
-          // Deletion must run as the requesting user: kibana_system holds the raw
-          // `cluster:admin/script/put` action (so managed installs work) but NOT
-          // `cluster:admin/script/delete`, which is only granted by cluster `manage`/`all`.
-          deleteEuidStoredScripts({
-            esClient: this.esClient,
-            logger: this.logger,
-          }),
-          this.globalStateClient.delete(),
-          stopStatusReportTask({
-            taskManager: this.taskManager,
-            logger: this.logger,
-            namespace: this.namespace,
-          }),
-          stopHistorySnapshotTask({
-            taskManager: this.taskManager,
-            logger: this.logger,
-            namespace: this.namespace,
-          }),
-        ]);
+        this.logger.debug(`Cleaning up namespace because last engine was uninstalled`);
+        await this.cleanupNamespace();
       }
 
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
@@ -292,6 +265,50 @@ export class AssetManagerClient {
       this.logger.get(type).error(`Error uninstalling assets for entity type ${type}`, { error });
       throw error;
     }
+  }
+
+  /**
+   * Tears down namespace-scoped Entity Store resources: Task Manager schedules
+   * (history, status, maintainers), Elasticsearch data-plane assets, and global
+   * state.
+   */
+  public async cleanupNamespace(): Promise<void> {
+    await Promise.all([
+      stopHistorySnapshotTask({
+        taskManager: this.taskManager,
+        logger: this.logger,
+        namespace: this.namespace,
+      }),
+      stopStatusReportTask({
+        taskManager: this.taskManager,
+        logger: this.logger,
+        namespace: this.namespace,
+      }),
+      ...entityMaintainersRegistry.getAll().map(({ id }) =>
+        removeEntityMaintainer({
+          taskManager: this.taskManager,
+          id,
+          namespace: this.namespace,
+          logger: this.logger,
+          analytics: this.analytics,
+        })
+      ),
+    ]);
+
+    // After schedules are gone: remove the ES/SO resources those tasks used so
+    // an in-flight or soon-to-run task cannot hit deleted indices.
+    await Promise.all([
+      uninstallElasticsearchAssets({
+        esClient: this.esClient,
+        logger: this.logger,
+        namespace: this.namespace,
+      }),
+      this.globalStateClient.delete(),
+    ]);
+
+    this.logger.debug(
+      `Finished cleaning up entity store resources for namespace "${this.namespace}"`
+    );
   }
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
