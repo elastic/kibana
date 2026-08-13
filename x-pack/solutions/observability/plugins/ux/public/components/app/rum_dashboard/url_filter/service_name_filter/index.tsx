@@ -65,7 +65,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   }, [serviceNames, selectedServiceName, updateServiceName, loading]);
 
   const webApplicationLabel = i18n.translate('xpack.ux.localFilters.titles.webApplication', {
-    defaultMessage: 'Web application',
+    defaultMessage: 'Web app',
   });
 
   return (

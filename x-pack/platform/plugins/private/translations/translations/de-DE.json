@@ -59981,7 +59981,7 @@
     "xpack.ux.localFilters.titles.os": "OS",
     "xpack.ux.localFilters.titles.serviceName": "Servicename",
     "xpack.ux.localFilters.titles.transactionUrl": "URL",
-    "xpack.ux.localFilters.titles.webApplication": "Webanwendung",
+    "xpack.ux.localFilters.titles.webApplication": "Web-App",
     "xpack.ux.localFiltersTitle": "Filter",
     "xpack.ux.median": "Median",
     "xpack.ux.metrics": "Metriken",

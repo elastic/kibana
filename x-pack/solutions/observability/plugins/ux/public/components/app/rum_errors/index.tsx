@@ -35,6 +35,7 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumErrors } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { TabTrendChart } from '../rum_overview/tab_trend_chart';
 
 const MiniTrend = ({ values }: { values: number[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -349,6 +350,9 @@ export function RumErrorsPanel() {
   ];
 
   return (
+    <>
+      <TabTrendChart accessor="errors" />
+      <EuiSpacer />
     <EuiPanel paddingSize="m" data-test-subj="uxRumErrorsPanel">
       <EuiTitle size="xs">
         <h2>{i18n.translate('xpack.ux.errors.title', { defaultMessage: 'Errors' })}</h2>
@@ -417,5 +421,6 @@ export function RumErrorsPanel() {
         />
       )}
     </EuiPanel>
+    </>
   );
 }

@@ -22,20 +22,19 @@ import {
   EuiStat,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { getCoreVitalsComponent } from '@kbn/observability-plugin/public';
-import type { RumOverviewResponse, RumPageRow, RumTrendPoint } from '../../../../common/rum_app';
+import type { RumOverviewResponse, RumPageRow } from '../../../../common/rum_app';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumOverview } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { useHasRumData } from '../rum_dashboard/hooks/use_has_rum_data';
+import { TrendMetric } from './trend_metric';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
 
@@ -46,47 +45,8 @@ const formatMs = (ms: number | null): string => {
   return ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`;
 };
 
-const TrendBars = ({
-  points,
-  accessor,
-}: {
-  points: RumTrendPoint[];
-  accessor: keyof RumTrendPoint;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const values = points.map((point) => Number(point[accessor]) || 0);
-  const max = Math.max(1, ...values);
-  return (
-    <div
-      css={css`
-        display: flex;
-        align-items: flex-end;
-        gap: 3px;
-        height: 72px;
-      `}
-    >
-      {points.map((point, index) => {
-        const value = values[index];
-        return (
-          <EuiToolTip key={point.timestamp} content={`${point.timestamp} · ${value}`}>
-            <div
-              tabIndex={0}
-              css={css`
-                flex: 1;
-                min-width: 4px;
-                height: ${Math.max(value > 0 ? 4 : 0, Math.round((value / max) * 72))}px;
-                background: ${euiTheme.colors.primary};
-                border-radius: 2px 2px 0 0;
-              `}
-            />
-          </EuiToolTip>
-        );
-      })}
-    </div>
-  );
-};
-
 export function RumOverviewV2() {
+  const { euiTheme } = useEuiTheme();
   const { http, docLinks } = useKibanaServices();
   const history = useHistory();
   const { hasData, loading: hasDataLoading } = useHasRumData();
@@ -413,21 +373,40 @@ export function RumOverviewV2() {
                 {i18n.translate('xpack.ux.overview.trendsTitle', { defaultMessage: 'Trends' })}
               </h3>
             </EuiTitle>
-            <EuiSpacer size="s" />
             <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.ux.overview.trendsSessions', { defaultMessage: 'Sessions' })}
+              {i18n.translate('xpack.ux.overview.trendsSubtitle', {
+                defaultMessage: 'Volume over the selected range',
+              })}
             </EuiText>
-            <TrendBars points={data.trends} accessor="sessions" />
+            <EuiSpacer size="m" />
+            <TrendMetric
+              id="sessions"
+              label={i18n.translate('xpack.ux.overview.trendsSessions', {
+                defaultMessage: 'Sessions',
+              })}
+              points={data.trends}
+              accessor="sessions"
+              color={euiTheme.colors.vis.euiColorVis0}
+            />
             <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.ux.overview.trendsViews', { defaultMessage: 'Page views' })}
-            </EuiText>
-            <TrendBars points={data.trends} accessor="pageViews" />
+            <TrendMetric
+              id="pageViews"
+              label={i18n.translate('xpack.ux.overview.trendsViews', {
+                defaultMessage: 'Page views',
+              })}
+              points={data.trends}
+              accessor="pageViews"
+              color={euiTheme.colors.vis.euiColorVis1}
+            />
             <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.ux.overview.trendsErrors', { defaultMessage: 'Errors' })}
-            </EuiText>
-            <TrendBars points={data.trends} accessor="errors" />
+            <TrendMetric
+              id="errors"
+              label={i18n.translate('xpack.ux.overview.trendsErrors', { defaultMessage: 'Errors' })}
+              points={data.trends}
+              accessor="errors"
+              color={euiTheme.colors.danger}
+              invertDelta
+            />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>

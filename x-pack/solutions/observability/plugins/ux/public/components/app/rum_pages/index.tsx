@@ -33,6 +33,7 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumPages } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { TabTrendChart } from '../rum_overview/tab_trend_chart';
 
 const formatMs = (ms: number | null): string => {
   if (ms == null) {
@@ -324,6 +325,9 @@ export function RumPagesPanel() {
   ];
 
   return (
+    <>
+      <TabTrendChart accessor="pageViews" />
+      <EuiSpacer />
     <EuiPanel paddingSize="m" data-test-subj="uxRumPagesPanel">
       <EuiTitle size="xs">
         <h2>{i18n.translate('xpack.ux.pages.title', { defaultMessage: 'Pages' })}</h2>
@@ -454,5 +458,6 @@ export function RumPagesPanel() {
         </EuiFlyout>
       )}
     </EuiPanel>
+    </>
   );
 }

@@ -44,6 +44,7 @@ import { useLegacyUrlParams } from '../../context/url_params_context/use_url_par
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplaySessions } from '../../services/rest/session_replay_api';
 import { mergeRumSearch } from '../../utils/rum_search';
+import { TabTrendChart } from '../app/rum_overview/tab_trend_chart';
 import {
   SessionReplayInjectButton,
   SessionReplayInjectFlyout,
@@ -634,6 +635,9 @@ export function SessionReplayPanel() {
   }, [history]);
 
   return (
+    <>
+      <TabTrendChart accessor="sessions" />
+      <EuiSpacer />
     <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
       {injectOpen && <SessionReplayInjectFlyout http={http} onClose={() => setInjectOpen(false)} />}
       {(pageUrl || errorGroup || sessionIds || frustration || urlUser) && (
@@ -885,5 +889,6 @@ export function SessionReplayPanel() {
         />
       )}
     </EuiPanel>
+    </>
   );
 }
