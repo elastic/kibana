@@ -18,6 +18,7 @@ import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/att
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getAiIndicesInstructions } from './utils/ai_indices';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
@@ -108,9 +109,10 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions },
+  configuration: { instructions: customInstructions, aiIndices },
   outputSchema,
   skills,
+  spaceId,
   experimentalFeatures,
   relevantSkillsEnabled,
   capabilities,
@@ -188,6 +190,9 @@ ${
 }
 
 ${getConversationMetadataSection(conversationTemplateId, conversationMetadata)}
+
+${getAiIndicesInstructions({ aiIndices, spaceId })}
+
 ## INSTRUCTIONS
 
 ${customInstructions}

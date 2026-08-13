@@ -36,8 +36,9 @@ describe('getResearchAgentPrompt', () => {
             } as any),
         }),
       },
-      configuration: { instructions: '' },
+      configuration: { instructions: '', aiIndices: [] },
       capabilities: { visualizations: false },
+      spaceId: 'default',
       skills: [],
       actions: [],
       cycleLimit: 1,
@@ -148,6 +149,26 @@ describe('getResearchAgentPrompt', () => {
     expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
   });
 
+  it('omits the AI indices section when the agent declares no AI indices', async () => {
+    const messages = await getResearchAgentPrompt(makeParams());
+
+    expect(asText(messages[0])).not.toContain('## AI INDICES');
+  });
+
+  it('renders the AI indices section with the running space when the agent declares one', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: { instructions: '', aiIndices: ['elastic'] },
+        spaceId: 'marketing',
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain('## AI INDICES');
+    expect(system).toContain('"spaces":"marketing"');
+    expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
+  });
+
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
     const params = {
       conversationTimestamp: now,
@@ -167,8 +188,10 @@ describe('getResearchAgentPrompt', () => {
       },
       configuration: {
         instructions: '',
+        aiIndices: [],
       },
       capabilities: { visualizations: false },
+      spaceId: 'default',
       skills: [],
       actions: [],
       cycleLimit: 1,

@@ -24,6 +24,16 @@ Use `platform.core.list_indices` to discover which ones exist.
 
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
 
+### Space scoping
+
+Some AI indices also carry a `spaces` keyword field naming the Kibana spaces a KI belongs to.
+Others omit the field entirely, and their KIs are visible from every space.
+
+Because of that split, the space condition belongs in the `filter` parameter of `execute_esql`,
+never in a `WHERE` clause: a `WHERE` on `spaces` would discard every KI from the indices that do
+not define the field. If your instructions carry an AI INDICES section, it gives the exact filter
+to pass, already resolved to the current space — use it verbatim on every query below.
+
 ---
 
 ## Aggregation
@@ -144,7 +154,7 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
    of KIs are available. You may want to sample a few KIs — potentially per type if type names
    are ambiguous (`WHERE type == "..." | LIMIT 2`) — before running your full query. Remember
    that this doesn't come for free, so only proceed with this if needed.
-3. **Query** — use FORK+FUSE hybrid search.
+3. **Query** — use FORK+FUSE hybrid search, passing the space `filter` described above.
 4. **Return** — the `KEEP` clause already limits results to `title`, `description`, `content`,
    `type` and `tags`. Seeing `tags` on the results is often enough to narrow a follow-up query
    without a separate aggregation.

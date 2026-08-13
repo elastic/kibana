@@ -20,6 +20,11 @@ import type { RelevantSkillSelection } from '../utils/relevant_skills/select_rel
 export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
+  /**
+   * Space the conversation runs in. Fixed for the life of a conversation, so including it keeps the
+   * system prefix stable across rounds.
+   */
+  spaceId: string;
   processedConversation: ProcessedConversation;
   skills: InternalSkillDefinition[];
   /**
