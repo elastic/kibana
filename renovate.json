@@ -1053,6 +1053,15 @@
       "enabled": true
     },
     {
+      "groupName": "isolated-vm",
+      "matchDepNames": ["isolated-vm"],
+      "reviewers": ["team:workflows-eng"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:One Workflow"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "workflow-yaml",
       "matchDepNames": [
         "@hey-api/openapi-ts",
