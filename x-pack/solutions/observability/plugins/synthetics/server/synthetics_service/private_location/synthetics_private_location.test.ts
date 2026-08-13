@@ -507,7 +507,7 @@ describe('SyntheticsPrivateLocation', () => {
           value: false,
         },
         certificate_error_spki_allowlist: {
-          type: 'text',
+          type: 'yaml',
           value: null,
         },
         location_name: {

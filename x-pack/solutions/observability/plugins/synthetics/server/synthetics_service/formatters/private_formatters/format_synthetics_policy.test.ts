@@ -85,7 +85,7 @@ describe('formatSyntheticsPolicy', () => {
                   value: false,
                 },
                 certificate_error_spki_allowlist: {
-                  type: 'text',
+                  type: 'yaml',
                   value: null,
                 },
                 location_name: {
@@ -220,7 +220,7 @@ describe('formatSyntheticsPolicy', () => {
       ?.streams.find((stream) => stream.data_stream.dataset === 'browser');
 
     expect(browserStream?.vars?.certificate_error_spki_allowlist).toEqual({
-      type: 'text',
+      type: 'yaml',
       value: JSON.stringify([pem]),
     });
   });
@@ -567,7 +567,7 @@ const testNewPolicy = {
             screenshots: { type: 'text' },
             synthetics_args: { type: 'text' },
             ignore_https_errors: { type: 'bool' },
-            certificate_error_spki_allowlist: { type: 'text' },
+            certificate_error_spki_allowlist: { type: 'yaml' },
             'throttling.config': { type: 'text' },
             'filter_journeys.tags': { type: 'yaml' },
             'filter_journeys.match': { type: 'text' },
