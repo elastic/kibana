@@ -51,7 +51,7 @@ const generateDisplayName = (assembly: string, part: string, preset?: string): s
  *
  * @example
  * ```typescript
- * import type { DeclarativeReturn } from '@kbn/content-list-assembly';
+ * import type { DeclarativeReturn } from '@kbn/ui-react-assembly';
  *
  * const Spacer = (_props: SpacerProps): DeclarativeReturn => null;
  *

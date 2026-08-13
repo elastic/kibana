@@ -1,4 +1,4 @@
-# @kbn/content-list-assembly
+# @kbn/ui-react-assembly
 
 Typed factory for building **declarative component** APIs in React. This package provides the shared infrastructure that allows parent components ("assemblies") to discover, identify, and extract configuration from declarative components placed as JSX children.
 
@@ -80,7 +80,7 @@ child element
 Primary API. Creates a typed assembly factory.
 
 ```typescript
-import { defineAssembly } from '@kbn/content-list-assembly';
+import { defineAssembly } from '@kbn/ui-react-assembly';
 
 const table = defineAssembly({ name: 'ContentListTable' });
 // table.name === 'ContentListTable' (literal type preserved).
@@ -88,9 +88,9 @@ const table = defineAssembly({ name: 'ContentListTable' });
 
 Returns an `AssemblyFactory<TName>` with the following methods:
 
-#### `assembly.definePart<TPresetMap, TOutput, TContext>(partDefinition)`
+#### `assembly.definePart<TPresetMap, TOutput, TContext, TSkeleton>(partDefinition)`
 
-Defines a part type within the assembly. `TPresetMap` is a mapping of preset names to their props types. `TOutput` is the return type of `resolve` (defaults to `ReactNode`). `TContext` is an optional context type passed to `resolve` (defaults to `void`). Returns a `PartFactory<TPresetMap, TOutput, TContext>`.
+Defines a part type within the assembly. `TPresetMap` is a mapping of preset names to their props types. `TOutput` is the return type of `resolve` (defaults to `ReactNode`). `TContext` is an optional context type passed to `resolve` and `resolveSkeleton` (defaults to `void`). `TSkeleton` is the return type of `resolveSkeleton` — the loading-placeholder vocabulary for this part (defaults to `never`, meaning no skeleton resolver is registered). Returns a `PartFactory<TPresetMap, TOutput, TContext, TSkeleton>`.
 
 ```typescript
 interface ColumnPresets {
@@ -171,7 +171,7 @@ const Column = column.createComponent<ColumnProps>({
 Tags an existing component with assembly metadata. Use when the component is already defined elsewhere.
 
 ```typescript
-import type { DeclarativeReturn } from '@kbn/content-list-assembly';
+import type { DeclarativeReturn } from '@kbn/ui-react-assembly';
 
 const Spacer = (_props: SpacerProps): DeclarativeReturn => null;
 
@@ -195,7 +195,7 @@ Union of `ParsedPart | ParsedChild`. Use the `type` field to discriminate.
 Function type for a non-generic declarative component. Shorthand for `(props: P) => null`.
 
 ```typescript
-import type { DeclarativeComponent } from '@kbn/content-list-assembly';
+import type { DeclarativeComponent } from '@kbn/ui-react-assembly';
 
 const MyControl: DeclarativeComponent<ControlProps> = (_props) => null;
 ```
@@ -205,7 +205,7 @@ const MyControl: DeclarativeComponent<ControlProps> = (_props) => null;
 Type alias for `null`. Use as the return type when hand-writing a declarative component signature. Prefer `DeclarativeComponent<P>` when possible.
 
 ```typescript
-import type { DeclarativeReturn } from '@kbn/content-list-assembly';
+import type { DeclarativeReturn } from '@kbn/ui-react-assembly';
 
 const Spacer = (_props: SpacerProps): DeclarativeReturn => null;
 ```
@@ -214,7 +214,7 @@ const Spacer = (_props: SpacerProps): DeclarativeReturn => null;
 
 ### Why `Symbol.for()` instead of string keys?
 
-`Symbol.for()` creates globally registered symbols that are identical across module boundaries -- even if two different versions of `@kbn/content-list-assembly` are loaded. This avoids the pitfalls of `instanceof` checks (which fail across bundles) and plain string property names (which risk collisions with user props).
+`Symbol.for()` creates globally registered symbols that are identical across module boundaries -- even if two different versions of `@kbn/ui-react-assembly` are loaded. This avoids the pitfalls of `instanceof` checks (which fail across bundles) and plain string property names (which risk collisions with user props).
 
 ### Why components that return `null`?
 
@@ -239,5 +239,5 @@ Do **not** wrap declarative components with `React.memo()`, `forwardRef()`, or H
 ## Testing
 
 ```bash
-yarn test:jest src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly
+yarn test:jest src/platform/kbn-ui/react-assembly
 ```

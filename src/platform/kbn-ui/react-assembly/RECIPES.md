@@ -24,7 +24,7 @@ Before defining any parts, create the assembly itself. This is the root that all
 
 ```typescript
 // action_bar/assembly.ts
-import { defineAssembly } from '@kbn/content-list-assembly';
+import { defineAssembly } from '@kbn/ui-react-assembly';
 
 export const actionBar = defineAssembly({ name: 'ActionBar' });
 ```
@@ -478,7 +478,7 @@ export interface ColumnContext {
 
 ### Wire it into `definePart`
 
-Specify all three generics: preset map, output type, and context type.
+Specify the generics: preset map, output type, and context type. A fourth generic, `TSkeleton`, is available for consumers that also want typed `resolveSkeleton` support — pass your placeholder descriptor type as `TSkeleton` so the `skeleton` callback and `resolveSkeleton` return type are both constrained to it rather than defaulting to `never`.
 
 ```typescript
 // column/part.ts
@@ -544,7 +544,7 @@ Use `tagComponent` when a component is **defined in another module** and you nee
 
 ```typescript
 // @kbn/shared-filters/sort.ts -- defined once, used by multiple assemblies.
-import type { DeclarativeReturn } from '@kbn/content-list-assembly';
+import type { DeclarativeReturn } from '@kbn/ui-react-assembly';
 
 export interface SortProps {
   field: string;
