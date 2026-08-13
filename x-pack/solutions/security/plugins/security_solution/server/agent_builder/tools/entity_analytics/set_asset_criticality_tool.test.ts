@@ -164,7 +164,9 @@ describe('setAssetCriticalityTool', () => {
 
   describe('handler — permissions', () => {
     it('returns a permission error and does not update the entity when the caller lacks the Kibana feature privilege', async () => {
-      mockCheckPrivileges.mockResolvedValueOnce({
+      // checkEntityStoreIndexPrivileges retries with legacy index patterns when the
+      // neutral check fails, so both privilege calls must return denied.
+      const deniedPrivileges = {
         hasAllRequested: false,
         privileges: {
           elasticsearch: {
@@ -184,7 +186,10 @@ describe('setAssetCriticalityTool', () => {
             { privilege: 'api:securitySolution-entity-analytics', authorized: false },
           ],
         },
-      });
+      };
+      mockCheckPrivileges
+        .mockResolvedValueOnce(deniedPrivileges)
+        .mockResolvedValueOnce(deniedPrivileges);
 
       const ctx = handlerContext();
       const result = (await tool.handler(
@@ -506,7 +511,9 @@ describe('setAssetCriticalityTool', () => {
     });
 
     it('reports success=false when the caller lacks write privilege', async () => {
-      mockCheckPrivileges.mockResolvedValueOnce({
+      // checkEntityStoreIndexPrivileges retries with legacy index patterns when the
+      // neutral check fails, so both privilege calls must return denied.
+      const deniedPrivileges = {
         hasAllRequested: false,
         privileges: {
           elasticsearch: {
@@ -526,7 +533,10 @@ describe('setAssetCriticalityTool', () => {
             { privilege: 'api:securitySolution-entity-analytics', authorized: true },
           ],
         },
-      });
+      };
+      mockCheckPrivileges
+        .mockResolvedValueOnce(deniedPrivileges)
+        .mockResolvedValueOnce(deniedPrivileges);
       const ctx = handlerContext();
 
       await tool.handler(
