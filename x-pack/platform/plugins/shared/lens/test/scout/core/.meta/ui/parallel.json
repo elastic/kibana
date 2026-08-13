@@ -1,5 +1,5 @@
 {
-  "sha1": "08104eeffd78dc01899f595c58d2d097fcb6642e",
+  "sha1": "294c66b19e4d17754123b4f01b2609de6bcb440b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -183,6 +183,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
         "line": 71,
         "column": 15
+      }
+    },
+    {
+      "id": "d2815d5da13fdd6-60b241ddf218024",
+      "title": "Lens chart data across visualization types renders the same terms + average config across chart types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_data.spec.ts",
+        "line": 57,
+        "column": 16
       }
     },
     {
@@ -740,7 +753,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 44,
+        "line": 36,
         "column": 79
       }
     },
@@ -753,8 +766,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 105,
-        "column": 29
+        "line": 76,
+        "column": 19
       }
     },
     {
@@ -766,7 +779,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 149,
+        "line": 118,
         "column": 30
       }
     },
@@ -779,7 +792,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
-        "line": 167,
+        "line": 133,
         "column": 9
       }
     },
@@ -901,6 +914,45 @@
       }
     },
     {
+      "id": "e97cb405298c2ea-004fc5174a88a75",
+      "title": "Lens palette and color mapping picks a legacy palette on an XY split dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 21,
+        "column": 13
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-2f7704d5e1102fd",
+      "title": "Lens palette and color mapping picks a color-mapping palette and carries it across pie and bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 44,
+        "column": 38
+      }
+    },
+    {
+      "id": "e97cb405298c2ea-cbc552dbee08aee",
+      "title": "Lens palette and color mapping renders legend colors from color mapping and categorical overrides",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/palette_and_color_mapping.spec.ts",
+        "line": 82,
+        "column": 31
+      }
+    },
+    {
       "id": "3a650e99e12dfc9-f94217f88e11f64",
       "title": "Lens reference lines creates, styles and duplicates reference lines",
       "expectedStatus": "passed",
@@ -914,6 +966,19 @@
       }
     },
     {
+      "id": "baf8a89526bac91-5065d73fcf0283a",
+      "title": "Lens share and CSV export enables share/export for a valid config and preserves filters in the shared URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/share.spec.ts",
+        "line": 23,
+        "column": 13
+      }
+    },
+    {
       "id": "b40d2b710de93c1-6951abc44e2fa95",
       "title": "Lens tag cloud filter renders tags, filters from a tag click, and narrows the cloud",
       "expectedStatus": "passed",
@@ -923,6 +988,19 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/tagcloud_filter.spec.ts",
         "line": 14,
+        "column": 13
+      }
+    },
+    {
+      "id": "d6d882085a838db-0726e0abd3eb5c7",
+      "title": "Lens time shift configures time-shifted metrics and applies terms fix actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/time_shift.spec.ts",
+        "line": 18,
         "column": 13
       }
     }
