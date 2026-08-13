@@ -78,11 +78,11 @@ export const registerCreateDatasetRoute = ({
             });
           }
 
-          const { name, description } = request.body;
+          const { name, description, tags, maturity } = request.body;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient();
 
-          const dataset = await datasetClient.create(name, description);
+          const dataset = await datasetClient.create({ name, description, tags, maturity });
 
           return response.ok({
             body: {

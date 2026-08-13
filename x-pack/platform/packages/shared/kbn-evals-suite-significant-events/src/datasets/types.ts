@@ -100,33 +100,16 @@ export interface DiscoveryScenario {
   output: {
     criteria: SamplingCriterion[];
     expected_min_evidence_count?: number;
-    /** Human-readable summary of expected output for quick orientation (e.g. `discoveries=[cascade, benign-auth]`). */
+    /** Human-readable summary of expected output for quick orientation. */
     expected_ground_truth?: string;
-    /**
-     * The discoveries the agent is expected to generate — same shape as the judge's
-     * `input.discoveries` (signals + causal_features + blast_radius). This is the canonical ground
-     * truth: the grouping check derives its expected groups from these `signals[].metadata.rule_uuid`s,
-     * and the same discoveries feed the judge scenario's input so the two stages stay consistent.
-     */
-    expected_discoveries: Array<Partial<SignificantEvent>>;
-  };
-  metadata: Record<string, unknown> & ScenarioMetadata;
-  snapshot_source?: SnapshotSourceOverride;
-}
-
-export interface DiscoveryJudgeScenario {
-  id?: string;
-  input: {
-    scenario_id: string;
-    discoveries: Array<Partial<SignificantEvent>>;
-  };
-  output: {
-    criteria: SamplingCriterion[];
-    /** Human-readable summary of the expected status for each event ID, e.g. `event_id=open (reason); event_id=dismissed (reason)`. */
-    expected_ground_truth: string;
-    /** Expected judge-confirmed rule UUIDs keyed by event ID. */
+    /** Expected confirmed rule UUIDs keyed by event ID. */
     expected_confirmed_rule_uuids?: Record<string, string[]>;
-    expect_assessment_note?: boolean;
+    /**
+     * The significant events the agent is expected to generate — signals + causal_features +
+     * blast_radius + status. The grouping check derives its expected groups from these events'
+     * `signals[].metadata.rule_uuid`s.
+     */
+    expected_significant_events: Array<Partial<SignificantEvent>>;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
@@ -141,5 +124,4 @@ export interface DatasetConfig {
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
   discovery: DiscoveryScenario[];
-  discoveryJudge: DiscoveryJudgeScenario[];
 }

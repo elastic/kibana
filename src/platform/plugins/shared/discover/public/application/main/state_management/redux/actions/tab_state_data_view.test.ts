@@ -164,8 +164,8 @@ describe('tab_state_data_view actions', () => {
         params.getCurrentTab().id
       );
       const previousSnapshot =
-        params.getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId];
-      const previousResetId = params.getCurrentTab().defaultProfileState.resetId;
+        params.getCurrentTab().profileAppStateDefaults.snapshotsByProfileId[profileId];
+      const previousResetId = params.getCurrentTab().profileAppStateDefaults.resetId;
 
       await params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
@@ -173,9 +173,9 @@ describe('tab_state_data_view actions', () => {
         })
       );
 
-      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('all');
-      expect(params.getCurrentTab().defaultProfileState.resetId).not.toBe(previousResetId);
-      expect(params.getCurrentTab().defaultProfileState.snapshotsByProfileId[profileId]).toBe(
+      expect(params.getCurrentTab().profileAppStateDefaults.fieldsToReset).toBe('all');
+      expect(params.getCurrentTab().profileAppStateDefaults.resetId).not.toBe(previousResetId);
+      expect(params.getCurrentTab().profileAppStateDefaults.snapshotsByProfileId[profileId]).toBe(
         previousSnapshot
       );
     });
@@ -214,15 +214,15 @@ describe('tab_state_data_view actions', () => {
       expect(params.getCurrentTab().isDataViewLoading).toBe(false);
     });
 
-    it('should call setProfileStateFieldsToReset correctly when switching data view', async () => {
+    it('should call setProfileAppStateDefaultFieldsToReset correctly when switching data view', async () => {
       const params = await setupTestParams(dataViewComplexMock);
-      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('none');
+      expect(params.getCurrentTab().profileAppStateDefaults.fieldsToReset).toBe('none');
       await params.internalState.dispatch(
         params.injectCurrentTab(internalStateActions.changeDataView)({
           dataViewOrDataViewId: dataViewComplexMock.id!,
         })
       );
-      expect(params.getCurrentTab().defaultProfileState.fieldsToReset).toBe('all');
+      expect(params.getCurrentTab().profileAppStateDefaults.fieldsToReset).toBe('all');
     });
   });
 
