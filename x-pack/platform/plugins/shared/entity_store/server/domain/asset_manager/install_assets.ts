@@ -50,6 +50,15 @@ interface SharedElasticsearchAssetOptions {
   namespace: string;
 }
 
+interface InstallSharedElasticsearchAssetOptions extends SharedElasticsearchAssetOptions {
+  /**
+   * Client used for legacy→neutral migration and compatibility aliases. Prefer the
+   * Kibana internal user (like v1 cleanup) so upgrade/migration is not gated on the
+   * requesting user's `manage` privileges on entity indices.
+   */
+  migrationEsClient: ElasticsearchClient;
+}
+
 /**
  * Installs all shared Elasticsearch assets and storage that must exist before per-entity
  * initialization begins: ingest pipeline, component templates (for ALL entity types),
@@ -60,18 +69,23 @@ interface SharedElasticsearchAssetOptions {
  */
 export async function installSharedElasticsearchAssets({
   esClient,
+  migrationEsClient,
   logger,
   namespace,
-}: SharedElasticsearchAssetOptions): Promise<void> {
+}: InstallSharedElasticsearchAssetOptions): Promise<void> {
   try {
     await installLatestIndexIngestPipeline(esClient, namespace, logger);
     await installMetadataIndexIngestPipeline(esClient, namespace, logger);
     await installAllComponentTemplates(esClient, namespace, logger);
     await installIndexTemplates(esClient, namespace, logger);
 
-    const legacyPresent = await hasLegacySecurityAssets(esClient, namespace);
+    const legacyPresent = await hasLegacySecurityAssets(migrationEsClient, namespace);
     if (legacyPresent) {
-      await migrateLegacySecurityAssets({ esClient, logger, namespace });
+      await migrateLegacySecurityAssets({
+        esClient: migrationEsClient,
+        logger,
+        namespace,
+      });
     }
 
     // Greenfield (or post-migration): ensure neutral indices/data streams exist.
@@ -79,7 +93,11 @@ export async function installSharedElasticsearchAssets({
 
     // Bridge custom / predefined roles still granting `.entities.v2.*.security_*`
     // until elasticsearch-controller and ES reserved roles ship neutral patterns.
-    await ensureLegacyCompatibilityAliases({ esClient, logger, namespace });
+    await ensureLegacyCompatibilityAliases({
+      esClient: migrationEsClient,
+      logger,
+      namespace,
+    });
   } catch (error) {
     logger.error(`error installing shared assets in ${namespace}: ${error}`);
     throw error;

@@ -50,8 +50,13 @@ import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
 import {
   getEntitiesAlias,
   ENTITY_LATEST,
+  ENTITY_METADATA,
+  ENTITY_SCHEMA_VERSION_V2,
+  ENTITY_UPDATES,
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
+  getLegacySecurityEntityIndexPattern,
+  getLegacySecurityLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
@@ -154,8 +159,13 @@ export class AssetManagerClient {
           taskManager: this.taskManager,
         }),
 
+        // Legacy index rename + compatibility aliases are system work — run as the
+        // internal user (same as v1 cleanup) so enable/install is not blocked when the
+        // caller only has read/write on entity indices. Template/index creation still
+        // uses the requesting user and is gated by getPrivileges.
         installSharedElasticsearchAssets({
           esClient: this.esClient,
+          migrationEsClient: this.internalEsClient,
           logger: this.logger,
           namespace: this.namespace,
         }),
@@ -385,29 +395,74 @@ export class AssetManagerClient {
     // The updates data stream is also an extraction source (`view_index_metadata`), so we
     // merge privileges into one map. Patterns starting with `-` are stripped: `_has_privileges`
     // treats them as literal index names, not exclusions.
-    const index: Record<string, string[]> = {};
-    const unionPrivileges = (name: string, privileges: string[]) => {
-      index[name] = Array.from(new Set([...(index[name] ?? []), ...privileges]));
+    const buildIndexPrivileges = (targets: string[]): Record<string, string[]> => {
+      const index: Record<string, string[]> = {};
+      const unionPrivileges = (name: string, privileges: string[]) => {
+        index[name] = Array.from(new Set([...(index[name] ?? []), ...privileges]));
+      };
+
+      targets.forEach((name) => unionPrivileges(name, ENTITY_STORE_TARGET_INDICES_PRIVILEGES));
+
+      sourceIndexPatterns
+        .filter((idx) => !idx.startsWith('-'))
+        .forEach((idx) => unionPrivileges(idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES));
+
+      return index;
     };
 
-    [
+    const neutralTargets = [
       getEntitiesAlias(ENTITY_LATEST, this.namespace),
       getLatestEntityIndexPattern(this.namespace),
       getUpdatesEntitiesDataStreamName(this.namespace),
       getMetadataEntitiesDataStreamName(this.namespace),
-    ].forEach((name) => unionPrivileges(name, ENTITY_STORE_TARGET_INDICES_PRIVILEGES));
+    ];
 
-    sourceIndexPatterns
-      .filter((idx) => !idx.startsWith('-'))
-      .forEach((idx) => unionPrivileges(idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES));
+    // Custom / predefined roles written against the pre-platform `security_*` names must
+    // still be able to enable/install while migration + role updates land. `_has_privileges`
+    // is AND across names, so check neutral and legacy as separate OR'd requests.
+    const legacyTargets = [
+      getEntitiesAlias(ENTITY_LATEST, this.namespace),
+      getLegacySecurityLatestEntityIndexPattern(this.namespace),
+      getLegacySecurityEntityIndexPattern({
+        schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+        dataset: ENTITY_UPDATES,
+        namespace: this.namespace,
+      }),
+      getLegacySecurityEntityIndexPattern({
+        schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+        dataset: ENTITY_METADATA,
+        namespace: this.namespace,
+      }),
+    ];
 
-    return checkPrivileges({
-      kibana: [kibanaPrivileges],
+    const kibana = [kibanaPrivileges];
+    const cluster = ENTITY_STORE_CLUSTER_PRIVILEGES;
+
+    const neutralPrivileges = await checkPrivileges({
+      kibana,
       elasticsearch: {
-        cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
-        index,
+        cluster,
+        index: buildIndexPrivileges(neutralTargets),
       },
     });
+    if (neutralPrivileges.hasAllRequested) {
+      return neutralPrivileges;
+    }
+
+    const legacyPrivileges = await checkPrivileges({
+      kibana,
+      elasticsearch: {
+        cluster,
+        index: buildIndexPrivileges(legacyTargets),
+      },
+    });
+    if (legacyPrivileges.hasAllRequested) {
+      return legacyPrivileges;
+    }
+
+    // Prefer the neutral result for UI detail when neither set is complete — that is the
+    // target privilege model after migration.
+    return neutralPrivileges;
   }
 
   public async install(type: EntityType): Promise<boolean> {

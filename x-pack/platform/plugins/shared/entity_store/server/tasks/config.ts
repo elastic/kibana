@@ -37,4 +37,10 @@ export const TasksConfig = {
     timeout: '5m',
     interval: '12h',
   },
+  [EntityStoreTaskType.enum.legacySecurityAssetsMigration]: {
+    title: 'Entity Store - Legacy Security Assets Migration',
+    type: 'entity_store:v2:legacy_security_assets_migration',
+    // Latest/metadata reindex can take a long time on large entity indices.
+    timeout: '60m',
+  },
 } as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;

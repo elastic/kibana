@@ -161,9 +161,12 @@ export {
   ENTITY_SCHEMA_VERSION_V2,
   MAPPING_VERSION,
   getEntityIndexPattern,
+  getLegacySecurityEntityIndexPattern,
   getEntitiesAlias,
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
+  getLegacySecurityLatestEntitiesIndexName,
+  getLegacySecurityLatestEntityIndexPattern,
   getEntityMetadataAlias,
   getMetadataEntityIndexPattern,
 } from './domain/entity_index';

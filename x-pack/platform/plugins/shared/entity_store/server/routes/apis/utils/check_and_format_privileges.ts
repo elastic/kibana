@@ -16,7 +16,11 @@ import {
   getLatestEntityIndexPattern,
   getEntityMetadataAlias,
   getMetadataEntityIndexPattern,
+  getLegacySecurityLatestEntityIndexPattern,
+  getLegacySecurityEntityIndexPattern,
   ENTITY_LATEST,
+  ENTITY_METADATA,
+  ENTITY_SCHEMA_VERSION_V2,
 } from '../../../../common';
 
 const PrivilegesDetail = z.object({
@@ -129,6 +133,10 @@ export interface CheckEntityStoreIndexPrivilegesOpts {
  * Shared write/read privilege check for the entities + latest entity indices, reused by the
  * `check_privileges` route, the `entityStore.updateAssetCriticality` workflow step, and the
  * Security Solution `set_asset_criticality` agent builder tool.
+ *
+ * Accepts either the solution-neutral `.entities.v2.*.{space}` names or the legacy
+ * Security-scoped `.entities.v2.*.security_{space}` names (OR), so custom roles written
+ * against the pre-platform patterns keep working through the rename window.
  */
 export async function checkEntityStoreIndexPrivileges({
   request,
@@ -139,35 +147,72 @@ export async function checkEntityStoreIndexPrivileges({
 }: CheckEntityStoreIndexPrivilegesOpts): Promise<Privileges> {
   const entitiesAliasPattern = getEntitiesAlias(ENTITY_LATEST, spaceId);
   const latestEntityIndexPattern = getLatestEntityIndexPattern(spaceId);
+  const legacyLatestEntityIndexPattern = getLegacySecurityLatestEntityIndexPattern(spaceId);
 
-  const index: Record<string, string[]> = {
-    [entitiesAliasPattern]: ['read', 'write'],
-    [latestEntityIndexPattern]: ['read', 'write'],
+  const buildIndex = (latestPattern: string): Record<string, string[]> => {
+    const index: Record<string, string[]> = {
+      [entitiesAliasPattern]: ['read', 'write'],
+      [latestPattern]: ['read', 'write'],
+    };
+
+    if (includeMetadataPrivileges) {
+      const isLegacy = latestPattern === legacyLatestEntityIndexPattern;
+      index[getEntityMetadataAlias(spaceId)] = ['read'];
+      index[
+        isLegacy
+          ? getLegacySecurityEntityIndexPattern({
+              schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+              dataset: ENTITY_METADATA,
+              namespace: spaceId,
+            })
+          : getMetadataEntityIndexPattern(spaceId)
+      ] = ['read'];
+    }
+
+    return index;
   };
 
-  if (includeMetadataPrivileges) {
-    index[getEntityMetadataAlias(spaceId)] = ['read'];
-    index[getMetadataEntityIndexPattern(spaceId)] = ['read'];
-  }
+  const kibana = kibanaFeaturePrivileges?.length
+    ? {
+        kibana: kibanaFeaturePrivileges.map((privilege) =>
+          security.authz.actions.api.get(privilege)
+        ),
+      }
+    : {};
 
-  return checkAndFormatPrivileges({
+  const neutral = await checkAndFormatPrivileges({
     request,
     security,
     indexPatterns: [entitiesAliasPattern, latestEntityIndexPattern],
     privilegesToCheck: {
       elasticsearch: {
         cluster: [],
-        index,
+        index: buildIndex(latestEntityIndexPattern),
       },
-      ...(kibanaFeaturePrivileges?.length
-        ? {
-            kibana: kibanaFeaturePrivileges.map((privilege) =>
-              security.authz.actions.api.get(privilege)
-            ),
-          }
-        : {}),
+      ...kibana,
     },
   });
+  if (neutral.has_all_required) {
+    return neutral;
+  }
+
+  const legacy = await checkAndFormatPrivileges({
+    request,
+    security,
+    indexPatterns: [entitiesAliasPattern, legacyLatestEntityIndexPattern],
+    privilegesToCheck: {
+      elasticsearch: {
+        cluster: [],
+        index: buildIndex(legacyLatestEntityIndexPattern),
+      },
+      ...kibana,
+    },
+  });
+  if (legacy.has_all_required) {
+    return legacy;
+  }
+
+  return neutral;
 }
 
 export const hasReadWritePermissions = (

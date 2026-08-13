@@ -208,6 +208,18 @@ describe('AssetManagerClient', () => {
     });
   });
 
+  it('runs legacy security asset migration as the internal user', async () => {
+    await client.init({} as KibanaRequest, ['host']);
+
+    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esClient: mockUserEsClient,
+        migrationEsClient: mockInternalEsClient,
+        namespace,
+      })
+    );
+  });
+
   it('does not recreate shared indices or data streams during per-type install', async () => {
     const installed = await client.install('host');
 
@@ -285,9 +297,11 @@ describe('AssetManagerClient', () => {
     it('checks the cluster + target assets that install creates as the requesting user', async () => {
       // The updates data stream is also returned as an extraction source.
       getLocalIndexPatternsMock.mockResolvedValue(['logs-*', '.entities.v2.updates.default']);
+      checkPrivilegesWithRequestMock.mockResolvedValue({ hasAllRequested: true });
 
       await getPrivilegesClient.getPrivileges({} as KibanaRequest);
 
+      expect(checkPrivilegesWithRequestMock).toHaveBeenCalledTimes(1);
       const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
 
       // Ingest pipelines + templates are both created during install.
@@ -309,6 +323,32 @@ describe('AssetManagerClient', () => {
       expect(calledWith.elasticsearch.index['.entities.v2.updates.default']).toEqual(
         expect.arrayContaining(['manage', 'view_index_metadata'])
       );
+    });
+
+    it('falls back to legacy security_* target names when neutral privileges fail', async () => {
+      getLocalIndexPatternsMock.mockResolvedValue(['logs-*']);
+      checkPrivilegesWithRequestMock
+        .mockResolvedValueOnce({
+          hasAllRequested: false,
+          privileges: { elasticsearch: {}, kibana: [] },
+        })
+        .mockResolvedValueOnce({
+          hasAllRequested: true,
+          privileges: { elasticsearch: {}, kibana: [] },
+        });
+
+      const result = await getPrivilegesClient.getPrivileges({} as KibanaRequest);
+
+      expect(result.hasAllRequested).toBe(true);
+      expect(checkPrivilegesWithRequestMock).toHaveBeenCalledTimes(2);
+
+      const [, legacyCall] = checkPrivilegesWithRequestMock.mock.calls;
+      const legacyIndexKeys = Object.keys(legacyCall[0].elasticsearch.index);
+      expect(legacyIndexKeys).toContain('entities-latest-default');
+      expect(legacyIndexKeys).toContain('.entities.v2.latest.security_default-*');
+      expect(legacyIndexKeys).toContain('.entities.v2.updates.security_default');
+      expect(legacyIndexKeys).toContain('.entities.v2.metadata.security_default');
+      expect(legacyIndexKeys).not.toContain('.entities.v2.latest.default-*');
     });
   });
 
