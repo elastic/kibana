@@ -13,6 +13,7 @@ import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { MemoryStorage } from '../storage/memory_storage';
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
+import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 const recallSchema = z.object({
@@ -46,10 +47,10 @@ const recallSchema = z.object({
  * Creates the `platform.memory.recall` registered tool.
  *
  * Uses `asInternalUser` for storage access; data isolation is enforced via
- * mandatory `space_id + author` filters in `buildRetriever` (G3). The
- * `read_agent_memory` Kibana privilege is the authz gate (enforced by the
- * agent builder route). Recall **fails open**: ES errors return empty results
- * rather than propagating to the agent (D-security, G5).
+ * mandatory `space_id + author` filters in `buildRetriever` (G3). Gated by
+ * `read_agent_memory` checked via `checkPrivilegesWithRequest` before any ES
+ * call. Recall **fails open**: ES errors return empty results rather than
+ * propagating to the agent (D-security, G5).
  */
 export const createRecallTool = ({
   getStorage,
@@ -84,6 +85,26 @@ Fails open: if the memory service is unavailable, returns an empty list without 
   },
   handler: async ({ query, category, limit }, context) => {
     const security = getSecurityStart();
+
+    // ── Authz gate: must have read_agent_memory before any ES call ────────────
+    const { hasAllRequested } = await security.authz
+      .checkPrivilegesWithRequest(context.request)
+      .atSpace(context.spaceId, {
+        kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.read)],
+      });
+
+    if (!hasAllRequested) {
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: { memories: [], note: 'Insufficient privileges to recall memories.' },
+          },
+        ],
+      };
+    }
+
+    // ── Identity resolution ───────────────────────────────────────────────────
     const identity = resolveIdentity({ request: context.request, security });
 
     if (!identity) {

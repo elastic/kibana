@@ -9,8 +9,13 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { DataStreamClient } from '@kbn/data-streams';
 import type { MemoryStorage } from '../storage/memory_storage';
+import type { agentMemoryHistoryMappings } from '../storage/history_stream';
 import { recallMemory } from '../core/recall_memory';
+import { resolveIdentity } from '../core/resolve_identity';
+import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
 
 /**
  * Workflow step type IDs for agent memory operations.
@@ -18,6 +23,10 @@ import { recallMemory } from '../core/recall_memory';
  * These are registered via `workflowsExtensions.registerStepDefinition` in setup().
  * They share the same core functions (`recallMemory` / `writeMemory`) as the
  * registered agent tools, ensuring consistent behaviour in both execution contexts.
+ *
+ * Identity (author, space_id) is derived from the step's execution context rather
+ * than accepted as step inputs — accepting identity as free-form input would allow
+ * any workflow author to read or forge memories belonging to another user.
  *
  * NOTE: Each step requires an approval hash file at:
  *   src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/
@@ -45,12 +54,6 @@ const RecallInputSchema = z.object({
     .optional()
     .default(10)
     .describe('Maximum number of memories to return.'),
-  space_id: z.string().max(256).describe('Kibana space to scope the recall query to.'),
-  author: z
-    .string()
-    .max(512)
-    .describe('Identity key of the user whose memories to recall.'),
-  author_kind: z.enum(['profile_uid', 'username']).describe('Discriminator for the author field.'),
 });
 
 const RecallOutputSchema = z.object({
@@ -79,29 +82,30 @@ const RetainInputSchema = z.object({
     .enum(['profile', 'preferences', 'entities', 'events', 'trajectories'])
     .optional()
     .describe('Memory category.'),
-  type: z
-    .enum(['episodic', 'semantic', 'procedural'])
-    .optional()
-    .describe('Memory type.'),
+  type: z.enum(['episodic', 'semantic', 'procedural']).optional().describe('Memory type.'),
   tags: z.array(z.string().max(100)).max(20).optional().describe('Optional classification tags.'),
-  space_id: z.string().max(256).describe('Kibana space to store the memory in.'),
-  author: z.string().max(512).describe('Identity key of the user this memory belongs to.'),
-  author_kind: z.enum(['profile_uid', 'username']).describe('Discriminator for the author field.'),
 });
 
 const RetainOutputSchema = z.object({
   id: z.string().describe('The agent-memory document id.'),
   revision: z.number().int().describe('The revision number after this operation.'),
-  action: z.enum(['created', 'updated']).describe('Whether this was a new memory or supersession.'),
+  action: z
+    .enum(['created', 'updated'])
+    .describe('Whether this was a new memory or supersession.'),
 });
 
 /**
  * Registers `memory.recall` and `memory.retain` step definitions with the
  * Workflows engine. Both steps use the same core functions as the agent tools.
+ *
+ * Identity and space are derived from the step execution context — they are
+ * never accepted as step inputs (cross-user forge prevention).
  */
 export const registerMemoryWorkflowSteps = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  getStorage: () => MemoryStorage
+  getStorage: () => MemoryStorage,
+  getHistoryClient: () => DataStreamClient<typeof agentMemoryHistoryMappings>,
+  getSecurityStart: () => SecurityPluginStart
 ): void => {
   // ── memory.recall ──────────────────────────────────────────────────────────
   workflowsExtensions.registerStepDefinition(
@@ -109,22 +113,34 @@ export const registerMemoryWorkflowSteps = (
       id: MEMORY_RECALL_STEP_ID,
       category: StepCategory.Ai,
       label: 'Recall memories',
-      description: 'Retrieves relevant memories for a user in a given Kibana space using RRF.',
+      description: 'Retrieves relevant memories for the executing user using RRF.',
       inputSchema: RecallInputSchema,
       outputSchema: RecallOutputSchema,
       handler: async (context) => {
-        const { query, category, limit, space_id, author, author_kind } = context.input;
-        const storage = getStorage();
+        const { query, category, limit } = context.input;
+        const security = getSecurityStart();
+        const request = context.contextManager.getFakeRequest();
+        const spaceId = context.contextManager.getContext().spaceId;
+
+        // ── Authz gate ──────────────────────────────────────────────────────
+        const { hasAllRequested } = await security.authz
+          .checkPrivilegesWithRequest(request)
+          .atSpace(spaceId, {
+            kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.read)],
+          });
+
+        if (!hasAllRequested) {
+          return { output: { memories: [] } };
+        }
+
+        const identity = resolveIdentity({ request, security });
+        if (!identity) {
+          return { output: { memories: [] } };
+        }
 
         const result = await recallMemory({
-          storage,
-          params: {
-            query,
-            category,
-            limit,
-            space_id,
-            identity: { author, author_kind },
-          },
+          storage: getStorage(),
+          params: { query, category, limit, space_id: spaceId, identity },
         });
 
         return { output: { memories: result.memories } };
@@ -134,52 +150,49 @@ export const registerMemoryWorkflowSteps = (
 
   // ── memory.retain ──────────────────────────────────────────────────────────
   workflowsExtensions.registerStepDefinition(
-    // Loaded lazily so the async import of write_memory only fires when the step is used.
     async () => {
       const { writeMemory } = await import('../core/write_memory');
-      const { DataStreamClient } = await import('@kbn/data-streams');
-      const { agentMemoryHistoryStream } = await import('../storage/history_stream');
 
       return createServerStepDefinition({
         id: MEMORY_RETAIN_STEP_ID,
         category: StepCategory.Ai,
         label: 'Retain memory',
         description:
-          'Stores a new memory or supersedes an existing one with identical content (find-or-create on content hash).',
+          'Stores a new memory or supersedes an existing one with identical content ' +
+          '(find-or-create on content hash). Writes as the executing user.',
         inputSchema: RetainInputSchema,
         outputSchema: RetainOutputSchema,
         handler: async (context) => {
-          const { title, description, category, type, tags, space_id, author, author_kind } =
-            context.input;
-          const storage = getStorage();
-          const esClient = context.contextManager.getScopedEsClient();
+          const { title, description, category, type, tags } = context.input;
+          const security = getSecurityStart();
+          const request = context.contextManager.getFakeRequest();
+          const spaceId = context.contextManager.getContext().spaceId;
 
-          const historyClient = DataStreamClient.fromDefinition({
-            dataStream: agentMemoryHistoryStream,
-            elasticsearchClient: esClient,
-          });
+          // ── Authz gate ────────────────────────────────────────────────────
+          const { hasAllRequested } = await security.authz
+            .checkPrivilegesWithRequest(request)
+            .atSpace(spaceId, {
+              kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.write)],
+            });
+
+          if (!hasAllRequested) {
+            throw new Error(
+              'Forbidden: the executing user does not have the write_agent_memory privilege.'
+            );
+          }
+
+          const identity = resolveIdentity({ request, security });
+          if (!identity) {
+            throw new Error('Cannot retain memory: no user identity available for scoping.');
+          }
 
           const result = await writeMemory({
-            storage,
-            historyClient,
-            params: {
-              title,
-              description,
-              category,
-              type,
-              tags,
-              space_id,
-              identity: { author, author_kind },
-            },
+            storage: getStorage(),
+            historyClient: getHistoryClient(),
+            params: { title, description, category, type, tags, space_id: spaceId, identity },
           });
 
-          return {
-            output: {
-              id: result.id,
-              revision: result.revision,
-              action: result.action,
-            },
-          };
+          return { output: { id: result.id, revision: result.revision, action: result.action } };
         },
       });
     }
