@@ -22,7 +22,7 @@ export interface AlertEventRecord {
   '@timestamp': string;
   group_hash: string;
   episode_id: string;
-  rule_id: string;
+  rule_id: string | null;
   space_id: string;
   source: string;
   rule_version?: number;

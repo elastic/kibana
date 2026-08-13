@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CLAIM_STRATEGY_UPDATE_BY_QUERY, CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_CAPACITY } from '../config';
 import { getDefaultCapacity } from './get_default_capacity';
 
 describe('getDefaultCapacity', () => {
@@ -109,7 +109,7 @@ describe('getDefaultCapacity', () => {
         isCloud: true,
         isServerless: false,
         isBackgroundTaskNodeOnly: false,
-        claimStrategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+        claimStrategy: CLAIM_STRATEGY_MGET,
       })
     ).toBe(DEFAULT_CAPACITY);
 
@@ -120,7 +120,7 @@ describe('getDefaultCapacity', () => {
         isCloud: true,
         isServerless: false,
         isBackgroundTaskNodeOnly: true,
-        claimStrategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+        claimStrategy: CLAIM_STRATEGY_MGET,
       })
     ).toBe(DEFAULT_CAPACITY);
   });

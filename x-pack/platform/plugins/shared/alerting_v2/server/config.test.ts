@@ -72,4 +72,44 @@ describe('alerting_v2 config schema', () => {
       expect(() => configSchema.validate({ rules: { maxScheduledPerMinute: 32001 } })).toThrow();
     });
   });
+
+  describe('rules.run.alerts.max', () => {
+    it('defaults to 10000', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.alerts.max).toBe(10000);
+    });
+
+    it('accepts a smaller configured value', () => {
+      expect(
+        configSchema.validate({ rules: { run: { alerts: { max: 100 } } } }).rules.run.alerts.max
+      ).toBe(100);
+    });
+
+    it('rejects values below 1', () => {
+      expect(() => configSchema.validate({ rules: { run: { alerts: { max: 0 } } } })).toThrow();
+    });
+
+    it('rejects values above the 10000 ceiling', () => {
+      expect(() => configSchema.validate({ rules: { run: { alerts: { max: 10001 } } } })).toThrow();
+    });
+  });
+
+  describe('rules.run.timeout', () => {
+    it('defaults to undefined', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.timeout).toBeUndefined();
+    });
+
+    it('accepts a valid duration', () => {
+      expect(configSchema.validate({ rules: { run: { timeout: '5m' } } }).rules.run.timeout).toBe(
+        '5m'
+      );
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() => configSchema.validate({ rules: { run: { timeout: 'nonsense' } } })).toThrow(
+        /Invalid duration/
+      );
+    });
+  });
 });

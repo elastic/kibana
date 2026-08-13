@@ -15,10 +15,7 @@ import {
   type ToolHandlerResult,
 } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  buildAgentBuilderTracesIndexPattern,
-  buildAgentBuilderTraceLogsIndexPattern,
-} from '@kbn/agent-builder-plugin/common/traces';
+import { buildAgentBuilderTracesIndexPattern } from '@kbn/agent-builder-plugin/common/traces';
 
 export const AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID = 'agent-builder-traces.generate_esql';
 
@@ -27,12 +24,7 @@ const tracesEsqlSchema = z.object({
     .string()
     .max(1024)
     .describe(
-      'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, etc.).'
-    ),
-  dataSource: z
-    .enum(['traces', 'logs'])
-    .describe(
-      'Which index to query: "traces" for spans (tokens, latency, tool calls, errors) or "logs" for span events (user prompts, LLM responses, system prompts, tool results).'
+      'Natural language question about Agent Builder OTel traces (token usage, latency, tool calls, errors, or captured message content).'
     ),
 });
 
@@ -53,42 +45,26 @@ This is a set of rules that you must follow strictly when generating ES|QL for A
 * duration is in nanoseconds — divide by 1000000000.0 for seconds
 * status.code == "Error" marks failed spans
 * For percentage calculations, multiply by 100.0 before dividing (e.g. ROUND((total - errors) * 100.0 / total, 2)) to avoid integer division
-* Prefer compact STATS aggregations over returning raw spans unless the user asked for individual span details
-`.trim();
-
-const buildLogsQueryRules = (traceLogsIndex: string) =>
-  `
-This is a set of rules that you must follow strictly when generating ES|QL for Agent Builder span-event logs:
-* Use ONLY this index: ${traceLogsIndex} — do not use a logs-agent_builder.otel-* wildcard or query any other index.
-* Always constrain the time range with @timestamp to the window the user asked about (default to the last 24 hours when they do not specify one).
-* Message content (user prompts, LLM responses, system prompts, tool results) is stored as OTel span events in this logs index.
-* User prompt events: event_name == "gen_ai.user.message" — prompt text is in attributes.content (requires agentBuilder:tracing:includeUserPrompts).
-* LLM response events: event_name IN ("gen_ai.assistant.message", "gen_ai.choice") — requires agentBuilder:tracing:includeLlmResponses.
-* System prompt events: event_name == "gen_ai.system.message" — requires agentBuilder:tracing:includeSystemPrompt.
-* Tool result events: event_name == "gen_ai.tool.message" — requires agentBuilder:tracing:includeToolDetails.
-* Span-event log documents link to parent spans via trace_id and span_id.
-* Prefer compact STATS aggregations over returning raw messages unless the user asked for message text
+* Message content (user prompts, LLM responses, system prompts, tool results) lives on chat spans (span.name LIKE "chat *") as JSON-string attributes, not on a separate logs index:
+  - attributes.gen_ai.input.messages — chat history sent to the model (user prompts and prior assistant/tool turns). Requires agentBuilder:tracing:includeUserPrompts / includeLlmResponses / includeToolDetails for the respective roles.
+  - attributes.gen_ai.output.messages — the model's response(s). Requires agentBuilder:tracing:includeLlmResponses.
+  - attributes.gen_ai.system_instructions — system prompt. Requires agentBuilder:tracing:includeSystemPrompt.
+* These attributes are JSON strings (arrays of { role, parts:[...] }); message text is not indexed as individual fields, so KEEP the whole attribute and let the caller parse it. Do not invent an attributes.content field.
+* Prefer compact STATS aggregations over returning raw spans unless the user asked for individual span details or message text
 `.trim();
 
 export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsqlSchema> => ({
   id: AGENT_BUILDER_TRACES_ESQL_INLINE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Generate and execute ES|QL against the current space Agent Builder OTel traces or logs index. ' +
-    'Pass dataSource "traces" for span telemetry or "logs" for message content. ' +
-    'Scopes queries to the active Kibana space automatically.',
+    'Generate and execute ES|QL against the current space Agent Builder OTel traces index ' +
+    '(span telemetry and captured message content). Scopes queries to the active Kibana space automatically.',
   schema: tracesEsqlSchema,
   confirmation: { askUser: 'never' },
-  handler: async ({ prompt, dataSource }, context) => {
+  handler: async ({ prompt }, context) => {
     const { esClient, events, modelProvider, logger, spaceId } = context;
     const tracesIndex = buildAgentBuilderTracesIndexPattern(spaceId);
-    const traceLogsIndex = buildAgentBuilderTraceLogsIndexPattern(spaceId);
-
-    const index = dataSource === 'logs' ? traceLogsIndex : tracesIndex;
-    const additionalContext =
-      dataSource === 'logs'
-        ? buildLogsQueryRules(traceLogsIndex)
-        : buildTracesQueryRules(tracesIndex);
+    const additionalContext = buildTracesQueryRules(tracesIndex);
 
     try {
       const model = await modelProvider.getDefaultModel();
@@ -98,7 +74,7 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
         events,
         nlQuery: prompt,
         esClient: esClient.asCurrentUser,
-        index,
+        index: tracesIndex,
         additionalContext,
       });
 
@@ -117,10 +93,7 @@ export const createTracesEsqlTool = (): BuiltinSkillBoundedTool<typeof tracesEsq
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
           data: {
-            message:
-              dataSource === 'logs'
-                ? `Agent Builder span-event logs index for this space: ${traceLogsIndex}.`
-                : `Agent Builder traces index for this space: ${tracesIndex}.`,
+            message: `Agent Builder traces index for this space: ${tracesIndex}.`,
           },
         },
       ];

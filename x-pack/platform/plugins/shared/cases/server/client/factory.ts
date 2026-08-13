@@ -54,8 +54,6 @@ import {
 import { AuthorizationAuditLogger } from '../authorization';
 import type { CasesClient } from '.';
 import { createCasesClient } from '.';
-import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
@@ -81,8 +79,6 @@ interface CasesClientFactoryArgs {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
   filesPluginStart: FilesStart;
@@ -213,8 +209,6 @@ export class CasesClientFactory {
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,
       actionsClient: await this.options.actionsPluginStart.getActionsClientWithRequest(request),
-      persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry: this.options.unifiedAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
       publicBaseUrl: this.options.publicBaseUrl,
@@ -276,16 +270,21 @@ export class CasesClientFactory {
         savedObjectsClient: unsecuredSavedObjectsClient,
       });
 
+    const fieldDefinitionsService = new FieldDefinitionsService({
+      unsecuredSavedObjectsClient,
+      refreshAnalyticsV2DataView,
+    });
+
     const templatesService = new TemplatesService({
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       esClient,
       namespace,
       refreshAnalyticsV2DataView,
-    });
-
-    const fieldDefinitionsService = new FieldDefinitionsService({
-      unsecuredSavedObjectsClient,
+      getFieldDefinitionsForOwner: (owner) =>
+        fieldDefinitionsService
+          .getFieldDefinitions(owner)
+          .then(({ fieldDefinitions }) => fieldDefinitions),
     });
 
     const caseService = new CasesService({

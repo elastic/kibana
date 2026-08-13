@@ -18,7 +18,7 @@ const HEADERS = Object.freeze({
 });
 
 /**
- * Persist `hideAnnouncements` globally so agent-builder announcement modals do not block UI.
+ * Persist `hideAnnouncements` globally so announcements and product tours do not block UI.
  * Call after operations that reload Kibana saved objects (e.g. esArchiver), which can reset
  * persisted global settings, and after login when tests do not go through `initializeDataViews`.
  *

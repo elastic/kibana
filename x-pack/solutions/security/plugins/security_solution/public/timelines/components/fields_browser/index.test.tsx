@@ -8,7 +8,7 @@
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { act, render, renderHook, waitFor } from '@testing-library/react';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import type { FieldEditorActionsRef, UseFieldBrowserOptions, UseFieldBrowserOptionsProps } from '.';
 import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
@@ -153,9 +153,16 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionEditRuntimeField').click();
     expect(mockOnHide).toHaveBeenCalledTimes(1);
@@ -211,9 +218,16 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionEditRuntimeField').click();
     expect(onSave).toBeDefined();
@@ -248,9 +262,16 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     getByTestId('actionDeleteRuntimeField').click();
     expect(onDelete).toBeDefined();
@@ -304,9 +325,16 @@ describe('useFieldBrowserOptions', () => {
       onHide: mockOnHide,
     });
 
-    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
-      wrapper: TestProviders,
-    });
+    const { getByTestId } = render(
+      <EuiInMemoryTable
+        tableCaption="Fields browser table"
+        items={[fieldItem]}
+        columns={columns}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
 
     expect(editorActionsRef?.current).toBeNull();
 

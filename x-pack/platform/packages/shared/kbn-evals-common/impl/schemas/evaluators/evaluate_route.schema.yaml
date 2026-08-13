@@ -48,6 +48,22 @@ paths:
                           reference_data:
                             type: object
                             additionalProperties: true
+                    instrumentation:
+                      type: object
+                      description: >-
+                        Optional instrumentation profile selection. When omitted,
+                        the elastic-inference profile is used.
+                      required:
+                        - profile
+                      properties:
+                        profile:
+                          type: string
+                          enum:
+                            - elastic-inference
+                            - otel-genai-events
+                            - otel-genai-attributes
+                            - claude-code
+                          default: elastic-inference
                 evaluators:
                   type: array
                   minItems: 1
@@ -134,6 +150,10 @@ paths:
                           required:
                             - message
                           properties:
+                            code:
+                              type: string
+                              enum:
+                                - evidence_unmet
                             message:
                               type: string
                               maxLength: 8192

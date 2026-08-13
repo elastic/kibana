@@ -182,6 +182,19 @@ export const attacksGenerateClickedEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksGenerationsControlCenterOpenedEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.GenerationsControlCenterOpened,
+  schema: {
+    source: {
+      type: 'keyword',
+      _meta: {
+        description: 'The source of the generations control center open',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = {
   eventType: AttacksEventTypes.FeaturePromotionCalloutAction,
   schema: {
@@ -244,6 +257,20 @@ export const attacksTourStepActionEvent: AttacksTelemetryEvent = {
   },
 };
 
+export const attacksWorkflowsPromotionCalloutActionEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.WorkflowsPromotionCalloutAction,
+  schema: {
+    action: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The action taken on the Attack Discovery Workflows promotion callout (view/enable/dismiss/learn_more)',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const attacksTelemetryEvents = [
   attacksTableSortChangedEvent,
   attacksViewOptionChangedEvent,
@@ -259,10 +286,12 @@ export const attacksTelemetryEvents = [
   attacksScheduleFlyoutOpenedEvent,
   attacksSettingsFlyoutOpenedEvent,
   attacksGenerateClickedEvent,
+  attacksGenerationsControlCenterOpenedEvent,
   attacksScheduleDetailsFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
   attacksWorkflowRunTriggeredEvent,
   attacksTypeFilterChangedEvent,
   attacksTourCalloutActionEvent,
   attacksTourStepActionEvent,
+  attacksWorkflowsPromotionCalloutActionEvent,
 ];

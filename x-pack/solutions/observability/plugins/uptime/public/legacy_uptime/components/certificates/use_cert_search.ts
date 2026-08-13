@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useContext } from 'react';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 

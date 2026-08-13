@@ -24,10 +24,10 @@ import { getEuiStepStatus } from '../../../../../common/utils/get_eui_step_statu
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { RuleMigrationTaskStats } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { QradarDataInputStep } from '../../types';
-import * as i18n from './translations';
 import { useMissingReferenceSetsListStep } from './sub_steps/missing_reference_set_list';
 import { useReferencesFileUploadStep } from './sub_steps/reference_sets_file_upload';
-import { type MigrationStepProps } from '../../../../../common/types';
+import { MigrationSource, type MigrationStepProps } from '../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../hooks/use_rule_migration_vendor_copy';
 
 interface ReferenceSetDataInputSubStepsProps {
   migrationStats: RuleMigrationTaskStats;
@@ -37,6 +37,7 @@ interface ReferenceSetDataInputSubStepsProps {
 
 export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
   ({ dataInputStep, migrationStats, missingResourcesIndexed, setDataInputStep }) => {
+    const { resourceDataInputStep } = useRuleMigrationVendorCopy(MigrationSource.QRADAR);
     const missingReferenceSet = useMemo(
       () => missingResourcesIndexed?.lookups,
       [missingResourcesIndexed]
@@ -66,7 +67,7 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiTitle size="xs" data-test-subj="referenceSetsUploadTitle">
-                  <b>{i18n.REFERENCE_SET_DATA_INPUT_TITLE}</b>
+                  <b>{resourceDataInputStep.title}</b>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -75,7 +76,7 @@ export const ReferenceSetDataInput = React.memo<MigrationStepProps>(
             <>
               <EuiFlexItem>
                 <EuiText size="s" color="subdued" data-test-subj="referenceSetsUploadDescription">
-                  {i18n.REFERENCE_SET_DATA_INPUT_DESCRIPTION}
+                  {resourceDataInputStep.description}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem>

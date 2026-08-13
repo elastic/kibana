@@ -18,6 +18,7 @@ export function SyntheticsRemoteBadge({ remote }: { remote?: RemoteMonitorInfo }
   return (
     <EuiToolTip content={remote.kibanaUrl || undefined} title={remote.remoteName}>
       <EuiBadge
+        tabIndex={0}
         color="default"
         data-test-subj="syntheticsRemoteBadge"
         onMouseDown={(e: React.MouseEvent) => {

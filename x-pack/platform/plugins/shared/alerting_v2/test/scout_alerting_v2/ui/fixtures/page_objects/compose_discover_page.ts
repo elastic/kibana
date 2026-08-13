@@ -13,26 +13,33 @@ export class ComposeDiscoverPage {
   public readonly nextButton: Locator;
   public readonly backButton: Locator;
   public readonly submitButton: Locator;
+  /** YAML-mode save button (non-representable rules — every alert + standalone). */
+  public readonly yamlSubmitButton: Locator;
   /**
-   * "Open query editor" — visible on the Alert Condition step in signal
-   * (non-alert) mode when no query has been committed yet.
+   * @deprecated Use {@link alertSummaryEditorButton}. Both alert and signal now
+   * share `esqlSummaryOpenEditor` on the Alert Condition step.
    */
   public readonly openEditorButton: Locator;
   /**
-   * "Edit query" — visible on the Alert Condition step when a query is committed
-   * in signal (non-alert) mode.
+   * @deprecated Use {@link alertSummaryEditorButton}. Both alert and signal now
+   * share `esqlSummaryOpenEditor` on the Alert Condition step.
    */
   public readonly editQueryButton: Locator;
   /**
-   * Edit CTA in the alert-mode query summary on the Alert Condition step. Labeled
+   * Edit CTA in the query summary on the Alert Condition step. Labeled
    * "Open query editor" before a query is applied and "Edit query" afterwards; both
-   * render the same test subject. Replaces the legacy base/alert "Edit queries" button —
-   * create now uses a single unified editor and the heuristic split runs on Apply.
+   * kinds share this subject. Create uses a single unified editor and the heuristic
+   * split runs on Apply (alert only).
    */
   public readonly alertSummaryEditorButton: Locator;
   public readonly sandboxCloseButton: Locator;
   public readonly sandboxSearchButton: Locator;
   public readonly sandboxApplyButton: Locator;
+  /** Time field selector on the Alert Condition step; `aria-invalid` when unresolved. */
+  public readonly timeFieldSelector: Locator;
+  /** Inline error rendered under the time field when no date field resolves. */
+  public readonly timeFieldError: Locator;
+  /** Time field selector inside the query sandbox flyout. */
   public readonly sandboxTimeFieldSelector: Locator;
   public readonly ruleNameInput: Locator;
   public readonly addRunbookButton: Locator;
@@ -42,6 +49,7 @@ export class ComposeDiscoverPage {
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
   public readonly createEsqlRuleCard: Locator;
+  /** Mode radio-card group on the Outcome step. */
   public readonly modeSelect: Locator;
   /**
    * Callout shown after Apply when the query has a base but no alert condition
@@ -60,13 +68,16 @@ export class ComposeDiscoverPage {
     this.nextButton = this.page.testSubj.locator('composeDiscoverNext');
     this.backButton = this.page.testSubj.locator('composeDiscoverBack');
     this.submitButton = this.page.testSubj.locator('composeDiscoverSubmit');
-    this.openEditorButton = this.page.testSubj.locator('composeDiscoverOpenEditor');
-    this.editQueryButton = this.page.testSubj.locator('composeDiscoverEditQuery');
+    this.yamlSubmitButton = this.page.testSubj.locator('composeDiscoverYamlSubmit');
     this.alertSummaryEditorButton = this.page.testSubj.locator('esqlSummaryOpenEditor');
+    this.openEditorButton = this.alertSummaryEditorButton;
+    this.editQueryButton = this.alertSummaryEditorButton;
     this.sandboxCloseButton = this.page.testSubj.locator('querySandboxClose');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
-    this.sandboxTimeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
+    this.timeFieldSelector = this.page.testSubj.locator('composeDiscoverTimeField');
+    this.timeFieldError = this.page.testSubj.locator('composeDiscoverTimeFieldError');
+    this.sandboxTimeFieldSelector = this.page.testSubj.locator('querySandboxTimeField');
     this.ruleNameInput = this.flyout.locator('[data-test-subj="ruleNameInput"]');
     this.addRunbookButton = this.flyout.locator('[data-test-subj="addRunbookButton"]');
     this.relatedDashboardsSelector = this.flyout.locator('[data-test-subj="dashboardsSelector"]');
@@ -99,10 +110,12 @@ export class ComposeDiscoverPage {
 
   async openCreateFlyout() {
     // Wait until either entry point is rendered — split dropdown (table state)
-    // or empty-state card — before deciding which path to take.
+    // or empty-state card — before deciding which path to take. After a prior
+    // test navigates away, Kibana can still be on the splash screen when
+    // beforeEach's rulesListLoading check already passed, so allow a long wait.
     await this.createRuleSplitDropdownButton
       .or(this.createEsqlRuleCard)
-      .waitFor({ state: 'visible' });
+      .waitFor({ state: 'visible', timeout: 60_000 });
     if (await this.createRuleSplitDropdownButton.isVisible()) {
       await this.createRuleSplitDropdownButton.click();
       await this.createEsqlRuleButton.click();
@@ -113,6 +126,14 @@ export class ComposeDiscoverPage {
 
   async openEditFlyout(ruleId: string) {
     await this.editRuleButton(ruleId).click();
+  }
+
+  /**
+   * Opens the query sandbox from the Alert Condition step (alert mode).
+   */
+  async openSandbox() {
+    await this.alertSummaryEditorButton.click();
+    await this.sandboxApplyButton.waitFor({ state: 'visible' });
   }
 
   /**
@@ -132,6 +153,10 @@ export class ComposeDiscoverPage {
     await this.submitButton.click();
   }
 
+  async clickYamlSubmit() {
+    await this.yamlSubmitButton.click();
+  }
+
   async clickApply() {
     await this.sandboxApplyButton.click();
   }
@@ -143,6 +168,31 @@ export class ComposeDiscoverPage {
 
   async setRuleName(name: string) {
     await this.ruleNameInput.fill(name);
+  }
+
+  /**
+   * Switches Alert / Signal mode on the Outcome step. The sandbox must be closed
+   * first — ModeSelect is disabled while the query sandbox is open.
+   */
+  async selectMode(kind: 'alert' | 'signal') {
+    await this.page.testSubj.locator(`composeDiscoverModeSelect-${kind}`).click();
+  }
+
+  /** Waits until a time-field `<select>` option is present (field-caps resolution). */
+  async waitForTimeFieldOption(selector: Locator, value: string) {
+    await selector.locator(`option[value="${value}"]`).waitFor({ state: 'attached' });
+  }
+
+  /** Selects a value in the Alert Condition step Time field `<select>`. */
+  async selectTimeField(value: string) {
+    await this.waitForTimeFieldOption(this.timeFieldSelector, value);
+    await this.timeFieldSelector.selectOption(value);
+  }
+
+  /** Selects a value in the query sandbox Time field `<select>`. */
+  async selectSandboxTimeField(value: string) {
+    await this.waitForTimeFieldOption(this.sandboxTimeFieldSelector, value);
+    await this.sandboxTimeFieldSelector.selectOption(value);
   }
 
   async addRunbook(text: string) {

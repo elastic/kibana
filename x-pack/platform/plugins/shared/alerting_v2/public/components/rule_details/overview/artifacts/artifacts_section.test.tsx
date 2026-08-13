@@ -22,7 +22,19 @@ jest.mock('./action_policies_artifacts_subsection', () => ({
   ),
 }));
 
+const mockCanRead = jest.fn();
+
+jest.mock('@kbn/core-di-browser', () => ({
+  CoreStart: (key: string) => key,
+  useService: () => ({ canRead: mockCanRead }),
+}));
+
 describe('ArtifactsSection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockCanRead.mockReturnValue(true);
+  });
+
   it('renders the artifacts accordion with dashboard and action policy subsections', () => {
     render(
       <I18nProvider>
@@ -35,5 +47,19 @@ describe('ArtifactsSection', () => {
     expect(screen.getByTestId('ruleArtifactsSubsectionsRow')).toBeInTheDocument();
     expect(screen.getByTestId('dashboardArtifactsSubsectionMock')).toBeInTheDocument();
     expect(screen.getByTestId('actionPoliciesArtifactsSubsectionMock')).toBeInTheDocument();
+    expect(mockCanRead).toHaveBeenCalledWith('actionPolicies');
+  });
+
+  it('hides the action policies subsection when the user cannot read action policies', () => {
+    mockCanRead.mockReturnValue(false);
+
+    render(
+      <I18nProvider>
+        <ArtifactsSection />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('dashboardArtifactsSubsectionMock')).toBeInTheDocument();
+    expect(screen.queryByTestId('actionPoliciesArtifactsSubsectionMock')).not.toBeInTheDocument();
   });
 });

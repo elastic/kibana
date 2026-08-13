@@ -30,3 +30,5 @@ export * from './examples/get_example_scores_route.gen';
 export * from './scores/ingest_scores_route.gen';
 export * from './evaluators/list_evaluators_route.gen';
 export * from './evaluators/evaluate_route.gen';
+export * from './evaluators/resolve_instrumentation_route.gen';
+export * from './evaluators/validate_route.gen';

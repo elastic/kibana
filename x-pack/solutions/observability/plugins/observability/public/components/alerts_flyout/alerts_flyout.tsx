@@ -141,6 +141,7 @@ export function AlertsFlyout({
             {alert?.[ALERT_RULE_NAME] ? (
               <EuiToolTip content={alert[ALERT_RULE_NAME]?.[0] as string}>
                 <span
+                  tabIndex={0}
                   css={{
                     display: '-webkit-box',
                     WebkitLineClamp: 2,

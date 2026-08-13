@@ -27,7 +27,12 @@ export default createTestConfig({
   services,
   pageObjects,
   testFiles: [require.resolve('../test_suites/screenshot_creation')],
-  kbnServerArgs: [`--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`],
+  kbnServerArgs: [
+    `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+    // Pin the Cases templates flag ON so the case-settings docs screenshots capture
+    // the v2 templates / field-library pages regardless of the plugin default.
+    `--xpack.cases.templates.enabled=true`,
+  ],
   junit: {
     reportName: 'Serverless Observability Screenshot Creation',
   },

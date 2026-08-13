@@ -18,6 +18,7 @@ import { CaseCustomFieldRt } from '../../../common/types/domain';
 import { validateCustomFieldTypesInRequest } from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { validateMaxUserActions } from '../../common/validators';
+import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
 
 export interface ReplaceCustomFieldArgs {
   /**
@@ -49,6 +50,7 @@ export const replaceCustomField = async (
     user,
     logger,
     authorization,
+    config,
   } = clientArgs;
 
   try {
@@ -112,11 +114,32 @@ export const replaceCustomField = async (
 
     const updatedAt = new Date().toISOString();
 
+    // Mirror customFields into extended_fields so that automations writing to the legacy API
+    // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
+    // value always overrides the mirror; a null value clears the mirror key.
+    //
+    // mergeCustomFieldsIntoExtendedFields returns the *same reference* when the result is
+    // value-identical — that signals "no change needed" and we must not spread extended_fields
+    // into the patch payload (it would be a spurious write that also triggers an extra user action).
+    const existingExtendedFields = caseToUpdate.attributes.extended_fields;
+    // Pass only the single field being replaced, not the full reconstructed decodedCustomFields.
+    // The reconstructed array includes all stored customFields from the case, and stored-null
+    // optional fields would hit the merge's delete branch and wipe unrelated mirror keys.
+    const mergedExtendedFields = config.templates.enabled
+      ? mergeCustomFieldsIntoExtendedFields(
+          [{ key: customFieldId, type: foundCustomField.type, value }],
+          existingExtendedFields
+        )
+      : undefined;
+    const extendedFieldsChanged = mergedExtendedFields !== existingExtendedFields;
+
     const patchCasesPayload = {
       caseId,
       originalCase: caseToUpdate,
       updatedAttributes: {
         customFields: decodedCustomFields,
+        ...(extendedFieldsChanged &&
+          mergedExtendedFields != null && { extended_fields: mergedExtendedFields }),
         updated_at: updatedAt,
         updated_by: user,
       },

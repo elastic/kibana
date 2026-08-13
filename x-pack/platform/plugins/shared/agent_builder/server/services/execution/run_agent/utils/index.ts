@@ -13,14 +13,7 @@ export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
 export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
-export {
-  prepareAttachmentPresentation,
-  getConversationAttachmentsSection,
-  getConversationAttachmentsSystemMessages,
-  type AttachmentPresentation,
-  type AttachmentPresentationMode,
-  type AttachmentPresentationConfig,
-} from './attachment_presentation';
+export { formatAttachmentsMetadata } from './attachment_presentation';
 export {
   createResultTransformer,
   type CreateResultTransformerOptions,

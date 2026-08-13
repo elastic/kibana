@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useLocation } from 'react-router-dom';
 

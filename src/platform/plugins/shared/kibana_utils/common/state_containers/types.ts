@@ -15,7 +15,7 @@ import type { FC, ComponentType } from 'react';
  * Base {@link StateContainer} state shape
  * @public
  */
-export type BaseState = object;
+export type BaseState = object | undefined;
 
 /**
  * @internal

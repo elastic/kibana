@@ -25,6 +25,11 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
+// Link rendered by the `security.timeline` case attachment (unified attachments flow).
+export const TIMELINE_CASE_ATTACHMENT_LINK = (timelineId: string) => {
+  return `[data-test-subj="timeline-attachment-link-${timelineId}"]`;
+};
+
 export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';

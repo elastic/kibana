@@ -7,36 +7,33 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { esql } from '@elastic/esql';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { get } from 'lodash';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import {
-  buildCategorizeWithSampleQuery,
+  categorizeWithNoiseExclusion,
   columnPath,
-  parseCategorizeWithSampleRows,
+  type CategorizeWithSampleRow,
 } from '../../utils/esql_categorize';
 import {
   getEsqlDocumentId,
   parseEsqlSourceDocuments,
 } from '../../utils/parse_esql_source_documents';
-import { getSampleDocumentsEsql } from './get_sample_documents';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
 const MAX_DOCS_TO_SAMPLE = 100_000;
-// Over-fetch factor for each metadata-free source-fetch round: a representative
-// value is not a unique key, so we pull several docs per value and keep the
-// first. Combined with the re-query-missing loop below this guarantees coverage.
+// A representative value is not a unique key, so over-fetch per value and keep the first.
 const SOURCE_FETCH_PER_VALUE = 10;
 
 interface GetDiverseSampleDocumentsOptions {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
-  offset: number;
+  iteration: number;
   size?: number;
   logger: Logger;
 }
@@ -47,7 +44,7 @@ export async function getDiverseSampleDocuments({
   start,
   end,
   size = 100,
-  offset,
+  iteration,
   logger,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
@@ -59,52 +56,24 @@ export async function getDiverseSampleDocuments({
     runEsqlCount({ esClient, indices, filter }),
   ]);
 
-  if (totalDocs === 0) {
+  if (totalDocs === 0 || !messageField) {
+    // Nothing to categorize; the caller's random sampling arm backfills this case.
     return { hits: [] };
   }
 
-  if (!messageField) {
-    // The old DSL path fell back to plain random sampling when no log-message
-    // text field was available. Keep that behavior, but use the ES|QL sampler so
-    // this retrieval path no longer depends on search hits/fields.
-    const { hits } = await getSampleDocumentsEsql({
-      esClient,
-      index,
-      start,
-      end,
-      sampleSize: size,
-    });
-    return { hits };
-  }
-
-  // The SAMPLE probability mirrors the previous DSL random_sampler cap:
-  // categorizing every document in a busy stream is expensive, and this helper
-  // only needs representative document diversity, not exact category counts.
   const samplingProbability =
     MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
 
-  // Categorize pass: group by message pattern and keep one representative field
-  // value per pattern via `TOP(<field>::keyword, 1)`. This needs no `_index`/
-  // `_id`/`_source` metadata, so unlike the previous two-pass approach it works
-  // on ES|QL views (e.g. query streams' `$.<name>` views), where `FROM <view>
-  // METADATA _index, _id` raises `Unknown column [_index]`.
-  //
-  // Ask for size+offset rows so we can client-side slice the window
-  // [offset, offset+size] after sorting by count.
-  const categorizeResponse = (await esClient.esql.query({
-    query: buildCategorizeWithSampleQuery({
-      indices,
-      field: messageField,
-      limit: size + offset,
-      samplingProbability,
-    }),
+  const rows = await categorizeWithNoiseExclusion({
+    esClient,
+    indices,
+    field: messageField,
+    total: totalDocs,
+    samplingProbability,
     filter,
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  });
 
-  const window = parseCategorizeWithSampleRows(categorizeResponse)
-    .sort((a, b) => b.count - a.count)
-    .slice(offset, offset + size);
+  const window = selectStratifiedWindow(rows, { iteration, size });
 
   const sampleValues = Array.from(
     new Set(window.map((row) => row.sample).filter((sample) => sample.length > 0))
@@ -122,7 +91,6 @@ export async function getDiverseSampleDocuments({
     filter,
   });
 
-  // Emit one document per category, preserving the count-descending window order.
   const hits: Array<SearchHit<Record<string, unknown>>> = [];
   const emittedValues = new Set<string>();
   for (const row of window) {
@@ -142,21 +110,56 @@ export async function getDiverseSampleDocuments({
   return { hits };
 }
 
+// Stable ordering by pattern identity, so sampling jitter on near-equal counts
+// can't change which representative an iteration picks.
+const hashPattern = (value: string): number => {
+  const hashMultiplier = 31;
+  const hashModulus = 2 ** 31 - 1;
+
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * hashMultiplier + value.charCodeAt(i)) % hashModulus;
+  }
+  return hash;
+};
+
 /**
- * Fetches the full document for each representative value, returning a map from
- * representative value to its hit.
- *
- * Keeping `METADATA _id, _source` means concrete indices return the real nested
- * `_source`, while views silently drop it and `parseEsqlSourceDocuments`
- * reconstructs the source from the projected columns. The join key is the
- * representative field value (not `_id`), so this is metadata-free too.
- *
- * A representative value is not a unique key, so a single `WHERE field IN
- * (values) | LIMIT n` lets one high-frequency value crowd others out of the
- * budget. To guarantee every value resolves, re-query only the still-missing
- * values each round — their per-value budget grows as the set shrinks — until
- * all are resolved or a round resolves nothing (the rest have no live document).
- * `pending` strictly shrinks each iteration, so this terminates.
+ * Cursor-free window of patterns for one iteration: rank by frequency, cut into
+ * `size` bands, take one pattern per band so the window spans common→rare.
+ * `iteration` rotates the within-band pick, advancing coverage without a
+ * positional cursor; within-band order is {@link hashPattern} for jitter stability.
+ */
+export const selectStratifiedWindow = (
+  rows: CategorizeWithSampleRow[],
+  { iteration, size }: { iteration: number; size: number }
+): CategorizeWithSampleRow[] => {
+  if (rows.length <= size) {
+    return rows;
+  }
+
+  const ranked = rows.slice().sort((a, b) => b.count - a.count);
+  const rotation = Math.max(0, iteration - 1);
+  const window: CategorizeWithSampleRow[] = [];
+
+  for (let band = 0; band < size; band++) {
+    const from = Math.floor((band * ranked.length) / size);
+    const to = Math.floor(((band + 1) * ranked.length) / size);
+    const members = ranked
+      .slice(from, to)
+      .sort((a, b) => hashPattern(a.pattern) - hashPattern(b.pattern));
+    if (members.length > 0) {
+      window.push(members[rotation % members.length]);
+    }
+  }
+
+  return window;
+};
+
+/**
+ * Maps each representative value to its full document. Join key is the field value,
+ * not `_id`, so views that drop `_source` work via `parseEsqlSourceDocuments`. A
+ * value isn't unique, so one round's `LIMIT` can starve some; re-query the still
+ * missing ones each round until none resolve (`pending` shrinks, so it terminates).
  */
 async function fetchRepresentativeDocuments({
   esClient,
@@ -165,7 +168,7 @@ async function fetchRepresentativeDocuments({
   sampleValues,
   filter,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   indices: string[];
   field: string;
   sampleValues: string[];
@@ -175,7 +178,7 @@ async function fetchRepresentativeDocuments({
   let pending = sampleValues;
 
   while (pending.length > 0) {
-    const fetchResponse = (await esClient.esql.query({
+    const fetchResponse = (await esClient.esql('diverse_sample_fetch_sources', {
       query: buildSourceFetchQuery({
         indices,
         field,
@@ -183,7 +186,6 @@ async function fetchRepresentativeDocuments({
         limit: pending.length * SOURCE_FETCH_PER_VALUE,
       }),
       filter,
-      drop_null_columns: true,
     })) as unknown as ESQLSearchResponse;
 
     const docs = parseEsqlSourceDocuments(fetchResponse);
@@ -207,9 +209,6 @@ async function fetchRepresentativeDocuments({
   return valueToHit;
 }
 
-/**
- * Resolves the categorized field value for each parsed document.
- */
 function resolveFieldValues({
   response,
   docs,
@@ -259,12 +258,13 @@ async function detectMessageField({
   start,
   end,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
 }): Promise<string | undefined> {
-  const columns = await getEsqlColumnSchema({ esClient, index, start, end });
+  // Traced esql() hardcodes drop_null_columns: true, which prunes all columns from a LIMIT 0 probe.
+  const columns = await getEsqlColumnSchema({ esClient: esClient.client, index, start, end });
   const textColumnNames = new Set(
     columns.filter((column) => column.type === 'text').map((column) => column.name)
   );
@@ -283,14 +283,13 @@ async function runEsqlCount({
   indices,
   filter,
 }: {
-  esClient: ElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   indices: string[];
   filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
 }): Promise<number> {
-  const response = (await esClient.esql.query({
+  const response = (await esClient.esql('diverse_sample_count', {
     query: esql.from(indices).pipe`STATS total = COUNT(*)`.print('basic'),
     filter,
-    drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 

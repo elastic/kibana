@@ -39,6 +39,11 @@ import { isPackageUnverified, isPackageUpdatable } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
 
+export interface CollectionStateRef {
+  groupId: string;
+  title: string;
+}
+
 export interface IntegrationCardItem {
   categories: string[];
   description: string;
@@ -46,12 +51,15 @@ export interface IntegrationCardItem {
   descriptionLineClamp?: number;
   extraLabelsBadges?: React.ReactNode[];
   fromIntegrations?: string;
+  fromCollection?: CollectionStateRef;
   hasDataStreams?: boolean;
   icons: Array<PackageSpecIcon | CustomIntegrationIcon>;
   id: string;
   installStatus?: EpmPackageInstallStatus;
   integration: string;
   isCollectionCard?: boolean;
+  groupMembers?: IntegrationCardItem[];
+  searchableContent?: string;
   isQuickstart?: boolean;
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
@@ -303,6 +311,17 @@ function formatAttempt(attempt: InstallFailedAttempt): React.ReactNode {
       <p>
         {attempt.error?.name || ''} : {attempt.error?.message || ''}
       </p>
+      {attempt.missing_assets && attempt.missing_assets.length > 0 && (
+        <p>
+          <FormattedMessage
+            id="xpack.fleet.packageCard.missingAssetsDescription"
+            defaultMessage="Missing assets: {assets}"
+            values={{
+              assets: attempt.missing_assets.map((a) => `${a.type}/${a.id}`).join(', '),
+            }}
+          />
+        </p>
+      )}
     </>
   );
 }

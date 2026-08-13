@@ -13,18 +13,20 @@ import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 
 jest.mock('../../hooks/use_eis_models');
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
-      application: {
-        capabilities: { searchInferenceEndpoints: { show: true, manage: true } },
-      },
-    },
-  })),
-}));
+jest.mock('../../hooks/use_kibana');
 
-const mockUseKibana = jest.requireMock('../../hooks/use_kibana').useKibana as jest.Mock;
+const { useKibana } = jest.requireMock('../../hooks/use_kibana');
+const mockUseKibana = useKibana as jest.Mock;
+
+const mockKibanaReturn = ({ manage = true }: { manage?: boolean } = {}) => ({
+  services: {
+    notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+    application: {
+      capabilities: { searchInferenceEndpoints: { show: true, manage } },
+    },
+  },
+});
+
 jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
@@ -36,6 +38,7 @@ const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
 describe('ElasticInferenceServiceModelsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue(mockKibanaReturn());
   });
 
   it('renders a loading spinner when data is loading', () => {
@@ -143,14 +146,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
 
   describe('read-only mode (manage: false)', () => {
     beforeEach(() => {
-      mockUseKibana.mockReturnValue({
-        services: {
-          notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
-          application: {
-            capabilities: { searchInferenceEndpoints: { show: true, manage: false } },
-          },
-        },
-      });
+      mockUseKibana.mockReturnValue(mockKibanaReturn({ manage: false }));
     });
 
     it('does not render the Add endpoint button inside the model detail flyout', () => {

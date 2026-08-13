@@ -95,7 +95,7 @@ const previewForDlmSelection = ({
   };
 };
 
-const previewFromLifecycle = ({
+export const previewFromLifecycle = ({
   lifecycle,
   ilmPolicies,
   isServerless,

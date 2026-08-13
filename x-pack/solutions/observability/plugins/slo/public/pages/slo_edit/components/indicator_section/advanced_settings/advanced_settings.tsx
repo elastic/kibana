@@ -22,11 +22,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOForm } from '../../../types';
+import { usePluginContext } from '../../../../../hooks/use_plugin_context';
 import { SyncFieldSelector } from './sync_field_selector';
 
 export function AdvancedSettings() {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const { isServerless } = usePluginContext();
   const preventBackfillCheckbox = useGeneratedHtmlId({ prefix: 'preventBackfill' });
+  const preventCrossProjectSearchCheckbox = useGeneratedHtmlId({
+    prefix: 'preventCrossProjectSearch',
+  });
   const advancedSettingsAccordion = useGeneratedHtmlId({ prefix: 'advancedSettingsAccordion' });
 
   return (
@@ -144,36 +149,72 @@ export function AdvancedSettings() {
           </EuiFlexItem>
         </EuiFlexGrid>
 
-        <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
-          <Controller
-            name="settings.preventInitialBackfill"
-            control={control}
-            render={({ field: { ref, onChange, ...field } }) => (
-              <EuiCheckbox
-                id={preventBackfillCheckbox}
-                label={
-                  <span>
-                    {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
-                      defaultMessage: 'Prevent initial backfill of data',
-                    })}{' '}
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',
-                        {
-                          defaultMessage:
-                            'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.',
-                        }
-                      )}
-                      position="top"
-                    />
-                  </span>
-                }
-                checked={Boolean(field.value)}
-                onChange={(event: any) => onChange(event.target.checked)}
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFormRow isInvalid={getFieldState('settings.preventInitialBackfill').invalid}>
+            <Controller
+              name="settings.preventInitialBackfill"
+              control={control}
+              render={({ field: { ref, onChange, ...field } }) => (
+                <EuiCheckbox
+                  id={preventBackfillCheckbox}
+                  label={
+                    <span>
+                      {i18n.translate('xpack.slo.sloEdit.settings.preventInitialBackfill.label', {
+                        defaultMessage: 'Prevent initial backfill of data',
+                      })}{' '}
+                      <EuiIconTip
+                        content={i18n.translate(
+                          'xpack.slo.sloEdit.settings.preventInitialBackfill.tooltip',
+                          {
+                            defaultMessage:
+                              'Start aggregating data from the time the SLO is created, instead of backfilling data from the beginning of the time window.',
+                          }
+                        )}
+                        position="top"
+                      />
+                    </span>
+                  }
+                  checked={Boolean(field.value)}
+                  onChange={(event: any) => onChange(event.target.checked)}
+                />
+              )}
+            />
+          </EuiFormRow>
+
+          {isServerless && (
+            <EuiFormRow isInvalid={getFieldState('settings.preventCrossProjectSearch').invalid}>
+              <Controller
+                name="settings.preventCrossProjectSearch"
+                control={control}
+                render={({ field: { ref, onChange, ...field } }) => (
+                  <EuiCheckbox
+                    id={preventCrossProjectSearchCheckbox}
+                    label={
+                      <span>
+                        {i18n.translate(
+                          'xpack.slo.sloEdit.settings.preventCrossProjectSearch.label',
+                          { defaultMessage: 'Restrict data collection to this project' }
+                        )}{' '}
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'xpack.slo.sloEdit.settings.preventCrossProjectSearch.tooltip',
+                            {
+                              defaultMessage:
+                                'Prevents the rollup transform from reading data from other linked projects (cross-project search). Enable this to limit SLI calculations to data in the current project only.',
+                            }
+                          )}
+                          position="top"
+                        />
+                      </span>
+                    }
+                    checked={Boolean(field.value)}
+                    onChange={(event: any) => onChange(event.target.checked)}
+                  />
+                )}
               />
-            )}
-          />
-        </EuiFormRow>
+            </EuiFormRow>
+          )}
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiAccordion>
   );

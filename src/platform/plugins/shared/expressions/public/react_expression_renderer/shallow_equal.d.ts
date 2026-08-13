@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import 'react-redux';
+import 'react-redux-v7';
 
-declare module 'react-redux' {
+declare module 'react-redux-v7' {
   export function shallowEqual<T>(objA: T, objB: T): boolean;
 }

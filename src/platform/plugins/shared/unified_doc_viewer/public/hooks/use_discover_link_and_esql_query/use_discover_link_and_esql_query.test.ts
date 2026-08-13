@@ -8,13 +8,15 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { from, where } from '@kbn/esql-composer';
+import { where } from '@kbn/esql-composer';
 import { useDiscoverLinkAndEsqlQuery } from '.';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 
 jest.mock('../use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: jest.fn(),
 }));
+
+const NULLIFY_HEADER = 'SET unmapped_fields="NULLIFY";';
 
 describe('useDiscoverLinkAndEsqlQuery', () => {
   const mockUseGetGenerateDiscoverLink = jest.mocked(useGetGenerateDiscoverLink);
@@ -35,7 +37,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     expect(generateDiscoverLink).not.toHaveBeenCalled();
   });
 
-  it('returns discoverUrl and esqlQueryString when inputs are provided', () => {
+  it('returns the raw esqlQueryString without SET prefix when no unmappedFieldsPolicy is provided', () => {
     const DISCOVER_URL = 'http://discover/url';
     const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
@@ -47,6 +49,25 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
 
     expect(generateDiscoverLink).toHaveBeenCalledWith(whereClause);
     expect(result.current.discoverUrl).toBe(DISCOVER_URL);
-    expect(result.current.esqlQueryString).toBe(from(indexPattern).pipe(whereClause).toString());
+    expect(result.current.esqlQueryString).not.toContain('SET unmapped_fields');
+    expect(result.current.esqlQueryString).toContain('FROM traces-*');
+    expect(result.current.esqlQueryString).toContain('trace.id == "abc123"');
+  });
+
+  it('prepends the SET directive when unmappedFieldsPolicy is provided', () => {
+    const DISCOVER_URL = 'http://discover/url';
+    const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
+    mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
+
+    const indexPattern = 'logs-*';
+    const whereClause = where('trace.id == ?traceId', { traceId: 'abc123' });
+
+    const { result } = renderHook(() =>
+      useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause, unmappedFieldsPolicy: 'NULLIFY' })
+    );
+
+    expect(result.current.esqlQueryString).toBe(
+      `${NULLIFY_HEADER}\nFROM logs-*\n  | WHERE trace.id == "abc123"`
+    );
   });
 });

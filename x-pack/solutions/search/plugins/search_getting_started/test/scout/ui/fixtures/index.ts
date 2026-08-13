@@ -13,11 +13,14 @@ import type {
   ScoutWorkerFixtures,
 } from '@kbn/scout-search';
 import { test as base, createLazyPageObject } from '@kbn/scout-search';
+
+import { EmbeddedConsole } from '@kbn/console-plugin/test/scout/ui/fixtures/page_objects';
 import { GettingStarted } from './page_objects/getting_started';
 
 export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     gettingStarted: GettingStarted;
+    embeddedConsole: EmbeddedConsole;
   };
   browserAuth: BrowserAuthFixture;
 }
@@ -37,6 +40,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     const extendedPageObjects = {
       ...pageObjects,
       gettingStarted: createLazyPageObject(GettingStarted, page),
+      embeddedConsole: createLazyPageObject(EmbeddedConsole, page),
     };
     await use(extendedPageObjects);
   },

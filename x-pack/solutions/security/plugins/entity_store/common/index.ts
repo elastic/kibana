@@ -24,6 +24,14 @@ export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
 
+export {
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENGINE_DESCRIPTOR_TYPE_NAME,
+  ENGINE_DESCRIPTOR_CREATE_PRIVILEGE,
+} from './privileges';
+
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([
   'not_installed',

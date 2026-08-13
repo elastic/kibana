@@ -146,6 +146,12 @@ const ExperimentHeader: React.FC<{
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
   const evaluatorModel = experimentData?.evaluator_model?.id;
+  const displayName = experimentData?.experiment_name || experimentId;
+  const detailLocation = {
+    pathname: `/experiments/${encodeURIComponent(experimentId)}`,
+    search: executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '',
+  };
+  const detailHref = history.createHref(detailLocation);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
@@ -170,15 +176,26 @@ const ExperimentHeader: React.FC<{
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.VIEW_EXPERIMENT_DETAIL}>
+          <EuiToolTip
+            content={
+              <>
+                {i18n.VIEW_EXPERIMENT_DETAIL}
+                <br />
+                {experimentId}
+              </>
+            }
+          >
             <EuiLink
-              onClick={() => {
-                const path = `/experiments/${encodeURIComponent(experimentId)}`;
-                const query = executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '';
-                history.push(`${path}${query}`);
+              href={detailHref}
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) {
+                  return;
+                }
+                event.preventDefault();
+                history.push(detailLocation);
               }}
             >
-              {experimentId}
+              {displayName}
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
@@ -412,7 +429,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_A} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="primary"
                     aria-label={i18n.FLYOUT_TRACE_A}
                     onClick={() => setSelectedTraceId(item.traceIdA)}
@@ -425,7 +442,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_B} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="accent"
                     aria-label={i18n.FLYOUT_TRACE_B}
                     onClick={() => setSelectedTraceId(item.traceIdB)}
@@ -460,7 +477,7 @@ const ExampleDrilldownFlyout: React.FC<{
         <EuiFlyoutBody>
           {!isLoading && pairs.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.FLYOUT_NO_EXAMPLES_TITLE}</h3>}
               body={<p>{i18n.FLYOUT_NO_EXAMPLES_BODY}</p>}
             />
@@ -778,7 +795,7 @@ export const CompareExperimentsPage: React.FC = () => {
                   ? 'check'
                   : csvCopyState === 'failed'
                   ? 'warning'
-                  : 'exportAction'
+                  : 'upload'
               }
               onClick={handleCsvExport}
               disabled={csvCopyState !== 'idle'}
@@ -913,7 +930,7 @@ export const CompareExperimentsPage: React.FC = () => {
 
           {sortedResults.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.NO_RESULTS_TITLE}</h3>}
               body={<p>{i18n.NO_RESULTS_BODY}</p>}
               actions={[

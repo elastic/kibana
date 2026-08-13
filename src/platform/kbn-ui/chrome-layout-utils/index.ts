@@ -26,3 +26,8 @@ export {
   getHighContrastBorder,
   getHighContrastSeparator,
 } from './src/high_contrast';
+
+export {
+  useCurrentChromeApplicationBreakpoint,
+  useIsWithinChromeApplicationBreakpoints,
+} from './src/application_breakpoints';

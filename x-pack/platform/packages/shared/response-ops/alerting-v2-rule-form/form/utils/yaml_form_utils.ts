@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isPlainObject } from 'lodash';
 import type { Query } from '@kbn/alerting-v2-schemas';
-import { dump, load } from 'js-yaml';
+import { noDataStrategy as noDataStrategyEnum } from '@kbn/alerting-v2-schemas';
+import { parse, stringify } from 'yaml';
 import type {
   FormValues,
   StateTransition,
@@ -29,16 +31,16 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
   if (!Array.isArray(artifacts)) return undefined;
 
   const parsedArtifacts = artifacts.flatMap((artifact) => {
-    if (!artifact || typeof artifact !== 'object' || Array.isArray(artifact)) {
+    if (!isPlainObject(artifact)) {
       return [];
     }
 
-    const { id, type, value } = artifact as Record<string, unknown>;
-    if (typeof id !== 'string' || typeof type !== 'string' || typeof value !== 'string') {
+    const { id, type, data } = artifact as Record<string, unknown>;
+    if (typeof id !== 'string' || typeof type !== 'string' || !isPlainObject(data)) {
       return [];
     }
 
-    return [{ id, type, value }];
+    return [{ id, type, data: data as Record<string, any> }];
   });
 
   return parsedArtifacts.length ? parsedArtifacts : undefined;
@@ -61,7 +63,7 @@ interface YamlRuleObject {
   no_data_strategy?: string;
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
-  artifacts?: Array<{ id: string; type: string; value: string }>;
+  artifacts?: Array<{ id: string; type: string; data: Record<string, any> }>;
 }
 
 const serializeStateTransition = (st?: StateTransition): YamlStateTransition | undefined => {
@@ -104,7 +106,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
     ...(values.noDataStrategy ? { no_data_strategy: values.noDataStrategy } : {}),
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
-    ...(st && { state_transition: st }),
+    ...(values.kind === 'alert' && st ? { state_transition: st } : {}),
     ...(allArtifacts?.length && { artifacts: allArtifacts }),
   };
 };
@@ -163,7 +165,7 @@ const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery =>
 export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   let parsed: unknown;
   try {
-    parsed = load(yamlString);
+    parsed = parse(yamlString);
   } catch (error) {
     return {
       values: null,
@@ -231,18 +233,19 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       ? (rawRecoveryStrategy as RecoveryStrategy)
       : undefined;
 
+  const resolvedKind = (kind as 'alert' | 'signal') ?? 'alert';
+
   const rawNoDataStrategy = obj.no_data_strategy;
-  const noDataStrategy =
-    rawNoDataStrategy === 'last_known_status' ||
-    rawNoDataStrategy === 'emit' ||
-    rawNoDataStrategy === 'recover' ||
-    rawNoDataStrategy === 'none'
+  const validStrategies = Object.values(noDataStrategyEnum) as string[];
+  const parsedNoDataStrategy =
+    typeof rawNoDataStrategy === 'string' && validStrategies.includes(rawNoDataStrategy)
       ? (rawNoDataStrategy as NoDataStrategy)
       : undefined;
+  const noDataStrategy = parsedNoDataStrategy ?? (resolvedKind === 'alert' ? 'none' : undefined);
 
   return {
     values: {
-      kind: (kind as 'alert' | 'signal') ?? 'alert',
+      kind: resolvedKind,
       metadata: {
         name: typeof name === 'string' ? name.trim() : '',
         enabled: metadata?.enabled !== false,
@@ -272,7 +275,16 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
 /**
  * Serialize current form values to YAML string
+ *
+ * `singleQuote` keeps scalars that need quoting in the single-quoted style users
+ * already see in the editor (e.g. `time_field: '@timestamp'`), and
+ * `aliasDuplicateObjects: false` inlines repeated objects rather than emitting
+ * anchors/aliases, which are undesirable in hand-editable rule YAML.
  */
 export const serializeFormToYaml = (values: FormValues): string => {
-  return dump(formValuesToYamlObject(values), { lineWidth: 120, noRefs: true });
+  return stringify(formValuesToYamlObject(values), {
+    lineWidth: 120,
+    singleQuote: true,
+    aliasDuplicateObjects: false,
+  });
 };

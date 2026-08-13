@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod/v4';
+import type { EvidenceRound } from './evidence/types';
 
 export interface TraceAccessor {
   traceId: string;
@@ -17,6 +18,7 @@ export interface TraceAccessor {
 
 export interface EvaluatorContext<ReferenceData = Record<string, unknown>> {
   trace: TraceAccessor;
+  round: EvidenceRound;
   referenceData?: ReferenceData;
   inferenceClient?: BoundInferenceClient;
   log: Logger;
@@ -38,6 +40,7 @@ export interface EvaluatorDefinition<ReferenceData = Record<string, unknown>> {
   kind: 'llm' | 'code';
   description: string;
   referenceDataSchema?: z.ZodType<ReferenceData>;
+  evidenceSchema?: z.ZodType<Partial<EvidenceRound>>;
   evaluate(ctx: EvaluatorContext<ReferenceData>): Promise<EvaluatorResult>;
 }
 

@@ -10,7 +10,7 @@ import { validateNonEmptyString } from '../schema_utils';
 
 export const GetOneScriptRequestSchema = {
   params: schema.object({
-    script_id: schema.string({ validate: validateNonEmptyString }),
+    script_id: schema.string({ maxLength: 256, validate: validateNonEmptyString }),
   }),
 };
 
