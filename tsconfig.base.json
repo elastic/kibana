@@ -343,6 +343,8 @@
       "@kbn/config-schema/*": ["./src/platform/packages/shared/kbn-config-schema/*"],
       "@kbn/connector-cli": ["./src/platform/packages/shared/kbn-connector-cli"],
       "@kbn/connector-cli/*": ["./src/platform/packages/shared/kbn-connector-cli/*"],
+      "@kbn/connector-events-bridge-plugin": ["./x-pack/platform/plugins/shared/connector_events_bridge"],
+      "@kbn/connector-events-bridge-plugin/*": ["./x-pack/platform/plugins/shared/connector_events_bridge/*"],
       "@kbn/connector-schemas": ["./src/platform/packages/shared/kbn-connector-schemas"],
       "@kbn/connector-schemas/*": ["./src/platform/packages/shared/kbn-connector-schemas/*"],
       "@kbn/connector-specs": ["./src/platform/packages/shared/kbn-connector-specs"],
