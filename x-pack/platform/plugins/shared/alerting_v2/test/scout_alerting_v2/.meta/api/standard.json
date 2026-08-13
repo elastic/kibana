@@ -1,5 +1,5 @@
 {
-  "sha1": "b27aab42453cccb0b7335b5698d9025e5dbe4791",
+  "sha1": "57e6bae28710e945037ba53bf2a643dcb4030116",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -6746,6 +6746,32 @@
       }
     },
     {
+      "id": "b6357d3d7fe0fc8-aada47ed9bc3de0",
+      "title": "Update rule API validation: should reject updating a signal rule query to composed format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 445,
+        "column": 10
+      }
+    },
+    {
+      "id": "b6357d3d7fe0fc8-59a4fa78ddb28c7",
+      "title": "Update rule API validation: should reject setting recovery_strategy on a signal rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 469,
+        "column": 10
+      }
+    },
+    {
       "id": "b6357d3d7fe0fc8-0be0aa964382938",
       "title": "Update rule API authorization: should return 200 for a user with full alerting_v2 privileges",
       "expectedStatus": "passed",
@@ -6754,7 +6780,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 433,
+        "line": 484,
         "column": 10
       }
     },
@@ -6767,7 +6793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 448,
+        "line": 499,
         "column": 10
       }
     },
@@ -6780,7 +6806,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 468,
+        "line": 519,
         "column": 10
       }
     },
