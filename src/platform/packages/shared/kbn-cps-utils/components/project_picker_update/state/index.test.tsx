@@ -10,17 +10,35 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject } from '../../../types';
 import { ProjectPickerList } from '../blocks/list/list';
+import { getProjectPickerListItemSwitchTestSubj } from '../blocks/list/list_item/list_item';
 import { FilterOperator, type FilterExpressionValue } from '../utils/filter_input_codec';
+import {
+  PROJECT_SELECTION_DIMENSION,
+  projectRoutingCodec,
+  type ProjectRoutingExpression,
+} from '../utils/project_routing_codec';
 import {
   ProjectPickerStateProvider,
   useProjectPickerActions,
   useProjectPickerState,
   type ProjectPickerStateProviderProps,
 } from '.';
+
+const emptyEncodeInput: Omit<ProjectRoutingExpression, 'projectRoutingStrategy'> = {
+  filterExpressions: [],
+  excludedProjectIds: [],
+  selectedProjectIds: [],
+};
+
+const getProjectListItemSwitch = (projectId: CPSProject['_id']) =>
+  screen.getByTestId(getProjectPickerListItemSwitchTestSubj(projectId));
+
+const toggleProjectListItemSwitch = (user: UserEvent, projectId: CPSProject['_id']) =>
+  user.click(getProjectListItemSwitch(projectId));
 
 const originProject: CPSProject = {
   _id: 'origin',
@@ -153,7 +171,10 @@ describe('ProjectPickerStateProvider', () => {
   describe('projectRoutingStrategy', () => {
     describe('dynamic', () => {
       it('does not call onProjectRoutingChange on mount when routing is already in sync', async () => {
-        const { onProjectRoutingChange } = renderProjectPicker();
+        const { onProjectRoutingChange } = renderProjectPicker({
+          currentProjectRoutingGetter: () => '_id:*',
+          defaultProjectRoutingGetter: () => '_id:*',
+        });
 
         await waitFor(() => {
           expect(onProjectRoutingChange).not.toHaveBeenCalled();
@@ -195,16 +216,17 @@ describe('ProjectPickerStateProvider', () => {
         const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
           currentRouting = routing;
         });
+
         renderProjectPicker({
           projectRoutingStrategy: 'dynamic',
           onProjectRoutingChange,
           currentProjectRoutingGetter: () => currentRouting,
         });
 
-        await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:* AND NOT _id:linked1');
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('(_id:* AND NOT _id:linked1)');
         });
       });
 
@@ -241,16 +263,29 @@ describe('ProjectPickerStateProvider', () => {
     });
 
     describe('snapshot', () => {
-      it('calls onProjectRoutingChange with clauses for all projects when there are no exclusions', async () => {
-        const onProjectRoutingChange = jest.fn();
+      it('does not call onProjectRoutingChange on mount and emits clauses for all projects once the user makes a change', async () => {
+        const user = userEvent.setup();
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
         renderProjectPicker({
           projectRoutingStrategy: 'snapshot',
           onProjectRoutingChange,
+          currentProjectRoutingGetter: () => currentRouting,
         });
 
-        expect(onProjectRoutingChange).toHaveBeenCalledWith(
-          '_id:origin AND _id:linked1 AND _id:linked2'
-        );
+        expect(onProjectRoutingChange).not.toHaveBeenCalled();
+
+        // deselecting and reselecting a project is a user change that results in all projects selected
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
+
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
+            '_id:origin AND _id:linked1 AND _id:linked2'
+          );
+        });
       });
 
       it('omits deselected projects from the explicit id clauses once exclusions exist', async () => {
@@ -265,7 +300,7 @@ describe('ProjectPickerStateProvider', () => {
           currentProjectRoutingGetter: () => currentRouting,
         });
 
-        await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
 
         await waitFor(() => {
           expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:origin AND _id:linked2');
@@ -296,15 +331,98 @@ describe('ProjectPickerStateProvider', () => {
           </ProjectPickerStateProvider>
         );
 
-        expect(onProjectRoutingChange).toHaveBeenCalledWith(
-          '_id:origin AND _id:linked1 AND _id:linked2'
-        );
+        expect(onProjectRoutingChange).not.toHaveBeenCalled();
 
         await user.click(screen.getByTestId('addFilterExpression'));
 
         await waitFor(() => {
           // the _type:security clause is added to the filter expression, which excludes project with id linked2
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security AND _id:linked1');
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
+            'NOT (_type:security) AND _id:linked1'
+          );
+        });
+      });
+    });
+
+    describe('cross-strategy routing', () => {
+      it('decodes a dynamic routing string in a snapshot picker and converts it once the user makes a change', async () => {
+        const user = userEvent.setup();
+
+        let currentRouting: ProjectRouting = projectRoutingCodec.encode({
+          ...emptyEncodeInput,
+          excludedProjectIds: [linkedProjectOne._id],
+          projectRoutingStrategy: 'dynamic',
+        });
+
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
+
+        renderProjectPicker({
+          projectRoutingStrategy: 'snapshot',
+          onProjectRoutingChange,
+          currentProjectRoutingGetter: () => currentRouting,
+        });
+
+        // the dynamic exclusion is reflected in the list without rewriting the routing string
+        expect(getProjectListItemSwitch(linkedProjectOne._id)).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
+        expect(onProjectRoutingChange).not.toHaveBeenCalled();
+
+        // Now we exclude the second project
+        await toggleProjectListItemSwitch(user, linkedProjectTwo._id);
+
+        // Now we expect the generated routing to be the origin project only
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
+            projectRoutingCodec.encode({
+              ...emptyEncodeInput,
+              selectedProjectIds: [originProject._id],
+              projectRoutingStrategy: 'snapshot',
+            })
+          );
+        });
+      });
+
+      it('decodes a snapshot routing string in a dynamic picker and converts it once the user makes a change', async () => {
+        const user = userEvent.setup();
+
+        let currentRouting: ProjectRouting = projectRoutingCodec.encode({
+          ...emptyEncodeInput,
+          selectedProjectIds: [originProject._id, linkedProjectTwo._id],
+          projectRoutingStrategy: 'snapshot',
+        });
+
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
+
+        // We start with the origin project and the second project selected
+        renderProjectPicker({
+          projectRoutingStrategy: 'dynamic',
+          onProjectRoutingChange,
+          currentProjectRoutingGetter: () => currentRouting,
+        });
+
+        // the project missing from the snapshot id list is reflected as excluded without a rewrite
+        expect(getProjectListItemSwitch(linkedProjectOne._id)).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
+        expect(onProjectRoutingChange).not.toHaveBeenCalled();
+
+        // Now we include the first project
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
+
+        // Now we expect the generated routing to specify all available projects, since we have no exclusions
+        await waitFor(() => {
+          // with every project re-included the dynamic strategy falls back to the
+          // match-all clause, which the codec itself never emits
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
+            `${PROJECT_SELECTION_DIMENSION}:*`
+          );
         });
       });
     });
@@ -315,7 +433,11 @@ describe('ProjectPickerStateProvider', () => {
       const onStateChange = jest.fn();
 
       render(
-        <ProjectPickerStateProvider {...defaultProviderProps}>
+        <ProjectPickerStateProvider
+          {...defaultProviderProps}
+          currentProjectRoutingGetter={() => '_id:*'}
+          defaultProjectRoutingGetter={() => '_id:*'}
+        >
           <ReadPickerState onChange={onStateChange} />
           <ProjectPickerList />
         </ProjectPickerStateProvider>
@@ -324,7 +446,7 @@ describe('ProjectPickerStateProvider', () => {
       await waitFor(() => {
         expect(onStateChange).toHaveBeenLastCalledWith(
           expect.objectContaining({
-            currentProjectRouting: '',
+            currentProjectRouting: '_id:*',
             isUsingSpaceDefaults: true,
           })
         );
@@ -336,7 +458,11 @@ describe('ProjectPickerStateProvider', () => {
       const onStateChange = jest.fn();
 
       render(
-        <ProjectPickerStateProvider {...defaultProviderProps}>
+        <ProjectPickerStateProvider
+          {...defaultProviderProps}
+          currentProjectRoutingGetter={() => '_id:*'}
+          defaultProjectRoutingGetter={() => '_id:*'}
+        >
           <ReadPickerState onChange={onStateChange} />
           <ProjectPickerList />
         </ProjectPickerStateProvider>
@@ -348,7 +474,7 @@ describe('ProjectPickerStateProvider', () => {
         );
       });
 
-      await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+      await toggleProjectListItemSwitch(user, linkedProjectOne._id);
 
       await waitFor(() => {
         expect(onStateChange).toHaveBeenLastCalledWith(
@@ -388,10 +514,10 @@ describe('ProjectPickerStateProvider', () => {
 
       const callsAfterFilter = fetchProjectsByRouting.mock.calls.length;
 
-      await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+      await toggleProjectListItemSwitch(user, linkedProjectOne._id);
 
       await waitFor(() => {
-        expect(screen.getByTestId('projectPickerListItemSwitch-linked1')).toHaveAttribute(
+        expect(getProjectListItemSwitch(linkedProjectOne._id)).toHaveAttribute(
           'aria-checked',
           'false'
         );

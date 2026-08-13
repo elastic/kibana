@@ -49,6 +49,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   originProjectId: 'origin',
   defaultProjectRouting: '',
   projectRoutingStrategy: 'dynamic',
+  hasUserModifiedRouting: false,
   filterExpressions: new Map(),
   filteringDimensions: [],
   availableProjects: new Map([[defaultProject._id, defaultProject]]),

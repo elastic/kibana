@@ -37,6 +37,10 @@ export interface ProjectPickerListItemProps {
   onLabelClick: (project: CPSProject, evt: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
+/** Builds the test subject for a project list item switch, keeping tests in sync with the rendered id. */
+export const getProjectPickerListItemSwitchTestSubj = (projectId: CPSProject['_id']): string =>
+  `projectPickerListItemSwitch-${projectId}`;
+
 export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
   controlsState,
   isSelected,
@@ -58,12 +62,8 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
       checked={isSelected}
       disabled={isToggleDisabled || controlsState === 'disabled'}
       onChange={(evt) => onToggle(project, evt.target.checked)}
-      label={i18n.translate('cpsUtils.projectPicker.listItem.toggleLabel', {
-        defaultMessage: 'Include project {projectName}',
-        values: { projectName: project._alias },
-      })}
-      showLabel={false}
-      data-test-subj={`projectPickerListItemSwitch-${project._id}`}
+      label={null}
+      data-test-subj={getProjectPickerListItemSwitchTestSubj(project._id)}
       compressed
     />
   );

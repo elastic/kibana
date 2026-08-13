@@ -58,6 +58,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   originProjectId: 'origin',
   defaultProjectRouting: '',
   projectRoutingStrategy: 'dynamic',
+  hasUserModifiedRouting: false,
   currentProjectRouting: '',
   isUsingSpaceDefaults: false,
   controlsState: 'enabled',

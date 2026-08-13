@@ -52,6 +52,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     originProjectId: 'origin',
     defaultProjectRouting: '',
     projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
     filterExpressions: new Map(),
     filteringDimensions: [],
     availableProjects,
@@ -274,7 +275,7 @@ describe('projectPickerDerivatives', () => {
     const derivedState = applyStoreDerivatives(
       createState({
         availableProjects,
-        defaultProjectRouting: '_type:security AND _id:* AND NOT _id:p2',
+        defaultProjectRouting: '_type:security AND (_id:* AND NOT _id:p2)',
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
         filteredProjectIds: ['p1', 'p2'],
         excludedOverrides: ['p2'],
@@ -282,7 +283,7 @@ describe('projectPickerDerivatives', () => {
       [...projectPickerDerivatives]
     );
 
-    expect(derivedState.currentProjectRouting).toBe('_type:security AND _id:* AND NOT _id:p2');
+    expect(derivedState.currentProjectRouting).toBe('_type:security AND (_id:* AND NOT _id:p2)');
     expect(derivedState.isUsingSpaceDefaults).toBe(true);
   });
 

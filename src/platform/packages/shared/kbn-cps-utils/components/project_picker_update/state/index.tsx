@@ -130,6 +130,7 @@ const createInitialPickerState = ({
     originProjectId,
     defaultProjectRouting,
     projectRoutingStrategy,
+    hasUserModifiedRouting: false,
     filterExpressions: createFilterExpressionsMap(parsed.filterExpressions),
     filteringDimensions: [],
     availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
@@ -257,7 +258,13 @@ export const ProjectPickerStateProvider = ({
 
   useEffect(() => {
     const routing = store.state.currentProjectRouting;
+
+    // Only report routing changes that originate from user edits, once any in-flight
+    // filter search has settled — never rewrite the incoming routing on mount, even
+    // when it was encoded with a different strategy than the configured one.
     if (
+      store.state.hasUserModifiedRouting &&
+      !store.state.isFilterSearchLoading &&
       routing !== (currentProjectRoutingGetter() ?? '') &&
       store.state.controlsState === 'enabled'
     ) {
@@ -268,6 +275,8 @@ export const ProjectPickerStateProvider = ({
     onProjectRoutingChange,
     currentProjectRoutingGetter,
     store.state.controlsState,
+    store.state.hasUserModifiedRouting,
+    store.state.isFilterSearchLoading,
   ]);
 
   const contextValue = useMemo((): ProjectPickerContext => {

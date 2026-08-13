@@ -26,6 +26,7 @@ const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPi
   originProjectId: 'origin',
   defaultProjectRouting: '',
   projectRoutingStrategy: 'dynamic',
+  hasUserModifiedRouting: false,
   filterExpressions: new Map(),
   filteringDimensions: [],
   availableProjects: new Map([

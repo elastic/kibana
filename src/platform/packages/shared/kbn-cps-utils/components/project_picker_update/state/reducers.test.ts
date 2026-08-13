@@ -55,6 +55,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     originProjectId: 'origin',
     defaultProjectRouting: '',
     projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
     filterExpressions: new Map(),
     filteringDimensions: [],
     availableProjects,
@@ -113,7 +114,7 @@ describe('createStoreReducers', () => {
   describe('#revertToSpaceDefaults', () => {
     it('resets filters and overrides when reverting to space defaults', () => {
       const state = createState({
-        defaultProjectRouting: '_type:security AND _id:* AND NOT _id:p2',
+        defaultProjectRouting: '_type:security AND (_id:* AND NOT _id:p2)',
         availableProjects: new Map([
           ['p1', createProject({ _id: 'p1' })],
           ['p2', createProject({ _id: 'p2' })],
@@ -490,6 +491,72 @@ describe('createStoreReducers', () => {
       const nextState = reducers.excludeOnlyProvidedProjectId(state, { anchorProjectId: 'p1' });
 
       expect(nextState).toBe(state);
+    });
+  });
+
+  describe('hasUserModifiedRouting', () => {
+    it('is set when a public reducer changes state', () => {
+      const state = createState();
+
+      const nextState = reducers.addFilterExpression(state, {
+        expression: typeSecurityExpression,
+      });
+
+      expect(state.hasUserModifiedRouting).toBe(false);
+      expect(nextState.hasUserModifiedRouting).toBe(true);
+    });
+
+    it('is not set when a public reducer no-ops', () => {
+      const state = createState({
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      const duplicateAdd = reducers.addFilterExpression(state, {
+        expression: typeSecurityExpression,
+      });
+      const selectionDimensionAdd = reducers.addFilterExpression(state, {
+        expression: {
+          operator: FilterOperator.EQUALS,
+          tagName: PROJECT_SELECTION_DIMENSION,
+          tagValue: 'p1',
+        },
+      });
+
+      expect(duplicateAdd.hasUserModifiedRouting).toBe(false);
+      expect(selectionDimensionAdd.hasUserModifiedRouting).toBe(false);
+    });
+
+    it('remains set across subsequent actions once flipped', () => {
+      const state = createState();
+
+      const afterAdd = reducers.addFilterExpression(state, {
+        expression: typeSecurityExpression,
+      });
+      const afterClear = reducers.clearProjectFilters(afterAdd);
+
+      expect(afterClear.hasUserModifiedRouting).toBe(true);
+    });
+
+    it('is not set by internal reducers and is preserved through rehydration', () => {
+      const availableProjects = new Map([['p1', createProject({ _id: 'p1' })]]);
+      const pristine = createState({ availableProjects });
+
+      const afterInternal = reducers._setStoreState(pristine, { availableProjects });
+      expect(afterInternal.hasUserModifiedRouting).toBe(false);
+
+      const modified = reducers.addFilterExpression(pristine, {
+        expression: typeSecurityExpression,
+      });
+      const rehydrated = reducers._setStoreState(modified, { availableProjects });
+      const afterSearchResult = reducers._setFilterSearchResult(rehydrated, {
+        isFilterSearchLoading: false,
+        filterSearchError: null,
+      });
+      const afterControls = reducers._setControlsState(afterSearchResult, {
+        controlsState: 'disabled',
+      });
+
+      expect(afterControls.hasUserModifiedRouting).toBe(true);
     });
   });
 });
