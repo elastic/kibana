@@ -39,6 +39,7 @@ const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN
       maxScheduledPerMinute: 400,
       run: { alerts: { max: maxAlertsPerRun } },
     },
+    esql: { responseFormat: 'arrow' },
   };
 
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
@@ -52,7 +53,7 @@ describe('ExecuteRuleQueryStep', () => {
   function createStep(maxAlertsPerRun?: number) {
     const { loggerService, mockLogger: logger } = createLoggerService();
     mockLogger = logger;
-    const mocks = createQueryService();
+    const mocks = createQueryService('arrow');
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
       loggerService,

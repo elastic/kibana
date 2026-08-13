@@ -9,15 +9,16 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createMockEsClient } from '../../test_utils';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import { QueryService } from './query_service';
+import type { EsqlConfig } from '../../../config';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 
-export function createQueryService(): {
+export function createQueryService(responseFormat: EsqlConfig['responseFormat'] = 'json'): {
   queryService: QueryService;
   mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   mockLogger: jest.Mocked<Logger>;
 } {
   const mockEsClient = createMockEsClient();
   const { loggerService, mockLogger } = createLoggerService();
-  const queryService = new QueryService(mockEsClient, loggerService);
+  const queryService = new QueryService(mockEsClient, loggerService, responseFormat);
   return { queryService, mockEsClient, mockLogger };
 }

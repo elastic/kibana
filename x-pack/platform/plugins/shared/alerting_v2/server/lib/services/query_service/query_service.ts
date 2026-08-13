@@ -14,6 +14,7 @@ import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ExecutionContext } from '../../execution_context';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
+import type { EsqlConfig } from '../../../config';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -34,7 +35,8 @@ const DROP_NULL_COLUMNS = true;
 export class QueryService implements QueryServiceContract {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    private readonly responseFormat: EsqlConfig['responseFormat'] = 'json'
   ) {}
 
   async executeQuery({
@@ -78,7 +80,38 @@ export class QueryService implements QueryServiceContract {
     return this.toRows<T>(response);
   }
 
-  async *executeQueryStream<T = Record<string, unknown>>({
+  async *executeQueryStream<T = Record<string, unknown>>(
+    params: ExecuteQueryParams
+  ): AsyncIterable<T[]> {
+    if (this.responseFormat === 'arrow') {
+      yield* this.streamArrow<T>(params);
+      return;
+    }
+
+    yield* this.streamJson<T>(params);
+  }
+
+  /**
+   * Runs the single-shot JSON query and yields the full result set as one in-memory batch,
+   * preserving the `AsyncIterable<T[]>` contract.
+   */
+  private async *streamJson<T>(params: ExecuteQueryParams): AsyncIterable<T[]> {
+    this.logger.debug({
+      message: () => `QueryService: Executing streaming query (json)`,
+    });
+
+    const rows = await this.executeQueryRows<T>(params);
+
+    // Empty results return nothing, this mirrorss the arrow path so callers
+    // relying on `withAtLeastOne` keep the same fallback behaviour.
+    if (rows.length === 0) {
+      return;
+    }
+
+    yield rows;
+  }
+
+  private async *streamArrow<T>({
     query,
     filter,
     params,
@@ -87,7 +120,7 @@ export class QueryService implements QueryServiceContract {
     const context = createExecutionContext(abortSignal ?? new AbortController().signal);
 
     this.logger.debug({
-      message: () => `QueryService: Executing streaming query`,
+      message: () => `QueryService: Executing streaming query (arrow)`,
     });
 
     let reader: AsyncRecordBatchStreamReader | undefined;
@@ -114,12 +147,12 @@ export class QueryService implements QueryServiceContract {
       yield* this.iterateReader<T>(reader, context);
 
       this.logger.debug({
-        message: `QueryService: Streaming query completed successfully`,
+        message: `QueryService: Streaming query completed successfully (arrow)`,
       });
     } catch (error) {
       if (isRuleExecutionCancellationError(error)) {
         this.logger.debug({
-          message: 'QueryService: Streaming query aborted',
+          message: 'QueryService: Streaming query aborted (arrow)',
         });
       } else {
         this.logger.error({
