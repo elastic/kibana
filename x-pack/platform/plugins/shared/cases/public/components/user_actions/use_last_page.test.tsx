@@ -27,6 +27,7 @@ const userActionsStats: CaseUserActionsStats = {
   totalHiddenCommentUpdates: 0,
   totalOtherActions: 3,
   totalOtherActionDeletions: 0,
+  totalVisibleOtherActions: 3,
 };
 
 jest.mock('../../common/lib/kibana');
@@ -61,6 +62,7 @@ describe('useLastPage', () => {
           totalCommentCreations: 10,
           totalOtherActions: 0,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 0,
         },
         userActivityQueryParams,
       })
@@ -83,6 +85,7 @@ describe('useLastPage', () => {
           totalCommentCreations: 10,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 21,
         },
         userActivityQueryParams,
       })
@@ -105,6 +108,7 @@ describe('useLastPage', () => {
           totalCommentCreations: 11,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 21,
         },
         userActivityQueryParams: {
           ...userActivityQueryParams,
@@ -130,6 +134,7 @@ describe('useLastPage', () => {
           totalCommentCreations: 10,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 21,
         },
         userActivityQueryParams: {
           ...userActivityQueryParams,
@@ -155,6 +160,7 @@ describe('useLastPage', () => {
           totalCommentCreations: 10,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 21,
         },
         userActivityQueryParams: {
           ...userActivityQueryParams,
@@ -180,6 +186,7 @@ describe('useLastPage', () => {
           totalCommentCreations: 10,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 21,
         },
         userActivityQueryParams: {
           ...userActivityQueryParams,
@@ -205,6 +212,7 @@ describe('useLastPage', () => {
           totalCommentCreations: 10,
           totalOtherActions: 21,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 21,
         },
         userActivityQueryParams: {
           ...userActivityQueryParams,

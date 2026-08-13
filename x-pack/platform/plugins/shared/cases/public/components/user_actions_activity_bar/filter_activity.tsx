@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFilterGroup, EuiFilterButton } from '@elastic/eui';
 
 import type { CaseUserActionsStats } from '../../containers/types';
 import * as i18n from './translations';
 import type { UserActivityFilter } from './types';
+import { getUserActivityTypeFilterCounts } from './get_type_filter_counts';
 
 interface FilterActivityProps {
   isLoading?: boolean;
@@ -30,6 +31,12 @@ export const FilterActivity = React.memo<FilterActivityProps>(
       [onFilterChange, type]
     );
 
+    const {
+      all: allCount,
+      comments: commentsCount,
+      history: historyCount,
+    } = useMemo(() => getUserActivityTypeFilterCounts(userActionsStats), [userActionsStats]);
+
     return (
       <EuiFilterGroup data-test-subj="user-actions-filter-activity-group">
         <EuiFilterButton
@@ -39,13 +46,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'all'}
           hasActiveFilters={type === 'all'}
-          numFilters={
-            userActionsStats && userActionsStats.total > 0
-              ? userActionsStats.total -
-                userActionsStats.totalCommentDeletions -
-                userActionsStats.totalHiddenCommentUpdates
-              : 0
-          }
+          numFilters={allCount}
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
@@ -59,10 +60,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'user'}
           hasActiveFilters={type === 'user'}
-          numFilters={
-            (userActionsStats?.totalCommentCreations ?? 0) -
-            (userActionsStats?.totalCommentDeletions ?? 0)
-          }
+          numFilters={commentsCount}
           isLoading={isLoading}
           isDisabled={isLoading}
           onClick={() => handleFilterChange('user')}
@@ -74,11 +72,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           isToggle
           isSelected={type === 'action'}
           hasActiveFilters={type === 'action'}
-          numFilters={
-            userActionsStats && userActionsStats.totalOtherActions > 0
-              ? userActionsStats.totalOtherActions
-              : 0
-          }
+          numFilters={historyCount}
           onClick={() => handleFilterChange('action')}
           isLoading={isLoading}
           isDisabled={isLoading}

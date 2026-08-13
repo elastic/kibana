@@ -43,6 +43,7 @@ const userActionsStats: CaseUserActionsStats = {
   totalHiddenCommentUpdates: 0,
   totalOtherActions: 16,
   totalOtherActionDeletions: 0,
+  totalVisibleOtherActions: 16,
 };
 
 const userActivityQueryParams: UserActivityParams = {

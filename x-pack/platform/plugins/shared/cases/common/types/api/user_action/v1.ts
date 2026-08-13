@@ -38,6 +38,12 @@ export const CaseUserActionStatsRt = rt.strict({
   total_hidden_comment_updates: rt.number,
   total_other_actions: rt.number,
   total_other_action_deletions: rt.number,
+  /**
+   * Document `total_other_actions` plus extra Activity rows from multi-field
+   * extended_fields expansions. Use for History badges (and to derive All);
+   * keep `total_other_actions` for pagination.
+   */
+  total_visible_other_actions: rt.number,
 });
 
 export type CaseUserActionStatsResponse = rt.TypeOf<typeof CaseUserActionStatsRt>;

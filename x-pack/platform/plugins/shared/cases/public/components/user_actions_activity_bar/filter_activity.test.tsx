@@ -26,6 +26,7 @@ describe('FilterActivity ', () => {
     totalHiddenCommentUpdates: 0,
     totalOtherActions: 9,
     totalOtherActionDeletions: 0,
+    totalVisibleOtherActions: 9,
   };
 
   const userActionsStatsWithDeletions: CaseUserActionsStats = {
@@ -37,6 +38,7 @@ describe('FilterActivity ', () => {
     totalHiddenCommentUpdates: 1,
     totalOtherActions: 9,
     totalOtherActionDeletions: 4,
+    totalVisibleOtherActions: 9,
   };
 
   it('renders filters correctly', () => {
@@ -121,7 +123,7 @@ describe('FilterActivity ', () => {
       )
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
+      screen.getByLabelText(`${userActionsStats.totalVisibleOtherActions} available filters`)
     ).toBeInTheDocument();
   });
 

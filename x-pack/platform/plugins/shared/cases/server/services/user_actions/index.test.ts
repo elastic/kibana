@@ -21,6 +21,7 @@ import type { UserActionEvent } from './types';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { V2_NOOP_ACTIVITY_WRITER } from '../../cases_analytics_v2';
@@ -202,6 +203,16 @@ describe('CaseUserActionService', () => {
         },
       } as unknown as SavedObjectsFindResponse;
 
+      let findAllSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        findAllSpy = jest.spyOn(service.finder, 'findAll').mockResolvedValue([]);
+      });
+
+      afterEach(() => {
+        findAllSpy.mockRestore();
+      });
+
       it('counts both legacy `user` and unified `comment` types as comments', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
 
@@ -216,6 +227,7 @@ describe('CaseUserActionService', () => {
           total_hidden_comment_updates: 6,
           total_other_actions: 10,
           total_other_action_deletions: 1,
+          total_visible_other_actions: 10,
         });
       });
 
@@ -250,6 +262,109 @@ describe('CaseUserActionService', () => {
             }),
           })
         );
+      });
+
+      it('adds extended_fields expansion extras to visible totals', async () => {
+        findAllSpy.mockResolvedValue([
+          {
+            id: 'ua-multi',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            attributes: {
+              payload: {
+                extended_fields: {
+                  a_as_keyword: '1',
+                  b_as_keyword: '2',
+                  c_as_keyword: '3',
+                },
+              },
+            },
+            references: [],
+          },
+          {
+            id: 'ua-single',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            attributes: {
+              payload: {
+                extended_fields: {
+                  label_as_keyword: 'on',
+                },
+              },
+            },
+            references: [],
+          },
+        ] as never);
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        const stats = await service.getCaseUserActionStats({ caseId: '123' });
+
+        // 3 rows from multi-field + 1 from single-field = 4 visible rows from 2 docs → +2 extras
+        expect(stats.total_other_actions).toBe(10);
+        expect(stats.total_visible_other_actions).toBe(12);
+        expect(stats.total).toBe(20);
+        expect(findAllSpy).toHaveBeenCalledWith({
+          caseId: '123',
+          types: [UserActionTypes.extended_fields],
+          decode: false,
+        });
+      });
+
+      it('treats empty extended_fields payloads as a single visible row', async () => {
+        findAllSpy.mockResolvedValue([
+          {
+            id: 'ua-empty',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            attributes: {
+              payload: {
+                extended_fields: {},
+              },
+            },
+            references: [],
+          },
+        ] as never);
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        const stats = await service.getCaseUserActionStats({ caseId: '123' });
+
+        expect(stats.total_visible_other_actions).toBe(stats.total_other_actions);
+      });
+
+      it('counts every extended_fields document without a sample size cap', async () => {
+        const manyDocs = Array.from({ length: 101 }, (_, i) => ({
+          id: `ua-${i}`,
+          type: CASE_USER_ACTION_SAVED_OBJECT,
+          attributes: {
+            payload: {
+              extended_fields: {
+                a_as_keyword: '1',
+                b_as_keyword: '2',
+              },
+            },
+          },
+          references: [],
+        }));
+        findAllSpy.mockResolvedValue(manyDocs as never);
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        const stats = await service.getCaseUserActionStats({ caseId: '123' });
+
+        // Each of 101 docs expands to 2 rows → +101 extras on top of document other_actions
+        expect(stats.total_visible_other_actions).toBe(10 + 101);
+        expect(findAllSpy.mock.calls[0][0]).not.toHaveProperty('limit');
+      });
+
+      it('does not request extended_fields via top_hits in stats aggregations', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
+
+        await service.getCaseUserActionStats({ caseId: '123' });
+
+        const findCall = unsecuredSavedObjectsClient.find.mock.calls[0][0] as {
+          aggs?: Record<string, unknown>;
+        };
+        expect(findCall.aggs).not.toHaveProperty('extendedFieldsActivity');
+        expect(JSON.stringify(findCall.aggs)).not.toContain('top_hits');
       });
     });
 

@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 
 import type { CaseUserActionsStats } from '../../../../../containers/types';
 import * as activityBarI18n from '../../../../user_actions_activity_bar/translations';
+import { getUserActivityTypeFilterCounts } from '../../../../user_actions_activity_bar/get_type_filter_counts';
 import { TYPE } from '../../../../case_view/components/translations';
 import type { UserActivityFilter } from '../../../../user_actions_activity_bar/types';
 
@@ -38,21 +39,11 @@ export const TypeFilter = React.memo<TypeFilterProps>(
     const togglePopover = useCallback(() => setIsPopoverOpen((prevValue) => !prevValue), []);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
-    const allCount =
-      userActionsStats && userActionsStats.total > 0
-        ? userActionsStats.total -
-          userActionsStats.totalCommentDeletions -
-          userActionsStats.totalHiddenCommentUpdates
-        : 0;
-    const commentsCount = Math.max(
-      (userActionsStats?.totalCommentCreations ?? 0) -
-        (userActionsStats?.totalCommentDeletions ?? 0),
-      0
-    );
-    const historyCount =
-      userActionsStats && userActionsStats.totalOtherActions > 0
-        ? userActionsStats.totalOtherActions
-        : 0;
+    const {
+      all: allCount,
+      comments: commentsCount,
+      history: historyCount,
+    } = useMemo(() => getUserActivityTypeFilterCounts(userActionsStats), [userActionsStats]);
 
     const options = useMemo<TypeOption[]>(
       () => [

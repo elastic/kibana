@@ -46,6 +46,7 @@ describe('useGetCaseUserActionsStats', () => {
           totalHiddenCommentUpdates: 0,
           totalOtherActions: 10,
           totalOtherActionDeletions: 0,
+          totalVisibleOtherActions: 10,
         },
         isError: false,
         isLoading: false,
