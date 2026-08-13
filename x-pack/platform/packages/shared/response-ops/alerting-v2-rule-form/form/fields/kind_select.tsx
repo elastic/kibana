@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
 
-interface ModeSelectProps {
+interface KindSelectProps {
   value: RuleKind;
   onChange: (kind: RuleKind) => void;
   disabled?: boolean;
@@ -26,32 +26,32 @@ interface ModeSelectProps {
   'data-test-subj'?: string;
 }
 
-const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.modeField.label', {
+const LABEL_TEXT = i18n.translate('xpack.alertingV2.ruleForm.kindField.label', {
   defaultMessage: "What's your goal?",
 });
 
-const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.title', {
+const ALERT_TITLE = i18n.translate('xpack.alertingV2.ruleForm.kindField.alert.title', {
   defaultMessage: 'Detect and respond',
 });
 
-const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.modeField.signal.title', {
+const SIGNAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.kindField.signal.title', {
   defaultMessage: 'Collect evidence',
 });
 
-const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.modeField.alert.description', {
+const ALERT_DESCRIPTION = i18n.translate('xpack.alertingV2.ruleForm.kindField.alert.description', {
   defaultMessage:
     'Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team.',
 });
 
 const SIGNAL_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.ruleForm.modeField.signal.description',
+  'xpack.alertingV2.ruleForm.kindField.signal.description',
   {
     defaultMessage:
       'Matches are stored as queryable events. No alerts, no notifications - just data.',
   }
 );
 
-const MODE_OPTIONS: Array<{
+const KIND_OPTIONS: Array<{
   value: RuleKind;
   title: string;
   description: string;
@@ -68,7 +68,7 @@ const MODE_OPTIONS: Array<{
   },
 ];
 
-const ModeCardLabel = ({ title, description }: { title: string; description: string }) => (
+const KindCardLabel = ({ title, description }: { title: string; description: string }) => (
   <>
     <EuiText size="s">
       <strong>{title}</strong>
@@ -80,15 +80,15 @@ const ModeCardLabel = ({ title, description }: { title: string; description: str
   </>
 );
 
-export const ModeSelect = ({
+export const KindSelect = ({
   value,
   onChange,
   disabled = false,
   readOnly = false,
-  'data-test-subj': dataTestSubj = 'ruleV2ModeSelect',
-}: ModeSelectProps) => {
-  const radioGroupId = useGeneratedHtmlId({ prefix: 'ruleV2ModeSelect' });
-  const options = readOnly ? MODE_OPTIONS.filter((option) => option.value === value) : MODE_OPTIONS;
+  'data-test-subj': dataTestSubj = 'ruleV2KindSelect',
+}: KindSelectProps) => {
+  const radioGroupId = useGeneratedHtmlId({ prefix: 'ruleV2KindSelect' });
+  const options = readOnly ? KIND_OPTIONS.filter((option) => option.value === value) : KIND_OPTIONS;
 
   return (
     <EuiFormRow
@@ -106,7 +106,7 @@ export const ModeSelect = ({
               <EuiCheckableCard
                 id={optionId}
                 data-test-subj={`${dataTestSubj}-${option.value}`}
-                label={<ModeCardLabel title={option.title} description={option.description} />}
+                label={<KindCardLabel title={option.title} description={option.description} />}
                 checkableType="radio"
                 name={radioGroupId}
                 checked={value === option.value}

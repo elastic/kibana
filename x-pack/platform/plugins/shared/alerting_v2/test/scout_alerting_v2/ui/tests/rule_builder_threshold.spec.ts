@@ -93,7 +93,7 @@ test.describe(
 
       await test.step('advance through Outcome step', async () => {
         await pageObjects.composeDiscover.clickNext();
-        await expect(pageObjects.composeDiscover.modeSelect).toBeVisible();
+        await expect(pageObjects.composeDiscover.kindSelect).toBeVisible();
       });
 
       await test.step('advance to Details step', async () => {

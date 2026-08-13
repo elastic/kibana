@@ -223,7 +223,7 @@ describe('RuleDetailPage', () => {
     renderPage(baseRule);
     const kindBadge = screen.getByTestId('kindBadge');
     expect(kindBadge).toHaveTextContent('Events');
-    expect(kindBadge.querySelector('[data-euiicon-type="stats"]')).toBeInTheDocument();
+    expect(kindBadge.querySelector('[data-euiicon-type="chartBarVertical"]')).toBeInTheDocument();
     expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('+2'));
