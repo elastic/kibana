@@ -587,8 +587,8 @@ describe('useDeploy', () => {
 
   it('deploys only untracked instances — does not redeploy already-running ones', async () => {
     // ec2_metrics is already deployed; lambda is a new selection.
-    // Both are in the 'aws' package so they are normally bundled into one group.
-    // The group is selected because lambda has no status yet, producing one API call.
+    // Both are in the 'aws' package and are normally bundled, but the bundle must be
+    // trimmed to only the untracked member (lambda) — ec2_metrics must not be re-included.
     setupMocks({
       selectedServiceIds: ['ec2_metrics', 'lambda'],
       deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
@@ -600,9 +600,13 @@ describe('useDeploy', () => {
       await result.current.handleDeploy();
     });
 
-    // One API call for the bundled 'aws' group (includes lambda)
+    // One API call for the trimmed bundle (lambda only)
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
+    // The already-running ec2_metrics must not appear enabled in the new call.
+    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
+    expect(submittedInputs['ec2-aws/metrics']?.enabled).not.toBe(true);
+    expect(submittedInputs['lambda-aws/metrics'].enabled).toBe(true);
   });
 
   it('deploys duplicate instances as separate agentless policy calls', async () => {

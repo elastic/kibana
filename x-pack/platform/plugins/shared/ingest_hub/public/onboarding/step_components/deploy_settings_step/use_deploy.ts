@@ -403,10 +403,23 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       let groupsToDeploy: DeployGroup[];
 
       if (isInitialDeploy) {
-        // Skip groups that are already fully deployed (all their instanceIds already have a status).
-        groupsToDeploy = deployGroups.filter(({ instanceIds: ids }) =>
-          ids.some((id) => !(id in deployAndDetectStep.serviceStatuses))
-        );
+        // For bundled groups, restrict members to those not already tracked — an already-running
+        // original must not be re-included in a new policy when a sibling is added later.
+        // Duplicate groups are always single-member so this only affects originals in practice.
+        groupsToDeploy = deployGroups
+          .map((group) => {
+            if (group.isDuplicateGroup) return group;
+            const untrackedMembers = group.members.filter(
+              ({ instance }) => !(instance.instanceId in deployAndDetectStep.serviceStatuses)
+            );
+            if (untrackedMembers.length === 0) return null;
+            return {
+              ...group,
+              instanceIds: untrackedMembers.map(({ instance }) => instance.instanceId),
+              members: untrackedMembers,
+            };
+          })
+          .filter((g): g is DeployGroup => g !== null);
         // Flat list of all instanceIds being deployed this run.
         const targets = groupsToDeploy.flatMap(({ instanceIds: ids }) => ids);
 
