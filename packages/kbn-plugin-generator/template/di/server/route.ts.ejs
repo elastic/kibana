@@ -7,7 +7,7 @@ import { ExampleService } from './example_service';
 export class ExampleRoute {
   static method = 'get' as const;
   static path = '/api/<%= snakeCase(name) %>/example';
-  static validate = false;
+  static validate = false as const;
   static security = {
     authz: {
       enabled: false,
