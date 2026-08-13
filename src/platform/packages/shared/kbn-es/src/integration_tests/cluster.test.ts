@@ -480,6 +480,38 @@ describe('#start(installPath)', () => {
       'search.check_ccs_compatibility=false',
     ]);
   });
+
+  test('sets http.port when port option is passed', async () => {
+    mockEsBin({ start: true });
+    extractConfigFilesMock.mockReturnValueOnce([]);
+
+    const cluster = new Cluster({ log, ssl: false });
+    await cluster.start(installPath, { port: 9201 });
+
+    expect(extractConfigFilesMock.mock.calls[0][0]).toMatchObject([
+      'action.destructive_requires_name=true',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
+      'ingest.geoip.downloader.enabled=false',
+      'search.check_ccs_compatibility=true',
+      'http.port=9201',
+    ]);
+  });
+
+  test('allows overriding http.port via esArgs', async () => {
+    mockEsBin({ start: true });
+    extractConfigFilesMock.mockReturnValueOnce([]);
+
+    const cluster = new Cluster({ log, ssl: false });
+    await cluster.start(installPath, { port: 9201, esArgs: ['http.port=9202'] });
+
+    expect(extractConfigFilesMock.mock.calls[0][0]).toMatchObject([
+      'action.destructive_requires_name=true',
+      'cluster.routing.allocation.disk.threshold_enabled=false',
+      'ingest.geoip.downloader.enabled=false',
+      'search.check_ccs_compatibility=true',
+      'http.port=9202',
+    ]);
+  });
 });
 
 describe('#run()', () => {

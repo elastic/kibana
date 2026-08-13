@@ -24,6 +24,7 @@ export const ApiKeyCreatedCallout: FunctionComponent<ApiKeyCreatedCalloutProps> 
 }) => {
   return (
     <EuiCallOut
+      data-test-subj="apiKeyCreatedCallOut"
       color="success"
       iconType="check"
       title={i18n.translate('xpack.security.management.apiKeys.createSuccessMessage', {

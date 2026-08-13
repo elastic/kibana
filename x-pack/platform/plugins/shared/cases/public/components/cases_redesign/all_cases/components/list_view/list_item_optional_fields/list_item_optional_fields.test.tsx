@@ -41,6 +41,7 @@ describe('ListItemOptionalFields', () => {
       <ListItemOptionalFields
         theCase={basicCase}
         selectedFields={[{ field: 'tags', name: i18n.TAGS, isChecked: false }]}
+        userProfiles={new Map()}
       />
     );
 
@@ -52,6 +53,7 @@ describe('ListItemOptionalFields', () => {
       <ListItemOptionalFields
         theCase={{ ...basicCase, tags: ['coke', 'pepsi'] }}
         selectedFields={[{ field: 'tags', name: i18n.TAGS, isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
@@ -67,6 +69,7 @@ describe('ListItemOptionalFields', () => {
           customFields: [{ key: 'priority', value: 'high', type: CustomFieldTypes.TEXT }],
         }}
         selectedFields={[{ field: 'priority', name: 'Priority', isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
@@ -88,6 +91,7 @@ describe('ListItemOptionalFields', () => {
       <ListItemOptionalFields
         theCase={{ ...basicCase, extendedFields: { priorityAsKeyword: 'high' } } as never}
         selectedFields={[{ field: 'priority_as_keyword', name: 'Priority', isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
@@ -109,9 +113,60 @@ describe('ListItemOptionalFields', () => {
       <ListItemOptionalFields
         theCase={{ ...basicCase, extendedFields: {} } as never}
         selectedFields={[{ field: 'priority_as_keyword', name: 'Priority', isChecked: true }]}
+        userProfiles={new Map()}
       />
     );
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('renders avatars for a user-picker extended field using the resolved profile', () => {
+    useCasesConfigMock.mockReturnValue({ templatesEnabled: true });
+    useGlobalInlineFieldsMock.mockReturnValue({
+      globalInlineFields: [
+        {
+          name: 'reviewers',
+          type: 'keyword',
+          control: FieldType.USER_PICKER,
+          label: 'Reviewers',
+        },
+      ],
+      isLoading: false,
+    });
+
+    const uid = 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0';
+    const userProfiles = new Map([
+      [
+        uid,
+        {
+          uid,
+          enabled: true,
+          data: {},
+          user: {
+            username: 'damaged_raccoon',
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+          },
+        },
+      ],
+    ]) as never;
+
+    renderWithTestingProviders(
+      <ListItemOptionalFields
+        theCase={
+          {
+            ...basicCase,
+            extendedFields: {
+              reviewersAsKeyword: JSON.stringify([{ uid, name: 'stale name' }]),
+            },
+          } as never
+        }
+        selectedFields={[{ field: 'reviewers_as_keyword', name: 'Reviewers', isChecked: true }]}
+        userProfiles={userProfiles}
+      />
+    );
+
+    expect(screen.getByTestId('cases-list-item-field-reviewers_as_keyword')).toBeInTheDocument();
+    expect(screen.getByText('DR')).toBeInTheDocument();
   });
 });
