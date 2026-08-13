@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
@@ -22,6 +23,7 @@ import {
   generateGroupingModesDoc,
   generateThrottleStrategiesDoc,
   generateThrottleGroupingCompatibilityDoc,
+  generateMatcherContextDoc,
   getSeverityValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
@@ -309,17 +311,56 @@ describe('schema_to_skill_docs', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateGroupingModesDoc()).toMatchSnapshot();
     });
+
+    it('is a standalone reference with auto-generated attribution', () => {
+      const doc = generateGroupingModesDoc();
+      expect(doc).toContain('# Grouping Modes');
+      expect(doc).toContain('Auto-generated from');
+      expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
+    });
   });
 
   describe('generateThrottleStrategiesDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateThrottleStrategiesDoc()).toMatchSnapshot();
     });
+
+    it('links to the dedicated compatibility reference', () => {
+      const doc = generateThrottleStrategiesDoc();
+      expect(doc).toContain('# Throttle Strategies');
+      expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
+    });
+  });
+
+  describe('generateMatcherContextDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateMatcherContextDoc()).toMatchSnapshot();
+    });
+
+    it('documents every MATCHER_CONTEXT_FIELDS path', () => {
+      const doc = generateMatcherContextDoc();
+      for (const field of MATCHER_CONTEXT_FIELDS) {
+        expect(doc).toContain(`\`${field.path}\``);
+      }
+    });
+
+    it('enriches episode_status and severity with schema enum values', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('`active`');
+      expect(doc).toContain('`critical`');
+    });
   });
 
   describe('generateThrottleGroupingCompatibilityDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateThrottleGroupingCompatibilityDoc()).toMatchSnapshot();
+    });
+
+    it('is a standalone reference with compatibility sets', () => {
+      const doc = generateThrottleGroupingCompatibilityDoc();
+      expect(doc).toContain('# Throttle / Grouping Compatibility');
+      expect(doc).toContain('Auto-generated from compatibility sets');
+      expect(doc).toContain('`per_episode`');
     });
   });
 

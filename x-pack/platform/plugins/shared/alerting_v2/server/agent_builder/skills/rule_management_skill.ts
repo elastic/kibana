@@ -36,21 +36,21 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
       {
-        name: 'concepts',
+        name: 'rule-kind',
         relativePath: './references',
-        content: `# Alerting V2 Concepts
+        content: generateRuleKindDoc(),
+      },
+      {
+        name: 'episode-lifecycle',
+        relativePath: './references',
+        content: generateEpisodeLifecycleDoc(),
+      },
+      {
+        name: 'notifications-overview',
+        relativePath: './references',
+        content: `# Notifications via Action Policies
 
-${generateRuleKindDoc()}
-
----
-
-${generateEpisodeLifecycleDoc()}
-
----
-
-## Notifications via Action Policies
-
-Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** (notification policies) — space-scoped saved objects that send matched episodes to workflow destinations.
+Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.
 
 When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
 
@@ -69,13 +69,7 @@ ${generateSeverityDoc()}`,
         content: generateRuleOperationsDoc(),
       },
     ],
-    content: `## Domain Knowledge
-
-For questions about alerting concepts — rule kinds (alert vs signal), episode lifecycle, or how notifications relate to rules — consult the [concepts reference](./references/concepts.md).
-
----
-
-## When to Use This Skill
+    content: `## When to Use This Skill
 
 Use this skill when:
 - A user asks to find, list, inspect, or modify existing alerting V2 rules.
@@ -83,10 +77,20 @@ Use this skill when:
 - A user asks to change a rule's query, schedule, thresholds, or metadata.
 
 Do **not** use this skill for:
-- Creating, inspecting, or modifying action policies (notification policies) — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill instead.
+- Creating, inspecting, or modifying action policies — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill instead.
 - Classic (V1) stack, Observability or Security detection rules.
 - Action connector configuration (connectors are managed separately).
 - Querying or analyzing data — use data exploration skills for that.
+
+---
+
+## Domain Knowledge
+
+For questions about alerting concepts:
+- Rule kinds (alert vs signal) — consult the [rule-kind reference](./references/rule-kind.md).
+- Episode lifecycle — consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+- How notifications relate to rules — consult the [notifications-overview reference](./references/notifications-overview.md).
+- Alert event severity — also covered in the [notifications-overview reference](./references/notifications-overview.md).
 
 ---
 
@@ -114,6 +118,8 @@ For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, 
 
 For an existing rule, pass the \`ruleAttachmentId\` and only include the operations needed for the changes requested.
 
+See the [rule-kind reference](./references/rule-kind.md) when choosing between \`alert\` and \`signal\`.
+
 ## ES|QL Query Guidance
 
 - Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
@@ -137,7 +143,7 @@ ${generateStateTransitionDoc()}
 
 ## Severity
 
-When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [concepts reference](./references/concepts.md) for valid values, the extraction model, and literal vs conditional patterns.
+When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Refer to the [notifications-overview reference](./references/notifications-overview.md) for valid values, the extraction model, and literal vs conditional patterns.
 
 ${generateRecoveryStrategyDoc()}
 
@@ -183,7 +189,7 @@ where \`attachmentId\` is \`ruleAttachment.id\` and \`version\` is \`version\` f
 
 ## Notifications Require Alert Kind
 
-Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch.
+Action policies only process alert episodes. Signal rules (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./references/rule-kind.md), [episode-lifecycle reference](./references/episode-lifecycle.md), and [notifications-overview reference](./references/notifications-overview.md).
 
 When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
 
@@ -202,6 +208,6 @@ After composing a complete **alert** rule (has name, query, schedule, and \`kind
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
 If the rule's kind is \`signal\`, follow the "Notifications Require Alert Kind" guidance above before proceeding.
 
-If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup. Do **not** compose action policies or notification workflows from this skill.`,
+If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup (see [notifications-overview reference](./references/notifications-overview.md)). Do **not** compose action policies or notification workflows from this skill.`,
     getInlineTools: () => [manageRuleTool(deps)],
   });

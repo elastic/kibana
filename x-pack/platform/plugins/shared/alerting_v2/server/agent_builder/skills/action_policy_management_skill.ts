@@ -18,9 +18,8 @@ import {
   generateActionPolicySchemaDoc,
   generateActionPolicyWorkflowPayloadDoc,
   generateGroupingModesDoc,
+  generateMatcherContextDoc,
   generateThrottleStrategiesDoc,
-  getEpisodeStatusValues,
-  formatEnumValuesList,
   generateThrottleGroupingCompatibilityDoc,
 } from './schema_to_skill_docs';
 
@@ -30,65 +29,46 @@ export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDe
     name: ACTION_POLICY_MANAGEMENT_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify Alerting V2 action policies (notification policies) within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
+      'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     referencedContent: [
       {
-        name: 'concepts',
+        name: 'action-policy-matchers',
         relativePath: './references',
-        content: `# Action Policy Concepts
-
-## Action Policies (Notification Policies)
-
-An action policy is a **space-scoped saved object** that controls how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations.
-
-Key characteristics:
-- **Not embedded in a rule.** One policy can match episodes from many rules.
-- **Matcher**: optional KQL query evaluated against episode context. An empty matcher is a catch-all that matches all episodes in the space.
-- **Only processes \`kind: alert\` episodes.** Signal events are excluded from the dispatcher pipeline — they never reach action policy evaluation.
-
-### Matcher Context Fields
-
-When the dispatcher evaluates a policy's KQL matcher, these fields are available:
-
-| Field | Description |
-|---|---|
-| \`episode_id\` | The episode UUID |
-| \`episode_status\` | ${formatEnumValuesList(getEpisodeStatusValues())} |
-| \`group_hash\` | Hash of the grouping fields |
-| \`last_event_timestamp\` | Timestamp of the most recent event |
-| \`rule.id\` | The rule's saved object ID |
-| \`rule.name\` | The rule's display name |
-| \`rule.tags\` | The rule's tags array |
-| \`data.*\` | Rule-specific ES|QL output columns (e.g. \`data.host.name\`, \`data.error_count\`) |
-
-${generateGroupingModesDoc()}
-
-${generateThrottleStrategiesDoc()}
-
----
-
-## Workflows
+        content: generateMatcherContextDoc(),
+      },
+      {
+        name: 'action-policy-grouping-modes',
+        relativePath: './references',
+        content: generateGroupingModesDoc(),
+      },
+      {
+        name: 'action-policy-throttle-strategies',
+        relativePath: './references',
+        content: generateThrottleStrategiesDoc(),
+      },
+      {
+        name: 'action-policy-throttle-grouping-compatibility',
+        relativePath: './references',
+        content: generateThrottleGroupingCompatibilityDoc(),
+      },
+      {
+        name: 'workflow-destinations',
+        relativePath: './references',
+        content: `# Workflows
 
 A workflow is a **concrete automation defined in YAML** that executes when dispatched by an action policy.
 
 - Workflow steps can use Kibana **connectors** (email, Slack, PagerDuty, etc.) via the \`connector-id\` field on each step.
 - Action policy destinations reference **workflow IDs**, never connector IDs directly.
 - Destination workflows must use **exactly one** \`triggers: - type: manual\` trigger — never \`alert\`.
-
----
-
-## Connectors
-
-A connector is a **configured integration instance** (e.g., an email server, a Slack webhook) managed under **Stack Management > Connectors**.
-
-- Referenced inside workflow YAML steps via \`connector-id\`, **not** in action policies.
-- The agent **cannot create connectors**. If no suitable connector exists, direct the user to set one up in Stack Management > Connectors.
-
----
-
-## Dispatch Flow
+- For deeper connector knowledge (types, \`connector-id\` usage, discovery tools), load the \`workflow-authoring\` skill.`,
+      },
+      {
+        name: 'dispatch-flow',
+        relativePath: './references',
+        content: `# Dispatch Flow
 
 The end-to-end notification path:
 
@@ -119,16 +99,10 @@ Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query 
         content: generateActionPolicyWorkflowPayloadDoc(),
       },
     ],
-    content: `## Domain Knowledge
-
-For questions about action policies, workflows, connectors, or the dispatch flow — consult the [concepts reference](./references/concepts.md).
-
----
-
-## When to Use This Skill
+    content: `## When to Use This Skill
 
 Use this skill when:
-- A user asks to find, list, inspect, or modify action policies (also called notification policies).
+- A user asks to find, list, inspect, or modify action policies.
 - A user asks to create or configure a new action policy with workflow destinations, matchers, grouping, or throttling.
 - A user wants to set up notifications (email, Slack, PagerDuty, etc.) for an alert rule.
 - The \`rule-management\` skill has handed off after composing a complete alert rule and the user agreed to set up notifications.
@@ -136,14 +110,33 @@ Use this skill when:
 Do **not** use this skill for:
 - Composing or editing alerting V2 rules themselves — load the \`rule-management\` skill for that.
 - Classic (V1) Kibana stack rules or Security detection rules.
-- Action connector configuration (connectors are managed separately).
+- Action connector configuration (connectors are managed separately — load \`workflow-authoring\` for connector discovery).
 - Querying or analyzing data — use data exploration skills for that.
 
 ---
 
-# Part 1: Action Policies (Notification Policies)
+## Domain Knowledge
 
-Action policies control how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations.
+For questions about matchers, grouping, throttling, workflows, or the dispatch flow:
+- Matchers — consult the [action-policy-matchers reference](./references/action-policy-matchers.md).
+- Grouping modes — consult the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md).
+- Throttle strategies — consult the [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
+- Throttle / grouping compatibility — consult the [action-policy-throttle-grouping-compatibility reference](./references/action-policy-throttle-grouping-compatibility.md).
+- Workflows — consult the [workflow-destinations reference](./references/workflow-destinations.md). For connectors (types, discovery, \`connector-id\` usage), load the \`workflow-authoring\` skill.
+- End-to-end dispatch path — consult the [dispatch-flow reference](./references/dispatch-flow.md).
+
+---
+
+# Part 1: Action Policies
+
+An action policy is a **space-scoped saved object** that controls how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations.
+
+Key characteristics:
+- **Not embedded in a rule.** One policy can match episodes from many rules.
+- **Matcher**: optional KQL query evaluated against episode context. An empty matcher is a catch-all that matches all episodes in the space. See the [action-policy-matchers reference](./references/action-policy-matchers.md).
+- **Only processes \`kind: alert\` episodes.** Signal events are excluded from the dispatcher pipeline — they never reach action policy evaluation.
+- Grouping and throttling details: [action-policy-grouping-modes](./references/action-policy-grouping-modes.md), [action-policy-throttle-strategies](./references/action-policy-throttle-strategies.md).
+- End-to-end path: [dispatch-flow reference](./references/dispatch-flow.md).
 
 ## Action Policy Discovery
 
@@ -161,15 +154,15 @@ Build the request for ${
       ALERTING_TOOL_IDS.manageActionPolicy
     } as an ordered \`operations\` array. Operations run in sequence.
 
-For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`.
+For a new policy, start with \`set_metadata\` (name required), then \`set_destinations\`. Destination workflows are covered in the [workflow-destinations reference](./references/workflow-destinations.md).
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-Refer to the [action-policy-operations-schema reference](./references/action-policy-operations-schema.md) for every operation's fields, types, and constraints. Grouping modes and throttle strategies are also summarized in the [concepts reference](./references/concepts.md).
+Refer to the [action-policy-operations-schema reference](./references/action-policy-operations-schema.md) for every operation's fields, types, and constraints. Grouping modes and throttle strategies are summarized in the [action-policy-grouping-modes reference](./references/action-policy-grouping-modes.md) and [action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md).
 
-Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`. Matcher context fields are listed in the concepts reference.
+Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`. Matcher context fields are listed in the [action-policy-matchers reference](./references/action-policy-matchers.md).
 
-${generateThrottleGroupingCompatibilityDoc()}
+The throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./references/action-policy-throttle-grouping-compatibility.md).
 
 If you set both in one request, put \`set_grouping\` before \`set_throttle\`. The tool validates compatibility after all operations run.
 
@@ -206,7 +199,7 @@ Action policies only process alert episodes. If the rule is \`kind: signal\`, do
 
 ## Step 1 — Create a Default Workflow
 
-1. Load the \`workflow-authoring\` skill via \`filestore.read\` (path: \`skills/platform/workflows\`).
+1. Load the \`workflow-authoring\` skill via \`filestore.read\` (path: \`skills/platform/workflows\`). That skill also covers connectors in depth. See also the [workflow-destinations reference](./references/workflow-destinations.md).
 2. Call \`platform.workflows.get_connectors\` with \`actionTypeId: ".email"\` to find an available email connector.
    - If no email connector exists, tell the user: "No email connector is configured. You can set one up under Stack Management → Connectors, then come back to add notifications."
 3. Generate a unique \`workflowId\` — a UUID (e.g. \`550e8400-e29b-41d4-a716-446655440000\`). Pass it as the \`workflowId\` parameter when calling \`platform.core.generate_workflow\`. This same ID will be used as the persisted workflow ID and must be referenced in the action policy destination. **Do NOT use a human-readable slug** — it would collide across conversations.
@@ -266,7 +259,7 @@ steps:
 
 ## Step 2 — Create a Default Action Policy
 
-Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order:
+Use ${ALERTING_TOOL_IDS.manageActionPolicy} with these operations in order (see [action-policy-matchers](./references/action-policy-matchers.md), [action-policy-grouping-modes](./references/action-policy-grouping-modes.md), and [action-policy-throttle-strategies](./references/action-policy-throttle-strategies.md) for details):
 
 1. \`set_metadata\`: name = \`"Notify on <rule-name>"\`, description = \`"Default notification for <rule-name>"\`
 2. \`set_destinations\`: \`[{ type: "workflow", id: "<workflowId-from-step-1>" }]\`
@@ -290,11 +283,13 @@ After rendering all three attachments (rule, workflow, action policy), remind th
 
 > "To activate this alerting setup, please save in order: **Rule → Workflow → Action Policy**. The action policy depends on both the rule and the workflow being saved first."
 
+The end-to-end path from rule evaluation to notification delivery is described in the [dispatch-flow reference](./references/dispatch-flow.md).
+
 ## Customization Hints
 
 After creating the defaults, briefly mention:
 - They can use a different connector type (Slack, PagerDuty, etc.) — offer to use \`platform.workflows.get_connectors\` to explore.
-- They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle.
+- They can change the throttle strategy — \`on_status_change\` (default) only notifies on transitions, \`every_time\` notifies on every evaluation cycle ([action-policy-throttle-strategies reference](./references/action-policy-throttle-strategies.md)).
 - They can broaden the policy to cover multiple rules by removing the \`rule.id\` matcher or replacing it with a broader matcher.`,
     getInlineTools: () => [manageActionPolicyTool(deps)],
   });

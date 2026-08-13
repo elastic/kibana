@@ -73,4 +73,58 @@ describe('createActionPolicyManagementSkill', () => {
     expect(payloadRef?.content).toContain('`rules`');
     expect(payloadRef?.content).toContain('`episode_status`');
   });
+
+  it('exposes schema-generated matcher, grouping, and throttle references', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const byName = Object.fromEntries(
+      (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
+    );
+
+    expect(byName['action-policy-matchers']).toContain(
+      'Auto-generated from `MATCHER_CONTEXT_FIELDS`'
+    );
+    expect(byName['action-policy-matchers']).toContain('`episode_status`');
+    expect(byName['action-policy-matchers']).toContain('`rule.id`');
+
+    expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
+    expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');
+    expect(byName['action-policy-throttle-strategies']).toContain(
+      'action-policy-throttle-grouping-compatibility.md'
+    );
+    expect(byName['action-policy-throttle-grouping-compatibility']).toContain(
+      'Auto-generated from compatibility sets'
+    );
+    expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_episode`');
+  });
+
+  it('exposes granular concept references instead of a monolithic concepts entry', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const refNames = (skill.referencedContent ?? []).map((entry) => entry.name);
+
+    expect(refNames).toEqual(
+      expect.arrayContaining([
+        'action-policy-matchers',
+        'action-policy-grouping-modes',
+        'action-policy-throttle-strategies',
+        'action-policy-throttle-grouping-compatibility',
+        'workflow-destinations',
+        'dispatch-flow',
+      ])
+    );
+    expect(refNames).not.toContain('concepts');
+    expect(refNames).not.toContain('connectors');
+    expect(skill.content).toContain('space-scoped saved object');
+    expect(skill.content).toContain('./references/action-policy-matchers.md');
+    expect(skill.content).toContain('./references/action-policy-grouping-modes.md');
+    expect(skill.content).toContain('./references/action-policy-throttle-strategies.md');
+    expect(skill.content).toContain(
+      './references/action-policy-throttle-grouping-compatibility.md'
+    );
+    expect(skill.content).toContain('./references/workflow-destinations.md');
+    expect(skill.content).toContain('./references/dispatch-flow.md');
+    expect(skill.content).toContain('workflow-authoring');
+    expect(skill.description).not.toContain('(notification policies)');
+    expect(skill.content).not.toContain('(Notification Policies)');
+    expect(skill.content).not.toContain('also called notification policies');
+  });
 });

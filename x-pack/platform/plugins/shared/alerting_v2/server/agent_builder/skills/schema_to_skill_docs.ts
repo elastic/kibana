@@ -11,6 +11,7 @@ import {
   createActionPolicyDataSchema,
   alertEventSeveritySchema,
   ALERT_EPISODE_STATUS,
+  MATCHER_CONTEXT_FIELDS,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
@@ -401,16 +402,18 @@ const formatStrategySet = (strategies: Set<string>): string =>
   formatEnumValuesList([...strategies]);
 
 /**
- * Generates the Throttle / Grouping Compatibility section with heading and
- * strategy-set bullets, derived from the schema's strategy sets.
+ * Generates standalone markdown for throttle / grouping compatibility from
+ * `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
   const groupingModes = getGroupingModeValues();
   const perEpisodeMode = groupingModes.find((m) => m === 'per_episode') ?? 'per_episode';
   const aggregateModes = groupingModes.filter((m) => m !== perEpisodeMode);
 
-  const lines = [
-    '### Throttle / Grouping Compatibility',
+  return [
+    '# Throttle / Grouping Compatibility',
+    '',
+    'Auto-generated from compatibility sets in `@kbn/alerting-v2-schemas`.',
     '',
     'The throttle strategy must be compatible with the grouping mode:',
     `- For \`${perEpisodeMode}\`: ${formatStrategySet(PER_EPISODE_STRATEGIES)}.`,
@@ -420,8 +423,9 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
     `- ${formatStrategySet(
       STRATEGIES_REQUIRING_INTERVAL
     )} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
-  ];
-  return lines.join('\n');
+    '',
+    'Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md).',
+  ].join('\n');
 };
 
 /** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
@@ -436,14 +440,14 @@ export const generateRuleKindDoc = (): string => {
 
   const kindDescriptions: Record<string, string[]> = {
     alert: [
-      `### Alert (\`kind: ${kinds.find((k) => k === 'alert')}\`)`,
+      `## Alert (\`kind: ${kinds.find((k) => k === 'alert')}\`)`,
       `- **Stateful alerting** with full episode lifecycle: ${episodeStatuses}.`,
       `- Supports state transitions (${transitionFields}), recovery detection, and notification dispatch.`,
       "- Produces `type: 'alert'` events that participate in the dispatcher pipeline.",
       '- Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.',
     ],
     signal: [
-      `### Signal (\`kind: ${kinds.find((k) => k === 'signal')}\`)`,
+      `## Signal (\`kind: ${kinds.find((k) => k === 'signal')}\`)`,
       '- **Stateless detection** (observation-only).',
       "- Produces `type: 'signal'` events but **skips** episode lifecycle and dispatcher processing entirely.",
       '- No notifications, no recovery, no state transitions.',
@@ -461,13 +465,13 @@ export const generateRuleKindDoc = (): string => {
   }
 
   return [
-    '## Rule Kind: Alert vs Signal',
+    '# Rule Kind: Alert vs Signal',
     '',
     'Rules declare a `kind` of `alert` or `signal`. This is the most important behavioral split in the system.',
     '',
     ...kinds.flatMap((k, i) => (i > 0 ? ['', ...kindDescriptions[k]] : kindDescriptions[k])),
     '',
-    '### Immutability',
+    '## Immutability',
     '`kind` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to `kind`. For draft (in-memory) rules, `set_kind` can change it freely.',
   ].join('\n');
 };
@@ -496,7 +500,7 @@ export const generateStateTransitionDoc = (): string => {
     '',
     ...bullets,
     '',
-    'State transition is only allowed on `kind: alert` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.',
+    'State transition is only allowed on `kind: alert` rules ([rule-kind reference](./references/rule-kind.md)). Episode statuses are explained in the [episode-lifecycle reference](./references/episode-lifecycle.md). Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.',
   ].join('\n');
 };
 
@@ -515,7 +519,7 @@ export const generateEpisodeLifecycleDoc = (): string => {
   });
 
   return [
-    '## Episode Lifecycle',
+    '# Episode Lifecycle',
     '',
     'Episodes are the unit of alert state. Each unique group (by `group_hash`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:',
     '',
@@ -574,7 +578,7 @@ export const generateNoDataStrategyDoc = (): string => {
     "When setting `no_data_strategy` to anything other than `'none'`, add a `no_data` block to the standalone query:",
     "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
     '',
-    'Signal rules cannot set `no_data_strategy`.',
+    'Signal rules cannot set `no_data_strategy` ([rule-kind reference](./references/rule-kind.md)).',
     'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
   ].join('\n');
 };
@@ -594,7 +598,7 @@ export const generateRecoveryStrategyDoc = (): string => {
   return [
     '## Recovery Strategy',
     '',
-    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (`kind: signal`) cannot set `recovery_strategy`.',
+    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./references/episode-lifecycle.md)). Signal rules (`kind: signal`) cannot set `recovery_strategy` ([rule-kind reference](./references/rule-kind.md)).',
     '',
     list,
     '',
@@ -608,7 +612,42 @@ export const generateRecoveryStrategyDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the Grouping Modes section with heading and bullet list. */
+/**
+ * Generates markdown for KQL matcher context fields from `MATCHER_CONTEXT_FIELDS`,
+ * enriching enum fields from `ALERT_EPISODE_STATUS` / `alertEventSeveritySchema`.
+ */
+export const generateMatcherContextDoc = (): string => {
+  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const severities = formatEnumValuesList(getSeverityValues());
+
+  const formatMatcherFieldType = (path: string, type: string): string => {
+    if (path === 'episode_status') return episodeStatuses;
+    if (path === 'severity') return severities;
+    if (path === 'data') return '`data.*` object';
+    return type;
+  };
+
+  const rows = MATCHER_CONTEXT_FIELDS.map((field) => {
+    const typeCell = escapeTableCell(formatMatcherFieldType(field.path, field.type));
+    return `| \`${field.path}\` | ${typeCell} | ${escapeTableCell(field.description)} |`;
+  });
+
+  return [
+    '# Matcher Context Fields',
+    '',
+    'Auto-generated from `MATCHER_CONTEXT_FIELDS` in `@kbn/alerting-v2-schemas`.',
+    '',
+    "When the dispatcher evaluates a policy's KQL matcher, these fields are available:",
+    '',
+    '| Field | Type | Description |',
+    '|---|---|---|',
+    ...rows,
+    '',
+    'An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use `rule.id: "<ruleId>"`.',
+  ].join('\n');
+};
+
+/** Generates standalone markdown for action-policy grouping modes. */
 export const generateGroupingModesDoc = (): string => {
   const list = generateEnumList({
     schemaValues: getGroupingModeValues(),
@@ -620,10 +659,18 @@ export const generateGroupingModesDoc = (): string => {
     schemaName: 'setGroupingOperationSchema.groupingMode',
   });
 
-  return ['### Grouping Modes', list].join('\n');
+  return [
+    '# Grouping Modes',
+    '',
+    'Auto-generated from `groupingMode` on the `manage_action_policy` tool Zod schemas.',
+    '',
+    list,
+    '',
+    'Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
+  ].join('\n');
 };
 
-/** Generates the Throttle Strategies section with heading and bullet list. */
+/** Generates standalone markdown for action-policy throttle strategies. */
 export const generateThrottleStrategiesDoc = (): string => {
   const list = generateEnumList({
     schemaValues: getThrottleStrategyValues(),
@@ -637,7 +684,15 @@ export const generateThrottleStrategiesDoc = (): string => {
     schemaName: 'setThrottleOperationSchema.strategy',
   });
 
-  return ['### Throttle Strategies', list].join('\n');
+  return [
+    '# Throttle Strategies',
+    '',
+    'Auto-generated from `strategy` on the `manage_action_policy` tool Zod schemas.',
+    '',
+    list,
+    '',
+    'Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
+  ].join('\n');
 };
 
 /**
