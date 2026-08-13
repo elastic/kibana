@@ -26,7 +26,7 @@ describe('extractDiscoveriesFromToolCall', () => {
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-invalid-params',
+        tool_call_id: 'ew-invalid-params',
         params: { items: 'not-an-array' },
       },
     ];
@@ -39,7 +39,7 @@ describe('extractDiscoveriesFromToolCall', () => {
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-bare-item',
+        tool_call_id: 'ew-bare-item',
         params: {
           status: 'pending',
           dedup_window: 'now-24h',
@@ -65,9 +65,9 @@ describe('extractDiscoveriesFromToolCall', () => {
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-bulk',
+        tool_call_id: 'ew-bulk',
         params: {
-          items: [{ title: 'Persisted discovery' }, { title: 'Failed discovery' }],
+          items: [{ title: 'Persisted event', status: 'open' }, { title: 'Failed event' }],
         },
         results: [
           {
@@ -88,19 +88,19 @@ describe('extractDiscoveriesFromToolCall', () => {
 
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([
       expect.objectContaining({
-        title: 'Persisted discovery',
+        title: 'Persisted event',
         event_id: 'event-1',
       }),
     ]);
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
-  it('skips misaligned discovery bulk results', () => {
+  it('skips misaligned bulk results', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-misaligned',
+        tool_call_id: 'ew-misaligned',
         params: { items: [{ title: 'one' }, { title: 'two' }] },
         results: [{ data: { results: [] } }],
       },
@@ -109,12 +109,12 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
 
-  it('skips reordered discovery bulk results', () => {
+  it('skips reordered bulk results', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-reordered',
+        tool_call_id: 'ew-reordered',
         params: { items: [{ title: 'first' }, { title: 'second' }] },
         results: [
           {
@@ -147,20 +147,44 @@ describe('extractRequestedEventIdsFromToolCall', () => {
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-new',
-        params: { items: [{ kind: 'discovery', title: 'New event' }] },
+        tool_call_id: 'ew-new',
+        params: { items: [{ status: 'open' }] },
         results: [
-          { data: { results: [{ index: 0, event_id: 'handler-generated', written: true }] } },
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'handler-generated',
+                  event_uuid: 'uuid-1',
+                  written: true,
+                },
+              ],
+            },
+          },
         ],
       },
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-continuation',
+        tool_call_id: 'ew-continuation',
         params: {
-          items: [{ kind: 'discovery', title: 'Continuation', event_id: 'agent-selected' }],
+          items: [{ event_id: 'agent-selected', status: 'open' }],
         },
-        results: [{ data: { results: [{ index: 0, event_id: 'agent-selected', written: true }] } }],
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'agent-selected',
+                  event_uuid: 'uuid-2',
+                  written: true,
+                },
+              ],
+            },
+          },
+        ],
       },
     ];
 
@@ -172,21 +196,36 @@ describe('extractRequestedEventIdsFromToolCall', () => {
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
-        tool_call_id: 'dw-bulk',
+        tool_call_id: 'ew-bulk',
         params: {
           items: [
-            { kind: 'discovery', title: 'New event' },
-            { kind: 'discovery', title: 'Continuation A', event_id: 'event-A' },
-            { kind: 'discovery', title: 'Continuation B', event_id: 'event-B' },
+            { status: 'open' },
+            { event_id: 'event-A', status: 'open' },
+            { event_id: 'event-B', status: 'open' },
           ],
         },
         results: [
           {
             data: {
               results: [
-                { index: 0, event_id: 'handler-generated', written: true },
-                { index: 1, event_id: 'event-A', written: true },
-                { index: 2, event_id: 'event-B', written: true },
+                {
+                  index: 0,
+                  event_id: 'handler-generated',
+                  event_uuid: 'uuid-0',
+                  written: true,
+                },
+                {
+                  index: 1,
+                  event_id: 'event-A',
+                  event_uuid: 'uuid-1',
+                  written: true,
+                },
+                {
+                  index: 2,
+                  event_id: 'event-B',
+                  event_uuid: 'uuid-2',
+                  written: true,
+                },
               ],
             },
           },
@@ -205,8 +244,8 @@ describe('extractSignificantEventsFromToolCall', () => {
       {
         type: 'tool_call',
         tool_id: 'other-tool',
-        tool_call_id: 'dw-1',
-        params: { kind: 'handled' },
+        tool_call_id: 'ew-1',
+        params: { status: 'open' },
       },
     ];
     expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
@@ -219,7 +258,10 @@ describe('extractSignificantEventsFromToolCall', () => {
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-bulk',
         params: {
-          items: [{ event_id: 'event-1' }, { event_id: 'event-2' }],
+          items: [
+            { event_id: 'event-1', status: 'open' },
+            { event_id: 'event-2', status: 'open' },
+          ],
         },
         results: [
           {
@@ -241,7 +283,7 @@ describe('extractSignificantEventsFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-retry',
-        params: { items: [{ event_id: 'event-2' }] },
+        params: { items: [{ event_id: 'event-2', status: 'open' }] },
         results: [
           {
             data: {
@@ -273,7 +315,10 @@ describe('extractSignificantEventsFromToolCall', () => {
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-reordered',
         params: {
-          items: [{ event_id: 'event-1' }, { event_id: 'event-2' }],
+          items: [
+            { event_id: 'event-1', status: 'open' },
+            { event_id: 'event-2', status: 'open' },
+          ],
         },
         results: [
           {

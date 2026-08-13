@@ -27,6 +27,7 @@ const OPEN_TIMELINE_MODAL_WIDTH = 1100; // px
 export const OpenTimelineModal = React.memo<OpenTimelineModalProps>(
   ({ hideActions = [], modalTitle, onClose, onOpen }) => (
     <EuiModal
+      aria-label={modalTitle ?? i18n.OPEN_TIMELINE_TITLE}
       data-test-subj="open-timeline-modal"
       maxWidth={OPEN_TIMELINE_MODAL_WIDTH}
       onClose={onClose}
