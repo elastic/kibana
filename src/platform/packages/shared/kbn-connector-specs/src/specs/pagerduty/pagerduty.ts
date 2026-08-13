@@ -18,7 +18,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
-import { skillFiles } from './skills';
+import { pagerdutySkillFile } from './skills/pagerduty-skill';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
   CallToolInput,
@@ -260,7 +260,7 @@ export const PagerdutyConnector: ConnectorSpec = {
     },
   },
 
-  skillFiles,
+  skillFiles: [pagerdutySkillFile],
 
   skill: [
     '## PagerDuty Connector Usage Guide',
@@ -272,23 +272,23 @@ export const PagerdutyConnector: ConnectorSpec = {
     '',
     '### Finding Who Is On Call',
     '',
-    '1. Use the `pagerduty-oncall` to get schedule information, including who is on call.',
+    '1. Use the `/pagerduty` skill to get schedule information, including who is on call.',
     '',
     '### Investigating Incidents',
     '',
-    'To investigate incidents, use the `pagerduty-list-incidents` skill',
+    'To investigate incidents, use the `/pagerduty` skill',
     '',
     'Once you have an incident ID from the list, call `getIncident` for full details including assignments, service, and timestamps.',
     '',
     '### Working with Escalation Policies',
     '',
     'To explore escalation policies:',
-    '1. Use the `pagerduty-escalation-policies` skill for escalation related topics.',
+    '1. Use the `/pagerduty` skill for escalation related topics.',
     '2. Use the returned IDs to call `getEscalationPolicy` for full details: escalation rules, delay minutes, targets, associated services, and teams.',
     '',
     '### User and Team lookup',
     'To explore teams and users:',
-    '1. Use the `pagerduty-users-teams` skill to lookup users or teams.',
+    '1. Use the `/pagerduty` skill to lookup users or teams.',
     "2. Use the returned IDs to call 'getTeam' for full team details.",
   ].join('\n'),
 };

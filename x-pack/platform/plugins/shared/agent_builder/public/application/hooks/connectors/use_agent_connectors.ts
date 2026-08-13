@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo } from 'react';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import type { ConnectorItem } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
@@ -21,7 +22,7 @@ import { agentHasConnector, getEffectiveConnectorIds } from './connector_ids_uti
 export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
   const { agent } = useAgentBuilderAgentById(agentId);
   const { connectors: allConnectors, isLoading } = useListConnectors({});
-  const { agentService } = useAgentBuilderServices();
+  const { agentService, skillsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const { addSuccessToast, addErrorToast } = useToasts();
 
@@ -117,29 +118,62 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
 
   const assign = useCallback(
     (connector: Pick<ConnectorItem, 'id' | 'name' | 'actionTypeId'>) => {
-      const currentIds = getCurrentConnectorIds();
-      if (currentIds.includes(connector.id)) return;
-
       const spec = getConnectorSpec(connector.actionTypeId);
-      const connectorSkillIds = spec?.skillFiles?.map((s) => s.name) ?? [];
+      const skillFiles = spec?.skillFiles ?? [];
+      const connectorSkillIds = skillFiles.map((s) => s.name);
 
-      updateConnectorsMutation.mutate([...currentIds, connector.id], {
-        onSuccess: () => {
-          addSuccessToast({
-            title: i18n.translate('xpack.agentBuilder.agentConnectors.assignSuccessToast', {
-              defaultMessage: '{name} added',
-              values: { name: connector.name },
+      // Always create skills for the connector type — idempotent; 409 (already exists) is safe.
+      Promise.allSettled(
+        skillFiles.map((skill) =>
+          skillsService.create({
+            id: skill.name,
+            name: skill.name,
+            description: skill.description,
+            content: skill.content,
+            referenced_content: skill.resources?.map((r) => ({
+              name: r.name,
+              relativePath: r.relativePath,
+              content: r.content,
+            })),
+            tool_ids: [],
+          })
+        )
+      ).then((results) => {
+        const anyUnexpectedFailure = results.some(
+          (r) => r.status === 'rejected' && (r.reason as IHttpFetchError)?.response?.status !== 409
+        );
+        if (anyUnexpectedFailure) {
+          addErrorToast({
+            title: i18n.translate('xpack.agentBuilder.agentConnectors.skillCreateErrorToast', {
+              defaultMessage: 'Connector added, but its skill could not be created.',
             }),
           });
-          if (connectorSkillIds.length > 0) {
-            const currentSkillIds = getCurrentSkillIds();
-            const newSkillIds = [
-              ...currentSkillIds,
-              ...connectorSkillIds.filter((id) => !currentSkillIds.includes(id)),
-            ];
-            updateSkillsMutation.mutate(newSkillIds);
-          }
-        },
+        }
+
+        // Always link skill IDs to the agent, even if connector was already visible.
+        if (connectorSkillIds.length > 0) {
+          const currentSkillIds = getCurrentSkillIds();
+          const newSkillIds = [
+            ...currentSkillIds,
+            ...connectorSkillIds.filter((id) => !currentSkillIds.includes(id)),
+          ];
+          updateSkillsMutation.mutate(newSkillIds);
+        }
+
+        // Only update connector_ids if the connector isn't already explicitly linked.
+        const currentIds = getCurrentConnectorIds();
+        if (currentIds.includes(connector.id)) return;
+
+        updateConnectorsMutation.mutate([...currentIds, connector.id], {
+          onSuccess: () => {
+            addSuccessToast({
+              title: i18n.translate('xpack.agentBuilder.agentConnectors.assignSuccessToast', {
+                defaultMessage: '{name} added',
+                values: { name: connector.name },
+              }),
+            });
+          },
+        });
       });
     },
     [
@@ -148,6 +182,8 @@ export const useAgentConnectors = ({ agentId }: { agentId: string }) => {
       updateConnectorsMutation,
       updateSkillsMutation,
       addSuccessToast,
+      addErrorToast,
+      skillsService,
     ]
   );
 
