@@ -28,16 +28,16 @@ export const roundToActions = ({
   toolIdMapping: ToolIdMapping;
 }): ResearchAgentAction[] => {
   const actions: ResearchAgentAction[] = [];
-  const groups = groupToolCallSteps(round.steps);
+  const groupsByHeadStep = new Map(
+    groupToolCallSteps(round.steps).map((group) => [group[0], group])
+  );
   const reasoningSteps = round.steps.filter(isReasoningStep);
-  let nextGroupIndex = 0;
 
   for (const step of round.steps) {
     if (isToolCallStep(step)) {
-      const group = groups[nextGroupIndex];
-      if (group && group[0] === step) {
+      const group = groupsByHeadStep.get(step);
+      if (group) {
         actions.push(...toolCallGroupToActions({ group, reasoningSteps, toolIdMapping }));
-        nextGroupIndex += 1;
       }
       continue;
     }
