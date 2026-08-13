@@ -6,10 +6,8 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { createSearchNavigationMock } from '../test_utils/search_navigation_mock';
+import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -17,6 +15,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 jest.mock('@kbn/esql/public', () => ({
@@ -49,19 +48,17 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
   return render(
     <I18nProvider>
       <EuiProvider>
-        <MockAppHeaderProvider>
-          <KibanaContextProvider
-            services={{
-              ...services,
-              history: scopedHistoryMock.create(),
-              searchNavigation: createSearchNavigationMock(),
-            }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <CreateAiIndexPage />
-            </QueryClientProvider>
-          </KibanaContextProvider>
-        </MockAppHeaderProvider>
+        <KibanaContextProvider
+          services={{
+            ...services,
+            history: scopedHistoryMock.create(),
+            appChrome: createAppChromeMock(),
+          }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <CreateAiIndexPage />
+          </QueryClientProvider>
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
@@ -101,7 +98,7 @@ describe('CreateAiIndexPage', () => {
       CONTEXT_ENGINE_APP_ID,
       expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
     );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
       'href',
       '/app/context_engine/'
     );
@@ -115,7 +112,7 @@ describe('CreateAiIndexPage', () => {
 
     renderWithProviders(services);
 
-    const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    const backButton = screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ);
     fireEvent.click(backButton);
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(

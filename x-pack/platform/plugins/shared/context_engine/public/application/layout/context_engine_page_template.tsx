@@ -22,7 +22,7 @@ export const ContextEnginePageTemplate = ({
   ...props
 }: ContextEnginePageTemplateProps) => {
   const {
-    services: { history, searchNavigation },
+    services: { history, appChrome },
   } = useKibana();
 
   useContextEngineBreadcrumbs(breadcrumbPageName);
@@ -32,7 +32,7 @@ export const ContextEnginePageTemplate = ({
       offset={0}
       restrictWidth={false}
       grow={false}
-      solutionNav={searchNavigation?.useClassicNavigation(history)}
+      solutionNav={appChrome?.useClassicNavigation(history)}
       {...props}
     >
       {children}

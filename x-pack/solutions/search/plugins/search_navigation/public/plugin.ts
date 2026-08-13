@@ -88,10 +88,13 @@ export class SearchNavigationPlugin
       },
     };
 
-    this.contextEngineSetup?.registerSearchNavigationAdapter({
+    this.contextEngineSetup?.registerAppChromeAdapter({
       handleOnAppMount: startContract.handleOnAppMount,
       useClassicNavigation: startContract.useClassicNavigation,
-      breadcrumbs: startContract.breadcrumbs,
+      breadcrumbs: {
+        setAppBreadcrumbs: startContract.breadcrumbs.setSearchBreadCrumbs,
+        clearBreadcrumbs: startContract.breadcrumbs.clearBreadcrumbs,
+      },
     });
 
     return startContract;

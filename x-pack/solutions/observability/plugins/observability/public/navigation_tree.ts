@@ -290,6 +290,10 @@ function createNavTree({
             },
           ]),
       {
+        icon: 'sparkles',
+        link: 'context_engine' as const,
+      },
+      {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
           defaultMessage: 'Machine Learning',

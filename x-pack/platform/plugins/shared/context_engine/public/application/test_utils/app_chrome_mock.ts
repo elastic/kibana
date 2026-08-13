@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ContextEngineSearchNavigationAdapter } from '../../search_navigation_adapter';
+import type { ContextEngineAppChromeAdapter } from '../../app_chrome_adapter';
 
-export const createSearchNavigationMock = (): ContextEngineSearchNavigationAdapter => ({
+export const createAppChromeMock = (): ContextEngineAppChromeAdapter => ({
   handleOnAppMount: jest.fn().mockResolvedValue(undefined),
   useClassicNavigation: jest.fn(),
   breadcrumbs: {
-    setSearchBreadCrumbs: jest.fn(),
+    setAppBreadcrumbs: jest.fn(),
     clearBreadcrumbs: jest.fn(),
   },
 });

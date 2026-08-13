@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
@@ -22,14 +20,15 @@ import {
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
 import { useAiIndex } from '../hooks/use_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
+import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
 import {
   ContextEnginePageSection,
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 
-const landingPageTitle = i18n.translate('xpack.contextEngine.landing.title', {
-  defaultMessage: 'Context',
+const backToContextLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.backToContext', {
+  defaultMessage: 'Back to Context',
 });
 
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
@@ -45,31 +44,24 @@ export const AiIndexDetailPage = () => {
   const isManaged = aiIndex !== undefined && aiIndex.managed;
   const hideEditControls = isLoading || isManaged;
   const pageTitle = aiIndex?.id ?? id ?? '';
+  const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
-  const back = useMemo<AppHeaderBack>(
-    () => ({
-      href: createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing),
-      label: landingPageTitle,
-      onClick: (event) => {
-        event.preventDefault();
-        navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
-      },
-    }),
-    [createContextEngineUrl, navigateToContextEngine]
-  );
-
-  const badges = useMemo<AppHeaderBadge[] | undefined>(
-    () =>
-      isManaged
-        ? [
-            {
-              label: managedBadgeLabel,
-              color: 'hollow',
-              'data-test-subj': 'contextAiIndexDetailManagedBadge',
-            },
-          ]
-        : undefined,
-    [isManaged]
+  const pageTitleContent = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <span data-test-subj="contextAiIndexDetailPageTitle">{pageTitle}</span>
+        </EuiFlexItem>
+        {isManaged && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow" data-test-subj="contextAiIndexDetailManagedBadge">
+              {managedBadgeLabel}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
+    [isManaged, pageTitle]
   );
 
   const pageContent = error ? (
@@ -132,9 +124,15 @@ export const AiIndexDetailPage = () => {
       data-test-subj="contextAiIndexDetailPage"
       breadcrumbPageName={pageTitle || undefined}
     >
-      <ContextEnginePageSection paddingSize="l">
-        <AppHeader spacing="flush" title={pageTitle} back={back} badges={badges} />
-      </ContextEnginePageSection>
+      <ContextEngineSubPageHeader
+        backLabel={backToContextLabel}
+        backHref={backHref}
+        onBackClick={(event) => {
+          event.preventDefault();
+          navigateToContextEngine(CONTEXT_ENGINE_PATHS.landing);
+        }}
+        pageTitle={pageTitleContent}
+      />
       <ContextEnginePageSection>{pageContent}</ContextEnginePageSection>
     </ContextEnginePageTemplate>
   );

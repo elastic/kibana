@@ -6,10 +6,8 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
-import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { createSearchNavigationMock } from '../test_utils/search_navigation_mock';
+import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
@@ -23,6 +21,7 @@ import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
 
 jest.mock('@kbn/esql/public', () => ({
@@ -106,7 +105,7 @@ const createServices = () => {
     ...coreMock.createStart(),
     share: sharePluginMock.createStartContract(),
     history: scopedHistoryMock.create(),
-    searchNavigation: createSearchNavigationMock(),
+    appChrome: createAppChromeMock(),
   };
   services.application.getUrlForApp.mockImplementation(
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
@@ -136,17 +135,15 @@ const renderWithProviders = (services: ReturnType<typeof createServices>) => {
   return render(
     <I18nProvider>
       <EuiProvider>
-        <MockAppHeaderProvider>
-          <KibanaContextProvider
-            services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
-          >
-            <QueryClientProvider client={queryClient}>
-              <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
-                <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
-              </MemoryRouter>
-            </QueryClientProvider>
-          </KibanaContextProvider>
-        </MockAppHeaderProvider>
+        <KibanaContextProvider
+          services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+        >
+          <QueryClientProvider client={queryClient}>
+            <MemoryRouter initialEntries={[getAiIndexDetailPath(aiIndex.id)]}>
+              <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+            </MemoryRouter>
+          </QueryClientProvider>
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
@@ -180,7 +177,7 @@ describe('AiIndexDetailPage', () => {
       '/api/context_engine/ai_index/my-ai-index',
       expect.objectContaining({ version: expect.any(String) })
     );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('my-ai-index');
+    expect(screen.getByTestId('contextAiIndexDetailPageTitle')).toHaveTextContent('my-ai-index');
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
     expect(screen.getByTestId('contextAiIndexKiTypeCount-index_metadata')).toHaveTextContent('10');
@@ -205,7 +202,7 @@ describe('AiIndexDetailPage', () => {
       CONTEXT_ENGINE_APP_ID,
       expect.objectContaining({ path: CONTEXT_ENGINE_PATHS.landing })
     );
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
       'href',
       '/app/context_engine/'
     );
@@ -219,7 +216,7 @@ describe('AiIndexDetailPage', () => {
 
     await waitForAiIndexDetailLoaded();
 
-    const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+    const backButton = screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ);
     const clickEvent = createEvent.click(backButton);
     fireEvent(backButton, clickEvent);
 
@@ -246,7 +243,7 @@ describe('AiIndexDetailPage', () => {
     renderWithProviders(services);
 
     expect(await screen.findByTestId('contextAiIndexDetailError')).toHaveTextContent('boom');
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toBeInTheDocument();
   });
 
   it('edits the description and refetches the AI index', async () => {

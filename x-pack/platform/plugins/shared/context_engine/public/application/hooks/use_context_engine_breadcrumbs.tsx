@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_APP_PATH } from '../../../common/features';
+import { clearAppBreadcrumbsViaCore, setAppBreadcrumbsViaCore } from '../utils/set_app_breadcrumbs';
 import { useKibana } from './use_kibana';
 
 const contextTitle = i18n.translate('xpack.contextEngine.landing.title', {
@@ -22,7 +23,7 @@ const contextTitle = i18n.translate('xpack.contextEngine.landing.title', {
  * In classic chrome, we set the Build > Context path manually.
  */
 export const useContextEngineBreadcrumbs = (pageName?: string) => {
-  const { http, searchNavigation, chrome } = useKibana().services;
+  const { http, appChrome, chrome } = useKibana().services;
   const chromeStyle = chrome.getChromeStyle();
 
   useEffect(() => {
@@ -45,11 +46,19 @@ export const useContextEngineBreadcrumbs = (pageName?: string) => {
     }
 
     if (breadcrumbs.length > 0) {
-      searchNavigation?.breadcrumbs.setSearchBreadCrumbs(breadcrumbs);
+      if (appChrome) {
+        appChrome.breadcrumbs.setAppBreadcrumbs(breadcrumbs);
+      } else {
+        setAppBreadcrumbsViaCore(chrome, chromeStyle, breadcrumbs);
+      }
     }
 
     return () => {
-      searchNavigation?.breadcrumbs.clearBreadcrumbs();
+      if (appChrome) {
+        appChrome.breadcrumbs.clearBreadcrumbs();
+      } else {
+        clearAppBreadcrumbsViaCore(chrome);
+      }
     };
-  }, [http, searchNavigation, chromeStyle, pageName]);
+  }, [http, appChrome, chrome, chromeStyle, pageName]);
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
 import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
@@ -52,14 +52,15 @@ const ContextLandingPageContent = () => {
             'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
         })}
         restrictWidth
+        bottomBorder={false}
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
-          border-block-end: none;
         `}
         rightSideItems={
           showHeaderCreateButton ? [<CreateAiIndexButton key="create-ai-index-button" />] : []
         }
       />
+      <EuiHorizontalRule margin="none" data-test-subj="contextLandingPageHeaderDivider" />
       <ContextEnginePageSection>
         {error ? (
           <AiIndexListError error={error} />

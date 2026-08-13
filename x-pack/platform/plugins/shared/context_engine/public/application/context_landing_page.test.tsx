@@ -9,7 +9,7 @@ import { EuiProvider } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { contentListQueryClient } from '@kbn/content-list-provider';
-import { createSearchNavigationMock } from './test_utils/search_navigation_mock';
+import { createAppChromeMock } from './test_utils/app_chrome_mock';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -58,7 +58,7 @@ const renderWithProviders = (core: CoreStart) =>
           services={{
             ...core,
             history: scopedHistoryMock.create(),
-            searchNavigation: createSearchNavigationMock(),
+            appChrome: createAppChromeMock(),
           }}
         >
           <QueryClientProvider client={createTestQueryClient()}>

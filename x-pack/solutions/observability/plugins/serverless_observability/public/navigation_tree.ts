@@ -268,6 +268,10 @@ export const createNavigationTree = ({
         },
         !showAiAssistant
       ),
+      {
+        icon: 'sparkles',
+        link: 'context_engine',
+      },
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',

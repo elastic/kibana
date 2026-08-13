@@ -9,11 +9,11 @@ import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 
-export interface ContextEngineSearchNavigationAdapter {
+export interface ContextEngineAppChromeAdapter {
   handleOnAppMount: () => Promise<void>;
   useClassicNavigation: (history: ScopedHistory) => SolutionNavProps | undefined;
   breadcrumbs: {
-    setSearchBreadCrumbs: (breadcrumbs: ChromeBreadcrumb[]) => void;
+    setAppBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => void;
     clearBreadcrumbs: () => void;
   };
 }

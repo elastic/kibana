@@ -34,6 +34,10 @@ export const createNavigationTree = (
     icon: 'productAgent',
     link: 'agent_builder' as AppDeepLinkId,
   };
+  const contextEngineLink = {
+    icon: 'sparkles',
+    link: 'context_engine' as AppDeepLinkId,
+  };
 
   return {
     body: [
@@ -44,7 +48,7 @@ export const createNavigationTree = (
         renderAs: 'home',
         title: SOLUTION_NAME,
       },
-      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink, contextEngineLink] : []),
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
@@ -70,7 +74,7 @@ export const createNavigationTree = (
           },
       ...getWorkflowsNavPanel(services),
       // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
-      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink, contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',

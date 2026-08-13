@@ -12,7 +12,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
-import type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
+import type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 /**
  * Context passed to the "Analyze & improve" chat opener: the AI index the user is looking at and,
@@ -29,10 +29,10 @@ export interface AnalyzeAndImproveContext {
 /** Opens Agent Builder to analyze the given signals. Registered via {@link ContextEnginePluginStart.registerChatOpener}. */
 export type ChatOpener = (context: AnalyzeAndImproveContext) => void;
 
-export type { ContextEngineSearchNavigationAdapter } from './search_navigation_adapter';
+export type { ContextEngineAppChromeAdapter } from './app_chrome_adapter';
 
 export interface ContextEnginePluginSetup {
-  registerSearchNavigationAdapter: (adapter: ContextEngineSearchNavigationAdapter) => void;
+  registerAppChromeAdapter: (adapter: ContextEngineAppChromeAdapter) => void;
 }
 
 export interface ContextEnginePluginStart {
@@ -56,7 +56,7 @@ export interface ContextEngineStartDependencies {
 
 export interface ContextEngineServicesContextDeps {
   history: AppMountParameters['history'];
-  searchNavigation?: ContextEngineSearchNavigationAdapter;
+  appChrome?: ContextEngineAppChromeAdapter;
 }
 
 export type ContextEngineAppServices = CoreStart & ContextEngineServicesContextDeps;
