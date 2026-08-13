@@ -64,7 +64,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     outcome: outcomeParam,
     enabled: !isError,
   });
-  const newEventsCount = newCountData?.totalEvents ?? 0;
+  const newEventsCount = newCountData?.total_events ?? 0;
 
   // Once the list refetch settles, hide the banner by advancing the lastSeenAt anchor.
   useEffect(() => {
@@ -105,7 +105,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
   };
 
   const items = data?.items ?? [];
-  const totalEvents = data?.totalEvents ?? 0;
+  const totalEvents = data?.total_events ?? 0;
   const showBanner = newEventsCount > 0 && !isError;
   const isFiltered =
     searchParam !== undefined || ruleFilters.length > 0 || outcome !== DEFAULT_OUTCOME;

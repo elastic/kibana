@@ -32,7 +32,7 @@ export type DatasetExample = z.infer<typeof DatasetExample>;
 
 export const GetEvaluationDatasetRequestParams = lazySchema(() =>
   z.object({
-    datasetId: z.string(),
+    datasetId: z.string().max(1024),
   })
 );
 export type GetEvaluationDatasetRequestParams = z.infer<typeof GetEvaluationDatasetRequestParams>;
