@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FlyoutSection } from './flyout_section';
 import { FlyoutSubsection } from './flyout_subsection';
@@ -157,5 +157,23 @@ describe('FlyoutAccordion', () => {
       </FlyoutAccordion>
     );
     expect(screen.getByRole('button', { name: 'View all' })).toBeInTheDocument();
+  });
+
+  it('opens after flushing both animation frames when initialIsOpen is true', () => {
+    jest.useFakeTimers();
+    try {
+      const { container } = render(
+        <FlyoutAccordion title="Details" initialIsOpen>
+          content
+        </FlyoutAccordion>
+      );
+      expect(container.firstChild).not.toHaveAttribute('data-open');
+      act(() => {
+        jest.runAllTimers();
+      });
+      expect(container.firstChild).toHaveAttribute('data-open');
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
