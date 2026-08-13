@@ -195,8 +195,6 @@ export const ALERTING_LOG_CODES = {
    * to prevent this. Emission of this code signals that the invariant
    * has been violated and the read path silently shrank a page.
    */
-  EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS: 'EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS',
-
   EXECUTION_HISTORY_NORMALIZER_DEGRADED: 'EXECUTION_HISTORY_NORMALIZER_DEGRADED',
   /**
    * Action-policy id resolution failed while building the search filter for

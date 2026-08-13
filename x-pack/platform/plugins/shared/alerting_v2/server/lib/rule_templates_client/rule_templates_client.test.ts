@@ -89,7 +89,7 @@ describe('RuleTemplatesClient', () => {
         items: [{ id: 'template-1', ...validTemplateAttributes }],
         total: 1,
         page: 1,
-        perPage: 20,
+        per_page: 20,
       });
     });
 

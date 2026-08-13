@@ -73,7 +73,7 @@ export const findRuleTemplatesResponseSchema = z
     items: z.array(ruleTemplateResponseSchema).describe('The list of rule templates.'),
     total: z.number().describe('The total number of rule templates matching the query.'),
     page: z.number().describe('The current page number.'),
-    perPage: z.number().describe('The number of rule templates per page.'),
+    per_page: z.number().describe('The number of rule templates per page.'),
   })
   .describe('Paginated list of rule templates.');
 

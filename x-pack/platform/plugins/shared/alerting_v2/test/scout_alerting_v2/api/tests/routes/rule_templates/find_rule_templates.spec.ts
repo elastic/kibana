@@ -61,7 +61,7 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
       const response = await apiClient.get(getFindRuleTemplatesUrl(), { headers: adminHeaders });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({ total: 1, page: 1, perPage: 20 });
+      expect(response.body).toMatchObject({ total: 1, page: 1, per_page: 20 });
       expect(response.body.items).toHaveLength(1);
       expect(response.body.items[0]).toMatchObject({ id: 'nginx-error-rate', engine: 'v2', rule });
     }
@@ -220,7 +220,7 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toMatchObject({ page: 1, perPage: 2, total: 5 });
+        expect(response.body).toMatchObject({ page: 1, per_page: 2, total: 5 });
         expect(getTemplateNames(response.body.items)).toStrictEqual([
           'paginated-template-0',
           'paginated-template-1',
@@ -233,7 +233,7 @@ apiTest.describe('Find rule templates API', { tag: tags.deploymentAgnostic }, ()
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toMatchObject({ page: 3, perPage: 2, total: 5 });
+        expect(response.body).toMatchObject({ page: 3, per_page: 2, total: 5 });
         expect(getTemplateNames(response.body.items)).toStrictEqual(['paginated-template-4']);
       });
     }
