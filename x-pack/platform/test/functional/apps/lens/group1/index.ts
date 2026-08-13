@@ -73,6 +73,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       // Layers and chart switching moved to Scout for the non-CCS run (see
       // x-pack/platform/plugins/shared/lens/test/scout/smokescreen). They stay here for CCS
       // because Scout cannot target a real remote cluster yet.
+      // Ticket: https://github.com/elastic/apps-dx/issues/44
       loadTestFile(require.resolve('./layers'));
       loadTestFile(require.resolve('./chart_switching'));
     } else {
