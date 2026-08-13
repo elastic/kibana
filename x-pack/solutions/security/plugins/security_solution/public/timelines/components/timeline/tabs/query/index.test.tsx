@@ -11,7 +11,6 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -52,6 +51,16 @@ import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+
+const mockPatterns = [
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+  'journalbeat-*',
+];
 
 jest.mock('../../../../../data_view_manager/hooks/use_browser_fields');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
@@ -247,7 +256,7 @@ describe.skip('query tab with unified timeline', () => {
 
     (useTimelineEventsDetails as jest.Mock).mockImplementation(() => [false, {}]);
 
-    jest.mocked(useDataView).mockReturnValue(withIndices(mockSourcererScope.selectedPatterns));
+    jest.mocked(useDataView).mockReturnValue(withIndices(mockPatterns));
 
     jest.mocked(useBrowserFields).mockReturnValue(mockBrowserFields);
 
