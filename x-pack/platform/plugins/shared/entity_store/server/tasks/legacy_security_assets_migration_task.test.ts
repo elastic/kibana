@@ -90,9 +90,7 @@ describe('legacy_security_assets_migration_task', () => {
       mockFind.mockResolvedValue({
         saved_objects: [{ namespaces: ['default'] }, { namespaces: ['other'] }],
       });
-      mockHasLegacySecurityAssets
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false);
+      mockHasLegacySecurityAssets.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
 
       const signal = new AbortController().signal;
       const result = await runLegacySecurityAssetsMigration({ coreStart, logger, signal });
