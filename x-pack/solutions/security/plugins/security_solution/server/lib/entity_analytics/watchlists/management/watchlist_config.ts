@@ -129,7 +129,7 @@ export class WatchlistConfigClient {
       options: {
         index: getIndexForWatchlist(this.deps.namespace),
         mappings: generateWatchlistEntityIndexMappings(),
-        settings: { hidden: true },
+        settings: { hidden: true, auto_expand_replicas: '0-1' },
       },
     });
 
