@@ -27,6 +27,13 @@ import { createIdentifyFeaturesPrompt } from './prompt';
 import { formatRawDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
+/**
+ * Mirrors the "2–5 evidence strings" guidance in the system prompt. Capping here rather than
+ * with `maxItems` in the finalize schema keeps an over-long array from failing tool-call
+ * validation, which would retry the whole generation and then drop the batch.
+ */
+const MAX_EVIDENCE_ITEMS = 5;
+
 export interface PreviouslyIdentifiedFeature {
   id: string;
   type: string;
@@ -189,6 +196,9 @@ export async function identifyFeatures({
         ...feature,
         stream_name: streamName,
         filter: tryParseFilter(feature.filter),
+        ...(Array.isArray(feature.evidence)
+          ? { evidence: feature.evidence.slice(0, MAX_EVIDENCE_ITEMS) }
+          : {}),
       };
       const result = identifiedFeatureSchema.safeParse(candidate);
       if (!result.success || Object.keys(result.data.properties).length === 0) {

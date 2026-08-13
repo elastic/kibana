@@ -44,6 +44,8 @@ export class InventoryPage {
   public readonly noDataPage: Locator;
   public readonly noDataPageActionButton: Locator;
 
+  public readonly noRemoteClusterPrompt: Locator;
+
   public readonly k8sPodWaffleContextMenu: Locator;
 
   public readonly alertsHeaderButton: Locator;
@@ -60,6 +62,8 @@ export class InventoryPage {
   public readonly alertsFlyout: Locator;
   public readonly alertsFlyoutRuleDefinitionSection: Locator;
   public readonly alertsFlyoutRuleTypeName: Locator;
+  public readonly alertsFlyoutDetailsStep: Locator;
+  public readonly alertsFlyoutLinkedDashboards: Locator;
 
   constructor(
     private readonly page: ScoutPage,
@@ -95,6 +99,8 @@ export class InventoryPage {
     this.noDataPage = this.page.getByTestId('kbnNoDataPage');
     this.noDataPageActionButton = this.noDataPage.getByTestId('noDataDefaultActionButton');
 
+    this.noRemoteClusterPrompt = this.page.getByTestId('infraHostsNoRemoteCluster');
+
     this.k8sPodWaffleContextMenu = this.page
       .getByRole('dialog')
       .filter({ hasText: 'Kubernetes Pod details' });
@@ -121,6 +127,8 @@ export class InventoryPage {
     this.alertsFlyoutRuleTypeName = this.alertsFlyout.getByTestId(
       'ruleDefinitionHeaderRuleTypeName'
     );
+    this.alertsFlyoutDetailsStep = this.alertsFlyout.getByRole('button', { name: 'Details' });
+    this.alertsFlyoutLinkedDashboards = this.alertsFlyout.getByTestId('ruleLinkedDashboards');
   }
 
   public async waitForNodesToLoad() {
@@ -311,5 +319,19 @@ export class InventoryPage {
     await this.page.getByRole('option', { name: schema }).waitFor();
     await this.page.getByRole('option', { name: schema }).click();
     await this.waitForNodesToLoad();
+  }
+
+  public async openInventoryRuleFlyout() {
+    await this.alertsHeaderButton.click();
+    await this.inventoryAlertsMenuOption.click();
+    await this.createInventoryRuleButton.click();
+    await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  public async openMetricsThresholdRuleFlyout() {
+    await this.alertsHeaderButton.click();
+    await this.metricsAlertsMenuOption.click();
+    await this.createMetricsThresholdRuleButton.click();
+    await this.alertsFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 }
