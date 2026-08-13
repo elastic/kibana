@@ -54,7 +54,14 @@ export const EBT_CLICK_ACTIONS = {
   OPEN_ACTIONS: 'openActions',
   /** User intends to add data to their (empty) cluster. Commonly used from empty data prompts and similar components */
   ADD_DATA: 'addData',
+  /** User sets the option a chart or grid is sorted by. */
+  SET_SORT_OPTION: 'setSortOption',
+  /** User sets the direction a chart or grid is sorted in. */
+  SET_SORT_DIRECTION: 'setSortDirection',
 } as const;
+
+/** EBT click `element` for the charts toolbar, shared by the unified histogram and metrics grid toolbars. */
+export const CHARTS_TOOLBAR_EBT_ELEMENT = 'chartsToolbar';
 
 /**
  * Sentinel value for `data-ebt-detail` when a field is not found in the ECS fields
