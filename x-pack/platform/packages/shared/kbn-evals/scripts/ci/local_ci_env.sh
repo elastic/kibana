@@ -95,7 +95,8 @@ if [[ "$EVAL_CONNECTOR_ID" == openrouter-* ]]; then
     echo "ERROR: evaluationConnectorId ($EVAL_CONNECTOR_ID) is not present in generated connectors." >&2
     echo "Sample generated connector ids:" >&2
     node -e "const b=process.env.KIBANA_TESTING_AI_CONNECTORS||'';const s=Buffer.from(b,'base64').toString('utf8');const o=JSON.parse(s);console.log(Object.keys(o).slice(0,20).join('\\n'));"
-  return 1
+    die "evaluationConnectorId ($EVAL_CONNECTOR_ID) is not present in generated connectors."
+  fi
 fi
 
 echo "Loaded kbn-evals CI env from: $CONFIG_PATH"
