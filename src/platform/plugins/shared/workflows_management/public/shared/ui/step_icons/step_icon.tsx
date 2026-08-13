@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import React, { Suspense } from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
+  getMaskableIconUrl,
   getStepIconType,
   getTriggerTypeIconType,
   HardcodedIcons,
@@ -94,7 +95,8 @@ export const StepIcon = React.memo(
       iconType = getStepIconType(stepType);
     }
 
-    if (typeof iconType === 'string' && iconType.startsWith('data:')) {
+    const maskUrl = getMaskableIconUrl(iconType);
+    if (maskUrl) {
       const statusColor = shouldApplyColorToIcon
         ? getExecutionStatusColors(euiTheme, executionStatus).color
         : undefined;
@@ -104,7 +106,7 @@ export const StepIcon = React.memo(
             display: inline-block;
             width: 16px;
             height: 16px;
-            mask-image: url('${iconType}');
+            mask-image: url('${maskUrl}');
             mask-size: contain;
             mask-repeat: no-repeat;
             mask-position: center;
