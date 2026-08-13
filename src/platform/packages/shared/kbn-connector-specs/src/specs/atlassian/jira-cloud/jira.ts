@@ -156,7 +156,7 @@ export const JiraConnector: ConnectorSpec = {
           }),
           helpText: i18n.translate('core.kibanaConnectorSpecs.jira.config.cloudId.helpText', {
             defaultMessage:
-              'Required for OAuth. To find your Cloud ID, visit https://your-subdomain.atlassian.net/_edge/tenant_info (replace your-subdomain with your Atlassian subdomain) and use the cloudId value from the response.',
+              'Required for OAuth. To find your Cloud ID, visit https://your-subdomain.atlassian.net/_edge/tenant_info (replace your-subdomain with your Atlassian subdomain) and use the cloudId value from the response. Your Atlassian OAuth app must have the write:jira-work scope enabled to use write actions.',
           }),
         }),
     })
@@ -431,6 +431,7 @@ export const JiraConnector: ConnectorSpec = {
       isTool: true,
       description:
         'Attach a file to a Jira issue. The file must be provided as a base64-encoded string. ' +
+        'WARNING: Only call this when you already have the base64-encoded content ready — do not call just to store arbitrary data. ' +
         'Use when you need to upload a screenshot, log, or report to a ticket.',
       input: AddAttachmentInputSchema,
       handler: async (ctx, input: AddAttachmentInput) => {
@@ -456,7 +457,8 @@ export const JiraConnector: ConnectorSpec = {
       description:
         'Download the content of a Jira attachment by its ID. ' +
         'Returns the file as a base64-encoded string along with its MIME type. ' +
-        'Attachment IDs are found in the attachments array of a getIssue response.',
+        'Attachment IDs are found in the attachments array of a getIssue response. ' +
+        'WARNING: Only call this when you have a concrete plan to process the binary data (e.g. pass it to an Elasticsearch ingest pipeline attachment processor). Do not call just to inspect file contents.',
       input: GetAttachmentInputSchema,
       handler: async (ctx, input: GetAttachmentInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -534,7 +536,9 @@ export const JiraConnector: ConnectorSpec = {
 
     removeWatcher: {
       isTool: true,
-      description: 'Remove a user from the watcher list of a Jira issue.',
+      description:
+        'Remove a user from the watcher list of a Jira issue. ' +
+        'Use searchUsers to resolve a name or email to an accountId before calling this.',
       input: RemoveWatcherInputSchema,
       handler: async (ctx, input: RemoveWatcherInput) => {
         const baseUrl = buildBaseUrl(ctx);
