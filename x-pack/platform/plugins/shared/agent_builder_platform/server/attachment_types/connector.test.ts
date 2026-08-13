@@ -268,6 +268,7 @@ describe('connector attachment type', () => {
                 handler: jest.fn(),
               },
             },
+            test: { handler: jest.fn(), enabled: false },
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
@@ -302,6 +303,7 @@ describe('connector attachment type', () => {
                 handler: jest.fn(),
               },
             },
+            test: { handler: jest.fn(), enabled: false },
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
@@ -333,6 +335,7 @@ describe('connector attachment type', () => {
                 handler: jest.fn(),
               },
             },
+            test: { handler: jest.fn(), enabled: false },
           });
 
           const attachment = createAttachment({ ...validData, connector_type: '.slack2' });
