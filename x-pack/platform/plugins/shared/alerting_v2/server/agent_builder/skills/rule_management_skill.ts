@@ -11,7 +11,6 @@ import {
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
   RULE_MANAGEMENT_SKILL_ID,
-  RULE_KIND_LABELS,
 } from '@kbn/alerting-v2-constants';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
