@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getEbtProps } from '@kbn/ebt-click';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -38,10 +39,17 @@ import { useDataState } from '../../hooks/use_data_state';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
 import {
+  ExpandedDocLinkability,
   getExpandedDocLinkability,
   getExpandedDocLinkDisabledReason,
 } from '../../utils/expanded_doc';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+
+const expandedDocLinkabilityEbtDetails: Record<ExpandedDocLinkability, string> = {
+  [ExpandedDocLinkability.Linkable]: 'linkable',
+  [ExpandedDocLinkability.EsqlMissingMetadata]: 'esqlMissingMetadata',
+  [ExpandedDocLinkability.EsqlTransformational]: 'esqlTransformational',
+};
 
 export interface DiscoverDocumentFlyoutProps {
   dataView: DataView;
@@ -87,9 +95,13 @@ export const DiscoverDocumentFlyout = memo(
       fetchStatus: documentState.fetchStatus,
     });
     const copyLink = useCopyExpandedDocLink({ dataView });
-    const copyLinkDisabledReason = useMemo(
-      () => getExpandedDocLinkDisabledReason(getExpandedDocLinkability(query, expandedDoc)),
+    const expandedDocLinkability = useMemo(
+      () => getExpandedDocLinkability(query, expandedDoc),
       [query, expandedDoc]
+    );
+    const copyLinkDisabledReason = useMemo(
+      () => getExpandedDocLinkDisabledReason(expandedDocLinkability),
+      [expandedDocLinkability]
     );
     const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(() => {
       if (!expandedDoc || expandedDocOwner !== DEFAULT_EXPANDED_DOC_OWNER) {
@@ -110,6 +122,16 @@ export const DiscoverDocumentFlyout = memo(
               })
             : copyLinkLabel,
           toolTipContent: copyLinkDisabledReason ?? copyLinkLabel,
+          toolTipProps: {
+            anchorProps: {
+              'data-test-subj': 'discoverDocFlyoutShareDirectLink',
+              ...getEbtProps({
+                action: 'shareDirectLink',
+                element: 'docViewerFlyoutHeader',
+                detail: expandedDocLinkabilityEbtDetails[expandedDocLinkability],
+              }),
+            },
+          },
           onClick: () => {
             if (copyLinkDisabledReason) {
               toastNotifications.addWarning({
@@ -125,7 +147,14 @@ export const DiscoverDocumentFlyout = memo(
           },
         },
       ];
-    }, [copyLink, copyLinkDisabledReason, expandedDoc, expandedDocOwner, toastNotifications]);
+    }, [
+      copyLink,
+      copyLinkDisabledReason,
+      expandedDoc,
+      expandedDocLinkability,
+      expandedDocOwner,
+      toastNotifications,
+    ]);
 
     const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
     const setExpandedDocForCurrentOwner = useCallback(

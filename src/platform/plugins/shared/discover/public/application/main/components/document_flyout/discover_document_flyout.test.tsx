@@ -151,6 +151,15 @@ const setup = async ({
 };
 
 describe('DiscoverDocumentFlyout', () => {
+  const expectShareButtonEbt = (shareButton: HTMLElement, detail: string) => {
+    const trackedElement = shareButton.closest('[data-ebt-action]');
+
+    expect(trackedElement).toHaveAttribute('data-test-subj', 'discoverDocFlyoutShareDirectLink');
+    expect(trackedElement).toHaveAttribute('data-ebt-action', 'shareDirectLink');
+    expect(trackedElement).toHaveAttribute('data-ebt-element', 'docViewerFlyoutHeader');
+    expect(trackedElement).toHaveAttribute('data-ebt-detail', detail);
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -161,6 +170,7 @@ describe('DiscoverDocumentFlyout', () => {
     const shareButton = await screen.findByRole('button', {
       name: 'Share direct link',
     });
+    expectShareButtonEbt(shareButton, 'linkable');
 
     act(() => {
       shareButton.click();
@@ -221,16 +231,18 @@ describe('DiscoverDocumentFlyout', () => {
       query: { esql: 'FROM logs' },
       expandedDoc: buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock),
       linkability: ExpandedDocLinkability.EsqlMissingMetadata,
+      ebtDetail: 'esqlMissingMetadata',
     },
     {
       name: 'a result from a transformational ES|QL query',
       query: { esql: 'FROM logs METADATA _id, _index | STATS count() BY host' },
       expandedDoc: buildDataTableRecord(outOfResultsHit, dataViewMock),
       linkability: ExpandedDocLinkability.EsqlTransformational,
+      ebtDetail: 'esqlTransformational',
     },
   ])(
     'explains why a link cannot be copied for $name',
-    async ({ query, expandedDoc, linkability }) => {
+    async ({ query, expandedDoc, linkability, ebtDetail }) => {
       const { services } = await setup({
         hits: esHitsMock,
         query,
@@ -242,6 +254,7 @@ describe('DiscoverDocumentFlyout', () => {
         name: `Cannot share direct link: ${disabledReason}`,
       });
 
+      expectShareButtonEbt(shareButton, ebtDetail);
       expect(shareButton).toBeEnabled();
       fireEvent.click(shareButton);
 
