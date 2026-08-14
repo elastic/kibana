@@ -59,7 +59,8 @@
       "investigate",
       "cps",
       "ingestHub",
-      "significantEvents"
+      "significantEvents",
+      "nightshiftInvestigations"
     ],
     "requiredBundles": [
       "aiops",
@@ -72,7 +73,8 @@
       "kibanaUtils",
       "significantEvents",
       "stackAlerts",
-      "observabilityAgentBuilder"
+      "observabilityAgentBuilder",
+      "nightshiftInvestigations"
     ],
     "extraPublicDirs": ["common"]
   }
