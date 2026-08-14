@@ -8,11 +8,13 @@
 import type { SetOptional } from 'type-fest';
 import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { ConfigSchema, ObservabilityRuleTypeRegistry, TopAlert } from '../..';
+import type { NightshiftInvestigationsRepositoryClient } from '@kbn/nightshift-investigations-plugin/public';
 
 export interface ObservabilityAlertsTableContext {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   config: ConfigSchema;
   parentAlert?: TopAlert;
+  investigationsClient?: NightshiftInvestigationsRepositoryClient;
 }
 
 export type ObservabilityAlertsTableProps = SetOptional<

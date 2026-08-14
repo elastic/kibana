@@ -13,6 +13,7 @@ import type { AlertDetailsNavigation } from '@kbn/response-ops-alerts-table/type
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { AlertsTableExpandedAlertView } from '../alerts_flyout/alerts_table_expanded_alert_view';
 import type { ObservabilityPublicStart } from '../..';
+import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
 import AlertActions from '../alert_actions/alert_actions';
 import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
@@ -40,7 +41,10 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
 };
 
 export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
-  const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
+  const { observability, nightshiftInvestigations } = useKibana<
+    observability?: ObservabilityPublicStart;
+    nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
+  >().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   const alertDetailsNavigation: AlertDetailsNavigation = {
@@ -58,6 +62,7 @@ export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
         observabilityRuleTypeRegistry:
           observabilityRuleTypeRegistry ?? observability?.observabilityRuleTypeRegistry,
         config,
+        investigationsClient: nightshiftInvestigations?.investigationsClient,
       }}
       renderCellValue={AlertsTableCellValue}
       renderActionsCell={AlertActions}
