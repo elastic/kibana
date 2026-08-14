@@ -15,7 +15,7 @@ import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
 import { episodeAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { alertEpisodeToEpisodeAttachment } from '../../../../common/agent_builder/episode_mappers';
-import { resolveEpisodeName } from '../../../../common/agent_builder/resolve_episode_name';
+import { resolveEpisodeLabel } from '../../../../common/agent_builder/resolve_episode_label';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { EpisodesClient } from '../../../lib/episodes_client';
@@ -105,11 +105,7 @@ export const refreshEpisodeTool = ({
 
       const data = episodeAttachmentDataSchema.parse(
         alertEpisodeToEpisodeAttachment(episode, {
-          episodeName: resolveEpisodeName({
-            ruleName,
-            episodeData: episode.episode_data,
-            groupingFields,
-          }),
+          episodeLabel: resolveEpisodeLabel({ episode, ruleName, groupingFields }),
         })
       );
 

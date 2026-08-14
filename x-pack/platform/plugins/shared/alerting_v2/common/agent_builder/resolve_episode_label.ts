@@ -6,25 +6,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-utils';
 
 const GROUP_NAME_SEPARATOR = ' · ';
 
-export interface ResolveEpisodeNameParams {
+export interface ResolveEpisodeLabelParams {
+  episode: AlertEpisode;
   ruleName?: string;
-  episodeData?: string | null;
   groupingFields?: readonly string[];
 }
 
 const resolveGroupName = (
-  episodeData?: string | null,
+  episode: AlertEpisode,
   groupingFields?: readonly string[]
 ): string | undefined => {
-  if (!groupingFields?.length || !episodeData) {
+  if (!groupingFields?.length || !episode.episode_data) {
     return undefined;
   }
 
-  const data = parseEpisodeDataJson(episodeData);
+  const data = parseEpisodeDataJson(episode.episode_data);
   const values = groupingFields
     .map((field) => getValueByFieldPath(data, field))
     .filter(
@@ -37,30 +38,31 @@ const resolveGroupName = (
   return values.length > 0 ? values.join(GROUP_NAME_SEPARATOR) : undefined;
 };
 
-/**
- * Temporary episode display name from the rule name and/or grouping values.
- * Replace this once episodes have a first-class name of their own.
- */
-export const resolveEpisodeName = ({
+export const resolveEpisodeLabel = ({
+  episode,
   ruleName,
-  episodeData,
   groupingFields,
-}: ResolveEpisodeNameParams = {}): string | undefined => {
+}: ResolveEpisodeLabelParams): string => {
   const resolvedRuleName = ruleName?.trim() || undefined;
-  const groupName = resolveGroupName(episodeData, groupingFields);
+  const groupName = resolveGroupName(episode, groupingFields);
 
   if (resolvedRuleName && groupName) {
-    return i18n.translate('xpack.alertingV2.episodeAttachment.episodeNameFromRuleAndGroup', {
+    return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleAndGroup', {
       defaultMessage: '{ruleName} alert for {groupName}',
       values: { ruleName: resolvedRuleName, groupName },
     });
   }
 
-  const name = resolvedRuleName ?? groupName;
-  return name
-    ? i18n.translate('xpack.alertingV2.episodeAttachment.episodeName', {
-        defaultMessage: '{name} alert',
-        values: { name },
-      })
-    : undefined;
+  const label = resolvedRuleName ?? groupName;
+  if (label) {
+    return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabel', {
+      defaultMessage: '{label} alert',
+      values: { label: resolvedRuleName ?? groupName },
+    });
+  }
+
+  return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleId', {
+    defaultMessage: 'Alert for rule {ruleId}',
+    values: { ruleId: episode['rule.id'] },
+  });
 };

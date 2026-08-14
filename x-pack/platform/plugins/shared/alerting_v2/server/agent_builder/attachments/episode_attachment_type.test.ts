@@ -137,14 +137,14 @@ describe('createEpisodeAttachmentType', () => {
       expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
     });
 
-    it('includes the episode name when the rule can be loaded', async () => {
+    it('includes the episode label when the rule can be loaded', async () => {
       getEpisode.mockResolvedValueOnce(baseEpisodeData);
       getRule.mockResolvedValueOnce({ metadata: { name: 'Host CPU high' } });
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
-      expect(result).toEqual(expect.objectContaining({ 'episode.name': 'Host CPU high alert' }));
+      expect(result).toEqual(expect.objectContaining({ 'episode.label': 'Host CPU high alert' }));
     });
 
     it('includes the rule name and group when both are available', async () => {
@@ -160,20 +160,22 @@ describe('createEpisodeAttachmentType', () => {
       const result = await definition.resolve!('ep-1', createResolveContext());
 
       expect(result).toEqual(
-        expect.objectContaining({ 'episode.name': 'Host CPU high alert for web-01' })
+        expect.objectContaining({ 'episode.label': 'Host CPU high alert for web-01' })
       );
     });
 
-    it('omits the episode name when the rule cannot be loaded and there is no group name', async () => {
+    it('falls back to rule ID label when the rule cannot be loaded and there is no group name', async () => {
       getEpisode.mockResolvedValueOnce(baseEpisodeData);
       getRule.mockRejectedValueOnce(new Error('not found'));
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(result).toEqual(expect.not.objectContaining({ 'episode.name': expect.anything() }));
+      expect(result).toEqual(
+        expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' })
+      );
     });
 
-    it('omits the episode name when the rule cannot be loaded and grouping fields are unknown', async () => {
+    it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {
       getEpisode.mockResolvedValueOnce({
         ...baseEpisodeData,
         episode_data: JSON.stringify({ host: { name: 'web-01' } }),
@@ -182,7 +184,9 @@ describe('createEpisodeAttachmentType', () => {
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(result).toEqual(expect.not.objectContaining({ 'episode.name': expect.anything() }));
+      expect(result).toEqual(
+        expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' })
+      );
     });
 
     it('uses grouping fields from the rule when the rule name is missing', async () => {
@@ -197,7 +201,7 @@ describe('createEpisodeAttachmentType', () => {
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(result).toEqual(expect.objectContaining({ 'episode.name': 'web-01 alert' }));
+      expect(result).toEqual(expect.objectContaining({ 'episode.label': 'web-01 alert' }));
     });
 
     it('normalizes null optional fields via alertEpisodeToEpisodeAttachment', async () => {
@@ -479,12 +483,12 @@ describe('createEpisodeAttachmentType', () => {
       expect(value).toContain('.alerts-security.alerts-*');
     });
 
-    it('includes the episode name when present', async () => {
+    it('includes the episode label when present', async () => {
       const value = await formatValue({
         ...baseEpisodeData,
-        'episode.name': 'Host CPU high alert',
+        'episode.label': 'Host CPU high alert',
       });
-      expect(value).toContain('Episode name: Host CPU high alert');
+      expect(value).toContain('Episode label: Host CPU high alert');
     });
 
     it('mentions the attachment-scoped refresh and get_rule tools', async () => {

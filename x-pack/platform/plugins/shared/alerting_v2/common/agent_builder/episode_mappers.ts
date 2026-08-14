@@ -11,7 +11,7 @@ import type { AlertEpisode, EpisodeAttachmentData } from '@kbn/alerting-v2-schem
 const nullishToUndefined = <T>(value: T | null | undefined): T | undefined => value ?? undefined;
 
 export interface AlertEpisodeToAttachmentOptions {
-  episodeName?: string;
+  episodeLabel?: string;
 }
 
 /**
@@ -23,7 +23,7 @@ export const alertEpisodeToEpisodeAttachment = (
 ): EpisodeAttachmentData => ({
   '@timestamp': episode['@timestamp'],
   'episode.id': episode['episode.id'],
-  ...(options.episodeName ? { 'episode.name': options.episodeName } : {}),
+  ...(options.episodeLabel ? { 'episode.label': options.episodeLabel } : {}),
   'episode.status': episode['episode.status'],
   'rule.id': episode['rule.id'],
   group_hash: episode.group_hash,

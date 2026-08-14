@@ -109,7 +109,7 @@ describe('refreshEpisodeTool', () => {
       });
     });
 
-    it('includes the episode name when the rule can be loaded', async () => {
+    it('includes the episode label when the rule can be loaded', async () => {
       get.mockResolvedValueOnce(baseEpisodeData);
       getRule.mockResolvedValueOnce({ metadata: { name: 'Host CPU high' } });
 
@@ -120,7 +120,7 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.objectContaining({ 'episode.name': 'Host CPU high alert' }),
+            data: expect.objectContaining({ 'episode.label': 'Host CPU high alert' }),
           },
         ],
       });
@@ -142,13 +142,13 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.objectContaining({ 'episode.name': 'Host CPU high alert for web-01' }),
+            data: expect.objectContaining({ 'episode.label': 'Host CPU high alert for web-01' }),
           },
         ],
       });
     });
 
-    it('omits the episode name when the rule cannot be loaded and there is no group name', async () => {
+    it('falls back to rule ID label when the rule cannot be loaded and there is no group name', async () => {
       get.mockResolvedValueOnce(baseEpisodeData);
       getRule.mockRejectedValueOnce(new Error('not found'));
 
@@ -158,7 +158,7 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.not.objectContaining({ 'episode.name': expect.anything() }),
+            data: expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }),
           },
         ],
       });
@@ -174,7 +174,7 @@ describe('refreshEpisodeTool', () => {
       );
     });
 
-    it('omits the episode name when the rule cannot be loaded and grouping fields are unknown', async () => {
+    it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {
       get.mockResolvedValueOnce({
         ...baseEpisodeData,
         episode_data: JSON.stringify({ host: { name: 'web-01' } }),
@@ -187,7 +187,7 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.not.objectContaining({ 'episode.name': expect.anything() }),
+            data: expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }),
           },
         ],
       });

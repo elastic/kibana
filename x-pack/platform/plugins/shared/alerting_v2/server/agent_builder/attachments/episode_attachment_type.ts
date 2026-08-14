@@ -21,7 +21,7 @@ import {
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
-import { resolveEpisodeName } from '../../../common/agent_builder/resolve_episode_name';
+import { resolveEpisodeLabel } from '../../../common/agent_builder/resolve_episode_label';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
@@ -58,8 +58,8 @@ const formatEpisodeDescription = ({
     `Status: ${data['episode.status']}`,
   ];
 
-  if (data['episode.name']) {
-    lines.push(`Episode name: ${data['episode.name']}`);
+  if (data['episode.label']) {
+    lines.push(`Episode label: ${data['episode.label']}`);
   }
   lines.push(
     `Rule ID: ${data['rule.id']}`,
@@ -152,11 +152,7 @@ export const createEpisodeAttachmentType = ({
 
       return episodeAttachmentDataSchema.parse(
         alertEpisodeToEpisodeAttachment(episode, {
-          episodeName: resolveEpisodeName({
-            ruleName,
-            episodeData: episode.episode_data,
-            groupingFields,
-          }),
+          episodeLabel: resolveEpisodeLabel({ episode, ruleName, groupingFields }),
         })
       );
     } catch (error) {

@@ -44,10 +44,10 @@ describe('alertEpisodeToEpisodeAttachment', () => {
     });
   });
 
-  it('includes an optional episode name', () => {
+  it('includes an optional episode label', () => {
     expect(
-      alertEpisodeToEpisodeAttachment(baseEpisode, { episodeName: 'Host CPU high alert' })
-    ).toEqual(expect.objectContaining({ 'episode.name': 'Host CPU high alert' }));
+      alertEpisodeToEpisodeAttachment(baseEpisode, { episodeLabel: 'Host CPU high alert' })
+    ).toEqual(expect.objectContaining({ 'episode.label': 'Host CPU high alert' }));
   });
 
   it('normalizes null optional fields from ES|QL to undefined', () => {

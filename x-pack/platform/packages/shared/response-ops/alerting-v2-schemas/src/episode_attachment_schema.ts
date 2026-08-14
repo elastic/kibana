@@ -22,7 +22,7 @@ export const episodeAttachmentDataSchema = z
   .object({
     '@timestamp': z.iso.datetime(),
     'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
-    'episode.name': z
+    'episode.label': z
       .string()
       .min(1)
       .max(MAX_NAME_LENGTH * 2 + 32)
