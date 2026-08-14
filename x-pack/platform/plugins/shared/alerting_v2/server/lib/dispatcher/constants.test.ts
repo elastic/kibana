@@ -36,11 +36,6 @@ describe('dispatcher constants invariants', () => {
     expect(DISPATCH_CHUNK_SIZE).toBe(250);
   });
 
-  it('DISPATCH_CHUNK_SIZE is a positive integer', () => {
-    expect(Number.isInteger(DISPATCH_CHUNK_SIZE)).toBe(true);
-    expect(DISPATCH_CHUNK_SIZE).toBeGreaterThan(0);
-  });
-
   it('EPISODE_QUERY_LIMIT matches the LIMIT literal in getDispatchableAlertEventsQuery', async () => {
     // Dynamically import to keep the assertion co-located without a cross-file import cycle.
     const { getDispatchableAlertEventsQuery } = await import('./queries');
