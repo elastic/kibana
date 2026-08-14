@@ -19,7 +19,10 @@ import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ConversationQueue } from '../../components/conversation_queue';
-import { type BaseActionsProps } from '../../components/conversation_card/base_actions';
+import {
+  type BaseActionsProps,
+  type CardActionType,
+} from '../../components/conversation_card/base_actions';
 import { BlastRadius } from '../../components/filters/blast_radius';
 import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
 
@@ -34,7 +37,7 @@ export const ConversationsPage: React.FC = () => {
   usePndDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
   const [modalState, setModalState] = useState<{
-    type: 'case' | 'dismiss' | 'assign' | null;
+    type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
     assignee?: string | null;
   }>({ type: null, recordId: null, assignee: null });
@@ -42,7 +45,6 @@ export const ConversationsPage: React.FC = () => {
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
       setModalState({ type: action, recordId, assignee });
-      console.log('conversation: ', recordId);
     },
     [setModalState]
   );

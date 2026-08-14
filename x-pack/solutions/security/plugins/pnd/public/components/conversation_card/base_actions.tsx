@@ -59,7 +59,7 @@ const useContextMenuItems = (
   );
 };
 
-type CardActionType = 'case' | 'dismiss' | 'assign';
+export type CardActionType = 'openIncident' | 'dismiss' | 'assign';
 export interface BaseActionsProps {
   investigation: Investigation;
   onClickAction: (action: CardActionType, conversationId: Investigation['recordId']) => void;
@@ -98,12 +98,14 @@ export const BaseActions = memo<BaseActionsProps>(
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
         {
-          key: 'openCase',
+          key: 'openIncident',
           icon: 'document',
-          name: i18n.translate('xpack.pnd.baseActions.openCase', {
-            defaultMessage: 'Open a case',
+          name: i18n.translate('xpack.pnd.baseActions.openAnIncident', {
+            defaultMessage: 'Open an incident',
           }),
-          onClick: () => onClickAction('case', investigation.recordId),
+          onClick: () => onClickAction('openIncident', investigation.recordId),
+          // TODO: Add a isdisabled for actions that are disabled
+          // might apply to openIncident if the investigation already has an incident created
         },
         {
           key: 'assign',
