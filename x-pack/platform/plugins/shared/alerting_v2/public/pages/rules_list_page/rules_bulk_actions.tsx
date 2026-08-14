@@ -28,6 +28,7 @@ export interface RulesBulkActionsProps {
   onClearSelection: () => void;
   onBulkEnable: () => void;
   onBulkDisable: () => void;
+  onBulkUpdateApiKey: () => void;
   onBulkDelete: () => void;
 }
 
@@ -46,6 +47,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
   onBulkEnable,
   onBulkDisable,
   onBulkDelete,
+  onBulkUpdateApiKey,
 }) => {
   const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
 
@@ -68,6 +70,11 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
     onBulkDelete();
   };
 
+  const handleBulkUpdateApiKey = () => {
+    setIsBulkActionsOpen(false);
+    onBulkUpdateApiKey();
+  };
+
   return (
     <>
       <EuiFlexItem grow={false}>
@@ -75,7 +82,7 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
           button={
             <EuiButtonEmpty
               size="xs"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               onClick={() => setIsBulkActionsOpen((open) => !open)}
               data-test-subj="bulkActionsButton"
@@ -109,12 +116,22 @@ export const RulesBulkActions: React.FC<RulesBulkActionsProps> = ({
               </EuiContextMenuItem>,
               <EuiContextMenuItem
                 key="disable"
-                icon={<EuiIcon type="crossInCircle" size="m" aria-hidden={true} />}
+                icon={<EuiIcon type="crossCircle" size="m" aria-hidden={true} />}
                 onClick={handleBulkDisable}
                 data-test-subj="bulkDisableRules"
               >
                 {i18n.translate('xpack.alertingV2.rulesList.bulkAction.disable', {
                   defaultMessage: 'Disable',
+                })}
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                key="updateApiKey"
+                icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
+                onClick={handleBulkUpdateApiKey}
+                data-test-subj="bulkUpdateRuleApiKey"
+              >
+                {i18n.translate('xpack.alertingV2.rulesList.bulkAction.updateApiKey', {
+                  defaultMessage: 'Update API key',
                 })}
               </EuiContextMenuItem>,
               <EuiContextMenuItem

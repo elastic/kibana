@@ -66,11 +66,13 @@ export function getLatencyChart({
   buildQuery,
   latencyAggregationType,
   titleAction,
+  projectRouting,
 }: {
   indices: string | undefined;
   buildQuery: (indices: string, aggregation: string) => ComposerQuery;
   latencyAggregationType: LatencyAggregationType;
   titleAction?: ReactNode;
+  projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   const { label, aggregation } = getLatencyAggregationConfig(latencyAggregationType);
 
@@ -82,6 +84,7 @@ export function getLatencyChart({
     titleAction,
     indices,
     buildQuery: (idx) => buildQuery(idx, aggregation),
+    projectRouting,
     yAxis: [
       {
         label,
@@ -98,9 +101,11 @@ export function getLatencyChart({
 export function getThroughputChart({
   indices,
   buildQuery,
+  projectRouting,
 }: {
   indices: string | undefined;
   buildQuery: (indices: string) => ComposerQuery;
+  projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   return buildChartDefinition({
     id: 'throughput',
@@ -109,6 +114,7 @@ export function getThroughputChart({
     }),
     indices,
     buildQuery,
+    projectRouting,
     yAxis: [
       {
         label: i18n.translate('xpack.apm.serviceFlyout.throughputSeriesLabel', {
@@ -127,16 +133,19 @@ export function getErrorRateChart({
   indices,
   buildQuery,
   title,
+  projectRouting,
 }: {
   indices: string | undefined;
   buildQuery: (indices: string) => ComposerQuery;
   title: string;
+  projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   return buildChartDefinition({
     id: 'failedTransactionRate',
     title,
     indices,
     buildQuery,
+    projectRouting,
     yBounds: { mode: 'custom', lowerBound: 0, upperBound: 1 },
     yAxis: [
       {

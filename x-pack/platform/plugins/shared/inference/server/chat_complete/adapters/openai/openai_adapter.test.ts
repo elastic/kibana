@@ -288,6 +288,59 @@ describe('openAIAdapter', () => {
       ]);
     });
 
+    it('injects a dummy tool when history has tool use and tools are omitted', () => {
+      openAIAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(pick(getRequest().body, 'tools')).toEqual({
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'doNotCallThisTool',
+              description: 'Do not call this tool, it is strictly forbidden',
+              parameters: {
+                type: 'object',
+                properties: {},
+              },
+            },
+          },
+        ],
+      });
+    });
+
     it('correctly formats tools and tool choice', () => {
       openAIAdapter
         .chatComplete({
