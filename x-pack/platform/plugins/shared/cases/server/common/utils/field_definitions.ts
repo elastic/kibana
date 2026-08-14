@@ -8,8 +8,10 @@
 import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
+import type { SavedObject } from '@kbn/core/server';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { FieldType, InlineFieldSchema } from '../../../common/types/domain/template/fields';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import {
   getV2FieldType,
   normalizeFieldDefinitionName,
@@ -270,4 +272,26 @@ export const buildFieldDefinitionYaml = (
   }
 
   return { name, yaml: stringifyYaml(fieldDef, { lineWidth: 0 }) };
+};
+
+/**
+ * Strips the server-managed `legacyKey` from an exported field-definition SO.
+ *
+ * `legacyKey` asserts "this definition is the canonical link for v1 custom-field key X in this
+ * space/owner" — an invariant that only holds in the space it was written in. Exporting is used
+ * to copy definitions elsewhere (a different space, deployment, or "create new copies" import),
+ * where that link no longer applies and, worse, could collide with a definition already holding
+ * the same `legacyKey` at the destination (surfaced as a hard `duplicate_legacy_key` failure on
+ * every future configure write for that owner). Dropping it makes an exported copy a plain,
+ * unlinked global field; if it lands back in its original space with a still-configured v1 field
+ * of the same name, ordinary name-fallback resolution re-links and repairs it.
+ */
+export const stripLegacyKeyForExport = (
+  savedObject: SavedObject<FieldDefinition>
+): SavedObject<FieldDefinition> => {
+  if (savedObject.attributes.legacyKey === undefined) {
+    return savedObject;
+  }
+  const { legacyKey, ...attributesWithoutLegacyKey } = savedObject.attributes;
+  return { ...savedObject, attributes: attributesWithoutLegacyKey };
 };

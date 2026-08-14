@@ -198,12 +198,18 @@ const migrateFieldDefinitions = async (
           refNamesByKey.set(cf.key, refName);
           libraryDefs.push(definition);
 
-          if (result.outcome === 'created') {
-            // Register in-loop so intra-config duplicate keys (which the API blocks but
-            // imported/legacy SOs may contain) converge on one SO.
+          if (result.outcome === 'created' || result.link === undefined) {
+            // A 'reused' outcome with no `link` converged on a concurrent creator's definition
+            // (ensureLinkedFieldDefinition's conflict fallback) rather than one already present
+            // in `existingFieldDefs` — that SO is genuinely new, so it must be registered and
+            // counted here the same as an outright `created` outcome, or a later key in this
+            // same run could push the owner past MAX_FIELD_DEFINITIONS_PER_OWNER uncounted.
             addDefinitionToIndexes(indexes, definition);
-            created++;
             totalCount++;
+          }
+
+          if (result.outcome === 'created') {
+            created++;
           } else {
             reused++;
             if (result.needsLegacyKeyRepair && result.link !== undefined) {

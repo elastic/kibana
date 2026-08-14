@@ -172,7 +172,12 @@ export const ensureGlobalFieldDefinitions = async ({
     // Register in-loop so intra-request duplicate keys converge on one SO and
     // later friendly-name generation sees the new name (#282060 semantics).
     addDefinitionToIndexes(indexes, result.definition);
-    if (result.outcome === 'created') {
+    // A 'reused' outcome with no `link` converged on a concurrent creator's definition (see
+    // ensureLinkedFieldDefinition's conflict-fallback) rather than a definition already present
+    // in `existingSavedObjects` — that SO is genuinely new and still consumes a capacity slot,
+    // so it must count here too or a later field in this same loop could push the owner past
+    // MAX_FIELD_DEFINITIONS_PER_OWNER.
+    if (result.outcome === 'created' || result.link === undefined) {
       totalCount++;
     }
   };

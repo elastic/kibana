@@ -393,15 +393,19 @@ export async function update(
     // configured v1 custom field can never become active without its v2 definition; a
     // linkage failure fails the whole update (addendum A1). Runs regardless of the
     // templates feature flag — the definition substrate must stay consistent either way.
-    // When the patch omits customFields, falls back to the pre-patch set (already
-    // linked → cheap no-op).
-    await ensureGlobalFieldDefinitions({
-      owner: configuration.attributes.owner,
-      spaceId: clientArgs.spaceId,
-      customFields: request.customFields ?? configuration.attributes.customFields,
-      fieldDefinitionsService,
-      logger,
-    });
+    // Skipped entirely when the patch omits customFields: the pre-patch set is already
+    // linked (a no-op), and re-running it would re-validate every existing link on writes
+    // that never touch custom fields (e.g. a connector-only patch) — a link that's since
+    // gone stale (imported duplicate legacyKey, etc.) would then block an unrelated edit.
+    if (request.customFields !== undefined) {
+      await ensureGlobalFieldDefinitions({
+        owner: configuration.attributes.owner,
+        spaceId: clientArgs.spaceId,
+        customFields: request.customFields,
+        fieldDefinitionsService,
+        logger,
+      });
+    }
 
     const patch = await caseConfigureService.patch({
       unsecuredSavedObjectsClient,

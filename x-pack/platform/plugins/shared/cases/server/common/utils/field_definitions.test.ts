@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
+import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import {
   MAX_GENERATED_FIELD_NAME_LENGTH,
   buildFieldDefinitionYaml,
@@ -13,6 +15,7 @@ import {
   generateFriendlyFieldName,
   normalizeLabelToFieldName,
   parseFieldDefinitionIdentity,
+  stripLegacyKeyForExport,
 } from './field_definitions';
 
 describe('parseFieldDefinitionIdentity', () => {
@@ -173,5 +176,33 @@ describe('buildFieldDefinitionYaml with an explicit name', () => {
     const { name, yaml } = buildFieldDefinitionYaml(legacy);
     expect(name).toBe('raw-v1-key');
     expect(yaml).toContain('name: raw-v1-key');
+  });
+});
+
+describe('stripLegacyKeyForExport', () => {
+  const makeSO = (attrs: Partial<FieldDefinition>): SavedObject<FieldDefinition> =>
+    ({
+      id: 'fd-1',
+      type: 'cases-field-definition',
+      references: [],
+      attributes: {
+        fieldDefinitionId: 'fd-1',
+        name: 'my_text',
+        owner: 'cases',
+        definition: 'name: my_text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+        ...attrs,
+      },
+    } as SavedObject<FieldDefinition>);
+
+  it('removes legacyKey from the attributes', () => {
+    const so = makeSO({ legacyKey: 'cf_priority' });
+    const result = stripLegacyKeyForExport(so);
+    expect(result.attributes).not.toHaveProperty('legacyKey');
+    expect(result.attributes).toMatchObject({ name: 'my_text' });
+  });
+
+  it('returns the same object reference when legacyKey is already absent', () => {
+    const so = makeSO({});
+    expect(stripLegacyKeyForExport(so)).toBe(so);
   });
 });

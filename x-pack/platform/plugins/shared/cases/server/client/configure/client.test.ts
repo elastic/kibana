@@ -1376,6 +1376,48 @@ describe('client', () => {
           ).not.toHaveBeenCalled();
         });
 
+        it('skips linkage validation entirely when the patch omits customFields (e.g. a connector-only edit)', async () => {
+          // A patch that never touches customFields must not re-validate the pre-existing set —
+          // otherwise an unrelated edit (connector-only here) would fail if an existing v1 field's
+          // linkage had since gone stale, blocking the operator's most natural repair path.
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            ...baseGetResult,
+            attributes: {
+              ...baseGetResult.attributes,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+          } as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+          ).not.toHaveBeenCalled();
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).not.toHaveBeenCalled();
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalled();
+        });
+
         it('fails the configuration update when createFieldDefinition fails (definition-before-config)', async () => {
           clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
           clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);

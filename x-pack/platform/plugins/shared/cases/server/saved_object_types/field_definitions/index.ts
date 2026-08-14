@@ -9,6 +9,7 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { type FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { CASE_FIELD_DEFINITION_SAVED_OBJECT } from '../../../common/constants';
+import { stripLegacyKeyForExport } from '../../common/utils/field_definitions';
 import { modelVersion1 } from './model_versions/model_version_1';
 import { modelVersion2 } from './model_versions/model_version_2';
 import { modelVersion3 } from './model_versions/model_version_3';
@@ -59,6 +60,10 @@ export const caseFieldDefinitionSavedObjectType: SavedObjectsType = {
     visibleInManagement: false,
     getTitle: (so) => so.attributes.name,
     icon: 'casesApp',
+    // Case export bundles field definitions itself (getTemplatesAndFieldDefinitionsForCases),
+    // which already strips legacyKey before returning them — this transform is defense-in-depth
+    // for a direct/API-driven export of this type by id, bypassing that bundling path.
+    onExport: (context, objects) => objects.map(stripLegacyKeyForExport),
   },
 };
 

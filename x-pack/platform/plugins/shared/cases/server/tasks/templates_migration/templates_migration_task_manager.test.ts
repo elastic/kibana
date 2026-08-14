@@ -8,6 +8,7 @@
 import { parse as parseYaml } from 'yaml';
 import type { CoreStart } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract, RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -21,6 +22,7 @@ import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { ConnectorTypes } from '../../../common/types/domain/connector/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import { getV2FieldType } from '../../../common/utils/template_fields';
+import { deriveFieldDefinitionId } from '../../common/utils/field_definitions';
 import { TemplatesMigrationTaskManager } from './templates_migration_task_manager';
 import {
   CASES_TEMPLATES_MIGRATION_TASK_TYPE,
@@ -878,6 +880,75 @@ describe('TemplatesMigrationTaskManager', () => {
         expect.anything()
       );
       expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('maximum of 200 field definitions')
+      );
+    });
+
+    it('counts a race-converged reuse toward the per-owner cap for a later key in the same run', async () => {
+      // 199 pre-existing definitions — one slot free for a genuine creation.
+      const existingFieldDefs = Array.from({ length: 199 }, (_, i) => ({
+        id: `fd-${i}`,
+        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        references: [],
+        attributes: {
+          name: `field_${i}`,
+          owner: 'cases',
+          definition: `name: field_${i}\ncontrol: INPUT_TEXT\ntype: keyword\n`,
+          fieldDefinitionId: `fd-${i}`,
+          isGlobal: true,
+        },
+      }));
+
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_race'), buildLegacyCustomField('cf_new')],
+        templates: [],
+      });
+
+      repo.find
+        .mockResolvedValueOnce({ saved_objects: [configSO], total: 1 })
+        .mockResolvedValueOnce({ saved_objects: existingFieldDefs, total: 199 }) // field-defs
+        .mockResolvedValueOnce({ saved_objects: [], total: 0 }); // templates
+
+      // cf_race's create races a concurrent creator and converges by refetch — that SO is new
+      // (not part of the 199 above) and must consume the last capacity slot.
+      const raceDeterministicId = deriveFieldDefinitionId({
+        spaceId: 'default',
+        owner: 'cases',
+        name: 'cf_race',
+      });
+      repo.create.mockImplementationOnce(() =>
+        Promise.reject(
+          SavedObjectsErrorHelpers.createConflictError(
+            CASE_FIELD_DEFINITION_SAVED_OBJECT,
+            raceDeterministicId
+          )
+        )
+      );
+      repo.get.mockResolvedValueOnce({
+        id: raceDeterministicId,
+        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        references: [],
+        attributes: {
+          name: 'label_for_cf_race',
+          owner: 'cases',
+          definition: 'name: label_for_cf_race\ncontrol: INPUT_TEXT\ntype: keyword\n',
+          fieldDefinitionId: raceDeterministicId,
+          isGlobal: true,
+          legacyKey: 'cf_race',
+        },
+      });
+
+      const manager = await buildAndSchedule();
+      await getTaskRunner(manager).run();
+
+      // cf_new needs a genuine new creation, which must now be blocked: 199 existing + 1
+      // race-converged reuse for cf_race == 200, the cap.
+      expect(repo.create).not.toHaveBeenCalledWith(
+        CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        expect.objectContaining({ legacyKey: 'cf_new' }),
+        expect.anything()
+      );
+      expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('maximum of 200 field definitions')
       );
     });

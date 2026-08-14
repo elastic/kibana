@@ -281,6 +281,39 @@ describe('ensureGlobalFieldDefinitions', () => {
     expect(fieldDefinitionsService.getFieldDefinition).toHaveBeenCalledWith(deterministicId);
   });
 
+  it('counts a race-converged reuse toward the per-owner cap for later fields in the same call', async () => {
+    // 199 pre-existing definitions — one slot free for a genuine creation.
+    const existing = Array.from({ length: 199 }, (_, i) =>
+      asSavedObject(
+        makeDefinition({
+          fieldDefinitionId: `fd-${i}`,
+          name: `field_${i}`,
+          definition: `name: field_${i}\nlabel: F\ntype: keyword\ncontrol: INPUT_TEXT\n`,
+        })
+      )
+    );
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(existing as never);
+
+    // textField's create races a concurrent creator and converges by refetch — that SO is
+    // new (not part of the 199 above) and must consume the last capacity slot.
+    const deterministicId = deriveFieldDefinitionId({ spaceId, owner, name: textField.key });
+    fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createConflictError('cases-field-definition', deterministicId)
+    );
+    fieldDefinitionsService.getFieldDefinition.mockResolvedValue(
+      asSavedObject(
+        makeDefinition({ fieldDefinitionId: deterministicId, legacyKey: 'text_key_1' })
+      ) as never
+    );
+
+    // toggleField needs a genuine new creation, which must now be blocked: 199 existing + 1
+    // race-converged reuse == 200, the cap.
+    await expect(ensure([textField, toggleField])).rejects.toThrow(
+      /maximum of 200 field definitions/
+    );
+    expect(fieldDefinitionsService.createFieldDefinition).toHaveBeenCalledTimes(1);
+  });
+
   it('creates missing definitions and reuses resolved ones in one pass', async () => {
     fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
       asSavedObject(makeDefinition({ legacyKey: 'text_key_1' })),
