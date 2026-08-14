@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { get, isPlainObject, isString } from 'lodash';
+import { isPlainObject } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  parseEpisodeDataJson,
+  getValueByFieldPath,
+} from '@kbn/alerting-v2-utils';
 
-/** Resolve a dot-path against nested objects or a single top-level key (e.g. flattened `host.name`). */
-export const getValueByFieldPath = (data: Record<string, unknown>, field: string): unknown =>
-  get(data, field);
+export { parseEpisodeDataJson, getValueByFieldPath };
 
 const isScalar = (value: unknown): value is string | number | boolean =>
   typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
@@ -89,19 +91,3 @@ export const getNonEmptyGroupingFields = (
     (field) => formatGroupingValue(field, getValueByFieldPath(data, field), dataView).trim() !== ''
   );
 
-export const parseEpisodeDataJson = (raw: unknown): Record<string, unknown> => {
-  if (!isString(raw) || raw.length === 0) {
-    return {};
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(raw);
-
-    if (isPlainObject(parsed)) {
-      return parsed as Record<string, unknown>;
-    }
-  } catch {
-    // ignore malformed JSON
-  }
-  return {};
-};

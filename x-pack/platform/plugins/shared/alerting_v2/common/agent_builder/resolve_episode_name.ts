@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-utils';
 
 const GROUP_NAME_SEPARATOR = ' · ';
 
@@ -15,36 +16,6 @@ export interface ResolveEpisodeNameParams {
   groupingFields?: readonly string[];
 }
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-const parseEpisodeData = (raw?: string | null): Record<string, unknown> => {
-  if (!raw) {
-    return {};
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    return isPlainObject(parsed) ? parsed : {};
-  } catch {
-    return {};
-  }
-};
-
-/** Reads a flattened top-level key or a nested dotted path. */
-const getByPath = (data: Record<string, unknown>, field: string): unknown => {
-  if (Object.hasOwn(data, field)) {
-    return data[field];
-  }
-
-  return field.split('.').reduce<unknown>((acc, key) => {
-    if (isPlainObject(acc) && Object.hasOwn(acc, key)) {
-      return acc[key];
-    }
-    return undefined;
-  }, data);
-};
-
 const resolveGroupName = (
   episodeData?: string | null,
   groupingFields?: readonly string[]
@@ -53,9 +24,9 @@ const resolveGroupName = (
     return undefined;
   }
 
-  const data = parseEpisodeData(episodeData);
+  const data = parseEpisodeDataJson(episodeData);
   const values = groupingFields
-    .map((field) => getByPath(data, field))
+    .map((field) => getValueByFieldPath(data, field))
     .filter(
       (v): v is string | number | boolean =>
         typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
