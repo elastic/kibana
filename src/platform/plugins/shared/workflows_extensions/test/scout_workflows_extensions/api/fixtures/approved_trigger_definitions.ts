@@ -151,6 +151,38 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'f140133a6ecef997484c3d4ef94b326207b4f1124cce889d34fef6e38fa019fe',
   },
   {
+    id: 'securitySolution.alertAssigneesChanged',
+    schemaHash: 'c0e186f2b9609d7b1ed65ac4a3a9adbf994ad57c8e6ebabc824f4c210dddd33b',
+  },
+  {
+    id: 'securitySolution.alertStatusChanged',
+    schemaHash: '28bb4e2c47c38ed775ff5b3b9d8b8ffa84183245d33d9fb30fc7a7f73b736c5d',
+  },
+  {
+    id: 'securitySolution.alertTagsChanged',
+    schemaHash: '1eb715323829f1588d9bf161213e317b3b19763344d2fa1cff1780ef6b88bbf5',
+  },
+  {
+    id: 'securitySolution.attackAssigneesChanged',
+    schemaHash: '229994b5302c9646bc45b47c4fb0748ba894533effece0c5d62f77270718c81a',
+  },
+  {
+    id: 'securitySolution.attackStatusChanged',
+    schemaHash: '9cc54de5fe92d57c4465ec7d6cfd8215a8d8a7a9cc7f2ced4a43567ce3287b0b',
+  },
+  {
+    id: 'securitySolution.attackTagsChanged',
+    schemaHash: 'eb74f4dc6bc49f708a08843a9e498a0e137fd92e5107ace56aa13dc632eafc3e',
+  },
+  {
+    id: 'securitySolution.noteCreated',
+    schemaHash: '072acd607dec1f923149c123ce55b2b0ef6b1b03fb9f35a9724c3df630902b4a',
+  },
+  {
+    id: 'securitySolution.noteUpdated',
+    schemaHash: 'ba011900a017fc2eaa1b0dda80808e9ae0145cb20ddea29885397a9c60c3ca07',
+  },
+  {
     id: 'workflows.failed',
     schemaHash: '2ac7a279823d7ca59c4d47de93ea7bd7103b1953ea484cef7f489d12d0c81980',
   },
