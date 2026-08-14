@@ -154,13 +154,26 @@ export const findKiBackingIndex = async ({
       ignore_unavailable: true,
       allow_no_indices: true,
       query: { ids: { values: [kiId] } },
-      size: 1,
+      size: 2,
       _source: false,
     },
     { signal: abortSignal }
   );
 
-  const backingIndex = response.hits.hits[0]?._index;
+  const { hits } = response.hits;
+  // A pattern dest can hold the same _id in multiple indices; refuse to pick one arbitrarily.
+  if (hits.length > 1) {
+    const indices = hits.flatMap((hit) => (hit._index ? [hit._index] : []));
+    throw new ExecutionError({
+      type: 'ValidationError',
+      message: `KI '${kiId}' is ambiguous in AI index '${aiIndexId}': it exists in multiple backing indices (${indices.join(
+        ', '
+      )})`,
+      details: { aiIndexId, kiId, indices },
+    });
+  }
+
+  const backingIndex = hits[0]?._index;
   if (!backingIndex) {
     throw kiNotFoundError(aiIndexId, kiId);
   }

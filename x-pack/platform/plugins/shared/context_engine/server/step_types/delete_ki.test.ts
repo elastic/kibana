@@ -103,6 +103,39 @@ describe('getDeleteKiStepDefinition', () => {
     );
   });
 
+  it('throws ValidationError when the KI id matches documents in multiple backing indices', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'ki-1', _index: 'ai-index-idx-foo' },
+            { _id: 'ki-1', _index: 'ai-index-idx-bar' },
+          ],
+        },
+      }),
+      delete: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({
+      type: 'index',
+      value: 'ai-index-idx-foo,ai-index-idx-bar',
+    });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('ValidationError');
+    expect(esClient.delete).not.toHaveBeenCalled();
+  });
+
   it('throws NotFoundError when the KI does not exist in the AI index', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),

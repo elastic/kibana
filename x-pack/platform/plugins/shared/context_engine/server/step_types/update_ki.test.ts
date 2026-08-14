@@ -99,7 +99,7 @@ describe('getUpdateKiStepDefinition', () => {
         ignore_unavailable: true,
         allow_no_indices: true,
         query: { ids: { values: ['ki-1'] } },
-        size: 1,
+        size: 2,
         _source: false,
       },
       { signal: context.abortSignal }
@@ -134,6 +134,36 @@ describe('getUpdateKiStepDefinition', () => {
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1', result: 'noop' } });
+  });
+
+  it('throws ValidationError when the KI id matches documents in multiple backing indices', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: 'ki-1', _index: 'ai-index-idx-foo' },
+            { _id: 'ki-1', _index: 'ai-index-idx-bar' },
+          ],
+        },
+      }),
+      update: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', ki: { title: 'New title' } },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-foo*' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('ValidationError');
+    expect(esClient.update).not.toHaveBeenCalled();
   });
 
   it('throws NotFoundError when the KI does not exist in the AI index', async () => {
