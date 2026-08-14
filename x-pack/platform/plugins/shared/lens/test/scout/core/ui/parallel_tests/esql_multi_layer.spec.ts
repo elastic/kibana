@@ -152,8 +152,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       await lens.layers.createLayer('referenceLine');
       expect(await lens.layers.getLayerCount()).toBe(3);
       await lens.layers.ensureLayerTabIsActive(2);
-      await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
-      expect(await lens.workspace.getEsqlQuery()).toBe(COUNT_QUERY);
+      await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
       expect(await lens.dimensions.getDimensionTriggerText(REFERENCE_LINE_DIMENSION)).toMatch(
         /^Static value: /
       );

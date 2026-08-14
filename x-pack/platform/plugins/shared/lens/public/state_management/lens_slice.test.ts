@@ -429,6 +429,26 @@ describe('lensSlice', () => {
         expect(state.stagedPreview).not.toBeDefined();
       });
 
+      it('addLayer: should add the layer to the requested datasource', () => {
+        customStore.dispatch(
+          addLayer({
+            layerId: 'foo',
+            layerType: LayerTypes.REFERENCELINE,
+            extraArg: undefined,
+            datasourceId: 'textBased',
+          })
+        );
+        const state = customStore.getState().lens;
+
+        expect(state.visualization.state).toEqual(['layer1', 'layer2', 'foo']);
+        expect(state.datasourceStates.formBased.state).toEqual(['layer1']);
+        expect(state.datasourceStates.textBased.state).toEqual([
+          'layer2',
+          'foo',
+          'linked-layer-id',
+        ]);
+      });
+
       it('addLayer: syncs linked dimensions', () => {
         const activeVisualization = visualizationMap[activeVisId];
 

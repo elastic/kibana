@@ -9,7 +9,12 @@ import type { ReactElement } from 'react';
 import { useCallback, useMemo } from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
-import type { AddLayerFunction, FramePublicAPI } from '@kbn/lens-common';
+import {
+  LENS_DATASOURCE_ID,
+  LENS_LAYER_TYPES,
+  type AddLayerFunction,
+  type FramePublicAPI,
+} from '@kbn/lens-common';
 
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createIndexPatternService } from '../../../data_views_service/service';
@@ -62,7 +67,17 @@ export const useAddLayerButton = (
     (layerType, extraArg, ignoreInitialValues, seriesType) => {
       const layerId = generateId();
       dispatchLens(
-        addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
+        addLayerAction({
+          layerId,
+          layerType,
+          extraArg,
+          ignoreInitialValues,
+          seriesType,
+          datasourceId:
+            layerType === LENS_LAYER_TYPES.REFERENCELINE
+              ? LENS_DATASOURCE_ID.FORM_BASED
+              : undefined,
+        })
       );
       dispatchLens(setSelectedLayerId({ layerId }));
     },

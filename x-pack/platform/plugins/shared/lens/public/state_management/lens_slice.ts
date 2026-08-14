@@ -31,6 +31,7 @@ import type {
   IndexPattern,
   LensEditEvent,
   LensEditContextMapping,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import { getInitialDatasourceId, getResolvedDateRange, getRemoveOperation } from '../utils';
 import { isComingFromContainerView } from '../app_plugin/app_helpers';
@@ -264,6 +265,7 @@ export const addLayer = createAction<{
   extraArg: unknown;
   ignoreInitialValues?: boolean;
   seriesType?: SeriesType;
+  datasourceId?: LensDatasourceId;
 }>('lens/addLayer');
 export const onDropToDimension = createAction<{
   source: DragDropIdentifier;
@@ -1018,16 +1020,30 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       .addCase(
         addLayer,
-        (state, { payload: { layerId, layerType, extraArg, seriesType, ignoreInitialValues } }) => {
+        (
+          state,
+          {
+            payload: {
+              layerId,
+              layerType,
+              extraArg,
+              seriesType,
+              ignoreInitialValues,
+              datasourceId,
+            },
+          }
+        ) => {
           if (!state.activeDatasourceId || !state.visualization.activeId) {
             return state;
           }
 
           const activeVisualization = visualizationMap[state.visualization.activeId];
-          const activeDatasource = datasourceMap[state.activeDatasourceId];
-          // reuse the active datasource dataView id for the new layer
-          const currentDataViewsId = activeDatasource.getUsedDataView(
-            state.datasourceStates[state.activeDatasourceId!].state
+          const currentDatasource = datasourceMap[state.activeDatasourceId];
+          const targetDatasourceId = datasourceId ?? state.activeDatasourceId;
+          const targetDatasource = datasourceMap[targetDatasourceId];
+          // reuse the current datasource dataView id for the new layer
+          const currentDataViewsId = currentDatasource.getUsedDataView(
+            state.datasourceStates[state.activeDatasourceId].state
           );
           const visualizationState = activeVisualization.appendLayer!(
             state.visualization.state,
@@ -1048,14 +1064,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const layersToLinkTo =
             activeVisualization.getLayersToLinkTo?.(visualizationState, layerId) ?? [];
 
+          const currentTargetDatasourceState = state.datasourceStates[targetDatasourceId]?.state;
+          const targetDatasourceState =
+            currentTargetDatasourceState ?? targetDatasource.createEmptyLayer(currentDataViewsId);
           const datasourceState =
-            !noDatasource && activeDatasource
-              ? activeDatasource.insertLayer(
-                  state.datasourceStates[state.activeDatasourceId].state,
-                  layerId,
-                  layersToLinkTo
-                )
-              : state.datasourceStates[state.activeDatasourceId].state;
+            !noDatasource && targetDatasource
+              ? targetDatasource.insertLayer(targetDatasourceState, layerId, layersToLinkTo)
+              : targetDatasourceState;
 
           const { activeDatasourceState, activeVisualizationState } = ignoreInitialValues
             ? {
@@ -1067,21 +1082,29 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
                 visualizationState,
                 framePublicAPI,
                 activeVisualization,
-                activeDatasource,
+                activeDatasource: targetDatasource,
                 layerId,
                 layerType,
               });
 
           state.visualization.state = activeVisualizationState;
-          state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+          state.datasourceStates[targetDatasourceId] = {
+            state: activeDatasourceState,
+            isLoading: false,
+          };
           state.stagedPreview = undefined;
 
           const {
             datasourceState: syncedDatasourceState,
             visualizationState: syncedVisualizationState,
-          } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
+          } = syncLinkedDimensions(
+            current(state),
+            visualizationMap,
+            datasourceMap,
+            targetDatasourceId
+          );
 
-          state.datasourceStates[state.activeDatasourceId].state = syncedDatasourceState;
+          state.datasourceStates[targetDatasourceId].state = syncedDatasourceState;
           state.visualization.state = syncedVisualizationState;
         }
       )
