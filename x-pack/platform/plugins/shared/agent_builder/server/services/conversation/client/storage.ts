@@ -19,6 +19,7 @@ import type {
   TimelineEvent,
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
@@ -88,6 +89,9 @@ const storageSettings = {
         },
         dynamic: false,
       }),
+      metadata: types.flattened({}),
+      template_id: types.keyword({}),
+      template_version: types.long({}),
     },
   },
 } satisfies IndexStorageSettings;
@@ -113,6 +117,9 @@ export interface ConversationProperties {
   workspace_id?: string;
   access_control?: Optional<ConversationAccessControl, 'entries'>;
   origin?: ConversationOrigin;
+  metadata?: Record<string, SerializedMetadataValue>;
+  template_id?: string;
+  template_version?: number;
   // legacy field
   rounds?: PersistentConversationRound[];
 }
