@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/client-apps-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/apm-agent-approvers'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/client-apps-plugin'
   description: Moon project for @kbn/client-apps-plugin
   channel: ''
-  owner: '@elastic/apm-agent-approvers'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/solutions/observability/plugins/client_apps
 dependsOn:
   - '@kbn/core'
