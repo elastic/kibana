@@ -14,6 +14,7 @@ import {
   LENS_LAYER_TYPES,
   type AddLayerFunction,
   type FramePublicAPI,
+  type LensDatasourceId,
 } from '@kbn/lens-common';
 
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -31,6 +32,14 @@ import {
 } from '../../../state_management';
 import { replaceIndexpattern } from '../../../state_management/lens_slice';
 import { generateId } from '../../../id_generator';
+
+export const getDatasourceIdForNewLayer = (
+  layerType: Parameters<AddLayerFunction>[0],
+  selectedLayerDatasourceId?: LensDatasourceId
+): LensDatasourceId | undefined =>
+  layerType === LENS_LAYER_TYPES.REFERENCELINE
+    ? LENS_DATASOURCE_ID.FORM_BASED
+    : selectedLayerDatasourceId;
 
 export const useAddLayerButton = (
   framePublicAPI: FramePublicAPI,
@@ -66,6 +75,13 @@ export const useAddLayerButton = (
   const addLayer: AddLayerFunction = useCallback(
     (layerType, extraArg, ignoreInitialValues, seriesType) => {
       const layerId = generateId();
+      const selectedLayerDatasourceId = (
+        visualization.selectedLayerId
+          ? framePublicAPI.datasourceLayers[visualization.selectedLayerId]?.datasourceId
+          : undefined
+      ) as LensDatasourceId | undefined;
+      const datasourceId = getDatasourceIdForNewLayer(layerType, selectedLayerDatasourceId);
+
       dispatchLens(
         addLayerAction({
           layerId,
@@ -73,15 +89,12 @@ export const useAddLayerButton = (
           extraArg,
           ignoreInitialValues,
           seriesType,
-          datasourceId:
-            layerType === LENS_LAYER_TYPES.REFERENCELINE
-              ? LENS_DATASOURCE_ID.FORM_BASED
-              : undefined,
+          datasourceId,
         })
       );
       dispatchLens(setSelectedLayerId({ layerId }));
     },
-    [dispatchLens]
+    [dispatchLens, framePublicAPI.datasourceLayers, visualization.selectedLayerId]
   );
 
   const registerLibraryAnnotationGroupFunction = useCallback<
