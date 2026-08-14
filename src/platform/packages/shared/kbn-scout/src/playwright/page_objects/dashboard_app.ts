@@ -604,6 +604,24 @@ export class DashboardApp {
     await option.click();
   }
 
+  /** Closes the options-list popover if it is open, and waits for it to disappear. */
+  async optionsListEnsurePopoverIsClosed() {
+    if (await this.optionsListControlSearchInput.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await this.optionsListControlSearchInput.waitFor({ state: 'hidden' });
+    }
+  }
+
+  /**
+   * Locator for the selected-options label of an options-list control, e.g. `AE`
+   * for a single selection or `AE, CN` for multiple.
+   */
+  getOptionsListSelectionsLocator(controlId: string) {
+    return this.page.testSubj
+      .locator(`optionsList-control-${controlId}`)
+      .getByTestId('optionsListSelections');
+  }
+
   async getSavedSearchRowCount(): Promise<number> {
     return this.page.evaluate(() => {
       const docElement = document.querySelector('[data-document-number]');

@@ -577,6 +577,41 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  /**
+   * Clicks "Save and return" in the top nav, available when Discover is opened as
+   * the editor for a by-value dashboard panel. Transfers the panel state straight
+   * back to the dashboard without opening a save modal.
+   */
+  async saveAndReturnToEditor() {
+    await this.clickAppMenuItem('discoverSaveButton');
+  }
+
+  /**
+   * Clicks "Cancel" in the top nav save split-button, available when Discover is
+   * opened as the editor for a by-value dashboard panel. Discards the edits and
+   * returns to the dashboard.
+   */
+  async cancelEditorChanges() {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    const cancelButton = this.page.testSubj.locator('discoverCancelButton');
+    await expect(cancelButton).toBeVisible();
+    await cancelButton.click();
+  }
+
+  /**
+   * Saves the current Discover table (including any ES|QL controls) as a by-value
+   * panel on a brand-new dashboard, then navigates to that dashboard.
+   */
+  async saveTableToNewDashboard(title: string) {
+    await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
+    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
+    await this.page.testSubj.fill('savedObjectTitle', title);
+    // Clicking the EuiRadio wrapper does not toggle the underlying input
+    // reliably; clicking the associated label does.
+    await this.page.locator('label[for="new-dashboard-option"]').click();
+    await this.confirmSaveModal();
+  }
+
   async getSharedUrl(): Promise<string> {
     await this.clickAppMenuItem('shareTopNavButton');
 

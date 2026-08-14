@@ -82,6 +82,14 @@ export const SESSION_WITH_CONTROL_KBN_ARCHIVE =
 /** Title of the only saved search in {@link SESSION_WITH_CONTROL_KBN_ARCHIVE}. */
 export const SESSION_WITH_CONTROL_TITLE = 'ESQL control unlink test';
 
+/**
+ * Dashboard holding {@link SESSION_WITH_CONTROL_TITLE} as an unlinked **by-value**
+ * `discover_session` panel plus the matching `esql_control` panel. Replaces the
+ * UI-driven "add from library, then unlink" setup the FTR suite used.
+ */
+export const ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls_by_value';
+
 export const DEFAULT_DATA_VIEW = 'logstash-*';
 
 export const SAVED_SEARCH_TITLE = 'A Saved Search';
