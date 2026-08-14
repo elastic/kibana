@@ -53277,7 +53277,6 @@
     "xpack.spaces.management.spaceDetails.footerActions.cancel": "取消",
     "xpack.spaces.management.spaceDetails.footerActions.deleteSpace": "删除空间",
     "xpack.spaces.management.spaceDetails.footerActions.updateSpace": "应用更改",
-    "xpack.spaces.management.spaceDetails.keepEditingButton": "保存然后离开",
     "xpack.spaces.management.spaceDetails.leavePageButton": "离开",
     "xpack.spaces.management.spaceDetails.roles.assign": "分配新角色",
     "xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title": "用户获得的访问权限取决于其角色的全局工作区权限与应用于此工作区的特定权限的组合。",

@@ -52863,7 +52863,6 @@
     "xpack.spaces.management.spaceDetails.footerActions.cancel": "Annuler",
     "xpack.spaces.management.spaceDetails.footerActions.deleteSpace": "Supprimer l'espace",
     "xpack.spaces.management.spaceDetails.footerActions.updateSpace": "Appliquer les modifications",
-    "xpack.spaces.management.spaceDetails.keepEditingButton": "Enregistrer avant de quitter",
     "xpack.spaces.management.spaceDetails.leavePageButton": "Quitter",
     "xpack.spaces.management.spaceDetails.roles.assign": "Attribuer de nouveaux rôles",
     "xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title": "L'accès de cet utilisateur dépend d'une combinaison des privilèges d'espace globaux de son rôle ainsi que des privilèges spécifiques appliqués à cet espace.",

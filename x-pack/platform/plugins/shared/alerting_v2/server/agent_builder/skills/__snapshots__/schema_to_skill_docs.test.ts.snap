@@ -169,12 +169,14 @@ Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important 
 - **Stateful alerting** with full episode lifecycle: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
 - Supports state transitions (\`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`), recovery detection, and notification dispatch.
 - Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
+- UI label: **\\"Alerts\\"**.
 - Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
 
 ### Signal (\`kind: signal\`)
 - **Stateless detection** (observation-only).
 - Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.
 - No notifications, no recovery, no state transitions.
+- UI label: **\\"Events\\"**.
 - Use for logging or detection without automated action.
 
 ### Immutability
