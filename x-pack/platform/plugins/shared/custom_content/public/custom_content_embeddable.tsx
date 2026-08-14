@@ -55,6 +55,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
+    const previewHtml$ = new BehaviorSubject<string | null>(null);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -118,13 +119,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
-        const [prompt, esqlQuery, savedTemplate, isFlyoutOpen, panelTitle] =
+        const [prompt, esqlQuery, savedTemplate, isFlyoutOpen, panelTitle, previewHtml] =
           useBatchedPublishingSubjects(
             prompt$,
             esqlQuery$,
             template$,
             isFlyoutOpen$,
-            titleManager.api.title$
+            titleManager.api.title$,
+            previewHtml$
           );
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
@@ -151,6 +153,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
         const handleFlyoutSave = useCallback(
           (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
+            previewHtml$.next(null);
             applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
             setGenerationVersion((v) => v + 1);
           },
@@ -198,6 +201,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleFlyoutClose = useCallback(() => {
+          previewHtml$.next(null);
           isFlyoutOpen$.next(false);
         }, []);
 
@@ -211,6 +215,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               generationVersion={generationVersion}
               savedTemplate={savedTemplate}
               onTemplateChange={onTemplateChange}
+              previewHtml={previewHtml}
             />
             {isFlyoutOpen && (
               <Suspense fallback={null}>
@@ -222,6 +227,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   panelTitle={panelTitle ?? undefined}
                   onSave={handleFlyoutSave}
                   onClose={handleFlyoutClose}
+                  onRunPreview={(html) => previewHtml$.next(html)}
                 />
               </Suspense>
             )}

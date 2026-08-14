@@ -24,7 +24,6 @@ export interface EditFlyoutState {
   previewData: EsqlDataResult | null;
   previewError: string | null;
   handlePreview: () => Promise<void>;
-  renderedHtml: string | null;
   isRunPreviewLoading: boolean;
   runPreviewError: string | null;
   handleRunPreview: () => Promise<void>;
@@ -35,6 +34,7 @@ export interface UseEditFlyoutStateParams {
   template: string | undefined;
   timeRange: TimeRange | undefined;
   colorMode: EuiThemeColorModeStandard;
+  onRunPreview: (html: string) => void;
 }
 
 export const useEditFlyoutState = ({
@@ -42,6 +42,7 @@ export const useEditFlyoutState = ({
   template,
   timeRange,
   colorMode,
+  onRunPreview,
 }: UseEditFlyoutStateParams): EditFlyoutState => {
   const [state, dispatch] = useReducer(flyoutReducer, {
     draftEsqlQuery: esqlQuery ?? '',
@@ -49,7 +50,6 @@ export const useEditFlyoutState = ({
     isPreviewLoading: false,
     previewData: null,
     previewError: null,
-    renderedHtml: null,
     isRunPreviewLoading: false,
     runPreviewError: null,
   });
@@ -126,7 +126,7 @@ export const useEditFlyoutState = ({
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted) {
-        dispatch({ type: 'RUN_PREVIEW_SUCCESS', payload: prepareHtml(rawHtml, colorMode) });
+        onRunPreview(prepareHtml(rawHtml, colorMode));
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
@@ -140,7 +140,15 @@ export const useEditFlyoutState = ({
         dispatch({ type: 'RUN_PREVIEW_DONE' });
       }
     }
-  }, [state.draftEsqlQuery, state.draftTemplate, timeRange, core.http, search, colorMode]);
+  }, [
+    state.draftEsqlQuery,
+    state.draftTemplate,
+    timeRange,
+    core.http,
+    search,
+    colorMode,
+    onRunPreview,
+  ]);
 
   return {
     draftEsqlQuery: state.draftEsqlQuery,
@@ -152,7 +160,6 @@ export const useEditFlyoutState = ({
     previewData: state.previewData,
     previewError: state.previewError,
     handlePreview,
-    renderedHtml: state.renderedHtml,
     isRunPreviewLoading: state.isRunPreviewLoading,
     runPreviewError: state.runPreviewError,
     handleRunPreview,

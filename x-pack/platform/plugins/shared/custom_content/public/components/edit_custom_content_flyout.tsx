@@ -45,6 +45,7 @@ export interface EditCustomContentFlyoutProps {
   isNewPanel?: boolean;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
+  onRunPreview: (html: string) => void;
 }
 
 export const EditCustomContentFlyout = ({
@@ -56,6 +57,7 @@ export const EditCustomContentFlyout = ({
   isNewPanel,
   onSave,
   onClose,
+  onRunPreview,
 }: EditCustomContentFlyoutProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { agentBuilder } = getServices();
@@ -70,11 +72,10 @@ export const EditCustomContentFlyout = ({
     previewData,
     previewError,
     handlePreview,
-    renderedHtml,
     isRunPreviewLoading,
     runPreviewError,
     handleRunPreview,
-  } = useEditFlyoutState({ esqlQuery, template, timeRange, colorMode });
+  } = useEditFlyoutState({ esqlQuery, template, timeRange, colorMode, onRunPreview });
 
   const handleGenerateWithChat = useCallback(() => {
     if (!agentBuilder) return;
@@ -244,47 +245,18 @@ export const EditCustomContentFlyout = ({
           onPreview={handlePreview}
         />
 
-        {/* Rendered template preview */}
-        {(renderedHtml || runPreviewError) && (
+        {runPreviewError && (
           <>
             <EuiSpacer size="m" />
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.customContent.editFlyout.previewLabel', {
-                  defaultMessage: 'Preview',
-                })}
-              </strong>
-            </EuiText>
-            <EuiSpacer size="s" />
-            {runPreviewError ? (
-              <EuiCallOut
-                color="danger"
-                title={i18n.translate('xpack.customContent.editFlyout.previewError', {
-                  defaultMessage: 'Preview failed',
-                })}
-              >
-                {runPreviewError}
-              </EuiCallOut>
-            ) : (
-              <div
-                css={css({
-                  border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-                  borderRadius: euiTheme.border.radius.medium,
-                  overflow: 'hidden',
-                  height: 320,
-                  position: 'relative',
-                })}
-              >
-                <iframe
-                  css={css({ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' })}
-                  srcDoc={renderedHtml ?? ''}
-                  sandbox=""
-                  title={i18n.translate('xpack.customContent.editFlyout.previewIframeTitle', {
-                    defaultMessage: 'Template preview',
-                  })}
-                />
-              </div>
-            )}
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              title={i18n.translate('xpack.customContent.editFlyout.previewError', {
+                defaultMessage: 'Preview failed',
+              })}
+            >
+              {runPreviewError}
+            </EuiCallOut>
           </>
         )}
       </EuiFlyoutBody>
@@ -302,8 +274,10 @@ export const EditCustomContentFlyout = ({
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  color="success"
                   iconType="play"
                   isLoading={isRunPreviewLoading}
+                  disabled={!hasChanges}
                   onClick={handleRunPreview}
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {

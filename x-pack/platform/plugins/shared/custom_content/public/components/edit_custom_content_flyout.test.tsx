@@ -45,7 +45,6 @@ const baseFlyoutState = {
   previewData: null,
   previewError: null,
   handlePreview: jest.fn(),
-  renderedHtml: null,
   isRunPreviewLoading: false,
   runPreviewError: null,
   handleRunPreview: jest.fn(),
@@ -60,6 +59,7 @@ const defaultProps = {
   timeRange: undefined,
   onSave: jest.fn(),
   onClose: jest.fn(),
+  onRunPreview: jest.fn(),
 };
 
 beforeEach(() => {
@@ -126,6 +126,49 @@ describe('EditCustomContentFlyout', () => {
 
       expect(onSave).not.toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('Run Preview', () => {
+    it('is disabled when nothing has been edited', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM logs',
+        draftTemplate: '<p>hi</p>',
+      });
+      render(
+        <EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />
+      );
+      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+    });
+
+    it('is enabled when the query differs from the saved value', () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM other' });
+      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
+    });
+
+    it('is enabled when the template differs from the saved value', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftTemplate: '<p>edited</p>',
+      });
+      render(<EditCustomContentFlyout {...defaultProps} template="<p>hi</p>" />);
+      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
+    });
+
+    it('calls handleRunPreview when clicked', async () => {
+      const handleRunPreview = jest.fn();
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM logs',
+        handleRunPreview,
+      });
+      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Run Preview' }));
+
+      expect(handleRunPreview).toHaveBeenCalled();
     });
   });
 
