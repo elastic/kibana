@@ -12,6 +12,10 @@ import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from './aws_service_matrix';
 import type { AwsServiceMatrixEntry } from './aws_service_matrix';
 
+const PACKAGE_QUERY_OPTIONS = { full: true };
+// Package manifests change only on new releases; 10 min cache avoids repeated EPR requests.
+const CACHE_OPTS = { staleTime: 10 * 60 * 1000 };
+
 /**
  * Returns the merged AWS service matrix, deriving managed_integration, signalType,
  * inputs, requiredConfig, mandatoryFields, defaultEnabled, and identityFederationSupported
@@ -19,31 +23,60 @@ import type { AwsServiceMatrixEntry } from './aws_service_matrix';
  * is still loading.
  */
 export function useAwsServiceMatrix(): AwsServiceMatrixEntry[] | undefined {
-  const { data: awsData } = useGetPackageInfoByKeyQuery('aws', undefined, { full: true });
-  const { data: bedrockData } = useGetPackageInfoByKeyQuery('aws_bedrock', undefined, {
-    full: true,
-  });
+  const { data: awsData } = useGetPackageInfoByKeyQuery(
+    'aws',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: bedrockData } = useGetPackageInfoByKeyQuery(
+    'aws_bedrock',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
   const { data: bedrockAgentcoreData } = useGetPackageInfoByKeyQuery(
     'aws_bedrock_agentcore',
     undefined,
-    { full: true }
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
   );
-  const { data: fargateData } = useGetPackageInfoByKeyQuery('awsfargate', undefined, {
-    full: true,
-  });
-  const { data: mqData } = useGetPackageInfoByKeyQuery('aws_mq', undefined, { full: true });
+  const { data: fargateData } = useGetPackageInfoByKeyQuery(
+    'awsfargate',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: mqData } = useGetPackageInfoByKeyQuery(
+    'aws_mq',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
   const { data: cloudtrailOtelData } = useGetPackageInfoByKeyQuery(
     'aws_cloudtrail_otel',
     undefined,
-    { full: true }
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
   );
-  const { data: vpcflowOtelData } = useGetPackageInfoByKeyQuery('aws_vpcflow_otel', undefined, {
-    full: true,
-  });
-  const { data: wafOtelData } = useGetPackageInfoByKeyQuery('aws_waf_otel', undefined, {
-    full: true,
-  });
-  const { data: logsData } = useGetPackageInfoByKeyQuery('aws_logs', undefined, { full: true });
+  const { data: vpcflowOtelData } = useGetPackageInfoByKeyQuery(
+    'aws_vpcflow_otel',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: wafOtelData } = useGetPackageInfoByKeyQuery(
+    'aws_waf_otel',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
+  const { data: logsData } = useGetPackageInfoByKeyQuery(
+    'aws_logs',
+    undefined,
+    PACKAGE_QUERY_OPTIONS,
+    CACHE_OPTS
+  );
 
   return useMemo(() => {
     if (
