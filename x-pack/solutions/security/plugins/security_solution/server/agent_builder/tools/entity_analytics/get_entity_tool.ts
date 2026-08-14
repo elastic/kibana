@@ -27,7 +27,7 @@ import type {
 } from '../../../plugin_contract';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import {
   buildSingleEntityAttachmentId,
   ensureEntityAttachment,
@@ -484,7 +484,13 @@ When exactly one entity is resolved, this tool also stores a \`security.entity\`
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
-        getEntityStoreV2ToolAvailability({ core, request, spaceId, experimentalFeatures, logger }),
+        getEntityAnalyticsToolAvailability({
+          core,
+          request,
+          spaceId,
+          experimentalFeatures,
+          logger,
+        }),
     },
     handler: async (params, { spaceId, esClient, savedObjectsClient, attachments }) => {
       logger.debug(
