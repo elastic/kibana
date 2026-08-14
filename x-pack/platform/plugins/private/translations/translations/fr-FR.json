@@ -1291,7 +1291,10 @@
     "core.euiFlyoutManaged.defaultTitle": "Volet inconnu",
     "core.euiFlyoutMenu.back": "Retour",
     "core.euiFlyoutMenu.history": "Historique",
+    "core.euiFlyoutMenu.history.tooltip": "Récemment visité",
     "core.euiFlyoutMenu.pagination.counter": "{position} sur {total}",
+    "core.euiFlyoutMenu.pagination.first": "Premier",
+    "core.euiFlyoutMenu.pagination.last": "Dernier",
     "core.euiFlyoutMenu.pagination.next": "Suivant",
     "core.euiFlyoutMenu.pagination.previous": "Précédent",
     "core.euiForm.addressFormErrors": "Veuillez remédier aux erreurs signalées en surbrillance.",
@@ -38091,6 +38094,10 @@
     "xpack.profiling.functionsView.samplesColumnLabel": "Exemples",
     "xpack.profiling.functionsView.samplesColumnLabel.hint": "Valeurs estimées",
     "xpack.profiling.functionsView.totalSampleCountLabel": "Total estimation d'échantillons :",
+    "xpack.profiling.header.betaBadgeTooltip": "Ce module n'est pas disponible. Nous vous remercions de bien vouloir nous aider en nous signalant tout bug.",
+    "xpack.profiling.headerActionMenu.addData": "Ajouter des données",
+    "xpack.profiling.headerActionMenu.settings": "Paramètres",
+    "xpack.profiling.headerActionMenu.storageExplorer": "Explorateur de stockage",
     "xpack.profiling.invalidLicense.description": "Vous devez disposer d'un abonnement Enterprise pour utiliser les fonctionnalités Universal Profiling.",
     "xpack.profiling.invalidLicense.message": "Pour accéder à Universal Profiling, passez à un abonnement Enterprise.",
     "xpack.profiling.invalidLicense.subscriptionManagementLink": "Mettre à niveau l'abonnement",
@@ -60271,9 +60278,6 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Le port webhook est requis.",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "Le nom d'utilisateur est requis.",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "Ce champ est requis.",
-    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes.",
-    "core.euiFlyoutMenu.history.tooltip": "Récemment visité",
-    "core.euiFlyoutMenu.pagination.first": "Premier",
-    "core.euiFlyoutMenu.pagination.last": "Dernier"
+    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes."
   }
 }

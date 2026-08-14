@@ -101,7 +101,9 @@ export function ProfilingAppPageTemplate({
                     items: [
                       {
                         id: 'storage-explorer',
-                        label: 'Storage explorer',
+                        label: i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
+                          defaultMessage: 'Storage explorer',
+                        }),
                         href: router.link('/storage-explorer', {
                           query: {
                             kuery,
@@ -114,7 +116,9 @@ export function ProfilingAppPageTemplate({
                       },
                       {
                         id: 'settings',
-                        label: 'Settings',
+                        label: i18n.translate('xpack.profiling.headerActionMenu.settings', {
+                          defaultMessage: 'Settings',
+                        }),
                         href: router.link('/settings'),
                         iconType: 'gear',
                         overflow: true,
@@ -122,11 +126,13 @@ export function ProfilingAppPageTemplate({
                     ],
                     primaryActionItem: {
                       id: 'add-data',
-                      label: 'Add data',
+                      label: i18n.translate('xpack.profiling.headerActionMenu.addData', {
+                        defaultMessage: 'Add data',
+                      }),
                       href: router.link('/add-data-instructions', {
                         query: { selectedTab: AddDataTabs.Kubernetes },
                       }),
-                      iconType: 'plusInCircle',
+                      iconType: 'plusCircle',
                     },
                   }
             }
@@ -134,9 +140,14 @@ export function ProfilingAppPageTemplate({
               showBetaBadge
                 ? [
                     {
-                      label: 'Beta',
+                      label: i18n.translate('xpack.profiling.header.betaBadgeLabel', {
+                        defaultMessage: 'Beta',
+                      }),
                       color: 'hollow',
-                      tooltip: 'This module is not GA. Please help us by reporting any bugs.',
+                      tooltip: i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
+                        defaultMessage:
+                          'This module is not GA. Please help us by reporting any bugs.',
+                      }),
                     },
                   ]
                 : undefined

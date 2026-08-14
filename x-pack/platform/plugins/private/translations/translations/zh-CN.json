@@ -1292,7 +1292,10 @@
     "core.euiFlyoutManaged.defaultTitle": "未知浮出控件",
     "core.euiFlyoutMenu.back": "返回",
     "core.euiFlyoutMenu.history": "历史记录",
+    "core.euiFlyoutMenu.history.tooltip": "最近访问",
     "core.euiFlyoutMenu.pagination.counter": "{position} 次（共 {total} 次）",
+    "core.euiFlyoutMenu.pagination.first": "第一页",
+    "core.euiFlyoutMenu.pagination.last": "最后一页",
     "core.euiFlyoutMenu.pagination.next": "下一步",
     "core.euiFlyoutMenu.pagination.previous": "上一步",
     "core.euiForm.addressFormErrors": "请解决突出显示的错误。",
@@ -38308,6 +38311,10 @@
     "xpack.profiling.functionsView.samplesColumnLabel": "样例",
     "xpack.profiling.functionsView.samplesColumnLabel.hint": "估计值",
     "xpack.profiling.functionsView.totalSampleCountLabel": "总样例数估值：",
+    "xpack.profiling.header.betaBadgeTooltip": "此模块不是 GA 版。请通过报告错误来帮助我们。",
+    "xpack.profiling.headerActionMenu.addData": "添加数据",
+    "xpack.profiling.headerActionMenu.settings": "设置",
+    "xpack.profiling.headerActionMenu.storageExplorer": "Storage Explorer",
     "xpack.profiling.invalidLicense.description": "您必须具有企业级订阅才能使用 Universal Profiling 功能。",
     "xpack.profiling.invalidLicense.message": "要访问 Universal Profiling，请升级到企业级订阅",
     "xpack.profiling.invalidLicense.subscriptionManagementLink": "升级订阅",
@@ -60735,9 +60742,6 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Webhook 端口必填。",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "“用户名”必填。",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "此字段必填。",
-    "xpack.watcher.watcherDescription": "通过创建、管理和监测警报来检测数据中的更改。",
-    "core.euiFlyoutMenu.history.tooltip": "最近访问",
-    "core.euiFlyoutMenu.pagination.first": "第一页",
-    "core.euiFlyoutMenu.pagination.last": "最后一页"
+    "xpack.watcher.watcherDescription": "通过创建、管理和监测警报来检测数据中的更改。"
   }
 }
