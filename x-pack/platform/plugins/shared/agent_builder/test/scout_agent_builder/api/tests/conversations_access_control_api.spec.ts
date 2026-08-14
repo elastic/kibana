@@ -19,7 +19,6 @@ import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ChatResponse } from '../../../../common/http_api/chat';
 import type {
-  GetConversationAccessControlResponse,
   GetConversationResponse,
   ListConversationsResponse,
   UpdateConversationAccessControlRequestBody,
@@ -399,15 +398,13 @@ apiTest.describe(
       );
     };
 
-    const getAccessControlAs = async (
+    const getConversationAs = async (
       apiClient: any,
       user: { username: string; password: string },
       conversationId: string
     ) => {
       return apiClient.get(
-        `${accessControlApiBase}/conversations/${encodeURIComponent(
-          conversationId
-        )}/access_control`,
+        `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
         { headers: headersFor(user), responseType: 'json' }
       );
     };
@@ -887,7 +884,7 @@ apiTest.describe(
       }
     );
 
-    // ── access-control GET/PUT routes ───────────────────────────────────────
+    // ── access-control conversation GET/PUT routes ──────────────────────────
 
     apiTest(
       'the owner shares a private conversation through the access-control routes',
@@ -918,7 +915,7 @@ apiTest.describe(
         let sharedAt = '';
 
         await apiTest.step('Bob cannot see the conversation before it is shared', async () => {
-          expect(await getAccessControlAs(apiClient, bob, conversationId)).toHaveStatusCode(404);
+          expect(await getConversationAs(apiClient, bob, conversationId)).toHaveStatusCode(404);
           expect(await listConversationIdsAs(apiClient, bob)).not.toContain(conversationId);
         });
 
@@ -971,10 +968,10 @@ apiTest.describe(
         });
 
         await apiTest.step('Bob sees the full member list but cannot manage it', async () => {
-          const response = await getAccessControlAs(apiClient, bob, conversationId);
+          const response = await getConversationAs(apiClient, bob, conversationId);
           expect(response).toHaveStatusCode(200);
 
-          const body = response.body as GetConversationAccessControlResponse;
+          const body = response.body as GetConversationResponse;
           expect(body.access_control.entries).toHaveLength(1);
           expect(body.access_control.entries[0].id).toBe(bobId);
           expect(body.permissions).toStrictEqual({ update_access_control: false });
@@ -1039,7 +1036,7 @@ apiTest.describe(
             0
           );
 
-          expect(await getAccessControlAs(apiClient, bob, conversationId)).toHaveStatusCode(404);
+          expect(await getConversationAs(apiClient, bob, conversationId)).toHaveStatusCode(404);
           expect(await listConversationIdsAs(apiClient, bob)).not.toContain(conversationId);
         });
 
@@ -1058,11 +1055,9 @@ apiTest.describe(
           });
           expect(response).toHaveStatusCode(200);
 
-          const bobView = await getAccessControlAs(apiClient, bob, conversationId);
+          const bobView = await getConversationAs(apiClient, bob, conversationId);
           expect(bobView).toHaveStatusCode(200);
-          expect(
-            (bobView.body as GetConversationAccessControlResponse).access_control
-          ).toStrictEqual({
+          expect((bobView.body as GetConversationResponse).access_control).toStrictEqual({
             access_mode: ConversationAccessControlMode.Public,
             entries: [],
           });

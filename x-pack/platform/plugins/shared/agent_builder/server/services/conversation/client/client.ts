@@ -34,7 +34,6 @@ import {
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
-  GetConversationAccessControlResponse,
   UpdateConversationAccessControlRequestBody,
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
@@ -94,7 +93,6 @@ export interface ConversationClient {
   ): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
-  getAccessControl(conversationId: string): Promise<GetConversationAccessControlResponse>;
   updateAccessControl(
     conversationId: string,
     update: UpdateConversationAccessControlRequestBody
@@ -355,21 +353,6 @@ class ConversationClientImpl implements ConversationClient {
       }
       throw err;
     }
-  }
-
-  async getAccessControl(conversationId: string): Promise<GetConversationAccessControlResponse> {
-    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-    const conversation = document._source!;
-
-    return {
-      access_control: normalizeConversationAccessControl(conversation.access_control),
-      permissions: {
-        update_access_control: hasConversationUpdateAccessControlAccess({
-          conversation,
-          user: this.user,
-        }),
-      },
-    };
   }
 
   async updateAccessControl(

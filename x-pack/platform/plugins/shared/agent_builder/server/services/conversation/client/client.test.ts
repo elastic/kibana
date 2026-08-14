@@ -1099,6 +1099,10 @@ describe('ConversationClient', () => {
         delete: true,
         update_access_control: true,
       });
+      expect(result.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      });
     });
 
     it('denies rename and delete to a participant of a public conversation on get', async () => {
@@ -1163,77 +1167,6 @@ describe('ConversationClient', () => {
       await expect(
         client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
       ).rejects.toThrow('Conversation conversation-1 not found');
-    });
-  });
-
-  describe('getAccessControl', () => {
-    const memberEntry: ConversationAccessControlEntry = {
-      type: 'user',
-      id: 'user-1',
-      role: ConversationAccessControlRole.Member,
-      added_at: '2026-01-01T00:00:00.000Z',
-    };
-    const otherMemberEntry: ConversationAccessControlEntry = {
-      ...memberEntry,
-      id: 'user-2',
-      added_at: '2026-01-02T00:00:00.000Z',
-    };
-
-    it('returns the access control and manage permission to the owner', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ entries: [otherMemberEntry] })] },
-      });
-
-      await expect(client.getAccessControl('conversation-1')).resolves.toEqual({
-        access_control: {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [otherMemberEntry],
-        },
-        permissions: { update_access_control: true },
-      });
-    });
-
-    it('returns the full entries list to a member, without the manage permission', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              entries: [memberEntry, otherMemberEntry],
-            }),
-          ],
-        },
-      });
-
-      await expect(client.getAccessControl('conversation-1')).resolves.toEqual({
-        access_control: {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [memberEntry, otherMemberEntry],
-        },
-        permissions: { update_access_control: false },
-      });
-    });
-
-    it('normalizes legacy access control without entries', async () => {
-      const document = createConversationDocument();
-      delete document._source!.access_control!.entries;
-      mockEsClient.search.mockResolvedValue({ hits: { hits: [document] } });
-
-      await expect(client.getAccessControl('conversation-1')).resolves.toEqual({
-        access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
-        permissions: { update_access_control: true },
-      });
-    });
-
-    it('masks conversations the caller cannot converse in as not found', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [createConversationDocument({ userId: 'other-user-id' })] },
-      });
-
-      await expect(client.getAccessControl('conversation-1')).rejects.toThrow(
-        'Conversation conversation-1 not found'
-      );
     });
   });
 

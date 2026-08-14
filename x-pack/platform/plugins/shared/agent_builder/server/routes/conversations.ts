@@ -19,7 +19,6 @@ import type {
   GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
-  GetConversationAccessControlResponse,
   UpdateConversationAccessControlRequestBody,
   UpdateConversationAccessControlResponse,
 } from '../../common/http_api/conversations';
@@ -218,59 +217,6 @@ export function registerConversationRoutes({
           body: {
             success: status,
           },
-        });
-      })
-    );
-
-  // Get conversation access control
-  router.versioned
-    .get({
-      path: `${publicApiPath}/conversations/{conversation_id}/access_control`,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
-      access: 'public',
-      summary: "Get a conversation's access control",
-      description:
-        'Get the access control for a specific conversation. Anyone who can read the conversation sees the full member list; `permissions.update_access_control` reports whether the caller can change it. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
-      options: {
-        tags: ['conversation', 'oas-tag:agent builder'],
-        availability: {
-          stability: 'tech_preview',
-          since: '9.6.0',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: {
-          request: {
-            params: schema.object({
-              conversation_id: schema.string({
-                maxLength: 256,
-                meta: {
-                  description:
-                    'The unique identifier of the conversation whose access control to retrieve.',
-                },
-              }),
-            }),
-          },
-        },
-        options: {
-          oasOperationObject: () =>
-            path.join(__dirname, 'examples/conversations_access_control_get.yaml'),
-        },
-      },
-      wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService } = getInternalServices();
-        const { conversation_id: conversationId } = request.params;
-
-        const client = await conversationsService.getScopedClient({ request });
-        const accessControl = await client.getAccessControl(conversationId);
-
-        return response.ok<GetConversationAccessControlResponse>({
-          body: accessControl,
         });
       })
     );

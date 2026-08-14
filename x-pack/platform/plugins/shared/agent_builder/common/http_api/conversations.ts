@@ -54,11 +54,6 @@ export interface MarkPinnedConversationResponse {
   pinned: boolean;
 }
 
-export interface GetConversationAccessControlResponse {
-  access_control: ConversationAccessControl;
-  permissions: Pick<ConversationPermissions, 'update_access_control'>;
-}
-
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
   entries: Array<Omit<ConversationAccessControlEntry, 'added_at'>>;

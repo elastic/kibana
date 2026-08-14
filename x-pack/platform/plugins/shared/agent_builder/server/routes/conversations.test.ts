@@ -270,28 +270,6 @@ describe('registerConversationRoutes', () => {
       notFound: jest.fn(),
     });
 
-    it('returns the access control and permissions when getting access control', async () => {
-      const accessControl = {
-        access_control: { access_mode: 'private', entries: [] },
-        permissions: { update_access_control: true },
-      };
-      const getAccessControl = jest.fn().mockResolvedValue(accessControl);
-      const handler = registerAndCapture({
-        method: 'get',
-        path: `${publicApiPath}/conversations/{conversation_id}/access_control`,
-        client: { getAccessControl },
-      });
-
-      const result = await handler(
-        context,
-        { params: { conversation_id: 'conversation-1' } },
-        response()
-      );
-
-      expect(getAccessControl).toHaveBeenCalledWith('conversation-1');
-      expect(result.payload).toBe(accessControl);
-    });
-
     it('passes the requested mode and entries through when updating access control', async () => {
       const body = {
         access_mode: 'private',
