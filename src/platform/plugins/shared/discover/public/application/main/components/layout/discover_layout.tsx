@@ -476,8 +476,6 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
-      {/* Rendered here rather than next to the grid so a document restored from a link opens
-          immediately, without waiting on the chart or the search that populates the grid */}
       <DiscoverDocumentFlyout
         dataView={dataView}
         columns={currentColumns}
