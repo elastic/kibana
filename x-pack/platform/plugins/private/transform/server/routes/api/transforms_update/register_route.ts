@@ -16,8 +16,7 @@ import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute(routeDependencies: RouteDependencies) {
-  const { router, getLicense } = routeDependencies;
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *

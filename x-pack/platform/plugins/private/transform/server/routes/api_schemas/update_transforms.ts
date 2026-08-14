@@ -13,6 +13,9 @@ import type { TransformPivotConfig } from '../../../common/types/transform';
 import { runtimeMappingsSchema } from './common';
 import { retentionPolicySchema, settingsSchema, syncSchema } from './transforms';
 
+// Update requests can send a partial `source`, for example only `project_routing`.
+// The route validates the request before the handler can merge it with the existing
+// transform source, so this cannot reuse the create/full transform `sourceSchema`.
 const sourceUpdateSchema = schema.object({
   runtime_mappings: schema.maybe(runtimeMappingsSchema),
   index: schema.maybe(
