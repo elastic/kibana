@@ -546,7 +546,7 @@ export function InternalDashboardTopNav({
         />
       )}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      <DashboardControlsRenderer />
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
