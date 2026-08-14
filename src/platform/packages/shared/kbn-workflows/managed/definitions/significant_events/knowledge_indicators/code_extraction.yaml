@@ -112,7 +112,7 @@ steps:
                 connector-id-by-feature: 'significant_events_ki_extraction'
                 plugin-id: 'significant_events_code_intelligence'
                 aggregate-by: 'significant_events'
-                create-conversation: false
+                create-conversation: true
                 with:
                   message: |
                     Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}` (ref key `{{ foreach.item.refKey }}`).
