@@ -38,10 +38,7 @@ const getErrorCode = (err: unknown): string | undefined => {
   return typeof err.code === 'string' ? err.code : undefined;
 };
 
-const matchesErrorOrCause = (
-  err: unknown,
-  predicate: (current: unknown) => boolean
-): boolean => {
+const matchesErrorOrCause = (err: unknown, predicate: (current: unknown) => boolean): boolean => {
   if (predicate(err)) {
     return true;
   }

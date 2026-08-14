@@ -118,7 +118,7 @@ describe('actionTypeRegistry', () => {
       );
     });
 
-    test('allows empty supported feature ids (support-only)', () => {
+    test('throws if empty supported feature ids provided', () => {
       const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       expect(() =>
         actionTypeRegistry.register(
@@ -126,8 +126,9 @@ describe('actionTypeRegistry', () => {
             supportedFeatureIds: [],
           })
         )
-      ).not.toThrow();
-      expect(actionTypeRegistry.has('my-connector-type')).toBe(true);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-connector-type\\"."`
+      );
     });
 
     test('throws if invalid feature ids provided', () => {

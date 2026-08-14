@@ -33,8 +33,7 @@ export const McpV2Connector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    // Support-only; creation is blocked until enablement.
-    supportedFeatureIds: [],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
