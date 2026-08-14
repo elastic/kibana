@@ -21,7 +21,7 @@ export const connectorTypeToEventNamespace = (connectorTypeId: string): string =
   connectorTypeId.startsWith('.') ? connectorTypeId.slice(1) : connectorTypeId;
 
 /**
- * URL `{typeId}` → canonical actionTypeId for connector SO lookup.
+ * URL `{connector_type_id}` → canonical actionTypeId for connector SO lookup.
  * `myConnector` → `.myConnector`
  */
 export const normalizeConnectorTypeId = (typeId: string): string =>

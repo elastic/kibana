@@ -80,7 +80,11 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import { dispatchConnectorEvents, type ConnectorEventEmitter } from './inbound';
+import {
+  createInboundEventsClient,
+  dispatchConnectorEvents,
+  type ConnectorEventEmitter,
+} from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -489,6 +493,19 @@ export class ActionsPlugin
 
     // Routes
     const router = core.http.createRouter<ActionsRequestHandlerContext>();
+    const inboundEventsClient = createInboundEventsClient({
+      logger: this.logger,
+      inboundEventsEnabled: actionsConfigUtils.isInboundEventsEnabled(),
+      maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+      getStartServices: core.getStartServices,
+      inMemoryConnectors: this.inMemoryConnectors,
+      emitConnectorEvents: (params) =>
+        dispatchConnectorEvents({
+          emitter: this.connectorEventEmitter,
+          params,
+          logger: this.logger,
+        }),
+    });
     defineRoutes({
       router,
       licenseState: this.licenseState,
@@ -498,17 +515,9 @@ export class ActionsPlugin
       core,
       oauthRateLimiter,
       inboundEvents: {
-        enabled: actionsConfigUtils.isInboundEventsEnabled(),
         maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-        maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+        client: inboundEventsClient,
         getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-        inMemoryConnectors: this.inMemoryConnectors,
-        emitConnectorEvents: (params) =>
-          dispatchConnectorEvents({
-            emitter: this.connectorEventEmitter,
-            params,
-            logger: this.logger,
-          }),
       },
     });
 

@@ -16,4 +16,4 @@ Emitter failures **rethrow** so the hub records `emit_threw` / `emit_partial` wh
 
 ## Phase 2 replacement
 
-Replace this bridge with the shared event bus **without changing** the SaaS-facing hub URL (`POST /api/events/{typeId}/{connectorId}`). Internal bus producers may pass a real `KibanaRequest`.
+Replace this bridge with the shared event bus **without changing** the SaaS-facing hub URL (`POST /api/events/{connector_type_id}/{connector_id}`). Internal bus producers may pass a real `KibanaRequest`.

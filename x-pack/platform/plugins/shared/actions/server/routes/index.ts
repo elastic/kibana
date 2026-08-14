@@ -15,7 +15,7 @@ import { listTypesRoute } from './connector/list_types';
 import { listTypesWithSystemRoute } from './connector/list_types_system';
 import { getConnectorSpecRoute } from './connector/get_spec';
 import type { ILicenseState } from '../lib';
-import type { ActionsRequestHandlerContext, InMemoryConnector } from '../types';
+import type { ActionsRequestHandlerContext } from '../types';
 import { createConnectorRoute } from './connector/create';
 import { deleteConnectorRoute } from './connector/delete';
 import { executeConnectorRoute } from './connector/execute';
@@ -33,7 +33,7 @@ import { inboundEventsRoute } from './inbound_events';
 
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
-import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from '../inbound/types';
+import type { InboundEventsClient } from '../inbound/client';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -44,14 +44,9 @@ export interface RouteOptions {
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
   inboundEvents: {
-    enabled: boolean;
     maxBodyBytes: number;
-    maxEmitted: number;
-    emitConnectorEvents: (
-      params: ConnectorEventEmitParams
-    ) => Promise<DispatchConnectorEventsResult>;
+    client: InboundEventsClient;
     getSpaceId: (request: KibanaRequest) => string;
-    inMemoryConnectors: InMemoryConnector[];
   };
 }
 
@@ -89,13 +84,8 @@ export function defineRoutes(opts: RouteOptions) {
 
   inboundEventsRoute({
     router,
-    inboundEventsEnabled: inboundEvents.enabled,
     maxBodyBytes: inboundEvents.maxBodyBytes,
-    maxEmitted: inboundEvents.maxEmitted,
-    logger,
-    emitConnectorEvents: inboundEvents.emitConnectorEvents,
-    getStartServices: core.getStartServices,
+    inboundEventsClient: inboundEvents.client,
     getSpaceId: inboundEvents.getSpaceId,
-    inMemoryConnectors: inboundEvents.inMemoryConnectors,
   });
 }

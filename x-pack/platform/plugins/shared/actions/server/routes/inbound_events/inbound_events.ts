@@ -7,53 +7,43 @@
 
 import { schema } from '@kbn/config-schema';
 import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
-import type { CoreSetup, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
 import { CONNECTOR_ID_MAX_LENGTH } from '../../../common';
-import type { ActionsRequestHandlerContext, InMemoryConnector } from '../../types';
+import type { ActionsRequestHandlerContext } from '../../types';
 import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
   INBOUND_EVENTS_SECURITY,
   INBOUND_EVENTS_TOKEN_MAX_LENGTH,
 } from '../../inbound/constants';
-import { handleInboundRequest } from '../../inbound/handle_inbound_request';
-import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from '../../inbound/types';
+import type { InboundEventsClient } from '../../inbound/client';
+import { mapIngestResultToResponse } from '../../inbound/map_ingest_result_to_response';
 
 export interface InboundEventsRouteParams {
   router: IRouter<ActionsRequestHandlerContext>;
-  inboundEventsEnabled: boolean;
   maxBodyBytes: number;
-  maxEmitted: number;
-  logger: Logger;
-  emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
-  getStartServices: CoreSetup['getStartServices'];
+  inboundEventsClient: InboundEventsClient;
   getSpaceId: (request: KibanaRequest) => string;
-  inMemoryConnectors: InMemoryConnector[];
 }
 
 export function inboundEventsRoute({
   router,
-  inboundEventsEnabled,
   maxBodyBytes,
-  maxEmitted,
-  logger,
-  emitConnectorEvents,
-  getStartServices,
+  inboundEventsClient,
   getSpaceId,
-  inMemoryConnectors,
 }: InboundEventsRouteParams): void {
   router.versioned
     .post({
       path: INBOUND_EVENTS_API_PATH,
       access: 'public',
       security: INBOUND_EVENTS_SECURITY,
-      summary: 'Ingest an external event for a connector',
+      summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback).',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback).',
       options: {
         xsrfRequired: false,
-        tags: ['api'],
+        tags: ['oas-tag:connectors'],
         body: {
           accepts: ['application/json', 'application/*+json', '*/*'],
           maxBytes: maxBodyBytes,
@@ -67,11 +57,11 @@ export function inboundEventsRoute({
           request: {
             params: schema.object({
               // maxLength is pre-normalize; handle rejects if normalize prepends '.' past the cap.
-              typeId: schema.string({
+              connector_type_id: schema.string({
                 minLength: 1,
                 maxLength: MAX_CONNECTOR_TYPE_ID_LENGTH,
               }),
-              connectorId: schema.string({
+              connector_id: schema.string({
                 minLength: 1,
                 maxLength: CONNECTOR_ID_MAX_LENGTH,
               }),
@@ -91,19 +81,15 @@ export function inboundEventsRoute({
           },
         },
       },
-      async (_context, request, response) =>
-        handleInboundRequest({
+      async (_context, request, response) => {
+        const { connector_type_id: connectorTypeId, connector_id: connectorId } = request.params;
+        const result = await inboundEventsClient.ingest({
           request,
-          response,
-          typeId: request.params.typeId,
-          connectorId: request.params.connectorId,
+          connectorTypeId,
+          connectorId,
           spaceId: getSpaceId(request),
-          inboundEventsEnabled,
-          maxEmitted,
-          emitConnectorEvents,
-          logger,
-          getStartServices,
-          inMemoryConnectors,
-        })
+        });
+        return mapIngestResultToResponse(result, response);
+      }
     );
 }

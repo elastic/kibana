@@ -15,7 +15,8 @@ import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
-import { handleInboundRequest } from './handle_inbound_request';
+import { ingestInboundEvent } from './ingest';
+import { mapIngestResultToResponse } from './map_ingest_result_to_response';
 import {
   INBOUND_INGRESS_OUTCOME_DETAIL_MAX_LENGTH,
   truncateInboundIngressDetail,
@@ -46,7 +47,7 @@ const createUnsecuredInboundSavedObjectsClientMock =
     typeof createUnsecuredInboundSavedObjectsClient
   >;
 
-describe('handleInboundRequest', () => {
+describe('ingestInboundEvent', () => {
   const logger = loggingSystemMock.createLogger();
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const getStartServices = jest.fn();
@@ -108,7 +109,7 @@ describe('handleInboundRequest', () => {
   const run = async (overrides?: {
     enabled?: boolean;
     maxEmitted?: number;
-    typeId?: string;
+    connectorTypeId?: string;
     spaceId?: string;
     query?: Record<string, unknown>;
     headers?: Record<string, string>;
@@ -120,10 +121,9 @@ describe('handleInboundRequest', () => {
       body: { hello: 'world' },
     });
     const response = httpServerMock.createResponseFactory();
-    await handleInboundRequest({
+    const result = await ingestInboundEvent({
       request,
-      response,
-      typeId: overrides?.typeId ?? 'myConnector',
+      connectorTypeId: overrides?.connectorTypeId ?? 'myConnector',
       connectorId,
       spaceId: overrides?.spaceId ?? spaceId,
       inboundEventsEnabled: overrides?.enabled ?? true,
@@ -133,7 +133,8 @@ describe('handleInboundRequest', () => {
       getStartServices,
       inMemoryConnectors: [],
     });
-    return { response, request };
+    mapIngestResultToResponse(result, response);
+    return { response, request, result };
   };
 
   const expectOutcome = (level: 'debug' | 'info' | 'warn' | 'error', outcome: string) => {
@@ -188,9 +189,9 @@ describe('handleInboundRequest', () => {
     expectOutcome('debug', 'load_miss');
   });
 
-  it('returns 404 when normalized typeId exceeds max length', async () => {
+  it('returns 404 when normalized connectorTypeId exceeds max length', async () => {
     const undotted = 'a'.repeat(MAX_CONNECTOR_TYPE_ID_LENGTH);
-    const { response: res } = await run({ typeId: undotted });
+    const { response: res } = await run({ connectorTypeId: undotted });
     expect(res.notFound).toHaveBeenCalled();
     expect(getConnectorSpecMock).not.toHaveBeenCalled();
     expectOutcome('debug', 'no_spec');

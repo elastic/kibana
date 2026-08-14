@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INBOUND_EVENTS_API_PATH = '/api/events/{typeId}/{connectorId}';
+export const INBOUND_EVENTS_API_PATH = '/api/events/{connector_type_id}/{connector_id}';
 export const INBOUND_EVENTS_API_VERSION = '2023-10-31';
 
 export const INBOUND_EVENTS_DISABLED_MESSAGE = i18n.translate(

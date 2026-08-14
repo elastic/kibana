@@ -13,6 +13,7 @@ import {
   INBOUND_EVENTS_API_VERSION,
   INBOUND_EVENTS_SECURITY,
 } from '../../inbound/constants';
+import { createInboundEventsClient } from '../../inbound/factory';
 import { inboundEventsRoute } from './inbound_events';
 
 describe('inboundEventsRoute', () => {
@@ -23,14 +24,16 @@ describe('inboundEventsRoute', () => {
 
     inboundEventsRoute({
       router,
-      inboundEventsEnabled: false,
       maxBodyBytes: 1024 * 1024,
-      maxEmitted: 25,
-      logger: loggingSystemMock.createLogger(),
-      emitConnectorEvents: jest.fn(),
-      getStartServices: coreMock.createSetup().getStartServices,
+      inboundEventsClient: createInboundEventsClient({
+        logger: loggingSystemMock.createLogger(),
+        inboundEventsEnabled: false,
+        maxEmitted: 25,
+        emitConnectorEvents: jest.fn(),
+        getStartServices: coreMock.createSetup().getStartServices,
+        inMemoryConnectors: [],
+      }),
       getSpaceId: jest.fn().mockReturnValue('default'),
-      inMemoryConnectors: [],
     });
 
     expect(router.versioned.post).toHaveBeenCalledWith(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   getConnectorSpec,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -19,19 +19,24 @@ import {
   INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
 } from './constants';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
-import { loadInboundConnector } from './load_inbound_connector';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
+import { loadInboundConnector } from './load_inbound_connector';
 
 export interface InboundEventsRequestQuery {
   token?: string;
 }
 
-export interface HandleInboundRequestParams {
+export type IngestInboundEventResult =
+  | { status: 'forbidden'; body: string }
+  | { status: 'not_found' }
+  | { status: 'error'; statusCode: 500; body: string }
+  | { status: 'accepted'; body: { ok: true } };
+
+export interface IngestInboundEventParams {
   request: KibanaRequest<unknown, InboundEventsRequestQuery, unknown>;
-  response: KibanaResponseFactory;
-  typeId: string;
+  connectorTypeId: string;
   connectorId: string;
   spaceId: string;
   inboundEventsEnabled: boolean;
@@ -47,10 +52,12 @@ const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, u
   return spokeConfig;
 };
 
-export async function handleInboundRequest({
+/**
+ * Orchestrates inbound connector event ingest (no HTTP mapping).
+ */
+export async function ingestInboundEvent({
   request,
-  response,
-  typeId,
+  connectorTypeId: connectorTypeIdParam,
   connectorId,
   spaceId,
   inboundEventsEnabled,
@@ -59,8 +66,8 @@ export async function handleInboundRequest({
   logger,
   getStartServices,
   inMemoryConnectors,
-}: HandleInboundRequestParams) {
-  const connectorTypeId = normalizeConnectorTypeId(typeId);
+}: IngestInboundEventParams): Promise<IngestInboundEventResult> {
+  const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
   const baseLog = {
     spaceId,
     connectorId,
@@ -70,19 +77,19 @@ export async function handleInboundRequest({
 
   if (!inboundEventsEnabled) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'disabled' });
-    return response.forbidden({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
+    return { status: 'forbidden', body: INBOUND_EVENTS_DISABLED_MESSAGE };
   }
 
   // Path schema maxLength is pre-normalize; reject post-normalize oversize (e.g. undotted 64 + '.').
   if (connectorTypeId.length > MAX_CONNECTOR_TYPE_ID_LENGTH) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'no_spec' });
-    return response.notFound();
+    return { status: 'not_found' };
   }
 
   const spec = getConnectorSpec(connectorTypeId);
   if (!spec?.events) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'no_spec' });
-    return response.notFound();
+    return { status: 'not_found' };
   }
 
   const unsecuredSavedObjectsClient = await createUnsecuredInboundSavedObjectsClient({
@@ -100,7 +107,7 @@ export async function handleInboundRequest({
   });
   if (!connector) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'load_miss' });
-    return response.notFound();
+    return { status: 'not_found' };
   }
 
   const ingestTokenHash =
@@ -109,10 +116,10 @@ export async function handleInboundRequest({
       : undefined;
   if (typeof ingestTokenHash !== 'string' || ingestTokenHash.length === 0) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
-    return response.notFound();
+    return { status: 'not_found' };
   }
 
-  // Query is validated by the route schema before the handler runs.
+  // Query is validated by the route schema before ingest runs.
   const providedToken = extractIngestToken({
     query: request.query,
     headers: request.headers,
@@ -127,7 +134,7 @@ export async function handleInboundRequest({
     })
   ) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'auth_fail' });
-    return response.notFound();
+    return { status: 'not_found' };
   }
 
   try {
@@ -146,10 +153,11 @@ export async function handleInboundRequest({
         outcome: 'handle_fail',
         detail: 'unexpected_handleEvents_type',
       });
-      return response.customError({
+      return {
+        status: 'error',
         statusCode: 500,
         body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
-      });
+      };
     }
 
     if (result.events.length > maxEmitted) {
@@ -158,10 +166,11 @@ export async function handleInboundRequest({
         outcome: 'handle_fail',
         detail: `emitted_events=${result.events.length}_max=${maxEmitted}`,
       });
-      return response.customError({
+      return {
+        status: 'error',
         statusCode: 500,
         body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
-      });
+      };
     }
 
     const validation = validateEmittedEvents(spec.events.definitions, result.events);
@@ -171,10 +180,11 @@ export async function handleInboundRequest({
         outcome: 'validate_fail',
         detail: JSON.stringify(validation.errors),
       });
-      return response.customError({
+      return {
+        status: 'error',
         statusCode: 500,
         body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
-      });
+      };
     }
 
     let emitFailures = 0;
@@ -212,16 +222,17 @@ export async function handleInboundRequest({
       logInboundIngressOutcome(logger, { ...baseLog, outcome: 'accepted' });
     }
 
-    return response.accepted({ body: { ok: true } });
+    return { status: 'accepted', body: { ok: true } };
   } catch (error) {
     logInboundIngressOutcome(logger, {
       ...baseLog,
       outcome: 'handle_fail',
       detail: error instanceof Error ? error.message : String(error),
     });
-    return response.customError({
+    return {
+      status: 'error',
       statusCode: 500,
       body: INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
-    });
+    };
   }
 }
