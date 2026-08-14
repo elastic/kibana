@@ -36,8 +36,8 @@
   {
     "attributes": {
       "elastic.cache_control.session_id": "[CONVERSATION_ID]",
-      "elastic.cache_control.type": "ephemeral",
       "elastic.cache_control.ttl": "5m",
+      "elastic.cache_control.type": "ephemeral",
       "elastic.inference.span.kind": "LLM",
       "elastic.llm.toolChoice": "{\"function\":\"set_title\"}",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",
@@ -59,8 +59,8 @@
   {
     "attributes": {
       "elastic.cache_control.session_id": "[CONVERSATION_ID]",
-      "elastic.cache_control.type": "ephemeral",
       "elastic.cache_control.ttl": "5m",
+      "elastic.cache_control.type": "ephemeral",
       "elastic.inference.span.kind": "LLM",
       "elastic.llm.toolChoice": "\"auto\"",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",
@@ -82,8 +82,8 @@
   {
     "attributes": {
       "elastic.cache_control.session_id": "[CONVERSATION_ID]",
-      "elastic.cache_control.type": "ephemeral",
       "elastic.cache_control.ttl": "5m",
+      "elastic.cache_control.type": "ephemeral",
       "elastic.inference.span.kind": "LLM",
       "elastic.llm.toolChoice": "\"auto\"",
       "gen_ai.conversation.id": "[CONVERSATION_ID]",
