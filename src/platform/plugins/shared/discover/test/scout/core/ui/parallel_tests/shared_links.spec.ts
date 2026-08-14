@@ -116,7 +116,7 @@ spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, 
 
       await expect
         .poll(() => pageObjects.dataGrid.getColumnTitles())
-        .toEqual(['@timestamp', 'bytes']);
+        .toStrictEqual(['@timestamp', 'bytes']);
 
       const sharedUrl = await pageObjects.discover.getSharedUrl();
 
@@ -125,7 +125,7 @@ spaceTest.describe('Discover shared links', { tag: '@local-stateful-classic' }, 
 
       await expect
         .poll(() => pageObjects.dataGrid.getColumnTitles())
-        .toEqual(['@timestamp', 'bytes']);
+        .toStrictEqual(['@timestamp', 'bytes']);
 
       await expect.poll(() => decodeURIComponent(page.url())).toContain('columns:!(bytes)');
     }
