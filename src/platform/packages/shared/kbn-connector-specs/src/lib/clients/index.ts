@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createMcpClientType } from '../mcp/client';
+import { createMcpClientType } from '../mcp/client/client_type';
 import type { ClientTypeSpecs } from './client_registry';
 
 export type {
