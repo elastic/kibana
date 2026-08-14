@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/mcp-dev-server'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/mcp-dev-server'
   description: Moon project for @kbn/mcp-dev-server
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: src/platform/packages/shared/kbn-mcp-dev-server
 dependsOn:
   - '@kbn/dev-cli-runner'
