@@ -93,7 +93,10 @@ export const repairUiamApiKey = async ({
   const { uiamConvert } = context;
 
   if (!context.shouldGrantUiam || context.apiKeyType !== ApiKeyType.UIAM || !uiamConvert) {
-    logger.debug('Not re-granting the UIAM API key for the rule.', { tags: logTags });
+    logger.debug(
+      'Not re-granting the UIAM API key: this deployment does not run rules with UIAM API keys.',
+      { tags: logTags }
+    );
     return;
   }
 
@@ -111,8 +114,28 @@ export const repairUiamApiKey = async ({
     const { rawRule, version } = await getDecryptedRule(context, ruleId, spaceId);
     const { apiKey, uiamApiKey, apiKeyCreatedByUser } = rawRule;
 
-    if (!uiamApiKey || !apiKey || apiKeyCreatedByUser === true) {
-      logger.debug('Not re-granting the UIAM API key for the rule.', { tags: logTags });
+    // Each reason gets its own message: these are the lines an operator reads to understand why a
+    // broken rule was left alone, so "which check skipped it" has to be obvious from the log alone.
+    if (!uiamApiKey) {
+      logger.debug('Not re-granting the UIAM API key: the rule does not have one.', {
+        tags: logTags,
+      });
+      return;
+    }
+
+    if (apiKeyCreatedByUser === true) {
+      logger.debug(
+        'Not re-granting the UIAM API key: it was created by the user, who manages its lifecycle.',
+        { tags: logTags }
+      );
+      return;
+    }
+
+    if (!apiKey) {
+      logger.debug(
+        'Not re-granting the UIAM API key: the rule has no Elasticsearch API key to convert.',
+        { tags: logTags }
+      );
       return;
     }
 

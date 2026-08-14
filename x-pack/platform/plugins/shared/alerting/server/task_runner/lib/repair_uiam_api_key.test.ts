@@ -152,27 +152,67 @@ describe('repairUiamApiKey()', () => {
     );
   });
 
+  // Every skip logs a distinct reason: these lines are how an operator tells which check left a
+  // broken rule alone, so identical messages would make the log useless.
   test.each([
-    ['the key was created by the user', { apiKeyCreatedByUser: true }],
-    ['the rule has no UIAM API key', { uiamApiKey: null }],
-    ['there is no Elasticsearch API key to convert', { apiKey: null }],
-  ])('does not re-grant when %s', async (_, overrides) => {
+    [
+      'the key was created by the user',
+      { apiKeyCreatedByUser: true },
+      'it was created by the user, who manages its lifecycle',
+    ],
+    ['the rule has no UIAM API key', { uiamApiKey: null }, 'the rule does not have one'],
+    [
+      'there is no Elasticsearch API key to convert',
+      { apiKey: null },
+      'the rule has no Elasticsearch API key to convert',
+    ],
+  ])('does not re-grant when %s', async (_, overrides, expectedReason) => {
     const { context, unsafeClient } = setup({ rawRule: getRawRule(overrides) });
 
     await callRepair(context);
 
     expect(context.uiamConvert).not.toHaveBeenCalled();
     expect(unsafeClient.update).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Not re-granting the UIAM API key: ${expectedReason}.`,
+      expect.anything()
+    );
   });
 
   test('does not re-grant when the deployment does not run rules with UIAM API keys', async () => {
+    const expectedMessage =
+      'Not re-granting the UIAM API key: this deployment does not run rules with UIAM API keys.';
+
     const esOnly = setup({ apiKeyType: ApiKeyType.ES });
     await callRepair(esOnly.context);
     expect(esOnly.context.uiamConvert).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(expectedMessage, expect.anything());
 
     const noUiam = setup({ shouldGrantUiam: false });
     await callRepair(noUiam.context);
     expect(noUiam.context.uiamConvert).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(expectedMessage, expect.anything());
+  });
+
+  test('logs a different message for every reason it declines to re-grant', async () => {
+    const messages = new Set<string>();
+
+    for (const overrides of [
+      { apiKeyCreatedByUser: true },
+      { uiamApiKey: null },
+      { apiKey: null },
+    ]) {
+      const { context } = setup({ rawRule: getRawRule(overrides) });
+      await callRepair(context);
+    }
+    const { context: esOnly } = setup({ apiKeyType: ApiKeyType.ES });
+    await callRepair(esOnly);
+
+    for (const [message] of logger.debug.mock.calls) {
+      messages.add(String(message));
+    }
+
+    expect(messages.size).toBe(4);
   });
 
   test('reports failure when the rule can no longer be decrypted', async () => {
