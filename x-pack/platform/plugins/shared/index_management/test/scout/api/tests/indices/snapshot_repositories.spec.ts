@@ -14,6 +14,8 @@ const { API_BASE_PATH, COMMON_HEADERS } = testData;
 
 const DEFAULT_REPOSITORY_SETTING = 'repositories.default_repository';
 const REPOSITORY_NAME = 'index-management-api-snapshot-repo';
+// ECH has no node-local `path.repo`, so reuse the managed repository it ships with (never create it).
+const CLOUD_REPOSITORY_NAME = 'found-snapshots';
 
 const cleanup = async (esClient: EsClient) => {
   await esClient.cluster.putSettings({ persistent: { [DEFAULT_REPOSITORY_SETTING]: null } });
@@ -36,34 +38,42 @@ apiTest.describe('Snapshot repositories API', { tag: tags.stateful.classic }, ()
     await cleanup(esClient);
   });
 
-  apiTest('reports no default repository when none is configured', async ({ apiClient }) => {
-    const response = await apiClient.get(`${API_BASE_PATH}/snapshot_repositories`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
+  apiTest(
+    'reports no default repository when none is configured',
+    async ({ apiClient, config }) => {
+      const response = await apiClient.get(`${API_BASE_PATH}/snapshot_repositories`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(200);
-    // `defaultRepository` is undefined and therefore omitted from the JSON response.
-    expect(Object.keys(response.body).sort()).toStrictEqual([
-      'canCreateRepository',
-      'hasDefaultRepository',
-      'hasRepositories',
-    ]);
-    expect(typeof response.body.canCreateRepository).toBe('boolean');
-    expect(response.body.hasDefaultRepository).toBe(false);
-    expect(response.body.hasRepositories).toBe(false);
-  });
+      expect(response).toHaveStatusCode(200);
+      // `defaultRepository` is undefined and therefore omitted from the JSON response.
+      expect(Object.keys(response.body).sort()).toStrictEqual([
+        'canCreateRepository',
+        'hasDefaultRepository',
+        'hasRepositories',
+      ]);
+      expect(typeof response.body.canCreateRepository).toBe('boolean');
+      expect(response.body.hasDefaultRepository).toBe(false);
+      // ECH always ships the managed `found-snapshots` repository, so a repo exists even with no default.
+      expect(response.body.hasRepositories).toBe(config.isCloud);
+    }
+  );
 
-  apiTest('reports the configured default repository', async ({ apiClient, esClient }) => {
-    // A repository has to be registered before it can be set as the cluster default. `/tmp/repo` is
-    // one of the locations Scout allows in `path.repo`.
-    await esClient.snapshot.createRepository({
-      name: REPOSITORY_NAME,
-      repository: { type: 'fs', settings: { location: '/tmp/repo' } },
-      verify: false,
-    });
+  apiTest('reports the configured default repository', async ({ apiClient, esClient, config }) => {
+    // A repository has to be registered before it can be set as the cluster default. Local Scout
+    // stateful allows an `fs` repo at `/tmp/repo` via `path.repo`; ECH has no node-local `path.repo`,
+    // so reuse the managed `found-snapshots` repository instead of creating one.
+    const repositoryName = config.isCloud ? CLOUD_REPOSITORY_NAME : REPOSITORY_NAME;
+    if (!config.isCloud) {
+      await esClient.snapshot.createRepository({
+        name: REPOSITORY_NAME,
+        repository: { type: 'fs', settings: { location: '/tmp/repo' } },
+        verify: false,
+      });
+    }
     await esClient.cluster.putSettings({
-      persistent: { [DEFAULT_REPOSITORY_SETTING]: REPOSITORY_NAME },
+      persistent: { [DEFAULT_REPOSITORY_SETTING]: repositoryName },
     });
 
     const response = await apiClient.get(`${API_BASE_PATH}/snapshot_repositories`, {
@@ -73,7 +83,7 @@ apiTest.describe('Snapshot repositories API', { tag: tags.stateful.classic }, ()
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.hasDefaultRepository).toBe(true);
-    expect(response.body.defaultRepository).toBe(REPOSITORY_NAME);
+    expect(response.body.defaultRepository).toBe(repositoryName);
     expect(typeof response.body.canCreateRepository).toBe('boolean');
     expect(response.body.hasRepositories).toBe(true);
   });
