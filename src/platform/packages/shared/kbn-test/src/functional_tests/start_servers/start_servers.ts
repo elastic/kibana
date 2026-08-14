@@ -36,11 +36,15 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       config = await readConfigFile(log, options.esVersion, options.config);
     }
 
+    let shutdownEs: (() => Promise<void>) | undefined;
+
     const esPromise = runElasticsearch({
       config,
       log,
       esFrom: options.esFrom,
       logsDir: options.logsDir,
+    }).then((shutdown) => {
+      shutdownEs = shutdown;
     });
 
     const kibanaPromise = runKibanaServer({
@@ -59,19 +63,16 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
           ],
     });
 
-    const [esResult, kibanaResult] = await Promise.allSettled([esPromise, kibanaPromise]);
+    try {
+      await Promise.all([esPromise, kibanaPromise]);
+    } catch (error) {
+      await esPromise.catch(() => {});
 
-    if (esResult.status === 'rejected') {
-      throw esResult.reason;
-    }
-    if (kibanaResult.status === 'rejected') {
-      await esResult.value().catch((error) => {
-        log.error(`failed to shut down Elasticsearch after Kibana failed to start: ${error}`);
+      await shutdownEs?.().catch((shutdownError) => {
+        log.error(`failed to shut down Elasticsearch after startup failed: ${shutdownError}`);
       });
-      throw kibanaResult.reason;
+      throw error;
     }
-
-    const shutdownEs = esResult.value;
 
     const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
@@ -134,7 +135,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     );
 
     await procs.waitForAllToStop();
-    await shutdownEs();
+    await shutdownEs?.();
   });
 }
 

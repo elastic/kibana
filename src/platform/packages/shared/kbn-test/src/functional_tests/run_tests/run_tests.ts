@@ -115,13 +115,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs: (() => Promise<void>) | undefined;
+        let esPromise: Promise<void> | undefined;
 
         try {
-          const esPromise =
+          esPromise =
             process.env.TEST_ES_DISABLE_STARTUP !== 'true'
               ? withSpan('start_elasticsearch', () =>
                   runElasticsearch({ ...options, log, config, onEarlyExit })
-                )
+                ).then((shutdown) => {
+                  shutdownEs = shutdown;
+                })
               : undefined;
 
           const kibanaPromise = withSpan('start_kibana', () =>
@@ -139,17 +142,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             })
           );
 
-          const [esResult, kibanaResult] = await Promise.allSettled([esPromise, kibanaPromise]);
-
-          if (esResult.status === 'fulfilled') {
-            shutdownEs = esResult.value;
-          }
-          if (esResult.status === 'rejected') {
-            throw esResult.reason;
-          }
-          if (kibanaResult.status === 'rejected') {
-            throw kibanaResult.reason;
-          }
+          await Promise.all([esPromise, kibanaPromise]);
 
           if (abortCtrl.signal.aborted) {
             return;
@@ -219,6 +212,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
             await withSpan('shutdown_kibana', () => procs.stop('kibana'));
           } finally {
+            await esPromise?.catch(() => {});
+
             if (shutdownEs) {
               await withSpan('shutdown_es', () => shutdownEs!());
             }
