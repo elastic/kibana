@@ -2,58 +2,70 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; at your election, the "Elastic License 2.0", the "GNU
- * Affero General Public License v3.0 only", or the "Server Side Public License, v
- * 1".
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ADD_DOC_TO_INDEX_TOOL_ID } from '../../../common';
 
 export const ADD_DOC_TO_INDEX_SKILL_CONTENT = `# Add documents to an Elasticsearch index
 
-This skill persists an uploaded JSON data file into a custom Elasticsearch index.
+This skill adds documents from a JSON file to a custom Elasticsearch index.
 
 ## When to use this skill
 
 Use this skill when the user wants to:
-- load / import / index an uploaded file into Elasticsearch
-- add documents from an uploaded file into a named index
+- load, import, or index a file into Elasticsearch
+- add documents from a file into a named index
 
 ## Available tool
 
-- **${ADD_DOC_TO_INDEX_TOOL_ID}** — persists an \`uploaded_file\` data file into a target Elasticsearch index. Takes \`attachment_id\` (the data file), \`index\` (target index name), and exactly one of \`mapping\` (inline JSON object) or \`mapping_attachment_id\` (an uploaded mapping JSON file). The file content is read server-side via \`readContent\` and is never inlined into your context.
+- **${ADD_DOC_TO_INDEX_TOOL_ID}** — adds the documents from a JSON file to a target Elasticsearch index. Provide the target index and either an inline mapping or a mapping file.
 
 ## Two distinct files
 
-- **Data file** (required) — the JSON file whose documents get indexed. Becomes \`attachment_id\`.
-- **Mapping file** (optional) — a JSON file of ES field mappings. Becomes \`mapping_attachment_id\`.
+- **Data file** (required) — the JSON file whose documents should be indexed.
+- **Mapping file** (optional) — a JSON file containing Elasticsearch field mappings.
 Do not confuse them. The data file is required; the mapping file is optional.
 
 ## Workflow
 
-This is a SINGLE-PROMPT workflow. Ask the user for everything in exactly ONE \`ask_user_question\` call, then call the tool. Do not ask a second question.
+Collect the required information in as few prompts as possible. Track each item independently and preserve every answer across prompts, regardless of the order in which the user provides it.
 
-### Step 1 — one \`ask_user_question\` call
+Before asking any question, check the conversation and all previous prompt answers for the information you need. Treat information already provided by the user as known, even when it was provided in a different prompt or order.
 
-Ask the user for these three things in a single call (use one question per item; pick the appropriate \`response_type\` for each based on the \`ask_user_question\` tool's own guidance):
+### Step 1 — ask for the missing information
+
+When information is missing, ask the user for:
 1. The JSON data file they want to index.
 2. The target Elasticsearch index name.
-3. (Optional) a mapping JSON file. Let the user skip this if they want Elasticsearch to infer the mapping dynamically.
+3. An optional mapping JSON file. Allow the user to skip it so Elasticsearch can infer the mapping dynamically.
 
-From the answers, record:
-- \`dataFileAttachmentId\` = the attachment id returned for the data file
-- \`index\` = the index name the user gave
-- for the mapping: if the user uploaded a mapping file, \`mappingAttachmentId\` = its attachment id; if the user skipped it, use \`mapping = {}\` (empty object → ES dynamic mapping).
+Request files through the question prompt. If the user asks how to upload the file, do not explain chat controls, paperclip buttons, or manual upload steps; start the question prompt so the user can provide the file there.
 
-### Step 2 — call the tool IMMEDIATELY
+If any item is still missing after a prompt, ask only for the missing item or items. Questions may be answered in any order.
 
-Call **${ADD_DOC_TO_INDEX_TOOL_ID}** now, with no further questions:
-- \`attachment_id\` = \`dataFileAttachmentId\`
-- \`index\` = \`index\`
-- if a mapping file was uploaded: \`mapping_attachment_id\` = \`mappingAttachmentId\`
-- if the mapping was skipped: \`mapping\` = \`{}\`
+### Step 2 — confirm before proceeding
 
-### Step 3 — confirm
+After the data file, index name, and mapping choice are known, summarize what the user provided:
+- the data file name
+- the target index name
+- the mapping file name, or that Elasticsearch will infer the mapping
+
+Ask the user to confirm that these details are correct. Do not proceed until the user confirms.
+
+If the user requests a change, ask only for the changed information and summarize the complete updated details again before proceeding.
+
+### Step 3 — call the tool
+
+After confirmation, call **${ADD_DOC_TO_INDEX_TOOL_ID}** immediately:
+- use the data file supplied by the user
+- use the index name supplied by the user
+- if a mapping file was supplied, use it as the mapping
+- if the mapping was skipped, pass \`mapping = {}\`
+
+### Step 4 — report the result
 
 After the tool returns, tell the user:
 - how many documents were indexed
@@ -62,14 +74,16 @@ After the tool returns, tell the user:
 
 ## Anti-loop rules (HARD)
 
-- This skill uses EXACTLY ONE \`ask_user_question\` call. After that single call, the ONLY valid action is to call ${ADD_DOC_TO_INDEX_TOOL_ID}.
-- NEVER ask a question you have already asked. The conversation history contains your prior \`ask_user_question\` answers (each attachment id and text) — read them and reuse them.
-- If you are about to call \`ask_user_question\` a second time, STOP. Call ${ADD_DOC_TO_INDEX_TOOL_ID} with the values you already have instead.
-- If the user provides the data file, the index name, and (optionally) a mapping file in their very first message, skip Step 1 entirely and call the tool directly.
+- Never ask for any information that you already have.
+- Before every question prompt, check the conversation and previous answers again.
+- After every answer, recompute which items are still missing. Do not restart the initial collection prompt or discard answers from earlier prompts.
+- A follow-up prompt is allowed only for information that is still missing, for a user-requested change, or when confirmation has not yet been given.
+- After confirmation, the only valid action is to call ${ADD_DOC_TO_INDEX_TOOL_ID}.
+- If the user provides the data file, the index name, and (optionally) a mapping file in their very first message, skip Step 1 entirely and summarize the details for confirmation.
 
 ## Other constraints
 
-- NEVER attempt to read the file content yourself. The \`uploaded_file\` attachment only exposes metadata (name, size) by design — the raw content is never inlined into your context. The tool reads the content server-side on your behalf via \`readContent\`.
+- Do not attempt to inspect or reproduce the file contents in the conversation. Let the tool process the supplied files.
 - Do not invent an index name. The index name must come from the user.
 - If the tool returns an error, surface it to the user and ask how to proceed; do not silently retry with different parameters.
 `;

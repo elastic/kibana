@@ -58,6 +58,7 @@ export {
   type AskUserQuestionAnswer,
   type AskUserQuestionPromptDefinition,
   type AskUserQuestionPrompt,
+  type UploadedFilePromptMetadata,
   type AskUserQuestionPromptResponse,
   type AskUserQuestionPromptResponseState,
   type PromptResponse,

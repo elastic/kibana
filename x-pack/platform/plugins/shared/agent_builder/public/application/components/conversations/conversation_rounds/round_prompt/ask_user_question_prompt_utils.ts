@@ -13,6 +13,7 @@ import type {
   AskUserQuestionAnswer,
   AskUserQuestionPromptResponse,
   AskUserQuestionItem,
+  UploadedFilePromptMetadata,
 } from '@kbn/agent-builder-common/agents';
 import {
   AGENT_BUILDER_EVENT_TYPES,
@@ -35,6 +36,8 @@ export interface AnswerDraft {
   file?: File;
   /** attachment_id returned by the platform upload route, once the file has been uploaded. */
   attachmentId?: string;
+  /** Safe metadata returned by the platform upload route. */
+  attachmentMetadata?: UploadedFilePromptMetadata;
 }
 
 export interface AskUserQuestionPromptProps {
@@ -114,7 +117,10 @@ export const draftToAnswer = (draft: AnswerDraft): AskUserQuestionAnswer => {
     return { skipped: true };
   }
   if (draft.attachmentId) {
-    return { attachment_id: draft.attachmentId };
+    return {
+      attachment_id: draft.attachmentId,
+      attachment_metadata: draft.attachmentMetadata,
+    };
   }
   const hasChoice = (draft.choice?.length ?? 0) > 0;
   const customTrim = draft.custom?.trim() ?? '';

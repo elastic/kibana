@@ -104,6 +104,12 @@ export interface AskUserQuestionOption {
   description?: string;
 }
 
+export interface UploadedFilePromptMetadata {
+  name: string;
+  mime: string;
+  size: number;
+}
+
 export interface AskUserQuestionAnswer {
   /** Selected option indices (in `questions[i].options`). For single-select questions: at most one entry. */
   choice?: number[];
@@ -117,6 +123,11 @@ export interface AskUserQuestionAnswer {
    * agent can reference the attachment in subsequent tool calls.
    */
   attachment_id?: string;
+  /**
+   * Safe metadata for the uploaded file. Raw content and filesystem paths are
+   * never included in the prompt answer.
+   */
+  attachment_metadata?: UploadedFilePromptMetadata;
 }
 
 export interface ConfirmationPromptResponse {

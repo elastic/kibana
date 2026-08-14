@@ -8,6 +8,7 @@
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useGeneratedHtmlId } from '@elastic/eui';
+import type { UploadedFilePromptMetadata } from '@kbn/agent-builder-common/agents';
 import {
   draftToAnswer,
   isDraftAnswerable,
@@ -138,7 +139,7 @@ export const useAskUserQuestionPrompt = ({
   );
 
   const uploadFile = useCallback(
-    async (file: File): Promise<string> => {
+    async (file: File): Promise<{ attachmentId: string; metadata: UploadedFilePromptMetadata }> => {
       if (!conversationId) {
         throw new Error('Cannot upload file: conversation id is not available');
       }
@@ -149,7 +150,12 @@ export const useAskUserQuestionPrompt = ({
       // The file name travels via the `name` query param so the route can
       // infer the mime from the extension.
       const text = await file.text();
-      const resp = await http.fetch<{ attachment_id: string }>(UPLOAD_PATH(conversationId), {
+      const resp = await http.fetch<{
+        attachment_id: string;
+        name: string;
+        mime: string;
+        size: number;
+      }>(UPLOAD_PATH(conversationId), {
         method: 'POST',
         body: text,
         query: { name: file.name },
@@ -158,7 +164,14 @@ export const useAskUserQuestionPrompt = ({
       if (!resp || !resp.attachment_id) {
         throw new Error('Upload succeeded but no attachment_id was returned');
       }
-      return resp.attachment_id;
+      return {
+        attachmentId: resp.attachment_id,
+        metadata: {
+          name: resp.name,
+          mime: resp.mime,
+          size: resp.size,
+        },
+      };
     },
     [conversationId, http]
   );
@@ -177,9 +190,9 @@ export const useAskUserQuestionPrompt = ({
     ) {
       setIsUploading(true);
       setUploadError(undefined);
-      let attachmentId: string;
+      let uploadedFile: Awaited<ReturnType<typeof uploadFile>>;
       try {
-        attachmentId = await uploadFile(currentDraft.file);
+        uploadedFile = await uploadFile(currentDraft.file);
       } catch (e) {
         setUploadError(e instanceof Error ? e.message : String(e));
         setIsUploading(false);
@@ -187,7 +200,8 @@ export const useAskUserQuestionPrompt = ({
       }
       const uploadedDraft: AnswerDraft = {
         ...currentDraft,
-        attachmentId,
+        attachmentId: uploadedFile.attachmentId,
+        attachmentMetadata: uploadedFile.metadata,
         file: undefined,
       };
       setIsUploading(false);

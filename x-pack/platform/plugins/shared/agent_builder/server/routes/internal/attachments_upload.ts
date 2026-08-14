@@ -28,6 +28,9 @@ const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 export interface UploadAttachmentResponse {
   attachment_id: string;
+  name: string;
+  mime: string;
+  size: number;
 }
 
 export function registerAttachmentUploadRoute(
@@ -182,7 +185,12 @@ export function registerAttachmentUploadRoute(
       );
 
       return response.ok<UploadAttachmentResponse>({
-        body: { attachment_id: attachment.id },
+        body: {
+          attachment_id: attachment.id,
+          name,
+          mime,
+          size: bytes.length,
+        },
       });
     })
   );

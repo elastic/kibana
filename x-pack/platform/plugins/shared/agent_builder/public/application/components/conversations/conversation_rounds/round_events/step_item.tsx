@@ -61,7 +61,9 @@ export const StepItem: React.FC<StepItemProps> = ({
     return <BackgroundAgentStep step={step} />;
   }
   if (isAskUserQuestionStep(step)) {
-    return <AskUserQuestionStepEvent step={step} />;
+    return (
+      <AskUserQuestionStepEvent step={step} conversationAttachments={conversationAttachments} />
+    );
   }
   return null;
 };

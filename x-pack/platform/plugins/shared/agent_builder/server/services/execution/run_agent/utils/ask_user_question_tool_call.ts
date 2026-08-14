@@ -28,6 +28,11 @@ export interface DenormalizedAnswer {
   skipped?: boolean;
   /** Present for `response_type: 'file'` questions; references an `uploaded_file` attachment. */
   attachment_id?: string;
+  attachment_metadata?: {
+    name: string;
+    mime: string;
+    size: number;
+  };
 }
 
 export const materializeAskUserQuestionToolCall = ({
@@ -69,6 +74,9 @@ const denormalizeAnswers = (
     }
     if (answer.attachment_id != null) {
       out.attachment_id = answer.attachment_id;
+    }
+    if (answer.attachment_metadata != null) {
+      out.attachment_metadata = answer.attachment_metadata;
     }
     return out;
   });

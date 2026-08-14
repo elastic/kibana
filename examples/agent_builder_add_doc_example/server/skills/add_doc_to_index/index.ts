@@ -24,7 +24,7 @@ export const createAddDocToIndexSkill = (): SkillDefinition<typeof NAME, typeof 
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Persist an uploaded file into a custom Elasticsearch index with a user-supplied mapping. Use when the user wants to load, import, or index an uploaded JSON file into Elasticsearch.',
+      'Guide the user through providing a JSON file and persist its documents into a custom Elasticsearch index with a user-supplied mapping. Use when the user wants to upload, load, import, or index a JSON file into Elasticsearch, including when they ask how to provide the file.',
     content: ADD_DOC_TO_INDEX_SKILL_CONTENT,
     getInlineTools: () => [addDocToIndexTool()],
   });
