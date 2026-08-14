@@ -44,7 +44,7 @@ export const RuleLibraryPage = () => {
           <p>
             <FormattedMessage
               id="xpack.alertingV2.ruleLibrary.emptyBody"
-              defaultMessage="Installed rule templates will appear here."
+              defaultMessage="Rule templates are provided by Fleet integrations. Update or install integrations to view available rule templates."
             />
           </p>
         }
