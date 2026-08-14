@@ -12,6 +12,7 @@ import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
+import type { Context } from '@kbn/cordis';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -25,6 +26,9 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { createCordisRoot } from './cordis_root';
+import { assertActive } from './barriers';
+import { createSetupAdapter, createStartAdapter } from './cordis_plugin_adapter';
 
 const Sec = 1000;
 
@@ -36,6 +40,11 @@ export class PluginsSystem<T extends PluginType> {
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
   private sortedPluginNames?: Set<string>;
+
+  /** Selects the plugin lifecycle driver. Set by PluginsService before calling setupPlugins. */
+  public runtime: 'legacy' | 'cordis' = 'legacy';
+  /** Root Cordis Context; initialised lazily by the Cordis driver in setupPlugins. */
+  private cordisCtx?: Context;
 
   constructor(private readonly coreContext: CoreContext, public readonly type: T) {
     this.log = coreContext.logger.get('plugins-system', this.type);
@@ -91,6 +100,10 @@ export class PluginsSystem<T extends PluginType> {
   public async setupPlugins(
     deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
   ): Promise<Map<string, unknown>> {
+    if (this.runtime === 'cordis') {
+      return this.cordisSetupPlugins(deps);
+    }
+
     const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
       return contracts;
@@ -172,6 +185,10 @@ export class PluginsSystem<T extends PluginType> {
   public async startPlugins(deps: PluginsServiceStartDeps) {
     if (this.type === PluginType.preboot) {
       throw new Error('Preboot plugins cannot be started.');
+    }
+
+    if (this.runtime === 'cordis') {
+      return this.cordisStartPlugins(deps);
     }
 
     const contracts = new Map<PluginName, unknown>();
@@ -306,6 +323,128 @@ export class PluginsSystem<T extends PluginType> {
       this.sortedPluginNames = getTopologicallySortedPluginNames(this.plugins);
     }
     return this.sortedPluginNames;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Cordis driver
+  // ---------------------------------------------------------------------------
+
+  private async cordisSetupPlugins(
+    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
+  ): Promise<Map<string, unknown>> {
+    const contracts = new Map<PluginName, unknown>();
+    if (this.plugins.size === 0) {
+      return contracts;
+    }
+
+    // Static cycle check: throws before any fiber materialises.  Cordis's failure
+    // mode for a cycle is "all participants stay PENDING silently".
+    const sortedPlugins = new Map(
+      [...this.getTopologicallySortedPluginNames()]
+        .map((name) => [name, this.plugins.get(name)!] as [string, PluginWrapper])
+        .filter(([, plugin]) => plugin.includesServerPlugin)
+    );
+
+    this.cordisCtx = createCordisRoot(this.log);
+    this.log.info(
+      `Setting up [${sortedPlugins.size}] plugins (Cordis): [${[...sortedPlugins.keys()].join(',')}]`
+    );
+
+    const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
+    this.runtimeResolver.setDependencyMap(runtimeDependencies);
+
+    // Unblock all setup fibers that have no plugin-level deps.
+    this.cordisCtx.provide('core.setup', { ready: true });
+
+    for (const [pluginName, plugin] of sortedPlugins) {
+      this.log.debug(`Setting up plugin "${pluginName}"...`);
+
+      let pluginSetupContext;
+      if (this.type === PluginType.preboot) {
+        pluginSetupContext = createPluginPrebootSetupContext({
+          deps: deps as PluginsServicePrebootSetupDeps,
+          plugin,
+        });
+      } else {
+        pluginSetupContext = createPluginSetupContext({
+          deps: deps as PluginsServiceSetupDeps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        });
+      }
+
+      await plugin.init();
+
+      const { component, getContract, getCapturedError } = createSetupAdapter({
+        plugin,
+        plugins: this.plugins,
+        setupContext: pluginSetupContext,
+        contracts,
+        isDevMode: this.coreContext.env.mode.dev,
+        log: this.log,
+      });
+
+      // Spawn and await.  Since all inject keys for this plugin are already
+      // provided (sequential driver), the fiber immediately transitions to
+      // LOADING → apply() → ACTIVE.  The await resolves after apply completes.
+      const fiber = await this.cordisCtx.plugin(component);
+      assertActive(fiber, getCapturedError(), pluginName, 'setup');
+
+      const contract = getContract();
+      contracts.set(pluginName, contract);
+      this.satupPlugins.push(pluginName);
+    }
+
+    this.cordisCtx.provide('core.setupComplete', { complete: true });
+    this.runtimeResolver.resolveSetupRequests(contracts);
+
+    return contracts;
+  }
+
+  private async cordisStartPlugins(deps: PluginsServiceStartDeps): Promise<Map<string, unknown>> {
+    const contracts = new Map<PluginName, unknown>();
+    if (this.satupPlugins.length === 0) {
+      return contracts;
+    }
+
+    if (!this.cordisCtx) {
+      throw new Error(
+        'Cordis root context not initialised. setupPlugins must complete before startPlugins.'
+      );
+    }
+
+    this.log.info(
+      `Starting [${this.satupPlugins.length}] plugins (Cordis): [${[...this.satupPlugins]}]`
+    );
+
+    // Unblock all start fibers.
+    this.cordisCtx.provide('core.start', { ready: true });
+
+    for (const pluginName of this.satupPlugins) {
+      this.log.debug(`Starting plugin "${pluginName}"...`);
+      const plugin = this.plugins.get(pluginName)!;
+
+      const { component, getContract, getCapturedError } = createStartAdapter({
+        plugin,
+        plugins: this.plugins,
+        startContext: createPluginStartContext({
+          deps,
+          plugin,
+          runtimeResolver: this.runtimeResolver,
+        }),
+        startContracts: contracts,
+        isDevMode: this.coreContext.env.mode.dev,
+        log: this.log,
+      });
+
+      const fiber = await this.cordisCtx.plugin(component);
+      assertActive(fiber, getCapturedError(), pluginName, 'start');
+
+      contracts.set(pluginName, getContract());
+    }
+
+    this.runtimeResolver.resolveStartRequests(contracts);
+    return contracts;
   }
 }
 

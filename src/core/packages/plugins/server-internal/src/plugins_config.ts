@@ -20,6 +20,19 @@ const configSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
 
   /**
+   * Selects the plugin lifecycle driver.
+   *
+   * 'legacy'  – original sequential Map-based driver (default).
+   * 'cordis'  – Cordis fiber driver; experimental, must be explicitly opted in.
+   *
+   * Both produce identical plugin ordering and contract shapes.
+   * Flip to 'cordis' for integration testing or incremental rollout.
+   */
+  runtime: schema.oneOf([schema.literal('legacy'), schema.literal('cordis')], {
+    defaultValue: 'legacy',
+  }),
+
+  /**
    * Defines an array of directories where another plugin should be loaded from.
    */
   paths: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
@@ -92,11 +105,15 @@ export class PluginsConfig {
    */
   public readonly allowlistPluginGroups?: readonly KibanaGroup[];
 
+  /** Which plugin lifecycle driver to use. */
+  public readonly runtime: 'legacy' | 'cordis';
+
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
     this.allowlistPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS);
     this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
+    this.runtime = rawConfig.runtime;
   }
 }

@@ -158,6 +158,7 @@ export class PluginsService
 
     const config = await firstValueFrom(this.config$);
     if (config.initialize) {
+      this.prebootPluginsSystem.runtime = config.runtime;
       await this.prebootPluginsSystem.setupPlugins(deps);
     } else {
       this.log.info(
@@ -173,6 +174,7 @@ export class PluginsService
 
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
+      this.standardPluginsSystem.runtime = config.runtime;
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
     } else {
       this.log.info(
