@@ -9,16 +9,21 @@ import React, { useMemo } from 'react';
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import {
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+  RunWorkflowPanel,
+} from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
-import { RunWorkflowPanel } from '@kbn/workflows-ui';
 
 // Include managed workflows that declare an `alert` trigger (e.g. the alert analysis workflow).
 // This is a module-scoped stable reference so it doesn't cause WorkflowSelector re-renders.
-const isAlertWorkflow = (w: { managed?: boolean; definition?: { triggers?: { type: string }[] } | null }) =>
-  !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
+const isAlertWorkflow = (w: {
+  managed?: boolean;
+  definition?: { triggers?: { type: string }[] } | null;
+}) => !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
 
 export interface AlertWorkflowsPanelProps {
   /** Array of alert ids and their respective indices */
@@ -46,7 +51,10 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerTypes="alert"
+      sortWorkflow={(a, b) =>
+        Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+        Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'))
+      }
       filterWorkflow={isAlertWorkflow}
       onClose={onClose}
       onExecute={onExecute}

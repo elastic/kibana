@@ -20,11 +20,11 @@ import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversio
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
 import * as i18n from './translations';
+import type { RunWorkflowOptions } from '../../api/types';
 import { useRunWorkflow } from '../../hooks/use_run_workflow';
 import { useWorkflows } from '../../hooks/use_workflows';
 import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
 import { WorkflowSelector } from '../workflow_selector/workflow_selector';
-import type { RunWorkflowOptions } from '../../api/types';
 
 /**
  * The inputs payload forwarded verbatim to the workflow execution API.
@@ -36,10 +36,10 @@ export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: WorkflowRunInputs;
   /**
-   * The trigger type(s) to sort to the top of the workflow list.
-   * Workflows whose triggers include any of these types are ranked first.
+   * Comparator passed directly to Array.sort — return negative to rank `a` before `b`.
+   * When omitted the list order is unchanged.
    */
-  sortTriggerTypes: string | readonly string[];
+  sortWorkflow?: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
   /**
    * Called for each workflow in the list. Return false to hide it.
    * Use this to include or exclude managed workflows, filter by trigger type, tags, etc.
@@ -60,7 +60,7 @@ interface RunWorkflowPanelServices {
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
-  sortTriggerTypes,
+  sortWorkflow,
   filterWorkflow,
   onClose,
   onExecute,
@@ -95,11 +95,6 @@ export const RunWorkflowPanel = ({
   const needsManualInputs = useMemo(
     () => requiresUserSuppliedInputs(normalizedInputs),
     [normalizedInputs]
-  );
-
-  const triggerTypes = useMemo(
-    () => (Array.isArray(sortTriggerTypes) ? sortTriggerTypes : [sortTriggerTypes]),
-    [sortTriggerTypes]
   );
 
   const executeWorkflow = useCallback(
@@ -170,13 +165,7 @@ export const RunWorkflowPanel = ({
             return filterWorkflow ? enabled.filter(filterWorkflow) : enabled;
           },
           sortFunction: (workflows) =>
-            workflows.sort((a, b) => {
-              const aHasType = a.definition?.triggers?.some((t) => triggerTypes.includes(t.type));
-              const bHasType = b.definition?.triggers?.some((t) => triggerTypes.includes(t.type));
-              if (aHasType && !bHasType) return -1;
-              if (!aHasType && bHasType) return 1;
-              return 0;
-            }),
+            sortWorkflow ? workflows.sort(sortWorkflow) : workflows,
           listView: true,
           hideTopRowHeader: true,
           hideViewWorkflowLink: true,
@@ -187,7 +176,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, triggerTypes, filterWorkflow]
+    [selectedId, sortWorkflow, filterWorkflow]
   );
 
   return (

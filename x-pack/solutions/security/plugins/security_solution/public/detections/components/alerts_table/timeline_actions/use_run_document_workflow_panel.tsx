@@ -44,7 +44,10 @@ export const DocumentWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerTypes="manual"
+      sortWorkflow={(a, b) =>
+        Number((b.definition?.triggers ?? []).some((t) => t.type === 'manual')) -
+        Number((a.definition?.triggers ?? []).some((t) => t.type === 'manual'))
+      }
       onClose={onClose}
       onExecute={onExecute}
     />
