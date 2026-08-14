@@ -221,10 +221,10 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         if (finalConfig.showSelectedInSearch) {
           setInputValue(changedOption.name);
           setIsSearching(false);
-        } else {
-          setInputValue('');
-          setIsSearching(true);
         }
+        // When showSelectedInSearch is false (list view), leave the search term as-is.
+        // The selected item is already visible — the user just clicked it — and clearing
+        // the search would reset the scroll position to the top, losing the selection context.
       } else {
         onWorkflowChange('');
         setInputValue('');
