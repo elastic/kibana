@@ -19,6 +19,10 @@ import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../../common/const
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  prefetchPreviousStatusesByIds,
+  extractWorkflowStatus,
+} from '../common/operations/prefetch_previous_statuses';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
   createAlertStatusPayloads,
@@ -113,22 +117,9 @@ export const setAttacksStatusRoute = (
           if (eventBus) {
             try {
               const esClient = core.elasticsearch.client.asCurrentUser;
-              const mgetResponse = await esClient.mget({
-                index: attackIndex.join(','),
-                ids,
-                _source_includes: [ALERT_WORKFLOW_STATUS],
-              });
-              for (const doc of mgetResponse.docs) {
-                if ('found' in doc && doc.found && doc._id != null) {
-                  attackPreviousStatuses.push({
-                    id: doc._id,
-                    previousStatus:
-                      (doc._source as Record<string, string> | null | undefined)?.[
-                        ALERT_WORKFLOW_STATUS
-                      ] ?? 'open',
-                  });
-                }
-              }
+              attackPreviousStatuses.push(
+                ...(await prefetchPreviousStatusesByIds(esClient, attackIndex, ids))
+              );
             } catch {
               // Non-blocking
             }
@@ -181,11 +172,7 @@ export const setAttacksStatusRoute = (
               .filter((hit) => hit._id != null)
               .map((hit) => ({
                 id: hit._id as string,
-                previousStatus: (() => {
-                  const src = hit._source as Record<string, unknown> | undefined;
-                  const v = src?.[ALERT_WORKFLOW_STATUS];
-                  return typeof v === 'string' ? v : 'open';
-                })(),
+                previousStatus: extractWorkflowStatus(hit._source),
               }));
 
             const relatedAlertIds = attackDocs.hits.hits.flatMap((hit) => {
@@ -204,23 +191,9 @@ export const setAttacksStatusRoute = (
             if (eventBus && relatedAlertIds.length > 0) {
               try {
                 const esClient = core.elasticsearch.client.asCurrentUser;
-                const relatedMgetResponse = await esClient.mget({
-                  index: Array.isArray(index) ? index.join(',') : index,
-                  ids: relatedAlertIds,
-                  _source_includes: [ALERT_WORKFLOW_STATUS],
-                });
-                for (const doc of relatedMgetResponse.docs) {
-                  if ('found' in doc && doc.found && doc._id != null) {
-                    relatedAlertPreviousStatuses.push({
-                      id: doc._id,
-                      previousStatus: (() => {
-                        const src = doc._source as Record<string, unknown> | null | undefined;
-                        const v = src?.[ALERT_WORKFLOW_STATUS];
-                        return typeof v === 'string' ? v : 'open';
-                      })(),
-                    });
-                  }
-                }
+                relatedAlertPreviousStatuses.push(
+                  ...(await prefetchPreviousStatusesByIds(esClient, index, relatedAlertIds))
+                );
               } catch {
                 // Non-blocking
               }

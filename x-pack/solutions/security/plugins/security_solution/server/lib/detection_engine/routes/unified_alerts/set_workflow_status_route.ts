@@ -12,7 +12,6 @@ import {
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL } from '../../../../../common/constants';
@@ -22,6 +21,7 @@ import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_aler
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { prefetchPreviousStatusesByIds } from '../common/operations/prefetch_previous_statuses';
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -70,23 +70,7 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
         if (eventBus) {
           try {
             const esClient = core.elasticsearch.client.asCurrentUser;
-            const mgetResponse = await esClient.mget({
-              index: Array.isArray(index) ? index.join(',') : index,
-              ids,
-              _source_includes: [ALERT_WORKFLOW_STATUS],
-            });
-            for (const doc of mgetResponse.docs) {
-              if ('found' in doc && doc.found && doc._id != null) {
-                previousStatuses.push({
-                  id: doc._id,
-                  previousStatus: (() => {
-                    const src = doc._source as Record<string, unknown> | null | undefined;
-                    const v = src?.[ALERT_WORKFLOW_STATUS];
-                    return typeof v === 'string' ? v : 'open';
-                  })(),
-                });
-              }
-            }
+            previousStatuses.push(...(await prefetchPreviousStatusesByIds(esClient, index, ids)));
           } catch {
             // Non-blocking — emit with empty previousStatuses
           }

@@ -14,7 +14,6 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
@@ -35,7 +34,10 @@ import {
   MAX_RUNTIME_FIELDS_PER_REQUEST,
 } from './bulk_close_runtime_mappings';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
-import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
+import {
+  prefetchPreviousStatusesByIds,
+  prefetchPreviousStatusesByQuery,
+} from '../common/operations/prefetch_previous_statuses';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -121,23 +123,9 @@ export const setSignalsStatusRoute = (
             const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
             if (eventBus) {
               try {
-                const mgetResponse = await esClient.mget({
-                  index: alertsIndex,
-                  ids: signalIds,
-                  _source_includes: [ALERT_WORKFLOW_STATUS],
-                });
-                for (const doc of mgetResponse.docs) {
-                  if ('found' in doc && doc.found && doc._id != null) {
-                    previousStatuses.push({
-                      id: doc._id,
-                      previousStatus: (() => {
-                        const src = doc._source as Record<string, unknown> | null | undefined;
-                        const v = src?.[ALERT_WORKFLOW_STATUS];
-                        return typeof v === 'string' ? v : 'open';
-                      })(),
-                    });
-                  }
-                }
+                previousStatuses.push(
+                  ...(await prefetchPreviousStatusesByIds(esClient, alertsIndex, signalIds))
+                );
               } catch {
                 logger.warn('Failed to pre-fetch previous alert statuses for workflow trigger');
               }
@@ -190,35 +178,16 @@ export const setSignalsStatusRoute = (
             // result to the underlying `_update_by_query`.
             const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
-            const prefetchedAlertIds: string[] = [];
-            const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
+            let prefetchedAlertIds: string[] = [];
+            let previousStatuses: Array<{ id: string; previousStatus: string }> = [];
             let truncated = false;
             if (eventBus) {
               try {
-                const searchResponse = await esClient.search({
-                  index: alertsIndex,
-                  query: { bool: { filter: query } },
-                  _source_includes: [ALERT_WORKFLOW_STATUS],
-                  size: MAX_ALERTS_PER_TRIGGER,
-                  ignore_unavailable: true,
-                });
-                const totalHits = searchResponse.hits.total;
-                const totalCount =
-                  typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
-                truncated = totalCount > MAX_ALERTS_PER_TRIGGER;
-                for (const hit of searchResponse.hits.hits) {
-                  if (hit._id != null) {
-                    prefetchedAlertIds.push(hit._id);
-                    previousStatuses.push({
-                      id: hit._id,
-                      previousStatus: (() => {
-                        const src = hit._source as Record<string, unknown> | null | undefined;
-                        const v = src?.[ALERT_WORKFLOW_STATUS];
-                        return typeof v === 'string' ? v : 'open';
-                      })(),
-                    });
-                  }
-                }
+                ({
+                  ids: prefetchedAlertIds,
+                  previousStatuses,
+                  truncated,
+                } = await prefetchPreviousStatusesByQuery(esClient, alertsIndex, query));
               } catch {
                 logger.warn('Failed to pre-fetch alert IDs for workflow trigger');
               }
