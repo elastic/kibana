@@ -30,7 +30,6 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 
-
 const renderWithScopedHistory = (routerBasename: string, initialPath: string) => {
   window.history.replaceState(null, '', `${routerBasename}${initialPath}`);
   const history: History = createBrowserHistory({ basename: routerBasename });
