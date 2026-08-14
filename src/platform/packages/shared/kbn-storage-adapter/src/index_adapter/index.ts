@@ -262,8 +262,7 @@ export class StorageIndexAdapter<
             : {}),
           ...(this.storage.ignoreMissingComponentTemplates !== undefined
             ? {
-                ignore_missing_component_templates:
-                  this.storage.ignoreMissingComponentTemplates,
+                ignore_missing_component_templates: this.storage.ignoreMissingComponentTemplates,
               }
             : {}),
           template: {
