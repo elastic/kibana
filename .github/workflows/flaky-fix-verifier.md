@@ -307,7 +307,6 @@ safe-outputs:
         - name: Close the duplicate fix PR
           uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
           with:
-            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
             script: |
               const fs = require('fs');
               const prNumber = Number(process.env.GH_AW_PR_NUMBER);
