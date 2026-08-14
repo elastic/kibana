@@ -10,6 +10,7 @@ import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
   ElasticGenAIAttributes,
   GenAISemanticConventions,
+  UserAttributes,
   parseJsonAttr,
   type GenAIInputMessage,
   type GenAIOutputMessage,
@@ -40,6 +41,7 @@ export interface TracingPrivacySettings {
   includeSystemPrompt: boolean;
   includeRealNames: boolean;
   includeRealIds: boolean;
+  includeUserData: boolean;
 }
 
 interface AgentBuilderSpanProcessorOpts {
@@ -74,6 +76,22 @@ function hashSensitiveAttributes(attributes: Record<string, unknown>): Record<st
   const workflowExecId = result['elastic.workflow.execution_id'];
   if (workflowExecId != null) {
     result['elastic.workflow.execution_id'] = toHashedId(String(workflowExecId));
+  }
+
+  return result;
+}
+
+/**
+ * Replaces real `user.id` with SemConv `user.hash` and strips `user.name`
+ * when user-identity attributes are disabled.
+ */
+function anonymizeUserData(attributes: Record<string, unknown>): Record<string, unknown> {
+  const { [UserAttributes.UserName]: _userName, ...result } = attributes;
+
+  const userId = result[UserAttributes.UserId];
+  if (userId != null) {
+    result[UserAttributes.UserHash] = toHashedId(String(userId));
+    delete result[UserAttributes.UserId];
   }
 
   return result;
@@ -298,6 +316,10 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
     let processedAttributes: Record<string, unknown> = settings.includeRealIds
       ? cleanAttributes
       : hashSensitiveAttributes(cleanAttributes);
+
+    processedAttributes = settings.includeUserData
+      ? processedAttributes
+      : anonymizeUserData(processedAttributes);
 
     processedAttributes = settings.includeToolDetails
       ? processedAttributes

@@ -25,9 +25,14 @@ const DEFAULT_TO = 'now';
 export function useTimeRange() {
   const location = useLocation();
 
-  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const rangeFrom = searchParams.get('rangeFrom') ?? DEFAULT_FROM;
-  const rangeTo = searchParams.get('rangeTo') ?? DEFAULT_TO;
+  // DateRangeRedirect ensures rangeFrom/rangeTo are always present.
+  const { rangeFrom, rangeTo } = useMemo(() => {
+    const searchParams = new URLSearchParams(location.search);
+    return {
+      rangeFrom: searchParams.get('rangeFrom') ?? DEFAULT_FROM,
+      rangeTo: searchParams.get('rangeTo') ?? DEFAULT_TO,
+    };
+  }, [location.search]);
 
   // Resolving "now" is memoized on the relative range: without it every render
   // produces new absolute values, which turns them into unstable effect/query

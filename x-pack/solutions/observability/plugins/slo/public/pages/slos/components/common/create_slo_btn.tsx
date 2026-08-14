@@ -94,7 +94,7 @@ export function CreateSloBtn() {
             data-test-subj="slosPageCreateSloDropdown"
             disabled={isDisabled}
             fill
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >

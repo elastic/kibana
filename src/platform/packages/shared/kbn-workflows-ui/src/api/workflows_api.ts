@@ -53,6 +53,7 @@ import type {
   RestoreWorkflowVersionResponseDto,
   ResumeExecutionParams,
   RunWorkflowOptions,
+  SearchExecutionsParams,
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
   TestWorkflowParams,
@@ -236,6 +237,13 @@ export class WorkflowApi {
     });
   }
 
+  async searchExecutions(params?: SearchExecutionsParams): Promise<WorkflowExecutionListDto> {
+    return this.http.get(`${BASE}/workflow/executions`, {
+      query: params as HttpFetchQuery,
+      version: API_VERSION,
+    });
+  }
+
   async getWorkflowExecutions(
     workflowId: string,
     params?: GetWorkflowExecutionsParams
@@ -366,6 +374,20 @@ export class WorkflowApi {
         version: INTERNAL_API_VERSION,
       }
     );
+  }
+
+  /**
+   * Installs a template from raw YAML (e.g. an uploaded file) rather than a
+   * catalog slug. The server parses, renders, and creates the workflow.
+   */
+  async installTemplateFromYaml(
+    yaml: string,
+    values: Record<string, unknown>
+  ): Promise<InstallTemplateResponse> {
+    return this.http.post(`${INTERNAL_BASE}/library/templates/install`, {
+      body: JSON.stringify({ yaml, values }),
+      version: INTERNAL_API_VERSION,
+    });
   }
 
   async restoreWorkflowVersion(

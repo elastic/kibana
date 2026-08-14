@@ -12,6 +12,7 @@ import { AppHeader } from '@kbn/app-header';
 import type {
   AppHeaderBack,
   AppHeaderBadge,
+  AppHeaderDescription,
   AppHeaderMetadataItems,
   AppHeaderTab,
   AppHeaderTitle,
@@ -24,6 +25,7 @@ export interface MlAppHeaderProps {
   menu?: AppHeaderMenu;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
+  description?: AppHeaderDescription;
   metadata?: AppHeaderMetadataItems;
   docLink?: string;
 }
@@ -34,9 +36,12 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
   menu,
   tabs,
   badges,
+  description,
   metadata,
   docLink,
 }) => {
+  const secondaryContent = description ? { description } : metadata ? { metadata } : {};
+
   return (
     <>
       <AppHeader
@@ -45,7 +50,7 @@ export const MlAppHeader: FC<MlAppHeaderProps> = ({
         menu={menu}
         tabs={tabs}
         badges={badges}
-        metadata={metadata}
+        {...secondaryContent}
         spacing="bleed"
         docLink={docLink}
         sticky={false}

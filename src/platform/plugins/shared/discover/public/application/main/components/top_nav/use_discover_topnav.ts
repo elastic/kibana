@@ -49,7 +49,7 @@ export const useDiscoverTopNav = ({
   const isEsqlMode = useIsEsqlMode();
   const hasShareIntegration = useHasShareIntegration(services);
 
-  const topNavMenu = useTopNavLinks({
+  const { menu: topNavMenu, shareAction } = useTopNavLinks({
     dataView,
     services,
     hasUnsavedChanges,
@@ -61,7 +61,7 @@ export const useDiscoverTopNav = ({
     onOpenSaveAsModal,
   });
 
-  return { topNavMenu, topNavBadges };
+  return { topNavMenu, topNavBadges, shareAction };
 };
 
 export type DiscoverTopNavHookResult = ReturnType<typeof useDiscoverTopNav>;

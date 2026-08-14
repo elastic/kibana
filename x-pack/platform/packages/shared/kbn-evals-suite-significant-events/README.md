@@ -142,9 +142,9 @@ node scripts/evals run \
 
 | Variable                                | Description                                                                 | Default                    |
 | --------------------------------------- | --------------------------------------------------------------------------- | -------------------------- |
-| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-02-25`               |
+| `SIGEVENTS_SNAPSHOT_RUN`                | Run ID subfolder in GCS to replay snapshots from                            | `2026-03-27`               |
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
-| `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `both`                     |
+| `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |
 | `TRACING_ES_URL`                        | Elasticsearch URL for trace queries (if traces are in a separate cluster)   | Falls back to test cluster |
