@@ -154,6 +154,12 @@ const SCHEMA_TAB_V13 = schema.object({
   attributes: SCHEMA_TAB_ATTRIBUTES_V13,
 });
 
+export const SCHEMA_DISCOVER_SESSION_V13 = schema.object({
+  title: schema.string(),
+  description: schema.string({ defaultValue: '' }),
+  tabs: schema.arrayOf(SCHEMA_TAB_V13, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
 const SCHEMA_TAB_ATTRIBUTES_V14 = SCHEMA_TAB_ATTRIBUTES_V13.extends({
   esqlApproximation: schema.maybe(schema.boolean()),
 });
@@ -162,12 +168,6 @@ const SCHEMA_TAB_V14 = schema.object({
   id: schema.string(),
   label: schema.string(),
   attributes: SCHEMA_TAB_ATTRIBUTES_V14,
-});
-
-export const SCHEMA_DISCOVER_SESSION_V13 = schema.object({
-  title: schema.string(),
-  description: schema.string({ defaultValue: '' }),
-  tabs: schema.arrayOf(SCHEMA_TAB_V13, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
 export const SCHEMA_DISCOVER_SESSION_V14 = schema.object({
