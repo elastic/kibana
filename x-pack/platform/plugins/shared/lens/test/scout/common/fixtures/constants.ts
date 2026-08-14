@@ -155,6 +155,8 @@ export const ESQL_CONVERSION_DASHBOARD_ID = '3cda479c-8797-4492-99f4-2259e1377f8
 export const ESQL_CONVERSION_PANEL_IDS = {
   INLINE_METRIC: 'fb4626b8-d8ce-42d3-913a-081af94cfb51',
   SAVED_METRIC: '3aef33a1-bcbc-4cd7-b2d9-fa678b2fefa5',
+  MULTI_LAYER: 'esql-conversion-multi-panel',
+  PARTIAL_MULTI_LAYER: 'esql-conversion-partial-panel',
 } as const;
 
 export const ESQL_MULTI_LAYER_PANEL_IDS = {

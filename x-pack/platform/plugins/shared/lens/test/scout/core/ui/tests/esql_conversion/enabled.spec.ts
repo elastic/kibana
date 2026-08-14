@@ -38,7 +38,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     const { dashboard } = pageObjects;
 
     await dashboard.openDashboardWithIdInEditMode(testData.ESQL_CONVERSION_DASHBOARD_ID);
-    await dashboard.waitForPanelsToLoad(2);
+    await dashboard.waitForPanelsToLoad(4);
   });
 
   test.afterAll(async ({ kbnClient, uiSettings, apiServices }) => {
@@ -114,6 +114,88 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     );
     await expect(page.getByText('ES|QL Query Results')).toBeVisible();
     await expect(lens.applyFlyoutButton).toBeDisabled();
+  });
+
+  test('converts eligible data layers and preserves annotation and reference layers', async ({
+    pageObjects,
+    page,
+  }) => {
+    const { dashboard, lens } = pageObjects;
+
+    await openInlineEditorAndWaitVisible(
+      pageObjects,
+      testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
+    );
+    await convertToEsqlViaModal({ pageObjects, page, selectAllLayers: true });
+
+    expect(await lens.layers.getLayerCount()).toBe(4);
+    expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
+
+    await lens.layers.activateLayerTab(1);
+    expect(await lens.workspace.getEsqlQuery()).toContain('STATS MEDIAN(bytes)');
+
+    await lens.layers.activateLayerTab(2);
+    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
+    await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xAnnotationsPanel')).toHaveText(
+      'Event'
+    );
+
+    await lens.layers.activateLayerTab(3);
+    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
+    expect(await lens.dimensions.getDimensionTriggerText('lnsXY_yReferenceLineLeftPanel')).toMatch(
+      /^Static value: /
+    );
+
+    const panel = dashboard.getPanelByEmbeddableId(testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER);
+    await expect(panel.getByRole('button', { name: /Count of records/ })).toBeVisible();
+    await expect(panel.getByRole('button', { name: /Median of bytes/ })).toBeVisible();
+    await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+
+    await applyLensInlineEditorAndWaitClosed({ lens });
+    await openInlineEditorAndWaitVisible(
+      pageObjects,
+      testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
+    );
+    expect(await lens.layers.getLayerCount()).toBe(4);
+    expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
+  });
+
+  test('converts eligible layers while keeping unsupported data layers form based', async ({
+    pageObjects,
+    page,
+  }) => {
+    const { dashboard, lens } = pageObjects;
+
+    await openInlineEditorAndWaitVisible(
+      pageObjects,
+      testData.ESQL_CONVERSION_PANEL_IDS.PARTIAL_MULTI_LAYER
+    );
+    await convertToEsqlViaModal({ pageObjects, page, selectAllLayers: true });
+
+    expect(await lens.layers.getLayerCount()).toBe(2);
+    expect(await lens.workspace.getEsqlQuery()).toContain('STATS COUNT(*)');
+
+    await lens.layers.activateLayerTab(1);
+    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
+    await expect
+      .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
+      .toBe('Median of bytes');
+
+    const panel = dashboard.getPanelByEmbeddableId(
+      testData.ESQL_CONVERSION_PANEL_IDS.PARTIAL_MULTI_LAYER
+    );
+    await expect(panel.getByRole('button', { name: /Count of records/ })).toBeVisible();
+    await expect(panel.getByRole('button', { name: /Median of bytes/ })).toBeVisible();
+    await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+
+    await applyLensInlineEditorAndWaitClosed({ lens });
+    await openInlineEditorAndWaitVisible(
+      pageObjects,
+      testData.ESQL_CONVERSION_PANEL_IDS.PARTIAL_MULTI_LAYER
+    );
+    expect(await lens.layers.getLayerCount()).toBe(2);
+    await lens.layers.activateLayerTab(1);
+    await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
   });
 
   test('should correctly cancel the conversion and close the flyout', async ({
