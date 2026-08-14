@@ -120,7 +120,9 @@ export async function generateAllComputedFeatures(
   }
 
   if (features.length === 0 && errors.length > 0) {
-    throw new Error(`All computed feature generators failed: ${errors.map((e) => e.error).join('; ')}`);
+    throw new Error(
+      `All computed feature generators failed: ${errors.map((e) => e.error).join('; ')}`
+    );
   }
 
   return { features, errors };
