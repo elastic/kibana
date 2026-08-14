@@ -19,6 +19,7 @@ export interface RumFiltersResponse {
   breakpoints: RumFacetBucket[];
   connections: RumFacetBucket[];
   devices: RumFacetBucket[];
+  countries: RumFacetBucket[];
 }
 
 export interface RumVitalRanks {

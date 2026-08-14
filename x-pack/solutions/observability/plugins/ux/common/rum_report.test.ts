@@ -17,11 +17,22 @@ import {
   joinPageRows,
   maskDisplayUser,
   parseFunnelStepsParam,
+  previousCompleteCalendarDay,
+  previousCompleteCalendarMonth,
   previousCompleteCalendarWeek,
+  reportPeriodForCadence,
+  resolveEmailReportRange,
   previousEqualPeriod,
   poorLcpShare,
+  markdownToEmailHtml,
+  reportEmailHtml,
+  reportEmailMarkdown,
   reportPrimaryCsv,
+  reportToPdfText,
   scorecardMarkdown,
+  shiftCalendarWeek,
+  canGoToNextCalendarWeek,
+  currentCalendarWeek,
   toCsv,
 } from './rum_report';
 import type { RumScorecardReport } from './rum_report';
@@ -58,6 +69,86 @@ describe('previousCompleteCalendarWeek', () => {
     const { rangeFrom, rangeTo } = previousCompleteCalendarWeek(now);
     expect(new Date(rangeFrom).getDate()).toBe(3);
     expect(new Date(rangeTo).getDate()).toBe(10);
+  });
+});
+
+describe('reportPeriodForCadence', () => {
+  const now = new Date(2026, 7, 14, 15, 30, 0);
+
+  it('uses yesterday for daily and weekdays', () => {
+    const day = previousCompleteCalendarDay(now);
+    expect(new Date(day.rangeFrom).getDate()).toBe(13);
+    expect(new Date(day.rangeTo).getDate()).toBe(14);
+    expect(reportPeriodForCadence('daily', now)).toEqual(day);
+    expect(reportPeriodForCadence('weekdays', now)).toEqual(day);
+  });
+
+  it('uses last month for monthly', () => {
+    const month = previousCompleteCalendarMonth(now);
+    expect(new Date(month.rangeFrom).getMonth()).toBe(6);
+    expect(new Date(month.rangeFrom).getDate()).toBe(1);
+    expect(new Date(month.rangeTo).getMonth()).toBe(7);
+    expect(new Date(month.rangeTo).getDate()).toBe(1);
+    expect(reportPeriodForCadence('monthly', now)).toEqual(month);
+  });
+
+  it('uses last week for weekly cadences', () => {
+    expect(reportPeriodForCadence('weekly', now)).toEqual(previousCompleteCalendarWeek(now));
+  });
+
+  it('prefers an explicit on-screen range for Send now', () => {
+    expect(
+      resolveEmailReportRange('weekly', {
+        rangeFrom: '2026-08-10T00:00:00.000Z',
+        rangeTo: '2026-08-17T00:00:00.000Z',
+      })
+    ).toEqual({
+      rangeFrom: '2026-08-10T00:00:00.000Z',
+      rangeTo: '2026-08-17T00:00:00.000Z',
+    });
+  });
+});
+
+describe('currentCalendarWeek', () => {
+  it('uses this Monday through next Monday', () => {
+    const now = new Date(2026, 7, 14, 15, 30, 0);
+    const { rangeFrom, rangeTo } = currentCalendarWeek(now);
+    expect(new Date(rangeFrom).getDay()).toBe(1);
+    expect(new Date(rangeTo).getDay()).toBe(1);
+    expect(new Date(rangeFrom).getDate()).toBe(10);
+    expect(new Date(rangeTo).getDate()).toBe(17);
+  });
+});
+
+describe('shiftCalendarWeek', () => {
+  it('moves a Monday window by whole weeks', () => {
+    const prev = shiftCalendarWeek(new Date(2026, 7, 10).toISOString(), -1);
+    expect(prev).not.toBeNull();
+    expect(new Date(prev!.rangeFrom).getDate()).toBe(3);
+    expect(new Date(prev!.rangeTo).getDate()).toBe(10);
+  });
+
+  it('snaps a mid-week bound to that week’s Monday before shifting', () => {
+    const next = shiftCalendarWeek(new Date(2026, 7, 12, 15).toISOString(), 0);
+    expect(next).not.toBeNull();
+    expect(new Date(next!.rangeFrom).getDate()).toBe(10);
+    expect(new Date(next!.rangeTo).getDate()).toBe(17);
+  });
+
+  it('steps last week forward onto the current week', () => {
+    const now = new Date(2026, 7, 14, 15, 30, 0);
+    expect(shiftCalendarWeek(previousCompleteCalendarWeek(now).rangeFrom, 1)).toEqual(
+      currentCalendarWeek(now)
+    );
+  });
+});
+
+describe('canGoToNextCalendarWeek', () => {
+  const now = new Date(2026, 7, 14, 15, 30, 0);
+
+  it('allows next from last week but not from the current week', () => {
+    expect(canGoToNextCalendarWeek(new Date(2026, 7, 3).toISOString(), now)).toBe(true);
+    expect(canGoToNextCalendarWeek(new Date(2026, 7, 10).toISOString(), now)).toBe(false);
   });
 });
 
@@ -342,7 +433,40 @@ describe('scorecardMarkdown / reportPrimaryCsv', () => {
     expect(md).toContain('TypeError');
     expect(md).not.toContain('@');
     expect(md).toContain('Germany');
+    expect(md).toContain('Core Web Vitals');
+    expect(md).toContain('Sessions to review');
     expect(md).toContain('https://kbn/app/ux/reports/scorecard');
+    expect(reportEmailMarkdown(report, 'https://kbn/app/ux/reports/scorecard')).toBe(md);
+  });
+
+  it('builds HTML and PDF text from the same scorecard content', () => {
+    const share = 'https://kbn/app/ux/reports/scorecard';
+    const html = reportEmailHtml(report, share);
+    const pdf = reportToPdfText(report, share);
+    expect(html).toContain('<table');
+    expect(html).toContain('Weekly UX scorecard');
+    expect(html).toContain('/checkout');
+    expect(html).toContain(share);
+    expect(html).not.toContain('@shop');
+    expect(pdf).toContain('Weekly UX scorecard');
+    expect(pdf).toContain('Core Web Vitals');
+    expect(pdf).toContain('/checkout');
+    expect(pdf).not.toMatch(/[•→#]/);
+  });
+
+  it('puts an AI narrative above the report in email and PDF', () => {
+    const share = 'https://kbn/app/ux/reports/scorecard';
+    const narrative = '## Findings\n\n- Error rate is high\n\n**Next:** open Sessions';
+    const md = reportEmailMarkdown(report, share, narrative);
+    const html = reportEmailHtml(report, share, narrative);
+    const pdf = reportToPdfText(report, share, narrative);
+    expect(md).toContain('# AI summary');
+    expect(md).toContain('Error rate is high');
+    expect(html).toContain('AI summary');
+    expect(html).toContain('<strong>Next:</strong> open Sessions');
+    expect(pdf.startsWith('AI summary')).toBe(true);
+    expect(pdf).toContain('Error rate is high');
+    expect(markdownToEmailHtml('- one\n- two')).toContain('<li>');
   });
 
   it('emits a pages CSV without email', () => {

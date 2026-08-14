@@ -19,7 +19,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { isRumReportTemplateId, type RumReportResponse } from '../../../../common/rum_report';
+import {
+  canGoToNextCalendarWeek,
+  isCurrentCalendarWeek,
+  isRumReportTemplateId,
+  shiftCalendarWeek,
+  type RumReportResponse,
+} from '../../../../common/rum_report';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumReport } from '../../../services/rest/rum_api';
@@ -29,6 +35,8 @@ import { ErrorsReport } from './errors_report';
 import { PagesReport } from './pages_report';
 import { ReportCover } from './report_cover';
 import { ReportToolbar } from './report_toolbar';
+import { AiReportPanel } from './ai_report_panel';
+import { ScheduleEmailFlyout } from './schedule_email_flyout';
 import { ScorecardReport } from './scorecard';
 import { ClientsReport, FrustrationReport, FunnelReport, UsersReport } from './thin_reports';
 
@@ -47,6 +55,7 @@ export function RumReportView({ templateId }: { templateId: string }) {
       serviceName,
       browser,
       os,
+      location,
       pageUrl,
       frustration,
       user,
@@ -64,6 +73,8 @@ export function RumReportView({ templateId }: { templateId: string }) {
   const [data, setData] = useState<RumReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const piiOn = includePii === 'true';
   const compareMode = compare === 'none' ? 'none' : 'previous';
@@ -234,9 +245,60 @@ export function RumReportView({ templateId }: { templateId: string }) {
 
   return (
     <div className="uxRumReportRoot" data-test-subj="uxReportView">
-      <ReportToolbar report={data} includePii={piiOn} exactStart={exactStart} exactEnd={exactEnd} />
+      <ReportToolbar
+        report={data}
+        includePii={piiOn}
+        exactStart={exactStart}
+        exactEnd={exactEnd}
+        onGenerateAi={() => setAiOpen(true)}
+        onScheduleEmail={() => setScheduleOpen(true)}
+      />
+      {scheduleOpen && (
+        <ScheduleEmailFlyout
+          templateId={data.templateId}
+          title={data.title}
+          rangeFrom={data.rangeFrom}
+          rangeTo={data.rangeTo}
+          compare={compareMode}
+          filters={{
+            serviceName,
+            browser,
+            os,
+            location,
+            pageUrl,
+            frustration,
+            user,
+            includeBots,
+            kuery,
+            breakpoint,
+            connection,
+            device,
+            errorGroup,
+            includePii: piiOn,
+          }}
+          onClose={() => setScheduleOpen(false)}
+        />
+      )}
+      <AiReportPanel report={data} expanded={aiOpen} />
       <EuiSpacer size="m" />
-      <ReportCover report={data} filterChips={chips} />
+      <ReportCover
+        report={data}
+        filterChips={chips}
+        canNextWeek={canGoToNextCalendarWeek(rangeFrom)}
+        isThisWeek={isCurrentCalendarWeek(rangeFrom)}
+        onPrevWeek={() => {
+          const period = shiftCalendarWeek(rangeFrom, -1);
+          if (period) {
+            pushRumPath(history, `/reports/${templateId}`, period);
+          }
+        }}
+        onNextWeek={() => {
+          const period = shiftCalendarWeek(rangeFrom, 1);
+          if (period) {
+            pushRumPath(history, `/reports/${templateId}`, period);
+          }
+        }}
+      />
       <EuiSpacer />
       {noRows ? (
         <EuiEmptyPrompt
@@ -301,7 +363,7 @@ export function RumReportView({ templateId }: { templateId: string }) {
         </>
       )}
       <EuiSpacer />
-      <EuiText size="xs" color="subdued">
+      <EuiText size="xs" color="subdued" className="uxRumReportNoPrint">
         {i18n.translate('xpack.ux.reports.footer.generatedLabel', {
           defaultMessage: 'Generated {when}',
           values: { when: data.generatedAt },

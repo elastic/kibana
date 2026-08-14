@@ -35,6 +35,7 @@ import { RumErrorsPanel } from '../rum_errors';
 import { RumReportsCatalog } from '../rum_reports';
 import { RumReportPrintStyles } from '../rum_reports/print.styles';
 import { RumReportView } from '../rum_reports/report_view';
+import { RumAiPanel } from './rum_ai_panel';
 import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
@@ -64,7 +65,18 @@ const REPORTS_LABEL = i18n.translate('xpack.ux.reports.tab', {
   defaultMessage: 'Reporting',
 });
 
-export type UxHomeTab = 'overview' | 'pages' | 'errors' | 'session-replay' | 'journeys' | 'reports';
+const AI_LABEL = i18n.translate('xpack.ux.ai.tab', {
+  defaultMessage: 'AI Analyst',
+});
+
+export type UxHomeTab =
+  | 'overview'
+  | 'pages'
+  | 'errors'
+  | 'session-replay'
+  | 'journeys'
+  | 'reports'
+  | 'ai';
 
 export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: string }) {
   const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
@@ -157,6 +169,7 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
           {tab === 'journeys' && <SessionFunnelPanel />}
           {tab === 'reports' &&
             (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
+          {tab === 'ai' && <RumAiPanel />}
         </div>
       </EuiPageSection>
     </PageTemplateComponent>
@@ -239,6 +252,9 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
           {...tabHref('/reports')}
         >
           {REPORTS_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
+          {AI_LABEL}
         </EuiTab>
       </EuiTabs>
       <EuiSpacer size="m" />

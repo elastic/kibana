@@ -32,6 +32,17 @@ const EMPTY: RumFiltersResponse = {
   breakpoints: [],
   connections: [],
   devices: [],
+  countries: [],
+};
+
+const countryLabel = (isoCode: string): string => {
+  try {
+    return (
+      new Intl.DisplayNames(undefined, { type: 'region' }).of(isoCode.toUpperCase()) ?? isoCode
+    );
+  } catch {
+    return isoCode;
+  }
 };
 
 const FRUSTRATION_OPTIONS: Array<{ key: string; label: string }> = [
@@ -84,7 +95,7 @@ const FacetSelect = ({
           onClick={() => setOpen((v) => !v)}
           hasActiveFilters={Boolean(value)}
           numActiveFilters={value ? 1 : undefined}
-          isDisabled={options.length === 0}
+          isDisabled={options.length === 0 && !value}
           grow={false}
         >
           {selected?.label ?? selected?.key ?? label}
@@ -119,6 +130,7 @@ export function OtelFilterBar() {
       serviceName,
       browser,
       os,
+      location,
       pageUrl,
       frustration,
       user,
@@ -176,6 +188,7 @@ export function OtelFilterBar() {
     (patch: {
       browser?: string;
       os?: string;
+      location?: string;
       pageUrl?: string;
       frustration?: string;
       includeBots?: string;
@@ -191,9 +204,12 @@ export function OtelFilterBar() {
     [history]
   );
 
+  const locationFilter = typeof location === 'string' ? location : undefined;
+
   const anyActive = Boolean(
     browser ||
       os ||
+      locationFilter ||
       pageUrl ||
       frustration ||
       includeBots === 'true' ||
@@ -202,10 +218,28 @@ export function OtelFilterBar() {
       device
   );
 
+  const countryOptions = bucketsToOptions(facets.countries).map((option) => ({
+    ...option,
+    label: countryLabel(option.key),
+  }));
+  if (locationFilter && !countryOptions.some((option) => option.key === locationFilter)) {
+    countryOptions.unshift({
+      key: locationFilter,
+      label: countryLabel(locationFilter),
+      count: 0,
+    });
+  }
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
+          <FacetSelect
+            label={i18n.translate('xpack.ux.filters.location', { defaultMessage: 'Location' })}
+            options={countryOptions}
+            value={locationFilter}
+            onChange={(next) => setFilter({ location: next ?? '' })}
+          />
           <FacetSelect
             label={i18n.translate('xpack.ux.filters.browser', { defaultMessage: 'Browser' })}
             options={bucketsToOptions(facets.browsers)}
@@ -271,6 +305,7 @@ export function OtelFilterBar() {
               setFilter({
                 browser: '',
                 os: '',
+                location: '',
                 pageUrl: '',
                 frustration: '',
                 includeBots: '',

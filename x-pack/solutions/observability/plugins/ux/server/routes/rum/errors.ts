@@ -21,6 +21,7 @@ import {
   traceIdFromHit,
   type OtelHit,
 } from '../session_replay/session_attributes';
+import { rumEsSearchOptions } from './es_retry';
 import {
   EXCEPTION_FILTER,
   identifiedUsers,
@@ -65,35 +66,38 @@ export const getRumErrorsRoute = createUxServerRoute({
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
 
-    const result = await client.search({
-      index: RUM_SESSION_SOURCE_INDEX,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 0,
-      query: { bool: { filter: [...rumBaseFilters(params.query), EXCEPTION_FILTER] } },
-      aggs: {
-        groups: {
-          terms: {
-            script: { source: ERROR_GROUP_SCRIPT, lang: 'painless' },
-            size: 50,
-          },
-          aggs: {
-            sessions: sessionCardinality,
-            users: identifiedUsers,
-            trend: {
-              auto_date_histogram: { field: '@timestamp', buckets: 16 },
+    const result = await client.search(
+      {
+        index: RUM_SESSION_SOURCE_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        query: { bool: { filter: [...rumBaseFilters(params.query), EXCEPTION_FILTER] } },
+        aggs: {
+          groups: {
+            terms: {
+              script: { source: ERROR_GROUP_SCRIPT, lang: 'painless' },
+              size: 50,
             },
-            sample: {
-              top_hits: {
-                size: 1,
-                sort: [{ '@timestamp': 'desc' as const }],
-                _source: SAMPLE_SOURCE,
+            aggs: {
+              sessions: sessionCardinality,
+              users: identifiedUsers,
+              trend: {
+                auto_date_histogram: { field: '@timestamp', buckets: 16 },
+              },
+              sample: {
+                top_hits: {
+                  size: 1,
+                  sort: [{ '@timestamp': 'desc' as const }],
+                  _source: SAMPLE_SOURCE,
+                },
               },
             },
           },
         },
       },
-    });
+      rumEsSearchOptions
+    );
 
     const groups: RumErrorGroup[] = termsBuckets(
       (result.aggregations as { groups?: unknown } | undefined)?.groups

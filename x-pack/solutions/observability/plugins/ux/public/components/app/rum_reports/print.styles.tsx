@@ -19,7 +19,7 @@ export function RumReportPrintStyles() {
 
         @media print {
           @page {
-            margin: 14mm;
+            margin: 10mm;
           }
 
           html,
@@ -86,20 +86,28 @@ export function RumReportPrintStyles() {
             color: #000;
             background: #fff;
             width: 100% !important;
+            min-height: 0 !important;
           }
 
           .uxRumReportRoot .euiPanel {
             box-shadow: none !important;
-            break-inside: avoid;
+            padding: 8px !important;
+          }
+
+          .uxRumReportRoot .euiSpacer {
+            height: 8px !important;
+            block-size: 8px !important;
           }
 
           .uxRumReportCover,
-          .uxRumReportKpis {
+          .uxRumReportKpis,
+          .uxRumReportKpiCard {
             break-inside: avoid;
+            break-after: avoid;
           }
 
-          .uxRumReportKpis {
-            break-after: page;
+          .uxRumReportRoot .euiTableRow {
+            break-inside: avoid;
           }
 
           .uxRumReportCoverTitle {

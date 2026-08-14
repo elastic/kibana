@@ -20,6 +20,16 @@ import { getRumOverviewRoute } from './rum/overview';
 import { getRumPagesRoute } from './rum/pages';
 import { getRumErrorsRoute } from './rum/errors';
 import { getRumReportRoute } from './rum/reports';
+import {
+  createRumReportScheduleRoute,
+  deleteRumReportScheduleRoute,
+  listRumReportEmailConnectorsRoute,
+  listRumReportSchedulesRoute,
+  sendRumReportNowRoute,
+  sendRumReportScheduleNowRoute,
+  testRumReportEmailConnectorRoute,
+  updateRumReportScheduleRoute,
+} from './rum/schedules';
 
 function getTypedUxServerRouteRepository() {
   return {
@@ -35,6 +45,14 @@ function getTypedUxServerRouteRepository() {
     ...getRumPagesRoute,
     ...getRumErrorsRoute,
     ...getRumReportRoute,
+    ...listRumReportEmailConnectorsRoute,
+    ...listRumReportSchedulesRoute,
+    ...createRumReportScheduleRoute,
+    ...updateRumReportScheduleRoute,
+    ...deleteRumReportScheduleRoute,
+    ...sendRumReportNowRoute,
+    ...sendRumReportScheduleNowRoute,
+    ...testRumReportEmailConnectorRoute,
   };
 }
 

@@ -24,4 +24,12 @@ describe('uxSearchIndex', () => {
       'traces-apm*,apm-*,traces-*.otel-*,logs-*.otel-*'
     );
   });
+
+  it('drops remote_cluster CCS hops when the data already lives locally', () => {
+    expect(
+      uxSearchIndex(
+        'remote_cluster:traces-*.otel-*,traces-*.otel-*,remote_cluster:logs-*.otel-*,logs-*.otel-*'
+      )
+    ).toBe('traces-*.otel-*,logs-*.otel-*');
+  });
 });

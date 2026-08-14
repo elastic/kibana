@@ -43,7 +43,7 @@ export function uxSearchIndex(dataViewTitle?: string): string {
   const parts = (dataViewTitle ?? '')
     .split(',')
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter((s) => s && !s.startsWith('remote_cluster:'));
   for (const pattern of UX_OTEL_INDEX_PATTERNS) {
     if (!parts.includes(pattern)) {
       parts.push(pattern);

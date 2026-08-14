@@ -28,6 +28,7 @@ import {
 } from './session_attributes';
 import { kueryFilters } from '../rum/kuery';
 import { botExclusionFilters } from '../rum/bots';
+import { rumEsSearchOptions } from '../rum/es_retry';
 import { SESSION_ID_SCRIPT } from './session_id_script';
 
 export { SESSION_ID_SCRIPT };
@@ -203,74 +204,80 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
     }
 
     const [rumResult, replayResult] = await Promise.all([
-      client.search({
-        index: RUM_SESSION_SOURCE_INDEX,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: 0,
-        query: { bool: { filter: filters } },
-        aggs: {
-          sessions: {
-            terms: {
-              script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
-              size: candidateSize,
-              order: { start_time: 'desc' },
-            },
-            aggs: {
-              start_time: { min: { field: '@timestamp' } },
-              end_time: { max: { field: '@timestamp' } },
-              error_count: {
-                filter: {
-                  bool: {
-                    should: [
-                      { term: { event_name: 'exception' } },
-                      { term: { name: 'exception' } },
-                      { term: { 'attributes.event.outcome': 'failure' } },
-                      { term: { 'attributes.log.level': 'ERROR' } },
-                    ],
-                    minimum_should_match: 1,
+      client.search(
+        {
+          index: RUM_SESSION_SOURCE_INDEX,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: 0,
+          query: { bool: { filter: filters } },
+          aggs: {
+            sessions: {
+              terms: {
+                script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
+                size: candidateSize,
+                order: { start_time: 'desc' },
+              },
+              aggs: {
+                start_time: { min: { field: '@timestamp' } },
+                end_time: { max: { field: '@timestamp' } },
+                error_count: {
+                  filter: {
+                    bool: {
+                      should: [
+                        { term: { event_name: 'exception' } },
+                        { term: { name: 'exception' } },
+                        { term: { 'attributes.event.outcome': 'failure' } },
+                        { term: { 'attributes.log.level': 'ERROR' } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                },
+                click_count: { filter: { term: { name: 'click' } } },
+                sample: {
+                  top_hits: {
+                    size: 100,
+                    sort: [{ '@timestamp': 'asc' as const }],
+                    _source: SAMPLE_SOURCE,
                   },
                 },
               },
-              click_count: { filter: { term: { name: 'click' } } },
-              sample: {
-                top_hits: {
-                  size: 100,
-                  sort: [{ '@timestamp': 'asc' as const }],
-                  _source: SAMPLE_SOURCE,
+            },
+          },
+        },
+        rumEsSearchOptions
+      ),
+      client.search(
+        {
+          index: SESSION_REPLAY_INDEX,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: 0,
+          query: { bool: { filter: filters } },
+          aggs: {
+            sessions: {
+              terms: {
+                script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' },
+                size: candidateSize,
+                order: { start_time: 'desc' },
+              },
+              aggs: {
+                start_time: { min: { field: '@timestamp' } },
+                end_time: { max: { field: '@timestamp' } },
+                sample: {
+                  top_hits: {
+                    size: 20,
+                    sort: [{ '@timestamp': 'asc' as const }],
+                    _source: SAMPLE_SOURCE,
+                  },
                 },
               },
             },
           },
         },
-      }),
-      client.search({
-        index: SESSION_REPLAY_INDEX,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: 0,
-        query: { bool: { filter: filters } },
-        aggs: {
-          sessions: {
-            terms: {
-              script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' },
-              size: candidateSize,
-              order: { start_time: 'desc' },
-            },
-            aggs: {
-              start_time: { min: { field: '@timestamp' } },
-              end_time: { max: { field: '@timestamp' } },
-              sample: {
-                top_hits: {
-                  size: 20,
-                  sort: [{ '@timestamp': 'asc' as const }],
-                  _source: SAMPLE_SOURCE,
-                },
-              },
-            },
-          },
-        },
-      }),
+        rumEsSearchOptions
+      ),
     ]);
 
     const rumBuckets =
@@ -493,10 +500,7 @@ const userKey = (session: RumSessionSummary): string | null =>
 const computeFacets = (sessions: RumSessionSummary[]): SessionListFacets => ({
   browsers: topBuckets(sessions, (session) => session.client.browser),
   os: topBuckets(sessions, (session) => session.client.os),
-  countries: topBuckets(
-    sessions,
-    (session) => session.client.countryIso || session.client.country
-  ),
+  countries: topBuckets(sessions, (session) => session.client.countryIso || session.client.country),
   users: topBuckets(sessions, userKey),
   hasReplay: sessions.filter((session) => session.hasReplay).length,
   hasErrors: sessions.filter((session) => session.errorCount > 0).length,

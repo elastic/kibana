@@ -165,6 +165,16 @@ export const OS_SCRIPT = `
   return '';
 `;
 
+export const COUNTRY_ISO_SCRIPT = `
+  if (doc.containsKey('client.geo.country_iso_code') && doc['client.geo.country_iso_code'].size() > 0) {
+    return doc['client.geo.country_iso_code'].value.toString();
+  }
+  if (doc.containsKey('resource.attributes.client.geo.country_iso_code') && doc['resource.attributes.client.geo.country_iso_code'].size() > 0) {
+    return doc['resource.attributes.client.geo.country_iso_code'].value.toString();
+  }
+  return '';
+`;
+
 export const sessionCardinality = {
   cardinality: { script: { source: SESSION_ID_SCRIPT, lang: 'painless' } },
 };

@@ -257,21 +257,117 @@ export const previousEqualPeriod = (
   };
 };
 
+const startOfLocalMonday = (value: Date): Date => {
+  const cursor = new Date(value);
+  cursor.setHours(0, 0, 0, 0);
+  const daysSinceMonday = (cursor.getDay() + 6) % 7;
+  cursor.setDate(cursor.getDate() - daysSinceMonday);
+  return cursor;
+};
+
+const mondayToMonday = (start: Date): { rangeFrom: string; rangeTo: string } => {
+  const end = new Date(start);
+  end.setDate(start.getDate() + 7);
+  return {
+    rangeFrom: start.toISOString(),
+    rangeTo: end.toISOString(),
+  };
+};
+
+/** Current calendar week: this Monday 00:00 → next Monday 00:00 in the local timezone. */
+export const currentCalendarWeek = (
+  now: Date = new Date()
+): { rangeFrom: string; rangeTo: string } => mondayToMonday(startOfLocalMonday(now));
+
+const startOfLocalDay = (value: Date): Date => {
+  const cursor = new Date(value);
+  cursor.setHours(0, 0, 0, 0);
+  return cursor;
+};
+
+/** Previous complete local day: yesterday 00:00 → today 00:00. */
+export const previousCompleteCalendarDay = (
+  now: Date = new Date()
+): { rangeFrom: string; rangeTo: string } => {
+  const end = startOfLocalDay(now);
+  const start = new Date(end);
+  start.setDate(start.getDate() - 1);
+  return { rangeFrom: start.toISOString(), rangeTo: end.toISOString() };
+};
+
+/** Previous complete local month: 1st of last month → 1st of this month. */
+export const previousCompleteCalendarMonth = (
+  now: Date = new Date()
+): { rangeFrom: string; rangeTo: string } => {
+  const end = startOfLocalDay(now);
+  end.setDate(1);
+  const start = new Date(end);
+  start.setMonth(start.getMonth() - 1);
+  return { rangeFrom: start.toISOString(), rangeTo: end.toISOString() };
+};
+
+export const reportPeriodForCadence = (
+  cadence: string,
+  now: Date = new Date()
+): { rangeFrom: string; rangeTo: string } => {
+  if (cadence === 'daily' || cadence === 'weekdays') {
+    return previousCompleteCalendarDay(now);
+  }
+  if (cadence === 'monthly') {
+    return previousCompleteCalendarMonth(now);
+  }
+  return previousCompleteCalendarWeek(now);
+};
+
+export const resolveEmailReportRange = (
+  cadence: string,
+  override?: { rangeFrom?: string; rangeTo?: string },
+  now: Date = new Date()
+): { rangeFrom: string; rangeTo: string } => {
+  if (override?.rangeFrom && override?.rangeTo) {
+    return { rangeFrom: override.rangeFrom, rangeTo: override.rangeTo };
+  }
+  return reportPeriodForCadence(cadence, now);
+};
+
 /** Previous complete Mon 00:00 → Mon 00:00 in the local timezone. */
 export const previousCompleteCalendarWeek = (
   now: Date = new Date()
 ): { rangeFrom: string; rangeTo: string } => {
-  const cursor = new Date(now);
-  cursor.setHours(0, 0, 0, 0);
-  const daysSinceMonday = (cursor.getDay() + 6) % 7;
-  const thisMonday = new Date(cursor);
-  thisMonday.setDate(cursor.getDate() - daysSinceMonday);
-  const lastMonday = new Date(thisMonday);
-  lastMonday.setDate(thisMonday.getDate() - 7);
-  return {
-    rangeFrom: lastMonday.toISOString(),
-    rangeTo: thisMonday.toISOString(),
-  };
+  const start = startOfLocalMonday(now);
+  start.setDate(start.getDate() - 7);
+  return mondayToMonday(start);
+};
+
+/** Shift a range onto a Monday–Monday window by `weeks` (negative = earlier). */
+export const shiftCalendarWeek = (
+  rangeFrom: string,
+  weeks: number
+): { rangeFrom: string; rangeTo: string } | null => {
+  const parsed = dateMath.parse(rangeFrom);
+  if (!parsed?.isValid()) {
+    return null;
+  }
+  const start = startOfLocalMonday(parsed.toDate());
+  start.setDate(start.getDate() + weeks * 7);
+  return mondayToMonday(start);
+};
+
+/** Next week is allowed until the window would start after this Monday. */
+export const canGoToNextCalendarWeek = (rangeFrom: string, now: Date = new Date()): boolean => {
+  const shifted = shiftCalendarWeek(rangeFrom, 1);
+  if (!shifted) {
+    return false;
+  }
+  return new Date(shifted.rangeFrom).getTime() <= startOfLocalMonday(now).getTime();
+};
+
+export const isCurrentCalendarWeek = (rangeFrom: string, now: Date = new Date()): boolean => {
+  const parsed = dateMath.parse(rangeFrom);
+  if (!parsed?.isValid()) {
+    return false;
+  }
+  return startOfLocalMonday(parsed.toDate()).getTime() === startOfLocalMonday(now).getTime();
 };
 
 export const isLiveRelativeRange = (rangeFrom?: string, rangeTo?: string): boolean => {
@@ -419,79 +515,13 @@ export const poorLcpShare = (pages: RumPageRow[]): number | null => {
 export const overviewIsEmpty = (overview: RumOverviewResponse): boolean =>
   overview.kpis.sessions === 0 && overview.kpis.pageViews === 0;
 
-const formatSignedPct = (pct: number | null): string => {
-  if (pct == null || !Number.isFinite(pct)) {
-    return 'n/a';
-  }
-  const rounded = Math.round(pct * 1000) / 10;
-  return `${rounded > 0 ? '+' : ''}${rounded}%`;
-};
-
-const kpiLine = (
-  label: string,
-  delta: RumReportDelta,
-  format: (value: number) => string
-): string => {
-  const current = delta.current == null ? '—' : format(delta.current);
-  return `• ${label}: ${current} (${formatSignedPct(delta.pct)} vs previous)`;
-};
-
-export const scorecardMarkdown = (report: RumScorecardReport, shareUrl: string): string => {
-  const formatCount = (value: number) => String(Math.round(value));
-  const formatMs = (value: number) =>
-    value >= 1000 ? `${(value / 1000).toFixed(2)}s` : `${Math.round(value)}ms`;
-  const formatRate = (value: number) => `${Math.round(value * 1000) / 10}%`;
-
-  const poorPages = [...report.topPages]
-    .filter((page) => page.p75Lcp != null && page.p75Lcp >= CWV_LCP_POOR_MS)
-    .sort((a, b) => (b.p75Lcp ?? 0) - (a.p75Lcp ?? 0))
-    .slice(0, 3);
-  const topErrors = report.errorGroups.slice(0, 3);
-
-  const pageLines =
-    poorPages.length === 0
-      ? ['• None with poor LCP in the top pages']
-      : poorPages.map((page) => `• ${page.path} (LCP p75 ${formatMs(page.p75Lcp ?? 0)})`);
-  const errorLines =
-    topErrors.length === 0
-      ? ['• None']
-      : topErrors.map((group) => `• ${group.type}: ${group.message} (${group.count})`);
-  const countryLines =
-    report.countries.length === 0
-      ? ['• None']
-      : report.countries
-          .slice(0, 8)
-          .map(
-            (row) =>
-              `• ${row.name} (${row.isoCode}): ${row.pageViews} views, ${row.sessions} sessions, ${row.errorCount} errors`
-          );
-
-  return [
-    `# ${report.title}`,
-    report.serviceName ? `Service: ${report.serviceName}` : 'Service: all',
-    `Period: ${report.rangeFrom} → ${report.rangeTo}`,
-    report.compareFrom && report.compareTo
-      ? `Compared to: ${report.compareFrom} → ${report.compareTo}`
-      : 'Compared to: none',
-    '',
-    kpiLine('Sessions', report.kpis.sessions, formatCount),
-    kpiLine('Page views', report.kpis.pageViews, formatCount),
-    kpiLine('Error rate', report.kpis.errorRate, formatRate),
-    kpiLine('p75 load', report.kpis.p75LoadMs, formatMs),
-    kpiLine('p75 INP', report.kpis.p75Inp, formatMs),
-    '',
-    'Top poor pages:',
-    ...pageLines,
-    '',
-    'Top errors:',
-    ...errorLines,
-    '',
-    'Top countries:',
-    ...countryLines,
-    '',
-    `Share: ${shareUrl}`,
-  ].join('\n');
-};
+export {
+  markdownToEmailHtml,
+  reportEmailHtml,
+  reportEmailMarkdown,
+  reportToPdfText,
+  scorecardMarkdown,
+} from './rum_report_email';
 
 export const reportPrimaryCsv = (report: RumReportResponse): string => {
   switch (report.templateId) {

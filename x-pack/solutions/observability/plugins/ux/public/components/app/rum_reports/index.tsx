@@ -18,8 +18,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
+  currentCalendarWeek,
   isLiveRelativeRange,
-  previousCompleteCalendarWeek,
   rumReportTitle,
   type RumReportTemplateId,
 } from '../../../../common/rum_report';
@@ -29,7 +29,7 @@ import { pushRumPath } from '../../../utils/rum_search';
 const PURPOSE: Record<RumReportTemplateId, string> = {
   scorecard: i18n.translate('xpack.ux.reports.catalog.scorecardDescription', {
     defaultMessage:
-      'Last week vs the week before — KPIs, CWV, countries, frustration, and sample sessions.',
+      'This week vs last week — KPIs, CWV, countries, frustration, and sample sessions.',
   }),
   pages: i18n.translate('xpack.ux.reports.catalog.pagesDescription', {
     defaultMessage: 'Slowest and most-viewed routes with Core Web Vitals.',
@@ -78,7 +78,7 @@ export function RumReportsCatalog() {
   } = useLegacyUrlParams();
 
   const openReport = (templateId: RumReportTemplateId) => {
-    const period = isLiveRelativeRange(rangeFrom, rangeTo) ? previousCompleteCalendarWeek() : {};
+    const period = isLiveRelativeRange(rangeFrom, rangeTo) ? currentCalendarWeek() : {};
     pushRumPath(history, `/reports/${templateId}`, {
       ...period,
       compare: 'previous',
@@ -94,7 +94,7 @@ export function RumReportsCatalog() {
         <p>
           {i18n.translate('xpack.ux.reports.catalog.subtitleDescription', {
             defaultMessage:
-              'Named, time-bounded artifacts you can paste, print, or export. Opening a card uses last complete week unless the date picker already has an absolute range.',
+              'Named, time-bounded artifacts you can paste, print, or export. Opening a card uses the current calendar week unless the date picker already has an absolute range.',
           })}
         </p>
       </EuiText>

@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -14,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -24,11 +26,25 @@ import { formatReportDate } from './format';
 export function ReportCover({
   report,
   filterChips,
+  onPrevWeek,
+  onNextWeek,
+  canNextWeek,
+  isThisWeek,
 }: {
   report: RumReportMeta;
   filterChips: Array<{ label: string; value: string }>;
+  onPrevWeek: () => void;
+  onNextWeek: () => void;
+  canNextWeek: boolean;
+  isThisWeek: boolean;
 }) {
   const { spaceId } = useUxPluginContext();
+  const prevWeekLabel = i18n.translate('xpack.ux.reports.cover.previousWeekAriaLabel', {
+    defaultMessage: 'Previous week',
+  });
+  const nextWeekLabel = i18n.translate('xpack.ux.reports.cover.nextWeekAriaLabel', {
+    defaultMessage: 'Next week',
+  });
 
   return (
     <EuiPanel hasBorder paddingSize="l" className="uxRumReportCover" data-test-subj="uxReportCover">
@@ -58,15 +74,55 @@ export function ReportCover({
                 },
               })}
             </p>
-            <p>
-              {i18n.translate('xpack.ux.reports.cover.periodLabel', {
-                defaultMessage: '{from} → {to}',
-                values: {
-                  from: formatReportDate(report.rangeFrom),
-                  to: formatReportDate(report.rangeTo),
-                },
-              })}
-            </p>
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              wrap
+              className="uxRumReportWeekNav"
+            >
+              <EuiFlexItem grow={false} className="uxRumReportNoPrint">
+                <EuiToolTip content={prevWeekLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="uxReportPrevWeek"
+                    iconType="arrowLeft"
+                    size="s"
+                    aria-label={prevWeekLabel}
+                    onClick={onPrevWeek}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.ux.reports.cover.periodLabel', {
+                  defaultMessage: '{from} → {to}',
+                  values: {
+                    from: formatReportDate(report.rangeFrom),
+                    to: formatReportDate(report.rangeTo),
+                  },
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className="uxRumReportNoPrint">
+                <EuiToolTip content={nextWeekLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="uxReportNextWeek"
+                    iconType="arrowRight"
+                    size="s"
+                    aria-label={nextWeekLabel}
+                    onClick={onNextWeek}
+                    disabled={!canNextWeek}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              {isThisWeek && (
+                <EuiFlexItem grow={false} className="uxRumReportNoPrint">
+                  <EuiBadge color="hollow">
+                    {i18n.translate('xpack.ux.reports.cover.thisWeekBadgeLabel', {
+                      defaultMessage: 'This week',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
             {report.compareFrom && report.compareTo && (
               <p>
                 {i18n.translate('xpack.ux.reports.cover.comparedToLabel', {

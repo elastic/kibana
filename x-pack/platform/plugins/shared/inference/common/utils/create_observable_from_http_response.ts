@@ -13,6 +13,26 @@ export interface StreamedHttpResponse {
   response?: { body: ReadableStream<Uint8Array> | null | undefined };
 }
 
+/**
+ * `@kbn/sse-utils-server` puts `type` in the SSE `event:` field and omits it from
+ * JSON. The browser parser must put it back so chatComplete chunk/error guards work.
+ */
+const rehydrateSseData = (event: { event?: string; data: string }): string => {
+  const sseType = event.event;
+  if (!sseType || sseType === 'message') {
+    return event.data;
+  }
+  try {
+    const parsed = JSON.parse(event.data);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.type == null) {
+      return JSON.stringify({ type: sseType, ...parsed });
+    }
+  } catch {
+    // Downstream JSON.parse reports malformed payloads.
+  }
+  return event.data;
+};
+
 export function createObservableFromHttpResponse(
   response: StreamedHttpResponse
 ): Observable<string> {
@@ -28,7 +48,7 @@ export function createObservableFromHttpResponse(
   return new Observable<string>((subscriber) => {
     const parser = createParser({
       onEvent: (event) => {
-        subscriber.next(event.data);
+        subscriber.next(rehydrateSseData(event));
       },
     });
 

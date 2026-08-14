@@ -156,6 +156,23 @@ function UxReportsPage() {
   );
 }
 
+function UxAiPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.aiAnalyst', {
+        defaultMessage: 'AI Analyst',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="ai" />
+    </div>
+  );
+}
+
 function UxReportViewPage() {
   const { path } = useParams('/reports/{templateId}') as unknown as {
     path: { templateId: string };
@@ -209,6 +226,9 @@ const uxRouter = createRouter({
   '/reports': {
     element: <UxReportsPage />,
   },
+  '/ai': {
+    element: <UxAiPage />,
+  },
   '/reports/{templateId}': {
     params: t.type({
       path: t.type({
@@ -253,6 +273,8 @@ export function UXAppRoot({
     data,
     dataViews,
     lens,
+    inference,
+    agentBuilder,
   },
   isDev,
   spaceId,
@@ -290,6 +312,8 @@ export function UXAppRoot({
               data,
               dataViews,
               lens,
+              inference,
+              agentBuilder,
             }}
           >
             <KibanaThemeProvider

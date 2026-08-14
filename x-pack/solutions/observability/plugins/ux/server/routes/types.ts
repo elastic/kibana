@@ -7,10 +7,12 @@
 
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { UxPluginStartDeps } from '../plugin_types';
 
 export type UxRouteHandlerResources = DefaultRouteHandlerResources & {
   core: {
-    setup: CoreSetup;
+    setup: CoreSetup<UxPluginStartDeps>;
     start: () => Promise<CoreStart>;
   };
+  startPlugins: () => Promise<UxPluginStartDeps>;
 };

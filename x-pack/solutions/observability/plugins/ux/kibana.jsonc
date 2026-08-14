@@ -24,7 +24,8 @@
       "observabilityShared",
       "embeddable",
       "inspector",
-      "apm"
+      "apm",
+      "inference"
     ],
     "optionalPlugins": [
       "cloud",
@@ -37,7 +38,8 @@
       "maps",
       "lens",
       "observabilityAIAssistant",
-      "spaces"
+      "spaces",
+      "agentBuilder"
     ],
     "requiredBundles": [
       "kibanaReact",

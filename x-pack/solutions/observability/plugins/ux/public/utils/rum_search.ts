@@ -56,6 +56,19 @@ export const pushRumPath = (history: History, pathname: string, patch: RumFilter
   });
 };
 
+export interface RumAiLocationState {
+  rumAiFollowUp?: string;
+}
+
+/** Open AI Analyst with a follow-up prompt, keeping the current filters. */
+export const pushRumAiFollowUp = (history: History, prompt: string) => {
+  history.push({
+    pathname: '/ai',
+    search: history.location.search,
+    state: { rumAiFollowUp: prompt } satisfies RumAiLocationState,
+  });
+};
+
 /** Exclusive sessions deep-link: set the given filters and clear the rest of the session-only keys. */
 export const sessionsPatch = (patch: RumFilterPatch): RumFilterPatch => ({
   frustration: '',

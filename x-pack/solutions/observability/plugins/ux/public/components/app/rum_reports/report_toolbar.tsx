@@ -33,11 +33,15 @@ export function ReportToolbar({
   includePii,
   exactStart,
   exactEnd,
+  onGenerateAi,
+  onScheduleEmail,
 }: {
   report: RumReportResponse;
   includePii: boolean;
   exactStart?: string;
   exactEnd?: string;
+  onGenerateAi?: () => void;
+  onScheduleEmail?: () => void;
 }) {
   const { http, notifications } = useKibanaServices();
   const history = useHistory();
@@ -134,7 +138,7 @@ export function ReportToolbar({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="uxReportPrint"
-            iconType="printer"
+            iconType="document"
             onClick={() => window.print()}
           >
             {i18n.translate('xpack.ux.reports.toolbar.printButtonLabel', {
@@ -169,6 +173,32 @@ export function ReportToolbar({
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
+        {onGenerateAi && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="uxReportAiOpen"
+              iconType="sparkles"
+              onClick={onGenerateAi}
+            >
+              {i18n.translate('xpack.ux.reports.toolbar.aiNarrativeButtonLabel', {
+                defaultMessage: 'Generate AI narrative',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {onScheduleEmail && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="uxReportScheduleEmail"
+              iconType="email"
+              onClick={onScheduleEmail}
+            >
+              {i18n.translate('xpack.ux.reports.toolbar.scheduleEmailButtonLabel', {
+                defaultMessage: 'Schedule email',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiSwitch
             data-test-subj="uxReportIncludePii"

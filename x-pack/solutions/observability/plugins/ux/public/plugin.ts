@@ -46,6 +46,8 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -75,6 +77,8 @@ export interface ApmPluginStartDeps {
   dataViews: DataViewsPublicPluginStart;
   lens: LensPublicStart;
   spaces?: SpacesPluginStart;
+  inference: InferencePublicStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {

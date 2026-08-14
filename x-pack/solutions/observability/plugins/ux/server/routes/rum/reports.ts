@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { i18n } from '@kbn/i18n';
 import type {
   RumErrorsResponse,
   RumOverviewResponse,
@@ -39,6 +40,7 @@ import { listSessionReplaySessionsRoute } from '../session_replay/list_sessions'
 import { getSessionPatternsRoute } from '../session_replay/patterns';
 import type { UxRouteHandlerResources } from '../types';
 import { getRumErrorsRoute } from './errors';
+import { isRumEsTimeout, withRumEsRetry } from './es_retry';
 import { getRumOverviewRoute } from './overview';
 import { getRumPagesRoute } from './pages';
 import { boundedString, rumListQueryCodec } from './query';
@@ -63,7 +65,8 @@ const rumReportQueryCodec = t.intersection([
 ]);
 
 type RumListQuery = t.TypeOf<typeof rumListQueryCodec>;
-type ReportQuery = t.TypeOf<typeof rumReportQueryCodec>;
+export type RumReportQuery = t.TypeOf<typeof rumReportQueryCodec>;
+type ReportQuery = RumReportQuery;
 
 const callRoute = async <T>(
   route: Record<string, unknown>,
@@ -82,22 +85,22 @@ const withRange = (query: RumListQuery, rangeFrom: string, rangeTo: string): Rum
   rangeTo,
 });
 
-const fetchOverview = (
+export const fetchOverview = (
   resources: UxRouteHandlerResources,
   query: RumListQuery
 ): Promise<RumOverviewResponse> => callRoute(getRumOverviewRoute, resources, { query });
 
-const fetchPages = (
+export const fetchPages = (
   resources: UxRouteHandlerResources,
   query: RumListQuery
 ): Promise<RumPagesResponse> => callRoute(getRumPagesRoute, resources, { query });
 
-const fetchErrors = (
+export const fetchErrors = (
   resources: UxRouteHandlerResources,
   query: RumListQuery
 ): Promise<RumErrorsResponse> => callRoute(getRumErrorsRoute, resources, { query });
 
-const fetchSessions = (
+export const fetchSessions = (
   resources: UxRouteHandlerResources,
   query: RumListQuery & {
     sortField?: string;
@@ -111,6 +114,7 @@ const fetchSessions = (
     sessionIds?: string;
     pageUrl?: string;
     frustration?: string;
+    minDurationMs?: string;
   }
 ): Promise<SessionListResponse> => callRoute(listSessionReplaySessionsRoute, resources, { query });
 
@@ -197,18 +201,24 @@ const buildScorecard = async (
 ): Promise<RumReportResponse> => {
   const { rangeFrom, rangeTo, includePii, period, listQuery, previousQuery } =
     resolveWindows(query);
-  const [current, previous, errors, errorsPrevious, sessions] = await Promise.all([
-    fetchOverview(resources, listQuery),
-    previousQuery ? fetchOverview(resources, previousQuery) : Promise.resolve(null),
-    fetchErrors(resources, listQuery),
-    previousQuery ? fetchErrors(resources, previousQuery) : Promise.resolve(null),
-    fetchSessions(resources, {
-      ...listQuery,
-      sortField: 'rageClickCount',
-      sortDirection: 'desc',
-      perPage: '50',
-    }),
+  const [current, errors, sessions] = await Promise.all([
+    withRumEsRetry(() => fetchOverview(resources, listQuery)),
+    withRumEsRetry(() => fetchErrors(resources, listQuery)),
+    withRumEsRetry(() =>
+      fetchSessions(resources, {
+        ...listQuery,
+        sortField: 'rageClickCount',
+        sortDirection: 'desc',
+        perPage: '50',
+      })
+    ),
   ]);
+  const [previous, errorsPrevious] = previousQuery
+    ? await Promise.all([
+        withRumEsRetry(() => fetchOverview(resources, previousQuery)),
+        withRumEsRetry(() => fetchErrors(resources, previousQuery)),
+      ])
+    : [null, null];
   const noPreviousPeriod = !previous || overviewIsEmpty(previous);
   const prev = noPreviousPeriod ? null : previous;
   return {
@@ -570,6 +580,12 @@ const builders: Record<
   users: buildUsers,
 };
 
+export const buildRumReport = (
+  templateId: RumReportTemplateId,
+  resources: UxRouteHandlerResources,
+  query: ReportQuery
+): Promise<RumReportResponse> => builders[templateId](resources, query);
+
 export const getRumReportRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/rum/reports/{templateId}',
   options: { access: 'internal' },
@@ -583,6 +599,20 @@ export const getRumReportRoute = createUxServerRoute({
     if (!isRumReportTemplateId(templateId)) {
       throw new Error(`Unknown report template: ${templateId}`);
     }
-    return builders[templateId](resources, resources.params.query);
+    try {
+      return await withRumEsRetry(() =>
+        buildRumReport(templateId, resources, resources.params.query)
+      );
+    } catch (error) {
+      if (isRumEsTimeout(error)) {
+        throw new Error(
+          i18n.translate('xpack.ux.reports.queryTimeoutErrorMessage', {
+            defaultMessage:
+              'The report query timed out. Click Retry — a second load is usually faster.',
+          })
+        );
+      }
+      throw error;
+    }
   },
 });

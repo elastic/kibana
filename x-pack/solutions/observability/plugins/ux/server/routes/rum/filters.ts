@@ -13,6 +13,7 @@ import {
   BROWSER_SCRIPT,
   BREAKPOINT_SCRIPT,
   CONNECTION_SCRIPT,
+  COUNTRY_ISO_SCRIPT,
   DEVICE_SCRIPT,
   OS_SCRIPT,
   facetFromScriptTerms,
@@ -53,6 +54,13 @@ export const getRumFiltersRoute = createUxServerRoute({
         devices: {
           terms: { script: { source: DEVICE_SCRIPT, lang: 'painless' }, size: 10, exclude: '' },
         },
+        countries: {
+          terms: {
+            script: { source: COUNTRY_ISO_SCRIPT, lang: 'painless' },
+            size: 30,
+            exclude: '',
+          },
+        },
       },
     });
 
@@ -64,6 +72,7 @@ export const getRumFiltersRoute = createUxServerRoute({
       breakpoints: facetFromScriptTerms(aggs.breakpoints),
       connections: facetFromScriptTerms(aggs.connections),
       devices: facetFromScriptTerms(aggs.devices),
+      countries: facetFromScriptTerms(aggs.countries),
     };
   },
 });
