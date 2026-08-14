@@ -57,7 +57,6 @@ const FlyoutTemplateRoot = ({
   historyKey,
   onActive,
   flyoutMenuProps,
-  flyoutMenuDisplayMode = 'auto',
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
@@ -101,7 +100,7 @@ const FlyoutTemplateRoot = ({
       session={session}
       historyKey={historyKey}
       onActive={onActive}
-      flyoutMenuDisplayMode={flyoutMenuDisplayMode}
+      flyoutMenuDisplayMode="auto"
       flyoutMenuProps={hasMenuProps ? mergedMenuProps : undefined}
       aria-label={flyoutAriaLabel}
       aria-labelledby={flyoutAriaLabelledBy}

@@ -81,7 +81,6 @@ export type FlyoutTemplateProps = Pick<
   | 'historyKey'
   | 'onActive'
   | 'flyoutMenuProps'
-  | 'flyoutMenuDisplayMode'
 > & {
   'aria-label'?: EuiFlyoutProps['aria-label'];
   'aria-labelledby'?: EuiFlyoutProps['aria-labelledby'];
