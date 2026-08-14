@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButton,
@@ -24,7 +24,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LazyAwsIdentityFederationSetup, LazyAwsStaticKeysForm } from '@kbn/fleet-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  LazyAwsIdentityFederationSetup,
+  LazyAwsStaticKeysForm,
+  useGetPackageInfoByKeyQuery,
+  getAnyCloudConnectorIacTemplateUrl,
+} from '@kbn/fleet-plugin/public';
+import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
@@ -37,6 +46,7 @@ export function ManagedIntegrationsSection({
   serviceCount,
   showIdentityFederation,
 }: ManagedIntegrationsSectionProps) {
+  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(true);
@@ -44,6 +54,15 @@ export function ManagedIntegrationsSection({
     showIdentityFederation ? 'identity_federation' : 'access_keys'
   );
   const [isDeployReady, setIsDeployReady] = useState(false);
+
+  const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery('aws', 'latest', undefined, {
+    enabled: showIdentityFederation,
+  });
+  const iacTemplateUrl = useMemo(
+    () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
+    [awsPackageResponse]
+  );
+  const cloud = services.cloud as CloudSetupForCloudConnector | undefined;
 
   const radioOptions = [
     {
@@ -165,7 +184,11 @@ export function ManagedIntegrationsSection({
 
             <Suspense fallback={<EuiLoadingSpinner />}>
               {preferredMethod === 'identity_federation' ? (
-                <LazyAwsIdentityFederationSetup onReadyChange={setIsDeployReady} />
+                <LazyAwsIdentityFederationSetup
+                  cloud={cloud}
+                  iacTemplateUrl={iacTemplateUrl}
+                  onReadyChange={setIsDeployReady}
+                />
               ) : (
                 <LazyAwsStaticKeysForm onReadyChange={setIsDeployReady} />
               )}

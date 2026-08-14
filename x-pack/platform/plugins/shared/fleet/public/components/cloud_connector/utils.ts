@@ -39,6 +39,7 @@ import {
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
   CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
+  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
 } from './constants';
 
 export type AzureCloudConnectorFieldNames =
@@ -195,6 +196,27 @@ export const getTemplateUrlFromPackageInfo = (
     }, '');
     return cloudFormationTemplate !== '' ? cloudFormationTemplate : undefined;
   }
+};
+
+/**
+ * Searches all policy templates in the package for the cloud connectors IAC template URL.
+ * Use when the specific policy template name is unknown (e.g. when using the AWS package
+ * that contains many policy templates, any of which may carry the URL).
+ */
+export const getAnyCloudConnectorIacTemplateUrl = (
+  packageInfo: PackageInfo | undefined
+): string | undefined => {
+  if (!packageInfo?.policy_templates) return undefined;
+  for (const pt of packageInfo.policy_templates) {
+    if (!('inputs' in pt) || !pt.inputs) continue;
+    for (const input of pt.inputs) {
+      const url = input.vars?.find(
+        (v) => v.name === CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS
+      )?.default;
+      if (url) return String(url);
+    }
+  }
+  return undefined;
 };
 
 export const getCloudConnectorRemoteRoleTemplate = ({

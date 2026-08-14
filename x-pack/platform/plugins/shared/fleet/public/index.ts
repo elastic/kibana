@@ -168,3 +168,5 @@ export const LazyAwsIdentityFederationSetup = lazy(() =>
   )
 );
 export type { AwsIdentityFederationSetupProps } from './components/cloud_connector/aws_connect_setup/aws_identity_federation_setup';
+
+export { getAnyCloudConnectorIacTemplateUrl } from './components/cloud_connector/utils';
