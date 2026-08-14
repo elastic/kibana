@@ -22,7 +22,7 @@ describe('mergeAppMenuConfigs', () => {
       id: 'addData',
       label: 'Add data',
       href: '/add-data',
-      iconType: 'plusInCircle' as const,
+      iconType: 'plusCircle' as const,
       testId: 'apmAddDataHeaderLink',
     },
   };
@@ -33,7 +33,7 @@ describe('mergeAppMenuConfigs', () => {
         id: 'exploreData',
         label: 'Explore data',
         href: '/explore',
-        iconType: 'visBarVerticalStacked' as const,
+        iconType: 'chartBarVerticalStack' as const,
         testId: 'apmAnalyzeDataButtonExploreDataButton',
       },
     ],

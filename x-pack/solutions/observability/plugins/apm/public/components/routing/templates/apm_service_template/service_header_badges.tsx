@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import type { AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { AgentName, AnomalyDetectorType, Environment } from '@kbn/apm-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -193,12 +192,13 @@ function useServiceHeaderStatusData({
   );
 }
 
-/** AppHeader `badges` entries for the legacy custom-badge layout (and unit tests). */
-export function useServiceHeaderBadges(props: ServiceHeaderStatusProps): AppHeaderBadge[] {
+/** Status badges row (alerts / SLO / anomaly) below AppHeader tabs, above search. */
+export function ServiceHeaderBadges(props: ServiceHeaderStatusProps) {
+  const { euiTheme } = useEuiTheme();
   const data = useServiceHeaderStatusData(props);
 
-  return useMemo(() => {
-    const badges: AppHeaderBadge[] = [];
+  const badges = useMemo(() => {
+    const items: Array<{ key: string; node: React.ReactNode }> = [];
 
     if (data.showAlerts) {
       const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.countLabel', {
@@ -207,12 +207,9 @@ export function useServiceHeaderBadges(props: ServiceHeaderStatusProps): AppHead
         values: { count: data.alertsCount },
       });
 
-      badges.push({
-        label: String(data.alertsCount),
-        color: 'danger',
-        tooltip: alertsTooltip,
-        'data-test-subj': 'serviceHeaderAlertsBadge',
-        renderCustomBadge: () => (
+      items.push({
+        key: 'alerts',
+        node: (
           <EuiToolTip position="bottom" content={alertsTooltip}>
             <EuiBadge
               data-test-subj="serviceHeaderAlertsBadge"
@@ -228,11 +225,9 @@ export function useServiceHeaderBadges(props: ServiceHeaderStatusProps): AppHead
     }
 
     if (data.showSlo) {
-      badges.push({
-        label: i18n.translate('xpack.apm.serviceHeader.sloBadge.label', {
-          defaultMessage: 'SLO',
-        }),
-        renderCustomBadge: () => (
+      items.push({
+        key: 'slo',
+        node: (
           <SloStatusBadge
             sloStatus={data.sloStatus}
             sloCount={data.sloCount}
@@ -244,12 +239,9 @@ export function useServiceHeaderBadges(props: ServiceHeaderStatusProps): AppHead
     }
 
     if (data.showAnomalies) {
-      badges.push({
-        label: i18n.translate('xpack.apm.serviceHeader.anomaliesBadge.label', {
-          defaultMessage: 'Anomalies',
-        }),
-        'data-test-subj': 'serviceHeaderAnomaliesBadge',
-        renderCustomBadge: () => (
+      items.push({
+        key: 'anomalies',
+        node: (
           <span data-test-subj="serviceHeaderAnomaliesBadge">
             <AnomaliesBadge
               score={data.anomalyScore}
@@ -281,14 +273,8 @@ export function useServiceHeaderBadges(props: ServiceHeaderStatusProps): AppHead
       });
     }
 
-    return badges;
+    return items;
   }, [data]);
-}
-
-/** Status badges row (alerts / SLO / anomaly). Used below AppHeader tabs in option 3. */
-export function ServiceHeaderBadges(props: ServiceHeaderStatusProps) {
-  const { euiTheme } = useEuiTheme();
-  const badges = useServiceHeaderBadges(props);
 
   if (badges.length === 0) {
     return null;
@@ -301,9 +287,9 @@ export function ServiceHeaderBadges(props: ServiceHeaderStatusProps) {
       responsive={false}
       css={{ marginBottom: euiTheme.size.m }}
     >
-      {badges.map((badge) => (
-        <EuiFlexItem key={badge.label} grow={false}>
-          {badge.renderCustomBadge?.({ badgeText: badge.label })}
+      {badges.map(({ key, node }) => (
+        <EuiFlexItem key={key} grow={false}>
+          {node}
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

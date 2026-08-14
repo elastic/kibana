@@ -76,7 +76,7 @@ const registeredMenu: AppMenuConfig = {
     id: 'addData',
     label: 'Add data',
     href: '/add-data',
-    iconType: 'plusInCircle',
+    iconType: 'plusCircle',
     testId: 'apmAddDataHeaderLink',
   },
 };

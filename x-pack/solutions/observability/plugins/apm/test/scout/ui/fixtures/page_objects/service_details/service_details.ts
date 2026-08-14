@@ -105,10 +105,7 @@ export class ServiceDetailsPage {
 
   // #region Service Header
   getServiceHeaderName() {
-    // AppHeader title; fall back to the legacy mobile service-template test id.
-    return this.page
-      .getByTestId('appHeaderTitle')
-      .or(this.page.getByTestId('apmMainTemplateHeaderServiceName'));
+    return this.page.getByTestId('appHeaderTitle');
   }
   // #endregion
 

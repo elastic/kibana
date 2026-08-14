@@ -113,8 +113,6 @@ function TemplateWithContext({
 
   const serviceInventoryHref = router.link('/services', { query });
 
-  // Option 3 (screenshot / likely keep): logos as AppHeader badges; status badges below tabs
-  // (APM-owned, above search — outside AppHeader metadata).
   const headerBadges = useServiceIconBadges({
     serviceName,
     environment,
