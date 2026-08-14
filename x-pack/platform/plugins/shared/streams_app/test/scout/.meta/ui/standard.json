@@ -1,5 +1,5 @@
 {
-  "sha1": "5651c42cd2722ef18a5aa3fdd747a234edf2faef",
+  "sha1": "3325d0f353a0ad5f70d8dc309972722d3fb8077f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -199,7 +199,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 53,
+        "line": 54,
         "column": 9
       }
     },
@@ -215,7 +215,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 9
       }
     },
@@ -231,7 +231,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 9
       }
     },
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 9
       }
     },
