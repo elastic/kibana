@@ -15,8 +15,7 @@ describe('SearchNavigationPlugin', () => {
     registerAppChromeAdapter: jest.fn(),
   });
 
-  const createPlugin = () =>
-    new SearchNavigationPlugin(coreMock.createPluginInitializerContext());
+  const createPlugin = () => new SearchNavigationPlugin(coreMock.createPluginInitializerContext());
 
   const createCoreStart = () => {
     const coreStart = coreMock.createStart();
