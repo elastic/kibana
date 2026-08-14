@@ -32,8 +32,34 @@ steps:
      message: \${{foreach.item}}
 `;
 
-/** Index name used for alert trigger test documents. */
-export const TEST_ALERTS_INDEX = 'test-workflow-alerts-index';
+/** Prefix of the per-space indices holding alert trigger test documents. */
+export const TEST_ALERTS_INDEX_PREFIX = 'test-workflow-alerts';
+
+/** Index pattern covering every worker's test index, for granting ES privileges. */
+export const TEST_ALERTS_INDEX_PATTERN = `${TEST_ALERTS_INDEX_PREFIX}-*`;
+
+/**
+ * Alert trigger tests run in parallel, one Kibana space per worker, so each
+ * worker needs its own index — a shared one lets one worker's documents fire
+ * another worker's rule and break exact execution-count assertions.
+ */
+export const getTestAlertsIndex = (spaceId: string) => `${TEST_ALERTS_INDEX_PREFIX}-${spaceId}`;
+
+/**
+ * `1m` is the smallest interval a rule may be scheduled at on a default
+ * deployment (`xpack.alerting.rules.minimumScheduleInterval`, enforced on
+ * serverless). Tests must not wait for this interval to elapse — they force a
+ * run instead, which is why the lookback windows below are far wider than it.
+ */
+const RULE_INTERVAL = '1m';
+
+/**
+ * Lookback each rule queries on every run. Generous on purpose: a forced run
+ * happens seconds after the documents are indexed, and both rule types
+ * de-duplicate (detection rules on document `_id`, the ES|QL rule via
+ * `excludeHitsFromPreviousRun`), so a wide window cannot double-alert.
+ */
+const RULE_LOOKBACK = '5m';
 
 /**
  * Workflow that creates a security detection rule with two workflow actions:
@@ -42,7 +68,7 @@ export const TEST_ALERTS_INDEX = 'test-workflow-alerts-index';
  *
  * Only works with the Security solution (uses the detection engine API).
  */
-export const getCreateSecurityAlertRuleWorkflowYaml = (name: string) => `
+export const getCreateSecurityAlertRuleWorkflowYaml = (name: string, alertsIndex: string) => `
 name: ${name}
 description: Create security detection rule
 enabled: true
@@ -56,7 +82,7 @@ triggers:
         type: string
         required: true
 consts:
-  alerts_index_name: ${TEST_ALERTS_INDEX}
+  alerts_index_name: ${alertsIndex}
 steps:
   - name: create_security_alert_rule
     type: kibana.request
@@ -66,7 +92,7 @@ steps:
       body:
         type: query
         index:
-          - ${TEST_ALERTS_INDEX}
+          - ${alertsIndex}
         filters: []
         language: kuery
         query: "not severity: foo"
@@ -85,8 +111,8 @@ steps:
         tags: []
         setup: ""
         license: ""
-        interval: 15s
-        from: now-20s
+        interval: ${RULE_INTERVAL}
+        from: now-${RULE_LOOKBACK}
         to: now
         actions:
           - id: system-connector-.workflows
@@ -118,8 +144,12 @@ steps:
  *
  * Works with Observability (and ESS) — uses the standard alerting framework
  * instead of the Security detection engine.
+ *
+ * Creates the index first because ES|QL `FROM` errors on a missing index, and
+ * the rule runs once as soon as it is created. The index is never deleted here:
+ * it is per-space and the test removes it on teardown.
  */
-export const getCreateObsAlertRuleWorkflowYaml = (name: string) => `
+export const getCreateObsAlertRuleWorkflowYaml = (name: string, alertsIndex: string) => `
 name: ${name}
 description: Create ES|QL alert rule
 enabled: true
@@ -133,14 +163,8 @@ triggers:
         type: string
         required: true
 consts:
-  alerts_index_name: ${TEST_ALERTS_INDEX}
+  alerts_index_name: ${alertsIndex}
 steps:
-  - name: delete_index
-    type: elasticsearch.indices.delete
-    with:
-      index: "{{consts.alerts_index_name}}"
-    on-failure:
-      continue: true
   - name: create_index
     type: elasticsearch.indices.create
     with:
@@ -160,8 +184,8 @@ steps:
           searchType: esqlQuery
           esqlQuery:
             esql: "FROM {{consts.alerts_index_name}} METADATA _id | KEEP _id, severity, alert_id, description, category"
-          timeWindowSize: 20
-          timeWindowUnit: s
+          timeWindowSize: 5
+          timeWindowUnit: m
           threshold:
             - 0
           thresholdComparator: ">"
@@ -171,7 +195,7 @@ steps:
           excludeHitsFromPreviousRun: true
           timeField: "@timestamp"
         schedule:
-          interval: 15s
+          interval: ${RULE_INTERVAL}
         actions:
           - id: system-connector-.workflows
             group: query matched
@@ -194,9 +218,12 @@ steps:
 
 /**
  * Workflow that creates a timestamp ingest pipeline and indexes alert
- * documents, which triggers an alert rule monitoring the test index.
+ * documents into the index the alert rule monitors.
+ *
+ * Indexes with `refresh=wait_for` so the documents are searchable by the time
+ * the test forces the rule to run.
  */
-export const getTriggerAlertWorkflowYaml = (name: string) => `
+export const getTriggerAlertWorkflowYaml = (name: string, alertsIndex: string) => `
 name: ${name}
 description: Add timestamp ingest pipeline, ingest docs, which will trigger the alert
 enabled: true
@@ -213,7 +240,7 @@ triggers:
         - "alerts"
 consts:
   pipeline_name: add_timestamp_if_missing
-  alerts_index_name: ${TEST_ALERTS_INDEX}
+  alerts_index_name: ${alertsIndex}
 
 steps:
   - name: create_ingest_pipeline
@@ -234,6 +261,6 @@ steps:
     foreach: "{{inputs.alerts}}"
     with:
       method: POST
-      path: /{{consts.alerts_index_name}}/_doc?pipeline={{consts.pipeline_name}}
+      path: /{{consts.alerts_index_name}}/_doc?pipeline={{consts.pipeline_name}}&refresh=wait_for
       body: \${{foreach.item}}
 `;

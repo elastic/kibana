@@ -32,6 +32,7 @@ export interface WorkflowsTestFixtures extends ScoutTestFixtures {
 
 export interface WorkflowsWorkerFixtures extends ScoutParallelWorkerFixtures {
   apiServices: WorkflowsApiServicesFixture;
+  workflowsUiEnabled: void;
 }
 
 export const test = base.extend<WorkflowsTestFixtures, ScoutWorkerFixtures>({
@@ -76,5 +77,18 @@ export const spaceTest = spaceBaseTest.extend<WorkflowsTestFixtures, WorkflowsWo
       await use(extendedApiServices);
     },
     { scope: 'worker' },
+  ],
+  /**
+   * The Workflows UI is gated behind a space-level UI setting. Enabling it per
+   * space keeps these tests on the default Scout server config and, unlike a
+   * `uiSettings.overrides` server arg, leaves the setting writable so a test can
+   * still turn it off.
+   */
+  workflowsUiEnabled: [
+    async ({ scoutSpace }: { scoutSpace: ScoutSpaceParallelFixture }, use: () => Promise<void>) => {
+      await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
+      await use();
+    },
+    { scope: 'worker', auto: true },
   ],
 });

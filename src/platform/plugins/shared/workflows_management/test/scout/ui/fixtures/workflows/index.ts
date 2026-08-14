@@ -30,7 +30,9 @@ export {
   getBrokenGraphWorkflowYaml,
 } from './console_workflows';
 export {
-  TEST_ALERTS_INDEX,
+  TEST_ALERTS_INDEX_PATTERN,
+  TEST_ALERTS_INDEX_PREFIX,
+  getTestAlertsIndex,
   getPrintAlertsWorkflowYaml,
   getCreateSecurityAlertRuleWorkflowYaml,
   getCreateObsAlertRuleWorkflowYaml,

@@ -9,6 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { WorkflowsApiServicesFixture } from '../../fixtures';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import {
@@ -20,8 +21,9 @@ import {
   getCreateObsAlertRuleWorkflowYaml,
   getCreateSecurityAlertRuleWorkflowYaml,
   getPrintAlertsWorkflowYaml,
+  getTestAlertsIndex,
   getTriggerAlertWorkflowYaml,
-  TEST_ALERTS_INDEX,
+  TEST_ALERTS_INDEX_PATTERN,
 } from '../../fixtures/workflows';
 
 /**
@@ -57,6 +59,53 @@ const getCreateAlertRuleWorkflow = (projectType: string | undefined) => {
   return getCreateObsAlertRuleWorkflowYaml;
 };
 
+/** The rule is created inside a workflow, so its ID has to be looked up afterwards. */
+const findRuleId = async (apiServices: WorkflowsApiServicesFixture, spaceId: string) => {
+  const { data } = await apiServices.alerting.rules.find({ per_page: 100 }, spaceId);
+  const rules = data.data as Array<{ id: string }>;
+  expect(rules).toHaveLength(1);
+  return rules[0].id;
+};
+
+/**
+ * Drives the alert chain without waiting on the rule's schedule: rules run at the
+ * 1m minimum a default deployment allows, which would dominate the test.
+ *
+ * `_run_soon` reports soft failures (rule already running, task update conflict)
+ * as a 200 with a message body that Scout's helper does not surface, so keep
+ * kicking the rule until every target workflow has an execution. Re-running is
+ * safe because both rule types de-duplicate already-seen documents.
+ *
+ * The rule is disabled once the alerts land so later scheduled runs cannot
+ * inflate the execution counts the test asserts on.
+ */
+const fireAlertsAndStopRule = async ({
+  apiServices,
+  spaceId,
+  targetWorkflowIds,
+}: {
+  apiServices: WorkflowsApiServicesFixture;
+  spaceId: string;
+  targetWorkflowIds: string[];
+}) => {
+  const ruleId = await findRuleId(apiServices, spaceId);
+
+  await expect(async () => {
+    await apiServices.alerting.rules.runSoon(ruleId, spaceId);
+
+    const executionCounts = await Promise.all(
+      targetWorkflowIds.map(async (workflowId) => {
+        const { total } = await apiServices.workflows.getExecutions(workflowId);
+        return total;
+      })
+    );
+
+    expect(executionCounts.every((count) => count > 0)).toBe(true);
+  }).toPass({ timeout: ALERT_PROPAGATION_TIMEOUT, intervals: [5_000] });
+
+  await apiServices.alerting.rules.disable(ruleId, spaceId);
+};
+
 // Alert trigger tests run on Security and Observability (and ESS), but NOT on Elasticsearch/Search.
 // Security uses the detection engine API; Observability uses the generic alerting API.
 // Failing: See https://github.com/elastic/kibana/issues/252959
@@ -80,7 +129,7 @@ test.describe.skip(
           cluster: ['manage_ingest_pipelines'],
           indices: [
             {
-              names: [TEST_ALERTS_INDEX],
+              names: [TEST_ALERTS_INDEX_PATTERN],
               privileges: ['write', 'read', 'view_index_metadata', 'create_index', 'delete_index'],
             },
           ],
@@ -95,8 +144,14 @@ test.describe.skip(
       });
     });
 
-    test.afterEach(async ({ scoutSpace, apiServices }) => {
+    test.afterEach(async ({ scoutSpace, apiServices, esClient }) => {
       await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
+      // The alert documents outlive the rules, so a later test in this space would
+      // otherwise match them and fire unexpected workflow executions.
+      await esClient.indices.delete(
+        { index: getTestAlertsIndex(scoutSpace.id) },
+        { ignore: [404] }
+      );
     });
 
     test('should trigger workflow from alert', async ({
@@ -104,9 +159,11 @@ test.describe.skip(
       page,
       apiServices,
       config,
+      scoutSpace,
     }) => {
       test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
       const getCreateAlertRuleYaml = getCreateAlertRuleWorkflow(config.projectType);
+      const alertsIndex = getTestAlertsIndex(scoutSpace.id);
 
       const singleWorkflowName = 'Handle single alert';
       const multipleWorkflowName = 'Handle multiple alerts';
@@ -135,8 +192,8 @@ test.describe.skip(
       const { created } = await apiServices.workflows.bulkCreate([
         getPrintAlertsWorkflowYaml(singleWorkflowName),
         getPrintAlertsWorkflowYaml(multipleWorkflowName),
-        getCreateAlertRuleYaml(createAlertRuleWorkflowName),
-        getTriggerAlertWorkflowYaml(triggerAlertWorkflowName),
+        getCreateAlertRuleYaml(createAlertRuleWorkflowName, alertsIndex),
+        getTriggerAlertWorkflowYaml(triggerAlertWorkflowName, alertsIndex),
       ]);
       const [singleWorkflow, multipleWorkflow, createAlertRuleWorkflow, triggerAlertWorkflow] =
         created;
@@ -155,6 +212,12 @@ test.describe.skip(
       await pageObjects.workflowEditor.executeWorkflowWithInputs({ alerts: mockAlerts });
 
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
+
+      await fireAlertsAndStopRule({
+        apiServices,
+        spaceId: scoutSpace.id,
+        targetWorkflowIds: [singleWorkflow.id, multipleWorkflow.id],
+      });
 
       // Validate single-alert workflow executions (one alert per execution)
       await pageObjects.workflowEditor.gotoWorkflowExecutions(singleWorkflow.id);
@@ -227,9 +290,11 @@ test.describe.skip(
       page,
       apiServices,
       config,
+      scoutSpace,
     }) => {
       test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
       const getCreateAlertRuleYaml = getCreateAlertRuleWorkflow(config.projectType);
+      const alertsIndex = getTestAlertsIndex(scoutSpace.id);
 
       const disabledWorkflowName = 'Disabled alert target';
       const canaryWorkflowName = 'Canary alert target';
@@ -251,8 +316,8 @@ test.describe.skip(
       const { created } = await apiServices.workflows.bulkCreate([
         getPrintAlertsWorkflowYaml(disabledWorkflowName),
         getPrintAlertsWorkflowYaml(canaryWorkflowName),
-        getCreateAlertRuleYaml(createRuleWorkflowName),
-        getTriggerAlertWorkflowYaml(triggerAlertWorkflowName),
+        getCreateAlertRuleYaml(createRuleWorkflowName, alertsIndex),
+        getTriggerAlertWorkflowYaml(triggerAlertWorkflowName, alertsIndex),
       ]);
       const [disabledWorkflow, canaryWorkflow, createRuleWorkflow, triggerAlertWorkflow] = created;
 
@@ -280,7 +345,13 @@ test.describe.skip(
       await pageObjects.workflowEditor.executeWorkflowWithInputs({ alerts: mockAlerts });
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-      // Wait for the canary workflow to receive executions — this proves alerts propagated
+      // The canary receiving an execution proves the alerts propagated.
+      await fireAlertsAndStopRule({
+        apiServices,
+        spaceId: scoutSpace.id,
+        targetWorkflowIds: [canaryWorkflow.id],
+      });
+
       await pageObjects.workflowEditor.gotoWorkflowExecutions(canaryWorkflow.id);
 
       const canaryExecutions = page.testSubj.locator('workflowExecutionListItem');
