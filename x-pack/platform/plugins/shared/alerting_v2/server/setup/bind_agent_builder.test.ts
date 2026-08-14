@@ -14,7 +14,6 @@ import { createActionPolicyAttachmentType } from '../agent_builder/attachments/a
 import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { registerSkills } from '../agent_builder/skills/register_skills';
-import { SchemaTranslationError } from '../agent_builder/skills/schema_to_skill_docs';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
@@ -229,30 +228,21 @@ describe('bindAgentBuilder', () => {
       );
     });
 
-    it('wires skill workflow helpers to the workflows management API', () => {
+    it('wires skill workflow helpers to the workflows management API', async () => {
       bindAgentBuilderPlugin();
       runOnStart();
 
       const deps = registerSkillsMock.mock.calls[0][1];
       const request = {} as never;
 
-      deps.getWorkflow('workflow-1', 'space-1');
+      await deps.getWorkflow('workflow-1', 'space-1');
       expect(workflowsManagementApi.getWorkflow).toHaveBeenCalledWith('workflow-1', 'space-1');
 
-      deps.getAvailableConnectors('space-1', request);
+      await deps.getAvailableConnectors('space-1', request);
       expect(workflowsManagementApi.getAvailableConnectors).toHaveBeenCalledWith(
         'space-1',
         request
       );
-    });
-
-    it('propagates SchemaTranslationError so Kibana start fails', () => {
-      bindAgentBuilderPlugin();
-      registerSkillsMock.mockImplementation(() => {
-        throw new SchemaTranslationError('schema boom');
-      });
-
-      expect(() => runOnStart()).toThrow(SchemaTranslationError);
     });
   });
 });

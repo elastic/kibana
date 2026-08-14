@@ -50,7 +50,7 @@ export const setMetadataOperationSchema = z
     tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
   })
   .describe(
-    'Use `set_metadata` to name the action policy and add a description or tags so the user can find and recognize it later.'
+    'Use `set_metadata` to name the action policy and add a description or tags so the user can filter by it later.'
   );
 
 export const setDestinationsOperationSchema = z
@@ -197,8 +197,8 @@ export const executeActionPolicyOperations = (
         }
         next = {
           ...next,
-          ...(op.groupingMode !== undefined ? { groupingMode: op.groupingMode } : {}),
-          ...(op.groupBy !== undefined ? { groupBy: op.groupBy } : {}),
+          ...(op.groupingMode !== undefined ? { grouping_mode: op.groupingMode } : {}),
+          ...(op.groupBy !== undefined ? { group_by: op.groupBy } : {}),
         };
         break;
       }
@@ -244,7 +244,7 @@ export const executeActionPolicyOperations = (
   }
 
   validateThrottleGroupingCompat(
-    next.groupingMode,
+    next.grouping_mode,
     next.throttle?.strategy,
     next.throttle?.interval
   );

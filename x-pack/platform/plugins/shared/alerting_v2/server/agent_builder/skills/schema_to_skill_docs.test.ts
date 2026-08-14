@@ -11,9 +11,11 @@ import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispat
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
+  generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
+  generateStateTransitionDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
   generateSeverityDoc,
@@ -23,6 +25,7 @@ import {
   generateThrottleGroupingCompatibilityDoc,
   generateMatcherContextDoc,
   getSeverityValues,
+  getDescribedEnumValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
 } from './schema_to_skill_docs';
@@ -173,9 +176,49 @@ describe('schema_to_skill_docs', () => {
         }),
       ]);
 
-      expect(() => generateOperationsDoc({ title: 'Missing Describe', schema })).toThrow(
-        /missing \.describe\(\)/
+      expect(() =>
+        generateOperationsDoc({
+          title: 'Missing Describe',
+          schema,
+        })
+      ).toThrow(/Missing \.describe\(\) on operation variant\(s\): set_name/);
+    });
+  });
+
+  describe('getDescribedEnumValues', () => {
+    it('returns each literal value with its .describe() copy', () => {
+      const schema = z.union([
+        z.literal('inactive').describe('Fully recovered'),
+        z.literal('active').describe('Alert is firing'),
+      ]);
+
+      expect(getDescribedEnumValues(schema, 'exampleStatusSchema')).toEqual([
+        { value: 'inactive', description: 'Fully recovered' },
+        { value: 'active', description: 'Alert is firing' },
+      ]);
+    });
+
+    it('throws when a literal is missing .describe()', () => {
+      const schema = z.union([
+        z.literal('inactive').describe('Fully recovered'),
+        z.literal('pending'),
+      ]);
+
+      expect(() => getDescribedEnumValues(schema, 'exampleStatusSchema')).toThrow(
+        /Missing \.describe\(\) on exampleStatusSchema value\(s\): pending/
       );
+    });
+
+    it('throws when the schema is not a union of literals', () => {
+      expect(() => getDescribedEnumValues(z.enum(['a', 'b']), 'exampleStatusSchema')).toThrow(
+        /exampleStatusSchema is not a union of described literals/
+      );
+    });
+  });
+
+  describe('generateRuleSchemaDoc', () => {
+    it('matches the snapshot', () => {
+      expect(generateRuleSchemaDoc()).toMatchSnapshot();
     });
   });
 
@@ -206,8 +249,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain(
         'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
       );
-      expect(doc).toContain('Use `set_kind` to choose whether the rule notifies');
-      expect(doc).not.toContain('Episode state transition thresholds (alert-only).');
+      expect(doc).toContain("Use `set_kind` to choose a rule kind matching the user's goal");
     });
   });
 
@@ -238,7 +280,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`name`');
       expect(doc).toContain('`destinations`');
       expect(doc).toContain('`matcher`');
-      expect(doc).toContain('`groupingMode`');
+      expect(doc).toContain('`grouping_mode`');
       expect(doc).toContain('`throttle`');
     });
   });
@@ -394,6 +436,28 @@ describe('schema_to_skill_docs', () => {
     it('documents the inputs.payload Liquid access pattern', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('inputs.payload');
+    });
+  });
+
+  describe('Alerting v2 agent builder start contract', () => {
+    it.each([
+      ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
+      ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
+      ['manage_rule operation .describe()', generateRuleOperationsDoc],
+      ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
+      ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
+      ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
+      ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
+      ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],
+      ['generateEnumList (throttle strategies from spec)', generateThrottleStrategiesDoc],
+      ['generateRuleKindDoc from spec', generateRuleKindDoc],
+      ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],
+      [
+        'generateActionPolicyWorkflowPayloadDoc workflow input definition',
+        generateActionPolicyWorkflowPayloadDoc,
+      ],
+    ] as const)('%s does not throw', (_label, generate) => {
+      expect(generate()).toEqual(expect.any(String));
     });
   });
 });

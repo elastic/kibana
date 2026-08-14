@@ -15,7 +15,6 @@ import type { LoggerServiceContract } from '../../lib/services/logger_service/lo
 import { createActionPolicyManagementSkill } from './action_policy_management_skill';
 import { createRuleManagementSkill } from './rule_management_skill';
 import { registerSkills } from './register_skills';
-import { SchemaTranslationError } from './schema_to_skill_docs';
 
 jest.mock('./rule_management_skill', () => ({
   createRuleManagementSkill: jest.fn(),
@@ -55,6 +54,8 @@ describe('registerSkills', () => {
   beforeEach(() => {
     agentBuilder = agentBuilderMocks.createSetup();
     logger = createLogger();
+    createRuleManagementSkillMock.mockReset();
+    createActionPolicyManagementSkillMock.mockReset();
     createRuleManagementSkillMock.mockReturnValue(ruleSkill);
     createActionPolicyManagementSkillMock.mockReturnValue(actionPolicySkill);
   });
@@ -73,29 +74,23 @@ describe('registerSkills', () => {
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(1, ruleSkill);
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(2, actionPolicySkill);
 
-    expect(logger.debug).toHaveBeenCalledWith({
+    expect(logger.debug).toHaveBeenNthCalledWith(1, {
       message: expect.any(Function),
-    });
-    const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-    expect(debugMessage()).toBe('Agent builder skills and attachments registered');
-    expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  it('logs SchemaTranslationError at error with skill_id and rethrows so Kibana start fails', () => {
-    createRuleManagementSkillMock.mockImplementation(() => {
-      throw new SchemaTranslationError('schema boom');
-    });
-
-    expect(() => registerSkills(agentBuilder, deps())).toThrow(SchemaTranslationError);
-
-    expect(logger.error).toHaveBeenCalledWith({
-      message: 'Failed to generate agent builder skill schema docs',
-      code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED,
       labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
-      error: expect.any(SchemaTranslationError),
     });
-    expect(agentBuilder.skills.register).not.toHaveBeenCalled();
-    expect(logger.debug).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenNthCalledWith(2, {
+      message: expect.any(Function),
+      labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
+    });
+    const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
+      ([{ message }]) => (typeof message === 'function' ? message() : message) as string
+    );
+    expect(debugMessages).toEqual([
+      `${RULE_MANAGEMENT_SKILL_ID} agent builder skill registered`,
+      `${ACTION_POLICY_MANAGEMENT_SKILL_ID} agent builder skill registered`,
+      'Agent builder skills and attachments registered',
+    ]);
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('logs unexpected register failures at error with skill_id and continues', () => {
@@ -109,14 +104,23 @@ describe('registerSkills', () => {
 
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith({
-      message: 'Failed to register agent builder skill',
+      message: `Failed to register agent builder skill. Id: ${ACTION_POLICY_MANAGEMENT_SKILL_ID}`,
       code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
       labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
       error: expect.any(Error),
     });
 
-    const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-    expect(debugMessage()).toBe('Agent builder skills partially registered');
+    const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
+      ([{ message }]) => (typeof message === 'function' ? message() : message) as string
+    );
+    expect(debugMessages).toEqual([
+      `${RULE_MANAGEMENT_SKILL_ID} agent builder skill registered`,
+      'Agent builder skills partially registered',
+    ]);
+    expect(logger.debug).toHaveBeenCalledWith({
+      message: expect.any(Function),
+      labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
+    });
   });
 
   it('does not log success debug when every skill fails', () => {

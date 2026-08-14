@@ -57,7 +57,7 @@ export const setMetadataOperationSchema = metadataSchema
   .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
-    'Use `set_metadata` to name the rule and add a description or tags so the user can find and recognize it later.'
+    'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
   );
 
 export const setKindOperationSchema = z
@@ -66,7 +66,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    'Use `set_kind` to choose whether the rule notifies (`alert`) or is observation-only (`signal`). Alert rules track episode lifecycle and can send notifications; signal rules do not.'
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`)."
   );
 
 export const setScheduleOperationSchema = scheduleSchema

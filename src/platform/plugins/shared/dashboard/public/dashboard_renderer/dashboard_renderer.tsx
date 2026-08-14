@@ -33,7 +33,7 @@ import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import type { DashboardRedirect } from '../dashboard_app/types';
-import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';
+import { coreServices, uiActionsService } from '../services/kibana_services';
 
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
@@ -174,11 +174,9 @@ export function DashboardRenderer({
 
   const isDashboardViewportLoading = !dashboardApi && !error;
 
-  const viewportClasses = classNames(
-    'dashboardViewport',
-    { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': isDashboardViewportLoading }
-  );
+  const viewportClasses = classNames('dashboardViewport', {
+    'dashboardViewport--loading': isDashboardViewportLoading,
+  });
 
   const loadingSpinner = showPlainSpinner ? (
     <EuiLoadingSpinner size="xxl" />
@@ -208,7 +206,6 @@ export function DashboardRenderer({
 
     return dashboardApi && dashboardInternalApi ? (
       <div
-        className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
