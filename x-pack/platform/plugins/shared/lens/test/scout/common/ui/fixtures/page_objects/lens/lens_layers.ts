@@ -15,9 +15,11 @@ export class LensLayers {
   // Tab `data-test-subj` values use layer ids (not numeric indices); this only ever
   // resolves to elements when there are 2+ layers (EUI hides the tab strip for one).
   private readonly layerTabsLocator;
+  private readonly layerTabButtonsLocator;
 
   constructor(private readonly page: ScoutPage) {
     this.layerTabsLocator = this.page.testSubj.locator('^unifiedTabs_tab_');
+    this.layerTabButtonsLocator = this.page.testSubj.locator('^unifiedTabs_selectTabBtn_');
   }
 
   /**
@@ -82,33 +84,23 @@ export class LensLayers {
     if (tabs.length === 0) {
       return;
     }
-    const tab = tabs[index];
-    if (!tab) {
-      throw new Error(`Layer tab not found at index ${index}`);
+    const tabButton = (await this.layerTabButtonsLocator.all())[index];
+    if (!tabButton) {
+      throw new Error(`Layer tab button not found at index ${index}`);
     }
-    if ((await tab.getAttribute('aria-selected')) === 'true') {
+    if ((await tabButton.getAttribute('aria-selected')) === 'true') {
       return;
     }
     await this.activateTab(index);
   }
 
   private async activateTab(index: number) {
-    // Pointer clicks can land on the delete action that overlays the selected tab.
-    // Unified Tabs activates adjacent tabs with arrow keys without touching overlay actions.
-    const tabs = await this.layerTabsLocator.all();
-    const selectedStates = await Promise.all(
-      tabs.map((candidate) => candidate.getAttribute('aria-selected'))
-    );
-    const selectedIndex = selectedStates.findIndex((selected) => selected === 'true');
-    if (selectedIndex < 0) {
-      throw new Error('Selected layer tab not found');
+    // Click the tab's interactive element rather than its wrapper, which also contains layer actions.
+    const tabButton = (await this.layerTabButtonsLocator.all())[index];
+    if (!tabButton) {
+      throw new Error(`Layer tab button not found at index ${index}`);
     }
-
-    await tabs[selectedIndex]?.focus();
-    const direction = index > selectedIndex ? 'ArrowRight' : 'ArrowLeft';
-    for (let step = 0; step < Math.abs(index - selectedIndex); step++) {
-      await this.page.keyboard.press(direction);
-    }
+    await tabButton.click();
     await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
   }
 
