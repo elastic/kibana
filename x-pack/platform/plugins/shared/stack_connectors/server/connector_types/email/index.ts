@@ -73,6 +73,11 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 
+// Emails sent from Elastic Cloud trial deployments (ECH and Serverless) go through the shared
+// Elastic SMTP relay (the `elastic_cloud` service). Their subjects are prefixed so trial traffic
+// can be identified and, if abused, filtered at the SMTP gateway.
+export const ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX = '[Elastic Cloud Trial]';
+
 const NO_RECIPIENTS_ERROR_MESSAGE = i18n.translate(
   'xpack.stackConnectors.email.noRecipientsErrorMessage',
   { defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required' }
@@ -226,6 +231,7 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
 
 interface GetConnectorTypeParams {
   publicBaseUrl?: string;
+  isElasticCloudTrial?: () => Promise<boolean>;
 }
 
 function validateConnector(
@@ -249,7 +255,7 @@ function validateConnector(
 
 // connector type definition
 export function getConnectorType(params: GetConnectorTypeParams): EmailConnectorType {
-  const { publicBaseUrl } = params;
+  const { publicBaseUrl, isElasticCloudTrial } = params;
   return {
     id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
@@ -276,7 +282,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       connector: validateConnector,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ publicBaseUrl }),
+    executor: curry(executor)({ publicBaseUrl, isElasticCloudTrial }),
   };
 }
 
@@ -299,8 +305,10 @@ function renderParameterTemplates(
 async function executor(
   {
     publicBaseUrl,
+    isElasticCloudTrial,
   }: {
     publicBaseUrl: GetConnectorTypeParams['publicBaseUrl'];
+    isElasticCloudTrial: GetConnectorTypeParams['isElasticCloudTrial'];
   },
   execOptions: EmailConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
@@ -427,6 +435,14 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
+  // Trial deployments (ECH and Serverless) route through the shared Elastic SMTP relay
+  // (the `elastic_cloud` service), so their subjects are prefixed to identify trial traffic.
+  // `&&` short-circuits, so the trial lookup only runs for the `elastic_cloud` service.
+  const subject =
+    config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
+      ? prefixTrialSubject(params.subject)
+      : params.subject;
+
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,
     transport,
@@ -438,7 +454,7 @@ async function executor(
       ...(params.replyTo ? { replyTo: params.replyTo } : {}),
     },
     content: {
-      subject: params.subject,
+      subject,
       message: actualMessage || 'no message set',
       messageHTML: actualHTMLMessage,
     },
@@ -483,6 +499,15 @@ async function executor(
 }
 
 // utilities
+
+// Prepend the trial marker unless the subject already carries it, so re-rendered or
+// user-authored subjects don't accumulate duplicate prefixes.
+function prefixTrialSubject(subject: string): string {
+  if (subject.startsWith(ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX)) {
+    return subject;
+  }
+  return `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} ${subject}`;
+}
 
 function trimMessageIfRequired(
   connectorId: string,
