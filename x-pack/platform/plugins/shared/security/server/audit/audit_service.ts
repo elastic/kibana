@@ -80,13 +80,13 @@ export class AuditService {
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
-    const auditLogPath = getAuditLogPath(config.appender);
+const auditLogPath = config.enabled ? getAuditLogPath(config.appender) : undefined;
 
     const probed$ = license.features$.pipe(
       distinctUntilKeyChanged('allowAuditLogging'),
       map((features) => ({
         features,
-        writeAccess: auditLogPath ? probeAuditLogWriteAccess(auditLogPath) : undefined,
+        writeAccess: auditLogPath && features.allowAuditLogging ? probeAuditLogWriteAccess(auditLogPath) : undefined,
       })),
       shareReplay(1)
     );
