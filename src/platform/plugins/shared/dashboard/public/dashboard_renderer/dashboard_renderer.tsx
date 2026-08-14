@@ -147,7 +147,7 @@ export function DashboardRenderer({
         setDashboard({
           api: results.api,
           internalApi: results.internalApi,
-          showControlGroup: results.useControlsIntegration,
+          showControlGroup: results.useControlsIntegration ?? true,
         });
         onApiAvailable?.(results.api, results.internalApi);
       })
