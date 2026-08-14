@@ -20,8 +20,12 @@ import { buildSiemResponse } from '../utils';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
-export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => {
+export const setAlertAssigneesRoute = (
+  router: SecuritySolutionPluginRouter,
+  eventBus?: SecuritySolutionEventBus
+) => {
   router.versioned
     .post({
       path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
@@ -56,9 +60,16 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
         const spaceId = securitySolution?.getSpaceId() ?? 'default';
         const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-        return withSiemErrorHandling(response, () =>
-          updateAlertsAssignees({ context, index, ids, assignees })
-        );
+        return withSiemErrorHandling(response, async () => {
+          const result = await updateAlertsAssignees({ context, index, ids, assignees });
+          void eventBus?.emitAlertAssigneesChanged(request, {
+            alertIds: ids,
+            assigneesToAdd: assignees.add,
+            assigneesToRemove: assignees.remove,
+            spaceId,
+          });
+          return result;
+        });
       }
     );
 };

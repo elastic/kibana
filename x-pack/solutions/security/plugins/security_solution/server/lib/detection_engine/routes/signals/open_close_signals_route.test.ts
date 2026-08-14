@@ -23,6 +23,7 @@ import { RuntimeFieldTypeEnum } from '../../../../../common/api/detection_engine
 import { MAX_RUNTIME_FIELDS_PER_REQUEST } from './bulk_close_runtime_mappings';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('set signal status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -290,6 +291,75 @@ describe('set signal status', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAlertStatusChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAlertStatusChanged: jest.fn() };
+      setSignalsStatusRoute(
+        server.router,
+        logger,
+        createMockTelemetryEventsSender(),
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    describe('by-ids path', () => {
+      test('emits alertStatusChanged with the updated ids and status', async () => {
+        await server.inject(
+          getSetSignalStatusByIdsRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            alertIds: ['somefakeid1', 'somefakeid2'],
+            status: 'closed',
+            truncated: false,
+          })
+        );
+      });
+    });
+
+    describe('by-query path', () => {
+      beforeEach(() => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            hits: [
+              {
+                _id: 'query-alert-1',
+                _index: '.siem-signals-default',
+                _source: { 'kibana.alert.workflow_status': 'open' },
+              },
+            ],
+            total: { value: 1, relation: 'eq' },
+            max_score: 0,
+          },
+        });
+      });
+
+      test('emits alertStatusChanged with prefetched alert ids', async () => {
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            alertIds: ['query-alert-1'],
+            status: 'closed',
+          })
+        );
+      });
     });
   });
 });

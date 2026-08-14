@@ -20,8 +20,12 @@ import { buildSiemResponse } from '../utils';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
-export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
+export const setAlertTagsRoute = (
+  router: SecuritySolutionPluginRouter,
+  eventBus?: SecuritySolutionEventBus
+) => {
   router.versioned
     .post({
       path: DETECTION_ENGINE_ALERT_TAGS_URL,
@@ -60,9 +64,16 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
         const spaceId = securitySolution.getSpaceId() ?? 'default';
         const index = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
-        return withSiemErrorHandling(response, () =>
-          updateAlertsTags({ context, index, ids, tags })
-        );
+        return withSiemErrorHandling(response, async () => {
+          const result = await updateAlertsTags({ context, index, ids, tags });
+          void eventBus?.emitAlertTagsChanged(request, {
+            alertIds: ids,
+            tagsToAdd: tags.tags_to_add,
+            tagsToRemove: tags.tags_to_remove,
+            spaceId,
+          });
+          return result;
+        });
       }
     );
 };

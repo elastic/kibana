@@ -14,6 +14,7 @@ import {
   ALERTS_API_ALL,
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SetAlertsStatusRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
@@ -33,11 +34,14 @@ import {
   buildRuntimeMappingsFromFieldTypes,
   MAX_RUNTIME_FIELDS_PER_REQUEST,
 } from './bulk_close_runtime_mappings';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger,
-  sender: ITelemetryEventsSender
+  sender: ITelemetryEventsSender,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -83,6 +87,7 @@ export const setSignalsStatusRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
         const alertsIndex = siemClient.getAlertsIndex();
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
         const user = core.security.authc.getCurrentUser();
 
         const clusterId = sender.getClusterID();
@@ -112,13 +117,47 @@ export const setSignalsStatusRoute = (
 
         try {
           if ('signal_ids' in request.body) {
+            const signalIds = request.body.signal_ids;
+            const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
+            if (eventBus) {
+              try {
+                const mgetResponse = await esClient.mget({
+                  index: alertsIndex,
+                  ids: signalIds,
+                  _source_includes: [ALERT_WORKFLOW_STATUS],
+                });
+                for (const doc of mgetResponse.docs) {
+                  if ('found' in doc && doc.found && doc._id != null) {
+                    previousStatuses.push({
+                      id: doc._id,
+                      previousStatus: (() => {
+                        const src = doc._source as Record<string, unknown> | null | undefined;
+                        const v = src?.[ALERT_WORKFLOW_STATUS];
+                        return typeof v === 'string' ? v : 'open';
+                      })(),
+                    });
+                  }
+                }
+              } catch {
+                logger.warn('Failed to pre-fetch previous alert statuses for workflow trigger');
+              }
+            }
+
             // Use common operation for "by IDs" case
             const body = await updateAlertsWorkflowStatus({
               context,
               index: alertsIndex,
-              ids: request.body.signal_ids,
+              ids: signalIds,
               status,
               reason,
+            });
+
+            void eventBus?.emitAlertStatusChanged(request, {
+              alertIds: signalIds,
+              status,
+              previousStatuses,
+              truncated: false,
+              spaceId,
             });
 
             return response.ok({ body });
@@ -151,6 +190,40 @@ export const setSignalsStatusRoute = (
             // result to the underlying `_update_by_query`.
             const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
+            const prefetchedAlertIds: string[] = [];
+            const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
+            let truncated = false;
+            if (eventBus) {
+              try {
+                const searchResponse = await esClient.search({
+                  index: alertsIndex,
+                  query: { bool: { filter: query } },
+                  _source_includes: [ALERT_WORKFLOW_STATUS],
+                  size: MAX_ALERTS_PER_TRIGGER,
+                  ignore_unavailable: true,
+                });
+                const totalHits = searchResponse.hits.total;
+                const totalCount =
+                  typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
+                truncated = totalCount > MAX_ALERTS_PER_TRIGGER;
+                for (const hit of searchResponse.hits.hits) {
+                  if (hit._id != null) {
+                    prefetchedAlertIds.push(hit._id);
+                    previousStatuses.push({
+                      id: hit._id,
+                      previousStatus: (() => {
+                        const src = hit._source as Record<string, unknown> | null | undefined;
+                        const v = src?.[ALERT_WORKFLOW_STATUS];
+                        return typeof v === 'string' ? v : 'open';
+                      })(),
+                    });
+                  }
+                }
+              } catch {
+                logger.warn('Failed to pre-fetch alert IDs for workflow trigger');
+              }
+            }
+
             const body = await updateSignalsStatusByQuery(
               status,
               query,
@@ -161,6 +234,14 @@ export const setSignalsStatusRoute = (
               reason,
               runtimeMappings
             );
+
+            void eventBus?.emitAlertStatusChanged(request, {
+              alertIds: prefetchedAlertIds,
+              status,
+              previousStatuses,
+              truncated,
+              spaceId,
+            });
 
             return response.ok({ body });
           }
