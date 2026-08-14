@@ -225,11 +225,12 @@ export const ranksFromPercentileRanks = (
   if (nums.length < 2) {
     return null;
   }
-  const good = nums[0];
-  const upToNi = nums[1];
+  // Same rounding as classic getRanksPercentages — integers that sum to 100.
+  const goodRounded = Number(nums[0].toFixed(0));
+  const upToNiRounded = Number(nums[1].toFixed(0));
   return {
-    good: Math.max(0, Math.min(100, good)),
-    ni: Math.max(0, Math.min(100, upToNi - good)),
-    poor: Math.max(0, Math.min(100, 100 - upToNi)),
+    good: Math.max(0, Math.min(100, goodRounded)),
+    ni: Math.max(0, Math.min(100, upToNiRounded - goodRounded)),
+    poor: Math.max(0, Math.min(100, 100 - upToNiRounded)),
   };
 };

@@ -73,8 +73,8 @@ export default function CoreVitals({
       <EuiSpacer size="s" />
       {displayServiceName && <ServiceName name={serviceName!} />}
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xl" justifyContent={'spaceBetween'} wrap>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
+      <EuiFlexGroup gutterSize="l">
+        <EuiFlexItem>
           <CoreVitalItem
             title={LCP_LABEL}
             value={formatToMilliseconds(lcp)}
@@ -85,7 +85,7 @@ export default function CoreVitals({
             dataTestSubj={'lcp-core-vital'}
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
+        <EuiFlexItem>
           <CoreVitalItem
             title={INP_LABEL}
             value={formatToMilliseconds(inp)}
@@ -96,7 +96,7 @@ export default function CoreVitals({
             dataTestSubj={'inp-core-vital'}
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ flexBasis: 380 }}>
+        <EuiFlexItem>
           <CoreVitalItem
             title={CLS_LABEL}
             value={cls?.toFixed(3) ?? null}

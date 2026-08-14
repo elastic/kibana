@@ -116,12 +116,7 @@ export function CoreVitalItem({
         titleColor={colorsStatus[biggestValIndex]}
       />
       <EuiSpacer size="s" />
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="flexStart"
-        style={{ maxWidth: 350 }}
-        responsive={false}
-      >
+      <EuiFlexGroup gutterSize="none" alignItems="flexStart" responsive={false}>
         {palette.map((hexCode, ind) => (
           <ColorPaletteFlexItem
             hexCode={hexCode}
