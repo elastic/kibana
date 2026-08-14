@@ -35,7 +35,6 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
 
       await addDataLayer(page, 'bar');
 
-      // FTR openChartSwitchPopover defaults to layer 0; keep that layer active before switching.
       await lens.layers.ensureLayerTabIsActive(0);
       await lens.openChartSwitchPopover({ visType: 'line', search: 'line' });
       await expect(lens.getChartSwitchWarning('line')).toBeHidden();
@@ -168,12 +167,15 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
 
       await lens.layers.duplicateLayer();
 
+      // now make the first layer bar percentage to lead it in an broken rendering state
       await lens.layers.ensureLayerTabIsActive(0);
       await lens.layers.switchToVisualizationSubtype('Percentage');
 
+      // now check that both the main visualization and the current visualization suggestion are in error state
       await expect(lens.workspace.currentSuggestionError).toBeVisible();
       expect(await lens.workspace.getErrorCount()).toBe(1);
 
+      // revert the subtype to stacked and everything should be fine again
       await lens.layers.switchToVisualizationSubtype('Stacked');
 
       await expect(lens.workspace.currentSuggestionError).toBeHidden();
