@@ -32,7 +32,7 @@ describe('resolution_target_ids', () => {
   });
 
   describe('resolveResolutionTargetEntityId', () => {
-    const logger = { debug: jest.fn() } as unknown as Logger;
+    const logger = { debug: jest.fn(), warn: jest.fn() } as unknown as Logger;
     const esClient = {} as ElasticsearchClient;
 
     beforeEach(() => {
@@ -68,7 +68,7 @@ describe('resolution_target_ids', () => {
       ).resolves.toBe('user:alias');
     });
 
-    it('falls back to the member id when the lookup throws', async () => {
+    it('returns null when the lookup throws', async () => {
       const createResolutionClient = jest.fn().mockReturnValue({
         getResolutionGroup: jest.fn().mockRejectedValue(new Error('not found')),
       });
@@ -81,8 +81,26 @@ describe('resolution_target_ids', () => {
           createResolutionClient,
           logger,
         })
-      ).resolves.toBe('user:alias');
-      expect(logger.debug).toHaveBeenCalled();
+      ).resolves.toBeNull();
+      expect(logger.warn).toHaveBeenCalled();
+    });
+
+    it('returns null when the target document has no entity.id', async () => {
+      const createResolutionClient = jest.fn().mockReturnValue({
+        getResolutionGroup: jest.fn().mockResolvedValue({
+          target: { entity: { name: 'only-name' } },
+        }),
+      });
+
+      await expect(
+        resolveResolutionTargetEntityId({
+          entityStoreId: 'user:alias',
+          spaceId: 'default',
+          esClient,
+          createResolutionClient,
+          logger,
+        })
+      ).resolves.toBeNull();
     });
   });
 });

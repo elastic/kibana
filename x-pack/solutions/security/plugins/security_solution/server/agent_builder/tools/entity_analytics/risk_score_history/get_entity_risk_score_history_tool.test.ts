@@ -442,7 +442,7 @@ describe('getEntityRiskScoreHistoryTool', () => {
       );
     });
 
-    it('falls back to the member entity id when resolution-group lookup fails', async () => {
+    it('returns an error when resolution-group lookup fails', async () => {
       mockExecuteEsql.mockResolvedValueOnce(exactUserHit);
 
       mockCore.getStartServices.mockResolvedValue([
@@ -467,18 +467,16 @@ describe('getEntityRiskScoreHistoryTool', () => {
         {},
       ]);
 
-      await runHandler({
+      const result = (await runHandler({
         entityType: 'user',
         entityId: 'user:alice',
         scoreType: 'resolution',
-      });
+      })) as ToolHandlerStandardReturn;
 
-      expect(mockGetRiskScoreHistory).toHaveBeenCalledWith(
-        expect.objectContaining({
-          entityId: 'user:alice',
-          scoreType: 'resolution',
-        })
-      );
+      const error = result.results[0] as ErrorResult;
+      expect(error.type).toBe(ToolResultType.error);
+      expect(mockGetRiskScoreHistory).not.toHaveBeenCalled();
+      expect(mockAttachmentsAdd).not.toHaveBeenCalled();
     });
 
     it('returns an error when no entity matches', async () => {

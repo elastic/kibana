@@ -270,13 +270,29 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
         // Resolution-group history is keyed by the resolution *target*'s entity.id.
         // Resolve that target before querying
         if (scoreType === 'resolution') {
-          historyEntityId = await resolveResolutionTargetEntityId({
+          const targetId = await resolveResolutionTargetEntityId({
             entityStoreId,
             spaceId,
             esClient: client,
             createResolutionClient: entityStore?.createResolutionClient,
             logger,
           });
+          if (targetId === null) {
+            const errorMessage = `Could not resolve resolution group target for "${entityId}"`;
+            telemetryTracker.recordFailure(errorMessage);
+            return {
+              results: [
+                {
+                  tool_result_id: getToolResultId(),
+                  type: ToolResultType.error,
+                  data: {
+                    message: errorMessage,
+                  },
+                },
+              ],
+            };
+          }
+          historyEntityId = targetId;
         }
 
         const riskScoreDataClient = new RiskScoreDataClient({

@@ -36,7 +36,8 @@ export const getResolutionTargetEntityId = (
 /**
  * Given any member (or target) entity id, looks up its resolution group and
  * returns the target's `entity.id`. Falls back to `entityStoreId` when the
- * resolution client is unavailable or the lookup fails.
+ * resolution client is unavailable. Returns `null` when the client is present
+ * but the lookup fails or the target has no `entity.id`.
  */
 export const resolveResolutionTargetEntityId = async ({
   entityStoreId,
@@ -50,20 +51,20 @@ export const resolveResolutionTargetEntityId = async ({
   esClient: ElasticsearchClient;
   createResolutionClient?: CreateResolutionClient;
   logger: Logger;
-}): Promise<string> => {
+}): Promise<string | null> => {
   if (!createResolutionClient) {
     return entityStoreId;
   }
 
   try {
     const group = await createResolutionClient(esClient, spaceId).getResolutionGroup(entityStoreId);
-    return getResolutionTargetEntityId(group.target) ?? entityStoreId;
+    return getResolutionTargetEntityId(group.target) ?? null;
   } catch (error) {
-    logger.debug(
+    logger.warn(
       `Failed to resolve resolution-group target for ${entityStoreId}: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
-    return entityStoreId;
+    return null;
   }
 };

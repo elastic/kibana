@@ -10,6 +10,22 @@ import type { SecurityAgentBuilderAttachments } from '../../../../common/constan
 import type { RiskScoreHistoryEntry } from '../../../../common/api/entity_analytics';
 import type { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 
+export type EntityRiskScoreHistoryAttachmentScoreType = Exclude<
+  RiskScoreHistoryEntry['score_type'],
+  'propagated'
+>;
+
+export type EntityRiskScoreHistoryAttachmentEntry = Pick<
+  RiskScoreHistoryEntry,
+  | '@timestamp'
+  | 'calculated_score_norm'
+  | 'calculated_level'
+  | 'calculated_score'
+  | 'score_type'
+  | 'category_1_score'
+  | 'category_1_count'
+>;
+
 export interface EntityRiskScoreHistoryAttachmentData {
   attachmentLabel?: string;
   identifierType: IdentifierType;
@@ -18,8 +34,8 @@ export interface EntityRiskScoreHistoryAttachmentData {
   from: string;
   to: string;
   bucketInterval: string;
-  scoreType?: RiskScoreHistoryEntry['score_type'];
-  entries: RiskScoreHistoryEntry[];
+  scoreType?: EntityRiskScoreHistoryAttachmentScoreType;
+  entries: EntityRiskScoreHistoryAttachmentEntry[];
 }
 
 export type EntityRiskScoreHistoryAttachment = Attachment<

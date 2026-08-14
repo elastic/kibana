@@ -78,7 +78,7 @@ const buildRiskHistoryFlyout = (
     return null;
   }
 
-  return { preview: [], right, ...(left ? { left } : {}) };
+  return { preview: [], right, left };
 };
 
 export const createEntityRiskScoreHistoryAttachmentDefinition = ({
