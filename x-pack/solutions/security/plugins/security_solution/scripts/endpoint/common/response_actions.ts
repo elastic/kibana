@@ -169,23 +169,6 @@ export const sendEndpointActionResponse = async (
       }
     }
 
-    // // `kill-process --kill-descendants`: add list of descendants killed
-    // if (
-    //   state === 'success' &&
-    //   isKillProcessAction(action) &&
-    //   (action.parameters as ResponseActionParametersWithEntityId | ResponseActionParametersWithPid)
-    //     ?.kill_descendants
-    // ) {
-    //   const tree = endpointActionGenerator.createProcessDescendants(
-    //     action.parameters?.pid ?? endpointActionGenerator.randomN(50)
-    //   );
-    //
-    //   (
-    //     endpointResponse.EndpointActions.data.output!
-    //       .content as unknown as KillProcessActionOutputContent
-    //   ).descendants = tree;
-    // }
-
     await esClient
       .index({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
