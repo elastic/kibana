@@ -8,24 +8,17 @@
  */
 
 /*
- * Same-team shortlist of Flaky Test Fixer PRs, for the fixer/verifier agent.
+ * Shortlists Flaky Test Fixer PRs that may duplicate a target, for the fixer/verifier agent.
  *
- * The fixer opens one PR per `failed-test` issue, but many issues share a single root cause
- * (the same page-object method or spec), so it opens several PRs touching the same code —
- * usually within minutes, by parallel runs, before any sibling PR exists. Rather than hand
- * the agent every open fixer PR (hundreds), this shortlists the ones whose `failed-test`
- * issue is owned by the same team as the target, so the agent has a short, relevant set to
- * confirm against the diffs.
+ * Parallel fixer runs often open several PRs for one root cause within minutes, before any
+ * sibling exists — so a "is a PR already open?" check misses them. Instead of handing the agent
+ * every open fixer PR (hundreds), we shortlist those whose `failed-test` issue shares the
+ * target's owning team, then let the agent confirm real duplicates against the diffs.
  *
- * Team is the signal because the fixer PRs themselves carry no ownership label, but the
- * `failed-test` issues they close reliably do (the reporter labels them from CODEOWNERS).
- * Two fixes for the same root cause touch the same file, which has one owning team, so their
- * issues share an ownership label — regardless of how the PR titles are worded. That label is
- * usually `Team:*` (e.g. `Team:Visualizations`), but some teams use a legacy colon-prefixed
- * area label instead (e.g. the ML team's `:ml`), so we match both. We read the target's team
- * from its issue, then find the team's `failed-test` issues in one search and intersect with
- * the linked-issue numbers we already parse from each PR — no per-issue fetch. Matching the
- * changed files (same method vs merely same file/team) is left to the agent, which has its diff.
+ * Team is the signal: fixer PRs carry no ownership label, but the `failed-test` issues they
+ * close do (labeled from CODEOWNERS), and same-root-cause fixes touch one team's files. We read
+ * the target's team from its issue, list that team's recent `failed-test` issues in one search,
+ * and intersect with the linked issues we already parse from each PR — no per-issue fetch.
  */
 
 const fs = require('fs');
@@ -35,12 +28,10 @@ const OWNER = 'elastic';
 const REPO = 'kibana';
 const FIXER_LABEL = 'flaky-test-fixer';
 const FAILED_TEST_LABEL = 'failed-test';
-// A merged fix means the root cause already landed; older merges aren't in flight.
+// A merge means the fix landed; only recent merges still count as in flight.
 const MERGED_LOOKBACK_DAYS = 30;
-// Buffer subtracted from the oldest in-flight PR's date to bound the team-issue search: a
-// `failed-test` issue is created shortly before its fix PR, so this window covers every issue
-// our PRs link while keeping the result under GitHub search's 1000-hit cap (busy teams have
-// thousands of `failed-test` issues all-time, but only a few hundred in any recent window).
+// Bounds the team-issue search back from the oldest in-flight PR: wide enough to cover every
+// issue our PRs link, tight enough to stay under GitHub search's 1000-hit cap.
 const TEAM_ISSUE_BUFFER_DAYS = 14;
 
 const linkedIssuesFromBody = (body) => [
@@ -66,8 +57,7 @@ const searchPrs = async (github, q, state) => {
   }));
 };
 
-// Every flaky-test-fixer PR that could still be work in flight for a root cause: every open
-// one, plus anything merged in the recent lookback window (a merge means the fix landed).
+// All fixer PRs that could still be in flight: every open one, plus recent merges.
 const fetchFixerPrs = async (github) => {
   const cutoff = new Date(Date.now() - MERGED_LOOKBACK_DAYS * 864e5).toISOString().slice(0, 10);
   const base = `repo:${OWNER}/${REPO} is:pr label:${FIXER_LABEL}`;
@@ -78,10 +68,8 @@ const fetchFixerPrs = async (github) => {
   return [...open, ...merged];
 };
 
-// A `failed-test` issue's owning team surfaces as either a `Team:*` label (the common case;
-// the colon may be followed or preceded by a space, e.g. `Team: SecuritySolution`) or a legacy
-// colon-prefixed area label (e.g. the ML team's `:ml`, used instead of `Team:ML`). Match both;
-// everything else on the issue (`failed-test`, `failure:*`, `scout-playwright`, …) is noise.
+// A team surfaces as either a `Team:*` label (allowing stray spaces, e.g. `Team: SecuritySolution`)
+// or a legacy colon-prefixed area label (e.g. ML's `:ml`, used instead of `Team:ML`). Match both.
 const isTeamLabel = (name) => /^team\s*:/i.test(name) || name.startsWith(':');
 
 const teamLabelsOf = (labels) =>
@@ -89,7 +77,7 @@ const teamLabelsOf = (labels) =>
     .map((label) => (typeof label === 'string' ? label : label.name))
     .filter((name) => name && isTeamLabel(name));
 
-// Numbers of the `failed-test` issues owned by any of `teamLabels`, created since `sinceDate`.
+// `failed-test` issue numbers owned by any of `teamLabels`, created since `sinceDate`.
 const fetchTeamIssueNumbers = async (github, teamLabels, sinceDate) => {
   const numbers = new Set();
   for (const teamLabel of teamLabels) {
@@ -102,12 +90,9 @@ const fetchTeamIssueNumbers = async (github, teamLabels, sinceDate) => {
 };
 
 /**
- * Shortlist the `flaky-test-fixer` PRs likely to duplicate a target, by owning team. Pass
- * `prNumber` (verifier) or `issueNumber` (fixer). Reads the target's `failed-test` issue to
- * get its team label(s) (`Team:*` or a colon-prefixed area label like `:ml`), then returns
- * every fixer PR whose linked issue belongs to the same team (or is the target's own issue),
- * as `{ team, candidates }` sorted oldest-first. Falls back to just the shared-linked-issue
- * matches when the target has no team label.
+ * Shortlist `flaky-test-fixer` PRs likely to duplicate a target, by owning team. Pass
+ * `prNumber` (verifier) or `issueNumber` (fixer). Returns `{ team, candidates }` with candidates
+ * sorted oldest-first. Falls back to shared-linked-issue matches when the target has no team.
  */
 const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
   const fixerPrs = await fetchFixerPrs(github);
@@ -132,7 +117,7 @@ const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
     throw new Error('findDuplicateCandidates requires either prNumber or issueNumber');
   }
 
-  // The target's owning team comes from its failed-test issue (fixer PRs carry no Team label).
+  // Owning team lives on the failed-test issue, not the PR.
   let teamLabels = [];
   const targetIssue = issueNumber ?? targetIssues[0];
   if (targetIssue != null) {
@@ -175,9 +160,8 @@ const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
   return { team: teamLabels, candidates };
 };
 
-// Workflow pre-step: write `duplicate-candidates.json` into the agent's context dir — the
-// `{ team, candidates }` same-team shortlist computed by `findDuplicateCandidates` — so the
-// agent reads it as a file instead of re-deriving it.
+// Workflow pre-step: write the `{ team, candidates }` shortlist to `duplicate-candidates.json`
+// in the agent's context dir, so the agent reads it as a file instead of recomputing it.
 const writeDuplicateCandidates = async ({
   github,
   core,
