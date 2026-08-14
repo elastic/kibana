@@ -160,7 +160,7 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
             const title = signal.metadata.rule_name || SIGNAL_FALLBACK_TITLE;
 
             return (
-              <React.Fragment key={`${signal.stream_name ?? title}-${index}`}>
+              <React.Fragment key={signal.metadata.detection_id}>
                 <EuiFlexGroup direction="column" gutterSize="xs">
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
                     <EuiFlexItem grow={false}>
