@@ -55,7 +55,7 @@ export type ProjectPickerContentProps =
 
 export const ProjectPickerContent = ({
   maxListHeight = 500,
-  projectRouting,
+  projectRouting = PROJECT_ROUTING.ORIGIN,
   onProjectRoutingChange,
   fetchProjectsByRouting,
   controlsState = 'enabled',
@@ -72,13 +72,7 @@ export const ProjectPickerContent = ({
   const { originProject, linkedProjects, isLoading } = projects;
 
   const availableProjects = useMemo(
-    () =>
-      originProject
-        ? [
-            originProject,
-            ...linkedProjects.slice(0).sort((a, b) => a._alias.localeCompare(b._alias)),
-          ]
-        : linkedProjects,
+    () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
     [originProject, linkedProjects]
   );
 

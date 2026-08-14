@@ -122,10 +122,10 @@ describe('CustomizeCps', () => {
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
 
-      expect(await getProjectSwitchButton('abcde1234567890')).toBeEnabled();
-      expect(await getProjectContextMenuButton('abcde1234567890')).toBeEnabled();
-      expect(await getProjectSwitchButton('badce1234567890')).toBeEnabled();
-      expect(await getProjectContextMenuButton('badce1234567890')).toBeEnabled();
+      expect(await getProjectSwitchButton(originProject._id)).toBeEnabled();
+      expect(await getProjectContextMenuButton(originProject._id)).toBeEnabled();
+      expect(await getProjectSwitchButton(linkedProject._id)).toBeEnabled();
+      expect(await getProjectContextMenuButton(linkedProject._id)).toBeEnabled();
     });
 
     it('renders with a space that has no projectRouting', async () => {
@@ -173,10 +173,10 @@ describe('CustomizeCps', () => {
 
       expect(await screen.findByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
 
-      expect(await getProjectSwitchButton('abcde1234567890')).toBeDisabled();
-      expect(await getProjectSwitchButton('badce1234567890')).toBeDisabled();
-      expect(await getProjectContextMenuButton('abcde1234567890')).toBeDisabled();
-      expect(await getProjectContextMenuButton('badce1234567890')).toBeDisabled();
+      expect(await getProjectSwitchButton(originProject._id)).toBeDisabled();
+      expect(await getProjectSwitchButton(linkedProject._id)).toBeDisabled();
+      expect(await getProjectContextMenuButton(originProject._id)).toBeDisabled();
+      expect(await getProjectContextMenuButton(linkedProject._id)).toBeDisabled();
     });
 
     it('allows the user to select project routing if the user has the manage_space_default capability', async () => {
@@ -193,15 +193,15 @@ describe('CustomizeCps', () => {
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
 
-      await user.click(await getProjectSwitchButton('badce1234567890'));
+      await user.click(await getProjectSwitchButton(linkedProject._id));
 
       expect(mockOnChange).toHaveBeenLastCalledWith({
         id: 'test-space',
         name: 'Test Space',
-        projectRouting: '_alias:* AND (_id:* AND NOT _id:badce1234567890)',
+        projectRouting: '_id:* AND NOT _id:badce1234567890',
       });
 
-      await user.click(await getProjectSwitchButton('badce1234567890'));
+      await user.click(await getProjectSwitchButton(linkedProject._id));
 
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();

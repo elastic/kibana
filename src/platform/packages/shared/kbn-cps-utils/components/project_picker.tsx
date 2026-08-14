@@ -106,10 +106,7 @@ export const ProjectPicker = ({
       return undefined;
     }
 
-    return [
-      projects?.origin,
-      ...projects.linkedProjects.slice(0).sort((a, b) => a._alias.localeCompare(b._alias)),
-    ];
+    return [projects?.origin, ...projects.linkedProjects];
   }, [projects?.origin, projects?.linkedProjects, totalProjectCount]);
 
   if (isDisabled) {

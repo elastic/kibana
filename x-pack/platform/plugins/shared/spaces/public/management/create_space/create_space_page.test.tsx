@@ -549,7 +549,7 @@ describe('ManageSpacePage', () => {
 
     await updateSolutionView('oblt');
 
-    // Click "This project" (sets routing to _alias:_origin)
+    // deselect linked project
     await userEvent.click(
       screen.getByTestId(
         `projectPickerListItemSwitch-${mockProjectRoutingFetchResult.linkedProjects[0]._id}`
@@ -568,7 +568,7 @@ describe('ManageSpacePage', () => {
       name: 'New Space Name',
       description: 'some description',
       solution: 'oblt',
-      projectRouting: '_alias:* AND (_id:* AND NOT _id:badce1234567890)',
+      projectRouting: '_id:* AND NOT _id:badce1234567890',
     });
   }, 10000);
 
