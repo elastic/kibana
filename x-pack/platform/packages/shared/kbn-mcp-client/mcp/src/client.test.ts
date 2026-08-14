@@ -135,9 +135,7 @@ describe('McpClient', () => {
       getServerCapabilities: jest.fn(),
     };
 
-    mockTransport = {
-      terminateSession: jest.fn().mockResolvedValue(undefined),
-    } as unknown as StreamableHTTPClientTransport;
+    mockTransport = {} as StreamableHTTPClientTransport;
 
     (Client as jest.MockedClass<typeof Client>).mockImplementation(
       () => mockClient as unknown as Client
@@ -290,14 +288,14 @@ describe('McpClient', () => {
       });
     });
 
-    it('forwards StreamableHTTPError', async () => {
+    it('throws StreamableHTTPError with formatted message', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const error = new StreamableHTTPError(500, 'Connection failed');
       mockClient.connect.mockRejectedValue(error);
 
       // The SDK formats the message as "Streamable HTTP error: Connection failed"
       // Our client just passes through the message without adding a prefix
-      await expect(client.connect()).rejects.toBe(error);
+      await expect(client.connect()).rejects.toThrow('Streamable HTTP error: Connection failed');
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -306,12 +304,12 @@ describe('McpClient', () => {
       );
     });
 
-    it('forwards UnauthorizedError', async () => {
+    it('throws UnauthorizedError with formatted message', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const error = new UnauthorizedError('Unauthorized');
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toBe(error);
+      await expect(client.connect()).rejects.toThrow('Unauthorized error: Unauthorized');
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -320,12 +318,14 @@ describe('McpClient', () => {
       );
     });
 
-    it('forwards generic errors', async () => {
+    it('throws generic error with formatted message', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const error = new Error('Generic error');
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toBe(error);
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP server: Generic error'
+      );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to connect to MCP server test-client, 1.0.0'
       );
@@ -334,15 +334,14 @@ describe('McpClient', () => {
       );
     });
 
-    it('logs the error cause when available', async () => {
+    it('includes error cause in the message when available', async () => {
       const client = new McpClient(mockLogger, clientDetails);
       const cause = new Error('unable to get local issuer certificate');
       const error = new TypeError('fetch failed', { cause });
       mockClient.connect.mockRejectedValue(error);
 
-      await expect(client.connect()).rejects.toBe(error);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'Error connecting to MCP server test-client, 1.0.0: fetch failed (cause: unable to get local issuer certificate)'
+      await expect(client.connect()).rejects.toThrow(
+        'Error connecting to MCP server: fetch failed (cause: unable to get local issuer certificate)'
       );
     });
 
@@ -387,33 +386,6 @@ describe('McpClient', () => {
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         'Disconnected from MCP client test-client, 1.0.0'
-      );
-    });
-
-    it('terminates the MCP session before closing the client', async () => {
-      const client = await createConnectedClient();
-      mockClient.close.mockResolvedValue(undefined);
-
-      await client.disconnect();
-
-      const terminateCall = (mockTransport.terminateSession as jest.Mock).mock
-        .invocationCallOrder[0];
-      const closeCall = mockClient.close.mock.invocationCallOrder[0];
-      expect(terminateCall).toBeLessThan(closeCall);
-    });
-
-    it('closes the client when session termination fails', async () => {
-      const client = await createConnectedClient();
-      const terminateError = new Error('Method not allowed');
-      (mockTransport.terminateSession as jest.Mock).mockRejectedValue(terminateError);
-      mockClient.close.mockResolvedValue(undefined);
-
-      await client.disconnect();
-
-      expect(mockClient.close).toHaveBeenCalled();
-      expect(client.isConnected()).toBe(false);
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Error terminating MCP session test-client, 1.0.0: Method not allowed'
       );
     });
 
