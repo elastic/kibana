@@ -399,16 +399,18 @@ export class LensWorkspace {
   }
 
   /**
-   * Applies a Lens suggestion by its card test-subj prefix (e.g. `lnsSuggestion-treemap`).
-   * Waits until the suggestion panel reflects a current visualization after apply.
+   * Applies a Lens suggestion by its card test-subj prefix, then waits until the
+   * resulting workspace chart has rendered.
+   *
+   * @param suggestionTestSubj - card prefix (e.g. `lnsSuggestion-treemap`)
+   * @param chartTestSubj - `data-test-subj` of the chart that apply should produce
+   *   (e.g. `partitionVisChart` for treemap/pie, `xyVisChart` for bar/line/area).
    */
-  async applySuggestion(suggestionTestSubj: string) {
+  async applySuggestion(suggestionTestSubj: string, chartTestSubj: string) {
     const suggestion = this.page.testSubj.locator(`${suggestionTestSubj} > lnsSuggestion`);
     await suggestion.waitFor({ state: 'visible' });
     await suggestion.click();
-    await this.page.testSubj
-      .locator('lnsSuggestion-currentVisualization')
-      .waitFor({ state: 'visible' });
+    await this.deps.waitForVisualization(chartTestSubj);
   }
 
   /**

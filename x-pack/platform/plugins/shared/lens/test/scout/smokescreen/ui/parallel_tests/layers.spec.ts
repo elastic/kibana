@@ -139,15 +139,15 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
       });
 
       await lens.save('twolayerchart', { addToDashboard: 'none' });
-      await lens.workspace.applySuggestion('lnsSuggestion-treemap');
+      await lens.workspace.applySuggestion('lnsSuggestion-treemap', 'partitionVisChart');
 
-      expect(await lens.layers.getLayerCount()).toBe(1);
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsPie_groupByDimensionPanel')
       ).toHaveText('Top 9 values of geo.dest');
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsPie_sizeByDimensionPanel')
       ).toHaveText('Average of bytes');
+      expect(await lens.layers.getLayerCount()).toBe(1);
     }
   );
 
