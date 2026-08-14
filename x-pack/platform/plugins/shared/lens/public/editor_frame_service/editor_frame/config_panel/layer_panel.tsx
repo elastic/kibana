@@ -338,16 +338,11 @@ export function LayerPanel(props: LayerPanelProps) {
   );
 
   const { dataViews } = props.framePublicAPI;
-  const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const layerState = layerDatasourceState as DatasourceStateWithLayers | undefined;
-  const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() ||
-    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
-    false;
+  const layerQuery = layerState?.layers?.[layerId]?.query as AggregateQuery | Query | undefined;
+  const isTextBasedLanguage = datasourcePublicAPI?.isTextBasedLanguage() ?? false;
   const shouldRenderESQLEditor =
-    isTextBasedLanguage &&
-    canEditTextBasedQuery &&
-    isOfAggregateQueryType(editorProps.attributes?.state.query);
+    isTextBasedLanguage && canEditTextBasedQuery && isOfAggregateQueryType(layerQuery);
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -424,18 +419,19 @@ export function LayerPanel(props: LayerPanelProps) {
     return true;
   };
 
-  const initialQuery = layerHasQuery(layerState) ? layerState!.layers[layerId].query : { esql: '' };
+  const getLayerQuery = (): AggregateQuery | Query =>
+    layerHasQuery(layerState) ? layerState!.layers[layerId].query : { esql: '' };
+  const initialQuery = getLayerQuery();
 
   const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
 
   const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
 
-  // Sync query state when layer is converted to ES|QL
+  // Sync query state when switching layers or when a layer is converted to ES|QL.
   useEffect(() => {
-    if (layerHasQuery(layerState)) {
-      const newQuery = layerState!.layers[layerId].query;
-      setQuery(newQuery);
-    }
+    const newQuery = getLayerQuery();
+    setQuery(newQuery);
+    prevQuery.current = newQuery;
     // Only sync when datasource state changes, not on user keystrokes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layerState, layerId]);
