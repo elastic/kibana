@@ -76,11 +76,15 @@ export function useCustomContentHtml({
   // wrote so we can skip the echo re-run without also skipping intentional version bumps.
   const selfWrittenRef = useRef<string | undefined>(undefined);
 
-  // Track the last-rendered timeRange and generationVersion so that timepicker changes and
-  // explicit refresh clicks still trigger a re-fetch even when savedTemplate hasn't changed
-  // (which would otherwise trip the echo-skip guard below).
+  // Track the last-rendered fetch inputs so that any change in unified search context
+  // (timeRange, filters, query, isApproximate, projectRouting, generationVersion) still
+  // triggers a re-fetch even when savedTemplate hasn't changed.
   const lastRenderedTimeRangeRef = useRef<TimeRange | undefined>(undefined);
   const lastRenderedGenerationVersionRef = useRef(generationVersion);
+  const lastRenderedIsApproximateRef = useRef(isApproximate);
+  const lastRenderedProjectRoutingRef = useRef<ProjectRouting | undefined>(projectRouting);
+  const lastRenderedQueryRef = useRef<Query | AggregateQuery | undefined>(query);
+  const lastRenderedFiltersRef = useRef<Filter[] | undefined>(filters);
 
   const colorModeRef = useRef(colorMode);
   useEffect(() => {
@@ -101,11 +105,27 @@ export function useCustomContentHtml({
     const generationVersionSame = generationVersion === lastRenderedGenerationVersionRef.current;
     lastRenderedGenerationVersionRef.current = generationVersion;
 
+    const isApproximateSame = isApproximate === lastRenderedIsApproximateRef.current;
+    lastRenderedIsApproximateRef.current = isApproximate;
+
+    const projectRoutingSame = projectRouting === lastRenderedProjectRoutingRef.current;
+    lastRenderedProjectRoutingRef.current = projectRouting;
+
+    const querySame = JSON.stringify(query) === JSON.stringify(lastRenderedQueryRef.current);
+    lastRenderedQueryRef.current = query;
+
+    const filtersSame = JSON.stringify(filters) === JSON.stringify(lastRenderedFiltersRef.current);
+    lastRenderedFiltersRef.current = filters;
+
     if (
       savedTemplate !== undefined &&
       savedTemplate === selfWrittenRef.current &&
       timeRangeSame &&
-      generationVersionSame
+      generationVersionSame &&
+      isApproximateSame &&
+      projectRoutingSame &&
+      querySame &&
+      filtersSame
     ) {
       return;
     }
