@@ -410,8 +410,6 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
             rowHeight: ROW_HEIGHT, // Increased height to accommodate secondary content and tags
             showIcons: false,
             css: {
-              // Remove EUI's scroll-fade mask — it looks out of place in a panel list.
-              maskImage: 'none',
               // Hide the badge when the option is focused
               // This should be configurable in EUI, but it's not :(
               '.euiSelectableListItem__onFocusBadge': {
