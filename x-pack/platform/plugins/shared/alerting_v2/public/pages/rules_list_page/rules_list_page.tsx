@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
-import { useService } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean } from '@kbn/react-hooks';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { RULES_CONTENT_LIST_ID } from '../../constants';
+import { RULES_CONTENT_LIST_ID, paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import {
@@ -49,6 +49,11 @@ export const RulesListPage = () => {
   const { flyout, openCreateFlyout, openCreateBuilderFlyout, openEditFlyout, openCloneFlyout } =
     useComposeDiscoverFlyout();
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+  const navigateToSequenceBuilder = useCallback(() => {
+    navigateToUrl(basePath.prepend(paths.sequenceRuleCreate));
+  }, [navigateToUrl, basePath]);
   const isRuleManagementABSkillAvailable = useIsRuleManagementABSkillAvailable();
   const abSkillRequirements = useRuleManagementABSkillRequirements();
   // We always render the "Create with agent" entry points; when the skill is unavailable they
@@ -153,6 +158,7 @@ export const RulesListPage = () => {
           onCreateRule={openCreateOptionsFlyout}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={navigateToAgentBuilder}
+          onBuildSequence={navigateToSequenceBuilder}
           createWithAgentDisabled={!isRuleManagementABSkillAvailable}
           createWithAgentTooltipText={createWithAgentTooltipText}
         />
