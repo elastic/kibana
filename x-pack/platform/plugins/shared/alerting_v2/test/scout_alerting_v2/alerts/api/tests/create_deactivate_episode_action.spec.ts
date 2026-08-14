@@ -222,7 +222,7 @@ apiTest.describe('Create deactivate episode action API', { tag: '@local-stateful
       });
 
       expect(response).toHaveStatusCode(404);
-      expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
+      expect(response.body.code).toBe('ALERT_EPISODE_NOT_LATEST');
       expect(response.body.details).toMatchObject({
         episode_id: olderEpisodeId,
         group_hash: groupHash,

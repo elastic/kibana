@@ -415,7 +415,7 @@ apiTest.describe('Bulk create episode actions API', { tag: '@local-stateful-clas
   );
 
   apiTest(
-    'lifecycle: reports ALERT_EPISODE_NOT_FOUND for a lifecycle item targeting a superseded episode',
+    'lifecycle: reports ALERT_EPISODE_NOT_LATEST for a lifecycle item targeting a superseded episode',
     async ({ apiClient, apiServices }) => {
       // Lifecycle actions are guarded to the latest episode of the series;
       // in bulk the guard is reported per item, keyed by the episode_id.
@@ -450,7 +450,7 @@ apiTest.describe('Bulk create episode actions API', { tag: '@local-stateful-clas
       expect(response.body.affected_count).toBe(0);
       expect(response.body.errors).toHaveLength(1);
       expect(response.body.errors[0].id).toBe(olderEpisodeId);
-      expect(response.body.errors[0].error.code).toBe('ALERT_EPISODE_NOT_FOUND');
+      expect(response.body.errors[0].error.code).toBe('ALERT_EPISODE_NOT_LATEST');
       expect(response.body.errors[0].error.details).toMatchObject({ group_hash: groupHash });
 
       const actions = await apiServices.alertingV2.alertActionsEvents.find({
