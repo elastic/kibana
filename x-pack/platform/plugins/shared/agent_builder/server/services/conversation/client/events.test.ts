@@ -7,8 +7,18 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { TimelineEvent, TimelineEventInput } from '@kbn/agent-builder-common';
-import { EventActorType, TimelineEventType, TimelineTriggerType } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRound,
+  TimelineEvent,
+  TimelineEventInput,
+} from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  EventActorType,
+  TimelineEventType,
+  TimelineTriggerType,
+} from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
@@ -175,6 +185,149 @@ describe('ConversationClient timeline events', () => {
       delete (doc._source as { events?: unknown }).events;
       mockStorageClient.search.mockResolvedValue({ hits: { hits: [doc] } });
       expect(await client.getEvents('conv-1')).toEqual([]);
+    });
+
+    it('converts legacy rounds when the conversation has no stored events', async () => {
+      const doc = makeDoc();
+      delete (doc._source as { events?: unknown }).events;
+      (doc._source as { conversation_rounds: unknown[] }).conversation_rounds = [
+        {
+          id: 'r1',
+          status: 'completed',
+          input: { message: 'hi' },
+          steps: [],
+          response: { message: 'yo' },
+          started_at: '2026-01-01T00:00:00.000Z',
+        },
+      ];
+      mockStorageClient.search.mockResolvedValue({ hits: { hits: [doc] } });
+
+      const events = await client.getEvents('conv-1');
+      expect(events.map((e) => [e.id, e.type])).toEqual([
+        ['r1::user_message', TimelineEventType.userMessage],
+        ['r1::execution_completed', TimelineEventType.executionCompleted],
+      ]);
+    });
+  });
+
+  describe('whole-doc writes preserve the timeline (P2.0)', () => {
+    const storedEvent: TimelineEvent = {
+      id: 'e1',
+      type: TimelineEventType.userMessage,
+      created_at: '2026-01-01T00:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1' },
+      data: { message: 'hi' },
+    };
+    const activeExecution = {
+      execution_id: 'exec-1',
+      trigger_event_id: 'e1',
+      started_at: '2026-01-01T00:00:00.000Z',
+    };
+
+    beforeEach(() => {
+      mockStorageClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('keeps events/active_execution/schema_version when a field is updated', async () => {
+      const doc = makeDoc([storedEvent]);
+      const docWithFields = {
+        ...doc,
+        _source: { ...doc._source, schema_version: 1, active_execution: activeExecution },
+      };
+      mockStorageClient.search.mockResolvedValue({ hits: { hits: [docWithFields] } });
+
+      await client.update({ id: 'conv-1', title: 'New title' });
+
+      const indexed = mockStorageClient.index.mock.calls[0][0].document;
+      expect(indexed.title).toBe('New title');
+      expect(indexed.events).toEqual([storedEvent]);
+      expect(indexed.schema_version).toBe(1);
+      expect(indexed.active_execution).toEqual(activeExecution);
+    });
+
+    it('does not introduce the fields when the stored doc lacks them', async () => {
+      const doc = makeDoc();
+      delete (doc._source as { events?: unknown }).events;
+      mockStorageClient.search.mockResolvedValue({ hits: { hits: [doc] } });
+
+      await client.update({ id: 'conv-1', title: 'New title' });
+
+      const indexed = mockStorageClient.index.mock.calls[0][0].document;
+      expect('events' in indexed).toBe(false);
+      expect('schema_version' in indexed).toBe(false);
+      expect('active_execution' in indexed).toBe(false);
+    });
+  });
+
+  describe('appendRoundTimelineEvents (producer)', () => {
+    const conversation = {
+      id: 'conv-1',
+      agent_id: 'agent-1',
+      user: { id: 'user-1', username: 'alice' },
+      title: 'T',
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+      rounds: [],
+    } as unknown as Conversation;
+
+    const round = (overrides: Partial<ConversationRound> = {}) =>
+      ({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+        input: { message: 'hello' },
+        steps: [],
+        response: { message: 'hi' },
+        started_at: '2026-01-01T00:00:00.000Z',
+        time_to_first_token: 1,
+        time_to_last_token: 2,
+        model_usage: { connector_id: 'c', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
+        ...overrides,
+      } as ConversationRound);
+
+    const appendedEvents = (): TimelineEvent[] =>
+      esClient.update.mock.calls[0][0].script.params.new_events;
+
+    it('appends user_message + execution_started + execution_completed for a fresh turn', async () => {
+      await client.appendRoundTimelineEvents(conversation, round(), { resumed: false });
+
+      const events = appendedEvents();
+      expect(events.map((e) => e.type)).toEqual([
+        TimelineEventType.userMessage,
+        TimelineEventType.executionStarted,
+        TimelineEventType.executionCompleted,
+      ]);
+      const [userMessage, started, completed] = events;
+      expect(userMessage.actor).toMatchObject({ type: EventActorType.user, id: 'user-1' });
+      expect(started.actor).toMatchObject({ type: EventActorType.agent, id: 'agent-1' });
+      // linkage: the run points back at the user message and shares one execution id
+      expect(started.trigger_event_id).toBe(userMessage.id);
+      expect(completed.trigger_event_id).toBe(userMessage.id);
+      expect(started.execution_id).toBe(completed.execution_id);
+    });
+
+    it('emits prompt_requested as the terminal event when the round awaits a prompt', async () => {
+      await client.appendRoundTimelineEvents(
+        conversation,
+        round({ status: ConversationRoundStatus.awaitingPrompt, pending_prompts: [] }),
+        { resumed: false }
+      );
+
+      const events = appendedEvents();
+      expect(events[events.length - 1].type).toBe(TimelineEventType.promptRequested);
+    });
+
+    it('emits only the terminal event for a resumed round', async () => {
+      await client.appendRoundTimelineEvents(conversation, round(), { resumed: true });
+
+      const events = appendedEvents();
+      expect(events.map((e) => e.type)).toEqual([TimelineEventType.executionCompleted]);
+    });
+
+    it('is best-effort: a failed append is swallowed, not thrown', async () => {
+      esClient.update.mockRejectedValueOnce(new Error('es down'));
+      await expect(
+        client.appendRoundTimelineEvents(conversation, round(), { resumed: false })
+      ).resolves.toBeUndefined();
     });
   });
 });

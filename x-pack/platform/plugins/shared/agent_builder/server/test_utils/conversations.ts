@@ -66,6 +66,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     delete: jest.fn(),
     appendEvents: jest.fn(),
     getEvents: jest.fn(),
+    appendRoundTimelineEvents: jest.fn().mockResolvedValue(undefined),
   };
 };
 

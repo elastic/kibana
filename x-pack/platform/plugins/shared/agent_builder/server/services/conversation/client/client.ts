@@ -12,10 +12,14 @@ import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
+  type ConversationRound,
   type TimelineEvent,
   type TimelineEventInput,
   type EventActor,
   EventActorType,
+  ConversationRoundStatus,
+  TimelineEventType,
+  TimelineTriggerType,
   createBadRequestError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
@@ -49,10 +53,17 @@ import type {
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
-import type { ConversationStorage } from './storage';
+import type { ConversationStorage, ConversationProperties } from './storage';
 import { conversationIndexName, createStorage } from './storage';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
+import {
+  roundsToEvents,
+  userMessageActor,
+  userMessageData,
+  agentActor,
+  executionCompletedData,
+} from './rounds_to_events';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -88,6 +99,16 @@ export interface ConversationClient {
   appendEvents(conversationId: string, events: TimelineEventInput[]): Promise<TimelineEvent[]>;
   /** Read the conversation's timeline, in order. */
   getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
+  /**
+   * Dual-write: translate a completed round into coarse timeline events and append them. Called
+   * by the execution pipeline right after the round is written. Best-effort — the timeline is
+   * additive to rounds, so a failure here is logged and swallowed rather than failing the run.
+   */
+  appendRoundTimelineEvents(
+    conversation: Conversation,
+    round: ConversationRound,
+    options: { resumed: boolean }
+  ): Promise<void>;
 }
 
 export const createClient = ({
@@ -379,7 +400,11 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<TimelineEvent[]> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    let events: TimelineEvent[] = document._source!.events ?? [];
+
+    let events: TimelineEvent[] =
+      document._source!.events !== undefined
+        ? document._source!.events
+        : roundsToEvents(fromEs(document));
 
     if (options.afterEventId) {
       const index = events.findIndex((event) => event.id === options.afterEventId);
@@ -396,6 +421,66 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return events;
+  }
+
+  async appendRoundTimelineEvents(
+    conversation: Conversation,
+    round: ConversationRound,
+    options: { resumed: boolean }
+  ): Promise<void> {
+    const executionId = uuidv4();
+    const agent = agentActor(conversation);
+    const events: TimelineEventInput[] = [];
+
+    let triggerEventId: string | undefined;
+
+    if (!options.resumed) {
+      triggerEventId = uuidv4();
+      events.push({
+        id: triggerEventId,
+        created_at: round.started_at,
+        actor: userMessageActor(conversation, round),
+        type: TimelineEventType.userMessage,
+        data: userMessageData(round),
+      });
+      events.push({
+        created_at: round.started_at,
+        actor: agent,
+        execution_id: executionId,
+        trigger_event_id: triggerEventId,
+        type: TimelineEventType.executionStarted,
+        data: { trigger_type: TimelineTriggerType.userMessage },
+      });
+    }
+
+    const terminal = {
+      created_at: new Date().toISOString(),
+      actor: agent,
+      execution_id: executionId,
+      ...(triggerEventId ? { trigger_event_id: triggerEventId } : {}),
+    };
+
+    if (round.status === ConversationRoundStatus.awaitingPrompt) {
+      events.push({
+        ...terminal,
+        type: TimelineEventType.promptRequested,
+        data: { prompts: round.pending_prompts ?? [] },
+      });
+    } else {
+      events.push({
+        ...terminal,
+        type: TimelineEventType.executionCompleted,
+        data: executionCompletedData(round),
+      });
+    }
+
+    try {
+      await this.appendEvents(conversation.id, events);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to append timeline events for conversation ${conversation.id}: ${error.message}`
+      );
+    }
   }
 
   private stampEvent(event: TimelineEventInput, now: string): TimelineEvent {
@@ -579,9 +664,28 @@ class ConversationClientImpl implements ConversationClient {
     access: ConversationAccess;
     maxRetries: number;
   }): OccWriter<Conversation> {
+    // These fields live on the stored document but not on the API `Conversation`, so `toEs`
+    // cannot round-trip them. A whole-document `index` would drop the event timeline. Capture
+    // them on read and re-emit them on write. Refreshed per attempt because `readModifyWrite`
+    // re-reads on retry, so a concurrent append is picked up before the next write.
+    let preserved: Pick<
+      ConversationProperties,
+      'events' | 'active_execution' | 'schema_version'
+    > = {};
+
     return new OccWriter<Conversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
+        const source = document._source!;
+        preserved = {
+          ...(source.events !== undefined ? { events: source.events } : {}),
+          ...(source.active_execution !== undefined
+            ? { active_execution: source.active_execution }
+            : {}),
+          ...(source.schema_version !== undefined
+            ? { schema_version: source.schema_version }
+            : {}),
+        };
 
         return {
           id,
@@ -592,7 +696,7 @@ class ConversationClientImpl implements ConversationClient {
       index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
         const response = await this.storage.getClient().index({
           id,
-          document: toEs(document, this.space),
+          document: { ...toEs(document, this.space), ...preserved },
           ...(ifSeqNo != null && ifPrimaryTerm != null
             ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
             : {}),

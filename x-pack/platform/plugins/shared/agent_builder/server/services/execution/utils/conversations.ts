@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { of, forkJoin, switchMap } from 'rxjs';
+import { forkJoin, switchMap } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -37,8 +37,8 @@ export const createConversation$ = ({
     title: title$,
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
-    switchMap(({ title, roundCompletedEvent }) => {
-      return conversationClient.create({
+    switchMap(async ({ title, roundCompletedEvent }) => {
+      const createdConversation = await conversationClient.create({
         id: conversation.id,
         title,
         agent_id: conversation.agent_id,
@@ -55,9 +55,15 @@ export const createConversation$ = ({
           ? { workspace_id: roundCompletedEvent.data.workspace_id }
           : {}),
       });
-    }),
-    switchMap((createdConversation) => {
-      return of(createConversationCreatedEvent(createdConversation));
+
+      // Dual-write: also append the coarse timeline events for this round.
+      await conversationClient.appendRoundTimelineEvents(
+        createdConversation,
+        roundCompletedEvent.data.round,
+        { resumed: false }
+      );
+
+      return createConversationCreatedEvent(createdConversation);
     })
   );
 };
@@ -77,7 +83,7 @@ export const updateConversation$ = ({
   action?: ConversationAction;
 }) => {
   return roundCompletedEvents$.pipe(
-    switchMap((roundCompletedEvent) => {
+    switchMap(async (roundCompletedEvent) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
 
       // A resumed round keeps the pending round's id, so it is matched by id.
@@ -88,7 +94,7 @@ export const updateConversation$ = ({
           ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      return conversationClient.upsertRound(
+      const updatedConversation = await conversationClient.upsertRound(
         {
           id: conversation.id,
           round,
@@ -106,9 +112,11 @@ export const updateConversation$ = ({
         },
         { access: 'converse' }
       );
-    }),
-    switchMap((updatedConversation) => {
-      return of(createConversationUpdatedEvent(updatedConversation));
+
+      // Dual-write: also append the coarse timeline events for this round.
+      await conversationClient.appendRoundTimelineEvents(updatedConversation, round, { resumed });
+
+      return createConversationUpdatedEvent(updatedConversation);
     })
   );
 };
