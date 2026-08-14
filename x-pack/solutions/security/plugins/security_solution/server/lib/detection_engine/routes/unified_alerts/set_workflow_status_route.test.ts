@@ -16,6 +16,7 @@ import {
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsWorkflowStatusRoute } from './set_workflow_status_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('set unified alerts workflow status', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -234,6 +235,54 @@ describe('set unified alerts workflow status', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAlertStatusChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAlertStatusChanged: jest.fn() };
+      setUnifiedAlertsWorkflowStatusRoute(
+        server.router,
+        ruleDataClient,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
+        docs: [
+          {
+            found: true,
+            _id: 'somefakeid1',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'open' },
+          },
+          {
+            found: true,
+            _id: 'somefakeid2',
+            _index: '.alerts-security.alerts-default',
+            _source: { 'kibana.alert.workflow_status': 'acknowledged' },
+          },
+        ],
+      });
+    });
+
+    test('emits alertStatusChanged with the updated ids and status', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['somefakeid1', 'somefakeid2'],
+          status: 'closed',
+          truncated: false,
+        })
+      );
     });
   });
 });

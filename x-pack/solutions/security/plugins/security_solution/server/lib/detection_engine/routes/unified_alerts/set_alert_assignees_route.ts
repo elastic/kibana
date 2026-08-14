@@ -20,10 +20,12 @@ import { validateAlertAssigneesArrays } from '../common/validators/validate_aler
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 export const setUnifiedAlertsAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient: IRuleDataClient | null
+  ruleDataClient: IRuleDataClient | null,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -55,10 +57,19 @@ export const setUnifiedAlertsAssigneesRoute = (
         }
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
-        return withSiemErrorHandling(response, () =>
-          updateAlertsAssignees({ context, index, ids, assignees })
-        );
+        return withSiemErrorHandling(response, async () => {
+          const result = await updateAlertsAssignees({ context, index, ids, assignees });
+          void eventBus?.emitAlertAssigneesChanged(request, {
+            alertIds: ids,
+            assigneesToAdd: assignees.add,
+            assigneesToRemove: assignees.remove,
+            spaceId,
+          });
+          return result;
+        });
       }
     );
 };

@@ -12,6 +12,7 @@ import {
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL } from '../../../../../common/constants';
@@ -20,10 +21,12 @@ import { validateClosingReason } from '../common/validators/validate_closing_rea
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient: IRuleDataClient | null
+  ruleDataClient: IRuleDataClient | null,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -60,10 +63,52 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
         }
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
-        return withSiemErrorHandling(response, () =>
-          updateAlertsWorkflowStatus({ context, index, ids, status, reason: closingReason.reason })
-        );
+        const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
+        if (eventBus) {
+          try {
+            const esClient = core.elasticsearch.client.asCurrentUser;
+            const mgetResponse = await esClient.mget({
+              index: Array.isArray(index) ? index.join(',') : index,
+              ids,
+              _source_includes: [ALERT_WORKFLOW_STATUS],
+            });
+            for (const doc of mgetResponse.docs) {
+              if ('found' in doc && doc.found && doc._id != null) {
+                previousStatuses.push({
+                  id: doc._id,
+                  previousStatus: (() => {
+                    const src = doc._source as Record<string, unknown> | null | undefined;
+                    const v = src?.[ALERT_WORKFLOW_STATUS];
+                    return typeof v === 'string' ? v : 'open';
+                  })(),
+                });
+              }
+            }
+          } catch {
+            // Non-blocking — emit with empty previousStatuses
+          }
+        }
+
+        return withSiemErrorHandling(response, async () => {
+          const result = await updateAlertsWorkflowStatus({
+            context,
+            index,
+            ids,
+            status,
+            reason: closingReason.reason,
+          });
+          void eventBus?.emitAlertStatusChanged(request, {
+            alertIds: ids,
+            status,
+            previousStatuses,
+            truncated: false,
+            spaceId,
+          });
+          return result;
+        });
       }
     );
 };

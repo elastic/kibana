@@ -20,10 +20,12 @@ import { validateAlertTagsArrays } from '../common/validators/validate_alert_arr
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 export const setUnifiedAlertsTagsRoute = (
   router: SecuritySolutionPluginRouter,
-  ruleDataClient: IRuleDataClient | null
+  ruleDataClient: IRuleDataClient | null,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -55,10 +57,19 @@ export const setUnifiedAlertsTagsRoute = (
         }
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
-        return withSiemErrorHandling(response, () =>
-          updateAlertsTags({ context, index, ids, tags })
-        );
+        return withSiemErrorHandling(response, async () => {
+          const result = await updateAlertsTags({ context, index, ids, tags });
+          void eventBus?.emitAlertTagsChanged(request, {
+            alertIds: ids,
+            tagsToAdd: tags.tags_to_add,
+            tagsToRemove: tags.tags_to_remove,
+            spaceId,
+          });
+          return result;
+        });
       }
     );
 };

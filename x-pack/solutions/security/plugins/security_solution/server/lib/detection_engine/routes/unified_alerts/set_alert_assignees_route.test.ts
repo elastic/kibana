@@ -13,6 +13,7 @@ import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_response
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsAssigneesRoute } from './set_alert_assignees_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('set unified alerts assignees', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -170,6 +171,55 @@ describe('set unified alerts assignees', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAlertAssigneesChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAlertAssigneesChanged: jest.fn() };
+      setUnifiedAlertsAssigneesRoute(
+        server.router,
+        ruleDataClient,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    test('emits alertAssigneesChanged after a successful update', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1', 'alert-2'],
+          assignees: { add: ['user-1'], remove: [] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1', 'alert-2'],
+          assigneesToAdd: ['user-1'],
+          assigneesToRemove: [],
+        })
+      );
+    });
+
+    test('does not emit when validation fails', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL,
+        body: {
+          ids: ['alert-1'],
+          assignees: { add: ['user-1'], remove: ['user-1'] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
     });
   });
 });

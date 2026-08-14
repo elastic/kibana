@@ -13,6 +13,7 @@ import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_response
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { setUnifiedAlertsTagsRoute } from './set_alert_tags_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 describe('set unified alerts tags', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -187,6 +188,55 @@ describe('set unified alerts tags', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalled();
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAlertTagsChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAlertTagsChanged: jest.fn() };
+      setUnifiedAlertsTagsRoute(
+        server.router,
+        ruleDataClient,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    test('emits alertTagsChanged after a successful update', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1', 'alert-2'],
+          tags: { tags_to_add: ['tag-add'], tags_to_remove: ['tag-remove'] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          alertIds: ['alert-1', 'alert-2'],
+          tagsToAdd: ['tag-add'],
+          tagsToRemove: ['tag-remove'],
+        })
+      );
+    });
+
+    test('does not emit when tag validation fails', async () => {
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL,
+        body: {
+          ids: ['alert-1'],
+          tags: { tags_to_add: ['dup'], tags_to_remove: ['dup'] },
+        },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
     });
   });
 });
