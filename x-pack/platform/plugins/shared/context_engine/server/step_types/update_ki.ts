@@ -6,12 +6,14 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { isResponseError } from '@kbn/es-errors';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   findKiBackingIndex,
+  kiNotFoundError,
   resolveAiIndexDest,
 } from './helpers';
 
@@ -40,15 +42,23 @@ export const getUpdateKiStepDefinition = ({
         abortSignal: context.abortSignal,
       });
 
-      const response = await esClient.update(
-        {
-          index: backingIndex,
-          id: kiId,
-          doc: ki,
-          refresh: 'wait_for',
-        },
-        { signal: context.abortSignal }
-      );
+      const response = await esClient
+        .update(
+          {
+            index: backingIndex,
+            id: kiId,
+            doc: ki,
+            refresh: 'wait_for',
+          },
+          { signal: context.abortSignal }
+        )
+        .catch((error) => {
+          // The KI may have been removed concurrently between the lookup and the update.
+          if (isResponseError(error) && error.statusCode === 404) {
+            throw kiNotFoundError(aiIndexId, kiId);
+          }
+          throw error;
+        });
 
       return {
         output: {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
@@ -12,6 +14,21 @@ import { getUpdateKiStepDefinition } from './update_ki';
 import { createMockStepContext, mockAiIndexService } from './test_utils';
 
 const searchHit = (index: string) => ({ hits: { hits: [{ _id: 'ki-1', _index: index }] } });
+
+const createNotFoundResponseError = () =>
+  new errors.ResponseError({
+    meta: {
+      aborted: false,
+      attempts: 1,
+      connection: null,
+      context: null,
+      name: 'document_missing_exception',
+      request: {} as unknown as DiagnosticResult['meta']['request'],
+    },
+    warnings: [],
+    body: 'document_missing_exception',
+    statusCode: 404,
+  });
 
 const enabled = async () => true;
 const allowed = async () => true;
@@ -138,6 +155,28 @@ describe('getUpdateKiStepDefinition', () => {
     expect(thrown).toBeInstanceOf(ExecutionError);
     expect(thrown.type).toBe('NotFoundError');
     expect(esClient.update).not.toHaveBeenCalled();
+  });
+
+  it('throws NotFoundError when the KI was removed concurrently', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      update: jest.fn().mockRejectedValue(createNotFoundResponseError()),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1', ki: { title: 'New title' } },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getUpdateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('NotFoundError');
   });
 
   it('throws NotFoundError when the AI index does not exist', async () => {

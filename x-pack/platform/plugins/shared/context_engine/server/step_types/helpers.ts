@@ -118,6 +118,14 @@ export const resolveOrCreateAiIndexDest = async (
   return dest;
 };
 
+/** The typed error for a KI that does not exist in the given AI index. */
+export const kiNotFoundError = (aiIndexId: string, kiId: string): ExecutionError =>
+  new ExecutionError({
+    type: 'NotFoundError',
+    message: `KI '${kiId}' not found in AI index '${aiIndexId}'`,
+    details: { aiIndexId, kiId },
+  });
+
 /**
  * Finds the concrete index holding a KI document. Update and delete must target
  * the backing index directly since the dest may be a data stream or a pattern.
@@ -147,11 +155,7 @@ export const findKiBackingIndex = async ({
 
   const backingIndex = response.hits.hits[0]?._index;
   if (!backingIndex) {
-    throw new ExecutionError({
-      type: 'NotFoundError',
-      message: `KI '${kiId}' not found in AI index '${aiIndexId}'`,
-      details: { aiIndexId, kiId },
-    });
+    throw kiNotFoundError(aiIndexId, kiId);
   }
   return backingIndex;
 };

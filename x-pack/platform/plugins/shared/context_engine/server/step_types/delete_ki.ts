@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
 import type { KiStepDependencies } from './helpers';
@@ -13,6 +12,7 @@ import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   findKiBackingIndex,
+  kiNotFoundError,
   resolveAiIndexDest,
 } from './helpers';
 
@@ -54,11 +54,7 @@ export const getDeleteKiStepDefinition = ({
 
       // The KI may have been removed concurrently between the lookup and the delete.
       if (response.result === 'not_found') {
-        throw new ExecutionError({
-          type: 'NotFoundError',
-          message: `KI '${kiId}' not found in AI index '${aiIndexId}'`,
-          details: { aiIndexId, kiId },
-        });
+        throw kiNotFoundError(aiIndexId, kiId);
       }
 
       return { output: { id: kiId } };
