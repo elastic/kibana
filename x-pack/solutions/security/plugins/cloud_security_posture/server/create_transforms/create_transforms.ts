@@ -10,6 +10,11 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { CDR_METERING_STATE_INDEX } from '@kbn/cloud-security-posture-common';
 import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  METERING_STATE_INDEX_PATTERN,
+  METERING_STATE_INDEX_TEMPLATE_NAME,
+} from '../../common/constants';
+import {
   latestFindingsTransform,
   DEPRECATED_FINDINGS_TRANSFORMS_VERSION,
   CURRENT_FINDINGS_TRANSFORM_VERSION,
@@ -156,6 +161,22 @@ const createMeteringStateIndexIfNotExists = async (
   logger: Logger
 ): Promise<boolean> => {
   try {
+    // The template must exist before the index: the dest name matches the
+    // built-in `logs` data stream template, and ES rejects a plain index whose
+    // winning template is data-stream-only. Priority 500 matches the plugin's
+    // other managed indices and outranks it.
+    await esClient.indices.putIndexTemplate({
+      name: METERING_STATE_INDEX_TEMPLATE_NAME,
+      index_patterns: METERING_STATE_INDEX_PATTERN,
+      template: { mappings: METERING_STATE_INDEX_MAPPINGS },
+      _meta: {
+        package: { name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME },
+        managed_by: 'cloud_security_posture',
+        managed: true,
+      },
+      priority: 500,
+    });
+
     const exists = await esClient.indices.exists({ index: CDR_METERING_STATE_INDEX });
     if (exists) return true;
     await esClient.indices.create({

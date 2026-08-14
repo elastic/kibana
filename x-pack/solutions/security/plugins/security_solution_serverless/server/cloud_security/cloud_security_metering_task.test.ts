@@ -344,38 +344,74 @@ describe('getCspmStateAggQuery', () => {
     expect(query.query.bool.minimum_should_match).toBe(1);
   });
 
-  it('has exactly three OR-branches — a new one could only broaden billing', () => {
-    expect(query.query.bool.should).toHaveLength(3);
+  it('has exactly four OR-branches — a new one could only broaden billing', () => {
+    expect(query.query.bool.should).toHaveLength(4);
   });
 
   it('scopes a sub_type that is actually in the CSPM billable asset list', () => {
     expect(BILLABLE_ASSETS_CONFIG[CSPM].values).toContain(GCP_COMPUTE_INSTANCE_SUB_TYPE);
   });
 
-  it('requires two scans and a >=24h current run for RUNNING GCP instances', () => {
+  it('never reads a lifecycle status field — running-ness is derived', () => {
+    // The state index cannot carry status: see metering_state_transform.ts.
+    // If a status term reappears here it will silently match nothing, because
+    // the transform stopped writing that field.
+    expect(JSON.stringify(query)).not.toContain('status');
+  });
+
+  it('requires two scans and a >=24h run for GCP instances that never stopped', () => {
     expect(query.query.bool.should[1]).toEqual({
       bool: {
         must: [
           { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
           { range: { span_ms: { gt: 0 } } },
-          { term: { 'latest.resource.lifecycle.status': 'RUNNING' } },
-          { range: { 'latest.resource.lifecycle.last_started_at': { lte: 'now-24h' } } },
+          { exists: { field: 'last_started_at' } },
+          { range: { last_started_at: { lte: 'now-24h' } } },
+        ],
+        must_not: [{ exists: { field: 'last_stopped_at' } }],
+      },
+    });
+  });
+
+  it('bills a restarted-and-running GCP instance via a negative run duration', () => {
+    // last_run_ms = last_stopped_at - last_started_at, so a start AFTER the
+    // last stop is negative. This is the only signal that separates a running
+    // restarted instance from a stopped one.
+    expect(query.query.bool.should[2]).toEqual({
+      bool: {
+        must: [
+          { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+          { range: { span_ms: { gt: 0 } } },
+          { range: { last_run_ms: { lt: 0 } } },
+          { range: { last_started_at: { lte: 'now-24h' } } },
         ],
       },
     });
   });
 
   it('bills stopped GCP instances only in their stop window, after a >=24h run', () => {
-    expect(query.query.bool.should[2]).toEqual({
+    expect(query.query.bool.should[3]).toEqual({
       bool: {
         must: [
           { term: { 'resource.sub_type': GCP_COMPUTE_INSTANCE_SUB_TYPE } },
           { range: { span_ms: { gt: 0 } } },
-          { range: { 'latest.resource.lifecycle.last_run_ms': { gte: 24 * 60 * 60 * 1000 } } },
-          { range: { 'latest.resource.lifecycle.last_stopped_at': { gte: 'now-24h' } } },
+          { range: { last_run_ms: { gte: 24 * 60 * 60 * 1000 } } },
+          { range: { last_stopped_at: { gte: 'now-24h' } } },
         ],
-        must_not: [{ term: { 'latest.resource.lifecycle.status': 'RUNNING' } }],
       },
+    });
+  });
+
+  it('keeps the running and stopped branches mutually exclusive', () => {
+    // A restarted instance has a stop on record, so branch 1 (must_not exists
+    // last_stopped_at) cannot also match it; and its negative last_run_ms
+    // cannot satisfy branch 3's `gte GCP_MIN_RUN_MS`. Without that, one
+    // instance could be counted through two branches.
+    const [, neverStopped, restarted, stopped] = query.query.bool.should;
+    expect(neverStopped.bool.must_not).toEqual([{ exists: { field: 'last_stopped_at' } }]);
+    expect(restarted.bool.must).toContainEqual({ range: { last_run_ms: { lt: 0 } } });
+    expect(stopped.bool.must).toContainEqual({
+      range: { last_run_ms: { gte: 24 * 60 * 60 * 1000 } },
     });
   });
 

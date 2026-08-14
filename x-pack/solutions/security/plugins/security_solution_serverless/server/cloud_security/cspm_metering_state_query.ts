@@ -27,10 +27,9 @@ const WINDOW = CSPM_METERING_WINDOW;
 // the sampling window even though both resolve to 24h today.
 const GCP_MIN_RUN_WINDOW = `now-${GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS}h`;
 const SUB_TYPE_FIELD = BILLABLE_ASSETS_CONFIG[CSPM].filter_attribute;
-const STATUS_FIELD = 'latest.resource.lifecycle.status';
-const LAST_START_FIELD = 'latest.resource.lifecycle.last_started_at';
-const LAST_STOP_FIELD = 'latest.resource.lifecycle.last_stopped_at';
-const LAST_RUN_FIELD = 'latest.resource.lifecycle.last_run_ms';
+const LAST_START_FIELD = 'last_started_at';
+const LAST_STOP_FIELD = 'last_stopped_at';
+const LAST_RUN_FIELD = 'last_run_ms';
 
 /**
  * CSPM billing query against the metering state index (maintained by the
@@ -46,9 +45,23 @@ const LAST_RUN_FIELD = 'latest.resource.lifecycle.last_run_ms';
  *     legacy latest-index query. The two-scan rule is deliberately GCP-scoped.
  *  3. gcp-compute-instance: two-scan corroboration (span_ms > 0 — seen on >=2
  *     scans of the CURRENT VM incarnation; POLICY KNOB) plus a >=24h attested
- *     run — RUNNING with an old-enough start, or stopped inside this window
- *     after a >=24h run (a stop older than the window was already billed on
- *     its stop day and never re-bills).
+ *     run, in one of three shapes.
+ *
+ * Running-ness is derived from the timestamps rather than read from a status
+ * field. The state index no longer carries lifecycle status: top_metrics was
+ * the only way to carry it and it cannot represent a missing value without
+ * breaking the whole document (see metering_state_transform.ts). The
+ * derivation is total — an instance is running iff it has never stopped, or it
+ * was started again after its last stop:
+ *
+ *   - never stopped:  last_started_at set, last_stopped_at absent
+ *   - restarted:      last_run_ms < 0 (stop precedes start, so stop-start < 0)
+ *   - stopped:        last_run_ms >= 0
+ *
+ * The two running shapes each require a start older than the minimum run
+ * window; the stopped shape requires a >=24h completed run AND a stop inside
+ * the sampling window (a stop older than the window was already billed on its
+ * stop day and never re-bills).
  *
  * The aggregations produce a response shape identical to the legacy CSPM
  * aggregation — which is what getUsageRecords depends on — so it consumes this
@@ -74,16 +87,31 @@ export const getCspmStateAggQuery = () => ({
             must_not: [{ term: { [SUB_TYPE_FIELD]: GCP_COMPUTE_INSTANCE_SUB_TYPE } }],
           },
         },
+        // Running, never stopped: started >=24h ago and no stop on record.
         {
           bool: {
             must: [
               { term: { [SUB_TYPE_FIELD]: GCP_COMPUTE_INSTANCE_SUB_TYPE } },
               { range: { span_ms: { gt: 0 } } },
-              { term: { [STATUS_FIELD]: 'RUNNING' } },
+              { exists: { field: LAST_START_FIELD } },
+              { range: { [LAST_START_FIELD]: { lte: GCP_MIN_RUN_WINDOW } } },
+            ],
+            must_not: [{ exists: { field: LAST_STOP_FIELD } }],
+          },
+        },
+        // Running after a restart: the last stop precedes the current start,
+        // so the derived run duration is negative.
+        {
+          bool: {
+            must: [
+              { term: { [SUB_TYPE_FIELD]: GCP_COMPUTE_INSTANCE_SUB_TYPE } },
+              { range: { span_ms: { gt: 0 } } },
+              { range: { [LAST_RUN_FIELD]: { lt: 0 } } },
               { range: { [LAST_START_FIELD]: { lte: GCP_MIN_RUN_WINDOW } } },
             ],
           },
         },
+        // Stopped inside this window after a completed >=24h run.
         {
           bool: {
             must: [
@@ -92,7 +120,6 @@ export const getCspmStateAggQuery = () => ({
               { range: { [LAST_RUN_FIELD]: { gte: GCP_MIN_RUN_MS } } },
               { range: { [LAST_STOP_FIELD]: { gte: WINDOW } } },
             ],
-            must_not: [{ term: { [STATUS_FIELD]: 'RUNNING' } }],
           },
         },
       ],

@@ -19,6 +19,10 @@ import {
   METERING_STATE_INDEX_MAPPINGS,
   METERING_STATE_TRANSFORM_ID,
 } from './metering_state_transform';
+import {
+  METERING_STATE_INDEX_PATTERN,
+  METERING_STATE_INDEX_TEMPLATE_NAME,
+} from '../../common/constants';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 
@@ -78,10 +82,41 @@ describe('meteringStateTransform', () => {
     ]);
   });
 
-  it('uses only script-free aggregations', () => {
+  it('uses only per-bucket aggregations, never a per-document script', () => {
     const aggs = meteringStateTransform.pivot!.aggregations!;
-    expect(Object.keys(aggs)).toEqual(['first_seen', 'last_seen', 'span_ms', 'latest']);
+    expect(Object.keys(aggs)).toEqual([
+      'first_seen',
+      'last_seen',
+      'span_ms',
+      'last_started_at',
+      'last_stopped_at',
+      'last_run_ms',
+    ]);
     expect(JSON.stringify(aggs)).not.toContain('scripted_metric');
+    expect(JSON.stringify(aggs)).not.toContain('runtime_mappings');
+  });
+
+  it('carries no top_metrics: it cannot express a missing metric', () => {
+    // top_metrics emits the string "null" for a metric absent from the bucket,
+    // which a date/long mapping rejects, dropping the whole state document.
+    // Regression guard for the outage that fix restored: every non-GCP
+    // resource and every never-stopped GCP instance produced no state doc.
+    expect(JSON.stringify(meteringStateTransform.pivot!.aggregations!)).not.toContain(
+      'top_metrics'
+    );
+  });
+
+  it('derives last_run_ms from sibling aggs reachable by buckets_path', () => {
+    const aggs = meteringStateTransform.pivot!.aggregations!;
+    // buckets_path parses dots as a metric sub-path, so these references only
+    // resolve while the sibling aggs keep flat, dot-free names.
+    expect(aggs.last_run_ms.bucket_script?.buckets_path).toEqual({
+      start: 'last_started_at',
+      stop: 'last_stopped_at',
+    });
+    expect(Object.keys(aggs)).toEqual(
+      expect.arrayContaining(['last_started_at', 'last_stopped_at'])
+    );
   });
 
   it('is continuous, unattended, and garbage-collected on last_seen', () => {
@@ -234,12 +269,42 @@ describe('initializeCspTransforms metering state index', () => {
     expect(wasMeteringTransformRegistered()).toBe(true);
   });
 
-  it('does not re-create the state index when it already exists', async () => {
+  it('is named so the kibana service account can read it', () => {
+    // elastic/kibana holds `read` on `logs-*.*`, which covers this name. Under
+    // `security_solution-*` the metering task's own query is denied with a 403
+    // that the freshness probe swallows, silently pinning CSPM to legacy
+    // billing forever. Verified against a real cluster: logs- name 200,
+    // security_solution- name 403.
+    expect(CDR_METERING_STATE_INDEX.startsWith('logs-')).toBe(true);
+  });
+
+  it('upserts the index template before creating the index', async () => {
+    // A plain index under logs-*-* is rejected unless a non-data-stream template
+    // outranks the built-in `logs` template, so the template must come first.
+    mockEsClient.indices.exists.mockResolvedValue(false);
+
+    await initialize();
+
+    expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: METERING_STATE_INDEX_TEMPLATE_NAME,
+        index_patterns: METERING_STATE_INDEX_PATTERN,
+        priority: 500,
+        template: { mappings: METERING_STATE_INDEX_MAPPINGS },
+      })
+    );
+    expect(mockEsClient.indices.putIndexTemplate.mock.invocationCallOrder[0]).toBeLessThan(
+      mockEsClient.indices.create.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('keeps the template up to date even when the index already exists', async () => {
     mockEsClient.indices.exists.mockResolvedValue(true);
 
     await initialize();
 
     expect(mockEsClient.indices.create).toHaveBeenCalledTimes(0);
+    expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(wasMeteringTransformRegistered()).toBe(true);
   });
 
