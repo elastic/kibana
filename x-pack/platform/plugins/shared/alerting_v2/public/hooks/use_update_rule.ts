@@ -32,7 +32,7 @@ export const useUpdateRule = () => {
       );
       void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
-      queryClient.invalidateQueries(ruleKeys.tags());
+      queryClient.invalidateQueries(ruleKeys.allTags());
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
     },
     onError: (error: Error) => {

@@ -108,3 +108,6 @@ export type {
   AlertingDateRangePickerProps,
   AlertingDateRangePickerServices,
 } from './date_range_picker';
+
+export { getRunbookContent, getDashboardId } from './form';
+export type { RunbookArtifactData, DashboardArtifactData } from './form';

@@ -58,9 +58,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
       expect(response.body.enabled).toBe(true);
-      expect(response.body.snoozedUntil).toBeNull();
+      expect(response.body.snoozed_until).toBeNull();
       // On create, updatedAt equals createdAt — there has been no replace yet.
-      expect(response.body.updatedAt).toBe(response.body.createdAt);
+      expect(response.body.updated_at).toBe(response.body.created_at);
       expect(response.body.auth.apiKey).toBeUndefined();
     }
   );
@@ -87,7 +87,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'upsert: 200 replaces and rotates version+updatedAt, preserves createdAt/createdBy',
+    'upsert: 200 replaces and rotates version+updated_at, preserves created_at/created_by',
     async ({ apiClient, apiServices }) => {
       const id = 'upsert-replace-policy';
       const created = await apiServices.alertingV2.actionPolicies.upsert(
@@ -96,7 +96,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
           name: 'first-version',
           description: 'before replace',
           matcher: 'env == "production"',
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '5m' },
         })
       );
@@ -117,10 +117,10 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(replaced.body.description).toBe('after replace');
       expect(replaced.body.destinations).toStrictEqual([{ type: 'workflow', id: 'wf-2' }]);
 
-      expect(replaced.body.createdBy).toBe(created.createdBy);
-      expect(replaced.body.createdAt).toBe(created.createdAt);
+      expect(replaced.body.created_by).toBe(created.created_by);
+      expect(replaced.body.created_at).toBe(created.created_at);
 
-      expect(replaced.body.updatedAt).not.toBe(created.createdAt);
+      expect(replaced.body.updated_at).not.toBe(created.created_at);
       expect(replaced.body.version).not.toBe(created.version);
     }
   );
@@ -134,7 +134,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({
           name: 'with-optional-fields',
           matcher: 'env == "production"',
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '5m' },
         })
       );
@@ -146,9 +146,9 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
 
       expect(replaced).toHaveStatusCode(200);
       expect(replaced.body.matcher).toBeNull();
-      expect(replaced.body.groupBy).toBeNull();
+      expect(replaced.body.group_by).toBeNull();
       expect(replaced.body.throttle).toBeNull();
-      expect(replaced.body.groupingMode).toBeNull();
+      expect(replaced.body.grouping_mode).toBeNull();
     }
   );
 
@@ -169,7 +169,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     expect(replaced.body.enabled).toBe(false);
   });
 
-  apiTest('upsert: preserves snoozedUntil on replace', async ({ apiClient, apiServices }) => {
+  apiTest('upsert: preserves snoozed_until on replace', async ({ apiClient, apiServices }) => {
     const id = 'upsert-preserve-snooze-policy';
     await apiServices.alertingV2.actionPolicies.upsert(
       id,
@@ -185,7 +185,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(replaced).toHaveStatusCode(200);
-    expect(replaced.body.snoozedUntil).toBe(snoozedUntil);
+    expect(replaced.body.snoozed_until).toBe(snoozedUntil);
   });
 
   apiTest('validation: rejects missing name', async ({ apiClient }) => {
@@ -275,11 +275,11 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
+  apiTest('validation: rejects strategy/grouping_mode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'on_status_change' },
       }),
     });
@@ -292,7 +292,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.put(getActionPolicyUrl('upsert-missing-interval'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'time_interval' },
       }),
     });

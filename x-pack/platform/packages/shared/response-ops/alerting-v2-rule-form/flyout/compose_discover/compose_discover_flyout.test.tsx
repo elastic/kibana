@@ -506,10 +506,10 @@ describe('ComposeDiscoverFlyout', () => {
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { format: 'standalone', breach: { query: '' } },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -913,10 +913,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -982,10 +982,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -1101,10 +1101,10 @@ describe('ComposeDiscoverFlyout', () => {
             breach: { segment: '| WHERE count > 100' },
             recovery: { segment: '| WHERE count < 50' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
@@ -1274,10 +1274,10 @@ describe('ComposeDiscoverFlyout', () => {
             base: 'FROM logs-*',
             breach: { segment: '| WHERE count > 100' },
           },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
+          created_by: 'test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: 'test',
+          updated_at: '2026-01-01T00:00:00Z',
         },
       });
 
