@@ -49,8 +49,8 @@ export class ComposeDiscoverPage {
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
   public readonly createEsqlRuleCard: Locator;
-  /** Mode radio-card group on the Outcome step. */
-  public readonly modeSelect: Locator;
+  /** Kind radio-card group on the Outcome step. */
+  public readonly kindSelect: Locator;
   /**
    * Callout shown after Apply when the query has a base but no alert condition
    * (no WHERE) — the whole query is treated as the breach query (every row breaches).
@@ -84,7 +84,7 @@ export class ComposeDiscoverPage {
     this.relatedDashboardsInput = this.flyout.locator(
       'input[placeholder="Link related dashboards for investigation"]'
     );
-    this.modeSelect = this.page.testSubj.locator('composeDiscoverModeSelect');
+    this.kindSelect = this.page.testSubj.locator('composeDiscoverKindSelect');
     this.createRuleSplitDropdownButton = this.page.testSubj.locator(
       'createRuleButton-secondary-button'
     );
@@ -129,7 +129,7 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Opens the query sandbox from the Alert Condition step (alert mode).
+   * Opens the query sandbox from the Alert Condition step (alert kind).
    */
   async openSandbox() {
     await this.alertSummaryEditorButton.click();
@@ -171,11 +171,11 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Switches Alert / Signal mode on the Outcome step. The sandbox must be closed
-   * first — ModeSelect is disabled while the query sandbox is open.
+   * Switches Alert / Signal kind on the Outcome step. The sandbox must be closed
+   * first — KindSelect is disabled while the query sandbox is open.
    */
-  async selectMode(kind: 'alert' | 'signal') {
-    await this.page.testSubj.locator(`composeDiscoverModeSelect-${kind}`).click();
+  async selectKind(kind: 'alert' | 'signal') {
+    await this.page.testSubj.locator(`composeDiscoverKindSelect-${kind}`).click();
   }
 
   /** Waits until a time-field `<select>` option is present (field-caps resolution). */
