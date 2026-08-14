@@ -4,6 +4,7 @@ env:
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
+    key: pre_build
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
@@ -51,7 +52,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - wait
+  - wait: ~
+    depends_on: pre_build
 
   - command: .buildkite/scripts/steps/store_cache.sh
     label: Store Cache for build
