@@ -11,9 +11,9 @@ Kibana is the open source interface to query, analyze, visualize, and manage you
 
 ## Getting Started
 
-If you just want to try Kibana out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
+If you just want to try Kibana out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/docs/get-started) to give it a whirl.
 
-If you're interested in diving a bit deeper and getting a taste of Kibana's capabilities, head over to the [Kibana Getting Started Page](https://www.elastic.co/guide/en/kibana/current/get-started.html).
+If you're interested in diving a bit deeper and getting a taste of Kibana's capabilities, head over to the [Kibana Getting Started Page](https://www.elastic.co/docs/explore-analyze/kibana-data-exploration-learning-tutorial).
 
 ### Using a Kibana Release
 
@@ -23,7 +23,7 @@ If you want to use a Kibana release in production, give it a test run, or just p
 - Learn more about Kibana's features and capabilities on the
 [Kibana Product Page](https://www.elastic.co/kibana).
 - We also offer a hosted version of Kibana on our
-[Cloud Service](https://www.elastic.co/cloud/as-a-service).
+[Cloud Service](https://www.elastic.co/cloud).
 
 ### Building and Running Kibana, and/or Contributing Code
 
@@ -36,9 +36,9 @@ out an open PR:
 
 ## Documentation
 
-Visit [Elastic.co](http://www.elastic.co/guide/en/kibana/current/index.html) for the full Kibana documentation.
+Visit [Elastic.co](https://www.elastic.co/docs/explore-analyze) for the full Kibana documentation.
 
-For information about building the documentation, see the README in [elastic/docs](https://github.com/elastic/docs).
+For information about writing and previewing documentation, see [docs/extend/contributing/codebase/documentation.md](docs/extend/contributing/codebase/documentation.md).
 
 ## Version Compatibility with Elasticsearch
 
@@ -60,5 +60,5 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 
 - If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new/choose).
   Please check to make sure someone else hasn't already created an issue for the same topic.
-- Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
+- Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/elastic-stack/kibana/7) and a fellow community member or
 Elastic engineer will be glad to help you out.
