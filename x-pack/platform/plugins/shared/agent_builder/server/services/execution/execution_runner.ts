@@ -153,6 +153,7 @@ const handleConversationExecution = async ({
     maxContentLength,
     accessControl,
     readOnly,
+    projectRouting,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -209,6 +210,7 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    projectRouting,
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE).

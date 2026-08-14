@@ -97,6 +97,11 @@ export interface CreateScopedRunnerDeps {
   request: KibanaRequest;
   defaultConnectorId?: string;
   /**
+   * Optional CPS project routing expression scoping this run's search tools to a set of projects
+   * Origin-only when omitted.
+   */
+  projectRouting?: string;
+  /**
    * Optional abort signal for the run (e.g. from the request).
    * Propagated to hooks so they can respect cancellation.
    */
@@ -123,6 +128,7 @@ export type CreateRunnerDeps = Omit<
   CreateScopedRunnerDeps,
   | 'request'
   | 'defaultConnectorId'
+  | 'projectRouting'
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
@@ -208,6 +214,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   const createScopedRunnerWithDeps = async ({
     request,
     defaultConnectorId,
+    projectRouting,
     telemetryMetadata,
     maxContentLength,
     conversation,
@@ -218,6 +225,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
+    projectRouting?: string;
     telemetryMetadata?: ConnectorTelemetryMetadata;
     maxContentLength?: number;
     conversation?: Conversation;
@@ -274,6 +282,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       modelProvider,
       request,
       defaultConnectorId,
+      projectRouting,
       abortSignal,
       resultStore,
       skillsStore,
@@ -320,6 +329,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const {
         request,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
         abortSignal,
@@ -330,6 +340,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const runner = await createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
+        projectRouting,
         telemetryMetadata,
         maxContentLength,
         conversation,

@@ -292,6 +292,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     skillServiceStart,
     toolManager,
     experimentalFeatures,
+    projectRouting,
   } = manager.deps;
   const spaceId = getCurrentSpaceId({ request, spaces });
   const savedObjectsClient = savedObjects.getScopedClient(request);
@@ -307,7 +308,10 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     request,
     spaceId,
     logger,
-    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
+    esClient: elasticsearch.client.asScoped(
+      request,
+      projectRouting ? { projectRouting: 'expression', value: projectRouting } : undefined
+    ),
     savedObjectsClient,
     modelProvider,
     runner: manager.getRunner(),
