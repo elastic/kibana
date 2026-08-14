@@ -7,7 +7,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { stripMarkdownFences } from '@kbn/custom-content-common';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
@@ -41,6 +42,11 @@ export interface UseCustomContentHtmlParams {
   savedTemplate: string | undefined;
   colorMode: EuiThemeColorModeStandard;
   euiTheme: EuiThemeComputed;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
+  onTemplateChange: (template: string) => void;
 }
 
 export interface UseCustomContentHtmlResult {
@@ -58,6 +64,10 @@ export function useCustomContentHtml({
   savedTemplate,
   colorMode,
   euiTheme,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
 }: UseCustomContentHtmlParams): UseCustomContentHtmlResult {
   const [processedHtml, setProcessedHtml] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -74,10 +84,17 @@ export function useCustomContentHtml({
     if (savedTemplate && esqlQuery) {
       const controller = new AbortController();
       const { core, search } = getServices();
+      const fetchOptions = {
+        isApproximate,
+        projectRouting,
+        query,
+        filters,
+        esQueryConfig: getEsQueryConfig(core.uiSettings),
+      };
 
       setIsLoading(true);
       setError(undefined);
-      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal)
+      fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal, fetchOptions)
         .then((response) => fillTemplate(savedTemplate, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
@@ -94,7 +111,17 @@ export function useCustomContentHtml({
     }
 
     setIsLoading(false);
-  }, [embeddableId, esqlQuery, generationVersion, savedTemplate, timeRange]);
+  }, [
+    embeddableId,
+    esqlQuery,
+    generationVersion,
+    savedTemplate,
+    timeRange,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+  ]);
 
   const html = useMemo(
     () =>

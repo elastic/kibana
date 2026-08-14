@@ -9,7 +9,7 @@ import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 
@@ -20,6 +20,11 @@ interface CustomContentComponentProps {
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
+  onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
 }
 
@@ -45,6 +50,11 @@ export const CustomContentComponent = ({
   timeRange,
   generationVersion,
   savedTemplate,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
+  onTemplateChange,
   onErrorChange,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -56,6 +66,11 @@ export const CustomContentComponent = ({
     savedTemplate,
     colorMode,
     euiTheme,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+    onTemplateChange,
   });
 
   useEffect(() => {

@@ -221,6 +221,19 @@ export function getMandatoryBooleanFields(
 
 export const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
 
+/** Returns true when the flyout has at least one visible field for the given service. */
+export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boolean {
+  if (hasTransportChoice(service)) return true;
+  const defaultTransport = getDefaultTransport(service);
+  if (getRequiredTextFields(service, defaultTransport).length > 0) return true;
+  if (getMandatoryBooleanFields(service, defaultTransport).length > 0) return true;
+  const flyoutFields = getFlyoutFields(service, defaultTransport);
+  const requiredSet = new Set(getRequiredTextFields(service, defaultTransport));
+  return flyoutFields.some(
+    (f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f) && f !== 'regions'
+  );
+}
+
 export function getRegionFieldName(
   service: AwsServiceMatrixEntry,
   activeTransport: string | null

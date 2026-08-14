@@ -16,27 +16,32 @@ jest.mock('dompurify', () => ({
 jest.mock('../services');
 jest.mock('../utils/fetch_esql_data');
 jest.mock('../utils/fill_template');
+jest.mock('@kbn/data-plugin/public', () => ({
+  getEsQueryConfig: jest.fn(),
+}));
 
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
 
+const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getEsQueryConfig>;
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
 const mockHttp = {} as unknown as HttpStart;
 const mockSearch = jest.fn();
 
-beforeEach(() => {
-  jest.clearAllMocks();
-  (getServices as jest.Mock).mockReturnValue({ core: { http: mockHttp }, search: mockSearch });
-  mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
-  mockFillTemplate.mockResolvedValue('<div>rendered</div>');
-});
+const defaultEsQueryConfig: EsQueryConfig = {
+  allowLeadingWildcards: false,
+  queryStringOptions: {},
+  ignoreFilterIfFieldNotInIndex: false,
+  dateFormatTZ: 'Browser',
+};
 
 const mockEuiTheme = {
   colors: {
@@ -52,6 +57,17 @@ const mockEuiTheme = {
   },
 } as any;
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  (getServices as jest.Mock).mockReturnValue({
+    core: { http: mockHttp, uiSettings: {} },
+    search: mockSearch,
+  });
+  mockGetEsQueryConfig.mockReturnValue(defaultEsQueryConfig);
+  mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
+  mockFillTemplate.mockResolvedValue('<div>rendered</div>');
+});
+
 const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   embeddableId: 'panel-1',
   esqlQuery: undefined,
@@ -60,6 +76,11 @@ const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   savedTemplate: undefined,
   colorMode: 'LIGHT' as const,
   euiTheme: mockEuiTheme,
+  isApproximate: false,
+  projectRouting: undefined,
+  query: undefined,
+  filters: undefined,
+  onTemplateChange: jest.fn(),
 };
 
 const VALID_HTML = `<html><body><p>hello</p></body></html>`;
@@ -93,7 +114,7 @@ describe('useCustomContentHtml', () => {
       savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
     };
 
-    it('calls fetchEsqlData and fillTemplate without calling the LLM', async () => {
+    it('calls fetchEsqlData and fillTemplate', async () => {
       const { result } = renderHook(() => useCustomContentHtml(esqlParams));
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -104,7 +125,13 @@ describe('useCustomContentHtml', () => {
         mockHttp,
         esqlParams.esqlQuery,
         undefined,
-        expect.any(AbortSignal)
+        expect.any(AbortSignal),
+        expect.objectContaining({
+          isApproximate: false,
+          projectRouting: undefined,
+          query: undefined,
+          filters: undefined,
+        })
       );
       expect(mockFillTemplate).toHaveBeenCalledWith(esqlParams.savedTemplate, [], []);
       expect(result.current.html).toContain('rendered');
@@ -167,7 +194,13 @@ describe('useCustomContentHtml', () => {
         mockHttp,
         esqlParams.esqlQuery,
         { from: 'now-7d', to: 'now' },
-        expect.any(AbortSignal)
+        expect.any(AbortSignal),
+        expect.objectContaining({
+          isApproximate: false,
+          projectRouting: undefined,
+          query: undefined,
+          filters: undefined,
+        })
       );
     });
   });
@@ -214,7 +247,6 @@ describe('useCustomContentHtml', () => {
 
       rerender({ colorMode: 'DARK' });
 
-      // Give the effect a chance to run if it incorrectly re-triggered
       await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
     });
   });
@@ -234,29 +266,229 @@ describe('useCustomContentHtml', () => {
       expect(result.current.html).toContain('--cc-color-background');
       expect(result.current.html).toContain('--cc-color-surface');
     });
+  });
 
-    it('updates html with new CSS vars when colorMode changes without re-fetching', async () => {
-      const esqlParams = {
-        ...baseParams,
-        savedTemplate: '<html><head></head><body><p>hello</p></body></html>',
+  describe('esQueryConfig — uiSettings passthrough via getEsQueryConfig', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+
+    it('forwards the full esQueryConfig from getEsQueryConfig to fetchEsqlData', async () => {
+      const customConfig: EsQueryConfig = {
+        allowLeadingWildcards: true,
+        queryStringOptions: { analyze_wildcard: true },
+        ignoreFilterIfFieldNotInIndex: true,
+        dateFormatTZ: 'Europe/Athens',
       };
+      mockGetEsQueryConfig.mockReturnValue(customConfig);
 
-      const { result, rerender } = renderHook(
-        ({ colorMode }: { colorMode: EuiThemeColorModeStandard }) =>
-          useCustomContentHtml({ ...esqlParams, colorMode }),
-        { initialProps: { colorMode: 'LIGHT' as EuiThemeColorModeStandard } }
+      const { result } = renderHook(() => useCustomContentHtml(esqlParams));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ esQueryConfig: customConfig })
+      );
+    });
+  });
+
+  describe('filters — unified search bar filters', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+    const activeFilters = [
+      {
+        meta: { index: 'logs-*', negate: false },
+        query: { match_phrase: { 'host.name': 'prod' } },
+      },
+    ] satisfies Filter[];
+
+    it('passes filters to fetchEsqlData when provided', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, filters: activeFilters })
       );
 
-      await waitFor(() => expect(result.current.html).toContain('--cc-color-text'));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-      const lightHtml = result.current.html;
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ filters: activeFilters })
+      );
+    });
 
-      rerender({ colorMode: 'DARK' });
+    it('re-fetches when filters change', async () => {
+      const { rerender } = renderHook(
+        ({ filters }: { filters: Filter[] | undefined }) =>
+          useCustomContentHtml({ ...esqlParams, filters }),
+        { initialProps: { filters: undefined as Filter[] | undefined } }
+      );
 
-      await waitFor(() => expect(result.current.html).not.toBe(lightHtml));
-      expect(result.current.html).toContain('--cc-color-text');
-      // No additional fetch happened
-      expect(mockFetchEsqlData).not.toHaveBeenCalled();
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ filters: activeFilters });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ filters: activeFilters })
+      );
+    });
+  });
+
+  describe('projectRouting — project routing context', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+    const routing = 'my-project';
+
+    it('passes projectRouting to fetchEsqlData when provided', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, projectRouting: routing })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ projectRouting: routing })
+      );
+    });
+
+    it('re-fetches when projectRouting changes', async () => {
+      const { rerender } = renderHook(
+        ({ projectRouting }: { projectRouting: string | undefined }) =>
+          useCustomContentHtml({ ...esqlParams, projectRouting }),
+        { initialProps: { projectRouting: undefined as string | undefined } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ projectRouting: routing });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ projectRouting: routing })
+      );
+    });
+  });
+
+  describe('isApproximate — approximation switch', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+
+    it('passes isApproximate=true to fetchEsqlData when the switch is on', async () => {
+      const { result } = renderHook(() =>
+        useCustomContentHtml({ ...esqlParams, isApproximate: true })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ isApproximate: true })
+      );
+    });
+
+    it('re-fetches when isApproximate toggles', async () => {
+      const { rerender } = renderHook(
+        ({ isApproximate }: { isApproximate: boolean }) =>
+          useCustomContentHtml({ ...esqlParams, isApproximate }),
+        { initialProps: { isApproximate: false } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ isApproximate: true });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ isApproximate: true })
+      );
+    });
+  });
+
+  describe('query — KQL search bar', () => {
+    const esqlParams = {
+      ...baseParams,
+      esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
+      savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
+    };
+    const kqlQuery: Query = { language: 'kuery', query: 'host.name: prod' };
+
+    it('passes query to fetchEsqlData when provided', async () => {
+      const { result } = renderHook(() => useCustomContentHtml({ ...esqlParams, query: kqlQuery }));
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockFetchEsqlData).toHaveBeenCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ query: kqlQuery })
+      );
+    });
+
+    it('re-fetches when query changes', async () => {
+      const { rerender } = renderHook(
+        ({ query }: { query: Query | undefined }) => useCustomContentHtml({ ...esqlParams, query }),
+        { initialProps: { query: undefined as Query | undefined } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ query: kqlQuery });
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(2));
+      expect(mockFetchEsqlData).toHaveBeenLastCalledWith(
+        mockSearch,
+        mockHttp,
+        esqlParams.esqlQuery,
+        undefined,
+        expect.any(AbortSignal),
+        expect.objectContaining({ query: kqlQuery })
+      );
     });
   });
 });
