@@ -69,7 +69,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
-import { DiscoverDocumentFlyout } from './discover_document_flyout';
+import { DiscoverDocumentFlyout } from '../document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { useIsChromeNextProjectHeader } from '../chrome_app_header';
