@@ -130,10 +130,10 @@ export function ProjectPickerFrameHeaderActions({
               >
                 <EuiButtonIcon
                   aria-labelledby={contextMenuTooltipId}
-                  data-test-subj="projectPickerHeaderActionsButton"
                   iconType="ellipsis"
                   onClick={() => setIsOpen(true)}
                   color="text"
+                  data-test-subj="projectPickerGlobalActionsButton"
                 />
               </EuiToolTip>
             }

@@ -240,14 +240,51 @@ export class SpacesPage {
     return this.page.testSubj.locator('projectPickerIncludeAllVisibleBtn');
   }
 
+  /** Picker header's "Global actions" menu trigger (clear filters / revert to space defaults). */
+  globalActionsButtonLocator() {
+    return this.page.testSubj.locator('projectPickerGlobalActionsButton');
+  }
+
+  clearProjectTagFiltersMenuItemLocator() {
+    return this.page.testSubj.locator('projectPickerClearFiltersMenuItem');
+  }
+
+  projectPickerListLoadingIndicatorLocator() {
+    return this.page.testSubj.locator('projectPickerListLoadingIndicator');
+  }
+
+  /**
+   * Clears any active project-tag filter via the picker's global actions menu; a no-op that
+   * just closes the menu when no filter is active. Needed because a space configured with the
+   * legacy `_alias:_origin`/`_alias:*` routing strings decodes as a stray project-tag filter
+   * (the picker's codec only understands `_id`-based selection), not an excluded-project
+   * override, so `includeAllVisibleButtonLocator` alone can't undo it.
+   */
+  async clearProjectTagFilters() {
+    await this.globalActionsButtonLocator().click();
+    const clearFiltersItem = this.clearProjectTagFiltersMenuItemLocator();
+    await clearFiltersItem.waitFor({ state: 'visible' });
+    if (await clearFiltersItem.isEnabled()) {
+      await clearFiltersItem.click();
+      await this.projectPickerListLoadingIndicatorLocator().waitFor({ state: 'hidden' });
+    } else {
+      await this.page.keyboard.press('Escape');
+    }
+  }
+
   /** Waits until the CPS panel and its project list have loaded. */
   async waitForProjectRoutingPicker() {
     await this.cpsDefaultScopePanelLocator().waitFor({ state: 'visible' });
     await this.projectPickerListLocator().waitFor({ state: 'visible' });
   }
 
-  /** Includes every visible project (the "all projects" routing outcome). No-op if already all-included. */
+  /**
+   * Includes every visible project (the "all projects" routing outcome): clears any active
+   * project-tag filter first, then ensures every remaining visible project is included.
+   * No-op if already all-included with no filter.
+   */
   async selectAllProjectsRouting() {
+    await this.clearProjectTagFilters();
     const includeAllButton = this.includeAllVisibleButtonLocator();
     if (await includeAllButton.isEnabled()) {
       await includeAllButton.click();
