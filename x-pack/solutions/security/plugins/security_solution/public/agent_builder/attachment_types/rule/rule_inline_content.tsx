@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { omit, pick } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiAccordion,
@@ -51,10 +50,8 @@ import {
 } from './translations';
 import {
   RuleDiffTab,
-  normalizeRule,
-  HIDDEN_PROPERTIES,
+  getRuleDiffSources,
 } from '../../../detection_engine/rule_management/components/rule_details/rule_diff_tab';
-import { stringifyWithExpandedEmpties } from '../../../detection_engine/rule_management/components/rule_details/three_way_diff/comparison_side/utils';
 import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
 
 /* Server-populated on save; spurious diffs against an AI-proposed rule, so hidden on the card only. */
@@ -136,14 +133,12 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
 
   const hasDiff = useMemo(() => {
     if (!originalRule || !rule) return false;
-    const normalizedNew = omit(normalizeRule({ ...rule, threat: rule.threat ?? [] }), [
-      ...HIDDEN_PROPERTIES,
-      ...AGENT_BUILDER_HIDDEN_PROPERTIES,
-    ]);
-    const normalizedOld = pick(normalizeRule(originalRule), Object.keys(normalizedNew));
-    return (
-      stringifyWithExpandedEmpties(normalizedOld) !== stringifyWithExpandedEmpties(normalizedNew)
+    const [oldSource, newSource] = getRuleDiffSources(
+      originalRule,
+      { ...rule, threat: rule.threat ?? [] },
+      AGENT_BUILDER_HIDDEN_PROPERTIES
     );
+    return oldSource !== newSource;
   }, [originalRule, rule]);
 
   if (!rule) {
@@ -260,27 +255,6 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
         </>
       )}
 
-      {hasDiff && originalRule && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiAccordion
-            id={`rule-diff-accordion-${attachment.id}`}
-            buttonContent={DIFF_ACCORDION_LABEL}
-            paddingSize="none"
-          >
-            <RuleDiffTab
-              oldRule={originalRule}
-              newRule={{ ...rule, threat: rule.threat ?? [] }}
-              leftDiffSideLabel={DIFF_SAVED_LABEL}
-              rightDiffSideLabel={DIFF_AI_LABEL}
-              leftDiffSideDescription={DIFF_SAVED_DESCRIPTION}
-              rightDiffSideDescription={DIFF_AI_DESCRIPTION}
-              extraHiddenProperties={AGENT_BUILDER_HIDDEN_PROPERTIES}
-            />
-          </EuiAccordion>
-        </>
-      )}
-
       <EuiSpacer size="s" />
       <SeverityRiskScore severity={rule.severity} riskScore={rule.risk_score} />
 
@@ -303,6 +277,27 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       <EuiCallOut size="s" color="primary" iconType="info" title={LIMITATIONS_TITLE}>
         <EuiText size="xs">{LIMITATIONS_BODY}</EuiText>
       </EuiCallOut>
+
+      {hasDiff && originalRule && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiAccordion
+            id={`rule-diff-accordion-${attachment.id}`}
+            buttonContent={DIFF_ACCORDION_LABEL}
+            paddingSize="none"
+          >
+            <RuleDiffTab
+              oldRule={originalRule}
+              newRule={{ ...rule, threat: rule.threat ?? [] }}
+              leftDiffSideLabel={DIFF_SAVED_LABEL}
+              rightDiffSideLabel={DIFF_AI_LABEL}
+              leftDiffSideDescription={DIFF_SAVED_DESCRIPTION}
+              rightDiffSideDescription={DIFF_AI_DESCRIPTION}
+              extraHiddenProperties={AGENT_BUILDER_HIDDEN_PROPERTIES}
+            />
+          </EuiAccordion>
+        </>
+      )}
     </EuiPanel>
   );
 };

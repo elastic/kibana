@@ -23,7 +23,7 @@ import { DiffView } from './json_diff/diff_view';
 import { stringifyWithExpandedEmpties } from './three_way_diff/comparison_side/utils';
 
 /* Inclding these properties in diff display might be confusing to users. */
-export const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
+const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
   /*
     By default, prebuilt rules don't have any actions or exception lists. So if a user has defined actions or exception lists for a rule, it'll show up as diff. This looks confusing as the user might think that their actions and exceptions lists will get removed after the upgrade, which is not the case - they will be preserved.
   */
@@ -70,7 +70,7 @@ export const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
  * @param {RuleResponse} originalRule - Rule of a RuleResponse type.
  * @returns {RuleResponse} - The updated normalized rule object.
  */
-export const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
+const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   const rule = { ...originalRule };
 
   /*
@@ -120,6 +120,30 @@ export const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
 // identity and don't recompute the diff memo on every render.
 const NO_EXTRA_HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [];
 
+/**
+ * Computes the stringified `[old, new]` rule sources shown in the diff. Shared so the decision to
+ * *show* a diff (e.g. the agent-builder card's accordion) and the diff that is actually *rendered*
+ * always apply the same hiding/normalization rules.
+ */
+export const getRuleDiffSources = (
+  oldRule: RuleResponse,
+  newRule: RuleResponse,
+  extraHiddenProperties: Array<keyof RuleResponse> = NO_EXTRA_HIDDEN_PROPERTIES
+): [string, string] => {
+  const hiddenProperties = [...HIDDEN_PROPERTIES, ...extraHiddenProperties];
+  const visibleNewRuleProperties = omit(normalizeRule(newRule), ...hiddenProperties);
+  /* Only compare properties that are present in the update. */
+  const visibleOldRuleProperties = pick(
+    normalizeRule(oldRule),
+    Object.keys(visibleNewRuleProperties)
+  );
+
+  return [
+    stringifyWithExpandedEmpties(visibleOldRuleProperties),
+    stringifyWithExpandedEmpties(visibleNewRuleProperties),
+  ];
+};
+
 interface RuleDiffTabProps {
   oldRule: RuleResponse;
   newRule: RuleResponse;
@@ -140,19 +164,10 @@ export const RuleDiffTab = ({
   rightDiffSideDescription,
   extraHiddenProperties = NO_EXTRA_HIDDEN_PROPERTIES,
 }: RuleDiffTabProps) => {
-  const [oldSource, newSource] = useMemo(() => {
-    const hiddenProperties = [...HIDDEN_PROPERTIES, ...extraHiddenProperties];
-    const visibleNewRuleProperties = omit(normalizeRule(newRule), ...hiddenProperties);
-    const visibleOldRuleProperties = omit(
-      /* Only compare properties that are present in the update. */
-      pick(normalizeRule(oldRule), Object.keys(visibleNewRuleProperties))
-    );
-
-    return [
-      stringifyWithExpandedEmpties(visibleOldRuleProperties),
-      stringifyWithExpandedEmpties(visibleNewRuleProperties),
-    ];
-  }, [oldRule, newRule, extraHiddenProperties]);
+  const [oldSource, newSource] = useMemo(
+    () => getRuleDiffSources(oldRule, newRule, extraHiddenProperties),
+    [oldRule, newRule, extraHiddenProperties]
+  );
 
   return (
     <>
