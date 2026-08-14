@@ -7,8 +7,10 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { CDR_METERING_STATE_INDEX } from '@kbn/cloud-security-posture-common';
 import { createTransformIfNotExists, startTransformIfNotStarted } from './create_transforms';
 import { latestFindingsTransform } from './latest_findings_transform';
+import { meteringStateTransform } from './metering_state_transform';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 
@@ -46,6 +48,40 @@ describe('createTransformIfNotExist', () => {
     await createTransformIfNotExists(mockEsClient, latestFindingsTransform, logger);
     expect(mockEsClient.transform.getTransform).toHaveBeenCalledTimes(1);
     expect(mockEsClient.transform.putTransform).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('meteringStateTransform', () => {
+  it('reads raw findings and writes the state index', () => {
+    expect(meteringStateTransform.source.index).toBe(
+      'logs-cloud_security_posture.findings-default*'
+    );
+    expect(meteringStateTransform.dest.index).toBe(CDR_METERING_STATE_INDEX);
+  });
+
+  it('groups by resource identity INCLUDING incarnation (name-reuse safe)', () => {
+    const keys = Object.keys(meteringStateTransform.pivot!.group_by!);
+    expect(keys).toEqual([
+      'resource.id',
+      'resource.lifecycle.incarnation',
+      'resource.sub_type',
+      'cloud.account.id',
+      'posture_type',
+    ]);
+  });
+
+  it('uses only script-free aggregations', () => {
+    const aggs = meteringStateTransform.pivot!.aggregations!;
+    expect(Object.keys(aggs)).toEqual(['first_seen', 'last_seen', 'span_ms', 'latest']);
+    expect(JSON.stringify(aggs)).not.toContain('scripted_metric');
+  });
+
+  it('is continuous, unattended, and garbage-collected on last_seen', () => {
+    expect(meteringStateTransform.sync?.time?.field).toBe('event.ingested');
+    expect(meteringStateTransform.settings?.unattended).toBe(true);
+    expect(meteringStateTransform.retention_policy).toEqual({
+      time: { field: 'last_seen', max_age: '7d' },
+    });
   });
 });
 
