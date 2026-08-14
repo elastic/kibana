@@ -528,6 +528,65 @@ export class SearchInterceptor {
   }
 
   /**
+   * Reads a streaming response body using oboe.js streaming JSON parser
+   * to handle responses larger than V8's string length limit (~536MB).
+   */
+  private async readStreamingResponse(response: Response): Promise<unknown> {
+    const reader = response.body?.getReader();
+    if (!reader) {
+      // Fallback to regular json() if no reader available
+      return response.json();
+    }
+
+    // Use dynamic import for oboe since it's a CommonJS module
+    const oboe = (await import('oboe')).default;
+
+    return new Promise((resolve, reject) => {
+      const stream = oboe();
+
+      // When the root object is fully parsed, resolve with it
+      stream.done((parsed: unknown) => {
+        resolve(parsed);
+      });
+
+      stream.fail((error: { thrown?: Error; message?: string }) => {
+        reject(new Error(error.thrown?.message || error.message || 'JSON parse error'));
+      });
+
+      const decoder = new TextDecoder();
+
+      // Read chunks and feed to oboe
+      const processStream = async () => {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              // Signal end of stream by calling emit with empty string
+              // oboe will finalize parsing
+              break;
+            }
+            if (value) {
+              // Decode chunk and feed to oboe
+              const text = decoder.decode(value, { stream: true });
+              stream.emit('data', text);
+            }
+          }
+          // Flush any remaining bytes in the decoder
+          const remaining = decoder.decode();
+          if (remaining) {
+            stream.emit('data', remaining);
+          }
+          stream.emit('end');
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      processStream();
+    });
+  }
+
+  /**
    * @internal
    * @throws `AbortError` | `ErrorLike`
    */
@@ -540,6 +599,11 @@ export class SearchInterceptor {
     const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
+    const isStreamingStrategy =
+      strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
+      strategy === ENHANCED_ES_SEARCH_STRATEGY ||
+      strategy === undefined; // undefined strategy is treated as enhanced ES
+
     const paramsToUse = request.id
       ? {
           wait_for_completion_timeout: options?.pollLength
@@ -569,31 +633,34 @@ export class SearchInterceptor {
             ...{ ...request, params: paramsToUse },
             ...searchOptions,
             requestHash,
-            stream:
-              strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
-              strategy === ENHANCED_ES_SEARCH_STRATEGY ||
-              strategy === undefined, // undefined strategy is treated as enhanced ES
+            stream: isStreamingStrategy,
           }),
           asResponse: true,
+          rawResponse: isStreamingStrategy, // Skip automatic body parsing for streaming responses
         }
       )
-      .then((rawResponse) => {
+      .then(async (rawResponse) => {
+        // For streaming responses, manually read and parse the body
+        let body = rawResponse.body;
+        if (isStreamingStrategy && rawResponse.response && !body) {
+          body = (await this.readStreamingResponse(rawResponse.response)) as typeof body;
+        }
         const warning = rawResponse.response?.headers.get('warning');
         const requestParams =
-          rawResponse.body && 'requestParams' in rawResponse.body
-            ? rawResponse.body.requestParams
+          body && 'requestParams' in body
+            ? body.requestParams
             : JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
         const isRestored =
-          rawResponse.body && 'isRestored' in rawResponse.body
-            ? rawResponse.body.isRestored
+          body && 'isRestored' in body
+            ? body.isRestored
             : rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
 
-        if (rawResponse.body && 'error' in rawResponse.body) {
+        if (body && 'error' in body) {
           // eslint-disable-next-line no-throw-literal
           throw {
             attributes: {
-              error: rawResponse.body.error,
-              rawResponse: rawResponse.body,
+              error: body.error,
+              rawResponse: body,
               requestParams,
               isRestored,
             },
@@ -602,8 +669,8 @@ export class SearchInterceptor {
 
         switch (strategy) {
           case ENHANCED_ES_SEARCH_STRATEGY:
-            if (rawResponse.body?.rawResponse) return rawResponse.body;
-            const typedResponse = rawResponse.body as unknown as AsyncSearchGetResponse;
+            if (body && 'rawResponse' in body) return body as IKibanaSearchResponse;
+            const typedResponse = body as unknown as AsyncSearchGetResponse;
             const shimmedResponse = shimHitsTotal(typedResponse.response, {
               legacyHitsTotal: searchOptions.legacyHitsTotal,
             });
@@ -618,7 +685,7 @@ export class SearchInterceptor {
               ...getTotalLoaded(shimmedResponse),
             };
           case ESQL_ASYNC_SEARCH_STRATEGY:
-            const esqlResponse = rawResponse.body as unknown as EsqlAsyncQueryResponse;
+            const esqlResponse = body as unknown as EsqlAsyncQueryResponse;
             return {
               id: esqlResponse.id,
               rawResponse: esqlResponse,
@@ -629,7 +696,7 @@ export class SearchInterceptor {
               warning,
             };
           default:
-            return rawResponse.body;
+            return body as IKibanaSearchResponse;
         }
       })
       .catch((e: IHttpFetchError<KibanaServerError>) => {

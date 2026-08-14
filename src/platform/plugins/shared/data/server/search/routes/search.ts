@@ -12,6 +12,7 @@ import { addSpanLabels } from '@kbn/apm-utils';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { Logger } from '@kbn/logging';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
@@ -120,9 +121,20 @@ export function registerSearchRoute(
               .toPromise();
 
             if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
+              const rawStream = response.rawResponse as unknown as IncomingMessage;
+
+              // Use PassThrough to ensure clean stream piping
+              const passThrough = new PassThrough();
+              rawStream.pipe(passThrough);
+
+              logger.info(
+                `[STREAM DEBUG] Returning stream response for ${strategy}/${id || 'new'}`
+              );
+
               return res.ok({
-                body: response.rawResponse,
+                body: passThrough,
                 headers: {
+                  'Content-Type': 'application/json',
                   'kbn-search-is-restored': response.isRestored ? '?1' : '?0',
                   'kbn-search-request-params': JSON.stringify(response.requestParams),
                 },

@@ -158,6 +158,14 @@ export const esqlAsyncSearchStrategyProvider = (
 
       const { body, headers, meta } = response;
 
+      const isBodyStream = typeof body === 'object' && body !== null && 'pipe' in body;
+      const contentLength = headers?.['content-length'];
+      logger.info(
+        `[ESQL DEBUG] Response received: id=${id || 'new'}, isStream=${isBodyStream}, ` +
+          `contentLength=${contentLength}, asyncId=${headers?.['x-elasticsearch-async-id']}, ` +
+          `isRunning=${headers?.['x-elasticsearch-async-is-running']}`
+      );
+
       return toAsyncKibanaSearchResponse(
         body as EsqlAsyncQueryResponse, // We can remove this cast after https://github.com/elastic/elasticsearch-js/issues/3215
         headers,
