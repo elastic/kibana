@@ -1092,6 +1092,7 @@ x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/search
 x-pack/platform/packages/shared/kbn-inference-prompt-utils @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-inference-tracing @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-inference-tracing-config @elastic/search-ml-ux
+x-pack/platform/packages/shared/kbn-ingest-pipeline-json-editor @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-ink @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-investigation-output @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team
@@ -1219,6 +1220,7 @@ x-pack/platform/plugins/shared/automatic_import @elastic/cloud-services
 x-pack/platform/plugins/shared/cases @elastic/kibana-cases
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
 x-pack/platform/plugins/shared/cloud_connect @elastic/kibana-management
+x-pack/platform/plugins/shared/connector_events_bridge @elastic/workflows-eng
 x-pack/platform/plugins/shared/content_connectors @elastic/search-ml-ux
 x-pack/platform/plugins/shared/context_engine @elastic/context-eng
 x-pack/platform/plugins/shared/custom_content @elastic/kibana-visualizations @elastic/kibana-presentation
@@ -2159,7 +2161,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/solutions/**/test/serverless/**/test_suites/ml/ @elastic/search-ml-ux
 
 # Security Machine Learning
-x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/security-ml
+x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security_* @elastic/threat-research-and-detection-engineering
 
 # Additional plugins and packages maintained by the ML team.
 /src/platform/test/examples/response_stream/*.ts @elastic/search-ml-ux
@@ -2627,6 +2629,9 @@ src/platform/packages/shared/kbn-connector-specs/src/lib/ears_experimental_utils
 src/platform/packages/shared/kbn-connector-specs/src/lib/ears_experimental_utils.test.ts @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.ts @elastic/workchat-eng @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.test.ts @elastic/workchat-eng @elastic/response-ops
+
+## Inbound connector events hub
+x-pack/platform/plugins/shared/connector_events_bridge/ @elastic/workflows-eng
 
 ## Relay
 x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift-context-and-research-team

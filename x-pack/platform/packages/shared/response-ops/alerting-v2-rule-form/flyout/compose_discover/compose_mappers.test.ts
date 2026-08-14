@@ -33,10 +33,10 @@ const baseRuleResponse: RuleResponse = {
     base: BASE,
     breach: { segment: ALERT_SEGMENT },
   },
-  createdBy: 'test',
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedBy: 'test',
-  updatedAt: '2026-01-01T00:00:00Z',
+  created_by: 'test',
+  created_at: '2026-01-01T00:00:00Z',
+  updated_by: 'test',
+  updated_at: '2026-01-01T00:00:00Z',
 };
 
 const baseFormValues: FormValues = {
