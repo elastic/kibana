@@ -72,6 +72,7 @@ export const EditCustomContentFlyout = ({
     esqlDataError,
     handleFetchData,
     isRenderLoading,
+    hasPreviewedCurrentDraft,
     handleRender,
   } = useEditFlyoutState({ esqlQuery, template, timeRange, colorMode, onRunPreview });
 
@@ -260,7 +261,7 @@ export const EditCustomContentFlyout = ({
                   color="success"
                   iconType="play"
                   isLoading={isRenderLoading}
-                  disabled={!hasChanges}
+                  disabled={!hasChanges || hasPreviewedCurrentDraft}
                   onClick={handleRender}
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
