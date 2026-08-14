@@ -6,20 +6,30 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-import type { AiIndexService } from '../ai_indices/service';
+import type { KiStepDependencies } from './helpers';
 import { getCreateKiStepDefinition } from './create_ki';
 import { getUpdateKiStepDefinition } from './update_ki';
 import { getDeleteKiStepDefinition } from './delete_ki';
 
-/** Registers the Context Engine KI workflow steps with the workflowsExtensions plugin. */
+/**
+ * Registers the Context Engine KI workflow steps with the workflowsExtensions
+ * plugin. The steps register only when the Context Engine advanced setting is
+ * on at startup; enabling it later requires a restart (mirroring the managed
+ * AI index registration). Handlers also re-check the setting at run time.
+ */
 export const registerStepDefinitions = ({
   workflowsExtensions,
-  getAiIndexService,
-}: {
+  ...deps
+}: KiStepDependencies & {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-  getAiIndexService: () => AiIndexService;
 }): void => {
-  workflowsExtensions.registerStepDefinition(getCreateKiStepDefinition(getAiIndexService));
-  workflowsExtensions.registerStepDefinition(getUpdateKiStepDefinition(getAiIndexService));
-  workflowsExtensions.registerStepDefinition(getDeleteKiStepDefinition(getAiIndexService));
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await deps.isContextEngineEnabled()) ? getCreateKiStepDefinition(deps) : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await deps.isContextEngineEnabled()) ? getUpdateKiStepDefinition(deps) : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await deps.isContextEngineEnabled()) ? getDeleteKiStepDefinition(deps) : undefined
+  );
 };

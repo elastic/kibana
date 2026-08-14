@@ -117,6 +117,12 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
+      isContextEngineEnabled: async () => {
+        const [coreStart] = await coreSetup.getStartServices();
+        const soClient = coreStart.savedObjects.createInternalRepository();
+        const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
+        return (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
+      },
     });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).

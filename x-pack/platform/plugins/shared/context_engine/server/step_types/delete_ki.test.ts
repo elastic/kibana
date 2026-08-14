@@ -13,7 +13,28 @@ import { createMockStepContext, mockAiIndexService } from './test_utils';
 
 const searchHit = (index: string) => ({ hits: { hits: [{ _id: 'ki-1', _index: index }] } });
 
+const enabled = async () => true;
+
 describe('getDeleteKiStepDefinition', () => {
+  it('throws FeatureDisabledError when Context Engine is disabled', async () => {
+    const esClient = { search: jest.fn(), delete: jest.fn() };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: async () => false,
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('FeatureDisabledError');
+    expect(esClient.delete).not.toHaveBeenCalled();
+  });
+
   it('deletes the KI from its backing index and returns the document id', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
@@ -25,7 +46,10 @@ describe('getDeleteKiStepDefinition', () => {
     });
     const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
 
-    const { handler } = getDeleteKiStepDefinition(() => service);
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1' } });
@@ -50,7 +74,10 @@ describe('getDeleteKiStepDefinition', () => {
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
 
-    const { handler } = getDeleteKiStepDefinition(() => service);
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
@@ -69,7 +96,10 @@ describe('getDeleteKiStepDefinition', () => {
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
 
-    const { handler } = getDeleteKiStepDefinition(() => service);
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
@@ -86,7 +116,10 @@ describe('getDeleteKiStepDefinition', () => {
       get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('missing')),
     } as unknown as AiIndexService;
 
-    const { handler } = getDeleteKiStepDefinition(() => service);
+    const { handler } = getDeleteKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);

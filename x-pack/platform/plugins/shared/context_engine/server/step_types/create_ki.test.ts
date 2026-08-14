@@ -17,6 +17,8 @@ const kiInput = {
   description: 'Profile of the logs indices',
 };
 
+const enabled = async () => true;
+
 describe('getCreateKiStepDefinition', () => {
   it('indexes the KI into an index dest and returns the document id', async () => {
     const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
@@ -26,7 +28,10 @@ describe('getCreateKiStepDefinition', () => {
     });
     const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
 
-    const { handler } = getCreateKiStepDefinition(() => service);
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1' } });
@@ -48,7 +53,10 @@ describe('getCreateKiStepDefinition', () => {
     });
     const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
 
-    const { handler } = getCreateKiStepDefinition(() => service);
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     await handler(context);
 
     expect(esClient.index).toHaveBeenCalledWith(
@@ -68,7 +76,10 @@ describe('getCreateKiStepDefinition', () => {
       create: jest.fn().mockResolvedValue(undefined),
     } as unknown as AiIndexService;
 
-    const { handler } = getCreateKiStepDefinition(() => service);
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1' } });
@@ -100,7 +111,10 @@ describe('getCreateKiStepDefinition', () => {
       create: jest.fn().mockRejectedValue(new AiIndexAlreadyExistsError('new-ai-index')),
     } as unknown as AiIndexService;
 
-    const { handler } = getCreateKiStepDefinition(() => service);
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const result = await handler(context);
 
     expect(result).toEqual({ output: { id: 'ki-1' } });
@@ -121,12 +135,34 @@ describe('getCreateKiStepDefinition', () => {
       create: jest.fn(),
     } as unknown as AiIndexService;
 
-    const { handler } = getCreateKiStepDefinition(() => service);
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
     expect(thrown.type).toBe('ValidationError');
     expect(service.create).not.toHaveBeenCalled();
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('throws FeatureDisabledError when Context Engine is disabled', async () => {
+    const esClient = { index: jest.fn() };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki: kiInput },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: async () => false,
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('FeatureDisabledError');
     expect(esClient.index).not.toHaveBeenCalled();
   });
 
@@ -138,7 +174,10 @@ describe('getCreateKiStepDefinition', () => {
     });
     const service = { get: jest.fn().mockRejectedValue(cause) } as unknown as AiIndexService;
 
-    const { handler } = getCreateKiStepDefinition(() => service);
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+    });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBe(cause);

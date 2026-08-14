@@ -7,17 +7,37 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
-/** Registers the Context Engine KI workflow steps with the workflowsExtensions plugin. */
-export const registerStepDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup
-): void => {
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./create_ki').then((m) => m.createKiStepDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./update_ki').then((m) => m.updateKiStepDefinition)
-  );
-  workflowsExtensions.registerStepDefinition(() =>
-    import('./delete_ki').then((m) => m.deleteKiStepDefinition)
-  );
+/**
+ * Registers the Context Engine KI workflow steps with the workflowsExtensions
+ * plugin. The steps register only when the Context Engine advanced setting is
+ * on; enabling it later requires a page reload.
+ */
+export const registerStepDefinitions = ({
+  workflowsExtensions,
+  isContextEngineEnabled,
+}: {
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+  isContextEngineEnabled: () => Promise<boolean>;
+}): void => {
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isContextEngineEnabled())) {
+      return undefined;
+    }
+    const { createKiStepDefinition } = await import('./create_ki');
+    return createKiStepDefinition;
+  });
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isContextEngineEnabled())) {
+      return undefined;
+    }
+    const { updateKiStepDefinition } = await import('./update_ki');
+    return updateKiStepDefinition;
+  });
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isContextEngineEnabled())) {
+      return undefined;
+    }
+    const { deleteKiStepDefinition } = await import('./delete_ki');
+    return deleteKiStepDefinition;
+  });
 };

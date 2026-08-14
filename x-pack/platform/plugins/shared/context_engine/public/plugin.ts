@@ -61,7 +61,13 @@ export class ContextEnginePlugin
     core: CoreSetup<ContextEngineStartDependencies>,
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
-    registerStepDefinitions(setupDeps.workflowsExtensions);
+    registerStepDefinitions({
+      workflowsExtensions: setupDeps.workflowsExtensions,
+      isContextEngineEnabled: async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID, false);
+      },
+    });
 
     const startServices = core.getStartServices();
     // Captured in a closure so `mount` (where `this` is the app config) can read the opener

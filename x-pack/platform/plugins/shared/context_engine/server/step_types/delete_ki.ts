@@ -8,13 +8,18 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
-import type { AiIndexService } from '../ai_indices/service';
-import { findKiBackingIndex, resolveAiIndexDest } from './helpers';
+import type { KiStepDependencies } from './helpers';
+import { assertContextEngineEnabled, findKiBackingIndex, resolveAiIndexDest } from './helpers';
 
-export const getDeleteKiStepDefinition = (getAiIndexService: () => AiIndexService) =>
+export const getDeleteKiStepDefinition = ({
+  getAiIndexService,
+  isContextEngineEnabled,
+}: KiStepDependencies) =>
   createServerStepDefinition({
     ...deleteKiStepCommonDefinition,
     handler: async (context) => {
+      await assertContextEngineEnabled(isContextEngineEnabled);
+
       const { ai_index_id: aiIndexId, ki_id: kiId } = context.input;
 
       const dest = await resolveAiIndexDest(getAiIndexService, aiIndexId);

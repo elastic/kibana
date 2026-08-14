@@ -7,13 +7,18 @@
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
-import type { AiIndexService } from '../ai_indices/service';
-import { findKiBackingIndex, resolveAiIndexDest } from './helpers';
+import type { KiStepDependencies } from './helpers';
+import { assertContextEngineEnabled, findKiBackingIndex, resolveAiIndexDest } from './helpers';
 
-export const getUpdateKiStepDefinition = (getAiIndexService: () => AiIndexService) =>
+export const getUpdateKiStepDefinition = ({
+  getAiIndexService,
+  isContextEngineEnabled,
+}: KiStepDependencies) =>
   createServerStepDefinition({
     ...updateKiStepCommonDefinition,
     handler: async (context) => {
+      await assertContextEngineEnabled(isContextEngineEnabled);
+
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
 
       const dest = await resolveAiIndexDest(getAiIndexService, aiIndexId);

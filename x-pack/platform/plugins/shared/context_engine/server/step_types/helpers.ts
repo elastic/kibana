@@ -7,10 +7,32 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
+import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+
+/** Dependencies injected into the KI step definition factories. */
+export interface KiStepDependencies {
+  getAiIndexService: () => AiIndexService;
+  isContextEngineEnabled: () => Promise<boolean>;
+}
+
+/**
+ * Fails the step when the Context Engine advanced setting is off, mirroring the
+ * request-time gate on the Context Engine HTTP routes.
+ */
+export const assertContextEngineEnabled = async (
+  isContextEngineEnabled: () => Promise<boolean>
+): Promise<void> => {
+  if (!(await isContextEngineEnabled())) {
+    throw new ExecutionError({
+      type: 'FeatureDisabledError',
+      message: `Context Engine is disabled. Enable the '${CONTEXT_ENGINE_ENABLED_SETTING_ID}' advanced setting to use this step.`,
+    });
+  }
+};
 
 /** Resolves an AI index id to its backing store, failing the step when the id is unknown. */
 export const resolveAiIndexDest = async (
