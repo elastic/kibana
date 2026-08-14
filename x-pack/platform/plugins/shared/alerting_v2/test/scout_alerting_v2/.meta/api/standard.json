@@ -1,5 +1,5 @@
 {
-  "sha1": "582f04b8ea7dd163c8f565745010dd4eb0a912f0",
+  "sha1": "7bedb6fc2d1ecfcd76a40f75d119f89a716296c9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -2500,6 +2500,175 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/enable_action_policy.spec.ts",
         "line": 127,
         "column": 8
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-e037f77b7ffc210",
+      "title": "Get action policy tags API tags: should return an empty tags array when no action policies exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 42,
+        "column": 31
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-bb003b9a6ed34b5",
+      "title": "Get action policy tags API tags: should return tags in a wrapped { tags } response shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 51,
+        "column": 5
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-154eca43385b2df",
+      "title": "Get action policy tags API search: should return only tags matching the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 62,
+        "column": 43
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-ad18396f55b9289",
+      "title": "Get action policy tags API search: should treat an empty search value as no search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 81,
+        "column": 30
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-74b158f0d816a65",
+      "title": "Get action policy tags API search: should escape regex special characters in the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 103,
+        "column": 72
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-04bc9256a303337",
+      "title": "Get action policy tags API search: should escape Elasticsearch-only regexp operators in the prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 121,
+        "column": 62
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-11e9a5534da9960",
+      "title": "Get action policy tags API cap: should return at most 20 tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 155,
+        "column": 67
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-9114b6e17c1dc0c",
+      "title": "Get action policy tags API sort: should return the most-used tags before less-used ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 176,
+        "column": 5
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-4180931f4614f3a",
+      "title": "Get action policy tags API validation: should return 400 when search exceeds the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 199,
+        "column": 30
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-843b9132d55ad3d",
+      "title": "Get action policy tags API validation: should return 400 when unknown query parameters are sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 210,
+        "column": 5
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-f39b2583d150f14",
+      "title": "Get action policy tags API authorization: should return 200 for a user with read-only action policy privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 215,
+        "column": 14
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-817de199776431a",
+      "title": "Get action policy tags API authorization: should return 200 for a user with full action policy privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 228,
+        "column": 14
+      }
+    },
+    {
+      "id": "3f5ac6931b7dc9d-14fc100b0c79593",
+      "title": "Get action policy tags API authorization: should return 403 for a user without action policy privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/action_policies/get_action_policy_tags.spec.ts",
+        "line": 244,
+        "column": 18
       }
     },
     {
@@ -5607,6 +5776,486 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
         "line": 161,
         "column": 16
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-c9813ccbe627f18",
+      "title": "Find rule templates API should return the installed v2 templates with their create-rule payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 35,
+        "column": 42
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-9086d9ed916a6e1",
+      "title": "Find rule templates API should exclude templates that do not belong to the v2 engine",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 61,
+        "column": 97
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-b2442a305675dbe",
+      "title": "Find rule templates API search: should match on the template name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 80,
+        "column": 9
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-1cb4323299d36a0",
+      "title": "Find rule templates API search: should match on the template description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 101,
+        "column": 57
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-1b1826dd30ba3c4",
+      "title": "Find rule templates API search: should return an empty page when nothing matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 124,
+        "column": 63
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-9644f86b7d5cb97",
+      "title": "Find rule templates API tags: should return only templates carrying the tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 140,
+        "column": 25
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-ef72d34badc91b3",
+      "title": "Find rule templates API tags: should OR repeated tag parameters together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 167,
+        "column": 29
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-2a9808edbf487e7",
+      "title": "Find rule templates API pagination: should slice results and report the total across pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 201,
+        "column": 14
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-c2481d01cba86c4",
+      "title": "Find rule templates API sort: should sort by name ascending by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 240,
+        "column": 4
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-617f0f4b4d23b19",
+      "title": "Find rule templates API sort: should sort by name descending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 261,
+        "column": 25
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-c70efe361525c64",
+      "title": "Find rule templates API should skip a template whose stored payload is no longer valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 286,
+        "column": 80
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-86aed49e6514271",
+      "title": "Find rule templates API validation: should reject per_page above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 310,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-72ee1943b2b02e8",
+      "title": "Find rule templates API validation: should reject page values below 1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 316,
+        "column": 16
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-5db574747e9fd48",
+      "title": "Find rule templates API validation: should reject unknown sort_field values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 324,
+        "column": 80
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-c868050ab07eee3",
+      "title": "Find rule templates API validation: should reject a search that is empty after trimming",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 334,
+        "column": 30
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-55c72b014cf89b0",
+      "title": "Find rule templates API validation: should reject more tags than the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 344,
+        "column": 11
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-e9a233d53f1c881",
+      "title": "Find rule templates API authorization: should return 200 for a user with read-only rules privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 355,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d530a75de0d0d9-153fcc7b2e66d94",
+      "title": "Find rule templates API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/find_rule_templates.spec.ts",
+        "line": 369,
+        "column": 40
+      }
+    },
+    {
+      "id": "f41f500e6922781-4d68d683cfdf216",
+      "title": "Get rule template API should return the template with the create-rule payload it installs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/get_rule_template.spec.ts",
+        "line": 27,
+        "column": 5
+      }
+    },
+    {
+      "id": "f41f500e6922781-7365c04d71725d3",
+      "title": "Get rule template API should return 404 when no template has that id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/get_rule_template.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "f41f500e6922781-93e1f36fb9f0956",
+      "title": "Get rule template API should return 404 for a template that belongs to another engine",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/get_rule_template.spec.ts",
+        "line": 57,
+        "column": 81
+      }
+    },
+    {
+      "id": "f41f500e6922781-2dd8147f2404fae",
+      "title": "Get rule template API should return 404 when the stored payload is no longer valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/get_rule_template.spec.ts",
+        "line": 71,
+        "column": 5
+      }
+    },
+    {
+      "id": "f41f500e6922781-c539fceb5d9f804",
+      "title": "Get rule template API authorization: should return 200 for a user with read-only rules privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/get_rule_template.spec.ts",
+        "line": 89,
+        "column": 43
+      }
+    },
+    {
+      "id": "f41f500e6922781-ac49aab753edc19",
+      "title": "Get rule template API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rule_templates/get_rule_template.spec.ts",
+        "line": 108,
+        "column": 5
       }
     },
     {
