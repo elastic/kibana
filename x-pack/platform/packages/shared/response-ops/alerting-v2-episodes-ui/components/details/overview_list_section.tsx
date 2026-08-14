@@ -40,7 +40,7 @@ export const AlertEpisodeOverviewListSection = ({
   } = useFetchEpisodeQuery({ episodeId, services });
 
   const ruleId = episode?.['rule.id'];
-  const triggeredAt = episode?.triggered_at;
+  const triggeredAt = episode?.triggered_at ?? undefined;
   const durationMs = episode?.duration;
 
   const { ruleState } = useFetchRule({ id: ruleId, http: services.http });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ALERT_EPISODE_STATUS, type AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { alertEpisodeToEpisodeAttachment } from './episode_mappers';
 
 const baseEpisode = {
@@ -84,11 +85,13 @@ describe('alertEpisodeToEpisodeAttachment', () => {
   });
 
   it('converts null to undefined on any field, including required ones', () => {
-    const result = alertEpisodeToEpisodeAttachment({
+    const episodeWithNullRequiredFields = {
       ...baseEpisode,
       group_hash: null,
       duration: null,
-    } as unknown as AlertEpisode);
+    } as unknown as AlertEpisode;
+
+    const result = alertEpisodeToEpisodeAttachment(episodeWithNullRequiredFields);
 
     expect(result.group_hash).toBeUndefined();
     expect(result.duration).toBeUndefined();
