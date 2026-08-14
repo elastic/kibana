@@ -11,14 +11,14 @@ import { useCallback, useRef } from 'react';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDiscoverLocatorParams } from '../../../utils/get_discover_locator_params';
+import { getDiscoverLocatorParams } from '../../../../utils/get_discover_locator_params';
 import {
   selectCurrentProfileLocatorState,
   useCurrentTabSelector,
   useInternalStateSelector,
   useRuntimeStateManager,
-} from '../state_management/redux';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
+} from '../../state_management/redux';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 /**
  * Copies a flyout link using the absolute time range that produced the current results.
@@ -65,7 +65,6 @@ export const useCopyExpandedDocLink = ({ dataView }: { dataView: DataView }) => 
       const shortUrl = await share.url.shortUrls.get(null).createWithLocator({ locator, params });
       url = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
-      // Duplicated from `relativeToAbsolute` for bundle size reasons, as in the share menu
       const link = document.createElement('a');
       link.setAttribute('href', locator.getRedirectUrl(params));
       url = link.href;

@@ -35,8 +35,8 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
-import { ExpandedDocNotice, useExpandedDocSync } from '../../hooks/use_expanded_doc_sync';
-import { useCopyExpandedDocLink } from '../../hooks/use_copy_expanded_doc_link';
+import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
+import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
 import {
   getExpandedDocLinkability,
   getExpandedDocLinkDisabledReason,

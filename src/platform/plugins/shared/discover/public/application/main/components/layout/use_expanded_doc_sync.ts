@@ -13,8 +13,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { fetchExpandedDoc } from '../data_fetching/fetch_expanded_doc';
-import { getExpandedDocRef, matchesExpandedDocRef } from '../utils/expanded_doc';
+import { fetchExpandedDoc } from '../../data_fetching/fetch_expanded_doc';
+import { getExpandedDocRef, matchesExpandedDocRef } from '../../utils/expanded_doc';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
@@ -22,10 +22,10 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
-} from '../state_management/redux';
-import { useScopedServices } from '../../../components/scoped_services_provider';
-import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { FetchStatus } from '../../types';
+} from '../../state_management/redux';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { FetchStatus } from '../../../types';
 
 /** Describes why a linked document is unavailable in the current results. */
 export enum ExpandedDocNotice {
