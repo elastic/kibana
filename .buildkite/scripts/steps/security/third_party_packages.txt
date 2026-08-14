@@ -1,5 +1,4 @@
 @eslint-community/eslint-plugin-eslint-comments
-eslint-plugin-n
 @xterm/xterm
 knip
 safe-stable-stringify
