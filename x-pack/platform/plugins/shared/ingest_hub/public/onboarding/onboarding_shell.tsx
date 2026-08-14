@@ -23,7 +23,7 @@ import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/c
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
-import { AWS_SERVICES_MAP } from './aws_service_matrix';
+import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
 import {
   DeploySettingsStep,
@@ -75,21 +75,26 @@ export function OnboardingShell() {
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
+  const awsServiceMatrix = useAwsServiceMatrix();
+
   useInvalidateDownstreamSteps({
     selectedServiceIds,
     downstreamStepIds: DOWNSTREAM_OF_SERVICES_STEP_IDS,
     markStepsIncomplete,
   });
 
-  const needsDeploySettingsStep = useMemo(
-    () =>
+  const needsDeploySettingsStep = useMemo(() => {
+    if (!awsServiceMatrix) return true; // loading — assume deploy settings needed
+    return (
       selectedServiceIds.length === 0 ||
       selectedServiceIds.some(
         (id) =>
-          AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
-      ),
-    [selectedServiceIds]
-  );
+          awsServiceMatrix
+            .find((s) => s.id === id)
+            ?.deploymentMethods.some((dm) => dm.method === 'managed_integration') ?? false
+      )
+    );
+  }, [selectedServiceIds, awsServiceMatrix]);
 
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);

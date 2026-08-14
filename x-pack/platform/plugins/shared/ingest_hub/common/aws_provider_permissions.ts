@@ -51,8 +51,8 @@ const actions = (...groups: ReadonlyArray<readonly string[]>): ProviderPermissio
 });
 
 /**
- * Provider permissions keyed by data stream id for agentless services.
- * Services with only cloud_forwarder/firehose delivery are omitted.
+ * Provider permissions keyed by data stream id for managed_integration services.
+ * Services with only ecf/agent_based deployment are omitted.
  * Used as fallback when a package does not yet declare provider_permissions in its manifest.
  */
 export const AWS_SERVICE_PROVIDER_PERMISSIONS: Readonly<Record<string, ProviderPermissions>> = {

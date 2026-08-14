@@ -44,8 +44,8 @@ beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));
 });
 
-// apigateway_logs  → cloud_forwarder (non-agentless): needsDeploySettingsStep = false
-// apigateway_metrics → agentless: needsDeploySettingsStep = true
+// apigateway_logs  → ecf (no managed_integration): needsDeploySettingsStep = false
+// apigateway_metrics → managed_integration: needsDeploySettingsStep = true
 const NON_AGENTLESS_ID = 'apigateway_logs';
 const AGENTLESS_ID = 'apigateway_metrics';
 
@@ -87,17 +87,16 @@ describe('OnboardingShell — downstream step invalidation', () => {
   /**
    * Path 1: stepper-skip via indicator.
    *
-   * When both agentless and non-agentless services are selected, Continue from
+   * When both managed_integration and ecf services are selected, Continue from
    * services goes to service-settings (not skipped). After completing it and
-   * going back to services, removing the non-agentless service changes the
-   * selection and must mark service-settings incomplete again so the indicator
-   * is no longer clickable.
+   * going back to services, changing the selection must mark service-settings
+   * incomplete again so the indicator is no longer clickable.
    */
   describe('path 1: stepper skip via indicator', () => {
     it('marks service-settings incomplete after the service selection changes', async () => {
       const { history, setIds } = renderShell('#services');
 
-      // Select an agentless service so needsDeploySettingsStep = true
+      // Select a managed_integration service so needsDeploySettingsStep = true
       // and Continue goes to service-settings (not skipped).
       await setIds([AGENTLESS_ID]);
 
@@ -121,18 +120,18 @@ describe('OnboardingShell — downstream step invalidation', () => {
   });
 
   /**
-   * Path 2: deploy-settings auto-complete / agentless flip.
+   * Path 2: deploy-settings auto-complete / managed_integration flip.
    *
-   * With only non-agentless services selected, Continue from services
-   * auto-marks deploy-settings complete and skips it. Adding an agentless
+   * With only ecf services selected, Continue from services auto-marks
+   * deploy-settings complete and skips it. Adding a managed_integration
    * service (which requires deploy-settings) must invalidate that stale
    * complete flag so the credentials step can no longer be skipped.
    */
-  describe('path 2: agentless flip — deploy-settings wrongly skipped', () => {
-    it('marks deploy-settings incomplete when selection switches to include an agentless service', async () => {
+  describe('path 2: managed_integration flip — deploy-settings wrongly skipped', () => {
+    it('marks deploy-settings incomplete when selection switches to include a managed_integration service', async () => {
       const { history, setIds } = renderShell('#services');
 
-      // Select only a non-agentless service: needsDeploySettingsStep = false.
+      // Select only an ecf service: needsDeploySettingsStep = false.
       await setIds([NON_AGENTLESS_ID]);
 
       // Continue from services — deploy-settings is auto-marked complete and
@@ -144,7 +143,7 @@ describe('OnboardingShell — downstream step invalidation', () => {
       // Go back to services
       act(() => history.push('/aws#services'));
 
-      // Add an agentless service — now needsDeploySettingsStep = true.
+      // Add a managed_integration service — now needsDeploySettingsStep = true.
       // The previously auto-completed deploy-settings must be invalidated.
       await setIds([NON_AGENTLESS_ID, AGENTLESS_ID]);
 

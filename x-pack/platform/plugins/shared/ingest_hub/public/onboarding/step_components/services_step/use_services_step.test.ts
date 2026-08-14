@@ -11,9 +11,20 @@ jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  useGetPackageInfoByKeyQuery: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
+jest.mock('../../use_aws_service_matrix', () => {
+  const { AWS_SERVICES_STATIC } = jest.requireActual('../../aws_service_matrix') as any;
+  return {
+    useAwsServiceMatrix: jest.fn().mockReturnValue(AWS_SERVICES_STATIC),
+  };
+});
+
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';
-import { AWS_SERVICES_MATRIX } from '../../aws_service_matrix';
+import { AWS_SERVICES_STATIC } from '../../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
@@ -44,7 +55,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
     // saved firstCat above. Re-render with a search that matches the category name
     // so the category stays visible but the service count would shrink if we used
     // filteredServices. Instead use a partial match that hits at least one service.
-    const firstService = AWS_SERVICES_MATRIX.find((s) => s.showInUI && s.category === firstCat);
+    const firstService = AWS_SERVICES_STATIC.find((s) => s.showInUI && s.category === firstCat);
     expect(firstService).toBeDefined();
 
     act(() => {
@@ -63,7 +74,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
 
     // Find a category that has services of both signal types.
     const mixedCat = result.current.categories.find((cat) => {
-      const allInCat = AWS_SERVICES_MATRIX.filter((s) => s.showInUI && s.category === cat);
+      const allInCat = AWS_SERVICES_STATIC.filter((s) => s.showInUI && s.category === cat);
       const hasLogs = allInCat.some((s) => s.signalType === 'logs');
       const hasMetrics = allInCat.some((s) => s.signalType === 'metrics');
       return hasLogs && hasMetrics;
@@ -71,7 +82,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
 
     if (!mixedCat) return; // No mixed category in the matrix — skip.
 
-    const allInMixed = AWS_SERVICES_MATRIX.filter((s) => s.showInUI && s.category === mixedCat);
+    const allInMixed = AWS_SERVICES_STATIC.filter((s) => s.showInUI && s.category === mixedCat);
     const expectedLogsTotal = allInMixed.filter((s) => s.signalType === 'logs').length;
     const expectedMetricsTotal = allInMixed.filter((s) => s.signalType === 'metrics').length;
 
@@ -93,7 +104,7 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
     const [firstCat] = result.current.categories;
     expect(firstCat).toBeDefined();
 
-    const metricsInCat = AWS_SERVICES_MATRIX.filter(
+    const metricsInCat = AWS_SERVICES_STATIC.filter(
       (s) => s.showInUI && s.category === firstCat && s.signalType === 'metrics'
     );
     expect(metricsInCat.length).toBeGreaterThan(0);

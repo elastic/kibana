@@ -7,8 +7,8 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { AWS_SERVICES_MATRIX } from '../../aws_service_matrix';
 import type { ServiceCategory, SignalType } from '../../aws_service_matrix';
+import { useAwsServiceMatrix } from '../../use_aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 export type SignalFilter = SignalType | 'all';
@@ -31,19 +31,22 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   const { servicesStep, setSelectedServiceIds } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
+  const rawMatrix = useAwsServiceMatrix();
+  const awsServiceMatrix = useMemo(() => rawMatrix ?? [], [rawMatrix]);
+
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
 
   const filteredServices = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return AWS_SERVICES_MATRIX.filter(
+    return awsServiceMatrix.filter(
       (s) =>
         s.showInUI &&
         (signalFilter === 'all' || s.signalType === signalFilter) &&
         (q === '' || s.name.toLowerCase().includes(q))
     );
-  }, [signalFilter, searchQuery]);
+  }, [awsServiceMatrix, signalFilter, searchQuery]);
 
   const categories = useMemo(() => {
     const present = new Set(filteredServices.map((s) => s.category));
@@ -76,10 +79,10 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   // so total/selected in the badge stay reachable under the active signal filter.
   const signalFilteredServices = useMemo(
     () =>
-      AWS_SERVICES_MATRIX.filter(
+      awsServiceMatrix.filter(
         (s) => s.showInUI && (signalFilter === 'all' || s.signalType === signalFilter)
       ),
-    [signalFilter]
+    [awsServiceMatrix, signalFilter]
   );
 
   const categoryStats = useMemo(() => {

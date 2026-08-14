@@ -42,7 +42,7 @@ const BASE_SERVICE: AwsServiceMatrixEntry = {
   signalType: 'logs',
   packageName: 'aws',
   policyTemplate: 's3',
-  deliveryMethods: [{ method: 'agentless' }],
+  deploymentMethods: [{ method: 'managed_integration' }],
   defaultEnabled: false,
   showInUI: true,
 };

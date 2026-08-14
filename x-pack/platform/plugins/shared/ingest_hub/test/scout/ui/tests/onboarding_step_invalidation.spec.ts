@@ -12,8 +12,8 @@ import { test } from '../fixtures';
 
 // Both services are in the default "Security, Identity and Compliance" category,
 // visible without switching signal filter or category.
-//   guardduty → cloud_forwarder (non-agentless): needsDeploySettingsStep = false
-//   inspector → agentless:                       needsDeploySettingsStep = true
+//   guardduty → ecf (non-managed_integration): needsDeploySettingsStep = false
+//   inspector → managed_integration:           needsDeploySettingsStep = true
 const NON_AGENTLESS_ID = 'guardduty';
 const AGENTLESS_ID = 'inspector';
 

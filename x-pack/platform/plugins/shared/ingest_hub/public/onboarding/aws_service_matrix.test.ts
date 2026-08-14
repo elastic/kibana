@@ -7,19 +7,14 @@
 
 import type {
   AwsServiceMatrixEntry,
-  DeliveryMethod,
+  DeploymentMethod,
   SignalType,
   ServiceCategory,
 } from './aws_service_matrix';
-import { AWS_SERVICES_MATRIX } from './aws_service_matrix';
+import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from './aws_service_matrix';
 
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
-const VALID_DELIVERY_METHODS: DeliveryMethod[] = [
-  'agentless',
-  'firehose',
-  'cloud_forwarder',
-  'agent_based',
-];
+const VALID_DEPLOYMENT_METHODS: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
 const VALID_CATEGORIES: ServiceCategory[] = [
   'Analytics',
   'Application Integration',
@@ -34,71 +29,187 @@ const VALID_CATEGORIES: ServiceCategory[] = [
   'Storage',
 ];
 
-describe('AWS_SERVICES_MATRIX', () => {
+// Build a mock PackageInfo that marks all unique aws policy templates as agentless-enabled.
+// data_streams is empty so signalType / inputs / config fields come from the static entries.
+const MOCK_AWS_PACKAGE_INFO = {
+  policy_templates: [
+    ...new Set(
+      AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws' && e.policyTemplate).map(
+        (e) => e.policyTemplate!
+      )
+    ),
+  ].map((name) => ({ name, deployment_modes: { agentless: { enabled: true } } })),
+  data_streams: [],
+} as any;
+
+const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_AWS_PACKAGE_INFO, AWS_SERVICES_STATIC);
+
+describe('AWS service matrix', () => {
   it('should have at least 40 entries', () => {
-    expect(AWS_SERVICES_MATRIX.length).toBeGreaterThanOrEqual(40);
+    expect(BUILT_MATRIX.length).toBeGreaterThanOrEqual(40);
   });
 
   it('should have no duplicate ids', () => {
-    const ids = AWS_SERVICES_MATRIX.map((s) => s.id);
+    const ids = BUILT_MATRIX.map((s) => s.id);
     const unique = new Set(ids);
     expect(unique.size).toBe(ids.length);
   });
 
-  describe.each(
-    AWS_SERVICES_MATRIX.map((entry) => [entry.id, entry] as [string, AwsServiceMatrixEntry])
-  )('service "%s"', (_id, entry) => {
-    it('has a non-empty id', () => {
-      expect(entry.id).toBeTruthy();
-    });
-
-    it('has a non-empty name', () => {
-      expect(entry.name).toBeTruthy();
-    });
-
-    it('has a valid category', () => {
-      expect(VALID_CATEGORIES).toContain(entry.category);
-    });
-
-    it('has a valid signalType', () => {
-      expect(VALID_SIGNAL_TYPES).toContain(entry.signalType);
-    });
-
-    it('has at least one delivery method', () => {
-      expect(entry.deliveryMethods.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it('has only valid delivery method values', () => {
-      entry.deliveryMethods.forEach(({ method }) => {
-        expect(VALID_DELIVERY_METHODS).toContain(method);
+  describe.each(BUILT_MATRIX.map((entry) => [entry.id, entry] as [string, AwsServiceMatrixEntry]))(
+    'service "%s"',
+    (_id, entry) => {
+      it('has a non-empty id', () => {
+        expect(entry.id).toBeTruthy();
       });
+
+      it('has a non-empty name', () => {
+        expect(entry.name).toBeTruthy();
+      });
+
+      it('has a valid category', () => {
+        expect(VALID_CATEGORIES).toContain(entry.category);
+      });
+
+      it('has a valid signalType', () => {
+        expect(VALID_SIGNAL_TYPES).toContain(entry.signalType);
+      });
+
+      it('has a deploymentMethods array', () => {
+        expect(Array.isArray(entry.deploymentMethods)).toBe(true);
+      });
+
+      it('has only valid deployment method values', () => {
+        entry.deploymentMethods.forEach(({ method }) => {
+          expect(VALID_DEPLOYMENT_METHODS).toContain(method);
+        });
+      });
+
+      it('has at most one preferred deployment method', () => {
+        const preferred = entry.deploymentMethods.filter((dm) => dm.preferred === true);
+        expect(preferred.length).toBeLessThanOrEqual(1);
+      });
+
+      it('has exactly one preferred deployment method when methods are present', () => {
+        if (entry.deploymentMethods.length > 0) {
+          const preferred = entry.deploymentMethods.filter((dm) => dm.preferred === true);
+          expect(preferred).toHaveLength(1);
+        }
+      });
+
+      it('has a non-empty packageName', () => {
+        expect(entry.packageName).toBeTruthy();
+      });
+
+      it('has a boolean defaultEnabled', () => {
+        expect(typeof entry.defaultEnabled).toBe('boolean');
+      });
+
+      it('has a boolean showInUI', () => {
+        expect(typeof entry.showInUI).toBe('boolean');
+      });
+    }
+  );
+
+  describe('identityFederationSupported derivation', () => {
+    const IF_MOCK_PACKAGE = {
+      policy_templates: [
+        {
+          name: 'guardduty',
+          inputs: [{ type: 'aws-s3', title: 'GuardDuty S3' }],
+        },
+        {
+          name: 'cloudtrail',
+          inputs: [
+            {
+              type: 'aws-s3',
+              title: 'CloudTrail S3',
+              hide_in_var_group_options: { credential_type: ['identity_federation'] },
+            },
+            {
+              type: 'aws-cloudwatch',
+              title: 'CloudTrail CW',
+              hide_in_var_group_options: { credential_type: ['identity_federation'] },
+            },
+          ],
+        },
+        {
+          name: 'elb',
+          inputs: [
+            { type: 'aws-s3', title: 'ELB S3' },
+            {
+              type: 'aws-cloudwatch',
+              title: 'ELB CW',
+              hide_in_var_group_options: { credential_type: ['identity_federation'] },
+            },
+          ],
+        },
+      ],
+      data_streams: [
+        { path: 'guardduty', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] },
+        {
+          path: 'cloudtrail',
+          type: 'logs',
+          streams: [
+            { input: 'aws-s3', vars: [] },
+            { input: 'aws-cloudwatch', vars: [] },
+          ],
+        },
+        {
+          path: 'elb_logs',
+          type: 'logs',
+          streams: [
+            { input: 'aws-s3', vars: [] },
+            { input: 'aws-cloudwatch', vars: [] },
+          ],
+        },
+      ],
+    } as any;
+
+    const IF_STATIC = AWS_SERVICES_STATIC.filter((e) =>
+      ['guardduty', 'cloudtrail', 'elb_logs'].includes(e.id)
+    );
+    const IF_MATRIX = buildAwsServiceMatrix(IF_MOCK_PACKAGE, IF_STATIC);
+
+    it('is true when no input hides identity_federation', () => {
+      const guardduty = IF_MATRIX.find((e) => e.id === 'guardduty');
+      expect(guardduty?.identityFederationSupported).toBe(true);
     });
 
-    it('has exactly one preferred delivery method', () => {
-      const preferred = entry.deliveryMethods.filter((dm) => dm.preferred === true);
-      expect(preferred).toHaveLength(1);
+    it('is false when all inputs hide identity_federation', () => {
+      const cloudtrail = IF_MATRIX.find((e) => e.id === 'cloudtrail');
+      expect(cloudtrail?.identityFederationSupported).toBe(false);
     });
 
-    it('has a non-empty packageName', () => {
-      expect(entry.packageName).toBeTruthy();
+    it('is false when any input hides identity_federation', () => {
+      const elbLogs = IF_MATRIX.find((e) => e.id === 'elb_logs');
+      expect(elbLogs?.identityFederationSupported).toBe(false);
     });
 
-    it('has a boolean defaultEnabled', () => {
-      expect(typeof entry.defaultEnabled).toBe('boolean');
-    });
-
-    it('has a boolean showInUI', () => {
-      expect(typeof entry.showInUI).toBe('boolean');
+    it('is undefined when data stream has no matching streams in manifest', () => {
+      const noDataStreamPackage = {
+        policy_templates: [{ name: 'guardduty', inputs: [] }],
+        data_streams: [],
+      } as any;
+      const result = buildAwsServiceMatrix(
+        noDataStreamPackage,
+        IF_STATIC.filter((e) => e.id === 'guardduty')
+      );
+      expect(result[0].identityFederationSupported).toBeUndefined();
     });
   });
 
-  const agentlessEntries = AWS_SERVICES_MATRIX.filter((entry) =>
-    entry.deliveryMethods.some(({ method }) => method === 'agentless')
+  // Only entries where managed_integration is the preferred method require providerPermissions.
+  const preferredManagedIntegrationEntries = BUILT_MATRIX.filter((entry) =>
+    entry.deploymentMethods.some(
+      ({ method, preferred }) => method === 'managed_integration' && preferred
+    )
   );
 
   describe.each(
-    agentlessEntries.map((entry) => [entry.id, entry] as [string, AwsServiceMatrixEntry])
-  )('agentless service "%s"', (_id, entry) => {
+    preferredManagedIntegrationEntries.map(
+      (entry) => [entry.id, entry] as [string, AwsServiceMatrixEntry]
+    )
+  )('managed_integration service "%s"', (_id, entry) => {
     it('has non-empty providerPermissions.actions', () => {
       expect(entry.providerPermissions?.actions?.length).toBeGreaterThan(0);
     });

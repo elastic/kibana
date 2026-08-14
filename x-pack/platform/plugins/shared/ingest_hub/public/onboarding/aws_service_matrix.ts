@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-// AWS service delivery matrix.
-// Source of truth for delivery mechanism, signal types, auth, and required config per AWS service.
+// AWS service deployment matrix.
+// Source of truth for deployment mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
 import {
@@ -16,7 +16,7 @@ import {
 
 export type SignalType = 'logs' | 'metrics';
 
-export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'agent_based';
+export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
 export type AuthType = 'identity_federation' | 'api_key';
 
@@ -35,8 +35,8 @@ export type ServiceCategory =
   | 'Security, Identity and Compliance'
   | 'Storage';
 
-export interface DeliveryMethodEntry {
-  method: DeliveryMethod;
+export interface DeploymentMethodEntry {
+  method: DeploymentMethod;
   /** When true, this is the mechanism used by default in the onboarding deployment step.
    *  Exactly one entry per service should be preferred. */
   preferred?: boolean;
@@ -48,10 +48,12 @@ export interface AwsServiceMatrixEntry {
   name: string;
   category: ServiceCategory;
   signalType: SignalType;
-  deliveryMethods: DeliveryMethodEntry[];
-  /** Authentication types available per delivery method. Populated once IF rollout status is confirmed. */
+  deploymentMethods: DeploymentMethodEntry[];
+  /** Authentication types available per deployment method. Populated once IF rollout status is confirmed. */
   authTypes?: AuthType[];
-  /** Whether OIDC-based IAM role assumption is supported. Populated once Security team confirms per-service status. */
+  /** Whether OIDC-based IAM role assumption is supported.
+   *  Derived from the package manifest: true when none of the service's inputs hide
+   *  the 'identity_federation' option in the 'credential_type' var_group. */
   identityFederationSupported?: boolean;
   /** Fleet integration input types required by this data stream (e.g. 'aws-s3', 'aws-cloudwatch') */
   inputs?: string[];
@@ -76,29 +78,33 @@ export interface AwsServiceMatrixEntry {
   providerPermissions?: ProviderPermissions;
 }
 
-function hasAgentlessDelivery(entry: AwsServiceMatrixEntry): boolean {
-  return entry.deliveryMethods.some(({ method }) => method === 'agentless');
-}
+/**
+ * Internal type for the static routing table.
+ * For 'aws' package entries, 'managed_integration' is derived at runtime from the Fleet package manifest.
+ * For non-aws entries, all deployment methods including 'managed_integration' may appear directly.
+ */
+type AwsServiceStaticEntry = Omit<
+  AwsServiceMatrixEntry,
+  'providerPermissions' | 'deploymentMethods'
+> & {
+  deploymentMethods?: DeploymentMethodEntry[];
+};
 
 function enrichWithProviderPermissions(
   entry: Omit<AwsServiceMatrixEntry, 'providerPermissions'>
 ): AwsServiceMatrixEntry {
-  if (!hasAgentlessDelivery(entry)) {
-    return entry;
-  }
-
   const providerPermissions = AWS_SERVICE_PROVIDER_PERMISSIONS[entry.id];
   return providerPermissions ? { ...entry, providerPermissions } : entry;
 }
 
-const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'>[] = [
+const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway_logs',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -112,7 +118,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -125,7 +130,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Lambda',
     category: 'Compute',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     mandatoryFields: ['collect_esm_metrics'],
@@ -139,7 +143,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Lambda',
     category: 'Compute',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -155,7 +159,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS EC2',
     category: 'Compute',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -169,7 +173,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS EC2',
     category: 'Compute',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -182,7 +185,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS ECS',
     category: 'Compute',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -195,7 +197,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS EMR',
     category: 'Compute',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -209,7 +211,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS EMR',
     category: 'Compute',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -224,7 +225,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Health',
     category: 'Management and Governance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -237,7 +237,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS CloudWatch',
     category: 'Management and Governance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -251,7 +251,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS CloudWatch',
     category: 'Management and Governance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions', 'metrics'],
     packageName: 'aws',
@@ -266,7 +265,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Billing',
     category: 'Cloud Financial Management',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     requiredConfig: [],
     mandatoryFields: ['leaderelection'],
@@ -280,7 +278,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Usage',
     category: 'Cloud Financial Management',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -295,7 +292,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS CloudTrail',
     category: 'Management and Governance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -309,7 +306,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Config',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['cel'],
     requiredConfig: ['aws_region'],
     mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
@@ -323,7 +319,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS GuardDuty',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws-s3', 'httpjson'],
     requiredConfig: ['aws_region', 'detector_id', 'bucket_arn', 'region'],
     mandatoryFields: [
@@ -335,14 +331,12 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     policyTemplate: 'guardduty',
     defaultEnabled: true,
     showInUI: true,
-    identityFederationSupported: false,
   },
   {
     id: 'inspector',
     name: 'AWS Inspector',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
     mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
@@ -356,7 +350,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -370,7 +364,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -383,7 +377,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Security Hub',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
     mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
@@ -397,7 +390,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Security Hub (Full Posture / CSPM)',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
     mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
@@ -411,7 +403,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Security Hub (Insights)',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['httpjson'],
     requiredConfig: ['aws_region'],
     mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
@@ -425,7 +416,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS WAF',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -441,7 +432,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS CloudFront',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3'],
     requiredConfig: ['bucket_arn', 'region'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -455,7 +446,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS ELB',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -469,7 +460,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS ELB',
     category: 'Networking and Content Delivery',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -482,7 +472,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS NAT Gateway',
     category: 'Networking and Content Delivery',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -495,7 +484,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Route 53 Public DNS',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-cloudwatch'],
     requiredConfig: ['log_group_arn', 'region_name'],
     mandatoryFields: ['preserve_original_event'],
@@ -509,7 +498,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Route 53 Resolver',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -523,7 +512,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Transit Gateway',
     category: 'Networking and Content Delivery',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -536,7 +524,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS VPC Flow',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -550,7 +538,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS VPN',
     category: 'Networking and Content Delivery',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -565,7 +552,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS EBS',
     category: 'Storage',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -578,7 +564,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS S3 (Storage metrics)',
     category: 'Storage',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -591,7 +576,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS S3 (Request metrics)',
     category: 'Storage',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -604,7 +588,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS S3 (Access logs)',
     category: 'Storage',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3'],
     requiredConfig: ['bucket_arn', 'region'],
     mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
@@ -618,7 +602,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS S3 Storage Lens',
     category: 'Storage',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -633,7 +616,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS DynamoDB',
     category: 'Databases',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -646,7 +628,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS RDS',
     category: 'Databases',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -659,7 +640,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Redshift',
     category: 'Databases',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -674,7 +654,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS MSK (Kafka)',
     category: 'Management and Governance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -687,7 +666,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Kinesis',
     category: 'Management and Governance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -700,7 +678,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS SNS',
     category: 'Management and Governance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -713,7 +690,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS SQS',
     category: 'Management and Governance',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
@@ -728,7 +704,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Bedrock (Guardrails)',
     category: 'Machine Learning',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws_bedrock',
@@ -741,7 +717,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Bedrock (Invocation)',
     category: 'Machine Learning',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_bedrock',
@@ -754,7 +730,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Bedrock (Runtime)',
     category: 'Machine Learning',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws_bedrock',
@@ -762,13 +738,13 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     showInUI: true,
     policyTemplate: 'aws_bedrock',
   },
-  // TODO(PM): delivery method and signal type TBD — awaiting PM ratification
+  // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'bedrock_agentcore',
     name: 'AWS Bedrock AgentCore',
     category: 'Machine Learning',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_bedrock_agentcore',
@@ -783,7 +759,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Fargate',
     category: 'Containers',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['awsfargate/metrics'],
     optionalConfig: ['regions'],
     packageName: 'awsfargate',
@@ -794,13 +770,13 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
   },
 
   // ── aws_mq package — Application Integration ────────────────────────────
-  // TODO(PM): delivery method and signal type TBD — awaiting PM ratification
+  // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'mq',
     name: 'AWS MQ',
     category: 'Application Integration',
     signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_mq',
@@ -815,7 +791,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS CloudTrail (OTel)',
     category: 'Management and Governance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_cloudtrail_otel',
@@ -828,7 +804,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS VPC Flow (OTel)',
     category: 'Networking and Content Delivery',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_vpcflow_otel',
@@ -841,7 +817,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS WAF (OTel)',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_waf_otel',
@@ -856,7 +832,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS Logs (Generic)',
     category: 'Management and Governance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_logs',
@@ -864,24 +840,137 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     showInUI: true,
     policyTemplate: 'aws_logs',
   },
-
-  // ── awsfirehose package — Analytics ─────────────────────────────────────
-  {
-    id: 'firehose',
-    name: 'AWS Firehose (Receiver)',
-    category: 'Analytics',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'firehose', preferred: true }],
-    inputs: [],
-    requiredConfig: [],
-    packageName: 'awsfirehose',
-    defaultEnabled: false,
-    showInUI: true,
-  },
 ];
 
-export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = AWS_SERVICES_MATRIX_RAW.map(
-  enrichWithProviderPermissions
-);
+/**
+ * Merge the static routing table with data from the Fleet package manifest.
+ * For 'aws' package entries, derives managed_integration, signalType, and inputs from the manifest.
+ * For non-aws entries, uses the static deploymentMethods directly.
+ */
+export function buildAwsServiceMatrix(
+  packageInfo: PackageInfo,
+  staticEntries: AwsServiceStaticEntry[]
+): AwsServiceMatrixEntry[] {
+  return staticEntries.map((entry) => {
+    const { deploymentMethods: staticMethods, ...rest } = entry;
 
-export const AWS_SERVICES_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));
+    let signalType = entry.signalType;
+    let inputs = entry.inputs;
+    let requiredConfig = entry.requiredConfig;
+    let mandatoryFields = entry.mandatoryFields;
+    let defaultEnabled = entry.defaultEnabled;
+    let deploymentMethods: DeploymentMethodEntry[];
+    let identityFederationSupported: boolean | undefined;
+
+    if (entry.packageName === 'aws') {
+      const pt = (packageInfo.policy_templates ?? []).find(
+        (p: any) => 'name' in p && p.name === entry.policyTemplate
+      );
+      const ds = (packageInfo.data_streams ?? []).find(
+        (d: any) => d.path === (entry.dataStream ?? entry.id)
+      );
+
+      const managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
+
+      if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
+        signalType = (ds as any).type as SignalType;
+      }
+
+      const dsInputs: string[] = [
+        ...new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string)),
+      ];
+      if (dsInputs.length > 0) {
+        inputs = dsInputs;
+      }
+
+      const allVars: any[] = ((ds as any)?.streams ?? []).flatMap((s: any) => s.vars ?? []);
+
+      const reqVars: string[] = [
+        ...new Set(
+          allVars.filter((v: any) => v.required && v.show_user).map((v: any) => v.name as string)
+        ),
+      ];
+      if (reqVars.length > 0) {
+        requiredConfig = reqVars;
+      }
+
+      const mandFields: string[] = [
+        ...new Set(
+          allVars.filter((v: any) => v.required && !v.show_user).map((v: any) => v.name as string)
+        ),
+      ];
+      if (mandFields.length > 0) {
+        mandatoryFields = mandFields;
+      }
+
+      if ((ds as any)?.streams?.length > 0) {
+        defaultEnabled = !(ds as any).streams.some((s: any) => s.enabled === false);
+      }
+
+      // Derive identityFederationSupported: true when none of this data stream's inputs
+      // hide 'identity_federation' in the 'credential_type' var_group.
+      const ptInputs: any[] = (pt as any)?.inputs ?? [];
+      const dsInputTypes = new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string));
+      if (ptInputs.length > 0 && dsInputTypes.size > 0) {
+        const relevantInputs = ptInputs.filter((i: any) => dsInputTypes.has(i.type));
+        if (relevantInputs.length > 0) {
+          identityFederationSupported = relevantInputs.every(
+            (i: any) =>
+              !(i.hide_in_var_group_options?.credential_type ?? []).includes('identity_federation')
+          );
+        }
+      }
+
+      // Build the merged deploymentMethods array for aws package entries.
+      // managed_integration always goes first so it is the preferred method when present.
+      const methods: DeploymentMethodEntry[] = [];
+      if (managedIntegrations) {
+        methods.push({ method: 'managed_integration' });
+      }
+      if (staticMethods?.length) {
+        methods.push(...staticMethods);
+      }
+      deploymentMethods = methods;
+    } else {
+      // Non-aws entries: use staticMethods directly (may include managed_integration).
+      deploymentMethods = staticMethods ?? [];
+    }
+
+    // Ensure exactly one preferred entry — set it on the first if none is marked.
+    if (deploymentMethods.length > 0 && !deploymentMethods.some((dm) => dm.preferred)) {
+      deploymentMethods[0] = { ...deploymentMethods[0], preferred: true };
+    }
+
+    const merged = {
+      ...rest,
+      deploymentMethods,
+      signalType,
+      inputs,
+      requiredConfig,
+      mandatoryFields,
+      defaultEnabled,
+      // For aws entries, override with manifest-derived value; for others, rest provides it.
+      ...(entry.packageName === 'aws' && { identityFederationSupported }),
+    } as Omit<AwsServiceMatrixEntry, 'providerPermissions'>;
+
+    return enrichWithProviderPermissions(merged);
+  });
+}
+
+/** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
+export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_RAW;
+
+/**
+ * Static metadata map for service lookups that do not require the manifest
+ * (name, category, showInUI, etc.).
+ * For manifest-enriched values (deploymentMethods, identityFederationSupported)
+ * use useAwsServicesMap() in React components.
+ */
+export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
+  AWS_SERVICES_STATIC.map((entry) => {
+    const { deploymentMethods: staticMethods, ...rest } = entry;
+    const deploymentMethods: DeploymentMethodEntry[] = staticMethods ?? [];
+    const base: Omit<AwsServiceMatrixEntry, 'providerPermissions'> = { ...rest, deploymentMethods };
+    return [entry.id, enrichWithProviderPermissions(base)];
+  })
+);

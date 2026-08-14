@@ -20,7 +20,7 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
     category: 'Compute',
     signalType: 'logs',
     inputs: [],
-    deliveryMethods: [],
+    deploymentMethods: [],
     showInUI: true,
     ...overrides,
   } as AwsServiceMatrixEntry;

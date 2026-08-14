@@ -16,6 +16,26 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendGetPackageInfoByKey: jest.fn(),
 }));
 
+jest.mock('../../use_aws_service_matrix', () => {
+  const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = jest.requireActual(
+    '../../aws_service_matrix'
+  ) as any;
+  const policyTemplates = [
+    ...new Set(
+      (AWS_SERVICES_STATIC as any[])
+        .filter((e: any) => e.packageName === 'aws' && e.policyTemplate)
+        .map((e: any) => e.policyTemplate as string)
+    ),
+  ].map((name: string) => ({ name, deployment_modes: { agentless: { enabled: true } } }));
+  const mockPackageInfo = { policy_templates: policyTemplates, data_streams: [] };
+  const matrix = buildAwsServiceMatrix(mockPackageInfo, AWS_SERVICES_STATIC);
+  const servicesMap = new Map(matrix.map((s: any) => [s.id, s]));
+  return {
+    useAwsServiceMatrix: jest.fn().mockReturnValue(matrix),
+    useAwsServicesMap: jest.fn().mockReturnValue(servicesMap),
+  };
+});
+
 jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
@@ -40,7 +60,7 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
     category: 'Compute',
     signalType: 'logs',
     packageName: 'aws',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws-s3'],
     requiredConfig: ['region'],
     identityFederationSupported: true,
@@ -522,7 +542,7 @@ describe('useDeploy', () => {
     );
   });
 
-  it('calls onContinue immediately when no agentless services are selected', async () => {
+  it('calls onContinue immediately when no managed_integration services are selected', async () => {
     setupMocks({ selectedServiceIds: [] });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -603,7 +623,7 @@ describe('useDeploy', () => {
     expect(submittedInputs['lambda-aws/metrics'].enabled).toBe(true);
   });
 
-  it('deploys duplicate instances as separate agentless policy calls', async () => {
+  it('deploys duplicate instances as separate managed_integration policy calls', async () => {
     // Original goes into a bundled group (1 call); duplicate gets its own call (1 call).
     // Total: 2 sendCreateAgentlessPolicy calls.
     const instances = [
@@ -734,8 +754,8 @@ describe('useDeploy', () => {
     expect(hasCloudtrailInput).toBe(false);
   });
 
-  it('includes non-agentless services as gray instantiating chips without deploying them', async () => {
-    // ec2_metrics is agentless; ec2_logs is cloud_forwarder (per updated service matrix)
+  it('includes non-managed_integration services as gray instantiating chips without deploying them', async () => {
+    // ec2_metrics is managed_integration; ec2_logs is ecf (per updated service matrix)
     setupMocks({ selectedServiceIds: ['ec2_metrics', 'ec2_logs'] });
     const onContinue = jest.fn();
     const { result } = renderHook(() => useDeploy({ onContinue }));
@@ -751,7 +771,7 @@ describe('useDeploy', () => {
     // Both services appear in the initial status update
     expect(initialUpdate.serviceStatuses.ec2_metrics).toBe('instantiating');
     expect(initialUpdate.serviceStatuses.ec2_logs).toBe('instantiating');
-    // Agentless API only called once (for ec2_metrics; ec2_logs is non-agentless)
+    // Managed integrations API called once (for ec2_metrics; ec2_logs is ecf, non-managed)
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
