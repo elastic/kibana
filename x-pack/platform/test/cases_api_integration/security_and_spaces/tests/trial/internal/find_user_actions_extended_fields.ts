@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { stringify as yamlStringify } from 'yaml';
 import { CASES_URL, CASE_EXTENDED_FIELDS } from '@kbn/cases-plugin/common/constants';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
@@ -62,9 +63,15 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     };
 
-    it('returns only matching fields when searching a multi-field extended_fields update', async () => {
-      const createdCase = await createCaseWithTwoFields();
+    // Create without a template does not emit an extended_fields user action
+    // (that audit path is template-scoped). PATCH is what produces the activity row
+    // these tests search over.
+    const PATCHED_EXTENDED_FIELDS = {
+      my_field_as_keyword: 'xyzaua',
+      label_as_keyword: 'option_2',
+    };
 
+    const patchExtendedFields = async (createdCase: Case): Promise<Case> => {
       const { body: updated } = await supertest
         .patch(`${CASES_URL}`)
         .set('kbn-xsrf', 'true')
@@ -74,19 +81,19 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               id: createdCase.id,
               version: createdCase.version,
-              [CASE_EXTENDED_FIELDS]: {
-                my_field_as_keyword: 'xyzaua',
-                label_as_keyword: 'option_2',
-              },
+              [CASE_EXTENDED_FIELDS]: PATCHED_EXTENDED_FIELDS,
             },
           ],
         })
         .expect(200);
 
-      expect(updated[0][CASE_EXTENDED_FIELDS]).to.eql({
-        my_field_as_keyword: 'xyzaua',
-        label_as_keyword: 'option_2',
-      });
+      expect(updated[0][CASE_EXTENDED_FIELDS]).to.eql(PATCHED_EXTENDED_FIELDS);
+      return updated[0];
+    };
+
+    it('returns only matching fields when searching a multi-field extended_fields update', async () => {
+      const createdCase = await createCaseWithTwoFields();
+      await patchExtendedFields(createdCase);
 
       const response = await findInternalCaseUserActions({
         caseID: createdCase.id,
@@ -115,6 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('returns the full extended_fields map when search matches the author', async () => {
       const createdCase = await createCaseWithTwoFields();
+      await patchExtendedFields(createdCase);
 
       await findInternalCaseUserActions({
         caseID: createdCase.id,
@@ -136,6 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('returns every field when search is not provided', async () => {
       const createdCase = await createCaseWithTwoFields();
+      await patchExtendedFields(createdCase);
 
       const response = await findInternalCaseUserActions({
         caseID: createdCase.id,
@@ -147,11 +156,7 @@ export default ({ getService }: FtrProviderContext): void => {
       );
       expect(extendedFieldActions.length).to.be.greaterThan(0);
 
-      const createAction = extendedFieldActions[0];
-      expect(createAction.payload.extended_fields).to.eql({
-        my_field_as_keyword: 'initial',
-        label_as_keyword: 'option_1',
-      });
+      expect(extendedFieldActions[0].payload.extended_fields).to.eql(PATCHED_EXTENDED_FIELDS);
     });
   });
 };
