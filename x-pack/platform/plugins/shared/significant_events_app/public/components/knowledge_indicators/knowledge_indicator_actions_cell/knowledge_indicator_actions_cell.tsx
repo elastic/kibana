@@ -24,6 +24,7 @@ import {
   RESTORE_LABEL,
   PROMOTE_LABEL,
 } from '../hooks/use_knowledge_indicator_actions';
+import { durabilityMenuItem } from '../durability_menu_item';
 import { useBlocksNewActivity } from '../../../hooks/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../../pages/significant_events/components/queries_table/translations';
 
@@ -40,9 +41,8 @@ export function KnowledgeIndicatorActionsCell({
 }: Props) {
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-  const { excludeFeature, restoreFeature, promoteQuery, isMutating } = useKnowledgeIndicatorActions(
-    { streamName }
-  );
+  const { excludeFeature, restoreFeature, promoteQuery, setDurability, isMutating } =
+    useKnowledgeIndicatorActions({ streamName });
 
   const featureActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'feature') {
@@ -82,6 +82,17 @@ export function KnowledgeIndicatorActionsCell({
           </EuiContextMenuItem>
         );
       }
+
+      items.push(
+        durabilityMenuItem({
+          knowledgeIndicator,
+          disabled: isMutating,
+          onToggle: (durable) => {
+            setIsActionsMenuOpen(false);
+            setDurability({ knowledgeIndicator, durable });
+          },
+        })
+      );
     }
 
     items.push(
@@ -100,7 +111,14 @@ export function KnowledgeIndicatorActionsCell({
     );
 
     return items;
-  }, [excludeFeature, isMutating, knowledgeIndicator, onDeleteRequest, restoreFeature]);
+  }, [
+    excludeFeature,
+    isMutating,
+    knowledgeIndicator,
+    onDeleteRequest,
+    restoreFeature,
+    setDurability,
+  ]);
 
   const queryActionItems = useMemo(() => {
     if (knowledgeIndicator.kind !== 'query') return [];
@@ -124,6 +142,14 @@ export function KnowledgeIndicatorActionsCell({
       >
         {PROMOTE_LABEL}
       </EuiContextMenuItem>,
+      durabilityMenuItem({
+        knowledgeIndicator,
+        disabled: isMutating,
+        onToggle: (durable) => {
+          setIsActionsMenuOpen(false);
+          setDurability({ knowledgeIndicator, durable });
+        },
+      }),
       <EuiContextMenuItem
         key="query-delete"
         icon="trash"
@@ -143,6 +169,7 @@ export function KnowledgeIndicatorActionsCell({
     knowledgeIndicator,
     onDeleteRequest,
     promoteQuery,
+    setDurability,
   ]);
 
   return (
