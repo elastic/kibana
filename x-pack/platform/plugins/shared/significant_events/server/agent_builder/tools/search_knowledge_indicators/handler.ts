@@ -100,11 +100,7 @@ function truncateMeta(meta: Record<string, unknown>): {
   const entries = Object.entries(meta);
   const arrayItemsOmitted: Record<string, number> = {};
   const kept = entries.slice(0, MAX_COMPACT_META_KEYS).map(([key, value]) => {
-    if (!Array.isArray(value)) {
-      return [key, value];
-    }
-
-    if (value.length > MAX_COMPACT_META_ARRAY_SAMPLE) {
+    if (Array.isArray(value) && value.length > MAX_COMPACT_META_ARRAY_SAMPLE) {
       arrayItemsOmitted[key] = value.length - MAX_COMPACT_META_ARRAY_SAMPLE;
     }
 
