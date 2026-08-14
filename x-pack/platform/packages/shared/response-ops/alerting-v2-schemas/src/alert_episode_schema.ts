@@ -10,7 +10,7 @@ import { ALERT_EPISODE_STATUS } from './alert_action_schema';
 import { tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_FINGERPRINT_LENGTH } from './constants';
 
-const alertEpisodeStatusSchema = z.enum([
+export const alertEpisodeStatusSchema = z.enum([
   ALERT_EPISODE_STATUS.ACTIVE,
   ALERT_EPISODE_STATUS.INACTIVE,
   ALERT_EPISODE_STATUS.PENDING,

@@ -673,21 +673,21 @@ export const WorkflowYAMLEditor = ({
         label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
           defaultMessage: 'Collapse all',
         }),
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
       },
       {
         id: 'unfoldAll',
         label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
           defaultMessage: 'Expand all',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plusCircle',
       },
       {
         id: 'find',
         label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
           defaultMessage: 'Find and Replace',
         }),
-        iconType: 'search',
+        iconType: 'magnify',
       },
     ];
     if (isVisualEditorEnabled && onToggleEditorMode) {

@@ -11,11 +11,13 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
+import { isError } from 'lodash';
 import pLimit from 'p-limit';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type {
   DispatcherPipelineState,
   DispatcherStep,
@@ -90,7 +92,11 @@ export class DispatchStep implements DispatcherStep {
 
       if (!apiKey) {
         const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
-        this.logger.warn({ message: () => message });
+        this.logger.warn({
+          message: () => message,
+          code: ALERTING_LOG_CODES.DISPATCH_POLICY_MISSING_API_KEY,
+          labels: { group_id: group.id, policy_id: group.policyId },
+        });
         failures.push(
           ...this.buildGroupFailures(group, DISPATCH_FAILURE_REASONS.MISSING_API_KEY, message)
         );
@@ -119,15 +125,21 @@ export class DispatchStep implements DispatcherStep {
             );
           }
         } catch (err) {
-          const error =
-            err instanceof Error
-              ? err
-              : new Error(
-                  `Failed to dispatch group ${group.id} to workflow ${destination.id}: ${String(
-                    err
-                  )}`
-                );
-          this.logger.error({ error });
+          // Normalized here because the recorded failure needs a message.
+          const error = isError(err)
+            ? err
+            : new Error(
+                `Failed to dispatch group ${group.id} to workflow ${destination.id}: ${String(err)}`
+              );
+          this.logger.error({
+            error,
+            code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+            labels: {
+              group_id: group.id,
+              policy_id: group.policyId,
+              workflow_id: destination.id,
+            },
+          });
           failures.push(
             this.buildFailure(
               group,
@@ -139,13 +151,16 @@ export class DispatchStep implements DispatcherStep {
         }
       }
     } catch (err) {
-      const error =
-        err instanceof Error
-          ? err
-          : new Error(
-              `Failed to dispatch group ${group.id} for policy ${group.policyId}: ${String(err)}`
-            );
-      this.logger.error({ error });
+      const error = isError(err)
+        ? err
+        : new Error(
+            `Failed to dispatch group ${group.id} for policy ${group.policyId}: ${String(err)}`
+          );
+      this.logger.error({
+        error,
+        code: ALERTING_LOG_CODES.DISPATCH_GROUP_UNHANDLED_ERROR,
+        labels: { group_id: group.id, policy_id: group.policyId },
+      });
       // Reached only for failures raised before the per-destination loop (e.g.
       // request crafting). Nothing has been dispatched yet, so record one
       // failure per workflow destination.
@@ -204,13 +219,21 @@ export class DispatchStep implements DispatcherStep {
 
     if (!workflow) {
       const message = `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`;
-      this.logger.warn({ message: () => message });
+      this.logger.warn({
+        message: () => message,
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+        labels: { group_id: group.id, workflow_id: workflowId },
+      });
       return { failure: { reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND, message } };
     }
 
     if (!workflow.enabled) {
       const message = `Workflow ${workflowId} is disabled, enable it to dispatch for group ${group.id}`;
-      this.logger.warn({ message: () => message });
+      this.logger.warn({
+        message: () => message,
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_DISABLED,
+        labels: { group_id: group.id, workflow_id: workflowId },
+      });
       return { failure: { reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED, message } };
     }
 
@@ -245,7 +268,11 @@ export class DispatchStep implements DispatcherStep {
 
     if (!executionId) {
       const message = `Workflow ${workflowId} scheduling returned no execution id for group ${group.id}`;
-      this.logger.warn({ message: () => message });
+      this.logger.warn({
+        message: () => message,
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+        labels: { group_id: group.id, workflow_id: workflowId },
+      });
       return { failure: { reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR, message } };
     }
 

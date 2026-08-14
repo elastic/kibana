@@ -148,7 +148,7 @@ export const AwsConnectSetup: React.FC<AwsConnectSetupProps> = ({
             <EuiFlexItem grow={false}>
               {onBack && (
                 <EuiButtonEmpty
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   iconSide="left"
                   onClick={onBack}
                   data-test-subj="awsConnectSetup-backButton"

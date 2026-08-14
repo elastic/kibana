@@ -14,7 +14,12 @@ import {
   type EventsWriteInput,
 } from './handler';
 import type { SignalEntry, BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
-import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+} from '@kbn/significant-events-schema';
 import { eventsWriteItemSchema } from './tool';
 
 const successfulBulkCreate = async (documents: object[]) => ({
@@ -959,6 +964,33 @@ describe('eventsWriteItemSchema', () => {
         },
       ],
     });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects symptom hypotheses exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects summaries exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects assessment notes exceeding the agent input limit', () => {
+    const result = eventsWriteItemSchema.safeParse({
+      ...validItem,
+      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+    });
+
     expect(result.success).toBe(false);
   });
 });
