@@ -18,7 +18,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiLink,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiPageSection,
   EuiPanel,
@@ -31,6 +30,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useHistory, useLocation } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type { PairedTTestResult } from '@kbn/evals-common';
@@ -869,15 +869,12 @@ export const CompareExperimentsPage: React.FC = () => {
         <>
           {(data.pairing.truncatedA || data.pairing.truncatedB) && (
             <>
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 title={i18n.TRUNCATION_WARNING_TITLE}
-                color="warning"
-                iconType="warning"
+                text={i18n.TRUNCATION_WARNING_BODY}
                 size="s"
-              >
-                <p>{i18n.TRUNCATION_WARNING_BODY}</p>
-              </EuiCallOut>
+              />
               <EuiSpacer size="m" />
             </>
           )}
