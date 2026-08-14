@@ -77,7 +77,8 @@ const FlyoutTemplateRoot = ({
   const headerAttrs = headerItem?.attributes as FlyoutHeaderProps | undefined;
   const menuTitle = headerAttrs?.title;
   const menuTitleString = typeof menuTitle === 'string' ? menuTitle : undefined;
-  const flyoutAriaLabelledBy = ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
+  const flyoutAriaLabelledBy =
+    ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
   const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : ariaLabel ?? menuTitleString;
 
   const mergedMenuProps = {
