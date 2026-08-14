@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const INBOUND_EVENTS_API_PATH = '/api/events/{connector_type_id}/{connector_id}';
-/** Internal numeric version until the route is published as public (`2023-10-31`). */
-export const INBOUND_EVENTS_API_VERSION = '1';
+export const INBOUND_EVENTS_API_VERSION = '2023-10-31';
 
 export const INBOUND_EVENTS_DISABLED_MESSAGE = i18n.translate(
   'xpack.actions.inboundEvents.disabledError',

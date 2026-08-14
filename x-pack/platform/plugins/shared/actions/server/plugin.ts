@@ -493,19 +493,27 @@ export class ActionsPlugin
 
     // Routes
     const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    const inboundEventsClient = createInboundEventsClient({
-      logger: this.logger,
-      inboundEventsEnabled: actionsConfigUtils.isInboundEventsEnabled(),
-      maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
-      getStartServices: core.getStartServices,
-      inMemoryConnectors: this.inMemoryConnectors,
-      emitConnectorEvents: (params) =>
-        dispatchConnectorEvents({
-          emitter: this.connectorEventEmitter,
-          params,
-          logger: this.logger,
-        }),
-    });
+    const inboundEventsEnabled = actionsConfigUtils.isInboundEventsEnabled();
+    const inboundEvents = inboundEventsEnabled
+      ? {
+          maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
+          client: createInboundEventsClient({
+            logger: this.logger,
+            inboundEventsEnabled: true,
+            maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
+            getStartServices: core.getStartServices,
+            inMemoryConnectors: this.inMemoryConnectors,
+            emitConnectorEvents: (params) =>
+              dispatchConnectorEvents({
+                emitter: this.connectorEventEmitter,
+                params,
+                logger: this.logger,
+              }),
+          }),
+          getSpaceId: (request: KibanaRequest) =>
+            this.spaces?.spacesService.getSpaceId(request) ?? 'default',
+        }
+      : undefined;
     defineRoutes({
       router,
       licenseState: this.licenseState,
@@ -514,11 +522,7 @@ export class ActionsPlugin
       logger: this.logger,
       core,
       oauthRateLimiter,
-      inboundEvents: {
-        maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-        client: inboundEventsClient,
-        getSpaceId: (request) => this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-      },
+      inboundEvents,
     });
 
     return {

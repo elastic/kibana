@@ -43,7 +43,7 @@ export interface RouteOptions {
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
-  inboundEvents: {
+  inboundEvents?: {
     maxBodyBytes: number;
     client: InboundEventsClient;
     getSpaceId: (request: KibanaRequest) => string;
@@ -82,10 +82,13 @@ export function defineRoutes(opts: RouteOptions) {
 
   getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
 
-  inboundEventsRoute({
-    router,
-    maxBodyBytes: inboundEvents.maxBodyBytes,
-    inboundEventsClient: inboundEvents.client,
-    getSpaceId: inboundEvents.getSpaceId,
-  });
+  // Only register when `xpack.actions.inboundEvents.enabled` — absent when off (not 403).
+  if (inboundEvents) {
+    inboundEventsRoute({
+      router,
+      maxBodyBytes: inboundEvents.maxBodyBytes,
+      inboundEventsClient: inboundEvents.client,
+      getSpaceId: inboundEvents.getSpaceId,
+    });
+  }
 }

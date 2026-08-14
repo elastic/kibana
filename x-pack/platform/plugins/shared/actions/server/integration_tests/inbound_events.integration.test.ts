@@ -8,7 +8,7 @@
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { getSupertest } from '@kbn/core-test-helpers-kbn-server';
 
-import { INBOUND_EVENTS_API_VERSION, INBOUND_EVENTS_DISABLED_MESSAGE } from '../inbound/constants';
+import { INBOUND_EVENTS_API_VERSION } from '../inbound/constants';
 import { setupTestServers } from './lib';
 
 describe('Inbound events HTTP API', () => {
@@ -16,8 +16,15 @@ describe('Inbound events HTTP API', () => {
   let kibanaServer: TestKibanaUtils;
 
   beforeAll(async () => {
-    // Default kill switch (enabled: false) — proves versioned public routing over HTTP.
-    const setupResult = await setupTestServers();
+    const setupResult = await setupTestServers({
+      xpack: {
+        actions: {
+          inboundEvents: {
+            enabled: true,
+          },
+        },
+      },
+    });
     esServer = setupResult.esServer;
     kibanaServer = setupResult.kibanaServer;
   });
@@ -31,22 +38,11 @@ describe('Inbound events HTTP API', () => {
     }
   });
 
-  it('returns 403 when inbound events are disabled', async () => {
-    const response = await getSupertest(
-      kibanaServer.root,
-      'post',
-      '/api/events/webhook/nonexistent-connector'
-    )
+  it('serves the versioned public route and returns 404 fail-closed for unknown connector', async () => {
+    await getSupertest(kibanaServer.root, 'post', '/api/events/webhook/nonexistent-connector')
       .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
-      .set('x-elastic-internal-origin', 'kibana')
       .set('kbn-xsrf', 'kibana')
       .send({ hello: 'world' })
-      .expect(403);
-
-    expect(response.body).toEqual(
-      expect.objectContaining({
-        message: INBOUND_EVENTS_DISABLED_MESSAGE,
-      })
-    );
+      .expect(404);
   });
 });

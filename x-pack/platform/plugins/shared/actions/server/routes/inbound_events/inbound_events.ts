@@ -49,11 +49,11 @@ export function inboundEventsRoute({
   router.versioned
     .post({
       path: INBOUND_EVENTS_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). Marked `access: internal` until Phase 1 is ready to publish; path remains `/api/events/...`.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). Registered only when `xpack.actions.inboundEvents.enabled` is true.',
       options: {
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
@@ -77,9 +77,6 @@ export function inboundEventsRoute({
               description:
                 'The ingress request was accepted. Downstream emit failures may still be partial; see server logs.',
               body: () => ingestEventsResponseSchemaV1,
-            },
-            403: {
-              description: 'Inbound connector events are disabled.',
             },
             404: {
               description:
