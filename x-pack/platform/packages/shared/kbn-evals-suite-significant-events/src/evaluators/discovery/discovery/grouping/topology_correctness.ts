@@ -221,7 +221,9 @@ export const scoreContinuationTopologyStability = (
 
     if (cycleScores.length === 0) {
       explanations.push(
-        `cycle ${index + 1} (${cycle.ruleName ?? '?'}): establishing event has no topology fields — skipped`
+        `cycle ${index + 1} (${
+          cycle.ruleName ?? '?'
+        }): establishing event has no topology fields — skipped`
       );
       continue;
     }

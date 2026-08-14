@@ -20,7 +20,12 @@ const signal = (ruleUuid: string) => ({
   stream_name: 'logs',
   confirmed: true as const,
   description: 'test signal',
-  metadata: { rule_uuid: ruleUuid, detection_id: `${ruleUuid}-det`, change_point_type: 'spike' as const, p_value: 0.01 },
+  metadata: {
+    rule_uuid: ruleUuid,
+    detection_id: `${ruleUuid}-det`,
+    change_point_type: 'spike' as const,
+    p_value: 0.01,
+  },
 });
 
 const feature = (feature_id: string) => ({ feature_id, name: feature_id, stream_name: 'logs' });
@@ -50,7 +55,9 @@ const event = (
 describe('scoreTopologyCorrectness', () => {
   it('returns null (unavailable) when no expected event has topology fields', () => {
     const actual = [event('e1', ['uuid-1'], [], [])] as unknown as SignificantEvent[];
-    const expected = [{ event_id: 'e1', signals: [signal('uuid-1')], causal_features: [], blast_radius: [] }];
+    const expected = [
+      { event_id: 'e1', signals: [signal('uuid-1')], causal_features: [], blast_radius: [] },
+    ];
 
     const result = scoreTopologyCorrectness(actual, expected);
     expect(result.score).toBeNull();
