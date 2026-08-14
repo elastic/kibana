@@ -40,6 +40,7 @@ import {
   useEvaluationExperiment,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -145,7 +146,7 @@ const ExperimentHeader: React.FC<{
   const branch = experimentData?.git_branch;
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
-  const evaluatorModel = experimentData?.evaluator_model?.id;
+  const evaluatorModels = experimentData?.evaluator_models ?? [];
   const displayName = experimentData?.experiment_name || experimentId;
   const detailLocation = {
     pathname: `/experiments/${encodeURIComponent(experimentId)}`,
@@ -237,7 +238,7 @@ const ExperimentHeader: React.FC<{
               </EuiFlexItem>
             </>
           )}
-          {evaluatorModel && (
+          {evaluatorModels.length > 0 && (
             <>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
@@ -245,7 +246,7 @@ const ExperimentHeader: React.FC<{
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">{evaluatorModel}</EuiBadge>
+                <EvaluatorModelsBadge models={evaluatorModels} />
               </EuiFlexItem>
             </>
           )}

@@ -19,6 +19,10 @@ import { z } from '@kbn/zod/v4';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import { resolveConnectorModel } from '../../lib/resolve_connector_model';
+import {
+  findDuplicateEvaluatorNames,
+  getDuplicateEvaluatorNamesMessage,
+} from '../../lib/duplicate_evaluator_names';
 import { getInstrumentationProfile } from '../../evaluators/evidence/resolve_instrumentation';
 import { formatEvidenceSchemaIssues } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
@@ -62,6 +66,16 @@ export const registerEvaluateRoute = ({
         if (subject.mode === 'single-turn' && subject.traces.length !== 1) {
           return response.badRequest({
             body: { message: 'single-turn mode requires exactly one trace' },
+          });
+        }
+
+        // Running the same evaluator under two judges is the obvious thing to reach for now
+        // that judges are per evaluator, but the scores would land on one another at ingest
+        // and the caller would be told the run succeeded. Refuse it here instead.
+        const duplicateEvaluatorNames = findDuplicateEvaluatorNames(evaluators);
+        if (duplicateEvaluatorNames.length > 0) {
+          return response.badRequest({
+            body: { message: getDuplicateEvaluatorNamesMessage(duplicateEvaluatorNames) },
           });
         }
 
@@ -172,8 +186,8 @@ export const registerEvaluateRoute = ({
         // The judge model is reported per evaluator so scores are attributed to the
         // connector that actually produced them, rather than to a single experiment-wide
         // model. Memoized because evaluators commonly share one connector.
-        const modelByConnectorId = new Map<string, Promise<Model>>();
-        const getModel = (connectorId: string): Promise<Model> | undefined => {
+        const modelByConnectorId = new Map<string, Promise<Model | undefined>>();
+        const getModel = (connectorId: string): Promise<Model | undefined> | undefined => {
           const cachedModel = modelByConnectorId.get(connectorId);
           if (cachedModel) {
             return cachedModel;

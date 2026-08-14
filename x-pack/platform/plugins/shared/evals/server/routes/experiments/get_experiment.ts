@@ -24,6 +24,8 @@ import type { RouteDependencies } from '../register_routes';
 
 type EvaluatorModel = NonNullable<EvaluatorStats['evaluator_model']>;
 
+const MAX_EVALUATOR_MODELS = 20;
+
 interface EvalDocSource {
   experiment_name?: string;
   task?: { model?: { id?: string; family?: string; provider?: string } };
@@ -117,22 +119,37 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
           };
 
           // Evaluators can each judge with their own model, so this summary comes from the
-          // per-evaluator stats: the model the most evaluators used, ties broken by id to keep
+          // per-evaluator stats: every distinct judge, most used first, ties broken by id to keep
           // the answer stable, and nothing at all when only code evaluators ran. Reading it off
           // `firstDoc` instead would report whichever judge the unsorted search happened to hit.
-          const evaluatorsPerModel = new Map<string, { model: EvaluatorModel; count: number }>();
-          for (const { evaluator_model: model } of stats) {
+          // Evaluators are counted once each, since stats carry a row per dataset an evaluator
+          // ran on and a judge should not gain weight from running on more datasets.
+          const evaluatorNamesPerModel = new Map<
+            string,
+            { model: EvaluatorModel; evaluatorNames: Set<string> }
+          >();
+          for (const { evaluator_model: model, evaluator_name: evaluatorName } of stats) {
             if (!model?.id) continue;
-            const entry = evaluatorsPerModel.get(model.id);
+            const entry = evaluatorNamesPerModel.get(model.id);
             if (entry) {
-              entry.count += 1;
+              entry.evaluatorNames.add(evaluatorName);
             } else {
-              evaluatorsPerModel.set(model.id, { model, count: 1 });
+              evaluatorNamesPerModel.set(model.id, {
+                model,
+                evaluatorNames: new Set([evaluatorName]),
+              });
             }
           }
-          const predominantEvaluatorModel = [...evaluatorsPerModel.values()].sort(
-            (a, b) => b.count - a.count || a.model.id.localeCompare(b.model.id)
-          )[0]?.model;
+          const evaluatorModels = [...evaluatorNamesPerModel.values()]
+            .sort(
+              (a, b) =>
+                b.evaluatorNames.size - a.evaluatorNames.size ||
+                a.model.id.localeCompare(b.model.id)
+            )
+            .map(({ model }) => model)
+            // Kept in step with the response schema's maxItems, which the SDK client enforces
+            // when it parses this response. No realistic experiment reaches it.
+            .slice(0, MAX_EVALUATOR_MODELS);
 
           return response.ok({
             body: {
@@ -142,7 +159,8 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
               suite_id: firstDoc.metadata?.suite_id ?? null,
               timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
-              evaluator_model: predominantEvaluatorModel,
+              evaluator_model: evaluatorModels[0],
+              evaluator_models: evaluatorModels,
               git_branch: firstDoc.metadata?.git?.branch ?? null,
               git_commit_sha: firstDoc.metadata?.git?.commit_sha ?? null,
               ci: firstDoc.metadata?.ci,

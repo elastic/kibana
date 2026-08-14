@@ -240,6 +240,101 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
       family: 'GPT',
       provider: 'OpenAI',
     });
+    // And every judge, most used first, so consumers can tell that the evaluators differ.
+    expect(response.payload.evaluator_models).toEqual([
+      { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+      { id: 'claude-3', family: 'Claude', provider: 'Anthropic' },
+    ]);
+  });
+
+  it('counts each evaluator once, so a judge gains no weight from running on more datasets', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              task: { model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' } },
+              metadata: { total_repetitions: 1 },
+            },
+          },
+        ],
+      },
+    } as any);
+
+    const claudeBucket = (key: string) => ({
+      key,
+      score_stats: {},
+      score_median: { values: {} },
+      evaluator_model_id: {
+        buckets: [
+          {
+            key: 'claude-3',
+            family: { buckets: [{ key: 'Claude' }] },
+            provider: { buckets: [{ key: 'Anthropic' }] },
+          },
+        ],
+      },
+    });
+    const gptBucket = (key: string) => ({
+      key,
+      score_stats: {},
+      score_median: { values: {} },
+      evaluator_model_id: {
+        buckets: [
+          {
+            key: 'gpt-4o',
+            family: { buckets: [{ key: 'GPT' }] },
+            provider: { buckets: [{ key: 'OpenAI' }] },
+          },
+        ],
+      },
+    });
+
+    // One evaluator judged by claude across three datasets, two evaluators judged by gpt-4o on
+    // one dataset. Counting stats rows would crown claude 3 to 2; counting evaluators picks gpt.
+    evaluationScoreService.search.mockResolvedValueOnce({
+      aggregations: {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'dataset-1',
+              dataset_name: { buckets: [{ key: 'Dataset One' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [
+                  claudeBucket('correctness'),
+                  gptBucket('groundedness'),
+                  gptBucket('relevance'),
+                ],
+              },
+            },
+            {
+              key: 'dataset-2',
+              dataset_name: { buckets: [{ key: 'Dataset Two' }] },
+              example_count: { value: 5 },
+              by_evaluator: { buckets: [claudeBucket('correctness')] },
+            },
+            {
+              key: 'dataset-3',
+              dataset_name: { buckets: [{ key: 'Dataset Three' }] },
+              example_count: { value: 5 },
+              by_evaluator: { buckets: [claudeBucket('correctness')] },
+            },
+          ],
+        },
+      },
+    } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.evaluator_model).toEqual({
+      id: 'gpt-4o',
+      family: 'GPT',
+      provider: 'OpenAI',
+    });
   });
 
   it('reports no judge model for an experiment run by code evaluators alone', async () => {
@@ -286,6 +381,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload.evaluator_model).toBeUndefined();
+    expect(response.payload.evaluator_models).toEqual([]);
     expect(response.payload.task_model.id).toBe('gpt-4');
   });
 

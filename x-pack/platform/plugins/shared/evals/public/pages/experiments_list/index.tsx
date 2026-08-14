@@ -32,6 +32,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
 import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import { resolvePrUrl } from '../../utils/pr_url';
 import { CopyableDetail } from './copyable_detail';
 import { LinkDetail } from './link_detail';
@@ -250,27 +251,12 @@ export const ExperimentsListPage: React.FC = () => {
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
-        field: 'evaluator_model',
+        field: 'evaluator_models',
         name: i18n.COLUMN_EVALUATOR_MODEL,
         width: '19%',
-        render: (
-          model: EvaluationExperimentSummary['evaluator_model'],
-          item: EvaluationExperimentSummary
-        ) => {
-          // Evaluators can each judge with their own model, so a single badge would
-          // misattribute the rest.
-          const modelIds = item.evaluator_models?.map(({ id }) => id).sort() ?? [];
-          if (modelIds.length > 1) {
-            return (
-              <EuiToolTip content={modelIds.join(', ')}>
-                <EuiBadge color="accent" tabIndex={0}>
-                  {i18n.getEvaluatorModelsBadge(modelIds.length)}
-                </EuiBadge>
-              </EuiToolTip>
-            );
-          }
-          return model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-';
-        },
+        render: (models: EvaluationExperimentSummary['evaluator_models']) => (
+          <EvaluatorModelsBadge models={models} />
+        ),
       },
       {
         field: 'total_repetitions',

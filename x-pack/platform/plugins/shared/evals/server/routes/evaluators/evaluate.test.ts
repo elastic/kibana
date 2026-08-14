@@ -600,6 +600,37 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.payload).toEqual({ message: 'Evaluator not found: missing' });
   });
 
+  it('returns 400 when one evaluator is listed twice, whatever judges it was given', async () => {
+    const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+    const { handler } = setup({
+      evaluatorRegistry: buildEvaluatorRegistry([groundedness]),
+    });
+
+    const response = await handler(
+      buildContext() as unknown as Parameters<typeof handler>[0],
+      {
+        body: {
+          subject: { traces: [{ trace_id: 'trace-1' }] },
+          evaluators: [
+            { name: 'groundedness', connector_id: 'connector-1' },
+            { name: 'groundedness', connector_id: 'connector-2' },
+          ],
+        },
+      } as unknown as Parameters<typeof handler>[1],
+      kibanaResponseFactory
+    );
+
+    // Both scores would be stored under the same evaluator name, so the second judge's would
+    // be dropped as a conflict and the caller would still be told the run succeeded.
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message:
+        'Evaluators must have distinct names, but these are listed more than once: groundedness. ' +
+        'Scores are stored per evaluator name, so only one score per name would be kept.',
+    });
+    expect(groundedness.evaluate).not.toHaveBeenCalled();
+  });
+
   it('returns 400 for pinned version misses', async () => {
     const { handler } = setup({
       evaluatorRegistry: buildEvaluatorRegistry([buildEvaluator({ name: 'groundedness' })]),
@@ -831,12 +862,12 @@ describe('POST /internal/evals/_evaluate', () => {
     expect(response.payload.results).toEqual([
       {
         status: 'error',
-        // No `getConnectorById` on the mock, so the model degrades to the connector id.
+        // No `getConnectorById` on the mock, so the judge stays unattributed rather than
+        // reporting the connector id as a model that never ran.
         evaluator: {
           name: 'groundedness',
           version: '1.0.0',
           kind: 'llm',
-          model: { id: 'connector-1' },
         },
         error: { message: 'Error: failed badly' },
       },

@@ -32,21 +32,52 @@ import * as i18n from './translations';
 const formatScore = (score: number | null | undefined) =>
   score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
 
+const POSITIVE_VERDICTS = [
+  'MATCH',
+  'CORRECT',
+  'ACCURATE',
+  'COMPLETE',
+  'GROUNDED',
+  'RELEVANT',
+  'SIMILAR',
+  'COHERENT',
+] as const;
+
+/**
+ * Every positive word above appears inside its own negations, so 'incorrect', 'no-match' and
+ * 'ungrounded' have to be recognized before the words they contain. Derived rather than listed
+ * so a new positive word cannot be added without its negations.
+ */
+const NEGATED_VERDICTS = ['NOT_', 'NON_', 'NO_', 'UN', 'IN', 'IR', 'MIS', 'DIS'].flatMap((prefix) =>
+  POSITIVE_VERDICTS.map((word) => `${prefix}${word}`)
+);
+
+const OTHER_NEGATIVE_VERDICTS = ['MISSING', 'MAJOR', 'SEVERE', 'UNSAFE', 'LEAK'];
+
 /**
  * Maps a verdict label + numeric score to an EUI badge color.
  *
  * The score decides the color whenever the evaluator reports one, because labels are free-form
  * and substring matching cannot be trusted: 'incorrect' contains 'correct', and evaluators name
  * their own scores things like 'correctness-analysis'. Keywords only classify label-only
- * verdicts, where there is no score to read, and negated forms are matched before the positives
- * they contain.
+ * verdicts, where there is no score to read.
  */
 export const getVerdictBadgeColor = (label: string, score: number | null | undefined): string => {
-  // Normalize to uppercase, convert hyphens so 'leak-detected' → 'LEAK_DETECTED'
-  const u = label.toUpperCase().replace(/-/g, '_');
+  // Fold separators into underscores so 'leak-detected', 'leak detected' and 'n/a' all normalize
+  const u = label
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
 
-  // Neutral sentinels — shown in muted gray regardless of score
-  if (u === 'NOT_APPLICABLE' || u === 'N_A' || u === 'NA' || u === 'UNAVAILABLE' || u === 'ERROR')
+  // Neutral sentinels — shown in muted gray regardless of score. An evaluator that could not
+  // judge reports why ('fixture-error', 'unavailable'), which is neither a pass nor a failure.
+  if (
+    u === 'NOT_APPLICABLE' ||
+    u === 'N_A' ||
+    u === 'NA' ||
+    u === 'UNAVAILABLE' ||
+    u.split('_').includes('ERROR')
+  )
     return 'default';
 
   if (score != null) {
@@ -55,40 +86,18 @@ export const getVerdictBadgeColor = (label: string, score: number | null | undef
     return 'danger';
   }
 
-  // Negative — check negated and compound forms first to avoid matching the positives inside them
   if (
-    u.includes('INCORRECT') ||
-    u.includes('INACCURATE') ||
-    u.includes('INCOMPLETE') ||
-    u.includes('UNGROUNDED') ||
-    u.includes('NO_MATCH') ||
-    u.includes('MISMATCH') ||
-    u.includes('INCOHERENT') ||
-    u.includes('IRRELEVANT') ||
-    u.includes('DISSIMILAR') ||
-    u.includes('MISSING') ||
-    u.includes('MAJOR') ||
-    u.includes('SEVERE') ||
+    NEGATED_VERDICTS.some((verdict) => u.includes(verdict)) ||
+    OTHER_NEGATIVE_VERDICTS.some((verdict) => u.includes(verdict)) ||
     u === 'POOR' ||
-    u.includes('UNSAFE') ||
-    u.includes('LEAK') ||
     u === 'OUT_OF_SCOPE'
   )
     return 'danger';
 
-  // Middling
   if (u.includes('MINOR') || u.includes('PARTIAL')) return 'warning';
 
-  // Positive
   if (
-    u.includes('MATCH') ||
-    u.includes('CORRECT') ||
-    u.includes('ACCURATE') ||
-    u.includes('COMPLETE') ||
-    u.includes('GROUNDED') ||
-    u.includes('RELEVANT') ||
-    u.includes('SIMILAR') ||
-    u.includes('COHERENT') ||
+    POSITIVE_VERDICTS.some((verdict) => u.includes(verdict)) ||
     u === 'GOOD' ||
     u === 'SAFE' ||
     u === 'IN_SCOPE'

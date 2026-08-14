@@ -60,6 +60,10 @@ export const GetEvaluationExperimentResponse = lazySchema(() =>
     timestamp: z.string().max(64).optional(),
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
+    /**
+     * The distinct models this experiment's evaluators judged with, most used first, so consumers can tell that they differ. `evaluator_model` is the first. Empty when only code evaluators scored the experiment.
+     */
+    evaluator_models: z.array(Model).max(20).optional(),
     execution_id: z.string().max(1024).optional(),
     /**
      * The suite ID when this experiment belongs to a suite run

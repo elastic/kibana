@@ -24,6 +24,10 @@ import {
   compareExperimentsCommonDefinition,
 } from '../../common/workflows/steps';
 import { resolveConnectorModel } from '../lib/resolve_connector_model';
+import {
+  findDuplicateEvaluatorNames,
+  getDuplicateEvaluatorNamesMessage,
+} from '../lib/duplicate_evaluator_names';
 import type { EvalStepDeps } from './types';
 import {
   buildExampleScoreBody,
@@ -98,13 +102,15 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
       const request = context.contextManager.getFakeRequest();
       return inference.getClient({ request, bindTo: { connectorId } });
     },
+    // The experiment-wide task and judge models are required at ingest, so an unreadable
+    // connector degrades to its id here rather than leaving the experiment unlabelled.
     resolveModel: async (connectorId: string): Promise<Model> =>
-      resolveConnectorModel({
+      (await resolveConnectorModel({
         connectorId,
         inference: await deps.getInferenceStart(),
         request: context.contextManager.getFakeRequest(),
         logger: context.logger,
-      }),
+      })) ?? { id: connectorId },
   });
 
   const resolveDatasetStep = createServerStepDefinition({
@@ -287,6 +293,12 @@ export const createEvalsServerSteps = (deps: EvalStepDeps): ServerStepDefinition
     start: async (context) => {
       const runtime = makeRuntime(context);
       const { input } = context;
+      // `/_evaluate` refuses this too, but only once an example has already run its task.
+      // Stopping here costs the caller nothing and reports the problem once, not per example.
+      const duplicateEvaluatorNames = findDuplicateEvaluatorNames(input.evaluators);
+      if (duplicateEvaluatorNames.length > 0) {
+        throw new Error(getDuplicateEvaluatorNamesMessage(duplicateEvaluatorNames));
+      }
       const datasets = await resolveDatasets(runtime, input.dataset_ids);
       const work = flattenDatasetWork(datasets);
       if (work.length === 0) {

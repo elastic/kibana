@@ -12,9 +12,10 @@ import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kb
 import type { Model } from '@kbn/evals-common';
 
 /**
- * Describes the model behind a connector for score attribution. Falls back to the
- * connector id as the model id when the connector cannot be read, so a lookup
- * failure degrades attribution rather than failing the evaluation.
+ * Describes the model behind a connector for score attribution. Returns nothing when the
+ * connector cannot be read: a per-score model outranks the request's default judge at ingest,
+ * so writing a placeholder would attribute those scores to a model that never ran. Callers
+ * that must produce a value supply their own fallback.
  */
 export const resolveConnectorModel = async ({
   connectorId,
@@ -26,7 +27,7 @@ export const resolveConnectorModel = async ({
   inference: InferenceServerStart;
   request: KibanaRequest;
   logger: Pick<Logger, 'debug'>;
-}): Promise<Model> => {
+}): Promise<Model | undefined> => {
   try {
     const connector = await inference.getConnectorById(connectorId, request);
     return {
@@ -36,10 +37,10 @@ export const resolveConnectorModel = async ({
     };
   } catch (error) {
     logger.debug(
-      `Could not resolve a model for connector "${connectorId}"; using the connector id as the model id: ${
+      `Could not resolve a model for connector "${connectorId}"; leaving it unattributed: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
-    return { id: connectorId };
+    return undefined;
   }
 };

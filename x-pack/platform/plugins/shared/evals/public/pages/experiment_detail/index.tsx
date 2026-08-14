@@ -363,16 +363,12 @@ export const ExperimentDetailPage: React.FC = () => {
 
   // Evaluators can each judge with their own model, so the experiment-level card reports the
   // distinct set rather than one value, and stays empty for experiments only code evaluators
-  // scored. The response's own `evaluator_model` is no fallback: it summarizes these same stats.
-  const evaluatorModelIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const stat of experimentDetail?.stats ?? []) {
-      if (stat.evaluator_model?.id) {
-        ids.add(stat.evaluator_model.id);
-      }
-    }
-    return Array.from(ids).sort();
-  }, [experimentDetail?.stats]);
+  // scored. Sorted so the tooltip reads the same here as everywhere else the set is listed;
+  // the response orders them by how many evaluators used each.
+  const evaluatorModelIds = useMemo(
+    () => (experimentDetail?.evaluator_models ?? []).map(({ id }) => id).sort(),
+    [experimentDetail?.evaluator_models]
+  );
 
   // Live progress derived from the scores already aggregated in Elasticsearch —
   // the same source the results table streams from. The workflow step's own

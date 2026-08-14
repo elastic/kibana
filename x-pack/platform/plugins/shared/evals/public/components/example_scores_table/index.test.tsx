@@ -344,7 +344,11 @@ describe('ExampleScoresTable', () => {
       expect(getVerdictBadgeColor('inaccurate', null)).toEqual('danger');
       expect(getVerdictBadgeColor('ungrounded', null)).toEqual('danger');
       expect(getVerdictBadgeColor('no-match', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('not correct', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('not-grounded', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('unmatched', null)).toEqual('danger');
       expect(getVerdictBadgeColor('correct', null)).toEqual('success');
+      expect(getVerdictBadgeColor('in-scope', null)).toEqual('success');
       expect(getVerdictBadgeColor('partial-match', null)).toEqual('warning');
       expect(getVerdictBadgeColor('something-bespoke', null)).toEqual('hollow');
     });
@@ -352,6 +356,9 @@ describe('ExampleScoresTable', () => {
     it('keeps neutral sentinels gray whatever the score says', () => {
       expect(getVerdictBadgeColor('unavailable', 0)).toEqual('default');
       expect(getVerdictBadgeColor('not-applicable', 1)).toEqual('default');
+      expect(getVerdictBadgeColor('N/A', 0)).toEqual('default');
+      // An evaluator that could not judge is neither a pass nor a failure.
+      expect(getVerdictBadgeColor('fixture-error', null)).toEqual('default');
     });
   });
 

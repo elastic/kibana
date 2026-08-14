@@ -202,7 +202,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         const { body } = await adminClient.get(path).expect(200);
 
-        const { stats } = body as GetEvaluationExperimentResponse;
+        const { stats, evaluator_models: evaluatorModels } =
+          body as GetEvaluationExperimentResponse;
         const modelByEvaluator = new Map(
           stats.map((stat) => [stat.evaluator_name, stat.evaluator_model?.id])
         );
@@ -210,6 +211,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(modelByEvaluator.get('correctness.factuality')).to.eql('judge-a');
         expect(modelByEvaluator.get('groundedness')).to.eql('gpt-4o');
         expect(modelByEvaluator.get('latency')).to.be(undefined);
+        // The same set the experiment summarizes, so the compare header can report that the
+        // evaluators judged with different models instead of naming one of them.
+        expect((evaluatorModels ?? []).map(({ id }) => id).sort()).to.eql(['gpt-4o', 'judge-a']);
       });
 
       it('exposes every distinct judge model on the experiments listing', async () => {
