@@ -54,9 +54,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cspDashboard.index.add(data);
       await cspDashboard.waitForKspmStatsData();
       await cspDashboard.navigateToComplianceDashboardPage();
-      await retry.waitFor(
-        'Cloud posture integration dashboard to be displayed',
-        async () => testSubjects.exists('dashboard-container', { timeout: 0 })
+      await retry.waitFor('Cloud posture integration dashboard to be displayed', async () =>
+        testSubjects.exists('dashboard-container', { timeout: 0 })
       );
     });
 
@@ -85,9 +84,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cspSecurity.logout();
         await cspSecurity.login('csp_read_user');
         await cspDashboard.navigateToComplianceDashboardPage();
-        await retry.waitFor(
-          'Cloud posture integration dashboard to be displayed',
-          async () => testSubjects.exists('dashboard-container', { timeout: 0 })
+        await retry.waitFor('Cloud posture integration dashboard to be displayed', async () =>
+          testSubjects.exists('dashboard-container', { timeout: 0 })
         );
         const scoreElement = await dashboard.getKubernetesComplianceScore();
 
