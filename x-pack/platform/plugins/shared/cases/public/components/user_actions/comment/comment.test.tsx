@@ -246,7 +246,7 @@ describe('createCommentUserActionBuilder', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByText('removed endpoint attachment')).toBeInTheDocument();
+      expect(screen.getByText('removed Endpoint attachment')).toBeInTheDocument();
     });
 
     it('renders correctly when deleting a unified value attachment', async () => {

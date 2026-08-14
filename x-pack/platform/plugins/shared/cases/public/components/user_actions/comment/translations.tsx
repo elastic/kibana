@@ -40,13 +40,6 @@ export const UNSAVED_DRAFT_COMMENT = i18n.translate(
   }
 );
 
-export const DELETE_REGISTERED_ATTACHMENT = i18n.translate(
-  'xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle',
-  {
-    defaultMessage: 'Deleted attachment',
-  }
-);
-
 export const getDeleteRegisteredAttachmentTitle = (displayName: string) =>
   i18n.translate(
     'xpack.cases.userActions.attachments.registeredAttachment.successToasterTitleWithType',
@@ -55,3 +48,9 @@ export const getDeleteRegisteredAttachmentTitle = (displayName: string) =>
       values: { displayName },
     }
   );
+
+export const getRemovedRegisteredAttachmentLabel = (displayName: string) =>
+  i18n.translate('xpack.cases.userActions.removedAttachmentTypeLabel', {
+    defaultMessage: 'removed {displayName} attachment',
+    values: { displayName },
+  });
