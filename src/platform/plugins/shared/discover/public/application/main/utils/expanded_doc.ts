@@ -72,7 +72,7 @@ export const getExpandedDocLinkDisabledReason = (
   switch (linkability) {
     case ExpandedDocLinkability.EsqlMissingMetadata:
       return i18n.translate('discover.expandedDoc.esqlMissingMetadataDescription', {
-        defaultMessage: 'Add `METADATA _id, _index` to your query to link to individual results.',
+        defaultMessage: 'Add "METADATA _id, _index" to your query to link to individual results.',
       });
     case ExpandedDocLinkability.EsqlTransformational:
       return i18n.translate('discover.expandedDoc.esqlTransformationalDescription', {
