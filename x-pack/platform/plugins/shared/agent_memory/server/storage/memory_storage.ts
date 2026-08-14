@@ -6,8 +6,25 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { MemoryDocument } from '@kbn/agent-memory-common';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
+
+export type {
+  AuthorKind,
+  CallSource,
+  MemoryCategory,
+  MemoryDocument,
+  MemoryDocumentEnvelope,
+  MemoryDocumentSnapshot,
+  MemoryLifecycle,
+  MemoryPayload,
+  MemoryPayloadSnapshot,
+  MemoryProvenance,
+  MemoryScope,
+  MemoryScopeKind,
+  MemoryType,
+} from '@kbn/agent-memory-common';
 
 /**
  * Non-hidden index backed by @kbn/storage-adapter.
@@ -21,29 +38,33 @@ import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
  * `asInternalUser`, because end users must not need the cluster-wide
  * `manage_index_templates` privilege.
  *
- * The schema is KI-envelope-shaped (type = 'memory') so a Phase-2 reindex is
- * a schema migration, not a redesign. All D5/D6/D11 fields are mapped from
- * day one because `dynamic: 'strict'` (hardcoded in the adapter) rejects any
- * unmapped field at write time.
+ * Agent Memory owns this KI-shaped root envelope and nested `memory` payload
+ * (type = 'memory'). Significant Events KIs are shape prior art only: this
+ * store has no shared runtime types, registration, or migration dependency.
+ * All lifecycle, scope, and revision fields are local Agent Memory state.
+ * They are mapped from day one because `dynamic: 'strict'` (hardcoded in the
+ * adapter) rejects any unmapped field at write time.
  */
 export const memoryStorageSettings = {
   name: 'agent-memory',
   schema: {
     properties: {
-      // ── KI envelope ────────────────────────────────────────────────────────
+      // ── Agent Memory envelope (KI-shaped prior art) ────────────────────────
       // `_id` is handled by the adapter; `id` mirrors it for ES|QL access.
       id: types.keyword({}),
-      /** Always 'memory' — discriminator in the KI envelope union. */
+      /** Always 'memory' — discriminator for the local document contract. */
       type: types.keyword({}),
       title: types.text({}),
       description: types.text({}),
-      /** Multi-value keyword; same shape as KI tags. */
+      /** Multi-value keyword; follows the prior-art KI tag shape. */
       tags: types.keyword({}),
       deleted: types.boolean({}),
       /** Per-record soft expiry (D5). Supersedes any index-level lifecycle. */
       expires_at: types.date({}),
       /** Dense vector for semantic recall; populated by inference pipeline. */
       search_embedding: types.semantic_text({}),
+      /** Time of the latest revision; distinct from stable creation time. */
+      '@timestamp': types.date({}),
       created_at: types.date({}),
       /** Kibana space; mandatory filter on every recall query (G3). */
       space_id: types.keyword({}),
@@ -63,8 +84,9 @@ export const memoryStorageSettings = {
           /** SHA-256 of the normalised description; drives find-or-create dedup. */
           content_hash: types.keyword({}),
 
-          // Scope (D6 — mapped, not enforced until Phase 3)
-          /** 'user' | 'agent' | 'space' — visibility tier. */
+          // Scope. New writes default to user/author; missing legacy scope is
+          // treated as user-scoped by mandatory author + space recall filters.
+          /** 'user' | 'agent' | 'space' — stored visibility metadata. */
           scope_kind: types.keyword({}),
           /** Identifier for the scoped entity (agent_id, space_id, …). */
           scope_id: types.keyword({}),
@@ -97,9 +119,10 @@ export const memoryStorageSettings = {
             },
           }),
 
-          // ── D5 reserved: bi-temporal and lifecycle fields ─────────────────
-          // None of these are used by Phase 1 logic; they are mapped so that
-          // the schema remains stable when Phase 2 activates them.
+          // ── Local bi-temporal and lifecycle state ──────────────────────────
+          // Recall requires: expired_at absent; suppress_until absent or <= now;
+          // valid_at absent or <= now; and invalid_at absent or > now. These
+          // markers are typed storage state, not public write input.
           valid_at: types.date({}),
           invalid_at: types.date({}),
           expired_at: types.date({}),
@@ -126,65 +149,6 @@ export const memoryStorageSettings = {
 } satisfies IndexStorageSettings;
 
 export type MemoryStorageSettings = typeof memoryStorageSettings;
-
-// ── Document type ────────────────────────────────────────────────────────────
-
-export type MemoryType = 'episodic' | 'semantic' | 'procedural';
-export type MemoryCategory = 'profile' | 'preferences' | 'entities' | 'events' | 'trajectories';
-export type AuthorKind = 'profile_uid' | 'username';
-export type CallSource = 'agent' | 'user' | 'mcp' | 'unknown';
-export type MemoryScopeKind = 'user' | 'agent' | 'space';
-
-export interface MemoryDocument {
-  _id?: string;
-  // KI envelope
-  id: string;
-  type: 'memory';
-  title: string;
-  description: string;
-  tags?: string[];
-  deleted?: boolean;
-  expires_at?: string;
-  search_embedding?: string;
-  created_at: string;
-  space_id: string;
-  // Memory payload
-  memory: {
-    type?: MemoryType;
-    category?: MemoryCategory;
-    revision: number;
-    content_hash: string;
-    // D6 (reserved)
-    scope_kind?: MemoryScopeKind;
-    scope_id?: string;
-    // Entity refs
-    entities?: string[];
-    // Quality
-    origin?: string;
-    assurance?: string;
-    // Provenance
-    provenance: {
-      author: string;
-      author_kind: AuthorKind;
-      call_source?: CallSource;
-      conversation_ids?: string[];
-      trace_ids?: string[];
-      source_memory_ids?: string[];
-    };
-    // D5 reserved
-    valid_at?: string;
-    invalid_at?: string;
-    expired_at?: string;
-    superseded_by?: string;
-    suppress_until?: string;
-    use_count?: number;
-    last_used_at?: string;
-    // D11 reserved
-    diff_id?: string;
-    derived_from?: string[];
-    prior_document?: object;
-  };
-}
 
 export type MemoryStorage = StorageIndexAdapter<MemoryStorageSettings, MemoryDocument>;
 
