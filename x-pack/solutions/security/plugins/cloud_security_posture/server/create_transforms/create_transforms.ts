@@ -8,6 +8,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import { CDR_METERING_STATE_INDEX } from '@kbn/cloud-security-posture-common';
 import {
   latestFindingsTransform,
   DEPRECATED_FINDINGS_TRANSFORMS_VERSION,
@@ -17,6 +18,7 @@ import {
   latestVulnerabilitiesTransform,
   DEPRECATED_VULN_TRANSFORM_VERSIONS,
 } from './latest_vulnerabilities_transforms';
+import { meteringStateTransform, METERING_STATE_INDEX_MAPPINGS } from './metering_state_transform';
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
@@ -30,6 +32,14 @@ export const initializeCspTransforms = async (
     await initializeTransform(esClient, latestFindingsTransform, logger);
   }
   await initializeTransform(esClient, latestVulnerabilitiesTransform, logger);
+
+  // Stateful CSPM metering state (security-team#17662). The dest index must be
+  // created first: deduce_mappings is false because top_metrics/bucket_script
+  // output mappings cannot be deduced.
+  const stateIndexReady = await createMeteringStateIndexIfNotExists(esClient, logger);
+  if (stateIndexReady) {
+    await initializeTransform(esClient, meteringStateTransform, logger);
+  }
 };
 
 export const initializeTransform = async (
@@ -138,6 +148,28 @@ export const deletePreviousTransformsVersions = async (
   for (const transform of deprecatedTransforms) {
     const response = await deleteTransformSafe(esClient, logger, transform);
     if (response) return;
+  }
+};
+
+const createMeteringStateIndexIfNotExists = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<boolean> => {
+  try {
+    const exists = await esClient.indices.exists({ index: CDR_METERING_STATE_INDEX });
+    if (exists) return true;
+    await esClient.indices.create({
+      index: CDR_METERING_STATE_INDEX,
+      mappings: METERING_STATE_INDEX_MAPPINGS,
+    });
+    logger.info(`Created metering state index ${CDR_METERING_STATE_INDEX}`);
+    return true;
+  } catch (err) {
+    const error = transformError(err);
+    // A concurrent Kibana node may have created it between exists() and create().
+    if (error.message.includes('resource_already_exists_exception')) return true;
+    logger.error(`Failed to create metering state index: ${error.message}`);
+    return false;
   }
 };
 

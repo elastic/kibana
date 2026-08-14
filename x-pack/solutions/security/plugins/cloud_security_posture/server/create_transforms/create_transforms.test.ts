@@ -8,9 +8,17 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { CDR_METERING_STATE_INDEX } from '@kbn/cloud-security-posture-common';
-import { createTransformIfNotExists, startTransformIfNotStarted } from './create_transforms';
+import {
+  createTransformIfNotExists,
+  initializeCspTransforms,
+  startTransformIfNotStarted,
+} from './create_transforms';
 import { latestFindingsTransform } from './latest_findings_transform';
-import { meteringStateTransform } from './metering_state_transform';
+import {
+  meteringStateTransform,
+  METERING_STATE_INDEX_MAPPINGS,
+  METERING_STATE_TRANSFORM_ID,
+} from './metering_state_transform';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 
@@ -176,5 +184,87 @@ describe('startTransformIfNotStarted', () => {
     expect(mockEsClient.transform.startTransform).toHaveBeenCalledWith({
       transform_id: latestFindingsTransform.transform_id,
     });
+  });
+});
+
+describe('initializeCspTransforms metering state index', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  // Transforms are absent, so each one reaches putTransform; the freshly created
+  // transform reports as started so no start is attempted.
+  const mockTransformsAsAbsentAndStarted = () => {
+    mockEsClient.transform.getTransform.mockRejectedValue({ statusCode: 404 });
+    mockEsClient.transform.getTransformStats.mockResolvedValue({
+      transforms: [getTransformWithState('started')],
+      count: 1,
+    });
+  };
+
+  const wasMeteringTransformRegistered = () =>
+    mockEsClient.transform.putTransform.mock.calls.some(
+      ([transform]) => transform?.transform_id === METERING_STATE_TRANSFORM_ID
+    );
+
+  // Errors as the ES client surfaces them, since transformError reads body.error.
+  const esError = (statusCode: number, type: string, reason: string) => ({
+    statusCode,
+    body: { error: { type, reason } },
+  });
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    jest.resetAllMocks();
+    mockTransformsAsAbsentAndStarted();
+  });
+
+  // `true` marks the findings index as package-managed, skipping that transform
+  // so only the vulnerabilities and metering transforms are initialized.
+  const initialize = () => initializeCspTransforms(mockEsClient, true, logger);
+
+  it('creates the state index with explicit mappings when it does not exist', async () => {
+    mockEsClient.indices.exists.mockResolvedValue(false);
+
+    await initialize();
+
+    expect(mockEsClient.indices.create).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.create).toHaveBeenCalledWith({
+      index: CDR_METERING_STATE_INDEX,
+      mappings: METERING_STATE_INDEX_MAPPINGS,
+    });
+    expect(wasMeteringTransformRegistered()).toBe(true);
+  });
+
+  it('does not re-create the state index when it already exists', async () => {
+    mockEsClient.indices.exists.mockResolvedValue(true);
+
+    await initialize();
+
+    expect(mockEsClient.indices.create).toHaveBeenCalledTimes(0);
+    expect(wasMeteringTransformRegistered()).toBe(true);
+  });
+
+  it('registers the transform when a concurrent node created the index first', async () => {
+    mockEsClient.indices.exists.mockResolvedValue(false);
+    mockEsClient.indices.create.mockRejectedValue(
+      esError(400, 'resource_already_exists_exception', 'index already exists')
+    );
+
+    await initialize();
+
+    expect(wasMeteringTransformRegistered()).toBe(true);
+  });
+
+  it('does not register the transform when the state index cannot be created', async () => {
+    mockEsClient.indices.exists.mockResolvedValue(false);
+    mockEsClient.indices.create.mockRejectedValue(
+      esError(403, 'security_exception', 'action [indices:admin/create] is unauthorized')
+    );
+
+    await initialize();
+
+    expect(wasMeteringTransformRegistered()).toBe(false);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to create metering state index')
+    );
   });
 });
