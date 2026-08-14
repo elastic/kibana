@@ -487,6 +487,7 @@ export const AgentBuilderErrorUtils = {
   isWorkflowExecutionError,
   isAgentExecutionError,
   isContextLengthExceededAgentError,
+  isConnectorAgentError,
   createInternalError,
   createForbiddenError,
   createToolNotFoundError,
