@@ -14,6 +14,8 @@
  * `dispatcher.spec.ts` and `rule_executor.spec.ts` for the equivalent reason.
  */
 
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { NameValuePair } from '../../../../../server/lib/usage/types';

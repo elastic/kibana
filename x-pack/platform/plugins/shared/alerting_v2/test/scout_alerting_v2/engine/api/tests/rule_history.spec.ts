@@ -13,6 +13,8 @@
  * which is the right tool here.
  */
 
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
 import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { expect } from '@kbn/scout/api';

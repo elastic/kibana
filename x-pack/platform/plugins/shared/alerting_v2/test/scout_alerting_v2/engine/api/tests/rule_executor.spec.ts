@@ -12,6 +12,8 @@
  * not on the APIs that are used to create the rule and source data.
  */
 
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
 import { setTimeout as wait } from 'timers/promises';
 import { keyBy } from 'lodash';
 import { expect } from '@kbn/scout/api';

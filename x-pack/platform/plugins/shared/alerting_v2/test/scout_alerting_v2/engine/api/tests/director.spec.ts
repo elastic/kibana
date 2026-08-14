@@ -13,6 +13,8 @@
  * rule and source data.
  */
 
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
