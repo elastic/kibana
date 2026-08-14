@@ -1882,6 +1882,42 @@ describe('executeDashboardOperations', () => {
       );
     });
 
+    it('preserves the existing template when resolveCustomContentTemplate is absent', async () => {
+      const existingPanel: AttachmentPanel = {
+        id: 'cc-1',
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: { prompt: 'old prompt', template: '<div>Existing</div>' },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      };
+
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test', description: 'Desc', panels: [existingPanel] },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'cc-1',
+                config: { prompt: 'updated prompt' },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent: jest.fn(),
+        // resolveCustomContentTemplate intentionally absent
+      });
+
+      expect(result.failures).toEqual([]);
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0].config).toEqual({
+        prompt: 'updated prompt',
+        template: '<div>Existing</div>',
+      });
+    });
+
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
       const deferred = createDeferred<PanelContentAttempt>();
       const resolvePanelContent = jest.fn<

@@ -142,14 +142,14 @@ export const editPanelsOperation = defineOperation({
         let resolvedConfig: typeof panelInput.config;
         try {
           resolvedConfig =
-            panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE &&
-            context.resolveCustomContentTemplate &&
-            existingPanel
-              ? await mergeAndResolveCustomContentEdit(
-                  panelInput.config,
-                  existingPanel.config as CustomContentState,
-                  context.resolveCustomContentTemplate
-                )
+            panelInput.type === CUSTOM_CONTENT_EMBEDDABLE_TYPE && existingPanel
+              ? context.resolveCustomContentTemplate
+                ? await mergeAndResolveCustomContentEdit(
+                    panelInput.config,
+                    existingPanel.config as CustomContentState,
+                    context.resolveCustomContentTemplate
+                  )
+                : { ...(existingPanel.config as CustomContentState), ...panelInput.config }
               : panelInput.config;
         } catch (err) {
           recordFailure(panelInput.panelId, getErrorMessage(err));
