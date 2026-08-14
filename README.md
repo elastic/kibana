@@ -36,7 +36,7 @@ out an open PR:
 
 ## Documentation
 
-Visit [Elastic.co](https://www.elastic.co/docs/explore-analyze) for the full Kibana documentation.
+Visit [elastic.co](https://www.elastic.co/docs/explore-analyze) for the full Kibana documentation.
 
 For information about writing and previewing documentation, see [docs/extend/contributing/codebase/documentation.md](docs/extend/contributing/codebase/documentation.md).
 
@@ -60,5 +60,5 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 
 - If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new/choose).
   Please check to make sure someone else hasn't already created an issue for the same topic.
-- Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/elastic-stack/kibana/7) and a fellow community member or
+- Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
 Elastic engineer will be glad to help you out.
