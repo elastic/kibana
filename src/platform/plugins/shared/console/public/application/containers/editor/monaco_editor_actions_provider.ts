@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { ErrorAnnotation } from '@kbn/monaco/src/console/types';
-import { checkForTripleQuotesAndEsqlQuery } from '@kbn/monaco/src/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -40,9 +39,11 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
+  getTripleQuoteContext,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
+import type { TripleQuoteContext } from './utils';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import { StorageQuotaError } from '../../components/storage_quota_error';
 import { ContextValue } from '../../contexts';
@@ -206,18 +207,20 @@ export class MonacoEditorActionsProvider {
   private async getRequestsBetweenLines(
     model: monaco.editor.ITextModel,
     startLineNumber: number,
-    endLineNumber: number
+    endLineNumber: number,
+    parsedRequests?: Awaited<ReturnType<ConsoleParsedRequestsProvider['getRequests']>>
   ): Promise<AdjustedParsedRequest[]> {
     if (!model) {
       return [];
     }
-    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    const resolvedParsedRequests =
+      parsedRequests ?? (await this.parsedRequestsProvider.getRequests());
     const selectedRequests: AdjustedParsedRequest[] = [];
-    for (const [index, parsedRequest] of parsedRequests.entries()) {
+    for (const [index, parsedRequest] of resolvedParsedRequests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
       const requestEndLineNumber = getRequestEndLineNumber({
         parsedRequest,
-        nextRequest: parsedRequests.at(index + 1),
+        nextRequest: resolvedParsedRequests.at(index + 1),
         model,
         startLineNumber,
       });
@@ -556,6 +559,14 @@ export class MonacoEditorActionsProvider {
     position: monaco.Position,
     context: monaco.languages.CompletionContext
   ): Promise<monaco.languages.CompletionList> {
+    const { insideTripleQuotes, insideEsqlQuery } = await this.isPositionInsideTripleQuotesAndQuery(
+      model,
+      position
+    );
+    if (insideTripleQuotes && !insideEsqlQuery) {
+      return { suggestions: [] };
+    }
+
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -807,36 +818,29 @@ export class MonacoEditorActionsProvider {
   private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
     position: monaco.Position
-  ): Promise<{ insideTripleQuotes: boolean; insideEsqlQuery: boolean }> {
-    const selectedRequests = await this.getSelectedParsedRequests();
+  ): Promise<TripleQuoteContext> {
+    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    const selectedRequests = await this.getRequestsBetweenLines(
+      model,
+      position.lineNumber,
+      position.lineNumber,
+      parsedRequests
+    );
+    return getTripleQuoteContext(model, position, selectedRequests, parsedRequests);
+  }
 
-    for (const request of selectedRequests) {
-      if (
-        request.startLineNumber <= position.lineNumber &&
-        request.endLineNumber >= position.lineNumber
-      ) {
-        const requestContentBefore = model.getValueInRange({
-          startLineNumber: request.startLineNumber,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-
-        const { insideTripleQuotes, insideEsqlQuery } =
-          checkForTripleQuotesAndEsqlQuery(requestContentBefore);
-        return {
-          insideTripleQuotes,
-          insideEsqlQuery,
-        };
-      }
-      if (request.startLineNumber > position.lineNumber) {
-        // Stop iteration once we pass the cursor position
-        return { insideTripleQuotes: false, insideEsqlQuery: false };
-      }
-    }
-
-    // Return false if the position is not inside a request
-    return { insideTripleQuotes: false, insideEsqlQuery: false };
+  private hasEditorStateChanged(
+    model: monaco.editor.ITextModel,
+    modelVersionId: number,
+    position: monaco.Position
+  ): boolean {
+    const currentPosition = this.editor.getPosition();
+    return (
+      this.editor.getModel() !== model ||
+      model.getVersionId() !== modelVersionId ||
+      !currentPosition ||
+      !monaco.Position.equals(currentPosition, position)
+    );
   }
 
   private triggerSuggestions() {
@@ -845,8 +849,12 @@ export class MonacoEditorActionsProvider {
     if (!model || !position) {
       return;
     }
+    const modelVersionId = model.getVersionId();
     this.isPositionInsideTripleQuotesAndQuery(model, position).then(
       ({ insideTripleQuotes, insideEsqlQuery }) => {
+        if (this.hasEditorStateChanged(model, modelVersionId, position)) {
+          return;
+        }
         if (insideTripleQuotes && !insideEsqlQuery) {
           // Don't trigger autocomplete suggestions inside scripts and strings
           return;
