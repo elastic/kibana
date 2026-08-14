@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { escapeKuery } from '@kbn/es-query';
 import { parse as parseYaml } from 'yaml';
@@ -212,7 +216,11 @@ export class FieldDefinitionsService {
    * `version` check makes a concurrent repair/update lose cleanly (409) instead
    * of silently overwriting; callers treat that as "skip, retry next write".
    */
-  async setLegacyKey(id: string, legacyKey: string, options: { version?: string } = {}) {
+  async setLegacyKey(
+    id: string,
+    legacyKey: string,
+    options: { version?: string } = {}
+  ): Promise<SavedObjectsUpdateResponse<FieldDefinition>> {
     return this.dependencies.unsecuredSavedObjectsClient.update<FieldDefinition>(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
       id,

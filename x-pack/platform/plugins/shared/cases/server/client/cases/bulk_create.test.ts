@@ -1576,6 +1576,61 @@ describe('bulkCreate', () => {
         )
       ).resolves.not.toThrow();
     });
+
+    it('records a template user action (with point-in-time name) when the flag is enabled', async () => {
+      const flagOnClientArgs = createCasesClientMockArgs();
+      flagOnClientArgs.config = { ...flagOnClientArgs.config, templates: { enabled: true } };
+      const caseSOWithTemplate = {
+        ...caseSO,
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+      flagOnClientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate],
+      });
+      flagOnClientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        attributes: { name: 'My Template' },
+      } as Awaited<ReturnType<typeof flagOnClientArgs.services.templatesService.getTemplate>>);
+
+      await bulkCreate({ cases: getCases() }, flagOnClientArgs, casesClient);
+
+      expect(flagOnClientArgs.services.templatesService.getTemplate).toHaveBeenCalledWith(
+        'tmpl-1',
+        '1'
+      );
+      expect(
+        flagOnClientArgs.services.userActionService.creator.bulkCreateUserAction
+      ).toHaveBeenCalledWith({
+        userActions: expect.arrayContaining([
+          expect.objectContaining({
+            type: 'template',
+            caseId: caseSOWithTemplate.id,
+            owner: caseSOWithTemplate.attributes.owner,
+            payload: { template: { id: 'tmpl-1', version: 1, name: 'My Template' } },
+          }),
+        ]),
+      });
+    });
+
+    it('does not record a template user action when the templates flag is disabled', async () => {
+      const flagOffClientArgs = createCasesClientMockArgs();
+      flagOffClientArgs.config = { ...flagOffClientArgs.config, templates: { enabled: false } };
+      const caseSOWithTemplate = {
+        ...caseSO,
+        attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+      };
+      flagOffClientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSOWithTemplate],
+      });
+
+      await bulkCreate({ cases: getCases() }, flagOffClientArgs, casesClient);
+
+      const [{ userActions: recordedUserActions }] =
+        flagOffClientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls[0];
+      expect(recordedUserActions.some((ua: { type: string }) => ua.type === 'template')).toBe(
+        false
+      );
+      expect(flagOffClientArgs.services.templatesService.getTemplate).not.toHaveBeenCalled();
+    });
   });
 
   describe('customFields → extended_fields adapter (write-time mirror)', () => {

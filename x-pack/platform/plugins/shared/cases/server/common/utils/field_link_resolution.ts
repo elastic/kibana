@@ -205,11 +205,16 @@ export const resolveDefinitionForLegacyField = (
   }
 
   // A definition already linked to a different v1 key can never be a name-based
-  // candidate for this one.
+  // candidate for this one. A v1 legacy custom field is inherently global (it applies to every
+  // case for the owner, unconditionally) — a non-global definition that happens to share a name
+  // must never be claimed as its link target, or the field ends up linked-but-not-global: mirrored
+  // writes would silently stop applying outside whatever template references it.
   const isFallbackCandidate = (
     linkable: LinkableFieldDefinition
   ): linkable is LinkableFieldDefinition & { identity: FieldDefinitionIdentity } =>
-    linkable.definition.legacyKey === undefined && isTypeCompatible(linkable, type);
+    linkable.definition.legacyKey === undefined &&
+    linkable.definition.isGlobal === true &&
+    isTypeCompatible(linkable, type);
 
   const byExactName = (indexes.byExactName.get(key) ?? []).filter(isFallbackCandidate);
   if (byExactName.length === 1) {

@@ -701,6 +701,9 @@ describe('TemplatesMigrationTaskManager', () => {
           owner: 'cases',
           definition: 'name: cf_text\ncontrol: INPUT_TEXT\ntype: keyword\n',
           fieldDefinitionId: 'x',
+          // A legacy custom field can only name-match a global definition (see
+          // field_link_resolution.ts's isFallbackCandidate) — every migrated field is global.
+          isGlobal: true,
         },
       };
 

@@ -262,25 +262,44 @@ export class TemplatesMigrationTaskManager {
         `${backfill.complete ? '' : ' (more cases remain — rescheduling)'}`
     );
 
-    // Backfill fully done — delete this one-shot task.
-    if (backfill.complete) {
+    // A space whose Phase-1 migrateOneConfigure keeps throwing never gets its
+    // legacyCustomFieldsMigrated/legacyTemplatesMigrated flags set, so configureNeedsCaseBackfill
+    // (and therefore backfill.complete) silently excludes it from "pending" rather than blocking
+    // on it — `backfill.complete` alone is not "every space fully migrated," just "every space
+    // Phase 1 considers eligible for backfill is backfilled." Gate deletion on both, otherwise the
+    // one-shot task would delete itself while that space's legacy data is never migrated, leaving
+    // it recoverable only via a Kibana restart re-scheduling a fresh task.
+    const phase1HasErrors = totals.errored > 0;
+
+    // Backfill fully done and no space is stuck on an unresolved Phase-1 error — delete this
+    // one-shot task.
+    if (backfill.complete && !phase1HasErrors) {
       await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
 
-    // Count consecutive runs that couldn't complete a space because its updates kept failing. A run
-    // that only stopped for budget/cancellation is normal progress and resets the count. After the
-    // cap, give up rather than rescheduling a poison space forever.
-    const failedRuns = backfill.hadFailures ? (previousState.failedRuns ?? 0) + 1 : 0;
+    // Count consecutive runs that couldn't fully complete because either a case update kept
+    // failing (Phase 2) or a space's field-definitions/templates migration kept throwing
+    // (Phase 1). A run that only stopped for budget/cancellation — with no Phase-1 errors — is
+    // normal progress and resets the count. After the cap, give up rather than rescheduling a
+    // poison space forever.
+    const failedRuns =
+      backfill.hadFailures || phase1HasErrors ? (previousState.failedRuns ?? 0) + 1 : 0;
     if (failedRuns >= MAX_CASE_BACKFILL_FAILED_RUNS) {
+      const failingPhases = [
+        ...(phase1HasErrors ? ['field-definitions/templates phase'] : []),
+        ...(backfill.hadFailures ? ['case extended_fields backfill'] : []),
+      ].join(', ');
       log.error(
-        `[${executionId}] Giving up the cases extended_fields backfill after ${failedRuns} consecutive runs ` +
-          `with update failures — some cases were not backfilled. Resolve the underlying error (see earlier ` +
-          `"updates failed" logs) and restart Kibana to re-run the migration.`
+        `[${executionId}] Giving up the cases templates v2 migration after ${failedRuns} consecutive runs ` +
+          `with failures (${failingPhases}) — some spaces were not fully migrated. Resolve the ` +
+          `underlying error (see earlier "Migration failed" / "updates failed" logs) and restart ` +
+          `Kibana to re-run the migration.`
       );
-      // Some cases may still have been backfilled successfully across prior runs; nudge analytics to
-      // re-index so those aren't stranded. A later restart re-runs the migration and completes it,
-      // firing this again (idempotent) once the remaining cases succeed.
+      // Some cases/spaces may still have been migrated/backfilled successfully across prior runs;
+      // nudge analytics to re-index so those aren't stranded. A later restart re-runs the
+      // migration and completes it, firing this again (idempotent) once the remaining work
+      // succeeds.
       await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
@@ -290,9 +309,10 @@ export class TemplatesMigrationTaskManager {
       ...(backfill.nextCursor ? { caseBackfill: backfill.nextCursor } : {}),
       ...(failedRuns > 0 ? { failedRuns } : {}),
     };
-    const delayMs = backfill.hadFailures
-      ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
-      : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
+    const delayMs =
+      backfill.hadFailures || phase1HasErrors
+        ? CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS
+        : CASE_BACKFILL_RESCHEDULE_DELAY_MS;
     return { state: nextState, runAt: new Date(Date.now() + delayMs) };
   }
 

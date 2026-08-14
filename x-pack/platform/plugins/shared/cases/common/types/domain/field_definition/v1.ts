@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_CUSTOM_FIELD_KEY_LENGTH } from '../../../constants';
 
 export const FieldDefinitionSchema = z.object({
   /**
@@ -50,7 +51,7 @@ export const FieldDefinitionSchema = z.object({
    * between `customFields` (keyed by `legacyKey`) and `extended_fields` (keyed by
    * this definition's name/type).
    */
-  legacyKey: z.string().optional(),
+  legacyKey: z.string().max(MAX_CUSTOM_FIELD_KEY_LENGTH).optional(),
 
   /**
    * The position of a global field in the case details view. It is assigned by

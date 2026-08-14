@@ -691,18 +691,6 @@ export const bulkUpdate = async (
       )
     );
 
-    for (const { updateReq, originalCase } of casesToUpdate) {
-      const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
-      const templateKey =
-        effectiveTemplate != null ? `${effectiveTemplate.id}@${effectiveTemplate.version}` : null;
-      validateExtendedFieldsOnClose({
-        updateReq,
-        originalCase,
-        templateFields: templateKey != null ? templateFieldsByKey.get(templateKey) ?? [] : [],
-        globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
-      });
-    }
-
     // Preload per-owner active-link maps for the customFields ⇄ extended_fields
     // pairing adapter. Only owners with at least one update touching either
     // representation pay the (bounded) definitions fetch. Pairing for existing
@@ -735,6 +723,29 @@ export const bulkUpdate = async (
       templatesService,
       fieldDefinitionsService,
       globalFieldsByOwner,
+    });
+
+    // Close-time required_on_close check must run against the fully PAIRED extended_fields, not
+    // the raw pre-pair merge — otherwise a required linked field supplied only via customFields
+    // reads as still empty (wrongly blocks a legitimate close), and one cleared only via
+    // customFields still reads as filled from the stale pre-update value (wrongly allows closing
+    // with an actually-empty required field). `patchCasesPayload.cases` is produced by mapping
+    // `casesToUpdate` 1:1 in order, so the two arrays are index-aligned. When pairing left
+    // extended_fields untouched, the original updateReq is already correct as-is.
+    casesToUpdate.forEach(({ updateReq, originalCase }, index) => {
+      const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
+      const templateKey =
+        effectiveTemplate != null ? `${effectiveTemplate.id}@${effectiveTemplate.version}` : null;
+      const pairedExtendedFields = patchCasesPayload.cases[index].updatedAttributes.extended_fields;
+      validateExtendedFieldsOnClose({
+        updateReq:
+          pairedExtendedFields != null
+            ? { ...updateReq, extended_fields: pairedExtendedFields }
+            : updateReq,
+        originalCase,
+        templateFields: templateKey != null ? templateFieldsByKey.get(templateKey) ?? [] : [],
+        globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
+      });
     });
 
     // Resolve names of newly-applied templates so the "applied template" user action records the

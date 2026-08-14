@@ -183,8 +183,54 @@ export const bulkCreate = async (
       });
     }
 
+    // Resolve names of applied templates so the "applied template" user action records a
+    // point-in-time snapshot — a template's name can change across versions, so it must reflect
+    // the exact version applied, not the current latest. Deduped by "id@version". Gated on the
+    // templates flag, matching create.ts: a caller-pinned template with the flag off leaves no
+    // trace here (pre-expansion behavior).
+    const templateNamesByKey = new Map<string, string>();
+    if (clientArgs.config.templates.enabled) {
+      const appliedTemplates = [
+        ...new Map(
+          casesSOs
+            .map((c) => c.attributes.template)
+            .filter((t): t is NonNullable<typeof t> => t != null)
+            .map((t) => [`${t.id}@${t.version}`, t] as const)
+        ).values(),
+      ];
+      await Promise.all(
+        appliedTemplates.map(async ({ id, version }) => {
+          const templateSO = await templatesService.getTemplate(id, String(version));
+          if (templateSO) {
+            templateNamesByKey.set(`${id}@${version}`, templateSO.attributes.name);
+          }
+        })
+      );
+    }
+
     for (const theCase of casesSOs) {
       userActions.push(createBulkCreateUserActionsRequest({ theCase, user }));
+
+      // The create_case user action payload does not carry `template` (CreateCaseUserActionRt
+      // strips it), so a dedicated entry is needed for the activity log to reflect which template
+      // (if any) the case was created from — mirrors create.ts's single-case equivalent.
+      if (clientArgs.config.templates.enabled && theCase.attributes.template != null) {
+        const { id: templateId, version: templateVersion } = theCase.attributes.template;
+        const templateName = templateNamesByKey.get(`${templateId}@${templateVersion}`);
+        userActions.push({
+          type: UserActionTypes.template,
+          caseId: theCase.id,
+          user,
+          payload: {
+            template: {
+              id: templateId,
+              version: templateVersion,
+              ...(templateName ? { name: templateName } : {}),
+            },
+          },
+          owner: theCase.attributes.owner,
+        });
+      }
 
       // Pairing (independent of the templates flag) can populate extended_fields from a linked
       // customFields value, or the caller can supply it directly — either way, create_case's

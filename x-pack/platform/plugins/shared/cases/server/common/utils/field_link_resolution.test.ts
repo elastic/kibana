@@ -165,6 +165,21 @@ describe('resolveDefinitionForLegacyField', () => {
       });
     });
 
+    it('never uses a non-global name match — a v1 legacy field must only link to a global definition', () => {
+      const indexes = buildFieldLinkIndexes([
+        makeDefinition({
+          name: 'text_key_1',
+          isGlobal: false,
+          definition: 'name: text_key_1\nlabel: A\ntype: keyword\ncontrol: INPUT_TEXT\n',
+        }),
+      ]);
+
+      expect(resolveDefinitionForLegacyField(textField, indexes)).toEqual({
+        status: 'unresolved',
+        reason: 'no_match',
+      });
+    });
+
     it('never uses a type-incompatible name match', () => {
       const indexes = buildFieldLinkIndexes([
         makeDefinition({

@@ -21,9 +21,10 @@ export const CASE_BACKFILL_PAGE_SIZE = 1000;
 export const CASE_BACKFILL_SCAN_BUDGET = 25000;
 export const CASE_BACKFILL_PIT_KEEP_ALIVE = '5m';
 export const CASE_BACKFILL_RESCHEDULE_DELAY_MS = 3000;
-// When a run can't fully backfill a space because its case updates keep failing, we back off and,
-// after this many consecutive failing runs, give up (with an error log) rather than rescheduling
-// forever — a single "poison" case must not spin the task or starve other spaces indefinitely.
+// When a run can't fully backfill a space because its case updates keep failing, or a space is
+// stuck on an unresolved Phase-1 (field-definitions/templates) error, we back off and, after this
+// many consecutive failing runs, give up (with an error log) rather than rescheduling forever — a
+// single "poison" space must not spin the task or starve other spaces indefinitely.
 export const CASE_BACKFILL_FAILURE_RESCHEDULE_DELAY_MS = 30000;
 export const MAX_CASE_BACKFILL_FAILED_RUNS = 5;
 

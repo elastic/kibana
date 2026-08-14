@@ -377,18 +377,27 @@ export const create = async (
       });
     }
 
-    // Activity records only values that differ from resolved TEMPLATE defaults — not the full
-    // persisted map (which still stamps empty/default keys on the case SO). Global-field
-    // defaults are deliberately excluded from this baseline: a global default is injected
-    // independently of any template (see the injection block above) and must always show up in
-    // the activity log, since that is the only server-side trace that it was written at all. When
-    // no template was resolved (flag off, or no template applied), the baseline is empty, so
-    // every persisted value is recorded — matching pre-filtering behavior.
+    // Activity records only values that differ from resolved defaults — not the full persisted
+    // map (which still stamps empty/default keys on the case SO). The baseline is the resolved
+    // template defaults, with any storage-key collision against a global field resolved to the
+    // global default — mirroring the same collision precedence used for injection above (global
+    // wins). A global field with no such collision (not also exposed by the template) is NOT
+    // part of this baseline: a global default is injected independently of any template and must
+    // always show up in the activity log, since that is the only server-side trace that it was
+    // written at all. When no template was resolved (flag off, or no template applied), the
+    // baseline is empty, so every persisted value — including plain global defaults — is
+    // recorded, matching pre-filtering behavior.
     const persistedExtendedFields = normalizedCase.extended_fields ?? {};
     const resolvedTemplateFieldDefaults = buildExtendedFieldsDefaults(resolvedTemplateFields ?? []);
+    const activityDefaultsBaseline = Object.fromEntries(
+      Object.keys(resolvedTemplateFieldDefaults).map((key) => [
+        key,
+        globalFieldsDefaults[key] ?? resolvedTemplateFieldDefaults[key],
+      ])
+    );
     const activityExtendedFields = pickExtendedFieldsDifferingFromDefaults(
       persistedExtendedFields,
-      resolvedTemplateFieldDefaults
+      activityDefaultsBaseline
     );
     if (Object.keys(activityExtendedFields).length > 0) {
       extraUserActions.push({
