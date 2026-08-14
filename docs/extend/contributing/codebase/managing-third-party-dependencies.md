@@ -134,11 +134,11 @@ Please consult with the owning team before using an existing dependency, as they
 
 ## Quarantining existing dependencies
 
-Some dependencies are **quarantined**: existing usage may remain, but new imports are forbidden while we work toward removal.
+Some dependencies are **quarantined**: existing usage can remain, but new imports are forbidden while we work toward removal.
 
-Allowlists live in [`packages/kbn-dependency-quarantine/configs/`](https://github.com/elastic/kibana/tree/main/packages/kbn-dependency-quarantine/configs). Each file lists a package name, a reason, and glob paths that may still import it (including subpaths). Empty `allowed` means fully banned.
+Allowlists live in [`packages/kbn-dependency-quarantine/configs/`](https://github.com/elastic/kibana/tree/main/packages/kbn-dependency-quarantine/configs). Each file lists a package name, a reason, and glob paths that can still import it (including subpaths). Empty `allowed` means fully banned.
 
-Enforcement is the ESLint rule `@kbn/imports/no_quarantined_imports` (cannot be disabled with `eslint-disable`).
+Enforcement is the ESLint rule `@kbn/imports/no_quarantined_imports` (`eslint-disable` comments do not apply to this rule).
 
 To add a new use of a quarantined package, add a file or glob to the relevant config and request review from `@elastic/kibana-security`. Internal `@kbn/*` packages can be quarantined the same way as npm packages.
 
