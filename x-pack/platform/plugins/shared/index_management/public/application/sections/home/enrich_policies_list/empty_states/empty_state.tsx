@@ -39,9 +39,7 @@ export const EmptyState = () => {
             defaultMessage="Use an enrich policy as a lookup reference, to add fields to incoming documents during ingest with {ingestPipelinesLink} or to use the ENRICH command in ES|QL"
             values={{
               ingestPipelinesLink: (
-                <EuiLink
-                  href={share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR')?.useUrl({})}
-                >
+                <EuiLink href={share.url.locators.get('INGEST_PIPELINES_APP_LOCATOR')?.useUrl({})}>
                   <FormattedMessage
                     id="xpack.idxMgmt.enrichPolicies.list.emptyPromptIngestPipelinesLink"
                     defaultMessage="ingest pipelines"
