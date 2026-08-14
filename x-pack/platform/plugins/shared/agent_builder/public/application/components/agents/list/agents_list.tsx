@@ -25,12 +25,16 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
+import moment from 'moment';
 import React, { useMemo } from 'react';
 import type { ListAgentResponseItem } from '../../../../../common/http_api/agents';
+import { resolveOwnerLabel } from '../../../utils/owner';
+import { useOwnerProfiles } from '../../../hooks/use_owner_profiles';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
 import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
@@ -45,6 +49,49 @@ import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
+const renderOwnerCell = (
+  owner: { id?: string; username?: string } | undefined,
+  date?: string,
+  profileMap?: Map<string, string>,
+  dateFormat?: string
+) => {
+  const label = resolveOwnerLabel(owner, profileMap);
+  const relativeDate = date ? moment(date).fromNow() : undefined;
+
+  if (!label && !relativeDate) {
+    return (
+      <EuiText size="s" color="subdued">
+        —
+      </EuiText>
+    );
+  }
+
+  if (!label) {
+    return (
+      <EuiText size="s" color="subdued">
+        {relativeDate}
+      </EuiText>
+    );
+  }
+
+  if (!relativeDate) {
+    return label;
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={moment(date).format(dateFormat ?? 'LL LT')}>
+          <EuiText size="xs" color="subdued" tabIndex={0}>
+            {relativeDate}
+          </EuiText>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
   accessControlMode: i18n.translate('xpack.agentBuilder.agents.accessControlModeColumn', {
@@ -53,6 +100,12 @@ const columnNames = {
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
   aiIndices: i18n.translate('xpack.agentBuilder.agents.aiIndicesColumn', {
     defaultMessage: 'AI indices',
+  }),
+  createdBy: i18n.translate('xpack.agentBuilder.agents.createdByColumn', {
+    defaultMessage: 'Created by',
+  }),
+  lastUpdatedBy: i18n.translate('xpack.agentBuilder.agents.lastUpdatedByColumn', {
+    defaultMessage: 'Last updated by',
   }),
 };
 
@@ -77,6 +130,7 @@ const actionLabels = {
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
+  const profileMap = useOwnerProfiles(agents ?? []);
   const isContextEngineEnabled = useIsContextEngineEnabled();
   const { inheritedAiIndicesByAgentId } = useInheritedAiIndices({
     enabled: isContextEngineEnabled,
@@ -84,6 +138,10 @@ export const AgentsList: React.FC = () => {
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
+  const {
+    services: { settings },
+  } = useKibana();
+  const dateFormat = settings?.client.get<string>('dateFormat');
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
   const [aclAgent, setAclAgent] = React.useState<ListAgentResponseItem | null>(null);
@@ -183,6 +241,24 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
+    const agentCreatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '12%',
+      field: 'created_by',
+      name: columnNames.createdBy,
+      render: (createdBy: ListAgentResponseItem['created_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(createdBy, agent.created_at, profileMap, dateFormat),
+      'data-test-subj': 'agentBuilderAgentsListCreatedBy',
+    };
+
+    const agentLastUpdatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '12%',
+      field: 'updated_by',
+      name: columnNames.lastUpdatedBy,
+      render: (updatedBy: ListAgentResponseItem['updated_by'], agent: ListAgentResponseItem) =>
+        renderOwnerCell(updatedBy, agent.updated_at, profileMap, dateFormat),
+      'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
+    };
+
     const agentActions: EuiTableActionsColumnType<ListAgentResponseItem> = {
       width: '120px',
       actions: [
@@ -266,6 +342,8 @@ export const AgentsList: React.FC = () => {
       agentAccessControlMode,
       agentLabels,
       ...(isContextEngineEnabled ? [agentAiIndices] : []),
+      agentCreatedBy,
+      agentLastUpdatedBy,
       agentActions,
     ];
   }, [
@@ -275,6 +353,8 @@ export const AgentsList: React.FC = () => {
     canManageAgentAccess,
     isContextEngineEnabled,
     inheritedAiIndicesByAgentId,
+    profileMap,
+    dateFormat,
   ]);
 
   const errorMessage = useMemo(
