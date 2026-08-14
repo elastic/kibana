@@ -99,9 +99,9 @@ export class LensLayers {
     if (!tabButton) {
       throw new Error(`Layer tab button not found at index ${index}`);
     }
-    // Layer actions overlap the right half and center of the tab's interactive element.
-    // Use its unobstructed label edge rather than bypassing actionability with a forced click.
-    await tabButton.click({ position: { x: 10, y: 10 } });
+    // Layer actions overlap the tab control when they appear on hover. Clicking the label follows
+    // the existing Unified Tabs/FTR locator pattern without relying on pointer coordinates.
+    await tabButton.locator('[data-test-subj="fullText"]').click();
     await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
   }
 
