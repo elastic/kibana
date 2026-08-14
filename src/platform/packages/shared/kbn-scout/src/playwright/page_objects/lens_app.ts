@@ -199,7 +199,7 @@ export class LensApp {
     } else if (options?.addToDashboard === 'none') {
       const libraryOption = this.page.locator('#add-to-library-option');
       await libraryOption.waitFor({ state: 'attached' });
-      await libraryOption.check({ force: true });
+      await libraryOption.check();
     }
 
     await this.page.components.toast().closeAll();
@@ -374,8 +374,7 @@ export class LensApp {
     // re-reads aria-checked and fails before Lens commits the update. Click when needed,
     // then wait for the attribute (no expect() in the page object).
     if ((await switchLocator.getAttribute('aria-checked')) !== want) {
-      // Dimension-editor overlay intercepts Playwright actionability (scroll/click hang).
-      await switchLocator.dispatchEvent('click');
+      await switchLocator.click();
     }
     await this.page.waitForFunction(
       ([subj, expected]) =>
@@ -394,7 +393,7 @@ export class LensApp {
     // Suggested-value panels can remount and exceed the 10s actionTimeout.
     // Save toasts can sit over the close control and make Playwright time out after scroll.
     await this.page.components.toast().closeAll();
-    await this.closeDimensionEditorButton.click({ timeout: 15_000, force: true });
+    await this.closeDimensionEditorButton.click({ timeout: 15_000 });
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 

@@ -765,11 +765,9 @@ export class DashboardApp {
 
   private async waitForCustomTimeRangeToggleState(enabled: boolean) {
     const expected = enabled ? 'true' : 'false';
-    const selector = `[data-test-subj="${this.customTimeRangeToggleTestSubj}"]`;
-    await this.page.waitForFunction(
-      ({ selector: selectorArg, expectedValue }) =>
-        document.querySelector(selectorArg)?.getAttribute('aria-checked') === expectedValue,
-      { selector, expectedValue: expected }
+    await expect(this.page.testSubj.locator(this.customTimeRangeToggleTestSubj)).toHaveAttribute(
+      'aria-checked',
+      expected
     );
   }
 
@@ -992,7 +990,7 @@ export class DashboardApp {
 
   /** Locator for a Discover drilldown action on a dashboard panel. */
   getDiscoverDrilldownAction() {
-    return this.page.locator('[data-test-subj^="embeddablePanelAction-discover_drilldown"]');
+    return this.page.testSubj.locator('^embeddablePanelAction-discover_drilldown');
   }
 
   // ============================================================
@@ -1101,11 +1099,7 @@ export class DashboardApp {
     const initialCount = await panels.count();
 
     await this.clickPanelAction('embeddablePanelAction-clonePanel', title);
-    await this.page.waitForFunction(
-      (expectedCount) =>
-        document.querySelectorAll('[data-test-subj="embeddablePanel"]').length > expectedCount,
-      initialCount
-    );
+    await expect(panels).toHaveCount(initialCount + 1);
   }
 
   /**
@@ -1172,9 +1166,7 @@ export class DashboardApp {
     if (!exists) {
       // Collect available actions for better error message
       await this.openPanelContextMenu(title);
-      const allActions = await this.page
-        .locator('[data-test-subj^="embeddablePanelAction-"]')
-        .all();
+      const allActions = await this.page.testSubj.locator('^embeddablePanelAction-').all();
       const actionNames: string[] = [];
       for (const action of allActions) {
         const testSubj = await action.getAttribute('data-test-subj');
@@ -1228,12 +1220,10 @@ export class DashboardApp {
 
   async openInlineEditor(id: string) {
     // Hover over the panel to show action buttons
-    const embeddableSelector = `[data-test-embeddable-id="${id}"]`;
-    await this.page.locator(embeddableSelector).hover();
-
-    // Wait for the edit button to appear and click it
-    const editVisualizationConfigurationSelector = `[data-test-subj="hover-actions-${id}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
-    await this.page.locator(editVisualizationConfigurationSelector).click();
+    await this.getPanelByEmbeddableId(id).hover();
+    await this.page.testSubj
+      .locator(`hover-actions-${id} > embeddablePanelAction-editPanel`)
+      .click();
   }
 
   /**

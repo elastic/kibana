@@ -133,12 +133,10 @@ spaceTest.describe(
       }
     );
 
-    // FTR skipped this scenario too (`it.skip`): saving an ES|QL panel on a dashboard and
-    // reopening it currently reverts the panel to a bare `FROM logs*` query instead of the
-    // full query that was applied, so the "carries the ES|QL query over" assertion below
-    // never passes. This looks like a genuine product bug in ES|QL panel persistence, not
-    // a test issue; verified the inline editor itself holds the correct value right up until
-    // the panel is saved/reloaded.
+    // FTR skipped this too (`it.skip`). Saving an ES|QL dashboard panel currently
+    // reverts it to a bare `FROM logs*` query, so Discover never receives the applied
+    // query. The inline editor holds the correct value until save/reload.
+    // Tracked in https://github.com/elastic/kibana/issues/285093
     spaceTest.fixme(
       'brings visualization context to Discover for Lens ES|QL panels',
       async ({ context, kbnUrl, page, pageObjects }) => {

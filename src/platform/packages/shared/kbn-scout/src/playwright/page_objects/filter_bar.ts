@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 interface FilterCreationOptions {
@@ -58,13 +59,7 @@ export class FilterBar {
       .setSelectedOptions([options.field]);
     const operatorCombo = this.page.testSubj.locator('filterOperatorList');
     await operatorCombo.waitFor({ state: 'visible' });
-    // Set operator
-    await this.page.waitForFunction(
-      () =>
-        !document
-          .querySelector('[data-test-subj="filterOperatorList"]')
-          ?.className.includes('euiComboBox-isDisabled')
-    );
+    await expect(operatorCombo).not.toHaveClass(/euiComboBox-isDisabled/);
     await this.page.components
       .comboBox('filterOperatorList')
       .setSelectedOptions([options.operator]);
@@ -77,10 +72,7 @@ export class FilterBar {
     // EuiPopover `ownFocus` overlay intercepts Playwright actionability on Save.
     await saveButton.dispatchEvent('click');
     await popover.waitFor({ state: 'hidden', timeout: 15_000 });
-    await this.page.waitForFunction(
-      (prev) => document.querySelectorAll('[data-test-subj^="filter-badge"]').length > prev,
-      previousCount
-    );
+    await expect(this.page.testSubj.locator('^filter-badge')).toHaveCount(previousCount + 1);
   }
 
   async addDslFilter(value: string) {
@@ -106,12 +98,7 @@ export class FilterBar {
       return;
     }
 
-    const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
-    await filterParamsInput.waitFor({ state: 'visible' });
-    await this.page.waitForFunction(() => {
-      const el = document.querySelector('[data-test-subj="filterParams"] input');
-      return el instanceof HTMLInputElement && !el.disabled;
-    });
+    const filterParamsInput = this.page.testSubj.locator('filterParams').locator('input');
 
     for (const item of Array.isArray(value) ? value : [value]) {
       await filterParamsInput.fill(item);

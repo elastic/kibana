@@ -435,7 +435,7 @@ export class LensWorkspace {
    */
   async getSharedUrl(): Promise<string> {
     await this.openShareModal();
-    await this.copyShareUrlButton.click({ force: true }); // Remove force?
+    await this.copyShareUrlButton.click();
     await this.page.waitForFunction(() => {
       const url = document
         .querySelector('[data-test-subj="copyShareUrlButton"]')
