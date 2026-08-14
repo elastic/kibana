@@ -55,9 +55,12 @@ export function ManagedIntegrationsSection({
   );
   const [isDeployReady, setIsDeployReady] = useState(false);
 
-  const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery('aws', undefined, undefined, {
-    enabled: showIdentityFederation,
-  });
+  const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
+    'aws',
+    undefined,
+    { full: true },
+    { enabled: showIdentityFederation }
+  );
   const iacTemplateUrl = useMemo(
     () => getAnyCloudConnectorIacTemplateUrl(awsPackageResponse?.item),
     [awsPackageResponse]
