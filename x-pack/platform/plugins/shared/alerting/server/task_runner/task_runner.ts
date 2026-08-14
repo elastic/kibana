@@ -78,6 +78,8 @@ import {
   getTaskRunError,
   evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
+  isMissingUiamApiKeyRunError,
+  repairUiamApiKey,
 } from './lib';
 import {
   ErrorWithType,
@@ -899,6 +901,14 @@ export class TaskRunner<
       runRuleResult = asErr(err);
       schedule = asErr(err);
       shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
+
+      // The rule's UIAM API key is unusable, so re-grant it now: the rule's next scheduled run then
+      // authenticates with a working credential instead of failing the same way indefinitely.
+      if (isMissingUiamApiKeyRunError(err)) {
+        await withAlertingSpan('alerting:repair-uiam-api-key', () =>
+          repairUiamApiKey({ context: this.context, logger: this.logger, ruleId, spaceId })
+        );
+      }
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
