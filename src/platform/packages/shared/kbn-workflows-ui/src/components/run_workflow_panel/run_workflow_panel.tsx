@@ -1,43 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import {
-  useRunWorkflow,
-  useWorkflows,
-  useWorkflowsCapabilities,
-  WorkflowSelector,
-} from '@kbn/workflows-ui';
-import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
+import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { RunWorkflowResponseDto } from '@kbn/workflows';
 import {
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
 } from '@kbn/workflows';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ToMountPointParams } from '@kbn/react-kibana-mount';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import type { RenderingService } from '@kbn/core-rendering-browser';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import * as i18n from '../translations';
+import { useRunWorkflow } from '../../hooks/use_run_workflow';
+import { useWorkflows } from '../../hooks/use_workflows';
+import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
+import { WorkflowSelector } from '../workflow_selector/workflow_selector';
+import type { WorkflowSelectorVisibility } from '../workflow_selector/workflow_utils';
+import * as i18n from './translations';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: Record<string, unknown>;
-  /** The trigger type to sort to the top of the workflow list. */
-  sortTriggerType: string;
+  /**
+   * The trigger type(s) to sort to the top of the workflow list.
+   * Workflows whose triggers include any of these types are ranked first.
+   */
+  sortTriggerTypes: string | readonly string[];
   /** data-test-subj prefix for the execute button. */
   executeButtonTestSubj: string;
+  /**
+   * When provided, only workflows carrying at least one of these tags are shown.
+   * An empty array (or undefined) disables the filter — all enabled workflows appear.
+   */
+  tags?: string[];
   /**
    * Managed workflows are excluded from the list unless the caller opts in with a matching
    * visibility. Pass the selector(s)/solution(s) the surfacing context maps to (e.g.
@@ -49,19 +56,25 @@ export interface RunWorkflowPanelProps {
   onExecute?: () => void;
 }
 
+interface RunWorkflowPanelServices {
+  application: ApplicationStart;
+  notifications: NotificationsStart;
+  rendering: ToMountPointParams;
+}
+
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
-  sortTriggerType,
+  sortTriggerTypes,
   executeButtonTestSubj,
+  tags,
   visibility,
   onClose,
   onExecute,
 }: RunWorkflowPanelProps) => {
   const {
-    services: { application, rendering },
-  } = useKibana<{ application: ApplicationStart; rendering: RenderingService }>();
-  const { addSuccess: workflowTriggerSuccess, addError: workflowTriggerFailed } = useAppToasts();
+    services: { application, notifications, rendering },
+  } = useKibana<RunWorkflowPanelServices>();
   const { euiTheme } = useEuiTheme();
 
   const runWorkflow = useRunWorkflow();
@@ -103,6 +116,11 @@ export const RunWorkflowPanel = ({
     [normalizedInputs]
   );
 
+  const triggerTypes = useMemo(
+    () => (Array.isArray(sortTriggerTypes) ? sortTriggerTypes : [sortTriggerTypes]),
+    [sortTriggerTypes]
+  );
+
   const executeWorkflow = useCallback(
     (extraInputs: Record<string, unknown>) => {
       if (!selectedId) return;
@@ -116,7 +134,7 @@ export const RunWorkflowPanel = ({
         },
         {
           onSuccess: (data: RunWorkflowResponseDto) => {
-            workflowTriggerSuccess({
+            notifications.toasts.addSuccess({
               title: i18n.WORKFLOW_START_SUCCESS_TOAST,
               ...(rendering && {
                 text: toMountPoint(
@@ -139,7 +157,7 @@ export const RunWorkflowPanel = ({
             });
           },
           onError: (err) => {
-            workflowTriggerFailed(err, {
+            notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
               title: i18n.WORKFLOW_START_FAILED_TOAST,
             });
           },
@@ -155,8 +173,7 @@ export const RunWorkflowPanel = ({
       selectedId,
       runWorkflow,
       inputs,
-      workflowTriggerSuccess,
-      workflowTriggerFailed,
+      notifications,
       rendering,
       onClose,
       onExecute,
@@ -177,11 +194,19 @@ export const RunWorkflowPanel = ({
       <WorkflowSelector
         config={{
           visibility,
-          filterFunction: (workflows) => workflows.filter((w) => w.enabled),
+          filterFunction: (workflows) => {
+            const enabled = workflows.filter((w) => w.enabled);
+            if (!tags || tags.length === 0) return enabled;
+            return enabled.filter((w) => tags.some((tag) => w.tags?.includes(tag)));
+          },
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
-              const aHasType = a.definition?.triggers?.some((t) => t.type === sortTriggerType);
-              const bHasType = b.definition?.triggers?.some((t) => t.type === sortTriggerType);
+              const aHasType = a.definition?.triggers?.some((t) =>
+                triggerTypes.includes(t.type)
+              );
+              const bHasType = b.definition?.triggers?.some((t) =>
+                triggerTypes.includes(t.type)
+              );
               if (aHasType && !bHasType) return -1;
               if (!aHasType && bHasType) return 1;
               return 0;
@@ -196,7 +221,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, sortTriggerType, visibility]
+    [selectedId, triggerTypes, visibility, tags]
   );
 
   return (

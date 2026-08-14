@@ -13,7 +13,7 @@ import type {
 } from '@elastic/eui';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import * as i18n from '../translations';
-import { RunWorkflowPanel } from './run_workflow_panel';
+import { RunWorkflowPanel } from '@kbn/workflows-ui';
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
@@ -44,7 +44,7 @@ export const DocumentWorkflowsPanel = ({
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerType="manual"
+      sortTriggerTypes="manual"
       executeButtonTestSubj="execute-document-workflow-button"
       onClose={onClose}
       onExecute={onExecute}

@@ -14,7 +14,7 @@ import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
-import { RunWorkflowPanel } from './run_workflow_panel';
+import { RunWorkflowPanel } from '@kbn/workflows-ui';
 
 // Managed workflows surfaced as rule actions (e.g. the alert analysis workflow) carry the
 // `rule_action` selector visibility context; requesting it here includes them in the list alongside
@@ -47,7 +47,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerType="alert"
+      sortTriggerTypes="alert"
       visibility={ALERT_WORKFLOW_VISIBILITY}
       executeButtonTestSubj="execute-alert-workflow-button"
       onClose={onClose}
