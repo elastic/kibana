@@ -1,5 +1,5 @@
 {
-  "sha1": "e78cf95deeeb7db2beabc3097ee24df25b5cb493",
+  "sha1": "d058898095c3ebb721c85d069b0f6fc5e45846a7",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -8,15 +8,15 @@
     {
       "id": "7f09fed36a7e0d8-c1ae45431291e6d",
       "title": "Observability alerts - status controls filters the alerts table by status",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/alerts/alert_controls.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 29,
+        "column": 7
       }
     },
     {
