@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { RuleChangeHistoryApi } from '../../../../services/rule_change_history_api';
 import { AutoOpenChangeHistoryModal } from './auto_open_change_history_modal';
@@ -53,10 +53,10 @@ export const useRuleChangeHistoryModal = ({
   // Advances on every open request so re-opening the same rule remounts the modal.
   const [openCount, setOpenCount] = useState(0);
 
-  const openChangeHistory = (rule: RuleChangeHistoryTarget) => {
+  const openChangeHistory = useCallback((rule: RuleChangeHistoryTarget) => {
     setTarget(rule);
     setOpenCount((count) => count + 1);
-  };
+  }, []);
 
   const changeHistoryModal = target ? (
     <RuleChangeHistoryProvider
