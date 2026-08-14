@@ -59,6 +59,18 @@ dependsOn:
   - '@kbn/scout-oblt'
   - '@kbn/app-header'
   - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/inference-plugin'
+  - '@kbn/inference-common'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/zod'
+  - '@kbn/core-spaces-common'
+  - '@kbn/management-settings-ids'
+  - '@kbn/core-http-server'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/actions-plugin'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod
