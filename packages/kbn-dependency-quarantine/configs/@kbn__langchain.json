@@ -1,0 +1,12 @@
+{
+  "name": "@kbn/langchain",
+  "reason": "Do not add new imports of @kbn/langchain. Existing consumers may keep using it; expand the allowlist only with @elastic/kibana-security review.",
+  "allowed": [
+    "x-pack/platform/packages/shared/kbn-langchain/**",
+    "x-pack/solutions/security/plugins/elastic_assistant/**",
+    "x-pack/solutions/security/plugins/security_solution/**",
+    "x-pack/solutions/security/packages/kbn-discoveries/**",
+    "x-pack/platform/plugins/shared/automatic_import/**",
+    "x-pack/solutions/search/plugins/search_playground/**"
+  ]
+}
