@@ -2066,9 +2066,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_118.0.0_splitbutton_redesign_03.tgz":
-  version "118.0.0"
-  resolved "file:./eui_118.0.0_splitbutton_redesign_03.tgz#242ac7c25a0c47f36c1852761560403492389531"
+"@elastic/eui@file:./eui_118.0.0_splitbutton_redesign_04.tgz":
+  version "119.0.0"
+  resolved "file:./eui_118.0.0_splitbutton_redesign_04.tgz#32fd5655384d1483fa4781110e7b7e43b657f99c"
   dependencies:
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
