@@ -193,10 +193,7 @@ export const fromTabStateToSavedObjectTab = ({
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,
     headerRowHeight: tab.appState.headerRowHeight,
-    esqlApproximation:
-      isTextBasedQuery && typeof tab.appState.esqlApproximation === 'boolean'
-        ? tab.appState.esqlApproximation
-        : undefined,
+    esqlApproximation: isTextBasedQuery ? tab.appState.esqlApproximation : undefined,
     timeRestore,
     timeRange: timeRestore ? tab.globalState.timeRange : undefined,
     refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,
