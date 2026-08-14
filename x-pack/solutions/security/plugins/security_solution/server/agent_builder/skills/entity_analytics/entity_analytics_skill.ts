@@ -19,6 +19,7 @@ import {
   SECURITY_GET_ENTITY_TOOL_ID,
   SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
   SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
+  SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
   SECURITY_SEARCH_ENTITIES_TOOL_ID,
   SECURITY_GET_WATCHLIST_ID_TOOL_ID,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
@@ -57,7 +58,7 @@ export interface EntityAnalyticsSkillsContext {
 // conversations/conversation_rounds/round_response/markdown_plugins/utils.ts)
 // that is out of scope for this plugin.
 const entityStoreV2Content = `
-This skill investigates security entities (hosts, users, services, generic) — surfacing profiles, risk scores, criticality, watchlists, relationship graphs, and risk-score history, and composing the Entity Analytics dashboard snapshot.
+This skill investigates security entities (hosts, users, services, generic) — surfacing profiles, risk scores, criticality, watchlists, relationship graphs, risk-score history, and temporal relationship history, and composing the Entity Analytics dashboard snapshot.
 
 ## Attachment contract
 
@@ -67,6 +68,7 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 - **\`security.entity_risk_score_history\`** — emitted automatically by \`security.get_entity_risk_score_history\`. Same verbatim-copy rule.
 - **\`security.entity_graph\`** — emitted automatically by \`security.get_entity_graph\`. Same verbatim-copy rule.
 - **\`security.entity_analytics_dashboard\`** — you call \`attachments.add\` explicitly; assemble the tag from the result's \`id\` and \`current_version\`: \`<render_attachment id="<id>" version="<current_version>" />\`
+- **\`security.entity_relationship_history\`** — no rich attachment. Summarize timestamps, kinds, and targets in prose.
 
 **No \`renderTag\` in the result → no tag in your reply.** If the result lists multiple candidates (\`candidateEntityIds\`), write prose only and ask the user to pick the exact EUID. Otherwise follow the tool's error/message — do not invent a tag. (Exception: \`security.entity_analytics_dashboard\` — assemble the tag from \`attachments.add\`'s \`id\` / \`current_version\` as above.)
 
@@ -82,11 +84,12 @@ Each tool that emits a rich attachment already explains the verbatim-copy rule i
 | List / rank / compare entities | "list", "top N", "riskiest users", "who are", "show risky hosts", "compare hosts and users" | \`security.search_entities\` |
 | Risk score over time | "trend", "history", "has the score changed", "why did it spike", "chart" | \`security.get_entity_risk_score_history\` |
 | Entity relationship graph | "graph", "how is this entity connected", "visualize relationships" | \`security.get_entity_graph\` |
+| Temporal relationship history | "when first/last seen", "ever related to", "first access", "what did they touch" | \`security.entity_relationship_history\` |
 | Named watchlist members | "who's on the Privileged Users watchlist", "list members of …" | \`security.get_watchlist_id\` → \`security.search_entities\` |
 | Set / clear asset criticality | "set criticality", "make this host high impact", "remove criticality" | \`security.set_asset_criticality\` |
 | Entity Analytics product page | "Entity Analytics dashboard/home/overview/landing", "show/open/view Entity Analytics" | \`security.search_entities\` → \`attachments.add\` |
 
-**Graph vs. card** — "graph" / "connected" / "relationships" → \`security.get_entity_graph\`. "Details" / "profile" → \`security.get_entity\`. Do not substitute one for the other.
+**Graph vs. card vs. relationship history** — "graph" / "connected" / "visualize relationships" → \`security.get_entity_graph\`. "When first/last seen" / "ever related to" / "what did they touch" → \`security.entity_relationship_history\` (timestamped event log — **not** the graph preview and **not** \`security.get_entity\` \`profile_history\`). "Details" / "profile" → \`security.get_entity\`. Do not substitute one for another.
 
 **Single-entity card vs. entities table** — the renderer selects automatically based on how many entities the \`security.entity\` attachment holds.
 
@@ -121,6 +124,8 @@ ${ENTITY_ANALYTICS_UI_NAVIGATION_CONTENT}
 **Multiple entities** — 2–4 prose bullets: top scorers, criticality gaps, outliers, recommended follow-ups. Do NOT re-list every row as markdown columns — the entities table Canvas already shows them.
 
 **Risk score history** — the tool's \`other\` result contains \`entries\` (peak score per histogram bucket), \`bucketInterval\`, and optionally per-entry contributions. Use \`entries\` to reason about trend direction, peak score, and whether the change exceeds ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points (significant). Keep prose to 1–3 sentences — do not dump all data points as a markdown table; the chart attachment shows the series.
+
+**Relationship history** — the result contains \`records\` (\`{ kind, target, timestamp, source }\`), \`total\`, and optionally \`truncated\`. Summarize distinct targets and first/last-seen timestamps in 1–3 sentences. Empty \`{ total: 0, records: [] }\` means no observations — do not invent events. No \`renderTag\`.
 
 ### 4. Risk score grounding
 
@@ -225,7 +230,7 @@ User: How has the resolution risk score of user:alice changed over time? / Show 
 2. Render the \`renderTag\`. Summarize the resolution-group trend; do not confuse it with the entity's base score.
 3. The chart's "Open full risk history" affordance opens the flyout on the Resolution group risk score sub-tab.
 
-### Example 5: Single-entity card vs. entities table vs. graph
+### Example 5: Single-entity card vs. entities table vs. graph vs. relationship history
 
 **Card** ("details on the riskiest host", "profile for this user"):
 1. \`security.search_entities\` with \`maxResults: 1\` for the relevant type.
@@ -239,6 +244,10 @@ User: How has the resolution risk score of user:alice changed over time? / Show 
 **Graph** ("show the graph for host web-01", "how is user jdoe connected"):
 1. \`security.get_entity_graph\` with the entity's EUID.
 2. Render the \`renderTag\`. 1–3 prose sentences on what the graph shows and what to investigate next. Do not restate nodes/edges. If multiple candidates are returned (no \`renderTag\`), ask the user to pick the exact EUID.
+
+**Relationship history** ("when did this user first access host:laptopA", "has this user ever communicated with that host", "what hosts did they touch in the last 30 days"):
+1. \`security.entity_relationship_history\` with the subject's EUID. First-seen: \`sortOrder: "asc"\`, \`maxResults: 1\`. Time-window lists: pass \`from\` (e.g. \`"now-30d"\`).
+2. Summarize timestamps, kinds, and targets in prose (no \`renderTag\`). Empty \`records\` means no observations. If multiple candidates are returned, ask the user to pick the exact EUID.
 
 ### Example 6: Vendor-scoped entities
 
@@ -377,9 +386,9 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
+      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), temporal relationship history (first/last seen, ever related to), resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
       'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_risk_score_history` (emitted by get_entity_risk_score_history); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, paste its `renderTag` verbatim in markdown (required for Preview/Canvas UI). ' +
-      'Risk history, alert contributions, watchlists, behaviors, discovering risky entities.',
+      'Risk history, alert contributions, watchlists, behaviors, discovering risky entities, relationship event history.',
     content: `
 # Entity Analysis Guide
 
@@ -397,6 +406,7 @@ ${ctx.isEntityStoreV2Enabled ? entityStoreV2Content : legacyContent}
             SECURITY_GET_ENTITY_TOOL_ID,
             SECURITY_GET_ENTITY_GRAPH_TOOL_ID,
             SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
+            SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
             SECURITY_SEARCH_ENTITIES_TOOL_ID,
             SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
             SECURITY_GET_WATCHLIST_ID_TOOL_ID,

@@ -12,6 +12,10 @@ export {
   getEntityRiskScoreHistoryTool,
   SECURITY_GET_ENTITY_RISK_SCORE_HISTORY_TOOL_ID,
 } from './risk_score_history/get_entity_risk_score_history_tool';
+export {
+  entityRelationshipHistoryTool,
+  SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID,
+} from './entity_relationship_history_tool';
 export { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 export {
   addEntitiesToWatchlistTool,

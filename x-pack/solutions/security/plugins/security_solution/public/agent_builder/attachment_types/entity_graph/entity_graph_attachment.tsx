@@ -114,7 +114,7 @@ export const createEntityGraphAttachmentDefinition = ({
       return [
         {
           label: OPEN_FULL_GRAPH_LABEL,
-          icon: 'popout',
+          icon: 'external',
           type: ActionButtonType.SECONDARY,
           handler: () => {
             navigateToEntityAnalyticsWithFlyoutInApp({

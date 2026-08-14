@@ -117,7 +117,7 @@ export const createEntityRiskScoreHistoryAttachmentDefinition = ({
       return [
         {
           label: OPEN_RISK_HISTORY_LABEL,
-          icon: 'popout',
+          icon: 'external',
           type: ActionButtonType.SECONDARY,
           handler: () => {
             navigateToEntityAnalyticsWithFlyoutInApp({

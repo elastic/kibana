@@ -14,7 +14,6 @@ import type {
 } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core/server';
-import dateMath from '@kbn/datemath';
 import { ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -33,6 +32,7 @@ import {
 } from './risk_score_history_attachment_utils';
 import { resolveSimpleRiskScoreHistoryInterval } from './resolve_risk_score_history_interval';
 import { resolveResolutionTargetEntityId } from '../resolution_target_ids';
+import { parseTimeBound, timeRangeParseError } from '../time_range_utils';
 
 const DEFAULT_FROM = 'now-90d' as const;
 const DEFAULT_TO = 'now' as const;
@@ -244,22 +244,12 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
         const { identifierType, identifier, entityStoreId } = resolved.identity;
 
         // 1 - Get the history data
-        const min = dateMath.parse(from);
-        const max = dateMath.parse(to, { roundUp: true });
-        if (!min?.isValid() || !max?.isValid()) {
-          const errorMessage = `Unable to parse time range from "${from}" to "${to}".`;
-          telemetryTracker.recordFailure(errorMessage);
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: errorMessage,
-                },
-              },
-            ],
-          };
+        const min = parseTimeBound(from);
+        const max = parseTimeBound(to, true);
+        if (!min || !max) {
+          const error = timeRangeParseError(from, to);
+          telemetryTracker.recordFailure(error.data.message);
+          return { results: [error] };
         }
 
         // Chat snapshot: simple auto-interval (no uiSettings). Flyout range control

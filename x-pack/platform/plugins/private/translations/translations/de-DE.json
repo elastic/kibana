@@ -1291,7 +1291,10 @@
     "core.euiFlyoutManaged.defaultTitle": "Unbekanntes Flyout",
     "core.euiFlyoutMenu.back": "Zurück",
     "core.euiFlyoutMenu.history": "Verlauf",
+    "core.euiFlyoutMenu.history.tooltip": "Kürzlich besucht",
     "core.euiFlyoutMenu.pagination.counter": "{position} von {total}",
+    "core.euiFlyoutMenu.pagination.first": "Erste",
+    "core.euiFlyoutMenu.pagination.last": "Letzte",
     "core.euiFlyoutMenu.pagination.next": "Weiter",
     "core.euiFlyoutMenu.pagination.previous": "Vorherige",
     "core.euiForm.addressFormErrors": "Bitte beheben Sie die markierten Fehler.",
@@ -57785,8 +57788,6 @@
     "xpack.transform.clone.fetchErrorPromptText": "Die Kibana-Datenansichts-ID konnte nicht abgerufen werden.",
     "xpack.transform.clone.noDataViewErrorPromptText": "Die Transformation {transformId} konnte nicht geklont werden. Es existiert keine Datenansicht für {dataViewTitle}.",
     "xpack.transform.cloneTransform.breadcrumbTitle": "Transformierung klonen",
-    "xpack.transform.cpsUnsupportedCallout.description": "Solange wir an diesem Feature arbeiten, ist der Suchbereich für alle Transformationen auf das aktuelle Projekt beschränkt.",
-    "xpack.transform.cpsUnsupportedCallout.title": "Projektübergreifende Suche nach Transformationen bald verfügbar",
     "xpack.transform.createTransform.breadcrumbTitle": "Transformation erstellen",
     "xpack.transform.danglingTasksError": "{count} {count, plural, one {transform is} other {Transformationen sind}} fehlende Konfigurationsdetails: [{transformIds}] {count, plural, one {It} other {Sie}} können nicht wiederhergestellt werden und sollten gelöscht werden.",
     "xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage": "Beim Löschen der Datenansicht {destinationIndex} ist ein Fehler aufgetreten",
@@ -60511,9 +60512,6 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Der Webhook-Port ist erforderlich.",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "Der Nutzername ist erforderlich.",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "Dies ist ein Pflichtfeld.",
-    "xpack.watcher.watcherDescription": "Erkennen Sie Änderungen an Ihren Daten, indem Sie Alerts erstellen, verwalten und überwachen.",
-    "core.euiFlyoutMenu.history.tooltip": "Kürzlich besucht",
-    "core.euiFlyoutMenu.pagination.first": "Erste",
-    "core.euiFlyoutMenu.pagination.last": "Letzte"
+    "xpack.watcher.watcherDescription": "Erkennen Sie Änderungen an Ihren Daten, indem Sie Alerts erstellen, verwalten und überwachen."
   }
 }
