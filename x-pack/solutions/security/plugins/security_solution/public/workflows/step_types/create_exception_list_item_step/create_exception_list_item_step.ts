@@ -12,7 +12,7 @@ import { createExceptionListItemStepCommonDefinition } from '../../../../common/
 export const createExceptionListItemStepDefinition = createPublicStepDefinition({
   ...createExceptionListItemStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/list_add').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/list_check').then(({ icon }) => ({
       default: icon,
     }))
   ),
