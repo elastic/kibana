@@ -23,8 +23,7 @@ const { API_BASE_PATH, COMMON_HEADERS } = testData;
 const DATA_STREAM_NAME = 'index-management-api-ds-get';
 
 const expectedLifecycle = { enabled: true };
-// A single-shard index has an unassigned replica on a single node, so it reports yellow.
-const expectedHealth = 'yellow';
+const expectedHealth = 'green';
 const expectedStats = { maxTimeStamp: 0 };
 const expectedStorage = {
   storageSize: 'string (populated)',
@@ -40,7 +39,8 @@ apiTest.describe('Data streams API - Get (stateful)', { tag: tags.stateful.class
 
   apiTest.beforeEach(async ({ esClient }) => {
     await deleteDataStream(esClient, DATA_STREAM_NAME);
-    await createDataStream(esClient, DATA_STREAM_NAME);
+    // Pin replicas to 0 so the single backing index reports `green` on any topology (single- or multi-node).
+    await createDataStream(esClient, DATA_STREAM_NAME, undefined, 0);
   });
 
   apiTest.afterEach(async ({ esClient }) => {

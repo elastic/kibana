@@ -9,13 +9,18 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { EsClient } from '@kbn/scout';
 
 // Creates a data stream and the index template it needs, both named `name`.
-export const createDataStream = async (esClient: EsClient, name: string, indexMode?: string) => {
+export const createDataStream = async (
+  esClient: EsClient,
+  name: string,
+  indexMode?: string,
+  numberOfReplicas?: number
+) => {
   await esClient.indices.putIndexTemplate({
     name,
     index_patterns: [`${name}*`],
     template: {
       mappings: { properties: { '@timestamp': { type: 'date' } } },
-      settings: { index: { mode: indexMode } },
+      settings: { index: { mode: indexMode, number_of_replicas: numberOfReplicas } },
       lifecycle: { enabled: true },
     },
     data_stream: {},
