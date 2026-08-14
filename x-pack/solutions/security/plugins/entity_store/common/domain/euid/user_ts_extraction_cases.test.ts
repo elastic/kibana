@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { USER_TS_EXTRACTION_CASES } from '../../../test/scout/api/fixtures/user_ts_extraction_cases';
+import { USER_TS_EXTRACTION_CASES } from '../../../test/scout/query_translation/api/fixtures/user_ts_extraction_cases';
 import { getEuidFromObject } from './memory';
 import { applyWhenConditionTrueSetFields, getDocument } from './commons';
 import {

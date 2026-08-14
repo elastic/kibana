@@ -7,6 +7,12 @@
 
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import {
+  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+} from '@kbn/significant-events-schema';
 import { BulkCreateOperationError } from '../query_utils';
 import { EventClient } from './event_client';
 import { storedEventSchema, type SignificantEvent } from './data_stream';
@@ -38,10 +44,13 @@ const createClient = (response: BulkResponse) => {
   };
 };
 
-const sourceResponse = (docs: SignificantEvent[]): ESQLSearchResponse =>
+const sourceResponse = (docs: SignificantEvent[], createdAt?: string): ESQLSearchResponse =>
   ({
-    columns: [{ name: '_source', type: 'object' }],
-    values: docs.map((doc) => [doc]),
+    columns: [
+      { name: '_source', type: 'object' },
+      ...(createdAt === undefined ? [] : [{ name: 'created_at', type: 'date' }]),
+    ],
+    values: docs.map((doc) => [doc, ...(createdAt === undefined ? [] : [createdAt])]),
   } as unknown as ESQLSearchResponse);
 
 const countResponse = (total: number): ESQLSearchResponse =>
@@ -50,13 +59,21 @@ const countResponse = (total: number): ESQLSearchResponse =>
     values: [[total]],
   } as unknown as ESQLSearchResponse);
 
-const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: number }) => {
+const createSearchClient = ({
+  hits,
+  total,
+  createdAt,
+}: {
+  hits: SignificantEvent[];
+  total: number;
+  createdAt?: string;
+}) => {
   const query = jest.fn(async (request: { query: string }) => {
     const { query: q } = request;
     if (q.includes('STATS total')) {
       return countResponse(total);
     }
-    return sourceResponse(hits);
+    return sourceResponse(hits, createdAt);
   });
 
   return {
@@ -71,6 +88,30 @@ const createSearchClient = ({ hits, total }: { hits: SignificantEvent[]; total: 
 
 describe('EventClient', () => {
   describe('bulkCreate', () => {
+    it('accepts stored narratives that exceed agent input limits (backward compat)', () => {
+      const event: SignificantEvent = {
+        ...createEvent(),
+        symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
+        summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
+        assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+        signals: [
+          {
+            type: 'detection',
+            stream_name: 'logs.test',
+            description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1),
+            metadata: {
+              detection_id: 'detection-1',
+              rule_uuid: 'rule-1',
+              change_point_type: 'spike',
+              p_value: 0.01,
+            },
+          },
+        ],
+      };
+
+      expect(storedEventSchema.safeParse(event).success).toBe(true);
+    });
+
     it('returns bulk responses with errors by default', async () => {
       const response = {
         errors: true,
@@ -139,6 +180,42 @@ describe('EventClient', () => {
       );
     });
 
+    it('returns the lineage creation timestamp before time and current-state filtering', async () => {
+      const createdAt = '2026-01-01T00:00:00.000Z';
+      const latest = {
+        ...createEvent(),
+        '@timestamp': '2026-01-03T00:00:00.000Z',
+        status: 'closed' as const,
+      };
+      const { client, query } = createSearchClient({ hits: [latest], total: 1, createdAt });
+
+      const result = await client.findLatestByCurrentStatePaginated({
+        from: '2026-01-02T00:00:00.000Z',
+        to: '2026-01-04T00:00:00.000Z',
+        status: ['closed'],
+        stream: ['logs.test'],
+      });
+
+      expect(result).toEqual({
+        hits: [{ ...latest, created_at: createdAt }],
+        page: 1,
+        perPage: 25,
+        total: 1,
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('INLINE STATS created_at = MIN(@timestamp) BY event_id');
+      expect(dataQuery!.indexOf('INLINE STATS created_at')).toBeLessThan(
+        dataQuery!.indexOf('@timestamp >= TO_DATETIME')
+      );
+      expect(dataQuery!.indexOf('INLINE STATS created_at')).toBeLessThan(
+        dataQuery!.indexOf('status IN')
+      );
+      expect(dataQuery).toContain('SORT @timestamp DESC, _id ASC');
+    });
+
     it('filters open state after latest-per-slug reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],
@@ -187,6 +264,57 @@ describe('EventClient', () => {
       expect(dataQuery).toContain('severity IN');
       expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
         dataQuery!.indexOf('severity IN')
+      );
+    });
+
+    it('applies no status filter when no status is provided', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({});
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).not.toContain('status');
+    });
+
+    it('filters by explicit event ids without a status filter', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({ eventIds: ['checkout-failure'] });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('event_id IN ("checkout-failure")');
+    });
+  });
+
+  describe('findLatestActive', () => {
+    it('filters to open status after latest-per-event reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestActive({
+        from: 'now-24h',
+        streamNames: ['logs.checkout'],
+        ruleUuids: ['rule-abc'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('status IN ("open")');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('status IN')
       );
     });
   });

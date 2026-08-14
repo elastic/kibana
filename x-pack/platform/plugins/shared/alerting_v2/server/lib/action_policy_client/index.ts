@@ -10,7 +10,7 @@ export type {
   BulkActionPoliciesByIdsParams,
   BulkSnoozeActionPoliciesParams,
   CreateActionPolicyParams,
-  FindActionPoliciesParams,
+  FindActionPoliciesArgs,
   FindActionPoliciesResponse,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,

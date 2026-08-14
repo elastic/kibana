@@ -111,7 +111,7 @@ const getCommentAttachmentViewObject = (props: CommentViewProps) => {
 export const getCommentAttachmentType = () =>
   defineAttachment({
     id: COMMENT_ATTACHMENT_TYPE,
-    icon: 'editorComment',
+    icon: 'comment',
     displayName: COMMENT,
     getAttachmentViewObject: getCommentAttachmentViewObject,
     getAttachmentRemovalObject: () => ({ event: REMOVED_COMMENT_LABEL_TITLE }),

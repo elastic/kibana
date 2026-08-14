@@ -247,6 +247,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
       if (opts.field) {
         await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
+        if (opts.isPreviousIncompatible) {
+          // Incomplete → field must commit before close, or close discards the transition.
+          await retry.waitFor('incompatible field transition to complete', async () => {
+            const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+            return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+          });
+        }
       }
 
       if (opts.formula) {
@@ -617,6 +624,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         )[dimensionIndex];
         await dimensionEditor.click();
       });
+      await retry.waitFor('dimension editor flyout to open', async () =>
+        this.isDimensionEditorOpen()
+      );
     },
 
     /**
@@ -868,6 +878,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async editDimensionLabel(label: string) {
       await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+      await retry.waitFor(`name-input value to be "${label}"`, async () => {
+        return (await testSubjects.getAttribute('name-input', 'value')) === label;
+      });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);

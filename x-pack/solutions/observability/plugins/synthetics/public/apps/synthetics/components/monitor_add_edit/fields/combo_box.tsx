@@ -97,27 +97,29 @@ export const FormattedComboBox = ({
   }
 
   const tagsToCopy = formattedSelectedOptions.map((option) => option.label).join('\n');
+  const copyTags = i18n.translate('xpack.synthetics.comboBox.copyTagsAriaLabel', {
+    defaultMessage: 'Copy tags',
+  });
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
       <EuiFlexItem>{comboBox}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiCopy textToCopy={tagsToCopy}>
+        <EuiCopy
+          textToCopy={tagsToCopy}
+          beforeMessage={copyTags}
+          tooltipProps={{ disableScreenReaderOutput: true }}
+        >
           {(copy) => (
             <EuiButtonIcon
-              iconType="copyClipboard"
+              iconType="copy"
               display="base"
               size="m"
               color="text"
               onClick={copy}
               isDisabled={formattedSelectedOptions.length === 0}
               data-test-subj="syntheticsFleetComboBoxCopyButton"
-              aria-label={i18n.translate('xpack.synthetics.comboBox.copyTagsAriaLabel', {
-                defaultMessage: 'Copy tags',
-              })}
-              title={i18n.translate('xpack.synthetics.comboBox.copyTagsTitle', {
-                defaultMessage: 'Copy tags',
-              })}
+              aria-label={copyTags}
             />
           )}
         </EuiCopy>

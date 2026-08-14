@@ -29,19 +29,6 @@ describe('EbtTelemetryClient', () => {
     client = new EbtTelemetryClient(analyticsService);
   });
 
-  describe('startTrackingEndpointLatency', () => {
-    it('does not track latency for endpoints not in the allow list', () => {
-      const finishTracking = client.startTrackingEndpointLatency({
-        name: 'test-stream',
-        endpoint: 'GET /api/streams/not-allowed',
-      });
-
-      finishTracking();
-
-      expect(analyticsService.reportEvent).not.toHaveBeenCalled();
-    });
-  });
-
   describe('trackSignificantEventsQueriesGenerated', () => {
     it('tracks significant events queries generated events', () => {
       client.trackSignificantEventsQueriesGenerated({

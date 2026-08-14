@@ -17,11 +17,55 @@ never drives findings). See `action-scoped-collector.md` for the design and
 `action-scoped-collector-spike.md` for the one-time manual capability check
 required before enabling it in any real session.
 
+`knowledge-hash.py` computes a knowledge markdown file's SHA-256 and its
+ordered list of top-level (`##`) section headings, and supports a
+`--verify <sha256>` mode that exits non-zero on a mismatch or missing file
+for a simple bash conditional. It backs the hash-gated knowledge-file
+approval described in `../phases/0-setup.md` Step 0g: an approval is
+recorded against exact file content, not just a path, so an edit to the
+file after approval (most commonly `../phases/3-report.md` Step 3d's own
+end-of-session write) is always detected and re-confirmed rather than
+silently reused. Both `../templates/subagent-prompt.md` and
+`../phases/2-flow-core.md` call it with `--verify` immediately before a
+worker reads the file.
+
+`parse-findings.py` and `render-report.py` move `../phases/3-report.md` Step
+3a's report bookkeeping out of manual, per-session instructions and into
+deterministic scripts, while the Markdown findings files (and the model's
+narrative judgment writing them) stay exactly as they were.
+
+- `parse-findings.py` reads every `findings-flow-<N>.md` in a session
+  directory and writes `findings.jsonl`: one `flow_header` record per file
+  (from its `<!-- flow: ... -->` comment) and one `finding` record per
+  `## Finding: ...` / `## Observation: ...` block. Each finding record
+  carries a `signature` — a hash of level + checklist step + normalized
+  title + normalized evidence facts — that `render-report.py` uses to group
+  the same underlying bug across flows, replacing the old, fragile
+  `type` + first-100-characters-of-`current_behavior` key. Exits non-zero if
+  a block is missing `Level` or `Current behavior`; a finding is never
+  silently dropped.
+- `render-report.py` reads that JSONL sidecar plus `config.json` and writes
+  the full `report.md` skeleton (`../templates/report-format.md`): header
+  metadata, the Timing & Cost table, Summary counts, and Level 1/2/3
+  findings in full finding format. A finding grouped from 2+ flows keeps the
+  **union** of every occurrence's Evidence bullets (never just the first
+  occurrence's) plus a trailing `Also seen in flows: ...` line naming every
+  flow, not just "2+". Judgment calls the script cannot make from data alone
+  — why a flow is `blocked`/`not started`/genuinely `timed out` rather than
+  `completed`, which checklist steps were skipped, and which findings Step
+  3b decided to suppress — are supplied via an `--overrides` JSON file
+  rather than guessed; suppressing a Level 1 finding is a hard error. See
+  either script's own module docstring for the full `--overrides` schema and
+  CLI reference, and `scripts/test_report_bookkeeping.py` for worked
+  examples (including golden `report.md` fixtures under
+  `__tests__/fixtures/report-session-basic*`).
+
 ## Running the Python tests
 
 ```bash
 cd x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts
 python3 test_session_resources.py
+python3 test_report_bookkeeping.py
 ```
 
 Requires only the standard library. Add `-k <pattern>` via `unittest` to narrow
@@ -52,6 +96,12 @@ and template documents, because the agent executes those code blocks verbatim:
 - Ownership is never downgraded silently: discarding a reservation this session
   made requires `--confirm-preexisting`, so a resource cannot vanish from both
   the pending list and the cleanup list.
+- `../phases/0-setup.md`'s environment/GitHub-input/CCS routes (Steps 0a/0b)
+  point to on-demand files — `0-managed-environment.md`,
+  `0-user-provided-environment.md`, `0-github-input.md`, `0-ccs.md` — instead
+  of inlining every route's content on every session. The untrusted-content
+  security rules in `0-github-input.md` are never dropped or weakened by that
+  move, and the hard-stop pointer to it is read before any `gh` command runs.
 
 ## `__tests__/` — the detector-injector JS harness
 
@@ -138,8 +188,23 @@ parity check against the bridge doc's own inline copy of the same logic, a
 malformed-encoding fixture, a hash-fragment case, the full credential-shaped
 param-name list, and the per-value hashed placeholder that keeps different
 secret values from collapsing into one signature), a duplicate-window check
-against total span rather than only adjacent gaps, and a CLI-vs-module
-classification round trip.
+against total span rather than only adjacent gaps, a CLI-vs-module
+classification round trip, and — parametrized over the real
+`__tests__/fixtures/live-drain-scenario*.json` captures — the six scenarios
+from `reports/task8-live-validation-report.md`'s live browser validation
+pass, including a documented false positive on rapid sequential polling
+(tracked, not silently expected to disappear on the next reducer change).
+
+Those `live-drain-scenario*.json` fixtures, and the browser-native-500
+regression fixture above them, were captured against `manual-tools/`'s local
+harness — `seeded-live-harness.html` (served by `serve-seeded-harness.py`,
+default port 8931) reproduces each scenario's real DOM/console/network
+signature via genuine `fetch()`/`AbortController`/`history` calls, driven
+through a live `browser_run_code_unsafe` bridge. It's a manual tool, not
+exercised by any automated test here — run it yourself (`python3
+manual-tools/serve-seeded-harness.py`) if you need to re-capture a scenario
+or add a new one; see `reports/task8-live-validation-report.md` for the full
+methodology and results.
 
 ```bash
 node __tests__/action-scoped-collector-bridge.test.mjs
