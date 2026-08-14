@@ -24,8 +24,8 @@ import {
   bulkGetRulesParamsSchema,
   updateRuleBodySchema,
   ruleTagsParamsSchema,
-  tagsResponseSchema,
 } from './rule_data_schema';
+import { tagsResponseSchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
