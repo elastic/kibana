@@ -199,15 +199,23 @@ export const getTemplateUrlFromPackageInfo = (
 };
 
 /**
- * Searches all policy templates in the package for the cloud connectors IAC template URL.
- * Use when the specific policy template name is unknown (e.g. when using the AWS package
- * that contains many policy templates, any of which may carry the URL).
+ * Searches a package for the cloud connectors IAC template URL without a specific
+ * policy template name or var_group selection. Checks var_groups first (the newer
+ * structure used by e.g. the AWS package), then falls back to searching all
+ * policy template input vars (older CSPM-style packages).
  */
 export const getAnyCloudConnectorIacTemplateUrl = (
   packageInfo: PackageInfo | undefined
 ): string | undefined => {
-  if (!packageInfo?.policy_templates) return undefined;
-  for (const pt of packageInfo.policy_templates) {
+  // Newer packages store the URL in var_groups[].options[].iac_template_url
+  for (const group of packageInfo?.var_groups ?? []) {
+    for (const option of group.options ?? []) {
+      const url = option.iac_template_url;
+      if (url) return String(url);
+    }
+  }
+  // Older packages store it in policy_templates[].inputs[].vars[].default
+  for (const pt of packageInfo?.policy_templates ?? []) {
     if (!('inputs' in pt) || !pt.inputs) continue;
     for (const input of pt.inputs) {
       const url = input.vars?.find(
