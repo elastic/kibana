@@ -12,7 +12,7 @@ import { AppMenuActionId, type DiscoverAppMenuItemType } from '@kbn/discover-uti
 import type { AppHeaderShareAction } from '@kbn/app-header';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
+import { isOfAggregateQueryType, type TimeRange } from '@kbn/es-query';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
@@ -68,6 +68,7 @@ const getExpandedDocHelpText = ({
     return undefined;
   }
 
+  const isEsqlMode = isOfAggregateQueryType(currentTab.appState.query);
   const disabledReason = getExpandedDocLinkDisabledReason(
     getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
   );
@@ -77,9 +78,15 @@ const getExpandedDocHelpText = ({
     return (
       <KbnInfoCallout
         data-test-subj="discoverShareExpandedDocCallout"
-        title={i18n.translate('discover.share.expandedDocNotLinkableTitle', {
-          defaultMessage: "This link won't include the open document",
-        })}
+        title={
+          isEsqlMode
+            ? i18n.translate('discover.share.expandedResultNotLinkableTitle', {
+                defaultMessage: "This link won't include the open result",
+              })
+            : i18n.translate('discover.share.expandedDocumentNotLinkableTitle', {
+                defaultMessage: "This link won't include the open document",
+              })
+        }
         text={disabledReason}
       />
     );
@@ -94,9 +101,15 @@ const getExpandedDocHelpText = ({
   return (
     <KbnInfoCallout
       data-test-subj="discoverShareExpandedDocCallout"
-      title={i18n.translate('discover.share.expandedDocRelativeTimeTitle', {
-        defaultMessage: 'This link includes an open document',
-      })}
+      title={
+        isEsqlMode
+          ? i18n.translate('discover.share.expandedResultRelativeTimeTitle', {
+              defaultMessage: 'This link includes an open result',
+            })
+          : i18n.translate('discover.share.expandedDocumentRelativeTimeTitle', {
+              defaultMessage: 'This link includes an open document',
+            })
+      }
       text={i18n.translate('discover.share.expandedDocRelativeTimeDescription', {
         defaultMessage:
           'Use an absolute time range so it stays in the results when the link is opened.',

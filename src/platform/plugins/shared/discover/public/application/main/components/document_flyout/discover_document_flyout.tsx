@@ -97,7 +97,7 @@ export const DiscoverDocumentFlyout = memo(
       }
 
       const copyLinkLabel = i18n.translate('discover.docViews.flyout.copyLinkLabel', {
-        defaultMessage: 'Share this document',
+        defaultMessage: 'Share direct link',
       });
 
       return [
@@ -105,7 +105,7 @@ export const DiscoverDocumentFlyout = memo(
           iconType: 'share',
           'aria-label': copyLinkDisabledReason
             ? i18n.translate('discover.docViews.flyout.copyLinkUnavailableAriaLabel', {
-                defaultMessage: 'Cannot share this document: {reason}',
+                defaultMessage: 'Cannot share direct link: {reason}',
                 values: { reason: copyLinkDisabledReason },
               })
             : copyLinkLabel,
@@ -114,7 +114,7 @@ export const DiscoverDocumentFlyout = memo(
             if (copyLinkDisabledReason) {
               toastNotifications.addWarning({
                 title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
-                  defaultMessage: 'Cannot share this document',
+                  defaultMessage: 'Cannot share direct link',
                 }),
                 text: copyLinkDisabledReason,
                 'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
@@ -239,12 +239,12 @@ const ExpandedDocNoticeText = ({
         {isSearching ? (
           <FormattedMessage
             id="discover.docViews.flyout.searchingResultsDescription"
-            defaultMessage="Searching for this document in the current results"
+            defaultMessage="Searching current results"
           />
         ) : (
           <FormattedMessage
             id="discover.docViews.flyout.notInResultsDescription"
-            defaultMessage="This document is not in the current results"
+            defaultMessage="Not found in current results"
           />
         )}
       </EuiFlexGroup>

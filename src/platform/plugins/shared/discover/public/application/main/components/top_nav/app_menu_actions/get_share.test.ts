@@ -400,6 +400,14 @@ describe('getShare', () => {
       expect((await getHelpTextProps())?.title).toBe('This link includes an open document');
     });
 
+    it('refers to an open result for an ES|QL query with a relative time range', async () => {
+      setQuery({ esql: 'FROM logs METADATA _id, _index' });
+      setTimeRange({ from: 'now-15m', to: 'now' });
+      setExpandedDoc(expandedDoc);
+
+      expect((await getHelpTextProps())?.title).toBe('This link includes an open result');
+    });
+
     it('does not warn when the time range is already absolute', async () => {
       setQuery({ query: '', language: 'kuery' });
       setTimeRange({ from: '2025-01-01T00:00:00.000Z', to: '2025-01-02T00:00:00.000Z' });
@@ -420,7 +428,7 @@ describe('getShare', () => {
 
       const props = await getHelpTextProps();
 
-      expect(props?.title).toBe("This link won't include the open document");
+      expect(props?.title).toBe("This link won't include the open result");
       expect(props?.text).toBe(
         getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlMissingMetadata)
       );
@@ -432,6 +440,7 @@ describe('getShare', () => {
 
       const props = await getHelpTextProps();
 
+      expect(props?.title).toBe("This link won't include the open result");
       expect(props?.text).toBe(
         getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlTransformational)
       );
@@ -442,7 +451,7 @@ describe('getShare', () => {
       setTimeRange({ from: 'now-15m', to: 'now' });
       setExpandedDoc(expandedDocWithoutMetadata);
 
-      expect((await getHelpTextProps())?.title).toBe("This link won't include the open document");
+      expect((await getHelpTextProps())?.title).toBe("This link won't include the open result");
     });
   });
 });

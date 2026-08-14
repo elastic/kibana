@@ -21,10 +21,7 @@ export const UnresolvedDocument = ({ requestState }: { requestState?: ElasticReq
         announceOnMount
         data-test-subj="docViewerFlyoutNotFound"
         title={
-          <FormattedMessage
-            id="unifiedDocViewer.flyout.notFoundTitle"
-            defaultMessage="Cannot find document"
-          />
+          <FormattedMessage id="unifiedDocViewer.flyout.notFoundTitle" defaultMessage="Not found" />
         }
         text={
           <FormattedMessage
@@ -44,13 +41,13 @@ export const UnresolvedDocument = ({ requestState }: { requestState?: ElasticReq
         title={
           <FormattedMessage
             id="unifiedDocViewer.flyout.errorTitle"
-            defaultMessage="Cannot load document"
+            defaultMessage="Unable to load"
           />
         }
         text={
           <FormattedMessage
             id="unifiedDocViewer.flyout.errorDescription"
-            defaultMessage="Something went wrong while retrieving the document."
+            defaultMessage="Something went wrong while retrieving it."
           />
         }
       />
