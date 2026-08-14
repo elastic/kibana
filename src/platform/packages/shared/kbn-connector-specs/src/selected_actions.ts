@@ -11,7 +11,7 @@ import { TEST_CONNECTOR_SUB_ACTION } from './connector_spec';
 
 /**
  * Connector-instance action allowlist.
- * - `null` / `undefined` = recommended mode (isTool actions only)
+ * - `undefined` / `null` = no selection; all actions enabled
  * - `string[]` = specific allowlist (empty array = none enabled)
  */
 export type SelectedActions = string[] | null | undefined;
@@ -26,16 +26,12 @@ export const isSpecificActionsSelection = (
  * Whether a sub-action is enabled for a connector instance.
  *
  * - Specific mode (`string[]`): name must be in the allowlist
- * - Recommended mode (absent/null): only `isTool` actions
+ * - Unset (`null` / `undefined`): all actions enabled
  * - Reserved `_test` is always enabled
- *
- * When `actions` is omitted in recommended mode, returns `true` (unknown type /
- * no spec available — callers that need a hard deny should pass an actions map).
  */
 export const isSelectedActionEnabled = (
   actionName: string,
-  selectedActions: SelectedActions,
-  actions?: Record<string, { isTool?: boolean }>
+  selectedActions: SelectedActions
 ): boolean => {
   if (actionName === TEST_CONNECTOR_SUB_ACTION) {
     return true;
@@ -43,15 +39,12 @@ export const isSelectedActionEnabled = (
   if (isSpecificActionsSelection(selectedActions)) {
     return selectedActions.includes(actionName);
   }
-  if (!actions) {
-    return true;
-  }
-  return actions[actionName]?.isTool ?? false;
+  return true;
 };
 
 /**
  * Filters a connector's actions by instance selection.
- * Recommended mode returns isTool actions; specific mode returns the allowlist.
+ * Unset (`null`/`undefined`) returns all actions; specific mode (`string[]`) returns the allowlist.
  */
 export const filterActionsBySelection = <T extends { isTool?: boolean; description?: string }>(
   actions: Record<string, T>,
@@ -61,7 +54,7 @@ export const filterActionsBySelection = <T extends { isTool?: boolean; descripti
   const entries = Object.entries(actions);
   const filtered = isSpecificActionsSelection(selectedActions)
     ? entries.filter(([name]) => selectedActions.includes(name))
-    : entries.filter(([, action]) => Boolean(action.isTool));
+    : entries;
 
   if (options?.requireDescription) {
     return filtered.filter(([, action]) => Boolean(action.description));

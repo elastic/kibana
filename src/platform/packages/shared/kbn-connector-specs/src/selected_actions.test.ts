@@ -35,32 +35,43 @@ describe('selected_actions helpers', () => {
 
   describe('isSelectedActionEnabled', () => {
     it('always allows the reserved test action', () => {
-      expect(isSelectedActionEnabled(TEST_CONNECTOR_SUB_ACTION, [], ACTIONS)).toBe(true);
-      expect(isSelectedActionEnabled(TEST_CONNECTOR_SUB_ACTION, ['search'], ACTIONS)).toBe(true);
-      expect(isSelectedActionEnabled(TEST_CONNECTOR_SUB_ACTION, undefined, ACTIONS)).toBe(true);
+      expect(isSelectedActionEnabled(TEST_CONNECTOR_SUB_ACTION, [])).toBe(true);
+      expect(isSelectedActionEnabled(TEST_CONNECTOR_SUB_ACTION, ['search'])).toBe(true);
+      expect(isSelectedActionEnabled(TEST_CONNECTOR_SUB_ACTION, undefined)).toBe(true);
     });
 
     it('in specific mode, only allows listed actions', () => {
-      expect(isSelectedActionEnabled('search', ['search'], ACTIONS)).toBe(true);
-      expect(isSelectedActionEnabled('approve', ['search'], ACTIONS)).toBe(false);
-      expect(isSelectedActionEnabled('search', [], ACTIONS)).toBe(false);
+      expect(isSelectedActionEnabled('search', ['search'])).toBe(true);
+      expect(isSelectedActionEnabled('approve', ['search'])).toBe(false);
+      expect(isSelectedActionEnabled('search', [])).toBe(false);
     });
 
-    it('in recommended mode, only allows isTool actions', () => {
-      expect(isSelectedActionEnabled('search', undefined, ACTIONS)).toBe(true);
-      expect(isSelectedActionEnabled('approve', null, ACTIONS)).toBe(false);
+    it('with undefined (unset selection), allows all actions', () => {
+      expect(isSelectedActionEnabled('search', undefined)).toBe(true);
+      expect(isSelectedActionEnabled('approve', undefined)).toBe(true);
     });
 
-    it('in recommended mode without an actions map, allows the action', () => {
-      expect(isSelectedActionEnabled('anything', undefined)).toBe(true);
+    it('with null (unset selection), allows all actions', () => {
+      expect(isSelectedActionEnabled('search', null)).toBe(true);
+      expect(isSelectedActionEnabled('approve', null)).toBe(true);
     });
   });
 
   describe('filterActionsBySelection', () => {
-    it('returns isTool actions in recommended mode', () => {
+    it('returns all actions when selectedActions is undefined (pre-feature connector)', () => {
       expect(filterActionsBySelection(ACTIONS, undefined).map(([name]) => name)).toEqual([
         'search',
         'send',
+        'approve',
+        'noDesc',
+      ]);
+    });
+
+    it('returns all actions when selectedActions is null (unset)', () => {
+      expect(filterActionsBySelection(ACTIONS, null).map(([name]) => name)).toEqual([
+        'search',
+        'send',
+        'approve',
         'noDesc',
       ]);
     });
@@ -74,10 +85,8 @@ describe('selected_actions helpers', () => {
 
     it('can require descriptions', () => {
       expect(
-        filterActionsBySelection(ACTIONS, undefined, { requireDescription: true }).map(
-          ([name]) => name
-        )
-      ).toEqual(['search', 'send']);
+        filterActionsBySelection(ACTIONS, null, { requireDescription: true }).map(([name]) => name)
+      ).toEqual(['search', 'send', 'approve']);
     });
   });
 

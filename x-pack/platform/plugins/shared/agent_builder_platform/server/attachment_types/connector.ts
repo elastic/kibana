@@ -77,6 +77,9 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
           if (subActionEntries.length > 0) {
             parts.push('');
             parts.push(`Available sub-actions (call ${toolId} with connectorId="${connectorId}"):`);
+            if (Array.isArray(selectedActions)) {
+              parts.push('Note: only selected sub-actions are enabled; do not call others.');
+            }
             for (const [actionName, action] of subActionEntries) {
               const paramsSummary = action.input
                 ? formatSchemaForLlm(action.input)

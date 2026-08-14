@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, useState, useMemo } from 'react';
+import React, { lazy, useMemo } from 'react';
 import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
@@ -16,7 +16,10 @@ import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserializ
 import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
+import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ConnectorActionSelector } from '../components/connector_action_selector';
 import type {
+  ConnectorActionDef,
   ConnectorSpecResponse,
   ConnectorSpecWireResponse,
 } from '../apis/fetch_connector_spec';
@@ -113,9 +116,6 @@ export function transformSpecToActionTypeModel(
   docLinks: DocLinksStart,
   uiSettings?: IUiSettingsClient
 ): ActionTypeModel {
-  let initialSelectedActions: string[] | null = null;
-  let currentSelectedActions: string[] | null = null;
-
   return {
     id: spec.metadata.id,
     actionTypeTitle: spec.metadata.displayName,
@@ -128,18 +128,35 @@ export function transformSpecToActionTypeModel(
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
     actionConnectorFields: lazy(async () => {
-      const [{ generateFormFields }, { ConnectorActionSelector }, { EuiSpacer }] =
-        await Promise.all([
-          import(/* webpackPrefetch: true */ '@kbn/response-ops-form-generator'),
-          import('../components/connector_action_selector'),
-          import('@elastic/eui'),
-        ]);
+      const [{ generateFormFields }, { EuiSpacer }] = await Promise.all([
+        import(/* webpackPrefetch: true */ '@kbn/response-ops-form-generator'),
+        import('@elastic/eui'),
+      ]);
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
         throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = (spec.actions ?? []).filter((a) => EXPOSE_ALL_ACTIONS || a.isTool);
+
+      // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
+      const ConnectorActionSelectorField = ({
+        field,
+        actions,
+        readOnly,
+      }: {
+        field: FieldHook<string[] | null>;
+        actions: ConnectorActionDef[];
+        readOnly?: boolean;
+      }) => (
+        <ConnectorActionSelector
+          value={field.value ?? null}
+          onChange={field.setValue}
+          actions={actions}
+          readOnly={readOnly}
+        />
+      );
+
       function SpecConnectorFormFields({ readOnly, isEdit, authMode }: ActionConnectorFieldsProps) {
         const narrowedSchema = useMemo(
           () => narrowSecretsSchemaForAuthMode(connectorZodSchema, authMode),
@@ -153,12 +170,6 @@ export function transformSpecToActionTypeModel(
           metaFunctions: { getMeta, setMeta },
         });
 
-        const [selectedActions, setSelectedActions] = useState<string[] | null>(
-          () => initialSelectedActions
-        );
-        // Keep currentSelectedActions in sync so the serializer sees the latest value.
-        currentSelectedActions = selectedActions;
-
         if (specActions.length <= 1) {
           return configFields;
         }
@@ -166,11 +177,11 @@ export function transformSpecToActionTypeModel(
           <>
             {configFields}
             <EuiSpacer size="m" />
-            <ConnectorActionSelector
-              value={selectedActions}
-              onChange={setSelectedActions}
-              actions={specActions}
-              readOnly={readOnly}
+            <UseField<string[] | null>
+              path="config.selectedActions"
+              config={{ defaultValue: null }}
+              component={ConnectorActionSelectorField}
+              componentProps={{ actions: specActions, readOnly }}
             />
           </>
         );
@@ -189,11 +200,8 @@ export function transformSpecToActionTypeModel(
           ...(secrets?.authType ? { authType: secrets.authType } : {}),
         };
 
-        // null = "recommended actions" sentinel; strip so no selectedActions key is saved.
-        if (currentSelectedActions === null) {
+        if (updatedConfig.selectedActions === undefined) {
           delete updatedConfig.selectedActions;
-        } else {
-          updatedConfig.selectedActions = currentSelectedActions;
         }
 
         return { ...formData, config: updatedConfig };
@@ -201,10 +209,6 @@ export function transformSpecToActionTypeModel(
       deserializer: ((apiData: Record<string, unknown>) => {
         const config = apiData?.config as Record<string, unknown> | undefined;
         const secrets = apiData?.secrets as Record<string, unknown> | undefined;
-
-        // Capture the saved selectedActions so the component can initialize from it.
-        initialSelectedActions = (config?.selectedActions as string[] | null | undefined) ?? null;
-        currentSelectedActions = initialSelectedActions;
 
         if (!config?.authType || secrets?.authType) {
           return apiData;
