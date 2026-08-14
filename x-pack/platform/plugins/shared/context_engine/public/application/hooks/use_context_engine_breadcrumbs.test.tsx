@@ -85,6 +85,16 @@ describe('useContextEngineBreadcrumbs', () => {
     expect(appChrome.breadcrumbs.setAppBreadcrumbs).not.toHaveBeenCalled();
   });
 
+  it('does not clear breadcrumbs on unmount when none were set', () => {
+    const appChrome = createAppChromeMock();
+    createServices('project', { appChrome });
+
+    const { unmount } = renderHook(() => useContextEngineBreadcrumbs());
+    unmount();
+
+    expect(appChrome.breadcrumbs.clearBreadcrumbs).not.toHaveBeenCalled();
+  });
+
   it('clears breadcrumbs on unmount', () => {
     const appChrome = createAppChromeMock();
     createServices('classic', { appChrome });

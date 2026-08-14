@@ -11,7 +11,7 @@ import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 
 export interface ContextEngineAppChromeAdapter {
   handleOnAppMount: () => Promise<void>;
-  useClassicNavigation: (history: ScopedHistory) => SolutionNavProps | undefined;
+  getClassicNavigation: (history: ScopedHistory) => SolutionNavProps | undefined;
   breadcrumbs: {
     setAppBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => void;
     clearBreadcrumbs: () => void;

@@ -32,7 +32,7 @@ export const ContextEnginePageTemplate = ({
       offset={0}
       restrictWidth={false}
       grow={false}
-      solutionNav={appChrome?.useClassicNavigation(history)}
+      solutionNav={appChrome?.getClassicNavigation(history)}
       {...props}
     >
       {children}

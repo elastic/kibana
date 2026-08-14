@@ -9,7 +9,7 @@ import type { ContextEngineAppChromeAdapter } from '../../app_chrome_adapter';
 
 export const createAppChromeMock = (): ContextEngineAppChromeAdapter => ({
   handleOnAppMount: jest.fn().mockResolvedValue(undefined),
-  useClassicNavigation: jest.fn(),
+  getClassicNavigation: jest.fn(),
   breadcrumbs: {
     setAppBreadcrumbs: jest.fn(),
     clearBreadcrumbs: jest.fn(),

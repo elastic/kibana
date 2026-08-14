@@ -45,7 +45,9 @@ export const useContextEngineBreadcrumbs = (pageName?: string) => {
       breadcrumbs.push({ text: pageName });
     }
 
-    if (breadcrumbs.length > 0) {
+    const didSetBreadcrumbs = breadcrumbs.length > 0;
+
+    if (didSetBreadcrumbs) {
       if (appChrome) {
         appChrome.breadcrumbs.setAppBreadcrumbs(breadcrumbs);
       } else {
@@ -54,6 +56,10 @@ export const useContextEngineBreadcrumbs = (pageName?: string) => {
     }
 
     return () => {
+      if (!didSetBreadcrumbs) {
+        return;
+      }
+
       if (appChrome) {
         appChrome.breadcrumbs.clearBreadcrumbs();
       } else {

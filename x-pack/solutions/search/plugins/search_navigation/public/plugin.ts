@@ -90,7 +90,7 @@ export class SearchNavigationPlugin
 
     this.contextEngineSetup?.registerAppChromeAdapter({
       handleOnAppMount: startContract.handleOnAppMount,
-      useClassicNavigation: startContract.useClassicNavigation,
+      getClassicNavigation: startContract.useClassicNavigation,
       breadcrumbs: {
         setAppBreadcrumbs: startContract.breadcrumbs.setSearchBreadCrumbs,
         clearBreadcrumbs: startContract.breadcrumbs.clearBreadcrumbs,
