@@ -53,11 +53,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           onContinue={() => handleDeploy()}
           continueButtonLabel={
             <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.continueButton"
-              defaultMessage="Deploy"
+              id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
+              defaultMessage="Next"
             />
           }
-          continueButtonIconType="playFilled"
           onConnectorIdChange={setConnectorId}
           onStaticKeysChange={setStaticKeys}
         />
