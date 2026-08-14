@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { notificationWriteSchema, notificationReadSchema } from './notification_schema';
+import {
+  notificationWriteSchema,
+  notificationReadSchema,
+  notificationQueryParamsSchema,
+} from './notification_schema';
 import type { Notification, NotificationInput, NotificationDocument } from './types';
 
 /** A producer submission — no `@timestamp` (NC stamps it on ingest). */
@@ -217,5 +221,27 @@ describe('NotificationDocument typing', () => {
     // @ts-expect-error — write payload lacks @timestamp, so it is not a NotificationDocument
     const unstamped: NotificationDocument = notificationWriteSchema.parse(validInput);
     expect(unstamped).toBeDefined();
+  });
+});
+
+describe('notificationQueryParamsSchema severity', () => {
+  it('normalizes a single value to an array', () => {
+    expect(notificationQueryParamsSchema.parse({ severity: 'critical' }).severity).toEqual([
+      'critical',
+    ]);
+  });
+
+  it('accepts an array of values', () => {
+    expect(
+      notificationQueryParamsSchema.parse({ severity: ['warning', 'error'] }).severity
+    ).toEqual(['warning', 'error']);
+  });
+
+  it('leaves severity undefined when omitted', () => {
+    expect(notificationQueryParamsSchema.parse({}).severity).toBeUndefined();
+  });
+
+  it('rejects an unknown severity tier', () => {
+    expect(() => notificationQueryParamsSchema.parse({ severity: 'nope' })).toThrow();
   });
 });
