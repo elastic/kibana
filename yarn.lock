@@ -1940,64 +1940,64 @@
     cssstyle "^4.2.1"
     micromatch "^4.0.8"
 
-"@elastic/esql-ast@^4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-ast/-/esql-ast-4.19.1.tgz#cf5c54bfd576d782676a2e6d02926917572281e6"
-  integrity sha512-kHVVSu3sOozQy445hfoRf11jmB1J0kE8fdkhD6z1IPRN6UQjBQxaLCQ3Za5EFhsDBr97WgxswqVt7sLpWGeXng==
+"@elastic/esql-ast@^4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-ast/-/esql-ast-4.19.2.tgz#0d1410c653af5d4784ea693520d3cca63fcae32f"
+  integrity sha512-nfxyheu+28XUUN61zoq5hm2jOIl+G9+NZn9CCDrPtiZyWx0qUtCvUGCjsO83Zr9vS/3LykMuF6uSD60qCKH8Mg==
   dependencies:
-    "@elastic/esql-definitions" "^4.19.1"
-    "@elastic/esql-grammar" "^4.19.1"
-    "@elastic/esql-promql-grammar" "^4.19.1"
-    "@elastic/esql-types" "^4.19.1"
+    "@elastic/esql-definitions" "^4.19.2"
+    "@elastic/esql-grammar" "^4.19.2"
+    "@elastic/esql-promql-grammar" "^4.19.2"
+    "@elastic/esql-types" "^4.19.2"
     tslib "2.8.1"
 
-"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.19.1.tgz#27d2b8ce6c16d36e48c9a814ee471d28c6448250"
-  integrity sha512-VCAgA4uDOczILHIiWOgqd5/1RkljejsHbA9lE/3qqwvwrQVxSR1Bjd+l8dVSAUzCKqxBc5SDgSmO7Naw/73dwg==
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.19.2.tgz#082bb3c85422bb7ce31b76023f2a892467da333c"
+  integrity sha512-M475JOIDx5cIPieIfWLaJHHTKpDteRcKeO1Rrhr2Lc42d6tvIZPwPFqD+WmsnvtxhipE506ylelh1JXhpYiOVw==
 
-"@elastic/esql-grammar@^4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.19.1.tgz#4f71324507d701d37ce05643cd07ce35b79fed67"
-  integrity sha512-I4U49XlHmF3Y3zKMSLYciUmLIiVvw1aIkCphbZi3J53D0q/IrnK5AHW5lQs8+ZU83J+auEN90mLs9z7hmPAFYg==
+"@elastic/esql-grammar@^4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.19.2.tgz#e5fd5d7822f908fa22ed9c2f3d39ea2949e2aeaf"
+  integrity sha512-/s2q3Fc7CkOf/UmrFtt9aiv/jKpcF6FXUWclBSlzfT7twaTCGOqFYuCkaTJXs1sxs9WrSOpwDPtZ72VeRIaGzQ==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-promql-grammar@^4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.19.1.tgz#110af0e624c86d652c0916992af91326e7207a7d"
-  integrity sha512-NjqD+5eBlXnGBr7kjHX7RJC68LAhlOc3p9Mi+wUHXxMz3Thfwlju9jDawVQRdPAeGXtmSHcas394kvJqkTKhJw==
+"@elastic/esql-promql-grammar@^4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.19.2.tgz#d1dc5199493727e40cb93e000595540fd1eaa4ea"
+  integrity sha512-yxOdje3oUKxnLwRJz4dOdbRKDFPL/wmrNCo2p8K03AEwWFkUriRb0FakIl5UMl7Xs9uxpyRo36cVbMlt6nGsrQ==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-traversal@^4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-traversal/-/esql-traversal-4.19.1.tgz#8f0f0fa980c0295954ea036e1f675f8b67260033"
-  integrity sha512-ff6raKerixnjJvwl1orEE20341BtPbU6ovtPmDhzptWoVhRQFD4dZTcsBzqiRGObxO4iuFi2ezrb2Kc5afAirg==
+"@elastic/esql-traversal@^4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-traversal/-/esql-traversal-4.19.2.tgz#9d6102e86026c2f6bfb8ebf542b9dc0ea0159f47"
+  integrity sha512-Yo9F2lz09vIA+63XOEkJI+gZzlQt5SAMJUBN056RmyoXYG7+vXqdhf2a21teKPxA7YC8xMrmW97hlhZhUkKZ1Q==
   dependencies:
-    "@elastic/esql-ast" "^4.19.1"
-    "@elastic/esql-types" "^4.19.1"
+    "@elastic/esql-ast" "^4.19.2"
+    "@elastic/esql-types" "^4.19.2"
     tslib "2.8.1"
 
-"@elastic/esql-types@^4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.19.1.tgz#f3c10fe81e80d03c7d4c2778cbf13fbf5b06871c"
-  integrity sha512-Uyk9/xgjENw9UwUtU+Q03Q/ZO7VHS7MNAfJVLlbf6dooFyjo6wc8psyPt0djBLjVn1hE143e6e9276CGPRHFBA==
+"@elastic/esql-types@^4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.19.2.tgz#3f1e5ebc5a73f8445940499f8c96ae27a86f861a"
+  integrity sha512-7SP7ho+YrvtNvMdsWtOfG84b6zrgXIqW6kQGHoHDn6yU51T6cL/ypB1hxA4UCIVZ9KBPYcmE+TO/4sHgFV40kw==
 
-"@elastic/esql@4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.19.1.tgz#b1c06f20a8c19f70fd05ef7ec6453a1d3d091856"
-  integrity sha512-cDEwrbGr+lPQ4Ijp0Ja4LpLxGIfYllXh2taD+M6EZErROxiKX8f7BPYTpQQL6VQX8nPQNzlIqciv5Z/dTmyj8g==
+"@elastic/esql@4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.19.2.tgz#3ec9ecd2f9ff8623567e2d497e4ad9507321bc70"
+  integrity sha512-o3/PiC5bt1M4zL4tgA61IntmKvJYZBwZ/uU6o1AuMgEKOYtfvaEHphIJV8Cw6i0wLbLlTqZmcTjyJVa6v0HD9Q==
   dependencies:
-    "@elastic/esql-ast" "^4.19.1"
-    "@elastic/esql-definitions" "^4.19.1"
-    "@elastic/esql-grammar" "^4.19.1"
-    "@elastic/esql-promql-grammar" "^4.19.1"
-    "@elastic/esql-traversal" "^4.19.1"
-    "@elastic/esql-types" "^4.19.1"
-    "@elastic/pretty-printer" "^4.19.1"
+    "@elastic/esql-ast" "^4.19.2"
+    "@elastic/esql-definitions" "^4.19.2"
+    "@elastic/esql-grammar" "^4.19.2"
+    "@elastic/esql-promql-grammar" "^4.19.2"
+    "@elastic/esql-traversal" "^4.19.2"
+    "@elastic/esql-types" "^4.19.2"
+    "@elastic/pretty-printer" "^4.19.2"
     antlr4 "4.13.2"
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -2099,12 +2099,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/micro-jq/-/micro-jq-2.0.2.tgz#c21d0bead514207c1791b77f7c40b3b70655595b"
   integrity sha512-w91RaO3VFa+hF7RS1OfduPgfNeP21G2fHqyfIm+Qdz7zY96VfHLZtWZrlu4s9Yc++qJx56DmR47bdA4EFgNPyA==
 
-"@elastic/monaco-esql@4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.19.1.tgz#beaeda639255aead72edc5535633b792de0e1239"
-  integrity sha512-7JG0txqqPE8tJGrreY4R9oEw8ZhFe4jJ5ngC1rMODOj+jJmWSbtyeQb1QPpPYf2I3lcnw9PMRQPu+yaMzcWcfw==
+"@elastic/monaco-esql@4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.19.2.tgz#39b56cf0fc46d3a9987ffe4a1095ca444fcabd6d"
+  integrity sha512-G6rF8F1TKeN22FoPB2kbequmBq9jbmtnL9bnd4+C7JNDHZhwQrkjsEZ+Z4TMrUGibTedNRU5hqWisApo30Tm8w==
   dependencies:
-    "@elastic/esql-definitions" "^4.19.1"
+    "@elastic/esql-definitions" "^4.19.2"
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -2192,10 +2192,10 @@
     import-in-the-middle "^3.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/pretty-printer@^4.19.1":
-  version "4.19.1"
-  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.19.1.tgz#e2ebdae366b03c73c06e13065126d09202f37fe8"
-  integrity sha512-gEWwTxVK55Pm4eCnduj6yrleqiOOKQk1btnFCprfN6UeR0zDF6ni9eFoQrGk7MB5bGGaVE3Um2ch7vjBMUehlw==
+"@elastic/pretty-printer@^4.19.2":
+  version "4.19.2"
+  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.19.2.tgz#05beb0d9a756a24add337415c178d2e29f4db851"
+  integrity sha512-Yv9O8bJ6WzEwaxqDm3O9vfQAbdeBOwUFOJxunGFFYrM78g/7QoE6IWnUC2n1qhtnzpYlTzJsGn5ZTfp//V/eQg==
   dependencies:
     tree-dump "1.1.0"
     tslib "2.8.1"
