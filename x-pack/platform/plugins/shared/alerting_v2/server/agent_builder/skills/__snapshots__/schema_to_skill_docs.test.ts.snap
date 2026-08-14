@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Operations Schema Reference
 
 Auto-generated from the \`manage_action_policy\` tool Zod schemas.
@@ -51,7 +53,9 @@ Auto-generated from the \`manage_action_policy\` tool Zod schemas.
 | \`operation\` | \\"validate\\" | required |  |"
 `;
 
-exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy API Schema Reference
 
 Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth for field names, types, and constraints.
@@ -64,13 +68,15 @@ Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth fo
 | \`description\` | string | required | A description of the action policy. (max length: 1024) |
 | \`destinations\` | { type: \\"workflow\\", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |
 | \`matcher\` | string | optional | A KQL query string to match alerts. (max length: 4096) |
-| \`groupBy\` | string[] | optional | The fields used to group alerts. (max items: 16) |
+| \`group_by\` | string[] | optional | The fields used to group alerts. (max items: 16) |
 | \`tags\` | string[] | optional | Tags for categorizing the action policy. (max items: 20) |
-| \`groupingMode\` | \\"per_episode\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. (enum: per_episode \\\\| all \\\\| per_field) |
+| \`grouping_mode\` | \\"per_episode\\" \\\\| \\"all\\" \\\\| \\"per_field\\" | optional | The grouping mode for alert notifications. (enum: per_episode \\\\| all \\\\| per_field) |
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
 
-exports[`schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`] = `
+exports[
+  `schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`
+] = `
 "# Action Policy Workflow Dispatch Payload
 
 Access pattern: \`{{ inputs.payload.<field> }}\` (e.g. \`{{ inputs.payload.policyId }}\`,
@@ -169,12 +175,14 @@ Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important 
 - **Stateful alerting** with full episode lifecycle: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
 - Supports state transitions (\`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`), recovery detection, and notification dispatch.
 - Produces \`type: 'alert'\` events that participate in the dispatcher pipeline.
+- UI label: **\\"Alerts\\"**.
 - Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.
 
 ### Signal (\`kind: signal\`)
 - **Stateless detection** (observation-only).
 - Produces \`type: 'signal'\` events but **skips** episode lifecycle and dispatcher processing entirely.
 - No notifications, no recovery, no state transitions.
+- UI label: **\\"Events\\"**.
 - Use for logging or detection without automated action.
 
 ### Immutability
