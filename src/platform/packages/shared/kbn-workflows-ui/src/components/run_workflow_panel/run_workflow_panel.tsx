@@ -34,11 +34,6 @@ export interface RunWorkflowPanelProps {
    */
   sortTriggerTypes: string | readonly string[];
   /**
-   * When provided, only workflows carrying at least one of these tags are shown.
-   * An empty array (or undefined) disables the filter — all enabled workflows appear.
-   */
-  tags?: string[];
-  /**
    * Called for each workflow in the list. Return false to hide it.
    * Use this to include or exclude managed workflows, filter by trigger type, tags, etc.
    * When omitted all enabled workflows (user-created and managed) are shown.
@@ -59,7 +54,6 @@ interface RunWorkflowPanelServices {
 export const RunWorkflowPanel = ({
   inputs,
   sortTriggerTypes,
-  tags,
   filterWorkflow,
   onClose,
   onExecute,
@@ -166,11 +160,7 @@ export const RunWorkflowPanel = ({
         config={{
           filterFunction: (workflows) => {
             const enabled = workflows.filter((w) => w.enabled);
-            const tagFiltered =
-              !tags || tags.length === 0
-                ? enabled
-                : enabled.filter((w) => tags.some((tag) => w.tags?.includes(tag)));
-            return filterWorkflow ? tagFiltered.filter(filterWorkflow) : tagFiltered;
+            return filterWorkflow ? enabled.filter(filterWorkflow) : enabled;
           },
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
@@ -190,7 +180,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, triggerTypes, filterWorkflow, tags]
+    [selectedId, triggerTypes, filterWorkflow]
   );
 
   return (
