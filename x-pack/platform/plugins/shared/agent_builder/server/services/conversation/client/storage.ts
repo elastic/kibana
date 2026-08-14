@@ -66,6 +66,7 @@ const storageSettings = {
       status: types.keyword({}),
       read: types.boolean({}),
       pinned: types.boolean({}),
+      read_only: types.boolean({}),
       workspace_id: types.keyword({}),
       access_control: types.object({
         properties: {
@@ -108,6 +109,7 @@ export interface ConversationProperties {
   status?: ConversationRoundStatus;
   read?: boolean;
   pinned?: boolean;
+  read_only?: boolean;
   workspace_id?: string;
   access_control?: Optional<ConversationAccessControl, 'entries'>;
   origin?: ConversationOrigin;
