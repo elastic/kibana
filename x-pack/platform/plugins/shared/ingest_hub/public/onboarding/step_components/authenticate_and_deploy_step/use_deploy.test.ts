@@ -380,7 +380,7 @@ function setupMocks({
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
-    deploySettingsStep: { connectorId, staticKeys },
+    authenticateAndDeployStep: { connectorId, staticKeys },
     deployAndDetectStep: {
       isDeploying: false,
       serviceStatuses: {},

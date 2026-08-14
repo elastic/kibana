@@ -15,16 +15,17 @@ import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
 import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
-import { useDeploy } from './deploy_settings_step/use_deploy';
+import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 
-interface DeploySettingsStepProps {
+interface AuthenticateAndDeployStepProps {
   onContinue: () => void;
   onBack?: () => void;
 }
 
-export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepProps) {
+export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { deploySettingsStep, setConnectorId, setStaticKeys, servicesStep } = useOnboardingFlow();
+  const { authenticateAndDeployStep, setConnectorId, setStaticKeys, servicesStep } =
+    useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const { handleDeploy } = useDeploy({ onContinue });
@@ -37,20 +38,22 @@ export function DeploySettingsStep({ onContinue, onBack }: DeploySettingsStepPro
   }, [selectedServiceIds]);
 
   return (
-    <div data-test-subj="onboardingStep-deploy-settings">
+    <div data-test-subj="onboardingStep-authenticate-and-deploy">
       <Suspense
-        fallback={<EuiLoadingSpinner data-test-subj="onboardingStep-deploy-settings-loading" />}
+        fallback={
+          <EuiLoadingSpinner data-test-subj="onboardingStep-authenticate-and-deploy-loading" />
+        }
       >
         <LazyAwsConnectSetup
           cloud={services.cloud as CloudSetupForCloudConnector | undefined}
-          initialConnectorId={deploySettingsStep.connectorId}
-          initialStaticKeys={deploySettingsStep.staticKeys}
+          initialConnectorId={authenticateAndDeployStep.connectorId}
+          initialStaticKeys={authenticateAndDeployStep.staticKeys}
           showIdentityFederation={showIdentityFederation}
           onBack={onBack}
           onContinue={() => handleDeploy()}
           continueButtonLabel={
             <FormattedMessage
-              id="xpack.ingestHub.deploySettingsStep.continueButton"
+              id="xpack.ingestHub.authenticateAndDeployStep.continueButton"
               defaultMessage="Deploy"
             />
           }
