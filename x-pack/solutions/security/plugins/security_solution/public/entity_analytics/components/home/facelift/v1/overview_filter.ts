@@ -18,9 +18,9 @@ import { useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { capitalize } from 'lodash';
-import { useKibana } from '../../../../common/lib/kibana';
-import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
-import { ENTITY_FIELDS } from '../entities_table/constants';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { CRITICALITY_LEVEL_TITLE } from '../../../asset_criticality/translations';
+import { ENTITY_FIELDS } from '../../entities_table/constants';
 import type { ActiveFilter, PageFilters } from './data';
 import { entitySourceToken, getEntityStoreEsHits, RISK_LEVEL_SCORE_RANGE } from './data';
 

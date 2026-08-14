@@ -12,8 +12,8 @@
  * still accounts for every record in the corpus.
  */
 
-import type { EntityType } from '../../../../../common/entity_analytics/types';
-import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import type { FaceliftIdentity, FaceliftRawRecord } from './data';
 import {
   IDENTITIES,

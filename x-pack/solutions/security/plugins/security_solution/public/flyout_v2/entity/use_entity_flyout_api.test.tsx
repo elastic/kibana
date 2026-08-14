@@ -68,6 +68,7 @@ describe('useEntityFlyoutApi', () => {
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
         telemetry: { reportEvent: mockReportEvent },
+        notifications: { toasts: { addSuccess: jest.fn() } },
       },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
@@ -80,8 +81,17 @@ describe('useEntityFlyoutApi', () => {
     expect(flyoutProviders).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       'FLYOUT_CONTENT',
-      expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
+      expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
+  });
+
+  it('openHostFlyout attaches a share custom action on the EuiFlyoutMenu', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openHostFlyout({ hostName: 'host-1' });
+
+    const props = mockOpenSystemFlyout.mock.calls[0][1];
+    expect(props.flyoutMenuProps.customActions).toHaveLength(1);
+    expect(props.flyoutMenuProps.customActions[0].iconType).toBe('share');
   });
 
   it('openHostFlyout falls back to "Host: <hostName>" when no title is provided', () => {
@@ -157,7 +167,7 @@ describe('useEntityFlyoutApi', () => {
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       'FLYOUT_CONTENT',
-      expect.objectContaining({ size: 's', session: 'start', historyKey: documentFlyoutHistoryKey })
+      expect.objectContaining({ size: 'm', session: 'start', historyKey: documentFlyoutHistoryKey })
     );
   });
 
@@ -252,7 +262,7 @@ describe('useEntityFlyoutApi', () => {
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       'FLYOUT_CONTENT',
-      expect.objectContaining({ size: 's', session: 'inherit' })
+      expect.objectContaining({ size: 'm', session: 'inherit' })
     );
   });
 

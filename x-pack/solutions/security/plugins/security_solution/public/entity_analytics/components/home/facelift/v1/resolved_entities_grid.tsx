@@ -44,32 +44,32 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useGrouping, type GroupOption } from '@kbn/grouping';
 
-import type { EntityType } from '../../../../../common/entity_analytics/types';
-import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
-import { createDataProviders } from '../../../../app/actions/add_to_timeline/data_provider';
-import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { InspectButton } from '../../../../common/components/inspect';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
+import type { EntityType } from '../../../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
+import { createDataProviders } from '../../../../../app/actions/add_to_timeline/data_provider';
+import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { InspectButton } from '../../../../../common/components/inspect';
+import { useQueryInspector } from '../../../../../common/components/page/manage_query';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { getEmptyTagValue } from '../../../../../common/components/empty_value';
+import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
-} from '../../../../flyout/entity_details/shared/constants';
-import { getSeverityColor } from '../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
-import { AssetCriticalityBadge } from '../../asset_criticality';
-import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../constants';
-import { LastUpdated } from '../last_updated';
-import { DataViewContext } from '../entities_table';
-import { AdditionalControls } from '../entities_table/additional_controls';
-import { ENTITY_GROUPING_OPTIONS } from '../entities_table/constants';
-import { RiskScoreCell } from '../entities_table/risk_score_cell';
+} from '../../../../../flyout/entity_details/shared/constants';
+import { getSeverityColor } from '../../../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import { AssetCriticalityBadge } from '../../../asset_criticality';
+import { EntityIconByType } from '../../../entity_store/entity_icon_by_type';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
+import { LastUpdated } from '../../last_updated';
+import { DataViewContext } from '../../entities_table';
+import { AdditionalControls } from '../../entities_table/additional_controls';
+import { ENTITY_GROUPING_OPTIONS } from '../../entities_table/constants';
+import { RiskScoreCell } from '../../entities_table/risk_score_cell';
 import type { TableView } from './data';
 import type {
   AlertSeverityCounts,
@@ -517,10 +517,7 @@ const RawRecords: React.FC<RawRecordsProps> = ({
         display: flex;
         align-items: center;
         min-block-size: 36px;
-
-        &:not(:last-of-type) {
-          border-block-end: ${euiTheme.border.thin};
-        }
+        border: none;
       `,
       cell: css`
         flex: 0 0 auto;

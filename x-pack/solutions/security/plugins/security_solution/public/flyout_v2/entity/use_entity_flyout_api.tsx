@@ -20,6 +20,7 @@ import {
   useDefaultToolsFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
+import { useFlyoutShareUrlCustomAction } from '../shared/hooks/use_flyout_share_url_custom_action';
 import {
   ALERTS_INSIGHTS_TITLE,
   ANOMALY_INSIGHTS_TITLE,
@@ -218,6 +219,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
+  const shareUrlCustomAction = useFlyoutShareUrlCustomAction();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
@@ -233,14 +235,20 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
 
   // The entity flyouts differ only in their base properties (document vs tools size) and session;
   // both are kept private here so callers never reason about them — they pick the method they want.
+  // Share lives on EuiFlyoutMenu (customActions) — same icon/copy behaviour as the Alert flyout.
   const mainProperties = useCallback(
     (session = sessionMode, title?: string) => ({
       ...defaultDocumentFlyoutProperties,
+      // Entity flyouts default to medium (document/alert flyouts stay small).
+      size: 'm' as const,
       historyKey,
       session,
       ...(title !== undefined ? { title } : {}),
+      flyoutMenuProps: {
+        customActions: [shareUrlCustomAction],
+      },
     }),
-    [defaultDocumentFlyoutProperties, historyKey, sessionMode]
+    [defaultDocumentFlyoutProperties, historyKey, sessionMode, shareUrlCustomAction]
   );
 
   const toolProperties = useCallback(

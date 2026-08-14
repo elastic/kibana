@@ -27,16 +27,16 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { CriticalityLevels } from '../../../../../common/constants';
-import type { CriticalityLevelWithUnassigned } from '../../../../../common/entity_analytics/asset_criticality/types';
-import { EntityType } from '../../../../../common/entity_analytics/types';
-import type { EntityRiskLevels } from '../../../../../common/api/entity_analytics/common';
-import { MultiselectFilter } from '../../../../common/components/multiselect_filter';
-import { useGetWatchlists } from '../../../api/hooks/use_get_watchlists';
-import { AssetCriticalityBadge } from '../../asset_criticality';
-import { CRITICALITY_LEVEL_TITLE } from '../../asset_criticality/translations';
-import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
-import { getRiskScoreColors } from '../entities_table/risk_score_cell';
+import { CriticalityLevels } from '../../../../../../common/constants';
+import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
+import type { EntityRiskLevels } from '../../../../../../common/api/entity_analytics/common';
+import { MultiselectFilter } from '../../../../../common/components/multiselect_filter';
+import { useGetWatchlists } from '../../../../api/hooks/use_get_watchlists';
+import { AssetCriticalityBadge } from '../../../asset_criticality';
+import { CRITICALITY_LEVEL_TITLE } from '../../../asset_criticality/translations';
+import { EntityIconByType } from '../../../entity_store/entity_icon_by_type';
+import { getRiskScoreColors } from '../../entities_table/risk_score_cell';
 import type { FaceliftRiskLevel, PageFilters } from './data';
 import { ENTITY_SOURCE_LABELS, RISK_LEVELS } from './data';
 
@@ -212,7 +212,7 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
   );
 
   return (
-    <EuiFilterGroup data-test-subj="eaFaceliftEntityFilters">
+    <EuiFilterGroup compressed data-test-subj="eaFaceliftEntityFilters">
       <MultiselectFilter<EntityType>
         data-test-subj="eaFaceliftEntityTypeFilter"
         title={TITLES.entityType}

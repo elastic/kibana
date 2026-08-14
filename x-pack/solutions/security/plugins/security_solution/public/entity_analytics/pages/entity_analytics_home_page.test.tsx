@@ -38,8 +38,61 @@ jest.mock('../../common/components/link_to', () => ({
       `/app/security/${deepLinkId}${path}`,
 }));
 
-jest.mock('../components/home/facelift/overview_band', () => ({
-  OverviewBand: () => <div data-test-subj="eaFaceliftOverviewBand">{'Overview band'}</div>,
+jest.mock('@kbn/app-header', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const mockReact = require('react');
+  return {
+    AppHeader: ({
+      title,
+      menu,
+    }: {
+      title: string;
+      menu?: {
+        primaryActionItem?: { label: string; testId?: string; iconType?: string };
+        items?: Array<{ label: string; href?: string; testId?: string; iconType?: string }>;
+      };
+    }) =>
+      mockReact.createElement(
+        'div',
+        { 'data-test-subj': 'eaFaceliftAppHeader' },
+        mockReact.createElement('h1', null, title),
+        menu?.primaryActionItem
+          ? mockReact.createElement(
+              'button',
+              {
+                key: menu.primaryActionItem.testId ?? menu.primaryActionItem.label,
+                'data-test-subj': menu.primaryActionItem.testId,
+                'aria-label': menu.primaryActionItem.label,
+              },
+              menu.primaryActionItem.label
+            )
+          : null,
+        ...(menu?.items ?? []).map((item) =>
+          mockReact.createElement(
+            'a',
+            {
+              key: item.testId ?? item.label,
+              href: item.href,
+              'data-test-subj': item.testId,
+              'aria-label': item.label,
+            },
+            item.label
+          )
+        )
+      ),
+  };
+});
+
+jest.mock('../components/home/facelift/facelift_home', () => ({
+  FaceliftHome: () => (
+    <>
+      <div data-test-subj="eaFaceliftOverviewBand">{'Overview band'}</div>
+      <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
+    </>
+  ),
+  FaceliftPageDescription: () => (
+    <span data-test-subj="eaFaceliftPageDescription">Page description</span>
+  ),
 }));
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
@@ -243,7 +296,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    // The SiemSearchBar should be rendered within FiltersGlobal
+    // The SiemSearchBar is in-page under the header for v.2 (default).
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
@@ -269,7 +322,7 @@ describe('EntityAnalyticsHomePage', () => {
     expect(screen.getByTestId('entity-analytics-home-entities-table')).toBeInTheDocument();
   });
 
-  it('renders the watchlists settings button', () => {
+  it('renders the management secondary action', () => {
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -277,7 +330,23 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByRole('link', { name: 'Watchlists settings' })).toBeInTheDocument();
+    const managementLink = screen.getByRole('link', { name: 'Management' });
+    expect(managementLink).toBeInTheDocument();
+    expect(managementLink).toHaveAttribute(
+      'href',
+      expect.stringContaining('/risk_score')
+    );
+  });
+
+  it('renders the Save view primary action', () => {
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    expect(screen.getByRole('button', { name: 'Save view' })).toBeInTheDocument();
   });
 
   it('renders the homepage (not onboarding) when running even if the data view has no matched indices', () => {

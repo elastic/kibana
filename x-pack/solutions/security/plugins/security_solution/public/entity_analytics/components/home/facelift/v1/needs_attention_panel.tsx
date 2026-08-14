@@ -24,18 +24,18 @@ import {
 import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
+import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine/risk_levels';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
-} from '../../../../flyout/entity_details/shared/constants';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
-import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
-import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
-import { formatRiskScore } from '../../../common/utils';
-import { EntityIconByType } from '../../entity_store/entity_icon_by_type';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../constants';
-import { getRiskScoreColors } from '../entities_table/risk_score_cell';
+} from '../../../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { formatRiskScore } from '../../../../common/utils';
+import { EntityIconByType } from '../../../entity_store/entity_icon_by_type';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
+import { getRiskScoreColors } from '../../entities_table/risk_score_cell';
 import type {
   ActiveFilter,
   AttentionEntry,

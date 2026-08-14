@@ -17,6 +17,8 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { EntityStoreEuidApiProvider } from '@kbn/entity-store/public';
+import { useEuiTheme } from '@elastic/eui';
+import { css, Global } from '@emotion/react';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider, useKibana } from '../../../common/lib/kibana';
@@ -29,6 +31,25 @@ import { MlCapabilitiesProvider } from '../../../common/components/ml/permission
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { ConsoleManager } from '../../../management/components/console/components/console_manager';
+
+/**
+ * EuiFlyoutMenu renders customActions as EuiButtonIcon with hardcoded size="s" (32px),
+ * while the menu close control uses the default size="xs" (24px). Force menu icon
+ * buttons to the same 24×24 hit target as close.
+ */
+const FlyoutMenuIconButtonSizing: FC = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <Global
+      styles={css`
+        [data-test-subj='euiFlyoutMenu'] .euiButtonIcon {
+          inline-size: ${euiTheme.size.l};
+          block-size: ${euiTheme.size.l};
+        }
+      `}
+    />
+  );
+};
 
 /**
  * Seeds the Security Solution Redux `global` time range from Kibana's global time filter on mount.
@@ -99,6 +120,7 @@ export const flyoutProviders = ({
   // PageOverlay they render calls `useLocation()` (for `hideOnUrlPathnameChange`).
   const flyoutContent = (
     <FlyoutRouter history={history}>
+      <FlyoutMenuIconButtonSizing />
       <ConsoleManager>
         <AssistantProvider>
           <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
