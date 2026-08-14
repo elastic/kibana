@@ -28,26 +28,83 @@ const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
   ({
     search: jest.fn(),
     count: jest.fn(),
-    termsEnum: jest.fn(),
     esql: {
       query: jest.fn(),
     },
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
+const PRIVILEGES_PATH = 'permissions.kibana.privileges';
+const PERM_NAME_FIELD = `${PRIVILEGES_PATH}.name`;
+const PERM_SPACE_FIELD = `${PRIVILEGES_PATH}.space`;
+const PERM_COUNT_FIELD = `${PRIVILEGES_PATH}.count`;
+
 /**
- * Build a `termsEnum` mock that serves a corpus permission universe keyed by
- * field and prefix. Returns only terms matching the prefix, mirroring real ES behavior.
- * Fields not present in the map return an empty, complete page (dimension unused by corpus).
+ * Response shape of the nested `composite` aggregation that enumerates the corpus's privilege
+ * universe. A single page with no `after_key` terminates pagination.
  */
-const buildTermsEnumMock = (universe: { kibana?: string[] }) =>
-  jest.fn().mockImplementation(async (req: { field: string; string?: string }) => {
-    if (req.field === 'permissions.kibana.privileges.name') {
-      const prefix = req.string ?? '';
-      const terms = (universe.kibana ?? []).filter((t) => t.startsWith(prefix));
-      return { complete: true, terms };
-    }
-    return { complete: true, terms: [] };
-  });
+const universeAgg = (actions: string[], opts: { failedShards?: number } = {}) => ({
+  _shards: { total: 1, successful: 1, failed: opts.failedShards ?? 0, skipped: 0 },
+  aggregations: {
+    privileges: {
+      in_space: {
+        names: { buckets: actions.map((name) => ({ key: { name }, doc_count: 1 })) },
+      },
+    },
+  },
+});
+
+/** A full page plus an `after_key`, so pagination never exhausts and the ceiling is reached. */
+const fullUniversePage = (pageSize = 1000) => {
+  const actions = Array.from({ length: pageSize }, (_, i) => `priv-${i}`);
+  const agg = universeAgg(actions) as any;
+  agg.aggregations.privileges.in_space.names.after_key = { name: actions[actions.length - 1] };
+  return agg;
+};
+
+/** The authorization filter `buildAuthzFilter` emits for a given authorized action set. */
+const expectedAuthzFilter = (actions: string[], spaceId = 'default') => ({
+  bool: {
+    should: [
+      {
+        bool: {
+          must_not: [
+            { nested: { path: PRIVILEGES_PATH, query: { match_all: {} }, score_mode: 'none' } },
+          ],
+        },
+      },
+      {
+        nested: {
+          path: PRIVILEGES_PATH,
+          score_mode: 'none',
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    should: [
+                      { term: { [PERM_SPACE_FIELD]: spaceId } },
+                      { term: { [PERM_SPACE_FIELD]: '*' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  terms_set: {
+                    [PERM_NAME_FIELD]: {
+                      terms: actions,
+                      minimum_should_match_field: PERM_COUNT_FIELD,
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
 
 // Column order produced by buildSmlEsqlQuery. The permission name field
 // (perm_kibana) is always present; spaces and other optional
@@ -112,6 +169,14 @@ const createMockScopedClient = (
   } as unknown as IScopedClusterClient;
 };
 
+/** The first `search` call that is not the privilege-enumeration aggregation. */
+const docSearchCall = (esClient: jest.Mocked<ElasticsearchClient>) =>
+  esClient.search.mock.calls.map((c) => c[0] as any).find((a) => !a?.aggs)!;
+
+/** How many privilege-enumeration aggregation calls were issued. */
+const enumerationCallCount = (esClient: jest.Mocked<ElasticsearchClient>) =>
+  esClient.search.mock.calls.filter((c) => (c[0] as any)?.aggs).length;
+
 const createMockLogger = () => {
   const log = loggerMock.create();
   log.get = jest.fn().mockReturnValue(log);
@@ -171,10 +236,13 @@ const createNotFoundError = () =>
   });
 
 /**
- * Build a fully-shaped `permissions` object for fixtures and assertions.
+ * Build a fully-shaped `permissions` object for fixtures and assertions: one nested element per
+ * space, each carrying that space's required actions and their count.
  */
-const makePermissions = (kibanaPrivs: string[] = []) => ({
-  kibana: { privileges: { name: kibanaPrivs, count: kibanaPrivs.length } },
+const makePermissions = (groups: Array<{ space: string; name: string[] }> = []) => ({
+  kibana: {
+    privileges: groups.map((g) => ({ space: g.space, name: g.name, count: g.name.length })),
+  },
 });
 
 describe('createSmlService', () => {
@@ -249,7 +317,10 @@ describe('isNotFoundError', () => {
 describe('SmlService', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
   let esqlQueryMock: jest.Mock;
-  let termsEnumMock: jest.Mock;
+  // Privilege enumeration and document fetches both go through `search`; these two hold the
+  // response for each so a test can set one without having to model the other.
+  let aggResponse: unknown;
+  let hitsResponse: unknown;
   let scopedClient: IScopedClusterClient;
   let logger: ReturnType<typeof createMockLogger>;
   let request: KibanaRequest;
@@ -258,9 +329,11 @@ describe('SmlService', () => {
     esClient = createMockEsClient();
     // `jest.Mocked` does not unwrap overloaded functions, so extract as jest.Mock directly.
     esqlQueryMock = (esClient as unknown as { esql: { query: jest.Mock } }).esql.query;
-    termsEnumMock = (esClient as unknown as { termsEnum: jest.Mock }).termsEnum;
-    // Default to an empty permission universe; per-case tests override this.
-    termsEnumMock.mockImplementation(async () => ({ complete: true, terms: [] }));
+    // Default to an empty permission universe; per-case tests override `aggResponse`.
+    aggResponse = universeAgg([]);
+    hitsResponse = { hits: { total: 0, hits: [] } };
+    esClient.search.mockImplementation((async (req: { aggs?: unknown }) =>
+      req?.aggs ? aggResponse : hitsResponse) as never);
     scopedClient = createMockScopedClient(esClient);
     logger = createMockLogger();
     request = {} as unknown as KibanaRequest;
@@ -662,7 +735,6 @@ describe('SmlService', () => {
       expect(logger.warn).toHaveBeenCalledWith('SML search failed: Connection refused');
     });
 
-
     it('emits no authz clause and skips enumeration when securityAuthz is absent', async () => {
       const service = createSmlService();
       service.setup({ logger });
@@ -687,7 +759,7 @@ describe('SmlService', () => {
       });
 
       // No security plugin → no enumeration, no authz filter, all rows returned.
-      expect(termsEnumMock).not.toHaveBeenCalled();
+      expect(enumerationCallCount(esClient)).toBe(0);
       const call = esqlQueryMock.mock.calls[0]![0]! as { query: string; filter?: unknown };
       expect(call.query).not.toContain('MV_CONTAINS(?, permissions');
       expect(call.filter).toBeUndefined();
@@ -696,10 +768,10 @@ describe('SmlService', () => {
 
     it('emits empty-terms filter (F3 fail-closed) when corpus has no permission tokens', async () => {
       // securityAuthz present but corpus has no permission tokens in the index →
-      // both termsEnum calls return empty. The filter is still emitted with terms:[]
+      // the enumeration aggregation returns no buckets. The filter is still emitted with terms:[]
       // (fail-closed: matches no documents with a count requirement).
       const securityAuthz = createMockSecurityAuthz([]);
-      // termsEnumMock default already returns empty pages.
+      // aggResponse defaults to an empty universe.
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
@@ -720,14 +792,7 @@ describe('SmlService', () => {
       const call = esqlQueryMock.mock.calls[0]![0]! as { query: string; filter?: unknown };
       expect(call.query).not.toContain('MV_CONTAINS(?, permissions');
       // Filter is emitted with empty terms (fail-closed).
-      expect(call.filter).toEqual({
-        terms_set: {
-          'permissions.kibana.privileges.name': {
-            terms: [],
-            minimum_should_match_field: 'permissions.kibana.privileges.count',
-          },
-        },
-      });
+      expect(call.filter).toEqual(expectedAuthzFilter([]));
     });
 
     it('uses default size of 10 when not specified (outer LIMIT = size)', async () => {
@@ -759,9 +824,9 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: { total: 0, hits: [] },
-      } as any);
+      };
 
       await smlService.autocomplete({
         query: 'git',
@@ -772,7 +837,7 @@ describe('SmlService', () => {
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = docSearchCall(esClient);
       expect(call.query).toEqual({
         bool: {
           must: [
@@ -819,7 +884,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+      hitsResponse = { hits: { total: 0, hits: [] } };
 
       await smlService.autocomplete({
         query: '*',
@@ -829,7 +894,7 @@ describe('SmlService', () => {
         request,
       });
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = docSearchCall(esClient);
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
@@ -871,7 +936,7 @@ describe('SmlService', () => {
         service.setup({ logger });
         const smlService = service.start({ logger });
 
-        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+        hitsResponse = { hits: { total: 0, hits: [] } };
 
         await smlService.autocomplete({
           query: 'connector/s3',
@@ -881,7 +946,7 @@ describe('SmlService', () => {
           request,
         });
 
-        const call = esClient.search.mock.calls[0]![0]!;
+        const call = docSearchCall(esClient);
         expect(call.query!.bool!.must).toEqual([
           {
             bool: {
@@ -922,7 +987,7 @@ describe('SmlService', () => {
         service.setup({ logger });
         const smlService = service.start({ logger });
 
-        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+        hitsResponse = { hits: { total: 0, hits: [] } };
 
         await smlService.autocomplete({
           query: 'connector/',
@@ -932,7 +997,7 @@ describe('SmlService', () => {
           request,
         });
 
-        const call = esClient.search.mock.calls[0]![0]!;
+        const call = docSearchCall(esClient);
         expect(call.query!.bool!.must).toEqual([nameNestedQuery('connector/')]);
       });
 
@@ -941,7 +1006,7 @@ describe('SmlService', () => {
         service.setup({ logger });
         const smlService = service.start({ logger });
 
-        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+        hitsResponse = { hits: { total: 0, hits: [] } };
 
         await smlService.autocomplete({
           query: '/s3',
@@ -951,7 +1016,7 @@ describe('SmlService', () => {
           request,
         });
 
-        const call = esClient.search.mock.calls[0]![0]!;
+        const call = docSearchCall(esClient);
         expect(call.query!.bool!.must).toEqual([nameNestedQuery('s3')]);
       });
     });
@@ -961,7 +1026,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+      hitsResponse = { hits: { total: 0, hits: [] } };
 
       await smlService.autocomplete({
         query: 'git',
@@ -972,7 +1037,7 @@ describe('SmlService', () => {
         constraints: { [SmlSearchFilterType.connector]: { ids: ['gh-1', 'jira-1'] } },
       });
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = docSearchCall(esClient);
       const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
       // With no securityAuthz, only the constraints filter is present.
       expect(filterClauses).toHaveLength(1);
@@ -994,7 +1059,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
@@ -1035,7 +1100,7 @@ describe('SmlService', () => {
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.autocomplete({
         query: 'git',
@@ -1068,7 +1133,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
@@ -1084,7 +1149,7 @@ describe('SmlService', () => {
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.autocomplete({
         query: 'sal',
@@ -1122,7 +1187,7 @@ describe('SmlService', () => {
     });
 
     it('emits empty-terms filter (matches nothing) when corpus has no permission tokens (F3 fail-closed)', async () => {
-      // When the corpus has no permission tokens in the index (both termsEnum calls return empty),
+      // When the corpus has no permission tokens in the index (the enumeration aggregation returns no buckets),
       // a terms_set filter with terms:[] is still emitted — fail-closed.
       const securityAuthz = createMockSecurityAuthzPartial(
         ['saved_object:dashboard/get'],
@@ -1132,10 +1197,10 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      // termsEnumMock returns empty universe by default.
-      esClient.search.mockResolvedValue({
+      // aggResponse defaults to an empty universe.
+      hitsResponse = {
         hits: { total: 0, hits: [] },
-      } as any);
+      };
 
       await smlService.autocomplete({
         query: 'a',
@@ -1145,37 +1210,26 @@ describe('SmlService', () => {
         request,
       });
 
-      // termsEnum called twice (spaceId| and *|).
-      expect(termsEnumMock).toHaveBeenCalledTimes(2);
+      // One enumeration aggregation; the space and wildcard scopes are a single nested filter now.
+      expect(enumerationCallCount(esClient)).toBe(1);
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = docSearchCall(esClient);
       const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
       expect(filterClauses).toHaveLength(1);
-      expect(filterClauses[0]).toEqual({
-        terms_set: {
-          'permissions.kibana.privileges.name': {
-            terms: [],
-            minimum_should_match_field: 'permissions.kibana.privileges.count',
-          },
-        },
-      });
+      expect(filterClauses[0]).toEqual(expectedAuthzFilter([]));
     });
 
-    it('emits a bare terms_set authz filter when securityAuthz is present', async () => {
+    it('emits the nested authz filter when securityAuthz is present', async () => {
       // Corpus uses two Kibana privileges; caller holds one.
       // The pre-aggregation pass emits a bare terms_set filter (no must_not/should wrapper)
       // in both spaceId| and *| forms.
       const securityAuthz = createMockSecurityAuthz(['saved_object:dashboard/get']);
-      termsEnumMock.mockImplementation(
-        buildTermsEnumMock({
-          kibana: ['default|saved_object:dashboard/get', 'default|saved_object:lens/get'],
-        })
-      );
+      aggResponse = universeAgg(['saved_object:dashboard/get', 'saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+      hitsResponse = { hits: { total: 0, hits: [] } };
 
       await smlService.autocomplete({
         query: 'git',
@@ -1185,21 +1239,13 @@ describe('SmlService', () => {
         request,
       });
 
-      // termsEnum called twice: spaceId| and *|.
-      expect(termsEnumMock).toHaveBeenCalledTimes(2);
+      // One enumeration aggregation; the space and wildcard scopes are a single nested filter now.
+      expect(enumerationCallCount(esClient)).toBe(1);
 
-      const call = esClient.search.mock.calls[0]![0]!;
+      const call = docSearchCall(esClient);
       const filterClauses = call.query!.bool!.filter as Array<Record<string, unknown>>;
       expect(filterClauses).toHaveLength(1);
-      // Bare terms_set — no bool/should wrapper, no must_not/exists branch.
-      expect(filterClauses[0]).toEqual({
-        terms_set: {
-          'permissions.kibana.privileges.name': {
-            terms: ['*|saved_object:dashboard/get', 'default|saved_object:dashboard/get'],
-            minimum_should_match_field: 'permissions.kibana.privileges.count',
-          },
-        },
-      });
+      expect(filterClauses[0]).toEqual(expectedAuthzFilter(['saved_object:dashboard/get']));
     });
 
     it('emits no authz filter when securityAuthz is absent (autocomplete open access)', async () => {
@@ -1207,7 +1253,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+      hitsResponse = { hits: { total: 0, hits: [] } };
 
       await smlService.autocomplete({
         query: 'git',
@@ -1217,21 +1263,19 @@ describe('SmlService', () => {
         request,
       });
 
-      // No termsEnum call — security plugin absent.
-      expect(termsEnumMock).not.toHaveBeenCalled();
-      const call = esClient.search.mock.calls[0]![0]!;
+      // No enumeration — security plugin absent.
+      expect(enumerationCallCount(esClient)).toBe(0);
+      const call = docSearchCall(esClient);
       expect((call.query!.bool!.filter as unknown[]).length).toBe(0);
     });
 
-    describe('pre-aggregation authz filter (MV_CONTAINS subset)', () => {
+    describe('pre-aggregation authz filter', () => {
       const getEsql = () =>
         esqlQueryMock.mock.calls[0]![0]! as { query: string; params?: unknown[] };
 
-      it('fails closed when _terms_enum returns complete=false', async () => {
+      it('fails closed when the enumeration aggregation reports shard failures', async () => {
         const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
-        termsEnumMock.mockImplementation(async () => {
-          return { complete: false, terms: ['saved_object:lens/get'] };
-        });
+        aggResponse = universeAgg(['saved_object:lens/get'], { failedShards: 1 });
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -1251,11 +1295,8 @@ describe('SmlService', () => {
 
       it('fails closed (SmlCorpusTooLargeError) when distinct values exceed the ceiling', async () => {
         const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
-        // Always return a full page → pagination never exhausts → ceiling hit.
-        const fullPage = Array.from({ length: 1000 }, (_, i) => `priv-${i}`);
-        termsEnumMock.mockImplementation(async () => {
-          return { complete: true, terms: fullPage };
-        });
+        // Always a full page with an after_key → pagination never exhausts → ceiling hit.
+        aggResponse = fullUniversePage();
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -1273,7 +1314,7 @@ describe('SmlService', () => {
 
       it('treats a missing index as an empty universe (emits empty-terms filter)', async () => {
         const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
-        termsEnumMock.mockRejectedValue(createNotFoundError());
+        esClient.search.mockRejectedValue(createNotFoundError());
         const service = createSmlService();
         service.setup({ logger });
         const smlService = service.start({ logger, securityAuthz });
@@ -1289,15 +1330,8 @@ describe('SmlService', () => {
 
         const call = getEsql() as { query: string; filter?: unknown };
         expect(call.query).not.toContain('MV_CONTAINS(?, permissions');
-        // Empty corpus → empty authorized tokens → fail-closed filter.
-        expect(call.filter).toEqual({
-          terms_set: {
-            'permissions.kibana.privileges.name': {
-              terms: [],
-              minimum_should_match_field: 'permissions.kibana.privileges.count',
-            },
-          },
-        });
+        // Empty corpus → no authorized actions → fail-closed filter.
+        expect(call.filter).toEqual(expectedAuthzFilter([]));
       });
     });
   });
@@ -1326,12 +1360,12 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 0,
           hits: [],
         },
-      } as any);
+      };
 
       const result = await smlService.checkItemsAccess({
         ids: ['missing-item'],
@@ -1350,19 +1384,21 @@ describe('SmlService', () => {
       const smlService = service.start({ logger, securityAuthz });
 
       // Documents store composite `space|action` tokens.
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
             {
               _source: {
                 id: 'item-1',
-                permissions: makePermissions(['default|saved_object:lens/get']),
+                permissions: makePermissions([
+                  { space: 'default', name: ['saved_object:lens/get'] },
+                ]),
               },
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.checkItemsAccess({
         ids: ['item-1'],
@@ -1381,19 +1417,21 @@ describe('SmlService', () => {
       const smlService = service.start({ logger, securityAuthz });
 
       // Documents store composite `space|action` tokens.
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
             {
               _source: {
                 id: 'item-1',
-                permissions: makePermissions(['default|saved_object:dashboard/get']),
+                permissions: makePermissions([
+                  { space: 'default', name: ['saved_object:dashboard/get'] },
+                ]),
               },
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.checkItemsAccess({
         ids: ['item-1'],
@@ -1411,19 +1449,19 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
             {
               _source: {
                 id: 'item-global',
-                permissions: makePermissions(['*|saved_object:lens/get']),
+                permissions: makePermissions([{ space: '*', name: ['saved_object:lens/get'] }]),
               },
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.checkItemsAccess({
         ids: ['item-global'],
@@ -1441,7 +1479,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
@@ -1449,12 +1487,14 @@ describe('SmlService', () => {
               _source: {
                 id: 'item-other-space',
                 // Only tokens for a different space — no spaceId| or *| match for 'default'.
-                permissions: makePermissions(['other-space|saved_object:lens/get']),
+                permissions: makePermissions([
+                  { space: 'other-space', name: ['saved_object:lens/get'] },
+                ]),
               },
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.checkItemsAccess({
         ids: ['item-other-space'],
@@ -1466,14 +1506,18 @@ describe('SmlService', () => {
       expect(result.get('item-other-space')).toBe(false);
     });
 
-    it('denies access for items with empty permissions (fail-closed)', async () => {
-      // Items with no permission tokens have no spaceId| or *| tokens → fail-closed deny.
+    it('grants access for items carrying no privilege elements at all (public document)', async () => {
+      // A document with an empty `privileges` array is public, matching the Elasticsearch-side
+      // `must_not nested(match_all)` branch of the implicit DLS query. Previously this denied,
+      // which meant Kibana hid documents Elasticsearch considered visible to everyone.
+      // Note this is distinct from a document that HAS elements but none for this space —
+      // covered by the `only tokens for other spaces` case above, which still denies.
       const securityAuthz = createMockSecurityAuthz([]);
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
@@ -1485,7 +1529,7 @@ describe('SmlService', () => {
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.checkItemsAccess({
         ids: ['item-1'],
@@ -1494,7 +1538,7 @@ describe('SmlService', () => {
         request,
       });
 
-      expect(result.get('item-1')).toBe(false);
+      expect(result.get('item-1')).toBe(true);
     });
 
     it('handles 404 error by returning false for all items', async () => {
@@ -1522,9 +1566,9 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger, securityAuthz });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: { total: 0, hits: [] },
-      } as any);
+      };
 
       await smlService.checkItemsAccess({
         ids: ['id-1'],
@@ -1552,7 +1596,7 @@ describe('SmlService', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('fails closed when checkPrivileges throws — denies all items', async () => {
+    it('fails closed when checkPrivileges throws — denies every item that requires a privilege', async () => {
       const securityAuthz = createMockSecurityAuthz(['saved_object:lens/get']);
       const service = createSmlService();
       service.setup({ logger });
@@ -1571,7 +1615,9 @@ describe('SmlService', () => {
             {
               _source: {
                 id: 'with-deps',
-                permissions: makePermissions(['default|saved_object:lens/get']),
+                permissions: makePermissions([
+                  { space: 'default', name: ['saved_object:lens/get'] },
+                ]),
               },
             },
           ],
@@ -1589,9 +1635,11 @@ describe('SmlService', () => {
         request,
       });
 
-      // Both denied: no-tokens has no relevant tokens (fail-closed); with-deps has
-      // tokens but checkPrivileges failed → getAuthorizedPrivileges returns empty Set.
-      expect(result.get('no-tokens')).toBe(false);
+      // with-deps requires an action, checkPrivileges failed → getAuthorizedPrivileges returns an
+      // empty Set → denied. no-tokens carries no privilege elements at all, so it is a public
+      // document: visible regardless of the privilege check, which is not a fail-open because
+      // nothing was ever required to see it.
+      expect(result.get('no-tokens')).toBe(true);
       expect(result.get('with-deps')).toBe(false);
     });
   });
@@ -1602,7 +1650,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 2,
           hits: [
@@ -1635,7 +1683,7 @@ describe('SmlService', () => {
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.getDocuments({
         ids: ['doc-1', 'doc-2'],
@@ -1677,7 +1725,7 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: {
           total: 1,
           hits: [
@@ -1696,12 +1744,14 @@ describe('SmlService', () => {
                 references: [{ uri: 'category://sales' }],
                 created_at: '2026-04-01T00:00:00.000Z',
                 updated_at: '2026-04-02T00:00:00.000Z',
-                permissions: makePermissions(['saved_object:dashboard/get']),
+                permissions: makePermissions([
+                  { space: 'default', name: ['saved_object:dashboard/get'] },
+                ]),
               },
             },
           ],
         },
-      } as any);
+      };
 
       const result = await smlService.getDocuments({
         ids: ['doc-3'],
@@ -1723,7 +1773,7 @@ describe('SmlService', () => {
         references: [{ uri: 'category://sales' }],
         created_at: '2026-04-01T00:00:00.000Z',
         updated_at: '2026-04-02T00:00:00.000Z',
-        permissions: makePermissions(['saved_object:dashboard/get']),
+        permissions: makePermissions([{ space: 'default', name: ['saved_object:dashboard/get'] }]),
         ingestion_method: 'crawled',
       });
     });
@@ -1778,9 +1828,9 @@ describe('SmlService', () => {
       service.setup({ logger });
       const smlService = service.start({ logger });
 
-      esClient.search.mockResolvedValue({
+      hitsResponse = {
         hits: { total: 0, hits: [] },
-      } as any);
+      };
 
       await smlService.getDocuments({
         ids: ['id-1', 'id-2'],

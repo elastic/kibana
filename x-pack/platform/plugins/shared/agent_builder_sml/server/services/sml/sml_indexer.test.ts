@@ -192,11 +192,10 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         permissions: {
           kibana: {
-            privileges: {
-              name: ['default|login:', 'default|perm1', 'space-2|login:', 'space-2|perm1'],
-              raw: ['login:', 'perm1'],
-              count: 2,
-            },
+            privileges: [
+              { space: 'default', name: ['perm1'], count: 1 },
+              { space: 'space-2', name: ['perm1'], count: 1 },
+            ],
           },
         },
         ingestion_method: 'crawled',
@@ -276,11 +275,7 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         permissions: {
           kibana: {
-            privileges: {
-              name: ['default|login:', 'default|saved_object:dashboard/get'],
-              raw: ['login:', 'saved_object:dashboard/get'],
-              count: 2,
-            },
+            privileges: [{ space: 'default', name: ['saved_object:dashboard/get'], count: 1 }],
           },
         },
         ingestion_method: 'crawled',
@@ -701,7 +696,7 @@ describe('createSmlIndexer', () => {
 
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
-          kibana: { privileges: { name: ['default|login:'], raw: ['login:'], count: 1 } },
+          kibana: { privileges: [{ space: 'default', name: [], count: 0 }] },
         });
       });
 
@@ -742,14 +737,9 @@ describe('createSmlIndexer', () => {
 
         expect(getPermissions).toHaveBeenCalledTimes(1);
         const bulkCall = bulkMock.mock.calls[0][0];
-        // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: {
-            privileges: {
-              name: ['default|login:', 'default|saved_object:lens/get'],
-              raw: ['login:', 'saved_object:lens/get'],
-              count: 2,
-            },
+            privileges: [{ space: 'default', name: ['saved_object:lens/get'], count: 1 }],
           },
         });
       });
@@ -783,14 +773,9 @@ describe('createSmlIndexer', () => {
         );
 
         const bulkCall = bulkMock.mock.calls[0][0];
-        // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: {
-            privileges: {
-              name: ['default|login:', 'default|p1'],
-              raw: ['login:', 'p1'],
-              count: 2,
-            },
+            privileges: [{ space: 'default', name: ['p1'], count: 1 }],
           },
         });
       });
@@ -867,14 +852,9 @@ describe('createSmlIndexer', () => {
         expect(getPermissions).toHaveBeenCalledTimes(1);
         const ops = bulkMock.mock.calls[0][0].operations;
         expect(ops).toHaveLength(1);
-        // permissions.kibana.privileges stores composite `space|action` tokens.
         expect(ops[0].index.document.permissions).toEqual({
           kibana: {
-            privileges: {
-              name: ['default|login:', 'default|p1'],
-              raw: ['login:', 'p1'],
-              count: 2,
-            },
+            privileges: [{ space: 'default', name: ['p1'], count: 1 }],
           },
         });
       });
@@ -909,11 +889,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: {
-            privileges: {
-              name: ['*|login:', '*|saved_object:dashboard/get'],
-              raw: ['login:', 'saved_object:dashboard/get'],
-              count: 2,
-            },
+            privileges: [{ space: '*', name: ['saved_object:dashboard/get'], count: 1 }],
           },
         });
       });
@@ -948,11 +924,7 @@ describe('createSmlIndexer', () => {
         const bulkCall = bulkMock.mock.calls[0][0];
         expect(bulkCall.operations[0].index.document.permissions).toEqual({
           kibana: {
-            privileges: {
-              name: ['default|login:', 'default|p1'],
-              raw: ['login:', 'p1'],
-              count: 2,
-            },
+            privileges: [{ space: 'default', name: ['p1'], count: 1 }],
           },
         });
       });
@@ -1029,12 +1001,9 @@ describe('createSmlIndexer', () => {
       expect(callArgs.query.bool.filter).toEqual([
         { term: { 'origin.uri': 'lens://att-wipe-all' } },
         {
-          bool: {
-            should: [
-              { prefix: { 'permissions.kibana.privileges.name': 'default|' } },
-              { prefix: { 'permissions.kibana.privileges.name': '*|' } },
-            ],
-            minimum_should_match: 1,
+          nested: {
+            path: 'permissions.kibana.privileges',
+            query: { terms: { 'permissions.kibana.privileges.space': ['default', '*'] } },
           },
         },
       ]);
@@ -1056,12 +1025,9 @@ describe('createSmlIndexer', () => {
         { term: { 'origin.uri': 'lens://att-wipe-manual' } },
         { term: { ingestion_method: 'manual' } },
         {
-          bool: {
-            should: [
-              { prefix: { 'permissions.kibana.privileges.name': 'default|' } },
-              { prefix: { 'permissions.kibana.privileges.name': '*|' } },
-            ],
-            minimum_should_match: 1,
+          nested: {
+            path: 'permissions.kibana.privileges',
+            query: { terms: { 'permissions.kibana.privileges.space': ['default', '*'] } },
           },
         },
       ]);
@@ -1083,18 +1049,15 @@ describe('createSmlIndexer', () => {
         { term: { 'origin.uri': 'lens://att-default-scope' } },
         { term: { ingestion_method: 'crawled' } },
         {
-          bool: {
-            should: [
-              { prefix: { 'permissions.kibana.privileges.name': 'default|' } },
-              { prefix: { 'permissions.kibana.privileges.name': '*|' } },
-            ],
-            minimum_should_match: 1,
+          nested: {
+            path: 'permissions.kibana.privileges',
+            query: { terms: { 'permissions.kibana.privileges.space': ['default', '*'] } },
           },
         },
       ]);
     });
 
-    it('scopes delete to caller space via token prefix filter', async () => {
+    it('scopes delete to caller space via nested space filter', async () => {
       const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens' }));
       const logger = createMockLogger();
       const esClient = createMockEsClient();
@@ -1111,12 +1074,9 @@ describe('createSmlIndexer', () => {
 
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       expect(callArgs.query.bool.filter).toContainEqual({
-        bool: {
-          should: [
-            { prefix: { 'permissions.kibana.privileges.name': 'space-a|' } },
-            { prefix: { 'permissions.kibana.privileges.name': '*|' } },
-          ],
-          minimum_should_match: 1,
+        nested: {
+          path: 'permissions.kibana.privileges',
+          query: { terms: { 'permissions.kibana.privileges.space': ['space-a', '*'] } },
         },
       });
     });
@@ -1133,10 +1093,7 @@ describe('createSmlIndexer', () => {
 
       const callArgs = (esClient.deleteByQuery as jest.Mock).mock.calls[0][0];
       // No space guard when spaces is empty — global delete.
-      expect(callArgs.query.bool.filter).toEqual([
-        { term: { 'origin.uri': 'lens://att-global' } },
-      ]);
+      expect(callArgs.query.bool.filter).toEqual([{ term: { 'origin.uri': 'lens://att-global' } }]);
     });
-
   });
 });

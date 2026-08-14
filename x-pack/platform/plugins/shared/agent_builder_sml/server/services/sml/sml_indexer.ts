@@ -18,12 +18,10 @@ import type {
   SmlIngestionMethod,
   SmlIndexerParams,
   SmlIndexerDeleteAttachmentParams,
-  SmlPermissions,
   SmlPermissionsInput,
   SmlTypeDefinition,
 } from './types';
 
-export const SPACE_MEMBERSHIP_ACTION = 'login:';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
@@ -292,18 +290,21 @@ class SmlIndexerImpl implements SmlIndexer {
     createdAt?: string;
   }) {
     const rawNames = resolvedPermissions.kibana?.privileges?.name ?? [];
-    const rawSet = new Set(Array.isArray(rawNames) ? rawNames : [rawNames]);
-    rawSet.add(SPACE_MEMBERSHIP_ACTION);
-    const rawActions = [...rawSet].sort();
+    const actions = [...new Set(Array.isArray(rawNames) ? rawNames : [rawNames])].sort();
 
     const normalizedSpaces = spaces.includes('*') ? ['*'] : [...new Set(spaces)];
     if (normalizedSpaces.length === 0) {
       this.logger.warn(`SML indexer: entry '${entryId}' has no spaces — skipping (fail closed)`);
       return undefined;
     }
-    const compositeNames = normalizedSpaces
-      .flatMap((space) => rawActions.map((name) => `${space}|${name}`))
-      .sort();
+
+    // One nested element per space. `count` is per-space: "how many actions THIS space requires".
+    // The ES-side DLS query evaluates each element independently, so a caller must satisfy a whole
+    // element to see the document — matches cannot accumulate across spaces.
+    const privileges = normalizedSpaces
+      .slice()
+      .sort()
+      .map((space) => ({ space, name: actions, count: actions.length }));
 
     const now = new Date().toISOString();
     const document: SmlDocument = {
@@ -314,9 +315,7 @@ class SmlIndexerImpl implements SmlIndexer {
       content: entry.content,
       created_at: createdAt || now,
       updated_at: now,
-      permissions: {
-        kibana: { privileges: { name: compositeNames, raw: rawActions, count: rawActions.length } },
-      },
+      permissions: { kibana: { privileges } },
       ingestion_method: ingestionMethod,
     };
     if (entry.description !== undefined) {
@@ -455,13 +454,16 @@ class SmlIndexerImpl implements SmlIndexer {
       filter.push({ term: { ingestion_method: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
+      // Space scoping is now a direct term match on the nested `.space` field. It used to be a
+      // `prefix` query against the composite `<space>|<action>` token, which is no longer a
+      // meaningful string — and a prefix match on a nested leaf would not select the root document
+      // anyway.
       filter.push({
-        bool: {
-          should: [
-            ...spaces.map((s) => ({ prefix: { 'permissions.kibana.privileges.name': `${s}|` } })),
-            { prefix: { 'permissions.kibana.privileges.name': '*|' } },
-          ],
-          minimum_should_match: 1,
+        nested: {
+          path: 'permissions.kibana.privileges',
+          query: {
+            terms: { 'permissions.kibana.privileges.space': [...spaces, '*'] },
+          },
         },
       });
     }

@@ -38,7 +38,7 @@ const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
   content: 'content',
   created_at: '2024-01-01',
   updated_at: '2024-01-02',
-  permissions: { kibana: { privileges: { name: [], raw: [], count: 0 } } },
+  permissions: { kibana: { privileges: [] } },
   ingestion_method: 'crawled',
   ...overrides,
 });

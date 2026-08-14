@@ -36,36 +36,33 @@ export interface SmlPermissionsInput {
 }
 
 /**
- * Stored on SML documents: composite space|action tokens + raw actions + count.
+ * One space's slice of an SML document's access requirements.
  *
- * `privileges.name` is a multi-value keyword field of composite `space|action`
- * tokens, e.g. `"default|saved_object:dashboard/get"`. The space prefix
- * ensures tokens for different spaces are distinct, so a single
- * `MV_CONTAINS` or `terms_set` query can enforce both space scoping and
- * action authorization in one pass.
+ * `name` holds bare Kibana action strings (no space prefix); `space` is the single space this
+ * group applies to; `count` is how many actions THIS space requires, used as the
+ * `minimum_should_match_field` of the ES-side `terms_set` clause.
+ */
+export interface SmlKibanaPrivilegeGroup {
+  space: string;
+  name: string[];
+  count: number;
+}
+
+/**
+ * Stored on SML documents as a `nested` field: one element per space.
  *
- * `privileges.count` stores the number of *raw* privileges required (i.e.
- * the number of distinct actions, before the space × action cross-product).
- * It is used by Elasticsearch's `terms_set` query with
- * `minimum_should_match_field` to express AND-semantics: the caller must hold
- * all N required privileges in the current space.
+ * Semantics are OR across spaces, AND across actions within a space. Grouping is what makes that
+ * expressible — a caller must satisfy one whole group to see the document, and matches cannot
+ * accumulate across groups. The previous flat `space|action` composite-token shape could not
+ * express this: `terms_set` counted matching tokens with no awareness of which space each came
+ * from, so a user holding one required action in each of two spaces cleared the threshold and saw
+ * a document they were authorized for in neither.
  *
- * This shape mirrors the Elasticsearch index template mappings at
- * `permissions.kibana.privileges.{name, raw, count}`.
+ * Mirrors the Elasticsearch-side contract in `AiIndexImplicitPrivilegesProvider`.
  */
 export interface SmlPermissions {
   kibana: {
-    privileges: {
-      /** Composite `space|action` tokens, e.g. `"default|saved_object:dashboard/get"`. */
-      name: string[];
-      /** Distinct raw action strings before the space cross-product. */
-      raw: string[];
-      /**
-       * Number of distinct raw actions required (= raw.length = per-space token count).
-       * Used by Elasticsearch's terms_set query with minimum_should_match_field.
-       */
-      count: number;
-    };
+    privileges: SmlKibanaPrivilegeGroup[];
   };
 }
 
@@ -244,7 +241,7 @@ export interface SmlDocument {
   /** Timestamp when last updated */
   updated_at: string;
   /**
-   * Permissions required to access this entry. See {@link SmlPermissions} for the composite token format.
+   * Permissions required to access this entry. See {@link SmlPermissions} for the per-space group shape.
    */
   permissions: SmlPermissions;
   /** How this entry was produced. */

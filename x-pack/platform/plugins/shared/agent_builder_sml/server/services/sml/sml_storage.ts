@@ -22,8 +22,15 @@ export const smlIndexName = 'ai-index-idx-sml-data';
  * History:
  *   1 — original shape (pre-composite-token era)
  *   2 — composite privilege tokens, `raw` field, implicit `login:` prefix, `count` semantics
+ *   3 — `permissions.kibana.privileges` becomes `nested`, one element per space carrying
+ *       `{ space, name[], count }`. `raw` and the implicit `login:` action are gone.
+ *
+ * The bump to 3 is load-bearing, not cosmetic: `object` -> `nested` is an illegal mapping merge
+ * ("can't merge a non-nested mapping with a nested mapping"), so an existing index cannot be
+ * updated in place. The version mismatch drops the index and forces a full re-crawl, which is the
+ * only way this shape change can land.
  */
-export const SML_SCHEMA_VERSION = 2;
+export const SML_SCHEMA_VERSION = 3;
 
 const SEMANTIC_MULTI_FIELD = {
   semantic: types.semantic_text({}),
@@ -85,10 +92,22 @@ const smlStorageSchemaProperties = {
     properties: {
       kibana: types.object({
         properties: {
-          privileges: types.object({
+          /**
+           * One element per space, each listing the actions that space requires plus a count of
+           * them. `nested` (not `object`) so ES-side DLS can bind space and action together within
+           * a single element — a flat field cannot express "all these actions, in this one space",
+           * which let a user holding one required action in each of two spaces clear a flat
+           * `terms_set` threshold. `discovery_labels` above is already nested, so this is an
+           * established shape in this index.
+           *
+           * Caveat: ES|QL cannot read `nested` leaves (its index resolution filters them out), so
+           * the read path authorizes via a `nested` Query DSL filter pushed into the `_query`
+           * `filter` parameter rather than a WHERE clause or a projected column.
+           */
+          privileges: types.nested({
             properties: {
               name: types.keyword({}),
-              raw: types.keyword({}),
+              space: types.keyword({}),
               count: types.long({}),
             },
           }),
