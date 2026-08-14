@@ -66,7 +66,10 @@ describe('syntax_validation evaluator', () => {
     expect(result.explanation).not.toContain('AST parse errors');
   });
 
-  it('returns score 0 when no queries generated', async () => {
+  it('abstains rather than scoring 0 when no queries were generated', async () => {
+    // A run that generated nothing has no syntax to be right or wrong about. Scoring it 0 made the
+    // published mean track the generation flake rate instead of query quality; `generation_success`
+    // owns that failure now, and every sibling evaluator abstains here too.
     const evaluator = createSyntaxValidationEvaluator(createEsClient({}));
 
     const result = await evaluator.evaluate({
@@ -76,7 +79,8 @@ describe('syntax_validation evaluator', () => {
       metadata: null,
     });
 
-    expect(result.score).toBe(0);
+    expect(result.score).toBeNull();
+    expect(result.explanation).toContain('No queries generated');
   });
 
   it('scores hit rate only for expect-match queries', async () => {

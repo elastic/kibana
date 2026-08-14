@@ -57,7 +57,10 @@ export const createSyntaxValidationEvaluator = (
   evaluate: async ({ output }) => {
     const queries = getQueriesFromOutput(output);
     if (queries.length === 0) {
-      return { score: 0, explanation: 'No queries generated' };
+      // Abstain rather than score 0: a run that generated nothing has no syntax to be right or
+      // wrong about, and scoring it drags the quality mean by however often generation flaked.
+      // `generation_success` owns that failure; every sibling evaluator abstains here too.
+      return { score: null, explanation: 'No queries generated' };
     }
 
     let astValidCount = 0;

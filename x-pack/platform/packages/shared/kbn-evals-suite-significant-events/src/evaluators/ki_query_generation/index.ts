@@ -19,6 +19,7 @@ import { statsStructureValidationEvaluator } from './stats/stats_structure_valid
 import { createStatsQualityCalibrationEvaluator } from './stats/stats_quality_calibration';
 import { createToolUsageEvaluator } from './tool_usage/tool_usage_validation';
 import { exactDuplicateAvoidanceEvaluator } from './novelty/exact_duplicate_avoidance';
+import { generationSuccessEvaluator } from './generation_success';
 import type {
   KIQueryGenerationEvaluationExample,
   KIQueryGenerationEvaluator,
@@ -52,6 +53,7 @@ export const createKIQueryGenerationEvaluators = (
     statsStructureValidationEvaluator,
     createToolUsageEvaluator(),
     exactDuplicateAvoidanceEvaluator,
+    generationSuccessEvaluator,
   ];
   const base = selectEvaluators(evaluators);
 
@@ -67,6 +69,10 @@ export const createKIQueryGenerationEvaluators = (
         criteriaFn: (c) =>
           criteriaFn(c) as Evaluator<KIQueryGenerationEvaluationExample, KIQueryGenerationOutput>,
         criteria,
+        // Judging an empty output returns a low score that reads as poor query quality when it
+        // actually means generation produced nothing. `generation_success` reports that instead.
+        skipWhen: (output) =>
+          getQueriesFromOutput(output).length === 0 ? 'No queries generated' : undefined,
         transformOutput: (output) => {
           // Rerun arms also expose attempts so the judge can see semantic retreads.
           if (

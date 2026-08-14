@@ -356,7 +356,12 @@ export async function identifyKIQueries({
               },
             };
           }
-          let hasFailures = false;
+          // Tracked separately: a missing-intent rejection can only happen when the eval turns
+          // `requireQueryIntent` on, so counting it in `add_queries.failures` would charge the model
+          // for a rule that does not exist in production and make tool-usage scores incomparable.
+          // The omission rate stays visible through `queryAttempts` (`failureReason`).
+          let hasNonIntentFailures = false;
+          let hasIntentFailures = false;
 
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
@@ -369,7 +374,7 @@ export async function identifyKIQueries({
                 : undefined;
 
               if (requireQueryIntent && typeof query.expects_matches !== 'boolean') {
-                hasFailures = true;
+                hasIntentFailures = true;
                 return {
                   query,
                   valid: false,
@@ -399,7 +404,7 @@ export async function identifyKIQueries({
                 }
 
                 if (validFeatureIds.length === 0) {
-                  hasFailures = true;
+                  hasNonIntentFailures = true;
                   return {
                     query,
                     valid: false,
@@ -483,7 +488,7 @@ export async function identifyKIQueries({
                   hints: allHints.length > 0 ? allHints : undefined,
                 };
               } catch (error) {
-                hasFailures = true;
+                hasNonIntentFailures = true;
                 logger.debug(
                   () =>
                     `ES|QL validation for query "${query.title}" failed: ${getErrorMessage(error)}`
@@ -511,8 +516,13 @@ export async function identifyKIQueries({
               });
             }
           }
-          if (hasFailures) {
+          if (hasNonIntentFailures) {
             toolUsage.add_queries.failures += 1;
+          }
+          if (hasIntentFailures) {
+            logger.debug(
+              `add_queries call omitted "expects_matches"; rejected for repair without counting a tool failure`
+            );
           }
           toolUsage.add_queries.latency_ms += Date.now() - startTime;
 

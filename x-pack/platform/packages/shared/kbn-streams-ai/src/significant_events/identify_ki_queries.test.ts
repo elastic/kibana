@@ -312,6 +312,46 @@ describe('identifyKIQueries agent', () => {
       expect(schema.properties.queries.items.required).not.toContain('expects_matches');
     });
 
+    it('does not count an intent-only rejection as an add_queries tool failure', async () => {
+      // requireQueryIntent is eval-only, so charging tool_usage for it would make the eval-arm
+      // score incomparable to production, where the rule does not exist.
+      const { result } = await runIdentifyKIQueries({
+        requireQueryIntent: true,
+        collectQueryAttempts: true,
+        scriptedAddQueries: [
+          [scriptedQuery('FROM logs | WHERE message == "a"', { expects_matches: undefined })],
+        ],
+      });
+
+      expect(result.toolUsage.add_queries.calls).toBe(1);
+      expect(result.toolUsage.add_queries.failures).toBe(0);
+      // The omission is still observable, just not as a tool failure.
+      expect(result.queryAttempts?.[0]).toMatchObject({ failureReason: 'missing_intent' });
+    });
+
+    it('still counts a genuine failure alongside an intent-only rejection', async () => {
+      const { result } = await runIdentifyKIQueries({
+        requireQueryIntent: true,
+        collectQueryAttempts: true,
+        scriptedAddQueries: [
+          [
+            scriptedQuery('FROM logs | WHERE message == "a"', { expects_matches: undefined }),
+            // Unknown feature_ids is a real tool-usage fault and must survive the split.
+            scriptedQuery('FROM logs | WHERE message == "b"', {
+              expects_matches: true,
+              feature_ids: ['nope'],
+            }),
+          ],
+        ],
+      });
+
+      expect(result.toolUsage.add_queries.failures).toBe(1);
+      expect(result.queryAttempts?.map((a) => a.failureReason)).toEqual([
+        'missing_intent',
+        'unknown_features',
+      ]);
+    });
+
     it('soft-fails a missing intent item while retaining a valid sibling', async () => {
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
         requireQueryIntent: true,
