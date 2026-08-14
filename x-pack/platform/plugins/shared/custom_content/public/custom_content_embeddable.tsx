@@ -172,6 +172,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       projectRouting$.next(ctx.projectRouting);
       query$.next(ctx.query);
       filters$.next(ctx.filters);
+      previewHtml$.next(null);
     });
 
     return {
