@@ -463,6 +463,7 @@ describe('TaskClaiming', () => {
       expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
         size: 40,
         seq_no_primary_term: true,
+        _source_excludes: ['task.state', 'task.params'],
       });
       expect(store.getDocVersions).toHaveBeenCalledWith([
         'task:id-1',
@@ -516,6 +517,67 @@ describe('TaskClaiming', () => {
         tasksLeftUnclaimed: 3,
       });
       expect(result.docs.length).toEqual(3);
+    });
+
+    test('creates a dedicated fixed-size search partition for batchable task types and charges cost once per batchSize boundary', async () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      definitions.registerTaskDefinitions({
+        batchable: {
+          title: 'batchable',
+          cost: TaskCost.Normal,
+          batchSize: 3,
+          createBatchTaskRunner: jest.fn(),
+        },
+      });
+
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      // available capacity is 10, cost is Normal (2) => 5 batch "slots" => search size is
+      // batchSize(3) * slots(5) = 15, with no over-fetch multiplier applied.
+      const fetchedTasks = Array.from({ length: 16 }, (_unused, i) =>
+        mockInstance({ id: `id-${i}`, taskType: 'batchable' })
+      );
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      // only 5 batches' worth of cost (5 * 2 = 10) fit in the available capacity of 10,
+      // i.e. 15 of the 16 candidate tasks (5 batches of batchSize 3) should be claimed.
+      const claimedTasks = fetchedTasks.slice(0, 15);
+      store.bulkGet.mockResolvedValueOnce(claimedTasks.map(asOk));
+      store.bulkPartialUpdate.mockResolvedValueOnce(claimedTasks.map(getPartialUpdateResult));
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: () => 10,
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      const result = unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(store.msearch.mock.calls[0][0]?.[0]).toMatchObject({
+        size: 15,
+        seq_no_primary_term: true,
+      });
+
+      expect(result.stats).toEqual(
+        expect.objectContaining({
+          tasksClaimed: 15,
+          tasksLeftUnclaimed: 1,
+        })
+      );
+      expect(result.docs.length).toEqual(15);
     });
 
     test('should handle no tasks to claim', async () => {

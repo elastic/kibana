@@ -771,6 +771,34 @@ describe('TaskStore', () => {
       });
     });
 
+    test('translates _source_excludes into a nested _source object, since msearch items only support source filtering that way', async () => {
+      const { args } = await testMsearch(
+        [
+          {
+            query: { term: { 'task.taskType': 'foo' } },
+            _source_excludes: ['task.state', 'task.params'],
+          },
+        ],
+        []
+      );
+
+      expect(args).toMatchObject({
+        searches: [
+          {},
+          {
+            query: {
+              bool: {
+                must: [{ term: { type: 'task' } }, { term: { 'task.taskType': 'foo' } }],
+              },
+            },
+            _source: { excludes: ['task.state', 'task.params'] },
+          },
+        ],
+      });
+      // the raw _source_excludes key must not be sent, ES rejects it in a search body
+      expect(args.searches?.[1]).not.toHaveProperty('_source_excludes');
+    });
+
     test('should return tasks with decrypted API keys', async () => {
       const { result } = await testMsearch(
         [{}],

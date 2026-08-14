@@ -503,6 +503,40 @@ export class SampleTaskManagerFixturePlugin
           async run() {},
         }),
       },
+      sampleBatchTask: {
+        title: 'Sample Batch Task',
+        description: 'A sample task exercising createBatchTaskRunner.',
+        batchSize: 5,
+        createBatchTaskRunner: ({ taskInstances }: { taskInstances: ConcreteTaskInstance[] }) => ({
+          async run() {
+            const results = new Map();
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.bulk({
+              refresh: true,
+              operations: taskInstances.flatMap((taskInstance) => [
+                { index: { _index: '.kibana_task_manager_test_result' } },
+                {
+                  type: 'task',
+                  taskType: 'sampleBatchTask',
+                  taskId: taskInstance.id,
+                  state: JSON.stringify(taskInstance.state),
+                  ranAt: new Date(),
+                },
+              ]),
+            });
+
+            for (const taskInstance of taskInstances) {
+              const prevState = taskInstance.state || { count: 0 };
+              results.set(taskInstance.id, {
+                state: { count: (prevState.count || 0) + 1 },
+              });
+            }
+
+            return results;
+          },
+        }),
+      },
       extraLargeCostTask: {
         title: 'Task used for testing task cost',
         cost: TaskCost.ExtraLarge,

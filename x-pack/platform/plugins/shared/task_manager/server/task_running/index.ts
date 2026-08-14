@@ -6,4 +6,5 @@
  */
 
 export * from './task_runner';
+export * from './batch_task_runner';
 export * from './errors';

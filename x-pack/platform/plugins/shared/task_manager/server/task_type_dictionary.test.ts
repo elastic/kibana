@@ -293,6 +293,86 @@ describe('taskTypeDictionary', () => {
       expect(definitions.get('foo')).toEqual(undefined);
     });
 
+    it('registers a valid batchable task', () => {
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          batchSize: 100,
+          createBatchTaskRunner: jest.fn(),
+        },
+      });
+      expect(definitions.has('foo')).toBe(true);
+    });
+
+    it('throws error when a task type defines neither createTaskRunner nor createBatchTaskRunner', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo: {
+            title: 'foo',
+          } as unknown as TaskDefinition,
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"foo\\" must define either createTaskRunner or createBatchTaskRunner."`
+      );
+    });
+
+    it('throws error when a task type defines both createTaskRunner and createBatchTaskRunner', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo: {
+            title: 'foo',
+            batchSize: 10,
+            createTaskRunner: jest.fn(),
+            createBatchTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"foo\\" cannot define both createTaskRunner and createBatchTaskRunner."`
+      );
+    });
+
+    it('throws error when createBatchTaskRunner is defined without batchSize', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo: {
+            title: 'foo',
+            createBatchTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"foo\\" defines createBatchTaskRunner but is missing batchSize."`
+      );
+    });
+
+    it('throws error when batchSize is defined without createBatchTaskRunner', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo: {
+            title: 'foo',
+            batchSize: 10,
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"foo\\" defines batchSize but is missing createBatchTaskRunner."`
+      );
+    });
+
+    it('throws error when combining createBatchTaskRunner with maxConcurrency', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          foo: {
+            title: 'foo',
+            batchSize: 10,
+            maxConcurrency: 2,
+            createBatchTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Task type \\"foo\\" cannot combine createBatchTaskRunner with maxConcurrency."`
+      );
+    });
+
     it('throws error when registering duplicate task type', () => {
       definitions.registerTaskDefinitions({
         foo: {

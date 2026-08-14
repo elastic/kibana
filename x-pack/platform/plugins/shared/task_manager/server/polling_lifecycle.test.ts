@@ -20,7 +20,8 @@ import type {
   TaskClaiming as TaskClaimingClass,
   ClaimOwnershipResult,
 } from './queries/task_claiming';
-import { TaskManagerRunner } from './task_running';
+import { TaskManagerRunner, TaskManagerBatchRunner } from './task_running';
+import { BufferedTaskStore } from './buffered_task_store';
 import type { ConcreteTaskInstance } from './task';
 import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
@@ -63,6 +64,7 @@ jest.mock('./task_running', () => {
   return {
     ...actual,
     TaskManagerRunner: jest.fn(),
+    TaskManagerBatchRunner: jest.fn(),
   };
 });
 
@@ -792,6 +794,127 @@ describe('TaskPollingLifecycle', () => {
       expect(TaskManagerRunner).toHaveBeenCalledWith(
         expect.objectContaining({ enrichFakeRequest })
       );
+    });
+  });
+
+  describe('createTaskRunnersForTasks', () => {
+    const buildDoc = (overrides: Partial<ConcreteTaskInstance>): ConcreteTaskInstance => ({
+      id: 'default-id',
+      taskType: 'bar',
+      runAt: new Date(),
+      scheduledAt: new Date(),
+      startedAt: new Date(),
+      retryAt: null,
+      attempts: 0,
+      params: {},
+      state: {},
+      status: 'idle' as ConcreteTaskInstance['status'],
+      ownerId: null,
+      traceparent: '',
+      ...overrides,
+    });
+
+    const getRunnersForTasks = (
+      lifecycle: TaskPollingLifecycle,
+      docs: ConcreteTaskInstance[]
+    ): unknown[] =>
+      (
+        lifecycle as unknown as {
+          createTaskRunnersForTasks: (tasks: ConcreteTaskInstance[]) => unknown[];
+        }
+      ).createTaskRunnersForTasks(docs);
+
+    beforeEach(() => {
+      (TaskManagerBatchRunner as jest.Mock).mockClear();
+      // the shared mockTaskClaiming defaults maxAttempts to 0, which would make
+      // every non-scheduled doc look "out of attempts"; give these tests headroom.
+      mockTaskClaiming = taskClaimingMock.create({ maxAttempts: 5 });
+    });
+
+    test('maps non-batchable task types 1:1 to TaskManagerRunner', () => {
+      const definitions = new TaskTypeDictionary(taskManagerLogger);
+      definitions.registerTaskDefinitions({ bar: { title: 'bar', createTaskRunner: jest.fn() } });
+
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        definitions,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const docs = [buildDoc({ id: 'a' }), buildDoc({ id: 'b' })];
+      const runners = getRunnersForTasks(lifecycle, docs);
+
+      expect(runners).toHaveLength(2);
+      expect(TaskManagerRunner).toHaveBeenCalledTimes(2);
+      expect(TaskManagerBatchRunner).not.toHaveBeenCalled();
+    });
+
+    test('chunks a batchable task type into batchSize-sized TaskManagerBatchRunners', () => {
+      const definitions = new TaskTypeDictionary(taskManagerLogger);
+      definitions.registerTaskDefinitions({
+        batchable: {
+          title: 'batchable',
+          batchSize: 2,
+          createBatchTaskRunner: jest.fn(),
+        },
+      });
+
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        definitions,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const docs = [
+        buildDoc({ id: 'a', taskType: 'batchable' }),
+        buildDoc({ id: 'b', taskType: 'batchable' }),
+        buildDoc({ id: 'c', taskType: 'batchable' }),
+      ];
+      const runners = getRunnersForTasks(lifecycle, docs);
+
+      // batchSize 2 over 3 docs => two batches: [a, b] and [c]
+      expect(runners).toHaveLength(2);
+      expect(TaskManagerBatchRunner).toHaveBeenCalledTimes(2);
+      expect(TaskManagerBatchRunner).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ taskType: 'batchable', docs: [docs[0], docs[1]] })
+      );
+      expect(TaskManagerBatchRunner).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ taskType: 'batchable', docs: [docs[2]] })
+      );
+      expect(TaskManagerRunner).not.toHaveBeenCalled();
+    });
+
+    test('removes ad hoc tasks that are out of attempts before constructing any runner', () => {
+      const definitions = new TaskTypeDictionary(taskManagerLogger);
+      definitions.registerTaskDefinitions({ bar: { title: 'bar', createTaskRunner: jest.fn() } });
+
+      mockTaskClaiming = taskClaimingMock.create({ maxAttempts: 3 });
+
+      const removeSpy = jest
+        .spyOn(BufferedTaskStore.prototype, 'remove')
+        .mockResolvedValue(undefined);
+
+      const elasticsearchAndSOAvailability$ = new Subject<boolean>();
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        definitions,
+        elasticsearchAndSOAvailability$,
+      });
+
+      const okDoc = buildDoc({ id: 'ok', attempts: 1 });
+      const outOfAttemptsDoc = buildDoc({ id: 'out-of-attempts', attempts: 3 });
+      const runners = getRunnersForTasks(lifecycle, [okDoc, outOfAttemptsDoc]);
+
+      expect(runners).toHaveLength(1);
+      expect(TaskManagerRunner).toHaveBeenCalledTimes(1);
+      expect(TaskManagerRunner).toHaveBeenCalledWith(expect.objectContaining({ instance: okDoc }));
+      expect(removeSpy).toHaveBeenCalledWith('out-of-attempts');
+
+      removeSpy.mockRestore();
     });
   });
 });

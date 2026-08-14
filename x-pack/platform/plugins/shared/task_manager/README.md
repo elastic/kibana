@@ -260,6 +260,50 @@ For example:
   });
 ```
 
+## Batch task definitions
+
+A task type normally maps one document to one `TaskManagerRunner`, occupying one capacity-pool slot per task. This is fine for most task types, but it means claiming and running tasks scale strictly per-instance: with the default capacity of 20 (10 normal-cost tasks) and a 500ms poll interval, one Kibana node tops out around 20 task starts/second, no matter how cheap the work itself is. This becomes a bottleneck when a single task type needs to process a very large number of same-type task instances (e.g. tens of thousands) that can be handled far more efficiently in bulk.
+
+For this case, a task type can opt into batching by defining `createBatchTaskRunner` and `batchSize` instead of `createTaskRunner`:
+
+```js
+taskManager.registerTaskDefinitions({
+  processItem: {
+    title: 'Process item',
+    timeout: '5m',
+
+    // Required together with createBatchTaskRunner. The number of task instances of this type
+    // grouped into one batch. Bounded by MAX_BATCH_SIZE.
+    batchSize: 1000,
+
+    // Mutually exclusive with createTaskRunner: define exactly one of the two.
+    createBatchTaskRunner({ taskInstances, signal }) {
+      return {
+        async run() {
+          // taskInstances is up to `batchSize` ConcreteTaskInstances of this type, claimed
+          // together in one poll cycle. Do the work in as few bulk operations as possible,
+          // e.g. one bulk Elasticsearch call instead of one call per task instance.
+          const results = new Map();
+          for (const instance of taskInstances) {
+            results.set(instance.id, { state: {} });
+          }
+          // A task id missing from the returned map is treated as a failure for that task,
+          // so it will be retried rather than silently marked successful.
+          return results;
+        },
+
+        // Optional, same semantics as the single-task runner: called if the batch times out.
+        async cancel() {},
+      };
+    },
+  },
+});
+```
+
+A batch of claimed task instances occupies a **single** capacity-pool slot (at the type's `cost`), regardless of how many task instances it contains — this is what lets one poll cycle claim and start thousands of task instances of a batchable type instead of a handful. Internally, Task Manager still constructs one ordinary `TaskManagerRunner` per task instance in the batch so that all the usual bookkeeping (state validation, event log, retry/reschedule, buffered writes) happens exactly as it would without batching; only claiming and pool accounting are collapsed to the batch level.
+
+Because of that single shared slot, `createBatchTaskRunner` cannot be combined with `maxConcurrency` — for a batchable type, `maxConcurrency` would cap the number of concurrent *batches*, not tasks, which is confusing. Use `cost` to size the batch's slot instead. Also note that every task instance in a batch shares one `timeout` and one abort signal: if the batch's `run()` is aborted or throws, every task instance in that batch is treated as failed and retried, so batch `run()` implementations should be idempotent and `batchSize` should be chosen conservatively relative to `timeout` and the expected per-item cost.
+
 ## Task instances
 
 The task_manager module will store scheduled task instances in an index. This allows for recovery of failed tasks, coordination across Kibana clusters, persistence across Kibana reboots, etc.

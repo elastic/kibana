@@ -9,7 +9,7 @@ description: Register and schedule background tasks with the Kibana Task Manager
 
 ## Overview
 
-A task type is registered in the **setup** lifecycle of a plugin via `taskManager.registerTaskDefinitions({ [type]: definition })`. The definition declares static metadata (`timeout`, `cost`, `priority`, `maxAttempts`, schemas) and a `createTaskRunner` factory that returns `{ run, cancel? }` per task instance.
+A task type is registered in the **setup** lifecycle of a plugin via `taskManager.registerTaskDefinitions({ [type]: definition })`. The definition declares static metadata (`timeout`, `cost`, `priority`, `maxAttempts`, schemas) and a `createTaskRunner` factory that returns `{ run, cancel? }` per task instance. A type that needs to process very large numbers of same-type tasks per poll cycle can instead opt into `createBatchTaskRunner` + `batchSize` — see §11.
 
 Tasks are **scheduled** separately, usually on plugin **start**, via `taskManager.ensureScheduled` (recurring/idempotent) or `taskManager.schedule` / `bulkSchedule` (one-shot).
 
@@ -368,7 +368,50 @@ await taskManager.ensureScheduled({
 
 Even on first scheduling, the empty `state` you pass MUST be valid input to `stateSchemaByVersion[1].schema`. Schedule with `state: {}` only when the v1 schema accepts an empty object.
 
-## 10. CI gate — update the registered task types assertion
+## 10. Batching — `createBatchTaskRunner` for high-volume same-type tasks
+
+**Rule:** Use `createBatchTaskRunner` + `batchSize` only when a single task type must process orders of magnitude more instances per poll cycle than the capacity pool would otherwise allow (e.g. "process 100,000 same-type tasks"), and the work can genuinely be collapsed into few bulk operations (e.g. one bulk ES call for N task instances instead of N separate calls). Do not use it as a way to raise a type's effective concurrency — that's what `cost` and `maxConcurrency` are for.
+
+Batching is **opt-in per task type** and mutually exclusive with the regular single-task runner:
+
+- Exactly one of `createTaskRunner` / `createBatchTaskRunner` must be defined — never both, never neither.
+- `batchSize` is required if and only if `createBatchTaskRunner` is defined (bounded by `MAX_BATCH_SIZE` in `task.ts`).
+- `createBatchTaskRunner` cannot be combined with `maxConcurrency` — a batch already occupies a single capacity slot regardless of how many member tasks it contains, so `maxConcurrency` would cap batches, not tasks, which is a confusing and easy-to-misread semantic. Use `cost` to size that one slot instead.
+
+```ts
+taskManager.registerTaskDefinitions({
+  'my-plugin:process-item': {
+    title: 'Process item',
+    timeout: '5m',
+    cost: TaskCost.Normal,
+    batchSize: 1000,
+    createBatchTaskRunner: ({ taskInstances, signal }) => ({
+      run: async () => {
+        const results = new Map<string, RunResult>();
+        // one bulk ES call covering all taskInstances instead of N separate calls
+        for (const instance of taskInstances) {
+          results.set(instance.id, { state: {} });
+        }
+        return results;
+      },
+      // cancel/cleanup are optional, same semantics as the single-task runner
+    }),
+  },
+});
+```
+
+Contract for the returned `Map<string, RunResult>`: a task id absent from the map is treated as a **failure** for that task (so it retries), not a silent success. This means a partial-failure batch should still return an entry for every id it was given.
+
+**Mechanics to understand before choosing this:**
+
+- The claimer (`strategy_mget.ts`) gives a batchable type its own fixed-size search partition (`batchSize × available slots`) and charges one task `cost` per `batchSize`-boundary of claimed docs — the rest of that batch's members are claimed for free. This is what lets one poll cycle claim thousands of docs for one type instead of ~10.
+- `polling_lifecycle.ts` chunks the claimed docs for a batchable type into `batchSize`-sized groups and wraps each group in a `TaskManagerBatchRunner`, which occupies exactly one pool slot at the definition's `cost`.
+- `TaskManagerBatchRunner` reuses one ordinary per-task `TaskManagerRunner` per member internally to do all the normal bookkeeping (state validation, event log, retry/reschedule, buffered writes) — batching does not change what gets logged or how retries/state work per task, only how claiming and slot accounting happen.
+- **All-or-nothing timeout.** Every member in a batch shares one `timeout`/`retryAt` and one abort `signal`. One slow or hung item can cause the whole batch (and its `run()`/bulk call) to be aborted, and every member in it will be retried. `run()` MUST be idempotent, and `batchSize` should stay conservative relative to `timeout` — do not set `batchSize` to `MAX_BATCH_SIZE` "for throughput" without first checking the type's actual per-item cost and `timeout`.
+- **ES pressure per cycle.** Multiple batches per cycle can be claimed for one type in a single poll, so a heavily-loaded batchable type multiplies the msearch/mget/bulk-update/bulkGet cost of a single cycle by `batchSize × number of batches`. This is a large win per task but a real spike every poll interval — size `batchSize` with this in mind, not just with the target total throughput.
+- Per-member observability (one APM transaction, one `task-run` event-log doc per task instance) is preserved even inside a batch, since each member still runs through its own `TaskManagerRunner`.
+
+## 11. CI gate — update the registered task types assertion
 
 **Rule:** Adding a new task type breaks the FTR test at `x-pack/platform/test/plugin_api_integration/test_suites/task_manager/check_registered_task_types.ts` by design. Add the new task type id to the assertion array in the same PR.
 
@@ -454,7 +497,9 @@ When reviewing a PR that adds or modifies a task:
 
 ## Source references
 
-- Task definition schema, `TaskCost`, `TaskPriority`, `InstanceTaskCost`, `RunContext`, `DEFAULT_TIMEOUT`: `x-pack/platform/plugins/shared/task_manager/server/task.ts`
+- Task definition schema, `TaskCost`, `TaskPriority`, `InstanceTaskCost`, `RunContext`, `DEFAULT_TIMEOUT`, `BatchRunContext`, `CancellableBatchTask`, `MAX_BATCH_SIZE`: `x-pack/platform/plugins/shared/task_manager/server/task.ts`
+- Batch claim partitioning and cost accounting: `x-pack/platform/plugins/shared/task_manager/server/task_claimers/strategy_mget.ts`
+- `TaskManagerBatchRunner`: `x-pack/platform/plugins/shared/task_manager/server/task_running/batch_task_runner.ts`
 - Error helpers (`throwUnrecoverableError`, `throwRetryableError`, `createRetryableError`): `x-pack/platform/plugins/shared/task_manager/server/task_running/errors.ts`
 - Plugin public exports: `x-pack/platform/plugins/shared/task_manager/server/index.ts`
 - Monitoring guide: `x-pack/platform/plugins/shared/task_manager/server/MONITORING.md`
