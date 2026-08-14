@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
   EuiBadge,
   EuiButton,
@@ -13,18 +14,32 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import type { ServiceChipState } from '../onboarding_flow_context';
-import { SERVICE_SETTINGS_SESSION_KEY } from './service_settings_step/use_service_settings';
-import type { ServiceInstance } from './service_settings_step/use_service_settings';
+import {
+  SERVICE_SETTINGS_SESSION_KEY,
+  type ServiceInstance,
+  type ServiceSettingsPersistedState,
+} from './service_settings_step/use_service_settings';
+import {
+  getEcfServiceConfigs,
+  buildEcfUnifiedCloudFormationUrl,
+  buildEcfOtelCloudFormationUrl,
+  buildEcfCrowdstrikeCloudFormationUrl,
+} from '../ecf_cloudformation';
 
 const CHIP_COLORS: Record<ServiceChipState, string> = {
   instantiating: 'default',
@@ -34,20 +49,31 @@ const CHIP_COLORS: Record<ServiceChipState, string> = {
   timeout: 'warning',
 };
 
+const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
+  globalRegion: '',
+  serviceVars: {},
+};
+
 interface DeployAndDetectStepProps {
   onContinue: () => void;
   onBack?: () => void;
 }
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
+  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
   const { deployAndDetectStep, retryDeploy } = useOnboardingFlow();
   const { isDeploying, serviceStatuses, failedInstances, deployErrors } = deployAndDetectStep;
 
-  const [serviceSettings] = useSessionStorage<{ instances?: ServiceInstance[] }>(
+  // Read service settings (global region + per-service vars + instances) from session storage.
+  // This is the same storage key used by the Service Settings step.
+  const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
-    {}
+    DEFAULT_SERVICE_SETTINGS
   );
-  const instancesById = React.useMemo(() => {
+  const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
+
+  // Instance lookup map — used to resolve display names for deployment status chips.
+  const instancesById = useMemo(() => {
     const map = new Map<string, ServiceInstance>();
     for (const inst of serviceSettings?.instances ?? []) {
       map.set(inst.instanceId, inst);
@@ -61,15 +87,277 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
     return AWS_SERVICES_MAP.get(instanceId)?.name ?? instanceId;
   };
 
+  const otlpEndpoint = services.cloud?.managedOtlp?.url;
+
+  // ── Agentless section ────────────────────────────────────────────────────
   const hasStarted = Object.keys(serviceStatuses).length > 0;
-  const allSucceeded =
+  const allAgentlessSucceeded =
     hasStarted &&
     !isDeploying &&
     failedInstances.length === 0 &&
     Object.values(serviceStatuses).some((s) => s === 'receiving');
 
+  // ── ECF section ──────────────────────────────────────────────────────────
+
+  // Derive unique service IDs from persisted instances for ECF filtering.
+  // For non-duplicate instances, instanceId === serviceId, so serviceVars lookups work correctly.
+  const selectedServiceIds = useMemo(
+    () => [...new Set((serviceSettings?.instances ?? []).map((i) => i.serviceId))],
+    [serviceSettings?.instances]
+  );
+
+  // All ECF service configs (services with an ecfLogType)
+  const allEcfConfigs = useMemo(
+    () => getEcfServiceConfigs(selectedServiceIds, serviceVars),
+    [selectedServiceIds, serviceVars]
+  );
+
+  // Unified ECS template services (ECF services with no dedicated template)
+  const ecfUnifiedConfigs = useMemo(
+    () =>
+      allEcfConfigs.filter((c) => AWS_SERVICES_MAP.get(c.serviceId)?.ecfDedicatedTemplate == null),
+    [allEcfConfigs]
+  );
+
+  // OTel template services
+  const ecfOtelConfigs = useMemo(
+    () =>
+      allEcfConfigs.filter(
+        (c) => AWS_SERVICES_MAP.get(c.serviceId)?.ecfDedicatedTemplate === 'otel'
+      ),
+    [allEcfConfigs]
+  );
+
+  // CrowdStrike FDR services (dedicated template)
+  const ecfCrowdstrikeServices = useMemo(
+    () =>
+      selectedServiceIds.filter(
+        (id) => AWS_SERVICES_MAP.get(id)?.ecfDedicatedTemplate === 'crowdstrike_fdr'
+      ),
+    [selectedServiceIds]
+  );
+
+  const hasEcfUnified = ecfUnifiedConfigs.length > 0;
+  const hasEcfOtel = ecfOtelConfigs.length > 0;
+  const hasEcfCrowdstrike = ecfCrowdstrikeServices.length > 0;
+  const hasAnyEcf = hasEcfUnified || hasEcfOtel || hasEcfCrowdstrike;
+
+  // Whether the agentless section has any content to show
+  const hasAgentlessServices = selectedServiceIds.some(
+    (id) =>
+      AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
+  );
+
+  const unifiedLaunchUrl = useMemo(
+    () =>
+      hasEcfUnified
+        ? buildEcfUnifiedCloudFormationUrl({
+            ecfConfigs: ecfUnifiedConfigs,
+            region: globalRegion,
+            otlpEndpoint,
+          })
+        : undefined,
+    [hasEcfUnified, ecfUnifiedConfigs, globalRegion, otlpEndpoint]
+  );
+
+  const otelLaunchUrl = useMemo(
+    () =>
+      hasEcfOtel
+        ? buildEcfOtelCloudFormationUrl({
+            ecfConfigs: ecfOtelConfigs,
+            region: globalRegion,
+            otlpEndpoint,
+          })
+        : undefined,
+    [hasEcfOtel, ecfOtelConfigs, globalRegion, otlpEndpoint]
+  );
+
+  const crowdstrikeLaunchUrl = useMemo(
+    () =>
+      hasEcfCrowdstrike
+        ? buildEcfCrowdstrikeCloudFormationUrl({ region: globalRegion, otlpEndpoint })
+        : undefined,
+    [hasEcfCrowdstrike, globalRegion, otlpEndpoint]
+  );
+
+  // ── Render ───────────────────────────────────────────────────────────────
+
   return (
     <div data-test-subj="onboardingStep-deploy-and-detect">
+      {/* ── ECF section ─────────────────────────────────────────────────── */}
+      {hasAnyEcf && (
+        <>
+          <EuiTitle size="s">
+            <h2>
+              <FormattedMessage
+                id="xpack.ingestHub.deployAndDetectStep.ecf.title"
+                defaultMessage="Elastic Cloud Forwarder"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.deployAndDetectStep.ecf.description"
+                defaultMessage="Deploy log collection via a single AWS CloudFormation stack. Click Launch to open the AWS console with your settings pre-filled."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+
+          {/* Unified template card */}
+          {hasEcfUnified && (
+            <EuiPanel
+              hasBorder
+              paddingSize="m"
+              data-test-subj="deployAndDetectStep-ecfUnifiedPanel"
+            >
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.title"
+                        defaultMessage="Multi-service stack"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="xs" />
+                  <EuiFlexGroup wrap gutterSize="s">
+                    {ecfUnifiedConfigs.map(({ serviceId }) => (
+                      <EuiFlexItem grow={false} key={serviceId}>
+                        <EuiBadge color="hollow">
+                          {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    href={unifiedLaunchUrl}
+                    target="_blank"
+                    iconType="popout"
+                    iconSide="right"
+                    fill
+                    data-test-subj="deployAndDetectStep-ecfUnifiedLaunchButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.launchButton"
+                      defaultMessage="Launch CloudFormation"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          )}
+
+          {/* OTel template card */}
+          {hasEcfOtel && (
+            <>
+              {hasEcfUnified && <EuiSpacer size="s" />}
+              <EuiPanel
+                hasBorder
+                paddingSize="m"
+                data-test-subj="deployAndDetectStep-ecfOtelPanel"
+              >
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.title"
+                          defaultMessage="OpenTelemetry stack"
+                        />
+                      </h3>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiFlexGroup wrap gutterSize="s">
+                      {ecfOtelConfigs.map(({ serviceId }) => (
+                        <EuiFlexItem grow={false} key={serviceId}>
+                          <EuiBadge color="hollow">
+                            {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      href={otelLaunchUrl}
+                      target="_blank"
+                      iconType="popout"
+                      iconSide="right"
+                      fill
+                      data-test-subj="deployAndDetectStep-ecfOtelLaunchButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.launchButton"
+                        defaultMessage="Launch CloudFormation"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </>
+          )}
+
+          {/* CrowdStrike FDR dedicated template card */}
+          {hasEcfCrowdstrike && (
+            <>
+              {(hasEcfUnified || hasEcfOtel) && <EuiSpacer size="s" />}
+              <EuiPanel
+                hasBorder
+                paddingSize="m"
+                data-test-subj="deployAndDetectStep-ecfCrowdstrikePanel"
+              >
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.title"
+                          defaultMessage="CrowdStrike FDR stack"
+                        />
+                      </h3>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiFlexGroup wrap gutterSize="s">
+                      {ecfCrowdstrikeServices.map((serviceId) => (
+                        <EuiFlexItem grow={false} key={serviceId}>
+                          <EuiBadge color="hollow">
+                            {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      href={crowdstrikeLaunchUrl}
+                      target="_blank"
+                      iconType="popout"
+                      iconSide="right"
+                      fill
+                      data-test-subj="deployAndDetectStep-ecfCrowdstrikeLaunchButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.launchButton"
+                        defaultMessage="Launch CloudFormation"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </>
+          )}
+
+          {hasAgentlessServices && <EuiHorizontalRule />}
+        </>
+      )}
+
+      {/* ── Agentless section ────────────────────────────────────────────── */}
       {isDeploying && (
         <EuiFlexGroup
           alignItems="center"
@@ -141,7 +429,8 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
         </>
       )}
 
-      {(onBack || allSucceeded) && (
+      {/* ── Navigation ──────────────────────────────────────────────────── */}
+      {(onBack || allAgentlessSucceeded) && (
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -156,7 +445,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {allSucceeded && (
+              {allAgentlessSucceeded && (
                 <EuiButton
                   fill
                   onClick={onContinue}
