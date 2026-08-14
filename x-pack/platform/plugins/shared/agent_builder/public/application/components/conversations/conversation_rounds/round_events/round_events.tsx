@@ -39,9 +39,9 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
   const displayItems = groupSteps(steps);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="agentBuilderThinkingPanel">
+    <EuiFlexGroup direction="column" data-test-subj="agentBuilderThinkingPanel">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup gutterSize="l" direction="column">
           {displayItems.map((item) => {
             if (item.kind === 'group') {
               return (
@@ -67,7 +67,7 @@ export const RoundEvents: React.FC<RoundEventsProps> = ({
             );
           })}
         </EuiFlexGroup>
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -116,7 +116,7 @@ export class RuleChangesHistorySubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: ALERTING_LOG_CODES.RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE,
+        code: ALERTING_LOG_CODES.EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED,
         labels: {
           event_type: event.type,
           rule_id: ruleId,

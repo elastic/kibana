@@ -145,7 +145,7 @@ export const ContextMenuSplitButton = ({
         {primaryLabel}
       </EuiSplitButton.ActionPrimary>
       <EuiSplitButton.ActionSecondary
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         aria-label={secondaryAriaLabel}
         isDisabled={isSecondaryDisabled}
         data-test-subj={secondaryDataTestSubj}
