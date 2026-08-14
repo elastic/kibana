@@ -18,6 +18,7 @@ import {
   COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
+  OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLES_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -247,6 +248,75 @@ triggers:
           triggerId: CommentsAddedTriggerId,
         },
       }),
+    ],
+  },
+};
+
+export const ObservablesAddedTriggerId = 'cases.observablesAdded' as const;
+
+const observablesAddedEventSchema = baseCaseEventSchema.extend({
+  observables: z
+    .array(
+      z.object({
+        id: z.string(),
+        typeKey: z.string(),
+        value: z.string(),
+        description: z.string().nullable().optional(),
+      })
+    )
+    .meta({ description: OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLES_DESCRIPTION }),
+});
+
+export const observablesAddedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: ObservablesAddedTriggerId,
+  stability: 'tech_preview',
+  eventSchema: observablesAddedEventSchema,
+  title: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.title', {
+    defaultMessage: 'Cases - Observables added',
+  }),
+  description: i18n.translate('xpack.cases.workflowTriggers.observablesAdded.description', {
+    defaultMessage: 'Emitted when one or more observables are added to a case.',
+  }),
+  documentation: {
+    details: i18n.translate(
+      'xpack.cases.workflowTriggers.observablesAdded.documentation.details',
+      {
+        defaultMessage:
+          'Emitted after observables are added to a case (both via manual add and auto-extraction). The payload includes event.caseId, event.owner, and event.observables — an array of the newly-added observables with their id, typeKey, value, and description. Use KQL on event.* for trigger conditions.\n\nNote: if the workflow itself uses the cases.addObservables step it may re-trigger this event. Guard against loops with `on.workflowEvents: "avoid-loop"` in the trigger configuration.',
+      }
+    ),
+    examples: [
+      i18n.translate(
+        'xpack.cases.workflowTriggers.observablesAdded.documentation.exampleCaseFilter',
+        {
+          defaultMessage: `## Run only for Security cases
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.owner: "securitySolution"'
+\`\`\``,
+          values: {
+            triggerId: ObservablesAddedTriggerId,
+          },
+        }
+      ),
+      i18n.translate(
+        'xpack.cases.workflowTriggers.observablesAdded.documentation.exampleTypeFilter',
+        {
+          defaultMessage: `## Run only when an IP address observable is added (and avoid loops)
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.observables.typeKey: "ip"'
+      workflowEvents: avoid-loop
+\`\`\``,
+          values: {
+            triggerId: ObservablesAddedTriggerId,
+          },
+        }
+      ),
     ],
   },
 };

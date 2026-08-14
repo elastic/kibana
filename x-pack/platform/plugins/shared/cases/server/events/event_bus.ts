@@ -14,6 +14,7 @@ import type {
   CaseCreatedEventPayload,
   CaseUpdatedEventPayload,
   AttachmentsAddedEventPayload,
+  ObservablesAddedEventPayload,
 } from './types';
 import type { Case } from '../../common';
 import type { CaseSavedObjectTransformed } from '../common/types/case';
@@ -22,6 +23,7 @@ export const CASE_CREATED_EVENT = 'caseCreated';
 export const CASE_UPDATED_EVENT = 'caseUpdated';
 export const ATTACHMENTS_ADDED_EVENT = 'attachmentsAdded';
 export const CASE_STATUS_CHANGED_EVENT = 'caseStatusChanged';
+export const OBSERVABLES_ADDED_EVENT = 'observablesAdded';
 
 interface CaseUpdatedExtraInfo {
   previousCase?: CaseSavedObjectTransformed;
@@ -61,6 +63,10 @@ export class CasesEventBus extends EventEmitter {
     this.emit(ATTACHMENTS_ADDED_EVENT, { type: 'attachmentsAdded', payload, request });
   }
 
+  emitObservablesAdded(request: KibanaRequest, payload: ObservablesAddedEventPayload) {
+    this.emit(OBSERVABLES_ADDED_EVENT, { type: 'observablesAdded', payload, request });
+  }
+
   onCaseCreated(listener: CasesEventBusListener<'caseCreated'>) {
     this.on(CASE_CREATED_EVENT, listener);
   }
@@ -71,5 +77,9 @@ export class CasesEventBus extends EventEmitter {
 
   onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>) {
     this.on(ATTACHMENTS_ADDED_EVENT, listener);
+  }
+
+  onObservablesAdded(listener: CasesEventBusListener<'observablesAdded'>) {
+    this.on(OBSERVABLES_ADDED_EVENT, listener);
   }
 }

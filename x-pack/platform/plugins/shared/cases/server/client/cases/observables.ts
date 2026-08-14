@@ -35,6 +35,7 @@ import {
   validateObservableValue,
 } from '../validators';
 import { processObservables } from './utils';
+import { emitObservablesAddedEvent } from './observables_trigger_utils';
 
 const ensureUpdateAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
@@ -123,6 +124,15 @@ export const applyObservablesToCase = async (
     },
   });
 
+  // Emit the observables-added event only for the newly-added slice.
+  const currentKeySet = new Set(currentObservables.map((o) => `${o.typeKey}-${o.value}`));
+  const newlyAddedObservables = finalObservables.filter(
+    (o) => !currentKeySet.has(`${o.typeKey}-${o.value}`)
+  );
+  if (newlyAddedObservables.length > 0) {
+    emitObservablesAddedEvent(clientArgs, retrievedCase, newlyAddedObservables);
+  }
+
   return {
     ...retrievedCase,
     ...patchedCase,
@@ -205,6 +215,10 @@ export const addObservable = async (
         },
       },
     });
+
+    // The newly-created observable is the last element (appended above).
+    const newObservable = updatedObservables[updatedObservables.length - 1];
+    emitObservablesAddedEvent(clientArgs, retrievedCase, [newObservable]);
 
     const res = flattenCaseSavedObject({
       savedObject: {

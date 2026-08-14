@@ -96,6 +96,12 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
   },
   {
+    // TODO: Replace placeholder with the real hash from GET /internal/workflows_extensions/trigger_definitions
+    // after running the server. Requires @elastic/workflows-eng approval.
+    id: 'cases.observablesAdded',
+    schemaHash: 'PLACEHOLDER_RUN_SERVER_AND_GET_HASH',
+  },
+  {
     id: 'cases.caseCreated',
     schemaHash: '616f3b574681800b6ee48d4809ea220bd2179ddc97a08c72f77171c0844de98b',
   },
