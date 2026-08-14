@@ -28,6 +28,9 @@ import {
 } from './session_attributes';
 import { kueryFilters } from '../rum/kuery';
 import { botExclusionFilters } from '../rum/bots';
+import { SESSION_ID_SCRIPT } from './session_id_script';
+
+export { SESSION_ID_SCRIPT };
 
 interface SessionBucket {
   key: string;
@@ -97,19 +100,6 @@ const deriveFromSample = (hits: OtelHit[], startMs: number, endMs: number): Sess
   };
 };
 
-/** Resolve session id from resource or document attributes (EDOT Browser). */
-export const SESSION_ID_SCRIPT = `
-  def rum = doc.containsKey('resource.attributes.rum.sessionId') ? doc['resource.attributes.rum.sessionId'] : null;
-  if (rum != null && rum.size() > 0) { return rum.value; }
-  def sid = doc.containsKey('resource.attributes.session.id') ? doc['resource.attributes.session.id'] : null;
-  if (sid != null && sid.size() > 0) { return sid.value; }
-  def arum = doc.containsKey('attributes.rum.sessionId') ? doc['attributes.rum.sessionId'] : null;
-  if (arum != null && arum.size() > 0) { return arum.value; }
-  def asid = doc.containsKey('attributes.session.id') ? doc['attributes.session.id'] : null;
-  if (asid != null && asid.size() > 0) { return asid.value; }
-  return '';
-`;
-
 const REPLAY_SESSION_ID_SCRIPT = `
   def rum = doc.containsKey('attributes.rum.sessionId') ? doc['attributes.rum.sessionId'] : null;
   if (rum != null && rum.size() > 0) { return rum.value; }
@@ -138,6 +128,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       hasDead: t.string,
       browser: t.string,
       os: t.string,
+      location: t.string,
       pageUrl: t.string,
       errorGroup: t.string,
       sessionIds: t.string,
@@ -192,6 +183,19 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
           should: [
             { term: { 'attributes.device.memory': params.query.device } },
             { term: { 'resource.attributes.device.memory': params.query.device } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
+    if (params.query.location) {
+      // Keep field list inline — importing from rum/query creates a circular dep
+      // (query.ts already imports SESSION_ID_SCRIPT from this file).
+      filters.push({
+        bool: {
+          should: [
+            { term: { 'client.geo.country_iso_code': params.query.location } },
+            { term: { 'resource.attributes.client.geo.country_iso_code': params.query.location } },
           ],
           minimum_should_match: 1,
         },
@@ -396,6 +400,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       hasDead,
       browser,
       os,
+      location,
       minDurationMs,
       maxDurationMs,
       pageUrl,
@@ -426,6 +431,13 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       if (wantDead && session.deadClickCount === 0) return false;
       if (browser && session.client.browser !== browser) return false;
       if (os && session.client.os !== os) return false;
+      if (
+        location &&
+        session.client.countryIso !== location &&
+        session.client.country !== location
+      ) {
+        return false;
+      }
       if (minDur != null && session.durationMs < minDur) return false;
       if (maxDur != null && session.durationMs > maxDur) return false;
       if (pageUrl && !session.pagePath.some((path) => path.includes(pageUrl))) return false;
@@ -481,6 +493,10 @@ const userKey = (session: RumSessionSummary): string | null =>
 const computeFacets = (sessions: RumSessionSummary[]): SessionListFacets => ({
   browsers: topBuckets(sessions, (session) => session.client.browser),
   os: topBuckets(sessions, (session) => session.client.os),
+  countries: topBuckets(
+    sessions,
+    (session) => session.client.countryIso || session.client.country
+  ),
   users: topBuckets(sessions, userKey),
   hasReplay: sessions.filter((session) => session.hasReplay).length,
   hasErrors: sessions.filter((session) => session.errorCount > 0).length,

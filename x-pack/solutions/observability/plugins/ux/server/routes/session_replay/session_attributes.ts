@@ -293,6 +293,7 @@ export const clientFromHits = (hits: OtelHit[]): SessionClient => {
     device: null,
     mobile: null,
     country: null,
+    countryIso: null,
     breakpoint: null,
     connection: null,
   };
@@ -314,9 +315,20 @@ export const clientFromHits = (hits: OtelHit[]): SessionClient => {
       client.country ||
       attrString(source, 'client.geo.country_name') ||
       attrString(source, 'geo.country_name');
+    client.countryIso =
+      client.countryIso ||
+      attrString(source, 'client.geo.country_iso_code') ||
+      attrString(source, 'geo.country.iso_code');
     client.breakpoint = client.breakpoint || attrString(source, 'browser.breakpoint');
     client.connection = client.connection || attrString(source, 'network.connection.type');
-    if (client.browser && client.os && client.country && client.breakpoint && client.connection) {
+    if (
+      client.browser &&
+      client.os &&
+      client.country &&
+      client.countryIso &&
+      client.breakpoint &&
+      client.connection
+    ) {
       break;
     }
   }

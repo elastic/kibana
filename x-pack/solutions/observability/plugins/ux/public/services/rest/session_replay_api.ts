@@ -36,6 +36,7 @@ export interface FetchSessionsParams {
   hasDead?: boolean;
   browser?: string;
   os?: string;
+  location?: string;
   pageUrl?: string;
   errorGroup?: string;
   sessionIds?: string;
@@ -66,6 +67,7 @@ export const fetchSessionReplaySessions = async ({
   hasDead,
   browser,
   os,
+  location,
   pageUrl,
   errorGroup,
   sessionIds,
@@ -95,6 +97,7 @@ export const fetchSessionReplaySessions = async ({
       ...(hasDead ? { hasDead: 'true' } : {}),
       ...(browser ? { browser } : {}),
       ...(os ? { os } : {}),
+      ...(location ? { location } : {}),
       ...(pageUrl ? { pageUrl } : {}),
       ...(errorGroup ? { errorGroup } : {}),
       ...(sessionIds ? { sessionIds } : {}),

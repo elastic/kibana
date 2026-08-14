@@ -20,6 +20,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
       serviceName,
       browser,
       os,
+      location,
       pageUrl,
       frustration,
       user,
@@ -34,6 +35,8 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
   const [points, setPoints] = useState<RumTrendPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const locationFilter = typeof location === 'string' ? location : undefined;
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -44,6 +47,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
         serviceName: typeof serviceName === 'string' ? serviceName : undefined,
         browser,
         os,
+        location: locationFilter,
         pageUrl,
         frustration,
         user,
@@ -66,6 +70,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
     serviceName,
     browser,
     os,
+    locationFilter,
     pageUrl,
     frustration,
     user,

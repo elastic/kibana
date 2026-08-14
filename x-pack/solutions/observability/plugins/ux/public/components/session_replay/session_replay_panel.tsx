@@ -63,6 +63,7 @@ import {
 const EMPTY_FACETS: SessionListFacets = {
   browsers: [],
   os: [],
+  countries: [],
   users: [],
   hasReplay: 0,
   hasErrors: 0,
@@ -256,6 +257,7 @@ export function SessionReplayPanel() {
       serviceName,
       browser: urlBrowser,
       os: urlOs,
+      location: urlLocation,
       pageUrl,
       errorGroup,
       sessionIds,
@@ -327,6 +329,7 @@ export function SessionReplayPanel() {
         hasRage: onlyRage || undefined,
         browser: urlBrowser || browser,
         os: urlOs || os,
+        location: typeof urlLocation === 'string' ? urlLocation : undefined,
         pageUrl,
         errorGroup,
         sessionIds,
@@ -369,6 +372,7 @@ export function SessionReplayPanel() {
     duration,
     urlBrowser,
     urlOs,
+    urlLocation,
     pageUrl,
     errorGroup,
     sessionIds,
@@ -601,6 +605,7 @@ export function SessionReplayPanel() {
     Boolean(urlUser) ||
     Boolean(urlBrowser) ||
     Boolean(urlOs) ||
+    Boolean(urlLocation) ||
     includeBotsActive;
 
   const clearFilters = useCallback(() => {
@@ -622,6 +627,7 @@ export function SessionReplayPanel() {
         sessionIds: '',
         browser: '',
         os: '',
+        location: '',
         user: '',
         includeBots: '',
       }),
@@ -640,7 +646,7 @@ export function SessionReplayPanel() {
       <EuiSpacer />
     <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
       {injectOpen && <SessionReplayInjectFlyout http={http} onClose={() => setInjectOpen(false)} />}
-      {(pageUrl || errorGroup || sessionIds || frustration || urlUser) && (
+      {(pageUrl || errorGroup || sessionIds || frustration || urlUser || urlLocation) && (
         <>
           <EuiCallOut
             announceOnMount
@@ -795,6 +801,24 @@ export function SessionReplayPanel() {
                 history.push({
                   ...history.location,
                   search: mergeRumSearch(history.location.search, { os: next ?? '' }),
+                });
+              }}
+            />
+            <FacetSelect
+              label={i18n.translate('xpack.ux.sessions.filter.country', {
+                defaultMessage: 'Country',
+              })}
+              options={facets.countries.map((bucket) => ({
+                key: bucket.key,
+                count: bucket.count,
+              }))}
+              value={typeof urlLocation === 'string' ? urlLocation : undefined}
+              searchable
+              onChange={(next) => {
+                setPageIndex(0);
+                history.push({
+                  ...history.location,
+                  search: mergeRumSearch(history.location.search, { location: next ?? '' }),
                 });
               }}
             />

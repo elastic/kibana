@@ -32,6 +32,9 @@ import { useUxPluginContext } from '../../../context/use_ux_plugin_context';
 import { RumOverviewV2 } from '../rum_overview';
 import { RumPagesPanel } from '../rum_pages';
 import { RumErrorsPanel } from '../rum_errors';
+import { RumReportsCatalog } from '../rum_reports';
+import { RumReportPrintStyles } from '../rum_reports/print.styles';
+import { RumReportView } from '../rum_reports/report_view';
 import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
@@ -57,9 +60,13 @@ const JOURNEYS_LABEL = i18n.translate('xpack.ux.journeys.tab', {
   defaultMessage: 'Journeys',
 });
 
-export type UxHomeTab = 'overview' | 'pages' | 'errors' | 'session-replay' | 'journeys';
+const REPORTS_LABEL = i18n.translate('xpack.ux.reports.tab', {
+  defaultMessage: 'Reporting',
+});
 
-export function RumHome({ tab }: { tab: UxHomeTab }) {
+export type UxHomeTab = 'overview' | 'pages' | 'errors' | 'session-replay' | 'journeys' | 'reports';
+
+export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: string }) {
   const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
     useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
@@ -140,6 +147,7 @@ export function RumHome({ tab }: { tab: UxHomeTab }) {
 
       <EuiPageSection paddingSize="m" restrictWidth={false}>
         <DashboardToolbar tab={tab} />
+        {tab === 'reports' && <RumReportPrintStyles />}
         {isLoading && tab === 'overview' && <EmptyStateLoading />}
         <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
           {tab === 'overview' && <RumOverviewV2 />}
@@ -147,6 +155,8 @@ export function RumHome({ tab }: { tab: UxHomeTab }) {
           {tab === 'errors' && <RumErrorsPanel />}
           {tab === 'session-replay' && <SessionReplayPanel />}
           {tab === 'journeys' && <SessionFunnelPanel />}
+          {tab === 'reports' &&
+            (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
         </div>
       </EuiPageSection>
     </PageTemplateComponent>
@@ -169,7 +179,7 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
   });
 
   return (
-    <>
+    <div className={tab === 'reports' ? 'uxRumReportNoPrint' : undefined}>
       <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
           <EuiBetaBadge
@@ -223,8 +233,15 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
         >
           {JOURNEYS_LABEL}
         </EuiTab>
+        <EuiTab
+          isSelected={tab === 'reports'}
+          data-test-subj="uxReportsTab"
+          {...tabHref('/reports')}
+        >
+          {REPORTS_LABEL}
+        </EuiTab>
       </EuiTabs>
       <EuiSpacer size="m" />
-    </>
+    </div>
   );
 }

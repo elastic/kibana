@@ -12,11 +12,13 @@ import {
   durationToMs,
   emptyVitalAttribution,
   ranksFromPercentileRanks,
+  type RumCountryRow,
   type RumOverviewResponse,
   type RumPageRow,
   type RumVitalSummary,
 } from '../../../common/rum_app';
-import { SAMPLE_SOURCE, SESSION_ID_SCRIPT } from '../session_replay/list_sessions';
+import { SAMPLE_SOURCE } from '../session_replay/list_sessions';
+import { SESSION_ID_SCRIPT } from '../session_replay/session_id_script';
 import {
   collectSessionSignals,
   countDeadAndErrorClicks,
@@ -199,6 +201,32 @@ export const getRumOverviewRoute = createUxServerRoute({
           os: {
             terms: { script: { source: OS_SCRIPT, lang: 'painless' }, size: 8, exclude: '' },
           },
+          countries: {
+            terms: { field: 'client.geo.country_iso_code', size: 12, missing: '' },
+            aggs: {
+              country_name: {
+                terms: { field: 'client.geo.country_name', size: 1 },
+              },
+              views: { filter: PAGE_VIEW_FILTER },
+              errors: { filter: EXCEPTION_FILTER },
+              sessions: sessionCardinality,
+              lcp: {
+                filter: {
+                  bool: {
+                    filter: [
+                      WEB_VITAL_FILTER,
+                      { term: { 'attributes.browser.web_vital.name': 'lcp' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  p75: {
+                    percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
+                  },
+                },
+              },
+            },
+          },
         },
       }),
       client.search({
@@ -275,6 +303,21 @@ export const getRumOverviewRoute = createUxServerRoute({
         resources: [],
       };
     });
+
+    const countries: RumCountryRow[] = termsBuckets(aggs.countries)
+      .filter((bucket) => String(bucket.key).length > 0)
+      .map((bucket) => {
+        const nameBucket = termsBuckets(bucket.country_name)[0];
+        return {
+          isoCode: String(bucket.key),
+          name: nameBucket ? String(nameBucket.key) : String(bucket.key),
+          pageViews: (bucket.views as { doc_count?: number } | undefined)?.doc_count ?? 0,
+          sessions: cardValue(bucket.sessions),
+          errorCount: (bucket.errors as { doc_count?: number } | undefined)?.doc_count ?? 0,
+          p75Lcp: percentileValue((bucket.lcp as { p75?: unknown } | undefined)?.p75),
+        };
+      })
+      .sort((a, b) => b.pageViews - a.pageViews || b.sessions - a.sessions);
 
     const trendBuckets = termsBuckets(aggs.trends);
     const trends = trendBuckets.map((bucket) => ({
@@ -361,6 +404,7 @@ export const getRumOverviewRoute = createUxServerRoute({
       topPages,
       browsers: facetFromScriptTerms(aggs.browsers),
       os: facetFromScriptTerms(aggs.os),
+      countries,
     };
   },
 });

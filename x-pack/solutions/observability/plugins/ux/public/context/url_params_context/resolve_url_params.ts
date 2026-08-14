@@ -43,6 +43,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     breakpoint,
     connection,
     device,
+    compare,
+    includePii,
   } = query;
 
   const localUIFilters = pickKeys(query, ...uxLocalUIFilterNames);
@@ -73,6 +75,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     breakpoint: toString(breakpoint),
     connection: toString(connection),
     device: toString(device),
+    compare: toString(compare),
+    includePii: toString(includePii),
 
     ...localUIFilters,
   });

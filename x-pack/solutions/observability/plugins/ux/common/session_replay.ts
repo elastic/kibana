@@ -28,6 +28,8 @@ export interface SessionClient {
   device: string | null;
   mobile: boolean | null;
   country: string | null;
+  /** ISO-3166 alpha-2 (`client.geo.country_iso_code`) for map / location filters. */
+  countryIso: string | null;
   breakpoint: string | null;
   connection: string | null;
 }
@@ -97,6 +99,8 @@ export interface SessionFacetBucket {
 export interface SessionListFacets {
   browsers: SessionFacetBucket[];
   os: SessionFacetBucket[];
+  /** Country ISO codes with session counts. */
+  countries: SessionFacetBucket[];
   /** Identified users (name, email, or id) with session counts. */
   users: SessionFacetBucket[];
   hasReplay: number;

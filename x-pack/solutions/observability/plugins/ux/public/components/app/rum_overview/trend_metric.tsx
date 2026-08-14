@@ -77,7 +77,8 @@ export function TrendMetric({
 
   const total = series.reduce((sum, point) => sum + point.y, 0);
   const change = halfWindowChange(series.map((point) => point.y));
-  const xExtents = series.length > 0 ? [series[0].x, series[series.length - 1].x] : [0, 1];
+  const xExtents: [number, number] =
+    series.length > 0 ? [series[0].x, series[series.length - 1].x] : [0, 1];
   const tickFormat = niceTimeFormatter(xExtents);
 
   const deltaIsUp = change != null && change > 0;

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { SESSION_ID_SCRIPT } from '../session_replay/list_sessions';
+import { SESSION_ID_SCRIPT } from '../session_replay/session_id_script';
 import { botExclusionFilters } from './bots';
 import { kueryFilters } from './kuery';
 
@@ -24,6 +24,8 @@ export const rumListQueryCodec = t.partial({
   serviceName: boundedString(256),
   browser: boundedString(128),
   os: boundedString(128),
+  /** ISO-3166 alpha-2 country code (`client.geo.country_iso_code`). */
+  location: boundedString(8),
   pageUrl: boundedString(512),
   frustration: boundedString(32),
   errorGroup: boundedString(256),
@@ -219,6 +221,7 @@ export interface RumQueryParams {
   serviceName?: string;
   browser?: string;
   os?: string;
+  location?: string;
   pageUrl?: string;
   user?: string;
   includeBots?: string;
@@ -227,6 +230,11 @@ export interface RumQueryParams {
   connection?: string;
   device?: string;
 }
+
+export const CLIENT_GEO_COUNTRY_ISO_FIELDS = [
+  'client.geo.country_iso_code',
+  'resource.attributes.client.geo.country_iso_code',
+] as const;
 
 const termShould = (fields: string[], value: string) => ({
   bool: {
@@ -265,6 +273,9 @@ export const rumBaseFilters = (params: RumQueryParams): object[] => {
         params.os
       )
     );
+  }
+  if (params.location) {
+    filters.push(termShould([...CLIENT_GEO_COUNTRY_ISO_FIELDS], params.location));
   }
   if (params.breakpoint) {
     filters.push(termShould(['attributes.browser.breakpoint'], params.breakpoint));

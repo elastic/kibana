@@ -114,6 +114,16 @@ export interface RumPageRow {
   resources: RumResourceRow[];
 }
 
+/** Country rollup for the Overview visitors panel (ISO code joins EMS / filters). */
+export interface RumCountryRow {
+  isoCode: string;
+  name: string;
+  pageViews: number;
+  sessions: number;
+  errorCount: number;
+  p75Lcp: number | null;
+}
+
 export interface RumOverviewResponse {
   kpis: RumOverviewKpis;
   vitals: {
@@ -127,6 +137,7 @@ export interface RumOverviewResponse {
   topPages: RumPageRow[];
   browsers: RumFacetBucket[];
   os: RumFacetBucket[];
+  countries: RumCountryRow[];
 }
 
 export interface RumPagesResponse {

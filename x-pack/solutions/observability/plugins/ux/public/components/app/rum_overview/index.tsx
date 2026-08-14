@@ -35,6 +35,7 @@ import { fetchRumOverview } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { useHasRumData } from '../rum_dashboard/hooks/use_has_rum_data';
 import { TrendMetric } from './trend_metric';
+import { VisitorCountriesPanel } from './visitor_countries';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
 
@@ -57,6 +58,7 @@ export function RumOverviewV2() {
       serviceName,
       browser,
       os,
+      location,
       pageUrl,
       frustration,
       user,
@@ -72,6 +74,8 @@ export function RumOverviewV2() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const locationFilter = typeof location === 'string' ? location : undefined;
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -83,6 +87,7 @@ export function RumOverviewV2() {
         serviceName: typeof serviceName === 'string' ? serviceName : undefined,
         browser,
         os,
+        location: locationFilter,
         pageUrl,
         frustration,
         user,
@@ -106,6 +111,7 @@ export function RumOverviewV2() {
     serviceName,
     browser,
     os,
+    locationFilter,
     pageUrl,
     frustration,
     user,
@@ -558,6 +564,14 @@ export function RumOverviewV2() {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <VisitorCountriesPanel
+        countries={data.countries}
+        activeLocation={locationFilter}
+        maxPageViews={Math.max(1, ...data.countries.map((row) => row.pageViews))}
+      />
 
       <EuiSpacer />
 

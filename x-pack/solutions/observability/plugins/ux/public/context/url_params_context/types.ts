@@ -33,6 +33,8 @@ export type UrlParams = {
   breakpoint?: string;
   connection?: string;
   device?: string;
+  compare?: string;
+  includePii?: string;
 } & Partial<Record<UxLocalUIFilterName, string>>;
 
 type StringifyAll<T> = { [K in keyof T]: string };

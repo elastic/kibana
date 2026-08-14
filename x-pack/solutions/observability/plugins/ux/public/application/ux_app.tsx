@@ -8,7 +8,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { RouterProvider, createRouter, RouteRenderer } from '@kbn/typed-react-router-config';
+import {
+  RouterProvider,
+  createRouter,
+  RouteRenderer,
+  useParams,
+} from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -35,6 +40,7 @@ import { SessionPlayerPage } from '../components/session_replay/session_player_p
 import { SessionDetailPage } from '../components/session_replay/session_detail_page';
 import { SessionReplaySettingsPage } from '../components/session_replay/session_replay_settings_page';
 import { UX_BREADCRUMBS } from './ux_breadcrumbs';
+import { isRumReportTemplateId, rumReportTitle } from '../../common/rum_report';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -133,6 +139,51 @@ function UxSessionFunnelPage() {
   );
 }
 
+function UxReportsPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.reports', {
+        defaultMessage: 'Reporting',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="reports" />
+    </div>
+  );
+}
+
+function UxReportViewPage() {
+  const { path } = useParams('/reports/{templateId}') as unknown as {
+    path: { templateId: string };
+  };
+  const templateId = path.templateId;
+  const reportLabel = isRumReportTemplateId(templateId)
+    ? rumReportTitle(templateId)
+    : i18n.translate('xpack.ux.breadcrumbs.reportFallback', {
+        defaultMessage: 'Report',
+      });
+
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.reports', {
+        defaultMessage: 'Reporting',
+      }),
+    },
+    { text: reportLabel },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="reports" templateId={templateId} />
+    </div>
+  );
+}
+
 const uxRouter = createRouter({
   '/': {
     element: <UxDashboardPage />,
@@ -154,6 +205,17 @@ const uxRouter = createRouter({
   },
   '/journeys': {
     element: <UxSessionFunnelPage />,
+  },
+  '/reports': {
+    element: <UxReportsPage />,
+  },
+  '/reports/{templateId}': {
+    params: t.type({
+      path: t.type({
+        templateId: t.string,
+      }),
+    }),
+    element: <UxReportViewPage />,
   },
   '/session-replay/settings': {
     element: <SessionReplaySettingsPage />,

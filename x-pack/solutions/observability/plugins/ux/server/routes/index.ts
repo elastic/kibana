@@ -19,6 +19,7 @@ import { getRumFiltersRoute } from './rum/filters';
 import { getRumOverviewRoute } from './rum/overview';
 import { getRumPagesRoute } from './rum/pages';
 import { getRumErrorsRoute } from './rum/errors';
+import { getRumReportRoute } from './rum/reports';
 
 function getTypedUxServerRouteRepository() {
   return {
@@ -33,6 +34,7 @@ function getTypedUxServerRouteRepository() {
     ...getRumOverviewRoute,
     ...getRumPagesRoute,
     ...getRumErrorsRoute,
+    ...getRumReportRoute,
   };
 }
 

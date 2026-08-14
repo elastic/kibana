@@ -12,6 +12,11 @@ import type {
   RumOverviewResponse,
   RumPagesResponse,
 } from '../../../common/rum_app';
+import type {
+  RumReportCompareMode,
+  RumReportResponse,
+  RumReportTemplateId,
+} from '../../../common/rum_report';
 
 export interface RumQueryParams {
   http: HttpStart;
@@ -20,6 +25,7 @@ export interface RumQueryParams {
   serviceName?: string;
   browser?: string;
   os?: string;
+  location?: string;
   pageUrl?: string;
   frustration?: string;
   user?: string;
@@ -28,6 +34,7 @@ export interface RumQueryParams {
   breakpoint?: string;
   connection?: string;
   device?: string;
+  errorGroup?: string;
 }
 
 const rumQuery = ({
@@ -36,6 +43,7 @@ const rumQuery = ({
   serviceName,
   browser,
   os,
+  location,
   pageUrl,
   frustration,
   user,
@@ -44,12 +52,14 @@ const rumQuery = ({
   breakpoint,
   connection,
   device,
+  errorGroup,
 }: Omit<RumQueryParams, 'http'>) => ({
   rangeFrom,
   rangeTo,
   ...(serviceName ? { serviceName } : {}),
   ...(browser ? { browser } : {}),
   ...(os ? { os } : {}),
+  ...(location ? { location } : {}),
   ...(pageUrl ? { pageUrl } : {}),
   ...(frustration ? { frustration } : {}),
   ...(user ? { user } : {}),
@@ -58,6 +68,7 @@ const rumQuery = ({
   ...(breakpoint ? { breakpoint } : {}),
   ...(connection ? { connection } : {}),
   ...(device ? { device } : {}),
+  ...(errorGroup ? { errorGroup } : {}),
 });
 
 export const fetchRumFilters = async ({
@@ -86,4 +97,27 @@ export const fetchRumErrors = async ({
   ...params
 }: RumQueryParams): Promise<RumErrorsResponse> => {
   return http.get<RumErrorsResponse>('/internal/ux/rum/errors', { query: rumQuery(params) });
+};
+
+export const fetchRumReport = async ({
+  http,
+  templateId,
+  compare,
+  includePii,
+  funnelSteps,
+  ...params
+}: RumQueryParams & {
+  templateId: RumReportTemplateId;
+  compare?: RumReportCompareMode;
+  includePii?: boolean;
+  funnelSteps?: string;
+}): Promise<RumReportResponse> => {
+  return http.get<RumReportResponse>(`/internal/ux/rum/reports/${encodeURIComponent(templateId)}`, {
+    query: {
+      ...rumQuery(params),
+      ...(compare ? { compare } : {}),
+      ...(includePii ? { includePii: 'true' } : {}),
+      ...(funnelSteps ? { funnelSteps } : {}),
+    },
+  });
 };

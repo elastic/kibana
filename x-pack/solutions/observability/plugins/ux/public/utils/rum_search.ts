@@ -15,6 +15,7 @@ export interface RumFilterPatch {
   sessionIds?: string;
   browser?: string;
   os?: string;
+  location?: string;
   user?: string;
   includeBots?: string;
   kuery?: string;
@@ -23,6 +24,10 @@ export interface RumFilterPatch {
   device?: string;
   /** Replay playhead offset in ms (`?t=`). */
   t?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  compare?: string;
+  includePii?: string;
 }
 
 /** Merge filter params into the current search string. Empty values remove the key. */
@@ -58,6 +63,7 @@ export const sessionsPatch = (patch: RumFilterPatch): RumFilterPatch => ({
   errorGroup: '',
   sessionIds: '',
   user: '',
+  location: '',
   ...patch,
 });
 
