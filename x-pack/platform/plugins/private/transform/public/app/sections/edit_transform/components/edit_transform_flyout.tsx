@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useState } from 'react';
+import React, { type FC, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -41,6 +41,17 @@ export const EditTransformFlyout: FC<EditAction> = ({
 }) => {
   const [isProjectScopeFlyoutVisible, setIsProjectScopeFlyoutVisible] = useState(false);
 
+  useEffect(() => {
+    if (!isFlyoutVisible) {
+      setIsProjectScopeFlyoutVisible(false);
+    }
+  }, [isFlyoutVisible]);
+
+  const closeEditFlyout = () => {
+    setIsProjectScopeFlyoutVisible(false);
+    closeFlyout();
+  };
+
   if (!config || !isFlyoutVisible) {
     return null;
   }
@@ -48,7 +59,7 @@ export const EditTransformFlyout: FC<EditAction> = ({
   return (
     <EditTransformFlyoutProvider config={config} dataViewId={dataViewId}>
       <EuiFlyout
-        onClose={closeFlyout}
+        onClose={closeEditFlyout}
         hideCloseButton
         aria-labelledby={
           isProjectScopeFlyoutVisible
@@ -100,14 +111,14 @@ export const EditTransformFlyout: FC<EditAction> = ({
             <EuiFlyoutFooter>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+                  <EuiButtonEmpty iconType="cross" onClick={closeEditFlyout} flush="left">
                     {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
                       defaultMessage: 'Cancel',
                     })}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EditTransformUpdateButton closeFlyout={closeFlyout} />
+                  <EditTransformUpdateButton closeFlyout={closeEditFlyout} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlyoutFooter>
