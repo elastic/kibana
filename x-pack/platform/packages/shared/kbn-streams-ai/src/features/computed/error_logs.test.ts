@@ -71,6 +71,7 @@ describe('errorLogsGenerator', () => {
     await errorLogsGenerator.generate({ stream, start: 100, end: 200, esClient, logger });
 
     const { whereCondition } = getSampleDocumentsEsqlMock.mock.calls[0][0];
+    if (!whereCondition) throw new Error('expected whereCondition to be defined');
     const printed = esql.from('logs-*').where`${whereCondition}`.print('basic');
     expect(printed).toContain(
       'QSTR("log.level:error OR message:error OR message:exception OR body.text:error OR body.text:exception")'
