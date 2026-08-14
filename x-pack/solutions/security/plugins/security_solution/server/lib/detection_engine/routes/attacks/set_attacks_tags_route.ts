@@ -75,8 +75,6 @@ export const setAttacksTagsRoute = (
         // Attack indices scope the update by query, so unknown/non-attack ids are
         // filtered out naturally (they never match `terms: { _id }`).
         const attackIndex = await getAttackAlertsIndex({ context });
-        const securitySolution = await context.securitySolution;
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         if (!updateRelatedAlerts) {
           return withSiemErrorHandlingAndAttacksTelemetry(
@@ -89,7 +87,6 @@ export const setAttacksTagsRoute = (
                 attackIds: ids,
                 tagsToAdd: tags.tags_to_add,
                 tagsToRemove: tags.tags_to_remove,
-                spaceId,
               });
               return result;
             }
@@ -134,14 +131,12 @@ export const setAttacksTagsRoute = (
               attackIds: verifiedAttackIds,
               tagsToAdd: tags.tags_to_add,
               tagsToRemove: tags.tags_to_remove,
-              spaceId,
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertTagsChanged(request, {
                 alertIds: relatedAlertIds,
                 tagsToAdd: tags.tags_to_add,
                 tagsToRemove: tags.tags_to_remove,
-                spaceId,
               });
             }
             return result;

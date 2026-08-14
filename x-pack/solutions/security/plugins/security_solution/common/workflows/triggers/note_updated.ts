@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { MAX_ID_LENGTH, MAX_SPACE_ID_LENGTH, MAX_USERNAME_LENGTH } from './constants';
+import { MAX_ID_LENGTH, MAX_USERNAME_LENGTH } from './constants';
 import {
   NOTE_UPDATED_SCHEMA_DOCUMENT_ID_DESCRIPTION,
   NOTE_UPDATED_SCHEMA_NOTE_ID_DESCRIPTION,
@@ -15,7 +15,6 @@ import {
   NOTE_UPDATED_TRIGGER_DESCRIPTION,
   NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS,
   NOTE_UPDATED_TRIGGER_TITLE,
-  TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
 } from './translations';
 
 export const NoteUpdatedTriggerId = 'securitySolution.noteUpdated' as const;
@@ -42,11 +41,6 @@ const noteUpdatedEventSchema = z.object({
     .min(1)
     .max(MAX_ID_LENGTH)
     .meta({ description: NOTE_UPDATED_SCHEMA_DOCUMENT_ID_DESCRIPTION }),
-  spaceId: z
-    .string()
-    .min(1)
-    .max(MAX_SPACE_ID_LENGTH)
-    .meta({ description: TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION }),
 });
 
 export const noteUpdatedTriggerDef: CommonTriggerDefinition = {

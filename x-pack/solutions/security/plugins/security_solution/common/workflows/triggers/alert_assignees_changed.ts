@@ -12,7 +12,6 @@ import {
   MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
   MAX_ID_LENGTH,
-  MAX_SPACE_ID_LENGTH,
 } from './constants';
 import {
   ALERT_ASSIGNEES_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION,
@@ -21,7 +20,6 @@ import {
   ALERT_ASSIGNEES_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION,
   TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
-  TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
 } from './translations';
 
 export const AlertAssigneesChangedTriggerId = 'securitySolution.alertAssigneesChanged' as const;
@@ -47,11 +45,6 @@ const alertAssigneesChangedEventSchema = z.object({
     .array(z.string().min(1).max(MAX_ASSIGNEE_UID_LENGTH))
     .max(MAX_ASSIGNEES_PER_OPERATION)
     .meta({ description: TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION }),
-  spaceId: z
-    .string()
-    .min(1)
-    .max(MAX_SPACE_ID_LENGTH)
-    .meta({ description: TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION }),
 });
 
 export const alertAssigneesChangedTriggerDef: CommonTriggerDefinition = {

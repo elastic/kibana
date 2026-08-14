@@ -89,7 +89,6 @@ export const setSignalsStatusRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
         const alertsIndex = siemClient.getAlertsIndex();
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
         const user = core.security.authc.getCurrentUser();
 
         const clusterId = sender.getClusterID();
@@ -145,7 +144,6 @@ export const setSignalsStatusRoute = (
               status,
               previousStatuses,
               truncated: false,
-              spaceId,
             });
 
             return response.ok({ body });
@@ -209,7 +207,6 @@ export const setSignalsStatusRoute = (
               status,
               previousStatuses,
               truncated,
-              spaceId,
             });
 
             return response.ok({ body });

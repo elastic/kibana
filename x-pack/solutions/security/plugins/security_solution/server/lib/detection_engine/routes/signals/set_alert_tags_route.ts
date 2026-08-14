@@ -70,7 +70,6 @@ export const setAlertTagsRoute = (
             alertIds: ids,
             tagsToAdd: tags.tags_to_add,
             tagsToRemove: tags.tags_to_remove,
-            spaceId,
           });
           return result;
         });

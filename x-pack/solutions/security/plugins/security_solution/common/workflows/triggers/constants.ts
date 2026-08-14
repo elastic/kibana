@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 
 export const MAX_ALERTS_PER_TRIGGER = 10_000;
 export const MAX_ID_LENGTH = 512;
-export const MAX_SPACE_ID_LENGTH = 1024;
 export const MAX_TAG_LENGTH = 256;
 export const MAX_ASSIGNEE_UID_LENGTH = 256;
 export const MAX_USERNAME_LENGTH = 256;

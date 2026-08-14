@@ -66,7 +66,6 @@ export const setAlertAssigneesRoute = (
             alertIds: ids,
             assigneesToAdd: assignees.add,
             assigneesToRemove: assignees.remove,
-            spaceId,
           });
           return result;
         });

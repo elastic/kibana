@@ -109,8 +109,6 @@ export const setAttacksStatusRoute = (
         // Attack indices scope the update by query, so unknown/non-attack ids are
         // filtered out naturally (they never match `terms: { _id }`).
         const attackIndex = await getAttackAlertsIndex({ context });
-        const securitySolution = await context.securitySolution;
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         if (!updateRelatedAlerts) {
           const attackPreviousStatuses: Array<{ id: string; previousStatus: string }> = [];
@@ -140,7 +138,6 @@ export const setAttacksStatusRoute = (
                 attackIds: ids,
                 status,
                 previousStatuses: attackPreviousStatuses,
-                spaceId,
               });
               return result;
             }
@@ -211,7 +208,6 @@ export const setAttacksStatusRoute = (
               attackIds: verifiedAttackIds,
               status,
               previousStatuses: attackPreviousStatuses,
-              spaceId,
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
@@ -219,7 +215,6 @@ export const setAttacksStatusRoute = (
                 status,
                 previousStatuses: relatedAlertPreviousStatuses,
                 truncated: false,
-                spaceId,
               });
             }
             return result;

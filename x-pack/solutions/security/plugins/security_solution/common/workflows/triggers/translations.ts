@@ -9,11 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 // Shared field descriptions used across multiple triggers
 
-export const TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.schema.spaceId',
-  { defaultMessage: 'The Kibana space ID.' }
-);
-
 export const TRIGGER_SCHEMA_STATUS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.schema.status',
   { defaultMessage: 'The new workflow status.' }
@@ -153,7 +148,7 @@ export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate
   'xpack.securitySolution.workflows.triggers.alertStatusChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after a batch of detection alerts has their workflow status updated. The payload includes event.alertIds, event.status (new status), event.previousStatuses, event.spaceId, and event.truncated (true when more than 10,000 alerts were affected).',
+      'Emitted after a batch of detection alerts has their workflow status updated. The payload includes event.alertIds, event.status (new status), event.previousStatuses, and event.truncated (true when more than 10,000 alerts were affected).',
   }
 );
 
@@ -173,7 +168,7 @@ export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.alertTagsChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after tags are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.tagsToAdd, event.tagsToRemove, and event.spaceId.',
+      'Emitted after tags are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.tagsToAdd, and event.tagsToRemove.',
   }
 );
 
@@ -193,7 +188,7 @@ export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.transl
   'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after assignees are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.assigneesToAdd, event.assigneesToRemove, and event.spaceId.',
+      'Emitted after assignees are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.assigneesToAdd, and event.assigneesToRemove.',
   }
 );
 
@@ -215,7 +210,7 @@ export const ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translat
   'xpack.securitySolution.workflows.triggers.attackStatusChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after a batch of attack discoveries has their workflow status updated. The payload includes event.attackIds, event.status, event.previousStatuses, and event.spaceId.',
+      'Emitted after a batch of attack discoveries has their workflow status updated. The payload includes event.attackIds, event.status, and event.previousStatuses.',
   }
 );
 
@@ -235,7 +230,7 @@ export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.attackTagsChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after tags are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.tagsToAdd, event.tagsToRemove, and event.spaceId.',
+      'Emitted after tags are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.tagsToAdd, and event.tagsToRemove.',
   }
 );
 
@@ -255,7 +250,7 @@ export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.trans
   'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesToAdd, event.assigneesToRemove, and event.spaceId.',
+      'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesToAdd, and event.assigneesToRemove.',
   }
 );
 
@@ -278,7 +273,7 @@ export const NOTE_CREATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteCreated.documentation.details',
   {
     defaultMessage:
-      'Emitted after a note is created on a specific document. Only fires for notes attached to an entity (documentId is set). Investigation guide and timeline-level notes do not fire this trigger. The payload includes event.noteId, event.createdBy, event.documentId, and event.spaceId.',
+      'Emitted after a note is created on a specific document. Only fires for notes attached to an entity (documentId is set). Investigation guide and timeline-level notes do not fire this trigger. The payload includes event.noteId, event.createdBy, and event.documentId.',
   }
 );
 
@@ -301,6 +296,6 @@ export const NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteUpdated.documentation.details',
   {
     defaultMessage:
-      'Emitted after a note is updated on a specific document. Only fires for notes attached to an entity (documentId is set). The payload includes event.noteId, event.updatedBy, event.documentId, and event.spaceId.',
+      'Emitted after a note is updated on a specific document. Only fires for notes attached to an entity (documentId is set). The payload includes event.noteId, event.updatedBy, and event.documentId.',
   }
 );

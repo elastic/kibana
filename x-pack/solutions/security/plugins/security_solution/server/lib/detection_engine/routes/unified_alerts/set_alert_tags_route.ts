@@ -57,8 +57,6 @@ export const setUnifiedAlertsTagsRoute = (
         }
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
-        const securitySolution = await context.securitySolution;
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsTags({ context, index, ids, tags });
@@ -66,7 +64,6 @@ export const setUnifiedAlertsTagsRoute = (
             alertIds: ids,
             tagsToAdd: tags.tags_to_add,
             tagsToRemove: tags.tags_to_remove,
-            spaceId,
           });
           return result;
         });

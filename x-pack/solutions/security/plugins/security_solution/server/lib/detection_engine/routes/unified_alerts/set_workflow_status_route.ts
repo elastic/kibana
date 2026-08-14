@@ -63,8 +63,6 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
         }
 
         const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
-        const securitySolution = await context.securitySolution;
-        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
         if (eventBus) {
@@ -89,7 +87,6 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             status,
             previousStatuses,
             truncated: false,
-            spaceId,
           });
           return result;
         });

@@ -10,7 +10,6 @@ import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   MAX_ALERTS_PER_TRIGGER,
   MAX_ID_LENGTH,
-  MAX_SPACE_ID_LENGTH,
   previousStatusSchema,
   workflowStatusEnum,
 } from './constants';
@@ -20,7 +19,6 @@ import {
   ATTACK_STATUS_CHANGED_TRIGGER_DESCRIPTION,
   ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ATTACK_STATUS_CHANGED_TRIGGER_TITLE,
-  TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
   TRIGGER_SCHEMA_STATUS_DESCRIPTION,
 } from './translations';
 
@@ -44,11 +42,6 @@ const attackStatusChangedEventSchema = z.object({
     .array(previousStatusSchema)
     .max(MAX_ALERTS_PER_TRIGGER)
     .meta({ description: ATTACK_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION }),
-  spaceId: z
-    .string()
-    .min(1)
-    .max(MAX_SPACE_ID_LENGTH)
-    .meta({ description: TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION }),
 });
 
 export const attackStatusChangedTriggerDef: CommonTriggerDefinition = {

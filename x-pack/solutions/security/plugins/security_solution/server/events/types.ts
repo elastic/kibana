@@ -17,58 +17,48 @@ export interface AlertStatusChangedPayload {
   readonly status: string;
   readonly previousStatuses: PreviousStatus[];
   readonly truncated: boolean;
-  readonly spaceId: string;
 }
 
 export interface AlertTagsChangedPayload {
   readonly alertIds: string[];
   readonly tagsToAdd: string[];
   readonly tagsToRemove: string[];
-  readonly spaceId: string;
 }
 
 export interface AlertAssigneesChangedPayload {
   readonly alertIds: string[];
   readonly assigneesToAdd: string[];
   readonly assigneesToRemove: string[];
-  readonly spaceId: string;
 }
 
 export interface AttackStatusChangedPayload {
   readonly attackIds: string[];
   readonly status: string;
   readonly previousStatuses: PreviousStatus[];
-  readonly spaceId: string;
 }
 
 export interface AttackTagsChangedPayload {
   readonly attackIds: string[];
   readonly tagsToAdd: string[];
   readonly tagsToRemove: string[];
-  readonly spaceId: string;
 }
 
 export interface AttackAssigneesChangedPayload {
   readonly attackIds: string[];
   readonly assigneesToAdd: string[];
   readonly assigneesToRemove: string[];
-  readonly spaceId: string;
 }
 
 export interface NoteCreatedPayload {
   readonly noteId: string;
-  readonly noteContent: string;
   readonly createdBy: string;
   readonly documentId: string;
-  readonly spaceId: string;
 }
 
 export interface NoteUpdatedPayload {
   readonly noteId: string;
-  readonly noteContent: string;
   readonly updatedBy: string;
   readonly documentId: string;
-  readonly spaceId: string;
 }
 
 interface SecuritySolutionDomainEventPayloadByType {
