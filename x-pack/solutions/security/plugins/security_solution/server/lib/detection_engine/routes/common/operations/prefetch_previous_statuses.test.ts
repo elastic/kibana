@@ -23,9 +23,13 @@ const makeFoundDoc = (id: string, status: string) => ({
 
 const makeNotFoundDoc = (id: string) => ({ _id: id, found: false as const });
 
-const makeSearchResponse = (hits: Array<{ _id: string; status: string }>, total: number) => ({
+const makeSearchResponse = (
+  hits: Array<{ _id: string; status: string }>,
+  total: number,
+  relation: 'eq' | 'gte' = 'eq'
+) => ({
   hits: {
-    total: { value: total, relation: 'eq' as const },
+    total: { value: total, relation },
     hits: hits.map(({ _id, status }) => ({
       _id,
       _source: { [ALERT_WORKFLOW_STATUS]: status },
@@ -193,9 +197,22 @@ describe('prefetchPreviousStatusesByQuery', () => {
     });
   });
 
-  it('sets truncated to true when total exceeds MAX_ALERTS_PER_TRIGGER', async () => {
+  it('sets truncated to true when total exceeds MAX_ALERTS_PER_TRIGGER (eq relation)', async () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     esClient.search.mockResolvedValue(makeSearchResponse([], MAX_ALERTS_PER_TRIGGER + 1) as any);
+
+    const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
+
+    expect(result.truncated).toBe(true);
+  });
+
+  it('sets truncated to true when ES returns gte relation at the track_total_hits boundary', async () => {
+    // Real ES returns relation:'gte' when total > track_total_hits (MAX_ALERTS_PER_TRIGGER + 1).
+    // value equals exactly MAX_ALERTS_PER_TRIGGER + 1 in that case.
+    esClient.search.mockResolvedValue(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      makeSearchResponse([], MAX_ALERTS_PER_TRIGGER + 1, 'gte') as any
+    );
 
     const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
@@ -232,11 +249,14 @@ describe('prefetchPreviousStatusesByQuery', () => {
     );
   });
 
-  it('uses MAX_ALERTS_PER_TRIGGER as the search size', async () => {
+  it('uses MAX_ALERTS_PER_TRIGGER as the search size and sets track_total_hits to detect truncation', async () => {
     await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
     expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ size: MAX_ALERTS_PER_TRIGGER })
+      expect.objectContaining({
+        size: MAX_ALERTS_PER_TRIGGER,
+        track_total_hits: MAX_ALERTS_PER_TRIGGER + 1,
+      })
     );
   });
 

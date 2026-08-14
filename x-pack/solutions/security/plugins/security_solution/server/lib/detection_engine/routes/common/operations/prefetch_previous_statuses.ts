@@ -52,6 +52,7 @@ export const prefetchPreviousStatusesByQuery = async (
     query: { bool: { filter: query } },
     _source_includes: [ALERT_WORKFLOW_STATUS],
     size: MAX_ALERTS_PER_TRIGGER,
+    track_total_hits: MAX_ALERTS_PER_TRIGGER + 1,
     ignore_unavailable: true,
   });
   const totalHits = searchResponse.hits.total;
