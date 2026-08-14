@@ -8,7 +8,10 @@
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 import { setPrf } from '../common/metrics';
-import { alignExpectedEventsToActuals, getConfirmedDetectionRuleUuids } from '../common/align_events';
+import {
+  alignExpectedEventsToActuals,
+  getConfirmedDetectionRuleUuids,
+} from '../common/align_events';
 
 export interface TopologyScore {
   score: number | null;

@@ -127,7 +127,12 @@ describe('scoreTopologyCorrectness', () => {
     // byOverlap has matching rule R1 but a different event_id.
     // Correct topology lives on byId; without event_id priority byOverlap wins the
     // overlap race and the wrong causal_features are scored.
-    const byId = event('cascade', ['R2'], ['transactionhistory'], []) as unknown as SignificantEvent;
+    const byId = event(
+      'cascade',
+      ['R2'],
+      ['transactionhistory'],
+      []
+    ) as unknown as SignificantEvent;
     const byOverlap = event('other', ['R1'], ['userservice'], []) as unknown as SignificantEvent;
 
     const expected = [event('cascade', ['R1'], ['transactionhistory'], [])];

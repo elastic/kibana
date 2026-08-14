@@ -7,9 +7,9 @@
 
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
-export const getConfirmedDetectionRuleUuids = (
-  event: { signals?: SignificantEvent['signals'] }
-): Set<string> =>
+export const getConfirmedDetectionRuleUuids = (event: {
+  signals?: SignificantEvent['signals'];
+}): Set<string> =>
   new Set(
     (event.signals ?? []).flatMap((s) =>
       s.type === 'detection' && s.confirmed !== false && s.metadata?.rule_uuid
