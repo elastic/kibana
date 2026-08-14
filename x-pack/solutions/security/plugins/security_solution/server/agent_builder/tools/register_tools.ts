@@ -8,7 +8,6 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
-import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { buildRedirectUrlTool } from './build_redirect_url_tool';
@@ -60,7 +59,6 @@ export const registerTools = (
   productFeaturesService: ProductFeaturesService,
   ml: SetupPlugins['ml'],
   rulePreviewDeps: RunRulePreviewDeps,
-  productFeaturesService: ProductFeaturesService,
   isServerless: boolean = false,
   kibanaVersion: string,
   hasEncryptionKey: boolean = false

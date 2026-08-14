@@ -13,13 +13,13 @@ evaluate.describe(
   { tag: [...tags.serverless.security.complete, ...tags.serverless.security.ease] },
   () => {
     evaluate(
-      'overview queries activate the automatic-migration-rules-get-all-stats skill and call get_all_rule_migration_stats',
+      'overview queries activate the automatic-migration-rules-summarize skill and call get_all_rule_migration_stats',
       async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
             name: 'agent builder: automatic-migration-summarize',
             description:
-              'Validates that overview/summary queries route to the automatic-migration-rules-get-all-stats ' +
+              'Validates that overview/summary queries route to the automatic-migration-rules-summarize ' +
               'skill and invoke security.siem_migration.get_all_rule_migration_stats. PR1 fixture-free: ' +
               'no migrations are seeded, so the tool returns empty and the expected text describes the ' +
               'tool-calling behavior rather than specific migration data. Queries are scoped to RULE ' +
@@ -37,7 +37,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Migration Overview',
-                  expectedSkill: 'automatic-migration-rules-get-all-stats',
+                  expectedSkill: 'automatic-migration-rules-summarize',
                   expectedOnlyToolId: 'security.siem_migration.get_all_rule_migration_stats',
                 },
               },
@@ -52,7 +52,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Migration Overview',
-                  expectedSkill: 'automatic-migration-rules-get-all-stats',
+                  expectedSkill: 'automatic-migration-rules-summarize',
                   expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
                 },
               },
@@ -69,7 +69,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Migration Drill-in',
-                  expectedSkill: 'automatic-migration-rules-get-all-stats',
+                  expectedSkill: 'automatic-migration-rules-summarize',
                   expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
                 },
               },

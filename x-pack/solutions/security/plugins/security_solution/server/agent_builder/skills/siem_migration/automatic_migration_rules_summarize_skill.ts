@@ -15,9 +15,9 @@ import {
 } from '../../tools/siem_migrations';
 import { AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK, NAME_NEVER_ID_BLOCK } from './shared/content';
 
-export const automaticMigrationRulesGetAllStatsSkill = defineSkillType({
-  id: 'automatic-migration-rules-get-all-stats',
-  name: 'automatic-migration-rules-get-all-stats',
+export const automaticMigrationRulesSummarizeSkill = defineSkillType({
+  id: 'automatic-migration-rules-summarize',
+  name: 'automatic-migration-rules-summarize',
   basePath: 'skills/security/siem_migrations',
   description: `Summarize Automatic Rule Migration progress: list every rule migration with its status and rule counts, or drill into one migration's task progress and translation stats.
 

@@ -19,7 +19,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder: automatic-migration-summarize-vs-start',
             description:
-              'Validates that overview queries route to automatic-migration-rules-get-all-stats and ' +
+              'Validates that overview queries route to automatic-migration-rules-summarize and ' +
               'start/reprocess/resume queries route to automatic-migration-rules-start-migration, and that the ' +
               'two rule-migration siblings do not steal each other intents.',
             examples: [
@@ -34,7 +34,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Migration Overview',
-                  expectedSkill: 'automatic-migration-rules-get-all-stats',
+                  expectedSkill: 'automatic-migration-rules-summarize',
                   shouldNotActivateSkill: 'automatic-migration-rules-start-migration',
                 },
               },
@@ -50,7 +50,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Start Rule Migration',
                   expectedSkill: 'automatic-migration-rules-start-migration',
-                  shouldNotActivateSkill: 'automatic-migration-rules-get-all-stats',
+                  shouldNotActivateSkill: 'automatic-migration-rules-summarize',
                 },
               },
             ],
@@ -68,7 +68,7 @@ evaluate.describe(
             description:
               'Automatic Migration covers both rules and dashboards as distinct features. The ' +
               'PR1 skills handle RULE migrations only. Validates that dashboard-migration intents ' +
-              'do NOT activate automatic-migration-rules-get-all-stats or automatic-migration-rules-start-migration, and ' +
+              'do NOT activate automatic-migration-rules-summarize or automatic-migration-rules-start-migration, and ' +
               'includes a positive control so the dashboard-negative assertions are not just ' +
               '"nothing activates".',
             examples: [
@@ -85,7 +85,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Dashboard Migration',
                   shouldNotActivateSkills: [
-                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-summarize',
                     'automatic-migration-rules-start-migration',
                   ],
                 },
@@ -97,12 +97,12 @@ evaluate.describe(
                 output: {
                   expected:
                     'Dashboard migration progress is not available through the rule-migration ' +
-                    'summarize skill. I will not activate automatic-migration-rules-get-all-stats for a ' +
+                    'summarize skill. I will not activate automatic-migration-rules-summarize for a ' +
                     'dashboard migration.',
                 },
                 metadata: {
                   query_intent: 'Dashboard Migration',
-                  shouldNotActivateSkill: 'automatic-migration-rules-get-all-stats',
+                  shouldNotActivateSkill: 'automatic-migration-rules-summarize',
                 },
               },
               {
@@ -176,7 +176,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Delete Migration',
                   shouldNotActivateSkills: [
-                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-summarize',
                     'automatic-migration-rules-start-migration',
                   ],
                 },
@@ -193,7 +193,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Platform Distractor',
                   shouldNotActivateSkills: [
-                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-summarize',
                     'automatic-migration-rules-start-migration',
                   ],
                 },
@@ -210,7 +210,7 @@ evaluate.describe(
                 metadata: {
                   query_intent: 'Rule Authoring Distractor',
                   shouldNotActivateSkills: [
-                    'automatic-migration-rules-get-all-stats',
+                    'automatic-migration-rules-summarize',
                     'automatic-migration-rules-start-migration',
                   ],
                 },
