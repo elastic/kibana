@@ -114,9 +114,9 @@ steps:
                 create-conversation: false
                 with:
                   message: |
-                    Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}`.
+                    Investigate the logging wrappers in repository `{{ foreach.item.repository }}` at commit `{{ foreach.item.gitSha }}` (ref key `{{ foreach.item.refKey }}`).
 
-                    Find the functions/macros this repository defines so other code can log without naming a logger, then write and validate Lucene RLIKE greps that match their call sites. Iterate with the `platform.sig_events.logging_queries_validate` tool until every returned grep reports `pass: true`. Return an empty `greps` list when the repository has no house wrapper (a correct and common answer).
+                    Find the functions/macros this repository defines so other code can log without naming a logger, then write and validate Lucene RLIKE greps that match their call sites. Iterate with the `platform.sig_events.logging_queries_validate` tool until every returned grep reports `pass: true`, passing `git_ref_key` (`{{ foreach.item.refKey }}`) alongside `git_commit`. Return an empty `greps` list when the repository has no house wrapper (a correct and common answer).
                   # Scope the agent to its read-only Sourcerer code tools plus the
                   # validate_logging_queries builtin (configuration_overrides replaces
                   # the stored tool set for this execution only).
@@ -190,6 +190,7 @@ steps:
               body:
                 repository: '{{ foreach.item.repository }}'
                 gitSha: '{{ foreach.item.gitSha }}'
+                gitRefKey: '{{ foreach.item.refKey }}'
                 repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
                 iacSignals: '${{ foreach.item.iacSignals }}'
                 hasOtel: '${{ foreach.item.hasOtel }}'
@@ -223,6 +224,7 @@ steps:
               body:
                 repository: '{{ foreach.item.repository }}'
                 gitSha: '{{ foreach.item.gitSha }}'
+                gitRefKey: '{{ foreach.item.refKey }}'
                 serviceRoot: '{{ foreach.item.serviceRoot }}'
                 name: '{{ foreach.item.name }}'
                 language: '{{ foreach.item.language }}'

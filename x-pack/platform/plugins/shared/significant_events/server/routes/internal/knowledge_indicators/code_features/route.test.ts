@@ -349,6 +349,61 @@ describe('Code Intelligence routes', () => {
     expect(mockIdentifyCodeQueries).toHaveBeenCalledWith(
       expect.objectContaining({ esClient: streamDataEsClient, otelGateBypassed: true })
     );
+    expect(mockDiscoverLoggingSites).toHaveBeenCalledWith(
+      expect.objectContaining({ gitRefKey: undefined })
+    );
+  });
+
+  it('threads gitRefKey to discoverLoggingSites in the template fallback path', async () => {
+    const sourceEsClient = { source: true };
+    const streamDataEsClient = { streamData: true };
+    mockExtractOtelSignalsResult.mockResolvedValue({ signals: [], failed: true });
+    mockDiscoverLoggingSites.mockResolvedValue([]);
+    mockClassifyLoggingSites.mockResolvedValue([]);
+    mockIdentifyCodeQueries.mockResolvedValue({ generatedCount: 1 });
+    mockResolveConnectorForFeature.mockResolvedValue('connector');
+
+    await identifyOtelSignalsRoute.handler({
+      params: {
+        body: {
+          repository: 'repository',
+          gitSha: 'sha',
+          gitRefKey: 'repository@main',
+          serviceRoot: 'service',
+          name: 'service',
+          language: 'typescript',
+          hasOtel: true,
+          signalCounts: {
+            instrumentation_grpc: 0,
+            instrumentation_http: 0,
+            instrumentation_other: 0,
+            start_span: 0,
+            set_attribute: 0,
+            add_event: 0,
+            record_exception: 0,
+            set_status_error: 0,
+            create_metric: 0,
+          },
+        },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        inferenceClient: {},
+        scopedClusterClient: { asCurrentUser: sourceEsClient },
+        streamDataEsClient,
+        streamsClient: { listStreams: jest.fn().mockResolvedValue([]) },
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({}),
+      }),
+      getSpaceId: jest.fn().mockResolvedValue('default'),
+      server: {},
+      logger: { get: jest.fn().mockReturnValue({ warn: jest.fn(), debug: jest.fn() }) },
+      maintenanceService: createMaintenanceService(),
+    } as unknown as IdentifyOtelHandlerParams);
+
+    expect(mockDiscoverLoggingSites).toHaveBeenCalledWith(
+      expect.objectContaining({ gitRefKey: 'repository@main' })
+    );
   });
 
   it('bounds OTel workflow input strings before they reach source-code queries', () => {
@@ -378,5 +433,9 @@ describe('Code Intelligence routes', () => {
         body: { ...body, repository: 'x'.repeat(MAX_ID_LENGTH + 1) },
       }).success
     ).toBe(false);
+    expect(
+      identifyOtelSignalsRoute.params.safeParse({ body: { ...body, gitRefKey: 'repo@main' } })
+        .success
+    ).toBe(true);
   });
 });

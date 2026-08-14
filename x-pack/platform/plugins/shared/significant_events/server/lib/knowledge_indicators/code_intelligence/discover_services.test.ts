@@ -24,6 +24,17 @@ const refsResponse = (rows: Array<[string, string, string, string]>) => ({
   values: rows,
 });
 
+const refsResponseWithRefKey = (rows: Array<[string, string, string, string, string]>) => ({
+  columns: [
+    { name: 'git.org', type: 'keyword' },
+    { name: 'git.repo', type: 'keyword' },
+    { name: 'git.commit', type: 'keyword' },
+    { name: 'git.ref', type: 'keyword' },
+    { name: 'git.ref_key', type: 'keyword' },
+  ],
+  values: rows,
+});
+
 const pathsResponse = (paths: string[]) => ({
   columns: [{ name: 'file.path', type: 'keyword' }],
   values: paths.map((path) => [path]),
@@ -72,6 +83,27 @@ describe('listIndexedRepos', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockRejectedValue(new Error('no index'));
     await expect(listIndexedRepos({ esClient, logger: loggerMock.create() })).resolves.toEqual([]);
+  });
+
+  it('KEEPs git.ref_key and populates IndexedRepoRef.refKey from it', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(
+      refsResponseWithRefKey([
+        [
+          'open-telemetry',
+          'opentelemetry-demo',
+          'abc123',
+          'main',
+          'open-telemetry/opentelemetry-demo@main',
+        ],
+      ])
+    );
+
+    const repos = await listIndexedRepos({ esClient, logger: loggerMock.create() });
+    expect(repos).toEqual([{ ...repo, refKey: 'open-telemetry/opentelemetry-demo@main' }]);
+
+    const { query } = esClient.esql.query.mock.calls[0][0];
+    expect(query).toContain('KEEP git.org, git.repo, git.commit, git.ref, git.ref_key');
   });
 });
 
@@ -127,6 +159,58 @@ describe('buildLanguageHistogram', () => {
       buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() })
     ).resolves.toEqual([]);
   });
+
+  it('scopes by git.commit in snapshot mode when repo.refKey is unset (INV-004)', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(
+      extBytesResponse([['ts', 1_000]]) as unknown as Awaited<
+        ReturnType<typeof esClient.esql.query>
+      >
+    );
+
+    await buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() });
+
+    const call = esClient.esql.query.mock.calls[0][0];
+    expect(call.query).toContain('update_mode == "snapshot"');
+    expect(call.query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
+    expect(call.query).toContain('git.commit IS NOT NULL');
+    expect(call.params).toEqual([
+      { git_ref_key: '' },
+      { git_org: 'open-telemetry' },
+      { git_repo: 'opentelemetry-demo' },
+      { git_commit: 'abc123' },
+    ]);
+  });
+
+  it('scopes by git.ref_key in incremental mode when repo.refKey is set', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(
+      extBytesResponse([['ts', 1_000]]) as unknown as Awaited<
+        ReturnType<typeof esClient.esql.query>
+      >
+    );
+
+    const incrementalRepo: IndexedRepoRef = {
+      ...repo,
+      refKey: 'open-telemetry/opentelemetry-demo@main',
+    };
+    const histogram = await buildLanguageHistogram({
+      esClient,
+      repo: incrementalRepo,
+      logger: loggerMock.create(),
+    });
+
+    expect(histogram).toEqual([{ language: 'TypeScript', count: 1_000 }]);
+
+    const call = esClient.esql.query.mock.calls[0][0];
+    expect(call.query).toContain('update_mode == "incremental"');
+    expect(call.params).toEqual([
+      { git_ref_key: 'open-telemetry/opentelemetry-demo@main' },
+      { git_org: 'open-telemetry' },
+      { git_repo: 'opentelemetry-demo' },
+      { git_commit: 'abc123' },
+    ]);
+  });
 });
 
 describe('discoverCandidateRoots', () => {
@@ -161,6 +245,39 @@ describe('discoverCandidateRoots', () => {
         hasEntrypoint: false,
       },
     ]);
+  });
+
+  it('threads repo.refKey as git_ref_key into every content query (INV-004 default snapshot)', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(pathsResponse([]));
+
+    await discoverCandidateRoots({ esClient, repo, logger: loggerMock.create() });
+
+    expect(esClient.esql.query.mock.calls.length).toBeGreaterThan(0);
+    for (const [{ query, params }] of esClient.esql.query.mock.calls) {
+      expect(params).toContainEqual({ git_ref_key: '' });
+      expect(query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
+      expect(query).toContain('update_mode == "snapshot"');
+    }
+  });
+
+  it('threads repo.refKey as git_ref_key in incremental mode when set', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(pathsResponse([]));
+    const incrementalRepo: IndexedRepoRef = {
+      ...repo,
+      refKey: 'open-telemetry/opentelemetry-demo@main',
+    };
+
+    await discoverCandidateRoots({ esClient, repo: incrementalRepo, logger: loggerMock.create() });
+
+    expect(esClient.esql.query.mock.calls.length).toBeGreaterThan(0);
+    for (const [{ query, params }] of esClient.esql.query.mock.calls) {
+      expect(params).toContainEqual({
+        git_ref_key: 'open-telemetry/opentelemetry-demo@main',
+      });
+      expect(query).toContain('update_mode == "incremental"');
+    }
   });
 
   it('rejects paths whose basename does not actually match the marker', async () => {

@@ -12,6 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 import {
   OVER_CAPTURE_CEILING,
   SOURCERER_LINES_INDEX,
+  SOURCERER_REFS_LOOKUP_INDEX,
 } from '../../../lib/knowledge_indicators/code_intelligence/constants';
 import { splitRepository } from '../../../lib/knowledge_indicators/code_intelligence/discover_logging_sites';
 
@@ -78,6 +79,11 @@ export interface ValidateLoggingQueriesOptions {
   repository: string;
   /** Immutable commit SHA to scope every grep to. */
   gitCommit: string;
+  /**
+   * Composite ref key (`git.ref_key`) scoping an incremental (branch-indexed)
+   * corpus via a `LOOKUP JOIN`. Defaults to `''` (snapshot mode).
+   */
+  gitRefKey?: string;
   greps: GrepCandidateInput[];
   /** Over-capture ratio ceiling; defaults to {@link OVER_CAPTURE_CEILING}. */
   ceiling?: number;
@@ -107,6 +113,7 @@ export async function validateLoggingQueriesHandler({
   esClient,
   repository,
   gitCommit,
+  gitRefKey = '',
   greps,
   ceiling = OVER_CAPTURE_CEILING,
   logger,
@@ -114,7 +121,14 @@ export async function validateLoggingQueriesHandler({
   const { org, repo } = splitRepository(repository);
   const gitCommitPattern = gitCommit || '*';
 
-  const repoTotalLines = await countRepoLines(esClient, org, repo, gitCommitPattern, logger);
+  const repoTotalLines = await countRepoLines(
+    esClient,
+    org,
+    repo,
+    gitCommitPattern,
+    gitRefKey,
+    logger
+  );
 
   const results: GrepValidationResult[] = [];
   for (const candidate of greps) {
@@ -124,6 +138,7 @@ export async function validateLoggingQueriesHandler({
         org,
         repo,
         gitCommit: gitCommitPattern,
+        gitRefKey,
         candidate,
         repoTotalLines,
         ceiling,
@@ -140,17 +155,28 @@ async function countRepoLines(
   org: string,
   repo: string,
   gitCommit: string,
+  gitRefKey: string,
   logger: Logger
 ): Promise<number> {
   try {
     const response = (await esClient.esql.query({
       query: `
         FROM ${SOURCERER_LINES_INDEX}
-        | WHERE MATCH(git.org, ?git_org)
-            AND git.repo LIKE ?git_repo
-            AND git.commit LIKE ?git_commit
+        | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                    AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+             OR (?git_ref_key != "" AND update_mode == "incremental"
+                    AND git.ref_key == ?git_ref_key)
+        | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+        | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+        | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+        | WHERE git.commit IS NOT NULL
         | STATS total = COUNT(*)`,
-      params: [{ git_org: org }, { git_repo: repo }, { git_commit: gitCommit }],
+      params: [
+        { git_ref_key: gitRefKey },
+        { git_org: org },
+        { git_repo: repo },
+        { git_commit: gitCommit },
+      ],
       drop_null_columns: false,
     })) as ESQLSearchResponse;
 
@@ -174,6 +200,7 @@ async function validateOneGrep({
   org,
   repo,
   gitCommit,
+  gitRefKey,
   candidate,
   repoTotalLines,
   ceiling,
@@ -183,6 +210,7 @@ async function validateOneGrep({
   org: string;
   repo: string;
   gitCommit: string;
+  gitRefKey: string;
   candidate: GrepCandidateInput;
   repoTotalLines: number;
   ceiling: number;
@@ -194,13 +222,19 @@ async function validateOneGrep({
     const response = (await esClient.esql.query({
       query: `
         FROM ${SOURCERER_LINES_INDEX}
-        | WHERE MATCH(git.org, ?git_org)
-            AND git.repo LIKE ?git_repo
-            AND git.commit LIKE ?git_commit
-            AND line.content RLIKE ?regex
+        | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                    AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+             OR (?git_ref_key != "" AND update_mode == "incremental"
+                    AND git.ref_key == ?git_ref_key)
+        | WHERE line.content RLIKE ?regex
+        | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+        | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+        | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+        | WHERE git.commit IS NOT NULL
         | EVAL e = CASE(file.path == ?ev_path AND line.number == ?ev_line, 1, 0)
         | STATS hits = COUNT(*), covers_evidence = MAX(e)`,
       params: [
+        { git_ref_key: gitRefKey },
         { git_org: org },
         { git_repo: repo },
         { git_commit: gitCommit },
@@ -227,7 +261,7 @@ async function validateOneGrep({
 
     let sample: string[] = [];
     if (status === 'ok' || status === 'evidence_missed') {
-      sample = await fetchSample(esClient, org, repo, gitCommit, regex, logger);
+      sample = await fetchSample(esClient, org, repo, gitCommit, gitRefKey, regex, logger);
     }
 
     return {
@@ -307,6 +341,7 @@ async function fetchSample(
   org: string,
   repo: string,
   gitCommit: string,
+  gitRefKey: string,
   regex: string,
   logger: Logger
 ): Promise<string[]> {
@@ -314,14 +349,25 @@ async function fetchSample(
     const response = (await esClient.esql.query({
       query: `
         FROM ${SOURCERER_LINES_INDEX}
-        | WHERE MATCH(git.org, ?git_org)
-            AND git.repo LIKE ?git_repo
-            AND git.commit LIKE ?git_commit
-            AND line.content RLIKE ?regex
+        | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                    AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+             OR (?git_ref_key != "" AND update_mode == "incremental"
+                    AND git.ref_key == ?git_ref_key)
+        | WHERE line.content RLIKE ?regex
+        | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+        | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+        | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+        | WHERE git.commit IS NOT NULL
         | KEEP file.path, line.number
         | SORT file.path, line.number
         | LIMIT 3`,
-      params: [{ git_org: org }, { git_repo: repo }, { git_commit: gitCommit }, { regex }],
+      params: [
+        { git_ref_key: gitRefKey },
+        { git_org: org },
+        { git_repo: repo },
+        { git_commit: gitCommit },
+        { regex },
+      ],
       drop_null_columns: false,
     })) as ESQLSearchResponse;
 

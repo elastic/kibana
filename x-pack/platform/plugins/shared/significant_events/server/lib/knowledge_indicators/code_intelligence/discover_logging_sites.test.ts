@@ -273,7 +273,44 @@ describe('codeGrep', () => {
     const call = esClient.esql.query.mock.calls[0][0];
     expect(call.query).toContain('FROM sourcerer-v1-lines*,sourcerer-v2-lines*');
     expect(call.query).toContain('line.content RLIKE ?regex');
+    expect(call.query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
+    expect(call.query).toContain('git.commit IS NOT NULL');
     expect(call.params).toEqual([
+      { git_ref_key: '' },
+      { git_org: 'open-telemetry' },
+      { git_repo: 'opentelemetry-demo' },
+      { git_commit: 'abc123' },
+      { file_path: 'src/ad/**' },
+      { regex: '.*logger[.]info.*' },
+    ]);
+  });
+
+  it('scopes by git.ref_key in incremental mode when gitRefKey is set', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue({
+      columns: COLUMNS,
+      values: [row('src/ad/Main.java', 42, 'logger.info("started");')],
+    });
+
+    const lines = await codeGrep({
+      esClient,
+      gitOrg: 'open-telemetry',
+      gitRepo: 'opentelemetry-demo',
+      gitCommit: 'abc123',
+      gitRefKey: 'open-telemetry/opentelemetry-demo@main',
+      filePath: 'src/ad/**',
+      regex: '.*logger[.]info.*',
+      limit: 500,
+    });
+
+    expect(lines).toEqual([
+      { filePath: 'src/ad/Main.java', lineNumber: 42, content: 'logger.info("started");' },
+    ]);
+
+    const call = esClient.esql.query.mock.calls[0][0];
+    expect(call.query).toContain('update_mode == "incremental"');
+    expect(call.params).toEqual([
+      { git_ref_key: 'open-telemetry/opentelemetry-demo@main' },
       { git_org: 'open-telemetry' },
       { git_repo: 'opentelemetry-demo' },
       { git_commit: 'abc123' },

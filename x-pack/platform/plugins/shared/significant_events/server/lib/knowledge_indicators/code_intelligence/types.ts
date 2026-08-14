@@ -133,6 +133,12 @@ export interface IndexedRepoRef {
   gitSha: string;
   /** Branch/tag name, if recorded. */
   ref?: string;
+  /**
+   * Composite ref key (`git.ref_key`) from the refs index, used to scope an
+   * incremental (branch-indexed) corpus via a `LOOKUP JOIN`. Empty/undefined for
+   * a snapshot-indexed corpus, which is scoped by `git.commit` instead.
+   */
+  refKey?: string;
 }
 
 /**
@@ -162,6 +168,12 @@ export interface ServiceCandidateRoot {
 export interface DiscoveredService {
   repository: string;
   gitSha: string;
+  /**
+   * Composite ref key (`git.ref_key`) from the refs index, threaded downstream
+   * to scope content queries via a `LOOKUP JOIN` for an incremental
+   * (branch-indexed) corpus. Empty/undefined for a snapshot-indexed corpus.
+   */
+  refKey?: string;
   serviceRoot: string;
   name: string;
   language: string;

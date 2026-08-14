@@ -415,6 +415,16 @@ export const isNonEmittingLine = (line: string): boolean => {
  */
 export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*,sourcerer-v2-refs*' as const;
 
+/**
+ * Exact lookup-mode index name used as the `LOOKUP JOIN` target when scoping a
+ * content (lines/files) query in incremental mode. A `LOOKUP JOIN` resolves the
+ * commit (and org/repo) that lives only on the ref doc onto each content row via
+ * `git.ref_key`. ES rejects a `LOOKUP JOIN` against a standard/wildcard index, so
+ * this MUST be the single exact lookup-mode name — never the comma/wildcard
+ * search alias {@link SOURCERER_REFS_INDEX}.
+ */
+export const SOURCERER_REFS_LOOKUP_INDEX = 'sourcerer-v1-refs' as const;
+
 export const SOURCERER_FILES_INDEX = 'sourcerer-v1-files*,sourcerer-v2-files*' as const;
 
 /**

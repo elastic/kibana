@@ -363,6 +363,58 @@ describe('validateLoggingQueriesHandler', () => {
     expect(statsCall!.params).toContainEqual({ ev_line: 21 });
   });
 
+  it('scopes by git.commit in snapshot mode by default and JOINs the refs lookup index (INV-004)', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    setupTotalMock(esClient);
+
+    await validateLoggingQueriesHandler({
+      esClient,
+      repository: 'supabase/realtime',
+      gitCommit: 'f5abfb19445404',
+      greps: [candidate('.*log_error[(].*')],
+      logger,
+    });
+
+    for (const [{ query, params }] of esClient.esql.query.mock.calls) {
+      expect(query).toContain('update_mode == "snapshot"');
+      expect(query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
+      expect(query).toContain('git.commit IS NOT NULL');
+      expect(params).toContainEqual({ git_ref_key: '' });
+    }
+  });
+
+  it('scopes by git.ref_key in incremental mode when gitRefKey is set', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isTotalQuery(req.query)) {
+        return { columns: TOTAL_COLUMNS, values: [[REPO_TOTAL_LINES]] };
+      }
+      if (isStatsQuery(req.query)) {
+        return { columns: STATS_COLUMNS, values: [[179, 1]] };
+      }
+      if (isSampleQuery(req.query)) {
+        return { columns: SAMPLE_COLUMNS, values: [['lib/realtime/logs.ex', 21]] };
+      }
+      return { columns: [], values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    const output = await validateLoggingQueriesHandler({
+      esClient,
+      repository: 'supabase/realtime',
+      gitCommit: 'f5abfb19445404',
+      gitRefKey: 'supabase/realtime@main',
+      greps: [candidate('.*log_error[(].*')],
+      logger,
+    });
+
+    expect(output.results[0].status).toBe('ok');
+    expect(output.repo_total_lines).toBe(REPO_TOTAL_LINES);
+    for (const [{ query, params }] of esClient.esql.query.mock.calls) {
+      expect(query).toContain('update_mode == "incremental"');
+      expect(params).toContainEqual({ git_ref_key: 'supabase/realtime@main' });
+    }
+  });
+
   it('honours a custom over-capture ceiling', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockImplementation((async (req: { query: string }) => {

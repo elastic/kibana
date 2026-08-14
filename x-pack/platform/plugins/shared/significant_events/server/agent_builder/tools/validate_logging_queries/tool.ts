@@ -34,6 +34,13 @@ const validateLoggingQueriesSchema = z.object({
     .describe(
       'Immutable commit SHA the repository is indexed at. Every grep is scoped to this commit so validation is reproducible.'
     ),
+  git_ref_key: z
+    .string()
+    .max(256)
+    .default('')
+    .describe(
+      'Composite ref key (`git.ref_key`) scoping validation to an incremental (branch-indexed) corpus via a `LOOKUP JOIN`. Empty (default) scopes by `git_commit` against a snapshot-indexed corpus instead.'
+    ),
   greps: z
     .array(
       z.object({
@@ -147,6 +154,7 @@ export function createValidateLoggingQueriesTool({
           esClient: scopedClients.scopedClusterClient.asCurrentUser,
           repository: toolParams.repository,
           gitCommit: toolParams.git_commit,
+          gitRefKey: toolParams.git_ref_key,
           greps: toolParams.greps,
           logger,
         });

@@ -16,6 +16,7 @@ import {
   SOURCERER_FILES_INDEX,
   SOURCERER_LINES_INDEX,
   SOURCERER_REFS_INDEX,
+  SOURCERER_REFS_LOOKUP_INDEX,
 } from './constants';
 import type {
   IacSignal,
@@ -42,18 +43,29 @@ export async function buildLanguageHistogram({
   repo: IndexedRepoRef;
   logger: Logger;
 }): Promise<LanguageCount[]> {
-  const { org, repo: repoName, gitSha, repository } = repo;
+  const { org, repo: repoName, gitSha, refKey, repository } = repo;
+  const gitRefKey = refKey ?? '';
   try {
     const response = (await esClient.esql.query({
       query: `
         FROM ${SOURCERER_FILES_INDEX}
-        | WHERE MATCH(git.org, ?git_org)
-            AND git.repo LIKE ?git_repo
-            AND git.commit LIKE ?git_commit
+        | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                    AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+             OR (?git_ref_key != "" AND update_mode == "incremental"
+                    AND git.ref_key == ?git_ref_key)
+        | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+        | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+        | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+        | WHERE git.commit IS NOT NULL
         | STATS bytes = SUM(file.size) BY file.extension
         | SORT bytes DESC
         | LIMIT 200`,
-      params: [{ git_org: org }, { git_repo: repoName }, { git_commit: gitSha || '*' }],
+      params: [
+        { git_ref_key: gitRefKey },
+        { git_org: org },
+        { git_repo: repoName },
+        { git_commit: gitSha || '*' },
+      ],
       drop_null_columns: false,
     })) as ESQLSearchResponse;
 
@@ -144,7 +156,7 @@ export async function listIndexedRepos({
       query: `
         FROM ${SOURCERER_REFS_INDEX}
         | WHERE status IN ("complete", "ready")
-        | KEEP git.org, git.repo, git.commit, git.ref
+        | KEEP git.org, git.repo, git.commit, git.ref, git.ref_key
         | SORT git.org, git.repo
         | LIMIT 1000`,
       drop_null_columns: false,
@@ -155,6 +167,7 @@ export async function listIndexedRepos({
     const repoCol = col('git.repo');
     const commitCol = col('git.commit');
     const refCol = col('git.ref');
+    const refKeyCol = col('git.ref_key');
     if (orgCol === -1 || repoCol === -1 || commitCol === -1) {
       return [];
     }
@@ -173,6 +186,7 @@ export async function listIndexedRepos({
         repo,
         gitSha,
         ref: refCol === -1 ? undefined : String(row[refCol] ?? '') || undefined,
+        refKey: refKeyCol === -1 ? undefined : String(row[refKeyCol] ?? '') || undefined,
       });
     }
 
@@ -217,6 +231,7 @@ async function listPaths({
   org,
   repo,
   gitSha,
+  gitRefKey,
   pattern,
   limit,
 }: {
@@ -224,21 +239,33 @@ async function listPaths({
   org: string;
   repo: string;
   gitSha: string;
+  gitRefKey: string;
   pattern: string;
   limit: number;
 }): Promise<string[]> {
   const response = (await esClient.esql.query({
     query: `
       FROM ${SOURCERER_LINES_INDEX}
-      | WHERE MATCH(git.org, ?git_org)
-          AND git.repo LIKE ?git_repo
-          AND git.commit LIKE ?git_commit
-          AND file.path RLIKE ?pattern
+      | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                  AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+           OR (?git_ref_key != "" AND update_mode == "incremental"
+                  AND git.ref_key == ?git_ref_key)
+      | WHERE file.path RLIKE ?pattern
+      | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+      | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+      | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+      | WHERE git.commit IS NOT NULL
       | STATS n = COUNT(*) BY file.path
       | KEEP file.path
       | SORT file.path
       | LIMIT ${limit}`,
-    params: [{ git_org: org }, { git_repo: repo }, { git_commit: gitSha }, { pattern }],
+    params: [
+      { git_ref_key: gitRefKey },
+      { git_org: org },
+      { git_repo: repo },
+      { git_commit: gitSha },
+      { pattern },
+    ],
     drop_null_columns: false,
   })) as ESQLSearchResponse;
 
@@ -261,6 +288,7 @@ async function grepLines({
   org,
   repo,
   gitSha,
+  gitRefKey,
   pattern,
   filePaths,
   limit,
@@ -269,6 +297,7 @@ async function grepLines({
   org: string;
   repo: string;
   gitSha: string;
+  gitRefKey: string;
   pattern: string;
   filePaths?: string[];
   limit: number;
@@ -282,14 +311,20 @@ async function grepLines({
   const response = (await esClient.esql.query({
     query: `
       FROM ${SOURCERER_LINES_INDEX}
-      | WHERE MATCH(git.org, ?git_org)
-          AND git.repo LIKE ?git_repo
-          AND git.commit LIKE ?git_commit${pathClause}
-          AND line.content RLIKE ?pattern
+      | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                  AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+           OR (?git_ref_key != "" AND update_mode == "incremental"
+                  AND git.ref_key == ?git_ref_key)
+      | WHERE line.content RLIKE ?pattern${pathClause}
+      | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+      | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+      | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+      | WHERE git.commit IS NOT NULL
       | KEEP file.path, line.number, line.content
       | SORT file.path, line.number
       | LIMIT ${limit}`,
     params: [
+      { git_ref_key: gitRefKey },
       { git_org: org },
       { git_repo: repo },
       { git_commit: gitSha },
@@ -321,6 +356,7 @@ async function readFileHead({
   org,
   repo,
   gitSha,
+  gitRefKey,
   filePath,
   limit,
 }: {
@@ -328,20 +364,32 @@ async function readFileHead({
   org: string;
   repo: string;
   gitSha: string;
+  gitRefKey: string;
   filePath: string;
   limit: number;
 }): Promise<string[]> {
   const response = (await esClient.esql.query({
     query: `
       FROM ${SOURCERER_LINES_INDEX}
-      | WHERE MATCH(git.org, ?git_org)
-          AND git.repo LIKE ?git_repo
-          AND git.commit LIKE ?git_commit
-          AND file.path == ?file_path
+      | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                  AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+           OR (?git_ref_key != "" AND update_mode == "incremental"
+                  AND git.ref_key == ?git_ref_key)
+      | WHERE file.path == ?file_path
+      | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+      | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+      | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+      | WHERE git.commit IS NOT NULL
       | KEEP line.number, line.content
       | SORT line.number
       | LIMIT ${limit}`,
-    params: [{ git_org: org }, { git_repo: repo }, { git_commit: gitSha }, { file_path: filePath }],
+    params: [
+      { git_ref_key: gitRefKey },
+      { git_org: org },
+      { git_repo: repo },
+      { git_commit: gitSha },
+      { file_path: filePath },
+    ],
     drop_null_columns: false,
   })) as ESQLSearchResponse;
 
@@ -387,7 +435,8 @@ export async function discoverCandidateRoots({
   logger,
   perMarkerLimit = 500,
 }: DiscoverCandidateRootsOptions): Promise<DiscoverCandidateRootsResult> {
-  const { org, repo: repoName, gitSha, repository } = repo;
+  const { org, repo: repoName, gitSha, refKey, repository } = repo;
+  const gitRefKey = refKey ?? '';
   const rootMarkers = new Map<string, Set<string>>();
   const rootLanguages = new Map<string, Set<string>>();
 
@@ -400,6 +449,7 @@ export async function discoverCandidateRoots({
         org,
         repo: repoName,
         gitSha,
+        gitRefKey,
         pattern,
         limit: perMarkerLimit,
       });
@@ -446,6 +496,7 @@ export async function discoverCandidateRoots({
         org,
         repo: repoName,
         gitSha,
+        gitRefKey,
         pattern,
         limit: perMarkerLimit,
       });
@@ -476,6 +527,7 @@ export async function discoverCandidateRoots({
           org,
           repo: repoName,
           gitSha,
+          gitRefKey,
           pattern,
           filePaths: sortedManifestPaths,
           limit: EVIDENCE_LINE_LIMIT,
@@ -499,6 +551,7 @@ export async function discoverCandidateRoots({
         org,
         repo: repoName,
         gitSha,
+        gitRefKey,
         pattern,
         limit: EVIDENCE_LINE_LIMIT,
       });
@@ -520,6 +573,7 @@ export async function discoverCandidateRoots({
         org,
         repo: repoName,
         gitSha,
+        gitRefKey,
         pattern,
         limit: EVIDENCE_LINE_LIMIT,
       });
@@ -555,7 +609,15 @@ export async function discoverCandidateRoots({
       continue;
     }
     try {
-      const paths = await listPaths({ esClient, org, repo: repoName, gitSha, pattern, limit: 1 });
+      const paths = await listPaths({
+        esClient,
+        org,
+        repo: repoName,
+        gitSha,
+        gitRefKey,
+        pattern,
+        limit: 1,
+      });
       if (paths.length > 0) {
         iacByKind.set(kind as IacKind, paths[0]);
       }
@@ -576,6 +638,7 @@ export async function discoverCandidateRoots({
       org,
       repo: repoName,
       gitSha,
+      gitRefKey,
       pattern: README_PATH_PATTERN,
       limit: perMarkerLimit,
     });
@@ -589,6 +652,7 @@ export async function discoverCandidateRoots({
           org,
           repo: repoName,
           gitSha,
+          gitRefKey,
           filePath: rootReadme,
           limit: README_LINE_LIMIT,
         }))

@@ -13,6 +13,7 @@ import {
   isNonEmittingLine,
   LOGGER_IDIOM_PATTERNS,
   SOURCERER_LINES_INDEX,
+  SOURCERER_REFS_LOOKUP_INDEX,
 } from './constants';
 import type { LoggingCandidate } from './types';
 
@@ -31,6 +32,13 @@ export interface CodeGrepOptions {
   gitRepo: string;
   /** Immutable commit (LIKE wildcard); `*` for any. */
   gitCommit: string;
+  /**
+   * Composite ref key (`git.ref_key`) scoping an incremental (branch-indexed)
+   * corpus via a `LOOKUP JOIN`. Optional, defaults to `''` (snapshot mode) so
+   * existing OTel-path callers compile and keep snapshot-mode behavior
+   * unchanged.
+   */
+  gitRefKey?: string;
   /** File-path glob, `*` single-segment and `**` recursive (e.g. `src/foo/**`). */
   filePath: string;
   /** Lucene RLIKE regex; anchored to the whole value, so wrap in `.*`. */
@@ -56,6 +64,7 @@ export async function codeGrep({
   gitOrg,
   gitRepo,
   gitCommit,
+  gitRefKey = '',
   filePath,
   regex,
   limit,
@@ -65,11 +74,15 @@ export async function codeGrep({
   // what keeps a bare `*` from crossing a `/`.
   const query = `
     FROM ${SOURCERER_LINES_INDEX}
-    | WHERE MATCH(git.org, ?git_org)
-        AND git.repo LIKE ?git_repo
-        AND git.commit LIKE ?git_commit
-        AND file.path LIKE ?file_path
-        AND line.content RLIKE ?regex
+    | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+         OR (?git_ref_key != "" AND update_mode == "incremental"
+                AND git.ref_key == ?git_ref_key)
+    | WHERE file.path LIKE ?file_path AND line.content RLIKE ?regex
+    | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+    | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+    | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+    | WHERE git.commit IS NOT NULL
     | EVAL fp_is_recursive = ?file_path != REPLACE(?file_path, "[*][*]", "")
     | EVAL fp_num_input_segments = LENGTH(?file_path) - LENGTH(REPLACE(?file_path, "/", "")) + 1
     | EVAL fp_num_segments = MV_COUNT(SPLIT(file.path, "/"))
@@ -81,6 +94,7 @@ export async function codeGrep({
   const response = (await esClient.esql.query({
     query,
     params: [
+      { git_ref_key: gitRefKey },
       { git_org: gitOrg },
       { git_repo: gitRepo },
       { git_commit: gitCommit },
@@ -123,6 +137,7 @@ export async function fetchLineWindows({
   gitOrg,
   gitRepo,
   gitCommit,
+  gitRefKey = '',
   hitsByFile,
   logger,
 }: {
@@ -130,6 +145,13 @@ export async function fetchLineWindows({
   gitOrg: string;
   gitRepo: string;
   gitCommit: string;
+  /**
+   * Composite ref key (`git.ref_key`) scoping an incremental (branch-indexed)
+   * corpus via a `LOOKUP JOIN`. Optional, defaults to `''` (snapshot mode) so
+   * existing OTel-path callers compile and keep snapshot-mode behavior
+   * unchanged.
+   */
+  gitRefKey?: string;
   /** file path -> set of matched line numbers. */
   hitsByFile: Map<string, Set<number>>;
   logger: Logger;
@@ -150,15 +172,20 @@ export async function fetchLineWindows({
       const response = (await esClient.esql.query({
         query: `
           FROM ${SOURCERER_LINES_INDEX}
-          | WHERE MATCH(git.org, ?git_org)
-              AND git.repo LIKE ?git_repo
-              AND git.commit LIKE ?git_commit
-              AND file.path == ?file_path
-              AND line.number >= ?lo AND line.number <= ?hi
+          | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                      AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+               OR (?git_ref_key != "" AND update_mode == "incremental"
+                      AND git.ref_key == ?git_ref_key)
+          | WHERE file.path == ?file_path AND line.number >= ?lo AND line.number <= ?hi
+          | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+          | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+          | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+          | WHERE git.commit IS NOT NULL
           | KEEP line.number, line.content
           | SORT line.number
           | LIMIT 10000`,
         params: [
+          { git_ref_key: gitRefKey },
           { git_org: gitOrg },
           { git_repo: gitRepo },
           { git_commit: gitCommit },
@@ -197,6 +224,11 @@ export interface DiscoverLoggingSitesOptions {
   repository: string;
   /** Immutable commit SHA to scope every grep to. */
   gitSha: string;
+  /**
+   * Composite ref key (`git.ref_key`) scoping an incremental (branch-indexed)
+   * corpus via a `LOOKUP JOIN`. Defaults to `''` (snapshot mode).
+   */
+  gitRefKey?: string;
   /** Repository-relative service root; grep is confined to `<root>/**`. */
   serviceRoot: string;
   /** Primary language, carried onto each candidate for downstream context. */
@@ -243,6 +275,7 @@ export async function discoverLoggingSites({
   esClient,
   repository,
   gitSha,
+  gitRefKey = '',
   serviceRoot,
   language,
   logger,
@@ -269,6 +302,7 @@ export async function discoverLoggingSites({
         gitOrg: org,
         gitRepo: repo,
         gitCommit,
+        gitRefKey,
         filePath,
         regex,
         limit: perPatternLimit,
@@ -340,6 +374,7 @@ export async function discoverLoggingSites({
     gitOrg: org,
     gitRepo: repo,
     gitCommit,
+    gitRefKey,
     hitsByFile,
     logger,
   });

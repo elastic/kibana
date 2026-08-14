@@ -799,6 +799,7 @@ const identifyOtelSignalsRoute = createServerRoute({
     body: z.object({
       repository: codeIntelligenceInput,
       gitSha: codeIntelligenceInput,
+      gitRefKey: codeIntelligenceInput.optional(),
       serviceRoot: codeIntelligenceInput,
       name: codeIntelligenceInput,
       language: codeIntelligenceInput,
@@ -819,7 +820,8 @@ const identifyOtelSignalsRoute = createServerRoute({
     const { scopedClusterClient, streamDataEsClient, licensing, inferenceClient } = scopedClients;
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
-    const { repository, gitSha, serviceRoot, name, language, signalCounts } = params.body;
+    const { repository, gitSha, gitRefKey, serviceRoot, name, language, signalCounts } =
+      params.body;
     const routeLogger = logger.get('code_intelligence', 'identify_otel_signals', name);
     // Sourcerer is always in the origin project. Stream sampling may route to a
     // connected project, so it must use the space-routed data client.
@@ -842,6 +844,7 @@ const identifyOtelSignalsRoute = createServerRoute({
         esClient: sourceEsClient,
         repository,
         gitSha,
+        gitRefKey,
         serviceRoot,
         language,
         logger: routeLogger,
@@ -1003,6 +1006,7 @@ const identifyServiceRoute = createServerRoute({
     body: z.object({
       repository: codeIntelligenceInput,
       gitSha: codeIntelligenceInput,
+      gitRefKey: codeIntelligenceInput.optional(),
       repositoryLanguages: z
         .array(
           z.object({
@@ -1081,6 +1085,7 @@ const identifyServiceRoute = createServerRoute({
     const {
       repository,
       gitSha,
+      gitRefKey,
       repositoryLanguages,
       iacSignals,
       service,
@@ -1112,6 +1117,7 @@ const identifyServiceRoute = createServerRoute({
         esClient,
         repository,
         gitSha,
+        gitRefKey,
         serviceRoot: service.serviceRoot,
         language: service.language,
         logger: routeLogger,

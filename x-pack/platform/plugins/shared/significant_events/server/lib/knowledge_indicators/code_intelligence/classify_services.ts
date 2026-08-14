@@ -135,6 +135,7 @@ export async function classifyServices({
   }
 
   const gitShaByRepo = new Map(repos.map((repo) => [repo.repository, repo.gitSha]));
+  const refKeyByRepo = new Map(repos.map((repo) => [repo.repository, repo.refKey]));
   const toService = (
     repository: string,
     serviceRoot: string,
@@ -191,6 +192,7 @@ export async function classifyServices({
     return {
       repository,
       gitSha: gitShaByRepo.get(repository) ?? '',
+      refKey: refKeyByRepo.get(repository),
       serviceRoot,
       name,
       language,

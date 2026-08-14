@@ -22,6 +22,7 @@ import {
   LOGGING_PROFILE_DRIFT_RATIO,
   OVER_CAPTURE_CEILING,
   SOURCERER_LINES_INDEX,
+  SOURCERER_REFS_LOOKUP_INDEX,
 } from './constants';
 import { getRepositoryFeatureStreamName } from './identify_code_features';
 import { splitRepository } from './discover_logging_sites';
@@ -308,6 +309,11 @@ export interface DetectLoggingProfileDriftOptions {
   repository: string;
   /** Immutable commit SHA the greps were validated against (and recounted on). */
   gitCommit: string;
+  /**
+   * Composite ref key (`git.ref_key`) scoping an incremental (branch-indexed)
+   * corpus via a `LOOKUP JOIN`. Defaults to `''` (snapshot mode).
+   */
+  gitRefKey?: string;
   /** The persisted profile to recount. */
   profile: LoggingProfile;
   /**
@@ -334,6 +340,7 @@ export async function detectLoggingProfileDrift({
   esClient,
   repository,
   gitCommit,
+  gitRefKey = '',
   profile,
   driftRatio = LOGGING_PROFILE_DRIFT_RATIO,
   logger,
@@ -349,6 +356,7 @@ export async function detectLoggingProfileDrift({
         org,
         repo,
         gitCommit: gitCommitPattern,
+        gitRefKey,
         stored,
         driftRatio,
         logger,
@@ -372,6 +380,7 @@ async function recountOneGrep({
   org,
   repo,
   gitCommit,
+  gitRefKey,
   stored,
   driftRatio,
   logger,
@@ -380,6 +389,7 @@ async function recountOneGrep({
   org: string;
   repo: string;
   gitCommit: string;
+  gitRefKey: string;
   stored: LoggingProfileGrep;
   driftRatio: number;
   logger: Logger;
@@ -389,12 +399,18 @@ async function recountOneGrep({
     const response = (await esClient.esql.query({
       query: `
         FROM ${SOURCERER_LINES_INDEX}
-        | WHERE MATCH(git.org, ?git_org)
-            AND git.repo LIKE ?git_repo
-            AND git.commit LIKE ?git_commit
-            AND line.content RLIKE ?regex
+        | WHERE (?git_ref_key == "" AND update_mode == "snapshot"
+                    AND git.org LIKE ?git_org AND git.repo LIKE ?git_repo AND git.commit LIKE ?git_commit)
+             OR (?git_ref_key != "" AND update_mode == "incremental"
+                    AND git.ref_key == ?git_ref_key)
+        | WHERE line.content RLIKE ?regex
+        | EVAL _org = git.org, _repo = git.repo, _commit = git.commit
+        | LOOKUP JOIN ${SOURCERER_REFS_LOOKUP_INDEX} ON git.ref_key
+        | EVAL git.org = _org, git.repo = _repo, git.commit = COALESCE(git.commit, _commit)
+        | WHERE git.commit IS NOT NULL
         | STATS hits = COUNT(*)`,
       params: [
+        { git_ref_key: gitRefKey },
         { git_org: org },
         { git_repo: repo },
         { git_commit: gitCommit },

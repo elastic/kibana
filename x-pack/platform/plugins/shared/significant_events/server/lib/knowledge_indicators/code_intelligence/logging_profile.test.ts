@@ -546,4 +546,42 @@ describe('detectLoggingProfileDrift', () => {
     expect(query).toContain('RLIKE ?regex');
     expect(params).toContainEqual({ regex: '.*log_error[(].*' });
   });
+
+  it('scopes by git.commit in snapshot mode by default (INV-004) and JOINs the refs lookup index', async () => {
+    const client = esClient();
+    client.esql.query.mockResolvedValue(statsResponse(179));
+
+    await detectLoggingProfileDrift({
+      esClient: client,
+      repository: 'supabase/realtime',
+      gitCommit: 'f5abfb19445404',
+      profile,
+      logger,
+    });
+
+    const [{ query, params }] = client.esql.query.mock.calls[0];
+    expect(query).toContain('update_mode == "snapshot"');
+    expect(query).toContain('LOOKUP JOIN sourcerer-v1-refs ON git.ref_key');
+    expect(query).toContain('git.commit IS NOT NULL');
+    expect(params).toContainEqual({ git_ref_key: '' });
+  });
+
+  it('scopes by git.ref_key in incremental mode when gitRefKey is set', async () => {
+    const client = esClient();
+    client.esql.query.mockResolvedValue(statsResponse(179));
+
+    const result = await detectLoggingProfileDrift({
+      esClient: client,
+      repository: 'supabase/realtime',
+      gitCommit: 'f5abfb19445404',
+      gitRefKey: 'supabase/realtime@main',
+      profile,
+      logger,
+    });
+
+    expect(result.greps[0]).toMatchObject({ actual: 179, refresh: false });
+    const [{ query, params }] = client.esql.query.mock.calls[0];
+    expect(query).toContain('update_mode == "incremental"');
+    expect(params).toContainEqual({ git_ref_key: 'supabase/realtime@main' });
+  });
 });
