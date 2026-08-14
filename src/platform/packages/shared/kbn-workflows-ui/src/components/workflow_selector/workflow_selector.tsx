@@ -290,7 +290,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       return (
         <>
           {search}
-          <div>{list}</div>
+          <div css={{ marginTop: euiTheme.size.xs }}>{list}</div>
           {workflowOptions.length > 0 && !finalConfig.hideViewWorkflowLink && (
             <EuiPanel
               paddingSize="s"
