@@ -7,6 +7,7 @@
 
 import type { AppMenuPrimaryActionItem } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
+import { APM_APP_MENU_EBT_ACTIONS, apmAppMenuEbt } from './ebt_constants';
 
 const addDataLabel = i18n.translate('xpack.apm.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -26,6 +27,7 @@ export function getAddDataMenuItem({
     label: addDataLabel,
     iconType: 'plusInCircle',
     href,
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.ADD_DATA),
     testId: 'apmAddDataHeaderLink',
   };
 }
