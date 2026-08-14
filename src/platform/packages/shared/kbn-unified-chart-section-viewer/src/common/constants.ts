@@ -91,8 +91,7 @@ export const METRICS_SORT_DIRECTION = {
   desc: 'desc',
 } as const;
 
-// Default metrics grid sort, derived from the canonical object form in
-// @kbn/discover-utils so the two representations cannot drift.
+// Default metrics grid sort
 export const DEFAULT_METRICS_SORT = [
   METRICS_GRID_SORT_DEFAULTS.sortField,
   METRICS_GRID_SORT_DEFAULTS.sortDirection,
