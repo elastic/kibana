@@ -15,11 +15,9 @@ import type { PublishesDataLoading } from '@kbn/presentation-publishing';
 import { apiPublishesDataLoading } from '@kbn/presentation-publishing';
 import type { DashboardLayout } from '../dashboard_api/layout_manager';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
-import { screenshotModeService } from '../services/kibana_services';
 
 export const DashboardControlsRenderer = () => {
   const dashboardApi = useDashboardApi();
-
   const onControlsLayoutChanged = useCallback(
     ({ controls }: ControlsLayout) => {
       dashboardApi.layout$.next({
@@ -81,14 +79,7 @@ export const DashboardControlsRenderer = () => {
   }, [dashboardApi]);
 
   return (
-    <span
-      data-dashboard-controls-ready={!anyApiUnavailable && !anyControlLoading}
-      // ControlsRenderer must always be rendered
-      // so that control filters are applied to dashboard
-      //
-      // do not display ControlsRenderer in reports
-      style={screenshotModeService.isScreenshotMode() ? { display: 'none' } : undefined}
-    >
+    <span data-dashboard-controls-ready={!anyApiUnavailable && !anyControlLoading}>
       <ControlsRenderer
         parentApi={dashboardApi}
         controls={controls} // only controls can currently be pinned
