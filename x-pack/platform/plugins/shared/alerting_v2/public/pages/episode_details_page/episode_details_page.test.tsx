@@ -458,7 +458,51 @@ describe('EpisodeDetailsPage', () => {
     it('sets the focused episode when the episode loads', () => {
       renderPage();
 
-      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenCalledWith(mockEpisode);
+      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenCalledWith(mockEpisode, {
+        episodeName: 'Rule A alert',
+      });
+    });
+
+    it('includes the group in the episode name when grouping values are present', () => {
+      mockUseFetchEpisodeQuery.mockReturnValue({
+        ...episodeQuery,
+        data: {
+          ...mockEpisode,
+          episode_data: JSON.stringify({ host: { name: 'web-01' } }),
+        },
+      } as unknown as EpisodeQueryResult);
+
+      renderPage();
+
+      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenCalledWith(
+        expect.objectContaining({ 'episode.id': 'ep-1' }),
+        { episodeName: 'Rule A alert for web-01' }
+      );
+    });
+
+    it('uses the group name when the rule name is not available', () => {
+      mockUseFetchRule.mockReturnValue({
+        ...fetchRuleResult,
+        data: undefined,
+        ruleState: {
+          status: RuleStateStatus.loading,
+          ruleId: 'rule-1',
+        },
+      } as unknown as FetchRuleResult);
+      mockUseFetchEpisodeQuery.mockReturnValue({
+        ...episodeQuery,
+        data: {
+          ...mockEpisode,
+          episode_data: JSON.stringify({ host: { name: 'web-01' } }),
+        },
+      } as unknown as EpisodeQueryResult);
+
+      renderPage();
+
+      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenCalledWith(
+        expect.objectContaining({ 'episode.id': 'ep-1' }),
+        { episodeName: 'web-01 alert' }
+      );
     });
 
     it('clears the focused episode on unmount with the episode id', () => {
@@ -498,7 +542,9 @@ describe('EpisodeDetailsPage', () => {
       );
 
       expect(mockFocusedEpisodeService.clearFocusedEpisode).toHaveBeenCalledWith('ep-1');
-      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenLastCalledWith(nextEpisode);
+      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenLastCalledWith(nextEpisode, {
+        episodeName: 'Rule A alert',
+      });
     });
   });
 });

@@ -45,11 +45,15 @@ export const createIdGenerator = (): IdGenerator => {
   };
 };
 
-const toAttachment = (episode: AlertEpisode, id: string): PendingEpisodeAttachment => ({
+const toAttachment = (
+  episode: AlertEpisode,
+  id: string,
+  episodeName?: string
+): PendingEpisodeAttachment => ({
   id,
   type: EPISODE_ATTACHMENT_TYPE,
   origin: episode['episode.id'],
-  data: alertEpisodeToEpisodeAttachment(episode),
+  data: alertEpisodeToEpisodeAttachment(episode, { episodeName }),
 });
 
 const isNewConversation = (conversation: ActiveConversation | null): boolean => {
@@ -125,8 +129,8 @@ export const registerEpisodeAutoAttach = ({
   const subscription = new Subscription();
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  const addAttachment = (episode: AlertEpisode) => {
-    agentBuilder.addAttachment(toAttachment(episode, draftAttachmentId.current));
+  const addAttachment = (episode: AlertEpisode, episodeName?: string) => {
+    agentBuilder.addAttachment(toAttachment(episode, draftAttachmentId.current, episodeName));
   };
 
   subscription.add(
@@ -142,13 +146,13 @@ export const registerEpisodeAutoAttach = ({
       chrome.sidebar.getCurrentAppId$(),
       focusedEpisodeService.focusedEpisode$,
       agentBuilder.events.ui.activeConversation$,
-    ]).subscribe(([appId, episode, conversation]) => {
+    ]).subscribe(([appId, focused, conversation]) => {
       if (pendingAddAttachmentTimeout !== undefined) {
         clearTimeout(pendingAddAttachmentTimeout);
         pendingAddAttachmentTimeout = undefined;
       }
 
-      if (appId !== AGENTBUILDER_FEATURE_ID || !episode || !isNewConversation(conversation)) {
+      if (appId !== AGENTBUILDER_FEATURE_ID || !focused || !isNewConversation(conversation)) {
         return;
       }
 
@@ -159,7 +163,7 @@ export const registerEpisodeAutoAttach = ({
        */
       pendingAddAttachmentTimeout = setTimeout(() => {
         pendingAddAttachmentTimeout = undefined;
-        addAttachment(episode);
+        addAttachment(focused.episode, focused.episodeName);
       });
     })
   );

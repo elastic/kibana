@@ -155,6 +155,21 @@ describe('registerEpisodeAutoAttach', () => {
     });
   });
 
+  it('includes the focused episode name on the attachment', () => {
+    focusedEpisodeService.setFocusedEpisode(createEpisode(), {
+      episodeName: 'Host CPU high alert',
+    });
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ 'episode.name': 'Host CPU high alert' }),
+      })
+    );
+  });
+
   it('does not attach to an existing conversation', () => {
     focusedEpisodeService.setFocusedEpisode(createEpisode());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);

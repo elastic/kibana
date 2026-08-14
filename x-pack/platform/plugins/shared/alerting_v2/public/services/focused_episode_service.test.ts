@@ -24,7 +24,7 @@ describe('FocusedEpisodeService', () => {
     const service = new FocusedEpisodeService();
     const episode = createEpisode('ep-1');
 
-    service.setFocusedEpisode(episode);
+    service.setFocusedEpisode(episode, { episodeName: 'Host CPU high alert' });
 
     expect(service.getFocusedEpisode()).toBe(episode);
 

@@ -9,22 +9,27 @@ import { BehaviorSubject } from 'rxjs';
 import { injectable } from 'inversify';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 
+export interface FocusedEpisode {
+  episode: AlertEpisode;
+  episodeName?: string;
+}
+
 @injectable()
 export class FocusedEpisodeService {
-  private readonly focusedEpisodeSubject$ = new BehaviorSubject<AlertEpisode | undefined>(
+  private readonly focusedEpisodeSubject$ = new BehaviorSubject<FocusedEpisode | undefined>(
     undefined
   );
 
   public readonly focusedEpisode$ = this.focusedEpisodeSubject$.asObservable();
 
-  public setFocusedEpisode(episode: AlertEpisode): void {
-    this.focusedEpisodeSubject$.next(episode);
+  public setFocusedEpisode(episode: AlertEpisode, options?: { episodeName?: string }): void {
+    this.focusedEpisodeSubject$.next({ episode, episodeName: options?.episodeName });
   }
 
   public clearFocusedEpisode(episodeId?: string): void {
     const focusedEpisode = this.focusedEpisodeSubject$.getValue();
 
-    if (episodeId && focusedEpisode?.['episode.id'] !== episodeId) {
+    if (episodeId && focusedEpisode?.episode['episode.id'] !== episodeId) {
       return;
     }
 
@@ -32,6 +37,6 @@ export class FocusedEpisodeService {
   }
 
   public getFocusedEpisode(): AlertEpisode | undefined {
-    return this.focusedEpisodeSubject$.getValue();
+    return this.focusedEpisodeSubject$.getValue()?.episode;
   }
 }
