@@ -25,10 +25,7 @@ import type { RulesClient } from '../../lib/rules_client';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { getRuleToolId } from '../tools/get_rule';
 import { refreshEpisodeToolId } from '../tools/refresh_episode';
-import {
-  createEpisodeAttachmentType,
-  EPISODE_ATTACHMENT_STALE_AFTER_MS,
-} from './episode_attachment_type';
+import { createEpisodeAttachmentType } from './episode_attachment_type';
 
 const SPACE_ID = 'default';
 
@@ -289,28 +286,16 @@ describe('createEpisodeAttachmentType', () => {
   });
 
   describe('isStale', () => {
-    const NOW = '2026-08-14T17:22:00.000Z';
-
-    const attachmentAt = (createdAt: string, data: EpisodeAttachmentData = baseEpisodeData) =>
+    const attachmentWithStatus = (status: EpisodeAttachmentData['episode.status']) =>
       buildVersionedAttachment({
-        origin_snapshot_at: createdAt,
         versions: [
           {
             version: 1,
-            data,
-            created_at: createdAt,
+            data: { ...baseEpisodeData, 'episode.status': status },
+            created_at: '2026-04-10T12:00:00.000Z',
           } as never,
         ],
       });
-
-    beforeEach(() => {
-      jest.useFakeTimers();
-      jest.setSystemTime(new Date(NOW));
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
 
     it('returns false when origin is missing', async () => {
       const attachment = buildVersionedAttachment({ origin: undefined });
@@ -329,61 +314,40 @@ describe('createEpisodeAttachmentType', () => {
       expect(result).toBe(false);
     });
 
-    it('returns false without fetching when the snapshot is already inactive', async () => {
-      const inactive = { ...baseEpisodeData, 'episode.status': ALERT_EPISODE_STATUS.INACTIVE };
+    it('returns false when live status matches the snapshot', async () => {
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
 
-      const result = await definition.isStale!(
-        attachmentAt('2026-04-10T12:00:00.000Z', inactive),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
-      expect(getEpisode).not.toHaveBeenCalled();
     });
 
-    it('returns true when live status is inactive but the snapshot is not', async () => {
+    it('returns true when live status differs from the snapshot', async () => {
+      getEpisode.mockResolvedValueOnce({
+        ...baseEpisodeData,
+        'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
+      });
+
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when both snapshot and live episode are inactive', async () => {
       getEpisode.mockResolvedValueOnce({
         ...baseEpisodeData,
         'episode.status': ALERT_EPISODE_STATUS.INACTIVE,
       });
 
       const result = await definition.isStale!(
-        attachmentAt('2026-04-10T12:00:00.000Z'),
-        createResolveContext()
-      );
-
-      expect(result).toBe(true);
-    });
-
-    it('returns false when a non-inactive snapshot is within 5 minutes', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
-
-      const result = await definition.isStale!(
-        attachmentAt(new Date(Date.parse(NOW) - EPISODE_ATTACHMENT_STALE_AFTER_MS).toISOString()),
+        attachmentWithStatus(ALERT_EPISODE_STATUS.INACTIVE),
         createResolveContext()
       );
 
       expect(result).toBe(false);
     });
 
-    it('returns true when a non-inactive snapshot is older than 5 minutes', async () => {
-      getEpisode.mockResolvedValueOnce({
-        ...baseEpisodeData,
-        'episode.status': ALERT_EPISODE_STATUS.RECOVERING,
-      });
-
-      const result = await definition.isStale!(
-        attachmentAt(
-          new Date(Date.parse(NOW) - EPISODE_ATTACHMENT_STALE_AFTER_MS - 1).toISOString()
-        ),
-        createResolveContext()
-      );
-
-      expect(result).toBe(true);
-    });
-
     it('returns true when current_version has no matching version entry', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
       const attachment = buildVersionedAttachment({
         current_version: 99,
       });
@@ -391,29 +355,7 @@ describe('createEpisodeAttachmentType', () => {
       const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(true);
-    });
-
-    it('returns false after a refresh resets snapshot age', async () => {
-      getEpisode.mockResolvedValueOnce(baseEpisodeData);
-      const attachment = buildVersionedAttachment({
-        current_version: 2,
-        versions: [
-          {
-            version: 1,
-            data: baseEpisodeData,
-            created_at: '2026-04-10T12:00:00.000Z',
-          } as never,
-          {
-            version: 2,
-            data: baseEpisodeData,
-            created_at: NOW,
-          } as never,
-        ],
-      });
-
-      const result = await definition.isStale!(attachment, createResolveContext());
-
-      expect(result).toBe(false);
+      expect(getEpisode).not.toHaveBeenCalled();
     });
 
     it('returns false and logs a warning when the client throws', async () => {

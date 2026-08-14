@@ -13,7 +13,6 @@ import type {
 import { getLatestVersion, type VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { RULE_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
 import {
-  ALERT_EPISODE_STATUS,
   EPISODE_ATTACHMENT_TYPE,
   episodeAttachmentDataSchema,
   type EpisodeAttachmentData,
@@ -27,9 +26,6 @@ import { loadRuleMetadata } from '../common/load_rule_metadata';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { getRuleTool, getRuleToolId } from '../tools/get_rule';
 import { refreshEpisodeTool, refreshEpisodeToolId } from '../tools/refresh_episode';
-
-/** Non-inactive episode snapshots older than this are treated as stale. */
-export const EPISODE_ATTACHMENT_STALE_AFTER_MS = 5 * 60 * 1000;
 
 interface CreateEpisodeAttachmentTypeOptions {
   logger: LoggerServiceContract;
@@ -168,22 +164,12 @@ export const createEpisodeAttachmentType = ({
     }
     const latestVersion = getLatestVersion(attachment);
     if (!latestVersion) return true;
-    if (latestVersion.data['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE) {
-      return false;
-    }
     try {
       const episode = await getEpisodesClient(context).get(attachment.origin);
       if (!episode) {
         return false;
       }
-      if (episode['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE) {
-        return true;
-      }
-      const snapshotAt = Date.parse(latestVersion.created_at);
-      if (Number.isNaN(snapshotAt)) {
-        return false;
-      }
-      return Date.now() - snapshotAt > EPISODE_ATTACHMENT_STALE_AFTER_MS;
+      return episode['episode.status'] !== latestVersion.data['episode.status'];
     } catch (error) {
       logger.warn({
         message: 'Failed to check episode attachment staleness',
