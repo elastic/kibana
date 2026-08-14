@@ -230,9 +230,16 @@ export class StorageIndexAdapter<
     const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
       _meta: { version },
       dynamic: 'strict',
-      properties: {
-        ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-      },
+      // `_meta` and `dynamic` stay on the index template even when the properties
+      // come from component templates, so the version check still sees them on
+      // the resulting index.
+      ...(this.storage.inlineSchemaMappings === false
+        ? {}
+        : {
+            properties: {
+              ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+            },
+          }),
     };
 
     const aliases: IndicesPutIndexTemplateIndexTemplateMapping['aliases'] = {
@@ -250,6 +257,15 @@ export class StorageIndexAdapter<
           index_patterns: getIndexPattern(this.storage.name),
           _meta: { version },
           ...(this.storage.priority !== undefined ? { priority: this.storage.priority } : {}),
+          ...(this.storage.composedOf !== undefined
+            ? { composed_of: this.storage.composedOf }
+            : {}),
+          ...(this.storage.ignoreMissingComponentTemplates !== undefined
+            ? {
+                ignore_missing_component_templates:
+                  this.storage.ignoreMissingComponentTemplates,
+              }
+            : {}),
           template: {
             ...(includeSettings ? { settings: StorageIndexAdapter.INDEX_SETTINGS } : {}),
             mappings,

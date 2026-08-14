@@ -22,6 +22,7 @@ import type {
   SmlTypeDefinition,
 } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
+import { ensureSmlMappingsComponentTemplate } from './sml_component_template';
 import { isNotFoundError } from './sml_service';
 import { SmlUnregisteredTypeError } from './sml_errors';
 
@@ -334,6 +335,10 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {
+    // The index template references this component, so it must exist before the
+    // storage adapter creates the template on first write.
+    await ensureSmlMappingsComponentTemplate({ esClient, logger: this.logger });
+
     const storage = createSmlStorage({ logger: this.logger, esClient });
     const smlClient = storage.getClient();
 

@@ -40,6 +40,10 @@ jest.mock('./sml_storage', () => ({
   createSmlStorage: jest.fn(),
 }));
 
+jest.mock('./sml_component_template', () => ({
+  ensureSmlMappingsComponentTemplate: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('@kbn/es-errors', () => ({
   isResponseError: jest.fn(
     (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'

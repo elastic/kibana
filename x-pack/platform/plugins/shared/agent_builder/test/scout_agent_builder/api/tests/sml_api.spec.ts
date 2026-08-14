@@ -52,6 +52,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
     sysEsClient = await createSystemIndicesEsClient(esClient, config);
+    // A standalone index with the SML document shape, so these tests don't depend
+    // on Kibana having crawled anything yet. The template composition that
+    // production relies on is covered by sml_index_template.spec.ts.
     const exists = await sysEsClient.indices.exists({ index: smlIndexName });
     if (!exists) {
       await sysEsClient.indices.create({

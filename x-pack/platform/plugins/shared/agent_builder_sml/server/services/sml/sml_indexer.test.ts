@@ -22,6 +22,10 @@ jest.mock('./sml_storage', () => ({
   }),
 }));
 
+jest.mock('./sml_component_template', () => ({
+  ensureSmlMappingsComponentTemplate: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('./sml_service', () => ({
   isNotFoundError: jest.fn(
     (error: unknown) => (error as { statusCode?: number })?.statusCode === 404

@@ -20,6 +20,7 @@ import { registerSearchRoute } from './routes/search';
 import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import { smlIndexName } from './services/sml/sml_storage';
+import { ensureSmlMappingsComponentTemplate } from './services/sml/sml_component_template';
 import {
   registerSmlCrawlerTaskDefinition,
   scheduleSmlCrawlerTasks,
@@ -120,6 +121,15 @@ export class AgentBuilderSmlPlugin
     });
 
     const smlService = this.smlService;
+
+    // Install up front so a cold cluster is ready before the first write. Write
+    // paths await the same memoized install, so a failure here only costs a retry.
+    ensureSmlMappingsComponentTemplate({
+      esClient: elasticsearch.client.asInternalUser,
+      logger: this.logger.get('sml'),
+    }).catch((error) => {
+      this.logger.error(`Failed to install the SML mappings component template: ${error.message}`);
+    });
 
     scheduleSmlCrawlerTasks({
       taskManager,

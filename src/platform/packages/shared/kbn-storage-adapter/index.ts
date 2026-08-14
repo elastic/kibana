@@ -48,6 +48,24 @@ interface StorageSettingsBase {
 export interface IndexStorageSettings extends StorageSettingsBase {
   name: string;
   priority?: number;
+  /**
+   * Component templates composed into the index template, in increasing order
+   * of precedence (later entries win on conflicting fields).
+   */
+  composedOf?: string[];
+  /**
+   * Subset of `composedOf` that may legitimately not exist yet — typically a
+   * user-owned customization slot. Anything omitted here must exist before the
+   * first write, or Elasticsearch rejects the index template.
+   */
+  ignoreMissingComponentTemplates?: string[];
+  /**
+   * Whether to write `schema.properties` into the index template. Defaults to
+   * true. Set false when the properties arrive via `composedOf` instead; the
+   * schema stays the source of truth for document types and the mapping
+   * version hash either way.
+   */
+  inlineSchemaMappings?: boolean;
 }
 
 export type StorageSettings = IndexStorageSettings;

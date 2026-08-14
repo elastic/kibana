@@ -23,6 +23,7 @@ import {
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
 import { createSmlStorage, smlIndexName, type SmlStorage } from './sml_storage';
+import { ensureSmlMappingsComponentTemplate } from './sml_component_template';
 
 export type { SmlCrawler };
 
@@ -62,6 +63,10 @@ export class SmlCrawlerImpl implements SmlCrawler {
       savedObjectsClient,
       logger: this.logger,
     };
+
+    // The index template references this component, so it must exist before the
+    // storage adapter creates the template or reconciles mappings.
+    await ensureSmlMappingsComponentTemplate({ esClient, logger: this.logger });
 
     const storage = createSmlStorage({ logger: this.logger, esClient });
     const crawlStartTime = new Date().toISOString();
