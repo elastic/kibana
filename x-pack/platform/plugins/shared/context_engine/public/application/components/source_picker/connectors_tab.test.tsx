@@ -6,12 +6,13 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { ContextEngineConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { ConnectorsTab } from './connectors_tab';
 import type { DataConnector } from '../../hooks/use_data_connectors';
@@ -22,14 +23,13 @@ const CONNECTORS: DataConnector[] = [
   { id: 'connector-notion', name: 'Notion', actionTypeId: '.notion' },
 ];
 
-const CONNECTORS_DEEP_LINK_ID = 'triggersActionsConnectors';
-
 interface RenderConnectorsTabOptions {
   connectors?: DataConnector[];
   isLoading?: boolean;
   isError?: boolean;
   selectedConnectorIds?: string[];
   onToggle?: jest.Mock;
+  canCreateConnector?: boolean;
 }
 
 const renderConnectorsTab = ({
@@ -38,10 +38,27 @@ const renderConnectorsTab = ({
   isError = false,
   selectedConnectorIds = [],
   onToggle = jest.fn(),
+  canCreateConnector = true,
 }: RenderConnectorsTabOptions = {}) => {
+  const coreStart = coreMock.createStart();
+  coreStart.application.capabilities = {
+    ...coreStart.application.capabilities,
+    actions: {
+      ...coreStart.application.capabilities.actions,
+      save: canCreateConnector,
+    },
+  };
+
+  const getAddConnectorFlyout = jest.fn(() => (
+    <div data-test-subj="contextCreateConnectorFlyout">Create connector flyout</div>
+  ));
+
   const services = {
-    ...coreMock.createStart(),
-    triggersActionsUi: triggersActionsUiMock.createStart(),
+    ...coreStart,
+    triggersActionsUi: {
+      ...triggersActionsUiMock.createStart(),
+      getAddConnectorFlyout,
+    },
   };
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
@@ -63,7 +80,7 @@ const renderConnectorsTab = ({
     </I18nProvider>
   );
 
-  return { onToggle, services };
+  return { onToggle, services, getAddConnectorFlyout, queryClient };
 };
 
 const getConnectorOption = (connectorId: string) =>
@@ -98,6 +115,13 @@ describe('ConnectorsTab', () => {
     expect(screen.getByTestId('contextConnectorsEmpty')).toBeInTheDocument();
     expect(screen.getByTestId('contextCreateConnectorButton')).toBeInTheDocument();
     expect(screen.queryByTestId('contextConnectorsTab')).not.toBeInTheDocument();
+  });
+
+  it('hides the create button when the user cannot save connectors', () => {
+    renderConnectorsTab({ connectors: [], canCreateConnector: false });
+
+    expect(screen.getByTestId('contextConnectorsEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextCreateConnectorButton')).not.toBeInTheDocument();
   });
 
   it('renders one option per connector showing each connector name', () => {
@@ -157,23 +181,124 @@ describe('ConnectorsTab', () => {
     expect(screen.queryByTestId('contextConnectorOption-connector-notion')).not.toBeInTheDocument();
   });
 
-  it('navigates to the connectors management page from the empty-state create button', () => {
-    const { services } = renderConnectorsTab({ connectors: [] });
+  it('opens the create connector flyout from the empty-state create button', async () => {
+    const { getAddConnectorFlyout } = renderConnectorsTab({ connectors: [] });
+
+    expect(screen.queryByTestId('contextCreateConnectorFlyout')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
-    expect(services.application.navigateToApp).toHaveBeenCalledWith('management', {
-      deepLinkId: CONNECTORS_DEEP_LINK_ID,
-    });
+    await waitFor(() =>
+      expect(screen.getByTestId('contextCreateConnectorFlyout')).toBeInTheDocument()
+    );
+    expect(getAddConnectorFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        featureId: ContextEngineConnectorFeatureId,
+      })
+    );
   });
 
-  it('navigates to the connectors management page from the create button below the list', () => {
-    const { services } = renderConnectorsTab();
+  it('opens the create connector flyout from the create button below the list', async () => {
+    const { getAddConnectorFlyout } = renderConnectorsTab();
 
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
-    expect(services.application.navigateToApp).toHaveBeenCalledWith('management', {
-      deepLinkId: CONNECTORS_DEEP_LINK_ID,
+    await waitFor(() =>
+      expect(screen.getByTestId('contextCreateConnectorFlyout')).toBeInTheDocument()
+    );
+    expect(getAddConnectorFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        featureId: ContextEngineConnectorFeatureId,
+      })
+    );
+  });
+
+  it('selects the created connector, invalidates queries, and closes the flyout on save', async () => {
+    const { getAddConnectorFlyout, onToggle, queryClient } = renderConnectorsTab({
+      connectors: [],
     });
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const createdConnector = {
+      id: 'new-connector',
+      name: 'New Connector',
+      actionTypeId: '.notion',
+      isMissingSecrets: false,
+      config: {},
+      secrets: {},
+    };
+
+    fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
+
+    const flyoutProps = getAddConnectorFlyout.mock.calls.at(-1)?.[0];
+    act(() => {
+      flyoutProps?.onConnectorCreated?.(createdConnector);
+      flyoutProps?.onClose?.();
+    });
+
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['context_engine', 'connectors', 'list'],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['context_engine', 'connectors', 'types'],
+    });
+    expect(onToggle).toHaveBeenCalledWith({
+      id: 'new-connector',
+      name: 'New Connector',
+      checked: true,
+    });
+    await waitFor(() =>
+      expect(screen.queryByTestId('contextCreateConnectorFlyout')).not.toBeInTheDocument()
+    );
+  });
+
+  it('selects the created connector and keeps the flyout open on save and test', async () => {
+    const { getAddConnectorFlyout, onToggle, queryClient } = renderConnectorsTab({
+      connectors: [],
+    });
+    const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
+    const createdConnector = {
+      id: 'new-connector',
+      name: 'New Connector',
+      actionTypeId: '.notion',
+      isMissingSecrets: false,
+      config: {},
+      secrets: {},
+    };
+
+    fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
+
+    const flyoutProps = getAddConnectorFlyout.mock.calls.at(-1)?.[0];
+    act(() => {
+      flyoutProps?.onConnectorCreated?.(createdConnector);
+      flyoutProps?.onTestConnector?.(createdConnector);
+    });
+
+    expect(onToggle).toHaveBeenCalledWith({
+      id: 'new-connector',
+      name: 'New Connector',
+      checked: true,
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['context_engine', 'connectors', 'list'],
+    });
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['context_engine', 'connectors', 'types'],
+    });
+    expect(screen.getByTestId('contextCreateConnectorFlyout')).toBeInTheDocument();
+  });
+
+  it('passes flyout handlers for create, close, and save and test', () => {
+    const { getAddConnectorFlyout } = renderConnectorsTab({ connectors: [] });
+
+    fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
+
+    expect(getAddConnectorFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({
+        featureId: ContextEngineConnectorFeatureId,
+        onClose: expect.any(Function),
+        onConnectorCreated: expect.any(Function),
+        onTestConnector: expect.any(Function),
+      })
+    );
   });
 });
