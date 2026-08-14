@@ -30,11 +30,24 @@ export type AnnouncementBannerActionSecondaryProps = NonNullable<
 >['secondary'] &
   DataAttributeProps;
 
-export type AnnouncementBannerProps = Omit<EuiBannerProps, 'announceOnMount' | 'actionProps'> & {
+/**
+ * Props for the dismiss button. Rendered as an `EuiButtonIcon`.
+ * `color`, `iconType` and `onClick` are controlled by the component.
+ */
+export type AnnouncementBannerDismissButtonProps = NonNullable<
+  EuiBannerProps['dismissButtonProps']
+> &
+  DataAttributeProps;
+
+export type AnnouncementBannerProps = Omit<
+  EuiBannerProps,
+  'announceOnMount' | 'actionProps' | 'dismissButtonProps'
+> & {
   actionProps?: {
     primary?: AnnouncementBannerActionPrimaryProps;
     secondary?: AnnouncementBannerActionSecondaryProps;
   };
+  dismissButtonProps?: AnnouncementBannerDismissButtonProps;
 };
 
 /**

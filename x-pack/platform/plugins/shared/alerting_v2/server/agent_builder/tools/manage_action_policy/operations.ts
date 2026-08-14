@@ -173,8 +173,8 @@ export const executeActionPolicyOperations = (
         }
         next = {
           ...next,
-          ...(op.groupingMode !== undefined ? { groupingMode: op.groupingMode } : {}),
-          ...(op.groupBy !== undefined ? { groupBy: op.groupBy } : {}),
+          ...(op.groupingMode !== undefined ? { grouping_mode: op.groupingMode } : {}),
+          ...(op.groupBy !== undefined ? { group_by: op.groupBy } : {}),
         };
         break;
       }
@@ -220,7 +220,7 @@ export const executeActionPolicyOperations = (
   }
 
   validateThrottleGroupingCompat(
-    next.groupingMode,
+    next.grouping_mode,
     next.throttle?.strategy,
     next.throttle?.interval
   );

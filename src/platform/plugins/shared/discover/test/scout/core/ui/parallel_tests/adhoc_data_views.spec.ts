@@ -47,10 +47,10 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
       await discover.loadSavedSearch('logstash-adhoc');
       const firstId = await discover.getCurrentDataViewId();
 
-      await discover.createRuntimeField(
-        '_bytes-runtimefield',
-        `emit(doc["bytes"].value.toString())`
-      );
+      await discover.createRuntimeField({
+        fieldName: '_bytes-runtimefield',
+        script: `emit(doc["bytes"].value.toString())`,
+      });
       await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
 
       const secondId = await discover.getCurrentDataViewId();
@@ -227,10 +227,10 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
           await discover.deleteRuntimeField('_bytes-runtimefield');
           await unifiedFieldList.waitUntilSidebarHasLoaded();
 
-          await discover.createRuntimeField(
-            '_bytes-runtimefield',
-            `emit((doc["bytes"].value * 2).toString())`
-          );
+          await discover.createRuntimeField({
+            fieldName: '_bytes-runtimefield',
+            script: `emit((doc["bytes"].value * 2).toString())`,
+          });
           await discover.waitUntilTabIsLoaded();
           await unifiedFieldList.waitUntilSidebarHasLoaded();
           await unifiedFieldList.clickFieldListItemAdd('_bytes-runtimefield');
