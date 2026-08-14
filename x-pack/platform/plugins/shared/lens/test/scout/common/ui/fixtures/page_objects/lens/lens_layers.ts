@@ -95,12 +95,13 @@ export class LensLayers {
   }
 
   private async activateTab(index: number) {
-    // Click the tab's interactive element rather than its wrapper, which also contains layer actions.
     const tabButton = (await this.layerTabButtonsLocator.all())[index];
     if (!tabButton) {
       throw new Error(`Layer tab button not found at index ${index}`);
     }
-    await tabButton.click();
+    // Layer actions overlap the right half and center of the tab's interactive element.
+    // Use its unobstructed label edge rather than bypassing actionability with a forced click.
+    await tabButton.click({ position: { x: 10, y: 10 } });
     await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
   }
 
