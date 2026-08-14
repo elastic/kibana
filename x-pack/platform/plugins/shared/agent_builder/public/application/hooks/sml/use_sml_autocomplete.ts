@@ -34,9 +34,8 @@ export interface UseSmlAutocompleteOptions {
 }
 
 /**
- * Typeahead hook for the @ menu. Hits POST `/sml/_autocomplete`, which returns
- * per-row `matched_discovery_labels` (with `kind` for UI badging, and
- * `highlighted` when ES is able to produce a snippet).
+ * Typeahead hook for the @ menu. Hits POST `/sml/_autocomplete`, which
+ * prefix-matches the typed text against each row's `type` and `title`.
  *
  * For full retrieval (LLM tool, content search), see `useSmlSearch`.
  */

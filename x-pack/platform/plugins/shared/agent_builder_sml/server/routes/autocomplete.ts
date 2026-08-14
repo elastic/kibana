@@ -92,18 +92,11 @@ export const registerAutocompleteRoute = ({
 
         const body: SmlAutocompleteHttpResponse = {
           results: results.map(
-            ({
+            ({ id, type, origin, title }): SmlAutocompleteHttpResultItem => ({
               id,
               type,
               origin,
               title,
-              matched_discovery_labels,
-            }): SmlAutocompleteHttpResultItem => ({
-              id,
-              type,
-              origin,
-              title,
-              matched_discovery_labels: matched_discovery_labels ?? [],
             })
           ),
         };

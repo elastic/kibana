@@ -19,7 +19,6 @@ import type {
   SmlTypeDefinition,
   SmlSearchFilters,
   SmlSearchConstraints,
-  MatchedDiscoveryLabel,
   SmlPermissions,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
@@ -970,72 +969,35 @@ const searchSml = async ({
 };
 
 /**
- * Pick a highlight snippet from ES's per-subfield highlight object.
- * Returns the first non-empty snippet; absent if none.
+ * Every typed token must match, with the trailing one matched as a prefix.
+ *
+ * A `search_as_you_type` multi-field would buy nothing here: the trailing
+ * partial token is a constant-score prefix query either way, so single-token
+ * queries tie regardless, and plain `title` already orders multi-token queries
+ * by adjacency.
  */
-const pickHighlightSnippet = (
-  highlight: Record<string, string[]> | undefined
-): string | undefined => {
-  if (!highlight) return undefined;
-  for (const snippets of Object.values(highlight)) {
-    if (snippets && snippets.length > 0) {
-      return snippets[0];
-    }
-  }
-  return undefined;
-};
-
-const SML_LABEL_FIELDS = [
-  'discovery_labels.value',
-  'discovery_labels.value._2gram',
-  'discovery_labels.value._3gram',
-] as const;
-
-const SML_LABEL_INNER_HITS = {
-  _source: ['discovery_labels.value', 'discovery_labels.kind'],
-  size: 10,
-  highlight: {
-    type: 'unified',
-    number_of_fragments: 0,
-    pre_tags: ['<em>'],
-    post_tags: ['</em>'],
-    // No-op until elastic/elasticsearch#53744 is fixed; HTML-encodes source text.
-    encoder: 'html',
-    fields: {
-      'discovery_labels.value': {},
-    },
-  },
-} as const;
-
-const buildLabelBoolPrefixClause = (text: string): Record<string, unknown> => ({
-  multi_match: {
-    query: text,
-    type: 'bool_prefix',
-    operator: 'and',
-    fields: SML_LABEL_FIELDS,
-  },
-});
-
-const buildNestedLabelQuery = (text: string): Record<string, unknown> => ({
-  nested: {
-    path: 'discovery_labels',
-    query: buildLabelBoolPrefixClause(text),
-    inner_hits: SML_LABEL_INNER_HITS,
-  },
+const buildTitlePrefixClause = (text: string): Record<string, unknown> => ({
+  match_bool_prefix: { title: { query: text, operator: 'and' } },
 });
 
 /**
- * Build the autocomplete query: nested `multi_match bool_prefix` against
- * `discovery_labels.value` (SAYT), requiring every typed token to match
- * (including the trailing partial, as a prefix).
+ * `type` is a low-cardinality keyword, so a `prefix` query is cheap. The typed
+ * text is lowercased because keyword prefix matching is case-sensitive and every
+ * registered type id is lowercase.
+ */
+const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
+  prefix: { type: text.toLowerCase() },
+});
+
+/**
+ * Build the autocomplete query: `match_bool_prefix` against `title`, requiring
+ * every typed token to match (including the trailing partial, as a prefix),
+ * plus a prefix clause on `type`.
  *
- * `type` and `title` are indexed as separate `discovery_labels` siblings, and
- * a nested query can't match tokens across siblings. So a "type/name" query
- * (e.g. "connector/s3", matching how results render) is split into two
- * nested queries ANDed together instead of one, each free to match a
- * different sibling — the type part is also constrained to `kind: 'type'`.
- * A bare trailing slash ("connector/") falls back to a single query so the
- * type value itself still matches.
+ * Results render as "type/title", so a "type/name" query (e.g. "connector/s3")
+ * matches each half against its own field. The type half goes in filter context
+ * so it doesn't skew ranking. A bare trailing slash ("connector/") matches on
+ * type alone.
  *
  * After trim: empty string or `*` → `match_all`.
  */
@@ -1046,34 +1008,40 @@ const buildSmlAutocompleteQuery = (query: string): Record<string, unknown> => {
   }
 
   const slashIdx = trimmed.indexOf('/');
-  const namePart = slashIdx === -1 ? '' : trimmed.slice(slashIdx + 1).trim();
 
-  if (slashIdx === -1 || namePart === '') {
-    return buildNestedLabelQuery(trimmed);
+  // No slash typed yet: the text could be either half, so match against both.
+  if (slashIdx === -1) {
+    return {
+      bool: {
+        should: [buildTitlePrefixClause(trimmed), buildTypePrefixClause(trimmed)],
+        minimum_should_match: 1,
+      },
+    };
   }
 
   const typePart = trimmed.slice(0, slashIdx).trim();
-  const nameClause = buildNestedLabelQuery(namePart);
+  const namePart = trimmed.slice(slashIdx + 1).trim();
 
-  if (!typePart) {
-    return nameClause;
+  // A lone "/" carries no signal. Match everything rather than leaning on
+  // Elasticsearch's empty-prefix behaviour, which does the same thing implicitly.
+  if (typePart === '' && namePart === '') {
+    return { match_all: {} };
   }
 
-  const typeClause = {
-    nested: {
-      path: 'discovery_labels',
-      query: {
-        bool: {
-          must: [
-            buildLabelBoolPrefixClause(typePart),
-            { term: { 'discovery_labels.kind': 'type' } },
-          ],
-        },
-      },
+  if (namePart === '') {
+    return { bool: { filter: [buildTypePrefixClause(typePart)] } };
+  }
+
+  if (typePart === '') {
+    return buildTitlePrefixClause(namePart);
+  }
+
+  return {
+    bool: {
+      filter: [buildTypePrefixClause(typePart)],
+      must: [buildTitlePrefixClause(namePart)],
     },
   };
-
-  return { bool: { must: [typeClause, nameClause] } };
 };
 
 /**
@@ -1139,7 +1107,7 @@ const autocompleteSml = async ({
       .filter((hit) => hit._source != null)
       .map((hit) => {
         const source = hit._source!;
-        const result: SmlAutocompleteResult = {
+        return {
           id: source.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
@@ -1147,44 +1115,6 @@ const autocompleteSml = async ({
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? emptyPermissions(),
         };
-        // Inner hits from the nested discovery_labels query: the specific entries
-        // that matched, with their ES-generated highlight snippet wrapping the
-        // matched span(s) in <em>...</em>.
-        const innerHits = (
-          hit as {
-            inner_hits?: Record<
-              string,
-              {
-                hits: {
-                  hits: Array<{
-                    _source: { value?: string; kind?: string };
-                    highlight?: Record<string, string[]>;
-                  }>;
-                };
-              }
-            >;
-          }
-        ).inner_hits;
-        const labelHits = innerHits?.discovery_labels?.hits?.hits;
-        if (labelHits && labelHits.length > 0) {
-          const matched: MatchedDiscoveryLabel[] = labelHits
-            .filter((h) => h._source?.value != null && h._source?.kind != null)
-            .map((h) => {
-              const entry: MatchedDiscoveryLabel = {
-                value: h._source.value!,
-                kind: h._source.kind!,
-              };
-              const snippet = pickHighlightSnippet(h.highlight);
-              if (snippet) {
-                entry.highlighted = snippet;
-              }
-              return entry;
-            });
-          if (matched.length > 0) {
-            result.matched_discovery_labels = matched;
-          }
-        }
-        return result;
       });
 
     logger.debug(`SML autocomplete: returned ${results.length} result(s)`);
@@ -1275,7 +1205,6 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
   };
   if (source.description !== undefined) doc.description = source.description;
   if (source.tags !== undefined) doc.tags = source.tags;
-  if (source.discovery_labels !== undefined) doc.discovery_labels = source.discovery_labels;
   if (source.extended_attrs !== undefined) doc.extended_attrs = source.extended_attrs;
   if (source.user_id !== undefined) doc.user_id = source.user_id;
   if (source.references !== undefined) doc.references = source.references;

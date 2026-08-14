@@ -195,14 +195,10 @@ describe('createSmlIndexer', () => {
           kibana: { privileges: [{ name: 'perm1' }] },
         },
         ingestion_method: 'crawled',
-        discovery_labels: [
-          { value: 'My Viz', kind: 'title' },
-          { value: 'lens', kind: 'type' },
-        ],
       });
     });
 
-    it('create action: round-trips all new schema fields (tags, discovery_labels, extended_attrs, references, description, user_id)', async () => {
+    it('create action: round-trips all new schema fields (tags, extended_attrs, references, description, user_id)', async () => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
       (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -213,10 +209,6 @@ describe('createSmlIndexer', () => {
         content: 'sales dashboard for Q3 with revenue and conversion metrics',
         description: 'Quarterly sales overview, executive audience',
         tags: ['sales', 'executive', 'quarterly'],
-        discovery_labels: [
-          { value: 'q3 sales', kind: 'tagline' },
-          { value: 'sales q3 dashboard', kind: 'nickname' },
-        ],
         extended_attrs: {
           owner_team: 'sales-ops',
           fields: [{ name: 'revenue', type: 'currency' }],
@@ -255,12 +247,6 @@ describe('createSmlIndexer', () => {
         content: 'sales dashboard for Q3 with revenue and conversion metrics',
         description: 'Quarterly sales overview, executive audience',
         tags: ['sales', 'executive', 'quarterly'],
-        discovery_labels: [
-          { value: 'Sales Q3', kind: 'title' },
-          { value: 'dashboard', kind: 'type' },
-          { value: 'q3 sales', kind: 'tagline' },
-          { value: 'sales q3 dashboard', kind: 'nickname' },
-        ],
         extended_attrs: {
           owner_team: 'sales-ops',
           fields: [{ name: 'revenue', type: 'currency' }],

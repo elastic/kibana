@@ -41,11 +41,6 @@ steps:
             type: keyword
           attributes:
             type: flattened
-          discovery_labels:
-            type: nested
-            properties:
-              value: { type: search_as_you_type }
-              kind: { type: keyword }
           ingestion_method: { type: keyword }
     on-failure:
       continue: true
