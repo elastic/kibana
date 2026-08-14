@@ -41,13 +41,15 @@ export const getDeleteKiStepDefinition = ({
         abortSignal: context.abortSignal,
       });
 
+      // `ignore: [404]` resolves a missing document as `result: 'not_found'`
+      // instead of throwing a ResponseError.
       const response = await esClient.delete(
         {
           index: backingIndex,
           id: kiId,
           refresh: 'wait_for',
         },
-        { signal: context.abortSignal }
+        { signal: context.abortSignal, ignore: [404] }
       );
 
       // The KI may have been removed concurrently between the lookup and the delete.

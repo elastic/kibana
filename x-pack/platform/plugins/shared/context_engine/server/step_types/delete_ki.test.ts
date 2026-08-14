@@ -82,7 +82,7 @@ describe('getDeleteKiStepDefinition', () => {
         id: 'ki-1',
         refresh: 'wait_for',
       },
-      { signal: context.abortSignal }
+      { signal: context.abortSignal, ignore: [404] }
     );
   });
 
