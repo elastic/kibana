@@ -22,8 +22,9 @@ export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
 
 /**
  * Builtin tool that validates candidate Lucene RLIKE greps against the indexed source
- * for a repository + commit. Not part of {@link platformSignificantEventsTools} (it is
- * local to this plugin's code-intelligence lane), so the id is a literal here.
+ * for a repository + commit. Sourced from {@link platformSignificantEventsTools} like
+ * every other builtin id here: `AGENT_BUILDER_BUILTIN_TOOLS` spreads that object, so a
+ * literal defined locally would not be allow-listed and registration would be rejected.
  */
 export const SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID =
-  'platform.sig_events.logging_queries_validate';
+  platformSignificantEventsTools.validateLoggingQueries;

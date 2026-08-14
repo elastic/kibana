@@ -14,15 +14,11 @@ import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
+import { SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID } from '../tool_ids';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { validateLoggingQueriesHandler, type ValidateLoggingQueriesOutput } from './handler';
 
-/**
- * Builtin tool id. Follows the `{namespace}.sig_events.{feature}_{entity}_{action}`
- * convention used by the other platform significant-events tools.
- */
-export const SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID =
-  'platform.sig_events.logging_queries_validate';
+export { SIGNIFICANT_EVENTS_LOGGING_QUERIES_VALIDATE_TOOL_ID } from '../tool_ids';
 
 const MAX_GREPS = 20;
 const MAX_SAMPLE_LINES = 3;
