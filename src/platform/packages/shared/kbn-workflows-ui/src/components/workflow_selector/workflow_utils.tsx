@@ -9,7 +9,11 @@
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { WorkflowListDto } from '@kbn/workflows';
+import type {
+  ManagedWorkflowSelector,
+  ManagedWorkflowSolution,
+  WorkflowListDto,
+} from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
 import * as i18n from './translations';
 
@@ -32,6 +36,11 @@ export interface WorkflowOption {
     secondaryContent?: string;
   };
   [key: string]: unknown; // Allow additional properties for EuiSelectable
+}
+
+export interface WorkflowSelectorVisibility {
+  selectors?: ManagedWorkflowSelector[];
+  solutions?: ManagedWorkflowSolution[];
 }
 
 export interface WorkflowSelectorConfig {
@@ -57,6 +66,8 @@ export interface WorkflowSelectorConfig {
   hideViewWorkflowLink?: boolean;
   // When true (default), the selected workflow's name is displayed in the search input.
   showSelectedInSearch?: boolean;
+  // Managed-workflow visibility — controls which managed workflows are fetched server-side.
+  visibility?: WorkflowSelectorVisibility;
 
   // Error Messages
   errorMessages?: {

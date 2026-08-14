@@ -15,7 +15,11 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
-import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
+import type { RunWorkflowResponseDto } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
@@ -25,6 +29,7 @@ import { useRunWorkflow } from '../../hooks/use_run_workflow';
 import { useWorkflows } from '../../hooks/use_workflows';
 import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
 import { WorkflowSelector } from '../workflow_selector/workflow_selector';
+import type { WorkflowSelectorVisibility } from '../workflow_selector/workflow_utils';
 
 /**
  * The inputs payload forwarded verbatim to the workflow execution API.
@@ -36,16 +41,17 @@ export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: WorkflowRunInputs;
   /**
-   * Comparator passed directly to Array.sort — return negative to rank `a` before `b`.
-   * When omitted the list order is unchanged.
+   * The trigger type(s) to sort to the top of the workflow list.
+   * Workflows whose triggers include any of these types are ranked first.
+   * When omitted, list order is unchanged.
    */
-  sortWorkflow?: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
+  sortTriggerTypes?: string | readonly string[];
   /**
-   * Called for each workflow in the list. Return false to hide it.
-   * Use this to include or exclude managed workflows, filter by trigger type, tags, etc.
-   * When omitted all enabled workflows (user-created and managed) are shown.
+   * Managed workflows are excluded from the list unless the caller opts in with a matching
+   * visibility. Pass the selector(s)/solution(s) the surfacing context maps to (e.g.
+   * `{ selectors: ['rule_action'] }`) to include managed workflows tagged with that context.
    */
-  filterWorkflow?: (workflow: WorkflowListItemDto) => boolean;
+  visibility?: WorkflowSelectorVisibility;
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -60,8 +66,8 @@ interface RunWorkflowPanelServices {
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
-  sortWorkflow,
-  filterWorkflow,
+  sortTriggerTypes,
+  visibility,
   onClose,
   onExecute,
 }: RunWorkflowPanelProps) => {
@@ -76,13 +82,25 @@ export const RunWorkflowPanel = ({
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
 
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
+  // Mirror the visibility-context derivation WorkflowSelector runs internally so both queries share
+  // a react-query cache key (one fetch) and the selected managed workflow resolves below.
+  const visibilityContext = useMemo(() => {
+    if (!visibility) return undefined;
+    const contexts = [
+      ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+      ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+    ];
+    return contexts.length > 0 ? contexts : undefined;
+  }, [visibility]);
 
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
   const { data: workflowsData } = useWorkflows({
     size: 1000,
     page: 1,
     query: '',
-    ...(canReadManagedWorkflow ? { managed: 'all' as const } : {}),
+    ...(visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext }
+      : {}),
   });
   const selectedWorkflow = useMemo(
     () => workflowsData?.results.find((w) => w.id === selectedId),
@@ -95,6 +113,16 @@ export const RunWorkflowPanel = ({
   const needsManualInputs = useMemo(
     () => requiresUserSuppliedInputs(normalizedInputs),
     [normalizedInputs]
+  );
+
+  const triggerTypes = useMemo(
+    () =>
+      !sortTriggerTypes
+        ? []
+        : Array.isArray(sortTriggerTypes)
+        ? [...sortTriggerTypes]
+        : [sortTriggerTypes],
+    [sortTriggerTypes]
   );
 
   const executeWorkflow = useCallback(
@@ -160,11 +188,16 @@ export const RunWorkflowPanel = ({
     () => (
       <WorkflowSelector
         config={{
-          filterFunction: (workflows) => {
-            const enabled = workflows.filter((w) => w.enabled);
-            return filterWorkflow ? enabled.filter(filterWorkflow) : enabled;
-          },
-          sortFunction: (workflows) => (sortWorkflow ? workflows.sort(sortWorkflow) : workflows),
+          visibility,
+          filterFunction: (workflows) => workflows.filter((w) => w.enabled),
+          sortFunction: (workflows) =>
+            workflows.sort((a, b) => {
+              const aHasType = a.definition?.triggers?.some((t) => triggerTypes.includes(t.type));
+              const bHasType = b.definition?.triggers?.some((t) => triggerTypes.includes(t.type));
+              if (aHasType && !bHasType) return -1;
+              if (!aHasType && bHasType) return 1;
+              return 0;
+            }),
           listView: true,
           hideTopRowHeader: true,
           hideViewWorkflowLink: true,
@@ -175,7 +208,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, sortWorkflow, filterWorkflow]
+    [selectedId, triggerTypes, visibility]
   );
 
   return (
