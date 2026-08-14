@@ -591,10 +591,18 @@ export const getBaseScoreESQL = (
     : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
-  // Prefer the pre-stamped field over the Painless-derived value. MV_FIRST picks the first
-  // element; STARTS_WITH guards against multi-entity alerts where the first element belongs
-  // to a different entity type, falling through to the EVAL-derived entity_id in that case.
-  const storedEuidCoalesceClause = `| EVAL entity_id = CASE(STARTS_WITH(MV_FIRST(${ALERT_ENTITY_ID}), "${entityType}:"), MV_FIRST(${ALERT_ENTITY_ID}), entity_id)`;
+  // Prefer the pre-stamped field over the EVAL-derived value. The array holds at most one EUID
+  // per entity type (host/user/service), so at most 3 elements. Scan all positions with
+  // MV_SLICE so multi-entity alerts are handled regardless of write order, mirroring the
+  // Painless loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
+  const f = ALERT_ENTITY_ID;
+  const p = `"${entityType}:"`;
+  const storedEuidCoalesceClause =
+    `| EVAL entity_id = CASE(` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
+    `entity_id)`;
 
   // Filter on entity_id (computed from cheap field evals) BEFORE the
   // CONCAT/base64 builders run, so non-matching alerts skip the per-row
@@ -685,7 +693,14 @@ export const getResolutionScoreESQLByIds = (
 
   const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
-  const storedEuidCoalesceClause = `| EVAL entity_id = CASE(STARTS_WITH(MV_FIRST(${ALERT_ENTITY_ID}), "${entityType}:"), MV_FIRST(${ALERT_ENTITY_ID}), entity_id)`;
+  const f = ALERT_ENTITY_ID;
+  const p = `"${entityType}:"`;
+  const storedEuidCoalesceClause =
+    `| EVAL entity_id = CASE(` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
+    `entity_id)`;
 
   // Compute entity_id (cheap), then override with the pre-stamped field when present,
   // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
