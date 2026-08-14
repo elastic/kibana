@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { DatasetsSelector } from './datasets_selector';
@@ -40,5 +40,37 @@ describe('DatasetsSelector', () => {
     await userEvent.click(screen.getByTitle('Remove missing.dataset from selection in this group'));
 
     expect(onChangeDatasetSelection).toHaveBeenCalledWith([]);
+  });
+
+  describe('when hasFailedLoading is true', () => {
+    it('shows a failure message', () => {
+      renderWithKibanaRenderContext(
+        <DatasetsSelector
+          availableDatasets={[]}
+          selectedDatasets={[]}
+          onChangeDatasetSelection={jest.fn()}
+          hasFailedLoading
+        />
+      );
+
+      expect(screen.getByText(/Failed to load datasets/i)).toBeInTheDocument();
+    });
+
+    it('calls onRetry when the retry link is clicked', () => {
+      const onRetry = jest.fn();
+
+      renderWithKibanaRenderContext(
+        <DatasetsSelector
+          availableDatasets={[]}
+          selectedDatasets={[]}
+          onChangeDatasetSelection={jest.fn()}
+          hasFailedLoading
+          onRetry={onRetry}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId('infraDatasetsSelectorRetryLink'));
+      expect(onRetry).toHaveBeenCalledTimes(1);
+    });
   });
 });
