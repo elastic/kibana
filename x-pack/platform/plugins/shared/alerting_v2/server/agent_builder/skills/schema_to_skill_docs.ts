@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ACTION_POLICY_MANAGEMENT_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -466,6 +467,17 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
   ].join('\n');
 };
 
+/** Product-facing label for a rule kind (`Alerts` / `Events`). Throws if a kind has no UI label. */
+const getRuleKindProductLabel = (kind: string): string => {
+  const label = RULE_KIND_LABELS[kind as keyof typeof RULE_KIND_LABELS];
+  if (!label) {
+    throw new SchemaTranslationError(
+      `Missing product label for rule kind "${kind}". Add it to RULE_KIND_LABELS.`
+    );
+  }
+  return label;
+};
+
 /** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
 export const generateRuleKindDoc = (): string => {
   const kinds = getDescribedEnumValues(ruleKindSchema, 'ruleKindSchema');
@@ -473,7 +485,7 @@ export const generateRuleKindDoc = (): string => {
   const transitionFields = formatEnumValuesList(getStateTransitionFields());
 
   const kindSections = kinds.flatMap(({ value, description }, i) => {
-    const heading = `### ${value.charAt(0).toUpperCase()}${value.slice(1)} (\`kind: ${value}\`)`;
+    const heading = `### ${getRuleKindProductLabel(value)} (\`kind: ${value}\`)`;
     const lines = [heading, description];
     if (value === 'alert') {
       lines.push(`Episode statuses: ${episodeStatuses}.`);
@@ -482,15 +494,44 @@ export const generateRuleKindDoc = (): string => {
     return i > 0 ? ['', ...lines] : lines;
   });
 
+  const alertLabel = getRuleKindProductLabel('alert');
+  const signalLabel = getRuleKindProductLabel('signal');
+
   return [
-    '# Rule Kind: Alert vs Signal',
+    `# Rule Kind: ${alertLabel} vs ${signalLabel}`,
     '',
-    'Rules declare a `kind` of `alert` or `signal`. This is the most important behavioral split in the system.',
+    `Rules declare a \`kind\` of \`alert\` (${alertLabel}) or \`signal\` (${signalLabel}). This is the most important behavioral split in the system.`,
     '',
     ...kindSections,
     '',
     '## Immutability',
     '`kind` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to `kind`. For draft (in-memory) rules, `set_kind` can change it freely.',
+  ].join('\n');
+};
+
+/**
+ * Generates the notifications-overview reference: action policies, plus how to
+ * handle notification requests on Events (`kind: signal`) vs Alerts (`kind: alert`) rules.
+ */
+export const generateNotificationsOverviewDoc = (): string => {
+  const alertLabel = getRuleKindProductLabel('alert');
+  const signalLabel = getRuleKindProductLabel('signal');
+
+  return [
+    '# Notifications via Action Policies',
+    '',
+    'Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.',
+    '',
+    `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
+    '',
+    '## Notifications Require Alert Kind',
+    '',
+    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./references/rule-kind.md) and [episode-lifecycle reference](./references/episode-lifecycle.md).`,
+    '',
+    'When a user asks for notifications on a rule that is currently `kind: signal` (or when composing a new rule where the user wants notifications):',
+    '',
+    `1. Use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
+    `2. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
   ].join('\n');
 };
 
@@ -610,7 +651,7 @@ export const generateRecoveryStrategyDoc = (): string => {
 
 /**
  * Generates markdown for KQL matcher context fields from `MATCHER_CONTEXT_FIELDS`,
- * enriching enum fields from `ALERT_EPISODE_STATUS` / `alertEventSeveritySchema`.
+ * enriching enum fields from `alertEpisodeStatusSchema` / `alertEventSeveritySchema`.
  */
 export const generateMatcherContextDoc = (): string => {
   const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());

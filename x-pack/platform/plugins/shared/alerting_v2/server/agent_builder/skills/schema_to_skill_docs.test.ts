@@ -28,6 +28,7 @@ import {
   getDescribedEnumValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
+  generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
 /**
@@ -318,6 +319,29 @@ describe('schema_to_skill_docs', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateRuleKindDoc()).toMatchSnapshot();
     });
+
+    it('uses product labels from RULE_KIND_LABELS', () => {
+      const doc = generateRuleKindDoc();
+      expect(doc).toContain('### Alerts (`kind: alert`)');
+      expect(doc).toContain('### Events (`kind: signal`)');
+      expect(doc).not.toContain('### Signal (`kind: signal`)');
+    });
+  });
+
+  describe('generateNotificationsOverviewDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateNotificationsOverviewDoc()).toMatchSnapshot();
+    });
+
+    it('uses product labels and the two-step convert-then-notify flow', () => {
+      const doc = generateNotificationsOverviewDoc();
+      expect(doc).toContain('Alerts (`kind: alert`)');
+      expect(doc).toContain('Events (`kind: signal`)');
+      expect(doc).toContain('Use `set_kind` to change it to `alert`');
+      expect(doc).toContain('After ensuring the rule is `kind: alert`');
+      expect(doc).not.toContain('**Explain the difference**');
+      expect(doc).not.toContain('existing Event rule cannot be converted');
+    });
   });
 
   describe('generateEpisodeLifecycleDoc', () => {
@@ -451,6 +475,7 @@ describe('schema_to_skill_docs', () => {
       ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],
       ['generateEnumList (throttle strategies from spec)', generateThrottleStrategiesDoc],
       ['generateRuleKindDoc from spec', generateRuleKindDoc],
+      ['generateNotificationsOverviewDoc from spec', generateNotificationsOverviewDoc],
       ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],
       [
         'generateActionPolicyWorkflowPayloadDoc workflow input definition',

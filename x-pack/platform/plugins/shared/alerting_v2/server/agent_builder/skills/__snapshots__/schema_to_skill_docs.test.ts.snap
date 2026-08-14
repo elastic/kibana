@@ -174,6 +174,23 @@ When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_
 Signal rules cannot set \`no_data_strategy\` ([rule-kind reference](./references/rule-kind.md))."
 `;
 
+exports[`schema_to_skill_docs generateNotificationsOverviewDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Notifications via Action Policies
+
+Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** — space-scoped saved objects that send matched episodes to workflow destinations.
+
+When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`action-policy-management\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.
+
+## Notifications Require Alert Kind
+
+Action policies only process Alerts (\`kind: alert\`). Events (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./references/rule-kind.md) and [episode-lifecycle reference](./references/episode-lifecycle.md).
+
+When a user asks for notifications on a rule that is currently \`kind: signal\` (or when composing a new rule where the user wants notifications):
+
+1. Use \`set_kind\` to change it to \`alert\`, then load the \`action-policy-management\` skill for notification setup.
+2. After ensuring the rule is \`kind: alert\`, load the \`action-policy-management\` skill for notification setup."
+`;
+
 exports[`schema_to_skill_docs generateRecoveryStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Recovery Strategy
 
@@ -189,17 +206,17 @@ When using \`recovery_strategy: 'query'\`, add a \`set_query\` operation that in
 `;
 
 exports[`schema_to_skill_docs generateRuleKindDoc matches the reviewed skill-doc snapshot 1`] = `
-"# Rule Kind: Alert vs Signal
+"# Rule Kind: Alerts vs Events
 
-Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important behavioral split in the system.
+Rules declare a \`kind\` of \`alert\` (Alerts) or \`signal\` (Events). This is the most important behavioral split in the system.
 
-### Alert (\`kind: alert\`)
-Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+### Alerts (\`kind: alert\`)
+Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
 Episode statuses: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
 State transition fields: \`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`.
 
-### Signal (\`kind: signal\`)
-Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+### Events (\`kind: signal\`)
+Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
 
 ## Immutability
 \`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely."
