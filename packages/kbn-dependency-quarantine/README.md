@@ -1,6 +1,6 @@
 # @kbn/dependency-quarantine
 
-Freeze current usage of selected dependencies. Existing files (or glob-covered trees) may keep importing them; new files outside the allowlist cannot.
+Freeze current usage of selected dependencies. Existing files (or glob-covered trees) can keep importing them; new files outside the allowlist cannot.
 
 ## Config
 
@@ -18,4 +18,4 @@ Add one JSON file per quarantined package under `configs/`:
 
 ## Enforcement
 
-ESLint rule `@kbn/imports/no_quarantined_imports` (cannot be disabled).
+ESLint rule `@kbn/imports/no_quarantined_imports` (`eslint-disable` comments do not apply).

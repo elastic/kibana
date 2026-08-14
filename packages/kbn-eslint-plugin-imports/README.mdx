@@ -29,7 +29,7 @@ If a valid import request can't be resolved for some reason please reach out to 
 
 ## `@kbn/imports/no_quarantined_imports`
 
-This rule blocks imports of quarantined packages outside their allowlisted files. Config lives in `@kbn/dependency-quarantine` (`packages/kbn-dependency-quarantine/configs/`). Expanding an allowlist requires review from `@elastic/kibana-security`. This rule cannot be disabled with `eslint-disable`.
+This rule blocks imports of quarantined packages outside their allowlisted files. Config lives in `@kbn/dependency-quarantine` (`packages/kbn-dependency-quarantine/configs/`). Expanding an allowlist requires review from `@elastic/kibana-security`. `eslint-disable` comments do not apply to this rule.
 
 ## `@kbn/imports/uniform_imports`
 
