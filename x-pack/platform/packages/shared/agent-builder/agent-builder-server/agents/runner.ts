@@ -62,8 +62,7 @@ export interface RunAgentParams {
    */
   maxContentLength?: number;
   /**
-   * Optional CPS project routing expression to scope this run's search tools to a specific set of
-   * projects (injected
+   * Optional CPS project routing expression to scope this run's search tools to a specific projects
    */
   projectRouting?: string;
 }
