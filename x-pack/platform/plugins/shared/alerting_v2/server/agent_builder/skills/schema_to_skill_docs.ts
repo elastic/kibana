@@ -48,6 +48,56 @@ export interface DescribedEnumValue {
 
 const LARGE_ENUM_THRESHOLD = 20;
 
+export class SchemaTranslationError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'SchemaTranslationError';
+  }
+}
+
+const throwIfNotZodUnion = (schema: z.ZodType, schemaName: string): z.ZodUnion => {
+  if (!(schema instanceof z.ZodUnion)) {
+    throw new SchemaTranslationError(
+      `${schemaName} is not a union of described literals. Use z.union of z.literal(...).describe(...) on each value.`
+    );
+  }
+  return schema;
+};
+
+const throwIfMissingDescribes = (missing: string[], subject: string, detail?: string): void => {
+  if (missing.length === 0) {
+    return;
+  }
+  const suffix = detail ? ` ${detail}` : '';
+  throw new SchemaTranslationError(
+    `Missing .describe() on ${subject}: ${missing.join(', ')}.${suffix}`
+  );
+};
+
+const throwIfMissingOperationDescribes = (
+  variants: JsonSchemaNode[] | undefined,
+  title: string
+): void => {
+  const missing = (variants ?? [])
+    .filter(
+      (variant) =>
+        typeof variant.description !== 'string' || variant.description.trim().length === 0
+    )
+    .map((variant) => {
+      const operation = (variant.properties as JsonSchemaNode | undefined)?.operation as
+        | JsonSchemaNode
+        | undefined;
+      const value = operation?.const ?? (operation?.enum as string[] | undefined)?.[0];
+      return typeof value === 'string' ? value : '(unnamed variant)';
+    });
+
+  throwIfMissingDescribes(
+    missing,
+    'operation variant(s)',
+    `Add a top-level .describe() explaining the user goal to each listed variant (${title}).`
+  );
+};
+
 /**
  * Replaces large enum arrays with a compact description to keep token counts
  * manageable. Reuses the pattern from the workflows plugin
@@ -76,13 +126,6 @@ function compactLargeEnums(node: unknown): unknown {
   }
 
   return result;
-}
-
-export class SchemaTranslationError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
-    super(message);
-    this.name = 'SchemaTranslationError';
-  }
 }
 
 function zodToJsonSchema(schema: z.ZodType): unknown {
@@ -239,21 +282,16 @@ function formatVariantSchemas(jsonSchema: unknown): string {
   return sections.join('\n\n');
 }
 
-const DEFAULT_API_SCHEMA_SOURCE =
-  '`@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.';
-
 /**
  * Generates markdown for a create/update API Zod schema (top-level field table,
  * plus optional extra sections such as query format variants).
  */
 export const generateApiSchemaDoc = ({
   title,
-  source = DEFAULT_API_SCHEMA_SOURCE,
   schema,
   extraSections,
 }: {
   title: string;
-  source?: string;
   schema: z.ZodType;
   extraSections?: (jsonSchema: unknown) => Array<{ heading: string; content: string }> | undefined;
 }): string => {
@@ -263,7 +301,7 @@ export const generateApiSchemaDoc = ({
   const sections = [
     `# ${title}`,
     '',
-    `Auto-generated from ${source}`,
+    'Auto-generated from `@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.',
     '',
     '## Top-Level Fields',
     '',
@@ -297,14 +335,6 @@ export const generateRuleSchemaDoc = (): string =>
     },
   });
 
-function operationVariantName(variant: JsonSchemaNode): string {
-  const operation = (variant.properties as JsonSchemaNode | undefined)?.operation as
-    | JsonSchemaNode
-    | undefined;
-  const value = operation?.const ?? (operation?.enum as string[] | undefined)?.[0];
-  return typeof value === 'string' ? value : '(unnamed variant)';
-}
-
 /**
  * Generates markdown for a discriminated-union tool operations schema
  * (e.g. `manage_rule` / `manage_action_policy`).
@@ -317,20 +347,10 @@ export const generateOperationsDoc = ({
   schema: z.ZodType;
 }): string => {
   const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
-  const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined;
-  const missing = (variants ?? [])
-    .filter(
-      (variant) =>
-        typeof variant.description !== 'string' || variant.description.trim().length === 0
-    )
-    .map(operationVariantName);
-  if (missing.length > 0) {
-    throw new SchemaTranslationError(
-      `Missing .describe() on operation variant(s): ${missing.join(
-        ', '
-      )}. Add a top-level .describe() explaining the user goal to each listed variant (${title}).`
-    );
-  }
+  throwIfMissingOperationDescribes(
+    (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined,
+    title
+  );
 
   return [`# ${title}`, '', formatVariantSchemas(jsonSchema)].join('\n');
 };
@@ -354,15 +374,11 @@ export const getDescribedEnumValues = (
   schema: z.ZodType,
   schemaName: string
 ): DescribedEnumValue[] => {
-  if (!(schema instanceof z.ZodUnion)) {
-    throw new SchemaTranslationError(
-      `${schemaName} is not a union of described literals. Use z.union of z.literal(...).describe(...) on each value.`
-    );
-  }
+  const union = throwIfNotZodUnion(schema, schemaName);
 
   const missing: string[] = [];
   const values: DescribedEnumValue[] = [];
-  for (const option of schema.options) {
+  for (const option of union.options) {
     if (!(option instanceof z.ZodLiteral) || typeof option.value !== 'string') {
       missing.push('(non-literal value)');
       continue;
@@ -375,12 +391,7 @@ export const getDescribedEnumValues = (
     values.push({ value: option.value, description });
   }
 
-  if (missing.length > 0) {
-    throw new SchemaTranslationError(
-      `Missing .describe() on ${schemaName} value(s): ${missing.join(', ')}.`
-    );
-  }
-
+  throwIfMissingDescribes(missing, `${schemaName} value(s)`);
   return values;
 };
 
