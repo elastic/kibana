@@ -112,11 +112,16 @@ export const ALERTING_ERROR_CODES = {
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
-   * The `group_hash` resolved to a latest alert event, but its `episode_id`
-   * did not match the one the item targeted (the episode was superseded).
-   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND`.
+   * No alert event matched the supplied `episode_id`. On the legacy bulk
+   * route it also covers a targeted `episode_id` superseded by a newer
+   * episode of the group.
    */
   ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
+  /**
+   * The episode exists but is not the latest episode of its series. Lifecycle
+   * actions (`activate` / `deactivate`) only accept the latest episode.
+   */
+  ALERT_EPISODE_NOT_LATEST: 'ALERT_EPISODE_NOT_LATEST',
   /** The requested action is incompatible with the episode's current `episode.status`. */
   INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
