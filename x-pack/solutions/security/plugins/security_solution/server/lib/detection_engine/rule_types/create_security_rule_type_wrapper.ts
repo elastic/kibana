@@ -310,6 +310,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             secondaryTimestamp,
             ruleExecutionLogger,
             isServerless: isServerless ?? false,
+            cpsData: options.cpsData,
           });
 
           warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));
