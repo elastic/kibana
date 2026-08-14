@@ -228,7 +228,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     }
 
     if (command === 'kill-process' && !output) {
-      output = this.generateKillProcessOutputContent(
+      output = this.generateKillProcessOutputResponse(
         {},
         { atError: Boolean(overrides.error) }
       ) as typeof output;
@@ -689,12 +689,12 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
-  generateKillProcessOutputContent(
+  generateKillProcessOutputResponse(
     overrides: DeepPartial<ActionResponseOutput<KillProcessActionOutputContent>> = {},
     {
       parameters = { pid: 234 },
       atError = false,
-    }: Partial<{
+    }: DeepPartial<{
       parameters: ResponseActionParametersWithProcessData;
       atError: boolean;
     }> = {}

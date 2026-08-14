@@ -458,7 +458,7 @@ const getOutputDataIfNeeded = (
 
     case 'kill-process':
       return {
-        output: endpointActionGenerator.generateKillProcessOutputContent(
+        output: endpointActionGenerator.generateKillProcessOutputResponse(
           state === 'success' &&
             (action.parameters as ResponseActionParametersWithPid).kill_descendants
             ? {
