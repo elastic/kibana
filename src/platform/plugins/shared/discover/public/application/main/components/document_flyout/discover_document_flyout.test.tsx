@@ -159,7 +159,7 @@ describe('DiscoverDocumentFlyout', () => {
     const { services } = await setup({ hits: esHitsMock });
 
     const shareButton = await screen.findByRole('button', {
-      name: 'Copy link to this document',
+      name: 'Share this document',
     });
 
     act(() => {
@@ -206,7 +206,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     await setup({ hits: esHitsMock, services });
 
-    await user.click(await screen.findByRole('button', { name: 'Copy link to this document' }));
+    await user.click(await screen.findByRole('button', { name: 'Share this document' }));
 
     expect(shortUrlClient.createWithLocator).toHaveBeenCalledWith({
       locator: services.locator,
@@ -239,14 +239,14 @@ describe('DiscoverDocumentFlyout', () => {
       const disabledReason = getExpandedDocLinkDisabledReason(linkability);
 
       const shareButton = await screen.findByRole('button', {
-        name: `Cannot copy link to this document: ${disabledReason}`,
+        name: `Cannot share this document: ${disabledReason}`,
       });
 
       expect(shareButton).toBeEnabled();
       fireEvent.click(shareButton);
 
       expect(services.toastNotifications.addWarning).toHaveBeenCalledWith({
-        title: 'Cannot copy link to this document',
+        title: 'Cannot share this document',
         text: disabledReason,
         'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
       });
@@ -394,9 +394,7 @@ describe('DiscoverDocumentFlyout', () => {
 
     expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
     expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: /copy link to this document/i })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /share this document/i })).not.toBeInTheDocument();
   });
 
   it('shows an error state when the document cannot be fetched', async () => {
@@ -504,9 +502,7 @@ describe('DiscoverDocumentFlyout', () => {
       expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
     });
 
-    expect(
-      screen.queryByRole('button', { name: /copy link to this document/i })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /share this document/i })).not.toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();

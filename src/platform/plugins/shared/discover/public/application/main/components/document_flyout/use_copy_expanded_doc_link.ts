@@ -72,7 +72,7 @@ export const useCopyExpandedDocLink = ({ dataView }: { dataView: DataView }) => 
 
     copyToClipboard(url);
     toastNotifications.addSuccess({
-      title: i18n.translate('discover.docViews.flyout.copyLinkSuccess', {
+      title: i18n.translate('discover.docViews.flyout.copyLinkSuccessTitle', {
         defaultMessage: 'Link copied to clipboard',
       }),
     });

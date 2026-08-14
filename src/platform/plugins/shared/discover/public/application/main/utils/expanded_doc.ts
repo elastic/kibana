@@ -71,12 +71,11 @@ export const getExpandedDocLinkDisabledReason = (
 ): string | undefined => {
   switch (linkability) {
     case ExpandedDocLinkability.EsqlMissingMetadata:
-      return i18n.translate('discover.expandedDoc.esqlMissingMetadataReason', {
-        defaultMessage:
-          'Add METADATA _id, _index to your ES|QL query to link to individual results.',
+      return i18n.translate('discover.expandedDoc.esqlMissingMetadataDescription', {
+        defaultMessage: 'Add `METADATA _id, _index` to your query to link to individual results.',
       });
     case ExpandedDocLinkability.EsqlTransformational:
-      return i18n.translate('discover.expandedDoc.esqlTransformationalReason', {
+      return i18n.translate('discover.expandedDoc.esqlTransformationalDescription', {
         defaultMessage:
           'Links to individual results are unavailable for queries that transform rows, such as STATS or KEEP.',
       });

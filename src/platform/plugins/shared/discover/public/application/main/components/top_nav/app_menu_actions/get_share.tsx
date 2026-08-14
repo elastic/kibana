@@ -78,7 +78,7 @@ const getExpandedDocHelpText = ({
       <KbnInfoCallout
         data-test-subj="discoverShareExpandedDocCallout"
         title={i18n.translate('discover.share.expandedDocNotLinkableTitle', {
-          defaultMessage: 'This link cannot include the open document',
+          defaultMessage: "This link won't include the open document",
         })}
         text={disabledReason}
       />
@@ -99,7 +99,7 @@ const getExpandedDocHelpText = ({
       })}
       text={i18n.translate('discover.share.expandedDocRelativeTimeDescription', {
         defaultMessage:
-          'Use an absolute time range so it stays in the results for whoever opens the link, or copy a link from the document itself.',
+          'Use an absolute time range so it stays in the results when the link is opened.',
       })}
     />
   );

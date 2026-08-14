@@ -96,8 +96,8 @@ export const DiscoverDocumentFlyout = memo(
         return undefined;
       }
 
-      const copyLinkLabel = i18n.translate('discover.docViews.flyout.copyLinkAriaLabel', {
-        defaultMessage: 'Copy link to this document',
+      const copyLinkLabel = i18n.translate('discover.docViews.flyout.copyLinkLabel', {
+        defaultMessage: 'Share this document',
       });
 
       return [
@@ -105,7 +105,7 @@ export const DiscoverDocumentFlyout = memo(
           iconType: 'share',
           'aria-label': copyLinkDisabledReason
             ? i18n.translate('discover.docViews.flyout.copyLinkUnavailableAriaLabel', {
-                defaultMessage: 'Cannot copy link to this document: {reason}',
+                defaultMessage: 'Cannot share this document: {reason}',
                 values: { reason: copyLinkDisabledReason },
               })
             : copyLinkLabel,
@@ -114,7 +114,7 @@ export const DiscoverDocumentFlyout = memo(
             if (copyLinkDisabledReason) {
               toastNotifications.addWarning({
                 title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
-                  defaultMessage: 'Cannot copy link to this document',
+                  defaultMessage: 'Cannot share this document',
                 }),
                 text: copyLinkDisabledReason,
                 'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
@@ -238,12 +238,12 @@ const ExpandedDocNoticeText = ({
         )}
         {isSearching ? (
           <FormattedMessage
-            id="discover.docViews.flyout.searchingResults"
-            defaultMessage="Looking for this document in the current results"
+            id="discover.docViews.flyout.searchingResultsDescription"
+            defaultMessage="Searching for this document in the current results"
           />
         ) : (
           <FormattedMessage
-            id="discover.docViews.flyout.notInResults"
+            id="discover.docViews.flyout.notInResultsDescription"
             defaultMessage="This document is not in the current results"
           />
         )}

@@ -420,7 +420,7 @@ describe('getShare', () => {
 
       const props = await getHelpTextProps();
 
-      expect(props?.title).toBe('This link cannot include the open document');
+      expect(props?.title).toBe("This link won't include the open document");
       expect(props?.text).toBe(
         getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlMissingMetadata)
       );
@@ -442,7 +442,7 @@ describe('getShare', () => {
       setTimeRange({ from: 'now-15m', to: 'now' });
       setExpandedDoc(expandedDocWithoutMetadata);
 
-      expect((await getHelpTextProps())?.title).toBe('This link cannot include the open document');
+      expect((await getHelpTextProps())?.title).toBe("This link won't include the open document");
     });
   });
 });

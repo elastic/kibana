@@ -64,7 +64,7 @@ export const UnresolvedDocument = ({ requestState }: { requestState?: ElasticReq
       title={
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiLoadingSpinner size="m" />
-          <FormattedMessage id="unifiedDocViewer.flyout.loading" defaultMessage="Loading…" />
+          <FormattedMessage id="unifiedDocViewer.flyout.loadingTitle" defaultMessage="Loading…" />
         </EuiFlexGroup>
       }
     />
