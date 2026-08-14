@@ -17,14 +17,15 @@
  * issue is owned by the same team as the target, so the agent has a short, relevant set to
  * confirm against the diffs.
  *
- * Team is the signal because the fixer PRs themselves carry no `Team:` label, but the
+ * Team is the signal because the fixer PRs themselves carry no ownership label, but the
  * `failed-test` issues they close reliably do (the reporter labels them from CODEOWNERS).
  * Two fixes for the same root cause touch the same file, which has one owning team, so their
- * issues share a `Team:` label — regardless of how the PR titles are worded. We read the
- * target's team from its issue, then find the team's `failed-test` issues in one search and
- * intersect with the linked-issue numbers we already parse from each PR — no per-issue fetch.
- * Matching the changed files (same method vs merely same file/team) is left to the agent,
- * which already has its own diff.
+ * issues share an ownership label — regardless of how the PR titles are worded. That label is
+ * usually `Team:*` (e.g. `Team:Visualizations`), but some teams use a legacy colon-prefixed
+ * area label instead (e.g. the ML team's `:ml`), so we match both. We read the target's team
+ * from its issue, then find the team's `failed-test` issues in one search and intersect with
+ * the linked-issue numbers we already parse from each PR — no per-issue fetch. Matching the
+ * changed files (same method vs merely same file/team) is left to the agent, which has its diff.
  */
 
 const fs = require('fs');
@@ -77,10 +78,16 @@ const fetchFixerPrs = async (github) => {
   return [...open, ...merged];
 };
 
+// A `failed-test` issue's owning team surfaces as either a `Team:*` label (the common case;
+// the colon may be followed or preceded by a space, e.g. `Team: SecuritySolution`) or a legacy
+// colon-prefixed area label (e.g. the ML team's `:ml`, used instead of `Team:ML`). Match both;
+// everything else on the issue (`failed-test`, `failure:*`, `scout-playwright`, …) is noise.
+const isTeamLabel = (name) => /^team\s*:/i.test(name) || name.startsWith(':');
+
 const teamLabelsOf = (labels) =>
   (labels ?? [])
     .map((label) => (typeof label === 'string' ? label : label.name))
-    .filter((name) => name?.startsWith('Team:'));
+    .filter((name) => name && isTeamLabel(name));
 
 // Numbers of the `failed-test` issues owned by any of `teamLabels`, created since `sinceDate`.
 const fetchTeamIssueNumbers = async (github, teamLabels, sinceDate) => {
@@ -97,9 +104,10 @@ const fetchTeamIssueNumbers = async (github, teamLabels, sinceDate) => {
 /**
  * Shortlist the `flaky-test-fixer` PRs likely to duplicate a target, by owning team. Pass
  * `prNumber` (verifier) or `issueNumber` (fixer). Reads the target's `failed-test` issue to
- * get its `Team:` label(s), then returns every fixer PR whose linked issue belongs to the
- * same team (or is the target's own issue), as `{ team, candidates }` sorted oldest-first.
- * Falls back to just the shared-linked-issue matches when the target has no team label.
+ * get its team label(s) (`Team:*` or a colon-prefixed area label like `:ml`), then returns
+ * every fixer PR whose linked issue belongs to the same team (or is the target's own issue),
+ * as `{ team, candidates }` sorted oldest-first. Falls back to just the shared-linked-issue
+ * matches when the target has no team label.
  */
 const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
   const fixerPrs = await fetchFixerPrs(github);
