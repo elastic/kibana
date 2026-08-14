@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/notification-center-plugin",
-  "owner": ["@elastic/search-kibana"],
+  "owner": ["@elastic/search-ml-ux"],
   "description": "Presentation and ingestion layer for search solution notifications",
   "group": "platform",
   "visibility": "shared",

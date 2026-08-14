@@ -84,7 +84,7 @@ export const OnboardingLandingPage = () => {
                 data-telemetry-id="vectordbOnboarding-pathSelection-documentation"
               >
                 {i18n.translate('vectordbOnboarding.pathSelection.documentation', {
-                  defaultMessage: 'Vector Database documentation',
+                  defaultMessage: 'Learn more about Elasticsearch Vector Database',
                 })}
               </EuiLink>
             </EuiFlexItem>
