@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
   EuiStepsHorizontal,
@@ -202,7 +203,13 @@ export function OnboardingShell() {
         <EuiSpacer size="xs" />
         <EuiStepsHorizontal steps={horizontalStepsConfig} />
         <EuiSpacer size="xl" />
-        {CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />}
+        {!awsServiceMatrix ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '300px' }}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexGroup>
+        ) : (
+          CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
+        )}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

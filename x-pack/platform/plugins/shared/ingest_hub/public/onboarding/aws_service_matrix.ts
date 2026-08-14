@@ -9,6 +9,8 @@
 // Source of truth for deployment mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
+
 import {
   AWS_SERVICE_PROVIDER_PERMISSIONS,
   type ProviderPermissions,
@@ -80,14 +82,16 @@ export interface AwsServiceMatrixEntry {
 
 /**
  * Internal type for the static routing table.
- * For 'aws' package entries, 'managed_integration' is derived at runtime from the Fleet package manifest.
- * For non-aws entries, all deployment methods including 'managed_integration' may appear directly.
+ * signalType and defaultEnabled are optional — derived at runtime from the Fleet package manifest.
+ * For non-aws packages where manifest derivation is not yet fully applied, static fallbacks remain.
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
-  'providerPermissions' | 'deploymentMethods'
+  'providerPermissions' | 'deploymentMethods' | 'signalType' | 'defaultEnabled'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
+  signalType?: SignalType;
+  defaultEnabled?: boolean;
 };
 
 function enrichWithProviderPermissions(
@@ -103,53 +107,36 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'apigateway_logs',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'apigateway',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'apigateway_metrics',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'apigateway',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'lambda',
     name: 'AWS Lambda',
     category: 'Compute',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
-    mandatoryFields: ['collect_esm_metrics'],
     packageName: 'aws',
     policyTemplate: 'lambda',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'lambda_logs',
     name: 'AWS Lambda',
     category: 'Compute',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-cloudwatch'],
-    requiredConfig: ['log_group_arn', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'lambda',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -158,64 +145,45 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'ec2_logs',
     name: 'AWS EC2',
     category: 'Compute',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'ec2',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'ec2_metrics',
     name: 'AWS EC2',
     category: 'Compute',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ec2',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'ecs_metrics',
     name: 'AWS ECS',
     category: 'Compute',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ecs',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'emr_logs',
     name: 'AWS EMR',
     category: 'Compute',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'emr',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'emr_metrics',
     name: 'AWS EMR',
     category: 'Compute',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'emr',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -224,38 +192,27 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'awshealth',
     name: 'AWS Health',
     category: 'Management and Governance',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'awshealth',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'cloudwatch_logs',
     name: 'AWS CloudWatch',
     category: 'Management and Governance',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-cloudwatch'],
-    requiredConfig: ['log_group_arn', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'cloudwatch',
-    defaultEnabled: false,
     showInUI: true,
   },
   {
     id: 'cloudwatch_metrics',
     name: 'AWS CloudWatch',
     category: 'Management and Governance',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions', 'metrics'],
     packageName: 'aws',
     policyTemplate: 'cloudwatch',
-    defaultEnabled: false,
     showInUI: true,
   },
 
@@ -264,25 +221,17 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'billing',
     name: 'AWS Billing',
     category: 'Cloud Financial Management',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
-    requiredConfig: [],
-    mandatoryFields: ['leaderelection'],
     packageName: 'aws',
     policyTemplate: 'billing',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'usage',
     name: 'AWS Usage',
     category: 'Cloud Financial Management',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'usage',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -291,138 +240,86 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'cloudtrail',
     name: 'AWS CloudTrail',
     category: 'Management and Governance',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'cloudtrail',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'config',
     name: 'AWS Config',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    inputs: ['cel'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'config',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'guardduty',
     name: 'AWS GuardDuty',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
-    inputs: ['aws-s3', 'httpjson'],
-    requiredConfig: ['aws_region', 'detector_id', 'bucket_arn', 'region'],
-    mandatoryFields: [
-      'collect_s3_logs',
-      'preserve_duplicate_custom_fields',
-      'preserve_original_event',
-    ],
     packageName: 'aws',
     policyTemplate: 'guardduty',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'inspector',
     name: 'AWS Inspector',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'inspector',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'firewall_logs',
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'firewall',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'firewall_metrics',
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
-    signalType: 'metrics',
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'firewall',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'securityhub_findings',
     name: 'AWS Security Hub',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'securityhub',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'securityhub_findings_full_posture',
     name: 'AWS Security Hub (Full Posture / CSPM)',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'securityhub',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'securityhub_insights',
     name: 'AWS Security Hub (Insights)',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'securityhub',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'waf',
     name: 'AWS WAF',
     category: 'Security, Identity and Compliance',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'waf',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -431,118 +328,81 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'cloudfront_logs',
     name: 'AWS CloudFront',
     category: 'Networking and Content Delivery',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn', 'region'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'cloudfront',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'elb_logs',
     name: 'AWS ELB',
     category: 'Networking and Content Delivery',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'elb',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'elb_metrics',
     name: 'AWS ELB',
     category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'elb',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'natgateway',
     name: 'AWS NAT Gateway',
     category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'natgateway',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'route53_public_logs',
     name: 'AWS Route 53 Public DNS',
     category: 'Networking and Content Delivery',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-cloudwatch'],
-    requiredConfig: ['log_group_arn', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'route53',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'route53_resolver_logs',
     name: 'AWS Route 53 Resolver',
     category: 'Networking and Content Delivery',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'route53',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'transitgateway',
     name: 'AWS Transit Gateway',
     category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'transitgateway',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'vpcflow',
     name: 'AWS VPC Flow',
     category: 'Networking and Content Delivery',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 'vpcflow',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'vpn',
     name: 'AWS VPN',
     category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'vpn',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -551,62 +411,45 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'ebs',
     name: 'AWS EBS',
     category: 'Storage',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ebs',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 's3_daily_storage',
     name: 'AWS S3 (Storage metrics)',
     category: 'Storage',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 's3_request',
     name: 'AWS S3 (Request metrics)',
     category: 'Storage',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 's3access',
     name: 'AWS S3 (Access logs)',
     category: 'Storage',
-    signalType: 'logs',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn', 'region'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
     packageName: 'aws',
     policyTemplate: 's3',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 's3_storage_lens',
     name: 'AWS S3 Storage Lens',
     category: 'Storage',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3_storage_lens',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -615,36 +458,27 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'dynamodb',
     name: 'AWS DynamoDB',
     category: 'Databases',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'dynamodb',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'rds',
     name: 'AWS RDS',
     category: 'Databases',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'rds',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'redshift',
     name: 'AWS Redshift',
     category: 'Databases',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'redshift',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -653,48 +487,36 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kafka_metrics',
     name: 'AWS MSK (Kafka)',
     category: 'Management and Governance',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'kafka',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'kinesis',
     name: 'AWS Kinesis',
     category: 'Management and Governance',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'kinesis',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'sns',
     name: 'AWS SNS',
     category: 'Management and Governance',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'sns',
-    defaultEnabled: true,
     showInUI: true,
   },
   {
     id: 'sqs',
     name: 'AWS SQS',
     category: 'Management and Governance',
-    signalType: 'metrics',
-    inputs: ['aws/metrics'],
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'sqs',
-    defaultEnabled: true,
     showInUI: true,
   },
 
@@ -843,12 +665,13 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 ];
 
 /**
- * Merge the static routing table with data from the Fleet package manifest.
- * For 'aws' package entries, derives managed_integration, signalType, and inputs from the manifest.
- * For non-aws entries, uses the static deploymentMethods directly.
+ * Merge the static routing table with data from any Fleet package manifest.
+ * Derives managed_integration, signalType, inputs, requiredConfig, mandatoryFields,
+ * defaultEnabled, and identityFederationSupported from the manifest for all packages.
+ * Static fallback values are used when the manifest does not provide a field.
  */
 export function buildAwsServiceMatrix(
-  packageInfo: PackageInfo,
+  packages: Record<string, PackageInfo>,
   staticEntries: AwsServiceStaticEntry[]
 ): AwsServiceMatrixEntry[] {
   return staticEntries.map((entry) => {
@@ -858,11 +681,12 @@ export function buildAwsServiceMatrix(
     let inputs = entry.inputs;
     let requiredConfig = entry.requiredConfig;
     let mandatoryFields = entry.mandatoryFields;
-    let defaultEnabled = entry.defaultEnabled;
-    let deploymentMethods: DeploymentMethodEntry[];
+    let defaultEnabled = entry.defaultEnabled ?? true;
     let identityFederationSupported: boolean | undefined;
+    let managedIntegrations = false;
 
-    if (entry.packageName === 'aws') {
+    const packageInfo = packages[entry.packageName];
+    if (packageInfo) {
       const pt = (packageInfo.policy_templates ?? []).find(
         (p: any) => 'name' in p && p.name === entry.policyTemplate
       );
@@ -870,14 +694,14 @@ export function buildAwsServiceMatrix(
         (d: any) => d.path === (entry.dataStream ?? entry.id)
       );
 
-      const managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
+      managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
 
       if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
         signalType = (ds as any).type as SignalType;
       }
 
       const dsInputs: string[] = [
-        ...new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string)),
+        ...new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string) as string[]),
       ];
       if (dsInputs.length > 0) {
         inputs = dsInputs;
@@ -920,21 +744,18 @@ export function buildAwsServiceMatrix(
           );
         }
       }
-
-      // Build the merged deploymentMethods array for aws package entries.
-      // managed_integration always goes first so it is the preferred method when present.
-      const methods: DeploymentMethodEntry[] = [];
-      if (managedIntegrations) {
-        methods.push({ method: 'managed_integration' });
-      }
-      if (staticMethods?.length) {
-        methods.push(...staticMethods);
-      }
-      deploymentMethods = methods;
-    } else {
-      // Non-aws entries: use staticMethods directly (may include managed_integration).
-      deploymentMethods = staticMethods ?? [];
     }
+
+    // Build the merged deploymentMethods array.
+    // managed_integration always goes first so it is the preferred method when present.
+    const methods: DeploymentMethodEntry[] = [];
+    if (managedIntegrations) {
+      methods.push({ method: 'managed_integration' });
+    }
+    if (staticMethods?.length) {
+      methods.push(...staticMethods);
+    }
+    const deploymentMethods: DeploymentMethodEntry[] = methods.length > 0 ? methods : [];
 
     // Ensure exactly one preferred entry — set it on the first if none is marked.
     if (deploymentMethods.length > 0 && !deploymentMethods.some((dm) => dm.preferred)) {
@@ -944,13 +765,12 @@ export function buildAwsServiceMatrix(
     const merged = {
       ...rest,
       deploymentMethods,
-      signalType,
+      signalType: (signalType ?? entry.signalType) as SignalType,
       inputs,
       requiredConfig,
       mandatoryFields,
       defaultEnabled,
-      // For aws entries, override with manifest-derived value; for others, rest provides it.
-      ...(entry.packageName === 'aws' && { identityFederationSupported }),
+      identityFederationSupported,
     } as Omit<AwsServiceMatrixEntry, 'providerPermissions'>;
 
     return enrichWithProviderPermissions(merged);
@@ -965,12 +785,17 @@ export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_
  * (name, category, showInUI, etc.).
  * For manifest-enriched values (deploymentMethods, identityFederationSupported)
  * use useAwsServicesMap() in React components.
+ * Note: signalType and defaultEnabled may be absent for aws package entries since
+ * those fields are derived from the manifest at runtime.
  */
 export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
   AWS_SERVICES_STATIC.map((entry) => {
     const { deploymentMethods: staticMethods, ...rest } = entry;
     const deploymentMethods: DeploymentMethodEntry[] = staticMethods ?? [];
-    const base: Omit<AwsServiceMatrixEntry, 'providerPermissions'> = { ...rest, deploymentMethods };
+    const base = {
+      ...rest,
+      deploymentMethods,
+    } as unknown as Omit<AwsServiceMatrixEntry, 'providerPermissions'>;
     return [entry.id, enrichWithProviderPermissions(base)];
   })
 );

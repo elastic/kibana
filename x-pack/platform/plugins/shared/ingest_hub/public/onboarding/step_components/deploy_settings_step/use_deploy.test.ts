@@ -27,8 +27,77 @@ jest.mock('../../use_aws_service_matrix', () => {
         .map((e: any) => e.policyTemplate as string)
     ),
   ].map((name: string) => ({ name, deployment_modes: { agentless: { enabled: true } } }));
-  const mockPackageInfo = { policy_templates: policyTemplates, data_streams: [] };
-  const matrix = buildAwsServiceMatrix(mockPackageInfo, AWS_SERVICES_STATIC);
+  // Provide data streams for aws entries with correct input types so deployment input keys
+  // (e.g. 'ec2-aws/metrics') are generated correctly in useDeploy tests.
+  const AWS_INPUT_MAP: Record<string, string[]> = {
+    apigateway_logs: ['aws-s3', 'aws-cloudwatch'],
+    apigateway_metrics: ['aws/metrics'],
+    lambda: ['aws/metrics'],
+    lambda_logs: ['aws-cloudwatch'],
+    ec2_logs: ['aws-s3', 'aws-cloudwatch'],
+    ec2_metrics: ['aws/metrics'],
+    ecs_metrics: ['aws/metrics'],
+    emr_logs: ['aws-s3', 'aws-cloudwatch'],
+    emr_metrics: ['aws/metrics'],
+    awshealth: ['aws/metrics'],
+    cloudwatch_logs: ['aws-cloudwatch'],
+    cloudwatch_metrics: ['aws/metrics'],
+    billing: ['aws/metrics'],
+    usage: ['aws/metrics'],
+    cloudtrail: ['aws-s3', 'aws-cloudwatch'],
+    config: ['cel'],
+    guardduty: ['aws-s3', 'httpjson'],
+    inspector: ['httpjson'],
+    firewall_logs: ['aws-s3', 'aws-cloudwatch'],
+    firewall_metrics: ['aws/metrics'],
+    securityhub_findings: ['httpjson'],
+    securityhub_findings_full_posture: ['httpjson'],
+    securityhub_insights: ['httpjson'],
+    waf: ['aws-s3', 'aws-cloudwatch'],
+    cloudfront_logs: ['aws-s3'],
+    elb_logs: ['aws-s3', 'aws-cloudwatch'],
+    elb_metrics: ['aws/metrics'],
+    natgateway: ['aws/metrics'],
+    route53_public_logs: ['aws-cloudwatch'],
+    route53_resolver_logs: ['aws-s3', 'aws-cloudwatch'],
+    transitgateway: ['aws/metrics'],
+    vpcflow: ['aws-s3', 'aws-cloudwatch'],
+    vpn: ['aws/metrics'],
+    ebs: ['aws/metrics'],
+    s3_daily_storage: ['aws/metrics'],
+    s3_request: ['aws/metrics'],
+    s3access: ['aws-s3'],
+    s3_storage_lens: ['aws/metrics'],
+    dynamodb: ['aws/metrics'],
+    rds: ['aws/metrics'],
+    redshift: ['aws/metrics'],
+    kafka_metrics: ['aws/metrics'],
+    kinesis: ['aws/metrics'],
+    sns: ['aws/metrics'],
+    sqs: ['aws/metrics'],
+  };
+  const dataStreams = (AWS_SERVICES_STATIC as any[])
+    .filter((e: any) => e.packageName === 'aws')
+    .map((e: any) => {
+      const inputList: string[] = AWS_INPUT_MAP[e.id] ?? ['aws-s3'];
+      return {
+        path: e.dataStream ?? e.id,
+        type: inputList[0].includes('metrics') ? 'metrics' : 'logs',
+        streams: inputList.map((input: string) => ({ input, vars: [], enabled: true })),
+      };
+    });
+  const mockPackages = {
+    aws: { policy_templates: policyTemplates, data_streams: dataStreams },
+    aws_bedrock: { policy_templates: [], data_streams: [] },
+    aws_bedrock_agentcore: { policy_templates: [], data_streams: [] },
+    awsfargate: { policy_templates: [], data_streams: [] },
+    aws_mq: { policy_templates: [], data_streams: [] },
+    aws_cloudtrail_otel: { policy_templates: [], data_streams: [] },
+    aws_vpcflow_otel: { policy_templates: [], data_streams: [] },
+    aws_waf_otel: { policy_templates: [], data_streams: [] },
+    aws_logs: { policy_templates: [], data_streams: [] },
+  };
+  const matrix = buildAwsServiceMatrix(mockPackages, AWS_SERVICES_STATIC);
   const servicesMap = new Map(matrix.map((s: any) => [s.id, s]));
   return {
     useAwsServiceMatrix: jest.fn().mockReturnValue(matrix),

@@ -29,20 +29,37 @@ const VALID_CATEGORIES: ServiceCategory[] = [
   'Storage',
 ];
 
-// Build a mock PackageInfo that marks all unique aws policy templates as agentless-enabled.
-// data_streams is empty so signalType / inputs / config fields come from the static entries.
-const MOCK_AWS_PACKAGE_INFO = {
-  policy_templates: [
-    ...new Set(
-      AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws' && e.policyTemplate).map(
-        (e) => e.policyTemplate!
-      )
-    ),
-  ].map((name) => ({ name, deployment_modes: { agentless: { enabled: true } } })),
-  data_streams: [],
-} as any;
+// Build a mock packages record.
+// For the aws package: provide data streams for all aws entries so that signalType and
+// defaultEnabled are derived from the manifest rather than static fallbacks (which are now removed).
+// Each entry gets a data stream with type 'logs' and one aws-s3 stream so signalType = 'logs'.
+// All aws policy templates are marked agentless-enabled to exercise managed_integration derivation.
+const MOCK_PACKAGES: Record<string, any> = {
+  aws: {
+    policy_templates: [
+      ...new Set(
+        AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws' && e.policyTemplate).map(
+          (e) => e.policyTemplate!
+        )
+      ),
+    ].map((name) => ({ name, deployment_modes: { agentless: { enabled: true } } })),
+    data_streams: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
+      path: e.dataStream ?? e.id,
+      type: 'logs',
+      streams: [{ input: 'aws-s3', vars: [], enabled: true }],
+    })),
+  },
+  aws_bedrock: { policy_templates: [], data_streams: [] },
+  aws_bedrock_agentcore: { policy_templates: [], data_streams: [] },
+  awsfargate: { policy_templates: [], data_streams: [] },
+  aws_mq: { policy_templates: [], data_streams: [] },
+  aws_cloudtrail_otel: { policy_templates: [], data_streams: [] },
+  aws_vpcflow_otel: { policy_templates: [], data_streams: [] },
+  aws_waf_otel: { policy_templates: [], data_streams: [] },
+  aws_logs: { policy_templates: [], data_streams: [] },
+};
 
-const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_AWS_PACKAGE_INFO, AWS_SERVICES_STATIC);
+const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 
 describe('AWS service matrix', () => {
   it('should have at least 40 entries', () => {
@@ -111,7 +128,7 @@ describe('AWS service matrix', () => {
   );
 
   describe('identityFederationSupported derivation', () => {
-    const IF_MOCK_PACKAGE = {
+    const IF_MOCK_PKG_CONTENT = {
       policy_templates: [
         {
           name: 'guardduty',
@@ -163,12 +180,14 @@ describe('AWS service matrix', () => {
           ],
         },
       ],
-    } as any;
+    };
+
+    const IF_PACKAGES = { aws: IF_MOCK_PKG_CONTENT } as any;
 
     const IF_STATIC = AWS_SERVICES_STATIC.filter((e) =>
       ['guardduty', 'cloudtrail', 'elb_logs'].includes(e.id)
     );
-    const IF_MATRIX = buildAwsServiceMatrix(IF_MOCK_PACKAGE, IF_STATIC);
+    const IF_MATRIX = buildAwsServiceMatrix(IF_PACKAGES, IF_STATIC);
 
     it('is true when no input hides identity_federation', () => {
       const guardduty = IF_MATRIX.find((e) => e.id === 'guardduty');
@@ -191,7 +210,7 @@ describe('AWS service matrix', () => {
         data_streams: [],
       } as any;
       const result = buildAwsServiceMatrix(
-        noDataStreamPackage,
+        { aws: noDataStreamPackage },
         IF_STATIC.filter((e) => e.id === 'guardduty')
       );
       expect(result[0].identityFederationSupported).toBeUndefined();

@@ -13,6 +13,41 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('react-use/lib/useSessionStorage');
 
+// apigateway_logs  → ecf (no managed_integration): needsDeploySettingsStep = false
+// apigateway_metrics → managed_integration: needsDeploySettingsStep = true
+// Provide a minimal matrix so OnboardingShell's needsDeploySettingsStep logic works
+// without needing a real QueryClient or live Fleet package manifests.
+jest.mock('./use_aws_service_matrix', () => {
+  const matrix = [
+    {
+      id: 'apigateway_logs',
+      name: 'AWS API Gateway',
+      category: 'Networking and Content Delivery',
+      signalType: 'logs',
+      deploymentMethods: [{ method: 'ecf', preferred: true }],
+      packageName: 'aws',
+      policyTemplate: 'apigateway',
+      defaultEnabled: true,
+      showInUI: true,
+    },
+    {
+      id: 'apigateway_metrics',
+      name: 'AWS API Gateway',
+      category: 'Networking and Content Delivery',
+      signalType: 'metrics',
+      deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+      packageName: 'aws',
+      policyTemplate: 'apigateway',
+      defaultEnabled: true,
+      showInUI: true,
+    },
+  ];
+  return {
+    useAwsServiceMatrix: jest.fn().mockReturnValue(matrix),
+    useAwsServicesMap: jest.fn().mockReturnValue(new Map(matrix.map((s) => [s.id, s]))),
+  };
+});
+
 // Stub heavy step components — we only care about shell-level stepper and navigation.
 jest.mock('./step_components', () => ({
   ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
@@ -44,8 +79,6 @@ beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));
 });
 
-// apigateway_logs  → ecf (no managed_integration): needsDeploySettingsStep = false
-// apigateway_metrics → managed_integration: needsDeploySettingsStep = true
 const NON_AGENTLESS_ID = 'apigateway_logs';
 const AGENTLESS_ID = 'apigateway_metrics';
 
