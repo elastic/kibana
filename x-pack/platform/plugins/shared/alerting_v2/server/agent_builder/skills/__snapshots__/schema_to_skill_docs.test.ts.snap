@@ -64,8 +64,6 @@ Use \`validate\` as the last operation to confirm the action policy is complete 
 exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy API Schema Reference
 
-Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth for field names, types, and constraints.
-
 ## Top-Level Fields
 
 | Field | Type | Required | Description |
@@ -176,12 +174,12 @@ exports[`schema_to_skill_docs generateRuleKindDoc matches the reviewed skill-doc
 Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important behavioral split in the system.
 
 ### Alert (\`kind: alert\`)
-Stateful alerting with full episode lifecycle, state transitions, recovery detection, and notification dispatch. Produces type: \\"alert\\" events that participate in the dispatcher pipeline. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+Stateful alerting with full episode lifecycle, state transitions, recovery detection, and notification dispatch. Produces alert events that participate in the dispatcher pipeline. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
 Episode statuses: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
 State transition fields: \`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`.
 
 ### Signal (\`kind: signal\`)
-Stateless detection (observation-only). Produces type: \\"signal\\" events but skips episode lifecycle and dispatcher processing entirely. No notifications, no recovery, no state transitions. Use for logging or detection without automated action.
+Stateless detection (observation-only). Produces events but skips alert lifecycle and dispatcher processing entirely. No notifications, no recovery, no state transitions. Use for logging or detection without automated action.
 
 ### Immutability
 \`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely."
@@ -264,8 +262,6 @@ Use \`validate\` as the last operation to confirm the rule is complete and ready
 
 exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 "# Rule API Schema Reference
-
-Auto-generated from \`@kbn/alerting-v2-schemas\`. This is the source of truth for field names, types, and constraints.
 
 ## Top-Level Fields
 

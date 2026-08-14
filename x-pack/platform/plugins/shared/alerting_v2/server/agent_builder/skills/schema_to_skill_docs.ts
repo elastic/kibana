@@ -301,8 +301,6 @@ export const generateApiSchemaDoc = ({
   const sections = [
     `# ${title}`,
     '',
-    'Auto-generated from `@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.',
-    '',
     '## Top-Level Fields',
     '',
     fieldTable,

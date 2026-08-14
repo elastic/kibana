@@ -60,14 +60,13 @@ describe('schema_to_skill_docs', () => {
       enabled: z.boolean().optional().describe('Whether the resource is enabled.'),
     });
 
-    it('renders title, default source line, and top-level field table', () => {
+    it('renders title and top-level field table', () => {
       const doc = generateApiSchemaDoc({
         title: 'Example API Schema Reference',
         schema: exampleApiSchema,
       });
 
       expect(doc).toContain('# Example API Schema Reference');
-      expect(doc).toContain('Auto-generated from `@kbn/alerting-v2-schemas`.');
       expect(doc).toContain('## Top-Level Fields');
       expect(doc).toContain(
         '| `name` | string | required | Display name. (min length: 1, max length: 64) |'
