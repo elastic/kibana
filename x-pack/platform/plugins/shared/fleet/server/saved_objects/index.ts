@@ -59,6 +59,8 @@ import {
   CloudOnboardingDeploymentSchemaV1,
 } from '../types';
 
+import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
+
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
 
 import {
@@ -140,22 +142,6 @@ import { bumpProfilingSymbolizerPolicy } from './model_versions/bump_profiling_s
  * Please update typings in `/common/types` as well as
  * schemas in `/server/types` if mappings are updated.
  */
-
-const _nullableString = schema.oneOf([schema.literal(null), schema.string()]);
-const downloadSourceSchemaV2 = schema.object(
-  {
-    source_id: schema.maybe(schema.string()),
-    name: schema.maybe(schema.string()),
-    is_default: schema.maybe(schema.boolean()),
-    is_preconfigured: schema.maybe(schema.boolean()),
-    host: schema.maybe(schema.string()),
-    proxy_id: schema.maybe(_nullableString),
-    ssl: schema.maybe(_nullableString),
-    auth: schema.maybe(_nullableString),
-    secrets: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-  },
-  { unknowns: 'ignore' }
-);
 
 export const getSavedObjectTypes = (
   options = { useSpaceAwareness: false }
