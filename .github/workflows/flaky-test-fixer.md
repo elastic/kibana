@@ -70,7 +70,7 @@ tools:
 
 # Bootstrap Kibana on the self-hosted runner, in a pre-agent step that runs on the
 # host (before `awf` starts the sandboxed agent), so `node_modules` and
-# `@kbn/setup-node-env` exist and the agent can lint and type check the fix.
+# `@kbn/setup-node-env` exist and the agent can lint and run Jest on the fix.
 runs-on: kibana
 steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -288,7 +288,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 - **Read each file once, in the smallest useful slice.** Prefer a ranged read or a targeted `grep` over dumping a whole file, and never re-read or re-download a file you already have — after you edit a file, trust the returned state instead of reading it back.
 - **Don't pull large or binary artifacts into context.** Describe a failure screenshot from its metadata rather than loading the image, and `grep`/`sed` a big log for the failure timestamp instead of reading it end to end. Fetch only the specific artifacts you will actually use.
-- **Don't repeat a check whose inputs haven't changed.** A lint, type check, or search returns the same result until you edit the code it inspects, so re-running it just burns budget — reuse the result you already have, and never loop a command hoping for a different outcome. (The repeated runs in [Verifying a Jest fix](#verifying-a-jest-fix) are the deliberate exception: they measure flakiness, not a fixed result.)
+- **Don't repeat a check whose inputs haven't changed.** A lint or search returns the same result until you edit the code it inspects, so re-running it just burns budget — reuse the result you already have, and never loop a command hoping for a different outcome. (The repeated runs in [Verifying a Jest fix](#verifying-a-jest-fix) are the deliberate exception: they measure flakiness, not a fixed result.)
 
 ## Steps
 
@@ -297,13 +297,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 3. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 4. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 5. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
-6. Verify the patch. Lint with `node scripts/eslint <changed files>`. Type check **only the project you touched** — pass the nearest `tsconfig.json` above the changed file and serialize the workers so the build fits in the runner's memory:
-
-   ```bash
-   KBN_TYPE_CHECK_BUILDERS=1 KBN_TYPE_CHECK_CHECKERS=1 node scripts/type_check --project <path/to/tsconfig.json>
-   ```
-
-   An unscoped `type_check` builds all ~1,400 projects at once and gets OOM-killed (`SIGKILL`, exit 137) on this runner. If even the scoped, serialized run is killed, treat type checking as environmentally blocked: note it under "Not verified locally" and do **not** retry it (a rerun will be killed the same way and just burns budget). For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
+6. Verify the patch. Lint with `node scripts/eslint <changed files>`. **Don't type check** — `node scripts/type_check` builds a large project graph and is slow and memory-heavy on this runner (an unscoped run is even OOM-killed with `SIGKILL`), and the PR's CI type-checks the change anyway, so leave that to CI. For a Jest test, repeat it as described in [Verifying a Jest fix](#verifying-a-jest-fix). For an application-side fix, also run the Jest tests nearest the changed code. FTR/Scout tests need a live Elasticsearch + Kibana and cannot be run here.
 7. Decide the backport strategy and open the PR (see "PR format" and "Backport label" below). If the fix has to land on a version branch rather than `main`, don't open a PR at all — hand it over in the outcome comment instead (see "Fixes that must target a version branch").
 8. Post the outcome comment on the issue (see "Outcome comment" below). Do this in every run, whether or not you opened a PR.
 9. Remove the `ai:fix-flaky` label from the issue via the `remove-labels` safe output. Do this in **every** run once you have a result — whether you opened a PR, found an existing one, or opened none.
@@ -381,7 +375,6 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
   ✅ Passed: `node scripts/eslint <files>`
-  ✅ Passed: `node scripts/type_check --project <tsconfig>`
   ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 4.9s), 0/25 after (avg 890ms, max 1.0s)
   ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
