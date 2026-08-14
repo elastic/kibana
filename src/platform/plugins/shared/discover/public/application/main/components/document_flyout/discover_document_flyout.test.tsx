@@ -10,6 +10,7 @@
 import React, { type ForwardedRef } from 'react';
 import { from, throwError } from 'rxjs';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { copyToClipboard, type EuiFlyoutProps } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
@@ -17,6 +18,7 @@ import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -171,6 +173,46 @@ describe('DiscoverDocumentFlyout', () => {
     expect(services.toastNotifications.addSuccess).toHaveBeenCalledWith({
       title: 'Link copied to clipboard',
     });
+    expect(services.locator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expandedDoc: expandedDocRef,
+        timeRange: services.data.query.timefilter.timefilter.getAbsoluteTime(),
+      })
+    );
+  });
+
+  it('copies a short URL when the user has permission to create one', async () => {
+    const user = userEvent.setup();
+    const services = createDiscoverServicesMock();
+    const share = sharePluginMock.createStartContract();
+    const shortUrlClient = share.url.shortUrls.get(null);
+    const shortUrlLocator = sharePluginMock.createLocator<{ slug: string }>();
+    shortUrlLocator.getUrl.mockResolvedValue('https://example.com/s/short-link');
+    jest.spyOn(share.url.shortUrls, 'get').mockReturnValue(shortUrlClient);
+    jest.spyOn(shortUrlClient, 'createWithLocator').mockResolvedValue({
+      data: {
+        id: 'short-url-id',
+        slug: 'short-link',
+        accessCount: 0,
+        accessDate: 0,
+        createDate: 0,
+        locator: { id: 'DISCOVER_APP_LOCATOR', version: '1', state: {} },
+      },
+      locator: shortUrlLocator,
+      params: { slug: 'short-link' },
+    });
+    services.share = share;
+    services.capabilities.discover_v2.createShortUrl = true;
+
+    await setup({ hits: esHitsMock, services });
+
+    await user.click(await screen.findByRole('button', { name: 'Copy link to this document' }));
+
+    expect(shortUrlClient.createWithLocator).toHaveBeenCalledWith({
+      locator: services.locator,
+      params: expect.objectContaining({ expandedDoc: expandedDocRef }),
+    });
+    expect(copyToClipboard).toHaveBeenCalledWith('https://example.com/s/short-link');
   });
 
   it.each([
@@ -337,6 +379,12 @@ describe('DiscoverDocumentFlyout', () => {
     });
   });
 
+  it('shows a loading state while the document request is unresolved', async () => {
+    await setup({ searchResult: new Promise(() => {}) });
+
+    expect(await screen.findByTestId('docViewerFlyoutLoading')).toBeVisible();
+  });
+
   it('shows a not found state when the document no longer exists', async () => {
     await setup({ searchResult: Promise.resolve({ rawResponse: { hits: { hits: [] } } }) });
 
@@ -379,6 +427,18 @@ describe('DiscoverDocumentFlyout', () => {
       expect(toolkit.getCurrentTab().expandedDoc).toBeUndefined();
       expect(screen.queryByTestId('docViewerFlyout')).not.toBeInTheDocument();
     });
+  });
+
+  it('clears a restored reference for a transformational ES|QL query without fetching', async () => {
+    const { toolkit, services } = await setup({
+      query: { esql: 'FROM logs METADATA _id, _index | STATS count() BY host' },
+    });
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().appState.expandedDoc).toBeUndefined();
+      expect(screen.queryByTestId('docViewerFlyout')).not.toBeInTheDocument();
+    });
+    expect(services.data.search.search).not.toHaveBeenCalled();
   });
 
   it('renders a cascade owned document with the columns and meta reported by its grid', async () => {

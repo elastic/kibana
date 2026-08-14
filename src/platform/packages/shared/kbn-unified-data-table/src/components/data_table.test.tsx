@@ -1751,7 +1751,7 @@ describe('UnifiedDataTable', () => {
   // Covers `useScrollToExpandedDoc` through the real grid rather than in isolation, since it
   // depends on the grid's pagination and imperative API. These assert the paging half only:
   // jsdom exposes grid pagination but not EUI's imperative virtualized scrolling API,
-  // so scroll is covered by functional tests instead.
+  // so scrolling and retry behavior are covered by the focused hook tests instead.
   describe('scrolling to the expanded document', () => {
     const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const onChangePageMock = jest.fn();
