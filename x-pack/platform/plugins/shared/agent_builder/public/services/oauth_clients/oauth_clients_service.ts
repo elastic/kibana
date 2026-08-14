@@ -13,6 +13,8 @@ import type {
   ListOAuthClientsResponse,
   RevokeOAuthClientPayload,
   RevokeOAuthClientResponse,
+  UpdateOAuthClientPayload,
+  UpdateOAuthClientResponse,
 } from '../../../common/http_api/oauth_clients';
 
 const OAUTH_API_PATH = '/internal/security/oauth';
@@ -38,6 +40,16 @@ export class OAuthClientsService {
     return await this.http.post<CreateOAuthClientResponse>(`${OAUTH_API_PATH}/clients`, {
       body: JSON.stringify(payload),
     });
+  }
+
+  async update(
+    clientId: string,
+    payload: UpdateOAuthClientPayload
+  ): Promise<UpdateOAuthClientResponse> {
+    return await this.http.patch<UpdateOAuthClientResponse>(
+      buildPath(`${OAUTH_API_PATH}/clients/{clientId}`, { clientId }),
+      { body: JSON.stringify(payload) }
+    );
   }
 
   async revoke(

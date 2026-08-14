@@ -33,9 +33,14 @@ export const McpClientActionsMenu = ({
   revoked,
 }: McpClientActionsMenuProps) => {
   const [isOpen, toggleOpen] = useToggle(false);
-  const { revokeMcpClient } = useMcpClientsActions();
+  const { editMcpClient, revokeMcpClient } = useMcpClientsActions();
 
   const closePopover = useCallback(() => toggleOpen(false), [toggleOpen]);
+
+  const handleEdit = useCallback(() => {
+    closePopover();
+    editMcpClient(clientId);
+  }, [closePopover, editMcpClient, clientId]);
 
   const handleRevoke = useCallback(() => {
     closePopover();
@@ -43,6 +48,19 @@ export const McpClientActionsMenu = ({
   }, [closePopover, revokeMcpClient, clientId, clientName, connectionCount]);
 
   const menuItems = [
+    <EuiContextMenuItem
+      key="edit"
+      icon="pencil"
+      onClick={handleEdit}
+      data-test-subj={`mcpClientEditAction-${clientId}`}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.globalManagement.MCP_CLIENT_EDIT_OPEN,
+        detail: AGENT_BUILDER_UI_EBT.entity.MCP_CLIENT,
+      })}
+    >
+      {labels.tools.mcpClients.actions.edit}
+    </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="revoke"
       icon="trash"

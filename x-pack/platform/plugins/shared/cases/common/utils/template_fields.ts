@@ -211,6 +211,28 @@ export const buildExtendedFieldsDefaults = (
   return out;
 };
 
+/**
+ * Selects create-time Activity Log entries for `extended_fields`: only keys whose persisted
+ * value differs from the resolved template + global defaults. A missing default is treated as
+ * `''`, so untouched empty stamps and empty keys with no default stay out of the audit payload.
+ *
+ * Does not mutate persistence — callers still store the full map on the case SO. Distinct from
+ * backfill "empty" semantics (`null`/`undefined` only); empty string is a real comparable value
+ * here (e.g. clearing a non-empty default must still surface in Activity).
+ */
+export const pickExtendedFieldsDifferingFromDefaults = (
+  persisted: Record<string, string>,
+  defaults: Record<string, string>
+): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(persisted)) {
+    if (value !== (defaults[key] ?? '')) {
+      out[key] = value;
+    }
+  }
+  return out;
+};
+
 // ---------------------------------------------------------------------------
 // customFields → extended_fields adapter utilities
 //

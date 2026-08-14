@@ -151,14 +151,12 @@ test.describe.skip('Rule details alerts tab', { tag: tags.stateful.classic }, ()
       await expect(pageObjects.ruleDetailsPage.alertSummaryTotalCount).toHaveText('2');
       await pageObjects.ruleDetailsPage.filterAlertsByKql('kibana.alert.status : "active"');
 
-      await pageObjects.ruleDetailsPage.alertsTable.ensureGridVisible();
-      const ruleNameCells =
-        pageObjects.ruleDetailsPage.alertsTable.getAllCellLocatorByColId(ALERT_RULE_NAME);
+      await expect(pageObjects.ruleDetailsPage.alertsTable.locator).toBeVisible();
+      const ruleNameCells = pageObjects.ruleDetailsPage.alertsTable.cells(ALERT_RULE_NAME);
       await expect(ruleNameCells).toHaveCount(1);
       await expect(ruleNameCells).toContainText(INDEX_THRESHOLD_RULE_NAME);
 
-      const statusCells =
-        pageObjects.ruleDetailsPage.alertsTable.getAllCellLocatorByColId(ALERT_STATUS);
+      const statusCells = pageObjects.ruleDetailsPage.alertsTable.cells(ALERT_STATUS);
       await expect(statusCells).toHaveCount(1);
       await expect(statusCells).toHaveText(/active/i);
 

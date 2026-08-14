@@ -16,6 +16,7 @@ import {
   getYamlDefaultAsString,
   mergeCustomFieldsIntoExtendedFields,
   parseFieldDefinitionsToInlineFields,
+  pickExtendedFieldsDifferingFromDefaults,
   resolveTemplateFields,
 } from './template_fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
@@ -326,6 +327,54 @@ describe('template field key utils', () => {
 
       expect(defaults).toEqual({ summary_as_keyword: 'hi' });
       expect(defaults).not.toHaveProperty('instructions_as_keyword');
+    });
+  });
+
+  describe('pickExtendedFieldsDifferingFromDefaults', () => {
+    it('returns an empty object when every persisted value matches its default', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { priority_as_keyword: 'medium', effort_as_integer: '' },
+          { priority_as_keyword: 'medium', effort_as_integer: '' }
+        )
+      ).toEqual({});
+    });
+
+    it('keeps a non-empty override that differs from the default', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { priority_as_keyword: 'high', effort_as_integer: '' },
+          { priority_as_keyword: 'medium', effort_as_integer: '' }
+        )
+      ).toEqual({ priority_as_keyword: 'high' });
+    });
+
+    it('keeps clearing a non-empty default as an empty-string entry', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { priority_as_keyword: '' },
+          { priority_as_keyword: 'medium' }
+        )
+      ).toEqual({ priority_as_keyword: '' });
+    });
+
+    it('drops empty persisted values when the default is also empty', () => {
+      expect(
+        pickExtendedFieldsDifferingFromDefaults(
+          { effort_as_integer: '' },
+          { effort_as_integer: '' }
+        )
+      ).toEqual({});
+    });
+
+    it('keeps a persisted key with no default when its value is non-empty', () => {
+      expect(pickExtendedFieldsDifferingFromDefaults({ notes_as_keyword: 'hello' }, {})).toEqual({
+        notes_as_keyword: 'hello',
+      });
+    });
+
+    it('drops a persisted key with no default when its value is empty', () => {
+      expect(pickExtendedFieldsDifferingFromDefaults({ notes_as_keyword: '' }, {})).toEqual({});
     });
   });
 });

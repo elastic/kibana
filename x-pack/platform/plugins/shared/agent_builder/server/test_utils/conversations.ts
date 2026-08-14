@@ -28,7 +28,7 @@ export const createEmptyConversation = (
       id: 'unknown',
       username: 'unknown',
     },
-    permissions: { rename: true, delete: true },
+    permissions: { rename: true, delete: true, update_access_control: true },
     ...parts,
   };
 };

@@ -73,6 +73,7 @@ export const ExampleInfo = lazySchema(() =>
     id: z.string().max(1024),
     index: z.number().int(),
     input: z.object({}).catchall(z.unknown()).nullable().optional(),
+    metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     dataset: z.object({
       id: z.string().max(1024),
       name: z.string().max(256),

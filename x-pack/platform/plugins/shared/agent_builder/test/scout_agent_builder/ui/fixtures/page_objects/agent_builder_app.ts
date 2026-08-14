@@ -557,6 +557,27 @@ export class AgentBuilderApp {
     return labelTexts;
   }
 
+  async navigateToAgentOverview(agentId: string) {
+    await this.page.gotoApp(`agent_builder/agents/${agentId}/overview`);
+    await this.page.testSubj.locator('agentOverviewPage').waitFor({
+      state: 'visible',
+      timeout: 60_000,
+    });
+  }
+
+  async openEditDetailsFlyout() {
+    await this.page.testSubj.click('agentOverviewEditDetailsButton');
+    await this.page.testSubj.locator('editDetailsFlyout').waitFor({ state: 'visible' });
+  }
+
+  async setEditDetailsInstructions(instructions: string) {
+    await this.page.testSubj.fill('editDetailsInstructionsInput', instructions);
+  }
+
+  async getEditDetailsInstructions() {
+    return this.page.testSubj.locator('editDetailsInstructionsInput').inputValue();
+  }
+
   async clickAgentChat(agentId: string) {
     await this.agentAction(agentId, `agentBuilderAgentsListChat-${agentId}`).click();
   }
@@ -778,6 +799,30 @@ export class AgentBuilderApp {
     ]);
     const { id }: { id: string } = await response.json();
     return id;
+  }
+
+  async openMcpClientEdit(clientId: string) {
+    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.page.testSubj
+      .locator(`mcpClientEditAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientEditAction-${clientId}`);
+    await this.page.testSubj.locator('agentBuilderMcpClientEditPage').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('mcpClientNameInput').waitFor({ state: 'visible' });
+  }
+
+  async submitMcpClientUpdate(): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(
+        (res) =>
+          res.url().includes('/internal/security/oauth/clients') &&
+          res.request().method() === 'PATCH'
+      ),
+      this.page.testSubj.click('mcpClientUpdateButton'),
+    ]);
+    await this.page.testSubj
+      .locator('agentBuilderMcpClientsListPage')
+      .waitFor({ state: 'visible' });
   }
 
   async closeMcpClientDetails() {

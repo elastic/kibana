@@ -41,9 +41,12 @@ interface SourceConfigurationResponse {
  * mutation never leaks into other sequential specs sharing this Kibana instance.
  *
  * The suite is stateful by default. Most tests also opt into serverless Observability
- * Complete. The "used by rules" case stays stateful-only: `metrics.alert.threshold` is
- * gated by `featureFlags.metricThresholdAlertRuleEnabled` and is not registered on
- * serverless (same reason `alerts_flyouts` leaves the metrics-threshold flyout stateful).
+ * Complete. Two cases stay stateful-only: the "used by rules" case because
+ * `metrics.alert.threshold` is gated by `featureFlags.metricThresholdAlertRuleEnabled`
+ * and is not registered on serverless (same reason `alerts_flyouts` leaves the
+ * metrics-threshold flyout stateful); and the "remote-cluster" case because serverless
+ * ES resolves an unconfigured remote as "no matching index" rather than raising
+ * `no_such_remote_cluster_exception`, so the danger callout it asserts never renders.
  */
 test.describe('Infrastructure source configuration', { tag: tags.stateful.classic }, () => {
   let defaultConfig: { name: string; metricAlias: string };
@@ -143,28 +146,29 @@ test.describe('Infrastructure source configuration', { tag: tags.stateful.classi
     }
   );
 
-  test(
-    'reflects a remote-cluster metric index pattern across settings and the inventory',
-    { tag: tags.serverless.observability.complete },
-    async ({ pageObjects: { inventoryPage, metricsSettingsPage } }) => {
-      await test.step('shows the remote-cluster danger callout after saving', async () => {
-        await metricsSettingsPage.goto();
-        await metricsSettingsPage.setName(MODIFIED_SOURCE_NAME);
-        await metricsSettingsPage.setMetricIndices('remote_cluster:metricbeat-*');
-        await metricsSettingsPage.save();
-        await expect(metricsSettingsPage.remoteClusterDangerCallout).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
+  // Stateful-only: serverless ES resolves an unconfigured remote as "no matching index"
+  // rather than raising `no_such_remote_cluster_exception`, so the danger callout this
+  // test asserts never renders there (the warning callout does instead).
+  test('reflects a remote-cluster metric index pattern across settings and the inventory', async ({
+    pageObjects: { inventoryPage, metricsSettingsPage },
+  }) => {
+    await test.step('shows the remote-cluster danger callout after saving', async () => {
+      await metricsSettingsPage.goto();
+      await metricsSettingsPage.setName(MODIFIED_SOURCE_NAME);
+      await metricsSettingsPage.setMetricIndices('remote_cluster:metricbeat-*');
+      await metricsSettingsPage.save();
+      await expect(metricsSettingsPage.remoteClusterDangerCallout).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
       });
+    });
 
-      await test.step('renders the no-remote-cluster prompt on the inventory', async () => {
-        await inventoryPage.goToPage({ skipLoadWait: true });
-        await expect(inventoryPage.noRemoteClusterPrompt).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
+    await test.step('renders the no-remote-cluster prompt on the inventory', async () => {
+      await inventoryPage.goToPage({ skipLoadWait: true });
+      await expect(inventoryPage.noRemoteClusterPrompt).toBeVisible({
+        timeout: EXTENDED_TIMEOUT,
       });
-    }
-  );
+    });
+  });
 
   // Stateful-only: metric threshold rule type is not registered on serverless.
   test('warns when editing an index pattern used by an alerting rule', async ({

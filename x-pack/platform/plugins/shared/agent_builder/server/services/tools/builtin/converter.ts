@@ -51,6 +51,7 @@ export const convertTool = ({
       getHandler: () => tool.handler,
       summarizeToolReturn: tool.summarizeToolReturn,
       maxResultTokens: tool.maxResultTokens,
+      annotations: tool.annotations,
     };
   }
   if (!isBuiltinDefinition(definition)) {
