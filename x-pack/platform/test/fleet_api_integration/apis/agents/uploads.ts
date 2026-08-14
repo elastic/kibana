@@ -6,7 +6,11 @@
  */
 import Moment from 'moment';
 import expect from '@kbn/expect';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import {
+  AGENT_ACTIONS_INDEX,
+  AGENT_ACTIONS_RESULTS_INDEX,
+  AGENTS_INDEX,
+} from '@kbn/fleet-plugin/common';
 import {
   FILE_STORAGE_DATA_AGENT_INDEX,
   FILE_STORAGE_METADATA_AGENT_INDEX,
