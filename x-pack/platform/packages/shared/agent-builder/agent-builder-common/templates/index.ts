@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/** A metadata value as callers and the LLM supply it — before serialization to ES `flattened`. */
+export type MetadataFieldValue = string | string[] | number | boolean;
+
+/** A metadata value as persisted in the ES `flattened` field (all leaves are keywords). */
+export type SerializedMetadataValue = string | string[];
+
 /**
  * The authoring type that governs what a user/agent supplies for a field.
  *
@@ -39,7 +45,7 @@ export interface ConversationTemplateFieldDefinition {
    * For TOGGLE fields this must be a boolean.
    * For NUMBER fields this may be a number or a numeric string.
    */
-  default_value?: string | string[] | number | boolean;
+  default_value?: MetadataFieldValue;
   /** When true, the field must be non-empty on every metadata write. */
   required?: boolean;
   /** SELECT only — the exhaustive set of accepted values. */
@@ -57,16 +63,8 @@ export interface ConversationTemplateFieldDefinition {
 /**
  * A user-authored (or code-registered) conversation template.
  *
- * `fields` is a plain object — insertion order is significant and is preserved
- * by both the JS runtime and Elasticsearch `_source` round-trips. The UI must
- * render fields in the order they appear here (RFC success criteria).
- *
- * Design note: field *definitions* (schema, validation rules, data types) live here
- * on the template. There is deliberately no separate "conversation type" concept — the
- * template is the single owner of field definitions, and a conversation references exactly
- * one template via its `template_id` field. Framework-level conversation fields that apply
- * regardless of template (e.g. a future `parent_conv_id` for forking) stay as top-level
- * `Conversation` properties, not inside `metadata`.
+ * `fields` is a plain object — insertion order is significant and preserved by both the
+ * JS runtime and ES `_source` round-trips. The UI renders fields in declaration order.
  */
 export interface ConversationTemplate {
   id: string;

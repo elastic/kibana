@@ -12,7 +12,7 @@ import {
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
-import type { ConversationTemplate } from '@kbn/agent-builder-common';
+import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
@@ -1130,7 +1130,7 @@ describe('ConversationClient', () => {
   }: {
     templateId?: string;
     templateVersion?: number;
-    metadata?: Record<string, string | string[]>;
+    metadata?: Record<string, SerializedMetadataValue>;
   } = {}): Document =>
     ({
       _id: 'conversation-1',
@@ -1368,6 +1368,127 @@ describe('ConversationClient', () => {
       await expect(client.applyTemplate('conversation-1', 'tmpl-a')).rejects.toMatchObject({
         message: expect.stringContaining('conversation-1'),
       });
+    });
+  });
+
+  describe('patchMetadata', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('throws when the conversation has no template', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate()] },
+      });
+
+      await expect(
+        client.patchMetadata('conversation-1', { severity: 'high' })
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('has no template'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('merges serialized updates into existing metadata', async () => {
+      const template = makeTemplate('tmpl-a', {
+        severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+        status: {
+          input_type: 'SELECT',
+          description: 'Status',
+          options: ['open', 'closed'],
+          default_value: 'open',
+        },
+        notified: { input_type: 'TOGGLE', description: 'Notified' },
+      });
+      getTemplateMock.mockReturnValue(template);
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-a',
+              metadata: { status: 'open' },
+            }),
+          ],
+        },
+      });
+
+      await client.patchMetadata('conversation-1', { severity: 'high', notified: true });
+
+      const written = mockEsClient.index.mock.calls[0][0].document;
+      expect(written.metadata).toEqual({
+        status: 'open', // pre-existing key preserved
+        severity: 'high', // new key added
+        notified: 'true', // TOGGLE serialized to string
+      });
+    });
+
+    it('performs the merge inside the OCC closure so concurrent writes are not lost', async () => {
+      // Simulate: at OCC read time the doc has an extra key `status` written concurrently.
+      const template = makeTemplate('tmpl-a', {
+        severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+        status: {
+          input_type: 'SELECT',
+          description: 'Status',
+          options: ['open', 'closed'],
+          default_value: 'open',
+        },
+      });
+      getTemplateMock.mockReturnValue(template);
+
+      // The OCC read (inside writeConversation → readModifyWrite) returns a doc that already
+      // has `status: 'closed'` written concurrently.
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-a',
+              metadata: { status: 'closed' },
+            }),
+          ],
+        },
+      });
+
+      await client.patchMetadata('conversation-1', { severity: 'high' });
+
+      const written = mockEsClient.index.mock.calls[0][0].document;
+      // The concurrently written `status` key must be preserved in the output.
+      expect(written.metadata).toEqual({
+        status: 'closed',
+        severity: 'high',
+      });
+    });
+
+    it('throws when an update key is not declared in the template', async () => {
+      const template = makeTemplate('tmpl-a', {
+        severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
+      });
+      getTemplateMock.mockReturnValue(template);
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })] },
+      });
+
+      await expect(
+        client.patchMetadata('conversation-1', { unknown_field: 'value' })
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('unknown_field'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('enforces owner access — throws for conversations owned by another user', async () => {
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
+        },
+      });
+
+      await expect(
+        client.patchMetadata('conversation-1', { x: 'value' })
+      ).rejects.toMatchObject({ message: expect.stringContaining('conversation-1') });
     });
   });
 

@@ -21,6 +21,7 @@ import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './ty
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
 import { getTemplate } from '../../../conversation/templates/registry';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -67,7 +68,7 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
-const renderFieldValue = (value: string | string[] | undefined): string => {
+const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {
   if (value === undefined) return '_not yet set_';
   if (Array.isArray(value)) return `**[${value.join(', ')}]**`;
   return `**${value}**`;
@@ -75,7 +76,7 @@ const renderFieldValue = (value: string | string[] | undefined): string => {
 
 const getConversationMetadataSection = (
   templateId: string | undefined,
-  metadata: Record<string, string | string[]> | undefined
+  metadata: Record<string, SerializedMetadataValue> | undefined
 ): string => {
   const template = templateId ? getTemplate(templateId) : undefined;
   if (!template) return '';
@@ -118,7 +119,7 @@ const getAgentSystemMessage = async ({
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
-    | Record<string, string | string[]>
+    | Record<string, SerializedMetadataValue>
     | undefined;
   const visEnabled = capabilities.visualizations;
 

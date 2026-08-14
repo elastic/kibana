@@ -24,7 +24,7 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { ConversationTemplate } from '@kbn/agent-builder-common';
+import type { ConversationTemplate, SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -67,12 +67,7 @@ import {
   type VersionedDocument,
 } from './converters';
 
-/**
- * Applies `deserializeMetadata` to a conversation if it has both a `template_id`
- * and a `metadata` field. The storage layer keeps values as `string | string[]`;
- * this restores the richer JS types (boolean for TOGGLE, number for NUMBER, etc.)
- * that consumers expect. Keys not declared in the current template pass through as-is.
- */
+/** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
 const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
   conversation: T
 ): T => {
@@ -82,7 +77,7 @@ const withDeserializedMetadata = <T extends { template_id?: string; metadata?: u
   return {
     ...conversation,
     metadata: deserializeMetadata(
-      conversation.metadata as Record<string, string | string[]>,
+      conversation.metadata as Record<string, SerializedMetadataValue>,
       template
     ),
   };
@@ -90,8 +85,8 @@ const withDeserializedMetadata = <T extends { template_id?: string; metadata?: u
 
 const buildMetadataFromTemplate = (
   template: ConversationTemplate
-): Record<string, string | string[]> =>
-  Object.entries(template.fields).reduce<Record<string, string | string[]>>(
+): Record<string, SerializedMetadataValue> =>
+  Object.entries(template.fields).reduce<Record<string, SerializedMetadataValue>>(
     (acc, [fieldName, def]) => {
       if (def.default_value !== undefined) {
         acc[fieldName] = serializeMetadataValue(def.default_value, def.input_type);
@@ -297,7 +292,7 @@ class ConversationClientImpl implements ConversationClient {
             key,
             def
               ? serializeMetadataValue(
-                  value as string | string[] | number | boolean,
+                  value as MetadataFieldValue,
                   def.input_type
                 )
               : value,
@@ -433,88 +428,83 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async applyTemplate(conversationId: string, templateId: string): Promise<Conversation> {
-    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
-    const existing = fromEs(document);
-
     const template = getTemplate(templateId);
     if (!template) {
       throw createBadRequestError(`Template not found: ${templateId}`);
-    }
-
-    // Reject switching to a different template — one template per conversation.
-    // Re-applying the same template is the explicit version-migration action.
-    if (existing.template_id && existing.template_id !== templateId) {
-      throw createBadRequestError(
-        `Conversation already has template "${existing.template_id}". ` +
-          `Switching templates is not supported; re-apply the same template to migrate to a newer version.`
-      );
     }
 
     validateTemplateDefaults(template);
     const newTemplateFieldNames = new Set(Object.keys(template.fields));
     const newTemplateMetadata = buildMetadataFromTemplate(template);
 
-    // Version bump (or first apply): preserve existing values for fields still
-    // declared in the new version, seed defaults for newly added fields, and drop
-    // everything else (fields the new version removed).
-    // `existing.metadata` here comes from `fromEs` (raw storage, string | string[]).
-    const storedMetadata = (existing.metadata ?? {}) as Record<string, string | string[]>;
-    const preservedValues = Object.fromEntries(
-      Object.entries(storedMetadata).filter(([key]) => newTemplateFieldNames.has(key))
-    );
-    const metadata: Record<string, string | string[]> = {
-      // Defaults fill any newly-added fields; existing values take precedence.
-      ...newTemplateMetadata,
-      ...preservedValues,
-    };
+    const result = await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      fields: (current) => {
+        // Reject switching to a different template — one template per conversation.
+        // Re-applying the same template is the explicit version-migration action.
+        if (current.template_id && current.template_id !== templateId) {
+          throw createBadRequestError(
+            `Conversation already has template "${current.template_id}". ` +
+              `Switching templates is not supported; re-apply the same template to migrate to a newer version.`
+          );
+        }
 
-    return this.update(
-      { id: conversationId, metadata, template_id: templateId, template_version: template.version },
-      { access: 'owner' }
-    );
+        // Version bump (or first apply): preserve existing values for fields still
+        // declared in the new version, seed defaults for newly added fields, and drop
+        // everything else (fields the new version removed).
+        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+        const preservedValues = Object.fromEntries(
+          Object.entries(storedMetadata).filter(([key]) => newTemplateFieldNames.has(key))
+        );
+        return {
+          metadata: { ...newTemplateMetadata, ...preservedValues },
+          template_id: templateId,
+          template_version: template.version,
+        };
+      },
+    });
+
+    return withDeserializedMetadata(result);
   }
 
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>
   ): Promise<Conversation> {
-    const document = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
-    const existing = fromEs(document);
+    const result = await this.writeConversation({
+      conversationId,
+      access: 'owner',
+      fields: (current) => {
+        if (!current.template_id) {
+          throw createBadRequestError(
+            `Conversation "${conversationId}" has no template — apply a template before writing metadata`
+          );
+        }
 
-    if (!existing.template_id) {
-      throw createBadRequestError(
-        `Conversation "${conversationId}" has no template — apply a template before writing metadata`
-      );
-    }
+        const template = getTemplate(current.template_id);
+        if (!template) {
+          throw createBadRequestError(
+            `Template "${current.template_id}" referenced by this conversation was not found`
+          );
+        }
 
-    const template = getTemplate(existing.template_id);
-    if (!template) {
-      throw createBadRequestError(
-        `Template "${existing.template_id}" referenced by this conversation was not found`
-      );
-    }
+        // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
+        validateMetadataUpdate(template.id, template.fields, updates);
 
-    // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
-    validateMetadataUpdate(template.id, template.fields, updates);
+        const serialized = Object.fromEntries(
+          Object.entries(updates).map(([k, v]) => {
+            const def = template.fields[k];
+            return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
+          })
+        );
 
-    const serialized = Object.fromEntries(
-      Object.entries(updates).map(([k, v]) => {
-        const def = template.fields[k];
-        return [
-          k,
-          serializeMetadataValue(v as string | string[] | number | boolean, def.input_type),
-        ];
-      })
-    );
+        const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+        return { metadata: { ...storedMetadata, ...serialized } };
+      },
+    });
 
-    // `existing.metadata` here comes from `fromEs` (raw storage, string | string[]).
-    // Cast to the storage type so the merge is correctly typed for the write path.
-    const mergedMetadata: Record<string, string | string[]> = {
-      ...((existing.metadata ?? {}) as Record<string, string | string[]>),
-      ...serialized,
-    };
-
-    return this.update({ id: conversationId, metadata: mergedMetadata }, { access: 'owner' });
+    return withDeserializedMetadata(result);
   }
 
   async appendEvents(

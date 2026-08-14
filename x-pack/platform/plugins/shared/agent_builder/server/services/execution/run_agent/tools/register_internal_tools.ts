@@ -11,6 +11,7 @@ import {
   ToolOrigin,
   type AgentCapabilities,
   type ConversationTemplate,
+  type SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -39,7 +40,7 @@ export interface RegisterInternalToolsParams {
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
   /** Callback to merge key/value updates into the active conversation's metadata. */
-  updateConversationMetadata?: (updates: Record<string, string | string[]>) => Promise<void>;
+  updateConversationMetadata?: (updates: Record<string, SerializedMetadataValue>) => Promise<void>;
   /** Active conversation template, used to validate values written by the LLM. */
   conversationTemplate?: ConversationTemplate;
   /** The agent's resolved skills, used by the `search_relevant_skills` tool. */

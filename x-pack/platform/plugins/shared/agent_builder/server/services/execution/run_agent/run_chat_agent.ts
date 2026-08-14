@@ -13,7 +13,12 @@ import {
   reverseMap,
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  ChatAgentEvent,
+  RoundInput,
+  SerializedMetadataValue,
+} from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -235,15 +240,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const conversationId = conversation?.id;
   const updateConversationMetadata =
     conversationId && conversation?.template_id
-      ? async (updates: Record<string, string | string[]>) => {
-          // Use asInternalUser — conversation docs live in a system (dot-prefixed) index
-          // that is not accessible to regular user credentials, matching the pattern
-          // used by ConversationService.getScopedClient.
-          //
-          // Use a Painless script update rather than a doc merge so that each call
-          // merges into the *current* persisted metadata rather than a stale snapshot
-          // captured at run start. Without this, a second call to set_conversation_metadata
-          // in the same run would silently discard the first call's keys.
+      ? async (updates: Record<string, SerializedMetadataValue>) => {
+          // Painless script merge — preserves any metadata keys written by concurrent tool
+          // calls in the same run that a doc-replace update would silently discard.
           await context.esClient.asInternalUser.update({
             index: conversationIndexName,
             id: conversationId,

@@ -13,6 +13,7 @@ import type {
   ConversationWithoutRounds,
   ToolResult,
   UserIdAndName,
+  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -253,7 +254,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.
     ...(conversation.metadata
-      ? { metadata: conversation.metadata as Record<string, string | string[]> }
+      ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }
       : {}),
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
     ...(conversation.template_version !== undefined
@@ -313,7 +314,7 @@ export const createRequestToEs = ({
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
     // Cast metadata to storage type — see note in toEs.
     ...(conversation.metadata
-      ? { metadata: conversation.metadata as Record<string, string | string[]> }
+      ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }
       : {}),
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
     ...(conversation.template_version !== undefined

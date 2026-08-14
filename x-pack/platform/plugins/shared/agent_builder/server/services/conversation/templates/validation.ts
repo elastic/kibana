@@ -9,22 +9,15 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import type {
   ConversationTemplate,
   ConversationTemplateFieldDefinition,
+  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/;
-
-// ---------------------------------------------------------------------------
-// Per-violation accumulation
-// ---------------------------------------------------------------------------
 
 interface FieldViolation {
   field: string;
   message: string;
 }
-
-// ---------------------------------------------------------------------------
-// Per-type value check — returns a violation message or null
-// ---------------------------------------------------------------------------
 
 const checkType = (
   fieldName: string,
@@ -65,10 +58,6 @@ const checkType = (
   return null;
 };
 
-// ---------------------------------------------------------------------------
-// Constraint checks — each returns a violation message or null
-// ---------------------------------------------------------------------------
-
 const checkRequired = (fieldName: string, value: unknown): string | null => {
   const empty = value === undefined || value === '' || (Array.isArray(value) && value.length === 0);
   return empty ? `field "${fieldName}": value is required` : null;
@@ -89,7 +78,7 @@ const checkSelect = (
 const checkMaxLength = (
   fieldName: string,
   def: ConversationTemplateFieldDefinition,
-  value: string | string[]
+  value: SerializedMetadataValue
 ): string | null => {
   if (def.max_length === undefined) return null;
   const items = Array.isArray(value) ? value : [value];
@@ -132,15 +121,11 @@ const checkRegex = (
 };
 
 const checkDateFormat = (fieldName: string, value: string): string | null => {
-  if (!ISO_DATE_RE.test(value)) {
+  if (!ISO_DATE_RE.test(value) || Number.isNaN(Date.parse(value))) {
     return `field "${fieldName}": "${value}" is not a valid ISO 8601 date`;
   }
   return null;
 };
-
-// ---------------------------------------------------------------------------
-// Collect all violations for a single field write
-// ---------------------------------------------------------------------------
 
 /**
  * Validates a single field value supplied by the LLM or via the metadata API.
@@ -194,7 +179,7 @@ export const collectFieldViolations = (
       break;
     }
     case 'TEXT_ARRAY': {
-      const msg = checkMaxLength(fieldName, def, value as string | string[]);
+      const msg = checkMaxLength(fieldName, def, value as SerializedMetadataValue);
       if (msg) violations.push(msg);
       break;
     }
@@ -203,10 +188,6 @@ export const collectFieldViolations = (
 
   return violations;
 };
-
-// ---------------------------------------------------------------------------
-// Public API — write-time validation (enforces required)
-// ---------------------------------------------------------------------------
 
 /**
  * Validates every key in a metadata update against the template's field definitions.
@@ -245,10 +226,6 @@ export const validateMetadataUpdate = (
   }
 };
 
-// ---------------------------------------------------------------------------
-// Apply-time validation (skips required — fields legitimately start empty)
-// ---------------------------------------------------------------------------
-
 /**
  * Validates default values declared in a template definition.
  * `required` is intentionally skipped — fields start empty when a template
@@ -267,10 +244,6 @@ export const validateTemplateDefaults = (template: ConversationTemplate): void =
     }
   }
 };
-
-// ---------------------------------------------------------------------------
-// Template self-validation (run once at registry load / template CRUD)
-// ---------------------------------------------------------------------------
 
 /**
  * Validates the template definition itself — ensures every field's constraints

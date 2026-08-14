@@ -11,6 +11,7 @@ import type {
   ConversationRound,
   ConverseInput,
   RoundInput,
+  MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -45,7 +46,7 @@ export interface ProcessedConversation {
    * Populated from `conversation.metadata` at prepare time so prompt factories
    * receive it via `processedConversation` rather than as a separate parameter.
    */
-  metadata?: Record<string, string | string[] | number | boolean>;
+  metadata?: Record<string, MetadataFieldValue>;
   /** ID of the template applied to this conversation, used to look up field definitions. */
   template_id?: string;
 }
@@ -157,7 +158,7 @@ export const prepareConversation = async ({
   nextInput: ConverseInput;
   context: AgentHandlerContext;
   action?: ConversationAction;
-  metadata?: Record<string, string | string[] | number | boolean>;
+  metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;

@@ -344,4 +344,6 @@ export type {
   ConversationTemplate,
   ConversationTemplateInputType,
   ConversationTemplateFieldDefinition,
+  MetadataFieldValue,
+  SerializedMetadataValue,
 } from './templates';

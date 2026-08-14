@@ -155,6 +155,10 @@ describe('collectFieldViolations', () => {
     it('returns violation for a non-ISO string', () => {
       expect(collectFieldViolations('f', def, 'not-a-date')).toHaveLength(1);
     });
+
+    it('returns violation for an impossible month (2025-13-45)', () => {
+      expect(collectFieldViolations('f', def, '2025-13-45')).toHaveLength(1);
+    });
   });
 
   // TOGGLE

@@ -8,20 +8,9 @@
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 /**
- * Code-registered system templates.
- *
- * These are engine fixtures for prototyping and UI development — NOT the shipping catalog.
- * The real catalog will be supplied by template-owning plugins via the template registry
- * (follow-up milestone). Templates from @melissaburpo (Security) and O11y will land there.
- *
- * Insertion order of each template's `fields` object is significant — the UI must render
- * fields in declaration order (RFC success criteria).
- *
- * The three templates here are intentionally varied in shape so the UI can prototype against
- * a large form (~10 fields, SELECT-heavy), a large form (mixed types), and a minimal form
- * (3 fields). Together they exercise every input_type the engine supports:
- *   SELECT (with options), TEXT (with max_length + regex), NUMBER (with min/max),
- *   DATE, TOGGLE, TEXT_ARRAY (with max_length), USER.
+ * Engine fixtures for prototyping. The real catalog will be supplied via the template registry
+ * (follow-up milestone). Insertion order of each template's `fields` is significant — the UI
+ * renders fields in declaration order.
  */
 export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
   {
@@ -145,9 +134,6 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
     },
   },
   {
-    // Deliberately minimal — 3 fields — so the UI has a small/simple case alongside the
-    // two larger security templates. USER + TOGGLE + TEXT covers three input_types without
-    // overlapping SELECT or NUMBER constraints exercised above.
     id: 'quick-note',
     version: 1,
     name: 'Quick Note',

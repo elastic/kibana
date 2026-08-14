@@ -25,6 +25,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
+import type { MetadataFieldValue } from '../templates';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -493,29 +494,13 @@ export interface Conversation {
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
   /**
-   * Arbitrary key/value pairs seeded from a template or set by callers.
-   *
-   * This is the single structured bag on a conversation — there is exactly one `metadata`
-   * record per conversation and no parallel field store. Framework-level fields that apply
-   * regardless of template (e.g. a future `parent_conv_id` for conversation forking) stay
-   * as top-level `Conversation` properties rather than going inside this bag.
-   *
-   * Stored in Elasticsearch as a `flattened` field (all leaves keyword-indexed for
-   * filterability). On the write path, values are serialized to `string | string[]`
-   * (`NUMBER` / `TOGGLE` / `DATE` → string; `TEXT_ARRAY` → string[]). On read,
-   * `deserializeMetadata` recovers the richer types using the active template's field
-   * definitions, so `TOGGLE` → boolean, `NUMBER` → number, `TEXT_ARRAY` → string[].
-   * Keys not declared in the current template pass through as stored strings.
+   * Arbitrary key/value metadata seeded from a template or set by callers.
+   * Stored in ES as a `flattened` field; typed values are recovered on read via the active template.
    */
-  metadata?: Record<string, string | string[] | number | boolean>;
-  /** ID of the template applied to this conversation. Each conversation supports exactly one template; re-applying the same template migrates to a newer version. */
+  metadata?: Record<string, MetadataFieldValue>;
+  /** ID of the template applied to this conversation. */
   template_id?: string;
-  /**
-   * Version of the template as it was when it was last applied.
-   * Pinned so that updating a template definition does not invalidate existing conversations.
-   * Reads always tolerate old shapes; migrating to a newer version is an explicit action
-   * (re-apply the template via `_apply_template`).
-   */
+  /** Version of the template as it was when it was last applied. */
   template_version?: number;
   /** Whether the conversation has been pinned by the user. */
   pinned?: boolean;

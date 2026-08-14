@@ -8,26 +8,15 @@
 import type {
   ConversationTemplate,
   ConversationTemplateInputType,
+  MetadataFieldValue,
+  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 
-/**
- * Normalizes a template field value to a string or string array for storage.
- *
- * The conversation `metadata` field is mapped as `flattened` in Elasticsearch,
- * which indexes every leaf as a keyword. Values must therefore be either strings
- * or arrays of strings so that term/terms queries and aggregations work uniformly.
- *
- * The LLM-facing tool and the template field definitions retain richer types
- * (boolean, number) to keep authoring ergonomics natural; serialization happens
- * here on the write path.
- *
- * - TEXT_ARRAY  → string[] (each item stringified)
- * - Everything else → String(value)
- */
+/** Converts a domain metadata value to its ES `flattened` storage form. TEXT_ARRAY → string[]; everything else → String(value). */
 export const serializeMetadataValue = (
-  value: string | string[] | number | boolean,
+  value: MetadataFieldValue,
   inputType: ConversationTemplateInputType
-): string | string[] => {
+): SerializedMetadataValue => {
   if (inputType === 'TEXT_ARRAY') {
     const arr = Array.isArray(value) ? value : [String(value)];
     return arr.map(String);
@@ -37,24 +26,12 @@ export const serializeMetadataValue = (
 
 /**
  * Converts a stored metadata value back to its declared JS type.
- *
- * ES `flattened` stores everything as strings (or string arrays). This function
- * uses the field's `input_type` to recover the original type on reads so that
- * consumers receive booleans, numbers, and arrays rather than their string forms.
- *
- * Keys not declared in the current template pass through untouched — this is the
- * "reads tolerate old shapes" rule, since `getTemplate` always returns the current
- * registry definition regardless of the pinned `template_version`.
- *
- * - TOGGLE       → boolean (true iff stored string === 'true')
- * - NUMBER       → number (falls back to the raw string if NaN)
- * - TEXT_ARRAY   → string[] (wraps a scalar value in an array)
- * - All others   → unchanged string
+ * TOGGLE → boolean, NUMBER → number (or raw string if NaN), TEXT_ARRAY → string[], others → unchanged.
  */
 export const deserializeMetadataValue = (
-  value: string | string[],
+  value: SerializedMetadataValue,
   inputType: ConversationTemplateInputType
-): string | string[] | number | boolean => {
+): MetadataFieldValue => {
   if (inputType === 'TOGGLE') {
     return value === 'true';
   }
@@ -68,15 +45,12 @@ export const deserializeMetadataValue = (
   return value;
 };
 
-/**
- * Deserializes all metadata keys that have a corresponding field definition in the
- * template. Keys the template does not declare are passed through as stored strings.
- */
+/** Deserializes all metadata keys that have a field definition; undeclared keys pass through. */
 export const deserializeMetadata = (
-  stored: Record<string, string | string[]>,
+  stored: Record<string, SerializedMetadataValue>,
   template: ConversationTemplate
-): Record<string, string | string[] | number | boolean> => {
-  const result: Record<string, string | string[] | number | boolean> = {};
+): Record<string, MetadataFieldValue> => {
+  const result: Record<string, MetadataFieldValue> = {};
   for (const [key, value] of Object.entries(stored)) {
     const def = template.fields[key];
     result[key] = def ? deserializeMetadataValue(value, def.input_type) : value;

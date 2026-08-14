@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, internalTools, createBadRequestError } from '@kbn/agent-builder-common';
-import type { ConversationTemplate } from '@kbn/agent-builder-common';
+import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -59,7 +59,7 @@ export const createSetConversationMetadataTool = ({
   updateConversationMetadata,
   template,
 }: {
-  updateConversationMetadata: (updates: Record<string, string | string[]>) => Promise<void>;
+  updateConversationMetadata: (updates: Record<string, SerializedMetadataValue>) => Promise<void>;
   template: ConversationTemplate;
 }): BuiltinToolDefinition<typeof setConversationMetadataSchema> => ({
   id: internalTools.setConversationMetadata,

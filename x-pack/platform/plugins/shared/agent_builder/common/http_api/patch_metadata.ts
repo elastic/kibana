@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { MetadataFieldValue } from '@kbn/agent-builder-common';
+
 export interface PatchConversationMetadataResponse {
   id: string;
-  metadata: Record<string, string | string[] | number | boolean>;
+  metadata: Record<string, MetadataFieldValue>;
 }
