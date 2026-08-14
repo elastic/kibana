@@ -74,47 +74,77 @@ describe('registerSkills', () => {
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(1, ruleSkill);
     expect(agentBuilder.skills.register).toHaveBeenNthCalledWith(2, actionPolicySkill);
 
-    expect(logger.debug).toHaveBeenCalledWith({
+    expect(logger.debug).toHaveBeenNthCalledWith(1, {
       message: expect.any(Function),
+      labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
     });
-    const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-    expect(debugMessage()).toBe('Agent builder skills and attachments registered');
+    expect(logger.debug).toHaveBeenNthCalledWith(2, {
+      message: expect.any(Function),
+      labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
+    });
+    const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
+      ([{ message }]) => (typeof message === 'function' ? message() : message) as string
+    );
+    expect(debugMessages).toEqual([
+      `${RULE_MANAGEMENT_SKILL_ID} agent builder skill registered`,
+      `${ACTION_POLICY_MANAGEMENT_SKILL_ID} agent builder skill registered`,
+      'Agent builder skills and attachments registered',
+    ]);
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs register failures at error with skill_id and does not throw', () => {
+  it('logs unexpected register failures at error with skill_id and continues', () => {
     agentBuilder.skills.register.mockImplementation((skill) => {
       if (skill.id === ACTION_POLICY_MANAGEMENT_SKILL_ID) {
         throw new Error('register boom');
       }
     });
 
-    expect(() => registerSkills(agentBuilder, deps())).not.toThrow();
+    registerSkills(agentBuilder, deps());
 
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith({
+      message: `Failed to register agent builder skill. Id: ${ACTION_POLICY_MANAGEMENT_SKILL_ID}`,
       code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
       labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
       error: expect.any(Error),
     });
-    expect(logger.debug).not.toHaveBeenCalled();
+
+    const debugMessages = (logger.debug as jest.Mock).mock.calls.map(
+      ([{ message }]) => (typeof message === 'function' ? message() : message) as string
+    );
+    expect(debugMessages).toEqual([
+      `${RULE_MANAGEMENT_SKILL_ID} agent builder skill registered`,
+      'Agent builder skills partially registered',
+    ]);
+    expect(logger.debug).toHaveBeenCalledWith({
+      message: expect.any(Function),
+      labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
+    });
   });
 
-  it('continues registering later skills after the first failure', () => {
+  it('does not log success debug when every skill fails', () => {
     createRuleManagementSkillMock.mockImplementation(() => {
       throw new Error('rule failed');
     });
+    createActionPolicyManagementSkillMock.mockImplementation(() => {
+      throw new Error('policy failed');
+    });
 
-    expect(() => registerSkills(agentBuilder, deps())).not.toThrow();
+    registerSkills(agentBuilder, deps());
 
-    expect(agentBuilder.skills.register).toHaveBeenCalledTimes(1);
-    expect(agentBuilder.skills.register).toHaveBeenCalledWith(actionPolicySkill);
-    expect(createActionPolicyManagementSkillMock).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(agentBuilder.skills.register).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
         labels: { skill_id: RULE_MANAGEMENT_SKILL_ID },
+      })
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
+        labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
       })
     );
     expect(logger.debug).not.toHaveBeenCalled();
