@@ -14,7 +14,6 @@ interface FlyoutReducerState {
   esqlData: EsqlDataResult | null;
   esqlDataError: string | null;
   isRenderLoading: boolean;
-  hasPreviewedCurrentDraft: boolean;
 }
 
 export type FlyoutAction =
@@ -25,7 +24,6 @@ export type FlyoutAction =
   | { type: 'FETCH_DATA_ERROR'; payload: string }
   | { type: 'FETCH_DATA_DONE' }
   | { type: 'RENDER_START' }
-  | { type: 'RENDER_SUCCESS' }
   | { type: 'RENDER_DONE' };
 
 export const flyoutReducer = (
@@ -34,9 +32,9 @@ export const flyoutReducer = (
 ): FlyoutReducerState => {
   switch (action.type) {
     case 'SET_ESQL_QUERY':
-      return { ...state, draftEsqlQuery: action.payload, hasPreviewedCurrentDraft: false };
+      return { ...state, draftEsqlQuery: action.payload };
     case 'SET_TEMPLATE':
-      return { ...state, draftTemplate: action.payload, hasPreviewedCurrentDraft: false };
+      return { ...state, draftTemplate: action.payload };
     case 'FETCH_DATA_START':
       return { ...state, isDataLoading: true, esqlDataError: null, esqlData: null };
     case 'FETCH_DATA_SUCCESS':
@@ -47,8 +45,6 @@ export const flyoutReducer = (
       return { ...state, isDataLoading: false };
     case 'RENDER_START':
       return { ...state, isRenderLoading: true, esqlDataError: null };
-    case 'RENDER_SUCCESS':
-      return { ...state, hasPreviewedCurrentDraft: true };
     case 'RENDER_DONE':
       return { ...state, isRenderLoading: false };
   }
