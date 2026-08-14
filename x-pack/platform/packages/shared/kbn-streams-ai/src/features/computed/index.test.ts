@@ -34,7 +34,7 @@ describe('generateAllComputedFeatures', () => {
     jest.spyOn(errorLogsGenerator, 'generate').mockRejectedValue(new Error('boom'));
     jest.spyOn(logSamplesGenerator, 'generate').mockResolvedValue({ samples: [] });
 
-    const features = await generateAllComputedFeatures(options);
+    const { features } = await generateAllComputedFeatures(options);
 
     expect(features).toHaveLength(1);
     expect(features[0].type).toBe(logSamplesGenerator.type);
@@ -68,6 +68,6 @@ describe('generateAllComputedFeatures', () => {
       codeAnalysisGenerator,
     ].forEach((generator) => jest.spyOn(generator, 'generate').mockResolvedValue(undefined));
 
-    await expect(generateAllComputedFeatures(options)).resolves.toEqual([]);
+    await expect(generateAllComputedFeatures(options)).resolves.toEqual({ features: [], errors: [] });
   });
 });
