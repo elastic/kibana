@@ -199,6 +199,42 @@ describe('persistLoggingProfileRoute — server-side re-validation (INV-001 / IN
     expect(mockWriteLoggingProfile).toHaveBeenCalledTimes(1);
     expect(mockWriteLoggingProfile.mock.calls[0][0].greps).toEqual([]);
   });
+
+  it('threads gitRefKey into validateLoggingQueriesHandler for an incremental-indexed repo', async () => {
+    mockValidateLoggingQueriesHandler.mockResolvedValue({
+      repo_total_lines: REPO_TOTAL_LINES,
+      results: [
+        {
+          grep: '.*log_error[(].*',
+          pass: true,
+          hits: 179,
+          hit_ratio: 179 / REPO_TOTAL_LINES,
+          covers_evidence: true,
+          error: null,
+          sample: [],
+          status: 'ok',
+        },
+      ],
+    });
+    mockWriteLoggingProfile.mockResolvedValue(undefined);
+
+    await persistRoute.handler(
+      baseParams({
+        gitRefKey: 'supabase/realtime@main',
+        greps: [
+          {
+            regex: '.*log_error[(].*',
+            expect_call_sites: 179,
+            evidence: { path: 'lib/realtime/logs.ex', line: 21 },
+          },
+        ],
+      }) as unknown as PersistHandlerParams
+    );
+
+    expect(mockValidateLoggingQueriesHandler).toHaveBeenCalledWith(
+      expect.objectContaining({ gitRefKey: 'supabase/realtime@main' })
+    );
+  });
 });
 
 describe('checkLoggingProfileRoute', () => {
@@ -272,5 +308,37 @@ describe('checkLoggingProfileRoute', () => {
 
     expect(result.needs_refresh).toBe(false);
     expect(result.reason).toBe('query_failed');
+  });
+
+  it('threads gitRefKey into detectLoggingProfileDrift for an incremental-indexed repo', async () => {
+    mockReadLoggingProfile.mockResolvedValue({
+      repository: 'supabase/realtime',
+      commit: 'f5abfb19445404',
+      generated_at: '2026-08-13T00:00:00.000Z',
+      greps: [
+        { regex: '.*log_error[(].*', expect_call_sites: 179, evidence: { path: 'a', line: 1 } },
+      ],
+    });
+    mockDetectLoggingProfileDrift.mockResolvedValue({
+      refresh: false,
+      greps: [
+        {
+          regex: '.*log_error[(].*',
+          expected: 179,
+          actual: 179,
+          failed: false,
+          refresh: false,
+          reason: null,
+        },
+      ],
+    });
+
+    await checkRoute.handler(
+      baseParams({ gitRefKey: 'supabase/realtime@main' }) as unknown as CheckHandlerParams
+    );
+
+    expect(mockDetectLoggingProfileDrift).toHaveBeenCalledWith(
+      expect.objectContaining({ gitRefKey: 'supabase/realtime@main' })
+    );
   });
 });

@@ -49,6 +49,7 @@ const checkLoggingProfileRoute = createServerRoute({
     body: z.object({
       repository: codeIntelligenceInput,
       gitSha: codeIntelligenceInput,
+      gitRefKey: codeIntelligenceInput.optional(),
       runId: codeIntelligenceInput.optional(),
     }),
   }),
@@ -101,6 +102,7 @@ const checkLoggingProfileRoute = createServerRoute({
       esClient,
       repository: params.body.repository,
       gitCommit: params.body.gitSha,
+      gitRefKey: params.body.gitRefKey,
       profile,
       logger: routeLogger,
     });
@@ -157,6 +159,7 @@ const persistLoggingProfileRoute = createServerRoute({
     body: z.object({
       repository: codeIntelligenceInput,
       gitSha: codeIntelligenceInput,
+      gitRefKey: codeIntelligenceInput.optional(),
       runId: codeIntelligenceInput.optional(),
       greps: z
         .array(
@@ -204,6 +207,7 @@ const persistLoggingProfileRoute = createServerRoute({
       esClient,
       repository: params.body.repository,
       gitCommit: params.body.gitSha,
+      gitRefKey: params.body.gitRefKey,
       greps: candidates,
       logger: routeLogger,
     });

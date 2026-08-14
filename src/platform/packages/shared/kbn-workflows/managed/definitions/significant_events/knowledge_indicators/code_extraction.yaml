@@ -86,6 +86,7 @@ steps:
               body:
                 repository: '{{ foreach.item.repository }}'
                 gitSha: '{{ foreach.item.gitSha }}'
+                gitRefKey: '{{ foreach.item.refKey }}'
                 runId: '{{ execution.id }}'
             on-failure:
               continue: true
@@ -175,6 +176,7 @@ steps:
                   body:
                     repository: '{{ foreach.item.repository }}'
                     gitSha: '{{ foreach.item.gitSha }}'
+                    gitRefKey: '{{ foreach.item.refKey }}'
                     runId: '{{ execution.id }}'
                     greps: '${{ steps.run_logging_wrappers_agent.output.structured_output.greps }}'
                 on-failure:
