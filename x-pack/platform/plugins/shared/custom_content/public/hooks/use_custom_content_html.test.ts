@@ -17,15 +17,21 @@ jest.mock('../services');
 jest.mock('../utils/stream_generate');
 jest.mock('../utils/fetch_esql_data');
 jest.mock('../utils/fill_template');
+jest.mock('@kbn/data-plugin/public', () => ({
+  getEsQueryConfig: jest.fn(),
+}));
 
 import type { HttpStart } from '@kbn/core/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { CustomContentTokenEvent } from '../../common/types';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
 import { useCustomContentHtml } from './use_custom_content_html';
+
+const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getEsQueryConfig>;
 
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
@@ -42,12 +48,20 @@ function makeHttp(events: CustomContentTokenEvent[]) {
   };
 }
 
+const defaultEsQueryConfig: EsQueryConfig = {
+  allowLeadingWildcards: false,
+  queryStringOptions: {},
+  ignoreFilterIfFieldNotInIndex: false,
+  dateFormatTZ: 'Browser',
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
   (getServices as jest.Mock).mockReturnValue({
-    core: { http: mockHttp, uiSettings: { get: jest.fn().mockReturnValue(false) } },
+    core: { http: mockHttp, uiSettings: {} },
     search: mockSearch,
   });
+  mockGetEsQueryConfig.mockReturnValue(defaultEsQueryConfig);
   (streamGenerate as jest.Mock).mockResolvedValue(undefined);
   mockFetchEsqlData.mockResolvedValue({ columns: [], values: [], all_columns: [] });
   mockFillTemplate.mockResolvedValue('<div>rendered</div>');
@@ -441,24 +455,21 @@ describe('useCustomContentHtml', () => {
     });
   });
 
-  describe('ignoreFilterIfFieldNotInIndex — uiSettings passthrough', () => {
+  describe('esQueryConfig — uiSettings passthrough via getEsQueryConfig', () => {
     const esqlParams = {
       ...baseParams,
       esqlQuery: 'FROM logs | STATS revenue = SUM(amount)',
       savedTemplate: '{% for row in rows %}{{ row["revenue"].value }}{% endfor %}',
-      filters: [
-        {
-          meta: { index: 'logs-*', negate: false },
-          query: { match_phrase: { 'host.name': 'prod' } },
-        },
-      ] satisfies Filter[],
     };
 
-    it('passes ignoreFilterIfFieldNotInIndex=true to fetchEsqlData when the uiSetting is enabled', async () => {
-      (getServices as jest.Mock).mockReturnValue({
-        core: { http: mockHttp, uiSettings: { get: jest.fn().mockReturnValue(true) } },
-        search: mockSearch,
-      });
+    it('forwards the full esQueryConfig from getEsQueryConfig to fetchEsqlData', async () => {
+      const customConfig: EsQueryConfig = {
+        allowLeadingWildcards: true,
+        queryStringOptions: { analyze_wildcard: true },
+        ignoreFilterIfFieldNotInIndex: true,
+        dateFormatTZ: 'Europe/Athens',
+      };
+      mockGetEsQueryConfig.mockReturnValue(customConfig);
 
       const { result } = renderHook(() => useCustomContentHtml(esqlParams));
 
@@ -470,10 +481,7 @@ describe('useCustomContentHtml', () => {
         esqlParams.esqlQuery,
         undefined,
         expect.any(AbortSignal),
-        expect.objectContaining({
-          ignoreFilterIfFieldNotInIndex: true,
-          filters: esqlParams.filters,
-        })
+        expect.objectContaining({ esQueryConfig: customConfig })
       );
     });
   });

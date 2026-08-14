@@ -7,7 +7,14 @@
 
 import dateMath from '@kbn/datemath';
 import type { HttpStart } from '@kbn/core/public';
-import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import type {
+  AggregateQuery,
+  EsQueryConfig,
+  Filter,
+  Query,
+  TimeRange,
+  ProjectRouting,
+} from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -20,7 +27,7 @@ export interface FetchEsqlOptions {
   projectRouting?: ProjectRouting;
   query?: Query | AggregateQuery;
   filters?: Filter[];
-  ignoreFilterIfFieldNotInIndex?: boolean;
+  esQueryConfig?: EsQueryConfig;
 }
 
 export async function fetchEsqlData(
@@ -31,8 +38,7 @@ export async function fetchEsqlData(
   signal: AbortSignal,
   options?: FetchEsqlOptions
 ): Promise<EsqlDataResult> {
-  const { isApproximate, projectRouting, query, filters, ignoreFilterIfFieldNotInIndex } =
-    options ?? {};
+  const { isApproximate, projectRouting, query, filters, esQueryConfig } = options ?? {};
 
   let timeRangeFilter: { range: Record<string, unknown> } | undefined;
   if (timeRange) {
@@ -53,9 +59,7 @@ export async function fetchEsqlData(
     }
   }
 
-  const esBoolQuery = buildEsQuery(undefined, query ?? [], filters ?? [], {
-    ignoreFilterIfFieldNotInIndex: ignoreFilterIfFieldNotInIndex ?? true,
-  });
+  const esBoolQuery = buildEsQuery(undefined, query ?? [], filters ?? [], esQueryConfig);
 
   const allFilters = timeRangeFilter
     ? [...esBoolQuery.bool.filter, timeRangeFilter]

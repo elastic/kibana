@@ -73,7 +73,7 @@ describe('fetchEsqlData', () => {
     it('calls buildEsQuery with empty arrays when query and filters are undefined', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], [], expect.any(Object));
+      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], [], undefined);
     });
 
     it('passes query array to buildEsQuery when query is provided', async () => {
@@ -83,7 +83,7 @@ describe('fetchEsqlData', () => {
         query: kqlQuery,
       });
 
-      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, kqlQuery, [], expect.any(Object));
+      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, kqlQuery, [], undefined);
     });
 
     it('passes filters array to buildEsQuery when filters are provided', async () => {
@@ -96,25 +96,28 @@ describe('fetchEsqlData', () => {
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, { filters });
 
-      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], filters, expect.any(Object));
+      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], filters, undefined);
     });
 
-    it('defaults ignoreFilterIfFieldNotInIndex to true when not provided', async () => {
+    it('passes undefined esQueryConfig to buildEsQuery when not provided', async () => {
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal);
 
-      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], [], {
-        ignoreFilterIfFieldNotInIndex: true,
-      });
+      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], [], undefined);
     });
 
-    it('forwards ignoreFilterIfFieldNotInIndex: false from options', async () => {
+    it('forwards esQueryConfig from options to buildEsQuery', async () => {
+      const esQueryConfig = {
+        allowLeadingWildcards: true,
+        queryStringOptions: { analyze_wildcard: true },
+        ignoreFilterIfFieldNotInIndex: true,
+        dateFormatTZ: 'Europe/Athens',
+      };
+
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
-        ignoreFilterIfFieldNotInIndex: false,
+        esQueryConfig,
       });
 
-      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], [], {
-        ignoreFilterIfFieldNotInIndex: false,
-      });
+      expect(mockBuildEsQuery).toHaveBeenCalledWith(undefined, [], [], esQueryConfig);
     });
   });
 

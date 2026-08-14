@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getServices } from '../services';
 import { streamGenerate } from '../utils/stream_generate';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
@@ -128,9 +129,7 @@ export function useCustomContentHtml({
       projectRouting,
       query,
       filters,
-      ignoreFilterIfFieldNotInIndex: core.uiSettings.get<boolean>(
-        'courier:ignoreFilterIfFieldNotInIndex'
-      ),
+      esQueryConfig: getEsQueryConfig(core.uiSettings),
     };
 
     // Fast path — ES|QL panel with stored template: fetch data client-side and render, no LLM.
