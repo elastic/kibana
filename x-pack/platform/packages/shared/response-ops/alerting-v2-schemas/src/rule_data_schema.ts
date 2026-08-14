@@ -46,7 +46,7 @@ export const ruleKindSchema = z
     z
       .literal('alert')
       .describe(
-        'Stateful alerting with full episode lifecycle, state transitions, recovery detection, and notification dispatch. Produces type: "alert" events that participate in the dispatcher pipeline. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.'
+        'Stateful alerting with full episode lifecycle, state transitions, recovery detection, and notification dispatch. Produces alert events that participate in the dispatcher pipeline. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.'
       ),
     z
       .literal('signal')
