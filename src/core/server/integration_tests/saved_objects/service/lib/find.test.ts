@@ -108,6 +108,18 @@ const registerSOTypes = (setup: InternalCoreSetup) => {
     },
     modelVersions: {},
   });
+
+  setup.savedObjects.registerType({
+    name: 'find-test-hidden-type',
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        title: { type: 'text' },
+      },
+    },
+    modelVersions: {},
+  });
 };
 
 describe('SOR - find API', () => {
@@ -141,6 +153,12 @@ describe('SOR - find API', () => {
 
     const start = await root.start();
     savedObjectsRepository = start.savedObjects.createInternalRepository();
+    const hiddenRepository = start.savedObjects.createInternalRepository(['find-test-hidden-type']);
+
+    await hiddenRepository.bulkCreate([
+      { type: 'find-test-hidden-type', attributes: { title: 'hidden one' } },
+      { type: 'find-test-hidden-type', attributes: { title: 'hidden two' } },
+    ]);
 
     await savedObjectsRepository.bulkCreate(
       users.map((user) => ({
@@ -212,5 +230,47 @@ describe('SOR - find API', () => {
 
     expect(documents.total).toBe(1);
     expect(documents.saved_objects[0].attributes?.comments[0]?.metadata?.author).toBe('alice');
+  });
+
+  it('does not include hidden types in a terms aggregation', async () => {
+    const result = await savedObjectsRepository.find({
+      type: ['find-test-nested-field-type', 'find-test-hidden-type'],
+      perPage: 0,
+      aggs: { all_types: { terms: { field: 'type', size: 50 } } },
+    });
+
+    expect(result).toEqual({
+      aggregations: {
+        all_types: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
+          buckets: [{ key: 'find-test-nested-field-type', doc_count: users.length }],
+        },
+      },
+      page: 1,
+      per_page: 0,
+      total: users.length,
+      saved_objects: [],
+      pit_id: undefined,
+    });
+  });
+
+  it('does not include hidden types in a cardinality aggregation', async () => {
+    const result = await savedObjectsRepository.find({
+      type: ['find-test-nested-field-type', 'find-test-hidden-type'],
+      perPage: 0,
+      aggs: { type_count: { cardinality: { field: 'type' } } },
+    });
+
+    expect(result).toEqual({
+      aggregations: {
+        type_count: { value: 1 },
+      },
+      page: 1,
+      per_page: 0,
+      total: users.length,
+      saved_objects: [],
+      pit_id: undefined,
+    });
   });
 });
