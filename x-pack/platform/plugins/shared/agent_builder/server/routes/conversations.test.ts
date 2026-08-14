@@ -231,13 +231,11 @@ describe('POST /conversations', () => {
       get: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
       delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
       post: jest.fn().mockImplementation((config: { path: string }) => ({
-        addVersion: jest
-          .fn()
-          .mockImplementation((_versionConfig: unknown, handler: any) => {
-            if (config.path === CREATE_CONVERSATION_PATH) {
-              onPost(handler);
-            }
-          }),
+        addVersion: jest.fn().mockImplementation((_versionConfig: unknown, handler: any) => {
+          if (config.path === CREATE_CONVERSATION_PATH) {
+            onPost(handler);
+          }
+        }),
       })),
     },
   });
@@ -288,9 +286,12 @@ describe('POST /conversations', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest
-            .fn()
-            .mockResolvedValue({ get: mockGet, list: jest.fn(), exists: mockExists, create: mockCreate }),
+          getScopedClient: jest.fn().mockResolvedValue({
+            get: mockGet,
+            list: jest.fn(),
+            exists: mockExists,
+            create: mockCreate,
+          }),
         },
         agents: {
           getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
@@ -324,9 +325,12 @@ describe('POST /conversations', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest
-            .fn()
-            .mockResolvedValue({ get: mockGet, list: jest.fn(), exists: mockExists, create: mockCreate }),
+          getScopedClient: jest.fn().mockResolvedValue({
+            get: mockGet,
+            list: jest.fn(),
+            exists: mockExists,
+            create: mockCreate,
+          }),
         },
         agents: {
           getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
@@ -363,9 +367,12 @@ describe('POST /conversations', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest
-            .fn()
-            .mockResolvedValue({ get: jest.fn(), list: jest.fn(), exists: jest.fn(), create: jest.fn() }),
+          getScopedClient: jest.fn().mockResolvedValue({
+            get: jest.fn(),
+            list: jest.fn(),
+            exists: jest.fn(),
+            create: jest.fn(),
+          }),
         },
         agents: {
           getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),
@@ -396,9 +403,12 @@ describe('POST /conversations', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest
-            .fn()
-            .mockResolvedValue({ get: jest.fn(), list: jest.fn(), exists: mockExists, create: jest.fn() }),
+          getScopedClient: jest.fn().mockResolvedValue({
+            get: jest.fn(),
+            list: jest.fn(),
+            exists: mockExists,
+            create: jest.fn(),
+          }),
         },
         agents: {
           getRegistry: jest.fn().mockResolvedValue({ get: mockAgentGet }),

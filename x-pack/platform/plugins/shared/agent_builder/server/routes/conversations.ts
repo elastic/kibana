@@ -258,7 +258,8 @@ export function registerConversationRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { conversations: conversationsService, agents: agentsService } = getInternalServices();
+        const { conversations: conversationsService, agents: agentsService } =
+          getInternalServices();
         const {
           agent_id: agentId,
           conversation_id: conversationId,

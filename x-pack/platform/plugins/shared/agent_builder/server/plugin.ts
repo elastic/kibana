@@ -9,6 +9,10 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import {
+  agentBuilderDefaultAgentId,
+  createConversationAlreadyExistsError,
+} from '@kbn/agent-builder-common';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -37,10 +41,6 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
-import {
-  agentBuilderDefaultAgentId,
-  createConversationAlreadyExistsError,
-} from '@kbn/agent-builder-common';
 
 export class AgentBuilderPlugin
   implements
