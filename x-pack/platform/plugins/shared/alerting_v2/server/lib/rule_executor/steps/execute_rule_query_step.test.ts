@@ -13,6 +13,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
+  createEsqlResponse,
   createPipelineStream,
   createRuleExecutionInput,
   createRuleResponse,
@@ -26,7 +27,7 @@ import { createQueryService } from '../../services/query_service/query_service.m
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import type { PluginConfig } from '../../../config';
+import type { EsqlConfig, PluginConfig } from '../../../config';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
 
@@ -39,7 +40,7 @@ const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN
       maxScheduledPerMinute: 400,
       run: { alerts: { max: maxAlertsPerRun } },
     },
-    esql: { responseFormat: 'arrow' },
+    esql: { responseFormat: 'json' },
   };
 
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
@@ -50,10 +51,13 @@ describe('ExecuteRuleQueryStep', () => {
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
 
-  function createStep(maxAlertsPerRun?: number) {
+  function createStep(
+    maxAlertsPerRun?: number,
+    responseFormat: EsqlConfig['responseFormat'] = 'json'
+  ) {
     const { loggerService, mockLogger: logger } = createLoggerService();
     mockLogger = logger;
-    const mocks = createQueryService('arrow');
+    const mocks = createQueryService(responseFormat);
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
       loggerService,
@@ -67,7 +71,9 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('builds query payload and executes query', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
+    );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -91,7 +97,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('passes correct parameters to ES client', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse();
     const abortController = new AbortController();
@@ -104,14 +110,14 @@ describe('ExecuteRuleQueryStep', () => {
       rule.query.format === 'standalone'
         ? `${rule.query.breach.query.trimEnd()}\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`
         : '';
-    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-      expect.objectContaining({ query: expectedQuery }),
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({ query: expectedQuery, drop_null_columns: true }),
       expect.objectContaining({ signal: abortController.signal })
     );
   });
 
   it('concatenates base and breach segment for composed format rules', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
       query: {
@@ -124,7 +130,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({
         query: `FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) > 0.9\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
       }),
@@ -134,7 +140,7 @@ describe('ExecuteRuleQueryStep', () => {
 
   it('appends the configured alerts max as an ES|QL LIMIT clause', async () => {
     step = createStep(500);
-    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
       query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
@@ -143,7 +149,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM logs-*\n| LIMIT 500' }),
       expect.any(Object)
     );
@@ -151,7 +157,7 @@ describe('ExecuteRuleQueryStep', () => {
 
   it('appends the configured max even when the rule query already has a smaller LIMIT', async () => {
     step = createStep(500);
-    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
 
     const rule = createRuleResponse({
       query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
@@ -162,7 +168,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     // ES|QL takes the min across multiple LIMIT commands, so the author's
     // smaller LIMIT still wins - appending the configured max is always safe.
-    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM logs-* | LIMIT 10\n| LIMIT 500' }),
       expect.any(Object)
     );
@@ -172,10 +178,7 @@ describe('ExecuteRuleQueryStep', () => {
     const abortController = new AbortController();
     abortController.abort();
 
-    mockHelpersEsqlToArrowReader(
-      mockEsClient,
-      jest.fn().mockRejectedValue(new Error('Request aborted'))
-    );
+    mockEsClient.esql.query.mockRejectedValue(new Error('Request aborted'));
 
     const state = createRulePipelineState({
       input: createRuleExecutionInput({ abortSignal: abortController.signal }),
@@ -188,10 +191,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('propagates non-abort errors', async () => {
-    mockHelpersEsqlToArrowReader(
-      mockEsClient,
-      jest.fn().mockRejectedValue(new Error('Query execution failed'))
-    );
+    mockEsClient.esql.query.mockRejectedValue(new Error('Query execution failed'));
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
 
@@ -201,9 +201,8 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('marks ResponseError(400) ES|QL errors as TaskErrorSource.USER', async () => {
-    mockHelpersEsqlToArrowReader(
-      mockEsClient,
-      jest.fn().mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
+    mockEsClient.esql.query.mockRejectedValue(
+      new errors.ResponseError({ statusCode: 400 } as DiagnosticResult)
     );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
@@ -215,10 +214,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('does not mark plain ES|QL errors as TaskErrorSource.USER', async () => {
-    mockHelpersEsqlToArrowReader(
-      mockEsClient,
-      jest.fn().mockRejectedValue(new Error('ES query failed'))
-    );
+    mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
 
@@ -229,15 +225,18 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('yields rows from query results', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [
-      {
-        numRows: 2,
-        rows: [
-          { 'host.name': 'host-a', count: 1 },
-          { 'host.name': 'host-b', count: 2 },
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse(
+        [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'count', type: 'integer' },
         ],
-      },
-    ]);
+        [
+          ['host-a', 1],
+          ['host-b', 2],
+        ]
+      )
+    );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -251,7 +250,9 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('yields continue with empty esqlRowBatch when query returns no rows', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, []);
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
+    );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -270,33 +271,27 @@ describe('ExecuteRuleQueryStep', () => {
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
 
-  it('emits rowsReturnedByQuery per batch equal to the batch row count', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [
-      { numRows: 2, rows: [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }] },
-      { numRows: 1, rows: [{ 'host.name': 'host-c' }] },
-    ]);
+  it('emits rowsReturnedByQuery equal to the row count in the single JSON batch', async () => {
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a'], ['host-b']])
+    );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(results).toHaveLength(2);
+    expect(results).toHaveLength(1);
     expect(results[0].type).toBe('continue');
 
     // @ts-expect-error: meta is present on the result
     expect(results[0].meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
     });
-
-    expect(results[1].type).toBe('continue');
-
-    // @ts-expect-error: meta is present on the result
-    expect(results[1].meta?.counters).toEqual({
-      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
-    });
   });
 
   it('emits rowsReturnedByQuery = 0 when the query returns no rows', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, []);
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [])
+    );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -306,6 +301,79 @@ describe('ExecuteRuleQueryStep', () => {
     // @ts-expect-error: meta is present on the result
     expect(result.meta?.counters).toEqual({
       [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 0,
+    });
+  });
+
+  describe('arrow response format', () => {
+    beforeEach(() => {
+      step = createStep(undefined, 'arrow');
+    });
+
+    it('streams via the Arrow reader helper and does not call esql.query', async () => {
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ 'host.name': 'host-a' }] },
+      ]);
+
+      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe('continue');
+      expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
+      expect(mockEsClient.helpers.esql).toHaveBeenCalled();
+      expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('streams each Arrow batch separately with per-batch rowsReturnedByQuery', async () => {
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 2, rows: [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }] },
+        { numRows: 1, rows: [{ 'host.name': 'host-c' }] },
+      ]);
+
+      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(results).toHaveLength(2);
+      expect(results[0].type).toBe('continue');
+
+      // @ts-expect-error: meta is present on the result
+      expect(results[0].meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+      });
+
+      expect(results[1].type).toBe('continue');
+
+      // @ts-expect-error: meta is present on the result
+      expect(results[1].meta?.counters).toEqual({
+        [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+      });
+    });
+
+    it('yields continue with empty esqlRowBatch when the reader yields no batches', async () => {
+      mockHelpersEsqlArrowBatches(mockEsClient, []);
+
+      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(results).toHaveLength(1);
+      expect(results[0].type).toBe('continue');
+      expect(results[0].state.esqlRowBatch).toEqual([]);
+      expect(results[0].state.queryPayload).toBeDefined();
+    });
+
+    it('marks ResponseError(400) ES|QL errors as TaskErrorSource.USER', async () => {
+      mockHelpersEsqlToArrowReader(
+        mockEsClient,
+        jest
+          .fn()
+          .mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
+      );
+
+      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const error = await getStepError(step, state);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
     });
   });
 });

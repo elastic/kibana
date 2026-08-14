@@ -12,7 +12,8 @@
     "server/**/*.json",
     "public/**/*",
     "test/scout/**/*",
-    "test/scout_alerting_v2/**/*"
+    "test/scout_alerting_v2/**/*",
+    "test/scout_alerting_v2_arrow/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
