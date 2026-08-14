@@ -245,9 +245,13 @@ function buildSourceFetchQuery({
   values: string[];
   limit: number;
 }): string {
-  return esql.from(indices, ['_id', '_source']).where`${esql.col(
-    columnPath(field)
-  )}::keyword IN (${values.map((value) => esql.str(value))})`
+  const fieldCol = esql.col(columnPath(field));
+  const phrases = values
+    .map((value) => esql.exp`MATCH_PHRASE(${fieldCol}, ${esql.str(value)})`)
+    .reduce((acc, clause) => esql.exp`${acc} OR ${clause}`);
+
+  return esql.from(indices, ['_id', '_source'])
+    .where`(${phrases}) AND ${fieldCol}::keyword IN (${values.map((value) => esql.str(value))})`
     .limit(limit)
     .print('basic');
 }
