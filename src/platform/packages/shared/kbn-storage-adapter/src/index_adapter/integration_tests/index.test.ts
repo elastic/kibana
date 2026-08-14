@@ -379,6 +379,263 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('component template composition', () => {
+    const composedIndexName = 'test_composed_index';
+    const requiredComponentName = 'test_composed_shared@mappings';
+    const ownedComponentName = 'test_composed_index@mappings';
+    const optionalComponentName = 'test_composed_index@custom';
+    let now = Date.now();
+    const composedSettings = {
+      name: composedIndexName,
+      priority: 600,
+      componentTemplate: {
+        name: ownedComponentName,
+        required: [requiredComponentName],
+        optional: [optionalComponentName],
+      },
+      schema: {
+        properties: {
+          foo: { type: 'keyword' as const },
+        },
+      },
+    } satisfies StorageSettings;
+
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      now += 30_001;
+      jest.spyOn(Date, 'now').mockImplementation(() => now);
+    });
+
+    afterEach(async () => {
+      await esClient.indices.deleteIndexTemplate({ name: composedIndexName }, { ignore: [404] });
+      await esClient.cluster.deleteComponentTemplate(
+        { name: [requiredComponentName, ownedComponentName, optionalComponentName] },
+        { ignore: [404] }
+      );
+      await esClient.indices.delete({ index: `${composedIndexName}-000001` }, { ignore: [404] });
+      jest.restoreAllMocks();
+    });
+
+    it('composes shared and generated mappings while preserving shared component ownership', async () => {
+      await esClient.cluster.putComponentTemplate({
+        name: requiredComponentName,
+        version: 2,
+        template: {
+          mappings: {
+            properties: {
+              shared: { type: 'keyword' },
+            },
+          },
+        },
+      });
+      const composedClient = createStorageIndexAdapter(composedSettings).getClient();
+
+      await composedClient.index({ id: 'doc1', document: { foo: 'bar' } });
+
+      const componentTemplate = await esClient.cluster.getComponentTemplate({
+        name: ownedComponentName,
+      });
+      const effectiveVersion =
+        componentTemplate.component_templates[0].component_template.template.mappings?._meta
+          ?.version;
+      expect(effectiveVersion).toEqual(expect.any(String));
+      expect(componentTemplate.component_templates[0].component_template.template.mappings).toEqual(
+        {
+          _meta: { version: effectiveVersion },
+          dynamic: 'strict',
+          properties: {
+            foo: { type: 'keyword' },
+          },
+        }
+      );
+
+      const indexTemplate = await esClient.indices.getIndexTemplate({ name: composedIndexName });
+      expect(indexTemplate.index_templates[0].index_template).toMatchObject({
+        priority: 600,
+        composed_of: [requiredComponentName, ownedComponentName, optionalComponentName],
+        ignore_missing_component_templates: [optionalComponentName],
+        template: {
+          mappings: {
+            _meta: { version: effectiveVersion },
+          },
+          aliases: {
+            [composedIndexName]: {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+
+      const index = await esClient.indices.get({ index: composedIndexName });
+      expect(index[`${composedIndexName}-000001`].mappings).toMatchObject({
+        _meta: { version: effectiveVersion },
+        dynamic: 'strict',
+        properties: {
+          shared: { type: 'keyword' },
+          foo: { type: 'keyword' },
+        },
+      });
+
+      await composedClient.clean();
+
+      await expect(
+        esClient.cluster.getComponentTemplate({ name: requiredComponentName })
+      ).resolves.toBeDefined();
+      await expect(
+        esClient.cluster.getComponentTemplate({ name: ownedComponentName })
+      ).rejects.toMatchObject({ statusCode: 404 });
+    });
+
+    it('propagates the Elasticsearch failure when a required component is missing', async () => {
+      const missingRequiredName = 'test_composed_missing@mappings';
+      const missingRequiredSettings = {
+        name: composedIndexName,
+        componentTemplate: {
+          name: ownedComponentName,
+          required: [missingRequiredName],
+        },
+        schema: {
+          properties: {
+            foo: { type: 'keyword' as const },
+          },
+        },
+      } satisfies StorageSettings;
+      const composedClient = createStorageIndexAdapter(missingRequiredSettings).getClient();
+
+      await expect(composedClient.index({ id: 'doc1', document: { foo: 'bar' } })).rejects.toThrow(
+        missingRequiredName
+      );
+
+      await expect(
+        esClient.cluster.getComponentTemplate({ name: ownedComponentName })
+      ).resolves.toBeDefined();
+      await expect(esClient.indices.exists({ index: composedIndexName })).resolves.toBe(false);
+    });
+
+    it('shares dependency resolution and mapping checks across adapter instances', async () => {
+      await esClient.cluster.putComponentTemplate({
+        name: requiredComponentName,
+        version: 2,
+        template: {
+          mappings: {
+            properties: {
+              shared: { type: 'keyword' },
+            },
+          },
+        },
+      });
+      const getComponentTemplateSpy = jest.spyOn(esClient.cluster, 'getComponentTemplate');
+      const getIndexSpy = jest.spyOn(esClient.indices, 'get');
+      const getAliasSpy = jest.spyOn(esClient.indices, 'getAlias');
+      const firstClient = createStorageIndexAdapter(composedSettings).getClient();
+      const secondClient = createStorageIndexAdapter(composedSettings).getClient();
+
+      await Promise.all([
+        firstClient.search({ track_total_hits: false, size: 1, query: { match_all: {} } }),
+        secondClient.search({ track_total_hits: false, size: 1, query: { match_all: {} } }),
+      ]);
+
+      expect(getComponentTemplateSpy).toHaveBeenCalledTimes(2);
+      expect(getIndexSpy).toHaveBeenCalledTimes(1);
+      expect(getAliasSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('reconciles an existing index when required component content changes', async () => {
+      await esClient.cluster.putComponentTemplate({
+        name: requiredComponentName,
+        version: 1,
+        template: {
+          mappings: {
+            properties: {
+              shared: { type: 'keyword' },
+            },
+          },
+        },
+      });
+      const composedClient = createStorageIndexAdapter(composedSettings).getClient();
+      await composedClient.index({ id: 'doc1', document: { foo: 'bar' } });
+      const initialIndex = await esClient.indices.get({ index: composedIndexName });
+      const initialVersion = initialIndex[`${composedIndexName}-000001`].mappings?._meta?.version;
+
+      await esClient.cluster.putComponentTemplate({
+        name: requiredComponentName,
+        version: 2,
+        template: {
+          mappings: {
+            properties: {
+              shared: { type: 'keyword' },
+              sharedV2: { type: 'keyword' },
+            },
+          },
+        },
+      });
+      now += 30_001;
+      await composedClient.search({
+        track_total_hits: false,
+        size: 1,
+        query: { match_all: {} },
+      });
+
+      const reconciledIndex = await esClient.indices.get({ index: composedIndexName });
+      const reconciledMappings = reconciledIndex[`${composedIndexName}-000001`].mappings;
+      expect(reconciledMappings?._meta?.version).not.toBe(initialVersion);
+      expect(reconciledMappings).toMatchObject({
+        properties: {
+          shared: { type: 'keyword' },
+          sharedV2: { type: 'keyword' },
+          foo: { type: 'keyword' },
+        },
+      });
+    });
+
+    it('reconciles an existing index when an optional component appears', async () => {
+      await esClient.cluster.putComponentTemplate({
+        name: requiredComponentName,
+        version: 2,
+        template: {
+          mappings: {
+            properties: {
+              shared: { type: 'keyword' },
+            },
+          },
+        },
+      });
+      const composedClient = createStorageIndexAdapter(composedSettings).getClient();
+      await composedClient.index({ id: 'doc1', document: { foo: 'bar' } });
+      const initialIndex = await esClient.indices.get({ index: composedIndexName });
+      const initialVersion = initialIndex[`${composedIndexName}-000001`].mappings?._meta?.version;
+
+      await esClient.cluster.putComponentTemplate({
+        name: optionalComponentName,
+        version: 1,
+        template: {
+          mappings: {
+            properties: {
+              optional: { type: 'keyword' },
+            },
+          },
+        },
+      });
+      now += 30_001;
+      await composedClient.search({
+        track_total_hits: false,
+        size: 1,
+        query: { match_all: {} },
+      });
+
+      const reconciledIndex = await esClient.indices.get({ index: composedIndexName });
+      const reconciledMappings = reconciledIndex[`${composedIndexName}-000001`].mappings;
+      expect(reconciledMappings?._meta?.version).not.toBe(initialVersion);
+      expect(reconciledMappings).toMatchObject({
+        properties: {
+          shared: { type: 'keyword' },
+          foo: { type: 'keyword' },
+          optional: { type: 'keyword' },
+        },
+      });
+    });
+  });
+
   describe('when bulk operation encounters errors', () => {
     afterAll(async () => {
       await client?.clean();
