@@ -31,6 +31,27 @@ function RootRedirect() {
   return null;
 }
 
+/**
+ * Returns true when session storage should be cleared on app mount.
+ *
+ * Conditions:
+ * - An integration id is present in the pathname (not the root redirect).
+ * - The navigation carried `state.newSession === true` (set by the tile entry point).
+ * - No `?deploymentId=<id>` query param is present; when it is, the hydration path in
+ *   elastic/ingest-dev#8099 is responsible for clearing-then-hydrating atomically.
+ */
+export function shouldClearSession(location: {
+  pathname: string;
+  search: string;
+  state: unknown;
+}): boolean {
+  const integrationId = location.pathname.split('/').filter(Boolean)[0];
+  const isNewSession =
+    (location.state as { newSession?: boolean } | undefined)?.newSession === true;
+  const hasDeploymentId = new URLSearchParams(location.search).has('deploymentId');
+  return Boolean(integrationId && isNewSession && !hasDeploymentId);
+}
+
 export function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
@@ -42,13 +63,8 @@ export function renderOnboardingApp(
   // already holds the old values and immediately rewrites them.
   const { pathname, search, hash, state } = params.history.location;
   const integrationId = pathname.split('/').filter(Boolean)[0];
-  const isNewSession = (state as { newSession?: boolean } | undefined)?.newSession === true;
-  // When ?deploymentId=<id> is present the intent is to resume a saved session by hydrating
-  // from the SO (elastic/ingest-dev#8099). Clearing here is deferred to that hydration path
-  // so it can clear-then-hydrate atomically. For now the flag simply prevents a premature clear.
-  const hasDeploymentId = new URLSearchParams(search).has('deploymentId');
 
-  if (integrationId && isNewSession && !hasDeploymentId) {
+  if (shouldClearSession({ pathname, search, state })) {
     clearOnboardingSession(integrationId);
     // Consume the flag so a reload does not trigger another clear and wipe an in-progress flow.
     // window.history.state survives a reload, so leaving it in place would re-clear every time.
