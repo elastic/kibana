@@ -7673,8 +7673,8 @@ paths:
           schema:
             enum:
               - name
-              - createdAt
-              - updatedAt
+              - created_at
+              - updated_at
             type: string
         - description: The sort direction.
           in: query
@@ -7695,31 +7695,31 @@ paths:
                   value:
                     items:
                       - auth:
-                          createdByUser: true
+                          created_by_user: true
                           owner: elastic
-                        createdAt: '2026-01-15T12:00:00.000Z'
-                        createdBy: elastic
+                        created_at: '2026-01-15T12:00:00.000Z'
+                        created_by: elastic
                         description: Sends a workflow notification when matching host alerts fire.
                         destinations:
                           - id: workflow-1
                             type: workflow
                         enabled: true
-                        groupBy: null
-                        groupingMode: per_episode
+                        group_by: null
+                        grouping_mode: per_episode
                         id: action-policy-1
                         matcher: 'host.name: "web-*"'
                         name: Notify on host alerts
-                        snoozedUntil: null
+                        snoozed_until: null
                         tags:
                           - production
                         throttle:
                           interval: null
                           strategy: on_status_change
-                        updatedAt: '2026-01-15T12:00:00.000Z'
-                        updatedBy: elastic
+                        updated_at: '2026-01-15T12:00:00.000Z'
+                        updated_by: elastic
                         version: WzAsMV0=
                     page: 1
-                    perPage: 20
+                    per_page: 20
                     total: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_list_response'
@@ -7832,7 +7832,7 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  groupingMode: per_episode
+                  grouping_mode: per_episode
                   matcher: 'host.name: "web-*"'
                   name: Notify on host alerts
                   tags:
@@ -7850,28 +7850,28 @@ paths:
                   summary: Newly created action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -8354,7 +8354,7 @@ paths:
                   ids:
                     - action-policy-1
                     - action-policy-2
-                  snoozedUntil: '2026-01-16T12:00:00.000Z'
+                  snoozed_until: '2026-01-16T12:00:00.000Z'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_snooze_action_policies_request'
       responses:
@@ -8382,11 +8382,11 @@ paths:
                       errors:
                         errors: []
                         properties:
-                          snoozedUntil:
+                          snoozed_until:
                             errors:
                               - 'Invalid input: expected string, received undefined'
                     error: Bad Request
-                    message: 'snoozedUntil: Invalid input: expected string, received undefined'
+                    message: 'snoozed_until: Invalid input: expected string, received undefined'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -8739,28 +8739,28 @@ paths:
                     items:
                       - actionPolicy:
                           auth:
-                            createdByUser: true
+                            created_by_user: true
                             owner: elastic
-                          createdAt: '2026-01-15T12:00:00.000Z'
-                          createdBy: elastic
+                          created_at: '2026-01-15T12:00:00.000Z'
+                          created_by: elastic
                           description: Sends a workflow notification when matching host alerts fire.
                           destinations:
                             - id: workflow-1
                               type: workflow
                           enabled: true
-                          groupBy: null
-                          groupingMode: per_episode
+                          group_by: null
+                          grouping_mode: per_episode
                           id: action-policy-1
                           matcher: 'host.name: "web-*"'
                           name: Notify on host alerts
-                          snoozedUntil: null
+                          snoozed_until: null
                           tags:
                             - production
                           throttle:
                             interval: null
                             strategy: on_status_change
-                          updatedAt: '2026-01-15T12:00:00.000Z'
-                          updatedBy: elastic
+                          updated_at: '2026-01-15T12:00:00.000Z'
+                          updated_by: elastic
                           version: WzAsMV0=
                         category: global-filtered
                     total: 1
@@ -8998,28 +8998,28 @@ paths:
                   summary: An action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -9165,28 +9165,28 @@ paths:
                   summary: Updated action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Updated description.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts (updated)
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -9336,7 +9336,7 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  groupingMode: per_episode
+                  grouping_mode: per_episode
                   matcher: 'host.name: "web-*"'
                   name: Notify on host alerts
                   tags:
@@ -9354,28 +9354,28 @@ paths:
                   summary: Replaced an existing action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -9388,28 +9388,28 @@ paths:
                   summary: Created a new action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -9560,28 +9560,28 @@ paths:
                   summary: Disabled action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: false
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -9731,28 +9731,28 @@ paths:
                   summary: Enabled action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -9900,7 +9900,7 @@ paths:
               snoozeActionPolicyRequest:
                 summary: Snooze until a specific timestamp
                 value:
-                  snoozedUntil: '2026-01-16T12:00:00.000Z'
+                  snoozed_until: '2026-01-16T12:00:00.000Z'
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_snooze_action_policy_request'
       responses:
@@ -9912,28 +9912,28 @@ paths:
                   summary: Snoozed action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: '2026-01-16T12:00:00.000Z'
+                    snoozed_until: '2026-01-16T12:00:00.000Z'
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -9950,11 +9950,11 @@ paths:
                       errors:
                         errors: []
                         properties:
-                          snoozedUntil:
+                          snoozed_until:
                             errors:
                               - 'Invalid input: expected string, received undefined'
                     error: Bad Request
-                    message: 'snoozedUntil: Invalid input: expected string, received undefined'
+                    message: 'snoozed_until: Invalid input: expected string, received undefined'
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates an invalid schema or parameters.
@@ -10083,28 +10083,28 @@ paths:
                   summary: Unsnoozed action policy
                   value:
                     auth:
-                      createdByUser: true
+                      created_by_user: true
                       owner: elastic
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     description: Sends a workflow notification when matching host alerts fire.
                     destinations:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    groupBy: null
-                    groupingMode: per_episode
+                    group_by: null
+                    grouping_mode: per_episode
                     id: action-policy-1
                     matcher: 'host.name: "web-*"'
                     name: Notify on host alerts
-                    snoozedUntil: null
+                    snoozed_until: null
                     tags:
                       - production
                     throttle:
                       interval: null
                       strategy: on_status_change
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_response'
@@ -12119,8 +12119,8 @@ paths:
                   summary: Paginated list containing one matching rule
                   value:
                     items:
-                      - createdAt: '2026-01-15T12:00:00.000Z'
-                        createdBy: elastic
+                      - created_at: '2026-01-15T12:00:00.000Z'
+                        created_by: elastic
                         enabled: true
                         grouping:
                           fields:
@@ -12146,11 +12146,11 @@ paths:
                           pending_count: 1
                           recovering_count: 1
                         time_field: '@timestamp'
-                        updatedAt: '2026-01-15T12:00:00.000Z'
-                        updatedBy: elastic
+                        updated_at: '2026-01-15T12:00:00.000Z'
+                        updated_by: elastic
                         version: WzAsMV0=
                     page: 1
-                    perPage: 20
+                    per_page: 20
                     total: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_list_response'
@@ -12291,8 +12291,8 @@ paths:
                 createRuleResponse:
                   summary: Created host CPU threshold rule
                   value:
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     enabled: true
                     grouping:
                       fields:
@@ -12318,8 +12318,8 @@ paths:
                       pending_count: 1
                       recovering_count: 1
                     time_field: '@timestamp'
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
@@ -12800,8 +12800,8 @@ paths:
                   summary: Returned the requested rules
                   value:
                     rules:
-                      - createdAt: '2026-01-15T12:00:00.000Z'
-                        createdBy: elastic
+                      - created_at: '2026-01-15T12:00:00.000Z'
+                        created_by: elastic
                         enabled: true
                         grouping:
                           fields:
@@ -12827,8 +12827,8 @@ paths:
                           pending_count: 1
                           recovering_count: 1
                         time_field: '@timestamp'
-                        updatedAt: '2026-01-15T12:00:00.000Z'
-                        updatedBy: elastic
+                        updated_at: '2026-01-15T12:00:00.000Z'
+                        updated_by: elastic
                         version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_get_rules_response'
@@ -13681,8 +13681,8 @@ paths:
                 getRuleResponse:
                   summary: Retrieved host CPU threshold rule
                   value:
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     enabled: true
                     grouping:
                       fields:
@@ -13708,8 +13708,8 @@ paths:
                       pending_count: 1
                       recovering_count: 1
                     time_field: '@timestamp'
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
@@ -13855,8 +13855,8 @@ paths:
                 updateRuleResponse:
                   summary: Updated rule metadata
                   value:
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     enabled: true
                     grouping:
                       fields:
@@ -13882,8 +13882,8 @@ paths:
                       pending_count: 1
                       recovering_count: 1
                     time_field: '@timestamp'
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
@@ -14059,8 +14059,8 @@ paths:
                 upsertRuleReplacedResponse:
                   summary: Replaced an existing rule
                   value:
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     enabled: true
                     grouping:
                       fields:
@@ -14086,8 +14086,8 @@ paths:
                       pending_count: 1
                       recovering_count: 1
                     time_field: '@timestamp'
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
@@ -14099,8 +14099,8 @@ paths:
                 upsertRuleCreatedResponse:
                   summary: Created a new rule with the given ID
                   value:
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     enabled: true
                     grouping:
                       fields:
@@ -14126,8 +14126,8 @@ paths:
                       pending_count: 1
                       recovering_count: 1
                     time_field: '@timestamp'
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
@@ -14273,8 +14273,8 @@ paths:
                 disableRuleResponse:
                   summary: Disabled host CPU threshold rule
                   value:
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     enabled: false
                     grouping:
                       fields:
@@ -14300,8 +14300,8 @@ paths:
                       pending_count: 1
                       recovering_count: 1
                     time_field: '@timestamp'
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
@@ -14450,8 +14450,8 @@ paths:
                 enableRuleResponse:
                   summary: Enabled host CPU threshold rule
                   value:
-                    createdAt: '2026-01-15T12:00:00.000Z'
-                    createdBy: elastic
+                    created_at: '2026-01-15T12:00:00.000Z'
+                    created_by: elastic
                     enabled: true
                     grouping:
                       fields:
@@ -14477,8 +14477,8 @@ paths:
                       pending_count: 1
                       recovering_count: 1
                     time_field: '@timestamp'
-                    updatedAt: '2026-01-15T12:00:00.000Z'
-                    updatedBy: elastic
+                    updated_at: '2026-01-15T12:00:00.000Z'
+                    updated_by: elastic
                     version: WzAsMV0=
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response'
@@ -14984,8 +14984,8 @@ paths:
                     metadata:
                       version: 2
                     snapshot:
-                      createdAt: '2026-01-15T12:00:00.000Z'
-                      createdBy: elastic
+                      created_at: '2026-01-15T12:00:00.000Z'
+                      created_by: elastic
                       enabled: true
                       grouping:
                         fields:
@@ -15011,8 +15011,8 @@ paths:
                         pending_count: 1
                         recovering_count: 1
                       time_field: '@timestamp'
-                      updatedAt: '2026-01-15T12:00:00.000Z'
-                      updatedBy: elastic
+                      updated_at: '2026-01-15T12:00:00.000Z'
+                      updated_by: elastic
                     timestamp: '2026-01-15T12:05:00.000Z'
               schema:
                 additionalProperties: false
@@ -81922,7 +81922,7 @@ components:
         page:
           description: The current page number.
           type: number
-        perPage:
+        per_page:
           description: The number of action policies per page.
           type: number
         total:
@@ -81932,7 +81932,7 @@ components:
         - items
         - total
         - page
-        - perPage
+        - per_page
     Kibana_HTTP_APIs_alerting_action_policy_response:
       additionalProperties: false
       type: object
@@ -81942,7 +81942,7 @@ components:
           description: Authentication and ownership information.
           type: object
           properties:
-            createdByUser:
+            created_by_user:
               description: Whether this policy was created by a user (vs system-generated).
               type: boolean
             owner:
@@ -81950,11 +81950,11 @@ components:
               type: string
           required:
             - owner
-            - createdByUser
-        createdAt:
+            - created_by_user
+        created_at:
           description: The ISO datetime when the action policy was created.
           type: string
-        createdBy:
+        created_by:
           description: The user ID who created the action policy.
           nullable: true
           type: string
@@ -81969,13 +81969,13 @@ components:
         enabled:
           description: Whether the action policy is enabled.
           type: boolean
-        groupBy:
+        group_by:
           description: The fields used to group alerts, or null for no grouping.
           items:
             type: string
           nullable: true
           type: array
-        groupingMode:
+        grouping_mode:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
           description: The grouping mode for alert notifications.
@@ -81990,7 +81990,7 @@ components:
         name:
           description: The name of the action policy.
           type: string
-        snoozedUntil:
+        snoozed_until:
           description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
           nullable: true
           type: string
@@ -82020,10 +82020,10 @@ components:
               type: string
           required:
             - interval
-        updatedAt:
+        updated_at:
           description: The ISO datetime when the action policy was last updated.
           type: string
-        updatedBy:
+        updated_by:
           description: The user ID who last updated the action policy.
           nullable: true
           type: string
@@ -82037,16 +82037,16 @@ components:
         - enabled
         - destinations
         - matcher
-        - groupBy
+        - group_by
         - tags
-        - groupingMode
+        - grouping_mode
         - throttle
-        - snoozedUntil
+        - snoozed_until
         - auth
-        - createdBy
-        - createdAt
-        - updatedBy
-        - updatedAt
+        - created_by
+        - created_at
+        - updated_by
+        - updated_at
     Kibana_HTTP_APIs_alerting_action_policy_throttle:
       additionalProperties: false
       type: object
@@ -82284,14 +82284,14 @@ components:
           maxItems: 100
           minItems: 1
           type: array
-        snoozedUntil:
+        snoozed_until:
           description: The ISO datetime until which the targeted action policies should be snoozed.
           format: date-time
           pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
       required:
         - ids
-        - snoozedUntil
+        - snoozed_until
     Kibana_HTTP_APIs_alerting_composed_rule_query:
       additionalProperties: false
       description: 'Composed query: a shared base with appendable breach and recovery segments.'
@@ -82459,7 +82459,7 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        groupBy:
+        group_by:
           description: The fields used to group alerts.
           items:
             maxLength: 256
@@ -82467,7 +82467,7 @@ components:
             type: string
           maxItems: 16
           type: array
-        groupingMode:
+        grouping_mode:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
           description: The grouping mode for alert notifications.
         matcher:
@@ -82939,7 +82939,7 @@ components:
         page:
           description: The current page number.
           type: number
-        perPage:
+        per_page:
           description: The number of rules per page.
           type: number
         total:
@@ -82949,7 +82949,7 @@ components:
         - items
         - total
         - page
-        - perPage
+        - per_page
     Kibana_HTTP_APIs_alerting_rule_metadata:
       additionalProperties: false
       description: Rule metadata.
@@ -83003,10 +83003,10 @@ components:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
           type: array
-        createdAt:
+        created_at:
           description: ISO timestamp when the rule was created.
           type: string
-        createdBy:
+        created_by:
           description: User who created the rule.
           nullable: true
           type: string
@@ -83085,10 +83085,10 @@ components:
           maxLength: 128
           minLength: 1
           type: string
-        updatedAt:
+        updated_at:
           description: ISO timestamp when the rule was last updated.
           type: string
-        updatedBy:
+        updated_by:
           description: User who last updated the rule.
           nullable: true
           type: string
@@ -83102,10 +83102,10 @@ components:
         - query
         - id
         - enabled
-        - createdBy
-        - createdAt
-        - updatedBy
-        - updatedAt
+        - created_by
+        - created_at
+        - updated_by
+        - updated_at
     Kibana_HTTP_APIs_alerting_rule_response_metadata:
       additionalProperties: false
       type: object
@@ -83173,13 +83173,13 @@ components:
       additionalProperties: false
       type: object
       properties:
-        snoozedUntil:
+        snoozed_until:
           description: The ISO datetime until which the action policy should be snoozed.
           format: date-time
           pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
           type: string
       required:
-        - snoozedUntil
+        - snoozed_until
     Kibana_HTTP_APIs_alerting_snooze_alert_action:
       additionalProperties: false
       type: object
@@ -83307,7 +83307,7 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        groupBy:
+        group_by:
           description: The fields used to group alerts.
           items:
             maxLength: 256
@@ -83316,7 +83316,7 @@ components:
           maxItems: 16
           nullable: true
           type: array
-        groupingMode:
+        grouping_mode:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
           description: The grouping mode for alert notifications.
