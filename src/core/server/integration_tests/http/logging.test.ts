@@ -11,6 +11,11 @@ import { schema } from '@kbn/config-schema';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 import { unsafeConsole } from '@kbn/security-hardening';
 
+const responseLogLines = (mockConsoleLog: jest.SpyInstance): string[] =>
+  mockConsoleLog.mock.calls
+    .map((call) => String(call[0]))
+    .filter((line) => line.includes('|http.server.response|'));
+
 describe('request logging', () => {
   let mockConsoleLog: jest.SpyInstance;
 
@@ -136,20 +141,7 @@ describe('request logging', () => {
         expect(logger).toBe('http.server.response');
       });
 
-      it('logs allowlisted paths at info when debug is not enabled', async () => {
-        const optionalAuth = {
-          authc: {
-            enabled: 'optional' as const,
-            reason:
-              'This route is part of an HTTP integration test and supports optional authentication.',
-          },
-          authz: {
-            enabled: false as const,
-            reason:
-              'This route is part of an HTTP integration test and does not require authorization.',
-          },
-        };
-
+      it('does not log non-allowlisted paths at info', async () => {
         root = createRoot({
           logging: {
             appenders: {
@@ -178,31 +170,88 @@ describe('request logging', () => {
         await root.preboot();
         const { http } = await root.setup();
 
-        const router = http.createRouter('/');
-        router.get(
+        http.createRouter('/').get(
           {
             path: '/ping',
-            security: optionalAuth,
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
             validate: false,
           },
           (context, req, res) => res.ok({ body: 'pong' })
         );
-        router.get(
+        await root.start();
+        mockConsoleLog.mockClear();
+
+        await request.get(root, '/ping').expect(200, 'pong');
+        expect(responseLogLines(mockConsoleLog)).toHaveLength(0);
+      });
+
+      it('logs allowlisted paths at info when debug is not enabled', async () => {
+        root = createRoot({
+          logging: {
+            appenders: {
+              'test-console': {
+                type: 'console',
+                layout: {
+                  type: 'pattern',
+                  pattern: '%level|%logger|%message|%meta',
+                },
+              },
+            },
+            loggers: [
+              {
+                name: 'http.server.response',
+                appenders: ['test-console'],
+                level: 'info',
+              },
+            ],
+          },
+          plugins: {
+            initialize: false,
+          },
+          elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
+        });
+        await root.preboot();
+        const { http } = await root.setup();
+
+        http.createRouter('/').get(
           {
             path: '/internal/api/endpoint/agent_status',
-            security: optionalAuth,
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            options: { access: 'public' },
             validate: false,
           },
           (context, req, res) => res.ok({ body: 'ok' })
         );
         await root.start();
-
-        await request.get(root, '/ping').expect(200, 'pong');
-        expect(mockConsoleLog).not.toHaveBeenCalled();
+        mockConsoleLog.mockClear();
 
         await request.get(root, '/internal/api/endpoint/agent_status').expect(200, 'ok');
-        expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-        const [level, logger, message, meta] = mockConsoleLog.mock.calls[0][0].split('|');
+        const lines = responseLogLines(mockConsoleLog);
+        expect(lines).toHaveLength(1);
+        const [level, logger, message, meta] = lines[0].split('|');
         expect(level).toBe('INFO');
         expect(logger).toBe('http.server.response');
         expect(message.includes('GET /internal/api/endpoint/agent_status 200')).toBe(true);
