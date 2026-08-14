@@ -144,33 +144,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       isEditingEnabled: () => true,
     });
 
-    const esqlUsageSubscription = esqlQuery$
-      .pipe(map(Boolean), distinctUntilChanged())
-      .subscribe((usesEsql) => usesEsql$.next(usesEsql));
-
-    // Important for unified search support — KQL bar and filter builder suggestions.
-    const dataViewsSubscription = esqlQuery$
-      .pipe(
-        distinctUntilChanged(),
-        switchMap((esqlQuery) => {
-          if (!esqlQuery) return of(undefined);
-          const { core, dataViews } = getServices();
-          return from(
-            getESQLAdHocDataview({ dataViewsService: dataViews, query: esqlQuery, http: core.http })
-          ).pipe(catchError(() => of(undefined)));
-        })
-      )
-      .subscribe((dataView) => dataViews$.next(dataView ? [dataView] : undefined));
-
-    const fetchSubscription = fetch$(api).subscribe(
-      ({ isApproximate, projectRouting, query, filters }) => {
-        isApproximate$.next(isApproximate);
-        projectRouting$.next(projectRouting);
-        query$.next(query);
-        filters$.next(filters);
-      }
-    );
-
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
@@ -203,6 +176,35 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         );
 
         useEffect(() => {
+          const esqlUsageSubscription = esqlQuery$
+            .pipe(map(Boolean), distinctUntilChanged())
+            .subscribe((usesEsql) => usesEsql$.next(usesEsql));
+
+          // Important for unified search support — KQL bar and filter builder suggestions.
+          const dataViewsSubscription = esqlQuery$
+            .pipe(
+              distinctUntilChanged(),
+              switchMap((esqlQueryValue) => {
+                if (!esqlQueryValue) return of(undefined);
+                const { core, dataViews } = getServices();
+                return from(
+                  getESQLAdHocDataview({
+                    dataViewsService: dataViews,
+                    query: esqlQueryValue,
+                    http: core.http,
+                  })
+                ).pipe(catchError(() => of(undefined)));
+              })
+            )
+            .subscribe((dataView) => dataViews$.next(dataView ? [dataView] : undefined));
+
+          const fetchSubscription = fetch$(api).subscribe((ctx) => {
+            isApproximate$.next(ctx.isApproximate);
+            projectRouting$.next(ctx.projectRouting);
+            query$.next(ctx.query);
+            filters$.next(ctx.filters);
+          });
+
           return () => {
             esqlUsageSubscription.unsubscribe();
             dataViewsSubscription.unsubscribe();
