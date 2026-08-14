@@ -7,7 +7,12 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { mockDataViewsService } from '../../data_views_service/mocks';
-import { loadIndexPatternRefs, getAllColumns, canColumnBeUsedBeInMetricDimension } from './utils';
+import {
+  loadIndexPatternRefs,
+  getAllColumns,
+  canColumnBeUsedBeInMetricDimension,
+  reconcileQueryColumns,
+} from './utils';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 
 describe('Text based languages utils', () => {
@@ -15,6 +20,65 @@ describe('Text based languages utils', () => {
     it('should return a list of sorted indexpattern refs', async () => {
       const refs = await loadIndexPatternRefs(mockDataViewsService() as DataViewsPublicPluginStart);
       expect(refs[0].title < refs[1].title).toBeTruthy();
+    });
+  });
+
+  describe('reconcileQueryColumns', () => {
+    it('preserves configured column IDs when compatible query fields change', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        {
+          columnId: 'x-axis',
+          fieldName: '@timestamp',
+          meta: { type: 'date' },
+        },
+        {
+          columnId: 'y-axis',
+          fieldName: 'COUNT(*)',
+          label: 'Count of records',
+          customLabel: true,
+          meta: { type: 'number' },
+        },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+        { id: 'MAX(bytes)', name: 'MAX(bytes)', meta: { type: 'number' } },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'x-axis',
+          fieldName: '@timestamp',
+          label: '@timestamp',
+          meta: { type: 'date' },
+          variable: undefined,
+        },
+        {
+          columnId: 'y-axis',
+          fieldName: 'MAX(bytes)',
+          label: 'Count of records',
+          customLabel: true,
+          meta: { type: 'number' },
+          variable: undefined,
+        },
+      ]);
+    });
+
+    it('uses query column IDs for new incompatible fields', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'metric', fieldName: 'COUNT(*)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'message', name: 'message', meta: { type: 'string' } },
+      ];
+
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'message',
+          fieldName: 'message',
+          label: 'message',
+          meta: { type: 'string' },
+        },
+      ]);
     });
   });
 

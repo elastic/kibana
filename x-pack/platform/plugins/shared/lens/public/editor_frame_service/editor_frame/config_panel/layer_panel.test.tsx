@@ -15,7 +15,7 @@ import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 
 import { generateId } from '../../../id_generator';
 import {
@@ -1191,15 +1191,29 @@ describe('LayerPanel', () => {
       expect(screen.queryByTestId('mockESQLEditor')).not.toBeInTheDocument();
     });
 
-    it('updates only the selected text-based layer query', async () => {
+    it('updates and reconciles only the selected text-based layer query', async () => {
       const firstQuery = { esql: 'FROM first-index | LIMIT 10' };
-      const secondQuery = { esql: 'FROM second-index | LIMIT 10' };
-      const newSecondQuery = { esql: 'FROM second-index | LIMIT 20' };
+      const secondQuery = { esql: 'FROM second-index | STATS COUNT(*)' };
+      const newSecondQuery = { esql: 'FROM second-index | STATS MAX(bytes)' };
+      const queryColumns: DatatableColumn[] = [
+        { id: 'MAX(bytes)', name: 'MAX(bytes)', meta: { type: 'number' } },
+      ];
       const updateDatasource = jest.fn();
       const textBasedState = {
         layers: {
           first: { columns: [], query: firstQuery },
-          second: { columns: [], query: secondQuery },
+          second: {
+            columns: [
+              {
+                columnId: 'second-metric',
+                fieldName: 'COUNT(*)',
+                label: 'Count of records',
+                customLabel: true,
+                meta: { type: 'number' as const },
+              },
+            ],
+            query: secondQuery,
+          },
         },
         indexPatternRefs: [],
       };
@@ -1207,6 +1221,16 @@ describe('LayerPanel', () => {
       renderLayerPanel({
         propsOverrides: {
           layerId: 'second',
+          dimensionGroups: [
+            {
+              groupId: 'metric',
+              groupLabel: 'Metric',
+              accessors: [{ columnId: 'second-metric' }],
+              supportsMoreColumns: true,
+              filterOperations: () => true,
+              dataTestSubj: 'metric',
+            },
+          ],
           updateDatasource,
           framePublicAPI: {
             ...createMockFramePublicAPI(),
@@ -1233,15 +1257,39 @@ describe('LayerPanel', () => {
         })
       );
 
-      await act(async () => editorProps?.onLayerQuerySubmit?.(newSecondQuery));
+      await act(async () => editorProps?.onLayerQuerySubmit?.(newSecondQuery, queryColumns));
 
       expect(updateDatasource).toHaveBeenCalledWith('textBased', {
         ...textBasedState,
         layers: {
           first: textBasedState.layers.first,
-          second: { ...textBasedState.layers.second, query: newSecondQuery },
+          second: {
+            ...textBasedState.layers.second,
+            query: newSecondQuery,
+            columns: [
+              {
+                columnId: 'second-metric',
+                fieldName: 'MAX(bytes)',
+                label: 'Count of records',
+                customLabel: true,
+                meta: { type: 'number' },
+              },
+            ],
+            errors: undefined,
+          },
         },
       });
+
+      updateDatasource.mockClear();
+      const incompatibleQuery = { esql: 'FROM second-index | KEEP message' };
+      const incompatibleColumns: DatatableColumn[] = [
+        { id: 'message', name: 'message', meta: { type: 'string' } },
+      ];
+
+      await expect(
+        editorProps?.onLayerQuerySubmit?.(incompatibleQuery, incompatibleColumns)
+      ).rejects.toThrow('does not contain compatible fields');
+      expect(updateDatasource).not.toHaveBeenCalled();
     });
   });
 

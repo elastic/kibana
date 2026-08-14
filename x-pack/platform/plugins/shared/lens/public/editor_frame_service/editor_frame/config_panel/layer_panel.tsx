@@ -20,10 +20,11 @@ import {
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
+import type { AggregateQuery } from '@kbn/es-query';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { isTextBasedAttributes } from '@kbn/lens-common';
 import { getTabIdAttribute } from '@kbn/unified-tabs';
-import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type {
   LensDatasourceId,
@@ -49,6 +50,7 @@ import {
   useLensSelector,
 } from '../../../state_management';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { reconcileQueryColumns } from '../../../datasources/text_based/utils';
 import { isOperation } from '../../../types_guards';
 import { getLongMessage } from '../../../user_messages_utils';
 import { useEditorFrameService } from '../../editor_frame_service_context';
@@ -346,21 +348,40 @@ export function LayerPanel(props: LayerPanelProps) {
     isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
 
   const updateLayerQuery = useCallback(
-    async (newQuery: AggregateQuery) => {
+    async (newQuery: AggregateQuery, columns: DatatableColumn[]) => {
       const layer = textBasedDatasourceState?.layers[layerId];
       if (!textBasedDatasourceState || !layer) {
         return;
+      }
+
+      const reconciledColumns = reconcileQueryColumns(layer.columns, columns);
+      const reconciledColumnIds = new Set(reconciledColumns.map(({ columnId }) => columnId));
+      const hasMissingDimension = allAccessors.some(
+        (columnId) => !reconciledColumnIds.has(columnId)
+      );
+      if (hasMissingDimension) {
+        throw new Error(
+          i18n.translate('xpack.lens.config.invalidLayerQueryColumns', {
+            defaultMessage:
+              'The query result does not contain compatible fields for every configured dimension. Remove the incompatible dimensions before submitting this query.',
+          })
+        );
       }
 
       updateDatasource(datasourceId, {
         ...textBasedDatasourceState,
         layers: {
           ...textBasedDatasourceState.layers,
-          [layerId]: { ...layer, query: newQuery },
+          [layerId]: {
+            ...layer,
+            query: newQuery,
+            columns: reconciledColumns,
+            errors: undefined,
+          },
         },
       });
     },
-    [datasourceId, layerId, textBasedDatasourceState, updateDatasource]
+    [allAccessors, datasourceId, layerId, textBasedDatasourceState, updateDatasource]
   );
 
   const visualizationLayerSettings = useMemo(

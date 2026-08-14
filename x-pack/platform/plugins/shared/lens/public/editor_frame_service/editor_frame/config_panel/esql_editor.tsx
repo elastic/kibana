@@ -10,6 +10,7 @@ import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getRepresentativeQuery } from '@kbn/lens-common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
@@ -28,7 +29,8 @@ import { useESQLEditorContext } from './esql_editor_context';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import { useLensSelector, selectSearchSessionId } from '../../../state_management';
 import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
-import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+import { getGridAttrs, getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+import { addColumnsToCache } from '../../../datasources/text_based/fieldlist_cache';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import type { LayerPanelProps } from './types';
@@ -44,6 +46,7 @@ export type ESQLEditorProps = Simplify<
     layerQuery?: AggregateQuery;
     onLayerQuerySubmit?: (
       query: AggregateQuery,
+      columns: DatatableColumn[],
       abortController?: AbortController
     ) => Promise<void>;
   } & Pick<
@@ -172,10 +175,29 @@ export function ESQLEditor({
       setErrors([]);
 
       if (onLayerQuerySubmit) {
-        await onLayerQuerySubmit(q, abortController);
-        prevQuery.current = q;
-        setSubmittedQuery(q);
-        setIsVisualizationLoading(false);
+        try {
+          const gridAttrs = await getGridAttrs(
+            q,
+            adHocDataViews,
+            data,
+            http,
+            uiSettings,
+            abortController,
+            esqlVariables,
+            isApproximate
+          );
+          addColumnsToCache(q, gridAttrs.columns);
+          setDataGridAttrs(gridAttrs);
+          await onLayerQuerySubmit(q, gridAttrs.columns, abortController);
+          prevQuery.current = q;
+          setSubmittedQuery(q);
+        } catch (error) {
+          if (!abortController?.signal.aborted) {
+            setErrors([error instanceof Error ? error : new Error(String(error))]);
+          }
+        } finally {
+          setIsVisualizationLoading(false);
+        }
         return;
       }
 
@@ -315,6 +337,7 @@ export function ESQLEditor({
         runQuery={runQuery}
         adHocDataViews={adHocDataViews}
         errors={errors}
+        setErrors={setErrors}
         suggestsLimitedColumns={suggestsLimitedColumns}
         isVisualizationLoading={isVisualizationLoading}
         setIsVisualizationLoading={setIsVisualizationLoading}
@@ -364,6 +387,7 @@ type InnerEditorProps = Simplify<
       shouldUpdateAttrs?: boolean
     ) => Promise<void>;
     errors: Error[];
+    setErrors: (errors: Error[]) => void;
     isVisualizationLoading: boolean | undefined;
     setIsVisualizationLoading: (status: boolean) => void;
     suggestsLimitedColumns: boolean;
@@ -377,6 +401,7 @@ function InnerESQLEditor({
   query,
   adHocDataViews,
   errors,
+  setErrors,
   suggestsLimitedColumns,
   attributes,
   parentApi,
@@ -410,7 +435,12 @@ function InnerESQLEditor({
       >
         <ESQLLangEditor
           query={query}
-          onTextLangQueryChange={setQuery}
+          onTextLangQueryChange={(nextQuery) => {
+            setQuery(nextQuery);
+            if (errors.length > 0) {
+              setErrors([]);
+            }
+          }}
           errors={errors}
           warning={
             suggestsLimitedColumns
