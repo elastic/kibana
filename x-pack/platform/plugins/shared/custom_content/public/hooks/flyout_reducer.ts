@@ -13,6 +13,9 @@ interface FlyoutReducerState {
   isPreviewLoading: boolean;
   previewData: EsqlDataResult | null;
   previewError: string | null;
+  renderedHtml: string | null;
+  isRunPreviewLoading: boolean;
+  runPreviewError: string | null;
 }
 
 export type FlyoutAction =
@@ -21,7 +24,11 @@ export type FlyoutAction =
   | { type: 'PREVIEW_START' }
   | { type: 'PREVIEW_SUCCESS'; payload: EsqlDataResult }
   | { type: 'PREVIEW_ERROR'; payload: string }
-  | { type: 'PREVIEW_DONE' };
+  | { type: 'PREVIEW_DONE' }
+  | { type: 'RUN_PREVIEW_START' }
+  | { type: 'RUN_PREVIEW_SUCCESS'; payload: string }
+  | { type: 'RUN_PREVIEW_ERROR'; payload: string }
+  | { type: 'RUN_PREVIEW_DONE' };
 
 export const flyoutReducer = (
   state: FlyoutReducerState,
@@ -40,5 +47,13 @@ export const flyoutReducer = (
       return { ...state, previewError: action.payload, previewData: null };
     case 'PREVIEW_DONE':
       return { ...state, isPreviewLoading: false };
+    case 'RUN_PREVIEW_START':
+      return { ...state, isRunPreviewLoading: true, runPreviewError: null };
+    case 'RUN_PREVIEW_SUCCESS':
+      return { ...state, renderedHtml: action.payload };
+    case 'RUN_PREVIEW_ERROR':
+      return { ...state, runPreviewError: action.payload, renderedHtml: null };
+    case 'RUN_PREVIEW_DONE':
+      return { ...state, isRunPreviewLoading: false };
   }
 };

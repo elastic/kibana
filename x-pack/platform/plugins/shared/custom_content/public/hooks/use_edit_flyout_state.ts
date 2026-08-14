@@ -6,9 +6,12 @@
  */
 
 import { useReducer, useCallback, useRef } from 'react';
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { getServices } from '../services';
 import { fetchEsqlData, type EsqlDataResult } from '../utils/fetch_esql_data';
+import { fillTemplate } from '../utils/fill_template';
+import { prepareHtml } from '../utils/prepare_html';
 import { flyoutReducer } from './flyout_reducer';
 
 export interface EditFlyoutState {
@@ -21,18 +24,24 @@ export interface EditFlyoutState {
   previewData: EsqlDataResult | null;
   previewError: string | null;
   handlePreview: () => Promise<void>;
+  renderedHtml: string | null;
+  isRunPreviewLoading: boolean;
+  runPreviewError: string | null;
+  handleRunPreview: () => Promise<void>;
 }
 
 export interface UseEditFlyoutStateParams {
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: TimeRange | undefined;
+  colorMode: EuiThemeColorModeStandard;
 }
 
 export const useEditFlyoutState = ({
   esqlQuery,
   template,
   timeRange,
+  colorMode,
 }: UseEditFlyoutStateParams): EditFlyoutState => {
   const [state, dispatch] = useReducer(flyoutReducer, {
     draftEsqlQuery: esqlQuery ?? '',
@@ -40,9 +49,13 @@ export const useEditFlyoutState = ({
     isPreviewLoading: false,
     previewData: null,
     previewError: null,
+    renderedHtml: null,
+    isRunPreviewLoading: false,
+    runPreviewError: null,
   });
 
   const abortRef = useRef<AbortController | undefined>(undefined);
+  const runPreviewAbortRef = useRef<AbortController | undefined>(undefined);
 
   const { agentBuilder, core, search } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
@@ -90,6 +103,45 @@ export const useEditFlyoutState = ({
     }
   }, [state.draftEsqlQuery, timeRange, core.http, search]);
 
+  const handleRunPreview = useCallback(async () => {
+    runPreviewAbortRef.current?.abort();
+    const controller = new AbortController();
+    runPreviewAbortRef.current = controller;
+
+    dispatch({ type: 'RUN_PREVIEW_START' });
+
+    try {
+      let rawHtml: string;
+      if (state.draftEsqlQuery) {
+        const result = await fetchEsqlData(
+          search,
+          core.http,
+          state.draftEsqlQuery,
+          timeRange,
+          controller.signal
+        );
+        if (controller.signal.aborted) return;
+        rawHtml = await fillTemplate(state.draftTemplate, result.columns, result.values ?? []);
+      } else {
+        rawHtml = state.draftTemplate;
+      }
+      if (!controller.signal.aborted) {
+        dispatch({ type: 'RUN_PREVIEW_SUCCESS', payload: prepareHtml(rawHtml, colorMode) });
+      }
+    } catch (err) {
+      if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
+        dispatch({
+          type: 'RUN_PREVIEW_ERROR',
+          payload: err instanceof Error ? err.message : String(err),
+        });
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        dispatch({ type: 'RUN_PREVIEW_DONE' });
+      }
+    }
+  }, [state.draftEsqlQuery, state.draftTemplate, timeRange, core.http, search, colorMode]);
+
   return {
     draftEsqlQuery: state.draftEsqlQuery,
     setDraftEsqlQuery,
@@ -100,5 +152,9 @@ export const useEditFlyoutState = ({
     previewData: state.previewData,
     previewError: state.previewError,
     handlePreview,
+    renderedHtml: state.renderedHtml,
+    isRunPreviewLoading: state.isRunPreviewLoading,
+    runPreviewError: state.runPreviewError,
+    handleRunPreview,
   };
 };

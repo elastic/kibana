@@ -34,6 +34,7 @@ const baseParams = {
   esqlQuery: 'FROM logs | LIMIT 10',
   template: 'hello',
   timeRange: undefined,
+  colorMode: 'LIGHT' as const,
 };
 
 describe('useEditFlyoutState', () => {
@@ -46,7 +47,7 @@ describe('useEditFlyoutState', () => {
 
     it('initializes draft state to empty strings when props are undefined', () => {
       const { result } = renderHook(() =>
-        useEditFlyoutState({ esqlQuery: undefined, template: undefined, timeRange: undefined })
+        useEditFlyoutState({ esqlQuery: undefined, template: undefined, timeRange: undefined, colorMode: 'LIGHT' as const })
       );
       expect(result.current.draftEsqlQuery).toBe('');
       expect(result.current.draftTemplate).toBe('');
@@ -104,7 +105,7 @@ describe('useEditFlyoutState', () => {
 
     it('does nothing when draftEsqlQuery is empty', async () => {
       const { result } = renderHook(() =>
-        useEditFlyoutState({ esqlQuery: undefined, template: undefined, timeRange: undefined })
+        useEditFlyoutState({ esqlQuery: undefined, template: undefined, timeRange: undefined, colorMode: 'LIGHT' as const })
       );
 
       await act(async () => {

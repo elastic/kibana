@@ -45,6 +45,10 @@ const baseFlyoutState = {
   previewData: null,
   previewError: null,
   handlePreview: jest.fn(),
+  renderedHtml: null,
+  isRunPreviewLoading: false,
+  runPreviewError: null,
+  handleRunPreview: jest.fn(),
 };
 
 const openChat = jest.fn();
