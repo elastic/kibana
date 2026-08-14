@@ -130,7 +130,7 @@ export const AutomationsPanel = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="s"
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={handleCreate}
                   isLoading={isCreating}
                   isDisabled={isBusy || !canAddMore}

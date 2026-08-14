@@ -32,6 +32,15 @@ const renderEntities = (selectedEntityKey?: string) =>
     </I18nProvider>
   );
 
+const renderState = (props: Partial<React.ComponentProps<typeof BlastRadiusEntities>>) =>
+  render(
+    <I18nProvider>
+      <EuiProvider>
+        <BlastRadiusEntities entities={[]} onSelect={jest.fn()} {...props} />
+      </EuiProvider>
+    </I18nProvider>
+  );
+
 describe('BlastRadiusEntities', () => {
   it('keeps a selected overflow chip visible after collapsing', () => {
     const selectedKey = `entity:${MAX_VISIBLE_BLAST_RADIUS_ENTITIES}`;
@@ -51,5 +60,44 @@ describe('BlastRadiusEntities', () => {
       'aria-pressed',
       'true'
     );
+  });
+
+  it('renders nothing when there is no impact and nothing is pending', () => {
+    const { container } = renderState({});
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('keeps the panel up while impacted services are still loading', () => {
+    renderState({ isLoading: true });
+
+    expect(screen.getByTestId('blast-radius-loading')).toBeInTheDocument();
+  });
+
+  it('offers a retry instead of an empty panel when the lookup failed', () => {
+    const onRetry = jest.fn();
+    renderState({ isError: true, onRetry });
+
+    expect(screen.getByText('Unable to load impacted services')).toBeInTheDocument();
+    expect(screen.queryByTestId('blast-radius-failed-streams')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('blast-radius-retry'));
+    expect(onRetry).toHaveBeenCalled();
+  });
+
+  it('names the unreachable streams while keeping the chips that did resolve', () => {
+    const onRetry = jest.fn();
+    renderState({
+      entities: buildEntities(2),
+      failedStreamNames: ['logs.payments', 'logs.checkout'],
+      onRetry,
+    });
+
+    expect(screen.getByText('Some impacted services could not be loaded')).toBeInTheDocument();
+    expect(screen.getByTestId('blast-radius-failed-streams')).toHaveTextContent(
+      'No response from logs.payments, logs.checkout.'
+    );
+    expect(screen.getAllByTestId('blast-radius-chip')).toHaveLength(2);
+    fireEvent.click(screen.getByTestId('blast-radius-retry'));
+    expect(onRetry).toHaveBeenCalled();
   });
 });

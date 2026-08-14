@@ -9,6 +9,7 @@ import type {
   AlertEpisodeStatus,
   AlertEventSeverity,
 } from '../../resources/datastreams/alert_events';
+import type { DispatchFailureReason } from './steps/constants';
 
 export type RuleId = string;
 export type ActionPolicyId = string;
@@ -126,6 +127,22 @@ export interface LastNotifiedInfo {
   episodeStatus?: string;
 }
 
+/**
+ * A single failed attempt to dispatch one action group to one workflow
+ * destination. Carries everything the execution-history step needs to emit a
+ * `dispatch_failed` event: the parent policy, the failing group + workflow, the
+ * affected episodes, and a machine-readable + human-readable cause.
+ */
+export interface DispatchFailure {
+  policyId: ActionPolicyId;
+  spaceId: string;
+  actionGroupId: ActionGroupId;
+  workflowId: string;
+  episodes: AlertEpisode[];
+  reason: DispatchFailureReason;
+  message: string;
+}
+
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
@@ -145,6 +162,7 @@ export interface DispatcherPipelineState {
   readonly dispatch?: ActionGroup[];
   readonly throttled?: ActionGroup[];
   readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  readonly dispatchFailures?: DispatchFailure[];
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions';

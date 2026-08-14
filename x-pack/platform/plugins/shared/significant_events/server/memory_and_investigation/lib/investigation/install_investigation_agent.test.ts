@@ -26,10 +26,10 @@ describe('installInvestigationAgent', () => {
       agent: {
         id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
         type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-        name: 'Streams Investigator',
+        name: 'Nightshift Investigator',
         description: expect.any(String),
         labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
-        avatar_symbol: 'SI',
+        avatar_symbol: 'NI',
         access_control: { access_mode: AgentAccessControlMode.Public },
         configuration: {
           tools: [],

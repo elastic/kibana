@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type {
@@ -19,7 +20,11 @@ import {
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { QueryServiceContract } from '../../lib/services/query_service/query_service';
+import type { EpisodesClient } from '../../lib/episodes_client';
+import type { RulesClient } from '../../lib/rules_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
+import { getRuleToolId } from '../tools/get_rule';
+import { refreshEpisodeToolId } from '../tools/refresh_episode';
 import { createEpisodeAttachmentType } from './episode_attachment_type';
 
 const SPACE_ID = 'default';
@@ -66,17 +71,32 @@ const buildVersionedAttachment = (
 });
 
 describe('createEpisodeAttachmentType', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  let executeQueryRows: jest.Mock;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
+  let getEpisode: jest.Mock;
+  let getRule: jest.Mock;
+  let canRead: jest.Mock;
   let definition: AttachmentTypeDefinition<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>;
 
+  const createPrivilegeCheckerMock = (canReadResult: boolean = true) => {
+    canRead = jest.fn().mockResolvedValue(canReadResult);
+    return {
+      canRead,
+      canWrite: jest.fn().mockResolvedValue(true),
+    } as unknown as PrivilegeChecker;
+  };
+
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
-    executeQueryRows = jest.fn();
-    const queryService = { executeQueryRows } as unknown as QueryServiceContract;
+    ({ loggerService, mockLogger } = createLoggerService());
+    getEpisode = jest.fn();
+    getRule = jest.fn();
+    const episodesClient = { get: getEpisode } as unknown as EpisodesClient;
+    const rulesClient = { getRule } as unknown as RulesClient;
     definition = createEpisodeAttachmentType({
-      logger,
-      getQueryService: () => queryService,
+      logger: loggerService,
+      getEpisodesClient: () => episodesClient,
+      getRulesClient: () => rulesClient,
+      getPrivilegeChecker: () => createPrivilegeCheckerMock(true),
     });
   });
 
@@ -106,30 +126,12 @@ describe('createEpisodeAttachmentType', () => {
 
   describe('resolve', () => {
     it('returns episode data parsed against the schema', async () => {
-      executeQueryRows.mockResolvedValueOnce([baseEpisodeData]);
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
 
-      const result = await definition.resolve!(
-        'ep-1',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(executeQueryRows).toHaveBeenCalledWith({
-        query: expect.stringContaining('ep-1'),
-      });
+      expect(getEpisode).toHaveBeenCalledWith('ep-1');
       expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
-    });
-
-    it('queries the requested episode within the context space', async () => {
-      executeQueryRows.mockResolvedValueOnce([baseEpisodeData]);
-
-      await definition.resolve!(
-        'ep-1',
-        createResolveContext('space-a')
-      );
-
-      const [{ query }] = executeQueryRows.mock.calls[0];
-      expect(query).toContain('episode.id == "ep-1"');
-      expect(query).toContain('space-a');
     });
 
     it('normalizes null nullable fields via alertEpisodeToEpisodeAttachment', async () => {
@@ -139,12 +141,9 @@ describe('createEpisodeAttachmentType', () => {
         episode_data: null,
         severity: null,
       };
-      executeQueryRows.mockResolvedValueOnce([episodeWithNulls]);
+      getEpisode.mockResolvedValueOnce(episodeWithNulls);
 
-      const result = await definition.resolve!(
-        'ep-1',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-1', createResolveContext());
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -156,136 +155,158 @@ describe('createEpisodeAttachmentType', () => {
       );
     });
 
-    it('normalizes a single-value last_tags into an array', async () => {
-      executeQueryRows.mockResolvedValueOnce([{ ...baseEpisodeData, last_tags: 'urgent' }]);
-
-      const result = await definition.resolve!(
-        'ep-1',
-        createResolveContext()
-      );
-
-      expect(result).toEqual(expect.objectContaining({ last_tags: ['urgent'] }));
-    });
-
     it('returns undefined when the episode does not exist', async () => {
-      executeQueryRows.mockResolvedValueOnce([]);
+      getEpisode.mockResolvedValueOnce(undefined);
 
-      const result = await definition.resolve!(
-        'ep-missing',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-missing', createResolveContext());
 
       expect(result).toBeUndefined();
     });
 
-    it('returns undefined and logs a warning when the query throws', async () => {
-      executeQueryRows.mockRejectedValueOnce(new Error('boom'));
+    it('returns undefined and logs a warning when the client throws', async () => {
+      getEpisode.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await definition.resolve!(
-        'ep-missing',
-        createResolveContext()
-      );
+      const result = await definition.resolve!('ep-missing', createResolveContext());
 
       expect(result).toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to resolve episode attachment for origin "ep-missing"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to resolve episode attachment',
+        expect.objectContaining({
+          labels: {
+            episode_id: 'ep-missing',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
+    });
+
+    it('returns undefined without fetching when user lacks Alerts: Read', async () => {
+      const unauthorizedDefinition = createEpisodeAttachmentType({
+        logger: loggerService,
+        getEpisodesClient: () => ({ get: getEpisode } as unknown as EpisodesClient),
+        getRulesClient: () => ({ getRule } as unknown as RulesClient),
+        getPrivilegeChecker: () => createPrivilegeCheckerMock(false),
+      });
+
+      const result = await unauthorizedDefinition.resolve!('ep-1', createResolveContext());
+
+      expect(result).toBeUndefined();
+      expect(getEpisode).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith('Unauthorized to resolve episode attachment', {
+        labels: { episode_id: 'ep-1', space_id: SPACE_ID },
+      });
+    });
+
+    it('resolves episode data when user has Alerts: Read', async () => {
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
+
+      const result = await definition.resolve!('ep-1', createResolveContext());
+
+      expect(result).toEqual(expect.objectContaining({ 'episode.id': 'ep-1' }));
+      expect(getEpisode).toHaveBeenCalledWith('ep-1');
+      expect(canRead).toHaveBeenCalledWith('alerts');
     });
   });
 
   describe('isStale', () => {
-    it('returns false when origin_snapshot_at is missing', async () => {
-      const attachment = buildVersionedAttachment({ origin_snapshot_at: undefined });
+    it('returns false when origin is missing', async () => {
+      const attachment = buildVersionedAttachment({ origin: undefined });
 
-      const result = await definition.isStale!(
-        attachment,
-        createResolveContext()
-      );
+      const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(false);
-      expect(executeQueryRows).not.toHaveBeenCalled();
+      expect(getEpisode).not.toHaveBeenCalled();
     });
 
-    it('returns false when last_timestamp equals snapshot time', async () => {
-      executeQueryRows.mockResolvedValueOnce([
-        {
-          ...baseEpisodeData,
-          last_timestamp: '2026-04-10T12:00:00.000Z',
-        },
-      ]);
+    it('returns false when the episode does not exist', async () => {
+      getEpisode.mockResolvedValueOnce(undefined);
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
 
-    it('returns false when last_timestamp is before snapshot time', async () => {
-      executeQueryRows.mockResolvedValueOnce([
-        {
-          ...baseEpisodeData,
-          last_timestamp: '2026-04-09T12:00:00.000Z',
-        },
-      ]);
+    it('returns false when live last_timestamp matches latest version', async () => {
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
 
-    it('returns true when last_timestamp is after snapshot AND differs from latest version', async () => {
-      executeQueryRows.mockResolvedValueOnce([
-        {
-          ...baseEpisodeData,
-          last_timestamp: '2026-04-20T12:00:00.000Z',
-        },
-      ]);
+    it('returns true when live last_timestamp differs from latest version', async () => {
+      getEpisode.mockResolvedValueOnce({
+        ...baseEpisodeData,
+        last_timestamp: '2026-04-20T12:00:00.000Z',
+      });
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(true);
     });
 
-    it('returns false when last_timestamp is after snapshot but matches latest version', async () => {
-      const sameTimestamp = '2026-04-15T12:00:00.000Z';
-      executeQueryRows.mockResolvedValueOnce([{ ...baseEpisodeData, last_timestamp: sameTimestamp }]);
+    it('returns true when current_version has no matching version entry', async () => {
+      getEpisode.mockResolvedValueOnce(baseEpisodeData);
       const attachment = buildVersionedAttachment({
+        current_version: 99,
+      });
+
+      const result = await definition.isStale!(attachment, createResolveContext());
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false after a refresh brings the latest version up to date', async () => {
+      const refreshedTimestamp = '2026-04-20T12:00:00.000Z';
+      getEpisode.mockResolvedValueOnce({
+        ...baseEpisodeData,
+        last_timestamp: refreshedTimestamp,
+      });
+      const attachment = buildVersionedAttachment({
+        current_version: 2,
         versions: [
           {
             version: 1,
-            data: { ...baseEpisodeData, last_timestamp: sameTimestamp },
-            created_at: '2026-04-15T12:00:00.000Z',
+            data: baseEpisodeData,
+            created_at: '2026-04-10T12:00:00.000Z',
+          } as never,
+          {
+            version: 2,
+            data: { ...baseEpisodeData, last_timestamp: refreshedTimestamp },
+            created_at: refreshedTimestamp,
           } as never,
         ],
       });
 
-      const result = await definition.isStale!(
-        attachment,
-        createResolveContext()
-      );
+      const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(false);
     });
 
-    it('returns false and logs a warning when the query throws', async () => {
-      executeQueryRows.mockRejectedValueOnce(new Error('boom'));
+    it('returns false and logs a warning when the client throws', async () => {
+      getEpisode.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        createResolveContext()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to check staleness for episode attachment "ep-1"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to check episode attachment staleness',
+        expect.objectContaining({
+          labels: {
+            episode_id: 'ep-1',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
     });
   });
@@ -320,13 +341,46 @@ describe('createEpisodeAttachmentType', () => {
       expect(value).toContain('Severity: high');
       expect(value).toContain('Tags: ops');
     });
+
+    it('mentions the attachment-scoped refresh and get_rule tools', async () => {
+      const value = await formatValue(baseEpisodeData);
+      expect(value).toContain(refreshEpisodeToolId('attach-1'));
+      expect(value).toContain(getRuleToolId('attach-1'));
+      expect(value).toContain('rule-management');
+    });
+
+    it('exposes refresh_episode and get_rule bounded tools unique to the attachment', async () => {
+      const formatted = await definition.format(buildAttachment(baseEpisodeData), {
+        request: {} as KibanaRequest,
+        spaceId: 'default',
+      });
+      expect(formatted.getBoundedTools).toBeDefined();
+      const tools = await formatted.getBoundedTools!();
+      expect(tools).toHaveLength(2);
+      expect(tools[0]).toEqual(
+        expect.objectContaining({
+          id: refreshEpisodeToolId('attach-1'),
+          description: expect.stringContaining('ep-1'),
+        })
+      );
+      expect(tools[1]).toEqual(
+        expect.objectContaining({
+          id: getRuleToolId('attach-1'),
+          description: expect.stringContaining('rule-1'),
+        })
+      );
+      expect(tools[1].description).toContain('rule-management');
+    });
   });
 
   describe('getAgentDescription', () => {
-    it('describes read-only episode context', () => {
+    it('describes read-only episode context, bounded tools, and rule-management skill', () => {
       const description = definition.getAgentDescription!();
       expect(description).toContain('alert episode');
       expect(description).toContain('read-only');
+      expect(description).toContain('refresh_episode');
+      expect(description).toContain('get_rule');
+      expect(description).toContain('rule-management');
     });
   });
 

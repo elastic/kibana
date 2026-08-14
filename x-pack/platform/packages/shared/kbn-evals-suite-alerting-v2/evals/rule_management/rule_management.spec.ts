@@ -92,8 +92,8 @@ evaluate.describe(
                 input: {
                   turns: [
                     CREATE_WITH_AGENT_INITIAL_PROMPT,
-                    `Average system.cpu.total.norm.pct on ${hostMetricsIndex} — alert me when it ` +
-                      'stays above 0.9 for 5 minutes, grouped by host.name.',
+                    `Average system.cpu.total.norm.pct on ${hostMetricsIndex} — create an alert rule that fires when it ` +
+                      'stays above 0.9 for 5 minutes, grouped by host.name. Check every 1 minute.',
                   ],
                 },
                 output: {
@@ -164,6 +164,42 @@ evaluate.describe(
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql).toContain(hostMetricsIndex);
                     expect(esql).toContain('system.cpu.total.norm.pct');
+                  },
+                },
+              },
+              {
+                input: {
+                  turns: [
+                    `Create alert rule on ${hostMetricsIndex} with severity critical that fires when average ` +
+                      'system.cpu.total.norm.pct exceeds 0.95, grouped by host.name.',
+                  ],
+                },
+                output: {
+                  criteria: [
+                    'The breach ES|QL query includes a `severity` column (e.g. via EVAL severity = "critical") to set the alert severity.',
+                    'The query filters for average system.cpu.total.norm.pct above 0.95 (or an equivalent threshold expression).',
+                    'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                    'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
+                  ],
+                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
+                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                  expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                  expectAttachmentData: (attachments) => {
+                    const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                      attachments,
+                      RULE_ATTACHMENT_TYPE
+                    );
+                    expect(attachment).toBeDefined();
+                    expect(attachment!.kind).toEqual('alert');
+                    expect(attachment!.grouping?.fields).toEqual(
+                      expect.arrayContaining(['host.name'])
+                    );
+                    const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                    expect(esql).toContain(hostMetricsIndex);
+                    expect(esql).toContain('system.cpu.total.norm.pct');
+                    expect(esql.toLowerCase()).toContain('severity');
+                    expect(esql.toLowerCase()).toContain('critical');
                   },
                 },
               },
