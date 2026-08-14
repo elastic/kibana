@@ -12,7 +12,8 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
 import type { StorageClientBulkRequest, StorageTransportOptions } from '../..';
-import { StorageIndexAdapter, type StorageSettings } from '../..';
+import { getSchemaVersion, StorageIndexAdapter, type StorageSettings } from '../..';
+import type { ResolvedComponentTemplateDependency } from '../get_schema_version';
 
 const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
@@ -31,6 +32,16 @@ const storageSettings = {
     properties: {
       foo: { type: 'keyword' as const },
     },
+  },
+} satisfies StorageSettings;
+
+const composedStorageSettings = {
+  ...storageSettings,
+  priority: 600,
+  componentTemplate: {
+    name: 'test_index@mappings',
+    required: ['shared@mappings'],
+    optional: ['test_index@custom'],
   },
 } satisfies StorageSettings;
 
@@ -54,6 +65,20 @@ const createMockEsClient = () => {
       took: 1,
     }),
     delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    cluster: {
+      putComponentTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+      getComponentTemplate: jest.fn().mockResolvedValue({
+        component_templates: [
+          {
+            name: 'test_index@mappings',
+            component_template: {
+              template: {},
+            },
+          },
+        ],
+      }),
+      deleteComponentTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+    },
     indices: {
       putIndexTemplate: jest.fn().mockResolvedValue({}),
       getIndexTemplate: jest.fn().mockResolvedValue({
@@ -100,6 +125,107 @@ const addEsqlQueryMock = (client: jest.Mocked<ElasticsearchClient>, query: jest.
   (client as unknown as EsqlQueryMock).esql = { query };
 };
 
+const requiredDependencyV1 = {
+  name: 'shared@mappings',
+  componentTemplate: {
+    version: 1,
+    template: {
+      mappings: {
+        properties: {
+          shared: { type: 'keyword' },
+        },
+      },
+    },
+  },
+} satisfies ResolvedComponentTemplateDependency;
+
+const requiredDependencyV2 = {
+  name: 'shared@mappings',
+  componentTemplate: {
+    version: 2,
+    template: {
+      mappings: {
+        properties: {
+          shared: { type: 'keyword' },
+          sharedV2: { type: 'keyword' },
+        },
+      },
+    },
+  },
+} satisfies ResolvedComponentTemplateDependency;
+
+const missingOptionalDependency = {
+  name: 'test_index@custom',
+} satisfies ResolvedComponentTemplateDependency;
+
+const presentOptionalDependency = {
+  name: 'test_index@custom',
+  componentTemplate: {
+    version: 1,
+    template: {
+      mappings: {
+        properties: {
+          optional: { type: 'keyword' },
+        },
+      },
+    },
+  },
+} satisfies ResolvedComponentTemplateDependency;
+
+describe('getSchemaVersion', () => {
+  it('preserves the historical hash when component composition is not configured', () => {
+    expect(getSchemaVersion(storageSettings)).toBe('f18ba576ba6e6125d9b6d5009d67d6c0964eea8e');
+  });
+
+  it('includes every component composition field in the version', () => {
+    const composedVersion = getSchemaVersion(composedStorageSettings);
+
+    expect(
+      getSchemaVersion({
+        ...composedStorageSettings,
+        componentTemplate: {
+          ...composedStorageSettings.componentTemplate,
+          name: 'test_index@other-mappings',
+        },
+      })
+    ).not.toBe(composedVersion);
+    expect(
+      getSchemaVersion({
+        ...composedStorageSettings,
+        componentTemplate: {
+          ...composedStorageSettings.componentTemplate,
+          required: ['other-shared@mappings'],
+        },
+      })
+    ).not.toBe(composedVersion);
+    expect(
+      getSchemaVersion({
+        ...composedStorageSettings,
+        componentTemplate: {
+          ...composedStorageSettings.componentTemplate,
+          optional: ['test_index@other-custom'],
+        },
+      })
+    ).not.toBe(composedVersion);
+  });
+
+  it('includes required component template version and content in the composed version', () => {
+    expect(
+      getSchemaVersion(composedStorageSettings, [requiredDependencyV1, missingOptionalDependency])
+    ).not.toBe(
+      getSchemaVersion(composedStorageSettings, [requiredDependencyV2, missingOptionalDependency])
+    );
+  });
+
+  it('distinguishes a missing optional component from a present component', () => {
+    expect(
+      getSchemaVersion(composedStorageSettings, [requiredDependencyV2, missingOptionalDependency])
+    ).not.toBe(
+      getSchemaVersion(composedStorageSettings, [requiredDependencyV2, presentOptionalDependency])
+    );
+  });
+});
+
 describe('StorageIndexAdapter - transport options forwarding', () => {
   let esClient: jest.Mocked<ElasticsearchClient>;
   let loggerMock: jest.Mocked<Logger>;
@@ -111,6 +237,10 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
   beforeEach(() => {
     esClient = createMockEsClient();
     loggerMock = createLoggerMock();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('forwards transport options to esClient.search', async () => {
@@ -242,6 +372,622 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
         }),
       })
     );
+  });
+
+  it('keeps schema mappings inline when component template composition is not configured', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: false,
+    });
+
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+    expect(esClient.cluster.getComponentTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          mappings: {
+            _meta: { version: expect.any(String) },
+            dynamic: 'strict',
+            properties: {
+              foo: { type: 'keyword' },
+            },
+          },
+        }),
+      })
+    );
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        composed_of: expect.anything(),
+        ignore_missing_component_templates: expect.anything(),
+      })
+    );
+  });
+
+  it('installs the generated component template before the composed index template', async () => {
+    const indexManagementClient = createMockEsClient();
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(indexManagementClient.cluster.putComponentTemplate).toHaveBeenCalledWith({
+      name: 'test_index@mappings',
+      create: false,
+      template: {
+        mappings: {
+          _meta: { version: expect.any(String) },
+          dynamic: 'strict',
+          properties: {
+            foo: { type: 'keyword' },
+          },
+        },
+      },
+    });
+    expect(indexManagementClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        priority: 600,
+        composed_of: ['shared@mappings', 'test_index@mappings', 'test_index@custom'],
+        ignore_missing_component_templates: ['test_index@custom'],
+        template: expect.objectContaining({
+          aliases: {
+            test_index: {
+              is_write_index: true,
+            },
+          },
+          mappings: {
+            _meta: { version: expect.any(String) },
+          },
+          settings: expect.objectContaining({
+            auto_expand_replicas: '0-1',
+            number_of_shards: 1,
+          }),
+        }),
+      })
+    );
+    expect(
+      (indexManagementClient.cluster.putComponentTemplate as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan(
+      (indexManagementClient.indices.putIndexTemplate as jest.Mock).mock.invocationCallOrder[0]
+    );
+  });
+
+  it('uses the management client for composed template management and simulation only', async () => {
+    const indexManagementClient = createMockEsClient();
+    (esClient.indices.get as jest.Mock).mockResolvedValueOnce({
+      'test_index-000001': {
+        mappings: { _meta: { version: 'outdated' } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    (indexManagementClient.indices.simulateIndexTemplate as jest.Mock).mockResolvedValueOnce({
+      template: {
+        mappings: {
+          _meta: { version: 'next' },
+          dynamic: 'strict',
+          properties: {
+            shared: { type: 'keyword' },
+            foo: { type: 'keyword' },
+          },
+        },
+      },
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(indexManagementClient.cluster.putComponentTemplate).toHaveBeenCalled();
+    expect(indexManagementClient.indices.putIndexTemplate).toHaveBeenCalled();
+    expect(indexManagementClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+    expect(esClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: 'test_index-000001',
+      _meta: { version: 'next' },
+      dynamic: 'strict',
+      properties: {
+        shared: { type: 'keyword' },
+        foo: { type: 'keyword' },
+      },
+    });
+    expect(esClient.index).toHaveBeenCalled();
+    expect(indexManagementClient.index).not.toHaveBeenCalled();
+  });
+
+  it('reconciles an existing legacy-version index when composition is enabled', async () => {
+    const legacyVersion = getSchemaVersion(storageSettings);
+    const composedVersion = getSchemaVersion(composedStorageSettings);
+    const indexManagementClient = createMockEsClient();
+    (esClient.indices.get as jest.Mock).mockResolvedValueOnce({
+      'test_index-000001': {
+        mappings: { _meta: { version: legacyVersion } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    (indexManagementClient.indices.simulateIndexTemplate as jest.Mock).mockResolvedValueOnce({
+      template: {
+        mappings: {
+          _meta: { version: composedVersion },
+          dynamic: 'strict',
+          properties: {
+            shared: { type: 'keyword' },
+            foo: { type: 'keyword' },
+          },
+        },
+      },
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+
+    await adapter
+      .getClient()
+      .search({ track_total_hits: false, size: 10, query: { match_all: {} } });
+
+    expect(indexManagementClient.cluster.putComponentTemplate).toHaveBeenCalled();
+    expect(indexManagementClient.indices.putIndexTemplate).toHaveBeenCalled();
+    expect(indexManagementClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'test_index-000001',
+        properties: {
+          shared: { type: 'keyword' },
+          foo: { type: 'keyword' },
+        },
+      })
+    );
+  });
+
+  it('reconciles dependency changes with one deduplicated lookup per dependency', async () => {
+    const existingVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV1,
+      missingOptionalDependency,
+    ]);
+    const expectedVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      missingOptionalDependency,
+    ]);
+    const indexManagementClient = createMockEsClient();
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockImplementation(
+      ({ name }) =>
+        Promise.resolve({
+          component_templates:
+            name === requiredDependencyV2.name
+              ? [
+                  {
+                    name: requiredDependencyV2.name,
+                    component_template: requiredDependencyV2.componentTemplate,
+                  },
+                ]
+              : [],
+        })
+    );
+    (indexManagementClient.indices.simulateIndexTemplate as jest.Mock).mockResolvedValue({
+      template: {
+        mappings: {
+          _meta: { version: expectedVersion },
+          dynamic: 'strict',
+          properties: {
+            shared: { type: 'keyword' },
+            sharedV2: { type: 'keyword' },
+            foo: { type: 'keyword' },
+          },
+        },
+      },
+    });
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: existingVersion } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+    const client = adapter.getClient();
+
+    await Promise.all([
+      client.search({ track_total_hits: false, size: 10, query: { match_all: {} } }),
+      client.search({ track_total_hits: false, size: 10, query: { match_all: {} } }),
+    ]);
+
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledTimes(2);
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledWith({
+      name: 'shared@mappings',
+    });
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledWith({
+      name: 'test_index@custom',
+    });
+    expect(indexManagementClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'test_index-000001',
+        _meta: { version: expectedVersion },
+      })
+    );
+  });
+
+  it('reconciles when an optional dependency appears', async () => {
+    const existingVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      missingOptionalDependency,
+    ]);
+    const expectedVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      presentOptionalDependency,
+    ]);
+    const indexManagementClient = createMockEsClient();
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockResolvedValue({
+      component_templates: [
+        {
+          name: requiredDependencyV2.name,
+          component_template: requiredDependencyV2.componentTemplate,
+        },
+        {
+          name: presentOptionalDependency.name,
+          component_template: presentOptionalDependency.componentTemplate,
+        },
+      ],
+    });
+    (indexManagementClient.indices.simulateIndexTemplate as jest.Mock).mockResolvedValue({
+      template: {
+        mappings: {
+          _meta: { version: expectedVersion },
+          dynamic: 'strict',
+          properties: {
+            shared: { type: 'keyword' },
+            sharedV2: { type: 'keyword' },
+            foo: { type: 'keyword' },
+            optional: { type: 'keyword' },
+          },
+        },
+      },
+    });
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: existingVersion } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+
+    await adapter
+      .getClient()
+      .search({ track_total_hits: false, size: 10, query: { match_all: {} } });
+
+    expect(indexManagementClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _meta: { version: expectedVersion },
+        properties: expect.objectContaining({
+          optional: { type: 'keyword' },
+        }),
+      })
+    );
+  });
+
+  it('does not simulate when the resolved dependency version matches the existing index', async () => {
+    const expectedVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      missingOptionalDependency,
+    ]);
+    const indexManagementClient = createMockEsClient();
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockImplementation(
+      ({ name }) =>
+        Promise.resolve({
+          component_templates:
+            name === requiredDependencyV2.name
+              ? [
+                  {
+                    name: requiredDependencyV2.name,
+                    component_template: requiredDependencyV2.componentTemplate,
+                  },
+                ]
+              : [],
+        })
+    );
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: expectedVersion } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+
+    await adapter
+      .getClient()
+      .search({ track_total_hits: false, size: 10, query: { match_all: {} } });
+
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledTimes(2);
+    expect(indexManagementClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('shares concurrent dependency resolution and mapping checks across adapters', async () => {
+    const expectedVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      missingOptionalDependency,
+    ]);
+    const indexManagementClient = createMockEsClient();
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockImplementation(
+      ({ name }) =>
+        Promise.resolve({
+          component_templates:
+            name === requiredDependencyV2.name
+              ? [
+                  {
+                    name: requiredDependencyV2.name,
+                    component_template: requiredDependencyV2.componentTemplate,
+                  },
+                ]
+              : [],
+        })
+    );
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: expectedVersion } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    const firstClient = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    }).getClient();
+    const secondClient = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    }).getClient();
+
+    await Promise.all([
+      firstClient.search({ track_total_hits: false, size: 10, query: { match_all: {} } }),
+      secondClient.search({ track_total_hits: false, size: 10, query: { match_all: {} } }),
+    ]);
+
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.get).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.getAlias).toHaveBeenCalledTimes(1);
+    expect(indexManagementClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('reuses dependency and mapping checks until TTL expiry, then detects optional appearance', async () => {
+    const missingOptionalVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      missingOptionalDependency,
+    ]);
+    const presentOptionalVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      presentOptionalDependency,
+    ]);
+    let now = 1_000;
+    let optionalPresent = false;
+    jest.spyOn(Date, 'now').mockImplementation(() => now);
+    const indexManagementClient = createMockEsClient();
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockImplementation(
+      ({ name }) =>
+        Promise.resolve({
+          component_templates:
+            name === requiredDependencyV2.name
+              ? [
+                  {
+                    name: requiredDependencyV2.name,
+                    component_template: requiredDependencyV2.componentTemplate,
+                  },
+                ]
+              : optionalPresent
+              ? [
+                  {
+                    name: presentOptionalDependency.name,
+                    component_template: presentOptionalDependency.componentTemplate,
+                  },
+                ]
+              : [],
+        })
+    );
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: missingOptionalVersion } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    (indexManagementClient.indices.simulateIndexTemplate as jest.Mock).mockResolvedValue({
+      template: {
+        mappings: {
+          _meta: { version: presentOptionalVersion },
+          dynamic: 'strict',
+          properties: {
+            shared: { type: 'keyword' },
+            sharedV2: { type: 'keyword' },
+            foo: { type: 'keyword' },
+            optional: { type: 'keyword' },
+          },
+        },
+      },
+    });
+    const createClient = () =>
+      new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+        indexManagementClient,
+        isServerless: false,
+      }).getClient();
+
+    await createClient().search({
+      track_total_hits: false,
+      size: 10,
+      query: { match_all: {} },
+    });
+    optionalPresent = true;
+    now += 29_999;
+    await createClient().search({
+      track_total_hits: false,
+      size: 10,
+      query: { match_all: {} },
+    });
+
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.get).toHaveBeenCalledTimes(1);
+    expect(indexManagementClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+
+    now += 2;
+    await createClient().search({
+      track_total_hits: false,
+      size: 10,
+      query: { match_all: {} },
+    });
+
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledTimes(4);
+    expect(esClient.indices.get).toHaveBeenCalledTimes(2);
+    expect(indexManagementClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _meta: { version: presentOptionalVersion },
+        properties: expect.objectContaining({
+          optional: { type: 'keyword' },
+        }),
+      })
+    );
+  });
+
+  it('evicts failed shared dependency resolutions so later adapters can retry', async () => {
+    const expectedVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV2,
+      missingOptionalDependency,
+    ]);
+    const indexManagementClient = createMockEsClient();
+    let rejectRequired = true;
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockImplementation(
+      ({ name }) => {
+        if (name === requiredDependencyV2.name && rejectRequired) {
+          rejectRequired = false;
+          return Promise.reject(new Error('dependency lookup failed'));
+        }
+        return Promise.resolve({
+          component_templates:
+            name === requiredDependencyV2.name
+              ? [
+                  {
+                    name: requiredDependencyV2.name,
+                    component_template: requiredDependencyV2.componentTemplate,
+                  },
+                ]
+              : [],
+        });
+      }
+    );
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: expectedVersion } },
+        aliases: { test_index: { is_write_index: true } },
+      },
+    });
+    const createClient = () =>
+      new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+        indexManagementClient,
+        isServerless: false,
+      }).getClient();
+
+    const failedResults = await Promise.allSettled([
+      createClient().search({ track_total_hits: false, size: 10, query: { match_all: {} } }),
+      createClient().search({ track_total_hits: false, size: 10, query: { match_all: {} } }),
+    ]);
+
+    expect(failedResults.map(({ status }) => status)).toEqual(['rejected', 'rejected']);
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledTimes(2);
+
+    await expect(
+      createClient().search({ track_total_hits: false, size: 10, query: { match_all: {} } })
+    ).resolves.toBeDefined();
+    expect(indexManagementClient.cluster.getComponentTemplate).toHaveBeenCalledTimes(4);
+  });
+
+  it('cleans only the plugin-owned component template and remains idempotent', async () => {
+    const indexManagementClient = createMockEsClient();
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+    const client = adapter.getClient();
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    (esClient.indices.get as jest.Mock).mockReset();
+    (esClient.indices.get as jest.Mock)
+      .mockResolvedValueOnce({
+        'test_index-000001': {
+          mappings: { _meta: { version: 'current' } },
+          aliases: { test_index: { is_write_index: true } },
+        },
+      })
+      .mockResolvedValue({});
+    (indexManagementClient.indices.getIndexTemplate as jest.Mock).mockReset();
+    (indexManagementClient.indices.getIndexTemplate as jest.Mock)
+      .mockResolvedValueOnce({
+        index_templates: [{ index_template: { _meta: { version: 'current' } } }],
+      })
+      .mockResolvedValue({ index_templates: [] });
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockReset();
+    (indexManagementClient.cluster.getComponentTemplate as jest.Mock)
+      .mockResolvedValueOnce({
+        component_templates: [
+          {
+            name: 'test_index@mappings',
+            component_template: { template: {} },
+          },
+        ],
+      })
+      .mockResolvedValue({ component_templates: [] });
+
+    await expect(client.clean()).resolves.toEqual({ acknowledged: true, result: 'deleted' });
+    await expect(client.clean()).resolves.toEqual({ acknowledged: true, result: 'noop' });
+
+    expect(indexManagementClient.cluster.deleteComponentTemplate).toHaveBeenCalledTimes(1);
+    expect(indexManagementClient.cluster.deleteComponentTemplate).toHaveBeenCalledWith({
+      name: 'test_index@mappings',
+    });
+    expect(indexManagementClient.cluster.deleteComponentTemplate).not.toHaveBeenCalledWith({
+      name: 'shared@mappings',
+    });
+    expect(indexManagementClient.cluster.deleteComponentTemplate).not.toHaveBeenCalledWith({
+      name: 'test_index@custom',
+    });
+    expect(
+      (indexManagementClient.indices.deleteIndexTemplate as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan(
+      (indexManagementClient.cluster.deleteComponentTemplate as jest.Mock).mock
+        .invocationCallOrder[0]
+    );
+  });
+
+  it('propagates a missing required component template installation failure', async () => {
+    const indexManagementClient = createMockEsClient();
+    const missingRequiredError = new Error(
+      'index_template [test_index] invalid, cause [component template [shared@mappings] does not exist]'
+    );
+    (indexManagementClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(
+      missingRequiredError
+    );
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
+      indexManagementClient,
+      isServerless: false,
+    });
+
+    await expect(adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } })).rejects.toBe(
+      missingRequiredError
+    );
+
+    expect(indexManagementClient.cluster.putComponentTemplate).toHaveBeenCalled();
+    expect(esClient.index).not.toHaveBeenCalled();
   });
 
   it('uses a separate index management client for template operations', async () => {

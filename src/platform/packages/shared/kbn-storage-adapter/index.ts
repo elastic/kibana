@@ -45,9 +45,19 @@ interface StorageSettingsBase {
   schema: StorageSchema;
 }
 
+export interface IndexStorageComponentTemplateSettings {
+  /** Cluster-unique component template owned by this storage adapter consumer. */
+  name: string;
+  /** Existing component templates that must be composed before the owned template. */
+  required?: readonly string[];
+  /** Optional component templates composed after the owned template. */
+  optional?: readonly string[];
+}
+
 export interface IndexStorageSettings extends StorageSettingsBase {
   name: string;
   priority?: number;
+  componentTemplate?: IndexStorageComponentTemplateSettings;
 }
 
 export type StorageSettings = IndexStorageSettings;
