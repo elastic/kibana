@@ -308,6 +308,7 @@ export class BlocklistValidator extends BaseValidator {
 
   private async validateBlocklistData(item: ExceptionItemLikeOptions): Promise<void> {
     await this.validateBasicData(item);
+    await this.validateEntryValueCharacters(item);
 
     try {
       BlocklistDataSchema.validate(item, { os: item.osTypes[0] });

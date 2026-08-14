@@ -47,8 +47,12 @@ const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
 export interface ConditionGroupProps {
   os: OperatingSystem;
   entries: TrustedAppConditionEntry[];
+  /** Validation messages for each entry, indexed by the entry's position in `entries` */
+  entryValidations?: Array<ConditionEntryInputProps['validation']>;
   onEntryRemove: ConditionEntryInputProps['onRemove'];
   onEntryChange: ConditionEntryInputProps['onChange'];
+  /** called when an entry value had invisible leading/trailing whitespace stripped from it */
+  onEntryValueTrimmed?: ConditionEntryInputProps['onValueTrimmed'];
   onAndClicked: () => void;
   isAndDisabled?: boolean;
   /** called when any of the entries is visited (triggered via `onBlur` DOM event) */
@@ -59,8 +63,10 @@ export const ConditionGroup = memo<ConditionGroupProps>(
   ({
     os,
     entries,
+    entryValidations,
     onEntryRemove,
     onEntryChange,
+    onEntryValueTrimmed,
     onAndClicked,
     isAndDisabled,
     onVisited,
@@ -88,10 +94,12 @@ export const ConditionGroup = memo<ConditionGroupProps>(
                 key={index}
                 os={os}
                 entry={entry}
+                validation={entryValidations?.[index]}
                 showLabels={index === 0}
                 isRemoveDisabled={index === 0 && entries.length <= 1}
                 onRemove={onEntryRemove}
                 onChange={onEntryChange}
+                onValueTrimmed={onEntryValueTrimmed}
                 onVisited={onVisited}
                 data-test-subj={getTestId(`entry${index}`)}
               />

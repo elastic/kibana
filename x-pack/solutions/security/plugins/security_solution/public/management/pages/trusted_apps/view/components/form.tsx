@@ -10,6 +10,7 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,8 +36,10 @@ import {
 import {
   hasSimpleExecutableName,
   validateHasWildcardWithWrongOperator,
+  getInvisibleCharacterIssue,
   isPathValid,
   ConditionEntryField,
+  InvisibleCharacterIssue,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
@@ -80,6 +83,7 @@ import {
   SELECT_OS_LABEL,
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
+  WHITESPACE_TRIMMED_NOTICE,
   TRUSTED_APPS_PROCESS_DESCENDANTS,
   TRUSTED_APPLICATIONS,
   TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS,
@@ -128,8 +132,23 @@ interface ValidationResult {
     [key in keyof NewTrustedApp]: FieldValidationState;
   }>;
 
+  /**
+   * Per-condition-entry validation state, indexed by the entry's position in `entries`.
+   *
+   * Messages that are about one specific entry live here rather than on `result.entries` so that
+   * they can be rendered by the offending input itself, instead of as detached text below the
+   * whole condition group where they are easily missed.
+   */
+  entryValidations: EntryValidationState[];
+
   /**  Additional Warning callout after submit */
   extraWarning?: boolean;
+}
+
+export interface EntryValidationState {
+  isInvalid: boolean;
+  errors: React.ReactNode[];
+  warnings: React.ReactNode[];
 }
 
 const addResultToValidation = (
@@ -159,11 +178,44 @@ const addResultToValidation = (
   validation.result[field]!.isInvalid = true;
 };
 
+/**
+ * Records a message against a single condition entry so it can be rendered inline, by that entry's
+ * own input. The condition group as a whole is still flagged as invalid so that the surrounding
+ * form row keeps its error state.
+ */
+const addEntryResultToValidation = (
+  validation: ValidationResult,
+  index: number,
+  type: 'warnings' | 'errors',
+  resultValue: React.ReactNode
+) => {
+  if (!validation.entryValidations[index]) {
+    validation.entryValidations[index] = {
+      isInvalid: false,
+      errors: [],
+      warnings: [],
+    };
+  }
+
+  validation.entryValidations[index][type].push(resultValue);
+  validation.entryValidations[index].isInvalid = true;
+
+  if (!validation.result.entries) {
+    validation.result.entries = {
+      isInvalid: false,
+      errors: [],
+      warnings: [],
+    };
+  }
+  validation.result.entries.isInvalid = true;
+};
+
 export const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
   let isValid: ValidationResult['isValid'] = true;
   const validation: ValidationResult = {
     isValid,
     result: {},
+    entryValidations: [],
   };
   let extraWarning: ValidationResult['extraWarning'];
 
@@ -206,65 +258,91 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
       });
     }
     values.entries.forEach((entry, index) => {
+      const entryValue = (entry as TrustedAppConditionEntry).value;
       const isValidPathEntry = isPathValid({
         os,
         field: entry.field as AllConditionEntryFields,
         type: entry.type as EntryTypes,
-        value: (entry as TrustedAppConditionEntry).value,
+        value: entryValue,
       });
 
       if (
         validateHasWildcardWithWrongOperator({
           operator: entry.type as EntryTypes,
-          value: (entry as TrustedAppConditionEntry).value,
+          value: entryValue,
         })
       ) {
         if (entry.field === ConditionEntryField.PATH) {
           extraWarning = true;
-          addResultToValidation(
+          addEntryResultToValidation(
             validation,
-            'entries',
+            index,
             'warnings',
             INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
           );
         } else {
-          addResultToValidation(
+          addEntryResultToValidation(
             validation,
-            'entries',
+            index,
             'warnings',
             INPUT_ERRORS.wildcardWithWrongField(index)
           );
         }
       }
 
-      if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
+      // Invisible corruption. Checked before the plausibility checks below because those all operate
+      // on the value as-is and would otherwise report a confusing "path may be formed incorrectly"
+      // for a value that looks perfectly correct on screen.
+      const invisibleCharacterIssue = getInvisibleCharacterIssue(entryValue);
+
+      if (!entry.field || !entryValue.trim()) {
         isValid = false;
-        addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.mustHaveValue(index));
-      } else if (
-        entry.field === ConditionEntryField.HASH &&
-        !isValidHash((entry as TrustedAppConditionEntry).value)
-      ) {
+        addEntryResultToValidation(validation, index, 'errors', INPUT_ERRORS.mustHaveValue(index));
+      } else if (invisibleCharacterIssue === InvisibleCharacterIssue.CONTROL_CHARACTERS) {
+        // Not auto-fixable, and an entry containing control characters can never match - hard error.
         isValid = false;
-        addResultToValidation(validation, 'entries', 'errors', INPUT_ERRORS.invalidHash(index));
+        addEntryResultToValidation(
+          validation,
+          index,
+          'errors',
+          INPUT_ERRORS.controlCharacters(index)
+        );
+      } else if (invisibleCharacterIssue === InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE) {
+        // Auto-trimmed when the field is left (see `ConditionEntryInput`), so this is only reachable
+        // for values that have not been visited yet - report it rather than let it save silently.
+        addEntryResultToValidation(
+          validation,
+          index,
+          'warnings',
+          INPUT_ERRORS.leadingTrailingWhitespace(index)
+        );
+      } else if (entry.field === ConditionEntryField.HASH && !isValidHash(entryValue)) {
+        isValid = false;
+        addEntryResultToValidation(validation, index, 'errors', INPUT_ERRORS.invalidHash(index));
       } else if (!isValidPathEntry) {
-        addResultToValidation(validation, 'entries', 'warnings', INPUT_ERRORS.pathWarning(index));
+        addEntryResultToValidation(validation, index, 'warnings', INPUT_ERRORS.pathWarning(index));
       } else if (
         isValidPathEntry &&
         !hasSimpleExecutableName({
           os,
-          value: (entry as TrustedAppConditionEntry).value,
+          value: entryValue,
           type: entry.type as EntryTypes,
         })
       ) {
         if (entry.type === 'wildcard') {
-          addResultToValidation(
+          addEntryResultToValidation(
             validation,
-            'entries',
+            index,
             'warnings',
             INPUT_ERRORS.wildcardPathWarning(index)
           );
         } else {
-          addResultToValidation(validation, 'entries', 'warnings', INPUT_ERRORS.pathWarning(index));
+          addEntryResultToValidation(
+            validation,
+            index,
+            'warnings',
+            INPUT_ERRORS.pathWarning(index)
+          );
         }
       }
     });
@@ -308,6 +386,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       }>
     >({});
     const [hasFormChanged, setHasFormChanged] = useState(false);
+    /** Set once a condition value has had invisible leading/trailing whitespace stripped for the user */
+    const [wasWhitespaceTrimmed, setWasWhitespaceTrimmed] = useState(false);
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
     const { getTagsUpdatedBy, getMultipleTagsUpdatedBy } = useGetUpdatedTags(item);
@@ -576,6 +656,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       },
       [item, processChanged]
     );
+
+    const handleEntryValueTrimmed = useCallback(() => {
+      setWasWhitespaceTrimmed(true);
+    }, []);
 
     const handleEntryRemove = useCallback(
       (entry: NewTrustedApp['entries'][0]) => {
@@ -932,12 +1016,24 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isProcessDescendantsFeatureForTrustedAppsEnabled &&
           filterTypeSubsection}
 
+        {wasWhitespaceTrimmed && (
+          <>
+            <EuiCallOut
+              size="s"
+              iconType="info"
+              color="primary"
+              data-test-subj={getTestId('whitespaceTrimmedCallout')}
+              title={WHITESPACE_TRIMMED_NOTICE}
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
+
         <EuiFormRow
           fullWidth
           data-test-subj={getTestId('conditionsRow')}
           isInvalid={visited.entries && validationResult.result.entries?.isInvalid}
           error={validationResult.result.entries?.errors}
-          helpText={validationResult.result.entries?.warnings}
         >
           {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode ? (
             <>
@@ -950,10 +1046,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           ) : (
             <LogicalConditionBuilder
               entries={trustedApp.entries as NewTrustedApp['entries']}
+              entryValidations={validationResult.entryValidations}
               os={selectedOs}
               onAndClicked={handleAndClick}
               onEntryRemove={handleEntryRemove}
               onEntryChange={handleEntryChange}
+              onEntryValueTrimmed={handleEntryValueTrimmed}
               onVisited={handleConditionBuilderOnVisited}
               data-test-subj={getTestId('conditionsBuilder')}
             />

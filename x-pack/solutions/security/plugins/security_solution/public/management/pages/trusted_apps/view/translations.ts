@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import {
+  CONTROL_CHARACTERS_ERROR,
+  ConditionEntryField,
+  LEADING_TRAILING_WHITESPACE_WARNING,
+} from '@kbn/securitysolution-utils';
 import type {
   LinuxConditionEntry,
   WindowsConditionEntry,
@@ -218,4 +222,22 @@ export const INPUT_ERRORS = {
       defaultMessage: `[{row}] Wildcards (? or *) are not supported for hash or signature entries.`,
       values: { row: index + 1 },
     }),
+  leadingTrailingWhitespace: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionWhitespaceMsg', {
+      defaultMessage: `[{row}] {message}`,
+      values: { row: index + 1, message: LEADING_TRAILING_WHITESPACE_WARNING },
+    }),
+  controlCharacters: (index: number) =>
+    i18n.translate('xpack.securitySolution.trustedapps.create.conditionControlCharactersMsg', {
+      defaultMessage: `[{row}] {message}`,
+      values: { row: index + 1, message: CONTROL_CHARACTERS_ERROR },
+    }),
 };
+
+export const WHITESPACE_TRIMMED_NOTICE = i18n.translate(
+  'xpack.securitySolution.trustedapps.create.whitespaceTrimmedNotice',
+  {
+    defaultMessage:
+      'Leading or trailing whitespace was removed from a condition value. Whitespace is invisible in this form but is part of the value, and would have stopped the entry from matching.',
+  }
+);

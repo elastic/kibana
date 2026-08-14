@@ -141,6 +141,85 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     );
   });
 
+  describe('and validating entry value characters', () => {
+    const itemWithEntryValue = (value: string | string[]): ExceptionItemLikeOptions => {
+      const type = Array.isArray(value) ? 'match_any' : 'match';
+
+      return createExceptionItemLikeOptionsMock({
+        entries: [
+          {
+            field: 'process.executable.caseless',
+            operator: 'included',
+            type,
+            value,
+          } as ExceptionItemLikeOptions['entries'][number],
+        ],
+      });
+    };
+
+    it.each([
+      ['a clean windows path', 'C:\\Windows\\notepad.exe'],
+      ['a clean unix path', '/usr/bin/ssh'],
+      ['a path containing interior spaces', 'C:\\Program Files\\app.exe'],
+    ])('should accept %s', async (_, value) => {
+      await expect(
+        initValidator()._validateEntryValueCharacters(itemWithEntryValue(value))
+      ).resolves.toBeUndefined();
+    });
+
+    it.each([
+      ['leading whitespace', ' C:\\Windows\\notepad.exe'],
+      ['a leading tab', '\tC:\\Windows\\notepad.exe'],
+      ['trailing whitespace', '/usr/bin/ssh  '],
+      ['a trailing newline', '/usr/bin/ssh\n'],
+      ['an embedded control character', 'C:\\Windows\\note\tpad.exe'],
+      ['an embedded NUL', '/usr/bin/s\u0000sh'],
+    ])('should reject a value with %s', async (_, value) => {
+      await expect(
+        initValidator()._validateEntryValueCharacters(itemWithEntryValue(value))
+      ).rejects.toBeInstanceOf(EndpointArtifactExceptionValidationError);
+    });
+
+    it('should reject when any value of a match_any entry is corrupted', async () => {
+      await expect(
+        initValidator()._validateEntryValueCharacters(
+          itemWithEntryValue(['/usr/bin/ssh', ' /usr/bin/curl'])
+        )
+      ).rejects.toBeInstanceOf(EndpointArtifactExceptionValidationError);
+    });
+
+    it('should report the offending field in the error message', async () => {
+      await expect(
+        initValidator()._validateEntryValueCharacters(
+          itemWithEntryValue('\tC:\\Windows\\notepad.exe')
+        )
+      ).rejects.toThrow(/\[process\.executable\.caseless\] has leading or trailing whitespace/);
+    });
+
+    it('should check values nested inside a `nested` entry', async () => {
+      const item = createExceptionItemLikeOptionsMock({
+        entries: [
+          {
+            field: 'process.Ext.code_signature',
+            type: 'nested',
+            entries: [
+              {
+                field: 'subject_name',
+                operator: 'included',
+                type: 'match',
+                value: 'Elastic N.V. ',
+              },
+            ],
+          } as ExceptionItemLikeOptions['entries'][number],
+        ],
+      });
+
+      await expect(initValidator()._validateEntryValueCharacters(item)).rejects.toBeInstanceOf(
+        EndpointArtifactExceptionValidationError
+      );
+    });
+  });
+
   it('should validate is allowed to create artifacts by policy', async () => {
     await expect(
       initValidator()._validateCanCreateByPolicyArtifacts(exceptionLikeItem)

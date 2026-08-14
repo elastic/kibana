@@ -28,10 +28,21 @@ import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/pa
 const ConditionEntryCell = memo<{
   showLabel: boolean;
   label?: string;
+  isInvalid?: boolean;
+  error?: React.ReactNode[];
   children: React.ReactElement;
-}>(({ showLabel, label = '', children }) => {
-  return showLabel ? (
-    <EuiFormRow label={label} fullWidth>
+}>(({ showLabel, label = '', isInvalid = false, error, children }) => {
+  const hasError = !!error?.length;
+
+  // The row is also rendered (without a label) when there is something to report, so that validation
+  // messages appear against the input they are about instead of below the whole condition group.
+  return showLabel || hasError ? (
+    <EuiFormRow
+      label={showLabel ? label : undefined}
+      isInvalid={isInvalid && hasError}
+      error={error}
+      fullWidth
+    >
       {children}
     </EuiFormRow>
   ) : (
@@ -41,15 +52,33 @@ const ConditionEntryCell = memo<{
 
 ConditionEntryCell.displayName = 'ConditionEntryCell';
 
+/**
+ * Validation messages that apply to this specific entry. Both errors and warnings are rendered as
+ * the value input's own EUI validation error: a path warning that is not seen is a path warning that
+ * does not work, and shipping a silently-broken condition is more expensive than a false alarm.
+ */
+export interface ConditionEntryValidation {
+  isInvalid: boolean;
+  errors: React.ReactNode[];
+  warnings: React.ReactNode[];
+}
+
 export interface ConditionEntryInputProps {
   os: OperatingSystem;
   entry: TrustedAppConditionEntry;
+  /** Validation state for this entry, rendered against the value input */
+  validation?: ConditionEntryValidation;
   /** controls if remove button is enabled/disabled */
   isRemoveDisabled?: boolean;
   /** If the labels for each Column in the input row should be shown. Normally set on the first row entry */
   showLabels: boolean;
   onRemove: (entry: TrustedAppConditionEntry) => void;
   onChange: (newEntry: TrustedAppConditionEntry, oldEntry: TrustedAppConditionEntry) => void;
+  /**
+   * Invoked when leading/trailing whitespace was stripped from the value on blur, so that the form
+   * can tell the user that its value was changed for them.
+   */
+  onValueTrimmed?: (entry: TrustedAppConditionEntry) => void;
   /**
    * invoked when at least one field in the entry was visited (triggered when `onBlur` DOM event is dispatched)
    * For this component, that will be triggered only when the `value` field is visited, since that is the
@@ -86,9 +115,11 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
   ({
     os,
     entry,
+    validation,
     showLabels = false,
     onRemove,
     onChange,
+    onValueTrimmed,
     isRemoveDisabled = false,
     onVisited,
     'data-test-subj': dataTestSubj,
@@ -183,8 +214,24 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     const handleRemoveClick = useCallback(() => onRemove(entry), [entry, onRemove]);
 
     const handleValueOnBlur = useCallback(() => {
+      // Leading/trailing whitespace is invisible in this input but is part of the stored value, and
+      // an artifact entry carrying it can never match. It is always a mistake, so fix it silently
+      // here rather than asking the user to spot a character they cannot see.
+      const trimmedValue = entry.value.trim();
+
+      if (trimmedValue !== entry.value && trimmedValue.length > 0) {
+        const trimmedEntry = { ...entry, value: trimmedValue };
+        onChange(trimmedEntry, entry);
+        onValueTrimmed?.(trimmedEntry);
+      }
+
       handleVisited();
-    }, [handleVisited]);
+    }, [entry, handleVisited, onChange, onValueTrimmed]);
+
+    const valueValidationMessages = useMemo<React.ReactNode[]>(
+      () => [...(validation?.errors ?? []), ...(validation?.warnings ?? [])],
+      [validation]
+    );
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>
@@ -220,7 +267,12 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           </ConditionEntryCell>
         </InputItem>
         <InputItem gridArea="value">
-          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
+          <ConditionEntryCell
+            showLabel={showLabels}
+            label={ENTRY_PROPERTY_TITLES.value}
+            isInvalid={!!validation?.isInvalid}
+            error={valueValidationMessages}
+          >
             <EuiFieldText
               name="value"
               value={entry.value}
@@ -231,6 +283,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               })}
               fullWidth
               required={isVisited}
+              isInvalid={!!validation?.isInvalid && valueValidationMessages.length > 0}
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}

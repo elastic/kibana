@@ -18,6 +18,12 @@ import {
   isTrustedDeviceFieldAvailableForOs,
   WILDCARD_WARNING,
   FILEPATH_WARNING,
+  CONTROL_CHARACTERS_ERROR,
+  InvisibleCharacterIssue,
+  LEADING_TRAILING_WHITESPACE_WARNING,
+  getInvisibleCharacterIssue,
+  hasControlCharacters,
+  hasLeadingOrTrailingWhitespace,
 } from '.';
 
 describe('validatePotentialWildcardInput', () => {
@@ -38,6 +44,151 @@ describe('validatePotentialWildcardInput', () => {
         value: 'some*value',
       })
     ).toEqual(WILDCARD_WARNING);
+  });
+});
+
+describe('invisible character detection', () => {
+  describe('hasControlCharacters', () => {
+    it.each([
+      ['tab', '\tC:\\Windows\\notepad.exe'],
+      ['line feed', 'C:\\Windows\\notepad.exe\n'],
+      ['carriage return', 'C:\\Windows\\notepad.exe\r'],
+      ['embedded NUL', 'C:\\Windows\\note\u0000pad.exe'],
+      ['DEL', 'C:\\Windows\\notepad.exe\u007f'],
+      ['C1 control', 'C:\\Windows\\note\u0085pad.exe'],
+    ])('detects %s', (_name, value) => {
+      expect(hasControlCharacters(value)).toBe(true);
+    });
+
+    it.each([
+      ['a clean windows path', 'C:\\Windows\\notepad.exe'],
+      ['a clean unix path', '/usr/bin/ssh'],
+      ['a path with a regular space', 'C:\\Program Files\\app.exe'],
+      ['an empty value', ''],
+    ])('does not flag %s', (_name, value) => {
+      expect(hasControlCharacters(value)).toBe(false);
+    });
+  });
+
+  describe('hasLeadingOrTrailingWhitespace', () => {
+    it.each([
+      ['a leading space', ' C:\\Windows\\notepad.exe'],
+      ['a leading tab', '\tC:\\Windows\\notepad.exe'],
+      ['a trailing space', 'C:\\Windows\\notepad.exe '],
+      ['a trailing newline', 'C:\\Windows\\notepad.exe\n'],
+      ['a leading non-breaking space', '\u00a0C:\\Windows\\notepad.exe'],
+      ['a leading byte order mark', '\ufeffC:\\Windows\\notepad.exe'],
+    ])('detects %s', (_name, value) => {
+      expect(hasLeadingOrTrailingWhitespace(value)).toBe(true);
+    });
+
+    it.each([
+      ['a clean path', 'C:\\Windows\\notepad.exe'],
+      ['an interior space', 'C:\\Program Files\\app.exe'],
+      ['an empty value', ''],
+    ])('does not flag %s', (_name, value) => {
+      expect(hasLeadingOrTrailingWhitespace(value)).toBe(false);
+    });
+  });
+
+  describe('getInvisibleCharacterIssue', () => {
+    it('reports leading whitespace, the corruption seen in production trust lists', () => {
+      expect(getInvisibleCharacterIssue('\tC:\\Windows\\notepad.exe')).toEqual(
+        InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE
+      );
+      expect(getInvisibleCharacterIssue(' /usr/bin/ssh')).toEqual(
+        InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE
+      );
+    });
+
+    it('reports trailing whitespace', () => {
+      expect(getInvisibleCharacterIssue('/usr/bin/ssh  ')).toEqual(
+        InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE
+      );
+    });
+
+    it('reports control characters inside the value, which trimming would not fix', () => {
+      expect(getInvisibleCharacterIssue('C:\\Windows\\note\tpad.exe')).toEqual(
+        InvisibleCharacterIssue.CONTROL_CHARACTERS
+      );
+      expect(getInvisibleCharacterIssue('/usr/bin/s\u0000sh')).toEqual(
+        InvisibleCharacterIssue.CONTROL_CHARACTERS
+      );
+    });
+
+    it('prefers the whitespace issue when trimming would fully fix the value', () => {
+      // A leading TAB is both whitespace and a control character; it is auto-fixable, so it must not
+      // be reported as the unfixable control-character issue.
+      expect(getInvisibleCharacterIssue('\tC:\\Windows\\notepad.exe')).toEqual(
+        InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE
+      );
+    });
+
+    it.each([
+      ['a clean windows path', 'C:\\Windows\\notepad.exe'],
+      ['a clean unix path', '/usr/bin/ssh'],
+      ['a path with interior spaces', 'C:\\Program Files\\app.exe'],
+      ['a hash', 'e50fb1a0e5fff590ece385082edc6c41'],
+      ['an empty value', ''],
+    ])('returns undefined for %s', (_name, value) => {
+      expect(getInvisibleCharacterIssue(value)).toBeUndefined();
+    });
+
+    it('returns undefined for non-string values', () => {
+      expect(getInvisibleCharacterIssue(undefined)).toBeUndefined();
+    });
+
+    it('checks every value of a match_any style array', () => {
+      expect(getInvisibleCharacterIssue(['/usr/bin/ssh', '/usr/bin/curl'])).toBeUndefined();
+      expect(getInvisibleCharacterIssue(['/usr/bin/ssh', ' /usr/bin/curl'])).toEqual(
+        InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE
+      );
+      expect(getInvisibleCharacterIssue(['/usr/bin/s\tsh'])).toEqual(
+        InvisibleCharacterIssue.CONTROL_CHARACTERS
+      );
+    });
+  });
+
+  describe('validatePotentialWildcardInput', () => {
+    it('reports leading whitespace instead of silently trimming it away', () => {
+      expect(
+        validatePotentialWildcardInput({
+          field: 'file.path.text',
+          os: OperatingSystem.WINDOWS,
+          value: '\tC:\\Windows\\notepad.exe',
+        })
+      ).toEqual(LEADING_TRAILING_WHITESPACE_WARNING);
+    });
+
+    it('reports control characters', () => {
+      expect(
+        validatePotentialWildcardInput({
+          field: 'file.path.text',
+          os: OperatingSystem.WINDOWS,
+          value: 'C:\\Windows\\note\tpad.exe',
+        })
+      ).toEqual(CONTROL_CHARACTERS_ERROR);
+    });
+
+    it('reports invisible corruption for non-path fields too', () => {
+      expect(
+        validatePotentialWildcardInput({
+          field: 'event.category',
+          os: OperatingSystem.WINDOWS,
+          value: 'process ',
+        })
+      ).toEqual(LEADING_TRAILING_WHITESPACE_WARNING);
+    });
+
+    it('still reports the wildcard warning for otherwise clean values', () => {
+      expect(
+        validatePotentialWildcardInput({
+          field: 'file.path.text',
+          os: OperatingSystem.WINDOWS,
+          value: 'c:\\path*.exe',
+        })
+      ).toEqual(WILDCARD_WARNING);
+    });
   });
 });
 

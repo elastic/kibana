@@ -394,6 +394,116 @@ describe('Trusted apps form', () => {
       });
     });
 
+    describe('path validation prominence', () => {
+      it('should render a path warning as the offending value input own validation error', () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+
+        // Rendered as a red form error and not as detached grey help text below the condition group
+        expect(getAllValidationErrors().map((element) => element.textContent)).toContain(
+          INPUT_ERRORS.pathWarning(0)
+        );
+        expect(getAllValidationWarnings()).toHaveLength(0);
+      });
+
+      it('should attach the warning to the row it is about when several entries exist', () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [
+            createEntry(ConditionEntryField.HASH, 'match', 'e50fb1a0e5fff590ece385082edc6c41'),
+            createEntry(ConditionEntryField.PATH, 'match', 'malformed-path'),
+          ],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+
+        expect(getCondition(1).textContent).toContain(INPUT_ERRORS.pathWarning(1));
+        expect(getCondition(0).textContent).not.toContain(INPUT_ERRORS.pathWarning(1));
+      });
+    });
+
+    describe('invisible corruption', () => {
+      it('should warn about leading whitespace, which is not visible in the input', () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', '\tC:\\Windows\\notepad.exe')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+
+        expect(screen.getByText(INPUT_ERRORS.leadingTrailingWhitespace(0))).not.toBeNull();
+        // The value is otherwise a perfectly good path - do not confuse the user with a path warning
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+      });
+
+      it('should warn about trailing whitespace', () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', '/usr/bin/ssh  ')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+
+        expect(screen.getByText(INPUT_ERRORS.leadingTrailingWhitespace(0))).not.toBeNull();
+      });
+
+      it('should hard error on embedded control characters and block submission', () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          name: 'Some process',
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'C:\\Windows\\note\tpad.exe')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+
+        expect(screen.getByText(INPUT_ERRORS.controlCharacters(0))).not.toBeNull();
+        expect(formProps.onChange).not.toHaveBeenCalledWith(
+          expect.objectContaining({ isValid: true })
+        );
+      });
+
+      it('should trim leading/trailing whitespace on blur and tell the user it did so', () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', ' /usr/bin/ssh ')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+
+        expect(renderResult.queryByTestId(`${formPrefix}-whitespaceTrimmedCallout`)).toBeNull();
+
+        act(() => {
+          fireEvent.blur(getConditionValue(getCondition()));
+        });
+
+        expect((latestUpdatedItem.entries[0] as TrustedAppConditionEntry).value).toEqual(
+          '/usr/bin/ssh'
+        );
+
+        rerenderWithLatestProps();
+        expect(renderResult.getByTestId(`${formPrefix}-whitespaceTrimmedCallout`)).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.leadingTrailingWhitespace(0))).toBeNull();
+      });
+
+      it('should not trim a value that is only whitespace, so the required-value error still shows', () => {
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', '   ')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+
+        act(() => {
+          fireEvent.blur(getConditionValue(getCondition()));
+        });
+
+        expect(renderResult.queryByTestId(`${formPrefix}-whitespaceTrimmedCallout`)).toBeNull();
+        expect(screen.getByText(INPUT_ERRORS.mustHaveValue(0))).not.toBeNull();
+      });
+    });
+
     it('should display the `AND` button', () => {
       const andButton = getConditionBuilderAndButton();
       expect(andButton.textContent).toEqual('AND');
@@ -936,6 +1046,44 @@ describe('Trusted apps form', () => {
       const result = validateValues(item);
       // Should be valid - all non-nested entries have values
       expect(result.isValid).toBe(true);
+    });
+
+    describe('invisible corruption in basic mode', () => {
+      const basicModeItem = (value: string): ArtifactFormComponentProps['item'] => ({
+        list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+        name: 'Test',
+        description: '',
+        os_types: [OperatingSystem.WINDOWS],
+        tags: ['policy:all'],
+        type: 'simple',
+        entries: [createEntry(ConditionEntryField.PATH, 'match', value)],
+      });
+
+      it('should attach messages to the entry they belong to', () => {
+        const result = validateValues(basicModeItem('\tC:\\Windows\\notepad.exe'));
+
+        expect(result.entryValidations[0].isInvalid).toBe(true);
+        expect(result.entryValidations[0].warnings).toEqual([
+          INPUT_ERRORS.leadingTrailingWhitespace(0),
+        ]);
+      });
+
+      it('should treat leading whitespace as a non-blocking warning (it is auto-trimmed)', () => {
+        expect(validateValues(basicModeItem(' C:\\Windows\\notepad.exe')).isValid).toBe(true);
+      });
+
+      it('should treat embedded control characters as a blocking error', () => {
+        const result = validateValues(basicModeItem('C:\\Windows\\note\tpad.exe'));
+
+        expect(result.isValid).toBe(false);
+        expect(result.entryValidations[0].errors).toEqual([INPUT_ERRORS.controlCharacters(0)]);
+      });
+
+      it('should still report plausibility warnings for clean values', () => {
+        const result = validateValues(basicModeItem('malformed-path'));
+
+        expect(result.entryValidations[0].warnings).toEqual([INPUT_ERRORS.pathWarning(0)]);
+      });
     });
   });
 });

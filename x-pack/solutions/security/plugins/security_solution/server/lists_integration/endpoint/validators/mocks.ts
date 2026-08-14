@@ -36,6 +36,10 @@ export class BaseValidatorMock extends BaseValidator {
     return this.validateBasicData(item);
   }
 
+  async _validateEntryValueCharacters(item: ExceptionItemLikeOptions): Promise<void> {
+    return this.validateEntryValueCharacters(item);
+  }
+
   async _validateCanCreateByPolicyArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
     return this.validateCanCreateByPolicyArtifacts(item);
   }

@@ -288,6 +288,7 @@ export class TrustedAppValidator extends BaseValidator {
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {
     await this.validateBasicData(item);
+    await this.validateEntryValueCharacters(item);
 
     try {
       const isTAAdvancedModeFeatureFlagEnabled =

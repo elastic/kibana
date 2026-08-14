@@ -17,12 +17,14 @@ export type LogicalConditionBuilderProps = CommonProps & ConditionGroupProps;
 export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
   ({
     entries,
+    entryValidations,
     os,
     className,
     isAndDisabled = false,
     onAndClicked,
     onEntryRemove,
     onEntryChange,
+    onEntryValueTrimmed,
     onVisited,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -37,8 +39,10 @@ export const LogicalConditionBuilder = memo<LogicalConditionBuilderProps>(
             <ConditionGroup
               os={os}
               entries={entries}
+              entryValidations={entryValidations}
               onEntryRemove={onEntryRemove}
               onEntryChange={onEntryChange}
+              onEntryValueTrimmed={onEntryValueTrimmed}
               onAndClicked={onAndClicked}
               isAndDisabled={isAndDisabled}
               onVisited={onVisited}

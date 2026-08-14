@@ -15,6 +15,86 @@ export const FILEPATH_WARNING = i18n.translate('utils.filename.pathWarning', {
   defaultMessage: `Path may be formed incorrectly; verify value`,
 });
 
+export const LEADING_TRAILING_WHITESPACE_WARNING = i18n.translate(
+  'utils.invisibleCharacters.whitespaceWarning',
+  {
+    defaultMessage: `Value starts or ends with whitespace. Whitespace is invisible here but is part of the value, so this entry will never match. It will be removed automatically.`,
+  }
+);
+
+export const CONTROL_CHARACTERS_ERROR = i18n.translate(
+  'utils.invisibleCharacters.controlCharactersError',
+  {
+    defaultMessage: `Value contains invisible control characters (for example a tab or a line break). An entry containing them can never match; remove them and re-enter the value.`,
+  }
+);
+
+/**
+ * The classes of "invisible corruption" we can detect in an artifact entry value. These are values
+ * that look correct in the UI but can never match anything on the endpoint, because the characters
+ * that break them are not rendered.
+ */
+export enum InvisibleCharacterIssue {
+  /** Control characters somewhere inside the value. Not auto-fixable - the user has to re-enter it. */
+  CONTROL_CHARACTERS = 'controlCharacters',
+  /** Leading and/or trailing whitespace. Auto-fixable by trimming. */
+  LEADING_TRAILING_WHITESPACE = 'leadingTrailingWhitespace',
+}
+
+export const INVISIBLE_CHARACTER_ISSUE_MESSAGES: Readonly<Record<InvisibleCharacterIssue, string>> =
+  Object.freeze({
+    [InvisibleCharacterIssue.CONTROL_CHARACTERS]: CONTROL_CHARACTERS_ERROR,
+    [InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE]: LEADING_TRAILING_WHITESPACE_WARNING,
+  });
+
+/** C0 controls (includes TAB, LF, CR), DEL and the C1 control block. */
+const CONTROL_CHARACTERS_REGEX = /[\u0000-\u001f\u007f-\u009f]/;
+
+export const hasControlCharacters = (value: string): boolean =>
+  CONTROL_CHARACTERS_REGEX.test(value);
+
+/**
+ * Note: relies on `String.prototype.trim()`, so it also catches non-obvious whitespace such as
+ * NBSP (\u00a0) and BOM (\ufeff) at either end of the value.
+ */
+export const hasLeadingOrTrailingWhitespace = (value: string): boolean =>
+  value.length > 0 && value !== value.trim();
+
+/**
+ * Detects values that are corrupted in a way the user cannot see in the form.
+ *
+ * Leading/trailing whitespace is reported only when trimming would actually fix the value - a value
+ * with a control character *inside* it (e.g. `C:\fold\u0009er\app.exe`) is reported as
+ * {@link InvisibleCharacterIssue.CONTROL_CHARACTERS} instead, since trimming would leave it broken.
+ */
+export const getInvisibleCharacterIssue = (
+  value: string | string[] | undefined
+): InvisibleCharacterIssue | undefined => {
+  if (Array.isArray(value)) {
+    for (const singleValue of value) {
+      const issue = getInvisibleCharacterIssue(singleValue);
+      if (issue) {
+        return issue;
+      }
+    }
+    return undefined;
+  }
+
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  if (hasControlCharacters(value.trim())) {
+    return InvisibleCharacterIssue.CONTROL_CHARACTERS;
+  }
+
+  if (hasLeadingOrTrailingWhitespace(value)) {
+    return InvisibleCharacterIssue.LEADING_TRAILING_WHITESPACE;
+  }
+
+  return undefined;
+};
+
 export enum ConditionEntryField {
   HASH = 'process.hash.*',
   PATH = 'process.executable.caseless',
@@ -104,6 +184,13 @@ export const validatePotentialWildcardInput = ({
   os: OperatingSystem;
   value?: string;
 }): string | undefined => {
+  // Reported before anything else: the checks below all operate on the trimmed value, which would
+  // otherwise silently hide the corruption we most want the user to see.
+  const invisibleCharacterIssue = getInvisibleCharacterIssue(value);
+  if (invisibleCharacterIssue) {
+    return INVISIBLE_CHARACTER_ISSUE_MESSAGES[invisibleCharacterIssue];
+  }
+
   const textInput = value.trim();
   if (field === 'file.path.text') {
     return validateFilePathInput({ os, value: textInput });

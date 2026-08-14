@@ -58,8 +58,10 @@ import {
   OperatorComponent,
 } from '@kbn/securitysolution-autocomplete';
 import {
+  INVISIBLE_CHARACTER_ISSUE_MESSAGES,
   OperatingSystem,
   WILDCARD_WARNING,
+  getInvisibleCharacterIssue,
   validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
@@ -415,6 +417,22 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     );
   };
 
+  /**
+   * Invisible corruption (leading/trailing whitespace, control characters) has no legitimate use in
+   * an endpoint artifact value, so we surface it for every operator - not just wildcard ones. It is
+   * skipped for detection-engine exceptions, whose values are not endpoint artifact conditions.
+   */
+  const getInvisibleCharacterWarning = (
+    value: string | string[] | undefined
+  ): string | undefined => {
+    if (listType === 'detection' || listType === 'rule_default') {
+      return undefined;
+    }
+
+    const issue = getInvisibleCharacterIssue(value);
+    return issue ? INVISIBLE_CHARACTER_ISSUE_MESSAGES[issue] : undefined;
+  };
+
   // eslint-disable-next-line complexity
   const getFieldValueComboBox = (type: OperatorTypeEnum, isFirst: boolean): JSX.Element => {
     const ariaLabel = i18n.EXCEPTION_ITEM_ARIA_LABEL(
@@ -426,9 +444,9 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     switch (type) {
       case OperatorTypeEnum.MATCH:
         const value = typeof entry.value === 'string' ? entry.value : undefined;
-        const fieldMatchWarning = /[*?]/.test(value ?? '')
-          ? getWildcardWithIsOperatorWarning()
-          : undefined;
+        const fieldMatchWarning =
+          getInvisibleCharacterWarning(value) ??
+          (/[*?]/.test(value ?? '') ? getWildcardWithIsOperatorWarning() : undefined);
         return (
           <AutocompleteFieldMatchComponent
             autocompleteService={autocompleteService}

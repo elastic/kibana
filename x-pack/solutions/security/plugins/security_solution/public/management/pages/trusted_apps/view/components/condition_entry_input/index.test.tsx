@@ -165,4 +165,96 @@ describe('Condition entry input', () => {
     const options = screen.getAllByRole('option');
     expect(options).toHaveLength(2);
   });
+
+  describe('validation display', () => {
+    it('should render nothing when there is no validation state', () => {
+      render();
+      expect(renderResult.container.querySelectorAll('.euiFormErrorText')).toHaveLength(0);
+    });
+
+    it('should render errors as the value input own validation error', () => {
+      props = {
+        ...props,
+        validation: { isInvalid: true, errors: ['Invalid hash value'], warnings: [] },
+      };
+      render();
+
+      const errors = Array.from(renderResult.container.querySelectorAll('.euiFormErrorText'));
+      expect(errors.map((element) => element.textContent)).toEqual(['Invalid hash value']);
+      expect(renderResult.getByTestId(`${formPrefix}-value`)).toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
+    });
+
+    it('should render warnings with the same prominence as errors, not as grey help text', () => {
+      props = {
+        ...props,
+        validation: {
+          isInvalid: true,
+          errors: [],
+          warnings: ['Path may be formed incorrectly; verify value'],
+        },
+      };
+      render();
+
+      const errors = Array.from(renderResult.container.querySelectorAll('.euiFormErrorText'));
+      expect(errors.map((element) => element.textContent)).toEqual([
+        'Path may be formed incorrectly; verify value',
+      ]);
+      expect(renderResult.container.querySelectorAll('.euiFormHelpText')).toHaveLength(0);
+    });
+
+    it('should render validation even when the row labels are hidden', () => {
+      props = {
+        ...props,
+        showLabels: false,
+        validation: { isInvalid: true, errors: ['Invalid hash value'], warnings: [] },
+      };
+      render();
+
+      expect(renderResult.container.querySelectorAll('.euiFormErrorText')).toHaveLength(1);
+    });
+  });
+
+  describe('invisible whitespace handling', () => {
+    it('should strip leading/trailing whitespace on blur and report it', async () => {
+      const onValueTrimmedMock = jest.fn();
+      const untrimmedEntry = { ...baseEntry, value: '\tC:\\Windows\\notepad.exe ' };
+      props = { ...props, entry: untrimmedEntry, onValueTrimmed: onValueTrimmedMock };
+      render();
+
+      await fireEvent.blur(renderResult.getByTestId(`${formPrefix}-value`));
+
+      const trimmedEntry = { ...baseEntry, value: 'C:\\Windows\\notepad.exe' };
+      expect(onChangeMock).toHaveBeenCalledWith(trimmedEntry, untrimmedEntry);
+      expect(onValueTrimmedMock).toHaveBeenCalledWith(trimmedEntry);
+    });
+
+    it('should leave a clean value alone on blur', async () => {
+      const onValueTrimmedMock = jest.fn();
+      props = { ...props, onValueTrimmed: onValueTrimmedMock };
+      render();
+
+      await fireEvent.blur(renderResult.getByTestId(`${formPrefix}-value`));
+
+      expect(onChangeMock).not.toHaveBeenCalled();
+      expect(onValueTrimmedMock).not.toHaveBeenCalled();
+    });
+
+    it('should not trim a value that is entirely whitespace', async () => {
+      const onValueTrimmedMock = jest.fn();
+      props = {
+        ...props,
+        entry: { ...baseEntry, value: '   ' },
+        onValueTrimmed: onValueTrimmedMock,
+      };
+      render();
+
+      await fireEvent.blur(renderResult.getByTestId(`${formPrefix}-value`));
+
+      expect(onChangeMock).not.toHaveBeenCalled();
+      expect(onValueTrimmedMock).not.toHaveBeenCalled();
+    });
+  });
 });

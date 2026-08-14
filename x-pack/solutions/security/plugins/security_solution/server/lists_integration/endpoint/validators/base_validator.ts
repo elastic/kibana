@@ -8,8 +8,13 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type {
+  EntriesArray,
+  Entry,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { InvisibleCharacterIssue } from '@kbn/securitysolution-utils';
+import { OperatingSystem, getInvisibleCharacterIssue } from '@kbn/securitysolution-utils';
 
 import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
@@ -81,6 +86,38 @@ export const BasicEndpointExceptionDataSchema = schema.object(
   // Because we are only validating some fields from the Exception Item, we set `unknowns` to `ignore` here
   { unknowns: 'ignore' }
 );
+
+const INVISIBLE_CHARACTER_ISSUE_DESCRIPTIONS: Readonly<Record<InvisibleCharacterIssue, string>> =
+  Object.freeze({
+    controlCharacters: 'contains control characters',
+    leadingTrailingWhitespace: 'has leading or trailing whitespace',
+  });
+
+/**
+ * Walks entries (including one level of `nested` entries) collecting any values that carry
+ * invisible corruption.
+ */
+const collectInvisibleCharacterIssues = (
+  entries: EntriesArray | Entry[],
+  found: Array<{ field: string; issue: InvisibleCharacterIssue }> = []
+): Array<{ field: string; issue: InvisibleCharacterIssue }> => {
+  for (const entry of entries) {
+    if (entry.type === 'nested') {
+      collectInvisibleCharacterIssues(entry.entries, found);
+      continue;
+    }
+
+    if (entry.type === 'match' || entry.type === 'match_any' || entry.type === 'wildcard') {
+      const issue = getInvisibleCharacterIssue(entry.value);
+
+      if (issue) {
+        found.push({ field: entry.field, issue });
+      }
+    }
+  }
+
+  return found;
+};
 
 /**
  * Provides base methods for doing validation that apply across endpoint exception entries
@@ -158,6 +195,33 @@ export class BaseValidator {
       BasicEndpointExceptionDataSchema.validate(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
+    }
+  }
+
+  /**
+   * Rejects entry values containing invisible corruption - leading/trailing whitespace or control
+   * characters.
+   *
+   * Such values have no legitimate use in an endpoint artifact: they look correct wherever they are
+   * displayed, but can never match anything on the endpoint. Silently accepting them has produced
+   * trust lists whose entries did nothing while appearing healthy, so this is a hard 400 rather
+   * than a soft warning (unlike the "path may be formed incorrectly" plausibility checks, which
+   * stay advisory because they have legitimate exceptions).
+   *
+   * @protected
+   */
+  protected async validateEntryValueCharacters(item: ExceptionItemLikeOptions): Promise<void> {
+    const issues = collectInvisibleCharacterIssues(item.entries ?? []);
+
+    if (issues.length) {
+      const details = issues
+        .map(({ field, issue }) => `[${field}] ${INVISIBLE_CHARACTER_ISSUE_DESCRIPTIONS[issue]}`)
+        .join(', ');
+
+      throw new EndpointArtifactExceptionValidationError(
+        `Entry value is invalid: ${details}. Values containing whitespace at either end, or ` +
+          `control characters, can never match and are not accepted.`
+      );
     }
   }
 
