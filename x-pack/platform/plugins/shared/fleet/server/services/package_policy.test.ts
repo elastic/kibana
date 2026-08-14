@@ -4183,7 +4183,7 @@ describe('Package policy service', () => {
       );
     });
 
-    it('should forward context and request to packagePolicyUpdate external callbacks', async () => {
+    it('should forward request context to packagePolicyUpdate external callbacks', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const mockPackagePolicy = createPackagePolicyMock();
@@ -4194,7 +4194,6 @@ describe('Package policy service', () => {
       const context = coreMock.createCustomRequestHandlerContext(
         xpackMocks.createRequestHandlerContext()
       );
-      const request = httpServerMock.createKibanaRequest();
       const updateCallback = jest.fn(async (policy) => policy);
 
       appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
@@ -4226,8 +4225,7 @@ describe('Package policy service', () => {
           inputs: [],
         },
         undefined,
-        context,
-        request
+        context
       );
 
       expect(updateCallback).toHaveBeenCalledWith(
@@ -4235,7 +4233,7 @@ describe('Package policy service', () => {
         soClient,
         esClient,
         context,
-        request
+        undefined
       );
     });
 
