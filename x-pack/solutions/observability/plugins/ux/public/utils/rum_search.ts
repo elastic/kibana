@@ -17,6 +17,9 @@ export interface RumFilterPatch {
   os?: string;
   location?: string;
   user?: string;
+  click?: string;
+  account?: string;
+  sessionQuery?: string;
   includeBots?: string;
   kuery?: string;
   breakpoint?: string;
@@ -76,6 +79,9 @@ export const sessionsPatch = (patch: RumFilterPatch): RumFilterPatch => ({
   errorGroup: '',
   sessionIds: '',
   user: '',
+  click: '',
+  account: '',
+  sessionQuery: '',
   location: '',
   ...patch,
 });

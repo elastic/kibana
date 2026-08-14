@@ -263,6 +263,9 @@ export function SessionReplayPanel() {
       sessionIds,
       frustration,
       user: urlUser,
+      click: urlClick,
+      account: urlAccount,
+      sessionQuery,
       includeBots,
       kuery,
       breakpoint,
@@ -278,8 +281,8 @@ export function SessionReplayPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [searchInput, setSearchInput] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(sessionQuery ?? '');
+  const [search, setSearch] = useState(sessionQuery ?? '');
   const [sortField, setSortField] = useState<SessionSortField>('startTime');
   const [sortDirection, setSortDirection] = useState<SessionSortDirection>('desc');
   const [pageIndex, setPageIndex] = useState(0);
@@ -293,12 +296,24 @@ export function SessionReplayPanel() {
   const [durationKey, setDurationKey] = useState('any');
 
   useEffect(() => {
+    setSearchInput(sessionQuery ?? '');
+    setSearch(sessionQuery ?? '');
+  }, [sessionQuery]);
+
+  useEffect(() => {
     const handle = setTimeout(() => {
-      setSearch(searchInput.trim());
+      const next = searchInput.trim();
+      setSearch(next);
       setPageIndex(0);
+      if (next !== (sessionQuery ?? '')) {
+        history.replace({
+          ...history.location,
+          search: mergeRumSearch(history.location.search, { sessionQuery: next }),
+        });
+      }
     }, 300);
     return () => clearTimeout(handle);
-  }, [searchInput]);
+  }, [history, searchInput, sessionQuery]);
 
   const duration = useMemo(
     () => DURATION_OPTIONS.find((option) => option.key === durationKey) ?? DURATION_OPTIONS[0],
@@ -337,6 +352,8 @@ export function SessionReplayPanel() {
         minDurationMs: duration.min,
         maxDurationMs: duration.max,
         user: urlUser,
+        click: urlClick,
+        account: urlAccount,
         includeBots,
         kuery,
         breakpoint,
@@ -378,6 +395,8 @@ export function SessionReplayPanel() {
     sessionIds,
     frustration,
     urlUser,
+    urlClick,
+    urlAccount,
     includeBots,
     kuery,
     breakpoint,
@@ -723,7 +742,7 @@ export function SessionReplayPanel() {
           <p>
             {i18n.translate('xpack.ux.sessions.intro', {
               defaultMessage:
-                'Each row is a browser visit. Journey shows page path changes (A → B → C), or in-page activity when the URL does not change. Open Details for a per-page breakdown, or Play the replay when available.',
+                'Each row is a browser visit. Find replays with path:/checkout, click:#buy, error:TypeError, user:ada, or account:acme. Journey shows page path changes (A → B → C), or in-page activity when the URL does not change.',
             })}
           </p>
         </EuiText>
@@ -734,7 +753,8 @@ export function SessionReplayPanel() {
             <EuiFieldSearch
               fullWidth
               placeholder={i18n.translate('xpack.ux.sessions.searchPlaceholder', {
-                defaultMessage: 'Search by user, page, browser, or session id',
+                defaultMessage:
+                  'path:/checkout  click:#buy  error:TypeError  user:ada  — or user / page / session id',
               })}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}

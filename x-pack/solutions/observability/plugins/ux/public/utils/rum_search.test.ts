@@ -29,6 +29,16 @@ describe('mergeRumSearch', () => {
   it('stores replay offset t', () => {
     expect(mergeRumSearch('?rangeFrom=now-24h', { t: '1500' })).toBe('rangeFrom=now-24h&t=1500');
   });
+
+  it('stores session find params', () => {
+    expect(
+      mergeRumSearch('?rangeFrom=now-24h', {
+        sessionQuery: 'click:#buy',
+        click: '#buy',
+        account: 'acme',
+      })
+    ).toBe('rangeFrom=now-24h&sessionQuery=click:%23buy&click=%23buy&account=acme');
+  });
 });
 
 describe('sessionsPatch', () => {
@@ -39,6 +49,9 @@ describe('sessionsPatch', () => {
       errorGroup: '',
       sessionIds: '',
       user: '',
+      click: '',
+      account: '',
+      sessionQuery: '',
       location: '',
     });
   });
@@ -50,6 +63,9 @@ describe('sessionsPatch', () => {
       errorGroup: '',
       sessionIds: '',
       user: 'ada',
+      click: '',
+      account: '',
+      sessionQuery: '',
       location: '',
     });
   });

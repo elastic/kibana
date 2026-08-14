@@ -30,6 +30,14 @@ import { kueryFilters } from '../rum/kuery';
 import { botExclusionFilters } from '../rum/bots';
 import { rumEsSearchOptions } from '../rum/es_retry';
 import { SESSION_ID_SCRIPT } from './session_id_script';
+import {
+  extraPathsForFind,
+  intersectSessionIds,
+  mergeSessionFind,
+  parseSessionFind,
+  sessionFindClauses,
+  sessionIdTermsFilter,
+} from '../../../common/session_find';
 
 export { SESSION_ID_SCRIPT };
 
@@ -137,6 +145,8 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       minDurationMs: t.string,
       maxDurationMs: t.string,
       user: t.string,
+      click: t.string,
+      account: t.string,
       includeBots: t.string,
       kuery: t.string,
       breakpoint: t.string,
@@ -190,8 +200,6 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       });
     }
     if (params.query.location) {
-      // Keep field list inline — importing from rum/query creates a circular dep
-      // (query.ts already imports SESSION_ID_SCRIPT from this file).
       filters.push({
         bool: {
           should: [
@@ -201,6 +209,53 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
           minimum_should_match: 1,
         },
       });
+    }
+
+    const find = mergeSessionFind(parseSessionFind(params.query.query), {
+      path: params.query.pageUrl,
+      click: params.query.click,
+      user: params.query.user,
+      account: params.query.account,
+    });
+    const findClauses = sessionFindClauses(find, extraPathsForFind(find, params.query.pageUrl));
+    if (findClauses.length > 0) {
+      const idSets = await Promise.all(
+        findClauses.map(async (clause) => {
+          const result = await client.search(
+            {
+              index: RUM_SESSION_SOURCE_INDEX,
+              ignore_unavailable: true,
+              allow_no_indices: true,
+              size: 0,
+              query: { bool: { filter: [...filters, ...clause] } },
+              aggs: {
+                sessions: {
+                  terms: {
+                    script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
+                    size: candidateSize,
+                    exclude: '',
+                  },
+                },
+              },
+            },
+            rumEsSearchOptions
+          );
+          const buckets =
+            (result.aggregations as { sessions?: { buckets?: Array<{ key?: string | number }> } })
+              ?.sessions?.buckets ?? [];
+          return buckets.map((bucket) => String(bucket.key ?? '')).filter(Boolean);
+        })
+      );
+      const matchingIds = intersectSessionIds(idSets);
+      if (matchingIds.length === 0) {
+        return {
+          sessions: [],
+          total: 0,
+          facets: computeFacets([]),
+          stats: computeStats([]),
+        };
+      }
+      filters.push(sessionIdTermsFilter(matchingIds));
     }
 
     const [rumResult, replayResult] = await Promise.all([
@@ -378,8 +433,8 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
 
     const all = [...sessionsById.values()];
 
-    // Search (bounded to avoid unbounded scans of the term against every field).
-    const term = (params.query.query ?? '').trim().toLowerCase().slice(0, 200);
+    // Unprefixed remainder only — structured path/click/error/user already ran in ES.
+    const term = (find.text ?? '').trim().toLowerCase().slice(0, 200);
     const searchFiltered = term
       ? all.filter((session) => {
           const name = session.user.name || session.user.email || session.user.id || '';
@@ -410,11 +465,9 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       location,
       minDurationMs,
       maxDurationMs,
-      pageUrl,
       errorGroup,
       sessionIds,
       frustration,
-      user,
     } = params.query;
     const minDur = minDurationMs ? Number(minDurationMs) : undefined;
     const maxDur = maxDurationMs ? Number(maxDurationMs) : undefined;
@@ -447,10 +500,8 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       }
       if (minDur != null && session.durationMs < minDur) return false;
       if (maxDur != null && session.durationMs > maxDur) return false;
-      if (pageUrl && !session.pagePath.some((path) => path.includes(pageUrl))) return false;
       if (errorGroup && !session.errorGroups.includes(errorGroup)) return false;
       if (idSet && !idSet.has(session.sessionId)) return false;
-      if (user && userKey(session) !== user) return false;
       return true;
     });
 

@@ -331,7 +331,15 @@ export function RumErrorsPanel() {
                   data-test-subj="uxColumnsSessionsButton"
                   size="s"
                   onClick={() =>
-                    pushRumPath(history, '/session-replay', sessionsPatch({ errorGroup: item.key }))
+                    pushRumPath(
+                      history,
+                      '/session-replay',
+                      sessionsPatch({
+                        errorGroup: item.key,
+                        sessionQuery: item.type ? `error:${item.type}` : '',
+                        pageUrl: pageUrl || '',
+                      })
+                    )
                   }
                 >
                   {i18n.translate('xpack.ux.errors.viewSessions', { defaultMessage: 'Sessions' })}
@@ -434,7 +442,15 @@ export function RumErrorsPanel() {
             traceHref={apmTraceHref(selected)}
             onClose={() => setSelected(null)}
             onViewSessions={() =>
-              pushRumPath(history, '/session-replay', sessionsPatch({ errorGroup: selected.key }))
+              pushRumPath(
+                history,
+                '/session-replay',
+                sessionsPatch({
+                  errorGroup: selected.key,
+                  sessionQuery: selected.type ? `error:${selected.type}` : '',
+                  pageUrl: pageUrl || '',
+                })
+              )
             }
           />
         )}

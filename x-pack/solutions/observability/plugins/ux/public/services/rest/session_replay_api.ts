@@ -44,6 +44,8 @@ export interface FetchSessionsParams {
   minDurationMs?: number;
   maxDurationMs?: number;
   user?: string;
+  click?: string;
+  account?: string;
   includeBots?: string;
   kuery?: string;
   breakpoint?: string;
@@ -75,6 +77,8 @@ export const fetchSessionReplaySessions = async ({
   minDurationMs,
   maxDurationMs,
   user,
+  click,
+  account,
   includeBots,
   kuery,
   breakpoint,
@@ -105,6 +109,8 @@ export const fetchSessionReplaySessions = async ({
       ...(minDurationMs != null ? { minDurationMs: String(minDurationMs) } : {}),
       ...(maxDurationMs != null ? { maxDurationMs: String(maxDurationMs) } : {}),
       ...(user ? { user } : {}),
+      ...(click ? { click } : {}),
+      ...(account ? { account } : {}),
       ...(includeBots ? { includeBots } : {}),
       ...(kuery ? { kuery } : {}),
       ...(breakpoint ? { breakpoint } : {}),

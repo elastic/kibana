@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiButtonEmpty,
   EuiContextMenu,
+  EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -122,11 +123,16 @@ const FilterOptionList = ({
   options,
   value,
   onPick,
+  customPlaceholder,
 }: {
   options: Array<{ key: string; label?: string; count?: number }>;
   value?: string;
   onPick: (next?: string) => void;
+  customPlaceholder?: string;
 }) => {
+  const [custom, setCustom] = useState(
+    value && !options.some((option) => option.key === value) ? value : ''
+  );
   const items: EuiSelectableOption[] = options.map((option) => ({
     label: `${option.label ?? option.key}${option.count != null ? ` (${option.count})` : ''}`,
     key: option.key,
@@ -146,6 +152,22 @@ const FilterOptionList = ({
     >
       {(list, search) => (
         <div style={{ width: 280 }}>
+          {customPlaceholder && (
+            <div style={{ padding: 8 }}>
+              <EuiFieldSearch
+                compressed
+                placeholder={customPlaceholder}
+                value={custom}
+                onChange={(event) => setCustom(event.target.value)}
+                onSearch={(next) => {
+                  const trimmed = next.trim();
+                  onPick(trimmed || undefined);
+                }}
+                isClearable
+                data-test-subj="uxOtelFilter-customPath"
+              />
+            </div>
+          )}
           {search}
           {list}
         </div>
@@ -153,6 +175,13 @@ const FilterOptionList = ({
     </EuiSelectable>
   );
 };
+
+const pagePathPlaceholder = i18n.translate('xpack.ux.filters.page.customPlaceholder', {
+  defaultMessage: 'Type a path, e.g. /checkout',
+});
+
+const customPlaceholderFor = (id: RumOtelFilterId): string | undefined =>
+  id === 'pageUrl' ? pagePathPlaceholder : undefined;
 
 const FacetSelect = ({
   id,
@@ -168,7 +197,7 @@ const FacetSelect = ({
   const [open, setOpen] = useState(false);
   const label = filterName(id);
   const selected = options.find((option) => option.key === value);
-  const buttonLabel = truncateValue(selected?.label ?? selected?.key ?? label, 28);
+  const buttonLabel = truncateValue(selected?.label ?? selected?.key ?? value ?? label, 28);
 
   return (
     <EuiPopover
@@ -186,7 +215,7 @@ const FacetSelect = ({
           onClick={() => setOpen((current) => !current)}
           hasActiveFilters={Boolean(value)}
           numActiveFilters={value ? 1 : undefined}
-          isDisabled={options.length === 0 && !value}
+          isDisabled={options.length === 0 && !value && id !== 'pageUrl'}
           grow={false}
           data-test-subj={`uxOtelFilter-${id}`}
         >
@@ -197,6 +226,7 @@ const FacetSelect = ({
       <FilterOptionList
         options={options}
         value={value}
+        customPlaceholder={customPlaceholderFor(id)}
         onPick={(next) => {
           onChange(next);
           setOpen(false);
@@ -288,6 +318,7 @@ const FilterPill = ({
       <FilterOptionList
         options={options}
         value={value}
+        customPlaceholder={customPlaceholderFor(id)}
         onPick={(next) => {
           onChange(next);
           setOpen(false);
@@ -475,6 +506,7 @@ export function OtelFilterBar() {
         content: (
           <FilterOptionList
             options={optionSets[id]}
+            customPlaceholder={customPlaceholderFor(id)}
             onPick={(next) => {
               setFilterValue(id, next);
               setAddOpen(false);

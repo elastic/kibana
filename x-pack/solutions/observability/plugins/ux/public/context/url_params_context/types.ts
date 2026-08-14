@@ -28,6 +28,9 @@ export type UrlParams = {
   errorGroup?: string;
   sessionIds?: string;
   user?: string;
+  click?: string;
+  account?: string;
+  sessionQuery?: string;
   includeBots?: string;
   kuery?: string;
   breakpoint?: string;
