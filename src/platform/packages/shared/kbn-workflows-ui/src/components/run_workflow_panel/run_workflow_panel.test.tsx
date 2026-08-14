@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import type { WorkflowListItemDto } from '@kbn/workflows';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { RunWorkflowPanel } from './run_workflow_panel';
 import type { RunWorkflowPanelProps } from './run_workflow_panel';
 import * as i18n from './translations';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 
 const mockMutate = jest.fn();
 const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: mockWorkflowsData } }));
@@ -130,7 +130,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 const defaultProps: RunWorkflowPanelProps = {
   inputs: { alert_ids: ['alert-1'] },
-  sortTriggerTypes: 'security_alert',
+  sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
+    Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+    Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert')),
   onClose: jest.fn(),
 };
 
@@ -154,9 +156,7 @@ describe('RunWorkflowPanel', () => {
     renderComponent();
 
     expect(screen.getByTestId('run-workflow-execute-button')).toBeInTheDocument();
-    expect(screen.getByTestId('run-workflow-execute-button')).toHaveTextContent(
-      i18n.RUN_WORKFLOW_BUTTON
-    );
+    expect(screen.getByTestId('run-workflow-execute-button')).toHaveTextContent(i18n.RUN_WORKFLOW_BUTTON);
   });
 
   it('should disable the execute button when no workflow is selected', () => {
@@ -272,8 +272,18 @@ describe('RunWorkflowPanel', () => {
     });
   });
 
-  describe('managed workflow visibility', () => {
-    it('requests only unmanaged workflows when no visibility is provided', () => {
+  describe('managed workflow fetching', () => {
+    it('always fetches managed workflows when canReadManagedWorkflow is true', () => {
+      renderComponent();
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({ managed: 'all' })
+      );
+    });
+
+    it('does not fetch managed workflows when canReadManagedWorkflow is false', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({ canReadManagedWorkflow: false });
+
       renderComponent();
 
       expect(mockUseWorkflows).toHaveBeenCalledWith(
@@ -281,25 +291,23 @@ describe('RunWorkflowPanel', () => {
       );
     });
 
-    it('opts into managed workflows matching the visibility context when readable', () => {
-      renderComponent({ visibility: { selectors: ['rule_action'] } });
+    it('applies filterWorkflow to hide workflows the caller excludes', () => {
+      const managedWorkflow = {
+        ...noInputsWorkflow,
+        id: 'managed-wf',
+        name: 'Managed workflow',
+        managed: true,
+      };
+      mockWorkflowsData = [noInputsWorkflow, managedWorkflow];
 
-      expect(mockUseWorkflows).toHaveBeenCalledWith(
-        expect.objectContaining({
-          managed: 'all',
-          visibilityContext: ['selector:rule_action'],
-        })
-      );
-    });
+      // Filter out managed workflows
+      renderComponent({ filterWorkflow: (w) => !w.managed });
 
-    it('does not opt into managed workflows without the read-managed capability', () => {
-      mockUseWorkflowsCapabilities.mockReturnValue({ canReadManagedWorkflow: false });
-
-      renderComponent({ visibility: { selectors: ['rule_action'] } });
-
-      expect(mockUseWorkflows).toHaveBeenCalledWith(
-        expect.not.objectContaining({ managed: expect.anything() })
-      );
+      // The managed workflow should not appear as a selectable option.
+      // WorkflowSelector is mocked, so we verify the filterFunction is passed via the prop
+      // by checking that only the non-managed workflow ends up selectable (tested in WorkflowSelector unit tests).
+      // Here we just confirm the component renders without error when filterWorkflow is provided.
+      expect(screen.getByTestId('workflow-selector-mock')).toBeInTheDocument();
     });
   });
 

@@ -10,19 +10,20 @@ import React, { useMemo } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
-  RunWorkflowPanel,
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
+  RunWorkflowPanel,
 } from '@kbn/workflows-ui';
-import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import * as i18n from '../translations';
 
-// Managed workflows surfaced as rule actions (e.g. the alert analysis workflow) carry the
-// `rule_action` selector visibility context; requesting it here includes them in the list alongside
-// user-created workflows. Module-scoped so the reference stays stable across renders.
-const ALERT_WORKFLOW_VISIBILITY: WorkflowSelectorVisibility = { selectors: ['rule_action'] };
+// Include managed workflows that declare an `alert` trigger (e.g. the alert analysis workflow).
+// This is a module-scoped stable reference so it doesn't cause WorkflowSelector re-renders.
+const isAlertWorkflow = (w: {
+  managed?: boolean;
+  definition?: { triggers?: { type: string }[] } | null;
+}) => !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
 
 export interface AlertWorkflowsPanelProps {
   /** Array of alert ids and their respective indices */
@@ -50,8 +51,11 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
   return (
     <RunWorkflowPanel
       inputs={inputs}
-      sortTriggerTypes="alert"
-      visibility={ALERT_WORKFLOW_VISIBILITY}
+      sortWorkflow={(a, b) =>
+        Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+        Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'))
+      }
+      filterWorkflow={isAlertWorkflow}
       onClose={onClose}
       onExecute={onExecute}
     />

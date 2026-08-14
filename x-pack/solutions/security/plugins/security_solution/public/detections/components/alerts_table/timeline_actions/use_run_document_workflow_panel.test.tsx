@@ -207,7 +207,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       await waitFor(() => {
         expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
       });
-      expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
+      expect(getByTestId('execute-document-workflow-button')).toBeInTheDocument();
     });
   });
 });

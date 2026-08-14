@@ -1291,10 +1291,7 @@
     "core.euiFlyoutManaged.defaultTitle": "Unbekanntes Flyout",
     "core.euiFlyoutMenu.back": "Zurück",
     "core.euiFlyoutMenu.history": "Verlauf",
-    "core.euiFlyoutMenu.history.tooltip": "Kürzlich besucht",
     "core.euiFlyoutMenu.pagination.counter": "{position} von {total}",
-    "core.euiFlyoutMenu.pagination.first": "Erste",
-    "core.euiFlyoutMenu.pagination.last": "Letzte",
     "core.euiFlyoutMenu.pagination.next": "Weiter",
     "core.euiFlyoutMenu.pagination.previous": "Vorherige",
     "core.euiForm.addressFormErrors": "Bitte beheben Sie die markierten Fehler.",
@@ -42627,6 +42624,7 @@
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showBuildingBlockTitle": "Baustein-Warnungen einbeziehen",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showOnlyThreatIndicatorAlerts": "Nur Bedrohungsindikator-Warnungen anzeigen",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersTitle": "Zusätzliche Filter",
+    "xpack.securitySolution.detectionEngine.alerts.workflow.inputs.resumeMessage": "Geben Sie etwas ein, um {workflowName} auszuführen",
     "xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow": "Workflow ausführen",
     "xpack.securitySolution.detectionEngine.alerts.workflow.menu.run.workflow.button": "Workflow ausführen",
     "xpack.securitySolution.detectionEngine.alerts.workflow.select.title": "Workflow auswählen",
@@ -60566,6 +60564,9 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Der Webhook-Port ist erforderlich.",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "Der Nutzername ist erforderlich.",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "Dies ist ein Pflichtfeld.",
-    "xpack.watcher.watcherDescription": "Erkennen Sie Änderungen an Ihren Daten, indem Sie Alerts erstellen, verwalten und überwachen."
+    "xpack.watcher.watcherDescription": "Erkennen Sie Änderungen an Ihren Daten, indem Sie Alerts erstellen, verwalten und überwachen.",
+    "core.euiFlyoutMenu.history.tooltip": "Kürzlich besucht",
+    "core.euiFlyoutMenu.pagination.first": "Erste",
+    "core.euiFlyoutMenu.pagination.last": "Letzte"
   }
 }
