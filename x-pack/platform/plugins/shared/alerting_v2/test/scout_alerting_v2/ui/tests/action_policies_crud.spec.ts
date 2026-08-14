@@ -80,7 +80,7 @@ test.describe('Action Policies - create and edit', { tag: [...tags.stateful.clas
       expect(items[0]).toMatchObject({
         name: CREATED_POLICY_NAME,
         matcher: MATCHER,
-        groupingMode: 'per_episode',
+        grouping_mode: 'per_episode',
         throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: workflowId }],
       });
