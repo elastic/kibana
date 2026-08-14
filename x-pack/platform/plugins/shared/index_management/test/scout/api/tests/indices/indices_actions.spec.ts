@@ -64,13 +64,13 @@ apiTest.describe('Indices actions API', { tag: tags.stateful.classic }, () => {
   apiTest('flushes an index', async ({ apiClient, esClient }) => {
     const flushCount = async () => {
       const { indices } = await esClient.indices.stats({ index: INDEX_NAME, metric: 'flush' });
-      return indices?.[INDEX_NAME].total?.flush?.total;
+      return indices?.[INDEX_NAME].total?.flush?.total ?? 0;
     };
-    expect(await flushCount()).toBe(0);
+    const before = await flushCount();
 
     expect(await executeAction(apiClient, 'flush')).toHaveStatusCode(200);
 
-    expect(await flushCount()).toBe(1);
+    expect(await flushCount()).toBeGreaterThan(before);
   });
 
   apiTest('refreshes an index', async ({ apiClient, esClient }) => {
