@@ -2660,10 +2660,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.0.tgz#a5417ae8427873f1dd08b70b3574b453e67b5f7f"
   integrity sha512-Ys+3g2TaW7gADOJzPt83SJtCDhMjndcDMFVQ/Tj9iA1BfJzFKD9mAUXT3OenpuPHbI6P/myECxRJrofUsDx/5g==
 
-"@faker-js/faker@9.7.0":
-  version "9.7.0"
-  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-9.7.0.tgz#1cf1fecfcad5e2da2332140bf3b5f23cc1c2a7f4"
-  integrity sha512-aozo5vqjCmDoXLNUJarFZx2IN/GgGaogY4TMJ6so/WLZOWpSV7fvj2dmrV6sEAnUm1O7aCrhTibjpzeDFgNqbg==
+"@faker-js/faker@10.5.0":
+  version "10.5.0"
+  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-10.5.0.tgz#d2f6a8c7f08d087ac5f077d6babd0821edf24c03"
+  integrity sha512-bsxD8WLS5lIj7aaoCx1YJkktqYj5vlBUE6HWzu2Q51ksrGJ0H737ECCKlFU7Yf8Br45z9t99frBp/J7kzbMPAg==
 
 "@fast-check/jest@2.1.1":
   version "2.1.1"
