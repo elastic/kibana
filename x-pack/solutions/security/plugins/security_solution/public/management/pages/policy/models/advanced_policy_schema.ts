@@ -2802,7 +2802,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.system_dll_enrichment',
       {
-        defaultMessage: 'Enrich memory events with additional data when they target certain system DLLs. Default: true.',
+        defaultMessage:
+          'Enrich memory events with additional data when they target certain system DLLs. Default: true.',
       }
     ),
   },
