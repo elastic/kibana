@@ -11,7 +11,6 @@ import type {
   listRuleExecutionsRequestSchema,
 } from '@kbn/alerting-v2-schemas';
 import {
-  ALERT_API_PATH,
   SERIES_API_PATH,
   EPISODES_API_PATH,
   ACTION_POLICY_API_PATH,
