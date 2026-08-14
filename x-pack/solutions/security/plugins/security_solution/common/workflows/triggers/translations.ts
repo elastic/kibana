@@ -167,27 +167,18 @@ export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate
   }
 );
 
-export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_1 = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.alertStatusChanged.documentation.example1',
-  {
-    defaultMessage: `## Run when alerts are acknowledged
+export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_1 = `## Run when alerts are acknowledged
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: securitySolution.alertStatusChanged
     on:
       condition: 'event.status: "acknowledged"'
-\`\`\``,
-    values: { triggerId: 'securitySolution.alertStatusChanged' },
-  }
-);
+\`\`\``;
 
-export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_2 = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.alertStatusChanged.documentation.example2',
-  {
-    defaultMessage: `## Process each affected alert sequentially
+export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_2 = `## Process each affected alert sequentially
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: securitySolution.alertStatusChanged
 steps:
   - name: process_each_alert
     type: foreach
@@ -197,10 +188,7 @@ steps:
         type: renderAlertNarrative
         with:
           alertId: "{{ foreach.item }}"
-\`\`\``,
-    values: { triggerId: 'securitySolution.alertStatusChanged' },
-  }
-);
+\`\`\``;
 
 // Alert tags changed
 
@@ -222,19 +210,13 @@ export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.alertTagsChanged.documentation.example',
-  {
-    defaultMessage: `## Run when a specific tag is added
+export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when a specific tag is added
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: securitySolution.alertTagsChanged
     on:
       condition: 'event.tagsToAdd: "high-priority"'
-\`\`\``,
-    values: { triggerId: 'securitySolution.alertTagsChanged' },
-  }
-);
+\`\`\``;
 
 // Alert assignees changed
 
@@ -256,19 +238,13 @@ export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.transl
   }
 );
 
-export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.alertAssigneesChanged.documentation.example',
-  {
-    defaultMessage: `## Run when an alert is assigned
+export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when an alert is assigned
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: securitySolution.alertAssigneesChanged
     on:
       condition: 'event.assigneesToAdd: *'
-\`\`\``,
-    values: { triggerId: 'securitySolution.alertAssigneesChanged' },
-  }
-);
+\`\`\``;
 
 // Attack status changed
 
@@ -292,19 +268,13 @@ export const ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translat
   }
 );
 
-export const ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.attackStatusChanged.documentation.example',
-  {
-    defaultMessage: `## Run when attacks are acknowledged
+export const ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when attacks are acknowledged
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: securitySolution.attackStatusChanged
     on:
       condition: 'event.status: "acknowledged"'
-\`\`\``,
-    values: { triggerId: 'securitySolution.attackStatusChanged' },
-  }
-);
+\`\`\``;
 
 // Attack tags changed
 
@@ -326,19 +296,13 @@ export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.attackTagsChanged.documentation.example',
-  {
-    defaultMessage: `## Run when a tag is added to attacks
+export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when a tag is added to attacks
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: securitySolution.attackTagsChanged
     on:
       condition: 'event.tagsToAdd: "escalated"'
-\`\`\``,
-    values: { triggerId: 'securitySolution.attackTagsChanged' },
-  }
-);
+\`\`\``;
 
 // Attack assignees changed
 
@@ -360,19 +324,13 @@ export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.trans
   }
 );
 
-export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.attackAssigneesChanged.documentation.example',
-  {
-    defaultMessage: `## Run when an attack is assigned
+export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when an attack is assigned
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
+  - type: securitySolution.attackAssigneesChanged
     on:
       condition: 'event.assigneesToAdd: *'
-\`\`\``,
-    values: { triggerId: 'securitySolution.attackAssigneesChanged' },
-  }
-);
+\`\`\``;
 
 // Note created
 
@@ -397,17 +355,11 @@ export const NOTE_CREATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const NOTE_CREATED_TRIGGER_DOCUMENTATION_EXAMPLE = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.noteCreated.documentation.example',
-  {
-    defaultMessage: `## Run whenever a note is added to a document
+export const NOTE_CREATED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run whenever a note is added to a document
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
-\`\`\``,
-    values: { triggerId: 'securitySolution.noteCreated' },
-  }
-);
+  - type: securitySolution.noteCreated
+\`\`\``;
 
 // Note updated
 
@@ -432,14 +384,8 @@ export const NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const NOTE_UPDATED_TRIGGER_DOCUMENTATION_EXAMPLE = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.noteUpdated.documentation.example',
-  {
-    defaultMessage: `## Run whenever a note is updated on a document
+export const NOTE_UPDATED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run whenever a note is updated on a document
 \`\`\`yaml
 triggers:
-  - type: {triggerId}
-\`\`\``,
-    values: { triggerId: 'securitySolution.noteUpdated' },
-  }
-);
+  - type: securitySolution.noteUpdated
+\`\`\``;
