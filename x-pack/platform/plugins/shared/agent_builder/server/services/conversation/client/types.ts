@@ -50,12 +50,22 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'pinned'
       | 'workspace_id'
       | 'access_control'
+      | 'metadata'
+      | 'template_id'
+      | 'template_version'
     >
   >;
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  'id' | 'title' | 'attachments' | 'read' | 'pinned'
+  | 'id'
+  | 'title'
+  | 'attachments'
+  | 'read'
+  | 'pinned'
+  | 'metadata'
+  | 'template_id'
+  | 'template_version'
 >;
 
 export interface GetEventsOptions {

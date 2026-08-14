@@ -343,3 +343,10 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export type {
+  ConversationTemplate,
+  ConversationTemplateInputType,
+  ConversationTemplateFieldDefinition,
+  MetadataFieldValue,
+  SerializedMetadataValue,
+} from './templates';

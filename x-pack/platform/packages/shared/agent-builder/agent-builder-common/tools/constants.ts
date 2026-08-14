@@ -97,6 +97,7 @@ export const internalTools = {
   readFile: 'read_file',
   listFiles: 'list_files',
   bash: 'bash',
+  setConversationMetadata: 'set_conversation_metadata',
   discoverApis: 'discover_apis',
   describeApi: 'describe_api',
   executeApi: 'execute_api',
