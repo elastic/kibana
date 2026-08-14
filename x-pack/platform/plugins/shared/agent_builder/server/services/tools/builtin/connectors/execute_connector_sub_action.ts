@@ -137,7 +137,7 @@ export const createExecuteConnectorSubActionTool = ({
     }
 
     // Enforce instance allowlist / recommended-mode rules.
-    if (!isSelectedActionEnabled(subAction, selectedActions, spec.actions)) {
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
       return {
         results: [
           createErrorResult({

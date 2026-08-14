@@ -135,7 +135,7 @@ export const generateExecutorFunction = ({
     }
 
     const selectedActions = config.selectedActions as SelectedActions;
-    if (!isSelectedActionEnabled(subAction, selectedActions, actions)) {
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
       const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
