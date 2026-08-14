@@ -7,9 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-utils';
-
-export { parseEpisodeDataJson, getValueByFieldPath };
+import { getValueByFieldPath } from '@kbn/alerting-v2-utils';
 
 const isScalar = (value: unknown): value is string | number | boolean =>
   typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';

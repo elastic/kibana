@@ -37,8 +37,6 @@ describe('alertEpisodeToEpisodeAttachment', () => {
         triggered_at: '2026-04-10T11:05:00.000Z',
         last_ack_action: 'ack',
         last_assignee_uid: 'user-1',
-        last_snooze_action: undefined,
-        snooze_expiry: undefined,
         last_tags: ['ops'],
         episode_data: '{"host":"a"}',
         severity: 'high',
@@ -83,5 +81,17 @@ describe('alertEpisodeToEpisodeAttachment', () => {
         severity: undefined,
       })
     );
+  });
+
+  it('converts null to undefined on any field, including required ones', () => {
+    const result = alertEpisodeToEpisodeAttachment({
+      ...baseEpisode,
+      group_hash: null,
+      duration: null,
+    } as unknown as AlertEpisode);
+
+    expect(result.group_hash).toBeUndefined();
+    expect(result.duration).toBeUndefined();
+    expect(result).not.toEqual(expect.objectContaining({ group_hash: null, duration: null }));
   });
 });
