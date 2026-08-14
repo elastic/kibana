@@ -29,7 +29,6 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import {
   KNOWLEDGE_INDICATOR_FEATURE_TYPES,
   MAX_COMPACT_META_ARRAY_SAMPLE,
-  MAX_COMPACT_META_DEPTH,
   MAX_COMPACT_META_KEYS,
   searchKnowledgeIndicatorsToolHandler,
 } from './handler';
@@ -113,7 +112,7 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .default('compact')
     .describe(
       dedent`Response detail level.
-      - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Bounds \`evidence\` and \`tags\` to ${MAX_FEATURE_ARRAY_ITEMS} items on all feature KIs; \`evidence_count\` and \`tags_count\` are present when those arrays were truncated. \`meta\` keeps the first ${MAX_COMPACT_META_KEYS} keys in JavaScript property-enumeration order, samples array values to ${MAX_COMPACT_META_ARRAY_SAMPLE} items, records omitted array items in \`meta_array_items_omitted\`, and truncates nested values beyond depth ${MAX_COMPACT_META_DEPTH}. \`meta_keys_omitted\` counts dropped keys. Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
+      - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Bounds \`evidence\` and \`tags\` to ${MAX_FEATURE_ARRAY_ITEMS} items on all feature KIs; \`evidence_count\` and \`tags_count\` are present when those arrays were truncated. \`meta\` is a flat key→value map; keeps the first ${MAX_COMPACT_META_KEYS} keys in JavaScript property-enumeration order, samples array values to ${MAX_COMPACT_META_ARRAY_SAMPLE} items, and records omitted array items in \`meta_array_items_omitted\`. \`meta_keys_omitted\` counts dropped keys. Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
       - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve untruncated evidence, tags, metadata, and computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
     ),
 });

@@ -450,19 +450,11 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
       expect(feature).not.toHaveProperty('meta_keys_omitted');
     });
 
-    it('truncates nested meta values and records omitted array items', async () => {
+    it('samples top-level array values and records omitted items', async () => {
       const meta = {
-        nested: {
-          deeper: {
-            value: 'omitted',
-          },
-        },
         ports: [443, 8443, 9200, 9300],
       };
       const feature = await getCompactFeature(makeFeature({ type: 'entity', meta }));
-      expect(feature.meta?.nested).toEqual({
-        deeper: '[nested metadata truncated]',
-      });
       expect(feature.meta?.ports).toEqual([443, 8443, 9200]);
       expect(feature.meta_array_items_omitted).toEqual({ ports: 1 });
     });

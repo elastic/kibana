@@ -86,12 +86,11 @@ const MAX_LOG_SAMPLES = 1;
 const MAX_LOG_PATTERNS = 1;
 export const MAX_COMPACT_META_ARRAY_SAMPLE = 3;
 export const MAX_COMPACT_META_KEYS = 10;
-export const MAX_COMPACT_META_DEPTH = 2;
 
-// Feature meta is free-form model output merged across runs; large features accumulate
-// dozens of near-synonym keys. Keep the first MAX_COMPACT_META_KEYS keys with array
-// values sampled to MAX_COMPACT_META_ARRAY_SAMPLE — dropped keys are surfaced via
-// meta_keys_omitted.
+// Feature meta is a flat Record<string, scalar | array> — see baseFeatureSchema in
+// kbn-significant-events-schema. Keep the first MAX_COMPACT_META_KEYS keys; sample
+// array values to MAX_COMPACT_META_ARRAY_SAMPLE items and record omissions in
+// meta_array_items_omitted. Unexpected object values are left as-is (schema violation).
 function truncateMeta(meta: Record<string, unknown>): {
   meta: Record<string, unknown>;
   omittedKeys: number;
@@ -100,11 +99,15 @@ function truncateMeta(meta: Record<string, unknown>): {
   const entries = Object.entries(meta);
   const arrayItemsOmitted: Record<string, number> = {};
   const kept = entries.slice(0, MAX_COMPACT_META_KEYS).map(([key, value]) => {
-    if (Array.isArray(value) && value.length > MAX_COMPACT_META_ARRAY_SAMPLE) {
-      arrayItemsOmitted[key] = value.length - MAX_COMPACT_META_ARRAY_SAMPLE;
+    if (Array.isArray(value)) {
+      if (value.length > MAX_COMPACT_META_ARRAY_SAMPLE) {
+        arrayItemsOmitted[key] = value.length - MAX_COMPACT_META_ARRAY_SAMPLE;
+        return [key, value.slice(0, MAX_COMPACT_META_ARRAY_SAMPLE)];
+      }
+      return [key, value];
     }
 
-    return [key, truncateMetaValue(value, 1)];
+    return [key, value];
   });
 
   return {
@@ -112,28 +115,6 @@ function truncateMeta(meta: Record<string, unknown>): {
     omittedKeys: Math.max(0, entries.length - MAX_COMPACT_META_KEYS),
     arrayItemsOmitted,
   };
-}
-
-function truncateMetaValue(value: unknown, depth: number): unknown {
-  if (Array.isArray(value)) {
-    return value
-      .slice(0, MAX_COMPACT_META_ARRAY_SAMPLE)
-      .map((item) => truncateMetaValue(item, depth + 1));
-  }
-
-  if (typeof value === 'object' && value !== null) {
-    if (depth >= MAX_COMPACT_META_DEPTH) {
-      return '[nested metadata truncated]';
-    }
-
-    return Object.fromEntries(
-      Object.entries(value)
-        .slice(0, MAX_COMPACT_META_KEYS)
-        .map(([key, nestedValue]) => [key, truncateMetaValue(nestedValue, depth + 1)])
-    );
-  }
-
-  return value;
 }
 
 function truncateComputedProperties(
