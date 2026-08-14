@@ -56,7 +56,7 @@ If artifacts are not available (expired, not uploaded, no `read_artifacts` token
 
 `bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --json` returns a JSON listing of every artifact uploaded for the failing job. Pass `--job-uuid <jobId>` for the failed attempt (without it, `bk` only returns the latest attempt and hides retried failures). If a build retried to green, failure artifacts only live on the failed job's listing; don't conclude "no screenshot" until you've scoped to the right job UUID.
 
-Each listing entry carries an artifact ID; download by ID into a directory with `bk artifacts download <artifact-id> <dest-dir> --build <build> -p <pipeline>`. Download only the artifacts you will actually read — the failure screenshot, the DOM/HTML snapshot, the relevant `target/test_failures/*.log` — not the whole listing. For a large text log, `grep`/`sed` around the failure timestamp instead of reading it end to end. These are the exact commands to use; don't probe the CLI (`--help`, `bk artifact` vs `bk artifacts`, etc.) to rediscover them.
+Each listing entry carries an artifact ID; download by ID into a directory with `bk artifacts download <artifact-id> <dest-dir> --build <build> -p <pipeline>`. Download only the artifacts you will actually read — the failure screenshot, the DOM/HTML snapshot, the relevant `target/test_failures/*.log` — not the whole listing. For a large text log, `grep`/`sed` around the failure timestamp instead of reading it end to end. Use these commands directly instead of rediscovering the syntax from scratch; only fall back to `bk ... --help` if one doesn't work as documented here.
 
 ### Where the Kibana & Elasticsearch logs live
 
