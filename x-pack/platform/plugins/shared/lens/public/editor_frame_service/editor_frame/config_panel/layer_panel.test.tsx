@@ -1168,15 +1168,20 @@ describe('LayerPanel', () => {
     };
 
     it('renders the editor for the selected text-based layer', () => {
+      mockVisualization.getLayerIds.mockReturnValue(['data', 'annotation']);
       renderLayerPanel({
         propsOverrides: {
           layerId: 'data',
+          isOnlyLayer: false,
           framePublicAPI: makeMixedDatasourceFrameAPI(),
         },
         preloadedState: mixedDatasourceState,
       });
 
       expect(screen.getByTestId('mockESQLEditor')).toBeInTheDocument();
+      expect(jest.mocked(ESQLEditor).mock.calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ onLayerQuerySubmit: expect.any(Function) })
+      );
     });
 
     it('does not render the editor for a selected static annotation layer', () => {
@@ -1192,6 +1197,7 @@ describe('LayerPanel', () => {
     });
 
     it('updates and reconciles only the selected text-based layer query', async () => {
+      mockVisualization.getLayerIds.mockReturnValue(['first', 'second']);
       const firstQuery = { esql: 'FROM first-index | LIMIT 10' };
       const secondQuery = { esql: 'FROM second-index | STATS COUNT(*)' };
       const newSecondQuery = { esql: 'FROM second-index | STATS MAX(bytes)' };
@@ -1221,6 +1227,7 @@ describe('LayerPanel', () => {
       renderLayerPanel({
         propsOverrides: {
           layerId: 'second',
+          isOnlyLayer: false,
           dimensionGroups: [
             {
               groupId: 'metric',

@@ -342,7 +342,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const layerQuery = textBasedDatasourceState?.layers[layerId]?.query;
   const usesLayerScopedQuery =
     textBasedDatasourceState !== undefined &&
-    Object.keys(textBasedDatasourceState.layers).length > 1;
+    activeVisualization.getLayerIds(visualizationState).length > 1;
   const activeQuery = layerQuery ?? editorProps.attributes?.state.query;
   const shouldRenderESQLEditor =
     isTextBasedLanguage && canEditTextBasedQuery && isTextBasedAttributes(editorProps.attributes);
@@ -567,16 +567,18 @@ export function LayerPanel(props: LayerPanelProps) {
               />
             )}
             {shouldRenderESQLEditor ? (
-              <ESQLEditor
-                uiSettings={core.uiSettings}
-                http={core.http}
-                isTextBasedLanguage={isTextBasedLanguage}
-                framePublicAPI={framePublicAPI}
-                layerId={layerId}
-                layerQuery={layerQuery}
-                onLayerQuerySubmit={usesLayerScopedQuery ? updateLayerQuery : undefined}
-                {...editorProps}
-              />
+              <React.Fragment key={layerId}>
+                <ESQLEditor
+                  uiSettings={core.uiSettings}
+                  http={core.http}
+                  isTextBasedLanguage={isTextBasedLanguage}
+                  framePublicAPI={framePublicAPI}
+                  layerId={layerId}
+                  layerQuery={layerQuery}
+                  onLayerQuerySubmit={usesLayerScopedQuery ? updateLayerQuery : undefined}
+                  {...editorProps}
+                />
+              </React.Fragment>
             ) : null}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
