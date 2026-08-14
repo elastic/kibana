@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 import { setupFleetPackages, removeFleetPackages } from '../../fixtures/fleet_helpers';
 
-const ALL_MODULE_IDS = [
+export const ALL_MODULE_IDS = [
   'apache_data_stream',
   'apache_ecs',
   'apm_transaction',
