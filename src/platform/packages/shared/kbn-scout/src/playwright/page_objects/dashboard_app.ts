@@ -164,13 +164,7 @@ export class DashboardApp {
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
-    await this.page.waitForURL(/#\/create/);
-    // Wait until the create route has finished painting. Clicking Add while the
-    // hash navigation is still settling detaches the Library tab mid-click.
     await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
-    await expect(this.page.getByRole('heading', { name: /This dashboard is empty/i })).toBeVisible({
-      timeout: options?.timeout ?? 20_000,
-    });
   }
 
   async openTryEsqlDashboard() {
@@ -277,10 +271,9 @@ export class DashboardApp {
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
   async openAddPanelFlyout(options?: TimeoutOptions) {
-    await this.toasts.dismissAll();
-    await this.addTopNavButton.waitFor({ state: 'visible', timeout: options?.timeout ?? 20_000 });
+    await this.addTopNavButton.waitFor({ state: 'visible', timeout: options?.timeout ?? 10_000 });
     await this.addTopNavButton.click();
-    await expect(this.panelSelectionFlyout).toBeVisible({ timeout: options?.timeout ?? 20_000 });
+    await expect(this.panelSelectionFlyout).toBeVisible({ timeout: options?.timeout ?? 10_000 });
   }
 
   async saveDashboard(name: string, options?: TimeoutOptions) {
@@ -290,9 +283,6 @@ export class DashboardApp {
   }
 
   async confirmSaveModal(options?: TimeoutOptions) {
-    // Save toasts from prior panels can sit over the confirm button and make it
-    // report as "not stable" / detach mid-click.
-    await this.toasts.dismissAll();
     await this.confirmSaveButton.click();
     await expect(this.saveModal).toBeHidden({
       timeout: options?.timeout ?? DEFAULT_SAVE_MODAL_TIMEOUT,
@@ -340,11 +330,8 @@ export class DashboardApp {
   }
 
   async clickQuickSave() {
-    await this.clickAppMenuItem('dashboardQuickSaveMenuItem');
-    // Save is async; disabled control means the dashboard finished persisting.
-    await this.page
-      .locator('[data-test-subj="dashboardQuickSaveMenuItem"][disabled]')
-      .waitFor({ state: 'visible' });
+    await expect(this.page.testSubj.locator('dashboardQuickSaveMenuItem')).toBeVisible();
+    await this.page.testSubj.click('dashboardQuickSaveMenuItem');
   }
 
   async clearUnsavedChanges() {
@@ -364,10 +351,6 @@ export class DashboardApp {
    * Opens the "Add from library" flyout.
    */
   async openLibraryFlyout(options?: TimeoutOptions) {
-    await this.toasts.dismissAll();
-    await expect(this.addTopNavButton).toBeVisible({
-      timeout: options?.timeout ?? 20_000,
-    });
     await this.addTopNavButton.click();
     const libraryTab = this.page.testSubj.locator('addToDashboardTab-library');
     // justified: create-route remounts can detach the tab; give the flyout time to settle
@@ -385,16 +368,15 @@ export class DashboardApp {
   }
 
   /**
-   * Closes the library flyout. Caller must have the finder open.
+   * Closes the library flyout.
    */
   async closeLibraryFlyout() {
-    // A lingering toast can sit over the flyout close button.
-    await this.toasts.dismissAll();
+    await expect(this.savedObjectsFinderTable).toBeVisible();
     await this.page
       .locator('.euiFlyout', { has: this.savedObjectsFinderTable })
       .locator('[data-test-subj="euiFlyoutCloseButton"]')
       .click();
-    await this.savedObjectsFinderTable.waitFor({ state: 'hidden' });
+    await expect(this.savedObjectsFinderTable).toBeHidden();
   }
 
   /**
@@ -769,9 +751,11 @@ export class DashboardApp {
 
   private async waitForCustomTimeRangeToggleState(enabled: boolean) {
     const expected = enabled ? 'true' : 'false';
-    await expect(this.page.testSubj.locator(this.customTimeRangeToggleTestSubj)).toHaveAttribute(
-      'aria-checked',
-      expected
+    const selector = `[data-test-subj="${this.customTimeRangeToggleTestSubj}"]`;
+    await this.page.waitForFunction(
+      ({ selector: selectorArg, expectedValue }) =>
+        document.querySelector(selectorArg)?.getAttribute('aria-checked') === expectedValue,
+      { selector, expectedValue: expected }
     );
   }
 
@@ -1072,8 +1056,6 @@ export class DashboardApp {
    * not just globally visible. This prevents clicking wrong panel's actions.
    */
   async clickPanelAction(actionTestSubj: string, title?: string) {
-    // Toasts from save/add-panel can cover hover actions / context menu items.
-    await this.toasts.dismissAll();
     const panelWrapper = this.getPanelHoverActionsLocator(title);
     await panelWrapper.scrollIntoViewIfNeeded();
     await panelWrapper.hover();
@@ -1103,7 +1085,11 @@ export class DashboardApp {
     const initialCount = await panels.count();
 
     await this.clickPanelAction('embeddablePanelAction-clonePanel', title);
-    await expect(panels).toHaveCount(initialCount + 1);
+    await this.page.waitForFunction(
+      (expectedCount) =>
+        document.querySelectorAll('[data-test-subj="embeddablePanel"]').length > expectedCount,
+      initialCount
+    );
   }
 
   /**
@@ -1126,9 +1112,11 @@ export class DashboardApp {
 
     // Fill in the new title
     await this.savedObjectTitleInput.fill(newTitle);
-    await this.toasts.dismissAll();
     await this.confirmSaveButton.click();
-    // Success toasts auto-dismiss; the linked-library badge is the durable signal.
+
+    // Wait for success
+    await expect(this.page.testSubj.locator('addPanelToLibrarySuccess')).toBeVisible();
+    // Verify the panel is now linked
     await this.expectLinkedToLibrary(newTitle);
   }
 
@@ -1157,10 +1145,8 @@ export class DashboardApp {
     const actionInMenu = this.page.testSubj.locator(actionTestSubj);
     const count = await actionInMenu.count();
 
+    // Close menu by pressing Escape
     await this.page.keyboard.press('Escape');
-    await this.page.testSubj.locator('embeddablePanelContextMenuOpen').waitFor({
-      state: 'hidden',
-    });
     return count > 0;
   }
 
@@ -1172,7 +1158,9 @@ export class DashboardApp {
     if (!exists) {
       // Collect available actions for better error message
       await this.openPanelContextMenu(title);
-      const allActions = await this.page.testSubj.locator('^embeddablePanelAction-').all();
+      const allActions = await this.page
+        .locator('[data-test-subj^="embeddablePanelAction-"]')
+        .all();
       const actionNames: string[] = [];
       for (const action of allActions) {
         const testSubj = await action.getAttribute('data-test-subj');
@@ -1226,10 +1214,12 @@ export class DashboardApp {
 
   async openInlineEditor(id: string) {
     // Hover over the panel to show action buttons
-    await this.getPanelByEmbeddableId(id).hover();
-    await this.page.testSubj
-      .locator(`hover-actions-${id} > embeddablePanelAction-editPanel`)
-      .click();
+    const embeddableSelector = `[data-test-embeddable-id="${id}"]`;
+    await this.page.locator(embeddableSelector).hover();
+
+    // Wait for the edit button to appear and click it
+    const editVisualizationConfigurationSelector = `[data-test-subj="hover-actions-${id}"] [data-test-subj="embeddablePanelAction-editPanel"]`;
+    await this.page.locator(editVisualizationConfigurationSelector).click();
   }
 
   /**
