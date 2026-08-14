@@ -12,7 +12,6 @@ export const MAX_ID_LENGTH = 512;
 export const MAX_SPACE_ID_LENGTH = 1024;
 export const MAX_TAG_LENGTH = 256;
 export const MAX_ASSIGNEE_UID_LENGTH = 256;
-export const MAX_NOTE_CONTENT_LENGTH = 30_000;
 export const MAX_USERNAME_LENGTH = 256;
 export const MAX_TAGS_PER_OPERATION = 100;
 export const MAX_ASSIGNEES_PER_OPERATION = 100;

@@ -108,11 +108,6 @@ export const NOTE_CREATED_SCHEMA_NOTE_ID_DESCRIPTION = i18n.translate(
   { defaultMessage: 'The saved object ID of the created note.' }
 );
 
-export const NOTE_CREATED_SCHEMA_NOTE_CONTENT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.noteCreated.schema.noteContent',
-  { defaultMessage: 'The text content of the note.' }
-);
-
 export const NOTE_CREATED_SCHEMA_CREATED_BY_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteCreated.schema.createdBy',
   { defaultMessage: 'The username of the note author.' }
@@ -128,11 +123,6 @@ export const NOTE_CREATED_SCHEMA_DOCUMENT_ID_DESCRIPTION = i18n.translate(
 export const NOTE_UPDATED_SCHEMA_NOTE_ID_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteUpdated.schema.noteId',
   { defaultMessage: 'The saved object ID of the updated note.' }
-);
-
-export const NOTE_UPDATED_SCHEMA_NOTE_CONTENT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.workflows.triggers.noteUpdated.schema.noteContent',
-  { defaultMessage: 'The updated text content of the note.' }
 );
 
 export const NOTE_UPDATED_SCHEMA_UPDATED_BY_DESCRIPTION = i18n.translate(
@@ -288,7 +278,7 @@ export const NOTE_CREATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteCreated.documentation.details',
   {
     defaultMessage:
-      'Emitted after a note is created on a specific document. Only fires for notes attached to an entity (documentId is set). Investigation guide and timeline-level notes do not fire this trigger. The payload includes event.noteId, event.noteContent, event.createdBy, event.documentId, and event.spaceId.',
+      'Emitted after a note is created on a specific document. Only fires for notes attached to an entity (documentId is set). Investigation guide and timeline-level notes do not fire this trigger. The payload includes event.noteId, event.createdBy, event.documentId, and event.spaceId.',
   }
 );
 
@@ -311,6 +301,6 @@ export const NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.securitySolution.workflows.triggers.noteUpdated.documentation.details',
   {
     defaultMessage:
-      'Emitted after a note is updated on a specific document. Only fires for notes attached to an entity (documentId is set). The payload includes event.noteId, event.noteContent, event.updatedBy, event.documentId, and event.spaceId.',
+      'Emitted after a note is updated on a specific document. Only fires for notes attached to an entity (documentId is set). The payload includes event.noteId, event.updatedBy, event.documentId, and event.spaceId.',
   }
 );

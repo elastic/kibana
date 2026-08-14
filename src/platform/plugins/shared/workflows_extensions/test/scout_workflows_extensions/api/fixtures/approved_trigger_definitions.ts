@@ -176,11 +176,11 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'securitySolution.noteCreated',
-    schemaHash: 'cc25972c9a7956404837ea9572a1a6325af1d2f684207d383d0f8a85c752cf20',
+    schemaHash: 'a3b3a4b01b67c161bd2ac1fc0e0f5ab29434a6ced78fedf51dd0fb1a7d853d10',
   },
   {
     id: 'securitySolution.noteUpdated',
-    schemaHash: 'e1d6db5f3b1d43dc184425716c7f880f05ae3ec819eb44a2102c36c28225ea1b',
+    schemaHash: '447dcffc8d5efe08be3c3d53895df797ae8f9fe3ad7b5f7365b2f66fbe6eda7e',
   },
   {
     id: 'workflows.failed',
