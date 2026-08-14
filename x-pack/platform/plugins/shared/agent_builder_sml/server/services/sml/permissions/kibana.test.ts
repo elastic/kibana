@@ -7,20 +7,20 @@
 
 import { kibanaPermissions } from './kibana';
 
-describe('kibanaSavedObjectPermissions', () => {
-  it('returns the standard `saved_object:<type>/get` privilege', () => {
+describe('kibanaPermissions', () => {
+  it('returns the standard `ai_index:<type>/get` privilege', () => {
     expect(kibanaPermissions({ kiType: 'lens' })).toEqual({
-      kibana: { privileges: { name: 'saved_object:lens/get' } },
+      kibana: { privileges: { name: 'ai_index:lens/get' } },
     });
   });
 
-  it('builds the privilege from the supplied SO type id (dashboard vs lens vs custom)', () => {
-    expect(
-      kibanaPermissions({ kiType: 'dashboard' }).kibana.privileges
-    ).toEqual({ name: 'saved_object:dashboard/get' });
-    expect(
-      kibanaPermissions({ kiType: 'custom-type' }).kibana.privileges
-    ).toEqual({ name: 'saved_object:custom-type/get' });
+  it('builds the privilege from the supplied KI type id (dashboard vs lens vs custom)', () => {
+    expect(kibanaPermissions({ kiType: 'dashboard' }).kibana.privileges).toEqual({
+      name: 'ai_index:dashboard/get',
+    });
+    expect(kibanaPermissions({ kiType: 'custom-type' }).kibana.privileges).toEqual({
+      name: 'ai_index:custom-type/get',
+    });
   });
 
   it('returns a fresh object on each call so callers cannot share state', () => {
@@ -32,9 +32,9 @@ describe('kibanaSavedObjectPermissions', () => {
     expect(first.kibana.privileges).not.toBe(second.kibana.privileges);
   });
 
-  it('throws when savedObjectType is empty', () => {
+  it('throws when kiType is empty', () => {
     expect(() => kibanaPermissions({ kiType: '' })).toThrow(
-      'kibanaSavedObjectPermissions: savedObjectType is required'
+      'kibanaPermissions: kiType is required'
     );
   });
 });
