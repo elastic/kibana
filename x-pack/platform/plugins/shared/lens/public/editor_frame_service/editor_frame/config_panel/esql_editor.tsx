@@ -41,6 +41,11 @@ export type ESQLEditorProps = Simplify<
     isTextBasedLanguage: boolean;
     uiSettings: IUiSettingsClient;
     http: CoreStart['http'];
+    layerQuery?: AggregateQuery;
+    onLayerQuerySubmit?: (
+      query: AggregateQuery,
+      abortController?: AbortController
+    ) => Promise<void>;
   } & Pick<
     LayerPanelProps,
     | 'attributes'
@@ -84,10 +89,12 @@ export function ESQLEditor({
   setCurrentAttributes,
   updateSuggestion,
   onTextBasedQueryStateChange,
+  layerQuery,
+  onLayerQuerySubmit,
 }: ESQLEditorProps) {
   // recomputed every render but only read by the useRef/useState initializers
   // below — do not hoist into a memo, later renders intentionally ignore it
-  const initialQuery = getRepresentativeQuery(attributes) || { esql: '' };
+  const initialQuery = layerQuery ?? (getRepresentativeQuery(attributes) || { esql: '' });
   const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
   const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
 
@@ -107,6 +114,17 @@ export function ESQLEditor({
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!layerQuery || isEqual(layerQuery, prevQuery.current)) {
+      return;
+    }
+
+    prevQuery.current = layerQuery;
+    setQuery(layerQuery);
+    setSubmittedQuery(layerQuery);
+    setErrors([]);
+  }, [layerQuery]);
 
   const currentAttributes = useCurrentAttributes({
     textBasedMode: isTextBasedLanguage,
@@ -152,6 +170,15 @@ export function ESQLEditor({
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
       setErrors([]);
+
+      if (onLayerQuerySubmit) {
+        await onLayerQuerySubmit(q, abortController);
+        prevQuery.current = q;
+        setSubmittedQuery(q);
+        setIsVisualizationLoading(false);
+        return;
+      }
+
       const attrs = await getSuggestions(
         q,
         data,
@@ -196,11 +223,12 @@ export function ESQLEditor({
       isApproximate,
       setCurrentAttributes,
       updateSuggestion,
+      onLayerQuerySubmit,
     ]
   );
 
   useInitializeChart({
-    isTextBasedLanguage,
+    isTextBasedLanguage: isTextBasedLanguage && !onLayerQuerySubmit,
     query,
     dataGridAttrs,
     isInitialized,
@@ -222,6 +250,10 @@ export function ESQLEditor({
   // Refresh the ES|QL results table for the last submitted query when inputs to the preview
   // request change without the user submitting again.
   useEffect(() => {
+    if (onLayerQuerySubmit) {
+      return;
+    }
+
     // Skip the initial render, the grid is populated by useInitializeChart → runQuery
     if (isInitialRenderRef.current) {
       isInitialRenderRef.current = false;
@@ -267,6 +299,7 @@ export function ESQLEditor({
     datasourceMap,
     visualizationMap,
     adHocDataViews,
+    onLayerQuerySubmit,
   ]);
 
   if (!isOfAggregateQueryType(query)) {
