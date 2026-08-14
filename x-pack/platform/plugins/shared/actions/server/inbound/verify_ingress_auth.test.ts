@@ -6,7 +6,7 @@
  */
 
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
-import { INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH } from '../../common/routes/events/apis/ingest';
+import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from '../../common/routes/events/apis/ingest';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 
 describe('extractIngestToken', () => {
@@ -39,12 +39,12 @@ describe('extractIngestToken', () => {
   });
 
   it('rejects tokens longer than the max length from query', () => {
-    const tooLong = 'a'.repeat(INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH + 1);
+    const tooLong = 'a'.repeat(INBOUND_EVENTS_TOKEN_MAX_LENGTH + 1);
     expect(extractIngestToken({ query: { token: tooLong }, headers: {} })).toBeUndefined();
   });
 
   it('does not fall back to query when Authorization Bearer is oversized', () => {
-    const tooLong = 'a'.repeat(INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH + 1);
+    const tooLong = 'a'.repeat(INBOUND_EVENTS_TOKEN_MAX_LENGTH + 1);
     expect(
       extractIngestToken({
         query: { token: 'from-query' },

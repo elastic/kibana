@@ -5,5 +5,37 @@
  * 2.0.
  */
 
-export type { InboundEventsClient, InboundEventsClientArgs } from './client';
-export { createInboundEventsClient } from './client';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+
+import type { InMemoryConnector } from '../types';
+import type { InboundEventsClient } from './client';
+import { buildInboundEventsClient } from './client';
+import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
+import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
+
+export type { InboundEventsClient } from './client';
+
+/**
+ * Public setup-time inputs for {@link createInboundEventsClient}.
+ * The factory binds `getStartServices` into a space-scoped SO client factory; callers do not pass SO clients.
+ */
+export interface InboundEventsClientArgs {
+  logger: Logger;
+  inboundEventsEnabled: boolean;
+  maxEmitted: number;
+  emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
+  getStartServices: CoreSetup['getStartServices'];
+  inMemoryConnectors: InMemoryConnector[];
+}
+
+/**
+ * Builds an inbound events client with shared deps (logger, emitter, config, SO factory).
+ */
+export function createInboundEventsClient(args: InboundEventsClientArgs): InboundEventsClient {
+  const { getStartServices, ...rest } = args;
+  return buildInboundEventsClient({
+    ...rest,
+    getUnsecuredSavedObjectsClient: (spaceId) =>
+      createUnsecuredInboundSavedObjectsClient({ getStartServices, spaceId }),
+  });
+}

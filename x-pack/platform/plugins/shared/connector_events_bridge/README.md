@@ -4,7 +4,7 @@ Phase 1 disposable bridge that registers on the Actions inbound events hub and f
 
 ## Why this plugin exists
 
-Keeps Actions free of a hard Workflows dependency. The hub (`actions/server/inbound`) stays consumer-agnostic; this plugin is the single Phase 1 emitter.
+Keeps Actions free of a hard Workflows dependency. The hub (`actions/server/inbound`) stays consumer-agnostic; this plugin is the single Phase 1 emitter. Actions rejects a second `registerConnectorEventEmitter` call (exactly one emitter).
 
 Registration is gated by `xpack.actions.inboundEvents.enabled`.
 

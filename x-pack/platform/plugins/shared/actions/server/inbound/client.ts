@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
 import type { InMemoryConnector } from '../types';
-import type { InboundEventsRequestQuery, IngestInboundEventResult } from './ingest';
+import type { IngestInboundEventResult } from './ingest';
 import { ingestInboundEvent } from './ingest';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 
-export interface InboundEventsClientArgs {
+/**
+ * Internal deps after the factory has bound the SO client factory.
+ * Not part of the public inbound surface — use {@link InboundEventsClientArgs} + `createInboundEventsClient`.
+ */
+interface InboundEventsClientInternalDeps {
   logger: Logger;
   inboundEventsEnabled: boolean;
   maxEmitted: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
-  getStartServices: CoreSetup['getStartServices'];
+  getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
 export interface InboundEventsClient {
   ingest(params: {
-    request: KibanaRequest<unknown, InboundEventsRequestQuery, unknown>;
+    request: KibanaRequest<unknown, IngestEventsRequestQuery, unknown>;
     connectorTypeId: string;
     connectorId: string;
     spaceId: string;
@@ -31,9 +36,11 @@ export interface InboundEventsClient {
 }
 
 /**
- * Builds an inbound events client with shared deps (logger, emitter, config flags).
+ * Binds resolved inbound deps onto an `ingest` operation.
  */
-export function createInboundEventsClient(args: InboundEventsClientArgs): InboundEventsClient {
+export function buildInboundEventsClient(
+  deps: InboundEventsClientInternalDeps
+): InboundEventsClient {
   return {
     ingest: ({ request, connectorTypeId, connectorId, spaceId }) =>
       ingestInboundEvent({
@@ -41,12 +48,12 @@ export function createInboundEventsClient(args: InboundEventsClientArgs): Inboun
         connectorTypeId,
         connectorId,
         spaceId,
-        inboundEventsEnabled: args.inboundEventsEnabled,
-        maxEmitted: args.maxEmitted,
-        emitConnectorEvents: args.emitConnectorEvents,
-        logger: args.logger,
-        getStartServices: args.getStartServices,
-        inMemoryConnectors: args.inMemoryConnectors,
+        inboundEventsEnabled: deps.inboundEventsEnabled,
+        maxEmitted: deps.maxEmitted,
+        emitConnectorEvents: deps.emitConnectorEvents,
+        logger: deps.logger,
+        getUnsecuredSavedObjectsClient: deps.getUnsecuredSavedObjectsClient,
+        inMemoryConnectors: deps.inMemoryConnectors,
       }),
   };
 }

@@ -9,5 +9,5 @@ export {
   ingestEventsRequestParamsSchema,
   ingestEventsRequestQuerySchema,
   ingestEventsRequestBodySchema,
-  INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH,
+  INBOUND_EVENTS_TOKEN_MAX_LENGTH,
 } from './v1';

@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
+  INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_SECURITY,
 } from '../../inbound/constants';
-import { createInboundEventsClient } from '../../inbound/factory';
+import type { InboundEventsClient } from '../../inbound/client';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { inboundEventsRoute } from './inbound_events';
 
 describe('inboundEventsRoute', () => {
-  it('registers a public versioned POST route', () => {
+  const getSpaceId = jest.fn().mockReturnValue('default');
+
+  const registerRoute = (client: InboundEventsClient) => {
     const router = httpServiceMock.createRouter();
     const addVersionMock = jest.fn();
     (router.versioned.post as jest.Mock).mockReturnValue({ addVersion: addVersionMock });
@@ -25,16 +28,16 @@ describe('inboundEventsRoute', () => {
     inboundEventsRoute({
       router,
       maxBodyBytes: 1024 * 1024,
-      inboundEventsClient: createInboundEventsClient({
-        logger: loggingSystemMock.createLogger(),
-        inboundEventsEnabled: false,
-        maxEmitted: 25,
-        emitConnectorEvents: jest.fn(),
-        getStartServices: coreMock.createSetup().getStartServices,
-        inMemoryConnectors: [],
-      }),
-      getSpaceId: jest.fn().mockReturnValue('default'),
+      inboundEventsClient: client,
+      getSpaceId,
     });
+
+    return { router, addVersionMock };
+  };
+
+  it('registers a public versioned POST route', () => {
+    const ingest = jest.fn();
+    const { router, addVersionMock } = registerRoute({ ingest });
 
     expect(router.versioned.post).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -56,5 +59,60 @@ describe('inboundEventsRoute', () => {
       }),
       expect.any(Function)
     );
+  });
+
+  it('maps accepted ingest results to 202', async () => {
+    const ingest = jest.fn().mockResolvedValue({ status: 'accepted', body: { ok: true } });
+    const { addVersionMock } = registerRoute({ ingest });
+    const handler = addVersionMock.mock.calls[0][1];
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: 'webhook', connector_id: 'c1' },
+      query: {},
+      body: { hello: 'world' },
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['accepted']);
+
+    await handler({}, request, res);
+
+    expect(ingest).toHaveBeenCalledWith({
+      request,
+      connectorTypeId: 'webhook',
+      connectorId: 'c1',
+      spaceId: 'default',
+    });
+    expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
+  });
+
+  it('maps forbidden ingest results to 403', async () => {
+    const ingest = jest
+      .fn()
+      .mockResolvedValue({ status: 'forbidden', body: INBOUND_EVENTS_DISABLED_MESSAGE });
+    const { addVersionMock } = registerRoute({ ingest });
+    const handler = addVersionMock.mock.calls[0][1];
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: 'webhook', connector_id: 'c1' },
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['forbidden']);
+
+    await handler({}, request, res);
+
+    expect(res.forbidden).toHaveBeenCalledWith({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
+  });
+
+  it('maps not_found ingest results to 404', async () => {
+    const ingest = jest.fn().mockResolvedValue({ status: 'not_found' });
+    const { addVersionMock } = registerRoute({ ingest });
+    const handler = addVersionMock.mock.calls[0][1];
+
+    const request = httpServerMock.createKibanaRequest({
+      params: { connector_type_id: 'webhook', connector_id: 'c1' },
+    });
+    const [, , res] = mockHandlerArguments({}, request, ['notFound']);
+
+    await handler({}, request, res);
+
+    expect(res.notFound).toHaveBeenCalled();
   });
 });

@@ -10,8 +10,8 @@ import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 
 import { CONNECTOR_ID_MAX_LENGTH } from '../../../../..';
 
-/** Max length for optional ingest token query parameter (Bearer preferred). */
-export const INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH = 128;
+/** Max length for ingest token (Bearer header or optional `token` query). */
+export const INBOUND_EVENTS_TOKEN_MAX_LENGTH = 128;
 
 export const ingestEventsRequestParamsSchema = schema.object({
   // maxLength is pre-normalize; hub rejects if normalize prepends '.' past the cap.
@@ -36,7 +36,7 @@ export const ingestEventsRequestQuerySchema = schema.object(
     token: schema.maybe(
       schema.string({
         minLength: 1,
-        maxLength: INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH,
+        maxLength: INBOUND_EVENTS_TOKEN_MAX_LENGTH,
         meta: {
           description:
             'Connector ingest token. Prefer `Authorization: Bearer <token>`. Query `token` is only used when the Authorization header is absent.',

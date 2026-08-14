@@ -8,6 +8,7 @@
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
 import type {
+  IngestEventsRequestBodyV1,
   IngestEventsRequestParamsV1,
   IngestEventsRequestQueryV1,
 } from '../../../common/routes/events/apis/ingest';
@@ -32,6 +33,12 @@ export interface InboundEventsRouteParams {
   inboundEventsClient: InboundEventsClient;
   getSpaceId: (request: KibanaRequest) => string;
 }
+
+type InboundEventsHttpRequest = KibanaRequest<
+  IngestEventsRequestParamsV1,
+  IngestEventsRequestQueryV1,
+  IngestEventsRequestBodyV1
+>;
 
 export function inboundEventsRoute({
   router,
@@ -84,13 +91,10 @@ export function inboundEventsRoute({
           },
         },
       },
-      async (_context, request, response) => {
-        const {
-          connector_type_id: connectorTypeId,
-          connector_id: connectorId,
-        }: IngestEventsRequestParamsV1 = request.params;
+      async (_context, request: InboundEventsHttpRequest, response) => {
+        const { connector_type_id: connectorTypeId, connector_id: connectorId } = request.params;
         const result = await inboundEventsClient.ingest({
-          request: request as KibanaRequest<unknown, IngestEventsRequestQueryV1, unknown>,
+          request,
           connectorTypeId,
           connectorId,
           spaceId: getSpaceId(request),

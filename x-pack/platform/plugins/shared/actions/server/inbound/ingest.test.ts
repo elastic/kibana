@@ -13,7 +13,6 @@ import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs
 
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
 import { INBOUND_EVENTS_DISABLED_MESSAGE, INBOUND_EVENTS_MAX_EMITTED_DEFAULT } from './constants';
-import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { ingestInboundEvent } from './ingest';
 import { mapIngestResultToResponse } from './map_ingest_result_to_response';
@@ -35,22 +34,14 @@ jest.mock('@kbn/connector-specs', () => {
   };
 });
 
-jest.mock('./create_unsecured_inbound_saved_objects_client', () => ({
-  createUnsecuredInboundSavedObjectsClient: jest.fn(),
-}));
-
 import { getConnectorSpec } from '@kbn/connector-specs';
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
-const createUnsecuredInboundSavedObjectsClientMock =
-  createUnsecuredInboundSavedObjectsClient as jest.MockedFunction<
-    typeof createUnsecuredInboundSavedObjectsClient
-  >;
 
 describe('ingestInboundEvent', () => {
   const logger = loggingSystemMock.createLogger();
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const getStartServices = jest.fn();
+  const getUnsecuredSavedObjectsClient = jest.fn().mockResolvedValue(unsecuredSavedObjectsClient);
   const emitConnectorEvents = jest
     .fn<Promise<DispatchConnectorEventsResult>, []>()
     .mockResolvedValue({ ok: true });
@@ -91,7 +82,7 @@ describe('ingestInboundEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     emitConnectorEvents.mockResolvedValue({ ok: true });
-    createUnsecuredInboundSavedObjectsClientMock.mockResolvedValue(unsecuredSavedObjectsClient);
+    getUnsecuredSavedObjectsClient.mockResolvedValue(unsecuredSavedObjectsClient);
     unsecuredSavedObjectsClient.get.mockResolvedValue({
       id: connectorId,
       type: 'action',
@@ -130,7 +121,7 @@ describe('ingestInboundEvent', () => {
       maxEmitted: overrides?.maxEmitted ?? INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
       emitConnectorEvents: overrides?.emit ?? emitConnectorEvents,
       logger,
-      getStartServices,
+      getUnsecuredSavedObjectsClient,
       inMemoryConnectors: [],
     });
     mapIngestResultToResponse(result, response);
@@ -155,7 +146,7 @@ describe('ingestInboundEvent', () => {
   it('returns 403 when inbound events are disabled', async () => {
     const { response: res } = await run({ enabled: false });
     expect(res.forbidden).toHaveBeenCalledWith({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
-    expect(createUnsecuredInboundSavedObjectsClientMock).not.toHaveBeenCalled();
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expectOutcome('warn', 'disabled');
   });

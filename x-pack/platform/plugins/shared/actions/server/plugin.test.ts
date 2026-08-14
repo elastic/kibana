@@ -192,6 +192,16 @@ describe('Actions Plugin', () => {
       expect(setupContract.getClientLeasePool()).toBe(clientLeasePool);
     });
 
+    it('allows only one connector event emitter registration', async () => {
+      const setupContract = await plugin.setup(coreSetup, pluginsSetup);
+      const emitter = { emit: jest.fn() };
+
+      setupContract.registerConnectorEventEmitter(emitter);
+      expect(() => setupContract.registerConnectorEventEmitter({ emit: jest.fn() })).toThrow(
+        /only one emitter is supported/
+      );
+    });
+
     describe('routeHandlerContext.getActionsClient()', () => {
       it('should not throw error when ESO plugin has encryption key', async () => {
         await plugin.setup(coreSetup, {

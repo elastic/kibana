@@ -2631,9 +2631,11 @@ src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema
 src/platform/packages/shared/kbn-connector-specs/src/lib/generate_secrets_schema_from_spec.test.ts @elastic/workchat-eng @elastic/response-ops
 
 ## Inbound connector events hub
-# HTTP / OAS shell only (Actions route conventions): response-ops.
+# Public OAS schemas
+x-pack/platform/plugins/shared/actions/common/routes/events/ @elastic/workflows-eng @elastic/response-ops
+# HTTP / OAS shell only
 x-pack/platform/plugins/shared/actions/server/routes/inbound_events/ @elastic/response-ops
-# Hub domain (token auth, load, emit orchestration): workflows + response-ops.
+# Hub domain (token auth, load, emit orchestration)
 x-pack/platform/plugins/shared/actions/server/inbound/ @elastic/workflows-eng @elastic/response-ops
 x-pack/platform/plugins/shared/connector_events_bridge/ @elastic/workflows-eng
 

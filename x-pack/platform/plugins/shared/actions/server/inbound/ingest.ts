@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   getConnectorSpec,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -13,20 +13,16 @@ import {
   validateEmittedEvents,
 } from '@kbn/connector-specs';
 
+import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
 import type { InMemoryConnector } from '../types';
 import {
   INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
 } from './constants';
-import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 import { logInboundIngressOutcome } from './log_inbound_ingress_outcome';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadInboundConnector } from './load_inbound_connector';
-
-export interface InboundEventsRequestQuery {
-  token?: string;
-}
 
 export type IngestInboundEventResult =
   | { status: 'forbidden'; body: string }
@@ -35,7 +31,7 @@ export type IngestInboundEventResult =
   | { status: 'accepted'; body: { ok: true } };
 
 export interface IngestInboundEventParams {
-  request: KibanaRequest<unknown, InboundEventsRequestQuery, unknown>;
+  request: KibanaRequest<unknown, IngestEventsRequestQuery, unknown>;
   connectorTypeId: string;
   connectorId: string;
   spaceId: string;
@@ -43,7 +39,7 @@ export interface IngestInboundEventParams {
   maxEmitted: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   logger: Logger;
-  getStartServices: CoreSetup['getStartServices'];
+  getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -64,7 +60,7 @@ export async function ingestInboundEvent({
   maxEmitted,
   emitConnectorEvents,
   logger,
-  getStartServices,
+  getUnsecuredSavedObjectsClient,
   inMemoryConnectors,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
@@ -92,10 +88,7 @@ export async function ingestInboundEvent({
     return { status: 'not_found' };
   }
 
-  const unsecuredSavedObjectsClient = await createUnsecuredInboundSavedObjectsClient({
-    getStartServices,
-    spaceId,
-  });
+  const unsecuredSavedObjectsClient = await getUnsecuredSavedObjectsClient(spaceId);
 
   const connector = await loadInboundConnector({
     connectorId,

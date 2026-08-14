@@ -181,7 +181,7 @@ export interface PluginSetupContract {
 
   /**
    * Registers the single consumer that receives connector events from the public inbound hub.
-   * Later registrations overwrite the previous emitter (with a warning).
+   * Throws if an emitter is already registered (exactly one emitter is supported).
    */
   registerConnectorEventEmitter(emitter: ConnectorEventEmitter): void;
 }
@@ -584,8 +584,8 @@ export class ActionsPlugin
       },
       registerConnectorEventEmitter: (emitter: ConnectorEventEmitter) => {
         if (this.connectorEventEmitter !== undefined) {
-          this.logger.warn(
-            'A connector event emitter is already registered; overwriting the previous emitter.'
+          throw new Error(
+            'A connector event emitter is already registered; only one emitter is supported.'
           );
         }
         this.connectorEventEmitter = emitter;
