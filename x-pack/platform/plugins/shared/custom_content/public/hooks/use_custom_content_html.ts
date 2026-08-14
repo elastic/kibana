@@ -46,7 +46,6 @@ export interface UseCustomContentHtmlParams {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  onTemplateChange: (template: string) => void;
 }
 
 export interface UseCustomContentHtmlResult {

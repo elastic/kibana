@@ -80,7 +80,6 @@ const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   projectRouting: undefined,
   query: undefined,
   filters: undefined,
-  onTemplateChange: jest.fn(),
 };
 
 const VALID_HTML = `<html><body><p>hello</p></body></html>`;
@@ -248,6 +247,29 @@ describe('useCustomContentHtml', () => {
       rerender({ colorMode: 'DARK' });
 
       await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+    });
+
+    it('updates html with new CSS vars when colorMode changes without re-fetching', async () => {
+      const esqlParams = {
+        ...baseParams,
+        savedTemplate: '<html><head></head><body><p>hello</p></body></html>',
+      };
+
+      const { result, rerender } = renderHook(
+        ({ colorMode }: { colorMode: EuiThemeColorModeStandard }) =>
+          useCustomContentHtml({ ...esqlParams, colorMode }),
+        { initialProps: { colorMode: 'LIGHT' as EuiThemeColorModeStandard } }
+      );
+
+      await waitFor(() => expect(result.current.html).toContain('--cc-color-text'));
+
+      const lightHtml = result.current.html;
+
+      rerender({ colorMode: 'DARK' });
+
+      await waitFor(() => expect(result.current.html).not.toBe(lightHtml));
+      expect(result.current.html).toContain('--cc-color-text');
+      expect(mockFetchEsqlData).not.toHaveBeenCalled();
     });
   });
 

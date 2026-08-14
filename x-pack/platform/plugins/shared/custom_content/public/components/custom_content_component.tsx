@@ -24,7 +24,6 @@ interface CustomContentComponentProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
 }
 
@@ -54,7 +53,6 @@ export const CustomContentComponent = ({
   projectRouting,
   query,
   filters,
-  onTemplateChange,
   onErrorChange,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -70,7 +68,6 @@ export const CustomContentComponent = ({
     projectRouting,
     query,
     filters,
-    onTemplateChange,
   });
 
   useEffect(() => {
