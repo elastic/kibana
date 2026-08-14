@@ -298,13 +298,7 @@ export const generateApiSchemaDoc = ({
   const jsonSchema = zodToJsonSchema(schema);
   const fieldTable = formatFieldTable(jsonSchemaToFieldTable(jsonSchema));
 
-  const sections = [
-    `# ${title}`,
-    '',
-    '## Top-Level Fields',
-    '',
-    fieldTable,
-  ];
+  const sections = [`# ${title}`, '', '## Top-Level Fields', '', fieldTable];
 
   for (const extra of extraSections?.(jsonSchema) ?? []) {
     if (extra.content) {
