@@ -241,7 +241,7 @@ export const CreateIssueInputSchema = lazySchema(() =>
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
     title: z.string().min(1).max(200).describe('Issue title'),
-    body: z.string().max(2000).optional().describe('Issue body in Markdown'),
+    body: z.string().max(65536).optional().describe('Issue body in Markdown'),
     assignees: z
       .array(z.string().max(200))
       .max(25)
@@ -262,7 +262,7 @@ export const AddIssueCommentInputSchema = lazySchema(() =>
     owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
     repo: z.string().min(1).max(200).describe('Repository name'),
     issueNumber: z.number().describe('Issue number'),
-    body: z.string().min(1).max(2000).describe('Comment body in Markdown'),
+    body: z.string().min(1).max(65536).describe('Comment body in Markdown'),
   })
 );
 export type AddIssueCommentInput = z.infer<typeof AddIssueCommentInputSchema>;
@@ -274,7 +274,7 @@ export const UpdateIssueInputSchema = lazySchema(() =>
       repo: z.string().min(1).max(200).describe('Repository name'),
       issueNumber: z.number().describe('Issue number to update'),
       title: z.string().min(1).max(200).optional().describe('New issue title'),
-      body: z.string().max(2000).optional().describe('New issue body in Markdown'),
+      body: z.string().max(65536).optional().describe('New issue body in Markdown'),
       state: z.enum(['open', 'closed']).optional().describe('New issue state: "open" or "closed"'),
       assignees: z
         .array(z.string().max(200))
@@ -321,7 +321,7 @@ export const CreatePullRequestInputSchema = lazySchema(() =>
         'Branch containing the changes (e.g. "feature/my-branch"). For cross-repo PRs use "user:branch".'
       ),
     base: z.string().min(1).max(200).describe('Branch to merge into (e.g. "main")'),
-    body: z.string().max(2000).optional().describe('Pull request description in Markdown'),
+    body: z.string().max(65536).optional().describe('Pull request description in Markdown'),
     draft: z.boolean().optional().describe('If true, create as a draft pull request'),
     maintainerCanModify: z
       .boolean()
@@ -437,7 +437,7 @@ export const UpdatePullRequestInputSchema = lazySchema(() =>
       repo: z.string().min(1).max(200).describe('Repository name'),
       pullNumber: z.number().describe('Pull request number to update'),
       title: z.string().min(1).max(200).optional().describe('New title for the pull request'),
-      body: z.string().max(2000).optional().describe('New description in Markdown'),
+      body: z.string().max(65536).optional().describe('New description in Markdown'),
       state: z.enum(['open', 'closed']).optional().describe('New state: "open" or "closed"'),
       base: z
         .string()
@@ -502,8 +502,8 @@ export const TriggerWorkflowInputSchema = lazySchema(() =>
     ref: z.string().min(1).max(200).describe('Branch name or tag to run the workflow on'),
     inputs: z
       .record(z.string().max(200), z.string().max(2000))
-      .refine((v) => Object.keys(v).length <= 50, {
-        message: 'inputs must have at most 50 entries',
+      .refine((v) => Object.keys(v).length <= 25, {
+        message: 'inputs must have at most 25 entries',
       })
       .optional()
       .describe(
