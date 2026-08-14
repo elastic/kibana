@@ -8,15 +8,14 @@
 import { defer, switchMap, identity } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import {
-  InferenceEndpointProvider,
-  type FunctionCallingMode,
-  type Message,
-  type ToolOptions,
-  type ChatCompleteMetadata,
-  type ChatCompletionChunkEvent,
-  type ChatCompletionTokenCountEvent,
-  type ChatCompleteCacheControl,
+import type {
+  FunctionCallingMode,
+  Message,
+  ToolOptions,
+  ChatCompleteMetadata,
+  ChatCompletionChunkEvent,
+  ChatCompletionTokenCountEvent,
+  ChatCompleteCacheControl,
 } from '@kbn/inference-common';
 import { InferenceEndpointProvider } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
@@ -149,7 +148,10 @@ const createEndpointRequest = ({
   });
 
   const eisFields: Pick<InferenceEndpointRequest, 'cache_control' | 'session_id'> = {};
-  if (provider === InferenceEndpointProvider.Elastic) {
+  if (
+    (cacheControl !== undefined || sessionId !== undefined) &&
+    provider === InferenceEndpointProvider.Elastic
+  ) {
     if (cacheControl !== undefined) {
       eisFields.cache_control = cacheControl;
     }

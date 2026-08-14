@@ -841,7 +841,7 @@ describe('inferenceEndpointAdapter', () => {
           .chatComplete({
             ...defaultArgs,
             messages: [{ role: MessageRole.User, content: 'question' }],
-            endpointProvider: InferenceEndpointProvider.Elastic,
+            provider: InferenceEndpointProvider.Elastic,
             cacheControl: { type: 'ephemeral', ttl: '1h' },
             sessionId: 'session-abc',
           })
@@ -862,7 +862,7 @@ describe('inferenceEndpointAdapter', () => {
           .chatComplete({
             ...defaultArgs,
             messages: [{ role: MessageRole.User, content: 'question' }],
-            endpointProvider: InferenceEndpointProvider.Elastic,
+            provider: InferenceEndpointProvider.Elastic,
             cacheControl: { type: 'ephemeral' },
             sessionId: 'session-abc',
           })
@@ -884,7 +884,7 @@ describe('inferenceEndpointAdapter', () => {
           .chatComplete({
             ...defaultArgs,
             messages: [{ role: MessageRole.User, content: 'question' }],
-            endpointProvider: InferenceEndpointProvider.Elastic,
+            provider: InferenceEndpointProvider.Elastic,
             sessionId: 'session-xyz',
           })
           .subscribe(noop);
@@ -906,7 +906,7 @@ describe('inferenceEndpointAdapter', () => {
           .chatComplete({
             ...defaultArgs,
             messages: [{ role: MessageRole.User, content: 'question' }],
-            endpointProvider: InferenceEndpointProvider.OpenAI,
+            provider: InferenceEndpointProvider.AmazonBedrock,
             cacheControl: { type: 'ephemeral' },
             sessionId: 'session-abc',
           })
@@ -939,7 +939,7 @@ describe('inferenceEndpointAdapter', () => {
           .chatComplete({
             ...defaultArgs,
             messages: [{ role: MessageRole.User, content: 'question' }],
-            endpointProvider: InferenceEndpointProvider.Elastic,
+            provider: InferenceEndpointProvider.Elastic,
             functionCalling: 'simulated',
             cacheControl: { type: 'ephemeral' },
             sessionId: 'session-abc',

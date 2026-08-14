@@ -173,6 +173,7 @@ interface InferenceGenerationOptions {
   tools?: Record<string, ToolDefinition>;
   toolChoice?: ToolChoice;
   cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 }
 
 /**
@@ -189,7 +190,8 @@ export function withChatCompleteSpan(
   options: InferenceGenerationOptions,
   cb: (span?: Span) => ChatCompleteCompositeResponse
 ): ChatCompleteCompositeResponse {
-  const { system, messages, model, toolChoice, tools, cacheControl, ...attributes } = options;
+  const { system, messages, model, toolChoice, tools, cacheControl, sessionId, ...attributes } =
+    options;
 
   const modelProvider = model?.provider ?? 'unknown';
   const modelId = model?.id ?? model?.family ?? 'unknown';
@@ -208,13 +210,13 @@ export function withChatCompleteSpan(
         [ElasticGenAIAttributes.ToolChoice]: toolChoice ? JSON.stringify(toolChoice) : toolChoice,
         ...(cacheControl
           ? {
-              [ElasticGenAIAttributes.CacheControlType]: cacheControl
-                ? cacheControl.type
+              [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
+              [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl
+                ? cacheControl.ttl
                 : undefined,
-              [ElasticGenAIAttributes.CacheControlTTL]:
-                cacheControl && cacheControl.ttl ? cacheControl.ttl : undefined,
             }
           : {}),
+        ...(sessionId ? { [ElasticGenAIAttributes.CacheControlSessionId]: sessionId } : {}),
       },
     },
     (span) => {

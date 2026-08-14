@@ -175,7 +175,7 @@ export interface ChatCompleteCacheControl {
    * Optional time-to-live as an Elasticsearch TimeValue string.
    * EIS currently supports `'5m'` and `'1h'`.
    */
-  ttl?: string;
+  ttl?: '5m' | '1h';
 }
 
 export interface ChatCompleteRetryConfiguration {
