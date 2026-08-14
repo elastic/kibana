@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButton,
@@ -99,6 +99,14 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     tourPopoverWidth: 360,
   };
 
+  // The anchor element is tracked as state (via a callback ref) instead of a plain RefObject:
+  // ref attachment does not trigger a re-render, so a `ref.current !== null` render guard may
+  // never re-evaluate and the tour would never mount.
+  const [tourAnchorElement, setTourAnchorElement] = useState<HTMLDivElement | null>(null);
+  const tourTargetRef = useCallback((node: HTMLDivElement | null) => {
+    setTourAnchorElement(node);
+  }, []);
+
   const tourStepsInfo = [
     {
       step: 1,
@@ -118,7 +126,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
         defaultMessage:
           'Rules will trigger based on the priority order. The first rule will take precedence over any following rules',
       }),
-      tourTargetRef: useRef<HTMLDivElement>(null),
+      tourTargetRef,
     },
   ];
 
@@ -146,6 +154,35 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
   useEffect(() => {
     localStorage.setItem(TOUR_QUERY_RULES_STORAGE_KEY, JSON.stringify(tourState));
   }, [tourState]);
+
+  // Tour step 1 anchors to the "Test in Console" menu item. The AppHeader menu is
+  // lazy-loaded, so the button appears in the DOM asynchronously — observe for it
+  // instead of querying once.
+  const [consoleTourAnchor, setConsoleTourAnchor] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!isTourEnabled || !tourState.isTourActive) {
+      return;
+    }
+    const findButton = () =>
+      document.querySelector<HTMLElement>(
+        '[data-test-subj="queryRulesetDetailTestInConsoleButton"]'
+      );
+    const existing = findButton();
+    if (existing) {
+      setConsoleTourAnchor(existing);
+      return;
+    }
+    const observer = new MutationObserver(() => {
+      const button = findButton();
+      if (button) {
+        setConsoleTourAnchor(button);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [isTourEnabled, tourState.isTourActive]);
+
   const incrementStep = () => {
     setTourState({
       ...tourState,
@@ -298,11 +335,9 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               setSearchFilter={setSearchFilter}
             />
 
-            {/* TODO: tour step 1 does not appear after the AppHeader migration — the anchor
-                never resolves. Must be fixed before opening the PR. */}
-            {tourStepsInfo[1]?.tourTargetRef?.current !== null && (
+            {consoleTourAnchor !== null && (
               <EuiTourStep
-                anchor={() => tourStepsInfo[1]?.tourTargetRef?.current as HTMLElement}
+                anchor={consoleTourAnchor}
                 content={<p>{tourStepsInfo[0].content}</p>}
                 isStepOpen={
                   isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 1
@@ -316,7 +351,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     <h6>{tourStepsInfo[0].title}</h6>
                   </EuiTitle>
                 }
-                anchorPosition="downLeft"
+                anchorPosition="downRight"
                 zIndex={1}
                 footerAction={
                   <EuiFlexGroup direction="row">
@@ -364,9 +399,9 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               />
             )}
 
-            {tourStepsInfo[1]?.tourTargetRef?.current !== null && (
+            {tourAnchorElement !== null && (
               <EuiTourStep
-                anchor={() => tourStepsInfo[1]?.tourTargetRef?.current || document.body}
+                anchor={tourAnchorElement}
                 content={<p>{tourStepsInfo[1].content}</p>}
                 isStepOpen={
                   isTourEnabled && tourState.isTourActive && tourState.currentTourStep === 2
