@@ -342,6 +342,13 @@ describe('schema_to_skill_docs', () => {
       expect(doc).not.toContain('**Explain the difference**');
       expect(doc).not.toContain('existing Event rule cannot be converted');
     });
+
+    it('links sibling references without a ./references/ prefix', () => {
+      const doc = generateNotificationsOverviewDoc();
+      expect(doc).toContain('(./rule-kind.md)');
+      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).not.toContain('./references/');
+    });
   });
 
   describe('generateEpisodeLifecycleDoc', () => {
@@ -354,11 +361,24 @@ describe('schema_to_skill_docs', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateRecoveryStrategyDoc()).toMatchSnapshot();
     });
+
+    it('links sibling references without a ./references/ prefix', () => {
+      const doc = generateRecoveryStrategyDoc();
+      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).toContain('(./rule-kind.md)');
+      expect(doc).not.toContain('./references/');
+    });
   });
 
   describe('generateNoDataStrategyDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateNoDataStrategyDoc()).toMatchSnapshot();
+    });
+
+    it('links sibling references without a ./references/ prefix', () => {
+      const doc = generateNoDataStrategyDoc();
+      expect(doc).toContain('(./rule-kind.md)');
+      expect(doc).not.toContain('./references/');
     });
   });
 

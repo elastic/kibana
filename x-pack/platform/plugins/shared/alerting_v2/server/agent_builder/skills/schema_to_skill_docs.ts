@@ -526,7 +526,7 @@ export const generateNotificationsOverviewDoc = (): string => {
     '',
     '## Notifications Require Alert Kind',
     '',
-    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./references/rule-kind.md) and [episode-lifecycle reference](./references/episode-lifecycle.md).`,
+    `Action policies only process ${alertLabel} (\`kind: alert\`). ${signalLabel} (\`kind: signal\`) do not participate in episode lifecycle or notification dispatch. See the [rule-kind reference](./rule-kind.md) and [episode-lifecycle reference](./episode-lifecycle.md).`,
     '',
     'When a user asks for notifications on a rule that is currently `kind: signal` (or when composing a new rule where the user wants notifications):',
     '',
@@ -625,7 +625,7 @@ export const generateNoDataStrategyDoc = (): string => {
     "When setting `no_data_strategy` to anything other than `'none'`, add a `no_data` block to the standalone query:",
     "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
     '',
-    'Signal rules cannot set `no_data_strategy` ([rule-kind reference](./references/rule-kind.md)).',
+    'Signal rules cannot set `no_data_strategy` ([rule-kind reference](./rule-kind.md)).',
   ].join('\n');
 };
 
@@ -639,7 +639,7 @@ export const generateRecoveryStrategyDoc = (): string => {
   return [
     '# Recovery Strategy',
     '',
-    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./references/episode-lifecycle.md)). Signal rules (`kind: signal`) cannot set `recovery_strategy` ([rule-kind reference](./references/rule-kind.md)).',
+    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive (see [episode-lifecycle reference](./episode-lifecycle.md)). Signal rules (`kind: signal`) cannot set `recovery_strategy` ([rule-kind reference](./rule-kind.md)).',
     '',
     list,
     '',
