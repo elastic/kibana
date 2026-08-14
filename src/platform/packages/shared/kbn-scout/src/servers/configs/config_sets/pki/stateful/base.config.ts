@@ -8,7 +8,9 @@
  */
 
 import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
   MOCK_IDP_ATTRIBUTE_NAME,
@@ -47,6 +49,12 @@ addOrReplaceArg(kbnServerArgs, 'xpack.security.authc.selector.enabled', 'false')
 addOrReplaceArg(kbnServerArgs, 'elasticsearch.hosts', 'https://localhost:9220');
 addOrReplaceArg(kbnServerArgs, 'elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
 addOrReplaceArg(kbnServerArgs, 'server.ssl.clientAuthentication', 'optional');
+kbnServerArgs.push(
+  `--plugin-path=${resolve(
+    REPO_ROOT,
+    'x-pack/platform/test/security_functional/plugins/test_endpoints'
+  )}`
+);
 
 export const pkiConfig: ScoutServerConfig = {
   servers: {
