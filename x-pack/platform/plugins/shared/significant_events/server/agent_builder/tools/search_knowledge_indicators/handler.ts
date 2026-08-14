@@ -178,6 +178,19 @@ function truncateComputedProperties(
   return properties;
 }
 
+interface BoundedArray<T> {
+  items: T[] | undefined;
+  count?: number;
+}
+
+function boundArray<T>(values: T[] | undefined): BoundedArray<T> {
+  if (values === undefined || values.length <= MAX_FEATURE_ARRAY_ITEMS) {
+    return { items: values };
+  }
+
+  return { items: values.slice(0, MAX_FEATURE_ARRAY_ITEMS), count: values.length };
+}
+
 function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndicatorFeature {
   const { uuid, run_id, updated_at, expires_at, confidence, evidence_doc_ids, filter, ...rest } =
     ki.feature;
@@ -186,18 +199,8 @@ function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndi
     ? truncateComputedProperties(rest.type, rest.properties)
     : rest.properties;
 
-  const evidenceOriginalLength = rest.evidence?.length;
-  const evidenceTruncated =
-    evidenceOriginalLength !== undefined && evidenceOriginalLength > MAX_FEATURE_ARRAY_ITEMS;
-  const evidence =
-    evidenceTruncated && rest.evidence
-      ? rest.evidence.slice(0, MAX_FEATURE_ARRAY_ITEMS)
-      : rest.evidence;
-
-  const tagsOriginalLength = rest.tags?.length;
-  const tagsTruncated =
-    tagsOriginalLength !== undefined && tagsOriginalLength > MAX_FEATURE_ARRAY_ITEMS;
-  const tags = tagsTruncated && rest.tags ? rest.tags.slice(0, MAX_FEATURE_ARRAY_ITEMS) : rest.tags;
+  const { items: evidence, count: evidenceCount } = boundArray(rest.evidence);
+  const { items: tags, count: tagsCount } = boundArray(rest.tags);
 
   const metaResult = rest.meta ? truncateMeta(rest.meta) : undefined;
 
@@ -209,8 +212,8 @@ function toCompactFeatureKI(ki: KnowledgeIndicatorFeature): CompactKnowledgeIndi
       evidence,
       tags,
       meta: metaResult?.meta,
-      ...(evidenceTruncated ? { evidence_count: evidenceOriginalLength } : {}),
-      ...(tagsTruncated ? { tags_count: tagsOriginalLength } : {}),
+      ...(evidenceCount !== undefined ? { evidence_count: evidenceCount } : {}),
+      ...(tagsCount !== undefined ? { tags_count: tagsCount } : {}),
       ...(metaResult && metaResult.omittedKeys > 0
         ? { meta_keys_omitted: metaResult.omittedKeys }
         : {}),
