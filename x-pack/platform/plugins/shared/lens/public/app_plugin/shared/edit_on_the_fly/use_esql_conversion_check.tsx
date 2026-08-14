@@ -111,16 +111,21 @@ export const useEsqlConversionCheck = (
       columnRoles[visState.maxAccessor] = 'max_value';
     }
 
-    // Iterate over all layers and attempt conversion for each
+    // Iterate over data layers and attempt conversion for each. Non-data layers remain
+    // visible in the conversion modal but stay in their original datasource.
     const convertibleLayers: ConvertibleLayer[] = [];
     for (const layerId of layerIds) {
-      const layer = layers[layerId];
-      if (!layer || !layer.columnOrder || !layer.columns) {
-        // Non-data layers (annotations, reference lines) are listed but not convertible
-        const layerType =
-          (
-            activeVisualization as { getLayerType?: (id: string, s: unknown) => string }
-          )?.getLayerType?.(layerId, state) ?? 'data';
+      // Metric trendlines are converted separately and omitted from the modal.
+      if (layerId === trendlineLayerId) {
+        continue;
+      }
+
+      const layerType =
+        (
+          activeVisualization as { getLayerType?: (id: string, s: unknown) => string }
+        )?.getLayerType?.(layerId, state) ?? layerTypes.DATA;
+
+      if (layerType !== layerTypes.DATA) {
         convertibleLayers.push({
           id: layerId,
           icon: 'layers',
@@ -133,24 +138,22 @@ export const useEsqlConversionCheck = (
         continue;
       }
 
+      const layer = layers[layerId];
+      if (!layer || !layer.columnOrder || !layer.columns) {
+        convertibleLayers.push({
+          id: layerId,
+          icon: 'layers',
+          name: `Layer ${layerId.substring(0, 6)}`,
+          type: layerTypes.DATA,
+          query: '',
+          isConvertibleToEsql: false,
+          conversionData: { esAggsIdMap: {}, partialRows: false },
+        });
+        continue;
+      }
+
       const { columnOrder } = layer;
-      // For trendline layers, strip includeEmptyRows from date_histogram columns
-      // since ES|QL trendlines don't need gap-filling and this flag blocks conversion
-      const isTrendlineLayer = layerId === trendlineLayerId;
-      const columns = isTrendlineLayer
-        ? Object.fromEntries(
-            Object.entries(layer.columns).map(([colId, col]) => {
-              const colWithParams = col as GenericIndexPatternColumn & {
-                params?: Record<string, unknown>;
-              };
-              return col.operationType === 'date_histogram' &&
-                colWithParams.params?.includeEmptyRows
-                ? [colId, { ...col, params: { ...colWithParams.params, includeEmptyRows: false } }]
-                : [colId, col];
-            })
-          )
-        : { ...layer.columns };
-      const layerForConversion = isTrendlineLayer ? { ...layer, columns } : layer;
+      const columns = { ...layer.columns };
       const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
       const [, esAggEntries] = partition(
         columnEntries,
@@ -164,7 +167,7 @@ export const useEsqlConversionCheck = (
       try {
         esqlLayer = generateEsqlQuery(
           esAggEntries,
-          layerForConversion,
+          layer,
           framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
           coreStart.uiSettings,
           framePublicAPI.dateRange,
@@ -231,10 +234,14 @@ export const useEsqlConversionCheck = (
       );
     }
 
-    // Trendline is auto-included in the conversion but not shown in the modal
+    // Trendline is auto-included in the conversion but not shown in the modal.
+    // Unsupported data and non-data layers remain in their original datasource.
+    const convertibleDataLayers = convertibleLayers.filter(
+      (layer) => layer.type === layerTypes.DATA && layer.isConvertibleToEsql
+    );
     const layersToConvert = trendlineResult?.success
-      ? [...convertibleLayers, trendlineResult.layer]
-      : convertibleLayers;
+      ? [...convertibleDataLayers, trendlineResult.layer]
+      : convertibleDataLayers;
 
     const newAttributes = convertFormBasedToTextBasedLayer({
       layersToConvert,
