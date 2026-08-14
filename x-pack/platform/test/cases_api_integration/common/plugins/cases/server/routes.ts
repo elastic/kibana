@@ -298,15 +298,24 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
       try {
         const [_, { taskManager }] = await core.getStartServices();
 
-        return res.ok({
-          body: await taskManager.ensureScheduled({
-            id: taskId,
-            taskType: ANALYTICS_BACKFILL_TASK_TYPE,
-            params: { sourceIndex, destIndex, sourceQuery: JSON.parse(sourceQuery) },
-            runAt: new Date(),
-            state: {},
-          }),
-        });
+        // The backfill task is one-off (no recurring `schedule`), so a task with this id may
+        // already exist from an earlier `ensureScheduled` call (e.g. triggered by index
+        // creation) with a `runAt` in the future. `ensureScheduled` is schedule-if-absent and
+        // silently no-ops in that case, so prefer `runSoon` to force immediate execution and
+        // only fall back to scheduling if the task doesn't exist yet.
+        try {
+          return res.ok({ body: await taskManager.runSoon(taskId) });
+        } catch (runSoonErr) {
+          return res.ok({
+            body: await taskManager.ensureScheduled({
+              id: taskId,
+              taskType: ANALYTICS_BACKFILL_TASK_TYPE,
+              params: { sourceIndex, destIndex, sourceQuery: JSON.parse(sourceQuery) },
+              runAt: new Date(),
+              state: {},
+            }),
+          });
+        }
       } catch (err) {
         logger.error(`Error : ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });

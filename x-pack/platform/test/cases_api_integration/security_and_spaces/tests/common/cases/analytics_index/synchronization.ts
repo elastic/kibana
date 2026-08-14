@@ -43,8 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const retry = getService('retry');
   const authSpace1 = getAuthWithSuperUser();
 
-  // Failing: See https://github.com/elastic/kibana/issues/227734
-  describe.skip('analytics indexes synchronization task', () => {
+  describe('analytics indexes synchronization task', () => {
     beforeEach(async () => {
       await deleteAllCaseAnalyticsItems(esClient);
       await deleteAllCaseItems(esClient);
@@ -63,8 +62,6 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(esClient);
     });
 
-    // This test passes locally but fails in the flaky test runner.
-    // Increasing the timeout did not work.
     it('should sync the cases index', async () => {
       await createConfiguration(
         supertest,
@@ -100,9 +97,9 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      await runCAISynchronizationTask(supertest);
-
       await retry.tryForTime(300000, async () => {
+        await runCAISynchronizationTask(supertest);
+
         const caseAnalytics = await esClient.get({
           index: '.internal.cases.securitysolution-default',
           id: `cases:${caseToBackfill.id}`,
@@ -157,7 +154,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should sync the cases attachments index', async () => {
+    // Failing: See https://github.com/elastic/kibana/issues/227734
+    // Root cause is deeper than the space-awareness bug this file's other tests were blocked
+    // on: the source query in cases_analytics/attachments_index/constants.ts still filters on
+    // the legacy `cases-comments` SO type (and its `cases-comments.type` sub-field), but
+    // attachment/comment writes now go exclusively to the unified `cases-attachments` SO type
+    // introduced by the AttachmentV2 migration (#275225), with fields nested under
+    // `cases-attachments.*` and sub-type values renamed (e.g. `alert` -> `security.alert`).
+    // Confirmed directly against a live dev Kibana/ES instance: the query matches zero
+    // documents, so the sync "succeeds" but reindexes nothing. Needs the source query updated
+    // to the current schema, not another test-side fix.
+    it.skip('should sync the cases attachments index', async () => {
       const postedCase = await createCase(
         supertest,
         {
@@ -187,9 +194,9 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runCAISynchronizationTask(supertest);
-
       await retry.tryForTime(300000, async () => {
+        await runCAISynchronizationTask(supertest, 'space1');
+
         const firstAttachmentAnalytics = await esClient.get({
           index: '.internal.cases-attachments.securitysolution-space1',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
@@ -206,7 +213,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should sync the cases comments index', async () => {
+    // Failing: See https://github.com/elastic/kibana/issues/227734
+    // Same root cause as the attachments-index test above: cases_analytics/comments_index/
+    // constants.ts's source query still targets the legacy `cases-comments` SO type, which no
+    // longer receives writes post-AttachmentV2 (unified `cases-attachments` type). Confirmed
+    // against a live dev instance that a newly-created comment has zero matching source docs.
+    it.skip('should sync the cases comments index', async () => {
       const postedCase = await createCase(
         supertest,
         { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
@@ -218,9 +230,9 @@ export default ({ getService }: FtrProviderContext): void => {
         params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
 
-      await runCAISynchronizationTask(supertest);
-
       await retry.try(async () => {
+        await runCAISynchronizationTask(supertest);
+
         const commentAnalytics = await esClient.get({
           index: '.internal.cases-comments.securitysolution-default',
           id: `cases-comments:${patchedCase.comments![0].id}`,
