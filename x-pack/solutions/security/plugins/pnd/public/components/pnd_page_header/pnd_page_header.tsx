@@ -154,7 +154,7 @@ export const PndPageHeader: React.FC<PndPageHeaderProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l" css={{ fontWeight: 500 }}>
-                  <h2>{title}</h2>
+                  <h1>{title}</h1>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
