@@ -86436,6 +86436,8 @@ components:
                         - comparator
                         - value
                     type: array
+                  maxItems: 2
+                  minItems: 2
                   type: array
                 groupBy:
                   items:

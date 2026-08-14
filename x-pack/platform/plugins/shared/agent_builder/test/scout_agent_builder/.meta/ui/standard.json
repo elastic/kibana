@@ -1,5 +1,5 @@
 {
-  "sha1": "6843a029fa35c3c9780b968ad9a6c2001261ed26",
+  "sha1": "493797a8a315772c58a6e6e8ef32a84e9be257d3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 7
       }
     },
@@ -377,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 7
       }
     },
@@ -390,7 +390,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 63,
+        "line": 64,
         "column": 13
       }
     },
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 11
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 111,
+        "line": 112,
         "column": 9
       }
     },
@@ -429,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 25
       }
     },
@@ -442,7 +442,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 172,
+        "line": 173,
         "column": 9
       }
     },
@@ -455,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 193,
+        "line": 194,
         "column": 13
       }
     },
@@ -468,7 +468,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 207,
+        "line": 210,
+        "column": 19
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-7ca72e847a3eb59",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management deletes a revoked client through the row actions menu",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 228,
         "column": 26
       }
     },
