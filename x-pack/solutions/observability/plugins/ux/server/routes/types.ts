@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { UxPluginStartDeps } from '../plugin_types';
 
 export type UxRouteHandlerResources = DefaultRouteHandlerResources & {
@@ -15,4 +16,5 @@ export type UxRouteHandlerResources = DefaultRouteHandlerResources & {
     start: () => Promise<CoreStart>;
   };
   startPlugins: () => Promise<UxPluginStartDeps>;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 };

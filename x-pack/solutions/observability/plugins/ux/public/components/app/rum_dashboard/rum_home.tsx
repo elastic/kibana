@@ -36,6 +36,8 @@ import { RumReportsCatalog } from '../rum_reports';
 import { RumReportPrintStyles } from '../rum_reports/print.styles';
 import { RumReportView } from '../rum_reports/report_view';
 import { RumAiPanel } from './rum_ai_panel';
+import { RumAlertsPanel } from '../rum_alerts';
+import { RumAlertFlyoutProvider } from '../rum_alerts/alert_flyout_context';
 import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
@@ -69,6 +71,10 @@ const AI_LABEL = i18n.translate('xpack.ux.ai.tab', {
   defaultMessage: 'AI Analyst',
 });
 
+const ALERTS_LABEL = i18n.translate('xpack.ux.alerts.tab', {
+  defaultMessage: 'Alerts',
+});
+
 export type UxHomeTab =
   | 'overview'
   | 'pages'
@@ -76,7 +82,8 @@ export type UxHomeTab =
   | 'session-replay'
   | 'journeys'
   | 'reports'
-  | 'ai';
+  | 'ai'
+  | 'alerts';
 
 export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: string }) {
   const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
@@ -161,16 +168,19 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
         <DashboardToolbar tab={tab} />
         {tab === 'reports' && <RumReportPrintStyles />}
         {isLoading && tab === 'overview' && <EmptyStateLoading />}
-        <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
-          {tab === 'overview' && <RumOverviewV2 />}
-          {tab === 'pages' && <RumPagesPanel />}
-          {tab === 'errors' && <RumErrorsPanel />}
-          {tab === 'session-replay' && <SessionReplayPanel />}
-          {tab === 'journeys' && <SessionFunnelPanel />}
-          {tab === 'reports' &&
-            (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
-          {tab === 'ai' && <RumAiPanel />}
-        </div>
+        <RumAlertFlyoutProvider>
+          <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
+            {tab === 'overview' && <RumOverviewV2 />}
+            {tab === 'pages' && <RumPagesPanel />}
+            {tab === 'errors' && <RumErrorsPanel />}
+            {tab === 'session-replay' && <SessionReplayPanel />}
+            {tab === 'journeys' && <SessionFunnelPanel />}
+            {tab === 'reports' &&
+              (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
+            {tab === 'ai' && <RumAiPanel />}
+            {tab === 'alerts' && <RumAlertsPanel />}
+          </div>
+        </RumAlertFlyoutProvider>
       </EuiPageSection>
     </PageTemplateComponent>
   );
@@ -255,6 +265,9 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
         </EuiTab>
         <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
           {AI_LABEL}
+        </EuiTab>
+        <EuiTab isSelected={tab === 'alerts'} data-test-subj="uxAlertsTab" {...tabHref('/alerts')}>
+          {ALERTS_LABEL}
         </EuiTab>
       </EuiTabs>
       <EuiSpacer size="m" />

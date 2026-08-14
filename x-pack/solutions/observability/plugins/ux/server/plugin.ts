@@ -19,6 +19,7 @@ import { getUxServerRouteRepository } from './routes';
 import type { UxRouteHandlerResources } from './routes/types';
 import { sessionReplaySettingsSavedObjectType } from './saved_objects/session_replay_settings';
 import { rumReportScheduleSavedObjectType } from './saved_objects/rum_report_schedule';
+import { rumAlertNotificationsSavedObjectType } from './saved_objects/rum_alert_notifications';
 import {
   installRumAnalystAgent,
   registerRumAnalystAgentType,
@@ -41,6 +42,7 @@ export class Plugin implements PluginType {
   public setup(core: CoreSetup<UxPluginStartDeps>, plugins: UxPluginSetupDeps = {}) {
     core.savedObjects.registerType(sessionReplaySettingsSavedObjectType);
     core.savedObjects.registerType(rumReportScheduleSavedObjectType);
+    core.savedObjects.registerType(rumAlertNotificationsSavedObjectType);
 
     const dependencies: Omit<UxRouteHandlerResources, keyof DefaultRouteHandlerResources> = {
       core: {
@@ -51,6 +53,7 @@ export class Plugin implements PluginType {
         const [, startPlugins] = await core.getStartServices();
         return startPlugins;
       },
+      workflowsManagement: plugins.workflowsManagement,
     };
 
     registerRoutes({

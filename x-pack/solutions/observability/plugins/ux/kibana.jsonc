@@ -39,7 +39,9 @@
       "lens",
       "observabilityAIAssistant",
       "spaces",
-      "agentBuilder"
+      "agentBuilder",
+      "alertingVTwo",
+      "workflowsManagement"
     ],
     "requiredBundles": [
       "kibanaReact",

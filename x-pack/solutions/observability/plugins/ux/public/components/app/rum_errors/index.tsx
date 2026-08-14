@@ -36,6 +36,7 @@ import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumErrors } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { TabTrendChart } from '../rum_overview/tab_trend_chart';
+import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 
 const MiniTrend = ({ values }: { values: number[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -168,6 +169,7 @@ const ErrorDetailFlyout = ({
 export function RumErrorsPanel() {
   const { http } = useKibanaServices();
   const history = useHistory();
+  const { open: openAlert } = useRumAlertFlyout();
   const {
     urlParams: {
       rangeFrom = 'now-24h',
@@ -335,6 +337,22 @@ export function RumErrorsPanel() {
                   {i18n.translate('xpack.ux.errors.viewSessions', { defaultMessage: 'Sessions' })}
                 </EuiButtonEmpty>
               </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="uxColumnsAlertButton"
+                size="s"
+                onClick={() =>
+                  openAlert({
+                    templateId: 'error_spike',
+                    errorType: item.type,
+                    errorMessage: item.message.split('\n')[0],
+                    threshold: Math.max(5, item.count),
+                  })
+                }
+              >
+                {i18n.translate('xpack.ux.errors.alert', { defaultMessage: 'Alert' })}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             {apmHref && (
               <EuiFlexItem grow={false}>

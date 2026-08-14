@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -36,6 +37,7 @@ import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { useHasRumData } from '../rum_dashboard/hooks/use_has_rum_data';
 import { TrendMetric } from './trend_metric';
 import { VisitorCountriesPanel } from './visitor_countries';
+import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
 
@@ -50,6 +52,7 @@ export function RumOverviewV2() {
   const { euiTheme } = useEuiTheme();
   const { http, docLinks } = useKibanaServices();
   const history = useHistory();
+  const { open: openAlert } = useRumAlertFlyout();
   const { hasData, loading: hasDataLoading } = useHasRumData();
   const {
     urlParams: {
@@ -348,6 +351,81 @@ export function RumOverviewV2() {
               />
             </EuiLink>
           </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="uxOverviewAlertSessions"
+            onClick={() =>
+              openAlert({
+                templateId: 'traffic_drop',
+                threshold: Math.max(1, Math.round(data.kpis.sessions * 0.5)),
+              })
+            }
+          >
+            {i18n.translate('xpack.ux.overview.alertSessions', {
+              defaultMessage: 'Alert on traffic',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="uxOverviewAlertTrafficSpike"
+            onClick={() =>
+              openAlert({
+                templateId: 'traffic_spike',
+                threshold: Math.max(10, Math.round(data.kpis.sessions * 2)),
+              })
+            }
+          >
+            {i18n.translate('xpack.ux.overview.alertTrafficSpikeButtonLabel', {
+              defaultMessage: 'Alert on spike',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="uxOverviewAlertErrors"
+            onClick={() =>
+              openAlert({
+                templateId: 'error_rate',
+                threshold: Math.max(0.01, Number((data.kpis.errorRate + 0.02).toFixed(2))),
+              })
+            }
+          >
+            {i18n.translate('xpack.ux.overview.alertErrors', { defaultMessage: 'Alert on errors' })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="uxOverviewAlertInp"
+            onClick={() =>
+              openAlert({
+                templateId: 'web_vital',
+                vital: 'inp',
+                threshold: data.kpis.p75Inp ?? 200,
+              })
+            }
+          >
+            {i18n.translate('xpack.ux.overview.alertInp', { defaultMessage: 'Alert on INP' })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="uxOverviewAlertFrustration"
+            onClick={() => openAlert({ templateId: 'frustration' })}
+          >
+            {i18n.translate('xpack.ux.overview.alertFrustration', {
+              defaultMessage: 'Alert on frustration',
+            })}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 

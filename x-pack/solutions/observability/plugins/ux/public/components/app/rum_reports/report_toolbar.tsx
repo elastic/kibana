@@ -35,6 +35,7 @@ export function ReportToolbar({
   exactEnd,
   onGenerateAi,
   onScheduleEmail,
+  onCreateAlert,
 }: {
   report: RumReportResponse;
   includePii: boolean;
@@ -42,6 +43,7 @@ export function ReportToolbar({
   exactEnd?: string;
   onGenerateAi?: () => void;
   onScheduleEmail?: () => void;
+  onCreateAlert?: () => void;
 }) {
   const { http, notifications } = useKibanaServices();
   const history = useHistory();
@@ -195,6 +197,19 @@ export function ReportToolbar({
             >
               {i18n.translate('xpack.ux.reports.toolbar.scheduleEmailButtonLabel', {
                 defaultMessage: 'Schedule email',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {onCreateAlert && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="uxReportCreateAlert"
+              iconType="bell"
+              onClick={onCreateAlert}
+            >
+              {i18n.translate('xpack.ux.reports.toolbar.createAlertButtonLabel', {
+                defaultMessage: 'Create alert',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>

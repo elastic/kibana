@@ -37,6 +37,7 @@ import { ReportCover } from './report_cover';
 import { ReportToolbar } from './report_toolbar';
 import { AiReportPanel } from './ai_report_panel';
 import { ScheduleEmailFlyout } from './schedule_email_flyout';
+import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { ScorecardReport } from './scorecard';
 import { ClientsReport, FrustrationReport, FunnelReport, UsersReport } from './thin_reports';
 
@@ -45,6 +46,7 @@ const filterChip = (label: string, value?: string) => (value ? [{ label, value }
 export function RumReportView({ templateId }: { templateId: string }) {
   const { http } = useKibanaServices();
   const history = useHistory();
+  const { open: openAlert } = useRumAlertFlyout();
   const { hasData, loading: hasDataLoading } = useHasRumData();
   const {
     urlParams: {
@@ -252,6 +254,7 @@ export function RumReportView({ templateId }: { templateId: string }) {
         exactEnd={exactEnd}
         onGenerateAi={() => setAiOpen(true)}
         onScheduleEmail={() => setScheduleOpen(true)}
+        onCreateAlert={() => openAlert({ templateId: 'web_vital' })}
       />
       {scheduleOpen && (
         <ScheduleEmailFlyout

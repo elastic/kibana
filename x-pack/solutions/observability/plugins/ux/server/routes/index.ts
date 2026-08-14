@@ -30,6 +30,17 @@ import {
   testRumReportEmailConnectorRoute,
   updateRumReportScheduleRoute,
 } from './rum/schedules';
+import {
+  createRumAlertRoute,
+  deleteRumAlertRoute,
+  disableRumAlertRoute,
+  enableRumAlertRoute,
+  generateRumAlertEsqlRoute,
+  getRumAlertStatusRoute,
+  listRumAlertsRoute,
+  previewRumAlertEsqlRoute,
+  upsertRumAlertNotificationsRoute,
+} from './rum/alerts';
 
 function getTypedUxServerRouteRepository() {
   return {
@@ -53,6 +64,15 @@ function getTypedUxServerRouteRepository() {
     ...sendRumReportNowRoute,
     ...sendRumReportScheduleNowRoute,
     ...testRumReportEmailConnectorRoute,
+    ...getRumAlertStatusRoute,
+    ...listRumAlertsRoute,
+    ...createRumAlertRoute,
+    ...deleteRumAlertRoute,
+    ...enableRumAlertRoute,
+    ...disableRumAlertRoute,
+    ...generateRumAlertEsqlRoute,
+    ...previewRumAlertEsqlRoute,
+    ...upsertRumAlertNotificationsRoute,
   };
 }
 

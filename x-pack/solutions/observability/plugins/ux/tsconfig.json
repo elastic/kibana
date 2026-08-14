@@ -67,6 +67,10 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/actions-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/alerting-v2-plugin",
+    "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-constants",
+    "@kbn/workflows-management-plugin",
   ],
   "exclude": ["target/**/*"]
 }

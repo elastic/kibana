@@ -39,6 +39,7 @@ describe('sessionsPatch', () => {
       errorGroup: '',
       sessionIds: '',
       user: '',
+      location: '',
     });
   });
 
@@ -49,6 +50,7 @@ describe('sessionsPatch', () => {
       errorGroup: '',
       sessionIds: '',
       user: 'ada',
+      location: '',
     });
   });
 });

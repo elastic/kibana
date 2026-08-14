@@ -173,6 +173,23 @@ function UxAiPage() {
   );
 }
 
+function UxAlertsPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.alerts', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="alerts" />
+    </div>
+  );
+}
+
 function UxReportViewPage() {
   const { path } = useParams('/reports/{templateId}') as unknown as {
     path: { templateId: string };
@@ -228,6 +245,9 @@ const uxRouter = createRouter({
   },
   '/ai': {
     element: <UxAiPage />,
+  },
+  '/alerts': {
+    element: <UxAlertsPage />,
   },
   '/reports/{templateId}': {
     params: t.type({
