@@ -22,6 +22,7 @@ import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import { prefetchPreviousStatusesByIds } from '../common/operations/prefetch_previous_statuses';
+import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -83,10 +84,10 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             reason: closingReason.reason,
           });
           void eventBus?.emitAlertStatusChanged(request, {
-            alertIds: ids,
+            alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
             status,
-            previousStatuses,
-            truncated: false,
+            previousStatuses: previousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+            truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
           });
           return result;
         });

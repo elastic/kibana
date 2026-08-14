@@ -38,6 +38,7 @@ import {
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
 } from '../common/operations/prefetch_previous_statuses';
+import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -140,10 +141,10 @@ export const setSignalsStatusRoute = (
             });
 
             void eventBus?.emitAlertStatusChanged(request, {
-              alertIds: signalIds,
+              alertIds: signalIds.slice(0, MAX_ALERTS_PER_TRIGGER),
               status,
-              previousStatuses,
-              truncated: false,
+              previousStatuses: previousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+              truncated: signalIds.length > MAX_ALERTS_PER_TRIGGER,
             });
 
             return response.ok({ body });

@@ -23,6 +23,7 @@ import {
   prefetchPreviousStatusesByIds,
   extractWorkflowStatus,
 } from '../common/operations/prefetch_previous_statuses';
+import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
   createAlertStatusPayloads,
@@ -135,9 +136,9 @@ export const setAttacksStatusRoute = (
                 reason: closingReason.reason,
               });
               void eventBus?.emitAttackStatusChanged(request, {
-                attackIds: ids,
+                attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
-                previousStatuses: attackPreviousStatuses,
+                previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
               });
               return result;
             }
@@ -205,16 +206,16 @@ export const setAttacksStatusRoute = (
             });
 
             void eventBus?.emitAttackStatusChanged(request, {
-              attackIds: verifiedAttackIds,
+              attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
               status,
-              previousStatuses: attackPreviousStatuses,
+              previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: relatedAlertIds,
+                alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
-                previousStatuses: relatedAlertPreviousStatuses,
-                truncated: false,
+                previousStatuses: relatedAlertPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+                truncated: relatedAlertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
             return result;
