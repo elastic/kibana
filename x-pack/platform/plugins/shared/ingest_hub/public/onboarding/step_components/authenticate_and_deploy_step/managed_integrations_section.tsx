@@ -271,6 +271,7 @@ export function ManagedIntegrationsSection({
                   }
                 >
                   <EuiRadioGroup
+                    name="managedIntegrationsPreferredMethod"
                     options={radioOptions}
                     idSelected={preferredMethod}
                     onChange={(id) => setPreferredMethod(id as PreferredMethod)}
