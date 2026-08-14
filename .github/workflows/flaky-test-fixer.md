@@ -288,7 +288,7 @@ This run has a fixed AI-credit budget, and every tool result you read stays in t
 
 - **Read each file once, in the smallest useful slice.** Prefer a ranged read or a targeted `grep` over dumping a whole file, and never re-read or re-download a file you already have — after you edit a file, trust the returned state instead of reading it back.
 - **Don't pull large or binary artifacts into context.** Describe a failure screenshot from its metadata rather than loading the image, and `grep`/`sed` a big log for the failure timestamp instead of reading it end to end. Fetch only the specific artifacts you will actually use.
-- **Run each check once.** Don't re-run a lint, type check, or search that already gave a clear result, and don't loop a command hoping for a different outcome.
+- **Don't repeat a check whose inputs haven't changed.** A lint, type check, or search returns the same result until you edit the code it inspects, so re-running it just burns budget — reuse the result you already have, and never loop a command hoping for a different outcome. (The repeated runs in [Verifying a Jest fix](#verifying-a-jest-fix) are the deliberate exception: they measure flakiness, not a fixed result.)
 
 ## Steps
 
