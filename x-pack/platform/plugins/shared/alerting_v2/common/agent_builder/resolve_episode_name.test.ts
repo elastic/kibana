@@ -70,7 +70,9 @@ describe('resolveEpisodeName', () => {
   it('returns undefined when no name source is available', () => {
     expect(resolveEpisodeName()).toBeUndefined();
     expect(resolveEpisodeName({ ruleName: '' })).toBeUndefined();
-    expect(resolveEpisodeName({ episodeData: '{}', groupingFields: ['host.name'] })).toBeUndefined();
+    expect(
+      resolveEpisodeName({ episodeData: '{}', groupingFields: ['host.name'] })
+    ).toBeUndefined();
   });
 
   it('returns undefined for malformed episode_data', () => {
