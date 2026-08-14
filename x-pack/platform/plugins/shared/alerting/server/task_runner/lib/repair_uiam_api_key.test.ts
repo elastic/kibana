@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ErrorWithReason } from '../../lib/error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../../types';
 import type { RawRule } from '../../types';
@@ -141,7 +142,7 @@ describe('repairUiamApiKey()', () => {
 
     expect(context.uiamConvert).toHaveBeenCalledWith([rawRule.apiKey]);
     expect(savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE],
     });
     expect(unsafeClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -231,15 +232,56 @@ describe('repairUiamApiKey()', () => {
     );
   });
 
-  test('reports failure when a concurrent update wins the optimistic concurrency check', async () => {
+  test.each([
+    [
+      'a concurrent update wins the optimistic concurrency check',
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-1'),
+    ],
+    [
+      'the rule was deleted while the run was in flight',
+      SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-1'),
+    ],
+  ])('queues the minted key for invalidation when %s', async (_, writeError) => {
     const { context, unsafeClient } = setup();
-    unsafeClient.update = jest.fn().mockRejectedValue(new Error('version conflict'));
+    unsafeClient.update = jest.fn().mockRejectedValue(writeError);
 
     await callRepair(context);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('version conflict'),
+      expect.stringContaining(writeError.message),
       expect.anything()
     );
+    // The write was rejected outright, so the key the convert API minted is referenced by nothing.
+    expect(unsafeClient.bulkCreate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        type: API_KEY_PENDING_INVALIDATION_TYPE,
+        attributes: expect.objectContaining({ apiKeyId: 'fresh-id', uiamApiKey: 'essu_fresh' }),
+      }),
+    ]);
+  });
+
+  test('leaves the minted key alone when the write may have committed anyway', async () => {
+    const { context, unsafeClient } = setup();
+    unsafeClient.update = jest.fn().mockRejectedValue(new Error('socket hang up'));
+
+    await callRepair(context);
+
+    // Revoking a key that did persist would break every subsequent run, so an ambiguous failure is
+    // accepted as a bounded leak instead.
+    expect(unsafeClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  test('does not queue anything for invalidation when no key was minted', async () => {
+    const { context, unsafeClient } = setup({
+      uiamConvert: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-1')
+        ),
+    });
+
+    await callRepair(context);
+
+    expect(unsafeClient.bulkCreate).not.toHaveBeenCalled();
   });
 });

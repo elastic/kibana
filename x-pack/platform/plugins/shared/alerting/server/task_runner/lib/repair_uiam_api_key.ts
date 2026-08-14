@@ -6,9 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UIAM_LOGS_REPAIR_TAGS } from '../../constants';
+import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { isErrorWithReason } from '../../lib/error_with_reason';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RawRule } from '../../types';
 import { getDecryptedRule } from '../rule_loader';
 import { ApiKeyType, type TaskRunnerContext } from '../types';
@@ -95,6 +97,13 @@ export const repairUiamApiKey = async ({
     return;
   }
 
+  const savedObjectsClient = context.savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE],
+  });
+  // Set once the convert API has minted a key, so a failed write can tell whether there is a live
+  // UIAM key left over to clean up.
+  let freshUiamApiKey: string | undefined;
+
   try {
     // Re-read the rule rather than reuse what the run loaded: the write below needs the current
     // `version` to lose a concurrency race rather than provoke a spurious one, and re-reading also
@@ -119,31 +128,47 @@ export const repairUiamApiKey = async ({
       return;
     }
 
-    await context.savedObjects
-      .getUnsafeInternalClient({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] })
-      .update<RawRule>(
-        RULE_SAVED_OBJECT_TYPE,
-        ruleId,
-        // A partial update would corrupt the encrypted `apiKey` / `uiamApiKey` attributes, so the
-        // full (decrypted) attribute set is written back and re-encrypted, as the UIAM provisioning
-        // task does. `version` makes the write lose to a concurrent update rather than clobber it.
-        { ...rawRule, uiamApiKey: Buffer.from(`${result.id}:${result.key}`).toString('base64') },
-        {
-          mergeAttributes: false,
-          version,
-          namespace: context.spaceIdToNamespace(spaceId),
-        }
-      );
+    freshUiamApiKey = Buffer.from(`${result.id}:${result.key}`).toString('base64');
+
+    await savedObjectsClient.update<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      ruleId,
+      // A partial update would corrupt the encrypted `apiKey` / `uiamApiKey` attributes, so the
+      // full (decrypted) attribute set is written back and re-encrypted, as the UIAM provisioning
+      // task does. `version` makes the write lose to a concurrent update rather than clobber it.
+      { ...rawRule, uiamApiKey: freshUiamApiKey },
+      {
+        mergeAttributes: false,
+        version,
+        namespace: context.spaceIdToNamespace(spaceId),
+      }
+    );
 
     logger.info(
       'Re-granted the UIAM API key for the rule after it failed to authenticate with the previous one.',
       { tags: logTags }
     );
   } catch (error) {
-    // Includes the 409 from another worker having re-granted the key first, which needs no handling
-    // of its own: that worker's key is live and this rule's next run will use it.
     logger.warn(`Failed to re-grant the UIAM API key for the rule: ${error.message}`, {
       tags: logTags,
     });
+
+    // The convert API had already minted a key, and Elasticsearch rejected the write outright — a
+    // concurrent update won the version check, or the rule is gone — so that key is certainly
+    // referenced by nothing and is queued for invalidation. Any other failure (a timeout, a dropped
+    // connection) may have committed after all, and revoking a key that did persist would break
+    // every subsequent run, so those are left alone as a bounded leak. Same split as the UIAM
+    // provisioning task makes between per-item and whole-call `bulkUpdate` failures.
+    if (
+      freshUiamApiKey &&
+      (SavedObjectsErrorHelpers.isConflictError(error) ||
+        SavedObjectsErrorHelpers.isNotFoundError(error))
+    ) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: [freshUiamApiKey] },
+        logger,
+        savedObjectsClient
+      );
+    }
   }
 };
