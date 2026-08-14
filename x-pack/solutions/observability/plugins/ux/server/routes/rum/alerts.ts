@@ -115,8 +115,8 @@ const toSummary = (rule: RuleResponse): RumAlertRuleSummary => ({
   description: rule.metadata.description ?? '',
   every: rule.schedule.every,
   lookback: rule.schedule.lookback,
-  createdAt: rule.createdAt,
-  updatedAt: rule.updatedAt,
+  createdAt: rule.created_at,
+  updatedAt: rule.updated_at,
 });
 
 const spaceIdOf = async (resources: UxRouteHandlerResources): Promise<string> => {
