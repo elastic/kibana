@@ -472,9 +472,7 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // of IN/AND, which trips an ES|QL PropagateNullable planner NPE (elastic/elasticsearch#141579).
 | EVAL isOrigin = ${
     originEventIds.length > 0
-      ? `COALESCE(event.id, "") in (${originEventIds
-          .map((_id, idx) => `?og_id${idx}`)
-          .join(', ')})`
+      ? `COALESCE(event.id, "") in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
       : 'false'
   }
 | EVAL isOriginAlert = ${
