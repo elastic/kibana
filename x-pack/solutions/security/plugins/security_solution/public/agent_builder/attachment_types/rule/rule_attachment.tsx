@@ -92,7 +92,11 @@ export const createRuleAttachmentDefinition = ({
           attachmentId: attachment.id,
           updateOrigin,
         });
-      } catch {
+      } catch (error) {
+        window.console.warn(
+          'RuleAttachment.getActionButtons: failed to build rule action buttons',
+          error
+        );
         return [];
       }
     },
