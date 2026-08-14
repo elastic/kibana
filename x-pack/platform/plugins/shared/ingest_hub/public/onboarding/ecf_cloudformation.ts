@@ -13,9 +13,13 @@
  * CloudWatch log groups, global region, OTLP endpoint) across Steps 1–3 so that the Launch button
  * in Step 4 can open the AWS console with everything pre-filled.
  *
+ * Three template families are supported, each producing its own Launch button in Step 4:
+ *   - Unified ECS (multi-signal): ecs_logs-cloudformation.yaml   → ECS data streams
+ *   - OTel (multi-signal):        otel_logs-cloudformation.yaml  → OpenTelemetry data streams (different S3 param name)
+ *   - CrowdStrike FDR (dedicated): crowdstrike_fdr_cloudformation.yaml
+ *
  * Reference templates:
- *   Unified (multi-signal): https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release/ecs_logs-cloudformation.yaml
- *   CrowdStrike FDR:        https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release/crowdstrike_fdr_cloudformation.yaml
+ *   https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
 
 import type { EcfLogType } from './aws_service_matrix';
@@ -40,6 +44,18 @@ export const ECF_CROWDSTRIKE_TEMPLATE_URL =
 
 /** Default stack name for the unified multi-signal ECF stack. */
 export const ECF_UNIFIED_STACK_NAME = 'edot-cloud-forwarder';
+
+/**
+ * S3 URL for the OTel multi-signal ECF CloudFormation template.
+ * Supports VPC Flow Logs, CloudTrail, ELB access logs, WAF, Network Firewall, and S3 access logs
+ * routed to OpenTelemetry-compatible data streams.
+ * Note: uses `S3SourceBuckets` instead of `S3Buckets` compared to the ECS unified template.
+ */
+export const ECF_OTEL_TEMPLATE_URL =
+  'https://edot-cloud-forwarder.s3.amazonaws.com/v1/latest/cloudformation/otel_logs-cloudformation.yaml';
+
+/** Default stack name for the unified multi-signal ECF stack. */
+export const ECF_OTEL_STACK_NAME = 'edot-cloud-forwarder-otel';
 
 /** Default stack name for the CrowdStrike FDR dedicated ECF stack. */
 export const ECF_CROWDSTRIKE_STACK_NAME = 'edot-cloud-forwarder-crowdstrike-fdr';
@@ -192,6 +208,68 @@ export const buildEcfCrowdstrikeCloudFormationUrl = ({
 
   if (otlpEndpoint) {
     hashParams.set('param_OTLPEndpoint', otlpEndpoint);
+  }
+
+  url.hash = `/stacks/quickcreate?${hashParams.toString()}`;
+  return url.toString();
+};
+
+/**
+ * Builds a CloudFormation Quick Create URL for the OTel multi-signal ECF template.
+ *
+ * The OTel template uses `S3SourceBuckets` instead of `S3Buckets` (unlike the ECS unified
+ * template). All other parameters — `CloudWatchLogGroups`, `LogTypes`, `OTLPEndpoint` — share
+ * the same names and semantics.
+ *
+ * `ElasticAPIKey` is intentionally NOT pre-filled for the same security reasons as the unified
+ * template: it must not appear in browser history or URL logs.
+ *
+ * @param ecfConfigs    ECF service configurations (from `getEcfServiceConfigs`).
+ * @param region        AWS region for the CloudFormation stack.
+ * @param otlpEndpoint  Managed OTLP endpoint URL from `cloud.managedOtlp?.url`.
+ */
+export const buildEcfOtelCloudFormationUrl = ({
+  ecfConfigs,
+  region,
+  otlpEndpoint,
+}: {
+  ecfConfigs: EcfServiceConfig[];
+  region: string;
+  otlpEndpoint?: string;
+}): string => {
+  const s3BucketArns = ecfConfigs
+    .map((c) => c.bucketArn)
+    .filter((arn): arn is string => Boolean(arn));
+
+  const logGroupArns = ecfConfigs
+    .map((c) => c.logGroupArn)
+    .filter((arn): arn is string => Boolean(arn))
+    .map(normaliseLogGroupArn);
+
+  const logTypes = ecfConfigs.map((c) => c.ecfLogType);
+
+  const url = new URL('https://console.aws.amazon.com/cloudformation/home');
+
+  if (region) {
+    url.searchParams.set('region', region);
+  }
+
+  const hashParams = new URLSearchParams();
+  hashParams.set('templateURL', ECF_OTEL_TEMPLATE_URL);
+  hashParams.set('stackName', ECF_OTEL_STACK_NAME);
+
+  if (otlpEndpoint) {
+    hashParams.set('param_OTLPEndpoint', otlpEndpoint);
+  }
+  // OTel template uses S3SourceBuckets, not S3Buckets
+  if (s3BucketArns.length > 0) {
+    hashParams.set('param_S3SourceBuckets', s3BucketArns.join(','));
+  }
+  if (logGroupArns.length > 0) {
+    hashParams.set('param_CloudWatchLogGroups', logGroupArns.join(','));
+  }
+  if (logTypes.length > 0) {
+    hashParams.set('param_LogTypes', logTypes.join(','));
   }
 
   url.hash = `/stacks/quickcreate?${hashParams.toString()}`;

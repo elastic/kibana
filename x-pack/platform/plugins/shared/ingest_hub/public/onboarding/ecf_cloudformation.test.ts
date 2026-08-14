@@ -8,10 +8,13 @@
 import {
   getEcfServiceConfigs,
   buildEcfUnifiedCloudFormationUrl,
+  buildEcfOtelCloudFormationUrl,
   buildEcfCrowdstrikeCloudFormationUrl,
   ECF_UNIFIED_TEMPLATE_URL,
+  ECF_OTEL_TEMPLATE_URL,
   ECF_CROWDSTRIKE_TEMPLATE_URL,
   ECF_UNIFIED_STACK_NAME,
+  ECF_OTEL_STACK_NAME,
   ECF_CROWDSTRIKE_STACK_NAME,
 } from './ecf_cloudformation';
 import type { ServiceVars } from './step_components/service_settings_step/use_service_settings';
@@ -199,6 +202,96 @@ describe('buildEcfUnifiedCloudFormationUrl()', () => {
   it('does not include ElasticAPIKey in the URL', () => {
     const url = buildEcfUnifiedCloudFormationUrl({
       ecfConfigs: baseConfigs,
+      region: 'us-east-1',
+      otlpEndpoint: 'https://otlp.example.com',
+    });
+    expect(url).not.toContain('APIKey');
+  });
+});
+
+// ── buildEcfOtelCloudFormationUrl ─────────────────────────────────────────────
+
+describe('buildEcfOtelCloudFormationUrl()', () => {
+  const otelConfigs = [
+    {
+      serviceId: 'vpcflow_otel',
+      ecfLogType: 'vpcflow' as const,
+      bucketArn: 'arn:aws:s3:::vpc-otel-bucket',
+    },
+    {
+      serviceId: 'cloudtrail_otel',
+      ecfLogType: 'cloudtrail' as const,
+      bucketArn: 'arn:aws:s3:::ct-otel-bucket',
+    },
+  ];
+
+  it('uses the OTel ECF template URL', () => {
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: otelConfigs, region: 'us-east-1' });
+    expect(url).toContain(encodeURIComponent(ECF_OTEL_TEMPLATE_URL));
+  });
+
+  it('includes the OTel stack name', () => {
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: otelConfigs, region: 'us-east-1' });
+    expect(url).toContain(`stackName=${ECF_OTEL_STACK_NAME}`);
+  });
+
+  it('uses S3SourceBuckets (not S3Buckets) for bucket ARNs', () => {
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: otelConfigs, region: 'us-east-1' });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_S3SourceBuckets=');
+    expect(hash).not.toContain('param_S3Buckets=');
+    expect(hash).toContain('arn:aws:s3:::vpc-otel-bucket');
+    expect(hash).toContain('arn:aws:s3:::ct-otel-bucket');
+  });
+
+  it('pre-selects the AWS region via the ?region= query param', () => {
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: otelConfigs, region: 'eu-central-1' });
+    const [beforeHash] = url.split('#');
+    expect(beforeHash).toContain('region=eu-central-1');
+  });
+
+  it('pre-fills OTLPEndpoint when provided', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
+      region: 'us-east-1',
+      otlpEndpoint: 'https://otlp.example.com/v1',
+    });
+    expect(url).toContain(encodeURIComponent('https://otlp.example.com/v1'));
+  });
+
+  it('omits OTLPEndpoint when not provided', () => {
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: otelConfigs, region: 'us-east-1' });
+    expect(url).not.toContain('param_OTLPEndpoint');
+  });
+
+  it('appends :* to CloudWatch log group ARNs that lack it', () => {
+    const configs = [
+      {
+        serviceId: 'waf_otel',
+        ecfLogType: 'waf' as const,
+        logGroupArn: 'arn:aws:logs:us-east-1:123456789012:log-group:waf-otel',
+      },
+    ];
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: configs, region: 'us-east-1' });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('arn:aws:logs:us-east-1:123456789012:log-group:waf-otel:*');
+  });
+
+  it('builds the comma-separated LogTypes param from service configs', () => {
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: otelConfigs, region: 'us-east-1' });
+    const hash = decodeURIComponent(url.split('#')[1]);
+    expect(hash).toContain('param_LogTypes=vpcflow,cloudtrail');
+  });
+
+  it('produces a URL that opens the CloudFormation quick-create console', () => {
+    const url = buildEcfOtelCloudFormationUrl({ ecfConfigs: otelConfigs, region: 'us-east-1' });
+    expect(url).toContain('console.aws.amazon.com/cloudformation/home');
+    expect(url).toContain('/stacks/quickcreate');
+  });
+
+  it('does not include ElasticAPIKey in the URL', () => {
+    const url = buildEcfOtelCloudFormationUrl({
+      ecfConfigs: otelConfigs,
       region: 'us-east-1',
       otlpEndpoint: 'https://otlp.example.com',
     });

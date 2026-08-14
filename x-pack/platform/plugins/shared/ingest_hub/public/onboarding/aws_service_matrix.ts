@@ -19,9 +19,9 @@ export type SignalType = 'logs' | 'metrics';
 export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'agent_based';
 
 /**
- * Log type identifiers used by the unified ECF CloudFormation template (ecs_logs-cloudformation.yaml).
+ * Log type identifiers used by the ECF CloudFormation templates.
  * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in Step 4.
- * @see https://github.com/elastic/edot-cloud-forwarder-aws/blob/main/templates/release/ecs_logs-cloudformation.yaml
+ * @see https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
 export type EcfLogType =
   | 'vpcflow'
@@ -33,10 +33,12 @@ export type EcfLogType =
   | 'netskope_alerts_events';
 
 /**
- * Marker for services that use a dedicated ECF CloudFormation template (e.g. CrowdStrike FDR)
- * rather than the shared unified template.
+ * Marker for services that use a dedicated ECF CloudFormation template rather than the shared
+ * unified ECS template.
+ *   - `'otel'`           — OTel multi-signal template (otel_logs-cloudformation.yaml), uses S3SourceBuckets
+ *   - `'crowdstrike_fdr'`— CrowdStrike FDR dedicated template
  */
-export type EcfDedicatedTemplate = 'crowdstrike_fdr';
+export type EcfDedicatedTemplate = 'otel' | 'crowdstrike_fdr';
 
 export type AuthType = 'identity_federation' | 'api_key';
 
@@ -95,9 +97,9 @@ export interface AwsServiceMatrixEntry {
    *  Temporary until packages expose provider_permissions in the manifest. */
   providerPermissions?: ProviderPermissions;
   /**
-   * ECF log type identifier for the unified `ecs_logs-cloudformation.yaml` template.
-   * Present only for services deployable via the Elastic Cloud Forwarder unified stack.
-   * Used to populate the `LogTypes` parameter and aggregate S3/CloudWatch sources in the Launch URL.
+   * ECF log type identifier passed as the `LogTypes` parameter in the CloudFormation template.
+   * Present only for services deployable via the Elastic Cloud Forwarder (ECF).
+   * Applies to both the unified ECS template and the OTel template.
    */
   ecfLogType?: EcfLogType;
   /**
@@ -852,12 +854,14 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     category: 'Management and Governance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: [],
-    requiredConfig: [],
+    inputs: ['aws-s3'],
+    requiredConfig: ['bucket_arn'],
     packageName: 'aws_cloudtrail_otel',
     defaultEnabled: false,
     showInUI: true,
     badge: 'technical_preview',
+    ecfLogType: 'cloudtrail',
+    ecfDedicatedTemplate: 'otel',
   },
   {
     id: 'vpcflow_otel',
@@ -865,12 +869,14 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     category: 'Networking and Content Delivery',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: [],
-    requiredConfig: [],
+    inputs: ['aws-s3'],
+    requiredConfig: ['bucket_arn'],
     packageName: 'aws_vpcflow_otel',
     defaultEnabled: false,
     showInUI: true,
     badge: 'technical_preview',
+    ecfLogType: 'vpcflow',
+    ecfDedicatedTemplate: 'otel',
   },
   {
     id: 'waf_otel',
@@ -878,12 +884,14 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
     deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: [],
-    requiredConfig: [],
+    inputs: ['aws-s3'],
+    requiredConfig: ['bucket_arn'],
     packageName: 'aws_waf_otel',
     defaultEnabled: false,
     showInUI: true,
     badge: 'technical_preview',
+    ecfLogType: 'waf',
+    ecfDedicatedTemplate: 'otel',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
