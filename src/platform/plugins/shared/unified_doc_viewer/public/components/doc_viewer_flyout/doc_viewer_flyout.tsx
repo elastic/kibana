@@ -13,7 +13,7 @@ import type { DocViewerProps, ElasticRequestState } from '@kbn/unified-doc-viewe
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutMenuAction, EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -48,6 +48,7 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
   flyoutActions?: React.ReactNode;
+  flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
   originDocType?: string;
@@ -108,6 +109,7 @@ export function UnifiedDocViewerFlyout({
   flyoutTitle,
   flyoutDefaultWidth,
   flyoutActions,
+  flyoutMenuTrailingActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
   originDocType,
@@ -271,6 +273,7 @@ export function UnifiedDocViewerFlyout({
               title: currentFlyoutTitle,
               'data-test-subj': 'docViewerRowDetailsTitle',
               hideTitle: false,
+              trailingActions: flyoutMenuTrailingActions,
             }}
             className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
             onClose={onClose}

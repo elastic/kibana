@@ -8,6 +8,8 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import type { EuiFlyoutMenuAction } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -31,6 +33,7 @@ import { useCopyExpandedDocLink } from '../../hooks/use_copy_expanded_doc_link';
 import { ExpandedDocNoticeText } from './expanded_doc_notice';
 import { getExpandedDocLinkability } from '../../../../../common/expanded_doc';
 import { getExpandedDocLinkDisabledReason } from '../../../../utils/get_expanded_doc_link_disabled_reason';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export interface DiscoverDocumentFlyoutProps {
   dataView: DataView;
@@ -54,6 +57,7 @@ const DiscoverDocumentFlyoutComponent = ({
   onRemoveColumn,
   onAddFilter,
 }: DiscoverDocumentFlyoutProps) => {
+  const { toastNotifications } = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const query = useAppStateSelector((state) => state.query);
   const persistedDiscoverSession = useInternalStateSelector(
@@ -76,11 +80,46 @@ const DiscoverDocumentFlyoutComponent = ({
     rows,
     fetchStatus: documentState.fetchStatus,
   });
-  const { copyLink, isCopyingLink } = useCopyExpandedDocLink({ dataView });
+  const copyLink = useCopyExpandedDocLink({ dataView });
   const copyLinkDisabledReason = useMemo(
     () => getExpandedDocLinkDisabledReason(getExpandedDocLinkability(query, expandedDoc)),
     [query, expandedDoc]
   );
+  const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(() => {
+    if (!expandedDoc || expandedDocOwner !== DEFAULT_EXPANDED_DOC_OWNER) {
+      return undefined;
+    }
+
+    const copyLinkLabel = i18n.translate('discover.docViews.flyout.copyLinkAriaLabel', {
+      defaultMessage: 'Copy link to this document',
+    });
+
+    return [
+      {
+        iconType: 'share',
+        'aria-label': copyLinkDisabledReason
+          ? i18n.translate('discover.docViews.flyout.copyLinkUnavailableAriaLabel', {
+              defaultMessage: 'Cannot copy link to this document: {reason}',
+              values: { reason: copyLinkDisabledReason },
+            })
+          : copyLinkLabel,
+        toolTipContent: copyLinkDisabledReason ?? copyLinkLabel,
+        onClick: () => {
+          if (copyLinkDisabledReason) {
+            toastNotifications.addWarning({
+              title: i18n.translate('discover.docViews.flyout.copyLinkUnavailableTitle', {
+                defaultMessage: 'Cannot copy link to this document',
+              }),
+              text: copyLinkDisabledReason,
+              'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
+            });
+          } else {
+            void copyLink();
+          }
+        },
+      },
+    ];
+  }, [copyLink, copyLinkDisabledReason, expandedDoc, expandedDocOwner, toastNotifications]);
 
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const setExpandedDocForCurrentOwner = useCallback(
@@ -168,9 +207,7 @@ const DiscoverDocumentFlyoutComponent = ({
       onAddColumn={onAddColumn}
       onClose={() => setExpandedDocForCurrentOwner(undefined)}
       setExpandedDoc={setExpandedDocForCurrentOwner}
-      onCopyLink={copyLink}
-      isCopyingLink={isCopyingLink}
-      copyLinkDisabledReason={copyLinkDisabledReason}
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
       docViewerRef={docViewerRef}
       onUpdateSelectedTabId={onUpdateSelectedTabId}
       initialDocViewerState={docViewerUiState}

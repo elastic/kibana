@@ -13,18 +13,10 @@ import type { UseNavigationProps } from '../../hooks/use_navigation_props';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 import type { FlyoutActionItem } from './types';
 
-export interface UseFlyoutActionsProps extends UseNavigationProps {
-  isEsqlQuery: boolean;
-  onCopyLink?: () => void;
-  isCopyingLink?: boolean;
-  /** Why the document cannot be linked to, when it cannot */
-  copyLinkDisabledReason?: string;
-}
-
 export const useFlyoutActions = (
-  props: UseFlyoutActionsProps
+  props: UseNavigationProps
 ): { flyoutActions: FlyoutActionItem[] } => {
-  const { dataView, isEsqlQuery, onCopyLink, isCopyingLink, copyLinkDisabledReason } = props;
+  const { dataView } = props;
   const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } =
     useNavigationProps(props);
 
@@ -32,8 +24,7 @@ export const useFlyoutActions = (
     const actions: FlyoutActionItem[] = [
       {
         id: 'singleDocument',
-        // Both views resolve documents through a data view, which ES|QL results do not have
-        enabled: !isEsqlQuery,
+        enabled: true,
         dataTestSubj: 'docTableRowAction',
         iconType: 'document',
         href: singleDocHref,
@@ -44,7 +35,7 @@ export const useFlyoutActions = (
       },
       {
         id: 'surroundingDocument',
-        enabled: !isEsqlQuery && Boolean(dataView.isTimeBased() && dataView.id),
+        enabled: Boolean(dataView.isTimeBased() && dataView.id),
         dataTestSubj: 'docTableRowAction',
         iconType: 'documents',
         href: contextViewHref,
@@ -57,38 +48,10 @@ export const useFlyoutActions = (
             'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
         }),
       },
-      {
-        id: 'copyLink',
-        enabled: Boolean(onCopyLink),
-        disabled: Boolean(copyLinkDisabledReason),
-        isLoading: isCopyingLink,
-        dataTestSubj: 'docTableCopyLink',
-        iconType: 'link',
-        onClick: () => onCopyLink?.(),
-        label: i18n.translate('discover.grid.tableRow.copyLinkLabel', {
-          defaultMessage: 'Copy link',
-        }),
-        helpText:
-          copyLinkDisabledReason ??
-          i18n.translate('discover.grid.tableRow.copyLinkHover', {
-            defaultMessage:
-              'Copy a link that reopens this document. The time range is captured as absolute values, so others see the same results.',
-          }),
-      },
     ];
 
     return actions.filter((action) => action.enabled);
-  }, [
-    contextViewHref,
-    copyLinkDisabledReason,
-    dataView,
-    isCopyingLink,
-    isEsqlQuery,
-    onCopyLink,
-    onOpenContextView,
-    onOpenSingleDoc,
-    singleDocHref,
-  ]);
+  }, [contextViewHref, dataView, onOpenContextView, onOpenSingleDoc, singleDocHref]);
 
   return { flyoutActions };
 };

@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ForwardedRef } from 'react';
 import { from, throwError } from 'rxjs';
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import { copyToClipboard, type EuiFlyoutProps } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
@@ -24,24 +26,55 @@ import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider
 import { internalStateActions } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocumentFlyout } from './discover_document_flyout';
+import { ExpandedDocLinkability, type ExpandedDocRef } from '../../../../../common/expanded_doc';
+import { getExpandedDocLinkDisabledReason } from '../../../../utils/get_expanded_doc_link_disabled_reason';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  const OriginalFlyout = actual.EuiFlyout;
+
+  return {
+    ...actual,
+    copyToClipboard: jest.fn(),
+    EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
+      <OriginalFlyout {...props} ref={ref}>
+        {props.flyoutMenuProps && (
+          <actual.EuiFlyoutMenu {...props.flyoutMenuProps} hideCloseButton />
+        )}
+        {props.children}
+      </OriginalFlyout>
+    )),
+  };
+});
 
 const [inResultsHit, outOfResultsHit] = esHitsMock;
-const expandedDocRef = { id: outOfResultsHit._id, index: outOfResultsHit._index };
+const expandedDocRef: ExpandedDocRef = {
+  id: outOfResultsHit._id,
+  index: outOfResultsHit._index,
+};
 
 const searchResponseFor = (hit: EsHitRecord): Promise<IKibanaSearchResponse> =>
   Promise.resolve({ rawResponse: { hits: { hits: [hit] } } });
+
+type InitialFlyout =
+  | { type: 'restoreFromRef'; ref: ExpandedDocRef }
+  | { type: 'openDocument'; document: DataTableRecord }
+  | { type: 'closed' };
 
 const setup = async ({
   searchResult,
   hits = [inResultsHit],
   fetchStatus = FetchStatus.COMPLETE,
-  withRef = true,
+  initialFlyout = { type: 'restoreFromRef', ref: expandedDocRef },
+  query,
   services = createDiscoverServicesMock(),
 }: {
   searchResult?: Promise<IKibanaSearchResponse> | Error;
   hits?: EsHitRecord[];
   fetchStatus?: FetchStatus;
-  withRef?: boolean;
+  initialFlyout?: InitialFlyout;
+  query?: Query | AggregateQuery;
   services?: DiscoverServices;
 } = {}) => {
   setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
@@ -57,19 +90,20 @@ const setup = async ({
   const toolkit = getDiscoverInternalStateMock({ services });
 
   await toolkit.initializeTabs();
+
+  if (query) {
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: toolkit.getCurrentTab().id,
+        appState: { query },
+      })
+    );
+  }
+
   await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
     skipWaitForDataFetching: true,
   });
-
-  if (withRef) {
-    toolkit.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: toolkit.getCurrentTab().id,
-        appState: { expandedDoc: expandedDocRef },
-      })
-    );
-  }
 
   const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
 
@@ -78,8 +112,23 @@ const setup = async ({
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   });
 
-  // Prevent any further updates to documents$ from clearing test data
-  dataStateContainer.data$.documents$.next = jest.fn();
+  await act(async () => {
+    if (initialFlyout.type === 'restoreFromRef') {
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: { expandedDoc: initialFlyout.ref },
+        })
+      );
+    } else if (initialFlyout.type === 'openDocument') {
+      toolkit.internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId: toolkit.getCurrentTab().id,
+          expandedDoc: initialFlyout.document,
+        })
+      );
+    }
+  });
 
   renderWithI18n(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
@@ -101,8 +150,67 @@ describe('DiscoverDocumentFlyout', () => {
     jest.clearAllMocks();
   });
 
+  it('copies a document link from the flyout menu and ignores duplicate clicks', async () => {
+    const { services } = await setup({ hits: esHitsMock });
+
+    const shareButton = await screen.findByRole('button', {
+      name: 'Copy link to this document',
+    });
+
+    act(() => {
+      shareButton.click();
+      shareButton.click();
+    });
+
+    await waitFor(() => {
+      expect(copyToClipboard).toHaveBeenCalledTimes(1);
+    });
+    expect(services.toastNotifications.addSuccess).toHaveBeenCalledWith({
+      title: 'Link copied to clipboard',
+    });
+  });
+
+  it.each([
+    {
+      name: 'an ES|QL result without document metadata',
+      query: { esql: 'FROM logs' },
+      expandedDoc: buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock),
+      linkability: ExpandedDocLinkability.EsqlMissingMetadata,
+    },
+    {
+      name: 'a result from a transformational ES|QL query',
+      query: { esql: 'FROM logs METADATA _id, _index | STATS count() BY host' },
+      expandedDoc: buildDataTableRecord(outOfResultsHit, dataViewMock),
+      linkability: ExpandedDocLinkability.EsqlTransformational,
+    },
+  ])(
+    'explains why a link cannot be copied for $name',
+    async ({ query, expandedDoc, linkability }) => {
+      const { services } = await setup({
+        hits: esHitsMock,
+        query,
+        initialFlyout: { type: 'openDocument', document: expandedDoc },
+      });
+      const disabledReason = getExpandedDocLinkDisabledReason(linkability);
+
+      const shareButton = await screen.findByRole('button', {
+        name: `Cannot copy link to this document: ${disabledReason}`,
+      });
+
+      expect(shareButton).toBeEnabled();
+      fireEvent.click(shareButton);
+
+      expect(services.toastNotifications.addWarning).toHaveBeenCalledWith({
+        title: 'Cannot copy link to this document',
+        text: disabledReason,
+        'data-test-subj': 'discoverDocFlyoutCopyLinkWarning',
+      });
+      expect(copyToClipboard).not.toHaveBeenCalled();
+    }
+  );
+
   it('renders nothing when no document is expanded', async () => {
-    await setup({ withRef: false });
+    await setup({ initialFlyout: { type: 'closed' } });
 
     expect(screen.queryByTestId('docViewerFlyout')).not.toBeInTheDocument();
   });
@@ -239,6 +347,9 @@ describe('DiscoverDocumentFlyout', () => {
     // not render as an empty bordered strip
     expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
     expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /copy link to this document/i })
+    ).not.toBeInTheDocument();
   });
 
   it('shows an error state when the document cannot be fetched', async () => {
@@ -334,6 +445,10 @@ describe('DiscoverDocumentFlyout', () => {
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyout')).toBeVisible();
     });
+
+    expect(
+      screen.queryByRole('button', { name: /copy link to this document/i })
+    ).not.toBeInTheDocument();
 
     // Navigating within the flyout keeps the cascade grid as the owner
     await waitFor(() => {

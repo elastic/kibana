@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiLoadingSpinner,
   EuiToolTip,
   useEuiTheme,
   useResizeObserver,
@@ -31,12 +30,6 @@ import {
 import type { FlyoutActionItem } from './types';
 
 const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;
-
-// Disabled buttons do not emit pointer events, which would stop the tooltip explaining why the
-// action is unavailable from ever showing. The anchor still receives them.
-const disabledTooltipAnchorStyles = css`
-  pointer-events: auto;
-`;
 
 const guardedOnClick = (action: FlyoutActionItem): FlyoutActionItem['onClick'] => {
   return (e: React.MouseEvent) => {
@@ -143,7 +136,6 @@ function FlyoutActions({
           {showFlyoutIconsOnly ? (
             <EuiToolTip
               content={action.helpText ? `${action.label} - ${action.helpText}` : action.label}
-              anchorProps={{ css: disabledTooltipAnchorStyles }}
             >
               <EuiButtonIcon
                 size="s"
@@ -151,16 +143,11 @@ function FlyoutActions({
                 data-test-subj={action.dataTestSubj}
                 aria-label={action.label}
                 href={action.href}
-                isDisabled={action.disabled}
-                isLoading={action.isLoading}
                 onClick={guardedOnClick(action)}
               />
             </EuiToolTip>
           ) : (
-            <EuiToolTip
-              content={action.helpText}
-              anchorProps={{ css: disabledTooltipAnchorStyles }}
-            >
+            <EuiToolTip content={action.helpText}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 size="s"
@@ -169,8 +156,6 @@ function FlyoutActions({
                 iconType={action.iconType}
                 data-test-subj={action.dataTestSubj}
                 href={action.href}
-                isDisabled={action.disabled}
-                isLoading={action.isLoading}
                 onClick={guardedOnClick(action)}
               >
                 {action.label}
@@ -237,17 +222,9 @@ function FlyoutActionsPopover({
         items={flyoutActions.map((action) => (
           <EuiContextMenuItem
             key={action.id}
-            icon={
-              action.isLoading ? (
-                <EuiLoadingSpinner size="m" />
-              ) : (
-                (action.iconType as EuiContextMenuItemIcon)
-              )
-            }
+            icon={action.iconType as EuiContextMenuItemIcon}
             data-test-subj={action.dataTestSubj}
             href={action.href}
-            disabled={action.disabled}
-            toolTipContent={action.helpText}
             onClick={guardedOnClick(action)}
           >
             {action.label}

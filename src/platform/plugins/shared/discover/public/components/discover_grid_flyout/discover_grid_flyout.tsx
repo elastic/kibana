@@ -34,6 +34,7 @@ export interface DiscoverGridFlyoutProps
     | 'onUpdateSelectedTabId'
     | 'requestState'
     | 'notice'
+    | 'flyoutMenuTrailingActions'
   > {
   savedSearchId?: string;
   filters?: Filter[];
@@ -54,14 +55,6 @@ export interface DiscoverGridFlyoutProps
     options?: { initialTabId?: string; initialTabState?: object }
   ) => void;
   hideFilteringOnComputedColumns?: boolean;
-  /**
-   * Copies a link that reopens this document. Only provided by the main Discover view, since
-   * the surrounding documents view and the saved search embeddable have no URL to restore into.
-   */
-  onCopyLink?: () => void;
-  isCopyingLink?: boolean;
-  /** Why the document cannot be linked to, when it cannot */
-  copyLinkDisabledReason?: string;
 }
 
 const getOriginDocType = (record: DataTableRecord | undefined): DocumentType =>
@@ -92,9 +85,7 @@ export function DiscoverGridFlyout({
   hideFilteringOnComputedColumns,
   requestState,
   notice,
-  onCopyLink,
-  isCopyingLink,
-  copyLinkDisabledReason,
+  flyoutMenuTrailingActions,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const isEsqlQuery = isOfAggregateQueryType(query);
@@ -108,10 +99,6 @@ export function DiscoverGridFlyout({
     columns,
     filters,
     savedSearchId,
-    isEsqlQuery,
-    onCopyLink,
-    isCopyingLink,
-    copyLinkDisabledReason,
   });
 
   const getDocViewerAccessor = useProfileAccessor('getDocViewer', {
@@ -139,10 +126,11 @@ export function DiscoverGridFlyout({
       originDocType={originDocType}
       flyoutTitle={docViewer?.title}
       flyoutActions={
-        actualHit && flyoutActions.length > 0 ? (
+        !isEsqlQuery && actualHit && flyoutActions.length > 0 ? (
           <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
         ) : null
       }
+      flyoutMenuTrailingActions={flyoutMenuTrailingActions}
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       services={services}
       docViewsRegistry={docViewer?.docViewsRegistry}
