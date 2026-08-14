@@ -79,6 +79,8 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   autoCreateConversationWithId?: boolean;
   /** Access mode to apply when creating a new conversation. Ignored for existing conversations. */
   accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
+  /** Read-only flag to apply when creating a new conversation. Ignored for existing conversations. */
+  readOnly?: boolean;
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
   /** Callback delivery configuration for this execution. */
