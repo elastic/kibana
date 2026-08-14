@@ -8,9 +8,10 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import { DEPLOYMENT_STATS_PATH } from '../../common/constants';
+import { fetchDashboardsCount } from '../lib/dashboards';
 import {
   INDEX_STATS_UNAVAILABLE,
-  fetchDashboardsCount,
+  fetchApiKeysStats,
   fetchIndexStats,
   hasIndexManagePrivilege,
 } from '../lib/deployment_stats';
@@ -32,11 +33,16 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         const client = core.elasticsearch.client;
         const savedObjectsClient = core.savedObjects.getClient();
 
-        const [{ indicesCount, storeSizeBytes, vectorCount }, dashboardsCount] = await Promise.all([
+        const [
+          { indicesCount, storeSizeBytes, vectorCount, documentsCount },
+          dashboardsCount,
+          { total: apiKeysCount, expiring: expiringApiKeysCount },
+        ] = await Promise.all([
           hasIndexManagePrivilege(client, logger).then((isPrivileged) =>
             isPrivileged ? fetchIndexStats(client, logger) : INDEX_STATS_UNAVAILABLE
           ),
           fetchDashboardsCount(savedObjectsClient, logger),
+          fetchApiKeysStats(client, logger),
         ]);
 
         return response.ok({
@@ -44,7 +50,10 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
             indicesCount,
             storeSizeBytes,
             vectorCount,
+            documentsCount,
             dashboardsCount,
+            apiKeysCount,
+            expiringApiKeysCount,
           },
         });
       } catch (error) {
