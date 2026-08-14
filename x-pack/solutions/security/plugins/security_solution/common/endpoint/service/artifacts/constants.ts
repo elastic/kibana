@@ -21,6 +21,33 @@ export const FILTER_PROCESS_DESCENDANTS_TAG = 'filter_process_descendants';
 /** The tag name for process descendants in trusted apps */
 export const TRUSTED_PROCESS_DESCENDANTS_TAG = 'trust_process_descendants';
 
+/**
+ * The tag prefix that narrows a process descendants event filter down to a set of event
+ * categories, e.g. `descendant_event_scope:file,library`. Only meaningful together with
+ * `FILTER_PROCESS_DESCENDANTS_TAG`. When absent, events of every category produced by the
+ * descendants are filtered (the original, all-or-nothing behaviour).
+ */
+export const DESCENDANT_EVENT_SCOPE_TAG_PREFIX = 'descendant_event_scope:';
+
+/**
+ * The event categories a process descendants event filter can be scoped to.
+ *
+ * NOTE: the order of this array is the canonical order used when emitting the scope into an
+ * artifact, so that the very same scope always produces the very same artifact hash.
+ */
+export const DESCENDANT_EVENT_SCOPE_CATEGORIES = Object.freeze([
+  'api',
+  'dns',
+  'file',
+  'library',
+  'network',
+  'process',
+  'registry',
+  'security',
+] as const);
+
+export type DescendantEventScopeCategory = (typeof DESCENDANT_EVENT_SCOPE_CATEGORIES)[number];
+
 /** The tag prefix that tracks the space(s) that is considered the "owner" of the artifact.  */
 export const OWNER_SPACE_ID_TAG_PREFIX = 'ownerSpaceId:';
 

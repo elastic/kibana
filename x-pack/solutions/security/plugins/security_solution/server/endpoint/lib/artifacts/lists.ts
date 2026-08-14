@@ -22,10 +22,15 @@ import {
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
-import { isProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
+import {
+  buildDescendantEventScopeEntry,
+  getDescendantEventScope,
+  isProcessDescendantsEnabled,
+} from '../../../../common/endpoint/service/artifacts/utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
+  TranslatedEntryDescendantOf,
   TranslatedPerformantEntries,
   TranslatedEntryMatcher,
   TranslatedEntryMatchWildcard,
@@ -191,7 +196,11 @@ export function translateToEndpointExceptions(
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
         isProcessDescendantsEnabled(entry)
       ) {
-        const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
+        const translatedItem = translateProcessDescendantEventFilter(
+          schemaVersion,
+          entry,
+          experimentalFeatures
+        );
         storeUniqueItem(translatedItem);
       } else if (
         experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
@@ -214,24 +223,49 @@ export function translateToEndpointExceptions(
 
 function translateProcessDescendantEventFilter(
   schemaVersion: string,
-  entry: ExceptionListItemSchema
+  entry: ExceptionListItemSchema,
+  experimentalFeatures: ExperimentalFeatures
 ): TranslatedExceptionListItem {
+  // The user provided conditions describe the *ancestor* process, so they are translated together
+  // with the `event.category is process` condition and nested inside `descendent_of`.
   const translatedEntries: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
     ...entry,
     entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
   }) as TranslatedEntriesOfProcessDescendants;
 
+  const descendantOfEntry: TranslatedEntryDescendantOf = {
+    operator: 'included',
+    type: 'descendent_of',
+    value: {
+      entries: [translatedEntries],
+    },
+  };
+
+  const eventScope = experimentalFeatures.scopedProcessDescendantEventFiltersEnabled
+    ? getDescendantEventScope(entry)
+    : [];
+
+  // No (valid) scope means every event category of the descendants is filtered out, which is the
+  // default and only behaviour of process descendants event filters prior to the event scope tag.
+  if (eventScope.length === 0) {
+    return {
+      type: entry.type,
+      entries: [descendantOfEntry],
+    };
+  }
+
+  // Conditions of a `simple` entry are AND'ed together by the endpoint, so emitting the event
+  // category condition as a *sibling* of `descendent_of` filters out only those categories from
+  // the matched process tree. Events of every other category (and all events of the matched
+  // process itself) remain visible.
+  const translatedEventScope: TranslatedEntriesOfProcessDescendants = translateItem(schemaVersion, {
+    ...entry,
+    entries: [buildDescendantEventScopeEntry(eventScope)],
+  }) as TranslatedEntriesOfProcessDescendants;
+
   return {
     type: entry.type,
-    entries: [
-      {
-        operator: 'included',
-        type: 'descendent_of',
-        value: {
-          entries: [translatedEntries],
-        },
-      },
-    ],
+    entries: [...translatedEventScope.entries, descendantOfEntry],
   };
 }
 

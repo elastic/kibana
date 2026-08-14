@@ -117,6 +117,13 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForTrustedAppsEnabled: false,
 
   /**
+   * Allows "filter process descendants" Event Filters to only apply to a subset of the event
+   * categories produced by the process tree (e.g. filter out `file` and `library` events of the
+   * descendants, but keep their `process` and `network` events).
+   */
+  scopedProcessDescendantEventFiltersEnabled: false,
+
+  /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */

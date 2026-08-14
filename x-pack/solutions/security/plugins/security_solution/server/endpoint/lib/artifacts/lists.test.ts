@@ -16,13 +16,19 @@ import {
   getFilteredEndpointExceptionListRaw,
   convertExceptionsToEndpointFormat,
 } from './lists';
-import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
+import type {
+  TranslatedEntry,
+  TranslatedExceptionListItem,
+  WrappedTranslatedExceptionList,
+} from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
+  DESCENDANT_EVENT_SCOPE_TAG_PREFIX,
   FILTER_PROCESS_DESCENDANTS_TAG,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
+import { buildDescendantEventScopeTag } from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
 
@@ -676,6 +682,166 @@ describe('artifacts lists', () => {
         const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      describe('with an event scope tag', () => {
+        let enabledScopedProcessDescendantEventFilters: ExperimentalFeatures;
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const descendantOfEntry: TranslatedEntry = {
+          operator: 'included',
+          type: 'descendent_of',
+          value: {
+            entries: [
+              {
+                type: 'simple',
+                entries: [
+                  {
+                    field: 'process.executable',
+                    operator: 'included',
+                    type: 'exact_caseless',
+                    value: 'C:\\Windows\\System32\\ping.exe',
+                  },
+                  {
+                    field: 'event.category',
+                    operator: 'included',
+                    type: 'exact_cased',
+                    value: 'process',
+                  },
+                ],
+              },
+            ],
+          },
+        };
+
+        const translateWithTags = async (
+          tags: string[],
+          features: ExperimentalFeatures
+        ): Promise<WrappedTranslatedExceptionList> => {
+          const exceptionMock = getFoundExceptionListItemSchemaMock();
+          exceptionMock.data[0].tags.push(...tags);
+          exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
+          exceptionMock.data[0].entries = inputEntry;
+          mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+          const resp = await getFilteredEndpointExceptionListRaw({
+            elClient: mockExceptionClient,
+            filter: TEST_FILTER,
+            listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+          });
+
+          return convertExceptionsToEndpointFormat(resp, 'v1', features);
+        };
+
+        beforeEach(() => {
+          enabledScopedProcessDescendantEventFilters = {
+            ...defaultFeatures,
+            scopedProcessDescendantEventFiltersEnabled: true,
+          };
+        });
+
+        it('should emit the scoped event categories as a sibling of `descendent_of`', async () => {
+          const expectedEndpointExceptions: TranslatedExceptionListItem = {
+            type: 'simple',
+            entries: [
+              {
+                field: 'event.category',
+                operator: 'included',
+                type: 'exact_cased_any',
+                value: ['file', 'library'],
+              },
+              descendantOfEntry,
+            ],
+          };
+
+          const translated = await translateWithTags(
+            [FILTER_PROCESS_DESCENDANTS_TAG, buildDescendantEventScopeTag(['file', 'library'])],
+            enabledScopedProcessDescendantEventFilters
+          );
+
+          expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+        });
+
+        it('should emit the scoped event categories in a stable order', async () => {
+          const translated = await translateWithTags(
+            [FILTER_PROCESS_DESCENDANTS_TAG, `${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}library, file`],
+            enabledScopedProcessDescendantEventFilters
+          );
+
+          expect(translated).toEqual({
+            entries: [
+              {
+                type: 'simple',
+                entries: [
+                  {
+                    field: 'event.category',
+                    operator: 'included',
+                    type: 'exact_cased_any',
+                    value: ['file', 'library'],
+                  },
+                  descendantOfEntry,
+                ],
+              },
+            ],
+          });
+        });
+
+        it('when the feature flag is disabled, it should filter all event categories', async () => {
+          const expectedEndpointExceptions: TranslatedExceptionListItem = {
+            type: 'simple',
+            entries: [descendantOfEntry],
+          };
+
+          const translated = await translateWithTags(
+            [FILTER_PROCESS_DESCENDANTS_TAG, buildDescendantEventScopeTag(['file', 'library'])],
+            defaultFeatures
+          );
+
+          expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+        });
+
+        it('when no event category is known, it should filter all event categories', async () => {
+          const expectedEndpointExceptions: TranslatedExceptionListItem = {
+            type: 'simple',
+            entries: [descendantOfEntry],
+          };
+
+          const translated = await translateWithTags(
+            [FILTER_PROCESS_DESCENDANTS_TAG, `${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}not-a-category`],
+            enabledScopedProcessDescendantEventFilters
+          );
+
+          expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+        });
+
+        it('when the item is not in process descendants mode, it should not be scoped', async () => {
+          const expectedEndpointExceptions: TranslatedExceptionListItem = {
+            type: 'simple',
+            entries: [
+              {
+                field: 'process.executable',
+                operator: 'included',
+                type: 'exact_caseless',
+                value: 'C:\\Windows\\System32\\ping.exe',
+              },
+            ],
+          };
+
+          const translated = await translateWithTags(
+            [buildDescendantEventScopeTag(['file'])],
+            enabledScopedProcessDescendantEventFilters
+          );
+
+          expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+        });
       });
     });
 

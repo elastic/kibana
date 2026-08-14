@@ -9,10 +9,15 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import type { PolicyData } from '../../types';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
+  DESCENDANT_EVENT_SCOPE_TAG_PREFIX,
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from './constants';
 import {
+  buildDescendantEventScopeEntry,
+  buildDescendantEventScopeTag,
+  getDescendantEventScope,
+  isDescendantEventScopeTag,
   buildSpaceOwnerIdTag,
   createExceptionListItemForCreate,
   getArtifactOwnerSpaceIds,
@@ -238,6 +243,64 @@ describe('Endpoint artifact utilities', () => {
       setArtifactOwnerSpaceId(item, 'abc');
 
       expect(item).toEqual({ tags: [buildSpaceOwnerIdTag('abc')] });
+    });
+  });
+
+  describe('when using `buildDescendantEventScopeTag()`', () => {
+    it('should return an artifact tag', () => {
+      expect(buildDescendantEventScopeTag(['file'])).toEqual(
+        `${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}file`
+      );
+    });
+
+    it('should keep the event categories in a canonical order', () => {
+      expect(buildDescendantEventScopeTag(['network', 'file'])).toEqual(
+        buildDescendantEventScopeTag(['file', 'network'])
+      );
+    });
+
+    it('should skip unknown event categories', () => {
+      expect(buildDescendantEventScopeTag(['file', 'not-a-category'])).toEqual(
+        `${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}file`
+      );
+    });
+  });
+
+  describe('when using `isDescendantEventScopeTag()`', () => {
+    it.each`
+      name                     | tag                                           | expectedResult
+      ${'an event scope tag'}  | ${`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}file`} | ${true}
+      ${'an empty scope tag'}  | ${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}          | ${true}
+      ${'the descendants tag'} | ${FILTER_PROCESS_DESCENDANTS_TAG}             | ${false}
+      ${'an unrelated tag'}    | ${'policy:all'}                               | ${false}
+    `('should return $expectedResult when tag is $name', ({ tag, expectedResult }) => {
+      expect(isDescendantEventScopeTag(tag)).toBe(expectedResult);
+    });
+  });
+
+  describe('when using `getDescendantEventScope()`', () => {
+    it.each`
+      name                                         | tags                                                                                                    | expectedResult
+      ${'empty array if no tags'}                  | ${{}}                                                                                                   | ${[]}
+      ${'empty array if no event scope tag'}       | ${{ tags: [FILTER_PROCESS_DESCENDANTS_TAG] }}                                                           | ${[]}
+      ${'empty array if no known category'}        | ${{ tags: [`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}not-a-category`] }}                                     | ${[]}
+      ${'the event categories in tag'}             | ${{ tags: [`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}file,library`] }}                                       | ${['file', 'library']}
+      ${'the event categories in canonical order'} | ${{ tags: [`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}library, file`] }}                                      | ${['file', 'library']}
+      ${'the event categories of all tags'}        | ${{ tags: [`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}library`, `${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}file`] }} | ${['file', 'library']}
+      ${'the known event categories only'}         | ${{ tags: [`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}file,not-a-category`] }}                                | ${['file']}
+    `('should return $name', ({ tags, expectedResult }) => {
+      expect(getDescendantEventScope(tags)).toEqual(expectedResult);
+    });
+  });
+
+  describe('when using `buildDescendantEventScopeEntry()`', () => {
+    it('should return an exception item entry matching any of the event categories', () => {
+      expect(buildDescendantEventScopeEntry(['file', 'library'])).toEqual({
+        field: 'event.category',
+        operator: 'included',
+        type: 'match_any',
+        value: ['file', 'library'],
+      });
     });
   });
 });

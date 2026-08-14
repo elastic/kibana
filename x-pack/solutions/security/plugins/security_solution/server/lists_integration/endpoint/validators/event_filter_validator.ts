@@ -14,6 +14,17 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 
+import {
+  DESCENDANT_EVENT_SCOPE_CATEGORIES,
+  DESCENDANT_EVENT_SCOPE_TAG_PREFIX,
+  FILTER_PROCESS_DESCENDANTS_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
+import {
+  getDescendantEventScopeValues,
+  isDescendantEventScopeCategory,
+  isDescendantEventScopeTag,
+  isProcessDescendantsEnabled,
+} from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
@@ -97,8 +108,53 @@ export class EventFilterValidator extends BaseValidator {
 
     try {
       EventFilterDataSchema.validate(item);
+      this.validateDescendantEventScope(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
+    }
+  }
+
+  /**
+   * Validates the (optional) tag that scopes a process descendants event filter down to a set of
+   * event categories. Items without that tag keep filtering every event category of the tree.
+   */
+  private validateDescendantEventScope(item: ExceptionItemLikeOptions): void {
+    const tags = item.tags ?? [];
+
+    if (!tags.some(isDescendantEventScopeTag)) {
+      return;
+    }
+
+    if (!this.endpointAppContext.experimentalFeatures.scopedProcessDescendantEventFiltersEnabled) {
+      throw new Error('Scoped process descendants event filtering feature is not enabled');
+    }
+
+    if (!isProcessDescendantsEnabled({ tags })) {
+      throw new Error(
+        `The \`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}\` tag is only allowed together with the \`${FILTER_PROCESS_DESCENDANTS_TAG}\` tag`
+      );
+    }
+
+    const eventScopeValues = getDescendantEventScopeValues({ tags });
+
+    if (eventScopeValues.length === 0) {
+      throw new Error(
+        `The \`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}\` tag must list at least one event category. Remove the tag to filter all event categories of the process descendants.`
+      );
+    }
+
+    const invalidCategories = eventScopeValues.filter(
+      (value) => !isDescendantEventScopeCategory(value)
+    );
+
+    if (invalidCategories.length > 0) {
+      throw new Error(
+        `Invalid event category [${invalidCategories.join(
+          ', '
+        )}] in the \`${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}\` tag. Allowed values are: ${DESCENDANT_EVENT_SCOPE_CATEGORIES.join(
+          ', '
+        )}`
+      );
     }
   }
 

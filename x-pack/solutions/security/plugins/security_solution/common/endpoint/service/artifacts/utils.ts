@@ -8,16 +8,21 @@
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
+  EntryMatchAny,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { v4 as uuidv4 } from 'uuid';
 import type { EffectedPolicySelection } from '../../../../public/management/components/effected_policy_select';
 import type { PolicyData } from '../../types';
+import type { DescendantEventScopeCategory } from './constants';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
+  DESCENDANT_EVENT_SCOPE_CATEGORIES,
+  DESCENDANT_EVENT_SCOPE_TAG_PREFIX,
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
   OWNER_SPACE_ID_TAG_PREFIX,
   ADVANCED_MODE_TAG,
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from './constants';
 
@@ -142,6 +147,81 @@ export const isFilterProcessDescendantsTag: TagFilter = (tag) =>
 /** Checks if the given tag is for filtering process descendants in trusted apps */
 export const isTrustedProcessDescendantsTag: TagFilter = (tag) =>
   tag === TRUSTED_PROCESS_DESCENDANTS_TAG;
+
+/** Checks if the given tag scopes a process descendants event filter to a set of event categories */
+export const isDescendantEventScopeTag: TagFilter = (tag) =>
+  tag.startsWith(DESCENDANT_EVENT_SCOPE_TAG_PREFIX);
+
+/** Checks if the given value is an event category a descendants event filter can be scoped to */
+export const isDescendantEventScopeCategory = (
+  value: string
+): value is DescendantEventScopeCategory =>
+  (DESCENDANT_EVENT_SCOPE_CATEGORIES as readonly string[]).includes(value);
+
+/**
+ * Builds the tag that stores the event categories a process descendants event filter applies to.
+ * Categories are stored in a canonical order so that the same selection always produces the same tag.
+ */
+export const buildDescendantEventScopeTag = (categories: readonly string[]): string => {
+  const canonicalCategories = DESCENDANT_EVENT_SCOPE_CATEGORIES.filter((category) =>
+    categories.includes(category)
+  );
+
+  return `${DESCENDANT_EVENT_SCOPE_TAG_PREFIX}${canonicalCategories.join(',')}`;
+};
+
+/**
+ * Returns the raw, comma separated values found on the artifact's event scope tag(s), without
+ * checking them against the list of known event categories. Mostly useful for validation - use
+ * {@link getDescendantEventScope} to get the categories that are actually applied.
+ */
+export const getDescendantEventScopeValues = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): string[] => {
+  const values = new Set<string>();
+
+  for (const tag of item.tags ?? []) {
+    if (!isDescendantEventScopeTag(tag)) {
+      continue;
+    }
+
+    for (const value of tag.substring(DESCENDANT_EVENT_SCOPE_TAG_PREFIX.length).split(',')) {
+      const trimmedValue = value.trim();
+
+      if (trimmedValue !== '') {
+        values.add(trimmedValue);
+      }
+    }
+  }
+
+  return [...values];
+};
+
+/**
+ * Returns the event categories a process descendants artifact is scoped to, deduplicated and in a
+ * canonical order. An empty array means "every event category", which is the default behaviour.
+ */
+export const getDescendantEventScope = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): DescendantEventScopeCategory[] => {
+  const values = new Set(getDescendantEventScopeValues(item));
+
+  return DESCENDANT_EVENT_SCOPE_CATEGORIES.filter((category) => values.has(category));
+};
+
+/**
+ * Builds the exception item entry that narrows a process descendants artifact down to the given
+ * event categories. It is meant to be AND'ed with (i.e. emitted as a sibling of) the
+ * `descendent_of` condition, so that only these event categories get filtered out of the tree.
+ */
+export const buildDescendantEventScopeEntry = (
+  categories: readonly DescendantEventScopeCategory[]
+): EntryMatchAny => ({
+  field: PROCESS_DESCENDANT_EXTRA_ENTRY.field,
+  operator: 'included',
+  type: 'match_any',
+  value: [...categories],
+});
 
 export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {
   return {

@@ -11,12 +11,22 @@ export {
   getPolicyIdsFromArtifact,
   getEffectedPolicySelectionByTags,
   getArtifactTagsByPolicySelection,
+  buildDescendantEventScopeEntry,
+  buildDescendantEventScopeTag,
+  getDescendantEventScope,
+  getDescendantEventScopeValues,
+  isDescendantEventScopeCategory,
+  isDescendantEventScopeTag,
 } from './utils';
 
 export {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
   ADVANCED_MODE_TAG,
+  DESCENDANT_EVENT_SCOPE_CATEGORIES,
+  DESCENDANT_EVENT_SCOPE_TAG_PREFIX,
   FILTER_PROCESS_DESCENDANTS_TAG,
   TRUSTED_PROCESS_DESCENDANTS_TAG,
 } from './constants';
+
+export type { DescendantEventScopeCategory } from './constants';
