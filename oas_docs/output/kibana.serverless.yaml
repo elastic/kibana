@@ -2019,6 +2019,62 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an empty conversation without sending a message. Returns the created conversation immediately. Use this to obtain a conversation ID before starting a chat session. To learn more about agent conversations, refer to the agent chat documentation.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: post-agent-builder-conversations
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                access_control:
+                  additionalProperties: false
+                  description: Optional access control settings. Defaults to private.
+                  type: object
+                  properties:
+                    access_mode:
+                      description: Access mode for the conversation. Defaults to private.
+                      enum:
+                        - private
+                        - public
+                      type: string
+                  required:
+                    - access_mode
+                agent_id:
+                  description: The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.
+                  type: string
+                conversation_id:
+                  description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
+                  type: string
+                title:
+                  description: Title for the conversation. Defaults to "New conversation".
+                  maxLength: 500
+                  type: string
+      responses: {}
+      summary: Create conversation
+      tags:
+        - agent builder
+      x-state: ''
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/conversations/{conversation_id}:
     delete:
       description: |-
