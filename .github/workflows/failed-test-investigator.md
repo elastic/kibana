@@ -10,6 +10,9 @@ on:
         type: string
   issues:
     types: [opened, labeled, reopened]
+  # listen for new "new failure" comment
+  issue_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -19,7 +22,20 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test') && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}"
+# run for one of three triggers:
+# - manual dispatch with an issue number
+# - a failed-test issue opened, reopened, or first labeled failed-test
+# - kibanamachine's "new failure" comment that brings failcount to 2
+if: >-
+  ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '')
+  || (github.event_name == 'issues' && !github.event.issue.pull_request
+  && contains(github.event.issue.labels.*.name, 'failed-test')
+  && (github.event.action != 'labeled' || github.event.label.name == 'failed-test'))
+  || (github.event_name == 'issue_comment' && !github.event.issue.pull_request
+  && contains(github.event.issue.labels.*.name, 'failed-test')
+  && github.event.comment.user.login == 'kibanamachine'
+  && (contains(github.event.issue.body, '"test.failCount":2,')
+  || contains(github.event.issue.body, '"test.failCount":2}'))) }}
 
 concurrency:
   # Keep one investigation lane per issue. Unrelated label events get their own group suffix so they can skip without canceling an in-flight investigation.
@@ -201,7 +217,14 @@ Add `failure:ai-fixable` to the issue if we are confident that a fix is availabl
 
 ### Automatic fix request
 
-When you add `failure:ai-fixable`, also add `ai:fix-flaky` to automatically request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. **Skip** the `ai:fix-flaky` label when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository — you already check for one when writing the tip block below; don't request a duplicate.
+Only request an automatic fix for a failure that has **recurred** — a test that failed at least twice on tracked branches, not a first-time one-off — so we don't spend a fix run on a fluke. Read `test.failCount` from the issue body's `kibanaCiData` metadata (the `<!-- kibanaCiData = ... -->` comment): `test.failCount >= 2` means it recurred. If that metadata is missing, treat the failure as recurring only when the timeline shows it — a "New failure" comment from `kibanamachine`, or a prior reopen.
+
+- **Recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** also add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
+- **First-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
+
+**Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate.
+
+An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate.
 
 ### "Previous fix didn't hold" label
 
@@ -233,10 +256,10 @@ When the verdict is that no change to this repository is needed, close the issue
 - the failure is not recurring: a CI-environment failure that keeps hitting the same test or suite needs escalation, not closing — leave it open;
 - you did not add `failure:ai-fixable` or `ai:fix-flaky`, and no fix PR referencing this issue is open.
 
-Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a tip block right after (and outside) the `<details>` block:
+Call the tool at most once, only after posting the verdict comment, and do not attach a closing comment to it. Instead, make the close visible in the verdict comment with a note block right after (and outside) the `<details>` block:
 
 ```markdown
-> [!TIP]
+> [!NOTE]
 > Closing this issue: {one-sentence reason}. It will reopen automatically if the test fails again.
 ```
 
@@ -249,7 +272,9 @@ When in doubt, leave the issue open.
 
 ## Comment format
 
-Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
+Post at most one comment on the issue. **On a re-run** — a reopen or a recurrence comment, where the issue already carries a prior investigation comment — read that latest comment first: if your fresh verdict agrees with it (same classification and root cause), **skip the comment entirely** and just apply the label changes the recurrence calls for — e.g. add `ai:fix-flaky`, plus add or remove any other labels as necessary. Post a comment only for the first investigation, or when your verdict genuinely differs (new evidence, a different root cause, or the prior verdict was inconclusive and now is not).
+
+When you do post, optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
 
 **Write tight.** Use bullet points, not paragraphs; every sentence must be earned. Concretely:
 
@@ -260,18 +285,27 @@ Post exactly one comment on the issue. Optimize for a reviewer who spends ~30 se
 
 Follow the format below exactly. Do not create standalone sections for "what the test does" "evidence," "where the test ran," or "failure screenshot". Integrate these details seamlessly into the sections below if they add value.
 
-The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a tip block about the automatically requested fix or an auto-close (it is only posted under certain conditions, more info below).
+The comment has different parts: a compact header that stays visible on the issue page (one `###` headline + one summary sentence), and a `<details>` block that hides everything else, as well as a note or tip block about the automatically requested fix or an auto-close (it is only posted under certain conditions, more info below).
 
 **Inside the `<details>` block, every section starts with `#### Section name` on its own line** (e.g., `#### Proposed fix`, `#### Root cause & evidence`).
 
-Add the following snippet of Markdown right after (and outside) the `<details>` block only if a fix is needed and available — i.e. you added `failure:ai-fixable` and requested a fix via `ai:fix-flaky` (see "Automatic fix request").
+Use `> [!TIP]` only when the callout suggests the reader add a label; use `> [!NOTE]` for a purely informational callout (an incoming fix, an existing fix PR, or an auto-close). Add one of the following snippets right after (and outside) the `<details>` block, only when a fix is needed and available (see "Automatic fix request").
+
+**Fix requested** — you added `failure:ai-fixable` and `ai:fix-flaky`. Informational, so use a note:
 
 ```markdown
-> [!TIP]
+> [!NOTE]
 > Marked "AI-fixable": fix PR incoming within ~20-30 min.
 ```
 
-If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the tip block instead of the automatic-request sentence.
+If a fix PR is already up (in draft or in review) in the Kibana repository — the case where you skipped the `ai:fix-flaky` label — mention the PR link in the note instead of the automatic-request sentence.
+
+**Fix held** — you added `failure:ai-fixable` without `ai:fix-flaky` because this is a first-time failure (`failCount` is 1). This suggests a label, so use a tip:
+
+```markdown
+> [!TIP]
+> Marked "AI-fixable". Add `ai:fix-flaky` to request a fix now; otherwise it will be requested automatically if the test fails again.
+```
 
 ### 1. Visible header (required)
 
