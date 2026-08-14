@@ -70,7 +70,7 @@ tools:
 
 # Bootstrap Kibana on the self-hosted runner, in a pre-agent step that runs on the
 # host (before `awf` starts the sandboxed agent), so `node_modules` and
-# `@kbn/setup-node-env` exist and the agent can lint and run Jest on the fix.
+# `@kbn/setup-node-env` exist so the agent can lint the fix and run any Jest tests.
 runs-on: kibana
 steps:
   - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
