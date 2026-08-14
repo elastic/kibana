@@ -10,6 +10,7 @@
 import Path from 'path';
 import type { Rule } from 'eslint';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { QuarantineConfig } from '@kbn/dependency-quarantine';
 import {
   formatQuarantineMessage,
   isPathAllowed,
@@ -20,6 +21,9 @@ import { visitAllImportStatements } from '../helpers/visit_all_import_statements
 import { report } from '../helpers/report';
 import { getSourcePath } from '../helpers/source';
 
+let cachedConfigs: QuarantineConfig[] | undefined;
+const getConfigs = (): QuarantineConfig[] => (cachedConfigs ??= loadQuarantineConfigs());
+
 export const NoQuarantinedImportsRule: Rule.RuleModule = {
   meta: {
     type: 'problem',
@@ -29,7 +33,7 @@ export const NoQuarantinedImportsRule: Rule.RuleModule = {
   },
 
   create(context) {
-    const configs = loadQuarantineConfigs();
+    const configs = getConfigs();
     const filename = getSourcePath(context);
     const repoRelPath = Path.relative(REPO_ROOT, filename).split(Path.sep).join('/');
 
