@@ -168,6 +168,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     status === AsyncStatus.Settled &&
     data?.has_setup === true &&
     data?.has_data === false &&
+    data?.pre_8_9_1_data === false &&
     pathname !== '/add-data-instructions'
   ) {
     // when there's no data redirect the user to the add data instructions page
