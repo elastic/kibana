@@ -235,7 +235,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`name`');
       expect(doc).toContain('`destinations`');
       expect(doc).toContain('`matcher`');
-      expect(doc).toContain('`groupingMode`');
+      expect(doc).toContain('`grouping_mode`');
       expect(doc).toContain('`throttle`');
     });
   });

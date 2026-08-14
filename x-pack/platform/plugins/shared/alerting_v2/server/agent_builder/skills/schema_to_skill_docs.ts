@@ -19,6 +19,7 @@ import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
 } from '@kbn/workflows';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import {
   ruleOperationSchema,
   setKindOperationSchema,
@@ -514,6 +515,7 @@ export const generateRuleKindDoc = (): string => {
       `- **Stateful alerting** with full episode lifecycle: ${episodeStatuses}.`,
       `- Supports state transitions (${transitionFields}), recovery detection, and notification dispatch.`,
       "- Produces `type: 'alert'` events that participate in the dispatcher pipeline.",
+      `- UI label: **"${RULE_KIND_LABELS.alert}"**.`,
       '- Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.',
     ],
     signal: [
@@ -521,6 +523,7 @@ export const generateRuleKindDoc = (): string => {
       '- **Stateless detection** (observation-only).',
       "- Produces `type: 'signal'` events but **skips** episode lifecycle and dispatcher processing entirely.",
       '- No notifications, no recovery, no state transitions.',
+      `- UI label: **"${RULE_KIND_LABELS.signal}"**.`,
       '- Use for logging or detection without automated action.',
     ],
   };

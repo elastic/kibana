@@ -87,7 +87,7 @@ export const needsInterval = (strategy: string | undefined): boolean =>
 
 export interface ValidationPayload {
   value: {
-    groupingMode?: string | null;
+    grouping_mode?: string | null;
     throttle?: { strategy?: string; interval?: string | null } | null;
   };
   issues: z.core.$ZodRawIssue[];
@@ -110,7 +110,7 @@ const validateStrategyInterval = (payload: ValidationPayload) => {
 
 const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
-  const mode = data.groupingMode ?? 'per_episode';
+  const mode = data.grouping_mode ?? 'per_episode';
   const strategy = data.throttle?.strategy;
   if (!strategy) return;
 
@@ -131,7 +131,7 @@ export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSche
 
 export const snoozeActionPolicyBodySchema = z
   .object({
-    snoozedUntil: z.iso
+    snoozed_until: z.iso
       .datetime()
       .describe('The ISO datetime until which the action policy should be snoozed.'),
   })
@@ -147,7 +147,7 @@ export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema
  */
 export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
   .extend({
-    snoozedUntil: z.iso
+    snoozed_until: z.iso
       .datetime()
       .describe('The ISO datetime until which the targeted action policies should be snoozed.'),
   })
@@ -173,13 +173,13 @@ const createActionPolicyDataBaseSchema = z
       .max(MAX_KQL_LENGTH)
       .optional()
       .describe('A KQL query string to match alerts.'),
-    groupBy: z
+    group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
       .optional()
       .describe('The fields used to group alerts.'),
     tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
-    groupingMode: groupingModeSchema
+    grouping_mode: groupingModeSchema
       .optional()
       .describe('The grouping mode for alert notifications.'),
     throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
@@ -218,14 +218,14 @@ export const updateActionPolicyDataSchema = z
       .optional()
       .nullable()
       .describe('A KQL query string to match alerts.'),
-    groupBy: z
+    group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
       .optional()
       .nullable()
       .describe('The fields used to group alerts.'),
     tags: tagsSchema.optional().nullable().describe('Tags for categorizing the action policy.'),
-    groupingMode: groupingModeSchema
+    grouping_mode: groupingModeSchema
       .optional()
       .nullable()
       .describe('The grouping mode for alert notifications.'),
@@ -237,7 +237,7 @@ export const updateActionPolicyDataSchema = z
   .strict()
   .check((payload) => {
     if (payload.value.throttle === null || payload.value.throttle === undefined) return;
-    if (payload.value.groupingMode === undefined) {
+    if (payload.value.grouping_mode === undefined) {
       validateStrategyInterval(payload);
       return;
     }
@@ -262,7 +262,7 @@ export type UpdateActionPolicyBody = z.infer<typeof updateActionPolicyBodySchema
 
 /** Sort field for the find action policies (list) API. */
 export const findActionPoliciesSortFieldSchema = z
-  .enum(['name', 'createdAt', 'updatedAt'])
+  .enum(['name', 'created_at', 'updated_at'])
   .describe('The available fields to sort action policies by.');
 export type FindActionPoliciesSortField = z.infer<typeof findActionPoliciesSortFieldSchema>;
 
