@@ -37,7 +37,11 @@ apiTest.describe('Indices actions API', { tag: tags.stateful.classic }, () => {
 
   apiTest.beforeEach(async ({ esClient }) => {
     await deleteIndices(esClient, `${INDEX_PREFIX}*`);
-    await esClient.indices.create({ index: INDEX_NAME });
+    // Disable ES's scheduled background refresh so the `refreshes an index` test only counts the explicit refresh.
+    await esClient.indices.create({
+      index: INDEX_NAME,
+      settings: { index: { refresh_interval: -1 } },
+    });
   });
 
   apiTest.afterEach(async ({ esClient }) => {
