@@ -38,6 +38,7 @@ import {
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
+  SOURCE_COLUMN,
 } from '@kbn/unified-data-table';
 import {
   MAX_DOC_FIELDS_DISPLAYED,
@@ -415,15 +416,20 @@ function DiscoverDocumentsComponent({
       dataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
-      sourceDisplayMode,
     }),
-    [dataView, cellRendererDensity, cellRendererRowHeight, sourceDisplayMode]
+    [dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
-    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
-  }, [cellRendererParams, getCellRenderersAccessor]);
+    const renderers = getCellRenderersAccessor(() => ({}))(cellRendererParams);
+    if (sourceDisplayMode !== 'json') return renderers;
+    // User explicitly chose the JSON document view; Show it instead of the profile
+    // customized column. Today profiles customize the _source column based on current Summary display,
+    // this is the less intrusive option, we can evaluate if they need to build on top of the JSON mode too.
+    const { [SOURCE_COLUMN]: _omit, ...rest } = renderers;
+    return rest;
+  }, [cellRendererParams, getCellRenderersAccessor, sourceDisplayMode]);
 
   const callouts = useMemo(
     () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,

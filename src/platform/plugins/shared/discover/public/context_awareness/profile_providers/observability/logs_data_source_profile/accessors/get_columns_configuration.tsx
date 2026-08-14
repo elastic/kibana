@@ -17,21 +17,15 @@ import type { DataSourceProfileProvider } from '../../../..';
 export const getColumnsConfiguration: DataSourceProfileProvider['profile']['getColumnsConfiguration'] =
   (prev) => () => ({
     ...(prev ? prev() : {}),
-    _source: ({ column, headerRowHeight, sourceDisplayMode }: CustomGridColumnProps) => {
-      if (sourceDisplayMode === 'summary') {
-        return {
-          ...column,
-          display: (
-            <DataTableSummaryColumnHeaderLogsContext
-              columnDisplayName={column.displayAsText}
-              headerRowHeight={headerRowHeight}
-            />
-          ),
-        };
-      }
-
-      return column;
-    },
+    _source: ({ column, headerRowHeight }: CustomGridColumnProps) => ({
+      ...column,
+      display: (
+        <DataTableSummaryColumnHeaderLogsContext
+          columnDisplayName={column.displayAsText}
+          headerRowHeight={headerRowHeight}
+        />
+      ),
+    }),
   });
 
 export const DataTableSummaryColumnHeaderLogsContext = ({

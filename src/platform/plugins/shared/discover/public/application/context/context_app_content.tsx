@@ -187,7 +187,6 @@ export function ContextAppContent({
         consumer: 'discover',
         configRowHeight,
       }),
-      sourceDisplayMode: 'summary',
     });
   }, [configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
 

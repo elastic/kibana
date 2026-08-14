@@ -14,7 +14,6 @@ import type {
   UnifiedDataTableProps,
   DataGridPaginationMode,
   CustomGridColumnsConfiguration,
-  SourceDisplayMode,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
@@ -284,10 +283,6 @@ export interface CellRenderersExtensionParams {
    * The current row height mode applied to the data grid component
    */
   rowHeight: number | undefined;
-  /**
-   * How the `_source` column is displayed. Summary or JSON mode.
-   */
-  sourceDisplayMode: SourceDisplayMode;
 }
 
 /**

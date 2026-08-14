@@ -186,7 +186,6 @@ describe('createChangePointDataSourceProfileProvider', () => {
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
-        sourceDisplayMode: 'summary',
       });
     };
 
@@ -207,7 +206,6 @@ describe('createChangePointDataSourceProfileProvider', () => {
         rowHeight: 1,
         dataView: {} as DataView,
         density: undefined,
-        sourceDisplayMode: 'summary',
       });
       expect(renderers).toBe(prevRenderers);
     });
