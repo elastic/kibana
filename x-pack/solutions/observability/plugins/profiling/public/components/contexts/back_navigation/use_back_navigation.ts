@@ -17,7 +17,7 @@ import { useProfilingSetupStatus } from '../profiling_setup_status/use_profiling
  * has no back button.
  *
  * When a back target is returned, it points at the last content route the user visited (preserving
- * path and query string). Falls back to /stacktraces with a default time range when nothing has
+ * path and query string). Falls back to the plugin root (/app/profiling) when nothing has
  * been recorded yet (e.g. cold deep link directly to /settings).
  */
 export const useBackNavigation = (): AppHeaderBack | undefined => {

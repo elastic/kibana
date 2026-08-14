@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
+import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
 import { EXTENDED_TIMEOUT } from '..';
 
 export class FunctionsPage {
@@ -115,8 +116,8 @@ export class FunctionsPage {
 
   // Settings methods
   async clickSettingsButton() {
-    await this.page.getByTestId('app-menu-overflow-button').click();
-    await this.page.getByTestId('app-menu-item-settings').click();
+    await this.page.getByTestId(APP_MENU_TEST_SUBJECTS.overflowButton).click();
+    await this.page.getByTestId(getAppMenuItemTestSubj('settings')).click();
   }
 
   async getSettingsModal() {
