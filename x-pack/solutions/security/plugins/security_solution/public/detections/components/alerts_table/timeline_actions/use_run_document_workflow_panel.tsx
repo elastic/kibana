@@ -45,7 +45,6 @@ export const DocumentWorkflowsPanel = ({
     <RunWorkflowPanel
       inputs={inputs}
       sortTriggerTypes="manual"
-      executeButtonTestSubj="execute-document-workflow-button"
       onClose={onClose}
       onExecute={onExecute}
     />

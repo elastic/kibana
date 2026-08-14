@@ -131,7 +131,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 const defaultProps: RunWorkflowPanelProps = {
   inputs: { alert_ids: ['alert-1'] },
   sortTriggerTypes: 'security_alert',
-  executeButtonTestSubj: 'test-execute-btn',
   onClose: jest.fn(),
 };
 
@@ -154,14 +153,14 @@ describe('RunWorkflowPanel', () => {
   it('should render the execute button', () => {
     renderComponent();
 
-    expect(screen.getByTestId('test-execute-btn')).toBeInTheDocument();
-    expect(screen.getByTestId('test-execute-btn')).toHaveTextContent(i18n.RUN_WORKFLOW_BUTTON);
+    expect(screen.getByTestId('run-workflow-execute-button')).toBeInTheDocument();
+    expect(screen.getByTestId('run-workflow-execute-button')).toHaveTextContent(i18n.RUN_WORKFLOW_BUTTON);
   });
 
   it('should disable the execute button when no workflow is selected', () => {
     renderComponent();
 
-    expect(screen.getByTestId('test-execute-btn')).toBeDisabled();
+    expect(screen.getByTestId('run-workflow-execute-button')).toBeDisabled();
   });
 
   it('should enable the execute button after selecting a workflow', () => {
@@ -169,14 +168,14 @@ describe('RunWorkflowPanel', () => {
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
 
-    expect(screen.getByTestId('test-execute-btn')).not.toBeDisabled();
+    expect(screen.getByTestId('run-workflow-execute-button')).not.toBeDisabled();
   });
 
   it('should call runWorkflow.mutate with the selected workflow id and inputs on execute', () => {
     renderComponent();
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     expect(mockMutate).toHaveBeenCalledWith(
       { id: 'test-workflow-id', inputs: { alert_ids: ['alert-1'] } },
@@ -191,7 +190,7 @@ describe('RunWorkflowPanel', () => {
   it('should not call mutate when clicking execute without a selection', () => {
     renderComponent();
 
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     expect(mockMutate).not.toHaveBeenCalled();
   });
@@ -201,7 +200,7 @@ describe('RunWorkflowPanel', () => {
     renderComponent({ onClose });
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     const { onSettled } = mockMutate.mock.calls[0][1];
     onSettled();
@@ -214,7 +213,7 @@ describe('RunWorkflowPanel', () => {
     renderComponent({ onExecute });
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     expect(onExecute).toHaveBeenCalledTimes(1);
   });
@@ -223,22 +222,22 @@ describe('RunWorkflowPanel', () => {
     renderComponent();
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
-    expect(screen.getByTestId('test-execute-btn')).toBeDisabled();
+    expect(screen.getByTestId('run-workflow-execute-button')).toBeDisabled();
   });
 
   it('should re-enable the button after settled', async () => {
     renderComponent();
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     const { onSettled } = mockMutate.mock.calls[0][1];
     onSettled();
 
     await waitFor(() => {
-      expect(screen.getByTestId('test-execute-btn')).not.toBeDisabled();
+      expect(screen.getByTestId('run-workflow-execute-button')).not.toBeDisabled();
     });
   });
 
@@ -246,7 +245,7 @@ describe('RunWorkflowPanel', () => {
     renderComponent();
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     const { onSuccess } = mockMutate.mock.calls[0][1];
     onSuccess({ workflowExecutionId: 'exec-123' });
@@ -260,7 +259,7 @@ describe('RunWorkflowPanel', () => {
     renderComponent();
 
     fireEvent.click(screen.getByTestId('select-workflow-option'));
-    fireEvent.click(screen.getByTestId('test-execute-btn'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     const error = new Error('something went wrong');
     const { onError } = mockMutate.mock.calls[0][1];
@@ -311,7 +310,7 @@ describe('RunWorkflowPanel', () => {
       renderComponent();
 
       fireEvent.click(screen.getByTestId('select-workflow-option'));
-      fireEvent.click(screen.getByTestId('test-execute-btn'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
       expect(screen.getByTestId('run-workflow-inputs-modal')).toBeInTheDocument();
       expect(mockMutate).not.toHaveBeenCalled();
@@ -321,7 +320,7 @@ describe('RunWorkflowPanel', () => {
       renderComponent();
 
       fireEvent.click(screen.getByTestId('select-workflow-option'));
-      fireEvent.click(screen.getByTestId('test-execute-btn'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
       fireEvent.click(screen.getByTestId('inputs-modal-cancel'));
 
       expect(screen.queryByTestId('run-workflow-inputs-modal')).not.toBeInTheDocument();
@@ -332,7 +331,7 @@ describe('RunWorkflowPanel', () => {
       renderComponent();
 
       fireEvent.click(screen.getByTestId('select-workflow-option'));
-      fireEvent.click(screen.getByTestId('test-execute-btn'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
       fireEvent.click(screen.getByTestId('inputs-modal-submit'));
 
       expect(mockMutate).toHaveBeenCalledWith(
@@ -352,7 +351,7 @@ describe('RunWorkflowPanel', () => {
       renderComponent();
 
       fireEvent.click(screen.getByTestId('select-workflow-option'));
-      fireEvent.click(screen.getByTestId('test-execute-btn'));
+      fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
       expect(screen.getByTestId('run-workflow-inputs-modal')).toBeInTheDocument();
 

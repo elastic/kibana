@@ -58,10 +58,10 @@ jest.mock('@kbn/workflows-ui', () => ({
   // RunWorkflowPanel now lives in @kbn/workflows-ui.
   // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
   // This stub covers panel-level rendering assertions only.
-  RunWorkflowPanel: ({ executeButtonTestSubj }: { executeButtonTestSubj: string }) => (
+  RunWorkflowPanel: () => (
     <div>
       <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
-      <button data-test-subj={executeButtonTestSubj} type="button">
+      <button data-test-subj="run-workflow-execute-button" type="button">
         {'Run workflow'}
       </button>
     </div>

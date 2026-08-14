@@ -49,7 +49,6 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
       inputs={inputs}
       sortTriggerTypes="alert"
       visibility={ALERT_WORKFLOW_VISIBILITY}
-      executeButtonTestSubj="execute-alert-workflow-button"
       onClose={onClose}
       onExecute={onExecute}
     />
