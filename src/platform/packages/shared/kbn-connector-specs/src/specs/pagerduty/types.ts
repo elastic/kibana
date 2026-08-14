@@ -28,6 +28,7 @@ export const ListSchedulesInputSchema = lazySchema(() =>
         'Free-text search string across name and description fields (e.g., "primary" or "weekend")'
       ),
     limit: z.number().optional().describe('Maximum number of schedules to return'),
+    offset: z.number().optional().describe('Offset to start pagination at'),
     include: z
       .array(z.string().max(100))
       .max(10)
