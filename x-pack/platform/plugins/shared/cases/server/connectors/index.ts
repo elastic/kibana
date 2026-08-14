@@ -18,9 +18,11 @@ import type {
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ServerlessProjectType } from '../../common/constants/types';
 import type { CasesClient } from '../client';
+import { LicensingService } from '../services/licensing';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
 export type * from './types';
@@ -79,6 +81,15 @@ export function registerConnectorTypes({
     return coreStart.uiSettings.asScopedToClient(savedObjectsClient);
   };
 
+  const isAtLeastPlatinum = async (): Promise<boolean> => {
+    const [, pluginsStart] = await core.getStartServices();
+    const { licensing } = pluginsStart as { licensing: LicensingPluginStart };
+    return new LicensingService(
+      licensing.license$,
+      licensing.featureUsage.notifyUsage
+    ).isAtLeastPlatinum();
+  };
+
   actions.registerSubActionConnectorType(
     getCasesConnectorType({
       getCasesClient,
@@ -89,6 +100,7 @@ export function registerConnectorTypes({
       serverlessProjectType,
       isCasesAttachmentsEnabled,
       isTemplatesEnabled,
+      isAtLeastPlatinum,
     })
   );
 

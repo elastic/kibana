@@ -76,6 +76,7 @@ describe('CasesConnector', () => {
     getUiSettingsClient,
     isCasesAttachmentsEnabled: false,
     isTemplatesEnabled: false,
+    isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
   };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
@@ -135,6 +136,7 @@ describe('CasesConnector', () => {
       spaceId: 'default',
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: false,
+      isAtLeastPlatinum: casesParams.isAtLeastPlatinum,
     });
   });
 
@@ -161,6 +163,33 @@ describe('CasesConnector', () => {
 
     expect(CasesConnectorExecutorMock).toBeCalledWith(
       expect.objectContaining({ isTemplatesEnabled: true })
+    );
+  });
+
+  it('threads isAtLeastPlatinum through to the CasesConnectorExecutor', async () => {
+    const isAtLeastPlatinum = jest.fn().mockResolvedValue(false);
+    const connectorWithLicenseCheck = new CasesConnector({
+      casesParams: { ...casesParams, isAtLeastPlatinum },
+      connectorParams,
+    });
+
+    await connectorWithLicenseCheck.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(CasesConnectorExecutorMock).toBeCalledWith(
+      expect.objectContaining({ isAtLeastPlatinum })
     );
   });
 

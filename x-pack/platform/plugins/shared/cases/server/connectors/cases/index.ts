@@ -55,6 +55,7 @@ interface GetCasesConnectorTypeArgs {
   serverlessProjectType?: string;
   isCasesAttachmentsEnabled: boolean;
   isTemplatesEnabled: boolean;
+  isAtLeastPlatinum: () => Promise<boolean>;
 }
 
 export const getCasesConnectorType = ({
@@ -66,6 +67,7 @@ export const getCasesConnectorType = ({
   serverlessProjectType,
   isCasesAttachmentsEnabled,
   isTemplatesEnabled,
+  isAtLeastPlatinum,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -82,6 +84,7 @@ export const getCasesConnectorType = ({
         getUiSettingsClient,
         isCasesAttachmentsEnabled,
         isTemplatesEnabled,
+        isAtLeastPlatinum,
       },
       connectorParams: params,
     }),

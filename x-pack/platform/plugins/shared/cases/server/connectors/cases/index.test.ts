@@ -42,6 +42,7 @@ describe('getCasesConnectorType', () => {
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: false,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
     });
   });
 
@@ -65,6 +66,7 @@ describe('getCasesConnectorType', () => {
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: true,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
     });
 
     // @ts-expect-error: only the subset of params used by getService is provided

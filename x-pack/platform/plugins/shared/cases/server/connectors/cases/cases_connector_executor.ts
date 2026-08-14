@@ -26,6 +26,7 @@ import {
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
+  SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
@@ -74,6 +75,7 @@ interface CasesConnectorExecutorParams {
   spaceId: string;
   isCasesAttachmentsEnabled?: boolean;
   isTemplatesEnabled?: boolean;
+  isAtLeastPlatinum?: () => Promise<boolean>;
 }
 
 type GroupedAlertsWithOracleKey = CasesGroupedAlerts & { oracleKey: string };
@@ -88,10 +90,26 @@ const NONE_CASE_CONNECTOR = {
   fields: null,
 } as const;
 
-const DEFAULT_CASE_SETTINGS = {
-  syncAlerts: false,
-  extractObservables: false,
-} as const;
+const getDefaultCaseSettings = (owner: string) => ({
+  syncAlerts: owner === SECURITY_SOLUTION_OWNER,
+  extractObservables: owner === SECURITY_SOLUTION_OWNER,
+});
+
+const getAssigneesFromTemplate = (
+  assignees: Array<{ uid: string }> | undefined,
+  hasPlatinumLicenseOrGreater: boolean
+): { assignees: Array<{ uid: string }> } | Record<string, never> => {
+  if (!hasPlatinumLicenseOrGreater || assignees === undefined) {
+    return {};
+  }
+
+  const templateAssignees = assignees.filter(({ uid }) => uid.length > 0);
+  if (templateAssignees.length === 0) {
+    return {};
+  }
+
+  return { assignees: templateAssignees };
+};
 
 export class CasesConnectorExecutor {
   private readonly logger: Logger;
@@ -102,6 +120,7 @@ export class CasesConnectorExecutor {
   private readonly spaceId: string;
   private readonly isCasesAttachmentsEnabled: boolean;
   private readonly isTemplatesEnabled: boolean;
+  private readonly isAtLeastPlatinum: () => Promise<boolean>;
 
   constructor({
     logger,
@@ -112,6 +131,7 @@ export class CasesConnectorExecutor {
     spaceId,
     isCasesAttachmentsEnabled = false,
     isTemplatesEnabled = false,
+    isAtLeastPlatinum = async () => true,
   }: CasesConnectorExecutorParams) {
     this.logger = logger;
     this.casesOracleService = casesOracleService;
@@ -121,6 +141,7 @@ export class CasesConnectorExecutor {
     this.spaceId = spaceId;
     this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
     this.isTemplatesEnabled = isTemplatesEnabled;
+    this.isAtLeastPlatinum = isAtLeastPlatinum;
   }
 
   public async execute(params: CasesConnectorRunParams) {
@@ -775,6 +796,7 @@ export class CasesConnectorExecutor {
 
     const { v2Template, extendedFields, templateRef, resolvedConnector } =
       await this.resolveV2TemplateWithFields(params, templatesConfigurationMap.get(params.owner));
+    const hasPlatinumLicenseOrGreater = await this.isAtLeastPlatinum();
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -789,7 +811,8 @@ export class CasesConnectorExecutor {
             v2Template ?? undefined,
             extendedFields,
             templateRef,
-            resolvedConnector
+            resolvedConnector,
+            hasPlatinumLicenseOrGreater
           )
         );
       }
@@ -836,7 +859,8 @@ export class CasesConnectorExecutor {
     customFieldsConfigurations?: CustomFieldsConfiguration,
     extendedFields?: Record<string, string>,
     templateRef?: { id: string; version: number },
-    resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector']
+    resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector'],
+    hasPlatinumLicenseOrGreater = true
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -849,9 +873,9 @@ export class CasesConnectorExecutor {
       tags: this.getCaseTags(params, flattenGrouping, v2Template.tags),
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
-      // Template settings keys are individually optional; merge so syncAlerts is always set for CaseSettingsRt.
-      settings: { ...DEFAULT_CASE_SETTINGS, ...v2Template.settings },
-      ...(v2Template.assignees ? { assignees: v2Template.assignees } : {}),
+      // Template settings keys are individually optional; merge over owner defaults so syncAlerts is always set.
+      settings: { ...getDefaultCaseSettings(params.owner), ...v2Template.settings },
+      ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
       customFields: builtCustomFields,
     };
@@ -886,7 +910,8 @@ export class CasesConnectorExecutor {
     v2Template?: ParsedTemplateDefinition,
     extendedFields?: Record<string, string>,
     templateRef?: { id: string; version: number },
-    resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector']
+    resolvedConnector?: BulkCreateCasesRequest['cases'][number]['connector'],
+    hasPlatinumLicenseOrGreater = true
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -899,7 +924,8 @@ export class CasesConnectorExecutor {
         customFieldsConfigurations,
         extendedFields,
         templateRef,
-        resolvedConnector
+        resolvedConnector,
+        hasPlatinumLicenseOrGreater
       );
     }
 
@@ -934,13 +960,8 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? { ...NONE_CASE_CONNECTOR },
-      /**
-       * TODO: Turn on for Security solution
-       */
-      settings: caseFieldsFromTemplate?.settings ?? { ...DEFAULT_CASE_SETTINGS },
-      ...(caseFieldsFromTemplate?.assignees
-        ? { assignees: caseFieldsFromTemplate?.assignees }
-        : {}),
+      settings: caseFieldsFromTemplate?.settings ?? getDefaultCaseSettings(params.owner),
+      ...getAssigneesFromTemplate(caseFieldsFromTemplate?.assignees, hasPlatinumLicenseOrGreater),
       ...(caseFieldsFromTemplate?.severity ? { severity: caseFieldsFromTemplate?.severity } : {}),
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
       owner: params.owner,
@@ -1205,6 +1226,7 @@ export class CasesConnectorExecutor {
       params,
       templatesConfigurationMapForReopened.get(params.owner)
     );
+    const hasPlatinumLicenseOrGreater = await this.isAtLeastPlatinum();
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(
@@ -1215,7 +1237,8 @@ export class CasesConnectorExecutor {
         v2TemplateForReopened ?? undefined,
         extendedFieldsForReopened,
         templateRefForReopened,
-        resolvedConnectorForReopened
+        resolvedConnectorForReopened,
+        hasPlatinumLicenseOrGreater
       )
     );
 

@@ -17,6 +17,8 @@ import {
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
   MAX_SUFFIX_LENGTH,
+  SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
 } from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
@@ -1366,6 +1368,86 @@ fields: []
             expect(actionsClient.get).toHaveBeenCalledWith({ id: 'jira-1' });
           });
 
+          it('skips template assignees without a Platinum license so case creation still succeeds', async () => {
+            const v2TemplateWithAssignees = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+assignees:
+  - uid: assignee-uid-1
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithAssignees);
+
+            const connectorExecutorWithoutPlatinum = new CasesConnectorExecutor({
+              logger: mockLogger,
+              casesOracleService: new CasesOracleServiceMock(),
+              casesService: new CasesServiceMock(),
+              casesClient: casesClientMock,
+              actionsClient,
+              spaceId: 'default',
+              isTemplatesEnabled: true,
+              isAtLeastPlatinum: async () => false,
+            });
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutorWithoutPlatinum.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.assignees).toBeUndefined();
+          });
+
+          it('drops empty-uid template assignees', async () => {
+            const v2TemplateWithEmptyUid = {
+              ...v2TemplateSO,
+              attributes: {
+                ...v2TemplateSO.attributes,
+                definition: `
+name: "V2 Template"
+assignees:
+  - uid: assignee-uid-1
+  - uid: ""
+fields: []
+`,
+              },
+            };
+            casesClientMock.templates.getTemplate = jest
+              .fn()
+              .mockResolvedValue(v2TemplateWithEmptyUid);
+
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+
+            await connectorExecutor.execute({
+              ...params,
+              templateId: 'tmpl-v2-id',
+              templateVersion: '1',
+            });
+
+            const createdCase = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0];
+            expect(createdCase.assignees).toEqual([{ uid: 'assignee-uid-1' }]);
+          });
+
           it('merges partial template settings over defaults so syncAlerts is always set', async () => {
             const v2TemplateWithPartialSettings = {
               ...v2TemplateSO,
@@ -2015,6 +2097,47 @@ fields: []
 
               expect(createdCase.template).toBeUndefined();
               expect(createdCase[CASE_EXTENDED_FIELDS]).toBeUndefined();
+            });
+          });
+        });
+
+        describe('Owner default settings', () => {
+          const mockCaseNotFound = () => {
+            casesClientMock.cases.bulkGet.mockResolvedValue({
+              cases: [],
+              errors: [
+                { caseId: 'mock-id-1', error: 'Not found', message: 'Not found', status: 404 },
+              ],
+            });
+          };
+
+          it('turns syncAlerts and extractObservables on for Security when no template is selected', async () => {
+            mockCaseNotFound();
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: SECURITY_SOLUTION_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: true,
+              extractObservables: true,
+            });
+          });
+
+          it('keeps syncAlerts and extractObservables off for Observability when no template is selected', async () => {
+            mockCaseNotFound();
+
+            await connectorExecutor.execute({
+              ...params,
+              owner: OBSERVABILITY_OWNER,
+              templateId: null,
+            });
+
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].settings).toEqual({
+              syncAlerts: false,
+              extractObservables: false,
             });
           });
         });
