@@ -17463,7 +17463,6 @@
     "xpack.cases.userActions.attachment": "Pièce jointe",
     "xpack.cases.userActions.attachmentNotRegisteredErrorMsg": "Le type de pièce jointe n'est pas enregistré",
     "xpack.cases.userActions.attachmentRenderErrorMsg": "Impossible d'afficher cette pièce jointe",
-    "xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle": "Pièce jointe supprimée",
     "xpack.cases.userActions.comment.unsavedDraftComment": "Vous avez des modifications non enregistrées pour ce commentaire",
     "xpack.cases.userActions.defaultEventAttachmentTitle": "ajouté une pièce jointe de type",
     "xpack.cases.userActions.deleteAttachment": "Supprimer la pièce jointe",

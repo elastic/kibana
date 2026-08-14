@@ -17551,7 +17551,6 @@
     "xpack.cases.userActions.attachment": "附件",
     "xpack.cases.userActions.attachmentNotRegisteredErrorMsg": "未注册附件类型",
     "xpack.cases.userActions.attachmentRenderErrorMsg": "无法渲染此附件",
-    "xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle": "已删除附件",
     "xpack.cases.userActions.comment.unsavedDraftComment": "此注释具有未保存编辑",
     "xpack.cases.userActions.defaultEventAttachmentTitle": "已添加以下类型的附件",
     "xpack.cases.userActions.deleteAttachment": "删除附件",

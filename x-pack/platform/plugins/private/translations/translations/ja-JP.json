@@ -17543,7 +17543,6 @@
     "xpack.cases.userActions.attachment": "添付ファイル",
     "xpack.cases.userActions.attachmentNotRegisteredErrorMsg": "アラートタイプが登録されていません",
     "xpack.cases.userActions.attachmentRenderErrorMsg": "この添付ファイルをレンダリングできませんでした",
-    "xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle": "削除された添付ファイル",
     "xpack.cases.userActions.comment.unsavedDraftComment": "このコメントに、保存されていない編集があります",
     "xpack.cases.userActions.defaultEventAttachmentTitle": "タイプの添付ファイルが追加されました",
     "xpack.cases.userActions.deleteAttachment": "添付ファイルの削除",

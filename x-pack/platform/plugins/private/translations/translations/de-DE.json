@@ -17496,7 +17496,6 @@
     "xpack.cases.userActions.attachment": "Anhang",
     "xpack.cases.userActions.attachmentNotRegisteredErrorMsg": "Der Anhangstyp ist nicht registriert",
     "xpack.cases.userActions.attachmentRenderErrorMsg": "Dieser Anhang konnte nicht gerendert werden",
-    "xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle": "Anhang löschen",
     "xpack.cases.userActions.comment.unsavedDraftComment": "Sie haben ungespeicherte Änderungen für diesen Kommentar",
     "xpack.cases.userActions.defaultEventAttachmentTitle": "hat einen Anhang vom Typ hinzugefügt",
     "xpack.cases.userActions.deleteAttachment": "Anhang löschen",
