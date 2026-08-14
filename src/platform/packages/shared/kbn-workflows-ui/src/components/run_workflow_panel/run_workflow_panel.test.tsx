@@ -131,8 +131,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 const defaultProps: RunWorkflowPanelProps = {
   inputs: { alert_ids: ['alert-1'] },
   sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
-    Number((b.definition?.triggers ?? []).some((t) => t.type === 'security_alert')) -
-    Number((a.definition?.triggers ?? []).some((t) => t.type === 'security_alert')),
+    Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+    Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert')),
   onClose: jest.fn(),
 };
 
