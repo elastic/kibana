@@ -480,7 +480,10 @@ describe('createEpisodeAttachmentType', () => {
     });
 
     it('includes the episode name when present', async () => {
-      const value = await formatValue({ ...baseEpisodeData, 'episode.name': 'Host CPU high alert' });
+      const value = await formatValue({
+        ...baseEpisodeData,
+        'episode.name': 'Host CPU high alert',
+      });
       expect(value).toContain('Episode name: Host CPU high alert');
     });
 

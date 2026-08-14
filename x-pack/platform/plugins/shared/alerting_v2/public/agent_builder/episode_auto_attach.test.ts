@@ -11,7 +11,11 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { ALERT_EPISODE_STATUS, EPISODE_ATTACHMENT_TYPE, type AlertEpisode } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_STATUS,
+  EPISODE_ATTACHMENT_TYPE,
+  type AlertEpisode,
+} from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { FocusedEpisodeService } from '../services/focused_episode_service';
 import { registerEpisodeAutoAttach, type IdGenerator } from './episode_auto_attach';
