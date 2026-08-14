@@ -11,28 +11,23 @@ import type { TransformIdParamSchema } from '../../api_schemas/common';
 import type { PostTransformsUpdateRequestSchema } from '../../api_schemas/update_transforms';
 
 import type { TransformRequestHandlerContext } from '../../../services/license';
-import type { RouteDependencies } from '../../../types';
 
 import { wrapError } from '../../utils/error_utils';
-import { updateTransformWithAuth } from './update_transform_with_auth';
+import { updateTransform } from './update_transform';
 
-export const routeHandlerFactory: (
-  routeDependencies: RouteDependencies
-) => RequestHandler<
+export const routeHandler: RequestHandler<
   TransformIdParamSchema,
   undefined,
   PostTransformsUpdateRequestSchema,
   TransformRequestHandlerContext
-> = (routeDependencies) => async (ctx, req, res) => {
+> = async (ctx, req, res) => {
   const { transformId } = req.params;
 
   try {
     const esClient = (await ctx.core).elasticsearch.client;
-    const body = await updateTransformWithAuth({
+    const body = await updateTransform({
       body: req.body,
       esClient: esClient.asCurrentUser,
-      request: req,
-      routeDependencies,
       transformId,
     });
     return res.ok({

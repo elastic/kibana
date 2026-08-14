@@ -14,7 +14,7 @@ import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
 
-import { routeHandlerFactory } from './route_handler';
+import { routeHandler } from './route_handler';
 
 export function registerRoute(routeDependencies: RouteDependencies) {
   const { router, getLicense } = routeDependencies;
@@ -56,7 +56,7 @@ export function registerRoute(routeDependencies: RouteDependencies) {
           TransformIdParamSchema,
           undefined,
           PostTransformsUpdateRequestSchema
-        >(routeHandlerFactory(routeDependencies))(ctx, request, response);
+        >(routeHandler)(ctx, request, response);
       }
     );
 }
