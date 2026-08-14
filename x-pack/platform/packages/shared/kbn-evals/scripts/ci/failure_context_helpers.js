@@ -7,13 +7,13 @@
  */
 
 const { slugifyId } = require('./slugify_id');
-const { parseMaybeBase64Json, buildOpenrouterConnectorFromVault } = require('./ai_connectors');
+const { TRIAGE_OPENROUTER_MODEL, buildOpenrouterConnectorFromVault } = require('./ai_connectors');
 
 const MAX_LOG_EXCERPT_CHARS = 4000;
 const MAX_CONTEXT_JSON_BYTES = 30 * 1024;
 
 // Triage/summary text is always generated with a small, low-cost OpenRouter model.
-const DEFAULT_TRIAGE_MODEL_ID = 'openrouter-anthropic-claude-haiku-4-5';
+const TRIAGE_OPENROUTER_CONNECTOR_ID = `openrouter-${slugifyId(TRIAGE_OPENROUTER_MODEL)}`;
 
 const TRIAGE_SYSTEM_PROMPT =
   'You are an SRE assistant triaging failed LLM evaluation CI runs. Be concise and factual, and base every statement on the provided context.';
@@ -261,14 +261,6 @@ function buildOpenrouterChatRequest(connector, messages) {
   };
 }
 
-/**
- * Resolve the OpenRouter model used to generate Slack/GitHub triage text.
- * override with `EVAL_TRIAGE_MODEL_ID`.
- */
-function resolveTriageModelId() {
-  return process.env.EVAL_TRIAGE_MODEL_ID || DEFAULT_TRIAGE_MODEL_ID;
-}
-
 function parseOpenrouterChatContent(responseJson) {
   if (!responseJson || typeof responseJson !== 'object') {
     throw new Error('OpenRouter response was not JSON');
@@ -322,25 +314,14 @@ async function postOpenrouterChatRequest({ url, headers, body }) {
 
 /**
  * Resolve the triage connector and its model id (shared by the text and
- * structured triage paths). Enforces the `openrouter-` guard and falls back to the
- * vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
+ * structured triage paths). Always builds from vault/env OpenRouter credentials;
+ * CI notify does not generate the OpenRouter catalog.
  */
 function resolveTriageConnector() {
-  const modelId = resolveTriageModelId();
-  if (!modelId.startsWith('openrouter-')) {
-    throw new Error(`Unsupported triage model connector id (expected openrouter-): ${modelId}`);
-  }
-
-  const connector =
-    parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || '')[modelId] ??
-    buildOpenrouterConnectorFromVault(modelId);
-  if (!connector) {
-    throw new Error(
-      `Model connector ${modelId} is not available (set KIBANA_TESTING_AI_CONNECTORS or OpenRouter env/config)`
-    );
-  }
-
-  return { connector, modelId };
+  return {
+    connector: buildOpenrouterConnectorFromVault(),
+    modelId: TRIAGE_OPENROUTER_CONNECTOR_ID,
+  };
 }
 
 /**
@@ -416,7 +397,7 @@ module.exports = {
   MAX_LOG_EXCERPT_CHARS,
   MAX_CONTEXT_JSON_BYTES,
   TRIAGE_SYSTEM_PROMPT,
-  resolveTriageModelId,
+  TRIAGE_OPENROUTER_CONNECTOR_ID,
   failureLogMetadataKey,
   failureLogMetadataKeysForProject,
   truncateText,

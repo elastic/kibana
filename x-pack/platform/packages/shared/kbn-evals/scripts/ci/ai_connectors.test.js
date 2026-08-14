@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-const {
-  connectorIdToOpenrouterModel,
-  buildOpenrouterConnectorFromVault,
-} = require('./ai_connectors');
-
-describe('connectorIdToOpenrouterModel', () => {
-  it('strips the openrouter- prefix and replaces the first dash with a slash', () => {
-    expect(connectorIdToOpenrouterModel('openrouter-openai-gpt-4o')).toBe('openai/gpt-4o');
-  });
-
-  it('passes through native provider/model ids', () => {
-    expect(connectorIdToOpenrouterModel('anthropic/claude-sonnet-4.6')).toBe(
-      'anthropic/claude-sonnet-4.6'
-    );
-  });
-});
+const { TRIAGE_OPENROUTER_MODEL, buildOpenrouterConnectorFromVault } = require('./ai_connectors');
 
 describe('buildOpenrouterConnectorFromVault', () => {
   const originalEnv = { ...process.env };
@@ -29,28 +14,35 @@ describe('buildOpenrouterConnectorFromVault', () => {
     process.env = { ...originalEnv };
     delete process.env.OPENROUTER_BASE_URL;
     delete process.env.OPENROUTER_API_KEY;
-    delete process.env.EVAL_OPENROUTER_MODEL;
     delete process.env.KBN_EVALS_CONFIG_B64;
   });
 
-  it('uses EVAL_OPENROUTER_MODEL when set', () => {
+  it('always uses the native Haiku id (does not reverse a slugified connector id)', () => {
     process.env.OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
     process.env.OPENROUTER_API_KEY = 'sk-test';
-    process.env.EVAL_OPENROUTER_MODEL = 'anthropic/claude-sonnet-4.6';
 
-    const connector = buildOpenrouterConnectorFromVault('openrouter-anthropic-claude-sonnet-4-6');
+    const connector = buildOpenrouterConnectorFromVault();
 
-    expect(connector.config.defaultModel).toBe('anthropic/claude-sonnet-4.6');
+    expect(connector.config.defaultModel).toBe(TRIAGE_OPENROUTER_MODEL);
     expect(connector.config.apiUrl).toBe('https://openrouter.ai/api/v1/chat/completions');
     expect(connector.secrets.apiKey).toBe('sk-test');
   });
 
-  it('uses the first-dash heuristic when EVAL_OPENROUTER_MODEL is unset', () => {
-    process.env.OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
-    process.env.OPENROUTER_API_KEY = 'sk-test';
+  it('reads OpenRouter credentials from KBN_EVALS_CONFIG_B64', () => {
+    process.env.KBN_EVALS_CONFIG_B64 = Buffer.from(
+      JSON.stringify({
+        openrouter: { baseUrl: 'https://openrouter.ai/api/v1', apiKey: 'sk-vault' },
+      }),
+      'utf8'
+    ).toString('base64');
 
-    const connector = buildOpenrouterConnectorFromVault('openrouter-openai-gpt-4o');
+    const connector = buildOpenrouterConnectorFromVault();
 
-    expect(connector.config.defaultModel).toBe('openai/gpt-4o');
+    expect(connector.config.defaultModel).toBe('anthropic/claude-haiku-4.5');
+    expect(connector.secrets.apiKey).toBe('sk-vault');
+  });
+
+  it('throws when OpenRouter credentials are missing', () => {
+    expect(() => buildOpenrouterConnectorFromVault()).toThrow(/OpenRouter credentials are missing/);
   });
 });

@@ -51,31 +51,13 @@ function parseVaultConfig() {
   }
 }
 
-/**
- * Maps an OpenRouter connector id (e.g. openrouter-openai-gpt-4o) to an OpenRouter model id.
- *
- * Strips the `openrouter-` prefix and replaces the first `-` with `/` so
- * `openrouter-openai-gpt-4o` → `openai/gpt-4o`. Matches OpenRouter's
- * `provider/model` shape.
- */
-function connectorIdToOpenrouterModel(connectorId) {
-  const raw = String(connectorId);
-  if (raw.includes('/') && !raw.startsWith('openrouter-')) {
-    return raw;
-  }
-
-  const stripped = raw.replace(/^openrouter-/, '');
-  const dashIdx = stripped.indexOf('-');
-  if (dashIdx === -1) {
-    return stripped;
-  }
-  return `${stripped.slice(0, dashIdx)}/${stripped.slice(dashIdx + 1)}`;
-}
+// CI notify triage uses this OpenRouter model.
+const TRIAGE_OPENROUTER_MODEL = 'anthropic/claude-haiku-4.5';
 
 /**
- * Build a minimal OpenRouter connector from vault config when KIBANA_TESTING_AI_CONNECTORS was not generated.
+ * Build the CI-notification triage connector from vault/env OpenRouter credentials.
  */
-function buildOpenrouterConnectorFromVault(modelConnectorId) {
+function buildOpenrouterConnectorFromVault() {
   const config = parseVaultConfig();
   const openrouter = config?.openrouter;
   const baseUrl = (
@@ -95,19 +77,10 @@ function buildOpenrouterConnectorFromVault(modelConnectorId) {
     );
   }
 
-  const defaultModel =
-    process.env.EVAL_OPENROUTER_MODEL || connectorIdToOpenrouterModel(modelConnectorId);
-  if (!defaultModel || !defaultModel.includes('/')) {
-    throw new Error(
-      `Unable to resolve OpenRouter model id from connector "${modelConnectorId}". ` +
-        'Pass a native id (provider/model) or set EVAL_OPENROUTER_MODEL.'
-    );
-  }
-
   return {
     config: {
       apiUrl: `${baseUrl}/chat/completions`,
-      defaultModel,
+      defaultModel: TRIAGE_OPENROUTER_MODEL,
     },
     secrets: { apiKey },
   };
@@ -116,6 +89,6 @@ function buildOpenrouterConnectorFromVault(modelConnectorId) {
 module.exports = {
   parseMaybeBase64Json,
   parseVaultConfig,
-  connectorIdToOpenrouterModel,
+  TRIAGE_OPENROUTER_MODEL,
   buildOpenrouterConnectorFromVault,
 };
