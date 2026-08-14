@@ -170,4 +170,41 @@ describe('KibanaSocket', () => {
       await expect(fakeSocket.renegotiate({})).resolves.toBeUndefined();
     });
   });
+
+  describe('HTTP/2 stream-destruction degraded state', () => {
+    // When an HTTP/2 stream is destroyed mid-request (RST_STREAM from an AbortController cancel,
+    // browser navigation, or search abort), Node.js clears the stream's internal session reference.
+    // The Http2ServerRequest.socket proxy's getPrototypeOf trap then falls back from the TLSSocket
+    // prototype to the Http2Stream prototype, causing instanceof TLSSocket to return false.
+    //
+    // KibanaSocket wraps this proxy. With instanceof TLSSocket returning false, all TLS-specific
+    // accessors degrade. A plain net.Socket (not TLSSocket) produces the same behaviour from
+    // KibanaSocket's perspective and is used here as a test double for the destroyed-stream proxy.
+    //
+    // The critical invariant this tests: authorized === undefined means "socket state is unknown"
+    // (the stream was destroyed before we could read it), NOT "the cert was rejected." Code that
+    // reads authorized must treat undefined differently from false. See kibana#258232.
+
+    it('returns undefined for authorized when the underlying socket is not a TLSSocket', () => {
+      const socket = new KibanaSocket(new Socket());
+      // undefined = state unknown; false = cert explicitly rejected. These are not equivalent.
+      expect(socket.authorized).toBeUndefined();
+      expect(socket.authorized).not.toBe(false);
+    });
+
+    it('returns null for getPeerCertificate when the underlying socket is not a TLSSocket', () => {
+      const socket = new KibanaSocket(new Socket());
+      expect(socket.getPeerCertificate(true)).toBeNull();
+    });
+
+    it('returns null for getProtocol when the underlying socket is not a TLSSocket', () => {
+      const socket = new KibanaSocket(new Socket());
+      expect(socket.getProtocol()).toBeNull();
+    });
+
+    it('returns undefined for authorizationError when the underlying socket is not a TLSSocket', () => {
+      const socket = new KibanaSocket(new Socket());
+      expect(socket.authorizationError).toBeUndefined();
+    });
+  });
 });
