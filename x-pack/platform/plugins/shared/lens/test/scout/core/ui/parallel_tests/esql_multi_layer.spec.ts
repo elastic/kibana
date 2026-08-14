@@ -29,6 +29,16 @@ const Y_DIMENSION = 'lnsXY_yDimensionPanel';
 const ANNOTATIONS_DIMENSION = 'lnsXY_xAnnotationsPanel';
 const REFERENCE_LINE_DIMENSION = 'lnsXY_yReferenceLineLeftPanel';
 
+const expectChartToRender = async (
+  dashboard: Parameters<typeof openInlineEditorAndWaitVisible>[0]['dashboard'],
+  panelId: string
+) => {
+  await dashboard.waitForRenderComplete();
+  const panel = dashboard.getPanelByEmbeddableId(panelId);
+  await expect(panel.locator('[data-test-subj="embeddableError"]')).toHaveCount(0);
+  await expect(panel.locator('[data-test-subj="xyVisChart"]')).toBeVisible();
+};
+
 spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-classic' }, () => {
   let dashboardId: string;
 
@@ -72,7 +82,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
     await dashboard.waitForRenderComplete();
     await lens.dimensions.setTextBasedDimensionField(X_DIMENSION, '@timestamp', 1);
     await lens.dimensions.setTextBasedDimensionField(Y_DIMENSION, 'MAX(bytes)', 1);
-    await dashboard.waitForRenderComplete();
+    await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
     const panel = dashboard.getPanelByEmbeddableId(testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
     await expect(panel.getByRole('button', { name: /Count of records/ })).toBeVisible();
@@ -110,7 +120,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
 
       await lens.layers.activateLayerTab(0);
       await lens.workspace.submitEsqlQuery(MAX_QUERY);
-      await dashboard.waitForRenderComplete();
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.MIXED_DATA);
 
       await lens.layers.activateLayerTab(1);
       await expect
@@ -123,7 +133,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       expect(await lens.workspace.getEsqlQuery()).toBe(MAX_QUERY);
       await lens.dimensions.setTextBasedDimensionField(X_DIMENSION, '@timestamp', 2);
       await lens.dimensions.setTextBasedDimensionField(Y_DIMENSION, 'MAX(bytes)', 2);
-      await dashboard.waitForRenderComplete();
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.MIXED_DATA);
 
       await lens.layers.activateLayerTab(1);
       await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeHidden();
@@ -146,6 +156,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_DIMENSION)).toHaveText(
         'Event'
       );
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
       await lens.layers.activateLayerTab(0);
       expect(await lens.workspace.getEsqlQuery()).toBe(COUNT_QUERY);
@@ -157,9 +168,8 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
         /^Static value: /
       );
 
-      await dashboard.waitForRenderComplete();
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
-      await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
 
       await applyLensInlineEditorAndWaitClosed({ lens });
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
@@ -187,7 +197,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       );
       await page.keyboard.press('Escape');
       await expect(lens.applyFlyoutButton).toBeDisabled();
-      await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
       await lens.workspace.submitEsqlQuery(INCOMPATIBLE_QUERY);
       await expect(errorButton).toBeVisible();
@@ -197,7 +207,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       );
       await page.keyboard.press('Escape');
       await expect(lens.applyFlyoutButton).toBeDisabled();
-      await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
       await lens.layers.activateLayerTab(0);
       expect(await lens.workspace.getEsqlQuery()).toBe(COUNT_QUERY);
