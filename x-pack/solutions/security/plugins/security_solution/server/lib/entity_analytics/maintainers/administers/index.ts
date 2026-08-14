@@ -52,6 +52,7 @@ export const administersMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: buildAdministersConfigs(lastProcessedTimestamp),
+      maintainerName: 'administers',
       signal,
       telemetryCollector: collector,
     });

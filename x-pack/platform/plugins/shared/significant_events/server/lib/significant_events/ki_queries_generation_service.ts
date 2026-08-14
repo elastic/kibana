@@ -49,6 +49,12 @@ export interface GenerateKIQueriesDependencies {
   soClient: SavedObjectsClientContract;
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
+  /**
+   * Client used to validate generated ES|QL against the stream's data. Separate from `esClient`
+   * because the stream can resolve to a remote CPS-connected project, while `esClient` reads the
+   * plugin's own (origin-only) indices.
+   */
+  streamDataEsClient: ElasticsearchClient;
   featureFlags: FeatureFlagsStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
   request: KibanaRequest;
@@ -79,6 +85,7 @@ export async function generateKIQueries(
     soClient,
     kiClient,
     esClient,
+    streamDataEsClient,
     featureFlags,
     searchInferenceEndpoints,
     request,
@@ -160,7 +167,7 @@ export async function generateKIQueries(
     },
     {
       inferenceClient,
-      esClient,
+      esClient: streamDataEsClient,
       kiClient,
       logger: logger.get('significant_events_generation'),
       signal,

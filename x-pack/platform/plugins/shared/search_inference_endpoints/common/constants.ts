@@ -32,6 +32,8 @@ export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
 
 export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
 
+export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
+
 /**
  * Maps a `csp::region` key to a human-readable region name.
  * Based on the EIS inference locations list provided by the EIS team.

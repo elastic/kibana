@@ -32,11 +32,6 @@ interface SearchResponse {
   }>;
 }
 
-interface TestResult {
-  ok: boolean;
-  message?: string;
-}
-
 describe('MicrosoftTeams', () => {
   const mockClient = {
     get: jest.fn(),
@@ -916,6 +911,8 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = MicrosoftTeams.test;
+
     it('should use /me/joinedTeams for delegated auth (bearer)', async () => {
       const mockResponse = {
         data: {
@@ -928,19 +925,13 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/joinedTeams',
         { params: { $select: 'id,displayName' } }
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 3 teams',
-      });
+      expect(result).toEqual({});
     });
 
     it('should use /me/joinedTeams for oauth_authorization_code (delegated) auth', async () => {
@@ -956,19 +947,13 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(oauthCodeContext)) as TestResult;
+      const result = await testSpec.handler(oauthCodeContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://graph.microsoft.com/v1.0/me/joinedTeams',
         { params: { $select: 'id,displayName' } }
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 1 teams',
-      });
+      expect(result).toEqual({});
     });
 
     it('should use /teams for app-only auth (oauth_client_credentials)', async () => {
@@ -987,18 +972,12 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(appOnlyContext)) as TestResult;
+      const result = await testSpec.handler(appOnlyContext);
 
       expect(mockClient.get).toHaveBeenCalledWith('https://graph.microsoft.com/v1.0/teams', {
         params: { $select: 'id,displayName' },
       });
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 2 teams',
-      });
+      expect(result).toEqual({});
     });
 
     it('should handle zero teams', async () => {
@@ -1007,75 +986,35 @@ describe('MicrosoftTeams', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
+      const result = await testSpec.handler(mockContext);
 
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Microsoft Teams: found 0 teams',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw when Graph API response is missing value array', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      await expect(testSpec.handler(mockContext)).rejects.toThrow(
+        'Unexpected Graph API response: missing value array'
+      );
+    });
+
+    it('should throw on invalid credentials', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid credentials');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should handle network errors', async () => {
+    it('should throw on network timeout', async () => {
       mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
 
-    it('should handle non-Error exceptions', async () => {
+    it('should throw on non-Error rejection (plain string)', async () => {
       mockClient.get.mockRejectedValue('string error');
 
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Unknown error');
-    });
-
-    it('should return failure when response is missing value array', async () => {
-      mockClient.get.mockResolvedValue({ data: { unexpected: true } });
-
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Unexpected Graph API response: missing value array');
-    });
-
-    it('should return failure when response data is null', async () => {
-      mockClient.get.mockResolvedValue({ data: null });
-
-      if (!MicrosoftTeams.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = (await MicrosoftTeams.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Unexpected Graph API response: missing value array');
+      await expect(testSpec.handler(mockContext)).rejects.toBeDefined();
     });
   });
 });

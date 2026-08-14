@@ -120,6 +120,22 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: '9f825d6e3cd79ed834759edfec89c88eef2be3a3e33b5872f53bddc365915593',
   },
   {
+    id: 'significant-events.eventCreated',
+    schemaHash: '64b1eb0d83b57fc4bdd63dd44dbac0ac98477d95db49e83f4ae5ae486131dd22',
+  },
+  {
+    id: 'significant-events.eventStatusChanged',
+    schemaHash: '9daa3d856b15e374d3697da943da7db7b2332b39b01163c5c252b8916bd4282c',
+  },
+  {
+    id: 'significant-events.investigationCompleted',
+    schemaHash: '0b4d44bfc8622414b093116ea0301d48b25ead279a9b52db77d678674aa9d770',
+  },
+  {
+    id: 'significant-events.investigationStarted',
+    schemaHash: '24a3de21574471c92605a102767c36e876a932ac13fc974e9b2d69db6194bd83',
+  },
+  {
     id: 'workflows.failed',
     schemaHash: '2ac7a279823d7ca59c4d47de93ea7bd7103b1953ea484cef7f489d12d0c81980',
   },

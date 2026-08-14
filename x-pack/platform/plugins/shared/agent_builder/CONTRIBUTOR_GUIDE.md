@@ -467,7 +467,7 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
     if (openSidebarConversation) {
       buttons.push({
         label: 'Continue in sidebar',
-        icon: 'discuss',
+        icon: 'comment',
         type: ActionButtonType.SECONDARY,
         handler: openSidebarConversation,
       });
@@ -668,7 +668,7 @@ getActionButtons: ({ attachment, updateOrigin, isCanvas }) => {
   if (attachment.origin) {
     buttons.push({
       label: 'Open in App',
-      icon: 'popout',
+      icon: 'external',
       type: ActionButtonType.SECONDARY,
       handler: () => {
         window.open(`/app/myApp/${attachment.origin}`, '_blank');

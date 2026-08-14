@@ -8,6 +8,7 @@
  */
 
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -130,7 +131,8 @@ export type LensApi = Simplify<
     LensApiCallbacks &
     LensHasEditPanel &
     LegacyLensStateApi &
-    SupportsJsonExport
+    SupportsJsonExport &
+    CanCancelRequests
 >;
 
 /**

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/logging-mocks'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package

@@ -299,20 +299,12 @@ export const SharepointServer: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Server test handler');
-      try {
-        const { siteUrl } = ctx.config as { siteUrl: string };
-        const response = await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/web/title`, {
-          headers: ODATA_HEADERS,
-        });
-        const title = response.data?.value ?? 'Unknown';
-        return {
-          ok: true,
-          message: `Successfully connected to SharePoint Server: ${title}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      const { siteUrl } = ctx.config as { siteUrl: string };
+      await ctx.client.get(`${normalizeUrl(siteUrl)}/_api/web/title`, {
+        headers: ODATA_HEADERS,
+      });
+      return {};
     },
+    enabled: true,
   },
 };

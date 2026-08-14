@@ -5,28 +5,23 @@
  * 2.0.
  */
 
-import type { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, AppUpdater } from '@kbn/core/public';
 import {
   DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
   type Plugin,
-  type PluginInitializerContext,
 } from '@kbn/core/public';
 import {
   SIGNIFICANT_EVENTS_APP_ID,
   type SignificantEventsLinkId,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import {
-  SIGNIFICANT_EVENTS_TIERED_FEATURE,
-  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-} from '@kbn/significant-events-plugin/common';
-import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
-import type { SignificantEventsAppLocator } from '../common/locators';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
+import { FocusedSignificantEventService } from './services/focused_significant_event_service';
 import type {
   SignificantEventsAppPublicSetup,
   SignificantEventsAppPublicStart,
@@ -34,6 +29,7 @@ import type {
   SignificantEventsAppStartDependencies,
 } from './types';
 import type { SignificantEventsAppServices } from './services/types';
+import type { KnowledgeIndicatorsPanelComponent } from './types';
 
 export class SignificantEventsAppPlugin
   implements
@@ -44,12 +40,12 @@ export class SignificantEventsAppPlugin
       SignificantEventsAppStartDependencies
     >
 {
-  private locator!: SignificantEventsAppLocator;
   // Built in start(); core guarantees every plugin start() runs before any app mount,
   // so the mount callback below can safely read it.
-  private availability$!: Observable<boolean>;
-
-  constructor(private readonly context: PluginInitializerContext) {}
+  private focusedSignificantEventService!: FocusedSignificantEventService;
+  private cleanupSignificantEventAttachment?: () => void;
+  private stopped = false;
+  private knowledgeIndicatorsPanel?: KnowledgeIndicatorsPanelComponent;
 
   setup(
     coreSetup: CoreSetup<SignificantEventsAppStartDependencies>,
@@ -57,9 +53,7 @@ export class SignificantEventsAppPlugin
   ): SignificantEventsAppPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
 
-    this.locator = pluginsSetup.share.url.locators.create(
-      new SignificantEventsAppLocatorDefinition()
-    );
+    pluginsSetup.share.url.locators.create(new SignificantEventsAppLocatorDefinition());
 
     coreSetup.application.register({
       id: SIGNIFICANT_EVENTS_APP_ID,
@@ -107,27 +101,34 @@ export class SignificantEventsAppPlugin
           keywords: ['rules', 'queries', 'significant events', 'sig events', 'sig events rules'],
         },
       ],
-      // TODO(significant-events-app): restore global search once the real pages are
-      // rehomed here (and streams_app stops advertising the same deep links). Gate on
-      // availability$ only (flag × license × pricing) — not streams navigationStatus$.
-      // Wire after start services resolve so this.availability$ is assigned:
-      //
-      //   updater$: from(startServicesPromise).pipe(
-      //     switchMap(() => this.availability$),
-      //     distinctUntilChanged(),
-      //     map(
-      //       (visible): AppUpdater =>
-      //         (app) => ({
-      //           visibleIn: visible ? ['globalSearch'] : [],
-      //           deepLinks: (app.deepLinks ?? []).map((link) => ({
-      //             ...link,
-      //             visibleIn: visible ? ['globalSearch'] : [],
-      //           })),
-      //         })
-      //     )
-      //   ),
-      //
-      // Re-add AppUpdater, from, and switchMap imports when restoring.
+      updater$: from(startServicesPromise).pipe(
+        switchMap(([, pluginsStart]) =>
+          // The server endpoint is the single source of truth for availability
+          // (rollout flag, project type, pricing tier, license, required plugins).
+          // Standalone app: surface in global search whenever it reports available.
+          // Nightshift and other consumers link here independently of Streams
+          // navigation status.
+          from(
+            pluginsStart.significantEvents.significantEventsRepositoryClient.fetch(
+              'GET /internal/significant_events/availability',
+              { signal: null }
+            )
+          ).pipe(
+            map(({ available }) => available),
+            catchError(() => of(false)),
+            map(
+              (visible): AppUpdater =>
+                (app) => ({
+                  visibleIn: visible ? ['globalSearch'] : [],
+                  deepLinks: (app.deepLinks ?? []).map((link) => ({
+                    ...link,
+                    visibleIn: visible ? ['globalSearch'] : [],
+                  })),
+                })
+            )
+          )
+        )
+      ),
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         const [[coreStart, pluginsStart], { renderApp }] = await Promise.all([
           startServicesPromise,
@@ -135,7 +136,7 @@ export class SignificantEventsAppPlugin
         ]);
 
         const services: SignificantEventsAppServices = {
-          availability$: this.availability$,
+          focusedSignificantEventService: this.focusedSignificantEventService,
         };
 
         // Trigger fetch to ensure the time filter has an up-to-date time range when
@@ -148,7 +149,6 @@ export class SignificantEventsAppPlugin
           services,
           coreStart,
           pluginsStart,
-          isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
         });
       },
     });
@@ -160,33 +160,56 @@ export class SignificantEventsAppPlugin
     coreStart: CoreStart,
     pluginsStart: SignificantEventsAppStartDependencies
   ): SignificantEventsAppPublicStart {
-    // Created once and multicast (refCount: false keeps the chain alive across
-    // subscriber churn): every flag evaluation POSTs to the feature-flags usage
-    // counter endpoint, so consumers must share this single subscription chain
-    // instead of recreating it.
-    this.availability$ = combineLatest([
-      coreStart.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
-      pluginsStart.licensing.license$,
-    ]).pipe(
-      map(([flagEnabled, license]) =>
-        Boolean(
-          flagEnabled &&
-            license?.hasAtLeast('enterprise') &&
-            coreStart.pricing.isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
-        )
-      ),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
+    this.focusedSignificantEventService = new FocusedSignificantEventService();
+
+    if (pluginsStart.agentBuilder) {
+      const { agentBuilder } = pluginsStart;
+      const { chrome } = coreStart;
+      const { focusedSignificantEventService } = this;
+      // Async so attachment UI / significant-events-schema (→ streamlang) stay off page-load.
+      void import('./components/significant_event_attachment').then(
+        ({ registerSignificantEventAttachment }) => {
+          const cleanup = registerSignificantEventAttachment({
+            agentBuilder,
+            chrome,
+            focusedSignificantEventService,
+          });
+          if (this.stopped) {
+            cleanup();
+            return;
+          }
+          this.cleanupSignificantEventAttachment = cleanup;
+        }
+      );
+    }
+
+    const services: SignificantEventsAppServices = {
+      focusedSignificantEventService: this.focusedSignificantEventService,
+    };
 
     return {
-      availability$: this.availability$,
-      fetchAvailability: (signal) =>
-        pluginsStart.significant_events.significantEventsRepositoryClient.fetch(
-          'GET /internal/significant_events/availability',
-          { signal: signal ?? null }
-        ),
-      locator: this.locator,
+      getKnowledgeIndicatorsPanel: () => {
+        if (!this.knowledgeIndicatorsPanel) {
+          this.knowledgeIndicatorsPanel = dynamic(() =>
+            import(
+              './components/knowledge_indicators_panel/create_knowledge_indicators_panel'
+            ).then(({ createKnowledgeIndicatorsPanel }) => ({
+              default: createKnowledgeIndicatorsPanel({
+                coreStart,
+                pluginsStart,
+                services,
+              }),
+            }))
+          );
+        }
+        return this.knowledgeIndicatorsPanel;
+      },
     };
+  }
+
+  stop() {
+    this.stopped = true;
+    this.cleanupSignificantEventAttachment?.();
+    this.cleanupSignificantEventAttachment = undefined;
   }
 }

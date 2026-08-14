@@ -392,7 +392,7 @@ export const PostHog: ConnectorSpec = {
         await ctx.client.get(buildProjectUrl(ctx, '/error_tracking/issues/'), {
           params: { limit: 1 },
         });
-        return { ok: true, message: 'Successfully connected to the PostHog API.' };
+        return { message: 'Successfully connected to the PostHog API.' };
       } catch (error) {
         throw formatPostHogError('test', error);
       }

@@ -16,7 +16,10 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ChatResponse } from '../../../../common/http_api/chat';
-import type { ListConversationsResponse } from '../../../../common/http_api/conversations';
+import type {
+  GetConversationResponse,
+  ListConversationsResponse,
+} from '../../../../common/http_api/conversations';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { internalApiPath, publicApiPath } from '../../../../common/constants';
 import { apiTest } from '../fixtures';
@@ -486,10 +489,10 @@ apiTest.describe(
         );
 
         await apiTest.step(
-          'public conversation rounds are attributed to the Kibana user who sent them',
+          'conversation rounds are attributed to the Kibana user who sent them',
           async () => {
             expect(publicConversation.author?.username).toBe(alice.username);
-            expect(privateConversation.author).toBeUndefined();
+            expect(privateConversation.author?.username).toBe(alice.username);
 
             const getPublicResponse = await apiClient.get(
               `${accessControlApiBase}/conversations/${encodeURIComponent(
@@ -512,7 +515,11 @@ apiTest.describe(
               { headers: headersFor(alice), responseType: 'json' }
             );
             expect(getPrivateResponse).toHaveStatusCode(200);
-            expect((getPrivateResponse.body as Conversation).rounds[0].author).toBeUndefined();
+            // Private rounds are attributed too, so authorship survives the conversation later
+            // being shared.
+            const privateRound = (getPrivateResponse.body as Conversation).rounds[0];
+            expect(privateRound.author?.username).toBe(alice.username);
+            expect(privateRound.author?.id).toBeDefined();
           }
         );
 
@@ -529,6 +536,47 @@ apiTest.describe(
             read: true,
           });
         });
+
+        await apiTest.step(
+          'permissions reflect what rename and delete allow, on both GET routes',
+          async () => {
+            const getAs = async (user: { username: string; password: string }) => {
+              const response = await apiClient.get(
+                `${accessControlApiBase}/conversations/${encodeURIComponent(
+                  publicConversation.conversation_id
+                )}`,
+                { headers: headersFor(user), responseType: 'json' }
+              );
+              expect(response).toHaveStatusCode(200);
+              return response.body as GetConversationResponse;
+            };
+
+            expect((await getAs(alice)).permissions).toStrictEqual({
+              rename: true,
+              delete: true,
+              update_access_control: true,
+            });
+            expect((await getAs(bob)).permissions).toStrictEqual({
+              rename: false,
+              delete: false,
+              update_access_control: false,
+            });
+
+            const listedForBob = await apiClient.get(`${accessControlApiBase}/conversations`, {
+              headers: headersFor(bob),
+              responseType: 'json',
+            });
+            expect(listedForBob).toHaveStatusCode(200);
+            const listedPublicConversation = (
+              listedForBob.body as ListConversationsResponse
+            ).results.find(({ id }) => id === publicConversation.conversation_id);
+            expect(listedPublicConversation?.permissions).toStrictEqual({
+              rename: false,
+              delete: false,
+              update_access_control: false,
+            });
+          }
+        );
 
         await apiTest.step('Bob cannot rename or delete Alice public conversation', async () => {
           const renameResponse = await renameConversationAs(

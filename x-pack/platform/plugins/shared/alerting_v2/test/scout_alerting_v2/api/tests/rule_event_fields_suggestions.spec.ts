@@ -8,8 +8,11 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
-import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE, testData } from '../fixtures';
+import {
+  ALERT_EVENTS_DATA_STREAM,
+  ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+} from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE } from '../fixtures';
 
 const RULE_ID_A = 'matcher-suggestions-rule-a';
 const RULE_ID_B = 'matcher-suggestions-rule-b';
@@ -43,7 +46,7 @@ const ruleEventFieldsUrl = (params: { matcher?: string } = {}): string => {
 
 const seedAlertEvents = async (esClient: EsClient): Promise<void> => {
   await esClient.bulk({
-    index: testData.ALERT_EVENTS_DATA_STREAM,
+    index: ALERT_EVENTS_DATA_STREAM,
     operations: [
       { create: {} },
       buildAlertEvent({ ruleId: RULE_ID_A, data: { host: 'h1', cpu: 95 } }),

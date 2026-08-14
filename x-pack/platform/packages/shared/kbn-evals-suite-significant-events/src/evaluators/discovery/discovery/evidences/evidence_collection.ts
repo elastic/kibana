@@ -9,11 +9,11 @@ import type { SignalEntry } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 
 const detectionSignalsByRuleUuid = (
-  discoveries: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['discoveries']
+  events: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['significantEvents']
 ): Map<string, SignalEntry[]> => {
   const signalsByRuleUuid = new Map<string, SignalEntry[]>();
-  for (const discovery of discoveries ?? []) {
-    for (const signal of discovery.signals ?? []) {
+  for (const event of events ?? []) {
+    for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') {
         continue;
       }
@@ -23,6 +23,11 @@ const detectionSignalsByRuleUuid = (
   }
   return signalsByRuleUuid;
 };
+
+const hasQuietNoQueryDisposition = (signal: SignalEntry): boolean =>
+  signal.evidence == null &&
+  signal.confirmed === undefined &&
+  /no backed query KI (?:matched|available)/i.test(signal.description);
 
 /** CODE evaluator: every input detection has one signal and evidence when an exact backed query exists. */
 export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
@@ -35,7 +40,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
         .map(({ rule_uuid: ruleUuid }) => ruleUuid)
         .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
     );
-    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.discoveries);
+    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.significantEvents);
     const issues: string[] = [];
     let covered = 0;
 
@@ -53,7 +58,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
         issues.push(`missing signal for input rule "${ruleUuid}"`);
       } else if (signals.length > 1) {
         issues.push(`duplicate signals for input rule "${ruleUuid}"`);
-      } else if (signals[0].evidence == null) {
+      } else if (signals[0].evidence == null && !hasQuietNoQueryDisposition(signals[0])) {
         issues.push(`no ES|QL evidence for input rule "${ruleUuid}"`);
       } else {
         covered++;
@@ -63,13 +68,18 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
     const unexpectedRuleUuids = [...signalsByRuleUuid.keys()].filter(
       (ruleUuid) => !expectedRuleUuids.has(ruleUuid)
     );
-    unexpectedRuleUuids.forEach((ruleUuid) => {
-      issues.push(
-        ruleUuid ? `unexpected signal for rule "${ruleUuid}"` : 'signal missing metadata.rule_uuid'
-      );
-    });
+    if (unexpectedRuleUuids.length > 0) {
+      const unexpectedRules = unexpectedRuleUuids
+        .map((ruleUuid) => (ruleUuid ? `"${ruleUuid}"` : 'a signal without metadata.rule_uuid'))
+        .join(', ');
+      return Promise.resolve({
+        score: 0,
+        label: 'unexpected-rule-uuid',
+        explanation: `Agent output contains detection signal(s) not present in the input batch: ${unexpectedRules}`,
+      });
+    }
 
-    const score = covered / (expectedRuleUuids.size + unexpectedRuleUuids.length);
+    const score = covered / expectedRuleUuids.size;
     return Promise.resolve({
       score,
       explanation:

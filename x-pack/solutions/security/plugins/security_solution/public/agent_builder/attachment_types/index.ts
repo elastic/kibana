@@ -11,6 +11,7 @@ import type {
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
@@ -243,6 +244,55 @@ export const registerEntityAnalyticsDashboardAttachment = ({
       searchSession,
       uiSettings,
     });
+  });
+};
+
+/**
+ * Registers the `security.entity_graph` attachment renderer (inline read-only
+ * relationship-graph preview + "Open full graph" deep link). Dynamically imports
+ * [./entity_graph](./entity_graph/index.ts) so the heavy graph deps
+ * (`@kbn/cloud-security-posture-graph`) stay off the main `securitySolution`
+ * page-load bundle.
+ *
+ * Race-window: same semantics as {@link registerRuleAttachment} — the chunk
+ * resolves during plugin start well before the user can receive a graph preview
+ * attachment from the LLM.
+ */
+export const registerEntityGraphAttachment = ({
+  attachments,
+  application,
+  http,
+  agentBuilder,
+  chrome,
+  searchSession,
+  experimentalFeatures,
+  uiSettings,
+}: {
+  attachments: AttachmentServiceStartContract;
+  application: ApplicationStart;
+  http: HttpStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  searchSession?: ISessionService;
+  experimentalFeatures: ExperimentalFeatures;
+  uiSettings: IUiSettingsClient;
+}): void => {
+  void import(
+    /* webpackChunkName: "security_entity_graph_attachment" */
+    './entity_graph'
+  ).then(({ createEntityGraphAttachmentDefinition }) => {
+    attachments.addAttachmentType(
+      SecurityAgentBuilderAttachments.entityGraph,
+      createEntityGraphAttachmentDefinition({
+        application,
+        http,
+        agentBuilder,
+        chrome,
+        searchSession,
+        experimentalFeatures,
+        uiSettings,
+      })
+    );
   });
 };
 

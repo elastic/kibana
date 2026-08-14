@@ -9,6 +9,7 @@ import type { AlertingOasOperationObject } from '../oas_types';
 import {
   ACTION_POLICY_NOT_FOUND_RESPONSE,
   ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
+  INVALID_QUERY_PARAMETERS_RESPONSE,
   actionPolicyResponseExample,
 } from './action_policy_oas_shared_examples';
 import { buildOasOperation } from '../oas_utils';
@@ -19,6 +20,7 @@ export const unsnoozeActionPolicyOasExamples = (): AlertingOasOperationObject =>
       200: actionPolicyResponseExample('unsnoozeActionPolicyResponse', 'Unsnoozed action policy', {
         snoozedUntil: null,
       }),
+      400: INVALID_QUERY_PARAMETERS_RESPONSE,
       404: ACTION_POLICY_NOT_FOUND_RESPONSE,
       409: ACTION_POLICY_VERSION_CONFLICT_RESPONSE,
     },

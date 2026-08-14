@@ -17,13 +17,11 @@ export function renderApp({
   services,
   coreStart,
   pluginsStart,
-  isServerless,
 }: {
   appMountParameters: AppMountParameters;
   services: SignificantEventsAppServices;
   coreStart: CoreStart;
   pluginsStart: SignificantEventsAppStartDependencies;
-  isServerless: boolean;
 }) {
   const { element } = appMountParameters;
 
@@ -36,7 +34,6 @@ export function renderApp({
         coreStart={coreStart}
         pluginsStart={pluginsStart}
         services={services}
-        isServerless={isServerless}
         appMountParameters={appMountParameters}
       />
     ),

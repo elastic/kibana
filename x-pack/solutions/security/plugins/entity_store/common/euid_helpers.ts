@@ -122,6 +122,26 @@ export const euid = {
      */
     getEuidFilterBasedOnDocument: euidModule.getEuidKqlFilterBasedOnDocument,
   },
+
+  /**
+   * Narrow-purpose helpers that trade generality for speed by hardcoding an
+   * assumption the general API derives at query time. **Each is correct only for
+   * callers whose data satisfies its documented precondition** — violate it and you
+   * get plausible-looking EUIDs that no entity-store record matches, so every write
+   * 404s silently.
+   *
+   * Reach for the equivalent under `esql` / `dsl` / `kql` unless you have measured
+   * evidence that the general path is too slow AND can state why the precondition
+   * holds for every document your query reads.
+   */
+  experimental: {
+    /**
+     * Minimal ESQL fragments (`{ evalAssignment, presenceGate }`) for the host-scoped
+     * (non-IDP) user EUID `user:<user.name>@<host.id>@local`, skipping the
+     * `entity.namespace` derivation.
+     */
+    getHostScopedUserEuidEsql: euidModule.getHostScopedUserEuidEsql,
+  },
 };
 
 /** Full EUID API (memory + painless + esql + dsl) — same object for Node and browser lazy chunk. */
