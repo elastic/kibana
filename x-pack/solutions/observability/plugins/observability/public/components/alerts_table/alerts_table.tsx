@@ -41,10 +41,10 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
 };
 
 export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
-  const { observability, nightshiftInvestigations } = useKibana<
+  const { observability, nightshiftInvestigations } = useKibana<{
     observability?: ObservabilityPublicStart;
     nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
-  >().services;
+  }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   const alertDetailsNavigation: AlertDetailsNavigation = {
