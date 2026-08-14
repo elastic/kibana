@@ -107,4 +107,3 @@ describe('getNonEmptyGroupingFields', () => {
     ).toEqual(['other']);
   });
 });
-

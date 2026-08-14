@@ -45,9 +45,9 @@ describe('alertEpisodeToEpisodeAttachment', () => {
   });
 
   it('resolves the episode label from the rule name', () => {
-    expect(
-      alertEpisodeToEpisodeAttachment(baseEpisode, { ruleName: 'Host CPU high' })
-    ).toEqual(expect.objectContaining({ 'episode.label': 'Host CPU high alert' }));
+    expect(alertEpisodeToEpisodeAttachment(baseEpisode, { ruleName: 'Host CPU high' })).toEqual(
+      expect.objectContaining({ 'episode.label': 'Host CPU high alert' })
+    );
   });
 
   it('falls back to rule ID label when no rule name is provided', () => {
