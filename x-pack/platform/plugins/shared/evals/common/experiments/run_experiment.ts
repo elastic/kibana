@@ -99,7 +99,7 @@ export interface LaunchedExperimentConfig {
   connector_names: string[];
   dataset_names: string[];
   evaluator_names: string[];
-  /** Only LLM evaluators appear here; code evaluators judge with no model. */
+  /** Only LLM evaluators appear here. Code evaluators invoke no model. */
   evaluator_judges?: LaunchedExperimentJudge[];
   repetitions?: number;
   concurrency?: number;
