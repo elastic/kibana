@@ -762,10 +762,16 @@ describe('GithubConnector', () => {
     it('rejects path traversal segments in path', () => {
       const base = { owner: 'elastic', repo: 'kibana', message: 'x', content: 'SGk=' };
       expect(() =>
-        GithubConnector.actions.createOrUpdateFile.input.parse({ ...base, path: '../../etc/passwd' })
+        GithubConnector.actions.createOrUpdateFile.input.parse({
+          ...base,
+          path: '../../etc/passwd',
+        })
       ).toThrow();
       expect(() =>
-        GithubConnector.actions.createOrUpdateFile.input.parse({ ...base, path: 'src/../../../secret' })
+        GithubConnector.actions.createOrUpdateFile.input.parse({
+          ...base,
+          path: 'src/../../../secret',
+        })
       ).toThrow();
       expect(() =>
         GithubConnector.actions.createOrUpdateFile.input.parse({ ...base, path: 'src/./README.md' })
