@@ -67,12 +67,12 @@ describe('getRunningProcessesTool', () => {
     service = createMockEndpointAppContext().service;
   });
 
-  it('returns a valid read-only builtin tool definition', () => {
+  it('returns a valid builtin tool definition', () => {
     const tool = getRunningProcessesTool(service);
     expect(tool.type).toBe(ToolType.builtin);
     expect(tool.id).toBe(RUNNING_PROCESSES_TOOL_ID);
     expect(RUNNING_PROCESSES_TOOL_ID).toBe('endpoint-response-actions.running_processes');
-    expect(tool.description).toContain('read-only');
+    expect(tool.description).toContain('running processes');
   });
 
   it('returns insufficient_privileges and does not dispatch when caller lacks canGetRunningProcesses', async () => {

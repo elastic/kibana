@@ -15,11 +15,11 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { LIST_ENDPOINTS_TOOL_ID } from '../..';
 import type { HostInfo } from '../types';
 import {
-  DEFAULT_PAGE_SIZE,
   insufficientPrivilegesResult,
   MAX_HOSTNAME_FILTER_LENGTH,
   responseActionErrorResult,
 } from '../types';
+
 const listEndpointsSchema = z.object({
   hostNameFilter: z
     .string()
@@ -60,7 +60,9 @@ export const listEndpointsTool = (
 
         const hostInfo = await metadataService.getHostMetadataList({
           page: 0,
-          pageSize: DEFAULT_PAGE_SIZE,
+          // Return up to 50 endpoints (broader than single-host lookups).
+          // The agent can refine with hostNameFilter if the list is too long.
+          pageSize: 50,
           ...(kuery ? { kuery } : {}),
         });
 

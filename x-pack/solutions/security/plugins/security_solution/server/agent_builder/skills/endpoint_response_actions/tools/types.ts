@@ -233,6 +233,10 @@ export async function waitForActionCompletion<T extends ActionDetails = ActionDe
           endpointAppContextService,
           spaceId,
           actionId,
+          // bypassSpaceValidation is safe here: the action was already
+          // validated to be in the caller's space before dispatch (see
+          // endpoint_lookup.ts -> ensureInCurrentSpace). Polling just reads
+          // back the action we already dispatched.
           { bypassSpaceValidation: true }
         );
         lastKnown = actionDetails;

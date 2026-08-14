@@ -9,6 +9,8 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { escapeKuery } from '@kbn/es-query';
+
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
@@ -76,7 +78,7 @@ export const getEndpointStatusTool = (
         const hostInfo = await metadataService.getHostMetadataList({
           page: 0,
           pageSize: 1,
-          kuery: `agent.id: ${agentId}`,
+          kuery: `agent.id: ${escapeKuery(agentId)}`,
         });
 
         if (!hostInfo.data?.length) {

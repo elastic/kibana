@@ -255,7 +255,7 @@ describe('listEndpointsTool', () => {
       }
     });
 
-    it('caps results at pageSize 20 by default', async () => {
+    it('returns up to 50 endpoints by default', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockResolvedValue({ data: [], total: 0 }),
       };
@@ -271,7 +271,7 @@ describe('listEndpointsTool', () => {
 
         expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
           expect.objectContaining({
-            pageSize: 20,
+            pageSize: 50,
           })
         );
       } finally {

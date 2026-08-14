@@ -74,7 +74,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                 'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
                 'Presented a confirmation prompt before executing the isolation',
-                'Called the executeHostIsolation inline tool or equivalent',
+                'Called the endpoint-response-actions.isolate_host inline tool',
                 'Reported the isolation result (success or pending) back to the user',
               ],
             },
@@ -104,7 +104,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                 'Resolved host name "eval-host-release" to an endpoint/agent ID',
                 'Presented a confirmation prompt before executing the release',
-                'Called the executeHostIsolation (release mode) or equivalent inline tool',
+                'Called the endpoint-response-actions.unisolate_host inline tool',
                 'Reported the release result back to the user',
               ],
             },
@@ -132,7 +132,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
             output: {
               criteria: [
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                'Called the getEndpointList inline tool or equivalent',
+                'Called the endpoint-response-actions.list_endpoints inline tool',
                 'Returned a list of endpoints including at least eval-host-isolate and eval-host-release',
                 'Did not attempt to isolate any host without explicit user confirmation',
               ],

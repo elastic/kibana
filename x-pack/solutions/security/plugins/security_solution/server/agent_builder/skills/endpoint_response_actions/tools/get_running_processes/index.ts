@@ -48,7 +48,7 @@ export const getRunningProcessesTool = (
   return {
     id: RUNNING_PROCESSES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieves the list of running processes from a host by its hostname. This is a read-only inspection action dispatched through the Elastic Defend Response Actions service; it does not modify the endpoint.`,
+    description: `Retrieves the list of running processes from a host by its hostname. Dispatches a running-processes response action through the Elastic Defend Response Actions service. The action enqueues on the endpoint and returns the process list once the host checks in.`,
     schema: getRunningProcessesSchema,
     handler: async (params, { logger, request, runContext, spaceId }) => {
       try {
