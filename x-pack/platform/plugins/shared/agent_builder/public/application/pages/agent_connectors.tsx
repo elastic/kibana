@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { SuppressChromeBackButton } from '@kbn/app-header';
 import { ConnectorsProvider } from '../context/connectors_provider';
 import { AgentConnectors } from '../components/agents/connectors/agent_connectors';
 import { useAgentBuilderAgentById } from '../hooks/agents/use_agent_by_id';
@@ -28,11 +27,8 @@ export const AgentBuilderAgentConnectorsPage: React.FC = () => {
   useBreadcrumb(breadcrumbs);
 
   return (
-    <>
-      <SuppressChromeBackButton />
-      <ConnectorsProvider onConnectorCreated={(connector) => assign(connector)}>
-        <AgentConnectors agentId={agentId} />
-      </ConnectorsProvider>
-    </>
+    <ConnectorsProvider onConnectorCreated={(connector) => assign(connector)}>
+      <AgentConnectors agentId={agentId} />
+    </ConnectorsProvider>
   );
 };
