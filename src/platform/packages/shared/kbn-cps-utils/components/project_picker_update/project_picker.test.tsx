@@ -138,7 +138,7 @@ describe('ProjectPicker', () => {
         availableProjects={availableProjects}
         originProjectId={matchingProject._id}
         onProjectRoutingChange={onProjectRoutingChange}
-        projectRouting="_id:matching AND _id:matching2"
+        projectRouting="_id:matching OR _id:matching2"
         projectRoutingStrategy="snapshot"
         fetchProjectsByRouting={createFetchProjectsByRouting(availableProjects)}
       />

@@ -264,7 +264,7 @@ describe('ProjectPickerStateProvider', () => {
         await toggleProjectListItemSwitch(user, linkedProjectOne._id);
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('(_id:* AND NOT _id:linked1)');
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:* AND NOT _id:linked1');
         });
       });
 
@@ -321,7 +321,7 @@ describe('ProjectPickerStateProvider', () => {
 
         await waitFor(() => {
           expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
-            '_id:origin AND _id:linked1 AND _id:linked2'
+            '_id:origin OR _id:linked1 OR _id:linked2'
           );
         });
       });
@@ -341,7 +341,7 @@ describe('ProjectPickerStateProvider', () => {
         await toggleProjectListItemSwitch(user, linkedProjectOne._id);
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:origin AND _id:linked2');
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:origin OR _id:linked2');
         });
       });
 
@@ -375,9 +375,7 @@ describe('ProjectPickerStateProvider', () => {
 
         await waitFor(() => {
           // the _type:security clause is added to the filter expression, which excludes project with id linked2
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
-            'NOT (_type:security) AND _id:linked1'
-          );
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security AND _id:linked1');
         });
       });
     });

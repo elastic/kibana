@@ -349,6 +349,32 @@ const readExcludedProjectIds = (node: ESQLAstExpression): string[] | null => {
 };
 
 /**
+ * Reads the selected project ids from a `_id:x` equality or a `(_id:a OR _id:b …)` OR group.
+ * Returns null for any other shape, including wildcard ids or non-selection columns.
+ */
+const readSelectedProjectIds = (node: ESQLAstExpression): string[] | null => {
+  const single = readSelectionDimensionEquality(node);
+  if (single) {
+    return single.isWildcard ? null : [single.projectId];
+  }
+
+  if (!isBinaryExpression(node) || node.name !== 'or') {
+    return null;
+  }
+
+  const projectIds: string[] = [];
+  for (const disjunct of collectOrDisjuncts(node)) {
+    const equality = readSelectionDimensionEquality(disjunct);
+    if (!equality || equality.isWildcard) {
+      return null;
+    }
+    projectIds.push(equality.projectId);
+  }
+
+  return projectIds;
+};
+
+/**
  * Guards that a filter subtree never references the reserved project selection dimension,
  * so `_id` clauses can never leak into decoded filter expressions.
  */
@@ -454,15 +480,17 @@ const decodeFilterConjuncts = (nodes: readonly ESQLAstExpression[]): FilterExpre
 };
 
 interface RoutingConjunctPartition {
-  /** Values of non-wildcard `_id:value` equalities, in source order. */
+  /** Ids collected from `_id:x` / `(_id:a OR _id:b)` selection conjuncts, in source order. */
   selectedProjectIds: string[];
+  /** Number of selection conjuncts the ids above came from. */
+  selectionConjunctCount: number;
   /** Number of `_id:*` wildcard equalities. */
   wildcardCount: number;
   /** Ids collected from `NOT _id:…` exclusion negations, in source order. */
   excludedProjectIds: string[];
   /** Number of exclusion negation conjuncts the ids above came from. */
   exclusionCount: number;
-  /** Every other conjunct (free tag filters, compound tails, candidate snapshot wrapper). */
+  /** Every other conjunct (free tag filters and compound tails). */
   freeNodes: ESQLAstExpression[];
 }
 
@@ -472,6 +500,7 @@ const partitionRoutingConjuncts = (
 ): RoutingConjunctPartition => {
   const partition: RoutingConjunctPartition = {
     selectedProjectIds: [],
+    selectionConjunctCount: 0,
     wildcardCount: 0,
     excludedProjectIds: [],
     exclusionCount: 0,
@@ -480,12 +509,15 @@ const partitionRoutingConjuncts = (
 
   for (const conjunct of conjuncts) {
     const equality = readSelectionDimensionEquality(conjunct);
-    if (equality) {
-      if (equality.isWildcard) {
-        partition.wildcardCount += 1;
-      } else {
-        partition.selectedProjectIds.push(equality.projectId);
-      }
+    if (equality?.isWildcard) {
+      partition.wildcardCount += 1;
+      continue;
+    }
+
+    const selections = readSelectedProjectIds(conjunct);
+    if (selections) {
+      partition.selectedProjectIds.push(...selections);
+      partition.selectionConjunctCount += 1;
       continue;
     }
 
@@ -507,10 +539,11 @@ const partitionRoutingConjuncts = (
  * matching tail. `_id` is the reserved project selection dimension.
  *
  * snapshot
- * 1.1 multiple conjuncts, all `_id:value` equalities (non-wildcard) → selected ids
+ * 1.1 a single `(_id:a OR _id:b …)` OR group of non-wildcard `_id:value` equalities →
+ *     selected ids
  * 1.2 a single `_id:value` equality → selected id
- * 1.3 exactly one `NOT (…)` wrapper whose subtree holds the tag filters, every other conjunct
- *     an `_id:value` equality → filters + selected ids
+ * 1.3 shape 1.1/1.2 beside free tag-filter conjuncts (columns other than `_id`) → filters +
+ *     selected ids; every free conjunct must decode strictly
  *
  * dynamic
  * 2.1 a lone `_id:*` wildcard → all projects, no exclusions
@@ -521,40 +554,28 @@ const partitionRoutingConjuncts = (
  * unknown
  * 3.1 blank, `@named`, or unparseable input (handled before this function)
  * 3.2 conjuncts that are only tag filters, with no `_id` clauses — filters are still recovered
- * 3.3 any other mix: `_id:*` without its negation, extra wildcards/negations/wrappers, `_id`
- *     appearing inside a filter subtree, or a free conjunct that fails strict decoding
+ * 3.3 any other mix: `_id:*` without its negation, extra wildcards/negations, more than one
+ *     selection conjunct, `_id` appearing inside a filter subtree, or a free conjunct that
+ *     fails strict decoding
  */
 const decodeRoutingExpressionAst = (root: ESQLAstExpression): ProjectRoutingExpression => {
   const conjuncts = collectAndConjuncts(root);
-  const { selectedProjectIds, wildcardCount, excludedProjectIds, exclusionCount, freeNodes } =
-    partitionRoutingConjuncts(conjuncts);
+  const {
+    selectedProjectIds,
+    selectionConjunctCount,
+    wildcardCount,
+    excludedProjectIds,
+    exclusionCount,
+    freeNodes,
+  } = partitionRoutingConjuncts(conjuncts);
 
-  const hasOnlySelectionEqualities =
-    selectedProjectIds.length > 0 && wildcardCount === 0 && exclusionCount === 0;
+  const hasSingleSelectionConjunct =
+    selectionConjunctCount === 1 && wildcardCount === 0 && exclusionCount === 0;
 
-  if (hasOnlySelectionEqualities && freeNodes.length === 0) {
-    return {
-      filterExpressions: [],
-      excludedProjectIds: [],
-      selectedProjectIds: uniq(selectedProjectIds),
-      projectRoutingStrategy: 'snapshot',
-    };
-  }
-
-  const snapshotWrapper =
-    hasOnlySelectionEqualities &&
-    freeNodes.length === 1 &&
-    isUnaryExpression(freeNodes[0]) &&
-    freeNodes[0].name === 'not'
-      ? freeNodes[0]
-      : null;
-
-  if (snapshotWrapper) {
+  if (hasSingleSelectionConjunct) {
     try {
       return {
-        filterExpressions: decodeFilterConjuncts(
-          collectAndConjuncts(snapshotWrapper.args[0] as ESQLAstExpression)
-        ),
+        filterExpressions: decodeFilterConjuncts(freeNodes),
         excludedProjectIds: [],
         selectedProjectIds: uniq(selectedProjectIds),
         projectRoutingStrategy: 'snapshot',
@@ -573,7 +594,7 @@ const decodeRoutingExpressionAst = (root: ESQLAstExpression): ProjectRoutingExpr
     };
   }
 
-  if (wildcardCount === 1 && exclusionCount === 1 && selectedProjectIds.length === 0) {
+  if (wildcardCount === 1 && exclusionCount === 1 && selectionConjunctCount === 0) {
     try {
       return {
         filterExpressions: decodeFilterConjuncts(freeNodes),
@@ -587,7 +608,7 @@ const decodeRoutingExpressionAst = (root: ESQLAstExpression): ProjectRoutingExpr
   }
 
   const hasNoSelectionClauses =
-    selectedProjectIds.length === 0 && wildcardCount === 0 && exclusionCount === 0;
+    selectionConjunctCount === 0 && wildcardCount === 0 && exclusionCount === 0;
 
   if (hasNoSelectionClauses && freeNodes.length > 0) {
     try {
@@ -600,34 +621,53 @@ const decodeRoutingExpressionAst = (root: ESQLAstExpression): ProjectRoutingExpr
   return unknownRoutingExpression();
 };
 
+/**
+ * Builds the `_id` selection clause. The clause is only parenthesized when filter clauses
+ * precede it in the encoded output — standalone it is the whole expression, so grouping
+ * parentheses add nothing.
+ */
 const buildProjectSelectionClauses = ({
   excludedProjectIds,
   selectedProjectIds,
   projectRoutingStrategy,
+  hasFilterClauses,
 }: Pick<
   z.infer<typeof ProjectRoutingExpressionSchema>,
   'excludedProjectIds' | 'selectedProjectIds'
-> & { projectRoutingStrategy: Exclude<ProjectRoutingStrategy, 'unknown'> }): string[] => {
+> & {
+  projectRoutingStrategy: Exclude<ProjectRoutingStrategy, 'unknown'>;
+  hasFilterClauses: boolean;
+}): string => {
   if (projectRoutingStrategy === 'dynamic') {
     if (excludedProjectIds.length === 0) {
-      return [];
+      return '';
     }
 
     const excludedProjectsSelection = excludedProjectIds
       .map((override) => `${PROJECT_SELECTION_DIMENSION}:${override}`)
       .join(' OR ');
 
-    return [
-      `(${[
-        `${PROJECT_SELECTION_DIMENSION}:${ROUTING_WILDCARD}`,
-        excludedProjectIds.length > 1
-          ? `NOT (${excludedProjectsSelection})`
-          : `NOT ${excludedProjectsSelection}`,
-      ].join(' AND ')})`,
-    ];
+    const dynamicSelection = [
+      `${PROJECT_SELECTION_DIMENSION}:${ROUTING_WILDCARD}`,
+      excludedProjectIds.length > 1
+        ? `NOT (${excludedProjectsSelection})`
+        : `NOT ${excludedProjectsSelection}`,
+    ].join(' AND ');
+
+    return hasFilterClauses ? `(${dynamicSelection})` : dynamicSelection;
   }
 
-  return selectedProjectIds.map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`);
+  if (selectedProjectIds.length === 0) {
+    return '';
+  }
+
+  const selectedProjectsSelection = selectedProjectIds
+    .map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`)
+    .join(' OR ');
+
+  return selectedProjectIds.length > 1 && hasFilterClauses
+    ? `(${selectedProjectsSelection})`
+    : selectedProjectsSelection;
 };
 
 /**
@@ -652,17 +692,10 @@ export const projectRoutingCodec = z.codec(z.optional(z.string()), ProjectRoutin
       excludedProjectIds: input.excludedProjectIds,
       selectedProjectIds: input.selectedProjectIds,
       projectRoutingStrategy: input.projectRoutingStrategy,
+      hasFilterClauses: filterClauses.length > 0,
     });
 
-    return (
-      input.projectRoutingStrategy === 'dynamic'
-        ? filterClauses.slice(0).concat(projectSelectionClauses)
-        : [filterClauses.length ? `NOT (${filterClauses.join(' AND ')})` : ''].concat(
-            projectSelectionClauses
-          )
-    )
-      .filter(Boolean)
-      .join(' AND ');
+    return filterClauses.concat(projectSelectionClauses).filter(Boolean).join(' AND ');
   },
   decode: (value) => {
     const trimmed = value?.trim();

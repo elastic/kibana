@@ -179,7 +179,7 @@ describe('ProjectPicker', () => {
     const linkedProjectSwitch = screen.getByTestId('projectPickerListItemSwitch-linked1');
     await userEvent.click(linkedProjectSwitch);
 
-    expect(onProjectRoutingChange).toHaveBeenLastCalledWith('(_id:* AND NOT _id:linked1)');
+    expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:* AND NOT _id:linked1');
     expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('2/3');
   });
 

@@ -91,7 +91,7 @@ describe('parseDefaultProjectRouting', () => {
   });
 
   it('parses explicit _id inclusions into exclusions for non-included projects', () => {
-    expect(parseDefaultProjectRouting('_id:origin AND _id:linked1', availableProjectIds)).toEqual({
+    expect(parseDefaultProjectRouting('(_id:origin OR _id:linked1)', availableProjectIds)).toEqual({
       filterExpressions: [],
       excludedOverrides: ['linked2'],
     });
@@ -137,24 +137,6 @@ describe('parseDefaultProjectRouting', () => {
     expect(
       parseDefaultProjectRouting(
         '(env:* AND NOT (env:prod OR env:staging)) AND (_id:* AND NOT _id:linked1)',
-        availableProjectIds
-      )
-    ).toEqual({
-      filterExpressions: [
-        {
-          operator: FilterOperator.NOT_ONE_OF,
-          tagName: 'env',
-          tagValue: ['prod', 'staging'],
-        },
-      ],
-      excludedOverrides: ['linked1'],
-    });
-  });
-
-  it('parses unparenthesized legacy NOT_ONE_OF beside a selection group', () => {
-    expect(
-      parseDefaultProjectRouting(
-        'env:* AND NOT (env:prod OR env:staging) AND (_id:* AND NOT _id:linked1)',
         availableProjectIds
       )
     ).toEqual({

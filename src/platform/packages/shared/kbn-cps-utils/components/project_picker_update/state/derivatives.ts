@@ -84,12 +84,15 @@ export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
 
   // fallback that captures all projects but is however project routing strategy
   // aware
-  routing ||=
-    state.projectRoutingStrategy === 'dynamic'
-      ? `${PROJECT_SELECTION_DIMENSION}:*`
-      : Array.from(state.availableProjects.keys())
-          .map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`)
-          .join(' AND ');
+  if (!routing) {
+    if (state.projectRoutingStrategy === 'dynamic') {
+      routing = `${PROJECT_SELECTION_DIMENSION}:*`;
+    } else {
+      routing = Array.from(state.availableProjects.keys())
+        .map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`)
+        .join(' OR ');
+    }
+  }
 
   return routing;
 };
