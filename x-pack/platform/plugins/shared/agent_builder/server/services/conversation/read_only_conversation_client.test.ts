@@ -57,9 +57,9 @@ describe('ReadOnlyConversationClient', () => {
 
   it('delegates list() to the internal conversation client', async () => {
     const conversations = [
-      { ...createEmptyConversation({ id: 'conv-1' }), rounds: undefined },
-      { ...createEmptyConversation({ id: 'conv-2' }), rounds: undefined },
-    ];
+      createEmptyConversation({ id: 'conv-1' }),
+      createEmptyConversation({ id: 'conv-2' }),
+    ].map(({ rounds, ...withoutRounds }) => withoutRounds);
     internalClient.list.mockResolvedValue(conversations);
 
     const result = await readOnlyClient.list({ agentId: 'agent-1' });

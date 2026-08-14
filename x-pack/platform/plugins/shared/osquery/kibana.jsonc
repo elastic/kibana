@@ -27,6 +27,7 @@
       "unifiedDocViewer"
     ],
     "optionalPlugins": [
+      "cps",
       "fleet",
       "home",
       "lens",

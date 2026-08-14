@@ -130,7 +130,7 @@ const InvestigationRow = ({
           <EuiToolTip content={OPEN_CONVERSATION_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="sigEventInvestigationOpenConversationButton"
-              iconType="discuss"
+              iconType="comment"
               size="s"
               aria-label={OPEN_CONVERSATION_LABEL}
               href={conversationHref}
