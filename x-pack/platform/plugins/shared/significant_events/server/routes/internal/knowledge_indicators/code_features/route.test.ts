@@ -38,11 +38,13 @@ jest.mock('../../../../lib/knowledge_indicators/code_intelligence', () => ({
 const listRoute =
   internalKICodeFeaturesRoutes['GET /internal/streams/code_intelligence/_knowledge_indicators'];
 const resetRoute = internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_reset'];
+const runRoute = internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_run'];
 const identifyOtelSignalsRoute =
   internalKICodeFeaturesRoutes['POST /internal/streams/code_intelligence/_identify_otel_signals'];
 
 type ListHandlerParams = Parameters<typeof listRoute.handler>[0];
 type ResetHandlerParams = Parameters<typeof resetRoute.handler>[0];
+type RunHandlerParams = Parameters<typeof runRoute.handler>[0];
 type IdentifyOtelHandlerParams = Parameters<typeof identifyOtelSignalsRoute.handler>[0];
 
 const codeFeature = (streamName: string, uuid: string): Feature =>
@@ -201,6 +203,38 @@ describe('Code Intelligence routes', () => {
     expect(routeLogger.warn).toHaveBeenCalledWith(
       expect.stringContaining('reset failed for stream "logs.two"')
     );
+  });
+
+  it('resolves the code-intelligence connector and passes it to the extraction run instead of the workflow default', async () => {
+    mockResolveConnectorForFeature.mockResolvedValue('.some-user-configured-connector');
+    const run = jest.fn().mockResolvedValue({ executionId: 'exec-1', isNew: true });
+    const codeExtractionClient = {
+      isInstalled: jest.fn().mockResolvedValue(true),
+      getStatus: jest.fn().mockResolvedValue({ available: true }),
+      run,
+    };
+
+    const result = await runRoute.handler({
+      params: {},
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
+      workflowClients: { codeExtractionClient },
+      getSpaceId: jest.fn().mockResolvedValue('default'),
+      server: { searchInferenceEndpoints: {} },
+      logger: { get: jest.fn().mockReturnValue({ info: jest.fn(), warn: jest.fn() }) },
+      maintenanceService: createMaintenanceService(),
+    } as unknown as RunHandlerParams);
+
+    expect(mockResolveConnectorForFeature).toHaveBeenCalledWith(
+      expect.objectContaining({ featureName: 'code intelligence extraction' })
+    );
+    expect(run).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'default',
+        inputs: { agentConnectorId: '.some-user-configured-connector' },
+      })
+    );
+    expect(result).toEqual({ executionId: 'exec-1', isNew: true });
   });
 
   it('does not fall back to message-string queries after a typed write fails', async () => {

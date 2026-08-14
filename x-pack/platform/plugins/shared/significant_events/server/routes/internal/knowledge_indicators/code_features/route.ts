@@ -1389,7 +1389,20 @@ const runCodeIntelligenceRoute = createServerRoute({
     }
 
     const spaceId = await getSpaceId(request);
-    return codeExtractionClient.run({ request, spaceId });
+    // Resolve the code-intelligence agent connector the same way logging-site
+    // classification does, rather than letting the workflow fall back to its
+    // hardcoded YAML default. Keeps the model choice under the user's
+    // searchInferenceEndpoints feature configuration.
+    // TODO: resolveConnectorForFeature also runs inside getCodeIntelligenceReadiness
+    // above (to confirm a connector exists). Collapse the two into a single resolve
+    // by having readiness return the resolved connector id, so this path resolves once.
+    const agentConnectorId = await resolveConnectorForFeature({
+      searchInferenceEndpoints: server.searchInferenceEndpoints,
+      featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+      featureName: 'code intelligence extraction',
+      request,
+    });
+    return codeExtractionClient.run({ request, spaceId, inputs: { agentConnectorId } });
   },
 });
 
