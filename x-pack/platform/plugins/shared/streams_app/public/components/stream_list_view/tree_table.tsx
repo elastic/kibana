@@ -36,6 +36,7 @@ import {
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -108,8 +109,7 @@ export function StreamsTreeTable({
 }) {
   const router = useStreamsAppRouter();
   const { dependencies } = useKibana();
-  const cpsHasLinkedProjects =
-    (dependencies.start.cps?.cpsManager?.getTotalProjectCount() ?? 0) > 1;
+  const cpsHasLinkedProjects = useIsCpsMultiProject(dependencies.start.cps?.cpsManager);
   const { rangeFrom, rangeTo } = useTimeRange();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
