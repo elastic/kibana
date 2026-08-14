@@ -156,7 +156,7 @@ export async function listIndexedRepos({
       query: `
         FROM ${SOURCERER_REFS_INDEX}
         | WHERE status IN ("complete", "ready")
-        | KEEP git.org, git.repo, git.commit, git.ref, git.ref_key
+        | KEEP git.org, git.repo, git.commit, git.ref, git.ref_key, update_mode
         | SORT git.org, git.repo
         | LIMIT 1000`,
       drop_null_columns: false,
@@ -168,6 +168,7 @@ export async function listIndexedRepos({
     const commitCol = col('git.commit');
     const refCol = col('git.ref');
     const refKeyCol = col('git.ref_key');
+    const updateModeCol = col('update_mode');
     if (orgCol === -1 || repoCol === -1 || commitCol === -1) {
       return [];
     }
@@ -180,13 +181,24 @@ export async function listIndexedRepos({
       if (!org || !repo || !gitSha) {
         continue;
       }
+      // Mode is decided by the ref doc's `update_mode`, not by the mere presence
+      // of `git.ref_key`. Snapshot ref docs DO carry a `git.ref_key` (a content
+      // hash), but snapshot line/file docs do NOT — they are scoped by `git.commit`.
+      // Only propagate `refKey` for incremental refs so downstream content queries
+      // take the snapshot branch (empty ref key) for snapshot repos; otherwise the
+      // incremental branch's `git.ref_key ==` predicate matches zero snapshot rows.
+      const updateMode = updateModeCol === -1 ? '' : String(row[updateModeCol] ?? '');
+      const refKey =
+        updateMode === 'incremental' && refKeyCol !== -1
+          ? String(row[refKeyCol] ?? '') || undefined
+          : undefined;
       refs.push({
         repository: `${org}/${repo}`,
         org,
         repo,
         gitSha,
         ref: refCol === -1 ? undefined : String(row[refCol] ?? '') || undefined,
-        refKey: refKeyCol === -1 ? undefined : String(row[refKeyCol] ?? '') || undefined,
+        refKey,
       });
     }
 

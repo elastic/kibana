@@ -24,13 +24,14 @@ const refsResponse = (rows: Array<[string, string, string, string]>) => ({
   values: rows,
 });
 
-const refsResponseWithRefKey = (rows: Array<[string, string, string, string, string]>) => ({
+const refsResponseWithRefKey = (rows: Array<[string, string, string, string, string, string]>) => ({
   columns: [
     { name: 'git.org', type: 'keyword' },
     { name: 'git.repo', type: 'keyword' },
     { name: 'git.commit', type: 'keyword' },
     { name: 'git.ref', type: 'keyword' },
     { name: 'git.ref_key', type: 'keyword' },
+    { name: 'update_mode', type: 'keyword' },
   ],
   values: rows,
 });
@@ -85,7 +86,7 @@ describe('listIndexedRepos', () => {
     await expect(listIndexedRepos({ esClient, logger: loggerMock.create() })).resolves.toEqual([]);
   });
 
-  it('KEEPs git.ref_key and populates IndexedRepoRef.refKey from it', async () => {
+  it('KEEPs git.ref_key + update_mode and populates refKey only for incremental refs', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue(
       refsResponseWithRefKey([
@@ -95,6 +96,7 @@ describe('listIndexedRepos', () => {
           'abc123',
           'main',
           'open-telemetry/opentelemetry-demo@main',
+          'incremental',
         ],
       ])
     );
@@ -103,7 +105,34 @@ describe('listIndexedRepos', () => {
     expect(repos).toEqual([{ ...repo, refKey: 'open-telemetry/opentelemetry-demo@main' }]);
 
     const { query } = esClient.esql.query.mock.calls[0][0];
-    expect(query).toContain('KEEP git.org, git.repo, git.commit, git.ref, git.ref_key');
+    expect(query).toContain(
+      'KEEP git.org, git.repo, git.commit, git.ref, git.ref_key, update_mode'
+    );
+  });
+
+  // Regression: snapshot ref docs DO carry a `git.ref_key` (a content hash), but
+  // snapshot line/file docs do NOT — they are scoped by `git.commit`. If refKey
+  // were propagated for snapshot refs, downstream content queries would take the
+  // incremental branch (`git.ref_key ==`) and match zero snapshot rows.
+  it('leaves refKey undefined for a snapshot ref even when git.ref_key is present', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(
+      refsResponseWithRefKey([
+        ['gatling', 'gatling', 'abc123', 'abc123', 'fbb50ae19ab63402a214a55aec17c21f', 'snapshot'],
+      ])
+    );
+
+    const repos = await listIndexedRepos({ esClient, logger: loggerMock.create() });
+    expect(repos).toEqual([
+      {
+        repository: 'gatling/gatling',
+        org: 'gatling',
+        repo: 'gatling',
+        gitSha: 'abc123',
+        ref: 'abc123',
+        refKey: undefined,
+      },
+    ]);
   });
 });
 

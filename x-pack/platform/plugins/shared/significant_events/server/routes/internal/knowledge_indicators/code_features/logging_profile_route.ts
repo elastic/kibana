@@ -23,6 +23,10 @@ import { assertNotPaused } from '../../../utils/assert_not_paused';
 import { StatusError } from '../../../../lib/errors/status_error';
 
 const codeIntelligenceInput = z.string().min(1).max(256);
+// `gitRefKey` uses the empty string as its snapshot-mode sentinel (incremental
+// scope only), so it must accept `''` and cannot carry the `.min(1)` bound the
+// other identifiers use.
+const gitRefKeyInput = z.string().max(256);
 
 /**
  * Checks whether a valid `logging_profile` exists for a repository + commit and
@@ -49,7 +53,7 @@ const checkLoggingProfileRoute = createServerRoute({
     body: z.object({
       repository: codeIntelligenceInput,
       gitSha: codeIntelligenceInput,
-      gitRefKey: codeIntelligenceInput.optional(),
+      gitRefKey: gitRefKeyInput.optional(),
       runId: codeIntelligenceInput.optional(),
     }),
   }),
@@ -159,7 +163,7 @@ const persistLoggingProfileRoute = createServerRoute({
     body: z.object({
       repository: codeIntelligenceInput,
       gitSha: codeIntelligenceInput,
-      gitRefKey: codeIntelligenceInput.optional(),
+      gitRefKey: gitRefKeyInput.optional(),
       runId: codeIntelligenceInput.optional(),
       greps: z
         .array(
