@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiAccordion,
   EuiButton,
-  EuiFieldPassword,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiRadioGroup,
   EuiSpacer,
@@ -26,135 +24,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LazyAwsIdentityFederationSetup, LazyAwsStaticKeysForm } from '@kbn/fleet-plugin/public';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
 interface ManagedIntegrationsSectionProps {
   serviceCount: number;
   showIdentityFederation: boolean;
-}
-
-function IdentityFederationForm() {
-  const [federatedIdentityName, setFederatedIdentityName] = useState('');
-  const [roleArn, setRoleArn] = useState('');
-
-  return (
-    <>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.federatedIdentityNameLabel"
-            defaultMessage="Federated Identity Name"
-          />
-        }
-      >
-        <EuiFieldText
-          value={federatedIdentityName}
-          onChange={(e) => setFederatedIdentityName(e.target.value)}
-          placeholder="e.g. elastic-forwarder-prod"
-          data-test-subj="managedIntegrationsSection-federatedIdentityName"
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        id="assumeRoleStepsAccordion"
-        buttonContent={
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.assumeRoleSteps.title"
-            defaultMessage="Steps to assume role"
-          />
-        }
-        arrowDisplay="left"
-        paddingSize="s"
-        data-test-subj="managedIntegrationsSection-assumeRoleSteps"
-      >
-        <EuiText size="s" color="subdued">
-          <ol>
-            <li>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.assumeRoleSteps.step1"
-                defaultMessage="Log in to your AWS Management Console and navigate to IAM &gt; Roles &gt; Create role."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.assumeRoleSteps.step2"
-                defaultMessage="Select {boldText} as the trusted entity type and enter the Elastic account ID."
-                values={{ boldText: <strong>Another AWS account</strong> }}
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.assumeRoleSteps.step3"
-                defaultMessage="Attach the required permissions policy to the role."
-              />
-            </li>
-            <li>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.assumeRoleSteps.step4"
-                defaultMessage="Copy the Role ARN and enter it in the field below."
-              />
-            </li>
-          </ol>
-        </EuiText>
-      </EuiAccordion>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.roleArnLabel"
-            defaultMessage="Role ARN"
-          />
-        }
-      >
-        <EuiFieldText
-          value={roleArn}
-          onChange={(e) => setRoleArn(e.target.value)}
-          placeholder="arn:aws:iam::123456789012:role/elastic-forwarder"
-          data-test-subj="managedIntegrationsSection-roleArn"
-        />
-      </EuiFormRow>
-    </>
-  );
-}
-
-function AccessKeysForm() {
-  const [accessKeyId, setAccessKeyId] = useState('');
-  const [secretAccessKey, setSecretAccessKey] = useState('');
-
-  return (
-    <>
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.accessKeyIdLabel"
-            defaultMessage="Access key ID"
-          />
-        }
-      >
-        <EuiFieldText
-          value={accessKeyId}
-          onChange={(e) => setAccessKeyId(e.target.value)}
-          data-test-subj="managedIntegrationsSection-accessKeyId"
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.secretAccessKeyLabel"
-            defaultMessage="Secret access key"
-          />
-        }
-      >
-        <EuiFieldPassword
-          value={secretAccessKey}
-          onChange={(e) => setSecretAccessKey(e.target.value)}
-          data-test-subj="managedIntegrationsSection-secretAccessKey"
-        />
-      </EuiFormRow>
-    </>
-  );
 }
 
 export function ManagedIntegrationsSection({
@@ -167,6 +43,7 @@ export function ManagedIntegrationsSection({
   const [preferredMethod, setPreferredMethod] = useState<PreferredMethod>(
     showIdentityFederation ? 'identity_federation' : 'access_keys'
   );
+  const [isDeployReady, setIsDeployReady] = useState(false);
 
   const radioOptions = [
     {
@@ -274,7 +151,10 @@ export function ManagedIntegrationsSection({
                     name="managedIntegrationsPreferredMethod"
                     options={radioOptions}
                     idSelected={preferredMethod}
-                    onChange={(id) => setPreferredMethod(id as PreferredMethod)}
+                    onChange={(id) => {
+                      setPreferredMethod(id as PreferredMethod);
+                      setIsDeployReady(false);
+                    }}
                     data-test-subj="managedIntegrationsSection-preferredMethodRadio"
                   />
                 </EuiFormRow>
@@ -283,15 +163,20 @@ export function ManagedIntegrationsSection({
 
             <EuiSpacer size="m" />
 
-            {preferredMethod === 'identity_federation' ? (
-              <IdentityFederationForm />
-            ) : (
-              <AccessKeysForm />
-            )}
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              {preferredMethod === 'identity_federation' ? (
+                <LazyAwsIdentityFederationSetup onReadyChange={setIsDeployReady} />
+              ) : (
+                <LazyAwsStaticKeysForm onReadyChange={setIsDeployReady} />
+              )}
+            </Suspense>
 
             <EuiSpacer size="m" />
 
-            <EuiButton data-test-subj="managedIntegrationsSection-deployButton">
+            <EuiButton
+              isDisabled={!isDeployReady}
+              data-test-subj="managedIntegrationsSection-deployButton"
+            >
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.deployButton"
                 defaultMessage="Deploy integrations"
