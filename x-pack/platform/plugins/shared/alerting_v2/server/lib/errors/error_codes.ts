@@ -469,7 +469,7 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
-  /** Agent Builder skill registration failed; Kibana start is aborted. */
+  /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
   // ─────────────────────────────── Tasks ─────────────────────────────

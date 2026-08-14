@@ -23,7 +23,7 @@ const createDeps = (): ManageActionPolicyToolDeps => ({
 });
 
 describe('createActionPolicyManagementSkill', () => {
-  it('generates schema docs without throwing — Kibana start aborts if this fails', () => {
+  it('generates schema docs without throwing', () => {
     expect(() => createActionPolicyManagementSkill(createDeps())).not.toThrow();
   });
 

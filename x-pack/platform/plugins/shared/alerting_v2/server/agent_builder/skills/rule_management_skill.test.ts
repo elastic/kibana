@@ -24,7 +24,7 @@ const createDeps = () => ({
 });
 
 describe('createRuleManagementSkill', () => {
-  it('generates schema docs without throwing — Kibana start aborts if this fails', () => {
+  it('generates schema docs without throwing', () => {
     expect(() => createRuleManagementSkill(createDeps())).not.toThrow();
   });
 

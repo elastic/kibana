@@ -19,8 +19,8 @@ import { createRuleManagementSkill } from './rule_management_skill';
 export type RegisterSkillsDeps = ManageRuleToolDeps & ManageActionPolicyToolDeps;
 
 /**
- * Registers Alerting v2 Agent Builder skills. Any failure is logged and
- * rethrown so Kibana start aborts — skills cannot run in a degraded state.
+ * Registers Alerting v2 Agent Builder skills. Failures are logged and skipped
+ * so Kibana start continues; remaining skills still attempt registration.
  */
 export const registerSkills = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -38,20 +38,23 @@ export const registerSkills = (
     },
   ] as const;
 
+  let registeredCount = 0;
   for (const { id, create } of skills) {
     try {
       agentBuilder.skills.register(create());
+      registeredCount += 1;
     } catch (e) {
       logger.error({
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
         labels: { skill_id: id },
         error: e,
       });
-      throw e;
     }
   }
 
-  logger.debug({
-    message: () => 'Agent builder skills and attachments registered',
-  });
+  if (registeredCount === skills.length) {
+    logger.debug({
+      message: () => 'Agent builder skills and attachments registered',
+    });
+  }
 };

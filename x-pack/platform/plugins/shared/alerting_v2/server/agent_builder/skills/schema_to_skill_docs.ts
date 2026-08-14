@@ -360,7 +360,8 @@ export const getSeverityValues = (): string[] => alertEventSeveritySchema.option
 
 /**
  * Reads per-value `.describe()` copy from a Zod union of literals.
- * Throws if a value has no description — same contract as Kibana start.
+ * Throws if a value has no description. Callers catch this during skill
+ * registration and log rather than aborting Kibana start.
  */
 export const getDescribedEnumValues = (
   schema: z.ZodType,

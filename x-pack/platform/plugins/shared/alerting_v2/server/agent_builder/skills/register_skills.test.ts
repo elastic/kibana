@@ -82,14 +82,14 @@ describe('registerSkills', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs register failures at error with skill_id and rethrows so Kibana start fails', () => {
+  it('logs register failures at error with skill_id and does not throw', () => {
     agentBuilder.skills.register.mockImplementation((skill) => {
       if (skill.id === ACTION_POLICY_MANAGEMENT_SKILL_ID) {
         throw new Error('register boom');
       }
     });
 
-    expect(() => registerSkills(agentBuilder, deps())).toThrow('register boom');
+    expect(() => registerSkills(agentBuilder, deps())).not.toThrow();
 
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith({
@@ -100,18 +100,16 @@ describe('registerSkills', () => {
     expect(logger.debug).not.toHaveBeenCalled();
   });
 
-  it('does not register later skills or log success after the first failure', () => {
+  it('continues registering later skills after the first failure', () => {
     createRuleManagementSkillMock.mockImplementation(() => {
       throw new Error('rule failed');
     });
-    createActionPolicyManagementSkillMock.mockImplementation(() => {
-      throw new Error('policy failed');
-    });
 
-    expect(() => registerSkills(agentBuilder, deps())).toThrow('rule failed');
+    expect(() => registerSkills(agentBuilder, deps())).not.toThrow();
 
-    expect(agentBuilder.skills.register).not.toHaveBeenCalled();
-    expect(createActionPolicyManagementSkillMock).not.toHaveBeenCalled();
+    expect(agentBuilder.skills.register).toHaveBeenCalledTimes(1);
+    expect(agentBuilder.skills.register).toHaveBeenCalledWith(actionPolicySkill);
+    expect(createActionPolicyManagementSkillMock).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({

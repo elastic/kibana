@@ -244,14 +244,5 @@ describe('bindAgentBuilder', () => {
         request
       );
     });
-
-    it('propagates registerSkills errors so Kibana start fails', () => {
-      bindAgentBuilderPlugin();
-      registerSkillsMock.mockImplementation(() => {
-        throw new Error('register boom');
-      });
-
-      expect(() => runOnStart()).toThrow('register boom');
-    });
   });
 });
