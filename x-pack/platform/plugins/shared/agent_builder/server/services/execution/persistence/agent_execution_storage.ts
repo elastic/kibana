@@ -28,6 +28,12 @@ const storageSettings = {
       status: types.keyword({}),
       agent_id: types.keyword({}),
       execution_mode: types.keyword({}),
+      interactivity: types.object({
+        dynamic: false,
+        properties: {
+          enabled: types.boolean({}),
+        },
+      }),
       parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
       agent_params: types.object({ dynamic: false, properties: {} }),
@@ -52,6 +58,7 @@ export interface AgentExecutionProperties {
   status: ExecutionStatus;
   agent_id: string;
   execution_mode?: string;
+  interactivity?: { enabled: boolean };
   parent_execution_id?: string;
   space_id: string;
   agent_params: AgentExecutionParams;

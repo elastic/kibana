@@ -119,7 +119,9 @@ export const handleAgentExecution = async ({
   interactivity?: InteractivityConfig;
 }): Promise<Observable<ChatEvent>> => {
   const resolvedInteractivity: InteractivityConfig =
-    interactivity ?? normalizeInteractive(undefined, execution.executionMode);
+    interactivity ??
+    execution.interactivity ??
+    normalizeInteractive(undefined, execution.executionMode);
   if (execution.executionMode === AgentExecutionMode.standalone) {
     return handleStandaloneExecution({
       execution,

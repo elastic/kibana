@@ -103,6 +103,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         agentParams: validatedParams,
         parentExecutionId: params.parentExecutionId,
         metadata,
+        interactivity,
       });
     } catch (err) {
       if (isVersionConflictError(err)) {

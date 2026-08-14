@@ -20,6 +20,7 @@ import type {
   ConversationRoundAuthor,
   ExecutionStatus,
   InteractiveInput,
+  InteractivityConfig,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -138,6 +139,10 @@ interface BaseAgentExecution {
   metadata?: Record<string, string>;
   /** The ID of the parent execution that spawned this standalone execution. */
   parentExecutionId?: string;
+  /**
+   * Canonical interactivity config for this execution, snapshotted at creation.
+   */
+  interactivity?: InteractivityConfig;
 }
 
 /**
