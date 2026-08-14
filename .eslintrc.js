@@ -226,6 +226,14 @@ const DEV_PATTERNS = [
 /** Restricted imports with suggested alternatives */
 const RESTRICTED_IMPORTS = [
   {
+    name: 'cordis',
+    message:
+      "Import from '@kbn/cordis' instead. " +
+      'src/core/packages/plugins/cordis/src/index.ts is the only file in the repo ' +
+      "allowed to import directly from 'cordis'. " +
+      'This single indirection lets us swap/vendor/patch the rc without touching every consumer.',
+  },
+  {
     name: 'lodash',
     importNames: ['set', 'setWith', 'template'],
     message:
@@ -1170,6 +1178,15 @@ module.exports = {
       files: ['src/setup_node_env/harden/index.js'],
       rules: {
         'no-restricted-modules': 'off',
+      },
+    },
+    {
+      // The @kbn/cordis barrel is the only file allowed to import directly from 'cordis'.
+      // It re-exports everything else in the repo needs, so that a single file mediates
+      // any rc API break, vendoring decision, or ESM/CJS compatibility change.
+      files: ['src/core/packages/plugins/cordis/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': 'off',
       },
     },
     {
