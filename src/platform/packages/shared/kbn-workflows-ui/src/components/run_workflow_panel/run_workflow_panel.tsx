@@ -24,10 +24,17 @@ import { useRunWorkflow } from '../../hooks/use_run_workflow';
 import { useWorkflows } from '../../hooks/use_workflows';
 import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
 import { WorkflowSelector } from '../workflow_selector/workflow_selector';
+import type { RunWorkflowOptions } from '../../api/types';
+
+/**
+ * The inputs payload forwarded verbatim to the workflow execution API.
+ * Aliased from RunWorkflowOptions['inputs'] so this type tracks any API changes automatically.
+ */
+export type WorkflowRunInputs = RunWorkflowOptions['inputs'];
 
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
-  inputs: Record<string, unknown>;
+  inputs: WorkflowRunInputs;
   /**
    * The trigger type(s) to sort to the top of the workflow list.
    * Workflows whose triggers include any of these types are ranked first.
