@@ -133,7 +133,13 @@ export class CspPlugin
         if (packageInfo) {
           pRetry(
             () => this.initialize(core, plugins.taskManager, packageInfo.install_version),
-            getRetryOptions(this.logger, 'initialize')
+            {
+              ...getRetryOptions(this.logger, 'initialize'),
+              // Use longer backoff than the default (1s) so transient ES/transform
+              // failures have time to resolve before the next attempt.
+              minTimeout: 5_000,
+              maxTimeout: 30_000,
+            }
           ).catch((e) => {
             this.logger.error('CSP plugin initialization failed after all retries', e);
           });
@@ -346,8 +352,6 @@ const isTransformAssetIncluded = (integrationVersion: string): boolean => {
 const getRetryOptions = (logger: Logger, operation: string): Options => {
   return {
     retries: 3,
-    minTimeout: 5_000,
-    maxTimeout: 30_000,
     onFailedAttempt: (err: FailedAttemptError) => {
       logger.warn(
         `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`

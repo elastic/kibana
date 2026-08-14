@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
+import { isNoneGroup } from '@kbn/grouping';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
@@ -330,11 +331,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
       const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
       await menuItems[menuItemValueIndex].click();
-      await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      await testSubjects.missingOrFail('is-loading-grouping-table');
       // Wait for accordion rows to be committed to the DOM after the spinner disappears,
-      // unless "None" was selected (which renders a flat table, not accordion rows).
-      if (value !== 'None') {
-        await testSubjects.existOrFail('grouping-accordion', { timeout: 5000 });
+      // unless the "no grouping" option was selected (which renders a flat table, not accordion rows).
+      // isNoneGroup checks against NONE_GROUP_KEY ('none'); callers pass the display label so lowercase first.
+      if (!isNoneGroup([value.toLowerCase()])) {
+        await testSubjects.existOrFail('grouping-accordion');
       }
     },
     async openDropDown() {

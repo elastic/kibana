@@ -250,10 +250,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Group table', async () => {
       it('shows vulnerabilities table when expanding', async () => {
         const grouping = await findings.findingsGrouping();
-        await retry.try(async () => {
+        // Retry only the element lookup — clicking inside retry risks toggling
+        // the accordion closed on a second attempt if the DOM re-renders.
+        const expandButton = await retry.try(async () => {
           const firstRow = await grouping.getRowAtIndex(0);
-          await (await firstRow.findByCssSelector('button')).click();
+          return firstRow.findByCssSelector('button');
         });
+        await expandButton.click();
         await pageObjects.header.waitUntilLoadingHasFinished();
         const latestFindingsTable = findings.createDataTableObject('latest_vulnerabilities_table');
         await retry.try(async () => {
