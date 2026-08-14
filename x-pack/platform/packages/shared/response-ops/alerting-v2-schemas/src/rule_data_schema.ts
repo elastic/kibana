@@ -51,7 +51,7 @@ export const ruleKindSchema = z
     z
       .literal('signal')
       .describe(
-        'Stateless detection (observation-only). Produces type: "signal" events but skips episode lifecycle and dispatcher processing entirely. No notifications, no recovery, no state transitions. Use for logging or detection without automated action.'
+        'Stateless detection (observation-only). Produces events but skips alert lifecycle and dispatcher processing entirely. No notifications, no recovery, no state transitions. Use for logging or detection without automated action.'
       ),
   ])
   .describe(
