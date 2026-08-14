@@ -519,9 +519,11 @@ export async function deleteAnnotationGroupFromLibrary(page: ScoutPage, title: s
 export async function convertToEsqlViaModal({
   pageObjects,
   page,
+  selectAllLayers = false,
 }: {
   pageObjects: DashboardAndLens;
   page: ScoutPage;
+  selectAllLayers?: boolean;
 }) {
   const { lens } = pageObjects;
 
@@ -530,6 +532,9 @@ export async function convertToEsqlViaModal({
 
   // Click on the confirmation button in the modal
   const modal = lens.workspace.convertToEsqlModal;
+  if (selectAllLayers) {
+    await modal.getByRole('checkbox', { name: 'Select all rows' }).click();
+  }
   await lens.workspace.convertToEsqlModalConfirmButton.click();
   await expect(modal).toBeHidden();
 
