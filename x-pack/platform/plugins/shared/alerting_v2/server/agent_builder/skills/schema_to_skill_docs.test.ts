@@ -265,7 +265,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain(
         'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
       );
-      expect(doc).toContain('Use `set_kind` to choose whether the rule notifies');
+      expect(doc).toContain('Use `set_kind` to choose a rule kind matching the user\'s goal');
     });
   });
 

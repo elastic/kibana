@@ -50,7 +50,7 @@ export const ruleEventsGeneratedRuleSchema = z.object({
   kind: ruleKindSchema.describe(
     i18n.translate('xpack.alertingV2.triggers.ruleEventsGenerated.schema.kind', {
       defaultMessage:
-        'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.',
+        'The kind of the rule.',
     })
   ),
   tags: tagsSchema.describe(

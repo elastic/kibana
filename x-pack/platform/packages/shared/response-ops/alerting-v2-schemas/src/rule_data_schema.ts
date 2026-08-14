@@ -46,17 +46,15 @@ export const ruleKindSchema = z
     z
       .literal('alert')
       .describe(
-        'Stateful alerting with full episode lifecycle, state transitions, recovery detection, and notification dispatch. Produces alert events that participate in the dispatcher pipeline. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.'
+        'Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.'
       ),
     z
       .literal('signal')
       .describe(
-        'Stateless detection (observation-only). Produces events but skips alert lifecycle and dispatcher processing entirely. No notifications, no recovery, no state transitions. Use for logging or detection without automated action.'
+        'Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.'
       ),
   ])
-  .describe(
-    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
-  );
+  .describe('The kind of the rule.');
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 

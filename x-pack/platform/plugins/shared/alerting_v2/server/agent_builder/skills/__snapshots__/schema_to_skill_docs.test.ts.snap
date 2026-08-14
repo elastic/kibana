@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[
-  `schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy Operations Schema Reference
 
 #### \`operation: \\"set_metadata\\"\`
@@ -63,9 +61,7 @@ Use \`validate\` as the last operation to confirm the action policy is complete 
 | \`operation\` | \\"validate\\" | required |  |"
 `;
 
-exports[
-  `schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateActionPolicySchemaDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy API Schema Reference
 
 ## Top-Level Fields
@@ -82,9 +78,7 @@ exports[
 | \`throttle\` | object | optional | The throttle configuration for notifications. |"
 `;
 
-exports[
-  `schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`
-] = `
+exports[`schema_to_skill_docs generateActionPolicyWorkflowPayloadDoc matches the reviewed skill-doc snapshot 1`] = `
 "# Action Policy Workflow Dispatch Payload
 
 Access pattern: \`{{ inputs.payload.<field> }}\` (e.g. \`{{ inputs.payload.policyId }}\`,
@@ -180,12 +174,12 @@ exports[`schema_to_skill_docs generateRuleKindDoc matches the reviewed skill-doc
 Rules declare a \`kind\` of \`alert\` or \`signal\`. This is the most important behavioral split in the system.
 
 ### Alert (\`kind: alert\`)
-Stateful alerting with full episode lifecycle, state transitions, recovery detection, and notification dispatch. Produces alert events that participate in the dispatcher pipeline. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
 Episode statuses: \`inactive\`, \`pending\`, \`active\`, \`recovering\`.
 State transition fields: \`pending_count\`, \`pending_timeframe\`, \`recovering_count\`, \`recovering_timeframe\`.
 
 ### Signal (\`kind: signal\`)
-Stateless detection (observation-only). Produces events but skips alert lifecycle and dispatcher processing entirely. No notifications, no recovery, no state transitions. Use for logging or detection without automated action.
+Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
 
 ### Immutability
 \`kind\` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to \`kind\`. For draft (in-memory) rules, \`set_kind\` can change it freely."
@@ -208,12 +202,12 @@ Use \`set_metadata\` to name the rule and add a description or tags so the user 
 
 #### \`operation: \\"set_kind\\"\`
 
-Use \`set_kind\` to choose whether the rule notifies (\`alert\`) or is observation-only (\`signal\`). Alert rules track episode lifecycle and can send notifications; signal rules do not.
+Use \`set_kind\` to choose a rule kind matching the user's goal: detect and respond (\`alert\`) or collect evidence (\`signal\`).
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_kind\\" | required |  |
-| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Rule kind: \\"alert\\" for stateful alerting with transitions, \\"signal\\" for stateless detection. |
+| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | The kind of the rule. |
 
 #### \`operation: \\"set_schedule\\"\`
 
@@ -273,7 +267,7 @@ exports[`schema_to_skill_docs generateRuleSchemaDoc matches the snapshot 1`] = `
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | Rule kind: \\"alert\\" for stateful alerting with transitions, \\"signal\\" for stateless detection. |
+| \`kind\` | \\"alert\\" \\\\| \\"signal\\" | required | The kind of the rule. |
 | \`metadata\` | object | required | Rule metadata. |
 | \`time_field\` | string | required | Time field used for the lookback window range filter. (min length: 1, max length: 128, default: \\"@timestamp\\") |
 | \`schedule\` | object | required | Execution schedule configuration. |

@@ -222,16 +222,16 @@ describe('rule template create-rule schema coupling', () => {
               "anyOf": Array [
                 Object {
                   "const": "alert",
-                  "description": "Stateful alerting with full episode lifecycle, state transitions, recovery detection, and notification dispatch. Produces type: \\"alert\\" events that participate in the dispatcher pipeline. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.",
+                  "description": "Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.",
                   "type": "string",
                 },
                 Object {
                   "const": "signal",
-                  "description": "Stateless detection (observation-only). Produces type: \\"signal\\" events but skips episode lifecycle and dispatcher processing entirely. No notifications, no recovery, no state transitions. Use for logging or detection without automated action.",
+                  "description": "Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.",
                   "type": "string",
                 },
               ],
-              "description": "Rule kind: \\"alert\\" for stateful alerting with transitions, \\"signal\\" for stateless detection.",
+              "description": "The kind of the rule.",
             },
             "metadata": Object {
               "additionalProperties": false,
