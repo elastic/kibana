@@ -164,8 +164,7 @@ export const RunWorkflowPanel = ({
             const enabled = workflows.filter((w) => w.enabled);
             return filterWorkflow ? enabled.filter(filterWorkflow) : enabled;
           },
-          sortFunction: (workflows) =>
-            sortWorkflow ? workflows.sort(sortWorkflow) : workflows,
+          sortFunction: (workflows) => (sortWorkflow ? workflows.sort(sortWorkflow) : workflows),
           listView: true,
           hideTopRowHeader: true,
           hideViewWorkflowLink: true,
