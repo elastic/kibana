@@ -969,6 +969,7 @@ describe('getAnyCloudConnectorIacTemplateUrl', () => {
             {
               name: 'cloud_connector',
               title: 'Federated Identity',
+              provider: 'aws',
               vars: [],
               iac_template_url:
                 'https://example.com/cloudformation.yaml?account_type=ACCOUNT_TYPE&resource_id=RESOURCE_ID',
@@ -982,82 +983,15 @@ describe('getAnyCloudConnectorIacTemplateUrl', () => {
     );
   });
 
-  it('returns first iac_template_url found across multiple var_groups', () => {
+  it('returns undefined when var_groups exist but no cloud provider option found', () => {
     const packageInfo = {
       var_groups: [
         {
           name: 'g1',
-          options: [{ name: 'no_url', vars: [] }],
-        },
-        {
-          name: 'g2',
-          options: [{ name: 'with_url', vars: [], iac_template_url: 'https://second.example.com' }],
-        },
-      ],
-    } as any;
-    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBe('https://second.example.com');
-  });
-
-  it('falls back to policy_templates input vars when var_groups has no iac_template_url', () => {
-    const packageInfo = {
-      var_groups: [{ name: 'g1', options: [{ name: 'no_url', vars: [] }] }],
-      policy_templates: [
-        {
-          name: 'cspm',
-          inputs: [
-            {
-              vars: [
-                {
-                  name: 'cloud_formation_cloud_connectors_template',
-                  default: 'https://cfn.example.com',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    } as any;
-    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBe('https://cfn.example.com');
-  });
-
-  it('returns undefined when policy_templates have no matching var', () => {
-    const packageInfo = {
-      policy_templates: [
-        {
-          name: 'cspm',
-          inputs: [{ vars: [{ name: 'other_var', default: 'something' }] }],
+          options: [{ name: 'no_cloud_provider', provider: 'other', vars: [] }],
         },
       ],
     } as any;
     expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBeUndefined();
-  });
-
-  it('prefers var_groups over policy_templates when both have a URL', () => {
-    const packageInfo = {
-      var_groups: [
-        {
-          name: 'g1',
-          options: [
-            { name: 'with_url', vars: [], iac_template_url: 'https://var-groups.example.com' },
-          ],
-        },
-      ],
-      policy_templates: [
-        {
-          name: 'tmpl',
-          inputs: [
-            {
-              vars: [
-                {
-                  name: 'cloud_formation_cloud_connectors_template',
-                  default: 'https://pt.example.com',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    } as any;
-    expect(getAnyCloudConnectorIacTemplateUrl(packageInfo)).toBe('https://var-groups.example.com');
   });
 });

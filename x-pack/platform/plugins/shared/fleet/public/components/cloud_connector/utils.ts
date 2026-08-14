@@ -15,6 +15,8 @@ import type {
   GcpCloudConnectorVars,
   CloudConnectorVars,
 } from '../../../common/types';
+import { isCloudProvider } from '../../../common/types';
+import { getIacTemplateUrlFromVarGroupSelection } from '../../../common/services/cloud_connectors';
 
 import type {
   AwsCloudConnectorCredentials,
@@ -39,7 +41,6 @@ import {
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
   CLOUD_CONNECTOR_GCP_CSPM_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_GCP_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
-  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
 } from './constants';
 
 export type AzureCloudConnectorFieldNames =
@@ -200,31 +201,24 @@ export const getTemplateUrlFromPackageInfo = (
 
 /**
  * Searches a package for the cloud connectors IAC template URL without a specific
- * policy template name or var_group selection. Checks var_groups first (the newer
- * structure used by e.g. the AWS package), then falls back to searching all
- * policy template input vars (older CSPM-style packages).
+ * policy template name or var_group selection. Selects whichever option in each
+ * var_group has a cloud provider (the newer AWS-package format).
+ *
+ * TODO: When multiple selected services support federated identity, a combined
+ * CloudFormation template will be needed rather than a single per-package URL.
  */
 export const getAnyCloudConnectorIacTemplateUrl = (
   packageInfo: PackageInfo | undefined
 ): string | undefined => {
-  // Newer packages store the URL in var_groups[].options[].iac_template_url
-  for (const group of packageInfo?.var_groups ?? []) {
-    for (const option of group.options ?? []) {
-      const url = option.iac_template_url;
-      if (url) return String(url);
-    }
+  const varGroups = packageInfo?.var_groups;
+  if (!varGroups?.length) return undefined;
+  // Build a synthetic selection that picks the cloud connector option in each var_group.
+  const selections: Record<string, string> = {};
+  for (const group of varGroups) {
+    const cloudOption = group.options.find((o) => isCloudProvider(o.provider));
+    if (cloudOption) selections[group.name] = cloudOption.name;
   }
-  // Older packages store it in policy_templates[].inputs[].vars[].default
-  for (const pt of packageInfo?.policy_templates ?? []) {
-    if (!('inputs' in pt) || !pt.inputs) continue;
-    for (const input of pt.inputs) {
-      const url = input.vars?.find(
-        (v) => v.name === CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS
-      )?.default;
-      if (url) return String(url);
-    }
-  }
-  return undefined;
+  return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
 };
 
 export const getCloudConnectorRemoteRoleTemplate = ({
