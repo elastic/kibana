@@ -259,7 +259,7 @@ timeout-minutes: 90
 
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
-- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. A pre-step has already shortlisted this team's in-flight `flaky-test-fixer` PRs in `/tmp/gh-aw/agent/duplicate-candidates.json` — start there (see [Duplicate detection](#duplicate-detection)), then also search for PRs that reference this issue number (in their body or in the issue timeline) and recent PRs touching the failing test's file, since a same-root-cause sibling may not be shortlisted;
+- a PR already addresses this root cause (open or merged) — see [Duplicate detection](#duplicate-detection), which runs first as step 1;
 - you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
 - the fix has to target a version branch (see "Fixes that must target a version branch").
 
@@ -275,8 +275,8 @@ Many `failed-test` issues share a single **root cause**, so the fixer can open s
 
 - A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ team, candidates }`): `team` is this issue's owning team (from its `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Read it first.
 - Same team means same owning code area, not the same test — so **open each candidate's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** as this issue's failing test — not merely the same team, a similar file, or the same file for an unrelated reason (a different method of the same page object is not a duplicate).
-- If this issue has no `Team:` label, `candidates` falls back to only PRs already closing this exact issue; also do a quick search for PRs referencing this issue number and recent PRs touching the failing test's file.
-- If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 9), and stop. The downstream Flaky Fix Verifier is the backstop that closes any duplicate that still slips through, so when genuinely in doubt, lean toward not opening a second PR.
+- If this issue has no `Team:` label, `candidates` falls back to only the PRs already closing this exact issue.
+- If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 9), and stop. If you **cannot confirm** a true duplicate, proceed and open the PR — the downstream Flaky Fix Verifier is the backstop that closes any real duplicate that slips through, whereas a flake you wrongly skip here just goes unfixed.
 
 ## Environment
 
