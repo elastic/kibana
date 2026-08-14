@@ -16,7 +16,9 @@ export const alertEpisodeStatusSchema = z.union([
     .literal(ALERT_EPISODE_STATUS.PENDING)
     .describe('Breached but below the consecutive-breaches threshold'),
   z.literal(ALERT_EPISODE_STATUS.ACTIVE).describe('Met the threshold — alert is firing'),
-  z.literal(ALERT_EPISODE_STATUS.RECOVERING).describe('Breach stopped but recovery condition is not yet met'),
+  z
+    .literal(ALERT_EPISODE_STATUS.RECOVERING)
+    .describe('Breach stopped but recovery condition is not yet met'),
 ]);
 
 /**
