@@ -9,7 +9,7 @@
 
 import { type Container } from 'inversify';
 import { inject, injectable, optional } from 'inversify';
-import { createToken, KibanaContainerModule, OnSetup } from '@kbn/core-di';
+import { createToken, KibanaContainerModule, OnSetup, OnStart } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
@@ -64,6 +64,10 @@ describe('http', () => {
     container.get(OnSetup)(container);
   }
 
+  function start() {
+    container.get(OnStart)(container);
+  }
+
   beforeEach(() => {
     jest.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
@@ -106,6 +110,7 @@ describe('http', () => {
 
   it('should handle a request', async () => {
     setup();
+    start();
 
     const handleSpy = jest.spyOn(TestRoute.prototype, 'handle');
     expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
@@ -130,6 +135,7 @@ describe('http', () => {
   it('should handle a request with an asynchronously bound dependency', async () => {
     container.bind(AsyncValue).toResolvedValue(async () => 'resolved-value');
     setup();
+    start();
 
     const [, handler] = router.post.mock.lastCall!;
     const response = {
