@@ -188,9 +188,12 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
    */
   const [groupingByInvalidSearch, setGroupingByInvalidSearch] = useState(false);
 
-  const onGroupingBySearchChange = useCallback((searchValue: string, hasMatchingOptions = false) => {
-    setGroupingByInvalidSearch(searchValue.length > 0 && !hasMatchingOptions);
-  }, []);
+  const onGroupingBySearchChange = useCallback(
+    (searchValue: string, hasMatchingOptions = false) => {
+      setGroupingByInvalidSearch(searchValue.length > 0 && !hasMatchingOptions);
+    },
+    []
+  );
 
   const onChangeMaxCasesToOpend: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
