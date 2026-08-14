@@ -20,13 +20,12 @@ export interface EditFlyoutState {
   draftTemplate: string;
   setDraftTemplate: (v: string) => void;
   isAiAvailable: boolean;
-  isPreviewLoading: boolean;
-  previewData: EsqlDataResult | null;
-  previewError: string | null;
-  handlePreview: () => Promise<void>;
-  isRunPreviewLoading: boolean;
-  runPreviewError: string | null;
-  handleRunPreview: () => Promise<void>;
+  isDataLoading: boolean;
+  esqlData: EsqlDataResult | null;
+  esqlDataError: string | null;
+  handleFetchData: () => Promise<void>;
+  isRenderLoading: boolean;
+  handleRender: () => Promise<void>;
 }
 
 export interface UseEditFlyoutStateParams {
@@ -47,11 +46,10 @@ export const useEditFlyoutState = ({
   const [state, dispatch] = useReducer(flyoutReducer, {
     draftEsqlQuery: esqlQuery ?? '',
     draftTemplate: template ?? '',
-    isPreviewLoading: false,
-    previewData: null,
-    previewError: null,
-    isRunPreviewLoading: false,
-    runPreviewError: null,
+    isDataLoading: false,
+    esqlData: null,
+    esqlDataError: null,
+    isRenderLoading: false,
   });
 
   const abortRef = useRef<AbortController | undefined>(undefined);
@@ -69,14 +67,14 @@ export const useEditFlyoutState = ({
     []
   );
 
-  const handlePreview = useCallback(async () => {
+  const handleFetchData = useCallback(async () => {
     if (!state.draftEsqlQuery) return;
 
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    dispatch({ type: 'PREVIEW_START' });
+    dispatch({ type: 'FETCH_DATA_START' });
 
     try {
       const result = await fetchEsqlData(
@@ -87,28 +85,28 @@ export const useEditFlyoutState = ({
         controller.signal
       );
       if (!controller.signal.aborted) {
-        dispatch({ type: 'PREVIEW_SUCCESS', payload: result });
+        dispatch({ type: 'FETCH_DATA_SUCCESS', payload: result });
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
         dispatch({
-          type: 'PREVIEW_ERROR',
+          type: 'FETCH_DATA_ERROR',
           payload: err instanceof Error ? err.message : String(err),
         });
       }
     } finally {
       if (!controller.signal.aborted) {
-        dispatch({ type: 'PREVIEW_DONE' });
+        dispatch({ type: 'FETCH_DATA_DONE' });
       }
     }
   }, [state.draftEsqlQuery, timeRange, core.http, search]);
 
-  const handleRunPreview = useCallback(async () => {
+  const handleRender = useCallback(async () => {
     runPreviewAbortRef.current?.abort();
     const controller = new AbortController();
     runPreviewAbortRef.current = controller;
 
-    dispatch({ type: 'RUN_PREVIEW_START' });
+    dispatch({ type: 'RENDER_START' });
 
     try {
       let rawHtml: string;
@@ -128,16 +126,11 @@ export const useEditFlyoutState = ({
       if (!controller.signal.aborted) {
         onRunPreview(prepareHtml(rawHtml, colorMode));
       }
-    } catch (err) {
-      if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
-        dispatch({
-          type: 'RUN_PREVIEW_ERROR',
-          payload: err instanceof Error ? err.message : String(err),
-        });
-      }
+    } catch {
+      // errors are surfaced via esqlDataError in the ES|QL accordion
     } finally {
       if (!controller.signal.aborted) {
-        dispatch({ type: 'RUN_PREVIEW_DONE' });
+        dispatch({ type: 'RENDER_DONE' });
       }
     }
   }, [
@@ -156,12 +149,11 @@ export const useEditFlyoutState = ({
     draftTemplate: state.draftTemplate,
     setDraftTemplate,
     isAiAvailable,
-    isPreviewLoading: state.isPreviewLoading,
-    previewData: state.previewData,
-    previewError: state.previewError,
-    handlePreview,
-    isRunPreviewLoading: state.isRunPreviewLoading,
-    runPreviewError: state.runPreviewError,
-    handleRunPreview,
+    isDataLoading: state.isDataLoading,
+    esqlData: state.esqlData,
+    esqlDataError: state.esqlDataError,
+    handleFetchData,
+    isRenderLoading: state.isRenderLoading,
+    handleRender,
   };
 };

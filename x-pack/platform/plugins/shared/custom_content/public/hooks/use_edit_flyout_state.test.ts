@@ -88,8 +88,8 @@ describe('useEditFlyoutState', () => {
     });
   });
 
-  describe('handlePreview', () => {
-    it('sets previewData on success', async () => {
+  describe('handleFetchData', () => {
+    it('sets esqlData on success', async () => {
       const mockResult = {
         columns: [{ name: 'count', type: 'long' }],
         values: [[42]],
@@ -100,24 +100,24 @@ describe('useEditFlyoutState', () => {
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
-        await result.current.handlePreview();
+        await result.current.handleFetchData();
       });
 
-      expect(result.current.previewData).toEqual(mockResult);
-      expect(result.current.previewError).toBeNull();
+      expect(result.current.esqlData).toEqual(mockResult);
+      expect(result.current.esqlDataError).toBeNull();
     });
 
-    it('sets previewError on failure', async () => {
+    it('sets esqlDataError on failure', async () => {
       mockFetchEsqlData.mockRejectedValue(new Error('query failed'));
 
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
-        await result.current.handlePreview();
+        await result.current.handleFetchData();
       });
 
-      expect(result.current.previewError).toBe('query failed');
-      expect(result.current.previewData).toBeNull();
+      expect(result.current.esqlDataError).toBe('query failed');
+      expect(result.current.esqlData).toBeNull();
     });
 
     it('does nothing when draftEsqlQuery is empty', async () => {
@@ -132,28 +132,27 @@ describe('useEditFlyoutState', () => {
       );
 
       await act(async () => {
-        await result.current.handlePreview();
+        await result.current.handleFetchData();
       });
 
       expect(mockFetchEsqlData).not.toHaveBeenCalled();
-      expect(result.current.previewData).toBeNull();
-      expect(result.current.previewError).toBeNull();
+      expect(result.current.esqlData).toBeNull();
+      expect(result.current.esqlDataError).toBeNull();
     });
   });
 
-  describe('handleRunPreview', () => {
+  describe('handleRender', () => {
     it('calls onRunPreview with prepared html when esql query is set', async () => {
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
-        await result.current.handleRunPreview();
+        await result.current.handleRender();
       });
 
       expect(mockFetchEsqlData).toHaveBeenCalled();
       expect(mockFillTemplate).toHaveBeenCalled();
       expect(mockPrepareHtml).toHaveBeenCalledWith('<p>filled</p>', 'LIGHT');
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
-      expect(result.current.runPreviewError).toBeNull();
     });
 
     it('skips fetch and uses draft template directly when no esql query', async () => {
@@ -162,7 +161,7 @@ describe('useEditFlyoutState', () => {
       );
 
       await act(async () => {
-        await result.current.handleRunPreview();
+        await result.current.handleRender();
       });
 
       expect(mockFetchEsqlData).not.toHaveBeenCalled();
@@ -171,19 +170,18 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
-    it('sets runPreviewError on failure', async () => {
+    it('does not call onRunPreview on fetch failure', async () => {
       mockFetchEsqlData.mockRejectedValue(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       await act(async () => {
-        await result.current.handleRunPreview();
+        await result.current.handleRender();
       });
 
-      expect(result.current.runPreviewError).toBe('fetch failed');
       expect(mockOnRunPreview).not.toHaveBeenCalled();
     });
 
-    it('shows loading state while running', async () => {
+    it('shows loading state while rendering', async () => {
       let resolvePromise!: () => void;
       mockFetchEsqlData.mockReturnValue(
         new Promise((resolve) => {
@@ -194,14 +192,14 @@ describe('useEditFlyoutState', () => {
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
       act(() => {
-        result.current.handleRunPreview();
+        result.current.handleRender();
       });
-      expect(result.current.isRunPreviewLoading).toBe(true);
+      expect(result.current.isRenderLoading).toBe(true);
 
       await act(async () => {
         resolvePromise();
       });
-      expect(result.current.isRunPreviewLoading).toBe(false);
+      expect(result.current.isRenderLoading).toBe(false);
     });
   });
 });

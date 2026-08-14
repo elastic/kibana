@@ -41,13 +41,12 @@ const baseFlyoutState = {
   draftTemplate: '',
   setDraftTemplate: jest.fn(),
   isAiAvailable: true,
-  isPreviewLoading: false,
-  previewData: null,
-  previewError: null,
-  handlePreview: jest.fn(),
-  isRunPreviewLoading: false,
-  runPreviewError: null,
-  handleRunPreview: jest.fn(),
+  isDataLoading: false,
+  esqlData: null,
+  esqlDataError: null,
+  handleFetchData: jest.fn(),
+  isRenderLoading: false,
+  handleRender: jest.fn(),
 };
 
 const openChat = jest.fn();
@@ -157,18 +156,18 @@ describe('EditCustomContentFlyout', () => {
       expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
     });
 
-    it('calls handleRunPreview when clicked', async () => {
-      const handleRunPreview = jest.fn();
+    it('calls handleRender when clicked', async () => {
+      const handleRender = jest.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
-        handleRunPreview,
+        handleRender,
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Run Preview' }));
 
-      expect(handleRunPreview).toHaveBeenCalled();
+      expect(handleRender).toHaveBeenCalled();
     });
   });
 

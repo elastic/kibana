@@ -23,7 +23,6 @@ import {
   EuiToolTip,
   useEuiTheme,
   EuiFormRow,
-  EuiCallOut,
 } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
@@ -68,13 +67,12 @@ export const EditCustomContentFlyout = ({
     draftTemplate,
     setDraftTemplate,
     isAiAvailable,
-    isPreviewLoading,
-    previewData,
-    previewError,
-    handlePreview,
-    isRunPreviewLoading,
-    runPreviewError,
-    handleRunPreview,
+    isDataLoading,
+    esqlData,
+    esqlDataError,
+    handleFetchData,
+    isRenderLoading,
+    handleRender,
   } = useEditFlyoutState({ esqlQuery, template, timeRange, colorMode, onRunPreview });
 
   const handleGenerateWithChat = useCallback(() => {
@@ -239,26 +237,11 @@ export const EditCustomContentFlyout = ({
         <EsqlPreviewSection
           esqlQuery={draftEsqlQuery}
           onEsqlQueryChange={setDraftEsqlQuery}
-          isPreviewLoading={isPreviewLoading}
-          previewData={previewData}
-          previewError={previewError}
-          onPreview={handlePreview}
+          isDataLoading={isDataLoading}
+          esqlData={esqlData}
+          esqlDataError={esqlDataError}
+          onFetchData={handleFetchData}
         />
-
-        {runPreviewError && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              title={i18n.translate('xpack.customContent.editFlyout.previewError', {
-                defaultMessage: 'Preview failed',
-              })}
-            >
-              {runPreviewError}
-            </EuiCallOut>
-          </>
-        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -276,9 +259,9 @@ export const EditCustomContentFlyout = ({
                 <EuiButton
                   color="success"
                   iconType="play"
-                  isLoading={isRunPreviewLoading}
+                  isLoading={isRenderLoading}
                   disabled={!hasChanges}
-                  onClick={handleRunPreview}
+                  onClick={handleRender}
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
                     defaultMessage: 'Run Preview',

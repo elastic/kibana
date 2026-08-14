@@ -21,7 +21,7 @@ interface CustomContentComponentProps {
   savedTemplate: string | undefined;
   onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
-  previewHtml?: string | null;
+  previewHtml: string | null;
 }
 
 const iframeContainerCss = css({
