@@ -55,7 +55,7 @@ export function ManagedIntegrationsSection({
   );
   const [isDeployReady, setIsDeployReady] = useState(false);
 
-  const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery('aws', 'latest', undefined, {
+  const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery('aws', undefined, undefined, {
     enabled: showIdentityFederation,
   });
   const iacTemplateUrl = useMemo(
