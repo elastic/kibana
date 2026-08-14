@@ -11,6 +11,7 @@ import {
   applyLensInlineEditorAndWaitClosed,
   cancelLensInlineEditorAndWaitClosed,
   getImportedDashboardId,
+  getImportedSavedObjectId,
   openInlineEditorAndWaitVisible,
   spaceTest,
   testData,
@@ -21,7 +22,7 @@ const COUNT_QUERY =
 const MAX_QUERY =
   'FROM logstash-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS MAX(bytes) BY @timestamp = BUCKET(@timestamp, 75, ?_tstart, ?_tend) | LIMIT 100';
 const INVALID_QUERY = 'FROM logstash-* | STATS';
-const INCOMPATIBLE_QUERY = 'FROM logstash-* | KEEP message | LIMIT 100';
+const INCOMPATIBLE_QUERY = 'FROM logstash-* | KEEP geo.src | LIMIT 100';
 
 const X_DIMENSION = 'lnsXY_xDimensionPanel';
 const Y_DIMENSION = 'lnsXY_yDimensionPanel';
@@ -36,8 +37,10 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       testData.KBN_ARCHIVE_PATHS.ESQL_MULTI_LAYER_DASHBOARD
     );
     dashboardId = getImportedDashboardId(savedObjects, 'ESQL Multi-layer Dashboard');
+    const dataViewId = getImportedSavedObjectId(savedObjects, 'index-pattern', 'logstash-*');
 
     await scoutSpace.uiSettings.set({
+      defaultIndex: dataViewId,
       'dateFormat:tz': 'UTC',
       'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
     });
@@ -50,7 +53,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
+    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
