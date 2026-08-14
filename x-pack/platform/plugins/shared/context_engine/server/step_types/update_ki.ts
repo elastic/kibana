@@ -23,8 +23,9 @@ export const getUpdateKiStepDefinition = ({
   createServerStepDefinition({
     ...updateKiStepCommonDefinition,
     handler: async (context) => {
-      await assertContextEngineEnabled(isContextEngineEnabled);
-      await assertKiWritePrivilege(checkWritePrivilege, context.contextManager.getFakeRequest());
+      const request = context.contextManager.getFakeRequest();
+      await assertContextEngineEnabled(isContextEngineEnabled, request);
+      await assertKiWritePrivilege(checkWritePrivilege, request);
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
 

@@ -9,42 +9,24 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { AiIndexService } from '../ai_indices/service';
 import { registerStepDefinitions } from '.';
 
-type StepLoader = () => Promise<{ id: string } | undefined>;
-
-const registerAll = (isContextEngineEnabled: () => Promise<boolean>): StepLoader[] => {
-  const loaders: StepLoader[] = [];
-  const workflowsExtensions = {
-    registerStepDefinition: jest.fn((loader: StepLoader) => loaders.push(loader)),
-  } as unknown as WorkflowsExtensionsServerPluginSetup;
-
-  registerStepDefinitions({
-    workflowsExtensions,
-    getAiIndexService: () => ({} as AiIndexService),
-    isContextEngineEnabled,
-    checkWritePrivilege: async () => true,
-  });
-  return loaders;
-};
-
 describe('registerStepDefinitions', () => {
-  it('resolves all step definitions when Context Engine is enabled', async () => {
-    const loaders = registerAll(async () => true);
+  it('registers the three KI step definitions', () => {
+    const definitions: Array<{ id: string }> = [];
+    const workflowsExtensions = {
+      registerStepDefinition: jest.fn((definition: { id: string }) => definitions.push(definition)),
+    } as unknown as WorkflowsExtensionsServerPluginSetup;
 
-    const definitions = await Promise.all(loaders.map((loader) => loader()));
+    registerStepDefinitions({
+      workflowsExtensions,
+      getAiIndexService: () => ({} as AiIndexService),
+      isContextEngineEnabled: async () => true,
+      checkWritePrivilege: async () => true,
+    });
 
-    expect(definitions.map((definition) => definition?.id)).toEqual([
+    expect(definitions.map((definition) => definition.id)).toEqual([
       'context-engine.createKi',
       'context-engine.updateKi',
       'context-engine.deleteKi',
     ]);
-  });
-
-  it('skips registration when Context Engine is disabled', async () => {
-    const loaders = registerAll(async () => false);
-
-    const definitions = await Promise.all(loaders.map((loader) => loader()));
-
-    expect(loaders).toHaveLength(3);
-    expect(definitions).toEqual([undefined, undefined, undefined]);
   });
 });

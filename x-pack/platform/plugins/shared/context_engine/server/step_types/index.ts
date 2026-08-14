@@ -13,9 +13,9 @@ import { getDeleteKiStepDefinition } from './delete_ki';
 
 /**
  * Registers the Context Engine KI workflow steps with the workflowsExtensions
- * plugin. The steps register only when the Context Engine advanced setting is
- * on at startup; enabling it later requires a restart (mirroring the managed
- * AI index registration). Handlers also re-check the setting at run time.
+ * plugin. Registration is global; the Context Engine advanced setting is
+ * space-scoped, so each handler enforces it per request (mirroring the HTTP
+ * routes) and the public registration gates editor visibility per space.
  */
 export const registerStepDefinitions = ({
   workflowsExtensions,
@@ -23,13 +23,7 @@ export const registerStepDefinitions = ({
 }: KiStepDependencies & {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }): void => {
-  workflowsExtensions.registerStepDefinition(async () =>
-    (await deps.isContextEngineEnabled()) ? getCreateKiStepDefinition(deps) : undefined
-  );
-  workflowsExtensions.registerStepDefinition(async () =>
-    (await deps.isContextEngineEnabled()) ? getUpdateKiStepDefinition(deps) : undefined
-  );
-  workflowsExtensions.registerStepDefinition(async () =>
-    (await deps.isContextEngineEnabled()) ? getDeleteKiStepDefinition(deps) : undefined
-  );
+  workflowsExtensions.registerStepDefinition(getCreateKiStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getUpdateKiStepDefinition(deps));
+  workflowsExtensions.registerStepDefinition(getDeleteKiStepDefinition(deps));
 };

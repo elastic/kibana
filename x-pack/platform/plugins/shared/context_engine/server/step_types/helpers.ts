@@ -16,7 +16,8 @@ import type { AiIndexService } from '../ai_indices/service';
 /** Dependencies injected into the KI step definition factories. */
 export interface KiStepDependencies {
   getAiIndexService: () => AiIndexService;
-  isContextEngineEnabled: () => Promise<boolean>;
+  /** Whether the Context Engine advanced setting is on in the request's space. */
+  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** Whether the request has the Context Engine write API privilege. */
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
 }
@@ -38,13 +39,15 @@ export const assertKiWritePrivilege = async (
 };
 
 /**
- * Fails the step when the Context Engine advanced setting is off, mirroring the
- * request-time gate on the Context Engine HTTP routes.
+ * Fails the step when the Context Engine advanced setting is off in the
+ * request's space, mirroring the request-time gate on the Context Engine HTTP
+ * routes.
  */
 export const assertContextEngineEnabled = async (
-  isContextEngineEnabled: () => Promise<boolean>
+  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>,
+  request: KibanaRequest
 ): Promise<void> => {
-  if (!(await isContextEngineEnabled())) {
+  if (!(await isContextEngineEnabled(request))) {
     throw new ExecutionError({
       type: 'FeatureDisabledError',
       message: `Context Engine is disabled. Enable the '${CONTEXT_ENGINE_ENABLED_SETTING_ID}' advanced setting to use this step.`,
