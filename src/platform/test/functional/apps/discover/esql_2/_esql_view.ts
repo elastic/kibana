@@ -474,7 +474,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         const historyItems = await esql.getHistoryItems();
-        await esql.isQueryPresentInTable('FROM logstash-*', historyItems);
+        await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {

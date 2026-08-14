@@ -1,5 +1,5 @@
 {
-  "sha1": "6a9ab7c1cefebf8fc932f532ff3136935fea5a4a",
+  "sha1": "001597df0c9a13f60a529198c65beff6e7e372f5",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -127,7 +127,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 151,
+        "line": 154,
         "column": 24
       }
     },
@@ -166,7 +166,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/data_view_editing.spec.ts",
-        "line": 151,
+        "line": 154,
         "column": 24
       }
     },
@@ -686,7 +686,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 44,
+        "line": 46,
         "column": 50
       }
     },
@@ -699,7 +699,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 107,
+        "line": 109,
         "column": 20
       }
     },
@@ -712,7 +712,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/sharing.spec.ts",
-        "line": 184,
+        "line": 186,
         "column": 54
       }
     },

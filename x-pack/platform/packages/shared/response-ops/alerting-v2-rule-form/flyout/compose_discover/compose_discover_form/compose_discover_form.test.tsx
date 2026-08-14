@@ -208,11 +208,15 @@ describe('step validation', () => {
           {
             id: 'runbook-id',
             type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'Investigate failed transactions\nCheck service logs',
+            data: { content: 'Investigate failed transactions\nCheck service logs' },
           },
         ],
         dashboardArtifacts: [
-          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
+          {
+            id: 'dashboard-id',
+            type: DASHBOARD_ARTIFACT_TYPE,
+            data: { dashboardId: DASHBOARD_ID },
+          },
         ],
       });
 
