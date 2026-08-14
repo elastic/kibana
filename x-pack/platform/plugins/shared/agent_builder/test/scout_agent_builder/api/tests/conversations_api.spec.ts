@@ -222,6 +222,7 @@ apiTest.describe(
       );
       expect(defaultBody.access_control).toStrictEqual({
         access_mode: ConversationAccessControlMode.Private,
+        entries: [],
       });
 
       const defaultConversationRes = await asAdmin.get(
@@ -231,6 +232,7 @@ apiTest.describe(
       expect(defaultConversationRes).toHaveStatusCode(200);
       expect((defaultConversationRes.body as Conversation).access_control).toStrictEqual({
         access_mode: ConversationAccessControlMode.Private,
+        entries: [],
       });
 
       const publicBody = await createConversationWithResponse(
@@ -243,6 +245,7 @@ apiTest.describe(
       );
       expect(publicBody.access_control).toStrictEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
       });
 
       const publicConversationRes = await asAdmin.get(
@@ -252,6 +255,7 @@ apiTest.describe(
       expect(publicConversationRes).toHaveStatusCode(200);
       expect((publicConversationRes.body as Conversation).access_control).toStrictEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
       });
     });
 
@@ -286,6 +290,7 @@ apiTest.describe(
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       expect((continueRes.body as ChatResponse).access_control).toStrictEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
       });
 
       const conversationRes = await asAdmin.get(
@@ -295,6 +300,7 @@ apiTest.describe(
       expect(conversationRes).toHaveStatusCode(200);
       expect((conversationRes.body as Conversation).access_control).toStrictEqual({
         access_mode: ConversationAccessControlMode.Public,
+        entries: [],
       });
     });
 

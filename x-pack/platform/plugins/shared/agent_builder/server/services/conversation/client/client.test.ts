@@ -148,13 +148,14 @@ describe('ConversationClient', () => {
         expect.objectContaining({
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
+            entries: [],
           },
           origin,
         })
       );
     });
 
-    it('filters listed conversations to public-or-owned conversations for accessible agents', async () => {
+    it('filters listed conversations to public, owned or shared conversations for accessible agents', async () => {
       agentRegistry.getIds.mockResolvedValue(['agent-1', 'agent-2']);
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -194,6 +195,20 @@ describe('ConversationClient', () => {
                                   },
                                 ],
                                 minimum_should_match: 1,
+                              },
+                            },
+                            {
+                              nested: {
+                                path: 'access_control.entries',
+                                ignore_unmapped: true,
+                                query: {
+                                  bool: {
+                                    filter: [
+                                      { term: { 'access_control.entries.type': 'user' } },
+                                      { term: { 'access_control.entries.id': 'user-1' } },
+                                    ],
+                                  },
+                                },
                               },
                             },
                           ],
@@ -493,6 +508,45 @@ describe('ConversationClient', () => {
       await expect(client.update({ id: 'conversation-1', title: 'Updated title' })).rejects.toThrow(
         'Conversation conversation-1 not found'
       );
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows the owner to rename with rename access', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename' }
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          document: expect.objectContaining({ title: 'Renamed' }),
+        })
+      );
+      expect(result.title).toBe('Renamed');
+    });
+
+    it('denies rename access to a public non-owner conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      await expect(
+        client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' })
+      ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
@@ -1013,6 +1067,93 @@ describe('ConversationClient', () => {
       mockEsClient.delete.mockRejectedValue(serverError);
 
       await expect(client.delete('conversation-1')).rejects.toBe(serverError);
+    });
+  });
+
+  describe('permissions', () => {
+    const publicConversationOwnedByAnotherUser = () =>
+      createConversationDocument({
+        userId: 'other-user-id',
+        username: 'other-user',
+        accessMode: ConversationAccessControlMode.Public,
+      });
+
+    it('grants rename and delete to the owner on get', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.get('conversation-1');
+
+      expect(result.permissions).toEqual({
+        rename: true,
+        delete: true,
+        update_access_control: true,
+      });
+    });
+
+    it('denies rename and delete to a participant of a public conversation on get', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [publicConversationOwnedByAnotherUser()] },
+      });
+
+      const result = await client.get('conversation-1');
+
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
+    });
+
+    it('resolves permissions per conversation on list', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({ id: 'owned' }),
+            { ...publicConversationOwnedByAnotherUser(), _id: 'participating' },
+          ],
+        },
+      });
+
+      const results = await client.list();
+
+      expect(results.map(({ id, permissions }) => ({ id, permissions }))).toEqual([
+        {
+          id: 'owned',
+          permissions: { rename: true, delete: true, update_access_control: true },
+        },
+        {
+          id: 'participating',
+          permissions: { rename: false, delete: false, update_access_control: false },
+        },
+      ]);
+    });
+
+    it('reports the denial that delete then enforces', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [publicConversationOwnedByAnotherUser()] },
+      });
+
+      const { permissions } = await client.get('conversation-1');
+
+      expect(permissions.delete).toBe(false);
+      await expect(client.delete('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+
+    it('reports the denial that rename then enforces', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [publicConversationOwnedByAnotherUser()] },
+      });
+
+      const { permissions } = await client.get('conversation-1');
+
+      expect(permissions.rename).toBe(false);
+      await expect(
+        client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
+      ).rejects.toThrow('Conversation conversation-1 not found');
     });
   });
 });

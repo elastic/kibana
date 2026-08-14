@@ -21,29 +21,29 @@ spaceTest.describe('Lens disable auto-apply', { tag: '@local-stateful-classic' }
     'toggles auto-apply and applies changes on demand',
     async ({ page, pageObjects: { lens } }) => {
       await spaceTest.step('persists the auto-apply setting across page refresh', async () => {
-        await lens.openSettingsMenu();
-        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
-        await lens.toggleAutoApply();
-        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
-        await lens.closeSettingsMenu();
+        await lens.workspace.openSettingsMenu();
+        await expect(lens.workspace.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
+        await lens.workspace.toggleAutoApply();
+        await expect(lens.workspace.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
+        await lens.workspace.closeSettingsMenu();
 
         await page.reload();
-        await lens.waitForEmptyWorkspace();
+        await lens.workspace.waitForEmptyWorkspace();
 
-        await lens.openSettingsMenu();
-        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
-        await lens.toggleAutoApply();
-        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
-        await lens.closeSettingsMenu();
+        await lens.workspace.openSettingsMenu();
+        await expect(lens.workspace.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
+        await lens.workspace.toggleAutoApply();
+        await expect(lens.workspace.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
+        await lens.workspace.closeSettingsMenu();
 
         await page.reload();
-        await lens.waitForEmptyWorkspace();
+        await lens.workspace.waitForEmptyWorkspace();
 
-        await lens.openSettingsMenu();
-        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
-        await lens.toggleAutoApply();
-        await expect(lens.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
-        await lens.closeSettingsMenu();
+        await lens.workspace.openSettingsMenu();
+        await expect(lens.workspace.autoApplyToggle).toHaveAttribute('aria-checked', 'true');
+        await lens.workspace.toggleAutoApply();
+        await expect(lens.workspace.autoApplyToggle).toHaveAttribute('aria-checked', 'false');
+        await lens.workspace.closeSettingsMenu();
       });
 
       await spaceTest.step(
@@ -56,10 +56,10 @@ spaceTest.describe('Lens disable auto-apply', { tag: '@local-stateful-classic' }
             keepOpen: true,
           });
 
-          await lens.toggleFullscreen();
-          await expect(lens.getApplyChangesButton('toolbar')).toBeVisible();
+          await lens.workspace.toggleFullscreen();
+          await expect(lens.workspace.getApplyChangesButton('toolbar')).toBeVisible();
 
-          await lens.toggleFullscreen();
+          await lens.workspace.toggleFullscreen();
           await lens.closeDimensionEditor();
         }
       );
@@ -75,17 +75,17 @@ spaceTest.describe('Lens disable auto-apply', { tag: '@local-stateful-classic' }
           field: '@timestamp',
         });
 
-        await lens.waitForWorkspaceWithApplyChangesPrompt();
-        await lens.applyChanges('workspace');
+        await lens.workspace.waitForWorkspaceWithApplyChangesPrompt();
+        await lens.workspace.applyChanges('workspace');
         await lens.waitForVisualization('xyVisChart');
       });
 
       await spaceTest.step('hides the suggestions apply button once a change is made', async () => {
         await lens.switchToVisualization('lnsDatatable');
-        await expect(lens.getApplyChangesButton('suggestions')).toBeVisible();
+        await expect(lens.workspace.getApplyChangesButton('suggestions')).toBeVisible();
 
-        await lens.applyChanges('suggestions');
-        await expect(lens.getApplyChangesButton('suggestions')).toBeHidden();
+        await lens.workspace.applyChanges('suggestions');
+        await expect(lens.workspace.getApplyChangesButton('suggestions')).toBeHidden();
       });
     }
   );

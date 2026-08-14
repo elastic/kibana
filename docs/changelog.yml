@@ -306,6 +306,7 @@ bundle:
   output_directory: docs/releases
   repo: kibana
   owner: elastic
+  branch: main
   link_allow_repos:
     - elastic/kibana
     - elastic/elasticsearch
