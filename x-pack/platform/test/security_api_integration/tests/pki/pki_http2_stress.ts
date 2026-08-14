@@ -45,8 +45,8 @@
  * After the fix: all RST_STREAM frames are handled gracefully; the session survives.
  */
 
-import http2 from 'http2';
 import { readFileSync } from 'fs';
+import http2 from 'http2';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
           const req = session.request({
             ':method': 'POST',
             ':path': '/authentication/slow/me',
-            'cookie': sessionCookie.cookieString(),
+            cookie: sessionCookie.cookieString(),
             'kbn-xsrf': 'xxx',
             'content-type': 'application/json',
           });
@@ -160,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
             const req = session.request({
               ':method': 'GET',
               ':path': '/internal/security/me',
-              'cookie': sessionCookie.cookieString(),
+              cookie: sessionCookie.cookieString(),
               'kbn-xsrf': 'xxx',
             });
             req.end();
