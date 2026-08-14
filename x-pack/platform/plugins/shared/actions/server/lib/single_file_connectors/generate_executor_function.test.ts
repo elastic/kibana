@@ -1218,10 +1218,13 @@ describe('generateExecutorFunction', () => {
   });
 
   describe('selectedActions enforcement', () => {
-    it('allows isTool actions when selectedActions is undefined (recommended)', async () => {
+    it('allows all actions when selectedActions is undefined (unset)', async () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1231,7 +1234,7 @@ describe('generateExecutorFunction', () => {
       expect(mockHandler).toHaveBeenCalled();
     });
 
-    it('blocks non-isTool actions when selectedActions is undefined (recommended)', async () => {
+    it('allows non-isTool actions when selectedActions is undefined (unset)', async () => {
       const hitlHandler = jest.fn().mockResolvedValue({ ok: true });
       const executor = generateExecutorFunction({
         actions: {
@@ -1239,19 +1242,25 @@ describe('generateExecutorFunction', () => {
           hitlAction: { isTool: false, input: {} as never, handler: hitlHandler },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
-      await expect(executor({ ...opts, config: {} })).rejects.toThrow(
-        "[Action][ExternalService] Action 'hitlAction' is not enabled for this connector."
-      );
-      expect(hitlHandler).not.toHaveBeenCalled();
+      const result = await executor({ ...opts, config: {} });
+
+      expect(result.status).toBe('ok');
+      expect(hitlHandler).toHaveBeenCalled();
     });
 
     it('allows execution when subAction is in selectedActions', async () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1268,6 +1277,9 @@ describe('generateExecutorFunction', () => {
           hitlAction: { isTool: false, input: {} as never, handler: hitlHandler },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
@@ -1281,6 +1293,9 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1300,6 +1315,9 @@ describe('generateExecutorFunction', () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
@@ -1320,6 +1338,9 @@ describe('generateExecutorFunction', () => {
           },
         },
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
       });
 
       const opts = makeExecOptions({

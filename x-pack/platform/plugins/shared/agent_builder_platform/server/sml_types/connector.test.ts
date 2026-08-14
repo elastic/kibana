@@ -314,7 +314,7 @@ describe('connectorSmlType', () => {
       expect(result!.content).toBe('MCP\nModel Context Protocol connector');
     });
 
-    it('includes sub-action descriptions when spec has isTool actions', async () => {
+    it('includes sub-action descriptions when spec has actions', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
         type: 'action',
@@ -351,7 +351,7 @@ describe('connectorSmlType', () => {
 
       expect(result!.content).toContain('searchMessages: Search Slack messages');
       expect(result!.content).toContain('sendMessage: Send a message to a channel');
-      expect(result!.content).not.toContain('internalAction');
+      expect(result!.content).toContain('internalAction: Internal only');
     });
 
     it('handles missing optional fields gracefully', async () => {
