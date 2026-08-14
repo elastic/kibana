@@ -429,6 +429,8 @@
       "@kbn/controls-renderer/*": ["./src/platform/packages/private/kbn-controls-renderer/*"],
       "@kbn/controls-schemas": ["./src/platform/packages/shared/controls/controls-schemas"],
       "@kbn/controls-schemas/*": ["./src/platform/packages/shared/controls/controls-schemas/*"],
+      "@kbn/cordis": ["./src/core/packages/plugins/cordis"],
+      "@kbn/cordis/*": ["./src/core/packages/plugins/cordis/*"],
       "@kbn/core": ["./src/core"],
       "@kbn/core/*": ["./src/core/*"],
       "@kbn/core-analytics-browser": ["./src/core/packages/analytics/browser"],

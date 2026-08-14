@@ -20,6 +20,12 @@ module.exports = () => ({
       },
     ],
   ],
+  plugins: [
+    // cordis@4 uses `static { }` class blocks which Babel does not transform by default.
+    // This plugin must be listed here so that it applies when Babel processes cordis/cosmokit
+    // files (allowed through transformIgnorePatterns in jest-preset.js).
+    require.resolve('@babel/plugin-transform-class-static-block'),
+  ],
   overrides: [
     {
       exclude: require('@kbn/babel-preset/styled_components_files').USES_STYLED_COMPONENTS,

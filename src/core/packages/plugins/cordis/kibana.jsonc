@@ -1,5 +1,5 @@
 {
-  "type": "shared-server",
+  "type": "shared-common",
   "id": "@kbn/cordis",
   "owner": [
     "@elastic/kibana-core"

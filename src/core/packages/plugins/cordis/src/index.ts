@@ -32,14 +32,23 @@
  *  - `ctx.get(key)` cannot distinguish "provided as undefined" from "not provided".
  */
 
-export {
-  Context,
-  Service,
-  FiberState,
-  CordisError,
-  ValidationError,
-  resolveConfig,
-} from 'cordis';
+export { Context, Service, CordisError, ValidationError, resolveConfig } from 'cordis';
+
+/**
+ * Fiber lifecycle states.
+ *
+ * Declared here as a regular (non-const) enum because `cordis` uses `const enum`
+ * in its `.d.ts` files, which is incompatible with TypeScript's `isolatedModules`
+ * mode. The numeric values match the runtime object in `cordis/lib/index.js` exactly.
+ */
+export enum FiberState {
+  PENDING = 0,
+  LOADING = 1,
+  ACTIVE = 2,
+  FAILED = 3,
+  DISPOSED = 4,
+  UNLOADING = 5,
+}
 
 export type {
   Fiber,

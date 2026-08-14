@@ -76,6 +76,7 @@ export class RenderingService {
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
   private exposeNavDependencies: boolean = false;
+  private pluginsRuntime: 'legacy' | 'cordis' = 'legacy';
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('rendering');
@@ -127,6 +128,12 @@ export class RenderingService {
     )
       .then((pluginsConfig) => pluginsConfig?.exposeNavDependencies ?? false)
       .catch(() => false);
+
+    this.pluginsRuntime = await firstValueFrom(
+      this.coreContext.configService.atPath<{ runtime?: 'legacy' | 'cordis' }>('plugins')
+    )
+      .then((pluginsConfig) => pluginsConfig?.runtime ?? 'legacy')
+      .catch(() => 'legacy');
 
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
@@ -198,6 +205,7 @@ export class RenderingService {
       airgapped: this.airgapped,
       isCoreRenderingInReactConcurrentMode: this.isCoreRenderingInReactConcurrentMode,
       exposeNavDependencies: this.exposeNavDependencies,
+      pluginsRuntime: this.pluginsRuntime,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const usingCdn = http.staticAssets.isUsingCdn();

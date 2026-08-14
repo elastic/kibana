@@ -142,6 +142,7 @@ async function testSetup() {
     initialize: true,
     paths: [],
     allowlistPluginGroups: ['observability'],
+    runtime: 'legacy',
   };
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: pluginsConfig });
   const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });

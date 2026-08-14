@@ -19,6 +19,7 @@ describe('PluginsConfig', () => {
     const rawConfig: PluginsConfigType = {
       initialize: true,
       paths: ['some-path', 'another-path'],
+      runtime: 'legacy',
     };
     const config = new PluginsConfig(rawConfig, env);
     expect(config.additionalPluginPaths).toEqual(['some-path', 'another-path']);
@@ -29,6 +30,7 @@ describe('PluginsConfig', () => {
     const rawConfig: PluginsConfigType = {
       initialize: true,
       paths: ['some-path', 'another-path'],
+      runtime: 'legacy',
     };
     const config = new PluginsConfig(rawConfig, env);
     expect(config.additionalPluginPaths).toEqual(['some-path', 'another-path']);
@@ -40,6 +42,7 @@ describe('PluginsConfig', () => {
       initialize: true,
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
+      runtime: 'legacy',
     };
     const config = new PluginsConfig(rawConfig, env);
     expect(config.shouldEnableAllPlugins).toEqual(true);
@@ -52,6 +55,7 @@ describe('PluginsConfig', () => {
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
       allowlistPluginGroups: ['search'],
+      runtime: 'legacy',
     };
     const config = new PluginsConfig(rawConfig, env);
     expect(config.allowlistPluginGroups).toEqual(['search']);

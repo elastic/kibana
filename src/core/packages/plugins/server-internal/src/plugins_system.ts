@@ -345,7 +345,7 @@ export class PluginsSystem<T extends PluginType> {
         .filter(([, plugin]) => plugin.includesServerPlugin)
     );
 
-    this.cordisCtx = createCordisRoot(this.log);
+    this.cordisCtx = createCordisRoot();
     this.log.info(
       `Setting up [${sortedPlugins.size}] plugins (Cordis): [${[...sortedPlugins.keys()].join(',')}]`
     );

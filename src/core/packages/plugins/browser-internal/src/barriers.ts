@@ -10,18 +10,6 @@
 import type { Fiber } from '@kbn/cordis';
 import { FiberState } from '@kbn/cordis';
 
-/**
- * Asserts that a fiber reached ACTIVE state after being awaited.
- *
- * CRITICAL: Fiber.await() resolves immediately when inject is unsatisfied
- * (fiber stays PENDING, inertia === undefined).  Without this guard a missing
- * dependency silently produces a non-functional plugin with no error.
- *
- * If the fiber is FAILED (apply() threw), re-throws the original error so the
- * caller gets the real stack trace rather than a generic state-mismatch message.
- *
- * Call after every `await ctx.plugin(...)` in the Cordis driver.
- */
 export const assertActive = (
   fiber: Fiber,
   capturedError: unknown,
@@ -33,16 +21,10 @@ export const assertActive = (
   const state = fiber.state as number;
 
   if (state === FiberState.ACTIVE) return;
-
-  // FAILED: apply() threw — re-surface the original error.
-  if (capturedError !== undefined) {
-    throw capturedError;
-  }
-
-  // PENDING: inject not yet satisfied.
+  if (capturedError !== undefined) throw capturedError;
   const detail =
     state === FiberState.PENDING
-      ? 'inject keys are not resolved — check that required dependencies are enabled and export server code'
+      ? 'inject keys are not resolved — check that required dependencies are enabled and export browser code'
       : `unexpected fiber state "${state}"`;
   throw new Error(
     `Cordis fiber for plugin "${pluginName}" (${phase}) did not become ACTIVE: ${detail}.`

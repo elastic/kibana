@@ -43,6 +43,7 @@
     "@kbn/core-di-browser",
     "@kbn/core-di-internal",
     "@kbn/core-di-mocks",
+    "@kbn/cordis",
   ],
   "exclude": [
     "target/**/*",

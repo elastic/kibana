@@ -67,6 +67,7 @@ export interface InjectedMetadata {
     airgapped: boolean;
     isCoreRenderingInReactConcurrentMode: boolean;
     exposeNavDependencies?: boolean;
+    pluginsRuntime?: 'legacy' | 'cordis';
   };
   featureFlags?: {
     overrides: Record<string, unknown>;

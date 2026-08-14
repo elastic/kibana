@@ -30,4 +30,6 @@ export interface CoreEnv {
    * internal `plugins.exposeNavDependencies` config (off by default).
    */
   exposeNavDependencies?: boolean;
+  /** Which plugin lifecycle driver to use in the browser. Mirrors the server-side `plugins.runtime` config. */
+  pluginsRuntime?: 'legacy' | 'cordis';
 }

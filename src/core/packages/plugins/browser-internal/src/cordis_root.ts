@@ -10,10 +10,9 @@
 import { Context } from '@kbn/cordis';
 
 /**
- * Creates the root Cordis Context for the server plugin driver.
+ * Creates the root Cordis Context for the browser plugin driver.
  *
  * Errors thrown inside a fiber's `apply()` are captured by the adapter's
- * try/catch (see `cordis_plugin_adapter.ts`) and surfaced via `assertActive`,
- * so no separate error-event bridge is needed here.
+ * try/catch and surfaced via `assertActive`, so no separate error bridge is needed.
  */
 export const createCordisRoot = (): Context => new Context();

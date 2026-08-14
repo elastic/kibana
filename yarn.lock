@@ -4994,6 +4994,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cordis@link:src/core/packages/plugins/cordis":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-analytics-browser-internal@link:src/core/packages/analytics/browser-internal":
   version "0.0.0"
   uid ""
@@ -18417,6 +18421,14 @@ copy-to-clipboard@3.3.3, copy-to-clipboard@^3.3.1:
   dependencies:
     toggle-selection "^1.0.6"
 
+cordis@4.0.0-rc.8:
+  version "4.0.0-rc.8"
+  resolved "https://registry.yarnpkg.com/cordis/-/cordis-4.0.0-rc.8.tgz#eef09987af58300edb4db422ae7934006dfcf070"
+  integrity sha512-vXaYK6XZJlIFTnODp4Rd973Qnd/gm3cwFzWsMTaeu6cQQheA7N+aA0GqHRNl0cFIrxMXWU8dst1ZXHlUQvfyRw==
+  dependencies:
+    "@standard-schema/spec" "^1.1.0"
+    cosmokit "^1.8.1"
+
 core-js-compat@^3.36.1, core-js-compat@^3.48.0:
   version "3.49.0"
   resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.49.0.tgz#06145447d92f4aaf258a0c44f24b47afaeaffef6"
@@ -18467,6 +18479,11 @@ cosmiconfig@^9.0.0:
     import-fresh "^3.3.0"
     js-yaml "^4.1.0"
     parse-json "^5.2.0"
+
+cosmokit@1.8.1, cosmokit@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/cosmokit/-/cosmokit-1.8.1.tgz#df8252c4d2c918f4f2a125c2e223565e3353827a"
+  integrity sha512-PDBv4l90xZKrUsZ0vtoycgZpO/j4iFsqJXrAxsyBDsnQRI7ZMJXIjgDJsKNjd5L8jnVnnlrDCdhkFbTncgCVjQ==
 
 crc-32@^1.2.0:
   version "1.2.0"
