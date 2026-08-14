@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,6 +22,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -62,11 +64,16 @@ interface DeploymentMethodCardProps {
 }
 
 export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMethodCardProps) {
+  const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
 
   const selectedOption = DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod)!;
+
+  const panelCss = css`
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+  `;
 
   const openModal = () => {
     setDraftMethod(selectedMethod);
@@ -84,7 +91,12 @@ export function DeploymentMethodCard({ selectedMethod, onChange }: DeploymentMet
 
   return (
     <>
-      <EuiPanel hasBorder paddingSize="m" data-test-subj="deploymentMethodCard">
+      <EuiPanel
+        paddingSize="m"
+        color="subdued"
+        css={panelCss}
+        data-test-subj="deploymentMethodCard"
+      >
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type="gear" size="m" color="subdued" aria-hidden />

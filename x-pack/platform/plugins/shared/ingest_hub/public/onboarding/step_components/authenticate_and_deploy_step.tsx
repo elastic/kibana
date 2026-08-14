@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
-import { LazyAwsConnectSetup } from '@kbn/fleet-plugin/public';
 import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
-import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import {
   DeploymentMethodCard,
   type DeploymentMethod,
 } from './authenticate_and_deploy_step/deployment_method_card';
+import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
+import { EcfSection } from './authenticate_and_deploy_step/ecf_section';
 
 interface AuthenticateAndDeployStepProps {
   onContinue: () => void;
@@ -27,49 +30,78 @@ interface AuthenticateAndDeployStepProps {
 }
 
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
-  const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { authenticateAndDeployStep, setConnectorId, setStaticKeys, servicesStep } =
-    useOnboardingFlow();
+  const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [deploymentMethod, setDeploymentMethod] =
     useState<DeploymentMethod>('managed_integrations');
 
-  const { handleDeploy } = useDeploy({ onContinue });
+  const miServiceIds = useMemo(
+    () =>
+      selectedServiceIds.filter((id) =>
+        AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless')
+      ),
+    [selectedServiceIds]
+  );
+
+  const ecfServiceIds = useMemo(
+    () =>
+      selectedServiceIds.filter((id) =>
+        AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'cloud_forwarder')
+      ),
+    [selectedServiceIds]
+  );
 
   const showIdentityFederation = useMemo(() => {
-    if (selectedServiceIds.length === 0) return true;
-    return selectedServiceIds.every(
-      (id) => AWS_SERVICES_MAP.get(id)?.identityFederationSupported === true
+    if (miServiceIds.length === 0) return true;
+    return miServiceIds.every(
+      (id) => AWS_SERVICES_MAP.get(id)?.identityFederationSupported !== false
     );
-  }, [selectedServiceIds]);
+  }, [miServiceIds]);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
       <DeploymentMethodCard selectedMethod={deploymentMethod} onChange={setDeploymentMethod} />
-      <EuiSpacer size="l" />
-      <Suspense
-        fallback={
-          <EuiLoadingSpinner data-test-subj="onboardingStep-authenticate-and-deploy-loading" />
-        }
-      >
-        <LazyAwsConnectSetup
-          cloud={services.cloud as CloudSetupForCloudConnector | undefined}
-          initialConnectorId={authenticateAndDeployStep.connectorId}
-          initialStaticKeys={authenticateAndDeployStep.staticKeys}
+
+      {(miServiceIds.length > 0 || ecfServiceIds.length > 0) && <EuiHorizontalRule margin="l" />}
+
+      {miServiceIds.length > 0 && (
+        <ManagedIntegrationsSection
+          serviceCount={miServiceIds.length}
           showIdentityFederation={showIdentityFederation}
-          onBack={onBack}
-          onContinue={() => handleDeploy()}
-          continueButtonLabel={
+        />
+      )}
+
+      {miServiceIds.length > 0 && ecfServiceIds.length > 0 && <EuiSpacer size="m" />}
+
+      {ecfServiceIds.length > 0 && <EcfSection serviceCount={ecfServiceIds.length} />}
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {onBack && (
+            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.backButton"
+                defaultMessage="Back"
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            onClick={onContinue}
+            data-test-subj="authenticateAndDeployStep-nextButton"
+          >
             <FormattedMessage
               id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
               defaultMessage="Next"
             />
-          }
-          onConnectorIdChange={setConnectorId}
-          onStaticKeysChange={setStaticKeys}
-        />
-      </Suspense>
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 }
