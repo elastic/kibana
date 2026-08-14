@@ -12,17 +12,14 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { CPSProject, ProjectsData } from '../../../types';
 import { ProjectPickerList } from '../blocks/list/list';
 import { getProjectPickerListItemSwitchTestSubj } from '../blocks/list/list_item/list_item';
 import { ProjectPickerFrameHeader } from '../blocks/frame/partials/header/header';
 import { ProjectPickerFrameBodyHeader } from '../blocks/frame/partials/body/body';
 import { FilterOperator, type FilterExpressionValue } from '../utils/filter_input_codec';
-import {
-  PROJECT_SELECTION_DIMENSION,
-  projectRoutingCodec,
-  type ProjectRoutingExpression,
-} from '../utils/project_routing_codec';
+import { projectRoutingCodec, type ProjectRoutingExpression } from '../utils/project_routing_codec';
 import {
   ProjectPickerStateProvider,
   useProjectPickerActions,
@@ -454,11 +451,9 @@ describe('ProjectPickerStateProvider', () => {
 
         // Now we expect the generated routing to specify all available projects, since we have no exclusions
         await waitFor(() => {
-          // with every project re-included the dynamic strategy falls back to the
-          // match-all clause, which the codec itself never emits
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
-            `${PROJECT_SELECTION_DIMENSION}:*`
-          );
+          // with every project re-included the codec itself never emits a clause, so this
+          // falls back to the canonical PROJECT_ROUTING.ALL constant
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith(PROJECT_ROUTING.ALL);
         });
       });
     });
@@ -471,8 +466,8 @@ describe('ProjectPickerStateProvider', () => {
       render(
         <ProjectPickerStateProvider
           {...defaultProviderProps}
-          currentProjectRoutingGetter={() => '_id:*'}
-          defaultProjectRoutingGetter={() => '_id:*'}
+          currentProjectRoutingGetter={() => PROJECT_ROUTING.ALL}
+          defaultProjectRoutingGetter={() => PROJECT_ROUTING.ALL}
         >
           <ReadPickerState onChange={onStateChange} />
           <ProjectPickerList />
@@ -482,7 +477,7 @@ describe('ProjectPickerStateProvider', () => {
       await waitFor(() => {
         expect(onStateChange).toHaveBeenLastCalledWith(
           expect.objectContaining({
-            currentProjectRouting: '_id:*',
+            currentProjectRouting: PROJECT_ROUTING.ALL,
             isUsingSpaceDefaults: true,
           })
         );
@@ -496,8 +491,8 @@ describe('ProjectPickerStateProvider', () => {
       render(
         <ProjectPickerStateProvider
           {...defaultProviderProps}
-          currentProjectRoutingGetter={() => '_id:*'}
-          defaultProjectRoutingGetter={() => '_id:*'}
+          currentProjectRoutingGetter={() => PROJECT_ROUTING.ALL}
+          defaultProjectRoutingGetter={() => PROJECT_ROUTING.ALL}
         >
           <ReadPickerState onChange={onStateChange} />
           <ProjectPickerList />

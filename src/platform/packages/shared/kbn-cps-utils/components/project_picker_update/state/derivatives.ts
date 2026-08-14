@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
 import { type FilterExpressionValue } from '../utils/filter_input_codec';
@@ -70,7 +71,7 @@ export const computeIsFilterProposalPending = (
 ): boolean => state.proposedFilters !== null;
 
 export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
-  let routing = projectRoutingCodec.encode({
+  const routing = projectRoutingCodec.encode({
     filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
       if (entry.enabled) {
         acc.push(entry.expression);
@@ -82,19 +83,7 @@ export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
     projectRoutingStrategy: state.projectRoutingStrategy,
   });
 
-  // fallback that captures all projects but is however project routing strategy
-  // aware
-  if (!routing) {
-    if (state.projectRoutingStrategy === 'dynamic') {
-      routing = `${PROJECT_SELECTION_DIMENSION}:*`;
-    } else {
-      routing = Array.from(state.availableProjects.keys())
-        .map((id) => `${PROJECT_SELECTION_DIMENSION}:${id}`)
-        .join(' OR ');
-    }
-  }
-
-  return routing;
+  return routing || PROJECT_ROUTING.ALL;
 };
 
 /**
