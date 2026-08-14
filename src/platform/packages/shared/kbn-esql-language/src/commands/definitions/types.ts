@@ -508,10 +508,6 @@ export interface ValidationErrors {
     message: string;
     type: { paramName: string; value: string; allowedValues: string };
   };
-  highlightOnFieldWrongType: {
-    message: string;
-    type: { fieldName: string; type: string };
-  };
   highlightMissingOnClause: {
     message: string;
     type: {};

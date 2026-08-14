@@ -15,6 +15,7 @@ import type {
   ESQLAstItem,
 } from '@elastic/esql/types';
 import type { ESQLMessage } from '../../definitions/types';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../../definitions/constants';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
@@ -33,18 +34,18 @@ const HIGHLIGHT_MAP_DEFINITION =
   "{name='encoder', values=[default, html], description='Encoding for highlighted text', type=[keyword]}" +
   "{name='boundary_scanner', values=[sentence, word], description='How to split fragments', type=[keyword]}" +
   "{name='boundary_scanner_locale', description='Locale for boundary scanning', type=[keyword]}" +
-  "{name='boundary_chars', description='Characters used as boundary markers', type=[keyword]}" +
-  "{name='boundary_max_scan', description='Maximum characters scanned for a boundary', type=[integer]}" +
   "{name='order', values=[none, score], description='Order of fragments', type=[keyword]}" +
   "{name='no_match_size', description='Characters to return when there is no match', type=[integer]}" +
-  "{name='max_analyzed_offset', description='Maximum character offset to analyze', type=[integer]}" +
-  "{name='phrase_limit', description='Maximum number of phrases to examine', type=[integer]}";
+  "{name='max_analyzed_offset', description='Maximum character offset to analyze', type=[integer]}";
 
-/** Field types accepted by ES for the HIGHLIGHT ON list. */
+/**
+ * Field types accepted by ES for the HIGHLIGHT ON list. `param` and `unknown` cannot be
+ * resolved at validation time, so they are let through.
+ */
 const ALLOWED_HIGHLIGHT_FIELD_TYPES = ['text', 'keyword', 'param', 'unknown'];
 
-/** Full-text functions usable as a HIGHLIGHT query, mirroring HighlightQueryBuilders. */
-const FULL_TEXT_QUERY_FUNCTIONS = ['match', 'match_phrase', 'qstr', 'kql', ':'];
+/** Types reported to the user when an ON field is rejected. */
+const SUPPORTED_HIGHLIGHT_FIELD_TYPES = 'text or keyword';
 
 /** Boolean operators that may combine full-text queries. */
 const BOOLEAN_QUERY_OPERATORS = ['and', 'or', 'not'];
@@ -74,7 +75,7 @@ const findInvalidQueryNode = (expression: ESQLAstItem): ESQLAstItem | undefined 
     return expression.args.map(findInvalidQueryNode).find(Boolean);
   }
 
-  return FULL_TEXT_QUERY_FUNCTIONS.includes(functionName) ? undefined : expression;
+  return FULL_TEXT_SEARCH_DEFINITIONS.includes(functionName) ? undefined : expression;
 };
 
 export const validate = (
@@ -141,8 +142,13 @@ export const validate = (
     if (!ALLOWED_HIGHLIGHT_FIELD_TYPES.includes(fieldType)) {
       messages.push(
         getMessageFromId({
-          messageId: 'highlightOnFieldWrongType',
-          values: { fieldName: field.name, type: fieldType },
+          messageId: 'unsupportedColumnTypeForCommand',
+          values: {
+            command: 'HIGHLIGHT',
+            type: SUPPORTED_HIGHLIGHT_FIELD_TYPES,
+            givenType: fieldType,
+            column: field.name,
+          },
           locations: field.location,
         })
       );

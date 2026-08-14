@@ -15,7 +15,13 @@ import type {
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { Location } from '../types';
-import { getPosition, CaretPosition, canSuggestPrefix } from './utils';
+import {
+  getPosition,
+  CaretPosition,
+  canSuggestPrefix,
+  HIGHLIGHT_DEFAULT_PREFIX,
+  HIGHLIGHT_PREFIX_KEYWORD,
+} from './utils';
 import {
   onCompleteItem,
   withCompleteItem,
@@ -29,10 +35,118 @@ import type { MapParameters } from '../../definitions/utils/autocomplete/map_exp
 import { getCommandMapExpressionSuggestions } from '../../definitions/utils/autocomplete/map_expression';
 import { suggestForExpression } from '../../definitions/utils';
 
-export const QUERY_TEXT = 'The text to highlight' as const;
-export const QUERY_TEXT_SNIPPET = `"$\{0:${QUERY_TEXT}}"`;
+export const getQueryText = () =>
+  i18n.translate('kbn-esql-language.commands.highlight.autocomplete.queryTextPlaceholder', {
+    defaultMessage: 'The text to highlight',
+  });
 
-const PREFIX_MODIFIER_SNIPPET = `prefix = "$\{0:highlight_}"`;
+export const getQueryTextSnippet = () => `"$\{0:${getQueryText()}}"`;
+
+const PREFIX_VALUE_SNIPPET = `"$\{0:${HIGHLIGHT_DEFAULT_PREFIX}}"`;
+const PREFIX_MODIFIER_SNIPPET = `${HIGHLIGHT_PREFIX_KEYWORD} = ${PREFIX_VALUE_SNIPPET}`;
+
+/**
+ * Parameters accepted by the `WITH { ... }` map, mirroring the Elasticsearch highlighter
+ * options. Built on demand so the descriptions are translated at runtime.
+ */
+const getHighlightMapParameters = (): MapParameters => ({
+  analyzer: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.analyzerDescription',
+      {
+        defaultMessage: 'Analyzer used to re-analyze the ON fields before highlighting',
+      }
+    ),
+    suggestions: [],
+  },
+  pre_tags: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.preTagsDescription',
+      {
+        defaultMessage: 'HTML tag to insert before highlighted text (default: <em>)',
+        ignoreTag: true,
+      }
+    ),
+    suggestions: [buildMapValueCompleteItem('<em>')],
+  },
+  post_tags: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.postTagsDescription',
+      {
+        defaultMessage: 'HTML tag to insert after highlighted text (default: </em>)',
+        ignoreTag: true,
+      }
+    ),
+    suggestions: [buildMapValueCompleteItem('</em>')],
+  },
+  number_of_fragments: {
+    type: 'number',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.numberOfFragmentsDescription',
+      { defaultMessage: 'Maximum number of fragments to return (default: 5)' }
+    ),
+    suggestions: [buildMapValueCompleteItem('5')],
+  },
+  fragment_size: {
+    type: 'number',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.fragmentSizeDescription',
+      { defaultMessage: 'Size of each fragment in characters (default: 100)' }
+    ),
+    suggestions: [buildMapValueCompleteItem('100')],
+  },
+  encoder: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.encoderDescription',
+      { defaultMessage: 'Encoding for highlighted text: default or html (default: default)' }
+    ),
+    suggestions: [buildMapValueCompleteItem('default'), buildMapValueCompleteItem('html')],
+  },
+  boundary_scanner: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.boundaryScannerDescription',
+      { defaultMessage: 'How to split fragments: sentence or word (default: sentence)' }
+    ),
+    suggestions: [buildMapValueCompleteItem('sentence'), buildMapValueCompleteItem('word')],
+  },
+  boundary_scanner_locale: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.boundaryScannerLocaleDescription',
+      { defaultMessage: 'Locale for boundary scanning (default: Locale.ROOT)' }
+    ),
+    suggestions: [],
+  },
+  order: {
+    type: 'string',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.orderDescription',
+      { defaultMessage: 'Order of fragments: none or score (default: none)' }
+    ),
+    suggestions: [buildMapValueCompleteItem('none'), buildMapValueCompleteItem('score')],
+  },
+  no_match_size: {
+    type: 'number',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.noMatchSizeDescription',
+      { defaultMessage: 'Characters to return when there is no match (default: 0)' }
+    ),
+    suggestions: [buildMapValueCompleteItem('0')],
+  },
+  max_analyzed_offset: {
+    type: 'number',
+    description: i18n.translate(
+      'kbn-esql-language.commands.highlight.autocomplete.maxAnalyzedOffsetDescription',
+      { defaultMessage: 'Maximum character offset to analyze (default: index setting)' }
+    ),
+    suggestions: [],
+  },
+});
 
 export async function autocomplete(
   query: string,
@@ -56,13 +170,16 @@ export async function autocomplete(
       return [
         {
           ...buildConstantsDefinitions(
-            [`"$\{0:highlight_}"`],
+            [PREFIX_VALUE_SNIPPET],
             '',
             undefined,
             undefined,
             SuggestionCategory.CONSTANT_VALUE
           )[0],
-          label: 'Custom prefix',
+          label: i18n.translate(
+            'kbn-esql-language.commands.highlight.autocomplete.customPrefixLabel',
+            { defaultMessage: 'Custom prefix' }
+          ),
           asSnippet: true,
         },
       ];
@@ -93,7 +210,7 @@ export async function autocomplete(
         suggestions.push({
           label: 'prefix = "..."',
           text: PREFIX_MODIFIER_SNIPPET,
-          kind: 'Keyword' as const,
+          kind: 'Keyword',
           detail: i18n.translate(
             'kbn-esql-language.commands.highlight.autocomplete.prefixModifierDetail',
             { defaultMessage: 'Custom column name prefix (default: highlight_)' }
@@ -112,13 +229,13 @@ export async function autocomplete(
 
       const stringSuggestion: ISuggestionItem = {
         ...buildConstantsDefinitions(
-          [QUERY_TEXT_SNIPPET],
+          [getQueryTextSnippet()],
           '',
           undefined,
           undefined,
           SuggestionCategory.CONSTANT_VALUE
         )[0],
-        label: QUERY_TEXT,
+        label: getQueryText(),
         asSnippet: true,
       };
 
@@ -151,130 +268,7 @@ export async function autocomplete(
     }
 
     case CaretPosition.WITHIN_MAP_EXPRESSION: {
-      const availableParameters: MapParameters = {
-        analyzer: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.analyzerDescription',
-            {
-              defaultMessage: 'Analyzer used to re-analyze the ON fields before highlighting',
-            }
-          ),
-          suggestions: [],
-        },
-        pre_tags: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.preTagsDescription',
-            {
-              defaultMessage: 'HTML tag to insert before highlighted text (default: <em>)',
-              ignoreTag: true,
-            }
-          ),
-          suggestions: [buildMapValueCompleteItem('<em>')],
-        },
-        post_tags: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.postTagsDescription',
-            {
-              defaultMessage: 'HTML tag to insert after highlighted text (default: </em>)',
-              ignoreTag: true,
-            }
-          ),
-          suggestions: [buildMapValueCompleteItem('</em>')],
-        },
-        number_of_fragments: {
-          type: 'number',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.numberOfFragmentsDescription',
-            { defaultMessage: 'Maximum number of fragments to return (default: 5)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('5')],
-        },
-        fragment_size: {
-          type: 'number',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.fragmentSizeDescription',
-            { defaultMessage: 'Size of each fragment in characters (default: 100)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('100')],
-        },
-        encoder: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.encoderDescription',
-            { defaultMessage: 'Encoding for highlighted text: default or html (default: default)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('default'), buildMapValueCompleteItem('html')],
-        },
-        boundary_scanner: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.boundaryScannerDescription',
-            { defaultMessage: 'How to split fragments: sentence or word (default: sentence)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('sentence'), buildMapValueCompleteItem('word')],
-        },
-        boundary_scanner_locale: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.boundaryScannerLocaleDescription',
-            { defaultMessage: 'Locale for boundary scanning (default: Locale.ROOT)' }
-          ),
-          suggestions: [],
-        },
-        boundary_chars: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.boundaryCharsDescription',
-            { defaultMessage: 'Characters used as boundary markers (default: .,!? \\t\\n)' }
-          ),
-          suggestions: [],
-        },
-        boundary_max_scan: {
-          type: 'number',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.boundaryMaxScanDescription',
-            { defaultMessage: 'Maximum characters scanned for a boundary (default: 20)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('20')],
-        },
-        order: {
-          type: 'string',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.orderDescription',
-            { defaultMessage: 'Order of fragments: none or score (default: none)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('none'), buildMapValueCompleteItem('score')],
-        },
-        no_match_size: {
-          type: 'number',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.noMatchSizeDescription',
-            { defaultMessage: 'Characters to return when there is no match (default: 0)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('0')],
-        },
-        max_analyzed_offset: {
-          type: 'number',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.maxAnalyzedOffsetDescription',
-            { defaultMessage: 'Maximum character offset to analyze (default: index setting)' }
-          ),
-          suggestions: [],
-        },
-        phrase_limit: {
-          type: 'number',
-          description: i18n.translate(
-            'kbn-esql-language.commands.highlight.autocomplete.phraseLimitDescription',
-            { defaultMessage: 'Maximum number of phrases to examine (default: 256)' }
-          ),
-          suggestions: [buildMapValueCompleteItem('256')],
-        },
-      };
-
-      return getCommandMapExpressionSuggestions(innerText, availableParameters);
+      return getCommandMapExpressionSuggestions(innerText, getHighlightMapParameters());
     }
 
     case CaretPosition.AFTER_COMMAND: {

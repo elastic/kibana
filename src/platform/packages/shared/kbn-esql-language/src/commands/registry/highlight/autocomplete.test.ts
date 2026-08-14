@@ -11,7 +11,7 @@ import {
   lookupIndexFields,
   getMockCallbacks,
 } from '../../../__tests__/commands/context_fixtures';
-import { QUERY_TEXT_SNIPPET, autocomplete } from './autocomplete';
+import { getQueryTextSnippet, autocomplete } from './autocomplete';
 import {
   onCompleteItem,
   withCompleteItem,
@@ -23,7 +23,7 @@ import { expectSuggestions, suggest } from '../../../__tests__/commands/autocomp
 import type { ICommandCallbacks } from '../types';
 import { buildConstantsDefinitions } from '../../definitions/utils/literals';
 
-const QUERY_LITERAL = buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '')[0].text;
+const QUERY_LITERAL = buildConstantsDefinitions([getQueryTextSnippet()], '')[0].text;
 
 interface QueryComponents {
   prefix?: string;

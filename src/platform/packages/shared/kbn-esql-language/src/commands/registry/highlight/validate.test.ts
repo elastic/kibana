@@ -44,7 +44,7 @@ describe('HIGHLIGHT Validation', () => {
   describe('ON field type validation', () => {
     it('reports an error when an ON field is not text or keyword', () => {
       highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON integerField', [
-        '[HIGHLIGHT] ON field [integerField] must be of type text or keyword. Found integer',
+        'HIGHLIGHT only supports values of type text or keyword. Found "integerField" of type integer',
       ]);
     });
 
@@ -54,8 +54,8 @@ describe('HIGHLIGHT Validation', () => {
 
     it('reports an error for every offending field in the list', () => {
       highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON integerField, doubleField', [
-        '[HIGHLIGHT] ON field [integerField] must be of type text or keyword. Found integer',
-        '[HIGHLIGHT] ON field [doubleField] must be of type text or keyword. Found double',
+        'HIGHLIGHT only supports values of type text or keyword. Found "integerField" of type integer',
+        'HIGHLIGHT only supports values of type text or keyword. Found "doubleField" of type double',
       ]);
     });
 

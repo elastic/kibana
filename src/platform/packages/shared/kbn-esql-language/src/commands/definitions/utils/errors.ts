@@ -25,6 +25,15 @@ import type {
   Signature,
   SupportedDataType,
 } from '../types';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../constants';
+
+/**
+ * Full-text function names for user-facing messages. Operator forms (the `:` match operator)
+ * are left out, since only the named functions read well in a list.
+ */
+const FULL_TEXT_FUNCTION_NAMES = FULL_TEXT_SEARCH_DEFINITIONS.filter((name) => /^\w+$/.test(name))
+  .map((name) => name.toUpperCase())
+  .join(', ');
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -520,15 +529,6 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'highlightOnFieldWrongType':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.highlightOnFieldWrongType', {
-          defaultMessage:
-            '[HIGHLIGHT] ON field [{fieldName}] must be of type text or keyword. Found {type}',
-          values: { fieldName: out.fieldName, type: out.type },
-        }),
-        type: 'error',
-      };
     case 'highlightMissingOnClause':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.highlightMissingOnClause', {
@@ -553,8 +553,8 @@ Expected one of:
           'kbn-esql-language.esql.validation.highlightInvalidQueryExpression',
           {
             defaultMessage:
-              '[HIGHLIGHT] Query must be a full-text function (MATCH, MATCH_PHRASE, QSTR, KQL), a string literal, or a boolean combination of them. Found [{expression}]',
-            values: { expression: out.expression },
+              '[HIGHLIGHT] Query must be a full-text function ({functions}), a string literal, or a boolean combination of them. Found [{expression}]',
+            values: { functions: FULL_TEXT_FUNCTION_NAMES, expression: out.expression },
           }
         ),
         type: 'error',

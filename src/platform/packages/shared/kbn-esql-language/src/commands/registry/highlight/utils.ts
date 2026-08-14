@@ -27,6 +27,15 @@ export const HIGHLIGHT_PREFIX_KEYWORD = 'prefix';
  */
 export const HIGHLIGHT_DEFAULT_PREFIX = 'highlight_';
 
+/** The keyword introducing the mandatory field list. */
+export const HIGHLIGHT_ON_KEYWORD = 'on';
+
+/** Matches the leading `HIGHLIGHT` keyword, so it can be stripped from the command text. */
+const COMMAND_KEYWORD_REGEX = /^\s*highlight\b/i;
+
+/** Matches a `prefix =` modifier still waiting for its value at the cursor. */
+const PENDING_PREFIX_ASSIGNMENT_REGEX = /\bprefix\s*=\s*$/i;
+
 export enum CaretPosition {
   PREFIX_VALUE, // After `prefix =`: suggest the prefix string
   QUERY_EXPRESSION, // Before ON: build the query expression (and optionally start a prefix)
@@ -42,7 +51,7 @@ const getTextAfterCommandKeyword = (
   query: string,
   command: ESQLAstHighlightCommand,
   cursorPosition: number
-): string => query.slice(command.location.min, cursorPosition).replace(/^\s*highlight\b/i, '');
+): string => query.slice(command.location.min, cursorPosition).replace(COMMAND_KEYWORD_REGEX, '');
 
 /**
  * The parser error-recovers `HIGHLIGHT "fox" O` by substituting the typed token for the ON
@@ -54,7 +63,8 @@ const findOnOption = (
   command: ESQLAstHighlightCommand
 ): ESQLCommandOption | undefined => {
   const onOption = command.args.find(
-    (arg): arg is ESQLCommandOption => isOptionNode(arg) && arg.name.toLowerCase() === 'on'
+    (arg): arg is ESQLCommandOption =>
+      isOptionNode(arg) && arg.name.toLowerCase() === HIGHLIGHT_ON_KEYWORD
   );
 
   if (!onOption) {
@@ -62,8 +72,9 @@ const findOnOption = (
   }
 
   const { min } = onOption.location;
+  const sourceKeyword = query.slice(min, min + HIGHLIGHT_ON_KEYWORD.length).toLowerCase();
 
-  return query.slice(min, min + 2).toLowerCase() === 'on' ? onOption : undefined;
+  return sourceKeyword === HIGHLIGHT_ON_KEYWORD ? onOption : undefined;
 };
 
 export function getPosition(
@@ -94,7 +105,10 @@ export function getPosition(
 
   const textAfterKeyword = getTextAfterCommandKeyword(query, command, cursorPosition);
 
-  if (command.prefix?.incomplete === true || /\bprefix\s*=\s*$/i.test(textAfterKeyword)) {
+  if (
+    command.prefix?.incomplete === true ||
+    PENDING_PREFIX_ASSIGNMENT_REGEX.test(textAfterKeyword)
+  ) {
     return CaretPosition.PREFIX_VALUE;
   }
 
