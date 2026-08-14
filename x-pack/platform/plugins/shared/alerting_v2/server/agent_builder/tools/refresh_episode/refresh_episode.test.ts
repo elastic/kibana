@@ -162,16 +162,6 @@ describe('refreshEpisodeTool', () => {
           },
         ],
       });
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Failed to load rule for episode refresh: not found',
-        {
-          labels: {
-            episode_id: 'ep-1',
-            space_id: 'default',
-            rule_id: 'rule-1',
-          },
-        }
-      );
     });
 
     it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {

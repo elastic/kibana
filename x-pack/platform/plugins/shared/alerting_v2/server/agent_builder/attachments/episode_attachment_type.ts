@@ -21,9 +21,9 @@ import {
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import { alertEpisodeToEpisodeAttachment } from '../../../common/agent_builder/episode_mappers';
-import { resolveEpisodeLabel } from '../../../common/agent_builder/resolve_episode_label';
 import type { EpisodesClient } from '../../lib/episodes_client';
 import type { RulesClient } from '../../lib/rules_client';
+import { loadRuleMetadata } from '../common/load_rule_metadata';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { getRuleTool, getRuleToolId } from '../tools/get_rule';
 import { refreshEpisodeTool, refreshEpisodeToolId } from '../tools/refresh_episode';
@@ -140,20 +140,13 @@ export const createEpisodeAttachmentType = ({
         return undefined;
       }
 
-      let ruleName: string | undefined;
-      let groupingFields: string[] | undefined;
-      try {
-        const rule = await getRulesClient(context).getRule({ id: episode['rule.id'] });
-        ruleName = rule.metadata.name;
-        groupingFields = rule.grouping?.fields;
-      } catch {
-        // Rule may be deleted or unauthorized; fall back to grouping values.
-      }
+      const { ruleName, groupingFields } = await loadRuleMetadata(
+        getRulesClient(context),
+        episode['rule.id']
+      );
 
       return episodeAttachmentDataSchema.parse(
-        alertEpisodeToEpisodeAttachment(episode, {
-          episodeLabel: resolveEpisodeLabel({ episode, ruleName, groupingFields }),
-        })
+        alertEpisodeToEpisodeAttachment(episode, { ruleName, groupingFields })
       );
     } catch (error) {
       logger.warn({
@@ -175,7 +168,6 @@ export const createEpisodeAttachmentType = ({
     }
     const latestVersion = getLatestVersion(attachment);
     if (!latestVersion) return true;
-    // Inactive is terminal — the episode cannot become active again.
     if (latestVersion.data['episode.status'] === ALERT_EPISODE_STATUS.INACTIVE) {
       return false;
     }

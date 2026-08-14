@@ -15,7 +15,7 @@ import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
 import { episodeAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { alertEpisodeToEpisodeAttachment } from '../../../../common/agent_builder/episode_mappers';
-import { resolveEpisodeLabel } from '../../../../common/agent_builder/resolve_episode_label';
+import { loadRuleMetadata } from '../../common/load_rule_metadata';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { EpisodesClient } from '../../../lib/episodes_client';
@@ -82,31 +82,16 @@ export const refreshEpisodeTool = ({
         };
       }
 
-      let ruleName: string | undefined;
-      let groupingFields: string[] | undefined;
-      try {
-        const rule = await getRulesClient({
+      const { ruleName, groupingFields } = await loadRuleMetadata(
+        getRulesClient({
           request: toolContext.request,
           spaceId: toolContext.spaceId,
-        }).getRule({ id: episode['rule.id'] });
-        ruleName = rule.metadata.name;
-        groupingFields = rule.grouping?.fields;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        logger.debug({
-          message: `Failed to load rule for episode refresh: ${message}`,
-          labels: {
-            episode_id: episodeId,
-            space_id: toolContext.spaceId,
-            rule_id: episode['rule.id'],
-          },
-        });
-      }
+        }),
+        episode['rule.id']
+      );
 
       const data = episodeAttachmentDataSchema.parse(
-        alertEpisodeToEpisodeAttachment(episode, {
-          episodeLabel: resolveEpisodeLabel({ episode, ruleName, groupingFields }),
-        })
+        alertEpisodeToEpisodeAttachment(episode, { ruleName, groupingFields })
       );
 
       return {

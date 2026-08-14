@@ -6,12 +6,14 @@
  */
 
 import type { AlertEpisode, EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
+import { resolveEpisodeLabel } from './resolve_episode_label';
 
 /** Normalize null → undefined for attachment storage. */
 const nullishToUndefined = <T>(value: T | null | undefined): T | undefined => value ?? undefined;
 
 export interface AlertEpisodeToAttachmentOptions {
-  episodeLabel?: string;
+  ruleName?: string;
+  groupingFields?: readonly string[];
 }
 
 /**
@@ -23,7 +25,11 @@ export const alertEpisodeToEpisodeAttachment = (
 ): EpisodeAttachmentData => ({
   '@timestamp': episode['@timestamp'],
   'episode.id': episode['episode.id'],
-  ...(options.episodeLabel ? { 'episode.label': options.episodeLabel } : {}),
+  'episode.label': resolveEpisodeLabel({
+    episode,
+    ruleName: options.ruleName,
+    groupingFields: options.groupingFields,
+  }),
   'episode.status': episode['episode.status'],
   'rule.id': episode['rule.id'],
   group_hash: episode.group_hash,
