@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+require('@kbn/setup-node-env');
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-    junit: {
-      reportName: 'Discover - Group 11',
-    },
-  };
+// --run-id must be applied before importing TS modules that read
+// SIGEVENTS_SNAPSHOT_RUN at module-evaluation time.
+var runIdIdx = process.argv.indexOf('--run-id');
+if (runIdIdx !== -1 && process.argv[runIdIdx + 1]) {
+  process.env.SIGEVENTS_SNAPSHOT_RUN = process.argv[runIdIdx + 1];
 }
+
+require('@kbn/evals-suite-significant-events/scripts/probe_eval_snapshot');
