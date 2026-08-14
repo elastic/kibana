@@ -452,6 +452,55 @@ describe('install', () => {
       );
     });
 
+    describe('name-only install when registry is reachable', () => {
+      const bundledPackage = {
+        name: 'test_package',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      };
+
+      beforeEach(() => {
+        mockGetBundledPackageByPkgKey.mockImplementation(async (pkgKey: string) => {
+          if (pkgKey.includes('-')) {
+            return pkgKey === `${bundledPackage.name}-${bundledPackage.version}`
+              ? bundledPackage
+              : undefined;
+          }
+
+          return undefined;
+        });
+        jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: false } as any);
+      });
+
+      it('should resolve via registry and not short-circuit to bundled when bundled is present', async () => {
+        (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        jest
+          .mocked(Registry.fetchFindLatestPackageOrThrow)
+          .mockImplementation(() =>
+            Promise.resolve({ name: 'test_package', version: '1.3.0' } as any)
+          );
+
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.error).toBeUndefined();
+        expect(mockGetBundledPackageByPkgKey).toHaveBeenCalledWith('test_package');
+        expect(Registry.fetchFindLatestPackageOrThrow).toHaveBeenCalledWith(
+          'test_package',
+          expect.any(Object)
+        );
+        expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalledWith(
+          expect.objectContaining({ installSource: 'registry' })
+        );
+      });
+    });
+
     it('should fetch latest version if version not provided', async () => {
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       const response = await installPackage({
