@@ -43,10 +43,10 @@ const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleRespo
         state_transition: expectedSnapshot.state_transition,
         grouping: expectedSnapshot.grouping,
         artifacts: expectedSnapshot.artifacts,
-        createdBy: expectedSnapshot.createdBy,
-        createdAt: expectedSnapshot.createdAt,
-        updatedBy: expectedSnapshot.updatedBy,
-        updatedAt: expectedSnapshot.updatedAt,
+        created_by: expectedSnapshot.created_by,
+        created_at: expectedSnapshot.created_at,
+        updated_by: expectedSnapshot.updated_by,
+        updated_at: expectedSnapshot.updated_at,
       },
       isUndefined
     )

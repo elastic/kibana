@@ -78,7 +78,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       expect(response.body.items).toStrictEqual([]);
       expect(response.body.total).toBe(0);
       expect(response.body.page).toBe(1);
-      expect(response.body.perPage).toBe(20);
+      expect(response.body.per_page).toBe(20);
     }
   );
 
@@ -105,11 +105,11 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
         destinations: [{ type: 'workflow', id: 'scout-workflow-id' }],
         enabled: true,
         matcher: null,
-        groupBy: null,
+        group_by: null,
         tags: null,
-        groupingMode: null,
+        grouping_mode: null,
         throttle: null,
-        snoozedUntil: null,
+        snoozed_until: null,
       };
 
       const itemsByName = new Map(
@@ -123,7 +123,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('pagination: paginates with page+perPage', async ({ apiClient, apiServices }) => {
+  apiTest('pagination: paginates with page+per_page', async ({ apiClient, apiServices }) => {
     await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: 'page-policy-1' })
     );
@@ -141,7 +141,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(firstPage.body.items).toHaveLength(2);
     expect(firstPage.body.total).toBe(3);
     expect(firstPage.body.page).toBe(1);
-    expect(firstPage.body.perPage).toBe(2);
+    expect(firstPage.body.per_page).toBe(2);
 
     const secondPage = await apiClient.get(getListActionPoliciesUrl({ page: 2, per_page: 2 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
@@ -150,7 +150,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(secondPage.body.items).toHaveLength(1);
     expect(secondPage.body.total).toBe(3);
     expect(secondPage.body.page).toBe(2);
-    expect(secondPage.body.perPage).toBe(2);
+    expect(secondPage.body.per_page).toBe(2);
   });
 
   apiTest('search: matches by name', async ({ apiClient, apiServices }) => {
@@ -309,11 +309,11 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(names).toStrictEqual(['Gamma Policy', 'Beta Policy', 'Alpha Policy']);
   });
 
-  apiTest('sort: by createdAt ascending', async ({ apiClient, apiServices }) => {
+  apiTest('sort: by created_at ascending', async ({ apiClient, apiServices }) => {
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ sort_field: 'createdAt', sort_order: 'asc' }),
+      getListActionPoliciesUrl({ sort_field: 'created_at', sort_order: 'asc' }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -324,11 +324,11 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.items[2].name).toBe('Gamma Policy');
   });
 
-  apiTest('sort: by createdAt descending', async ({ apiClient, apiServices }) => {
+  apiTest('sort: by created_at descending', async ({ apiClient, apiServices }) => {
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ sort_field: 'createdAt', sort_order: 'desc' }),
+      getListActionPoliciesUrl({ sort_field: 'created_at', sort_order: 'desc' }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -365,7 +365,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.total).toBe(3);
     expect(response.body.items).toHaveLength(2);
     expect(response.body.page).toBe(1);
-    expect(response.body.perPage).toBe(2);
+    expect(response.body.per_page).toBe(2);
   });
 
   apiTest('validation: rejects page=0', async ({ apiClient }) => {
@@ -376,7 +376,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
+  apiTest('validation: rejects per_page=0', async ({ apiClient }) => {
     const response = await apiClient.get(getListActionPoliciesUrl({ per_page: 0 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
@@ -384,7 +384,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('validation: rejects perPage over the maximum', async ({ apiClient }) => {
+  apiTest('validation: rejects per_page over the maximum', async ({ apiClient }) => {
     const response = await apiClient.get(
       getListActionPoliciesUrl({ per_page: ACTION_POLICY_PER_PAGE_MAX + 1 }),
       {

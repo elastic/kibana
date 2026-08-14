@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLAstHighlightCommand, ESQLCommand } from '@elastic/esql/types';
+import type { ESQLCommandSummary } from '../types';
+import { getHighlightColumnNames } from './utils';
 
-declare namespace jsyaml {
-  function load<T = any>(str: string, opts?: jsyaml.LoadOptions): T;
-}
+export const summary = (command: ESQLCommand, _query: string): ESQLCommandSummary => {
+  const highlightCommand = command as ESQLAstHighlightCommand;
+  return { newColumns: new Set(getHighlightColumnNames(highlightCommand)) };
+};

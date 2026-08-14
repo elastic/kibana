@@ -53,7 +53,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
     expect(response).toHaveStatusCode(204);
 
     const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
-    expect(fetched.updatedAt).not.toBe(created.createdAt);
+    expect(fetched.updated_at).not.toBe(created.created_at);
     expect(fetched.version).not.toBe(created.version);
   });
 
@@ -66,7 +66,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
           description: 'preserve-attrs-policy description',
           destinations: [{ type: 'workflow', id: 'preserve-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '5m' },
         })
       );
@@ -80,12 +80,12 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
       const fetched = await apiServices.alertingV2.actionPolicies.get(created.id);
       expect(fetched).toStrictEqual({
         ...created,
-        updatedAt: fetched.updatedAt,
-        updatedBy: fetched.updatedBy,
+        updated_at: fetched.updated_at,
+        updated_by: fetched.updated_by,
         version: fetched.version,
         auth: fetched.auth,
       });
-      expect(Date.parse(fetched.updatedAt)).toBeGreaterThanOrEqual(Date.parse(created.updatedAt));
+      expect(Date.parse(fetched.updated_at)).toBeGreaterThanOrEqual(Date.parse(created.updated_at));
       expect(fetched.version).not.toBe(created.version);
     }
   );

@@ -640,10 +640,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
       ),
   }),
   enabled: z.boolean().describe('Whether the rule is enabled.'),
-  createdBy: z.string().nullable().describe('User who created the rule.'),
-  createdAt: z.string().describe('ISO timestamp when the rule was created.'),
-  updatedBy: z.string().nullable().describe('User who last updated the rule.'),
-  updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  created_by: z.string().nullable().describe('User who created the rule.'),
+  created_at: z.string().describe('ISO timestamp when the rule was created.'),
+  updated_by: z.string().nullable().describe('User who last updated the rule.'),
+  updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
   version: z
     .string()
     .optional()
@@ -687,7 +687,7 @@ export const findRulesResponseSchema = z
     items: z.array(ruleResponseSchema).describe('The list of rules.'),
     total: z.number().describe('The total number of rules matching the query.'),
     page: z.number().describe('The current page number.'),
-    perPage: z.number().describe('The number of rules per page.'),
+    per_page: z.number().describe('The number of rules per page.'),
   })
   .describe('Paginated list of rules.');
 

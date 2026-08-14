@@ -46,7 +46,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
           description: 'policy-description',
           destinations: [{ type: 'workflow', id: 'policy-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '10m' },
         })
       );
@@ -64,10 +64,10 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         { type: 'workflow', id: 'policy-workflow-id' },
       ]);
       expect(response.body.matcher).toBe("env == 'production' && region == 'us-east-1'");
-      expect(response.body.groupBy).toStrictEqual(['service.name']);
+      expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '10m' });
-      expect(new Date(response.body.createdAt).toISOString()).toBe(response.body.createdAt);
-      expect(new Date(response.body.updatedAt).toISOString()).toBe(response.body.updatedAt);
+      expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
+      expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
       expect(typeof response.body.auth.owner).toBe('string');
       expect(response.body.auth.apiKey).toBeUndefined();
     }
@@ -90,10 +90,10 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response.body).toMatchObject({
         id: created.id,
         enabled: true,
-        snoozedUntil: null,
+        snoozed_until: null,
         matcher: null,
-        groupBy: null,
-        groupingMode: null,
+        group_by: null,
+        grouping_mode: null,
         throttle: null,
       });
     }

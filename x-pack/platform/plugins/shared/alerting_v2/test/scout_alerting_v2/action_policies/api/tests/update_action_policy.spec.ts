@@ -44,7 +44,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         description: 'original-policy-description',
         destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
         matcher: "env == 'production' && region == 'us-east-1'",
-        groupBy: ['service.name'],
+        group_by: ['service.name'],
         throttle: { interval: '1m' },
       })
     );
@@ -56,7 +56,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         description: 'updated-policy-description',
         destinations: [{ type: 'workflow', id: 'updated-workflow-id' }],
         matcher: "env == 'production' && region == 'us-west-2'",
-        groupBy: ['service.name', 'environment'],
+        group_by: ['service.name', 'environment'],
         throttle: { interval: '5m' },
         version: created.version,
       },
@@ -71,9 +71,9 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       { type: 'workflow', id: 'updated-workflow-id' },
     ]);
     expect(response.body.matcher).toBe("env == 'production' && region == 'us-west-2'");
-    expect(response.body.groupBy).toStrictEqual(['service.name', 'environment']);
+    expect(response.body.group_by).toStrictEqual(['service.name', 'environment']);
     expect(response.body.throttle).toStrictEqual({ interval: '5m' });
-    expect(new Date(response.body.updatedAt).toISOString()).toBe(response.body.updatedAt);
+    expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
     // The API key is server-side only and must never be exposed over the wire.
     expect(response.body.auth.apiKey).toBeUndefined();
   });
@@ -87,7 +87,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '1m' },
         })
       );
@@ -104,7 +104,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
       expect(response.body.matcher).toBe("env == 'production' && region == 'us-east-1'");
-      expect(response.body.groupBy).toStrictEqual(['service.name']);
+      expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '1m' });
     }
   );
@@ -118,7 +118,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: "env == 'production'",
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '1m' },
         })
       );
@@ -135,13 +135,13 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
       expect(response.body.matcher).toBe("env == 'production'");
-      expect(response.body.groupBy).toStrictEqual(['service.name']);
+      expect(response.body.group_by).toStrictEqual(['service.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '1m' });
     }
   );
 
   apiTest(
-    'partial: updates matcher/groupBy/throttle and preserves name/description/destinations',
+    'partial: updates matcher/group_by/throttle and preserves name/description/destinations',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -149,7 +149,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           description: 'original-policy-description',
           destinations: [{ type: 'workflow', id: 'original-workflow-id' }],
           matcher: "env == 'production' && region == 'us-east-1'",
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '1m' },
         })
       );
@@ -158,7 +158,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           matcher: "env == 'staging' && region == 'eu-central-1'",
-          groupBy: ['service.name', 'host.name'],
+          group_by: ['service.name', 'host.name'],
           throttle: { interval: '15m' },
           version: created.version,
         },
@@ -171,7 +171,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         { type: 'workflow', id: 'original-workflow-id' },
       ]);
       expect(response.body.matcher).toBe("env == 'staging' && region == 'eu-central-1'");
-      expect(response.body.groupBy).toStrictEqual(['service.name', 'host.name']);
+      expect(response.body.group_by).toStrictEqual(['service.name', 'host.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '15m' });
     }
   );
@@ -185,7 +185,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           description: 'dest-policy description',
           destinations: [{ type: 'workflow', id: 'original-dest-workflow' }],
           matcher: "env == 'staging'",
-          groupBy: ['host.name'],
+          group_by: ['host.name'],
           throttle: { interval: '2m' },
         })
       );
@@ -205,20 +205,20 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.name).toBe('dest-policy');
       expect(response.body.description).toBe('dest-policy description');
       expect(response.body.matcher).toBe("env == 'staging'");
-      expect(response.body.groupBy).toStrictEqual(['host.name']);
+      expect(response.body.group_by).toStrictEqual(['host.name']);
       expect(response.body.throttle).toStrictEqual({ interval: '2m' });
     }
   );
 
   apiTest(
-    'partial: updates groupingMode and throttle strategy together',
+    'partial: updates grouping_mode and throttle strategy together',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
           name: 'mode-update-policy',
           description: 'will update grouping mode',
           destinations: [{ type: 'workflow', id: 'wf-1' }],
-          groupingMode: 'per_episode',
+          grouping_mode: 'per_episode',
           throttle: { strategy: 'on_status_change' },
         })
       );
@@ -226,14 +226,14 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
-          groupingMode: 'all',
+          grouping_mode: 'all',
           throttle: { strategy: 'time_interval', interval: '10m' },
           version: created.version,
         },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.groupingMode).toBe('all');
+      expect(response.body.grouping_mode).toBe('all');
       expect(response.body.throttle).toStrictEqual({
         strategy: 'time_interval',
         interval: '10m',
@@ -250,7 +250,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           name: 'strategy-transition-policy',
           description: 'transitions from per_status_interval to on_status_change',
           destinations: [{ type: 'workflow', id: 'wf-1' }],
-          groupingMode: 'per_episode',
+          grouping_mode: 'per_episode',
           throttle: { strategy: 'per_status_interval', interval: '10m' },
         })
       );
@@ -276,15 +276,15 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest(
-    'nullable: clears groupingMode/groupBy/throttle when set to null',
+    'nullable: clears grouping_mode/group_by/throttle when set to null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
           name: 'clear-mode-policy',
           description: 'will clear grouping mode',
           destinations: [{ type: 'workflow', id: 'wf-1' }],
-          groupingMode: 'per_field',
-          groupBy: ['host.name'],
+          grouping_mode: 'per_field',
+          group_by: ['host.name'],
           throttle: { strategy: 'time_interval', interval: '5m' },
         })
       );
@@ -292,22 +292,22 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
-          groupingMode: null,
-          groupBy: null,
+          grouping_mode: null,
+          group_by: null,
           throttle: null,
           version: created.version,
         },
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.groupingMode).toBeNull();
-      expect(response.body.groupBy).toBeNull();
+      expect(response.body.grouping_mode).toBeNull();
+      expect(response.body.group_by).toBeNull();
       expect(response.body.throttle).toBeNull();
     }
   );
 
   apiTest(
-    'nullable: clears matcher/groupBy/throttle when set to null',
+    'nullable: clears matcher/group_by/throttle when set to null',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
@@ -315,7 +315,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
           description: 'nullable-policy description',
           destinations: [{ type: 'workflow', id: 'nullable-workflow-id' }],
           matcher: "env == 'production'",
-          groupBy: ['service.name'],
+          group_by: ['service.name'],
           throttle: { interval: '5m' },
         })
       );
@@ -324,7 +324,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: {
           matcher: null,
-          groupBy: null,
+          group_by: null,
           throttle: null,
           version: created.version,
         },
@@ -332,7 +332,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.matcher).toBeNull();
-      expect(response.body.groupBy).toBeNull();
+      expect(response.body.group_by).toBeNull();
       expect(response.body.throttle).toBeNull();
       expect(response.body.name).toBe('nullable-policy');
       expect(response.body.destinations).toStrictEqual([
