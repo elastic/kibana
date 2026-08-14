@@ -155,7 +155,9 @@ export class EventClient {
         where,
         esql.exp`(TO_LOWER(${esql.col('title')}) LIKE ${pattern} OR TO_LOWER(${esql.col(
           'summary'
-        )}) LIKE ${pattern} OR TO_LOWER(${esql.col('symptom_hypothesis')}) LIKE ${pattern})`
+        )}) LIKE ${pattern} OR TO_LOWER(${esql.col(
+          'symptom_hypothesis'
+        )}) LIKE ${pattern} OR ${esql.col(FIELD_EVENT_ID)} == ${esql.str(options.search)})`
       );
     }
 
