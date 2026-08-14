@@ -81,9 +81,12 @@ const createIpRangeListClientMock = (dashCount: number): ListClient => {
     data: generateDashIpRanges(dashCount),
     total: dashCount,
   });
+  // This total stays below MAXIMUM_SMALL_VALUE_LIST_SIZE. So the item passes
+  // filterOutUnprocessableValueLists. buildListClause then rejects the item with the
+  // dash-size gate. This forces the item to the createOrClauses path (unprocessableExceptionItems).
   (freshListClient.findListItem as jest.Mock).mockResolvedValue({
     ...getFoundListItemSchemaMock(),
-    total: dashCount,
+    total: 1,
   });
   return freshListClient;
 };
@@ -630,8 +633,11 @@ describe('build_exceptions_filter', () => {
       });
 
       expect(filter).toBeDefined();
-      expect(unprocessedExceptions).toHaveLength(1);
-      expect(unprocessedExceptions).toContainEqual(unprocessableItem);
+      // buildListClause is the only caller of findAllListItems. This assertion proves
+      // the item reached the createOrClauses path. It did not take the earlier
+      // value-list path (findListItem).
+      expect(freshListClient.findAllListItems).toHaveBeenCalled();
+      expect(unprocessedExceptions).toEqual([unprocessableItem]);
     });
 
     test('it should accumulate unprocessable items from both rejection paths', async () => {
@@ -666,9 +672,10 @@ describe('build_exceptions_filter', () => {
       });
 
       expect(filter).toBeDefined();
-      expect(unprocessedExceptions).toHaveLength(2);
-      expect(unprocessedExceptions).toContainEqual(textListItem);
-      expect(unprocessedExceptions).toContainEqual(ipRangeItem);
+      expect(freshListClient.findAllListItems).toHaveBeenCalled();
+      // The order is a contract. Value-list rejects (filterOutUnprocessableValueLists)
+      // come first. createOrClauses rejects (unprocessableExceptionItems) come second.
+      expect(unprocessedExceptions).toEqual([textListItem, ipRangeItem]);
     });
 
     test('it should return empty unprocessedExceptions when no items provided', async () => {
