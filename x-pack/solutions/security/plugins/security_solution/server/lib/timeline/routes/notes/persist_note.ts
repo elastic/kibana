@@ -20,8 +20,12 @@ import {
   type PersistNoteRouteResponse,
 } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
-export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
+export const persistNoteRoute = (
+  router: SecuritySolutionPluginRouter,
+  eventBus?: SecuritySolutionEventBus
+) => {
   router.versioned
     .patch({
       path: NOTE_URL,
@@ -53,6 +57,28 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
             note,
             overrideOwner: true,
           });
+
+          if (eventBus && note.eventId) {
+            const securitySolution = await context.securitySolution;
+            const spaceId = securitySolution?.getSpaceId() ?? 'default';
+            if (noteId == null) {
+              void eventBus.emitNoteCreated(request, {
+                noteId: res.note.noteId ?? '',
+                noteContent: note.note ?? '',
+                createdBy: res.note.createdBy ?? '',
+                documentId: note.eventId,
+                spaceId,
+              });
+            } else {
+              void eventBus.emitNoteUpdated(request, {
+                noteId: res.note.noteId ?? '',
+                noteContent: note.note ?? '',
+                updatedBy: res.note.updatedBy ?? res.note.createdBy ?? '',
+                documentId: note.eventId,
+                spaceId,
+              });
+            }
+          }
 
           return response.ok({
             body: res,

@@ -9,6 +9,7 @@ import type { StartServicesAccessor } from '@kbn/core-lifecycle-server';
 import type { StartPlugins } from '../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../..';
+import type { SecuritySolutionEventBus } from '../../../events/event_bus';
 import {
   createTimelinesRoute,
   deleteTimelinesRoute,
@@ -33,7 +34,8 @@ import { persistPinnedEventRoute } from './pinned_events';
 export function registerTimelineRoutes(
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  startServices: StartServicesAccessor<StartPlugins>
+  startServices: StartServicesAccessor<StartPlugins>,
+  eventBus?: SecuritySolutionEventBus
 ) {
   createTimelinesRoute(router);
   patchTimelinesRoute(router);
@@ -52,7 +54,7 @@ export function registerTimelineRoutes(
 
   installPrepackedTimelinesRoute(router, config);
 
-  persistNoteRoute(router);
+  persistNoteRoute(router, eventBus);
   deleteNoteRoute(router);
   getNotesRoute(router, startServices);
 
