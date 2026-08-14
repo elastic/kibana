@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ExecutionError } from '@kbn/workflows/server';
+import type { AiIndexService } from '../ai_indices/service';
+import { AiIndexNotFoundError } from '../ai_indices/errors';
+import { getDeleteKiStepDefinition } from './delete_ki';
+import { createMockStepContext, mockAiIndexService } from './test_utils';
+
+const searchHit = (index: string) => ({ hits: { hits: [{ _id: 'ki-1', _index: index }] } });
+
+describe('getDeleteKiStepDefinition', () => {
+  it('deletes the KI from its backing index and returns the document id', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
+      delete: jest.fn().mockResolvedValue({ result: 'deleted' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'data_stream', value: 'ai-index-ds-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition(() => service);
+    const result = await handler(context);
+
+    expect(result).toEqual({ output: { id: 'ki-1' } });
+    expect(esClient.delete).toHaveBeenCalledWith(
+      {
+        index: '.ds-ai-index-ds-my-ai-index-000001',
+        id: 'ki-1',
+        refresh: 'wait_for',
+      },
+      { signal: context.abortSignal }
+    );
+  });
+
+  it('throws NotFoundError when the KI does not exist in the AI index', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      delete: jest.fn(),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'missing-ki' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition(() => service);
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('NotFoundError');
+    expect(esClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('throws NotFoundError when the KI was removed concurrently', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
+      delete: jest.fn().mockResolvedValue({ result: 'not_found' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getDeleteKiStepDefinition(() => service);
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('NotFoundError');
+  });
+
+  it('throws NotFoundError when the AI index does not exist', async () => {
+    const esClient = { search: jest.fn(), delete: jest.fn() };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'missing', ki_id: 'ki-1' },
+      esClient,
+    });
+    const service = {
+      get: jest.fn().mockRejectedValue(new AiIndexNotFoundError('missing')),
+    } as unknown as AiIndexService;
+
+    const { handler } = getDeleteKiStepDefinition(() => service);
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('NotFoundError');
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+});

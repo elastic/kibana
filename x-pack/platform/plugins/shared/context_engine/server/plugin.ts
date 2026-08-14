@@ -31,6 +31,7 @@ import { AiIndexRegistry } from './ai_indices/registry';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
+import { registerStepDefinitions } from './step_types';
 
 export class ContextEnginePlugin
   implements
@@ -105,6 +106,16 @@ export class ContextEnginePlugin
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
+      },
+    });
+
+    registerStepDefinitions({
+      workflowsExtensions: setupDeps.workflowsExtensions,
+      getAiIndexService: () => {
+        if (!this.aiIndexService) {
+          throw new Error('AI index service not available — plugin has not started');
+        }
+        return this.aiIndexService;
       },
     });
 

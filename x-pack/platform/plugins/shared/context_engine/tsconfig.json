@@ -55,6 +55,9 @@
     "@kbn/content-list-provider",
     "@kbn/content-list-provider-client",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
+    "@kbn/zod"
   ]
 }
