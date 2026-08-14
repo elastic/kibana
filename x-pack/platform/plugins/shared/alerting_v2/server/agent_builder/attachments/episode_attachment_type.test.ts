@@ -170,9 +170,7 @@ describe('createEpisodeAttachmentType', () => {
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(result).toEqual(
-        expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' })
-      );
+      expect(result).toEqual(expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }));
     });
 
     it('falls back to rule ID label when the rule cannot be loaded and grouping fields are unknown', async () => {
@@ -184,9 +182,7 @@ describe('createEpisodeAttachmentType', () => {
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(result).toEqual(
-        expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' })
-      );
+      expect(result).toEqual(expect.objectContaining({ 'episode.label': 'Alert for rule rule-1' }));
     });
 
     it('uses grouping fields from the rule when the rule name is missing', async () => {

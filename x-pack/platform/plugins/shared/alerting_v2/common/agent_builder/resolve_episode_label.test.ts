@@ -84,7 +84,11 @@ describe('resolveEpisodeLabel', () => {
 
   it('ignores grouping fields when episode_data is absent', () => {
     expect(
-      resolveEpisodeLabel({ episode: baseEpisode, ruleName: 'Host CPU high', groupingFields: ['host.name'] })
+      resolveEpisodeLabel({
+        episode: baseEpisode,
+        ruleName: 'Host CPU high',
+        groupingFields: ['host.name'],
+      })
     ).toBe('Host CPU high alert');
   });
 
