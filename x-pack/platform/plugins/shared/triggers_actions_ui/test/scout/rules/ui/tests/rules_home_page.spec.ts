@@ -72,7 +72,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator(APP_TITLE_SUBJ)).toHaveText('Rules');
   });
 
-  test('renders the rules list with a newly-created rule visible', async ({
+  test('renders a newly-created rule and opens its details', async ({
     apiServices,
     browserAuth,
     page,
@@ -88,36 +88,19 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     await page.gotoApp(RULES_APP);
     await page.testSubj.click(RULES_TAB_SUBJ);
 
-    await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
-    await expect(
-      page.testSubj
-        .locator(RULES_LIST_SUBJ)
-        .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`)
-    ).toBeVisible();
-  });
-
-  test('navigates to the rule details page when clicking a rule in the list', async ({
-    apiServices,
-    browserAuth,
-    page,
-  }) => {
-    const ruleResponse = await apiServices.alerting.rules.create(
-      makeEsQueryRule('scout-home-page')
-    );
-    const ruleId = ruleResponse.data.id;
-    const ruleName = ruleResponse.data.name;
-    createdRuleIds.push(ruleId);
-
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp(RULES_APP);
-    await page.testSubj.click(RULES_TAB_SUBJ);
-
-    await page.testSubj
+    const ruleRow = page.testSubj
       .locator(RULES_LIST_SUBJ)
-      .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`)
-      .click();
+      .locator(`[data-test-subj="rulesListTableRowName-${ruleName}"]`);
 
-    await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
-    expect(page.url()).toContain(`/rule/${ruleId}`);
+    await test.step('renders the rules list with the rule visible', async () => {
+      await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
+      await expect(ruleRow).toBeVisible();
+    });
+
+    await test.step('navigates to the rule details page when clicking the rule', async () => {
+      await ruleRow.click();
+      await page.waitForURL(new RegExp(`/rule/${ruleId}(\\b|$)`));
+      expect(page.url()).toContain(`/rule/${ruleId}`);
+    });
   });
 });
