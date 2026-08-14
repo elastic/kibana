@@ -217,6 +217,98 @@ export const buildSequenceEsql = (state: SequenceFormValues): string => {
   return lines.join('\n');
 };
 
+const recoveryTypeFilter = (pairs: RecoveryTrackingPair[]): string => {
+  const hasAlert = pairs.some((p) => p.kind !== 'signal');
+  const hasSignal = pairs.some((p) => p.kind === 'signal');
+  if (hasAlert && hasSignal) return 'type IN ("alert", "signal")';
+  if (hasSignal) return 'type == "signal"';
+  return 'type == "alert"';
+};
+
+export const buildSequenceRecoveryEsql = (state: SequenceFormValues): string => {
+  if (state.steps.length < 2) return '';
+  if (state.hopWindows.length !== state.steps.length - 1) return '';
+
+  const recoveryPairs = resolveRecoveryTrackingPairs(state);
+  if (!recoveryPairs) return '';
+
+  const isCorrelated = getCommonGroupingFields(state).length > 0;
+
+  const isLastStepMode = !state.recoveryStepIndices?.length;
+  if (recoveryPairs.length === 1 && isLastStepMode) {
+    const { ruleId, kind, stalenessSeconds } = recoveryPairs[0];
+    const singleTypeFilter = kind === 'signal' ? 'type == "signal"' : 'type == "alert"';
+
+    if (kind === 'signal') {
+      if (isCorrelated) {
+        return [
+          `FROM ${RULE_EVENTS_INDEX}`,
+          `| WHERE ${singleTypeFilter} AND rule.id == "${ruleId}"`,
+          '| STATS latest_breach = MAX(CASE(status == "breached", @timestamp, NULL))',
+          `        BY ${GROUP_HASH_COL}`,
+          `| WHERE DATE_DIFF("seconds", latest_breach, NOW()) > ${stalenessSeconds}`,
+        ].join('\n');
+      }
+
+      return [
+        `FROM ${RULE_EVENTS_INDEX}`,
+        `| WHERE ${singleTypeFilter} AND rule.id == "${ruleId}"`,
+        '| STATS latest_breach = MAX(CASE(status == "breached", @timestamp, NULL))',
+        `| EVAL ${SEQUENCE_GROUP_COL} = "${SEQUENCE_GROUP_VALUE}"`,
+        `| WHERE latest_breach IS NULL OR DATE_DIFF("seconds", latest_breach, NOW()) > ${stalenessSeconds}`,
+      ].join('\n');
+    }
+
+    if (isCorrelated) {
+      return [
+        `FROM ${RULE_EVENTS_INDEX}`,
+        `| WHERE ${singleTypeFilter} AND rule.id == "${ruleId}"`,
+        '| STATS latest_recovered = MAX(CASE(status == "recovered", @timestamp, NULL)),',
+        '        latest_any        = MAX(@timestamp)',
+        `        BY ${GROUP_HASH_COL}`,
+        '| WHERE latest_recovered == latest_any',
+      ].join('\n');
+    }
+
+    return [
+      `FROM ${RULE_EVENTS_INDEX}`,
+      `| WHERE ${singleTypeFilter} AND rule.id == "${ruleId}"`,
+      '| SORT @timestamp DESC',
+      '| LIMIT 1',
+      `| EVAL ${SEQUENCE_GROUP_COL} = "${SEQUENCE_GROUP_VALUE}"`,
+      '| WHERE status == "recovered"',
+    ].join('\n');
+  }
+
+  const allRuleIds = recoveryPairs.map((p) => `"${p.ruleId}"`).join(', ');
+  const typeFilter = recoveryTypeFilter(recoveryPairs);
+
+  const statsLines = recoveryPairs.flatMap((pair, i) => {
+    const suffix = recoveryTrackingColSuffix(pair);
+    const comma = i < recoveryPairs.length - 1 ? ',' : '';
+    if (pair.kind === 'signal') {
+      return [`    a_${suffix} = MAX(CASE(rule.id == "${pair.ruleId}", @timestamp, NULL))${comma}`];
+    }
+    return [
+      `    r_${suffix} = MAX(CASE(rule.id == "${pair.ruleId}" AND status == "recovered", @timestamp, NULL)),`,
+      `    a_${suffix} = MAX(CASE(rule.id == "${pair.ruleId}", @timestamp, NULL))${comma}`,
+    ];
+  });
+
+  const whereConditions = recoveryTrackingPredicate(recoveryPairs);
+
+  return [
+    `FROM ${RULE_EVENTS_INDEX}`,
+    `| WHERE ${typeFilter} AND rule.id IN (${allRuleIds})`,
+    `| STATS`,
+    ...statsLines,
+    ...(isCorrelated
+      ? [`    BY ${GROUP_HASH_COL}`]
+      : [`| EVAL ${SEQUENCE_GROUP_COL} = "${SEQUENCE_GROUP_VALUE}"`]),
+    `| WHERE ${whereConditions}`,
+  ].join('\n');
+};
+
 export const buildSequenceRuleQueryData = (
   state: SequenceFormValues
 ): {
@@ -228,13 +320,14 @@ export const buildSequenceRuleQueryData = (
   const breachQuery = buildSequenceEsql(state);
   if (!breachQuery) return null;
 
+  const recoveryQuery = buildSequenceRecoveryEsql(state);
   const lookback = totalLookbackSeconds(state);
   const isCorrelated = getCommonGroupingFields(state).length > 0;
   const groupingFields = isCorrelated ? [GROUP_HASH_COL] : [SEQUENCE_GROUP_COL];
 
   return {
     breachQuery,
-    recoveryQuery: '',
+    recoveryQuery,
     groupingFields,
     lookbackString: formatLookbackString(lookback),
   };
