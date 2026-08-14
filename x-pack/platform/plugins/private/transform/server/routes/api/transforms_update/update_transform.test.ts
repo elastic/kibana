@@ -54,4 +54,18 @@ describe('updateTransform', () => {
       transform_id: 'transform-id',
     });
   });
+
+  it('fails the update when fetching the existing source config fails', async () => {
+    const esClient = createEsClient();
+    esClient.transform.getTransform.mockRejectedValue(new Error('get transform failed'));
+
+    await expect(
+      updateTransform({
+        body: { source: { project_routing: '_id:linked-id' } },
+        esClient,
+        transformId: 'transform-id',
+      })
+    ).rejects.toThrow('get transform failed');
+    expect(esClient.transform.updateTransform).not.toHaveBeenCalled();
+  });
 });

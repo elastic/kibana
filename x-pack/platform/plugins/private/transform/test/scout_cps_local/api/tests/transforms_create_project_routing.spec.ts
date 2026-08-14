@@ -54,60 +54,64 @@ apiTest.describe(
         const transformConfig = generateTransformConfig(transformId);
         const updatedProjectRouting = PROJECT_ROUTING.ALL;
 
-        const { statusCode, body } = await apiClient.put(
-          `internal/transform/transforms/${transformId}?deferValidation=true`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...transformManagerCookieHeader,
-            },
-            body: {
-              ...transformConfig,
-              source: {
-                ...transformConfig.source,
-                project_routing: projectRouting,
+        await apiTest.step('creates a transform with project routing', async () => {
+          const { statusCode, body } = await apiClient.put(
+            `internal/transform/transforms/${transformId}?deferValidation=true`,
+            {
+              headers: {
+                ...COMMON_HEADERS,
+                ...transformManagerCookieHeader,
               },
-            },
-            responseType: 'json',
-          }
-        );
-        const createResponse = body as PutTransformsResponseSchema;
-
-        expect(statusCode).toBe(200);
-        expect(createResponse.errors).toHaveLength(0);
-        expect(createResponse.transformsCreated).toMatchObject([
-          {
-            transform: transformId,
-          },
-        ]);
-
-        const transform = await apiServices.transform.getTransform({
-          transform_id: transformId,
-        });
-        expect(transform.source.project_routing).toBe(projectRouting);
-
-        const { statusCode: updateStatusCode } = await apiClient.post(
-          `internal/transform/transforms/${transformId}/_update`,
-          {
-            headers: {
-              ...COMMON_HEADERS,
-              ...transformManagerCookieHeader,
-            },
-            body: {
-              source: {
-                project_routing: updatedProjectRouting,
+              body: {
+                ...transformConfig,
+                source: {
+                  ...transformConfig.source,
+                  project_routing: projectRouting,
+                },
               },
+              responseType: 'json',
+            }
+          );
+          const createResponse = body as PutTransformsResponseSchema;
+
+          expect(statusCode).toBe(200);
+          expect(createResponse.errors).toHaveLength(0);
+          expect(createResponse.transformsCreated).toMatchObject([
+            {
+              transform: transformId,
             },
-            responseType: 'json',
-          }
-        );
+          ]);
 
-        expect(updateStatusCode).toBe(200);
-
-        const updatedTransform = await apiServices.transform.getTransform({
-          transform_id: transformId,
+          const transform = await apiServices.transform.getTransform({
+            transform_id: transformId,
+          });
+          expect(transform.source.project_routing).toBe(projectRouting);
         });
-        expect(updatedTransform.source.project_routing).toBe(updatedProjectRouting);
+
+        await apiTest.step('updates the project routing on the existing transform', async () => {
+          const { statusCode: updateStatusCode } = await apiClient.post(
+            `internal/transform/transforms/${transformId}/_update`,
+            {
+              headers: {
+                ...COMMON_HEADERS,
+                ...transformManagerCookieHeader,
+              },
+              body: {
+                source: {
+                  project_routing: updatedProjectRouting,
+                },
+              },
+              responseType: 'json',
+            }
+          );
+
+          expect(updateStatusCode).toBe(200);
+
+          const updatedTransform = await apiServices.transform.getTransform({
+            transform_id: transformId,
+          });
+          expect(updatedTransform.source.project_routing).toBe(updatedProjectRouting);
+        });
       }
     );
   }

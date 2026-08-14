@@ -15,12 +15,8 @@ const getExistingTransform = async (
   esClient: ElasticsearchClient,
   transformId: TransformId
 ): Promise<estypes.TransformGetTransformTransformSummary | undefined> => {
-  try {
-    const response = await esClient.transform.getTransform({ transform_id: transformId });
-    return response.transforms[0];
-  } catch {
-    return undefined;
-  }
+  const response = await esClient.transform.getTransform({ transform_id: transformId });
+  return response.transforms[0];
 };
 
 const getUpdateBody = (
