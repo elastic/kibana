@@ -334,6 +334,7 @@ export function EditingQueryStreamEntry({
           onCancel={closeDeleteModal}
           onDelete={handleDelete}
           name={streamName}
+          variant="query"
         />
       )}
     </>

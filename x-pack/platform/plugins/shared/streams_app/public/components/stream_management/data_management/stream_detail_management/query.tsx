@@ -191,6 +191,7 @@ export function QueryStreamDetailManagement({
           onClose={() => setShowDeleteModal(false)}
           onCancel={() => setShowDeleteModal(false)}
           onDelete={deleteStream}
+          variant="query"
         />
       )}
     </>

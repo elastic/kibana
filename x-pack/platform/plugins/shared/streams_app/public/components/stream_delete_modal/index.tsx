@@ -22,6 +22,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiText,
   copyToClipboard,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -37,11 +38,13 @@ export function StreamDeleteModal({
   onDelete,
   onCancel,
   name,
+  variant = 'default',
 }: {
   onClose: () => void;
   onDelete: () => Promise<void>;
   onCancel: () => void;
   name: string;
+  variant?: 'default' | 'query';
 }) {
   const {
     core: { notifications },
@@ -50,6 +53,7 @@ export function StreamDeleteModal({
   const [isDeletingStream, setDeleteInProgress] = useState(false);
   const [streamName, setStreamName] = useState('');
   const modalTitleId = useGeneratedHtmlId();
+  const isQueryStream = variant === 'query';
 
   const handleDelete = async () => {
     try {
@@ -86,36 +90,64 @@ export function StreamDeleteModal({
     <EuiModal aria-labelledby={modalTitleId} onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.title', {
-            defaultMessage: 'Are you sure you want to delete {stream} ?',
-            values: { stream: name },
-          })}
+          {isQueryStream
+            ? i18n.translate('xpack.streams.streamDetailView.deleteQueryStreamModal.title', {
+                defaultMessage: 'Are you sure you want to delete the Query Stream {stream}?',
+                values: { stream: name },
+              })
+            : i18n.translate('xpack.streams.streamDetailView.deleteStreamModal.title', {
+                defaultMessage: 'Are you sure you want to delete {stream} ?',
+                values: { stream: name },
+              })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiCallOut
-          color="warning"
-          iconType="warning"
+          color={isQueryStream ? 'primary' : 'warning'}
+          iconType={isQueryStream ? 'iInCircle' : 'warning'}
+          data-test-subj="streamsAppDeleteStreamModalCallout"
           title={
-            <FormattedMessage
-              id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
-              defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents. This action cannot be undone."
-              values={{
-                stream: (
-                  <EuiLink
-                    onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                      e.currentTarget.blur();
-                      copyToClipboard(name);
-                    }}
-                  >
-                    {name} <EuiIcon type="copy" aria-hidden={true} />
-                  </EuiLink>
-                ),
-              }}
-            />
+            isQueryStream ? (
+              <FormattedMessage
+                id="xpack.streams.streamDetailView.deleteQueryStreamModal.infoTitle"
+                defaultMessage="Query Streams are read-only. Deleting this Query Stream only removes its saved configuration."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.streams.streamDetailView.deleteStreamModal.warningText"
+                defaultMessage="This action cannot be undone and permanently deletes the {stream} stream and all its contents. This action cannot be undone."
+                values={{
+                  stream: (
+                    <EuiLink
+                      onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                        e.currentTarget.blur();
+                        copyToClipboard(name);
+                      }}
+                    >
+                      {name} <EuiIcon type="copy" aria-hidden={true} />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )
           }
         />
+
+        {isQueryStream && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.streams.streamDetailView.deleteQueryStreamModal.infoBody"
+                  defaultMessage="Query Streams read data from CPS-connected source streams. Deleting {stream} removes its saved query string and stream configuration, but does not delete indexed data."
+                  values={{ stream: name }}
+                />
+              </p>
+            </EuiText>
+          </>
+        )}
 
         <EuiSpacer size="m" />
 

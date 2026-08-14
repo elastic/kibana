@@ -20,11 +20,25 @@ import {
 const QUERY_STREAM_NAME = 'logs.ecs.delete-test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
 const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
+const SOURCE_STREAM_NAME = 'logs.ecs';
+const SOURCE_STREAM_HOST_NAME = 'query-stream-delete-source-host';
 
 test.describe('Query streams - Delete query stream', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
+  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
     await enableQueryStreams(kbnClient);
+    await apiServices.streams.restoreDataStream(SOURCE_STREAM_NAME);
+    await esClient.bulk({
+      index: SOURCE_STREAM_NAME,
+      operations: [
+        { create: {} },
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': SOURCE_STREAM_HOST_NAME,
+        },
+      ],
+      refresh: true,
+    });
     await createRootStreamViews(esClient);
     await createQueryStream(
       esClient,
@@ -42,10 +56,18 @@ test.describe('Query streams - Delete query stream', { tag: tags.stateful.classi
     await disableQueryStreams(kbnClient);
   });
 
-  test('should support deleting an existing query stream', async ({ pageObjects, esClient }) => {
+  test('should support deleting an existing query stream', async ({
+    pageObjects,
+    esClient,
+    page,
+  }) => {
     await pageObjects.streams.clickStreamNameLink(QUERY_STREAM_NAME);
     await pageObjects.streams.clickQueryStreamDetailsTab('overview');
     await pageObjects.streams.clickDeleteQueryStreamButton();
+    await expect(
+      page.getByText(/Query Streams are read-only\. Deleting this Query Stream only removes/i)
+    ).toBeVisible();
+    await expect(page.getByText(/does not delete indexed data/i)).toBeVisible();
     await pageObjects.streams.fillDeleteQueryStreamModalInput(QUERY_STREAM_NAME);
     await pageObjects.streams.clickDeleteQueryStreamModalDeleteButton();
     await expect(pageObjects.streams.queryStreamDeletedSuccessToast).toBeVisible();
@@ -57,5 +79,16 @@ test.describe('Query streams - Delete query stream', { tag: tags.stateful.classi
         path: `/_query/view/${encodeURIComponent(ESQL_VIEW_NAME)}`,
       })
     ).rejects.toThrow(/resource_not_found_exception/);
+
+    const sourceStreamSearchResult = await esClient.search({
+      index: SOURCE_STREAM_NAME,
+      query: {
+        term: {
+          'host.name': SOURCE_STREAM_HOST_NAME,
+        },
+      },
+    });
+
+    expect(sourceStreamSearchResult.hits.total).toStrictEqual({ relation: 'eq', value: 1 });
   });
 });
