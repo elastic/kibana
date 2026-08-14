@@ -20,14 +20,35 @@ import {
   ALERT_STATUS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION,
   ALERT_STATUS_CHANGED_TRIGGER_DESCRIPTION,
   ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-  ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_1,
-  ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_2,
   ALERT_STATUS_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
   TRIGGER_SCHEMA_STATUS_DESCRIPTION,
 } from './translations';
 
 export const AlertStatusChangedTriggerId = 'securitySolution.alertStatusChanged' as const;
+
+const documentationExample1 = `## Run when alerts are acknowledged
+\`\`\`yaml
+triggers:
+  - type: securitySolution.alertStatusChanged
+    on:
+      condition: 'event.status: "acknowledged"'
+\`\`\``;
+
+const documentationExample2 = `## Process each affected alert sequentially
+\`\`\`yaml
+triggers:
+  - type: securitySolution.alertStatusChanged
+steps:
+  - name: process_each_alert
+    type: foreach
+    foreach: "{{ event.alertIds | json }}"
+    steps:
+      - name: summarize
+        type: renderAlertNarrative
+        with:
+          alertId: "{{ foreach.item }}"
+\`\`\``;
 
 const alertStatusChangedEventSchema = z.object({
   alertIds: z
@@ -55,9 +76,6 @@ export const alertStatusChangedTriggerDef: CommonTriggerDefinition = {
   description: ALERT_STATUS_CHANGED_TRIGGER_DESCRIPTION,
   documentation: {
     details: ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-    examples: [
-      ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_1,
-      ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_2,
-    ],
+    examples: [documentationExample1, documentationExample2],
   },
 };

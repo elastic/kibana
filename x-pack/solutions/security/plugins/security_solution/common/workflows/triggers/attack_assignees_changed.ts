@@ -18,7 +18,6 @@ import {
   ATTACK_ASSIGNEES_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION,
   ATTACK_ASSIGNEES_CHANGED_TRIGGER_DESCRIPTION,
   ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-  ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE,
   ATTACK_ASSIGNEES_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION,
   TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
@@ -26,6 +25,14 @@ import {
 } from './translations';
 
 export const AttackAssigneesChangedTriggerId = 'securitySolution.attackAssigneesChanged' as const;
+
+const documentationExample = `## Run when an attack is assigned
+\`\`\`yaml
+triggers:
+  - type: securitySolution.attackAssigneesChanged
+    on:
+      condition: 'event.assigneesToAdd: *'
+\`\`\``;
 
 const attackAssigneesChangedEventSchema = z.object({
   attackIds: z
@@ -55,6 +62,6 @@ export const attackAssigneesChangedTriggerDef: CommonTriggerDefinition = {
   description: ATTACK_ASSIGNEES_CHANGED_TRIGGER_DESCRIPTION,
   documentation: {
     details: ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-    examples: [ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE],
+    examples: [documentationExample],
   },
 };

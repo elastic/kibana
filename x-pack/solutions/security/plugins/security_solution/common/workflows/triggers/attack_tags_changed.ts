@@ -18,7 +18,6 @@ import {
   ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION,
   ATTACK_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-  ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE,
   ATTACK_TAGS_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
   TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION,
@@ -26,6 +25,14 @@ import {
 } from './translations';
 
 export const AttackTagsChangedTriggerId = 'securitySolution.attackTagsChanged' as const;
+
+const documentationExample = `## Run when a tag is added to attacks
+\`\`\`yaml
+triggers:
+  - type: securitySolution.attackTagsChanged
+    on:
+      condition: 'event.tagsToAdd: "escalated"'
+\`\`\``;
 
 const attackTagsChangedEventSchema = z.object({
   attackIds: z
@@ -55,6 +62,6 @@ export const attackTagsChangedTriggerDef: CommonTriggerDefinition = {
   description: ATTACK_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   documentation: {
     details: ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-    examples: [ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE],
+    examples: [documentationExample],
   },
 };

@@ -18,7 +18,6 @@ import {
   ALERT_ASSIGNEES_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION,
   ALERT_ASSIGNEES_CHANGED_TRIGGER_DESCRIPTION,
   ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-  ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE,
   ALERT_ASSIGNEES_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION,
   TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
@@ -26,6 +25,14 @@ import {
 } from './translations';
 
 export const AlertAssigneesChangedTriggerId = 'securitySolution.alertAssigneesChanged' as const;
+
+const documentationExample = `## Run when an alert is assigned
+\`\`\`yaml
+triggers:
+  - type: securitySolution.alertAssigneesChanged
+    on:
+      condition: 'event.assigneesToAdd: *'
+\`\`\``;
 
 const alertAssigneesChangedEventSchema = z.object({
   alertIds: z
@@ -55,6 +62,6 @@ export const alertAssigneesChangedTriggerDef: CommonTriggerDefinition = {
   description: ALERT_ASSIGNEES_CHANGED_TRIGGER_DESCRIPTION,
   documentation: {
     details: ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-    examples: [ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE],
+    examples: [documentationExample],
   },
 };

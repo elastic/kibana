@@ -20,12 +20,17 @@ import {
   NOTE_UPDATED_SCHEMA_UPDATED_BY_DESCRIPTION,
   NOTE_UPDATED_TRIGGER_DESCRIPTION,
   NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS,
-  NOTE_UPDATED_TRIGGER_DOCUMENTATION_EXAMPLE,
   NOTE_UPDATED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
 } from './translations';
 
 export const NoteUpdatedTriggerId = 'securitySolution.noteUpdated' as const;
+
+const documentationExample = `## Run whenever a note is updated on a document
+\`\`\`yaml
+triggers:
+  - type: securitySolution.noteUpdated
+\`\`\``;
 
 const noteUpdatedEventSchema = z.object({
   noteId: z
@@ -63,6 +68,6 @@ export const noteUpdatedTriggerDef: CommonTriggerDefinition = {
   description: NOTE_UPDATED_TRIGGER_DESCRIPTION,
   documentation: {
     details: NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS,
-    examples: [NOTE_UPDATED_TRIGGER_DOCUMENTATION_EXAMPLE],
+    examples: [documentationExample],
   },
 };

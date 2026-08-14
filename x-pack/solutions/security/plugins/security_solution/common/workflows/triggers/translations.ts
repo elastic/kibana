@@ -167,29 +167,6 @@ export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate
   }
 );
 
-export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_1 = `## Run when alerts are acknowledged
-\`\`\`yaml
-triggers:
-  - type: securitySolution.alertStatusChanged
-    on:
-      condition: 'event.status: "acknowledged"'
-\`\`\``;
-
-export const ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE_2 = `## Process each affected alert sequentially
-\`\`\`yaml
-triggers:
-  - type: securitySolution.alertStatusChanged
-steps:
-  - name: process_each_alert
-    type: foreach
-    foreach: "{{ event.alertIds | json }}"
-    steps:
-      - name: summarize
-        type: renderAlertNarrative
-        with:
-          alertId: "{{ foreach.item }}"
-\`\`\``;
-
 // Alert tags changed
 
 export const ALERT_TAGS_CHANGED_TRIGGER_TITLE = i18n.translate(
@@ -210,14 +187,6 @@ export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when a specific tag is added
-\`\`\`yaml
-triggers:
-  - type: securitySolution.alertTagsChanged
-    on:
-      condition: 'event.tagsToAdd: "high-priority"'
-\`\`\``;
-
 // Alert assignees changed
 
 export const ALERT_ASSIGNEES_CHANGED_TRIGGER_TITLE = i18n.translate(
@@ -237,14 +206,6 @@ export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.transl
       'Emitted after assignees are added or removed from a batch of detection alerts. The payload includes event.alertIds, event.assigneesToAdd, event.assigneesToRemove, and event.spaceId.',
   }
 );
-
-export const ALERT_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when an alert is assigned
-\`\`\`yaml
-triggers:
-  - type: securitySolution.alertAssigneesChanged
-    on:
-      condition: 'event.assigneesToAdd: *'
-\`\`\``;
 
 // Attack status changed
 
@@ -268,14 +229,6 @@ export const ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translat
   }
 );
 
-export const ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when attacks are acknowledged
-\`\`\`yaml
-triggers:
-  - type: securitySolution.attackStatusChanged
-    on:
-      condition: 'event.status: "acknowledged"'
-\`\`\``;
-
 // Attack tags changed
 
 export const ATTACK_TAGS_CHANGED_TRIGGER_TITLE = i18n.translate(
@@ -296,14 +249,6 @@ export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when a tag is added to attacks
-\`\`\`yaml
-triggers:
-  - type: securitySolution.attackTagsChanged
-    on:
-      condition: 'event.tagsToAdd: "escalated"'
-\`\`\``;
-
 // Attack assignees changed
 
 export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_TITLE = i18n.translate(
@@ -323,14 +268,6 @@ export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.trans
       'Emitted after assignees are added or removed from a batch of attack discoveries. The payload includes event.attackIds, event.assigneesToAdd, event.assigneesToRemove, and event.spaceId.',
   }
 );
-
-export const ATTACK_ASSIGNEES_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run when an attack is assigned
-\`\`\`yaml
-triggers:
-  - type: securitySolution.attackAssigneesChanged
-    on:
-      condition: 'event.assigneesToAdd: *'
-\`\`\``;
 
 // Note created
 
@@ -355,12 +292,6 @@ export const NOTE_CREATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
-export const NOTE_CREATED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run whenever a note is added to a document
-\`\`\`yaml
-triggers:
-  - type: securitySolution.noteCreated
-\`\`\``;
-
 // Note updated
 
 export const NOTE_UPDATED_TRIGGER_TITLE = i18n.translate(
@@ -383,9 +314,3 @@ export const NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translate(
       'Emitted after a note is updated on a specific document. Only fires for notes attached to an entity (documentId is set). The payload includes event.noteId, event.noteContent, event.updatedBy, event.documentId, and event.spaceId.',
   }
 );
-
-export const NOTE_UPDATED_TRIGGER_DOCUMENTATION_EXAMPLE = `## Run whenever a note is updated on a document
-\`\`\`yaml
-triggers:
-  - type: securitySolution.noteUpdated
-\`\`\``;

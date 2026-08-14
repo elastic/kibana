@@ -18,7 +18,6 @@ import {
   ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION,
   ALERT_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-  ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE,
   ALERT_TAGS_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
   TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION,
@@ -26,6 +25,14 @@ import {
 } from './translations';
 
 export const AlertTagsChangedTriggerId = 'securitySolution.alertTagsChanged' as const;
+
+const documentationExample = `## Run when a specific tag is added
+\`\`\`yaml
+triggers:
+  - type: securitySolution.alertTagsChanged
+    on:
+      condition: 'event.tagsToAdd: "high-priority"'
+\`\`\``;
 
 const alertTagsChangedEventSchema = z.object({
   alertIds: z
@@ -55,6 +62,6 @@ export const alertTagsChangedTriggerDef: CommonTriggerDefinition = {
   description: ALERT_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   documentation: {
     details: ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-    examples: [ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE],
+    examples: [documentationExample],
   },
 };

@@ -19,13 +19,20 @@ import {
   ATTACK_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION,
   ATTACK_STATUS_CHANGED_TRIGGER_DESCRIPTION,
   ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-  ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE,
   ATTACK_STATUS_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_SPACE_ID_DESCRIPTION,
   TRIGGER_SCHEMA_STATUS_DESCRIPTION,
 } from './translations';
 
 export const AttackStatusChangedTriggerId = 'securitySolution.attackStatusChanged' as const;
+
+const documentationExample = `## Run when attacks are acknowledged
+\`\`\`yaml
+triggers:
+  - type: securitySolution.attackStatusChanged
+    on:
+      condition: 'event.status: "acknowledged"'
+\`\`\``;
 
 const attackStatusChangedEventSchema = z.object({
   attackIds: z
@@ -52,6 +59,6 @@ export const attackStatusChangedTriggerDef: CommonTriggerDefinition = {
   description: ATTACK_STATUS_CHANGED_TRIGGER_DESCRIPTION,
   documentation: {
     details: ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-    examples: [ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_EXAMPLE],
+    examples: [documentationExample],
   },
 };
