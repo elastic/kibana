@@ -191,12 +191,9 @@ export const useBulkAddToCaseActions = ({
             disableOnQuery: true,
             disabledLabel: ADD_TO_NEW_CASE,
             onClick: (alerts?: TimelineItem[]) => {
-              const caseAttachments =
-                alerts && caseOwner
-                  ? casesService?.helpers.groupAlertsByRule(alerts, caseOwner) ?? []
-                  : [];
               createCaseFlyout.open({
-                attachments: caseAttachments,
+                getAttachments: (owner) =>
+                  alerts ? casesService?.helpers.groupAlertsByRule(alerts, owner) ?? [] : [],
               });
             },
           },

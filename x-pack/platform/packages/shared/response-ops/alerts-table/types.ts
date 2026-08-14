@@ -107,7 +107,7 @@ export interface SystemCellComponentMap {
 export type SystemCellId = keyof SystemCellComponentMap;
 
 type UseCasesAddToNewCaseFlyout = (props?: Record<string, unknown> & { onSuccess: () => void }) => {
-  open: ({ attachments }: { attachments: any[] }) => void;
+  open: (props: { attachments?: any[]; getAttachments?: (owner: string) => any[] }) => void;
   close: () => void;
 };
 

@@ -64,7 +64,9 @@ describe('bulk action hooks', () => {
 
   const refresh = jest.fn();
   const clearSelection = jest.fn();
-  const mockOpenNewCase = jest.fn();
+  const mockOpenNewCase = jest.fn().mockImplementation(({ getAttachments }) => {
+    getAttachments?.('cases');
+  });
   const setIsBulkActionsLoading = jest.fn();
 
   const mockOpenExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
