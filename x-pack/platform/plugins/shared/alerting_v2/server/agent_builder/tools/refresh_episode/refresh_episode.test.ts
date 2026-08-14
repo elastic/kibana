@@ -163,7 +163,7 @@ describe('refreshEpisodeTool', () => {
         ],
       });
       expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Failed to load rule for episode refresh; falling back to grouping values: not found',
+        'Failed to load rule for episode refresh: not found',
         {
           labels: {
             episode_id: 'ep-1',
@@ -174,7 +174,7 @@ describe('refreshEpisodeTool', () => {
       );
     });
 
-    it('uses the group name when the rule cannot be loaded', async () => {
+    it('omits the episode name when the rule cannot be loaded and grouping fields are unknown', async () => {
       get.mockResolvedValueOnce({
         ...baseEpisodeData,
         episode_data: JSON.stringify({ host: { name: 'web-01' } }),
@@ -187,7 +187,7 @@ describe('refreshEpisodeTool', () => {
         results: [
           {
             type: ToolResultType.other,
-            data: expect.objectContaining({ 'episode.name': 'web-01 alert' }),
+            data: expect.not.objectContaining({ 'episode.name': expect.anything() }),
           },
         ],
       });

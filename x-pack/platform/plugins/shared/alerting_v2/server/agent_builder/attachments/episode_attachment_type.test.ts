@@ -173,7 +173,7 @@ describe('createEpisodeAttachmentType', () => {
       expect(result).toEqual(expect.not.objectContaining({ 'episode.name': expect.anything() }));
     });
 
-    it('uses the group name when the rule cannot be loaded', async () => {
+    it('omits the episode name when the rule cannot be loaded and grouping fields are unknown', async () => {
       getEpisode.mockResolvedValueOnce({
         ...baseEpisodeData,
         episode_data: JSON.stringify({ host: { name: 'web-01' } }),
@@ -182,7 +182,7 @@ describe('createEpisodeAttachmentType', () => {
 
       const result = await definition.resolve!('ep-1', createResolveContext());
 
-      expect(result).toEqual(expect.objectContaining({ 'episode.name': 'web-01 alert' }));
+      expect(result).toEqual(expect.not.objectContaining({ 'episode.name': expect.anything() }));
     });
 
     it('uses grouping fields from the rule when the rule name is missing', async () => {

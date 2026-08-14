@@ -11,7 +11,6 @@ const GROUP_NAME_SEPARATOR = ' · ';
 
 export interface ResolveEpisodeNameParams {
   ruleName?: string;
-  groupName?: string;
   episodeData?: string | null;
   groupingFields?: readonly string[];
 }
@@ -32,7 +31,7 @@ const parseEpisodeData = (raw?: string | null): Record<string, unknown> => {
   }
 };
 
-/** Nested path, or a single flattened top-level key such as `host.name`. */
+/** Reads a flattened top-level key or a nested dotted path. */
 const getByPath = (data: Record<string, unknown>, field: string): unknown => {
   if (Object.hasOwn(data, field)) {
     return data[field];
@@ -46,56 +45,25 @@ const getByPath = (data: Record<string, unknown>, field: string): unknown => {
   }, data);
 };
 
-const collectStringLeaves = (value: unknown, skipKeys?: ReadonlySet<string>): string[] => {
-  if (typeof value === 'string') {
-    const text = value.trim();
-    return text === '' ? [] : [text];
-  }
-  if (Array.isArray(value)) {
-    return value.flatMap((item) => collectStringLeaves(item));
-  }
-  if (isPlainObject(value)) {
-    return Object.entries(value).flatMap(([key, nested]) =>
-      skipKeys?.has(key) ? [] : collectStringLeaves(nested)
-    );
-  }
-  return [];
-};
-
-const formatGroupingValue = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    return '';
-  }
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return String(value).trim();
-  }
-  return collectStringLeaves(value).join(', ');
-};
-
-export const resolveGroupNameFromEpisodeData = (
+const resolveGroupName = (
   episodeData?: string | null,
   groupingFields?: readonly string[]
 ): string | undefined => {
+  if (!groupingFields?.length || !episodeData) {
+    return undefined;
+  }
+
   const data = parseEpisodeData(episodeData);
+  const values = groupingFields
+    .map((field) => getByPath(data, field))
+    .filter(
+      (v): v is string | number | boolean =>
+        typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean'
+    )
+    .map((v) => String(v).trim())
+    .filter(Boolean);
 
-  if (groupingFields && groupingFields.length > 0) {
-    const values = groupingFields.map((field) => formatGroupingValue(getByPath(data, field)));
-    const nonEmpty = values.filter((value) => value !== '');
-    return nonEmpty.length > 0 ? nonEmpty.join(GROUP_NAME_SEPARATOR) : undefined;
-  }
-
-  const values = collectStringLeaves(data, new Set(['rule_name']));
   return values.length > 0 ? values.join(GROUP_NAME_SEPARATOR) : undefined;
-};
-
-const firstNonEmpty = (...values: Array<string | undefined>): string | undefined => {
-  for (const value of values) {
-    const trimmed = value?.trim();
-    if (trimmed) {
-      return trimmed;
-    }
-  }
-  return undefined;
 };
 
 /**
@@ -104,37 +72,24 @@ const firstNonEmpty = (...values: Array<string | undefined>): string | undefined
  */
 export const resolveEpisodeName = ({
   ruleName,
-  groupName,
   episodeData,
   groupingFields,
 }: ResolveEpisodeNameParams = {}): string | undefined => {
-  const data = parseEpisodeData(episodeData);
-  const resolvedRuleName = firstNonEmpty(
-    ruleName,
-    typeof data.rule_name === 'string' ? data.rule_name : undefined
-  );
-  const resolvedGroupName = firstNonEmpty(
-    groupName,
-    groupingFields && groupingFields.length > 0
-      ? resolveGroupNameFromEpisodeData(episodeData, groupingFields)
-      : undefined,
-    resolvedRuleName ? undefined : resolveGroupNameFromEpisodeData(episodeData)
-  );
+  const resolvedRuleName = ruleName?.trim() || undefined;
+  const groupName = resolveGroupName(episodeData, groupingFields);
 
-  if (resolvedRuleName && resolvedGroupName) {
+  if (resolvedRuleName && groupName) {
     return i18n.translate('xpack.alertingV2.episodeAttachment.episodeNameFromRuleAndGroup', {
       defaultMessage: '{ruleName} alert for {groupName}',
-      values: { ruleName: resolvedRuleName, groupName: resolvedGroupName },
+      values: { ruleName: resolvedRuleName, groupName },
     });
   }
 
-  const name = resolvedRuleName ?? resolvedGroupName;
-  if (!name) {
-    return undefined;
-  }
-
-  return i18n.translate('xpack.alertingV2.episodeAttachment.episodeName', {
-    defaultMessage: '{name} alert',
-    values: { name },
-  });
+  const name = resolvedRuleName ?? groupName;
+  return name
+    ? i18n.translate('xpack.alertingV2.episodeAttachment.episodeName', {
+        defaultMessage: '{name} alert',
+        values: { name },
+      })
+    : undefined;
 };
