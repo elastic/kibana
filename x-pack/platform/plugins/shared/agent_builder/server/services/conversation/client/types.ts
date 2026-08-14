@@ -67,6 +67,13 @@ export type ConversationUpdateRequest = Pick<
   | 'template_version'
 >;
 
+export interface GetEventsOptions {
+  /** Return only events after the one with this id (exclusive). */
+  afterEventId?: string;
+  /** Cap the number of events returned (applied after `afterEventId`). */
+  limit?: number;
+}
+
 /**
  * Persists a single completed round as intent, not end state, so it can be merged into
  * whatever is stored. A caller-supplied `rounds` array would drop concurrent rounds.

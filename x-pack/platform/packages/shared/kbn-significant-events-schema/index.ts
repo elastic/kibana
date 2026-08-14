@@ -105,6 +105,7 @@ export {
   type Severity,
   severitySchema,
   SEVERITY_OPTIONS,
+  SEVERITY_CONTRACT_RULE,
   getSeverityLabel,
   detectionSchema,
   blastRadiusEntrySchema,
