@@ -62,9 +62,6 @@ export const DISCOVER_ESQL_COLUMNS_KBN_ARCHIVE =
 export const ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls';
 
-/** Title of the only dashboard in {@link ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE}. */
-export const ESQL_CONTROLS_DASHBOARD_TITLE = 'ES|QL controls fixture dashboard';
-
 /**
  * ID of the ES|QL control in {@link ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE}. Lives
  * inside the dashboard's `controlGroupInput`, so it survives the saved-object

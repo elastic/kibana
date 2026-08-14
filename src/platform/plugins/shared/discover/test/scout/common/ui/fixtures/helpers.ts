@@ -120,7 +120,7 @@ export const runCascadeQuery = async (
  * Discover the same control does sit inside a control group. Matching on
  * `[data-control-id]` alone therefore works in both places.
  */
-export const getControls = (page: ScoutPage) => page.locator('[data-control-id]');
+const getControls = (page: ScoutPage) => page.locator('[data-control-id]');
 
 /** Asserts exactly one control is rendered and returns its id. */
 export const getOnlyControlId = async (page: ScoutPage): Promise<string> => {
@@ -136,12 +136,12 @@ export const getOnlyControlId = async (page: ScoutPage): Promise<string> => {
 /**
  * Creates an ES|QL control from the Discover editor by typing a query that ends in
  * a variable position, picking "Create control" from the suggestion widget, and
- * saving the flyout.
+ * saving the flyout. Returns once the control group is rendered.
  */
 export const createEsqlControl = async (
   page: ScoutPage,
   query: string,
-  { variableName, label }: { variableName?: string; label?: string } = {}
+  { variableName, label, values }: { variableName?: string; label?: string; values?: string[] } = {}
 ): Promise<void> => {
   const codeEditor = new KibanaCodeEditorWrapper(page);
   await codeEditor.setCodeEditorValue(query);
@@ -160,9 +160,16 @@ export const createEsqlControl = async (
   if (label !== undefined) {
     await page.testSubj.fill('esqlControlLabel', label);
   }
+  if (values) {
+    const valuesComboBox = page.components.comboBox('esqlValuesOptions');
+    for (const value of values) {
+      await valuesComboBox.setCustomSelectedOptions([value]);
+    }
+  }
 
   const saveButton = page.testSubj.locator('saveEsqlControlsFlyoutButton');
   await expect(saveButton).toBeEnabled();
   await saveButton.click();
   await flyout.waitFor({ state: 'hidden' });
+  await page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
 };

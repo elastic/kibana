@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '../fixtures';
+import { createEsqlControl, spaceTest } from '../fixtures';
 
 const LOGSTASH_QUERY_START = 'FROM logstash-* | WHERE geo.dest == ';
 const ESQL_MULTI_VALUE_QUERY_START = 'FROM logstash-* | WHERE MV_CONTAINS( ';
@@ -18,33 +16,6 @@ const ESQL_MULTI_VALUE_QUERY =
   'FROM logstash-* | WHERE MV_CONTAINS( ?values, geo.dest ) | KEEP geo.dest';
 
 const createSessionName = (prefix: string, spaceId: string) => `${prefix}-${spaceId}-${Date.now()}`;
-
-const createEsqlControl = async (
-  page: ScoutPage,
-  query: string,
-  { values }: { values?: string[] } = {}
-) => {
-  const codeEditor = new KibanaCodeEditorWrapper(page);
-  await codeEditor.setCodeEditorValue(query);
-  await codeEditor.triggerSuggest(query);
-
-  const suggestionWidget = codeEditor.getCodeEditorSuggestWidget();
-  await suggestionWidget.waitFor({ state: 'visible' });
-  await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
-  await page.testSubj.locator('create_esql_control_flyout').waitFor({ state: 'visible' });
-
-  if (values) {
-    const valuesComboBox = page.components.comboBox('esqlValuesOptions');
-    for (const value of values) {
-      await valuesComboBox.setCustomSelectedOptions([value]);
-    }
-  }
-
-  await page.testSubj.locator('saveEsqlControlsFlyoutButton').waitFor({ state: 'visible' });
-  await page.testSubj.locator('saveEsqlControlsFlyoutButton').click();
-  await page.testSubj.locator('create_esql_control_flyout').waitFor({ state: 'hidden' });
-  await page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
-};
 
 const expectOnlyRowsContaining = (rows: string[][], values: string[]) => {
   expect(rows.length).toBeGreaterThan(0);

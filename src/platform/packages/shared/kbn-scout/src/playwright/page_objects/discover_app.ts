@@ -613,17 +613,24 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
 
     // Navigating to the dashboard leaves the current Discover session behind, so a
-    // session with unsaved changes prompts for confirmation first. The prompt does
-    // not appear when there is nothing unsaved, hence the bounded wait.
-    const leaveConfirmModal = this.page.testSubj.locator('appLeaveConfirmModal');
-    const promptAppeared = await leaveConfirmModal
-      .waitFor({ state: 'visible', timeout: 5_000 })
-      .then(
+    // session with unsaved changes prompts for confirmation first. When there is
+    // nothing unsaved the prompt is skipped and the save modal just closes, so wait
+    // for whichever of the two actually happens rather than a fixed timeout.
+    const leaveConfirmButton = this.page.testSubj
+      .locator('appLeaveConfirmModal')
+      .getByTestId('confirmModalConfirmButton');
+    const promptAppeared = await Promise.race([
+      leaveConfirmButton.waitFor({ state: 'visible' }).then(
         () => true,
         () => false
-      );
+      ),
+      saveModal.waitFor({ state: 'hidden' }).then(
+        () => false,
+        () => false
+      ),
+    ]);
     if (promptAppeared) {
-      await leaveConfirmModal.getByTestId('confirmModalConfirmButton').click();
+      await leaveConfirmButton.click();
     }
 
     await expect(saveModal).toBeHidden({ timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
@@ -969,6 +976,16 @@ export class DiscoverApp {
       this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
     getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
       this.controls.getControlFrame(controlId).getByText(value),
+    /**
+     * Locator for an options-list control's selected-values label, e.g. `AE` for a
+     * single selection or `AE, CN` for multiple. Unlike
+     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
+     * assert that a value is the *only* selection.
+     */
+    getSelectionsLocator: (controlId: string): Locator =>
+      this.page.testSubj
+        .locator(`optionsList-control-${controlId}`)
+        .getByTestId('optionsListSelections'),
   };
 
   getDocHeaderLabels(): Locator {

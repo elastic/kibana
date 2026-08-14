@@ -51,6 +51,9 @@ spaceTest.describe(
     spaceTest(
       'should retain the controls and their state',
       async ({ browserAuth, kbnUrl, page, pageObjects }) => {
+        // FTR ran as `kibana_admin` + `test_logstash_reader`. `kibana_admin` grants full
+        // Kibana administrative privileges, so `admin` is the faithful mapping here;
+        // `loginAsPrivilegedUser()` (`editor`) would be a downgrade, not an equivalent.
         await browserAuth.loginAsAdmin();
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 

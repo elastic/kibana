@@ -36,6 +36,9 @@ spaceTest.describe(
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
+      // FTR ran as `kibana_admin` + `test_logstash_reader`. `kibana_admin` grants full
+      // Kibana administrative privileges, so `admin` is the faithful mapping here;
+      // `loginAsPrivilegedUser()` (`editor`) would be a downgrade, not an equivalent.
       await browserAuth.loginAsAdmin();
     });
 
@@ -52,7 +55,7 @@ spaceTest.describe(
 
         const discoverControlId = await getOnlyControlId(page);
         await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(discoverControlId)
+          pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
         ).toHaveText(INITIAL_SELECTION);
 
         await pageObjects.dashboard.optionsListOpenPopover(discoverControlId);
@@ -61,7 +64,7 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilTabIsLoaded();
 
         await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(discoverControlId)
+          pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
         ).toHaveText(UPDATED_SELECTION);
 
         await pageObjects.discover.saveTableToNewDashboard(BY_VALUE_TABLE_TITLE);
@@ -124,7 +127,7 @@ spaceTest.describe(
         await pageObjects.discover.waitUntilTabIsLoaded();
 
         await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(discoverControlId)
+          pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
         ).toHaveText(UPDATED_SELECTION);
 
         await pageObjects.discover.saveAndReturnToEditor();
