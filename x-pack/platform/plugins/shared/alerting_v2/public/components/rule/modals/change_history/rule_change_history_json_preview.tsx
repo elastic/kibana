@@ -14,6 +14,11 @@ import { diffJson, type Change } from 'diff';
 
 const formatSnapshot = (snapshot: unknown): string => JSON.stringify(snapshot, null, 2);
 
+const snapshotCodeBlockStyle = css`
+  height: 100%;
+  margin: 0;
+`;
+
 const RuleChangeHistoryJsonPreview = ({
   change,
   compareSpec,
@@ -47,6 +52,28 @@ const RuleChangeHistoryJsonPreview = ({
     diffTelemetry?.reportDiffViewed();
   }, [diffTelemetry, hasChanges, hasCompare, isLoadingCompareContext]);
 
+  const diffWrapperStyle = css`
+    height: 100%;
+    min-height: 0;
+    padding: ${euiTheme.size.s};
+  `;
+
+  const diffContainerStyle = css`
+    min-height: 0;
+    overflow: auto;
+    border: ${euiTheme.border.thin};
+    border-radius: ${euiTheme.border.radius.small};
+    background: ${euiTheme.colors.backgroundBasePlain};
+    font-family: ${euiTheme.font.familyCode};
+    font-size: ${euiTheme.size.m};
+    line-height: 1.5;
+    white-space: pre;
+  `;
+
+  const diffContentStyle = css`
+    padding: ${euiTheme.size.m};
+  `;
+
   if (!diffParts) {
     return (
       <EuiCodeBlock
@@ -56,10 +83,7 @@ const RuleChangeHistoryJsonPreview = ({
         fontSize="s"
         overflowHeight={640}
         data-test-subj="ruleChangeHistoryJsonPreview"
-        css={css`
-          height: 100%;
-          margin: 0;
-        `}
+        css={snapshotCodeBlockStyle}
       >
         {formatSnapshot(targetSnapshot)}
       </EuiCodeBlock>
@@ -71,11 +95,7 @@ const RuleChangeHistoryJsonPreview = ({
       direction="column"
       gutterSize="s"
       responsive={false}
-      css={css`
-        height: 100%;
-        min-height: 0;
-        padding: ${euiTheme.size.s};
-      `}
+      css={diffWrapperStyle}
       data-test-subj="ruleChangeHistoryJsonDiffPreview"
     >
       <EuiFlexItem grow={false}>
@@ -87,25 +107,8 @@ const RuleChangeHistoryJsonPreview = ({
           })}
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow
-        css={css`
-          min-height: 0;
-          overflow: auto;
-          border: ${euiTheme.border.thin};
-          border-radius: ${euiTheme.border.radius.small};
-          background: ${euiTheme.colors.backgroundBasePlain};
-          font-family: ${euiTheme.font.familyCode};
-          font-size: ${euiTheme.size.m};
-          line-height: 1.5;
-          white-space: pre;
-        `}
-      >
-        <div
-          css={css`
-            padding: ${euiTheme.size.m};
-          `}
-        >
+      <EuiFlexItem grow css={diffContainerStyle}>
+        <div css={diffContentStyle}>
           {diffParts.map((part, index) => {
             let background = 'transparent';
             let color = euiTheme.colors.textParagraph;
