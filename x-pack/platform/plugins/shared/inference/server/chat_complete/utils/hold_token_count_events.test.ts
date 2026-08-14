@@ -138,6 +138,31 @@ describe('retryHoldingTokenCountEvents', () => {
     expect(caughtError).toEqual(new Error('non retryable'));
   });
 
+  it('resets the retry prediction counter for each subscription', async () => {
+    let attempt = 0;
+    const source$ = defer(() => {
+      attempt++;
+      if (attempt % 2 === 1) {
+        return concat(
+          of(failedTokens),
+          throwError(() => new Error(`attempt ${attempt} failed`))
+        );
+      }
+      return from([successTokens, messageEvent('message')]);
+    });
+
+    const composed$ = source$.pipe(retryHoldingTokenCountEvents({ maxRetry: 1, initialDelay: 1 }));
+
+    expect(await firstValueFrom(composed$.pipe(toArray()))).toEqual([
+      successTokens,
+      messageEvent('message'),
+    ]);
+    expect(await firstValueFrom(composed$.pipe(toArray()))).toEqual([
+      successTokens,
+      messageEvent('message'),
+    ]);
+  });
+
   it('flushes the final attempt token counts when retries are exhausted', async () => {
     let attempt = 0;
     const source$ = defer(() => {
