@@ -11,11 +11,6 @@
 
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 
-import {
-  AWS_SERVICE_PROVIDER_PERMISSIONS,
-  type ProviderPermissions,
-} from './aws_provider_permissions';
-
 export type SignalType = 'logs' | 'metrics';
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
@@ -75,9 +70,6 @@ export interface AwsServiceMatrixEntry {
   /** Whether this service should be shown in the AWS onboarding UI */
   showInUI: boolean;
   badge?: Badge;
-  /** Hardcoded AWS IAM permissions required to ingest this data stream.
-   *  Temporary until packages expose provider_permissions in the manifest. */
-  providerPermissions?: ProviderPermissions;
 }
 
 /**
@@ -87,19 +79,12 @@ export interface AwsServiceMatrixEntry {
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
-  'providerPermissions' | 'deploymentMethods' | 'signalType' | 'defaultEnabled'
+  'deploymentMethods' | 'signalType' | 'defaultEnabled'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   signalType?: SignalType;
   defaultEnabled?: boolean;
 };
-
-function enrichWithProviderPermissions(
-  entry: Omit<AwsServiceMatrixEntry, 'providerPermissions'>
-): AwsServiceMatrixEntry {
-  const providerPermissions = AWS_SERVICE_PROVIDER_PERMISSIONS[entry.id];
-  return providerPermissions ? { ...entry, providerPermissions } : entry;
-}
 
 const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
@@ -778,9 +763,9 @@ export function buildAwsServiceMatrix(
       mandatoryFields,
       defaultEnabled,
       identityFederationSupported,
-    } as Omit<AwsServiceMatrixEntry, 'providerPermissions'>;
+    } as AwsServiceMatrixEntry;
 
-    return enrichWithProviderPermissions(merged);
+    return merged;
   });
 }
 
@@ -802,7 +787,7 @@ export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
     const base = {
       ...rest,
       deploymentMethods,
-    } as unknown as Omit<AwsServiceMatrixEntry, 'providerPermissions'>;
-    return [entry.id, enrichWithProviderPermissions(base)];
+    } as unknown as AwsServiceMatrixEntry;
+    return [entry.id, base];
   })
 );
