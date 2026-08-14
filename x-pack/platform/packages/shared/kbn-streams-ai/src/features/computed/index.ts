@@ -84,6 +84,11 @@ function toComputedFeature(
   };
 }
 
+export interface ComputedFeatureGenerationResult {
+  features: BaseFeature[];
+  errors: Array<{ feature: string; error: string }>;
+}
+
 /**
  * Generates all computed features by running every registered generator.
  *
@@ -93,30 +98,30 @@ function toComputedFeature(
  */
 export async function generateAllComputedFeatures(
   options: ComputedFeatureGeneratorOptions
-): Promise<BaseFeature[]> {
+): Promise<ComputedFeatureGenerationResult> {
   const allGenerators = registry.getAll();
   const results = await Promise.allSettled(
     allGenerators.map((generator) => generator.generate(options))
   );
 
-  const rejectedReasons: unknown[] = [];
-  const features = results.flatMap((result, index) => {
-    if (result.status === 'rejected') {
-      rejectedReasons.push(result.reason);
-      options.logger.warn(
-        `Computed feature generator "${allGenerators[index].type}" failed: ${result.reason}`
-      );
-      return [];
-    }
-    if (result.value === undefined) {
-      return [];
-    }
-    return [toComputedFeature(allGenerators[index], result.value, options.stream.name)];
-  });
+  const errors: Array<{ feature: string; error: string }> = [];
+  const features: BaseFeature[] = [];
 
-  if (features.length === 0 && rejectedReasons.length > 0) {
-    throw new Error(`All computed feature generators failed: ${rejectedReasons.join('; ')}`);
+  for (const [index, result] of results.entries()) {
+    const generator = allGenerators[index];
+    if (result.status === 'rejected') {
+      const message =
+        result.reason instanceof Error ? result.reason.message : String(result.reason);
+      options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
+      errors.push({ feature: generator.type, error: message });
+    } else if (result.value !== undefined) {
+      features.push(toComputedFeature(generator, result.value, options.stream.name));
+    }
   }
 
-  return features;
+  if (features.length === 0 && errors.length > 0) {
+    throw new Error(`All computed feature generators failed: ${errors.map((e) => e.error).join('; ')}`);
+  }
+
+  return { features, errors };
 }

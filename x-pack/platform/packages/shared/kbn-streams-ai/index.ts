@@ -45,7 +45,10 @@ export {
   type SearchSimilarFeaturesArguments,
   type SimilarFeatureHit,
 } from './src/features/identify_features';
-export { generateAllComputedFeatures } from './src/features/computed';
+export {
+  generateAllComputedFeatures,
+  type ComputedFeatureGenerationResult,
+} from './src/features/computed';
 export {
   CODE_ANALYSIS_PROVIDER_KEY,
   codeAnalysisGenerator,
