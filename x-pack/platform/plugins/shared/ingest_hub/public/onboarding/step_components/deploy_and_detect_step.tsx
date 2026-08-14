@@ -238,7 +238,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                   <EuiButton
                     href={unifiedLaunchUrl}
                     target="_blank"
-                    iconType="popout"
+                    iconType="external"
                     iconSide="right"
                     fill
                     data-test-subj="deployAndDetectStep-ecfUnifiedLaunchButton"
@@ -287,7 +287,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                     <EuiButton
                       href={otelLaunchUrl}
                       target="_blank"
-                      iconType="popout"
+                      iconType="external"
                       iconSide="right"
                       fill
                       data-test-subj="deployAndDetectStep-ecfOtelLaunchButton"
@@ -337,7 +337,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                     <EuiButton
                       href={crowdstrikeLaunchUrl}
                       target="_blank"
-                      iconType="popout"
+                      iconType="external"
                       iconSide="right"
                       fill
                       data-test-subj="deployAndDetectStep-ecfCrowdstrikeLaunchButton"
