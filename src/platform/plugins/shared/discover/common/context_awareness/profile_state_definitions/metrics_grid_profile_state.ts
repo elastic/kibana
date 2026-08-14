@@ -16,9 +16,9 @@ import {
 import type { ProfileStateDefinition } from '../profile_state';
 import { ProfileStateType } from '../profile_state';
 
-export type MetricsGridState = MetricsGridSettings & MetricsGridSort;
+export type MetricsState = MetricsGridSettings & MetricsGridSort;
 
-export const METRICS_GRID_SETTINGS_STATE_DEF: ProfileStateDefinition<MetricsGridState> = {
+export const METRICS_STATE_DEF: ProfileStateDefinition<MetricsState> = {
   key: 'metricsGridSettings',
   descriptor: {
     counterAggregation: { type: ProfileStateType.Persistent },

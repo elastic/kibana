@@ -95,7 +95,7 @@ spaceTest.describe(
         // Tab state is written to local storage on a trailing throttle, so an
         // immediate reload could race the write. Poll storage until the sort
         // lands to deterministically test "persisted sort survives a reload".
-        // The `metricsGridSettings` key mirrors `METRICS_GRID_SETTINGS_STATE_DEF.key`
+        // The `metricsGridSettings` key mirrors `METRICS_STATE_DEF.key`
         // (not importable from Scout specs); keep in sync if that key ever changes.
         await expect
           .poll(() =>

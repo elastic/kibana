@@ -8,28 +8,28 @@
  */
 
 import { ProfileStateRegistry, ProfileStateType } from '../profile_state';
-import { METRICS_GRID_SETTINGS_STATE_DEF } from './metrics_grid_profile_state';
+import { METRICS_STATE_DEF } from './metrics_grid_profile_state';
 
-const KEY = METRICS_GRID_SETTINGS_STATE_DEF.key;
+const KEY = METRICS_STATE_DEF.key;
 
 const createRegistry = () => {
   const registry = new ProfileStateRegistry();
-  registry.registerDefinition(METRICS_GRID_SETTINGS_STATE_DEF);
+  registry.registerDefinition(METRICS_STATE_DEF);
   return registry;
 };
 
-describe('METRICS_GRID_SETTINGS_STATE_DEF', () => {
+describe('METRICS_STATE_DEF', () => {
   it('registers the definition', () => {
     const registry = createRegistry();
 
-    expect(registry.hasDefinition(METRICS_GRID_SETTINGS_STATE_DEF)).toBe(true);
+    expect(registry.hasDefinition(METRICS_STATE_DEF)).toBe(true);
     // The key is a storage contract: it is persisted inside users' local tab
     // storage with no migration path, so renaming it orphans persisted state.
-    expect(METRICS_GRID_SETTINGS_STATE_DEF.key).toBe('metricsGridSettings');
+    expect(METRICS_STATE_DEF.key).toBe('metricsGridSettings');
   });
 
   it('types all fields as Persistent so the host persists them locally across reloads', () => {
-    expect(METRICS_GRID_SETTINGS_STATE_DEF.descriptor).toEqual({
+    expect(METRICS_STATE_DEF.descriptor).toEqual({
       counterAggregation: { type: ProfileStateType.Persistent },
       gaugeAggregation: { type: ProfileStateType.Persistent },
       histogramPercentile: { type: ProfileStateType.Persistent },

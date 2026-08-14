@@ -24,10 +24,7 @@ import type { DiscoverAppState } from '../../../../../application/main/state_man
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
 import type { ProfileStateAdapter } from '../../../..';
-import {
-  METRICS_GRID_SETTINGS_STATE_DEF,
-  type MetricsGridState,
-} from '../../../../../../common/context_awareness';
+import { METRICS_STATE_DEF, type MetricsState } from '../../../../../../common/context_awareness';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 import { RecentMetricsStorage } from './recent_metrics_storage';
 /**
@@ -37,7 +34,7 @@ import { RecentMetricsStorage } from './recent_metrics_storage';
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & {
     actions: ContextAwarenessToolkitActions;
-    metricsStateAdapter: ProfileStateAdapter<MetricsGridState>;
+    metricsStateAdapter: ProfileStateAdapter<MetricsState>;
   }
 ) => {
   const { metricsStateAdapter } = props;
@@ -141,7 +138,7 @@ export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev, { toolkit }) =>
   () => {
-    const metricsStateAdapter = toolkit.getStateAdapter(METRICS_GRID_SETTINGS_STATE_DEF);
+    const metricsStateAdapter = toolkit.getStateAdapter(METRICS_STATE_DEF);
     return {
       ...prev(),
       renderChartSection: (props) => {

@@ -22,6 +22,6 @@ export {
   type ExampleProfileState,
 } from './profile_state_definitions/example_profile_state';
 export {
-  METRICS_GRID_SETTINGS_STATE_DEF,
-  type MetricsGridState,
+  METRICS_STATE_DEF,
+  type MetricsState,
 } from './profile_state_definitions/metrics_grid_profile_state';

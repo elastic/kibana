@@ -32,7 +32,7 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
-import type { MetricsGridState } from '../../../../../../common/context_awareness';
+import type { MetricsState } from '../../../../../../common/context_awareness';
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 import type { ContextAwarenessToolkit, ContextAwarenessToolkitActions } from '../../../../toolkit';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
@@ -66,13 +66,13 @@ jest.mock('@kbn/unified-chart-section-viewer', () => ({
   },
 }));
 
-const createFakeMetricsStateAdapter = (initialState: MetricsGridState) => {
+const createFakeMetricsStateAdapter = (initialState: MetricsState) => {
   const subject = new BehaviorSubject(initialState);
   return {
     getState: () => subject.getValue(),
     getState$: () => subject.asObservable(),
-    setState: (state: MetricsGridState) => subject.next(state),
-    updateState: jest.fn((update: Partial<MetricsGridState>) =>
+    setState: (state: MetricsState) => subject.next(state),
+    updateState: jest.fn((update: Partial<MetricsState>) =>
       subject.next({ ...subject.getValue(), ...update })
     ),
   };
