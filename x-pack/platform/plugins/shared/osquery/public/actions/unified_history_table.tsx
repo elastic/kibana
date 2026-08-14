@@ -435,7 +435,9 @@ const UnifiedHistoryTableComponent = () => {
   }, []);
 
   const renderTimestampColumn = useCallback(
-    (_: unknown, row: UnifiedHistoryRow) => <>{formatDate(row.timestamp)}</>,
+    (_: unknown, row: UnifiedHistoryRow) => (
+      <>{formatDate(isScheduledRow(row) ? row.plannedTime ?? row.timestamp : row.timestamp)}</>
+    ),
     []
   );
 
@@ -632,7 +634,7 @@ const UnifiedHistoryTableComponent = () => {
 
     if (visibleSet.has('created_at')) {
       cols.push({
-        field: 'timestamp',
+        field: 'plannedTime',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
           defaultMessage: 'Created at',
         }),

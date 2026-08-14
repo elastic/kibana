@@ -42,6 +42,9 @@ const config: TaskManagerConfig = {
     active_nodes_lookback: '30s',
     interval: 10000,
   },
+  execution_control: {
+    poll_interval: 5000,
+  },
   kibanas_per_partition: 2,
   invalidate_api_key_task: {
     interval: '5m',

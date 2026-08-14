@@ -24,7 +24,7 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
     const { lens } = pageObjects;
 
     await spaceTest.step('drop a field onto the workspace', async () => {
-      await lens.dragFieldWithKeyboard('@timestamp');
+      await lens.dragDrop.dragFieldWithKeyboard('@timestamp');
       await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
         '@timestamp'
       );
@@ -38,11 +38,11 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
     });
 
     await spaceTest.step('drop fields onto empty and reverse targets', async () => {
-      await lens.dragFieldWithKeyboard('bytes', 4);
+      await lens.dragDrop.dragFieldWithKeyboard('bytes', 4);
       await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
         ['Count of records', 'Median of bytes']
       );
-      await lens.dragFieldWithKeyboard('@message.raw', 1, true);
+      await lens.dragDrop.dragFieldWithKeyboard('@message.raw', 1, true);
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
       ).toHaveText(['Top 9 values of @message.raw']);
@@ -55,7 +55,7 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
     });
 
     await spaceTest.step('replace an existing dimension via keyboard', async () => {
-      await lens.dragFieldWithKeyboard('clientip', 1, true);
+      await lens.dragDrop.dragFieldWithKeyboard('clientip', 1, true);
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
       ).toHaveText(['Top 9 values of clientip']);
@@ -68,7 +68,7 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
     });
 
     await spaceTest.step('duplicate an element in a group', async () => {
-      await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
+      await lens.dragDrop.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
       await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
         ['Count of records', 'Median of bytes', 'Count of records [1]']
       );
@@ -78,7 +78,7 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
     });
 
     await spaceTest.step('move dimension to compatible dimension', async () => {
-      await lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 5);
+      await lens.dragDrop.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 5);
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')
       ).toHaveCount(0);
@@ -86,7 +86,7 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
         lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
       ).toHaveText(['@timestamp']);
 
-      await lens.dimensionKeyboardDragDrop('lnsXY_splitDimensionPanel', 0, 5, true);
+      await lens.dragDrop.dimensionKeyboardDragDrop('lnsXY_splitDimensionPanel', 0, 5, true);
       await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
         ['@timestamp']
       );
@@ -97,12 +97,12 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
     });
 
     await spaceTest.step('move dimension to incompatible dimension', async () => {
-      await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 1, 2);
+      await lens.dragDrop.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 1, 2);
       await expect(
         lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
       ).toHaveText(['bytes']);
 
-      await lens.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 2);
+      await lens.dragDrop.dimensionKeyboardDragDrop('lnsXY_xDimensionPanel', 0, 2);
       await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
         ['Count of records', 'Count of @timestamp']
       );
@@ -112,7 +112,7 @@ spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classi
     });
 
     await spaceTest.step('reorder elements with keyboard', async () => {
-      await lens.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
+      await lens.dragDrop.dimensionKeyboardReorder('lnsXY_yDimensionPanel', 0, 1);
       await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')).toHaveText(
         ['Count of @timestamp', 'Count of records']
       );

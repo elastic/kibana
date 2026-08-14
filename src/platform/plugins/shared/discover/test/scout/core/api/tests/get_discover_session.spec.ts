@@ -118,7 +118,7 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest(
-    'returns 500 when the output transform fails to validate the stored Discover session',
+    'returns warnings and preserves valid controls when a stored control is invalid',
     async ({ apiClient, kbnClient }) => {
       const { attributes, references } =
         await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
@@ -128,7 +128,9 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       const [firstTab, ...otherTabs] = attributes.tabs;
       const controlGroup = JSON.parse(firstTab.attributes.controlGroupJson!);
       const controlId = Object.keys(controlGroup)[0];
+      const validControlId = 'valid-control';
 
+      controlGroup[validControlId] = { ...controlGroup[controlId], order: 1 };
       controlGroup[controlId].width = 'extra_large';
 
       await kbnClient.savedObjects.create({
@@ -162,7 +164,17 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
         }
       );
 
-      expect(response).toHaveStatusCode(500);
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.data.tabs[0].control_panels).toStrictEqual([
+        expect.objectContaining({ id: validControlId }),
+      ]);
+      expect(response.body.warnings).toStrictEqual([
+        expect.objectContaining({
+          type: 'dropped_panel',
+          tab_id: firstTab.id,
+          panel_id: controlId,
+        }),
+      ]);
     }
   );
 });
