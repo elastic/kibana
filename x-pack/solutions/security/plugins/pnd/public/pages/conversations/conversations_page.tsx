@@ -21,7 +21,7 @@ import { QUEUE_PAGE_INFO } from './translations';
 import { ConversationQueue } from '../../components/conversation_queue';
 import { type BaseActionsProps } from '../../components/conversation_card/base_actions';
 import { BlastRadius } from '../../components/filters/blast_radius';
-import { BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
+import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -36,11 +36,13 @@ export const ConversationsPage: React.FC = () => {
   const [modalState, setModalState] = useState<{
     type: 'case' | 'dismiss' | 'assign' | null;
     recordId: Investigation['recordId'] | null;
-  }>({ type: null, recordId: null });
+    assignee?: string | null;
+  }>({ type: null, recordId: null, assignee: null });
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
-    (action, recordId) => {
-      setModalState({ type: action, recordId });
+    (action, recordId, assignee = null) => {
+      setModalState({ type: action, recordId, assignee });
+      console.log('conversation: ', recordId);
     },
     [setModalState]
   );
@@ -98,25 +100,20 @@ export const ConversationsPage: React.FC = () => {
       `}
     >
       {modalState.type === 'assign' && modalState.recordId && (
-        <BaseActionModal
-          title={MODAL_TRANSLATIONS.assign.title}
+        <AssignActionModal
           recordId={modalState.recordId}
+          initialAssignee={modalState.assignee}
           onClose={() => setModalState({ type: null, recordId: null })}
-          rationalePlaceholder={MODAL_TRANSLATIONS.assign.rationalePlaceholder}
-          primaryAction={{
-            color: 'primary',
-            label: MODAL_TRANSLATIONS.assign.actionButtonLabel,
-            onClick: () => {
-              setModalState({ type: null, recordId: null });
-            },
+          onAssign={() => {
+            // TODO: use assign action API call hook
+            setModalState({ type: null, recordId: null });
           }}
-        >
-          {'dropdown goes here'}
-        </BaseActionModal>
+        />
       )}
 
       {modalState.type === 'dismiss' && modalState.recordId && (
         <BaseActionModal
+          type="dismiss"
           title={MODAL_TRANSLATIONS.dismiss.title}
           recordId={modalState.recordId}
           onClose={() => setModalState({ type: null, recordId: null })}
@@ -125,6 +122,7 @@ export const ConversationsPage: React.FC = () => {
             color: 'danger',
             label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
             onClick: () => {
+              // TODO: use dismiss action API call hook
               setModalState({ type: null, recordId: null });
             },
           }}

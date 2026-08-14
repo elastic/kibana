@@ -30,18 +30,29 @@ export interface ActionModalPrimaryAction {
 }
 
 export interface BaseActionModalProps {
+  type: 'assign' | 'dismiss';
   title: string;
   /** Case/record ID shown in the decision-history body sentence */
   recordId: string;
   /** Optional content rendered between the body text and the rationale field (e.g. an "Assign to" select) */
   children?: React.ReactNode;
+  hasAssigneeError?: boolean;
   rationalePlaceholder: string;
   primaryAction: ActionModalPrimaryAction;
   onClose: () => void;
 }
 
 export const BaseActionModal = memo<BaseActionModalProps>(
-  ({ title, recordId, children, rationalePlaceholder, primaryAction, onClose }) => {
+  ({
+    type,
+    title,
+    recordId,
+    children,
+    hasAssigneeError,
+    rationalePlaceholder,
+    primaryAction,
+    onClose,
+  }) => {
     const [rationale, setRationale] = useState('');
 
     return (
@@ -110,7 +121,7 @@ export const BaseActionModal = memo<BaseActionModalProps>(
             color={primaryAction.color ?? 'primary'}
             iconType={primaryAction.icon}
             onClick={() => primaryAction.onClick(rationale)}
-            isDisabled={rationale.trim() === ''}
+            isDisabled={(type === 'assign' && hasAssigneeError) || rationale.trim() === ''}
           >
             {primaryAction.label}
           </EuiButton>

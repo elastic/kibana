@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { AssignActionModal } from './assign_action_modal';
 export { BaseActionModal } from './base_action_modal';
 export { MODAL_TRANSLATIONS } from './translations';
