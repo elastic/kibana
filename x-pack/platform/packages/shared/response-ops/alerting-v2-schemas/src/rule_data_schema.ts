@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
-import { durationSchema, tagsSchema } from './common';
+import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
@@ -640,10 +640,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
       ),
   }),
   enabled: z.boolean().describe('Whether the rule is enabled.'),
-  createdBy: z.string().nullable().describe('User who created the rule.'),
-  createdAt: z.string().describe('ISO timestamp when the rule was created.'),
-  updatedBy: z.string().nullable().describe('User who last updated the rule.'),
-  updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  created_by: z.string().nullable().describe('User who created the rule.'),
+  created_at: z.string().describe('ISO timestamp when the rule was created.'),
+  updated_by: z.string().nullable().describe('User who last updated the rule.'),
+  updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
   version: z
     .string()
     .optional()
@@ -687,7 +687,7 @@ export const findRulesResponseSchema = z
     items: z.array(ruleResponseSchema).describe('The list of rules.'),
     total: z.number().describe('The total number of rules matching the query.'),
     page: z.number().describe('The current page number.'),
-    perPage: z.number().describe('The number of rules per page.'),
+    per_page: z.number().describe('The number of rules per page.'),
   })
   .describe('Paginated list of rules.');
 
@@ -706,15 +706,6 @@ export const ruleTagsParamsSchema = z
   .strict();
 
 export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
-
-/** Normalized wrapped tags response (shared by rule-tag and action-policy-tag routes). */
-export const tagsResponseSchema = z
-  .object({
-    tags: z.array(z.string()).describe('The list of unique tags.'),
-  })
-  .describe('Wrapped tags response.');
-
-export type TagsResponse = z.infer<typeof tagsResponseSchema>;
 
 /** Rule tags response schema. */
 export const ruleTagsResponseSchema = tagsResponseSchema.describe('All unique tags across rules.');
