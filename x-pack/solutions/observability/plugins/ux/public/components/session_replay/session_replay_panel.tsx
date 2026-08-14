@@ -644,275 +644,282 @@ export function SessionReplayPanel() {
     <>
       <TabTrendChart accessor="sessions" />
       <EuiSpacer />
-    <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
-      {injectOpen && <SessionReplayInjectFlyout http={http} onClose={() => setInjectOpen(false)} />}
-      {(pageUrl || errorGroup || sessionIds || frustration || urlUser || urlLocation) && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            iconType="filter"
-            title={i18n.translate('xpack.ux.sessions.deepLinkTitle', {
-              defaultMessage: 'Filtered from another view',
-            })}
-          >
-            <p>
-              {[
-                pageUrl
-                  ? i18n.translate('xpack.ux.sessions.deepLink.page', {
-                      defaultMessage: 'Page: {page}',
-                      values: { page: pageUrl },
-                    })
-                  : null,
-                errorGroup
-                  ? i18n.translate('xpack.ux.sessions.deepLink.error', {
-                      defaultMessage: 'Error group: {group}',
-                      values: { group: errorGroup },
-                    })
-                  : null,
-                frustration
-                  ? i18n.translate('xpack.ux.sessions.deepLink.frustration', {
-                      defaultMessage: 'Frustration: {kind}',
-                      values: { kind: frustration },
-                    })
-                  : null,
-                urlUser
-                  ? i18n.translate('xpack.ux.sessions.deepLink.user', {
-                      defaultMessage: 'User: {user}',
-                      values: { user: urlUser },
-                    })
-                  : null,
-                sessionIds
-                  ? i18n.translate('xpack.ux.sessions.deepLink.ids', {
-                      defaultMessage: '{count} linked sessions',
-                      values: { count: sessionIds.split(',').filter(Boolean).length },
-                    })
-                  : null,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
-          </EuiCallOut>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <SessionReplayInjectButton onClick={() => setInjectOpen(true)} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="gear"
-            onClick={openSettings}
-            data-test-subj="uxSessionReplaySettingsButton"
-          >
-            {i18n.translate('xpack.ux.sessions.settingsButton', {
-              defaultMessage: 'Capture settings',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <KpiStrip stats={stats} />
-      <EuiSpacer size="m" />
-
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.ux.sessions.intro', {
-            defaultMessage:
-              'Each row is a browser visit. Journey shows page path changes (A → B → C), or in-page activity when the URL does not change. Open Details for a per-page breakdown, or Play the replay when available.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            placeholder={i18n.translate('xpack.ux.sessions.searchPlaceholder', {
-              defaultMessage: 'Search by user, page, browser, or session id',
-            })}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            isClearable
-            data-test-subj="uxSessionSearch"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <EuiFilterButton
-              hasActiveFilters={onlyReplay}
-              onClick={() => resetPage(() => setOnlyReplay((v) => !v))}
-              numFilters={facets.hasReplay}
-              data-test-subj="uxSessionFilterReplay"
+      <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
+        {injectOpen && (
+          <SessionReplayInjectFlyout http={http} onClose={() => setInjectOpen(false)} />
+        )}
+        {(pageUrl || errorGroup || sessionIds || frustration || urlUser || urlLocation) && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              iconType="filter"
+              title={i18n.translate('xpack.ux.sessions.deepLinkTitle', {
+                defaultMessage: 'Filtered from another view',
+              })}
             >
-              {i18n.translate('xpack.ux.sessions.filter.hasReplay', {
-                defaultMessage: 'Has replay',
-              })}
-            </EuiFilterButton>
-            <EuiFilterButton
-              hasActiveFilters={onlyErrors}
-              onClick={() => resetPage(() => setOnlyErrors((v) => !v))}
-              numFilters={facets.hasErrors}
-              data-test-subj="uxSessionFilterErrors"
-            >
-              {i18n.translate('xpack.ux.sessions.filter.hasErrors', {
-                defaultMessage: 'Has errors',
-              })}
-            </EuiFilterButton>
-            <EuiFilterButton
-              hasActiveFilters={onlyRage}
-              onClick={() => resetPage(() => setOnlyRage((v) => !v))}
-              numFilters={facets.hasRage}
-              data-test-subj="uxSessionFilterRage"
-            >
-              {i18n.translate('xpack.ux.sessions.filter.hasRage', {
-                defaultMessage: 'Rage clicks',
-              })}
-            </EuiFilterButton>
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
-            <FacetSelect
-              label={i18n.translate('xpack.ux.sessions.filter.browser', {
-                defaultMessage: 'Browser',
-              })}
-              options={facets.browsers.map((bucket) => ({ key: bucket.key, count: bucket.count }))}
-              value={urlBrowser || browser}
-              searchable
-              onChange={(next) => {
-                resetPage(() => setBrowser(next));
-                history.push({
-                  ...history.location,
-                  search: mergeRumSearch(history.location.search, { browser: next ?? '' }),
-                });
-              }}
-            />
-            <FacetSelect
-              label={i18n.translate('xpack.ux.sessions.filter.os', { defaultMessage: 'OS' })}
-              options={facets.os.map((bucket) => ({ key: bucket.key, count: bucket.count }))}
-              value={urlOs || os}
-              searchable
-              onChange={(next) => {
-                resetPage(() => setOs(next));
-                history.push({
-                  ...history.location,
-                  search: mergeRumSearch(history.location.search, { os: next ?? '' }),
-                });
-              }}
-            />
-            <FacetSelect
-              label={i18n.translate('xpack.ux.sessions.filter.country', {
-                defaultMessage: 'Country',
-              })}
-              options={facets.countries.map((bucket) => ({
-                key: bucket.key,
-                count: bucket.count,
-              }))}
-              value={typeof urlLocation === 'string' ? urlLocation : undefined}
-              searchable
-              onChange={(next) => {
-                setPageIndex(0);
-                history.push({
-                  ...history.location,
-                  search: mergeRumSearch(history.location.search, { location: next ?? '' }),
-                });
-              }}
-            />
-            <FacetSelect
-              label={i18n.translate('xpack.ux.sessions.filter.user', { defaultMessage: 'User' })}
-              options={userFacetOptions}
-              value={urlUser}
-              searchable
-              onChange={setUserFilter}
-            />
-            <FacetSelect
-              label={i18n.translate('xpack.ux.sessions.filter.duration', {
-                defaultMessage: 'Duration',
-              })}
-              options={DURATION_OPTIONS.filter((option) => option.key !== 'any').map((option) => ({
-                key: option.key,
-                label: option.label,
-              }))}
-              value={durationKey === 'any' ? undefined : durationKey}
-              onChange={(next) => resetPage(() => setDurationKey(next ?? 'any'))}
-            />
-            <EuiFilterButton
-              hasActiveFilters={includeBotsActive}
-              onClick={toggleIncludeBots}
-              data-test-subj="uxSessionFilterIncludeBots"
-            >
-              {i18n.translate('xpack.ux.sessions.filter.includeBots', {
-                defaultMessage: 'Include bots',
-              })}
-            </EuiFilterButton>
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        {anyFilterActive && (
+              <p>
+                {[
+                  pageUrl
+                    ? i18n.translate('xpack.ux.sessions.deepLink.page', {
+                        defaultMessage: 'Page: {page}',
+                        values: { page: pageUrl },
+                      })
+                    : null,
+                  errorGroup
+                    ? i18n.translate('xpack.ux.sessions.deepLink.error', {
+                        defaultMessage: 'Error group: {group}',
+                        values: { group: errorGroup },
+                      })
+                    : null,
+                  frustration
+                    ? i18n.translate('xpack.ux.sessions.deepLink.frustration', {
+                        defaultMessage: 'Frustration: {kind}',
+                        values: { kind: frustration },
+                      })
+                    : null,
+                  urlUser
+                    ? i18n.translate('xpack.ux.sessions.deepLink.user', {
+                        defaultMessage: 'User: {user}',
+                        values: { user: urlUser },
+                      })
+                    : null,
+                  sessionIds
+                    ? i18n.translate('xpack.ux.sessions.deepLink.ids', {
+                        defaultMessage: '{count} linked sessions',
+                        values: { count: sessionIds.split(',').filter(Boolean).length },
+                      })
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <SessionReplayInjectButton onClick={() => setInjectOpen(true)} />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
-              iconType="cross"
-              onClick={clearFilters}
-              data-test-subj="uxSessionClearFilters"
+              iconType="gear"
+              onClick={openSettings}
+              data-test-subj="uxSessionReplaySettingsButton"
             >
-              {i18n.translate('xpack.ux.sessions.filter.clear', { defaultMessage: 'Clear' })}
+              {i18n.translate('xpack.ux.sessions.settingsButton', {
+                defaultMessage: 'Capture settings',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <KpiStrip stats={stats} />
+        <EuiSpacer size="m" />
 
-      <EuiSpacer size="m" />
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.ux.sessions.intro', {
+              defaultMessage:
+                'Each row is a browser visit. Journey shows page path changes (A → B → C), or in-page activity when the URL does not change. Open Details for a per-page breakdown, or Play the replay when available.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
 
-      {error ? (
-        <EuiEmptyPrompt
-          color="danger"
-          iconType="error"
-          title={
-            <h2>
-              {i18n.translate('xpack.ux.sessions.loadErrorTitle', {
-                defaultMessage: 'Unable to load sessions',
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem>
+            <EuiFieldSearch
+              fullWidth
+              placeholder={i18n.translate('xpack.ux.sessions.searchPlaceholder', {
+                defaultMessage: 'Search by user, page, browser, or session id',
               })}
-            </h2>
-          }
-          body={<p>{error}</p>}
-          actions={
-            <EuiButtonEmpty data-test-subj="uxSessionListPageRetryButton" onClick={loadSessions}>
-              {i18n.translate('xpack.ux.sessions.retry', { defaultMessage: 'Retry' })}
-            </EuiButtonEmpty>
-          }
-        />
-      ) : (
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.ux.sessions.tableCaption', {
-            defaultMessage: 'User sessions',
-          })}
-          items={sessions}
-          columns={columns}
-          loading={loading}
-          sorting={{ sort: { field: sortField, direction: sortDirection } }}
-          pagination={{
-            pageIndex,
-            pageSize,
-            totalItemCount: total,
-            pageSizeOptions: [10, 25, 50],
-          }}
-          onChange={onTableChange}
-          rowProps={(item) => ({
-            onClick: () => openDetail(item.sessionId),
-            style: { cursor: 'pointer' },
-          })}
-          noItemsMessage={i18n.translate('xpack.ux.sessions.empty', {
-            defaultMessage:
-              'No sessions found for this time range. Capture traffic with EDOT Browser (session.id on traces/logs), or enable Session Replay.',
-          })}
-          data-test-subj="uxSessionReplayTable"
-        />
-      )}
-    </EuiPanel>
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              isClearable
+              data-test-subj="uxSessionSearch"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
+              <EuiFilterButton
+                hasActiveFilters={onlyReplay}
+                onClick={() => resetPage(() => setOnlyReplay((v) => !v))}
+                numFilters={facets.hasReplay}
+                data-test-subj="uxSessionFilterReplay"
+              >
+                {i18n.translate('xpack.ux.sessions.filter.hasReplay', {
+                  defaultMessage: 'Has replay',
+                })}
+              </EuiFilterButton>
+              <EuiFilterButton
+                hasActiveFilters={onlyErrors}
+                onClick={() => resetPage(() => setOnlyErrors((v) => !v))}
+                numFilters={facets.hasErrors}
+                data-test-subj="uxSessionFilterErrors"
+              >
+                {i18n.translate('xpack.ux.sessions.filter.hasErrors', {
+                  defaultMessage: 'Has errors',
+                })}
+              </EuiFilterButton>
+              <EuiFilterButton
+                hasActiveFilters={onlyRage}
+                onClick={() => resetPage(() => setOnlyRage((v) => !v))}
+                numFilters={facets.hasRage}
+                data-test-subj="uxSessionFilterRage"
+              >
+                {i18n.translate('xpack.ux.sessions.filter.hasRage', {
+                  defaultMessage: 'Rage clicks',
+                })}
+              </EuiFilterButton>
+            </EuiFilterGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup>
+              <FacetSelect
+                label={i18n.translate('xpack.ux.sessions.filter.browser', {
+                  defaultMessage: 'Browser',
+                })}
+                options={facets.browsers.map((bucket) => ({
+                  key: bucket.key,
+                  count: bucket.count,
+                }))}
+                value={urlBrowser || browser}
+                searchable
+                onChange={(next) => {
+                  resetPage(() => setBrowser(next));
+                  history.push({
+                    ...history.location,
+                    search: mergeRumSearch(history.location.search, { browser: next ?? '' }),
+                  });
+                }}
+              />
+              <FacetSelect
+                label={i18n.translate('xpack.ux.sessions.filter.os', { defaultMessage: 'OS' })}
+                options={facets.os.map((bucket) => ({ key: bucket.key, count: bucket.count }))}
+                value={urlOs || os}
+                searchable
+                onChange={(next) => {
+                  resetPage(() => setOs(next));
+                  history.push({
+                    ...history.location,
+                    search: mergeRumSearch(history.location.search, { os: next ?? '' }),
+                  });
+                }}
+              />
+              <FacetSelect
+                label={i18n.translate('xpack.ux.sessions.filter.country', {
+                  defaultMessage: 'Country',
+                })}
+                options={facets.countries.map((bucket) => ({
+                  key: bucket.key,
+                  count: bucket.count,
+                }))}
+                value={typeof urlLocation === 'string' ? urlLocation : undefined}
+                searchable
+                onChange={(next) => {
+                  setPageIndex(0);
+                  history.push({
+                    ...history.location,
+                    search: mergeRumSearch(history.location.search, { location: next ?? '' }),
+                  });
+                }}
+              />
+              <FacetSelect
+                label={i18n.translate('xpack.ux.sessions.filter.user', { defaultMessage: 'User' })}
+                options={userFacetOptions}
+                value={urlUser}
+                searchable
+                onChange={setUserFilter}
+              />
+              <FacetSelect
+                label={i18n.translate('xpack.ux.sessions.filter.duration', {
+                  defaultMessage: 'Duration',
+                })}
+                options={DURATION_OPTIONS.filter((option) => option.key !== 'any').map(
+                  (option) => ({
+                    key: option.key,
+                    label: option.label,
+                  })
+                )}
+                value={durationKey === 'any' ? undefined : durationKey}
+                onChange={(next) => resetPage(() => setDurationKey(next ?? 'any'))}
+              />
+              <EuiFilterButton
+                hasActiveFilters={includeBotsActive}
+                onClick={toggleIncludeBots}
+                data-test-subj="uxSessionFilterIncludeBots"
+              >
+                {i18n.translate('xpack.ux.sessions.filter.includeBots', {
+                  defaultMessage: 'Include bots',
+                })}
+              </EuiFilterButton>
+            </EuiFilterGroup>
+          </EuiFlexItem>
+          {anyFilterActive && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="cross"
+                onClick={clearFilters}
+                data-test-subj="uxSessionClearFilters"
+              >
+                {i18n.translate('xpack.ux.sessions.filter.clear', { defaultMessage: 'Clear' })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        {error ? (
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="error"
+            title={
+              <h2>
+                {i18n.translate('xpack.ux.sessions.loadErrorTitle', {
+                  defaultMessage: 'Unable to load sessions',
+                })}
+              </h2>
+            }
+            body={<p>{error}</p>}
+            actions={
+              <EuiButtonEmpty data-test-subj="uxSessionListPageRetryButton" onClick={loadSessions}>
+                {i18n.translate('xpack.ux.sessions.retry', { defaultMessage: 'Retry' })}
+              </EuiButtonEmpty>
+            }
+          />
+        ) : (
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.ux.sessions.tableCaption', {
+              defaultMessage: 'User sessions',
+            })}
+            items={sessions}
+            columns={columns}
+            loading={loading}
+            sorting={{ sort: { field: sortField, direction: sortDirection } }}
+            pagination={{
+              pageIndex,
+              pageSize,
+              totalItemCount: total,
+              pageSizeOptions: [10, 25, 50],
+            }}
+            onChange={onTableChange}
+            rowProps={(item) => ({
+              onClick: () => openDetail(item.sessionId),
+              style: { cursor: 'pointer' },
+            })}
+            noItemsMessage={i18n.translate('xpack.ux.sessions.empty', {
+              defaultMessage:
+                'No sessions found for this time range. Capture traffic with EDOT Browser (session.id on traces/logs), or enable Session Replay.',
+            })}
+            data-test-subj="uxSessionReplayTable"
+          />
+        )}
+      </EuiPanel>
     </>
   );
 }

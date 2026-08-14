@@ -328,136 +328,146 @@ export function RumPagesPanel() {
     <>
       <TabTrendChart accessor="pageViews" />
       <EuiSpacer />
-    <EuiPanel paddingSize="m" data-test-subj="uxRumPagesPanel">
-      <EuiTitle size="xs">
-        <h2>{i18n.translate('xpack.ux.pages.title', { defaultMessage: 'Pages' })}</h2>
-      </EuiTitle>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.ux.pages.description', {
-            defaultMessage:
-              'Routes grouped from documentLoad spans and browser.navigation events. Open a row for vitals, or jump to the sessions that hit that page.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
-      {error && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            title={i18n.translate('xpack.ux.pages.errorTitle', {
-              defaultMessage: 'Unable to load pages',
+      <EuiPanel paddingSize="m" data-test-subj="uxRumPagesPanel">
+        <EuiTitle size="xs">
+          <h2>{i18n.translate('xpack.ux.pages.title', { defaultMessage: 'Pages' })}</h2>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.ux.pages.description', {
+              defaultMessage:
+                'Routes grouped from documentLoad spans and browser.navigation events. Open a row for vitals, or jump to the sessions that hit that page.',
             })}
-          >
-            <p>{error}</p>
-            <EuiButton
-              data-test-subj="uxRumPagesPanelRetryButton"
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+
+        {error && (
+          <>
+            <EuiCallOut
+              announceOnMount
               color="danger"
-              onClick={() => void load()}
-            >
-              {i18n.translate('xpack.ux.pages.retry', { defaultMessage: 'Retry' })}
-            </EuiButton>
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      )}
-
-      {loading && pages.length === 0 ? (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.ux.pages.tableCaption', {
-            defaultMessage: 'Pages grouped by URL path',
-          })}
-          items={pages}
-          columns={columns}
-          loading={loading}
-          noItemsMessage={i18n.translate('xpack.ux.pages.empty', {
-            defaultMessage: 'No pages in this range',
-          })}
-        />
-      )}
-
-      {selected && (
-        <EuiFlyout size="m" onClose={() => setSelected(null)} aria-labelledby="uxPageDetailTitle">
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="s">
-              <h2 id="uxPageDetailTitle">{selected.path}</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiDescriptionList
-              listItems={[
-                {
-                  title: i18n.translate('xpack.ux.pages.detail.views', { defaultMessage: 'Views' }),
-                  description: String(selected.views),
-                },
-                {
-                  title: i18n.translate('xpack.ux.pages.detail.errors', {
-                    defaultMessage: 'Errors',
-                  }),
-                  description: String(selected.errorCount),
-                },
-                {
-                  title: i18n.translate('xpack.ux.pages.detail.lcp', { defaultMessage: 'LCP p75' }),
-                  description: formatMs(selected.p75Lcp),
-                },
-                {
-                  title: i18n.translate('xpack.ux.pages.detail.inp', { defaultMessage: 'INP p75' }),
-                  description: formatMs(selected.p75Inp),
-                },
-                {
-                  title: i18n.translate('xpack.ux.pages.detail.cls', { defaultMessage: 'CLS p75' }),
-                  description: selected.p75Cls == null ? '—' : selected.p75Cls.toFixed(3),
-                },
-                {
-                  title: i18n.translate('xpack.ux.pages.detail.load', {
-                    defaultMessage: 'Avg load',
-                  }),
-                  description: formatMs(selected.avgDurationMs),
-                },
-              ]}
-            />
-            <EuiSpacer />
-            <EuiTitle size="xxs">
-              <h3>
-                {i18n.translate('xpack.ux.pages.why.title', { defaultMessage: 'Why is this slow' })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <WhySlow attribution={selected.attribution} />
-            <EuiSpacer />
-            <EuiTitle size="xxs">
-              <h3>
-                {i18n.translate('xpack.ux.pages.resources.title', {
-                  defaultMessage: 'Slowest resources',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <ResourcePanel resources={selected.resources} />
-            <EuiSpacer />
-            <EuiButton
-              data-test-subj="uxRumPagesPanelViewSessionsOnThisPageButton"
-              fill
-              onClick={() =>
-                pushRumPath(history, '/session-replay', sessionsPatch({ pageUrl: selected.path }))
-              }
-            >
-              {i18n.translate('xpack.ux.pages.detail.viewSessions', {
-                defaultMessage: 'View sessions on this page',
+              title={i18n.translate('xpack.ux.pages.errorTitle', {
+                defaultMessage: 'Unable to load pages',
               })}
-            </EuiButton>
-          </EuiFlyoutBody>
-        </EuiFlyout>
-      )}
-    </EuiPanel>
+            >
+              <p>{error}</p>
+              <EuiButton
+                data-test-subj="uxRumPagesPanelRetryButton"
+                color="danger"
+                onClick={() => void load()}
+              >
+                {i18n.translate('xpack.ux.pages.retry', { defaultMessage: 'Retry' })}
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
+        {loading && pages.length === 0 ? (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.ux.pages.tableCaption', {
+              defaultMessage: 'Pages grouped by URL path',
+            })}
+            items={pages}
+            columns={columns}
+            loading={loading}
+            noItemsMessage={i18n.translate('xpack.ux.pages.empty', {
+              defaultMessage: 'No pages in this range',
+            })}
+          />
+        )}
+
+        {selected && (
+          <EuiFlyout size="m" onClose={() => setSelected(null)} aria-labelledby="uxPageDetailTitle">
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="s">
+                <h2 id="uxPageDetailTitle">{selected.path}</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <EuiDescriptionList
+                listItems={[
+                  {
+                    title: i18n.translate('xpack.ux.pages.detail.views', {
+                      defaultMessage: 'Views',
+                    }),
+                    description: String(selected.views),
+                  },
+                  {
+                    title: i18n.translate('xpack.ux.pages.detail.errors', {
+                      defaultMessage: 'Errors',
+                    }),
+                    description: String(selected.errorCount),
+                  },
+                  {
+                    title: i18n.translate('xpack.ux.pages.detail.lcp', {
+                      defaultMessage: 'LCP p75',
+                    }),
+                    description: formatMs(selected.p75Lcp),
+                  },
+                  {
+                    title: i18n.translate('xpack.ux.pages.detail.inp', {
+                      defaultMessage: 'INP p75',
+                    }),
+                    description: formatMs(selected.p75Inp),
+                  },
+                  {
+                    title: i18n.translate('xpack.ux.pages.detail.cls', {
+                      defaultMessage: 'CLS p75',
+                    }),
+                    description: selected.p75Cls == null ? '—' : selected.p75Cls.toFixed(3),
+                  },
+                  {
+                    title: i18n.translate('xpack.ux.pages.detail.load', {
+                      defaultMessage: 'Avg load',
+                    }),
+                    description: formatMs(selected.avgDurationMs),
+                  },
+                ]}
+              />
+              <EuiSpacer />
+              <EuiTitle size="xxs">
+                <h3>
+                  {i18n.translate('xpack.ux.pages.why.title', {
+                    defaultMessage: 'Why is this slow',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <WhySlow attribution={selected.attribution} />
+              <EuiSpacer />
+              <EuiTitle size="xxs">
+                <h3>
+                  {i18n.translate('xpack.ux.pages.resources.title', {
+                    defaultMessage: 'Slowest resources',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <ResourcePanel resources={selected.resources} />
+              <EuiSpacer />
+              <EuiButton
+                data-test-subj="uxRumPagesPanelViewSessionsOnThisPageButton"
+                fill
+                onClick={() =>
+                  pushRumPath(history, '/session-replay', sessionsPatch({ pageUrl: selected.path }))
+                }
+              >
+                {i18n.translate('xpack.ux.pages.detail.viewSessions', {
+                  defaultMessage: 'View sessions on this page',
+                })}
+              </EuiButton>
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        )}
+      </EuiPanel>
     </>
   );
 }

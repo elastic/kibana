@@ -30,7 +30,10 @@ import type { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 import { uxFiltersByName, uxLocalUIFilterNames } from '../../../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { OTEL_BROWSER_NAME, OTEL_BROWSER_OS } from '../../../../../common/otel_rum';
-import { rumPageLoadFilter, rumServiceNameFilter } from '../../../../services/data/rum_otel_filters';
+import {
+  rumPageLoadFilter,
+  rumServiceNameFilter,
+} from '../../../../services/data/rum_otel_filters';
 
 const filterNames: UxLocalUIFilterName[] = ['location', 'device', 'os', 'browser'];
 

@@ -132,7 +132,8 @@ describe('Lens Attribute', () => {
           dataType: 'number',
           filter: {
             language: 'kuery',
-            query: '((transaction.type: page-load and processor.event: transaction) or name: documentLoad)',
+            query:
+              '((transaction.type: page-load and processor.event: transaction) or name: documentLoad)',
           },
           isBucketed: false,
           label: 'Page load time',

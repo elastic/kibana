@@ -353,74 +353,74 @@ export function RumErrorsPanel() {
     <>
       <TabTrendChart accessor="errors" />
       <EuiSpacer />
-    <EuiPanel paddingSize="m" data-test-subj="uxRumErrorsPanel">
-      <EuiTitle size="xs">
-        <h2>{i18n.translate('xpack.ux.errors.title', { defaultMessage: 'Errors' })}</h2>
-      </EuiTitle>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.ux.errors.description', {
-            defaultMessage:
-              'JavaScript exceptions grouped by type and message. Open a group to see a sample stack, or jump to the sessions (and APM, when a grouping key is present).',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
-      {error && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            title={i18n.translate('xpack.ux.errors.errorTitle', {
-              defaultMessage: 'Unable to load errors',
+      <EuiPanel paddingSize="m" data-test-subj="uxRumErrorsPanel">
+        <EuiTitle size="xs">
+          <h2>{i18n.translate('xpack.ux.errors.title', { defaultMessage: 'Errors' })}</h2>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.ux.errors.description', {
+              defaultMessage:
+                'JavaScript exceptions grouped by type and message. Open a group to see a sample stack, or jump to the sessions (and APM, when a grouping key is present).',
             })}
-          >
-            <p>{error}</p>
-            <EuiButton
-              data-test-subj="uxRumErrorsPanelRetryButton"
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+
+        {error && (
+          <>
+            <EuiCallOut
+              announceOnMount
               color="danger"
-              onClick={() => void load()}
+              title={i18n.translate('xpack.ux.errors.errorTitle', {
+                defaultMessage: 'Unable to load errors',
+              })}
             >
-              {i18n.translate('xpack.ux.errors.retry', { defaultMessage: 'Retry' })}
-            </EuiButton>
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      )}
+              <p>{error}</p>
+              <EuiButton
+                data-test-subj="uxRumErrorsPanelRetryButton"
+                color="danger"
+                onClick={() => void load()}
+              >
+                {i18n.translate('xpack.ux.errors.retry', { defaultMessage: 'Retry' })}
+              </EuiButton>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
 
-      {loading && groups.length === 0 ? (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.ux.errors.tableCaption', {
-            defaultMessage: 'JavaScript error groups',
-          })}
-          items={groups}
-          columns={columns}
-          loading={loading}
-          noItemsMessage={i18n.translate('xpack.ux.errors.empty', {
-            defaultMessage: 'No exceptions in this range',
-          })}
-        />
-      )}
+        {loading && groups.length === 0 ? (
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.ux.errors.tableCaption', {
+              defaultMessage: 'JavaScript error groups',
+            })}
+            items={groups}
+            columns={columns}
+            loading={loading}
+            noItemsMessage={i18n.translate('xpack.ux.errors.empty', {
+              defaultMessage: 'No exceptions in this range',
+            })}
+          />
+        )}
 
-      {selected && (
-        <ErrorDetailFlyout
-          group={selected}
-          apmHref={apmErrorHref(selected)}
-          traceHref={apmTraceHref(selected)}
-          onClose={() => setSelected(null)}
-          onViewSessions={() =>
-            pushRumPath(history, '/session-replay', sessionsPatch({ errorGroup: selected.key }))
-          }
-        />
-      )}
-    </EuiPanel>
+        {selected && (
+          <ErrorDetailFlyout
+            group={selected}
+            apmHref={apmErrorHref(selected)}
+            traceHref={apmTraceHref(selected)}
+            onClose={() => setSelected(null)}
+            onViewSessions={() =>
+              pushRumPath(history, '/session-replay', sessionsPatch({ errorGroup: selected.key }))
+            }
+          />
+        )}
+      </EuiPanel>
     </>
   );
 }
