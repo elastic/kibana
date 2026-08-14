@@ -1708,10 +1708,10 @@ describe('bulkGetRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    createdBy: 'user-a',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user-a',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
   };
 
   it('accepts an empty rules array', () => {

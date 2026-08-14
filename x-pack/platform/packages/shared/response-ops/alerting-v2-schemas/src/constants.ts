@@ -104,6 +104,9 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
 
+/** Maximum number of rule templates returned per page. */
+export const RULE_TEMPLATE_MAX_PER_PAGE = 100;
+
 /**
  * Maximum length of the `episode_data` JSON string snapshotted into an episode
  * attachment. Bounds open-ended user JSON so attachment payloads stay finite.
