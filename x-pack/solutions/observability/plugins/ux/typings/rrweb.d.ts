@@ -9,7 +9,12 @@ declare module 'rrweb' {
   export class Replayer {
     constructor(
       events: unknown[],
-      config?: { root?: HTMLElement; skipInactive?: boolean; speed?: number }
+      config?: {
+        root?: HTMLElement;
+        skipInactive?: boolean;
+        speed?: number;
+        mouseTail?: boolean;
+      }
     );
     play(timeOffset?: number): void;
     pause(): void;

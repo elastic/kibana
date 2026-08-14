@@ -49,16 +49,12 @@ describe('ranksFromPercentileRanks', () => {
   });
 
   it('rounds cumulative ranks so legend percents are integers that sum to 100', () => {
-    expect(
-      ranksFromPercentileRanks({ '2500.0': 55.35714285714286, '4000.0': 100 })
-    ).toEqual({
+    expect(ranksFromPercentileRanks({ '2500.0': 55.35714285714286, '4000.0': 100 })).toEqual({
       good: 55,
       ni: 45,
       poor: 0,
     });
-    expect(
-      ranksFromPercentileRanks({ '0.1': 86.2532596863776, '0.25': 100 })
-    ).toEqual({
+    expect(ranksFromPercentileRanks({ '0.1': 86.2532596863776, '0.25': 100 })).toEqual({
       good: 86,
       ni: 14,
       poor: 0,

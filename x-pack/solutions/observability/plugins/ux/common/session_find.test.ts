@@ -93,7 +93,12 @@ describe('pagePathFilter', () => {
 
 describe('helpers', () => {
   it('intersects session id sets', () => {
-    expect(intersectSessionIds([['a', 'b', 'c'], ['b', 'c', 'd']])).toEqual(['b', 'c']);
+    expect(
+      intersectSessionIds([
+        ['a', 'b', 'c'],
+        ['b', 'c', 'd'],
+      ])
+    ).toEqual(['b', 'c']);
   });
 
   it('builds a terms filter across session id fields', () => {

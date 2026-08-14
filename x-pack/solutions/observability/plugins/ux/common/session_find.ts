@@ -208,10 +208,7 @@ const identityFilter = (raw: string, fields: readonly string[]): object =>
  * Independent ES filter groups. Session ids from each group are intersected
  * (AND). Click+identity and error+path stay on one document when both are set.
  */
-export const sessionFindClauses = (
-  find: SessionFind,
-  extraPaths: string[] = []
-): object[][] => {
+export const sessionFindClauses = (find: SessionFind, extraPaths: string[] = []): object[][] => {
   const clauses: object[][] = [];
   const paths = uniq([find.path, ...extraPaths]);
   const parsedPath = find.path;
