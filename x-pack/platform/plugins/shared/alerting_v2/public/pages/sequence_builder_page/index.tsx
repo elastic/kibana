@@ -80,6 +80,37 @@ export const SequenceBuilderPage: React.FC = () => {
   const handleToggleRuleList = useCallback(() => setIsRuleListOpen((prev) => !prev), []);
   const [recoveryConfig, setRecoveryConfig] = useState<RecoveryConfig>(DEFAULT_RECOVERY_CONFIG);
 
+  const handleStepChange = useCallback(
+    (nextStep: 'alert' | 'recovery') => {
+      if (nextStep === 'recovery') {
+        uiState.setSeqValues((prev) => {
+          if (recoveryConfig.mode === 'all') {
+            return {
+              ...prev,
+              recoveryStepIndex: 0,
+              recoveryStepIndices: prev.steps.map((_, i) => i),
+            };
+          }
+          if (recoveryConfig.mode === 'custom' && recoveryConfig.selectedStepIndices.length > 0) {
+            const valid = recoveryConfig.selectedStepIndices.filter((i) => i < prev.steps.length);
+            return {
+              ...prev,
+              recoveryStepIndex: valid[0] ?? Math.max(0, prev.steps.length - 1),
+              recoveryStepIndices: valid.length > 0 ? valid : undefined,
+            };
+          }
+          return {
+            ...prev,
+            recoveryStepIndex: Math.max(0, prev.steps.length - 1),
+            recoveryStepIndices: undefined,
+          };
+        });
+      }
+      uiState.setStep(nextStep);
+    },
+    [uiState, recoveryConfig]
+  );
+
   const basePath = useService(CoreStart('http')).basePath;
   const handleCancel = useCallback(() => {
     application.navigateToUrl(basePath.prepend(paths.ruleList));
@@ -122,7 +153,7 @@ export const SequenceBuilderPage: React.FC = () => {
               seqValues={uiState.seqValues}
               isSaving={uiState.isSaving}
               rulesListHref={rulesListHref}
-              onStepChange={uiState.setStep}
+              onStepChange={handleStepChange}
               onSave={handleSave}
               onCancel={handleCancel}
             />
