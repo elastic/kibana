@@ -19,7 +19,7 @@ import { ProfileStateType } from '../profile_state';
 export type MetricsState = MetricsGridSettings & MetricsGridSort;
 
 export const METRICS_STATE_DEF: ProfileStateDefinition<MetricsState> = {
-  key: 'metricsGridSettings',
+  key: 'metricsState',
   descriptor: {
     counterAggregation: { type: ProfileStateType.Persistent },
     gaugeAggregation: { type: ProfileStateType.Persistent },

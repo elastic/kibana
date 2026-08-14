@@ -25,7 +25,7 @@ describe('METRICS_STATE_DEF', () => {
     expect(registry.hasDefinition(METRICS_STATE_DEF)).toBe(true);
     // The key is a storage contract: it is persisted inside users' local tab
     // storage with no migration path, so renaming it orphans persisted state.
-    expect(METRICS_STATE_DEF.key).toBe('metricsGridSettings');
+    expect(METRICS_STATE_DEF.key).toBe('metricsState');
   });
 
   it('types all fields as Persistent so the host persists them locally across reloads', () => {

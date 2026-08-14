@@ -95,7 +95,7 @@ spaceTest.describe(
         // Tab state is written to local storage on a trailing throttle, so an
         // immediate reload could race the write. Poll storage until the sort
         // lands to deterministically test "persisted sort survives a reload".
-        // The `metricsGridSettings` key mirrors `METRICS_STATE_DEF.key`
+        // The `metricsState` key mirrors `METRICS_STATE_DEF.key`
         // (not importable from Scout specs); keep in sync if that key ever changes.
         await expect
           .poll(() =>
@@ -106,11 +106,11 @@ spaceTest.describe(
               }
               const { openTabs } = JSON.parse(raw) as {
                 openTabs?: Array<{
-                  profileState?: { metricsGridSettings?: { direction?: string } };
+                  profileState?: { metricsState?: { sortDirection?: string } };
                 }>;
               };
               return Boolean(
-                openTabs?.some((tab) => tab.profileState?.metricsGridSettings?.direction === 'desc')
+                openTabs?.some((tab) => tab.profileState?.metricsState?.sortDirection === 'desc')
               );
             }, testData.DISCOVER_TABS_LOCAL_STORAGE_KEY)
           )
