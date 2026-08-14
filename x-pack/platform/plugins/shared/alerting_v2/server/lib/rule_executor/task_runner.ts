@@ -52,6 +52,7 @@ export class RuleExecutorTaskRunner {
       rule_id: params.ruleId,
       space_id: params.spaceId,
       task_id: taskInstance.id,
+      execution_id: executionUuid,
     });
 
     return {
