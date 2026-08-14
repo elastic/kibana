@@ -34,7 +34,6 @@ describe('SecuritySolutionEventBus', () => {
           status: 'acknowledged' as const,
           previousStatuses: [],
           truncated: false,
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertStatusChanged(cb),
       expectedPayload: {
@@ -42,14 +41,12 @@ describe('SecuritySolutionEventBus', () => {
         status: 'acknowledged',
         previousStatuses: [],
         truncated: false,
-        spaceId: 'default',
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
           tagsToAdd: [],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
     },
     {
@@ -59,17 +56,15 @@ describe('SecuritySolutionEventBus', () => {
           alertIds: ['a'],
           tagsToAdd: ['t'],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertTagsChanged(cb),
-      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [], spaceId: 'default' },
+      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [] },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertStatusChanged(mockRequest, {
           alertIds: [],
           status: 'open' as const,
           previousStatuses: [],
           truncated: false,
-          spaceId: 'default',
         }),
     },
     {
@@ -79,21 +74,18 @@ describe('SecuritySolutionEventBus', () => {
           alertIds: ['a'],
           assigneesToAdd: ['uid'],
           assigneesToRemove: [],
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAlertAssigneesChanged(cb),
       expectedPayload: {
         alertIds: ['a'],
         assigneesToAdd: ['uid'],
         assigneesToRemove: [],
-        spaceId: 'default',
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
           tagsToAdd: [],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
     },
     {
@@ -103,21 +95,18 @@ describe('SecuritySolutionEventBus', () => {
           attackIds: ['a'],
           status: 'closed' as const,
           previousStatuses: [],
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackStatusChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
         status: 'closed',
         previousStatuses: [],
-        spaceId: 'default',
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
           tagsToAdd: [],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
     },
     {
@@ -127,21 +116,18 @@ describe('SecuritySolutionEventBus', () => {
           attackIds: ['a'],
           tagsToAdd: ['t'],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackTagsChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
         tagsToAdd: ['t'],
         tagsToRemove: [],
-        spaceId: 'default',
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
           tagsToAdd: [],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
     },
     {
@@ -151,21 +137,18 @@ describe('SecuritySolutionEventBus', () => {
           attackIds: ['a'],
           assigneesToAdd: ['uid'],
           assigneesToRemove: [],
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackAssigneesChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
         assigneesToAdd: ['uid'],
         assigneesToRemove: [],
-        spaceId: 'default',
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
           tagsToAdd: [],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
     },
     {
@@ -173,25 +156,20 @@ describe('SecuritySolutionEventBus', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitNoteCreated(mockRequest, {
           noteId: 'n1',
-          noteContent: 'text',
           createdBy: 'user',
           documentId: 'doc',
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onNoteCreated(cb),
       expectedPayload: {
         noteId: 'n1',
-        noteContent: 'text',
         createdBy: 'user',
         documentId: 'doc',
-        spaceId: 'default',
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
           tagsToAdd: [],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
     },
     {
@@ -199,25 +177,20 @@ describe('SecuritySolutionEventBus', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitNoteUpdated(mockRequest, {
           noteId: 'n1',
-          noteContent: 'updated',
           updatedBy: 'user',
           documentId: 'doc',
-          spaceId: 'default',
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onNoteUpdated(cb),
       expectedPayload: {
         noteId: 'n1',
-        noteContent: 'updated',
         updatedBy: 'user',
         documentId: 'doc',
-        spaceId: 'default',
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {
           alertIds: [],
           tagsToAdd: [],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
     },
   ])('$name', ({ emit, on, expectedPayload, otherEmit }) => {

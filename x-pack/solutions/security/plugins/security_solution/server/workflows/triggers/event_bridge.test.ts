@@ -50,7 +50,6 @@ describe('registerSecurityWorkflowEventBridge', () => {
       status: 'open',
       previousStatuses: [],
       truncated: false,
-      spaceId: 'default',
     });
     expect(mockEmitEvent).not.toHaveBeenCalled();
   });
@@ -65,14 +64,12 @@ describe('registerSecurityWorkflowEventBridge', () => {
           status: 'open' as const,
           previousStatuses: [],
           truncated: false,
-          spaceId: 'default',
         }),
       expectedPayload: {
         alertIds: ['a'],
         status: 'open',
         previousStatuses: [],
         truncated: false,
-        spaceId: 'default',
       },
     },
     {
@@ -83,9 +80,8 @@ describe('registerSecurityWorkflowEventBridge', () => {
           alertIds: ['a'],
           tagsToAdd: ['t'],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
-      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [], spaceId: 'default' },
+      expectedPayload: { alertIds: ['a'], tagsToAdd: ['t'], tagsToRemove: [] },
     },
     {
       name: 'alertAssigneesChanged',
@@ -95,13 +91,11 @@ describe('registerSecurityWorkflowEventBridge', () => {
           alertIds: ['a'],
           assigneesToAdd: ['uid'],
           assigneesToRemove: [],
-          spaceId: 'default',
         }),
       expectedPayload: {
         alertIds: ['a'],
         assigneesToAdd: ['uid'],
         assigneesToRemove: [],
-        spaceId: 'default',
       },
     },
     {
@@ -112,13 +106,11 @@ describe('registerSecurityWorkflowEventBridge', () => {
           attackIds: ['a'],
           status: 'closed' as const,
           previousStatuses: [],
-          spaceId: 'default',
         }),
       expectedPayload: {
         attackIds: ['a'],
         status: 'closed',
         previousStatuses: [],
-        spaceId: 'default',
       },
     },
     {
@@ -129,13 +121,11 @@ describe('registerSecurityWorkflowEventBridge', () => {
           attackIds: ['a'],
           tagsToAdd: ['t'],
           tagsToRemove: [],
-          spaceId: 'default',
         }),
       expectedPayload: {
         attackIds: ['a'],
         tagsToAdd: ['t'],
         tagsToRemove: [],
-        spaceId: 'default',
       },
     },
     {
@@ -146,13 +136,11 @@ describe('registerSecurityWorkflowEventBridge', () => {
           attackIds: ['a'],
           assigneesToAdd: ['uid'],
           assigneesToRemove: [],
-          spaceId: 'default',
         }),
       expectedPayload: {
         attackIds: ['a'],
         assigneesToAdd: ['uid'],
         assigneesToRemove: [],
-        spaceId: 'default',
       },
     },
     {
@@ -161,17 +149,13 @@ describe('registerSecurityWorkflowEventBridge', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitNoteCreated(mockRequest, {
           noteId: 'n1',
-          noteContent: 'text',
           createdBy: 'user',
           documentId: 'doc',
-          spaceId: 'default',
         }),
       expectedPayload: {
         noteId: 'n1',
-        noteContent: 'text',
         createdBy: 'user',
         documentId: 'doc',
-        spaceId: 'default',
       },
     },
     {
@@ -180,17 +164,13 @@ describe('registerSecurityWorkflowEventBridge', () => {
       emit: (b: SecuritySolutionEventBus) =>
         b.emitNoteUpdated(mockRequest, {
           noteId: 'n1',
-          noteContent: 'updated',
           updatedBy: 'user',
           documentId: 'doc',
-          spaceId: 'default',
         }),
       expectedPayload: {
         noteId: 'n1',
-        noteContent: 'updated',
         updatedBy: 'user',
         documentId: 'doc',
-        spaceId: 'default',
       },
     },
   ])('$name', ({ triggerId, emit, expectedPayload }) => {
@@ -212,7 +192,6 @@ describe('registerSecurityWorkflowEventBridge', () => {
       status: 'open',
       previousStatuses: [],
       truncated: false,
-      spaceId: 'default',
     });
     await new Promise((r) => setTimeout(r, 0));
     expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -225,10 +204,8 @@ describe('registerSecurityWorkflowEventBridge', () => {
     registerSecurityWorkflowEventBridge(bus, mockWorkflowsExtensions, mockLogger as Logger);
     bus.emitNoteCreated(mockRequest, {
       noteId: 'n1',
-      noteContent: 'text',
       createdBy: 'user',
       documentId: 'doc',
-      spaceId: 'default',
     });
     await new Promise((r) => setTimeout(r, 0));
     expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining(NoteCreatedTriggerId));
