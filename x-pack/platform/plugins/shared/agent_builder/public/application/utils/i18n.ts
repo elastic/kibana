@@ -2936,4 +2936,161 @@ export const labels = {
       defaultMessage: 'Yes, abort',
     }),
   },
+  traces: {
+    libraryTitle: i18n.translate('xpack.agentBuilder.traces.libraryTitle', {
+      defaultMessage: 'Traces',
+    }),
+    pageDescription: i18n.translate('xpack.agentBuilder.traces.pageDescription', {
+      defaultMessage:
+        'Inspect a conversation trace as a timeline or a structured span tree. Paste a trace ID from a conversation round to get started.',
+    }),
+    traceIdLabel: i18n.translate('xpack.agentBuilder.traces.traceIdLabel', {
+      defaultMessage: 'Trace ID',
+    }),
+    traceIdPlaceholder: i18n.translate('xpack.agentBuilder.traces.traceIdPlaceholder', {
+      defaultMessage: 'Paste a trace ID',
+    }),
+    viewTraceButton: i18n.translate('xpack.agentBuilder.traces.viewTraceButton', {
+      defaultMessage: 'View trace',
+    }),
+    viewToggleLegend: i18n.translate('xpack.agentBuilder.traces.viewToggleLegend', {
+      defaultMessage: 'Trace view',
+    }),
+    waterfallViewLabel: i18n.translate('xpack.agentBuilder.traces.waterfallViewLabel', {
+      defaultMessage: 'Waterfall',
+    }),
+    treeViewLabel: i18n.translate('xpack.agentBuilder.traces.treeViewLabel', {
+      defaultMessage: 'Tree',
+    }),
+    debugWithAgentButton: i18n.translate('xpack.agentBuilder.traces.debugWithAgentButton', {
+      defaultMessage: 'Debug with agent',
+    }),
+    debugWithAgentTooltip: i18n.translate('xpack.agentBuilder.traces.debugWithAgentTooltip', {
+      defaultMessage:
+        'Open a new conversation with the Elastic AI Agent, pre-filled with a debug prompt for this trace. You can review or edit the prompt before sending.',
+    }),
+    tracingDisabledTitle: i18n.translate('xpack.agentBuilder.traces.tracingDisabledTitle', {
+      defaultMessage: 'Agent Builder tracing is disabled',
+    }),
+    tracingDisabledMessage: i18n.translate('xpack.agentBuilder.traces.tracingDisabledMessage', {
+      defaultMessage:
+        'Enable the "agentBuilder:tracing:enabled" advanced setting to record and view traces for conversations.',
+    }),
+    emptyStateTitle: i18n.translate('xpack.agentBuilder.traces.emptyStateTitle', {
+      defaultMessage: 'Enter a trace ID',
+    }),
+    emptyStateMessage: i18n.translate('xpack.agentBuilder.traces.emptyStateMessage', {
+      defaultMessage:
+        'Trace IDs are shown on individual conversation rounds. Paste one above to visualise its spans.',
+    }),
+    treeEmptyPanelMessage: i18n.translate('xpack.agentBuilder.traces.treeEmptyPanelMessage', {
+      defaultMessage: 'Select a span to see its details.',
+    }),
+    spanStatusError: i18n.translate('xpack.agentBuilder.traces.spanStatusError', {
+      defaultMessage: 'Error',
+    }),
+    conversationTracesTitle: i18n.translate('xpack.agentBuilder.traces.conversationTracesTitle', {
+      defaultMessage: 'Traces for this conversation',
+    }),
+    conversationTracesMenuItem: i18n.translate(
+      'xpack.agentBuilder.traces.conversationTracesMenuItem',
+      {
+        defaultMessage: 'View all traces',
+      }
+    ),
+    noConversationTracesTitle: i18n.translate(
+      'xpack.agentBuilder.traces.noConversationTracesTitle',
+      {
+        defaultMessage: 'No traces yet',
+      }
+    ),
+    noConversationTracesMessage: i18n.translate(
+      'xpack.agentBuilder.traces.noConversationTracesMessage',
+      {
+        defaultMessage:
+          'This conversation has no rounds with traces. Send a message with tracing enabled to record one.',
+      }
+    ),
+    backToList: i18n.translate('xpack.agentBuilder.traces.backToList', {
+      defaultMessage: 'Back to traces',
+    }),
+    emptyMessagePreview: i18n.translate('xpack.agentBuilder.traces.emptyMessagePreview', {
+      defaultMessage: '(no message)',
+    }),
+    tracesCount: (count: number) =>
+      i18n.translate('xpack.agentBuilder.traces.tracesCount', {
+        defaultMessage: '{count, plural, one {# trace} other {# traces}}',
+        values: { count },
+      }),
+    turnLabel: (turn: number) =>
+      i18n.translate('xpack.agentBuilder.traces.turnLabel', {
+        defaultMessage: 'Turn {turn}:',
+        values: { turn },
+      }),
+    roundTraceHeading: (turn: number) =>
+      i18n.translate('xpack.agentBuilder.traces.roundTraceHeading', {
+        defaultMessage: 'Turn {turn} trace',
+        values: { turn },
+      }),
+    recentTracesTitle: i18n.translate('xpack.agentBuilder.traces.recentTracesTitle', {
+      defaultMessage: 'Recent traces',
+    }),
+    recentTracesDescription: i18n.translate('xpack.agentBuilder.traces.recentTracesDescription', {
+      defaultMessage:
+        'The 10 most recent traces recorded in this space. Select a trace to open its waterfall.',
+    }),
+    recentTracesEmptyTitle: i18n.translate('xpack.agentBuilder.traces.recentTracesEmptyTitle', {
+      defaultMessage: 'No recent traces',
+    }),
+    recentTracesEmptyMessage: i18n.translate('xpack.agentBuilder.traces.recentTracesEmptyMessage', {
+      defaultMessage:
+        'No traces have been recorded in this space yet. Send a conversation with tracing enabled to see traces here.',
+    }),
+    recentTracesLoadErrorTitle: i18n.translate(
+      'xpack.agentBuilder.traces.recentTracesLoadErrorTitle',
+      {
+        defaultMessage: 'Unable to load recent traces',
+      }
+    ),
+    recentTracesColumnTraceId: i18n.translate(
+      'xpack.agentBuilder.traces.recentTracesColumnTraceId',
+      {
+        defaultMessage: 'Trace ID',
+      }
+    ),
+    recentTracesColumnStartedAt: i18n.translate(
+      'xpack.agentBuilder.traces.recentTracesColumnStartedAt',
+      {
+        defaultMessage: 'Started',
+      }
+    ),
+    recentTracesColumnRootSpan: i18n.translate(
+      'xpack.agentBuilder.traces.recentTracesColumnRootSpan',
+      {
+        defaultMessage: 'Root span',
+      }
+    ),
+    recentTracesColumnActions: i18n.translate(
+      'xpack.agentBuilder.traces.recentTracesColumnActions',
+      {
+        defaultMessage: 'Actions',
+      }
+    ),
+    searchByIdLabel: i18n.translate('xpack.agentBuilder.traces.searchByIdLabel', {
+      defaultMessage: 'Or search by trace ID',
+    }),
+    backToTraces: i18n.translate('xpack.agentBuilder.traces.backToTraces', {
+      defaultMessage: 'Back to traces',
+    }),
+    copyTraceIdAriaLabel: i18n.translate('xpack.agentBuilder.traces.copyTraceIdAriaLabel', {
+      defaultMessage: 'Copy trace ID',
+    }),
+    traceNotFoundTitle: i18n.translate('xpack.agentBuilder.traces.traceNotFoundTitle', {
+      defaultMessage: 'Trace not found',
+    }),
+    traceNotFoundMessage: i18n.translate('xpack.agentBuilder.traces.traceNotFoundMessage', {
+      defaultMessage:
+        'No spans were found for this trace ID in the current space. It may not have been ingested yet, or it may belong to a different space.',
+    }),
+  },
 };

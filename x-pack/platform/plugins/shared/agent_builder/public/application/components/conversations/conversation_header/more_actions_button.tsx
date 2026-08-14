@@ -26,9 +26,12 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTracingEnabled } from '../../../hooks/use_tracing_enabled';
 import { appPaths } from '../../../utils/app_paths';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { ConversationTracesFlyout } from '../../traces/conversation_traces_flyout';
+import { labels as sharedLabels } from '../../../utils/i18n';
 
 const fullscreenLabels = {
   actions: i18n.translate('xpack.agentBuilder.conversationActions.actions', {
@@ -75,6 +78,7 @@ interface MoreActionsButtonProps {
 
 export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSidebar }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isTracesFlyoutOpen, setIsTracesFlyoutOpen] = useState(false);
 
   const agentId = useAgentId();
   const { createAgentBuilderUrl, navigateToAgentBuilderUrl } = useNavigation();
@@ -84,6 +88,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const isExperimentalEnabled = useExperimentalFeatures();
   const { conversation } = useConversation();
   const conversationRounds = useConversationRounds();
+  const isTracingEnabled = useTracingEnabled();
 
   const {
     services: { application, plugins },
@@ -143,9 +148,31 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   const showAddToDatasetItem =
     isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
 
+  // Only surface the "View all traces" menu item when tracing is enabled AND at
+  // least one round in this conversation actually has a trace to show — otherwise
+  // the flyout would open with an unhelpful empty state.
+  const hasAnyTrace = useMemo(
+    () =>
+      conversationRounds.some((round) => {
+        const traceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+        return Boolean(traceId);
+      }),
+    [conversationRounds]
+  );
+  const showViewAllTracesItem = isTracingEnabled && hasAnyTrace;
+
   const closePopover = () => {
     setIsPopoverOpen(false);
   };
+
+  const openTracesFlyout = useCallback(() => {
+    setIsPopoverOpen(false);
+    setIsTracesFlyoutOpen(true);
+  }, []);
+
+  const closeTracesFlyout = useCallback(() => {
+    setIsTracesFlyoutOpen(false);
+  }, []);
 
   const togglePopover = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -190,6 +217,28 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           })}
         >
           {fullscreenLabels.addToDataset}
+        </EuiContextMenuItem>,
+      ]
+    : [];
+
+  // Reuses the existing VIEW_TRACE EBT action rather than defining a new id — this is
+  // still a "view trace" affordance, just scoped to the whole conversation instead of a
+  // single round. The `conversation_all` detail keeps it distinguishable from the
+  // per-round trace button (which reports `conversation`) in telemetry.
+  const viewAllTracesMenuItem = showViewAllTracesItem
+    ? [
+        <EuiContextMenuItem
+          key="conversationTraces"
+          icon="chartWaterfall"
+          data-test-subj="agentBuilderViewConversationTracesButton"
+          onClick={openTracesFlyout}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TRACE,
+            detail: 'conversation_all',
+          })}
+        >
+          {sharedLabels.traces.conversationTracesMenuItem}
         </EuiContextMenuItem>,
       ]
     : [];
@@ -244,6 +293,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           </EuiContextMenuItem>,
         ]
       : []),
+    ...viewAllTracesMenuItem,
     ...addToDatasetMenuItem,
   ];
 
@@ -280,6 +330,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           </EuiContextMenuItem>,
         ]
       : []),
+    ...viewAllTracesMenuItem,
     ...addToDatasetMenuItem,
   ];
 
@@ -311,6 +362,9 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
       >
         <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
+      {isTracesFlyoutOpen && (
+        <ConversationTracesFlyout rounds={conversationRounds} onClose={closeTracesFlyout} />
+      )}
     </>
   );
 };

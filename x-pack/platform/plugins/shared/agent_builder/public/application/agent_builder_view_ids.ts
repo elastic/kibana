@@ -33,4 +33,6 @@ export const agentBuilderViewIds = {
   manageMcpClients: 'agent_builder_manage_mcp_clients',
   manageMcpClientCreate: 'agent_builder_manage_mcp_clients_create',
   manageMcpClientEdit: 'agent_builder_manage_mcp_clients_edit',
+  manageTraces: 'agent_builder_manage_traces',
+  manageTraceDetails: 'agent_builder_manage_traces_detail',
 } as const;

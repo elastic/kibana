@@ -41,6 +41,10 @@ export const appPaths = {
     mcpClients: '/manage/tools/mcp_clients',
     mcpClientCreate: '/manage/tools/mcp_clients/new',
     mcpClientEdit: ({ clientId }: { clientId: string }) => `/manage/tools/mcp_clients/${clientId}`,
+    // Trace viewer routes are keyed off a `traceId` param so a trace can be pulled up by URL alone.
+    // `traces` (no id) is the searchable landing page; `traceDetails` renders the waterfall/tree.
+    traces: '/manage/traces',
+    traceDetails: ({ traceId }: { traceId: string }) => `/manage/traces/${traceId}`,
   },
 
   // Legacy paths - redirect to new structure via LegacyConversationRedirect

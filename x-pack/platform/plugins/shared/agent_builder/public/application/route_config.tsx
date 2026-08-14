@@ -31,6 +31,7 @@ import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderMcpClientsPage } from './pages/mcp_clients';
 import { AgentBuilderMcpClientCreatePage } from './pages/mcp_client_create';
 import { AgentBuilderMcpClientEditPage } from './pages/mcp_client_edit';
+import { AgentBuilderTracesPage } from './pages/traces';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
 import { appPaths } from './utils/app_paths';
 
@@ -78,6 +79,9 @@ const navLabels = {
   }),
   agents: i18n.translate('xpack.agentBuilder.routeConfig.agents', {
     defaultMessage: 'Agents',
+  }),
+  traces: i18n.translate('xpack.agentBuilder.routeConfig.traces', {
+    defaultMessage: 'Traces',
   }),
 };
 
@@ -242,6 +246,23 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageToolDetails,
     sidebarView: 'manage',
     element: <AgentBuilderToolDetailsPage />,
+  },
+  // Trace viewer: `traces/:traceId` (details) must precede the parameter-less list
+  // route so react-router matches the more specific path first.
+  {
+    path: '/manage/traces/:traceId',
+    viewId: agentBuilderViewIds.manageTraceDetails,
+    sidebarView: 'manage',
+    isExperimental: true,
+    element: <AgentBuilderTracesPage />,
+  },
+  {
+    path: '/manage/traces',
+    viewId: agentBuilderViewIds.manageTraces,
+    sidebarView: 'manage',
+    isExperimental: true,
+    navLabel: navLabels.traces,
+    element: <AgentBuilderTracesPage />,
   },
 ];
 
