@@ -55,12 +55,12 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
       // The API key rotation is not observable directly (Task Manager stores it
       // encrypted), so assert the side effect via the saved object write. The
       // OCC `version` is the reliable witness: every successful write bumps it,
-      // independently of the clock. `updatedAt` is a weaker, clock-dependent
+      // independently of the clock. `updated_at` is a weaker, clock-dependent
       // proxy kept only as a sanity check that the write advanced the timestamp.
       for (const created of [ruleA, ruleB]) {
         const fetched = await apiServices.alertingV2.rules.get(created.id);
         expect(fetched.version).not.toBe(created.version);
-        expect(Date.parse(fetched.updatedAt)).toBeGreaterThan(Date.parse(created.updatedAt));
+        expect(Date.parse(fetched.updated_at)).toBeGreaterThan(Date.parse(created.updated_at));
       }
     }
   );
@@ -85,8 +85,8 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
       expect(fetched.enabled).toBe(true);
       expect(fetched).toStrictEqual({
         ...created,
-        updatedAt: fetched.updatedAt,
-        updatedBy: fetched.updatedBy,
+        updated_at: fetched.updated_at,
+        updated_by: fetched.updated_by,
         version: fetched.version,
       });
       expect(fetched.version).not.toBe(created.version);
