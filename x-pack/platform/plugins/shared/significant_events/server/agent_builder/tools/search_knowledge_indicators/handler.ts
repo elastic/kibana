@@ -165,8 +165,7 @@ export async function searchKnowledgeIndicatorsToolHandler({
     },
     getFeatures: async (streamName, { searchText, featureTypes, featureIds }) => {
       if (searchText) {
-        return (await kiClient.findFeatures(streamName, searchText, { featureTypes, featureIds }))
-          .hits;
+        return (await kiClient.findFeatures(streamName, searchText, { featureTypes, featureIds })).hits;
       }
 
       return (await kiClient.getFeatures(streamName, { type: featureTypes })).hits;

@@ -7,59 +7,24 @@
 
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
+import { setPrf, extractRuleUuids } from '../common/metrics';
 
 export interface TopologyScore {
   score: number | null;
   explanation: string;
 }
 
-function f1(precision: number, recall: number): number {
-  return precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
-}
-
-export function featureF1(
-  actualIds: string[],
-  expectedIds: string[]
-): { score: number; precision: number; recall: number } {
-  if (expectedIds.length === 0) return { score: 1, precision: 1, recall: 1 };
-  const actualSet = new Set(actualIds);
-  const expectedSet = new Set(expectedIds);
-  const tp = [...expectedSet].filter((id) => actualSet.has(id)).length;
-  const precision = actualIds.length === 0 ? 0 : tp / actualIds.length;
-  const recall = tp / expectedSet.size;
-  return { score: f1(precision, recall), precision, recall };
-}
-
-function ruleUuids(signals: Array<{ metadata?: { rule_uuid?: string } }> | undefined): Set<string> {
-  return new Set(
-    (signals ?? []).map((s) => s.metadata?.rule_uuid).filter((id): id is string => Boolean(id))
-  );
-}
-
-/** Keep only expected events whose signals overlap the actual write payload's rule UUIDs. */
-export const filterExpectedEventsForActuals = (
-  expectedEvents: Array<Partial<SignificantEvent>>,
-  actuals: SignificantEvent[]
-): Array<Partial<SignificantEvent>> => {
-  const actualRuleUuids = new Set(actuals.flatMap((event) => [...ruleUuids(event.signals)]));
-  if (actualRuleUuids.size === 0) {
-    return expectedEvents;
-  }
-
-  return expectedEvents.filter((event) =>
-    [...ruleUuids(event.signals)].some((ruleUuid) => actualRuleUuids.has(ruleUuid))
-  );
-};
-
 function findBestMatch(
   expectedSignals: Array<{ metadata?: { rule_uuid?: string } }> | undefined,
-  actuals: SignificantEvent[]
+  actuals: SignificantEvent[],
+  assigned: Set<SignificantEvent>
 ): SignificantEvent | undefined {
-  const expectedKeys = ruleUuids(expectedSignals);
+  const expectedKeys = extractRuleUuids(expectedSignals);
   let best: SignificantEvent | undefined;
   let bestOverlap = 0;
   for (const event of actuals) {
-    const overlap = [...ruleUuids(event.signals)].filter((k) => expectedKeys.has(k)).length;
+    if (assigned.has(event)) continue;
+    const overlap = [...extractRuleUuids(event.signals)].filter((k) => expectedKeys.has(k)).length;
     if (overlap > bestOverlap) {
       bestOverlap = overlap;
       best = event;
@@ -93,7 +58,7 @@ const scoreTopologyFields = (
   if (expected.causal_features?.length) {
     const expectedIds = expected.causal_features.map((f) => f.feature_id);
     const actualIds = (actual.causal_features ?? []).map((f) => f.feature_id);
-    const { score, precision, recall } = featureF1(actualIds, expectedIds);
+    const { score, precision, recall } = setPrf(actualIds, expectedIds);
     eventScores.push(score);
     if (score < 1) {
       explanations.push(
@@ -107,7 +72,7 @@ const scoreTopologyFields = (
   if (expected.blast_radius?.length) {
     const expectedIds = expected.blast_radius.map((f) => f.feature_id);
     const actualIds = (actual.blast_radius ?? []).map((f) => f.feature_id);
-    const { score, precision, recall } = featureF1(actualIds, expectedIds);
+    const { score, precision, recall } = setPrf(actualIds, expectedIds);
     eventScores.push(score);
     if (score < 1) {
       explanations.push(
@@ -127,6 +92,7 @@ const scoreTopologyFields = (
 /**
  * Precision/recall F1 over causal_features and blast_radius feature IDs.
  * Each expected event is matched to the actual event with the highest rule UUID overlap in signals.
+ * Each actual event can only be claimed by one expected event (no double-counting).
  */
 export const scoreTopologyCorrectness = (
   actuals: SignificantEvent[],
@@ -143,15 +109,18 @@ export const scoreTopologyCorrectness = (
 
   const explanations: string[] = [];
   let totalScore = 0;
+  const assignedActuals = new Set<SignificantEvent>();
 
   for (const exp of topologyExpected) {
-    const match = findBestMatch(exp.signals, actuals);
+    const match = findBestMatch(exp.signals, actuals, assignedActuals);
 
     if (!match) {
       explanations.push(`event=${exp.event_id ?? '?'}: no matching actual event found`);
       totalScore += 0;
       continue;
     }
+
+    assignedActuals.add(match);
 
     const { score: eventScore, explanations: fieldExplanations } = scoreTopologyFields(
       match,
@@ -186,8 +155,10 @@ export interface ContinuationTopologyCycle {
 /**
  * Score continuation writes against the establishing cycle's emitted topology.
  * Each follow-up cycle with `expectReuse !== false` must preserve that topology in events_write.
+ * Measures topology stability (follow-up vs. establishing), not ground-truth correctness.
+ * Follow-up items are matched to establishing items by event_id; falls back to index 0.
  */
-export const scoreContinuationTopologyCorrectness = (
+export const scoreContinuationTopologyStability = (
   cycles: ContinuationTopologyCycle[]
 ): TopologyScore => {
   const establishingIndex = cycles.findIndex((cycle) => (cycle.writeItems?.length ?? 0) > 0);
@@ -217,42 +188,65 @@ export const scoreContinuationTopologyCorrectness = (
 
   const explanations: string[] = [];
   let totalScore = 0;
+  let scoredCycles = 0;
 
   for (const { cycle, index } of followUps) {
     const writeItems = (cycle.writeItems ?? []) as SignificantEvent[];
-    const establishing = establishingItems[0];
-    const followUp = writeItems[0];
 
-    if (!establishing || !followUp) {
+    if (writeItems.length === 0 || establishingItems.length === 0) {
       explanations.push(`cycle ${index + 1} (${cycle.ruleName ?? '?'}): missing write item`);
-      totalScore += 0;
       continue;
     }
 
-    const result = scoreTopologyFields(followUp, establishing, `establishing-0`);
-    if (result.score === null) {
-      explanations.push(
-        `cycle ${index + 1} (${cycle.ruleName ?? '?'}): establishing topology was empty`
+    const cycleScores: number[] = [];
+    for (const followUp of writeItems) {
+      const establishing =
+        (followUp.event_id
+          ? establishingItems.find((e) => e.event_id === followUp.event_id)
+          : undefined) ?? establishingItems[0];
+      const result = scoreTopologyFields(
+        followUp,
+        establishing,
+        establishing.event_id ?? 'establishing-0'
       );
-      totalScore += 0;
+      if (result.score !== null) {
+        cycleScores.push(result.score);
+        if (result.score < 1) {
+          explanations.push(
+            `cycle ${index + 1} (${cycle.ruleName ?? '?'}): ${result.explanations.join('; ')}`
+          );
+        }
+      }
+    }
+
+    if (cycleScores.length === 0) {
+      explanations.push(
+        `cycle ${index + 1} (${cycle.ruleName ?? '?'}): establishing event has no topology fields — skipped`
+      );
       continue;
     }
 
-    totalScore += result.score;
-    if (result.score < 1) {
-      explanations.push(
-        `cycle ${index + 1} (${cycle.ruleName ?? '?'}): ${result.explanations.join('; ')}`
-      );
-    }
+    totalScore += cycleScores.reduce((a, b) => a + b, 0) / cycleScores.length;
+    scoredCycles++;
   }
 
-  const score = totalScore / followUps.length;
+  if (scoredCycles === 0) {
+    return {
+      score: null,
+      explanation:
+        explanations.length > 0
+          ? explanations.join('; ')
+          : 'No follow-up cycles had scorable topology',
+    };
+  }
+
+  const score = totalScore / scoredCycles;
   return {
     score,
     explanation:
       explanations.length > 0
         ? explanations.join('; ')
-        : `All ${followUps.length} continuation cycle(s) preserved establishing topology in events_write`,
+        : `All ${scoredCycles} continuation cycle(s) preserved establishing topology in events_write`,
   };
 };
 

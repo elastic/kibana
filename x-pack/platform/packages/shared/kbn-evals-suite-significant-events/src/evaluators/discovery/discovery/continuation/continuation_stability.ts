@@ -8,7 +8,7 @@
 import type { ConverseStep, Evaluator } from '@kbn/evals';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluationExample } from '../../types';
-import { scoreContinuationTopologyCorrectness } from '../grouping/topology_correctness';
+import { scoreContinuationTopologyStability } from '../grouping/topology_correctness';
 
 /** Minimal event fields captured per continuation cycle for severity stability checks. */
 export interface ContinuationProducedEvent {
@@ -214,10 +214,10 @@ export const continuationRoutingEvaluator: ContinuationEvaluator = {
   evaluate: ({ output }) => Promise.resolve(scoreContinuationRouting(output.cycles ?? [])),
 };
 
-/** CODE evaluator: scores topology fields in continuation events_write payloads. */
-export const continuationTopologyCorrectnessEvaluator: ContinuationEvaluator = {
-  name: 'topology_correctness',
+/** CODE evaluator: scores topology-field stability across continuation events_write payloads. */
+export const continuationTopologyStabilityEvaluator: ContinuationEvaluator = {
+  name: 'continuation_topology_stability',
   kind: 'CODE',
   evaluate: ({ output }) =>
-    Promise.resolve(scoreContinuationTopologyCorrectness(output.cycles ?? [])),
+    Promise.resolve(scoreContinuationTopologyStability(output.cycles ?? [])),
 };

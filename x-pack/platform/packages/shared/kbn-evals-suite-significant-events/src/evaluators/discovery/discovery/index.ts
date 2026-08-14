@@ -27,7 +27,7 @@ import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
 import {
   continuationRoutingEvaluator,
   continuationStabilityEvaluator,
-  continuationTopologyCorrectnessEvaluator,
+  continuationTopologyStabilityEvaluator,
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
 import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
@@ -83,6 +83,6 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
     continuationStabilityEvaluator,
     continuationRoutingEvaluator,
     continuationSeverityStabilityEvaluator,
-    continuationTopologyCorrectnessEvaluator,
+    continuationTopologyStabilityEvaluator,
     continuationTrajectoryEvaluator,
   ]);
