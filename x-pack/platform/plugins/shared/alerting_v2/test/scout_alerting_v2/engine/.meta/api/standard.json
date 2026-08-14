@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "150a7d60a39cdcecdb34eb85ec9141f18d0b5a94",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -412,8 +412,8 @@
       }
     },
     {
-      "id": "a19f0a3f2549dfe-b7b27c5b60f61ef",
-      "title": "Dispatcher groups episodes by the specified data fields when the action policy has groupBy fields",
+      "id": "a19f0a3f2549dfe-9d273948e3c398f",
+      "title": "Dispatcher groups episodes by the specified data fields when the action policy has group_by fields",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

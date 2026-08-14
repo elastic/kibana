@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "100db2d4413a59a5b823be1209875e69f1aff8d9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -110,8 +110,8 @@
       }
     },
     {
-      "id": "0d4530450053d38-e637125d8c52fd6",
-      "title": "ComposeDiscoverFlyout — create and edit flows create flow: signal (standalone) mode can select timestamp and create",
+      "id": "0d4530450053d38-1c2cb2f0c214184",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: signal (standalone) kind can select timestamp and create",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

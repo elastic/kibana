@@ -1,5 +1,5 @@
 {
-  "sha1": "",
+  "sha1": "d04ae0fd97f6713e4985608232d1ca5ac7eaa0fc",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -396,8 +396,8 @@
       }
     },
     {
-      "id": "a4628069955367b-e2e2b054c6ca694",
-      "title": "Bulk snooze action policies API snooze: snoozes policies with snoozedUntil",
+      "id": "a4628069955367b-bbc80be1fcb86cf",
+      "title": "Bulk snooze action policies API snooze: snoozes policies with snoozed_until",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -422,8 +422,8 @@
       }
     },
     {
-      "id": "a4628069955367b-a86dd8277551344",
-      "title": "Bulk snooze action policies API validation: rejects an invalid snoozedUntil",
+      "id": "a4628069955367b-cee15cef522fc2f",
+      "title": "Bulk snooze action policies API validation: rejects an invalid snoozed_until",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -431,12 +431,12 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/bulk_snooze_action_policies.spec.ts",
         "line": 74,
-        "column": 70
+        "column": 71
       }
     },
     {
-      "id": "a4628069955367b-ee91150e5a4cb2a",
-      "title": "Bulk snooze action policies API validation: rejects a missing snoozedUntil",
+      "id": "a4628069955367b-d1d0c48037c1ae1",
+      "title": "Bulk snooze action policies API validation: rejects a missing snoozed_until",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -847,7 +847,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
         "line": 94,
-        "column": 25
+        "column": 26
       }
     },
     {
@@ -886,7 +886,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
         "line": 147,
-        "column": 26
+        "column": 27
       }
     },
     {
@@ -1059,8 +1059,8 @@
       }
     },
     {
-      "id": "4ca74a7cb4b63d9-d5eebcbb1f93692",
-      "title": "Create action policy API validation: rejects groupBy with too many fields",
+      "id": "4ca74a7cb4b63d9-b4c6116e8bba1b4",
+      "title": "Create action policy API validation: rejects group_by with too many fields",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1072,8 +1072,8 @@
       }
     },
     {
-      "id": "4ca74a7cb4b63d9-5acc6f0f6e96536",
-      "title": "Create action policy API validation: rejects groupBy with empty field name",
+      "id": "4ca74a7cb4b63d9-66bc9e145a1ca1e",
+      "title": "Create action policy API validation: rejects group_by with empty field name",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1085,8 +1085,8 @@
       }
     },
     {
-      "id": "4ca74a7cb4b63d9-44e7c671027ed12",
-      "title": "Create action policy API validation: rejects groupBy field name over max length",
+      "id": "4ca74a7cb4b63d9-89315cde2e8fe53",
+      "title": "Create action policy API validation: rejects group_by field name over max length",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1098,8 +1098,8 @@
       }
     },
     {
-      "id": "4ca74a7cb4b63d9-9cde131d1cacce3",
-      "title": "Create action policy API validation: rejects unknown groupingMode",
+      "id": "4ca74a7cb4b63d9-86b49cf3ea98faa",
+      "title": "Create action policy API validation: rejects unknown grouping_mode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1107,7 +1107,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
         "line": 343,
-        "column": 89
+        "column": 90
       }
     },
     {
@@ -1120,7 +1120,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
         "line": 353,
-        "column": 78
+        "column": 79
       }
     },
     {
@@ -1133,7 +1133,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/create_action_policy.spec.ts",
         "line": 365,
-        "column": 80
+        "column": 81
       }
     },
     {
@@ -1163,8 +1163,8 @@
       }
     },
     {
-      "id": "4ca74a7cb4b63d9-285e63ace05f3fe",
-      "title": "Create action policy API validation: rejects strategy/groupingMode combo mismatch",
+      "id": "4ca74a7cb4b63d9-2fbbec4211e9d26",
+      "title": "Create action policy API validation: rejects strategy/grouping_mode combo mismatch",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1332,8 +1332,8 @@
       }
     },
     {
-      "id": "f3f28d710cdcfd3-c1de3282ed94439",
-      "title": "Disable action policy API state: preserves snoozedUntil and all other fields when disabling a snoozed policy",
+      "id": "f3f28d710cdcfd3-a08d358ce290869",
+      "title": "Disable action policy API state: preserves snoozed_until and all other fields when disabling a snoozed policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1436,8 +1436,8 @@
       }
     },
     {
-      "id": "27e0d6e194c7245-13b95f0e706af07",
-      "title": "Enable action policy API state: preserves snoozedUntil and all other fields after a disable → enable round-trip",
+      "id": "27e0d6e194c7245-4eb5f1f4e69b9dc",
+      "title": "Enable action policy API state: preserves snoozed_until and all other fields after a disable → enable round-trip",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1718,7 +1718,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/get_action_policy.spec.ts",
         "line": 95,
-        "column": 22
+        "column": 23
       }
     },
     {
@@ -1813,8 +1813,8 @@
       }
     },
     {
-      "id": "896355e7cc70574-4418c5820a4b919",
-      "title": "List action policies API pagination: paginates with page+perPage",
+      "id": "896355e7cc70574-13b12796f17a1a6",
+      "title": "List action policies API pagination: paginates with page+per_page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1969,8 +1969,8 @@
       }
     },
     {
-      "id": "896355e7cc70574-4cd921332f9ea07",
-      "title": "List action policies API sort: by createdAt ascending",
+      "id": "896355e7cc70574-d4ec6ab97273491",
+      "title": "List action policies API sort: by created_at ascending",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1982,8 +1982,8 @@
       }
     },
     {
-      "id": "896355e7cc70574-55225f9e866d8c9",
-      "title": "List action policies API sort: by createdAt descending",
+      "id": "896355e7cc70574-29de12626d101dc",
+      "title": "List action policies API sort: by created_at descending",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2034,8 +2034,8 @@
       }
     },
     {
-      "id": "896355e7cc70574-3ae0ff738ed8705",
-      "title": "List action policies API validation: rejects perPage=0",
+      "id": "896355e7cc70574-d3a215b11dda306",
+      "title": "List action policies API validation: rejects per_page=0",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2047,8 +2047,8 @@
       }
     },
     {
-      "id": "896355e7cc70574-d65a2af23520ebf",
-      "title": "List action policies API validation: rejects perPage over the maximum",
+      "id": "896355e7cc70574-e5855c425e28068",
+      "title": "List action policies API validation: rejects per_page over the maximum",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2203,8 +2203,8 @@
       }
     },
     {
-      "id": "c6f60e96d64a0c5-240cc2406cd890a",
-      "title": "Snooze action policy API snooze: snoozes a policy with a future ISO date and returns snoozedUntil",
+      "id": "c6f60e96d64a0c5-426e632e275aa05",
+      "title": "Snooze action policy API snooze: snoozes a policy with a future ISO date and returns snoozed_until",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2229,8 +2229,8 @@
       }
     },
     {
-      "id": "c6f60e96d64a0c5-ef2138b94dfc20b",
-      "title": "Snooze action policy API idempotency: updates snoozedUntil when snoozing an already-snoozed policy",
+      "id": "c6f60e96d64a0c5-8d4abb2213b918b",
+      "title": "Snooze action policy API idempotency: updates snoozed_until when snoozing an already-snoozed policy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2264,7 +2264,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/snooze_action_policy.spec.ts",
         "line": 105,
-        "column": 42
+        "column": 43
       }
     },
     {
@@ -2281,8 +2281,8 @@
       }
     },
     {
-      "id": "c6f60e96d64a0c5-00f1bab19c97624",
-      "title": "Snooze action policy API validation: rejects empty snoozedUntil",
+      "id": "c6f60e96d64a0c5-3037897cd5a91d5",
+      "title": "Snooze action policy API validation: rejects empty snoozed_until",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2294,8 +2294,8 @@
       }
     },
     {
-      "id": "c6f60e96d64a0c5-739993bd5dcf4dd",
-      "title": "Snooze action policy API validation: rejects missing snoozedUntil",
+      "id": "c6f60e96d64a0c5-861bb773153ae15",
+      "title": "Snooze action policy API validation: rejects missing snoozed_until",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2372,8 +2372,8 @@
       }
     },
     {
-      "id": "2b01b3bfc30b520-2618bbbcdb8a8f2",
-      "title": "Unsnooze action policy API unsnooze: unsnoozes a snoozed policy and returns snoozedUntil=null",
+      "id": "2b01b3bfc30b520-4f14ff51d75c2e4",
+      "title": "Unsnooze action policy API unsnooze: unsnoozes a snoozed policy and returns snoozed_until=null",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2398,8 +2398,8 @@
       }
     },
     {
-      "id": "2b01b3bfc30b520-1bdaf970f7b9e66",
-      "title": "Unsnooze action policy API idempotency: unsnoozing an already-unsnoozed policy returns snoozedUntil=null",
+      "id": "2b01b3bfc30b520-147c88a76b8a255",
+      "title": "Unsnooze action policy API idempotency: unsnoozing an already-unsnoozed policy returns snoozed_until=null",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2606,8 +2606,8 @@
       }
     },
     {
-      "id": "fe9694472a8c5f1-706dacc0a5c89bc",
-      "title": "Update action policy API partial: updates matcher/groupBy/throttle and preserves name/description/destinations",
+      "id": "fe9694472a8c5f1-7bdb2c51aa68082",
+      "title": "Update action policy API partial: updates matcher/group_by/throttle and preserves name/description/destinations",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2615,7 +2615,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy.spec.ts",
         "line": 152,
-        "column": 21
+        "column": 22
       }
     },
     {
@@ -2632,8 +2632,8 @@
       }
     },
     {
-      "id": "fe9694472a8c5f1-ec31a73a541792f",
-      "title": "Update action policy API partial: updates groupingMode and throttle strategy together",
+      "id": "fe9694472a8c5f1-8bfaadc1e0531a1",
+      "title": "Update action policy API partial: updates grouping_mode and throttle strategy together",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2658,8 +2658,8 @@
       }
     },
     {
-      "id": "fe9694472a8c5f1-18be1b4781cfd7b",
-      "title": "Update action policy API nullable: clears groupingMode/groupBy/throttle when set to null",
+      "id": "fe9694472a8c5f1-9ab1b8865546a78",
+      "title": "Update action policy API nullable: clears grouping_mode/group_by/throttle when set to null",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2667,12 +2667,12 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/api/tests/update_action_policy.spec.ts",
         "line": 296,
-        "column": 24
+        "column": 25
       }
     },
     {
-      "id": "fe9694472a8c5f1-1c4f4edab7658fb",
-      "title": "Update action policy API nullable: clears matcher/groupBy/throttle when set to null",
+      "id": "fe9694472a8c5f1-e116ecd6498c289",
+      "title": "Update action policy API nullable: clears matcher/group_by/throttle when set to null",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2879,8 +2879,8 @@
       }
     },
     {
-      "id": "2fa1e7a47503ebc-f16ccd99eb0d2e7",
-      "title": "Upsert action policy API upsert: 200 replaces and rotates version+updatedAt, preserves createdAt/createdBy",
+      "id": "2fa1e7a47503ebc-bc24b622de996af",
+      "title": "Upsert action policy API upsert: 200 replaces and rotates version+updated_at, preserves created_at/created_by",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2918,8 +2918,8 @@
       }
     },
     {
-      "id": "2fa1e7a47503ebc-415d3556d9845d4",
-      "title": "Upsert action policy API upsert: preserves snoozedUntil on replace",
+      "id": "2fa1e7a47503ebc-1949d8b856bd535",
+      "title": "Upsert action policy API upsert: preserves snoozed_until on replace",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -3022,8 +3022,8 @@
       }
     },
     {
-      "id": "2fa1e7a47503ebc-a6c3dbe8b0f6d53",
-      "title": "Upsert action policy API validation: rejects strategy/groupingMode combo mismatch",
+      "id": "2fa1e7a47503ebc-1c94bac105d2967",
+      "title": "Upsert action policy API validation: rejects strategy/grouping_mode combo mismatch",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

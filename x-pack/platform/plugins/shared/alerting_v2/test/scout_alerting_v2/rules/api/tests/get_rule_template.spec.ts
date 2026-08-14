@@ -16,7 +16,7 @@ import {
   getRuleTemplateUrl,
   NO_ACCESS_ROLE,
   testData,
-} from '../../../fixtures';
+} from '../fixtures';
 
 apiTest.describe('Get rule template API', { tag: tags.deploymentAgnostic }, () => {
   let adminHeaders: Record<string, string>;

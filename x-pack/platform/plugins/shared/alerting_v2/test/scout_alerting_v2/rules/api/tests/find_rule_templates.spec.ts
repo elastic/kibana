@@ -18,7 +18,7 @@ import {
   RULE_TEMPLATE_PER_PAGE_MAX,
   RULE_TEMPLATE_TAGS_MAX_COUNT,
   testData,
-} from '../../../fixtures';
+} from '../fixtures';
 
 const getTemplateNames = (items: Array<{ rule: { metadata: { name: string } } }>) =>
   items.map((template) => template.rule.metadata.name);

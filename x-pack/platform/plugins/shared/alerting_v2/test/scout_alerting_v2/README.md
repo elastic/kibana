@@ -8,20 +8,25 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 
 | Namespace | API | UI | Notes |
 |---|---|---|---|
-| `rules` | Rule HTTP CRUD, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | Local-only (`@local-stateful-classic`) |
+| `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | Mostly local-only (`@local-stateful-classic`); the rule-template specs are `tags.deploymentAgnostic` |
 | `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges | Local-only |
 | `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | Local-only |
 | `engine` | Executor, director, dispatcher, end-to-end, telemetry, implicit index privileges, **rule history** | — | Every `tags.stateful.classic` spec (local **and** cloud). API-only. |
-| `management` | — | `management_required_privileges` | The only `tags.deploymentAgnostic` spec. UI-only. |
+| `management` | — | `management_required_privileges` | `tags.deploymentAgnostic`. UI-only. |
 
 `common/` is shared utilities and Playwright fixtures. It is **not** a namespace (no `playwright.config.ts`).
 
 ### Where a new spec goes
 
-- HTTP route for rules / action policies / alert actions / execution history → that family's namespace, `api/tests/`.
+- HTTP route for rules / rule templates / action policies / alert actions / execution history → that family's namespace, `api/tests/`.
 - Executor → director → dispatcher pipeline, or anything that polls `.rule-events` / `.alert-actions` with `POLL_TIMEOUT_MS` → `engine`.
 - UI for a management page → the matching namespace's `ui/tests/`.
 - Cross-page privilege interstitial → `management`.
+
+Every spec must live under some namespace's `testDir` (`<namespace>/{api,ui}/tests/`). There
+is no catch-all config, so a spec outside those directories is silently never run. After
+adding or moving a spec, run `update-test-config-manifests` and confirm the `.meta/`
+manifest lists it.
 
 ### Why `rule_history` lives in `engine`
 
