@@ -22,7 +22,7 @@ export const useFeaturedItems = ({
   returnFocus?: () => void;
 }): { featuredItems: MenuItem[]; loading: boolean } => {
   const [featuredItems, setFeaturedItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let canceled = false;

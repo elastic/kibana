@@ -53,5 +53,5 @@ export type { FindActionPoliciesArgs } from './lib/action_policy_client';
  * on these codes; renaming or removing an entry is a breaking wire-contract
  * change (see the catalog file for details).
  */
-export { ALERTING_V2_ERROR_CODES } from './lib/errors/error_codes';
+export { ALERTING_ERROR_CODES } from './lib/errors/error_codes';
 export type { AlertingV2ErrorCode } from './lib/errors/error_codes';

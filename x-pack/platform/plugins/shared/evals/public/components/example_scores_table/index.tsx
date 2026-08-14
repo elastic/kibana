@@ -121,7 +121,7 @@ const EvaluatorScoreAccordion: React.FC<{
         {hasTraceId && (
           <EuiButtonEmpty
             size="xs"
-            iconType="apmTrace"
+            iconType="chartWaterfall"
             onClick={() => onTraceClick(evaluator.trace_id!)}
             aria-label={i18n.getEvaluatorViewTraceAriaLabel(evaluator.name)}
           >
@@ -394,7 +394,7 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
                 >
                   <EuiButtonIcon
                     size="s"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     onClick={() => onTraceClick(traceId, row.exampleId)}
                     aria-label={i18n.getTraceButtonAriaLabel(traceId)}
                   />

@@ -14,6 +14,7 @@ import {
   EuiImage,
   EuiSpacer,
   EuiSuperUpdateButton,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -35,7 +36,14 @@ import type { OnUpdateFields } from '../types';
 import { AttachmentAccordion } from './attachment_accordion';
 import { useGetCaseFileStats } from '../../../containers/use_get_case_file_stats';
 import { getAttachmentItemCount } from './helpers';
-import { NO_SEARCH_RESULTS_TITLE, NO_SEARCH_RESULTS_BODY, CLEAR_FILTERS } from './translations';
+import {
+  NO_SEARCH_RESULTS_TITLE,
+  NO_SEARCH_RESULTS_BODY,
+  CLEAR_FILTERS,
+  COLLAPSE_ALL_ATTACHMENTS,
+  EXPAND_ALL_ATTACHMENTS,
+  NO_COLLAPSIBLE_ATTACHMENTS,
+} from './translations';
 import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
 
 interface CaseViewAttachmentsProps {
@@ -44,6 +52,22 @@ interface CaseViewAttachmentsProps {
   searchTerm?: string;
   onUpdateField: (args: OnUpdateFields) => void;
 }
+
+/** Explains the disabled pair on hover; a disabled button fires no pointer events of its own. */
+const CollapseDisabledReason: React.FC<React.PropsWithChildren<{ show: boolean }>> = ({
+  show,
+  children,
+}) =>
+  show ? (
+    <EuiToolTip content={NO_COLLAPSIBLE_ATTACHMENTS} display="inlineBlock">
+      {/* Focusable so the explanation is reachable by keyboard: a disabled button is not. */}
+      <span tabIndex={0}>{children}</span>
+    </EuiToolTip>
+  ) : (
+    <>{children}</>
+  );
+
+CollapseDisabledReason.displayName = 'CollapseDisabledReason';
 
 export const CaseViewAttachments = ({
   caseData,
@@ -128,17 +152,21 @@ export const CaseViewAttachments = ({
     caseData,
     searchTerm
   );
+  const hasVisibleObservables =
+    showObservables && !(searchTerm && filteredObservables.length === 0);
 
   const showNoResults = useMemo(
     () =>
       // observables is either hidden (e.g. observability)
       // or a search is active and produced zero matches
-      (!showObservables || (Boolean(searchTerm) && filteredObservables.length === 0)) &&
-      attachmentSections.length === 0,
-    [searchTerm, attachmentSections.length, showObservables, filteredObservables.length]
+      !hasVisibleObservables && attachmentSections.length === 0,
+    [attachmentSections.length, hasVisibleObservables]
   );
 
   const [inputValue, setInputValue] = useState(searchTerm ?? '');
+  const [collapsedAttachmentIds, setCollapsedAttachmentIds] = useState<Set<string>>(
+    () => new Set()
+  );
   useEffect(() => {
     setInputValue(searchTerm ?? '');
   }, [searchTerm]);
@@ -152,6 +180,51 @@ export const CaseViewAttachments = ({
       refreshCaseView();
     }
   }, [isDirty, inputValue, onSearch, refreshCaseView]);
+
+  const visibleAttachmentIds = useMemo(
+    () => [
+      ...attachmentSections.map((attachmentSection) => attachmentSection.id),
+      ...(hasVisibleObservables ? [OBSERVABLES_FILTER_ID] : []),
+    ],
+    [attachmentSections, hasVisibleObservables]
+  );
+  // More than one, matching the activity feed: collapsing a single item is what its own toggle is
+  // for, so a bulk control would be redundant rather than useful.
+  const hasCollapsibleAttachments = visibleAttachmentIds.length > 1;
+  const allAttachmentsCollapsed =
+    visibleAttachmentIds.length > 0 &&
+    visibleAttachmentIds.every((id) => collapsedAttachmentIds.has(id));
+  const allAttachmentsExpanded = visibleAttachmentIds.every(
+    (id) => !collapsedAttachmentIds.has(id)
+  );
+
+  const onAttachmentToggle = useCallback((id: string, isOpen: boolean) => {
+    setCollapsedAttachmentIds((currentCollapsedAttachmentIds) => {
+      const nextCollapsedAttachmentIds = new Set(currentCollapsedAttachmentIds);
+      if (isOpen) {
+        nextCollapsedAttachmentIds.delete(id);
+      } else {
+        nextCollapsedAttachmentIds.add(id);
+      }
+      return nextCollapsedAttachmentIds;
+    });
+  }, []);
+
+  const collapseAllAttachments = useCallback(() => {
+    setCollapsedAttachmentIds((currentCollapsedAttachmentIds) => {
+      const nextCollapsedAttachmentIds = new Set(currentCollapsedAttachmentIds);
+      visibleAttachmentIds.forEach((id) => nextCollapsedAttachmentIds.add(id));
+      return nextCollapsedAttachmentIds;
+    });
+  }, [visibleAttachmentIds]);
+
+  const expandAllAttachments = useCallback(() => {
+    setCollapsedAttachmentIds((currentCollapsedAttachmentIds) => {
+      const nextCollapsedAttachmentIds = new Set(currentCollapsedAttachmentIds);
+      visibleAttachmentIds.forEach((id) => nextCollapsedAttachmentIds.delete(id));
+      return nextCollapsedAttachmentIds;
+    });
+  }, [visibleAttachmentIds]);
 
   return (
     <>
@@ -208,6 +281,38 @@ export const CaseViewAttachments = ({
         ) : (
           <EuiSpacer size="m" />
         )}
+        {/* Always present, never appearing and disappearing with the contents of the tab: a control
+            that comes and goes reads as instability. Disabled with a reason when there is nothing to
+            collapse. Right-aligned and icon-led, matching the activity feed's equivalent pair. */}
+        <EuiFlexGroup gutterSize="s" responsive={false} justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <CollapseDisabledReason show={!hasCollapsibleAttachments}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="fold"
+                onClick={collapseAllAttachments}
+                disabled={!hasCollapsibleAttachments || allAttachmentsCollapsed}
+                data-test-subj="case-view-attachments-collapse-all"
+              >
+                {COLLAPSE_ALL_ATTACHMENTS}
+              </EuiButtonEmpty>
+            </CollapseDisabledReason>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CollapseDisabledReason show={!hasCollapsibleAttachments}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="unfold"
+                onClick={expandAllAttachments}
+                disabled={!hasCollapsibleAttachments || allAttachmentsExpanded}
+                data-test-subj="case-view-attachments-expand-all"
+              >
+                {EXPAND_ALL_ATTACHMENTS}
+              </EuiButtonEmpty>
+            </CollapseDisabledReason>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
         {showNoResults ? (
           <EuiEmptyPrompt
             data-test-subj="case-view-attachments-no-search-results"
@@ -228,17 +333,26 @@ export const CaseViewAttachments = ({
         ) : (
           <EuiFlexGroup direction="column" gutterSize="m">
             {attachmentSections.map(({ id, displayName, count, Children }) => (
-              <AttachmentAccordion key={id} id={id} title={displayName} count={count}>
+              <AttachmentAccordion
+                key={id}
+                id={id}
+                title={displayName}
+                count={count}
+                isOpen={!collapsedAttachmentIds.has(id)}
+                onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}
+              >
                 <Children caseData={authorFilteredCaseData} searchTerm={searchTerm} />
               </AttachmentAccordion>
             ))}
-            {showObservables && (
+            {hasVisibleObservables && (
               <CaseViewObservables
                 caseData={caseData}
                 observables={filteredObservables}
                 isLoading={isLoadingObservables}
                 searchTerm={searchTerm}
                 onUpdateField={onUpdateField}
+                isOpen={!collapsedAttachmentIds.has(OBSERVABLES_FILTER_ID)}
+                onToggle={(isOpen) => onAttachmentToggle(OBSERVABLES_FILTER_ID, isOpen)}
               />
             )}
           </EuiFlexGroup>

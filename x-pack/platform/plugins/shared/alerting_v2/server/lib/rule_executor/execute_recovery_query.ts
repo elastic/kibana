@@ -6,7 +6,6 @@
  */
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { stableStringify } from '@kbn/std';
 import { isEsqlUserError } from '../errors/esql_user_error';
 import type { RuleExecutionInput } from './types';
 import { buildQueryRecoveryAlertEvents, resolveAlertEventType } from './build_alert_events';
@@ -51,14 +50,8 @@ export const executeRecoveryQuery = async ({
   });
 
   logger.debug({
-    message: () =>
-      `[execute_recovery_query] Executing recovery query for rule ${
-        input.ruleId
-      } - ${stableStringify({
-        query: effectiveQuery,
-        filter: queryPayload.filter,
-        params: queryPayload.params,
-      })}`,
+    message: 'Executing recovery query',
+    labels: { rule_id: input.ruleId },
   });
 
   try {
@@ -71,7 +64,7 @@ export const executeRecoveryQuery = async ({
 
     return buildQueryRecoveryAlertEvents({
       ruleId: rule.id,
-      ruleVersion: 1,
+      ruleVersion: rule.metadata.version,
       spaceId: input.spaceId,
       ruleAttributes: rule,
       activeGroupHashes,

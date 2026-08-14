@@ -9,6 +9,7 @@ import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { get, isEmpty, pickBy } from 'lodash';
 import type {
+  CaseAssignee,
   CaseAssignees,
   CaseCustomField,
   CaseCustomFields,
@@ -87,9 +88,22 @@ export class UserActionPersister {
 
       const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.updatedAttributes);
+      // Templates v2 mirrors a customFields edit into extended_fields in the same patch (see
+      // replace_custom_field.ts / bulk_update.ts), so both keys land in `updatedAttributes`
+      // together. Surfacing two activity-log entries for what the user experiences as one edit is
+      // redundant — extended_fields is what templates v2 renders and what the mirror already
+      // captures the customFields value into, so it wins and the customFields entry is dropped.
+      // customFields-only updates (templates disabled, or a field with no migrated counterpart)
+      // are unaffected since extended_fields won't be present in that case.
+      const suppressCustomFieldsUserAction =
+        updatedFields.includes(UserActionTypes.customFields) &&
+        updatedFields.includes(UserActionTypes.extended_fields);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
+        .filter(
+          (field) => !(suppressCustomFieldsUserAction && field === UserActionTypes.customFields)
+        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
           // Persist the closeReason to the status userAction
@@ -276,13 +290,26 @@ export class UserActionPersister {
     return fieldUserAction ? [fieldUserAction] : [];
   }
 
-  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseUserProfile>) {
+  private buildAssigneesUserActions(params: TypedUserActionDiffedItems<CaseAssignee>) {
     const createPayload: CreatePayloadFunction<
       CaseUserProfile,
       typeof UserActionTypes.assignees
     > = (items: CaseAssignees) => ({ assignees: items });
 
-    return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.assignees);
+    // assigneeIdentity persists username/full_name/email on the SO; client PATCHes uid-only.
+    // Diff by uid so retained assignees are not recorded as delete+add.
+    const toUidOnly = (assignees: CaseAssignee[]): CaseUserProfile[] =>
+      assignees.map(({ uid }) => ({ uid }));
+
+    return this.buildAddDeleteUserActions(
+      {
+        ...params,
+        originalValue: toUidOnly(params.originalValue),
+        newValue: toUidOnly(params.newValue),
+      },
+      createPayload,
+      UserActionTypes.assignees
+    );
   }
 
   private buildTagsUserActions(params: TypedUserActionDiffedItems<string>) {

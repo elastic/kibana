@@ -50,7 +50,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.id).toBe(id);
-      expect(response.body.metadata).toStrictEqual(body.metadata);
+      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
       expect(response.body.kind).toBe(body.kind);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
@@ -58,6 +58,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.id).toBe(id);
       expect(persisted.metadata.name).toBe('created-via-upsert');
+      expect(persisted.metadata.version).toBe(1);
     }
   );
 
@@ -79,16 +80,18 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      // Body is replaced wholesale.
-      expect(response.body.metadata).toStrictEqual(replacementBody.metadata);
+      expect(response.body.metadata).toStrictEqual({
+        ...replacementBody.metadata,
+        version: created.metadata.version + 1,
+      });
       expect(response.body.schedule).toStrictEqual(replacementBody.schedule);
       expect(response.body.query).toStrictEqual(replacementBody.query);
       // createdAt / createdBy / enabled are preserved across an upsert-replace.
-      expect(response.body.createdAt).toBe(created.createdAt);
-      expect(response.body.createdBy).toBe(created.createdBy);
+      expect(response.body.created_at).toBe(created.created_at);
+      expect(response.body.created_by).toBe(created.created_by);
       expect(response.body.enabled).toBe(created.enabled);
       // updatedAt is refreshed on every replace.
-      expect(response.body.updatedAt).not.toBe(created.updatedAt);
+      expect(response.body.updated_at).not.toBe(created.updated_at);
     }
   );
 
