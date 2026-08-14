@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /**
@@ -68,8 +68,7 @@ export class LensLayers {
       throw new Error(`Layer tab not found at index ${index}`);
     }
 
-    await tab.click();
-    await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
+    await this.activateTab(tab, index);
   }
 
   /**
@@ -90,7 +89,13 @@ export class LensLayers {
     if ((await tab.getAttribute('aria-selected')) === 'true') {
       return;
     }
-    await tab.click();
+    await this.activateTab(tab, index);
+  }
+
+  private async activateTab(tab: Locator, index: number) {
+    // Pointer clicks can land on the delete action that overlays the tab while it is focused.
+    // Keyboard activation targets the tab itself and avoids opening the confirmation modal.
+    await tab.press('Enter');
     await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
   }
 
