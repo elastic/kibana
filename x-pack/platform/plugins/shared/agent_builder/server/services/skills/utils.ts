@@ -78,10 +78,8 @@ export const resolveSkill = (
   const isPath = target.includes('/');
 
   if (isPath) {
-    const lastSlash = target.lastIndexOf('/');
-    const basePath = target.slice(0, lastSlash);
-    const name = target.slice(lastSlash + 1);
-    const match = allSkills.find((s) => s.name === name && s.basePath === basePath);
+    const targetPath = `/${target}${SKILL_FILE_SUFFIX}`;
+    const match = allSkills.find((s) => getSkillAbsolutePath({ skill: s }) === targetPath);
     if (!match) {
       return { error: `Skill not found at path '${input}'.` };
     }

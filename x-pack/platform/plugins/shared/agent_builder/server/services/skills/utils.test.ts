@@ -6,6 +6,7 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import { getSkillAbsolutePath } from '../execution/runner/store/volumes/skills/utils';
 import { internalToPublicDefinition, resolveSkill } from './utils';
 
 describe('internalToPublicDefinition', () => {
@@ -191,6 +192,26 @@ describe('resolveSkill', () => {
     it('trims surrounding whitespace', () => {
       const s = skill({ id: 'a', name: 'my-skill' });
       expect(resolveSkill('  my-skill  ', [s])).toEqual({ match: s });
+    });
+  });
+
+  describe('basePath storage shapes', () => {
+    it("resolves a skill with a mount-default basePath ('/skills', no subfolder)", () => {
+      const s = skill({ id: 'a', name: 'Repo Discovery', basePath: '/skills' });
+      const path = getSkillAbsolutePath({ skill: s });
+      expect(resolveSkill(path, [s])).toEqual({ match: s });
+    });
+
+    it("resolves a skill with a bare basePath ('skills/platform')", () => {
+      const s = skill({ id: 'a', name: 'my-skill', basePath: 'skills/platform' });
+      const path = getSkillAbsolutePath({ skill: s });
+      expect(resolveSkill(path, [s])).toEqual({ match: s });
+    });
+
+    it("resolves a skill with an explicit custom basePath (no 'skills' prefix)", () => {
+      const s = skill({ id: 'a', name: 'my-skill', basePath: 'sourcerer' });
+      const path = getSkillAbsolutePath({ skill: s });
+      expect(resolveSkill(path, [s])).toEqual({ match: s });
     });
   });
 });
