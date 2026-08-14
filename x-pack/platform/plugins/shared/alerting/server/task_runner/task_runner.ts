@@ -78,9 +78,12 @@ import {
   getTaskRunError,
   evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
-  isMissingUiamApiKeyRunError,
-  repairUiamApiKey,
 } from './lib';
+// Imported directly rather than through `./lib`: that barrel is also the entry point for widely used
+// helpers such as `withAlertingSpan`, so adding a module with heavy dependencies to it changes module
+// initialization order for every importer and closes an import cycle that leaves
+// `DEFAULT_APP_CATEGORIES` undefined in `alert_deletion_client`.
+import { isMissingUiamApiKeyRunError, repairUiamApiKey } from './lib/repair_uiam_api_key';
 import {
   ErrorWithType,
   isOutdatedTaskVersionError,

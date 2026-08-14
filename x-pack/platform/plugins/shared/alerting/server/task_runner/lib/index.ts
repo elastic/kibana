@@ -17,4 +17,3 @@ export { evaluatePerAlertSnoozeExpiry } from './evaluate_per_alert_snooze_expiry
 export type { EvaluatePerAlertSnoozeExpiryResult } from './evaluate_per_alert_snooze_expiry';
 export { evaluatePerAlertSnoozeConditions } from './evaluate_per_alert_snooze_conditions';
 export type { EvaluatePerAlertSnoozeConditionsResult } from './evaluate_per_alert_snooze_conditions';
-export { isMissingUiamApiKeyRunError, repairUiamApiKey } from './repair_uiam_api_key';
