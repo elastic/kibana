@@ -101,8 +101,14 @@ steps:
                 # server/agent_builder/agents/logging_wrappers/logging_wrappers.ts
                 # (YAML cannot import a TS constant).
                 agent-id: 'significant-events.logging-wrappers'
-                # Billing attribution: code-intelligence inference feature.
-                connector-id-by-feature: 'significant_events_code_intelligence'
+                # Wrapper discovery is a low-volume, high-judgment task: it must
+                # distinguish a repo's house wrapper from any function merely named
+                # `log_*`. Use the KI-extraction inference feature (strong-model tier:
+                # GPT-5.4 / GPT-OSS-120B / Sonnet 4.6) rather than the code-intelligence
+                # classification feature, whose recommended flash-lite/haiku tier
+                # over-emits here (it validated 26 bespoke helpers as "wrappers" for one
+                # repo). Billing attribution stays on code intelligence via plugin-id.
+                connector-id-by-feature: 'significant_events_ki_extraction'
                 plugin-id: 'significant_events_code_intelligence'
                 aggregate-by: 'significant_events'
                 create-conversation: false
