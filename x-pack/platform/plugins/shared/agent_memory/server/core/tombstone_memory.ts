@@ -11,7 +11,7 @@ import type { MemoryHistoryRecord, agentMemoryHistoryMappings } from '../storage
 import type { ResolvedIdentity } from './resolve_identity';
 
 export interface TombstoneMemoryParams {
-  /** The `agent-memory` document id to soft-delete. */
+  /** The Agent Memory document ID to soft-delete. */
   id: string;
   space_id: string;
   identity: ResolvedIdentity;

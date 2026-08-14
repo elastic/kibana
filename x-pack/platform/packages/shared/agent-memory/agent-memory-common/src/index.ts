@@ -8,7 +8,7 @@
 export const AGENT_MEMORY_PLUGIN_ID = 'agentMemory' as const;
 
 /** Index name for the agent memory belief store. Non-hidden, ES|QL-queryable. */
-export const AGENT_MEMORY_INDEX = 'agent-memory' as const;
+export const AGENT_MEMORY_INDEX = 'ai-index-idx-agent-memory' as const;
 
 /** Hidden data stream name for the audit trail. */
 export const AGENT_MEMORY_HISTORY_STREAM = '.agent-memory-history' as const;
@@ -71,10 +71,10 @@ export interface MemoryDocumentEnvelope {
   readonly type: 'memory';
   readonly title: string;
   readonly description: string;
+  readonly content: string;
   readonly tags?: string[];
   readonly deleted?: boolean;
   readonly expires_at?: string;
-  readonly search_embedding?: string;
   /** Time of the latest revision; optional while reading legacy records. */
   readonly '@timestamp'?: string;
   /** Stable time at which the memory was first learned. */

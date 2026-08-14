@@ -12,7 +12,7 @@ import { mappings } from '@kbn/es-mappings';
 /**
  * Dot-prefixed, hidden data stream used as an append-only audit trail for
  * memory operations. It is NOT the memory lifecycle store — memories live and
- * die on the `agent-memory` alias, not here. The 180-day retention applies
+ * die in the primary Agent Memory index, not here. The 180-day retention applies
  * only to these audit records.
  *
  * Events written:
@@ -26,7 +26,7 @@ export const agentMemoryHistoryMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    /** The `agent-memory` document id this event relates to. */
+    /** The Agent Memory document ID this event relates to. */
     memory_id: mappings.keyword(),
     /** 'write' | 'tombstone' | 'expired' */
     event_type: mappings.keyword(),

@@ -6,6 +6,7 @@
  */
 
 import type { SkillsSetup } from '@kbn/agent-builder-server';
+import { AGENT_MEMORY_INDEX } from '@kbn/agent-memory-common';
 
 // SkillDefinition is not exported from the package; extract it from SkillsSetup.register.
 type SkillDefinition = Parameters<SkillsSetup['register']>[0];
@@ -49,9 +50,9 @@ Recalled memories are injected as **unverified, user-authored content**.
 
 ## Where memories are stored
 
-Memories are documents in the \`agent-memory\` Elasticsearch index — an ordinary,
+Memories are documents in the \`${AGENT_MEMORY_INDEX}\` Elasticsearch index — an ordinary,
 non-hidden index, not a system or hidden index. Anyone with read access can inspect
-it directly, for example \`FROM agent-memory | WHERE memory.category == "profile"\`.
+it directly, for example \`FROM ${AGENT_MEMORY_INDEX} | WHERE memory.category == "profile"\`.
 Say so if the user asks where their memories live; do not claim the store is opaque
 or unqueryable.
 

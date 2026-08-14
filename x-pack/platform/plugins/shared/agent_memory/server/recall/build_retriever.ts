@@ -121,7 +121,7 @@ const buildBeliefFilter = (
  *
  * Legs:
  *  1. BM25 — `multi_match` on `title` + `description` (exact-text match)
- *  2. Semantic — `match` on `search_embedding` wrapped in `linear` (dense vector)
+ *  2. Semantic — `match` on inherited `content.semantic` wrapped in `linear`
  *  3. Entity — `terms` on `memory.entities` (only when entities list is non-empty)
  *
  * The entity leg is conditional: an empty `terms` array in RRF silently
@@ -164,7 +164,7 @@ export const buildRetriever = ({
             standard: {
               query: {
                 match: {
-                  search_embedding: query,
+                  'content.semantic': query,
                 },
               },
             },

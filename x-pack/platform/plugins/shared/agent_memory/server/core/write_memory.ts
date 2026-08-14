@@ -34,7 +34,7 @@ export interface WriteMemoryParams {
 }
 
 export interface WriteMemoryResult {
-  /** The `agent-memory` document id. */
+  /** The Agent Memory document ID. */
   id: string;
   revision: number;
   /** Whether this was a new memory (`created`) or an in-place supersession (`updated`). */
@@ -60,8 +60,8 @@ const contentHash = (description: string): string =>
  * and `memory.revision` is incremented. This keeps the doc count stable while
  * preserving the diff chain (D11 requirement).
  *
- * `search_embedding` carries `title + "\n\n" + description` so that the
- * semantic recall leg covers both the concise label and the full content.
+ * The inherited `content` field carries `title + "\n\n" + description` so
+ * that semantic recall covers both the concise label and the full content.
  *
  * If a tombstoned doc is found (same content_hash + author + space), it is
  * resurrected rather than duplicated — re-remembering forgotten content should
@@ -132,9 +132,9 @@ export const writeMemory = async ({
       '@timestamp': now,
       title,
       description,
+      content: `${title}\n\n${description}`,
       tags: tags ?? prev.tags,
       expires_at: expires_at ?? prev.expires_at,
-      search_embedding: `${title}\n\n${description}`,
       memory: {
         ...prevMemory,
         scope_kind: prev.memory.scope_kind ?? 'user',
@@ -190,10 +190,10 @@ export const writeMemory = async ({
     type: 'memory',
     title,
     description,
+    content: `${title}\n\n${description}`,
     tags,
     deleted: false,
     expires_at,
-    search_embedding: `${title}\n\n${description}`,
     '@timestamp': now,
     created_at: now,
     space_id,

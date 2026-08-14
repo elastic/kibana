@@ -11,7 +11,7 @@ import type { AgentMemoryRouteHandlerDeps } from '../types';
 /**
  * GET /internal/agent_memory/status
  *
- * Returns whether the agent-memory index exists and is ready.
+ * Returns whether the Agent Memory storage index exists and is ready.
  * Requires `read_agent_memory` privilege.
  */
 export const registerStatusRoute = ({ router, getMemoryStorage }: AgentMemoryRouteHandlerDeps) => {

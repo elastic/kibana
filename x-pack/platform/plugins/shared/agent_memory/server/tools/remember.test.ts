@@ -51,7 +51,7 @@ describe('createRememberTool', () => {
     (resolveIdentity as jest.Mock).mockReturnValue({ author: 'user-1', author_kind: 'username' });
   });
 
-  it('writes to agent-memory as the current user, not kibana_system', async () => {
+  it('writes to Agent Memory as the current user, not kibana_system', async () => {
     const tool = createRememberTool({
       getStorage,
       getHistoryClient,

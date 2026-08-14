@@ -44,8 +44,8 @@ const recallSchema = z.object({
 /**
  * Creates the `platform.memory.recall` registered tool.
  *
- * Uses `asCurrentUser` for storage access — `agent-memory` is a user data
- * index, so `kibana_system` is unauthorized. Data isolation is enforced via
+ * Uses `asCurrentUser` for storage access because Agent Memory is user data,
+ * so `kibana_system` is unauthorized. Data isolation is enforced via
  * mandatory `space_id + author` filters in `buildRetriever` (G3). Gated by
  * `read_agent_memory` checked via `checkPrivilegesWithRequest` before any ES
  * call. Recall **fails open**: ES errors return empty results rather than
