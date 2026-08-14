@@ -361,6 +361,7 @@ function resolveAndCreatePipeline({
                   ...options,
                   executor,
                   endpointModelId: endpointMeta.modelId,
+                  provider: endpointMeta.provider,
                 }),
             };
           }
@@ -402,6 +403,7 @@ function resolveAndCreatePipeline({
                     ...options,
                     executor: endpointExecutor,
                     endpointModelId: endpointMeta.modelId,
+                    provider: endpointMeta.provider,
                   }),
               };
             }

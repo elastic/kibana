@@ -17,6 +17,7 @@ import type {
   ChatCompletionTokenCountEvent,
   ChatCompletionReasoning,
 } from '@kbn/inference-common';
+import { InferenceEndpointProvider } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import {
   processOpenAIStream,
@@ -32,6 +33,7 @@ import {
 import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
 import { ensureToolsWhenHistoryHasToolUse } from '../../utils/ensure_tools_when_history_has_tool_use';
+import { sanitizeToolSchemasForVertex } from './sanitize_tool_schemas_for_vertex';
 import type { OpenAIRequest } from '../openai/types';
 import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
 
@@ -46,6 +48,7 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   modelName?: string;
   // Endpoint model identity is authoritative for parameter support.
   endpointModelId?: string;
+  provider?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
@@ -69,6 +72,7 @@ export const inferenceEndpointAdapter = {
       reasoning,
       modelName,
       endpointModelId,
+      provider,
       logger,
       abortSignal,
       timeout,
@@ -77,11 +81,16 @@ export const inferenceEndpointAdapter = {
 
     const useSimulatedFunctionCalling = functionCalling === 'simulated';
 
+    const sanitizedTools =
+      provider === InferenceEndpointProvider.GoogleVertexAI
+        ? sanitizeToolSchemasForVertex(tools)
+        : tools;
+
     const request = createEndpointRequest({
       system,
       messages,
       toolChoice,
-      tools,
+      tools: sanitizedTools,
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
       reasoning,
