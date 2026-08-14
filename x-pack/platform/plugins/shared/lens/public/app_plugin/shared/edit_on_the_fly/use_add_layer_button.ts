@@ -42,6 +42,14 @@ export const getDatasourceIdForNewLayer = (
     ? LENS_DATASOURCE_ID.FORM_BASED
     : selectedLayerDatasourceId;
 
+export const getDatasourceIdForNewLayer = (
+  layerType: Parameters<AddLayerFunction>[0],
+  selectedLayerDatasourceId?: LensDatasourceId
+): LensDatasourceId | undefined =>
+  layerType === LENS_LAYER_TYPES.REFERENCELINE
+    ? LENS_DATASOURCE_ID.FORM_BASED
+    : selectedLayerDatasourceId;
+
 export const useAddLayerButton = (
   framePublicAPI: FramePublicAPI,
   coreStart: CoreStart,
