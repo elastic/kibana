@@ -165,6 +165,22 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
+  - name: Detect duplicate fix PRs
+    # Deterministically list the other `flaky-test-fixer` PRs that touch the same file(s)
+    # or reference the same issue as this PR, so the agent reads a precomputed candidate
+    # set (with a canonical pick) instead of blind-searching. Non-fatal: a detection
+    # failure must not block verification — the agent treats a missing file as "none".
+    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    env:
+      REPO: ${{ github.repository }}
+    with:
+      script: |
+        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
+        try {
+          await writeDuplicateCandidates({ github, core, prNumber: Number(process.env.PR_NUMBER) });
+        } catch (err) {
+          core.warning(`Duplicate detection failed: ${err.message}`);
+        }
 
 safe-outputs:
   activation-comments: false
@@ -274,6 +290,66 @@ safe-outputs:
                 // Non-fatal: auto-merge may be rejected (e.g. all requirements already met, or a transient draft-state race); a human can still merge.
                 core.warning(`Could not enable auto-merge for PR #${prNumber}: ${err.status || ''} ${err.message}`);
               }
+    close-as-duplicate:
+      description: 'Close THIS fix PR as a duplicate of an existing canonical fix PR and point to it. Call only in kickoff mode, only once, and only after confirming another `flaky-test-fixer` PR fixes the same root cause (same method/purpose) and is the canonical one to keep (see "Duplicate detection"). Pass the canonical PR number in `canonical_pr`. Never call it alongside `mark_pr_ready`, a `/flaky` run, or `flaky-fix-check:started`.'
+      runs-on: ubuntu-latest
+      needs: safe_outputs
+      permissions:
+        contents: read
+        pull-requests: write
+        issues: write
+      inputs:
+        canonical_pr:
+          description: 'PR number (digits only) of the canonical fix this PR duplicates.'
+          required: true
+          type: string
+      env:
+        GH_AW_PR_NUMBER: *pr_number
+      steps:
+        - name: Close the duplicate fix PR
+          uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          with:
+            github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+            script: |
+              const fs = require('fs');
+              const prNumber = Number(process.env.GH_AW_PR_NUMBER);
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              if (!Number.isInteger(prNumber) || !outputPath || !fs.existsSync(outputPath)) {
+                core.info('Missing PR number or agent output; nothing to do.');
+                return;
+              }
+              // Custom safe-jobs read their inputs from the agent output file, not the job inputs context.
+              const { items = [] } = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+              const entry = items.find((item) => item.type === 'close_as_duplicate');
+              if (!entry) {
+                core.info('No close_as_duplicate request; nothing to do.');
+                return;
+              }
+              const canonical = String(entry.canonical_pr || '').trim().replace(/^#/, '');
+              const canonicalRef = /^\d+$/.test(canonical) ? `#${canonical}` : 'another open fix PR';
+              const { owner, repo } = context.repo;
+              const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+              if (pr.state !== 'open') {
+                core.info(`PR #${prNumber} is already ${pr.state}; nothing to do.`);
+                return;
+              }
+              const body = [
+                '### 🔁 Closing as a duplicate fix',
+                '',
+                `This PR fixes the same flaky test as ${canonicalRef}, which is already in flight, so it is being closed to avoid duplicate work. Reopen it if ${canonicalRef} turns out not to cover this case.`,
+              ].join('\n');
+              try {
+                await github.rest.issues.createComment({ owner, repo, issue_number: prNumber, body });
+              } catch (err) {
+                core.warning(`Could not comment on #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
+              try {
+                await github.rest.pulls.update({ owner, repo, pull_number: prNumber, state: 'closed' });
+                core.info(`Closed #${prNumber} as a duplicate of ${canonicalRef}.`);
+              } catch (err) {
+                // Non-fatal: a failure to close must not fail the verification run.
+                core.warning(`Could not close #${prNumber}: ${err.status || ''} ${err.message}`);
+              }
 
 strict: false
 timeout-minutes: 30
@@ -298,6 +374,7 @@ A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer 
 - `pr-issue-comments.json` — every PR comment, including prior `## Flaky Test Runner Stats` result comments and the `/flaky` comments this workflow posted.
 - `flaky-run-count.json` — `{ triggeredByBot }`: the deterministic, pre-computed number of `/flaky` runs `kibanamachine` has already triggered on this PR (see [Number of runs](#number-of-runs)).
 - `pr-review-comments.json`, `pr-reviews.json` — review threads and reviews.
+- `duplicate-candidates.json` — other `flaky-test-fixer` PRs that overlap this one (same changed file or same linked issue), each with the files/issue it shares, plus a deterministically-chosen `canonical` PR for the group and whether this PR is that canonical. See [Duplicate detection](#duplicate-detection). Absent if detection failed — treat that as "no candidates".
 
 Only fetch data live when it is not in these files. In particular, the linked `failed-test` issue's investigator comment lives on a **different** issue (not this PR), so fetch it directly.
 
@@ -307,6 +384,18 @@ You run in one of two modes, selected from the triggering event:
 
 - `kickoff`: the trigger is `pull_request_target` (a PR was labeled `flaky-test-fixer`), or a manual `workflow_dispatch` on a PR that does **not** yet have both the `flaky-fix-check:started` label and flaky test runner result comments. Decide whether the fix needs a run (see below); if so, resolve configs and trigger the first flaky test runner run.
 - `process_results`: the trigger is an `issue_comment` whose body contains `## Flaky Test Runner Stats`, or a manual `workflow_dispatch` on a PR that **already** has the `flaky-fix-check:started` label and flaky test runner result comments. Read the results, attribute them, and decide whether to finish or iterate.
+
+## Duplicate detection
+
+The fixer opens one PR per `failed-test` issue, but many issues share a single root cause, so several fixer PRs can end up changing the **same method or spec**. They are usually opened within minutes of each other by parallel runs, so the fixer's own pre-open search can't see them. This verifier is the chokepoint that catches them: it runs once per PR, after the PRs exist. A pre-step has already written `duplicate-candidates.json` (see [Prefetched PR context](#prefetched-pr-context)) listing the other `flaky-test-fixer` PRs that overlap this one. Run this check **first in `kickoff` mode**, before screening the patch or spending any runs — and **only** in `kickoff` mode, never in `process_results`:
+
+1. Read `duplicate-candidates.json`. If it is missing or `candidates` is empty, there is no duplicate — continue with the normal kickoff steps. The list matches on a shared changed file or shared linked issue and is deliberately broad, so confirm each candidate yourself.
+2. **Confirm true duplicates.** A candidate is a true duplicate only when it changes the **same method / same code for the same purpose** as this PR — not merely the same file for an unrelated reason (two PRs hardening *different* methods of the same page object are **not** duplicates, even though they share the file). Compare this PR's diff (`pr-diff.txt`) against each candidate's diff (fetch it) to decide. If none is a true duplicate, continue with the normal kickoff steps.
+3. **Find the canonical PR** the group should collapse onto, considering this PR together with its confirmed true duplicates:
+   - if any confirmed duplicate is **merged**, the fix has already landed, so this PR is redundant and the merged one is canonical;
+   - otherwise the canonical is the **earliest-created open** PR (compare `createdAt`; `duplicate-candidates.json` already sorts by it and suggests `canonical`/`isSelfCanonical`).
+4. **If this PR is the canonical one** (earliest open, none merged), do **not** close anything — it is the one to keep; continue with the normal kickoff steps. You never close a *different* PR from here: each newer duplicate's own verifier run closes itself against this one, so the group converges without races.
+5. **Otherwise close THIS PR**: call `close_as_duplicate` with `canonical_pr` set to the canonical PR's number. Do not add `flaky-fix-check:started`, do not post a `/flaky` comment, and do not call `mark_pr_ready`. Stop — this PR is done.
 
 ## Number of runs
 
@@ -371,21 +460,23 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
 ## `kickoff` mode
 
-1. **Read the fixer PR.** From the prefetched context, read `pr-diff.txt` (changed files) and `pr-metadata.json` (the body links the originating `failed-test` issue via `Fixes #<n>`). Then fetch the linked investigator comment on that issue (not prefetched). From these, identify:
+1. **Rule out a duplicate first.** Before anything else, run the [Duplicate detection](#duplicate-detection) check. If it closes this PR (via `close_as_duplicate`), stop here — there is nothing more to do. Otherwise continue.
+
+2. **Read the fixer PR.** From the prefetched context, read `pr-diff.txt` (changed files) and `pr-metadata.json` (the body links the originating `failed-test` issue via `Fixes #<n>`). Then fetch the linked investigator comment on that issue (not prefetched). From these, identify:
 
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-2. **Screen the patch against the Fix guardrails.** Check `pr-diff.txt` against the [Fix guardrails](#fix-guardrails) before spending any runs: a guardrail-violating fix — e.g. a retry or error-tolerance loop anywhere (test, framework, or application code), or a framework internal newly exposed to enable the fix — must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Derive a compliant fix, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot derive a compliant fix, add `flaky-fix-check:failed`, post a failed comment naming the violated guardrail, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
+3. **Screen the patch against the Fix guardrails.** Check `pr-diff.txt` against the [Fix guardrails](#fix-guardrails) before spending any runs: a guardrail-violating fix — e.g. a retry or error-tolerance loop anywhere (test, framework, or application code), or a framework internal newly exposed to enable the fix — must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Derive a compliant fix, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot derive a compliant fix, add `flaky-fix-check:failed`, post a failed comment naming the violated guardrail, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
 
-3. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
+4. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
 
    - **Runner-supported test.** The `/flaky` runner accepts only **FTR** and **Scout** configs. If the fix touches only a **Jest** test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), it can't help: the fixer already verifies Jest fixes by local repetition.
    - **A fix repeated runs can actually validate.** The required CI already catches deterministic failures; extra runs add signal only when one pass isn't a reliable verdict: when the test still has a timing/ordering/concurrency element after the fix. Trigger a run only when the fix *mitigates* a non-deterministic cause (a race, a wait/timeout, ordering, shared-state timing) whose stability is confirmed by holding across many runs.
 
    When both gates hold, resolve the config(s) (next step).
 
-4. **Resolve config paths**:
+5. **Resolve config paths**:
 
    - **Reuse first:** if a previous `/flaky` comment on the PR already names the config(s) — e.g. an earlier iteration recorded them in `pr-issue-comments.json` — reuse those exact config paths so runs stay consistent, and skip the file-tree walk below (only add a config if your latest change touches files under a different one).
    - **FTR:** walk up from each changed test file to the nearest leaf `config*.ts` (skip `*.base.ts`); verify it actually runs the file via `testFiles` / `loadTestFile` (directly or via glob). If none is found by walking up, search for the config that includes the file.
@@ -393,7 +484,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) asking a human to identify the config, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
    - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
-5. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
+6. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
 
    ```
    /flaky <type>:<path>:30 [<type>:<path>:30 ...]
@@ -403,7 +494,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
    The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object): skip it for a routine first run rather than restate which test you're exercising. When you do post it, use the rationale heading from [Update comment](#update-comment).
 
-6. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
+7. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
 
 ---
 

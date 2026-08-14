@@ -79,6 +79,31 @@ steps:
       cache: yarn
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
+  - name: Detect duplicate fix PRs
+    # Deterministically list the other `flaky-test-fixer` PRs that already reference this
+    # issue or touch the test file(s) it names, so the agent can bail out before spending a
+    # full run re-fixing something already in flight. Non-fatal: a detection failure must
+    # not block the fix — the agent treats a missing file as "no in-flight duplicate".
+    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    env:
+      REPO: ${{ github.repository }}
+    with:
+      script: |
+        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
+        const issueNumber = Number(process.env.ISSUE_NUMBER);
+        let issueBody = '';
+        try {
+          const { owner, repo } = context.repo;
+          const { data: issue } = await github.rest.issues.get({ owner, repo, issue_number: issueNumber });
+          issueBody = issue.body || '';
+        } catch (err) {
+          core.warning(`Could not fetch issue #${issueNumber}: ${err.message}`);
+        }
+        try {
+          await writeDuplicateCandidates({ github, core, issueNumber, issueBody });
+        } catch (err) {
+          core.warning(`Duplicate detection failed: ${err.message}`);
+        }
 
 network:
   allowed:
@@ -245,7 +270,7 @@ timeout-minutes: 90
 
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
-- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. Search for PRs that reference this issue number (in their body or in the issue timeline), and for recent PRs touching the failing test's file;
+- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. A pre-step has already listed the overlapping `flaky-test-fixer` PRs in `/tmp/gh-aw/agent/duplicate-candidates.json` — start there (see [Duplicate detection](#duplicate-detection)), then also search for PRs that reference this issue number (in their body or in the issue timeline) and recent PRs touching the failing test's file, since a sibling opened moments ago may not be listed yet;
 - you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
 - the fix has to target a version branch (see "Fixes that must target a version branch").
 
@@ -255,13 +280,22 @@ Whatever the outcome, always finish by leaving one concise comment on the issue 
 
 `${{ env.REQUESTED_BY }}` triggered this run — the user who applied `ai:fix-flaky`, or the manual dispatcher. @-mention them (`@${{ env.REQUESTED_BY }}`) in both the outcome comment and the PR body so they get pinged to review the outcome and the fix, but **only if it is a real user account**: if `${{ env.REQUESTED_BY }}` ends with `[bot]` or is `kibanamachine`, omit the mention (and the "Requested by" line) entirely.
 
+## Duplicate detection
+
+Many `failed-test` issues share a single root cause, so the fixer can open several PRs that change the **same method or spec** — usually within minutes of each other, by parallel runs. Before doing any work, rule out that a fix is already in flight:
+
+- A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json`: the other `flaky-test-fixer` PRs (open, or merged in the last 30 days) that reference this issue or touch a test file this issue names. Read it first.
+- Treat a candidate as a real match only when it addresses the **same root cause / same method for the same purpose** — not merely the same file for an unrelated reason (a different method of the same page object is not a duplicate). Open the candidate's diff to confirm.
+- The file is a starting point, not the whole truth: the match is file/issue-based and a sibling opened moments ago may not appear yet, so still do a quick search for PRs referencing this issue number and recent PRs touching the failing test's file.
+- If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 8), and stop. The downstream Flaky Fix Verifier is the backstop that closes any duplicate that still slips through, so when genuinely in doubt, lean toward not opening a second PR.
+
 ## Environment
 
 Kibana is already bootstrapped for you. The `bk` (Buildkite) CLI is installed and authenticated and `BUILDKITE_ORGANIZATION_SLUG` is `elastic`, so you can inspect CI builds and download failure artifacts (JUnit XML, screenshots, server logs) when you need to re-investigate (see "Validate the investigation is current").
 
 ## Steps
 
-1. **Establish a current root-cause analysis.** Read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
+1. **Rule out a duplicate, then establish a current root-cause analysis.** First run [Duplicate detection](#duplicate-detection); if a fix for this root cause is already in flight, skip straight to step 7 (outcome comment) and step 8 (remove label) — do not open a PR. Otherwise, read the failed-test investigator's comment(s) on the issue for the suspected root cause and proposed fix, and note the most recent one's permalink, timestamp, any attribution it makes (e.g. an implicated PR/commit), and where the failures happened, so you can cite them in the PR's Context section. **Do not treat that comment as ground truth**: a prior analysis can be based on stale data or superseded guidance, and building on a stale diagnosis is a top cause of fixes that don't hold. Assess whether it is still current and, when it is not, re-investigate from scratch before proposing anything — see [Validate the investigation is current](#validate-the-investigation-is-current). If, after that, no action is needed, skip to step 7.
 2. Read the failing test and the helpers, fixtures, and page objects it imports — and the application code the failing assertions exercise, so a product-side root cause isn't missed.
 3. Decide where the fix should land. The default target is `main`. But if the failure is on a **version branch** (check the issue's CI data / investigator comment) and `main` already carries the fix, don't target `main` — follow "Fix already on `main`", which decides between recommending a backport of the existing PR and handing over a best-effort fix for the version branch. Neither path opens a PR.
 4. Apply the smallest patch that addresses the root cause on the target branch, whether that's in test code or application code, staying within the [Fix guardrails](#fix-guardrails). Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any. Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
