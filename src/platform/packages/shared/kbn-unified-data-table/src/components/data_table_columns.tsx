@@ -287,10 +287,6 @@ function buildEuiGridColumn({
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
 
-  if (columnWidth > 0) {
-    column.initialWidth = Number(columnWidth);
-  }
-
   if (column.id === SOURCE_COLUMN) {
     column.display = (
       <DataTableSourceColumnHeaderMemoized
@@ -303,8 +299,6 @@ function buildEuiGridColumn({
     if (sourceDisplayMode === 'json') {
       column.isExpandable = false;
       column.cellActions = EMPTY_CELL_ACTIONS;
-      // Early return to avoid the column to be overridden by custom implementations.
-      return column;
     }
   }
 
@@ -336,7 +330,15 @@ function buildEuiGridColumn({
     );
   }
 
+  if (columnWidth > 0) {
+    column.initialWidth = Number(columnWidth);
+  }
+
   if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
+    // Do not allow overwrites to the JSON column.
+    if (column.id === SOURCE_COLUMN && sourceDisplayMode === 'json') {
+      return column;
+    }
     return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
   }
 
