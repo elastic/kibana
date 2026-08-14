@@ -59,14 +59,3 @@ export function extractAgentConversationIds(
 
   return result;
 }
-
-/**
- * Convenience for the single-agent-step case. Prefer
- * {@link extractAgentConversationIds} when a workflow may contain more than one
- * `ai.agent` step; this returns only the first match.
- */
-export function extractFirstAgentConversationId(
-  steps: ReadonlyArray<Pick<WorkflowStepExecutionDto, 'stepId' | 'stepType' | 'output'>>
-): string | undefined {
-  return extractAgentConversationIds(steps)[0]?.conversationId;
-}

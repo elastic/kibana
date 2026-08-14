@@ -87,5 +87,14 @@ describe('getTraceId', () => {
     it('returns undefined when neither APM nor an OTEL span is active', () => {
       expect(getTraceId(apmlessTransaction)).toBeUndefined();
     });
+
+    it('rejects the all-zero INVALID_TRACEID rather than persisting it', async () => {
+      // An unsampled context surfaces the all-zero trace id, which matches no span.
+      const span = spanWithTraceId('00000000000000000000000000000000');
+
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        expect(getTraceId(apmlessTransaction)).toBeUndefined();
+      });
+    });
   });
 });

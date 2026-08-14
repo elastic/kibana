@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  extractAgentConversationIds,
-  extractFirstAgentConversationId,
-} from './agent_conversation_ids';
+import { extractAgentConversationIds } from './agent_conversation_ids';
 import type { WorkflowStepExecutionDto } from './v1';
 
 /**
@@ -132,28 +129,5 @@ describe('extractAgentConversationIds', () => {
     expect(extractAgentConversationIds(steps)).toEqual([
       { stepId: 'real_agent', conversationId: 'conv-real', stepType: 'ai.agent' },
     ]);
-  });
-});
-
-describe('extractFirstAgentConversationId', () => {
-  it('returns only the first conversation id (single-agent convenience)', () => {
-    const steps = [
-      step({
-        stepId: 'draft_creation',
-        stepType: 'ai.agent',
-        output: { conversation_id: 'conv-draft' },
-      }),
-      step({
-        stepId: 'review_agent',
-        stepType: 'ai.agent',
-        output: { conversation_id: 'conv-review' },
-      }),
-    ];
-
-    expect(extractFirstAgentConversationId(steps)).toBe('conv-draft');
-  });
-
-  it('returns undefined when no conversation id is present', () => {
-    expect(extractFirstAgentConversationId([])).toBeUndefined();
   });
 });
