@@ -17,6 +17,7 @@ import {
 } from './session_replay/settings';
 import { getRumFiltersRoute } from './rum/filters';
 import { getRumOverviewRoute } from './rum/overview';
+import { getRumClickMapRoute } from './rum/click_map';
 import { getRumPagesRoute } from './rum/pages';
 import { getRumErrorsRoute } from './rum/errors';
 import { getRumReportRoute } from './rum/reports';
@@ -54,6 +55,7 @@ function getTypedUxServerRouteRepository() {
     ...updateSessionReplaySettingsRoute,
     ...getRumFiltersRoute,
     ...getRumOverviewRoute,
+    ...getRumClickMapRoute,
     ...getRumPagesRoute,
     ...getRumErrorsRoute,
     ...getRumReportRoute,

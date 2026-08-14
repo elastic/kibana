@@ -37,6 +37,7 @@ import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { useHasRumData } from '../rum_dashboard/hooks/use_has_rum_data';
 import { TrendMetric } from './trend_metric';
 import { VisitorCountriesPanel } from './visitor_countries';
+import { ClickMapPanel } from './click_map_panel';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { useRumBudgetFlyout } from '../rum_budgets/budget_flyout_context';
 import { BudgetChips } from '../rum_budgets/budget_chips';
@@ -682,6 +683,10 @@ export function RumOverviewV2() {
         activeLocation={locationFilter}
         maxPageViews={Math.max(1, ...data.countries.map((row) => row.pageViews))}
       />
+
+      <EuiSpacer />
+
+      <ClickMapPanel />
 
       <EuiSpacer />
 

@@ -18,6 +18,7 @@ export const OTEL_EVENT_NAVIGATION = 'browser.navigation';
 export const OTEL_EVENT_RAGE_CLICK = 'browser.frustration.rage_click';
 export const OTEL_EVENT_DEAD_CLICK = 'browser.frustration.dead_click';
 export const OTEL_EVENT_ERROR_CLICK = 'browser.frustration.error_click';
+export const OTEL_EVENT_USER_ACTION_CLICK = 'browser.user_action.click';
 
 export const OTEL_SERVICE_NAME = 'resource.attributes.service.name';
 export const OTEL_SERVICE_ENVIRONMENT = 'resource.attributes.deployment.environment';

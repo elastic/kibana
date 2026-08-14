@@ -12,6 +12,7 @@ import type {
   RumOverviewResponse,
   RumPagesResponse,
 } from '../../../common/rum_app';
+import type { RumClickMapResponse } from '../../../common/rum_click_map';
 import type {
   RumReportCompareMode,
   RumReportResponse,
@@ -83,6 +84,13 @@ export const fetchRumOverview = async ({
   ...params
 }: RumQueryParams): Promise<RumOverviewResponse> => {
   return http.get<RumOverviewResponse>('/internal/ux/rum/overview', { query: rumQuery(params) });
+};
+
+export const fetchRumClickMap = async ({
+  http,
+  ...params
+}: RumQueryParams): Promise<RumClickMapResponse> => {
+  return http.get<RumClickMapResponse>('/internal/ux/rum/click_map', { query: rumQuery(params) });
 };
 
 export const fetchRumPages = async ({

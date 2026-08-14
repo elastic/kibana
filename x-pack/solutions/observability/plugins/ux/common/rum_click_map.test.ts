@@ -1,0 +1,97 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  binClicks,
+  extractPageSnapshot,
+  inViewportBand,
+  isOnSnapshotViewport,
+  pathFromHref,
+} from './rum_click_map';
+
+describe('pathFromHref', () => {
+  it('returns pathname from a full URL', () => {
+    expect(pathFromHref('https://shop.example/cart?ref=1')).toBe('/cart');
+  });
+
+  it('prefers hash routes that look like paths', () => {
+    expect(pathFromHref('https://shop.example/#/account')).toBe('/account');
+  });
+});
+
+describe('extractPageSnapshot', () => {
+  const meta = (href: string, width = 1280, height = 800, timestamp = 1) => ({
+    type: 4,
+    timestamp,
+    data: { href, width, height },
+  });
+  const snapshot = (timestamp = 2) => ({ type: 2, timestamp, data: { node: { id: 1 } } });
+
+  it('returns Meta + FullSnapshot and ignores synthetic type 99', () => {
+    const result = extractPageSnapshot([
+      { type: 99, data: { name: 'replay-started' } },
+      meta('https://shop.example/'),
+      snapshot(),
+      { type: 3, timestamp: 3, data: { source: 2 } },
+    ]);
+    expect(result).not.toBeNull();
+    expect(result?.width).toBe(1280);
+    expect(result?.height).toBe(800);
+    expect(result?.href).toBe('https://shop.example/');
+    expect(result?.events).toHaveLength(2);
+    expect((result?.events[0] as { type: number }).type).toBe(4);
+    expect((result?.events[1] as { type: number }).type).toBe(2);
+  });
+
+  it('prefers a Meta whose href matches the page path', () => {
+    const result = extractPageSnapshot(
+      [
+        meta('https://shop.example/'),
+        snapshot(2),
+        meta('https://shop.example/cart', 1024, 768, 10),
+        snapshot(11),
+      ],
+      '/cart'
+    );
+    expect(result?.href).toBe('https://shop.example/cart');
+    expect(result?.width).toBe(1024);
+  });
+
+  it('returns null without a FullSnapshot', () => {
+    expect(extractPageSnapshot([meta('https://shop.example/')])).toBeNull();
+  });
+});
+
+describe('binClicks', () => {
+  it('clusters nearby clicks and keeps the hottest bins', () => {
+    const binned = binClicks(
+      [
+        { x: 10, y: 10 },
+        { x: 11, y: 9 },
+        { x: 200, y: 200 },
+      ],
+      12,
+      10
+    );
+    expect(binned[0].count).toBe(2);
+    expect(binned).toHaveLength(2);
+  });
+});
+
+describe('inViewportBand / isOnSnapshotViewport', () => {
+  it('accepts nearby viewport widths', () => {
+    expect(inViewportBand(1280, 1280)).toBe(true);
+    expect(inViewportBand(1200, 1280)).toBe(true);
+    expect(inViewportBand(800, 1280)).toBe(false);
+    expect(inViewportBand(null, 1280)).toBe(true);
+  });
+
+  it('keeps above-the-fold clicks', () => {
+    expect(isOnSnapshotViewport({ x: 100, y: 200 }, 1280, 800)).toBe(true);
+    expect(isOnSnapshotViewport({ x: 100, y: 4000 }, 1280, 800)).toBe(false);
+  });
+});
