@@ -15,7 +15,7 @@ export const MAX_USERNAME_LENGTH = 256;
 export const MAX_TAGS_PER_OPERATION = 100;
 export const MAX_ASSIGNEES_PER_OPERATION = 100;
 
-export const workflowStatusEnum = z.enum(['open', 'acknowledged', 'closed']);
+export const workflowStatusEnum = z.enum(['open', 'acknowledged', 'in-progress', 'closed']);
 
 export const previousStatusSchema = z.object({
   id: z.string().min(1).max(MAX_ID_LENGTH),

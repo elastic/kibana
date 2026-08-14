@@ -148,7 +148,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'securitySolution.alertStatusChanged',
-    schemaHash: 'bd09cadbef980fb92d2fe412011d5ec5f8cf05e8b057f4423f6e03b943485606',
+    schemaHash: '975d9066961cad2453415869279d140e23af66ca7e637c04d6c1b22e0eb5b75a',
   },
   {
     id: 'securitySolution.alertTagsChanged',
@@ -160,7 +160,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'securitySolution.attackStatusChanged',
-    schemaHash: '1304bb3f9bf3d6ab0d9016a00b9da34042e11c86b6f42b5aef711b2c1d0edfed',
+    schemaHash: 'd15fcbb49f276e433bdbe5aaafd42386df74397405fa9fd566e171ce075c525a',
   },
   {
     id: 'securitySolution.attackTagsChanged',
