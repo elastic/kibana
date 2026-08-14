@@ -37,6 +37,10 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import {
+  agentBuilderDefaultAgentId,
+  createConversationAlreadyExistsError,
+} from '@kbn/agent-builder-common';
 
 export class AgentBuilderPlugin
   implements
@@ -300,9 +304,32 @@ export class AgentBuilderPlugin
       conversations: {
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
+          const agentRegistry = await agents.getRegistry({ request });
           return {
             get: client.get.bind(client),
             list: client.list.bind(client),
+            create: async ({ agentId, id, title, accessControl }) => {
+              const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
+
+              // Validate agent before writing — avoids creating an orphaned document
+              // when the internal create() would otherwise persist first and fail on get().
+              // AgentBuilderErrors propagate as-is; callers handle them by error code / statusCode.
+              await agentRegistry.get(effectiveAgentId, { access: 'use' });
+
+              // Guard against duplicate IDs — internal create() maps ES version-conflict
+              // to a 404 (createConversationNotFoundError), indistinguishable from other failures
+              if (id && (await client.exists(id))) {
+                throw createConversationAlreadyExistsError({ conversationId: id });
+              }
+
+              return client.create({
+                agent_id: effectiveAgentId,
+                id,
+                title: title ?? 'New conversation',
+                access_control: accessControl,
+                rounds: [],
+              });
+            },
           };
         },
       },

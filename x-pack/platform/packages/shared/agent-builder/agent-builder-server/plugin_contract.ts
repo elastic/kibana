@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   AgentCreateRequest,
   Conversation,
+  ConversationAccessControl,
   ConversationWithoutRounds,
   ConversationListOptions,
 } from '@kbn/agent-builder-common';
@@ -196,9 +197,23 @@ export interface RuntimeStart {
 }
 
 /**
- * A read-only conversation client exposing only get and list operations.
+ * Input for pre-creating an empty conversation without starting an execution.
  */
-export interface ReadOnlyConversationClient {
+export interface ConversationCreatePublicRequest {
+  /** The agent to associate with the conversation. Defaults to the default Elastic AI agent. */
+  agentId?: string;
+  /** Client-supplied UUID. Server-generated if omitted. */
+  id?: string;
+  /** Defaults to "New conversation". */
+  title?: string;
+  /** Defaults to private. */
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
+}
+
+/**
+ * A conversation client exposing get, list, and create operations.
+ */
+export interface ConversationPublicClient {
   /**
    * Retrieve a single conversation by its ID, including all rounds.
    */
@@ -207,16 +222,27 @@ export interface ReadOnlyConversationClient {
    * List conversations for the current user, optionally filtered by agent ID.
    */
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  /**
+   * Create an empty conversation (no rounds, no execution).
+   *
+   * Validates that the agent is accessible before writing — prevents orphaned
+   * documents if the agent is invalid. Throws a 404-shaped error if the agent
+   * does not exist or is inaccessible.
+   *
+   * Throws a 409-shaped error (AgentBuilderConversationAlreadyExistsError) if
+   * a conversation with the given ID already exists.
+   */
+  create(request: ConversationCreatePublicRequest): Promise<Conversation>;
 }
 
 /**
- * AgentBuilder conversations service's start contract (read-only).
+ * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
   /**
-   * Returns a read-only conversation client scoped to the given request's user and space.
+   * Returns a conversation client scoped to the given request's user and space.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
 /**

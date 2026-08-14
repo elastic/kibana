@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ReadOnlyConversationClient, ConversationsStart } from '../../types';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient, ConversationsStart } from '../../types';
 import {
   createConversationClientMock,
   createEmptyConversation,
@@ -25,14 +26,22 @@ const createConversationsStart = (internalService: ConversationService): Convers
     return {
       get: client.get.bind(client),
       list: client.list.bind(client),
+      create: ({ agentId, id, title, accessControl }) =>
+        client.create({
+          agent_id: agentId ?? agentBuilderDefaultAgentId,
+          id,
+          title: title ?? 'New conversation',
+          access_control: accessControl,
+          rounds: [],
+        }),
     };
   },
 });
 
-describe('ReadOnlyConversationClient', () => {
+describe('ConversationPublicClient', () => {
   let conversationsStart: ConversationsStart;
   let internalClient: ConversationClientMock;
-  let readOnlyClient: ReadOnlyConversationClient;
+  let publicClient: ConversationPublicClient;
   const request = {} as KibanaRequest;
 
   beforeEach(async () => {
@@ -42,14 +51,14 @@ describe('ReadOnlyConversationClient', () => {
       getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
     };
     conversationsStart = createConversationsStart(internalService);
-    readOnlyClient = await conversationsStart.getScopedClient({ request });
+    publicClient = await conversationsStart.getScopedClient({ request });
   });
 
   it('delegates get() to the internal conversation client', async () => {
     const conversation = createEmptyConversation({ id: 'conv-1', title: 'Test' });
     internalClient.get.mockResolvedValue(conversation);
 
-    const result = await readOnlyClient.get('conv-1');
+    const result = await publicClient.get('conv-1');
 
     expect(internalClient.get).toHaveBeenCalledWith('conv-1');
     expect(result).toEqual(conversation);
@@ -62,18 +71,34 @@ describe('ReadOnlyConversationClient', () => {
     ].map(({ rounds, ...withoutRounds }) => withoutRounds);
     internalClient.list.mockResolvedValue(conversations);
 
-    const result = await readOnlyClient.list({ agentId: 'agent-1' });
+    const result = await publicClient.list({ agentId: 'agent-1' });
 
     expect(internalClient.list).toHaveBeenCalledWith({ agentId: 'agent-1' });
     expect(result).toEqual(conversations);
   });
 
-  it('does not expose create, update, delete, or exists methods', () => {
-    const clientKeys = Object.keys(readOnlyClient);
-    expect(clientKeys).toEqual(expect.arrayContaining(['get', 'list']));
-    expect(clientKeys).not.toContain('create');
+  it('delegates create() to the internal conversation client with defaults', async () => {
+    const conversation = createEmptyConversation({ id: 'conv-1' });
+    internalClient.create.mockResolvedValue(conversation);
+
+    const result = await publicClient.create({ agentId: 'agent-1', id: 'conv-1' });
+
+    expect(internalClient.create).toHaveBeenCalledWith({
+      agent_id: 'agent-1',
+      id: 'conv-1',
+      title: 'New conversation',
+      access_control: undefined,
+      rounds: [],
+    });
+    expect(result).toEqual(conversation);
+  });
+
+  it('does not expose update, delete, upsertRound, or exists methods', () => {
+    const clientKeys = Object.keys(publicClient);
+    expect(clientKeys).toEqual(expect.arrayContaining(['get', 'list', 'create']));
     expect(clientKeys).not.toContain('update');
     expect(clientKeys).not.toContain('delete');
+    expect(clientKeys).not.toContain('upsertRound');
     expect(clientKeys).not.toContain('exists');
   });
 });

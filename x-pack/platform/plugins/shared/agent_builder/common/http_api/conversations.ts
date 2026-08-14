@@ -47,3 +47,5 @@ export interface MarkPinnedConversationResponse {
   id: string;
   pinned: boolean;
 }
+
+export type CreateConversationResponse = ConversationWithPermissions;
