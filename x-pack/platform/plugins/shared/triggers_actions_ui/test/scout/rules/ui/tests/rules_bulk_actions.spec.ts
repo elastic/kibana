@@ -5,47 +5,21 @@
  * 2.0.
  */
 
-import type { KbnClient, ScoutPage } from '@kbn/scout';
-import { tags } from '@kbn/scout';
+import { tags, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, makeEsQueryRule, makeIndexThresholdRule } from '../fixtures';
 
-// ── API helpers ──────────────────────────────────────────────────────────────
-
-const scheduleRuleSnooze = async (kbnClient: KbnClient, ruleId: string) => {
-  await kbnClient.request({
-    method: 'POST',
-    path: `/internal/alerting/rule/${ruleId}/_snooze`,
-    headers: { 'kbn-xsrf': 'scout' },
-    body: {
-      snooze_schedule: {
-        duration: 0,
-        id: 'scout-schedule-id',
-        rRule: {
-          count: 1,
-          dtstart: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-          tzid: 'UTC',
-        },
-      },
-    },
-  });
-};
-
-// Switch to the Rules tab to trigger a list refresh (mirrors FTR's refreshAlertsList).
-const refreshRulesList = async (page: ScoutPage) => {
-  await page.testSubj.click('logsTab');
+const openRulesList = async (page: ScoutPage) => {
+  await page.gotoApp('rules');
   await page.testSubj.click('rulesTab');
+  await expect(page.testSubj.locator('rulesList')).toBeVisible();
 };
-
-// ── Tests ────────────────────────────────────────────────────────────────────
 
 test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
   const createdRuleIds: string[] = [];
 
-  test.beforeEach(async ({ browserAuth, page }) => {
+  test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp('rules');
-    await page.testSubj.click('rulesTab');
   });
 
   test.afterEach(async ({ apiServices }) => {
@@ -61,7 +35,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
 
-    await refreshRulesList(page);
+    await openRulesList(page);
 
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
@@ -95,9 +69,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       apiServices.alerting.rules.snooze(r2.data.id, 100_000_000),
     ]);
 
-    await refreshRulesList(page);
+    await openRulesList(page);
 
-    await page.testSubj.locator('ruleSearchField').fill('');
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
     await page.testSubj.click('showBulkActionButton');
@@ -124,9 +97,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
 
-    await refreshRulesList(page);
+    await openRulesList(page);
 
-    await page.testSubj.locator('ruleSearchField').fill('');
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
     await page.testSubj.click('showBulkActionButton');
@@ -146,20 +118,19 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     }
   });
 
-  test('should allow rule schedule to be removed', async ({ page, apiServices, kbnClient }) => {
+  test('should allow rule schedule to be removed', async ({ page, apiServices }) => {
     const [r1, r2] = await Promise.all([
       apiServices.alerting.rules.create(makeEsQueryRule('remove-schedule-a')),
       apiServices.alerting.rules.create(makeEsQueryRule('remove-schedule-b')),
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
     await Promise.all([
-      scheduleRuleSnooze(kbnClient, r1.data.id),
-      scheduleRuleSnooze(kbnClient, r2.data.id),
+      apiServices.alerting.rules.scheduleSnooze(r1.data.id),
+      apiServices.alerting.rules.scheduleSnooze(r2.data.id),
     ]);
 
-    await refreshRulesList(page);
+    await openRulesList(page);
 
-    await page.testSubj.locator('ruleSearchField').fill('');
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click(`checkboxSelectRow-${r2.data.id}`);
     await page.testSubj.click('showBulkActionButton');
@@ -186,9 +157,8 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id);
 
-    await refreshRulesList(page);
+    await openRulesList(page);
 
-    await page.testSubj.locator('ruleSearchField').fill('');
     // Select r1, select-all (both selected), then deselect r2 → only r1 remains
     await page.testSubj.click(`checkboxSelectRow-${r1.data.id}`);
     await page.testSubj.click('selectAllRulesButton');
@@ -216,7 +186,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     ]);
     createdRuleIds.push(r1.data.id, r2.data.id, r3.data.id);
 
-    await refreshRulesList(page);
+    await openRulesList(page);
 
     await expect(page.testSubj.locator('totalRulesCount')).toContainText('3 rules');
 
@@ -236,10 +206,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText('Disabled 2 rules');
 
-    // Navigate fresh then clear the type filter if it persisted.
-    await page.gotoApp('rules');
-    await page.testSubj.click('rulesTab');
-    await expect(page.testSubj.locator('rulesList')).toBeVisible();
+    await openRulesList(page);
     await page.testSubj
       .locator('rules-list-clear-filter')
       .click({ timeout: 5_000 })
@@ -259,9 +226,6 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
       await expect(row.locator('[data-test-subj="statusDropdown"]')).toContainText(expectedStatus);
     }
 
-    // Filter to enabled rules (only r2) and bulk-delete it
-    await refreshRulesList(page);
-
     await page.testSubj.click('ruleStatusFilterButton');
     await page.testSubj.click('ruleStatusFilterOption-enabled');
     await page.testSubj.click('ruleStatusFilterButton');
@@ -279,10 +243,7 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
     createdRuleIds.length = 0;
     createdRuleIds.push(r1.data.id, r3.data.id);
 
-    // Navigate fresh and clear the status filter before counting surviving rules.
-    await page.gotoApp('rules');
-    await page.testSubj.click('rulesTab');
-    await expect(page.testSubj.locator('rulesList')).toBeVisible();
+    await openRulesList(page);
     await page.testSubj
       .locator('rules-list-clear-filter')
       .click({ timeout: 5_000 })
