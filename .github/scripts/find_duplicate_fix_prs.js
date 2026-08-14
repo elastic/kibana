@@ -167,7 +167,9 @@ const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
   return { team: teamLabels, candidates };
 };
 
-// Workflow pre-step: run the shortlist and drop the result where the agent can read it.
+// Workflow pre-step: write `duplicate-candidates.json` into the agent's context dir — the
+// `{ team, candidates }` same-team shortlist computed by `findDuplicateCandidates` — so the
+// agent reads it as a file instead of re-deriving it.
 const writeDuplicateCandidates = async ({
   github,
   core,
