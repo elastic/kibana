@@ -7,9 +7,12 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-test-helpers-kbn-server",
     "@kbn/logging",
+    "@kbn/logging-mocks",
     "@kbn/config-schema",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-genai-utils",
     "@kbn/agent-memory-common",

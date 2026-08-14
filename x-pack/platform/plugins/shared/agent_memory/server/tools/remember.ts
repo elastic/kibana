@@ -58,8 +58,8 @@ const rememberSchema = z.object({
 /**
  * Creates the `platform.memory.remember` registered tool.
  *
- * Writes via `asCurrentUser` — `agent-memory` is a user data index, so
- * `kibana_system` is unauthorized. Gated by the `write_agent_memory` Kibana
+ * Writes via `asCurrentUser` because Agent Memory is user data, so `kibana_system`
+ * is unauthorized. Gated by the `write_agent_memory` Kibana
  * privilege checked via `checkPrivilegesWithRequest` before any ES call.
  * If the privilege check fails or the identity is missing, returns a typed
  * error without throwing (SIGN-OFF #2, verification item 6).

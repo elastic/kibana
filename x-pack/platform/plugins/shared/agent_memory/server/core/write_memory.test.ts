@@ -45,7 +45,7 @@ describe('writeMemory', () => {
     jest.useRealTimers();
   });
 
-  it('sets creation and revision timestamps to the current time when creating a memory', async () => {
+  it('sets timestamps and semantic content when creating a memory', async () => {
     jest.useFakeTimers().setSystemTime(new Date(CURRENT_TIME));
     const { storage, historyClient, index } = createDependencies();
 
@@ -67,6 +67,7 @@ describe('writeMemory', () => {
 
     expect(writtenDocument.created_at).toBe(CURRENT_TIME);
     expect(writtenDocument['@timestamp']).toBe(CURRENT_TIME);
+    expect(writtenDocument.content).toBe('New memory\n\nNew description');
   });
 
   it('defaults new memories to the resolved user scope', async () => {
@@ -100,6 +101,7 @@ describe('writeMemory', () => {
       type: 'memory',
       title: 'Original title',
       description: 'Same description',
+      content: 'Original title\n\nSame description',
       deleted: true,
       '@timestamp': '2026-08-02T00:00:00.000Z',
       created_at: '2026-08-01T00:00:00.000Z',
@@ -158,6 +160,7 @@ describe('writeMemory', () => {
         scope_id: 'user-1',
       },
     });
+    expect(request.document.content).toBe('Restored title\n\nSame description');
   });
 
   it('preserves an explicit non-user scope when superseding', async () => {
@@ -166,6 +169,7 @@ describe('writeMemory', () => {
       type: 'memory',
       title: 'Original title',
       description: 'Same description',
+      content: 'Original title\n\nSame description',
       created_at: '2026-08-01T00:00:00.000Z',
       space_id: 'default',
       memory: {
@@ -212,6 +216,7 @@ describe('writeMemory', () => {
       type: 'memory',
       title: 'Original title',
       description: 'Original description',
+      content: 'Original title\n\nOriginal description',
       tags: ['original'],
       created_at: '2026-08-01T00:00:00.000Z',
       space_id: 'default',
@@ -228,6 +233,7 @@ describe('writeMemory', () => {
       ...priorDocument,
       title: 'Existing title',
       description: 'Existing description',
+      content: 'Existing title\n\nExisting description',
       tags: ['existing'],
       memory: {
         ...priorDocument.memory,

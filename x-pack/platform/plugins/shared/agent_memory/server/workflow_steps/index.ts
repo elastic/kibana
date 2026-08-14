@@ -90,7 +90,7 @@ const RetainInputSchema = z.object({
 });
 
 const RetainOutputSchema = z.object({
-  id: z.string().describe('The agent-memory document id.'),
+  id: z.string().describe('The Agent Memory document ID.'),
   revision: z.number().int().describe('The revision number after this operation.'),
   action: z.enum(['created', 'updated']).describe('Whether this was a new memory or supersession.'),
 });

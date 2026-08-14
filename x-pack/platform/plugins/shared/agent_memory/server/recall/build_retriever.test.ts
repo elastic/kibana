@@ -103,4 +103,33 @@ describe('buildRetriever', () => {
       }),
     });
   });
+
+  it('queries the inherited semantic content field', () => {
+    expect(buildTestRetriever()).toEqual({
+      rrf: expect.objectContaining({
+        retrievers: expect.arrayContaining([
+          {
+            linear: {
+              retrievers: [
+                {
+                  retriever: {
+                    standard: {
+                      query: {
+                        match: {
+                          'content.semantic': 'preferred sources',
+                        },
+                      },
+                    },
+                  },
+                  weight: 1,
+                  normalizer: 'minmax',
+                },
+              ],
+              rank_window_size: 20,
+            },
+          },
+        ]),
+      }),
+    });
+  });
 });

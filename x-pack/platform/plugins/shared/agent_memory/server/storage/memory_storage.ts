@@ -6,7 +6,7 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { MemoryDocument } from '@kbn/agent-memory-common';
+import { AGENT_MEMORY_INDEX, type MemoryDocument } from '@kbn/agent-memory-common';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 
@@ -29,42 +29,35 @@ export type {
 /**
  * Non-hidden index backed by @kbn/storage-adapter.
  *
- * Naming: `agent-memory` (no dot prefix) so users can query it directly with
- * `FROM agent-memory | WHERE …` in Discover / ES|QL. The `viewer` and `editor`
- * ES built-in roles grant read + view_index_metadata on all non-dot indices,
- * so no role changes are needed.
+ * Naming: `ai-index-idx-agent-memory` (no dot prefix) so users can query it
+ * directly in Discover / ES|QL. The `viewer` and `editor` ES built-in roles
+ * grant read + view_index_metadata on all non-dot indices, so no role changes
+ * are needed.
  *
  * Document and index operations use `asCurrentUser`. Template operations use
  * `asInternalUser`, because end users must not need the cluster-wide
  * `manage_index_templates` privilege.
  *
- * Agent Memory owns this KI-shaped root envelope and nested `memory` payload
- * (type = 'memory'). Significant Events KIs are shape prior art only: this
- * store has no shared runtime types, registration, or migration dependency.
- * All lifecycle, scope, and revision fields are local Agent Memory state.
- * They are mapped from day one because `dynamic: 'strict'` (hardcoded in the
- * adapter) rejects any unmapped field at write time.
+ * Shared KI envelope mappings are composed before the Agent Memory-owned
+ * mappings. All lifecycle, scope, and revision fields are local Agent Memory
+ * state. They are mapped from day one because the adapter's owned component
+ * template uses `dynamic: 'strict'` and rejects unmapped fields at write time.
  */
 export const memoryStorageSettings = {
-  name: 'agent-memory',
+  name: AGENT_MEMORY_INDEX,
+  priority: 600,
+  componentTemplate: {
+    name: 'ai-index-agent-memory@mappings',
+    required: ['ai-index@mappings'],
+    optional: ['ai-index@custom'],
+  },
   schema: {
     properties: {
-      // ── Agent Memory envelope (KI-shaped prior art) ────────────────────────
       // `_id` is handled by the adapter; `id` mirrors it for ES|QL access.
       id: types.keyword({}),
-      /** Always 'memory' — discriminator for the local document contract. */
-      type: types.keyword({}),
-      title: types.text({}),
-      description: types.text({}),
-      /** Multi-value keyword; follows the prior-art KI tag shape. */
-      tags: types.keyword({}),
       deleted: types.boolean({}),
       /** Per-record soft expiry (D5). Supersedes any index-level lifecycle. */
       expires_at: types.date({}),
-      /** Dense vector for semantic recall; populated by inference pipeline. */
-      search_embedding: types.semantic_text({}),
-      /** Time of the latest revision; distinct from stable creation time. */
-      '@timestamp': types.date({}),
       created_at: types.date({}),
       /** Kibana space; mandatory filter on every recall query (G3). */
       space_id: types.keyword({}),
@@ -152,7 +145,7 @@ export type MemoryStorageSettings = typeof memoryStorageSettings;
 
 export type MemoryStorage = StorageIndexAdapter<MemoryStorageSettings, MemoryDocument>;
 
-/** Creates the storage adapter for the `agent-memory` index. */
+/** Creates the storage adapter for the Agent Memory index. */
 export const createMemoryStorage = ({
   logger,
   esClient,
