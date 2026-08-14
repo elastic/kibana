@@ -114,6 +114,8 @@ network:
     - github.com
     - api.github.com
     - openrouter.ai
+    # to properly display links to best practices docs
+    - elastic.co
 sandbox:
   agent: awf
 
@@ -204,17 +206,17 @@ safe-outputs:
     footer: false
     target: *pr_number
     max: 1
-  # Custom safe-job: take the draft fix PR out of draft once verification is done.
+  # Custom safe-job: take the draft fix PR out of draft once verification clears it.
   jobs:
     mark-pr-ready:
-      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied a terminal `flaky-fix-check:*` label (passed, failed, inconclusive, or skipped). Never call it while still iterating.'
+      description: 'Take the draft fix PR out of draft (mark it ready for review) and enable auto-merge (squash) so it merges once required CI is green and it has an approval. Call exactly once, and only after you have applied `flaky-fix-check:passed` or `flaky-fix-check:skipped`. Never call it for a `failed` or `inconclusive` verdict, and never while still iterating.'
       runs-on: ubuntu-latest
       needs: safe_outputs
       permissions:
         pull-requests: write
       inputs:
         confirm:
-          description: 'Set to true to mark the PR ready for review. Only pass true once a terminal verdict has been reached.'
+          description: 'Set to true to mark the PR ready for review. Only pass true once verification has passed or been skipped.'
           required: true
           type: boolean
       env:
@@ -232,6 +234,17 @@ safe-outputs:
               }
               const { owner, repo } = context.repo;
               const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+              // Only a verified or unverifiable fix goes to a human: a `failed` or `inconclusive`
+              // verdict stays a draft. The labels are written by the safe_outputs job this one
+              // depends on, so they are the authoritative verdict by the time we read them.
+              const readyVerdicts = ['flaky-fix-check:passed', 'flaky-fix-check:skipped'];
+              const labels = pr.labels.map((label) => label.name);
+              if (!labels.some((label) => readyVerdicts.includes(label))) {
+                core.info(
+                  `PR #${prNumber} carries none of ${readyVerdicts.join(', ')} (labels: ${labels.join(', ') || 'none'}); leaving it as a draft.`
+                );
+                return;
+              }
               if (pr.draft) {
                 try {
                   // markPullRequestReadyForReview only exists on the GraphQL API and needs the PR node id.
@@ -313,16 +326,17 @@ Use the PR itself as the state store — there is no separate state file or hidd
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | `flaky-fix-check:started`      | A flaky test runner check has been triggered; verification is in progress.                                           |
 | `flaky-fix-check:passed`       | The targeted test held across the run(s); the fix is confirmed.                                                      |
-| `flaky-fix-check:failed`       | The targeted test still failed after the run budget — the fix did not hold.                                          |
+| `flaky-fix-check:failed`       | The targeted test still failed after the run budget (the fix did not hold), or the patch violates the Fix guardrails and no compliant revision could be derived. |
 | `flaky-fix-check:inconclusive` | The run budget was exhausted without a clear verdict (e.g. only unrelated failures, or the failure couldn't be attributed). |
 | `flaky-fix-check:skipped`      | The flaky test runner isn't used — either it can't verify this fix (Jest-only change, or no FTR/Scout config) or the fix is deterministic, so the required CI pass is sufficient signal. |
 
-Exactly one of these should apply at a time. When you reach a terminal verdict (`passed`, `failed`, `inconclusive`, or `skipped`), **remove `flaky-fix-check:started`** and add the terminal label, so the PR's current state is unambiguous and the workflow stops re-processing result comments. Then open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
+Exactly one of these should apply at a time. When you reach a terminal verdict (`passed`, `failed`, `inconclusive`, or `skipped`), **remove `flaky-fix-check:started`** and add the terminal label, so the PR's current state is unambiguous and the workflow stops re-processing result comments. Then decide whether the verdict earns a review (see [Opening the PR for review](#opening-the-pr-for-review)).
 
 ## Opening the PR for review
 
-The fixer opens its PR as a **draft**. Verification is what decides it's ready to face a human, so as soon as you reach **any** terminal verdict — `passed`, `failed`, `inconclusive`, or `skipped` — take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal label. Do this for every terminal verdict so a finished fix never lingers as a draft.
+The fixer opens its PR as a **draft**, and verification decides whether it is fit to face a human. Only two verdicts earn that — `passed` (the fix held under repeated runs) and `skipped` (the runner can add no signal, so required CI is the whole verdict). For those, take the PR out of draft by calling the `mark_pr_ready` tool with `confirm: true`, in the same run where you set the terminal label.
 
+- **Red verdicts stay a draft.** On `failed` or `inconclusive` the fix isn't trusted, so don't call `mark_pr_ready`: a patch we can't vouch for shouldn't cost a reviewer their time, let alone arm auto-merge behind it. The terminal label and your verdict comment are what hand it to the owning team — say in that comment that the PR is left as a draft, so nobody reads the draft state as "still running".
 - **Terminal only.** Never call `mark_pr_ready` while you are still iterating — i.e. whenever you leave `flaky-fix-check:started` in place to trigger another `/flaky` run. Marking a PR ready fires the downstream review and CI automation, which would be wasted on a commit you are about to replace.
 
 ## Environment constraints
@@ -362,14 +376,16 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - the **touched test file(s)** (the files the fix changes), and
    - the **originally-flaky test title(s)** the fix is meant to stabilize. Record these as `targetedTests`.
 
-2. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
+2. **Screen the patch against the Fix guardrails.** Check `pr-diff.txt` against the [Fix guardrails](#fix-guardrails) before spending any runs: a guardrail-violating fix — e.g. a retry or error-tolerance loop anywhere (test, framework, or application code), or a framework internal newly exposed to enable the fix — must never be verified as-is, because a masking patch holds across every flaky run precisely because it hides the root cause. Derive a compliant fix, push it (see [Pushing a revised fix](#pushing-a-revised-fix)), and verify that revision instead. If you cannot derive a compliant fix, add `flaky-fix-check:failed`, post a failed comment naming the violated guardrail, and open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)).
+
+3. **Decide whether the flaky test runner is needed.** A run is **not** always required. Both gates below must hold to trigger one; otherwise add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) explaining which gate the fix missed, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
 
    - **Runner-supported test.** The `/flaky` runner accepts only **FTR** and **Scout** configs. If the fix touches only a **Jest** test (`*.test.ts(x)` not under a `test/scout*/` or FTR `test/` config), it can't help: the fixer already verifies Jest fixes by local repetition.
    - **A fix repeated runs can actually validate.** The required CI already catches deterministic failures; extra runs add signal only when one pass isn't a reliable verdict: when the test still has a timing/ordering/concurrency element after the fix. Trigger a run only when the fix *mitigates* a non-deterministic cause (a race, a wait/timeout, ordering, shared-state timing) whose stability is confirmed by holding across many runs.
 
    When both gates hold, resolve the config(s) (next step).
 
-3. **Resolve config paths**:
+4. **Resolve config paths**:
 
    - **Reuse first:** if a previous `/flaky` comment on the PR already names the config(s) — e.g. an earlier iteration recorded them in `pr-issue-comments.json` — reuse those exact config paths so runs stay consistent, and skip the file-tree walk below (only add a config if your latest change touches files under a different one).
    - **FTR:** walk up from each changed test file to the nearest leaf `config*.ts` (skip `*.base.ts`); verify it actually runs the file via `testFiles` / `loadTestFile` (directly or via glob). If none is found by walking up, search for the config that includes the file.
@@ -377,7 +393,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    - Deduplicate; include each config once. If you cannot resolve any config, add `flaky-fix-check:skipped`, post a skipped comment (see [Update comment](#update-comment)) asking a human to identify the config, open the PR for review (see [Opening the PR for review](#opening-the-pr-for-review)), and stop.
    - If the PR touches a page object in one of the Scout packages (e.g., `@kbn/scout`, `@kbn/scout-oblt`, etc.) determine if it is worthwhile to run extra configs to test the fix is stable and won't create flakiness.
 
-4. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
+5. **Trigger the run.** Confirm `triggeredByBot` in `flaky-run-count.json` is below 6 (this precomputed count already ignores developer-posted `/flaky` comments). Then post the trigger command as its own comment (it must start with `/flaky ` so the trigger workflow picks it up):
 
    ```
    /flaky <type>:<path>:30 [<type>:<path>:30 ...]
@@ -387,7 +403,7 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
 
    The `/flaky` comment is the only comment this step needs. Add a separate one-sentence rationale comment **only** when the config choice isn't obvious from the diff (e.g. you added an extra config to guard a shared page object): skip it for a routine first run rather than restate which test you're exercising. When you do post it, use the rationale heading from [Update comment](#update-comment).
 
-5. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
+6. **Mark state.** Add the `flaky-fix-check:started` label (if it doesn't already exist). Do not wait for results. Stop here.
 
 ---
 
@@ -424,10 +440,10 @@ The `/flaky` trigger comment is not an update comment: it contains nothing but t
    | Every config green **and** targeted test ran                   | **Passed.** Remove `flaky-fix-check:started`, add `flaky-fix-check:passed`, and mark the PR ready for review via `mark_pr_ready` (see [Opening the PR for review](#opening-the-pr-for-review)). Post no comment **unless** the fix only held after more than one flaky run — see the passed-after-iteration case in [Update comment](#update-comment).                                                                                                                                                                                                                                          |
    | Targeted test still **fails** and fewer than 6 runs triggered  | **Iterate.** From the failure artifacts, derive a revised, minimal fix that addresses the root cause, whether it lives in test code or application code. Check out the PR head branch, apply the change, and push it. Then post a `/flaky` comment to re-run against the new commit: the pushed commit message carries the reasoning, so add a separate rationale comment only when the change or its motivation isn't clear from that commit (rationale heading, per [Update comment](#update-comment)). A run's results only count for the commit they ran on, so re-run every config your change affects: always the config(s) where the targeted test still failed, plus any previously-green config that exercises code your revision touched (e.g. a shared Scout page object). Reuse the config paths from your prior `/flaky` comment (add one only if the fix now touches files under a different config); you may keep trusting an earlier green only for configs your change can't affect. Only re-trigger after an actual code change — never burn budget re-running an unchanged patch hoping for a luckier result. |
    | Targeted test **passes** but only an **unrelated** test failed | Investigate whether the PR is responsible. If you are confident the failure is unrelated (lane pollution / pre-existing), remove `flaky-fix-check:started`, add `flaky-fix-check:passed`, and mark the PR ready for review via `mark_pr_ready`; post no comment unless the fix only held after more than one flaky run (see [Update comment](#update-comment)). If you cannot rule out the PR, treat it as inconclusive (see below).                  |
-   | Targeted test still **fails** after 6 runs (fix did not hold)  | **Failed.** Remove `flaky-fix-check:started`, add `flaky-fix-check:failed`, and mark the PR ready for review via `mark_pr_ready` (see [Opening the PR for review](#opening-the-pr-for-review)). Post a failed comment ([Update comment](#update-comment)): a sentence or two naming **what still fails and why** — whether it's the targeted test itself or unrelated tests sharing the config (lane pollution not caused by this PR) — plus the recommended next step for the owning team; add a short `<details>` only if a concrete fix or the failing-test detail genuinely helps.                        |
-   | 6 runs exhausted without a clear verdict (ambiguous / only unrelated failures) | **Inconclusive.** Remove `flaky-fix-check:started`, add `flaky-fix-check:inconclusive`, and mark the PR ready for review via `mark_pr_ready` (see [Opening the PR for review](#opening-the-pr-for-review)). Post an inconclusive comment ([Update comment](#update-comment)): a sentence or two on why no verdict was reached — e.g. only unrelated tests in the same config failed (lane pollution not attributable to this PR), naming them — and the suggested next step; add a short `<details>` only if the run detail genuinely helps.                                            |
+   | Targeted test still **fails** after 6 runs (fix did not hold)  | **Failed.** Remove `flaky-fix-check:started`, add `flaky-fix-check:failed`, and leave the PR as a **draft** — do not call `mark_pr_ready` (see [Opening the PR for review](#opening-the-pr-for-review)). Post a failed comment ([Update comment](#update-comment)): a sentence or two naming **what still fails and why** — whether it's the targeted test itself or unrelated tests sharing the config (lane pollution not caused by this PR) — plus the recommended next step for the owning team; add a short `<details>` only if a concrete fix or the failing-test detail genuinely helps.                        |
+   | 6 runs exhausted without a clear verdict (ambiguous / only unrelated failures) | **Inconclusive.** Remove `flaky-fix-check:started`, add `flaky-fix-check:inconclusive`, and leave the PR as a **draft** — do not call `mark_pr_ready` (see [Opening the PR for review](#opening-the-pr-for-review)). Post an inconclusive comment ([Update comment](#update-comment)): a sentence or two on why no verdict was reached — e.g. only unrelated tests in the same config failed (lane pollution not attributable to this PR), naming them — and the suggested next step; add a short `<details>` only if the run detail genuinely helps.                                            |
 
-5. **Always** leave the PR in a coherent state: the correct label(s) set, and — on any terminal verdict (`passed`/`failed`/`inconclusive`/`skipped`) — the PR marked ready for review via `mark_pr_ready` (see [Opening the PR for review](#opening-the-pr-for-review)). Add a `/flaky` re-trigger comment when iterating, or a terminal comment for a `failed`, `inconclusive`, or `skipped` verdict. A `passed` verdict is label-only and posts nothing, **unless** the fix only held after more than one flaky run (see [Update comment](#update-comment)).
+5. **Always** leave the PR in a coherent state: the correct label(s) set, and — on a `passed` or `skipped` verdict only — the PR marked ready for review via `mark_pr_ready`, with `failed` and `inconclusive` left as drafts (see [Opening the PR for review](#opening-the-pr-for-review)). Add a `/flaky` re-trigger comment when iterating, or a terminal comment for a `failed`, `inconclusive`, or `skipped` verdict. A `passed` verdict is label-only and posts nothing, **unless** the fix only held after more than one flaky run (see [Update comment](#update-comment)).
 
 ### Pushing a revised fix
 
@@ -436,6 +452,7 @@ When you iterate, you are editing a PR you did not open. This is allowed because
 - Check out the PR head branch (e.g. `gh pr checkout ${{ env.PR_NUMBER }}`), make the minimal edit, and commit it.
 - Emit a single `push-to-pull-request-branch` safe output targeting PR #${{ env.PR_NUMBER }}.
 - Keep the change minimal and focused on the root cause. Re-running `/flaky` after the push validates the new commit, since the runner builds from the updated PR head.
+- Re-enable the test suite(s) or test case(s) if they were skipped. Remove any stale flaky comments (e.g., `// FLAKY: <issue-url>` / `// Failing: See <issue-url>`, etc.) if they carry any.
 - **Keep the PR description current.** If your revision changed the approach, the root cause, or what the patch does, also emit one `update-pull-request` safe output correcting the title/body (keep the fixer's format, rewrite only what went stale); if they still describe the fix accurately, emit nothing.
 - Don't add explanatory code comments to the patch by default — a good fix is self-explanatory. Add one only when the fix is particularly involved or non-obvious, and keep it strictly to 1 comment line; a simple change like a timeout bump never warrants a comment.
 
