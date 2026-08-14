@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import { SuppressChromeBackButton } from '@kbn/app-header';
 import { AgentPlugins } from '../components/agents/plugins/agent_plugins';
 import { useAgentBuilderAgentById } from '../hooks/agents/use_agent_by_id';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
@@ -27,5 +28,10 @@ export const AgentBuilderAgentPluginsPage: React.FC = () => {
 
   useBreadcrumb(breadcrumbs);
 
-  return <AgentPlugins />;
+  return (
+    <>
+      <SuppressChromeBackButton />
+      <AgentPlugins />
+    </>
+  );
 };
