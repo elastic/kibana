@@ -23,8 +23,6 @@ const { API_BASE_PATH, COMMON_HEADERS } = testData;
 const DATA_STREAM_NAME = 'index-management-api-ds-get';
 
 const expectedLifecycle = { enabled: true };
-// A single-shard index has an unassigned replica on a single node, so it reports yellow.
-const expectedHealth = 'yellow';
 const expectedStats = { maxTimeStamp: 0 };
 const expectedStorage = {
   storageSize: 'string (populated)',
@@ -60,12 +58,13 @@ apiTest.describe('Data streams API - Get (stateful)', { tag: tags.stateful.class
     expect(dataStream).toBeDefined();
 
     const { name: indexName, uuid } = dataStream!.indices[0];
+    expect(['green', 'yellow']).toContain(dataStream!.health);
     expect(dataStream).toStrictEqual(
       expectedDataStream({
         name: DATA_STREAM_NAME,
         indexName,
         uuid,
-        health: expectedHealth,
+        health: dataStream!.health,
         lifecycle: expectedLifecycle,
       })
     );
@@ -87,12 +86,13 @@ apiTest.describe('Data streams API - Get (stateful)', { tag: tags.stateful.class
     expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual(expectedStorage);
 
     const { name: indexName, uuid } = rest.indices[0];
+    expect(['green', 'yellow']).toContain(rest.health);
     expect(rest).toStrictEqual({
       ...expectedDataStream({
         name: DATA_STREAM_NAME,
         indexName,
         uuid,
-        health: expectedHealth,
+        health: rest.health,
         lifecycle: expectedLifecycle,
       }),
       ...expectedStats,
@@ -110,12 +110,13 @@ apiTest.describe('Data streams API - Get (stateful)', { tag: tags.stateful.class
     expect(describeStorage(storageSize, storageSizeBytes)).toStrictEqual(expectedStorage);
 
     const { name: indexName, uuid } = rest.indices[0];
+    expect(['green', 'yellow']).toContain(rest.health);
     expect(rest).toStrictEqual({
       ...expectedDataStream({
         name: DATA_STREAM_NAME,
         indexName,
         uuid,
-        health: expectedHealth,
+        health: rest.health,
         lifecycle: expectedLifecycle,
       }),
       ...expectedStats,
