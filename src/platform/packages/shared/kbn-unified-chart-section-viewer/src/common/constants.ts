@@ -8,6 +8,7 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 
 // Full screen classes
 export const METRICS_GRID_CLASS = 'metricsGrid';
@@ -90,8 +91,9 @@ export const METRICS_SORT_DIRECTION = {
   desc: 'desc',
 } as const;
 
-// Default metrics grid sort
+// Default metrics grid sort, derived from the canonical object form in
+// @kbn/discover-utils so the two representations cannot drift.
 export const DEFAULT_METRICS_SORT = [
-  METRICS_SORT_BY.alphabetically,
-  METRICS_SORT_DIRECTION.asc,
+  METRICS_GRID_SORT_DEFAULTS.sortField,
+  METRICS_GRID_SORT_DEFAULTS.sortDirection,
 ] as const;
