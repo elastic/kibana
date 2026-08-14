@@ -12,10 +12,16 @@ import { METRICS_DATA_SOURCE_PROFILE_ID, createMetricsDataSourceProfileProvider 
 import type { ContextWithProfileId } from '../../../profile_service';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
+import { METRICS_STATE_DEF } from '../../../../../common/context_awareness';
 
 const RESOLUTION_MATCH = {
   isMatch: true,
-  context: { category: DataSourceCategory.Metrics },
+  context: {
+    category: DataSourceCategory.Metrics,
+    // Returning the definition here is what opts the profile into `_p` URL sync. Dropping it
+    // silently stops sort from reaching the URL, so it is asserted explicitly.
+    profileState: METRICS_STATE_DEF,
+  },
 };
 
 const RESOLUTION_MISMATCH = {
