@@ -7,10 +7,7 @@
 
 import { isPlainObject } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  parseEpisodeDataJson,
-  getValueByFieldPath,
-} from '@kbn/alerting-v2-utils';
+import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-utils';
 
 export { parseEpisodeDataJson, getValueByFieldPath };
 
@@ -90,4 +87,3 @@ export const getNonEmptyGroupingFields = (
   fields.filter(
     (field) => formatGroupingValue(field, getValueByFieldPath(data, field), dataView).trim() !== ''
   );
-
