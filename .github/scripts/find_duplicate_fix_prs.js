@@ -22,17 +22,11 @@
 const fs = require('fs');
 const path = require('path');
 
+const OWNER = 'elastic';
+const REPO = 'kibana';
 const FIXER_LABEL = 'flaky-test-fixer';
 // A merged fix means the root cause already landed; older merges aren't in flight.
 const MERGED_LOOKBACK_DAYS = 30;
-
-const parseRepo = (repoFullName) => {
-  const [owner, repo] = (repoFullName ?? '').split('/');
-  if (!owner || !repo) {
-    throw new Error(`Expected REPO in owner/repo form, received: ${repoFullName}`);
-  }
-  return { owner, repo };
-};
 
 // GitHub's GraphQL search 502s intermittently on a repo this size; a couple of retries
 // keep the verifier's one-shot detection from missing a duplicate over a transient error.
@@ -96,9 +90,9 @@ const search = async (github, q) => {
 
 // Every flaky-test-fixer PR that could still be work in flight for a root cause: all open
 // ones, plus anything merged recently (a merge means the fix already landed).
-const fetchFixerPrs = async (github, owner, repo) => {
+const fetchFixerPrs = async (github) => {
   const cutoff = new Date(Date.now() - MERGED_LOOKBACK_DAYS * 864e5).toISOString().slice(0, 10);
-  const base = `repo:${owner}/${repo} is:pr label:${FIXER_LABEL}`;
+  const base = `repo:${OWNER}/${REPO} is:pr label:${FIXER_LABEL}`;
   const [open, merged] = await Promise.all([
     search(github, `${base} is:open`),
     search(github, `${base} is:merged merged:>=${cutoff}`),
@@ -140,14 +134,12 @@ const shared = (a, b) => a.filter((value) => b.includes(value));
  */
 const findDuplicateFixPrs = async ({
   github,
-  repoFullName = process.env.REPO,
   prNumber,
   issueNumber,
   issueBody = '',
   testFiles = [],
 }) => {
-  const { owner, repo } = parseRepo(repoFullName);
-  const fixerPrs = await fetchFixerPrs(github, owner, repo);
+  const fixerPrs = await fetchFixerPrs(github);
 
   let self = null;
   let targetFiles;
@@ -159,8 +151,8 @@ const findDuplicateFixPrs = async ({
       self?.files ??
       (
         await github.paginate(github.rest.pulls.listFiles, {
-          owner,
-          repo,
+          owner: OWNER,
+          repo: REPO,
           pull_number: prNumber,
           per_page: 100,
         })

@@ -171,8 +171,6 @@ steps:
     # set (with a canonical pick) instead of blind-searching. Non-fatal: a detection
     # failure must not block verification — the agent treats a missing file as "none".
     uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-    env:
-      REPO: ${{ github.repository }}
     with:
       script: |
         const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
