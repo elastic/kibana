@@ -27,11 +27,7 @@ export interface FetchExpandedDocParams {
   abortSignal: AbortSignal;
 }
 
-/**
- * Fetches a single document by reference, for restoring a flyout from a link when the document
- * is not part of the current results. Returns `undefined` when it no longer exists or is not
- * accessible.
- */
+/** Fetches a linked document that is absent from the current results. */
 export const fetchExpandedDoc = async (
   params: FetchExpandedDocParams
 ): Promise<DataTableRecord | undefined> =>
@@ -65,11 +61,8 @@ const fetchEsqlExpandedDoc = async ({
   data,
   abortSignal,
 }: FetchExpandedDocParams): Promise<DataTableRecord | undefined> => {
-  // Backing indices of a data stream cannot be queried directly, so this reuses the index
-  // pattern the current query already resolves against (e.g. `logs-*`) rather than `ref.index`,
-  // and filters for the specific document instead. Deliberately a standalone query rather than
-  // the user's with a filter applied, so the document is found regardless of the time range,
-  // sort, limit, and filtering of the current results.
+  // Query the current index pattern because data stream backing indices cannot be queried directly.
+  // Kept independent of the current filters, time range, sort, and limit, so the document is always found.
   const indexPattern = getIndexPatternFromESQLQuery(esqlQueryText);
   const esqlQuery = `FROM ${indexPattern} METADATA _index, _id
 | WHERE _index == ${escapeStringValue(ref.index)} AND _id == ${escapeStringValue(ref.id)}
@@ -86,8 +79,7 @@ const fetchEsqlExpandedDoc = async ({
     return undefined;
   }
 
-  // Matches the shape ES|QL results take when the main search produces them, where the raw and
-  // flattened forms are both the row keyed by column name
+  // Match the row shape produced by the main ES|QL search.
   const row: DatatableRow = zipObject(
     response.columns.map(({ name }) => name),
     values

@@ -12,13 +12,7 @@ import { EuiFlexGroup, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandedDocNotice } from '../../hooks/use_expanded_doc_sync';
 
-/**
- * Explains a flyout showing a document that is not part of the current results, which is
- * reached by following a link to a document the current search does not return.
- *
- * Callers pass nothing at all when there is no notice, rather than rendering this with
- * {@link ExpandedDocNotice.None}, so the flyout can tell an empty subheader from a populated one.
- */
+/** Explains why a linked document is unavailable in the current results. */
 export const ExpandedDocNoticeText = ({
   notice,
 }: {

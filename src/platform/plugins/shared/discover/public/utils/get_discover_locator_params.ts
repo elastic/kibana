@@ -17,11 +17,7 @@ import type { ProfileStateMap } from '../../common/context_awareness';
 import type { TabState } from '../application/main/state_management/redux';
 
 /**
- * Builds the locator params describing the current view, shared by the share menu and the
- * copy link action in the doc viewer so the two cannot drift.
- *
- * The tab's app state is spread wholesale, which is how state such as the expanded document
- * reference ends up in generated links without needing to be listed here.
+ * Builds shared locator params, including URL-only values spread from the tab's app state.
  */
 export const getDiscoverLocatorParams = ({
   currentTab,
@@ -39,7 +35,6 @@ export const getDiscoverLocatorParams = ({
   timeRange: TimeRange | undefined;
   refreshInterval: RefreshInterval | undefined;
   profileState: ProfileStateMap | undefined;
-  // `timeRange` is always assigned, which share's sharing data requires as a present key
 }): DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } => ({
   ...omit(currentTab.appState, 'dataSource'),
   ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),

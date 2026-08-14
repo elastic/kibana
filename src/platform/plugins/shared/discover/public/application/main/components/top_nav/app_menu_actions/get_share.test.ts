@@ -347,7 +347,6 @@ describe('getShare', () => {
       });
 
     const expandedDoc = buildDataTableRecord({ _id: '1', _index: 'i' }, dataViewMock);
-    // An ES|QL row without METADATA requested never carries these fields in the first place
     const expandedDocWithoutMetadata = buildDataTableRecord(
       { _source: { message: 'no metadata' } },
       dataViewMock
@@ -371,7 +370,7 @@ describe('getShare', () => {
       );
     };
 
-    // The mock's `getTime` is a fixed stub, so drive the range through it rather than `setTime`
+    // `getTime` is a fixed stub, so configure it directly.
     const setTimeRange = (timeRange: { from: string; to: string }) => {
       jest
         .mocked(mockDiscoverService.data.query.timefilter.timefilter.getTime)
@@ -437,8 +436,6 @@ describe('getShare', () => {
     });
 
     it('reports the unlinkable reason ahead of the relative time range', async () => {
-      // Both apply, but a link that cannot capture the document at all is the more useful thing
-      // to say about it
       setQuery({ esql: 'FROM logs' });
       setTimeRange({ from: 'now-15m', to: 'now' });
       setExpandedDoc(expandedDocWithoutMetadata);

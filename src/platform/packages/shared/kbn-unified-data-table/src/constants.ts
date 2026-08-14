@@ -64,6 +64,5 @@ export const toolbarVisibility = {
   },
 };
 
-// We need to manually query the react-window wrapper since EUI doesn't
-// expose outerRef in virtualizationOptions, but we should request it
+// EUI does not expose react-window's outerRef, so query its wrapper directly.
 export const VIRTUALIZED_SELECTOR = '.euiDataGrid__virtualized';

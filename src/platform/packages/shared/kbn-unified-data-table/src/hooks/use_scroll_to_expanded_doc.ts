@@ -13,18 +13,10 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { VIRTUALIZED_SELECTOR } from '../constants';
 import type { DataGridPaginationMode } from '../types';
 
-/**
- * Frames to keep retrying a scroll before giving up. On initial load the virtualized grid
- * renders well after the expanded document is known, so the first attempts have nothing to
- * scroll within.
- */
+/** Retry while the virtualized grid renders after the expanded document is known. */
 const MAX_SCROLL_ATTEMPTS = 60;
 
-/**
- * How long to keep the expanded row centered after reaching it, covering the reflow caused by
- * the doc viewer opening alongside the grid. Kept short so that resizing the window later, or
- * after scrolling elsewhere, does not pull the grid back to the expanded row.
- */
+/** Keep the row centered only while the doc viewer reflows the grid. */
 const SCROLL_SETTLE_DURATION = 500;
 
 type ScrollAttemptResult =
@@ -47,12 +39,7 @@ export interface UseScrollToExpandedDocProps {
   dataGridWrapper: HTMLElement | null;
 }
 
-/**
- * Keeps the expanded document's row in view, so expanding a document always shows which row it
- * came from. This matters most when the document was not expanded by clicking its row, e.g. when
- * restoring one from a link or paginating within the doc viewer, in which case it can be on a
- * different page entirely.
- */
+/** Keeps the expanded document's row visible when opening links or paginating the doc viewer. */
 export const useScrollToExpandedDoc = ({
   expandedDoc,
   displayedRows,
@@ -67,8 +54,7 @@ export const useScrollToExpandedDoc = ({
   const scrolledToDocId = useRef<string>();
   const isPaginated = paginationMode === 'multiPage' && isPaginationEnabled;
 
-  // Read through a ref so retries in later frames see the committed page rather than the one
-  // that was current when the attempt started
+  // Let later retries see the committed page rather than the page where scrolling started.
   const pageIndexRef = useRef(pageIndex);
   pageIndexRef.current = pageIndex;
 
@@ -79,9 +65,7 @@ export const useScrollToExpandedDoc = ({
 
     const rowIndex = displayedRows.findIndex(({ id }) => id === expandedDoc.id);
 
-    // The document may not be part of the results, e.g. when restoring one from a link that the
-    // current search does not return. It may still arrive in a later fetch, so this is not
-    // treated as a failed attempt.
+    // A linked document may arrive in a later results fetch, so do not treat absence as failure.
     if (rowIndex === -1) {
       return 'unavailable';
     }
@@ -96,8 +80,6 @@ export const useScrollToExpandedDoc = ({
       }
     }
 
-    // Only available once the virtualized grid body has rendered, which on initial load happens
-    // well after the expanded document is known
     if (!dataGridRef.current?.scrollToItem) {
       return 'retry';
     }
@@ -116,8 +98,7 @@ export const useScrollToExpandedDoc = ({
       return;
     }
 
-    // Only scroll the first time a document becomes the expanded one, otherwise background
-    // refetches would repeatedly pull the grid away from wherever the user scrolled to
+    // Do not let background refetches pull the grid away from the user's scroll position.
     if (expandedDoc.id === scrolledToDocId.current) {
       return;
     }
@@ -133,10 +114,7 @@ export const useScrollToExpandedDoc = ({
       observer?.disconnect();
     };
 
-    // Opening the doc viewer narrows the grid, which re-wraps rows into taller ones and moves the
-    // expanded row back out of view. That reflow lands over several frames, so hold the row in
-    // place until it is done, then stop: later resizes are the user's own and must not yank them
-    // back to a row they have since scrolled or paged away from.
+    // Hold the row through the doc viewer reflow, but do not react to later user resizes.
     const holdRowCenteredWhileSettling = () => {
       const scrollContainer = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
 
@@ -146,7 +124,7 @@ export const useScrollToExpandedDoc = ({
 
       observer = new ResizeObserver(() => {
         cancelAnimationFrame(frameId);
-        // Row heights are measured after the resize, so wait for that before re-centering
+        // Re-center after the grid measures its new row heights.
         frameId = requestAnimationFrame(centerExpandedRow);
       });
 

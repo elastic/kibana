@@ -123,34 +123,27 @@ type ExpandedDocPayload = TabActionPayload<{
   initialDocViewerTabState?: object;
 }>;
 
-/**
- * Set the document expanded in the doc viewer flyout, keeping the URL reference in sync
- * so the open flyout can be captured in a shareable link and restored on load.
- */
+/** Sets the expanded document and synchronizes its URL reference. */
 export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
   function setExpandedDocThunkFn(dispatch, getState) {
     dispatch(internalStateSlice.actions.setExpandedDoc(payload));
 
     const { tabId, expandedDoc, expandedDocOwner = DEFAULT_EXPANDED_DOC_OWNER } = payload;
 
-    // Only the main grid's flyout is deep linkable. Cascade owned flyouts render documents
-    // from a nested grid, which the restore path has no way to reconstruct.
+    // The restore path cannot reconstruct documents from cascade grids.
     if (expandedDoc && expandedDocOwner !== DEFAULT_EXPANDED_DOC_OWNER) {
       return;
     }
 
     const { appState } = selectTab(getState(), tabId);
 
-    // A query whose rows cannot be resolved back to documents must not produce a reference, even
-    // when its rows happen to carry the metadata columns, and neither should a document that
-    // itself lacks `_id`/`_index` (e.g. fetched under an earlier, non-linkable query)
+    // Require both a refetchable query and stable document metadata.
     const nextExpandedDocRef =
       getExpandedDocLinkability(appState.query, expandedDoc) === ExpandedDocLinkability.Linkable
         ? getExpandedDocRef(expandedDoc)
         : undefined;
 
-    // Compare before dispatching, since updateAppState treats a merged `undefined` value as a
-    // change against a missing key and would push a redundant history entry on every close
+    // Avoid adding URL history when closing a flyout that never wrote a reference.
     if (isEqual(appState.expandedDoc, nextExpandedDocRef)) {
       return;
     }

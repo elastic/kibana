@@ -24,7 +24,6 @@ describe('getExpandedDocRef', () => {
   });
 
   it('returns undefined for a record without a stable identity', () => {
-    // ES|QL rows only carry `_id` and `_index` when the query requests them via METADATA
     const esqlRow = buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock);
 
     expect(getExpandedDocRef(esqlRow)).toBeUndefined();
@@ -34,7 +33,6 @@ describe('getExpandedDocRef', () => {
 
 describe('matchesExpandedDocRef', () => {
   it('matches on the raw fields rather than the composed doc ID', () => {
-    // `_routing` contributes to the composed ID but is not part of the reference
     const doc = buildDataTableRecord({ _id: '1', _index: 'i', _routing: 'r' }, dataViewMock);
 
     expect(matchesExpandedDocRef(doc, { id: '1', index: 'i' })).toBe(true);
@@ -64,9 +62,7 @@ describe('getExpandedDocLinkability', () => {
   });
 
   it('reports an ES|QL document missing _id/_index as unlinkable', () => {
-    // Checked on the document itself rather than the query text, since a query edit does not
-    // retroactively add the fields to a document expanded before the edit, and the fetch used to
-    // restore a link does not depend on the current query requesting them either
+    // Linkability follows the open document, not later query edits.
     expect(
       getExpandedDocLinkability({ esql: 'FROM logs METADATA _id, _index' }, docWithoutMetadata)
     ).toBe(ExpandedDocLinkability.EsqlMissingMetadata);

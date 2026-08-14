@@ -60,20 +60,11 @@ export interface UnifiedDocViewerFlyoutProps
   isEsqlQuery: boolean;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
-  /**
-   * The expanded document. May be undefined while it is still being resolved, e.g. when
-   * restoring a shared link, in which case {@link requestState} drives what is rendered.
-   */
+  /** The expanded document, or undefined while a shared link resolves. */
   hit?: DataTableRecord;
-  /**
-   * State of the request resolving {@link hit}, used to render a loading or error state
-   * in place of the doc viewer when there is no document to show.
-   */
+  /** Request state rendered when the document is unavailable. */
   requestState?: ElasticRequestState;
-  /**
-   * Rendered in place of the document pagination, which is only available for documents
-   * that belong to the current result set.
-   */
+  /** Replaces pagination when the document is absent from the current results. */
   notice?: ReactNode;
   hits?: DataTableRecord[];
   dataView: DataView;

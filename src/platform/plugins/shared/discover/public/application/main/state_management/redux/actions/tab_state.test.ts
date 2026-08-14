@@ -111,8 +111,7 @@ describe('tab_state actions', () => {
   describe('setExpandedDoc', () => {
     const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMockWithTimeField);
 
-    // The shared setup uses an ES|QL query, so tests state the query they depend on rather than
-    // relying on whichever mode the fixture happens to use
+    // Shared setup is ES|QL, so each test declares the query mode it needs.
     const setQuery = (
       internalState: Awaited<ReturnType<typeof setup>>['internalState'],
       tabId: string,
@@ -198,8 +197,6 @@ describe('tab_state actions', () => {
 
     it('should not write a reference for an ES|QL document without _id/_index', async () => {
       const { internalState, tabId } = await setup();
-      // Checked on the document itself rather than the query text: a plain "FROM logs" query
-      // without METADATA never produces rows carrying these fields in the first place
       const esqlRecordWithoutMetadata = buildDataTableRecord(
         { _source: { message: 'no metadata' } },
         dataViewMockWithTimeField
@@ -216,7 +213,6 @@ describe('tab_state actions', () => {
     it('should not write a reference for transformational ES|QL queries', async () => {
       const { internalState, tabId } = await setup();
 
-      // The rows still carry the metadata columns, but they no longer describe documents
       setQuery(internalState, tabId, {
         esql: 'FROM logs METADATA _id, _index | KEEP _id, _index, host',
       });
@@ -229,8 +225,7 @@ describe('tab_state actions', () => {
       const { internalState, tabId } = await setup();
       const initialAppState = selectTab(internalState.getState(), tabId).appState;
 
-      // Closing a flyout that never wrote a reference would otherwise merge an `undefined`
-      // value over a missing key and push a redundant history entry
+      // Closing a locally owned flyout must not add URL history.
       internalState.dispatch(
         internalStateActions.setExpandedDoc({ tabId, expandedDoc: undefined })
       );

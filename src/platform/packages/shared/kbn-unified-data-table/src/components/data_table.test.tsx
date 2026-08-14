@@ -1749,9 +1749,9 @@ describe('UnifiedDataTable', () => {
   });
 
   // Covers `useScrollToExpandedDoc` through the real grid rather than in isolation, since it
-  // depends on the grid's pagination and imperative API. These assert the paging half only: the
-  // scroll itself goes through EUI's imperative grid API, which jsdom never populates because
-  // the grid body is not virtualized here, so it is covered by functional tests instead.
+  // depends on the grid's pagination and imperative API. These assert the paging half only:
+  // jsdom exposes grid pagination but not EUI's imperative virtualized scrolling API,
+  // so scroll is covered by functional tests instead.
   describe('scrolling to the expanded document', () => {
     const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
     const onChangePageMock = jest.fn();
@@ -1776,21 +1776,17 @@ describe('UnifiedDataTable', () => {
 
       onChangePageMock.mockClear();
 
-      // With one row per page, the third document is on the third page
       rerender(<DataTableWithI18n {...props} expandedDoc={rows[2]} />);
 
       await waitFor(() => {
         expect(onChangePageMock).toHaveBeenCalledWith(2);
       });
 
-      // The scroll is retried until the virtualized grid is ready, which must not re-trigger
-      // the page change on every attempt
+      // Scrolling retries must not repeat the page change.
       expect(onChangePageMock).toHaveBeenCalledTimes(1);
     });
 
     it('should page to the expanded document once it arrives in the results', async () => {
-      // Reached by following a link to a document: it is expanded before the search that
-      // contains it has returned, so there is no row to scroll to on the first attempt
       const props = { ...getPagedProps(), rows: rows.slice(0, 1), expandedDoc: rows[2] };
       const { rerender } = await renderComponent(props);
 
@@ -1828,8 +1824,7 @@ describe('UnifiedDataTable', () => {
 
       onChangePageMock.mockClear();
 
-      // A background refetch replaces the rows without changing which document is expanded,
-      // which should not pull the grid away from wherever the user scrolled to
+      // A background refetch must not pull the grid from the user's scroll position.
       rerender(<DataTableWithI18n {...props} rows={[...rows]} />);
 
       await waitFor(() => {
@@ -1845,7 +1840,6 @@ describe('UnifiedDataTable', () => {
 
       onChangePageMock.mockClear();
 
-      // Reached by restoring a document from a link that the current search does not return
       rerender(
         <DataTableWithI18n
           {...props}

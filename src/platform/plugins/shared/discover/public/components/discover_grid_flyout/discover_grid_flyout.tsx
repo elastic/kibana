@@ -110,8 +110,7 @@ export function DiscoverGridFlyout({
       docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
-    // Document profiles customize the viewer based on the record, so there is nothing to
-    // resolve until it is available
+    // Document profiles cannot resolve a doc viewer until the record is available.
     return actualHit ? getDocViewer({ record: actualHit }) : undefined;
   }, [actualHit, getDocViewerAccessor]);
 

@@ -54,10 +54,7 @@ interface BuildShareOptionsParams {
  */
 type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
 
-/**
- * Explains what a link will and will not capture about the open document, so the user is not
- * left to discover after sharing that the recipient does not land where they did.
- */
+/** Explains limitations when sharing an open document. */
 const getExpandedDocHelpText = ({
   currentTab,
   timeRange,
@@ -73,8 +70,7 @@ const getExpandedDocHelpText = ({
     getExpandedDocLinkability(currentTab.appState.query, currentTab.expandedDoc)
   );
 
-  // The link cannot capture the document at all, which matters more than how its time range is
-  // expressed, so report that instead
+  // A non-linkable document takes precedence over the relative-time warning.
   if (disabledReason) {
     return (
       <KbnInfoCallout
@@ -87,10 +83,7 @@ const getExpandedDocHelpText = ({
     );
   }
 
-  // A relative time range resolves differently for whoever opens the link, so the document often
-  // will not be in their results and has to be fetched by ID instead, losing its surrounding
-  // context. Point at the switch that captures the range as absolute values instead.
-  // Duplicated from `isTimeRangeAbsoluteTime` (for bundle size reasons, as elsewhere in this file)
+  // Relative time may exclude the document from the recipient's results and lose its context.
   const isTimeRangeAbsolute = !(timeRange?.from?.includes('now') || timeRange?.to?.includes('now'));
   if (isTimeRangeAbsolute) {
     return undefined;

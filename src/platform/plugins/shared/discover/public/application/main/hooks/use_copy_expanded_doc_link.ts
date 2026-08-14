@@ -21,12 +21,7 @@ import {
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 /**
- * Copies a link that reopens the current view with the expanded document's flyout already open.
- *
- * The time range is snapshotted to absolute values, using the window that produced the current
- * results rather than re-resolving "now", so the recipient's search is far more likely to
- * actually contain the document. Without that, a relative range resolves differently for them
- * and the document usually has to be fetched by ID instead.
+ * Copies a flyout link using the absolute time range that produced the current results.
  */
 export const useCopyExpandedDocLink = ({ dataView }: { dataView: DataView }) => {
   const services = useDiscoverServices();

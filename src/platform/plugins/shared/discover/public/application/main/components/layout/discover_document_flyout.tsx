@@ -44,11 +44,8 @@ export interface DiscoverDocumentFlyoutProps {
 }
 
 /**
- * Renders the expanded document's flyout.
- *
- * Deliberately rendered above the data grid rather than alongside it, since the grid is nested
- * inside the Unified Histogram layout and does not mount until that has initialized. A document
- * restored from a link would otherwise have to wait on the chart before it could open.
+ * Renders the expanded document's flyout above the data grid,
+ * so linked documents need not wait for the search to initialize.
  */
 const DiscoverDocumentFlyoutComponent = ({
   dataView,
@@ -176,8 +173,7 @@ const DiscoverDocumentFlyoutComponent = ({
     return cascadedColumnsMeta;
   }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
 
-  // The grid reports the columns it renders, but the flyout can open before the grid exists,
-  // so fall back to the same derivation the grid uses
+  // Derive columns for when a linked flyout opens before the grid exists.
   const displayedColumns = useMemo(
     () => getDisplayedColumns(columns, dataView),
     [columns, dataView]
@@ -196,7 +192,6 @@ const DiscoverDocumentFlyoutComponent = ({
         notice === ExpandedDocNotice.None ? undefined : <ExpandedDocNoticeText notice={notice} />
       }
       hits={renderDocumentViewMeta?.displayedRows}
-      // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
       columns={renderDocumentViewMeta?.displayedColumns ?? displayedColumns}
       columnsMeta={flyoutColumnsMeta}
       savedSearchId={persistedDiscoverSession?.id!}

@@ -41,8 +41,6 @@ describe('fetchExpandedDoc', () => {
         abortSignal: new AbortController().signal,
       });
 
-      // Data view records keep the ES hit as the raw form and flatten the source alongside the
-      // metadata fields, unlike ES|QL records where both forms are the same row
       expect(record?.id).toBe(`${ref.index}::${ref.id}::`);
       expect(record?.raw).toEqual({ _id: ref.id, _index: ref.index, _source: { a: 1 } });
       expect(record?.flattened).toEqual({ _index: ref.index, _score: undefined, a: 1 });
@@ -86,10 +84,6 @@ describe('fetchExpandedDoc', () => {
         abortSignal: new AbortController().signal,
       });
 
-      // Backing indices of a data stream cannot be queried directly, so this reuses the index
-      // pattern rather than `ref.index`, and filters for the document instead. Standalone, and
-      // without the current query's own filtering, so the document is found regardless of the
-      // time range, sort, limit and filtering of the current results.
       expect(getSearchParams().params.query).toBe(
         `FROM logs-* METADATA _index, _id\n| WHERE _index == "${ref.index}" AND _id == "${ref.id}"\n| LIMIT 1`
       );
@@ -106,7 +100,6 @@ describe('fetchExpandedDoc', () => {
         abortSignal: new AbortController().signal,
       });
 
-      // ES|QL records use the row keyed by column name as both the raw and flattened form
       const row = { _index: ref.index, _id: ref.id, message: 'hello' };
 
       expect(record).toEqual({ id: `${ref.index}::${ref.id}::`, raw: row, flattened: row });

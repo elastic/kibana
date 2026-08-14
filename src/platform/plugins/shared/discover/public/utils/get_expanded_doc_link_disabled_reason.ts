@@ -10,11 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { ExpandedDocLinkability } from '../../common/expanded_doc';
 
-/**
- * Explains why the current query cannot produce links to individual documents, or `undefined`
- * when it can. Shared by the doc viewer's copy link action and the share menu so the two give
- * the same explanation.
- */
+/** Returns the shared explanation for a document-link restriction. */
 export const getExpandedDocLinkDisabledReason = (
   linkability: ExpandedDocLinkability
 ): string | undefined => {

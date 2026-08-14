@@ -137,9 +137,7 @@ export interface DiscoverAppState {
    */
   isApproximate?: boolean;
   /**
-   * The document expanded in the doc viewer flyout, so it can be captured in a
-   * shareable link and reopened on load. Intentionally URL-only and not persisted
-   * to saved sessions, since it identifies a document rather than search config.
+   * The expanded document reference
    */
   expandedDoc?: ExpandedDocRef;
 }

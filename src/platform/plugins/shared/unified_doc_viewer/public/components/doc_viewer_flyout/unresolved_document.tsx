@@ -13,11 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 
-/**
- * Rendered in the flyout body while the expanded document is still being resolved, or when it
- * could not be resolved at all. Reached when opening a shared link to a document that is not
- * part of the current results, since it has to be fetched by ID before it can be shown.
- */
+/** Renders the request state while a linked document resolves. */
 export const UnresolvedDocument = ({ requestState }: { requestState?: ElasticRequestState }) => {
   if (requestState === ElasticRequestState.NotFound) {
     return (

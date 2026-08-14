@@ -278,7 +278,6 @@ describe('DiscoverDocumentFlyout', () => {
 
     const documents$ = toolkit.getCurrentTabDataStateContainer().data$.documents$;
 
-    // The document is not in the results yet, so the direct fetch starts
     documents$.next({
       fetchStatus: FetchStatus.LOADING,
       result: [buildDataTableRecord(inResultsHit, dataViewMock)],
@@ -300,7 +299,6 @@ describe('DiscoverDocumentFlyout', () => {
       expect(services.data.search.search).toHaveBeenCalled();
     });
 
-    // The main search comes back with the document while the direct fetch is still in flight
     act(() => {
       documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
@@ -343,8 +341,6 @@ describe('DiscoverDocumentFlyout', () => {
       expect(screen.getByTestId('docViewerFlyoutNotFound')).toBeVisible();
     });
 
-    // Nothing belongs in the subheader for a document that could not be resolved, so it should
-    // not render as an empty bordered strip
     expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
     expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
     expect(
@@ -367,7 +363,6 @@ describe('DiscoverDocumentFlyout', () => {
       expect(toolkit.getCurrentTab().expandedDoc).toBeDefined();
     });
 
-    // Mirrors the browser back button reverting the app state
     act(() => {
       toolkit.internalState.dispatch(
         internalStateActions.updateAppState({
@@ -450,7 +445,6 @@ describe('DiscoverDocumentFlyout', () => {
       screen.queryByRole('button', { name: /copy link to this document/i })
     ).not.toBeInTheDocument();
 
-    // Navigating within the flyout keeps the cascade grid as the owner
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeVisible();
     });
@@ -470,7 +464,6 @@ describe('DiscoverDocumentFlyout', () => {
       expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
     });
 
-    // Cascade owned documents are not deep linkable, so no reference is written
     expect(toolkit.getCurrentTab().appState.expandedDoc).toBeUndefined();
   });
 

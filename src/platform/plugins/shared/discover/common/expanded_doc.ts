@@ -13,34 +13,22 @@ import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 
 /**
- * Identifies the document expanded in the doc viewer flyout, so it can be captured
- * in a shareable link and restored on load.
- *
- * `_id` and `_index` are kept separate rather than using the composed doc ID
- * (see `getDocId`) so the reference stays parseable when `_index` is a cross cluster
- * reference (e.g. `cluster:index`), and so it maps directly onto the
- * `METADATA _id, _index` columns if ES|QL support is added later.
+ * Identifies a document in a shareable link. Keeping `_id` and `_index` separate
+ * supports direct querying and maps to ES|QL metadata columns.
  */
 export interface ExpandedDocRef extends SerializableRecord {
   id: string;
   index: string;
 }
 
-/**
- * Builds the shareable reference for a record, or `undefined` when the record has no
- * stable identity. ES|QL rows only carry `_id` and `_index` when the query requests
- * `METADATA _id, _index`, so this doubles as the check for whether a record is linkable.
- */
+/** Builds a reference when the record has the `_id` and `_index` needed for a stable identity. */
 export const getExpandedDocRef = (doc: DataTableRecord | undefined): ExpandedDocRef | undefined => {
   const { _id: id, _index: index } = doc?.raw ?? {};
 
   return id && index ? { id, index } : undefined;
 };
 
-/**
- * Matches a record against a reference. Compares the raw fields rather than the composed
- * doc ID so the result is unaffected by `_routing`, which the reference does not carry.
- */
+/** Matches a record against a reference, comparing the raw fields. */
 export const matchesExpandedDocRef = (doc: DataTableRecord, ref: ExpandedDocRef) =>
   doc.raw._id === ref.id && doc.raw._index === ref.index;
 
@@ -56,15 +44,8 @@ export enum ExpandedDocLinkability {
 }
 
 /**
- * Determines whether a specific expanded document is deep linkable.
- *
- * Data view documents always are, since every document has an `_id` and `_index`. ES|QL rows
- * only qualify when the query does not transform its rows (a transformational query can still
- * carry `_id` through, e.g. via `KEEP`, while producing rows that cannot be resolved back to a
- * document) and the document itself actually carries `_id`/`_index`, which is checked directly
- * on the document rather than by inspecting whether the query requests `METADATA` - a query edit
- * does not retroactively add the fields to a document expanded before the edit, and the fetch
- * used to restore a link does not depend on the current query requesting them either.
+ * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably refetched,
+ * and metadata is checked directly on the document instance because query edits do not change open rows.
  */
 export const getExpandedDocLinkability = (
   query: Query | AggregateQuery | undefined,
