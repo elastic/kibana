@@ -53098,7 +53098,6 @@
     "xpack.spaces.management.spaceDetails.footerActions.cancel": "Abbrechen",
     "xpack.spaces.management.spaceDetails.footerActions.deleteSpace": "Space löschen",
     "xpack.spaces.management.spaceDetails.footerActions.updateSpace": "Änderungen anwenden",
-    "xpack.spaces.management.spaceDetails.keepEditingButton": "Speichern Sie, bevor Sie die Seite verlassen",
     "xpack.spaces.management.spaceDetails.leavePageButton": "Verlassen",
     "xpack.spaces.management.spaceDetails.roles.assign": "Neue Rollen zuweisen",
     "xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title": "Der Zugriff des Nutzers hängt von einer Kombination aus den globalen Raumprivilegien seiner Rolle und den spezifischen Privilegien ab, die für diesen Raum gelten.",

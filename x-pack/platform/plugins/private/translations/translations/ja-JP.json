@@ -53272,7 +53272,6 @@
     "xpack.spaces.management.spaceDetails.footerActions.cancel": "キャンセル",
     "xpack.spaces.management.spaceDetails.footerActions.deleteSpace": "スペースを削除",
     "xpack.spaces.management.spaceDetails.footerActions.updateSpace": "変更を適用",
-    "xpack.spaces.management.spaceDetails.keepEditingButton": "移動する前に保存",
     "xpack.spaces.management.spaceDetails.leavePageButton": "移動",
     "xpack.spaces.management.spaceDetails.roles.assign": "新しいロールを割り当て",
     "xpack.spaces.management.spaceDetails.roles.assign.privilegeCombinationMsg.title": "ユーザーの最終的なアクセス権は、そのユーザーのロールのグローバルスペース権限と、そのスペースに適用されている特定の権限の組み合わせによって決まります。",
