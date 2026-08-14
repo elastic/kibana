@@ -7,30 +7,12 @@
 
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
-import { setPrf, extractRuleUuids } from '../common/metrics';
+import { setPrf } from '../common/metrics';
+import { alignExpectedEventsToActuals, getConfirmedDetectionRuleUuids } from '../common/align_events';
 
 export interface TopologyScore {
   score: number | null;
   explanation: string;
-}
-
-function findBestMatch(
-  expectedSignals: Array<{ metadata?: { rule_uuid?: string } }> | undefined,
-  actuals: SignificantEvent[],
-  assigned: Set<SignificantEvent>
-): SignificantEvent | undefined {
-  const expectedKeys = extractRuleUuids(expectedSignals);
-  let best: SignificantEvent | undefined;
-  let bestOverlap = 0;
-  for (const event of actuals) {
-    if (assigned.has(event)) continue;
-    const overlap = [...extractRuleUuids(event.signals)].filter((k) => expectedKeys.has(k)).length;
-    if (overlap > bestOverlap) {
-      bestOverlap = overlap;
-      best = event;
-    }
-  }
-  return bestOverlap > 0 ? best : undefined;
 }
 
 const topologyExpectedEvents = (
@@ -109,18 +91,22 @@ export const scoreTopologyCorrectness = (
 
   const explanations: string[] = [];
   let totalScore = 0;
-  const assignedActuals = new Set<SignificantEvent>();
 
-  for (const exp of topologyExpected) {
-    const match = findBestMatch(exp.signals, actuals, assignedActuals);
+  const alignmentKeys = topologyExpected.map((exp) => ({
+    event_id: exp.event_id,
+    expectedRuleUuids: getConfirmedDetectionRuleUuids(exp),
+  }));
+  const matches = alignExpectedEventsToActuals(alignmentKeys, actuals);
+
+  for (let i = 0; i < topologyExpected.length; i++) {
+    const exp = topologyExpected[i];
+    const match = matches[i];
 
     if (!match) {
       explanations.push(`event=${exp.event_id ?? '?'}: no matching actual event found`);
       totalScore += 0;
       continue;
     }
-
-    assignedActuals.add(match);
 
     const { score: eventScore, explanations: fieldExplanations } = scoreTopologyFields(
       match,

@@ -92,13 +92,47 @@ describe('scoreTopologyCorrectness', () => {
     expect(result.score).toBeLessThan(1);
   });
 
-  it('scores 0 when no actual event matches expected signals', () => {
-    const actual = [event('e1', ['uuid-X'], ['svc-a'], [])] as unknown as SignificantEvent[];
+  it('scores 0 when no actual event matches — different event_id and no rule UUID overlap', () => {
+    // Different event_id prevents exact-id match; different rule UUID prevents overlap match.
+    const actual = [event('other', ['uuid-X'], ['svc-a'], [])] as unknown as SignificantEvent[];
     const expected = [event('e1', ['uuid-1'], ['svc-a'], [])];
 
     const result = scoreTopologyCorrectness(actual, expected);
     expect(result.score).toBe(0);
     expect(result.explanation).toMatch(/no matching actual event/);
+  });
+
+  it('does not match an actual whose only shared rule UUID is refuted (confirmed=false)', () => {
+    // dismissed shares R1 with the expected event but its signal is confirmed=false.
+    // open has the same R1 confirmed=true and the correct topology.
+    // Without the confirmed filter the dismisssed event wins the overlap race;
+    // with it, only open qualifies.
+    const refutedSignal = { ...signal('R1'), confirmed: false as const };
+    const dismissed = {
+      event_id: 'dismissed-1',
+      status: 'dismissed' as const,
+      signals: [refutedSignal],
+      causal_features: [feature('userservice')],
+      blast_radius: [],
+    } as unknown as SignificantEvent;
+    const open = event('open-1', ['R1'], ['transactionhistory'], []) as unknown as SignificantEvent;
+
+    const expected = [event('cascade', ['R1'], ['transactionhistory'], [])];
+    const result = scoreTopologyCorrectness([dismissed, open], expected);
+    expect(result.score).toBe(1);
+  });
+
+  it('prefers exact event_id match over highest rule UUID overlap', () => {
+    // byId shares event_id='cascade' with the expected event but a different rule (R2);
+    // byOverlap has matching rule R1 but a different event_id.
+    // Correct topology lives on byId; without event_id priority byOverlap wins the
+    // overlap race and the wrong causal_features are scored.
+    const byId = event('cascade', ['R2'], ['transactionhistory'], []) as unknown as SignificantEvent;
+    const byOverlap = event('other', ['R1'], ['userservice'], []) as unknown as SignificantEvent;
+
+    const expected = [event('cascade', ['R1'], ['transactionhistory'], [])];
+    const result = scoreTopologyCorrectness([byId, byOverlap], expected);
+    expect(result.score).toBe(1);
   });
 
   it('does not double-count: two expected events cannot claim the same actual', () => {
