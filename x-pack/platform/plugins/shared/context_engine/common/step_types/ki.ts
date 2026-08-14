@@ -58,7 +58,7 @@ export const kiFieldsSchema = z.object({
     .describe('Tags used to categorize the KI'),
   attributes: z
     .record(
-      z.string().max(MAX_KI_ATTRIBUTE_KEY_LENGTH),
+      z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH),
       z.union([z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH), z.number(), z.boolean()])
     )
     .optional()
