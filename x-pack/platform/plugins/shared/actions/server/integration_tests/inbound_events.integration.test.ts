@@ -38,6 +38,7 @@ describe('Inbound events HTTP API', () => {
       '/api/events/webhook/nonexistent-connector'
     )
       .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
+      .set('x-elastic-internal-origin', 'kibana')
       .set('kbn-xsrf', 'kibana')
       .send({ hello: 'world' })
       .expect(403);

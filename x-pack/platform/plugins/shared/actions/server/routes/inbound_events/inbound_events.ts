@@ -49,11 +49,11 @@ export function inboundEventsRoute({
   router.versioned
     .post({
       path: INBOUND_EVENTS_API_PATH,
-      access: 'public',
+      access: 'internal',
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback).',
+        'Ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). Marked `access: internal` until Phase 1 is ready to publish; path remains `/api/events/...`.',
       options: {
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],

@@ -35,14 +35,14 @@ describe('inboundEventsRoute', () => {
     return { router, addVersionMock };
   };
 
-  it('registers a public versioned POST route', () => {
+  it('registers an internal versioned POST route', () => {
     const ingest = jest.fn();
     const { router, addVersionMock } = registerRoute({ ingest });
 
     expect(router.versioned.post).toHaveBeenCalledWith(
       expect.objectContaining({
         path: INBOUND_EVENTS_API_PATH,
-        access: 'public',
+        access: 'internal',
         security: INBOUND_EVENTS_SECURITY,
         options: expect.objectContaining({
           xsrfRequired: false,
