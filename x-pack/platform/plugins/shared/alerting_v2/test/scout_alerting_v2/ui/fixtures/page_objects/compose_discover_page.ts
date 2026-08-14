@@ -6,30 +6,30 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
-import { KibanaCodeEditorWrapper, type EuiSuperSelectObject } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 export class ComposeDiscoverPage {
   public readonly flyout: Locator;
   public readonly nextButton: Locator;
   public readonly backButton: Locator;
   public readonly submitButton: Locator;
-  /** YAML-mode save button (non-representable rules such as alert + standalone). */
+  /** YAML-mode save button (non-representable rules — every alert + standalone). */
   public readonly yamlSubmitButton: Locator;
   /**
-   * "Open query editor" — visible on the Alert Condition step in signal
-   * (non-alert) mode when no query has been committed yet.
+   * @deprecated Use {@link alertSummaryEditorButton}. Both alert and signal now
+   * share `esqlSummaryOpenEditor` on the Alert Condition step.
    */
   public readonly openEditorButton: Locator;
   /**
-   * "Edit query" — visible on the Alert Condition step when a query is committed
-   * in signal (non-alert) mode.
+   * @deprecated Use {@link alertSummaryEditorButton}. Both alert and signal now
+   * share `esqlSummaryOpenEditor` on the Alert Condition step.
    */
   public readonly editQueryButton: Locator;
   /**
-   * Edit CTA in the alert-mode query summary on the Alert Condition step. Labeled
+   * Edit CTA in the query summary on the Alert Condition step. Labeled
    * "Open query editor" before a query is applied and "Edit query" afterwards; both
-   * render the same test subject. Replaces the legacy base/alert "Edit queries" button —
-   * create now uses a single unified editor and the heuristic split runs on Apply.
+   * kinds share this subject. Create uses a single unified editor and the heuristic
+   * split runs on Apply (alert only).
    */
   public readonly alertSummaryEditorButton: Locator;
   public readonly sandboxCloseButton: Locator;
@@ -49,7 +49,8 @@ export class ComposeDiscoverPage {
   public readonly createEsqlRuleButton: Locator;
   /** "Create ES|QL rule" card in the empty-state panel (shown when no rules exist). */
   public readonly createEsqlRuleCard: Locator;
-  public readonly modeSelect: Locator;
+  /** Kind radio-card group on the Outcome step. */
+  public readonly kindSelect: Locator;
   /**
    * Callout shown after Apply when the query has a base but no alert condition
    * (no WHERE) — the whole query is treated as the breach query (every row breaches).
@@ -59,20 +60,18 @@ export class ComposeDiscoverPage {
   public readonly emptyQueryCallout: Locator;
 
   private readonly codeEditor: KibanaCodeEditorWrapper;
-  private readonly modeSuperSelect: EuiSuperSelectObject;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
-    this.modeSuperSelect = page.components.superSelect('composeDiscoverModeSelect');
 
     this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
     this.nextButton = this.page.testSubj.locator('composeDiscoverNext');
     this.backButton = this.page.testSubj.locator('composeDiscoverBack');
     this.submitButton = this.page.testSubj.locator('composeDiscoverSubmit');
     this.yamlSubmitButton = this.page.testSubj.locator('composeDiscoverYamlSubmit');
-    this.openEditorButton = this.page.testSubj.locator('composeDiscoverOpenEditor');
-    this.editQueryButton = this.page.testSubj.locator('composeDiscoverEditQuery');
     this.alertSummaryEditorButton = this.page.testSubj.locator('esqlSummaryOpenEditor');
+    this.openEditorButton = this.alertSummaryEditorButton;
+    this.editQueryButton = this.alertSummaryEditorButton;
     this.sandboxCloseButton = this.page.testSubj.locator('querySandboxClose');
     this.sandboxSearchButton = this.page.testSubj.locator('composeDiscoverRunQuery');
     this.sandboxApplyButton = this.page.testSubj.locator('querySandboxApply');
@@ -85,7 +84,7 @@ export class ComposeDiscoverPage {
     this.relatedDashboardsInput = this.flyout.locator(
       'input[placeholder="Link related dashboards for investigation"]'
     );
-    this.modeSelect = this.page.testSubj.locator('composeDiscoverModeSelect');
+    this.kindSelect = this.page.testSubj.locator('composeDiscoverKindSelect');
     this.createRuleSplitDropdownButton = this.page.testSubj.locator(
       'createRuleButton-secondary-button'
     );
@@ -130,7 +129,7 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Opens the query sandbox from the Alert Condition step (alert mode).
+   * Opens the query sandbox from the Alert Condition step (alert kind).
    */
   async openSandbox() {
     await this.alertSummaryEditorButton.click();
@@ -172,11 +171,11 @@ export class ComposeDiscoverPage {
   }
 
   /**
-   * Switches Alert / Signal mode. The sandbox must be closed first — ModeSelect
-   * is disabled while the query sandbox is open in form mode.
+   * Switches Alert / Signal kind on the Outcome step. The sandbox must be closed
+   * first — KindSelect is disabled while the query sandbox is open.
    */
-  async selectMode(kind: 'alert' | 'signal') {
-    await this.modeSuperSelect.selectOptionByValue(kind);
+  async selectKind(kind: 'alert' | 'signal') {
+    await this.page.testSubj.locator(`composeDiscoverKindSelect-${kind}`).click();
   }
 
   /** Waits until a time-field `<select>` option is present (field-caps resolution). */
