@@ -90,6 +90,8 @@ steps:
       connectorId: ""
       barrenCount: 0
       effectivePatience: "${{ inputs.convergencePatience | at_least: 1 }}"
+      # Fail-open default: unknown materiality (computed step skipped/errored) => run queries.
+      computedMaterialChange: true
 
   # -----------------------------------------------------------------------
   # Step 2: Main loop — each pass runs identify_inferred_features.
@@ -208,6 +210,19 @@ steps:
         featureTtlDays: "${{ inputs.featureTtlDays }}"
 
   # -----------------------------------------------------------------------
+  # Step 4b: Capture the materiality signal only on computed-step success;
+  #          otherwise the fail-open default stands.
+  # -----------------------------------------------------------------------
+  - name: capture_materiality
+    type: if
+    condition: "${{ steps.identify_computed.error == null }}"
+    steps:
+      - name: set_materiality
+        type: data.set
+        with:
+          computedMaterialChange: "${{ steps.identify_computed.output.materialChange }}"
+
+  # -----------------------------------------------------------------------
   # Step 5: Output results.
   # -----------------------------------------------------------------------
   - name: output_result
@@ -217,6 +232,7 @@ steps:
       connectorId: "${{ variables.connectorId }}"
       discoveredFeatures: "${{ variables.discoveredFeatures }}"
       computedFeaturesCount: "${{ steps.identify_computed.output.computedFeaturesCount }}"
+      computedFeaturesMaterialChange: "${{ variables.computedMaterialChange }}"
       tokensUsed:
         completion: "${{ variables.totalCompletionTokens }}"
         prompt: "${{ variables.totalPromptTokens }}"
