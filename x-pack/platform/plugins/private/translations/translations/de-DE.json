@@ -57788,8 +57788,6 @@
     "xpack.transform.clone.fetchErrorPromptText": "Die Kibana-Datenansichts-ID konnte nicht abgerufen werden.",
     "xpack.transform.clone.noDataViewErrorPromptText": "Die Transformation {transformId} konnte nicht geklont werden. Es existiert keine Datenansicht für {dataViewTitle}.",
     "xpack.transform.cloneTransform.breadcrumbTitle": "Transformierung klonen",
-    "xpack.transform.cpsUnsupportedCallout.description": "Solange wir an diesem Feature arbeiten, ist der Suchbereich für alle Transformationen auf das aktuelle Projekt beschränkt.",
-    "xpack.transform.cpsUnsupportedCallout.title": "Projektübergreifende Suche nach Transformationen bald verfügbar",
     "xpack.transform.createTransform.breadcrumbTitle": "Transformation erstellen",
     "xpack.transform.danglingTasksError": "{count} {count, plural, one {transform is} other {Transformationen sind}} fehlende Konfigurationsdetails: [{transformIds}] {count, plural, one {It} other {Sie}} können nicht wiederhergestellt werden und sollten gelöscht werden.",
     "xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage": "Beim Löschen der Datenansicht {destinationIndex} ist ein Fehler aufgetreten",

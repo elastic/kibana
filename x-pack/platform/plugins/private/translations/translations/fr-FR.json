@@ -57535,8 +57535,6 @@
     "xpack.transform.clone.fetchErrorPromptText": "Impossible de récupérer l'ID de vue des données Kibana.",
     "xpack.transform.clone.noDataViewErrorPromptText": "Impossible de cloner la transformation {transformId}. Il n'existe aucune vue de données pour {dataViewTitle}.",
     "xpack.transform.cloneTransform.breadcrumbTitle": "Cloner la transformation",
-    "xpack.transform.cpsUnsupportedCallout.description": "Pendant que nous travaillons sur cette fonctionnalité, toutes les recherches de transformation seront limitées au projet en cours.",
-    "xpack.transform.cpsUnsupportedCallout.title": "La recherche de transformations interprojets sera bientôt disponible",
     "xpack.transform.createTransform.breadcrumbTitle": "Créer une transformation",
     "xpack.transform.deleteTransform.deleteAnalyticsWithDataViewErrorMessage": "Une erreur s'est produite lors de la suppression de la vue de données {destinationIndex}",
     "xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage": "Une erreur s'est produite lors de la suppression de l'index de destination {destinationIndex}",
