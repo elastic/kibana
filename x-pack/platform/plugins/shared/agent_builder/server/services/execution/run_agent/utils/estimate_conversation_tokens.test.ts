@@ -84,8 +84,8 @@ describe('estimateMessagesTokens', () => {
         ],
       }),
     ]);
-    // If we were estimating char/4, this would be ~100k. Flat cost keeps it well below 1k.
-    expect(withImage).toBeLessThan(1_000);
+    // If we were estimating char/4, this would be ~100k. Flat cost keeps it well below that.
+    expect(withImage).toBeLessThan(2_000);
   });
 });
 

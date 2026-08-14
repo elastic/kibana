@@ -98,9 +98,10 @@ describe('skill attachment type', () => {
       const formatted = await definition.format(attachment, formatContext);
       const repr = await formatted.getRepresentation?.();
       expect(repr?.type).toBe('text');
-      expect(repr?.value).toContain('Skill (id: incident-triage)');
-      expect(repr?.value).toContain(validSkill.skill.content);
-      expect(repr?.value).toContain('platform.core.execute_esql');
+      if (repr?.type !== 'text') throw new Error('expected text representation');
+      expect(repr.value).toContain('Skill (id: incident-triage)');
+      expect(repr.value).toContain(validSkill.skill.content);
+      expect(repr.value).toContain('platform.core.execute_esql');
     });
   });
 

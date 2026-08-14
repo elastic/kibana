@@ -265,13 +265,14 @@ const formatRoundInput = ({
 };
 
 const formatAttachment = ({ attachment }: { attachment: ProcessedAttachment }): XmlNode => {
+  const { representation } = attachment;
   return {
     tagName: 'attachment',
     attributes: {
       type: attachment.attachment.type,
       id: attachment.attachment.id,
     },
-    children: [attachment.representation.value],
+    children: [representation.type === 'text' ? representation.value : ''],
   };
 };
 
@@ -368,6 +369,9 @@ const createGroupedToolCallMessages = async (
         content: wrapToolResultContent(JSON.stringify({ results: processedResults })),
       })
     );
+    // TODO: ToolResultType.image results carry only a marker (no bytes). A follow-up
+    // message with the real content (via the attachment's getBase64()) needs to be
+    // pushed here — not implemented yet, forward-wired for a later PR.
   }
 
   return [aiMessage, ...toolMessages];

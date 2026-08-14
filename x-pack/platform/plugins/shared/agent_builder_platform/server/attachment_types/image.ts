@@ -56,8 +56,6 @@ export const createImageAttachmentType = ({
         }),
       };
     },
-    getAgentDescription: () =>
-      'An image attachment. Call attachment_read(attachment_id) — the image will be shown to you directly as visual input in the message following the tool result.',
     getTools: () => [],
   };
 };
