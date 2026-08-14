@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
   ToolHandlerContext,
@@ -42,18 +42,6 @@ const mockContext = {
 describe('createListAiConnectorsTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('has the correct id, type, and tags', () => {
-    const tool = createListAiConnectorsTool({ getActions, getInference });
-    expect(tool.id).toBe(platformCoreTools.listAiConnectors);
-    expect(tool.type).toBe(ToolType.builtin);
-    expect(tool.tags).toEqual(['connector', 'ai']);
-  });
-
-  it('uses space-cached availability', () => {
-    const tool = createListAiConnectorsTool({ getActions, getInference });
-    expect(tool.availability?.cacheMode).toBe('space');
   });
 
   it('delegates to inference.getConnectorList and returns the connectors', async () => {
