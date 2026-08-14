@@ -20,6 +20,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiHorizontalRule,
   EuiSpacer,
   EuiFlyoutFooter,
@@ -680,10 +681,17 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               announceOnMount
               size="m"
               title={
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
-                  defaultMessage="Preparing OpAMP configuration..."
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
+                      defaultMessage="Preparing OpAMP configuration..."
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             />
           ) : null}

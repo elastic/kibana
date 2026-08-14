@@ -6,7 +6,14 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiLink,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -147,22 +154,29 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           announceOnMount
           size="m"
           title={
-            isLongEnrollment ? (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
-                defaultMessage="Listening for agent... this can take several minutes"
-              />
-            ) : isCollector ? (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listeningCollector"
-                defaultMessage="Listening for collector"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listening"
-                defaultMessage="Listening for agent"
-              />
-            )
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {isLongEnrollment ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
+                    defaultMessage="Listening for agent... this can take several minutes"
+                  />
+                ) : isCollector ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listeningCollector"
+                    defaultMessage="Listening for collector"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.fleet.agentEnrollment.loading.listening"
+                    defaultMessage="Listening for agent"
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         />
         <EuiSpacer size="m" />
