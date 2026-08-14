@@ -171,6 +171,7 @@ An empty matcher is a catch-all.
 | Settle buffer | `5` seconds | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write |
 | Stuck-tick limit | `10` ticks (~50 s) | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires |
 | Pre-fetch force-advance lag | `15` minutes | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known episodes and lag exceeds this, skip the unread window |
+| Dispatch chunk size | `250` items | `DISPATCH_CHUNK_SIZE` — max items per `bulkScheduleWorkflow` call. Workflows are prefetched with `getWorkflowsByIds` (one call per space) and scheduled in chunks batched by policy API key. The tick signal is checked between chunks. |
 | Matcher language | KQL | `@kbn/eval-kql` |
 
 ## Important pipeline state
@@ -246,6 +247,7 @@ If the pipeline never reached `FetchEpisodesStep` (`episodes` empty), there is n
 
 - Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
 - Destination handlers should therefore be idempotent.
+- Workflow destinations are scheduled in `DISPATCH_CHUNK_SIZE` (250) batches via `bulkScheduleWorkflow`, not per-group `pLimit(3)`.
 - The episode query is capped at `EPISODE_QUERY_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
 - Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
 - Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `episode_count`, `stuck_ticks`.
@@ -382,7 +384,7 @@ If you are not adding a new pipeline phase, but instead want to support a new de
 - `steps/dispatch_step.ts` to add the new dispatch branch
 - any saved object / route validation that defines allowed destinations
 
-Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request and schedule workflows through the workflows management plugin.
+Current production delivery is workflow-based. `DispatchStep` uses the policy API key to craft a fake request, prefetches workflows with `getWorkflowsByIds`, and schedules them through `bulkScheduleWorkflow` on the workflows management plugin.
 
 ## Testing
 

@@ -112,8 +112,8 @@ function mockNpFindAllDecrypted(
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
-    getWorkflow: jest.fn().mockResolvedValue(null),
-    runWorkflow: jest.fn().mockResolvedValue('exec-1'),
+    getWorkflowsByIds: jest.fn().mockResolvedValue([]),
+    bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>);
 
 function buildDispatcherService(deps: {
