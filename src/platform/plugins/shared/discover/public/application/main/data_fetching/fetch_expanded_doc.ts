@@ -16,7 +16,7 @@ import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { escapeStringValue, getESQLResults, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { buildSearchBody } from '@kbn/unified-doc-viewer-plugin/public';
-import type { ExpandedDocRef } from '../../../../common/expanded_doc';
+import type { ExpandedDocRef } from '../utils/expanded_doc';
 
 export interface FetchExpandedDocParams {
   ref: ExpandedDocRef;

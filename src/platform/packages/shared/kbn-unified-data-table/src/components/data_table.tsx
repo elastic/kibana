@@ -1351,6 +1351,8 @@ const InternalUnifiedDataTable = React.forwardRef<
             return prevHasScrolledToBottom;
           }
 
+          // We need to manually query the react-window wrapper since EUI doesn't
+          // expose outerRef in virtualizationOptions, but we should request it
           const outerRef = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
 
           if (!outerRef) {

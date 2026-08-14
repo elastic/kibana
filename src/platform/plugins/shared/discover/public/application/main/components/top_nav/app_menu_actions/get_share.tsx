@@ -28,8 +28,10 @@ import {
 } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import { getDiscoverLocatorParams } from '../../../../../utils/get_discover_locator_params';
-import { getExpandedDocLinkability } from '../../../../../../common/expanded_doc';
-import { getExpandedDocLinkDisabledReason } from '../../../../../utils/get_expanded_doc_link_disabled_reason';
+import {
+  getExpandedDocLinkability,
+  getExpandedDocLinkDisabledReason,
+} from '../../../utils/expanded_doc';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';

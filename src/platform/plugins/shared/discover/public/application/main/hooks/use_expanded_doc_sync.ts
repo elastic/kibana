@@ -14,7 +14,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { fetchExpandedDoc } from '../data_fetching/fetch_expanded_doc';
-import { getExpandedDocRef, matchesExpandedDocRef } from '../../../../common/expanded_doc';
+import { getExpandedDocRef, matchesExpandedDocRef } from '../utils/expanded_doc';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,

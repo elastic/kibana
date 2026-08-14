@@ -11,8 +11,10 @@ import { isValidElement } from 'react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { ExpandedDocLinkability } from '../../../../../../common/expanded_doc';
-import { getExpandedDocLinkDisabledReason } from '../../../../../utils/get_expanded_doc_link_disabled_reason';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkDisabledReason,
+} from '../../../utils/expanded_doc';
 import type { DiscoverAppState } from '../../../state_management/redux';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { buildShareOptions } from './get_share';

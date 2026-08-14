@@ -26,8 +26,11 @@ import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider
 import { internalStateActions } from '../../state_management/redux';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocumentFlyout } from './discover_document_flyout';
-import { ExpandedDocLinkability, type ExpandedDocRef } from '../../../../../common/expanded_doc';
-import { getExpandedDocLinkDisabledReason } from '../../../../utils/get_expanded_doc_link_disabled_reason';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkDisabledReason,
+  type ExpandedDocRef,
+} from '../../utils/expanded_doc';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');

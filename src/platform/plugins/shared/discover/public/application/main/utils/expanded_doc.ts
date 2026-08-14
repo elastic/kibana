@@ -11,6 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Identifies a document in a shareable link. Keeping `_id` and `_index` separate
@@ -62,4 +63,24 @@ export const getExpandedDocLinkability = (
   return getExpandedDocRef(doc)
     ? ExpandedDocLinkability.Linkable
     : ExpandedDocLinkability.EsqlMissingMetadata;
+};
+
+/** Returns the shared explanation for a document-link restriction. */
+export const getExpandedDocLinkDisabledReason = (
+  linkability: ExpandedDocLinkability
+): string | undefined => {
+  switch (linkability) {
+    case ExpandedDocLinkability.EsqlMissingMetadata:
+      return i18n.translate('discover.expandedDoc.esqlMissingMetadataReason', {
+        defaultMessage:
+          'Add METADATA _id, _index to your ES|QL query to link to individual results.',
+      });
+    case ExpandedDocLinkability.EsqlTransformational:
+      return i18n.translate('discover.expandedDoc.esqlTransformationalReason', {
+        defaultMessage:
+          'Links to individual results are unavailable for queries that transform rows, such as STATS or KEEP.',
+      });
+    default:
+      return undefined;
+  }
 };
