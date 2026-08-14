@@ -13,8 +13,8 @@ import type { KibanaContainerModuleLoadOptions } from '@kbn/core-di';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import { Global } from '@kbn/core-di-internal';
 
-export function loadApplication({ bind }: KibanaContainerModuleLoadOptions) {
-  bind(Application).onSetup(({ inject }, definition, application) => {
+export function loadApplication({ onSetup }: KibanaContainerModuleLoadOptions) {
+  onSetup(Application, CoreSetup('application'), ({ inject }, application, definition) => {
     application.register({
       ...definition,
       mount: inject(CoreStart('injection'), (injection, params) => {
@@ -33,5 +33,5 @@ export function loadApplication({ bind }: KibanaContainerModuleLoadOptions) {
         return isPromise(unmount) ? unmount.then(wrap) : wrap(unmount);
       }) as App['mount'],
     });
-  }, CoreSetup('application'));
+  });
 }
