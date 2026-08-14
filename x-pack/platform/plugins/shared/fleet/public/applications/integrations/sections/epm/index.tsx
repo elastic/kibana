@@ -21,6 +21,7 @@ import { Detail } from './screens/detail';
 import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
+import { CollectionDetailPage } from './screens/collection';
 
 export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
@@ -61,6 +62,9 @@ export const EPMApp: React.FunctionComponent = () => {
           <CreateIntegration />
         </Route>
       )}
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integration_collection}>
+        <CollectionDetailPage />
+      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
         <EPMHomePage />
       </Route>

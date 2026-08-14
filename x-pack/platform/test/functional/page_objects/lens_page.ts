@@ -624,6 +624,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         )[dimensionIndex];
         await dimensionEditor.click();
       });
+      await retry.waitFor('dimension editor flyout to open', async () =>
+        this.isDimensionEditorOpen()
+      );
     },
 
     /**
@@ -875,6 +878,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async editDimensionLabel(label: string) {
       await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+      await retry.waitFor(`name-input value to be "${label}"`, async () => {
+        return (await testSubjects.getAttribute('name-input', 'value')) === label;
+      });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);

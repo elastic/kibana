@@ -15,6 +15,8 @@ import type { RuleApiResponse } from '../../../../services/rules_api';
 
 const mockResolveDashboardsByIds = jest.fn();
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  getDashboardId: (artifact: { data: Record<string, unknown> }) =>
+    typeof artifact.data.dashboardId === 'string' ? artifact.data.dashboardId : undefined,
   resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
 }));
 
@@ -135,7 +137,9 @@ describe('DashboardArtifactsSubsection', () => {
 
     renderSubsection({
       ...baseRule,
-      artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      ],
     });
 
     expect(screen.getByTestId('ruleDashboardArtifactsLoading')).toBeInTheDocument();
@@ -146,7 +150,9 @@ describe('DashboardArtifactsSubsection', () => {
 
     renderSubsection({
       ...baseRule,
-      artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      ],
     });
 
     await waitFor(() => {
@@ -162,7 +168,9 @@ describe('DashboardArtifactsSubsection', () => {
 
     renderSubsection({
       ...baseRule,
-      artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+      ],
     });
 
     await waitFor(() => {
@@ -194,8 +202,8 @@ describe('DashboardArtifactsSubsection', () => {
     const rule = {
       ...baseRule,
       artifacts: [
-        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' },
-        { id: 'artifact-2', type: 'runbook', value: 'runbook-content' },
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        { id: 'artifact-2', type: 'runbook', data: { content: 'runbook-content' } },
       ],
     };
 
@@ -212,7 +220,7 @@ describe('DashboardArtifactsSubsection', () => {
       {
         id: 'rule-1',
         payload: {
-          artifacts: [{ id: 'artifact-2', type: 'runbook', value: 'runbook-content' }],
+          artifacts: [{ id: 'artifact-2', type: 'runbook', data: { content: 'runbook-content' } }],
         },
       },
       expect.objectContaining({ onSettled: expect.any(Function) })
@@ -227,7 +235,13 @@ describe('DashboardArtifactsSubsection', () => {
 
     const rule = {
       ...baseRule,
-      artifacts: [{ id: 'artifact-missing', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-missing' }],
+      artifacts: [
+        {
+          id: 'artifact-missing',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: 'dash-missing' },
+        },
+      ],
     };
 
     renderSubsection(rule);
@@ -277,7 +291,9 @@ describe('DashboardArtifactsSubsection', () => {
 
       renderSubsection({
         ...baseRule,
-        artifacts: [{ id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, value: 'dash-1' }],
+        artifacts: [
+          { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
+        ],
       });
 
       await waitFor(() => {
