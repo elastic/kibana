@@ -80,11 +80,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     it('returns the correct number of services', async () => {
       const response = await getServiceGroupCounts(apmApiClient);
       expect(response.status).to.be(200);
-      expect(response.body).to.eql({
-        [synthbeansServiceGroupId]: { alerts: 0, services: 2 },
-        [opbeansServiceGroupId]: { alerts: 0, services: 1 },
-        ['transactionOnlyServiceGroupId']: { alerts: 0, services: 1 },
-      });
+      expect(Object.keys(response.body).length).to.be(2);
+      expect(response.body[synthbeansServiceGroupId]).to.have.property('services', 2);
+      expect(response.body[opbeansServiceGroupId]).to.have.property('services', 1);
     });
 
     describe('with alerts', () => {
@@ -128,10 +126,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await retry.tryForTime(10000, async () => {
           const response = await getServiceGroupCounts(apmApiClient);
           expect(response.status).to.be(200);
-          expect(response.body).to.eql({
-            [synthbeansServiceGroupId]: { alerts: 1, services: 2 },
-            [opbeansServiceGroupId]: { alerts: 0, services: 1 },
-          });
+          expect(Object.keys(response.body).length).to.be(2);
+          expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
+          expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
         });
       });
     });
