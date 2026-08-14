@@ -257,11 +257,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
           {hasEcfOtel && (
             <>
               {hasEcfUnified && <EuiSpacer size="s" />}
-              <EuiPanel
-                hasBorder
-                paddingSize="m"
-                data-test-subj="deployAndDetectStep-ecfOtelPanel"
-              >
+              <EuiPanel hasBorder paddingSize="m" data-test-subj="deployAndDetectStep-ecfOtelPanel">
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
                   <EuiFlexItem>
                     <EuiTitle size="xs">
