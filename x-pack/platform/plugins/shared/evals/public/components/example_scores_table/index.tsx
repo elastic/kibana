@@ -35,12 +35,13 @@ const formatScore = (score: number | null | undefined) =>
 /**
  * Maps a verdict label + numeric score to an EUI badge color.
  *
- * Order matters: compound negatives (MISMATCH, INCOHERENT, IRRELEVANT, DISSIMILAR) must be
- * checked before their positive substrings (MATCH, COHERENT, RELEVANT, SIMILAR).
- * Unknown/user-defined labels fall back to score-based coloring so they still get a meaningful
- * signal without requiring an exhaustive keyword list.
+ * The score decides the color whenever the evaluator reports one, because labels are free-form
+ * and substring matching cannot be trusted: 'incorrect' contains 'correct', and evaluators name
+ * their own scores things like 'correctness-analysis'. Keywords only classify label-only
+ * verdicts, where there is no score to read, and negated forms are matched before the positives
+ * they contain.
  */
-const getVerdictBadgeColor = (label: string, score: number | null | undefined): string => {
+export const getVerdictBadgeColor = (label: string, score: number | null | undefined): string => {
   // Normalize to uppercase, convert hyphens so 'leak-detected' → 'LEAK_DETECTED'
   const u = label.toUpperCase().replace(/-/g, '_');
 
@@ -48,12 +49,24 @@ const getVerdictBadgeColor = (label: string, score: number | null | undefined): 
   if (u === 'NOT_APPLICABLE' || u === 'N_A' || u === 'NA' || u === 'UNAVAILABLE' || u === 'ERROR')
     return 'default';
 
-  // Negative — check compound forms first to avoid matching their positive substrings
+  if (score != null) {
+    if (score >= 0.8) return 'success';
+    if (score >= 0.5) return 'warning';
+    return 'danger';
+  }
+
+  // Negative — check negated and compound forms first to avoid matching the positives inside them
   if (
+    u.includes('INCORRECT') ||
+    u.includes('INACCURATE') ||
+    u.includes('INCOMPLETE') ||
+    u.includes('UNGROUNDED') ||
+    u.includes('NO_MATCH') ||
     u.includes('MISMATCH') ||
     u.includes('INCOHERENT') ||
     u.includes('IRRELEVANT') ||
     u.includes('DISSIMILAR') ||
+    u.includes('MISSING') ||
     u.includes('MAJOR') ||
     u.includes('SEVERE') ||
     u === 'POOR' ||
@@ -64,9 +77,9 @@ const getVerdictBadgeColor = (label: string, score: number | null | undefined): 
     return 'danger';
 
   // Middling
-  if (u.includes('MINOR') || u.includes('PARTIAL') || u === 'PARTIAL') return 'warning';
+  if (u.includes('MINOR') || u.includes('PARTIAL')) return 'warning';
 
-  // Positive — safe to match substrings now that their negative compounds are handled above
+  // Positive
   if (
     u.includes('MATCH') ||
     u.includes('CORRECT') ||
@@ -81,13 +94,6 @@ const getVerdictBadgeColor = (label: string, score: number | null | undefined): 
     u === 'IN_SCOPE'
   )
     return 'success';
-
-  // Score-based fallback for user-defined or unknown labels
-  if (score != null) {
-    if (score >= 0.8) return 'success';
-    if (score >= 0.5) return 'warning';
-    return 'danger';
-  }
 
   return 'hollow';
 };

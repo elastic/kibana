@@ -95,6 +95,15 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
                     key: 'correctness',
                     score_stats: { avg: 0.85, std_deviation: 0.1, min: 0.5, max: 1.0, count: 10 },
                     score_median: { values: { '50.0': 0.9 } },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'claude-3',
+                          family: { buckets: [{ key: 'claude-3' }] },
+                          provider: { buckets: [{ key: 'anthropic' }] },
+                        },
+                      ],
+                    },
                   },
                 ],
               },
@@ -117,6 +126,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
       dataset_name: 'My Dataset',
       evaluator_name: 'correctness',
       example_count: 5,
+      evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
       stats: {
         mean: 0.85,
         median: 0.9,
@@ -159,25 +169,49 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
                     key: 'correctness',
                     score_stats: {},
                     score_median: { values: {} },
-                    evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
-                    evaluator_model_family: { buckets: [{ key: 'Claude' }] },
-                    evaluator_model_provider: { buckets: [{ key: 'Anthropic' }] },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'claude-3',
+                          family: { buckets: [{ key: 'Claude' }] },
+                          provider: { buckets: [{ key: 'Anthropic' }] },
+                        },
+                      ],
+                    },
                   },
                   {
                     key: 'groundedness',
                     score_stats: {},
                     score_median: { values: {} },
-                    evaluator_model_id: { buckets: [{ key: 'gpt-4o' }] },
-                    evaluator_model_family: { buckets: [{ key: 'GPT' }] },
-                    evaluator_model_provider: { buckets: [{ key: 'OpenAI' }] },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'gpt-4o',
+                          family: { buckets: [{ key: 'GPT' }] },
+                          provider: { buckets: [{ key: 'OpenAI' }] },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    key: 'relevance',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'gpt-4o',
+                          family: { buckets: [{ key: 'GPT' }] },
+                          provider: { buckets: [{ key: 'OpenAI' }] },
+                        },
+                      ],
+                    },
                   },
                   {
                     key: 'latency',
                     score_stats: {},
                     score_median: { values: {} },
                     evaluator_model_id: { buckets: [] },
-                    evaluator_model_family: { buckets: [] },
-                    evaluator_model_provider: { buckets: [] },
                   },
                 ],
               },
@@ -197,8 +231,62 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
     ).toEqual([
       ['correctness', { id: 'claude-3', family: 'Claude', provider: 'Anthropic' }],
       ['groundedness', { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' }],
+      ['relevance', { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' }],
       ['latency', undefined],
     ]);
+    // The judge most evaluators used, not the one on whichever document the search returned.
+    expect(response.payload.evaluator_model).toEqual({
+      id: 'gpt-4o',
+      family: 'GPT',
+      provider: 'OpenAI',
+    });
+  });
+
+  it('reports no judge model for an experiment run by code evaluators alone', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+
+    evaluationScoreService.search.mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            _source: {
+              task: { model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' } },
+              metadata: { total_repetitions: 1 },
+            },
+          },
+        ],
+      },
+    } as any);
+
+    evaluationScoreService.search.mockResolvedValueOnce({
+      aggregations: {
+        by_dataset: {
+          buckets: [
+            {
+              key: 'dataset-1',
+              dataset_name: { buckets: [{ key: 'My Dataset' }] },
+              example_count: { value: 5 },
+              by_evaluator: {
+                buckets: [
+                  {
+                    key: 'latency',
+                    score_stats: {},
+                    score_median: { values: {} },
+                    evaluator_model_id: { buckets: [] },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.evaluator_model).toBeUndefined();
+    expect(response.payload.task_model.id).toBe('gpt-4');
   });
 
   it('returns 500 when ES throws', async () => {

@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { EvaluationExperimentDatasetExample } from '@kbn/evals-common';
-import { ExampleScoresTable } from '.';
+import { ExampleScoresTable, getVerdictBadgeColor } from '.';
 
 const buildScore = ({
   timestamp,
@@ -328,6 +328,31 @@ describe('ExampleScoresTable', () => {
     expect(screen.getByText('Factuality:')).toBeInTheDocument();
     expect(screen.getByText('0.80')).toBeInTheDocument();
     expect(screen.getByText('ACCURATE')).toBeInTheDocument();
+  });
+
+  describe('getVerdictBadgeColor', () => {
+    it('colors by score, so a label containing a positive word cannot turn a failure green', () => {
+      expect(getVerdictBadgeColor('correctness-analysis', 0)).toEqual('danger');
+      expect(getVerdictBadgeColor('groundedness-analysis', 0.2)).toEqual('danger');
+      expect(getVerdictBadgeColor('incomplete-rule-assignment', 0)).toEqual('danger');
+      expect(getVerdictBadgeColor('correctness-analysis', 1)).toEqual('success');
+      expect(getVerdictBadgeColor('accurate', 0.6)).toEqual('warning');
+    });
+
+    it('classifies label-only verdicts by keyword, negated forms first', () => {
+      expect(getVerdictBadgeColor('incorrect', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('inaccurate', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('ungrounded', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('no-match', null)).toEqual('danger');
+      expect(getVerdictBadgeColor('correct', null)).toEqual('success');
+      expect(getVerdictBadgeColor('partial-match', null)).toEqual('warning');
+      expect(getVerdictBadgeColor('something-bespoke', null)).toEqual('hollow');
+    });
+
+    it('keeps neutral sentinels gray whatever the score says', () => {
+      expect(getVerdictBadgeColor('unavailable', 0)).toEqual('default');
+      expect(getVerdictBadgeColor('not-applicable', 1)).toEqual('default');
+    });
   });
 
   it('shows explanation and metadata when accordion is expanded', () => {

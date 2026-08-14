@@ -361,10 +361,9 @@ export const ExperimentDetailPage: React.FC = () => {
     );
   }, [experimentDetail?.stats]);
 
-  // Evaluators can each judge with their own model, so the experiment-level card
-  // reports the distinct set rather than one value. Code evaluators contribute none.
-  // Falls back to the experiment's default model for documents written before scores
-  // carried a per-evaluator model.
+  // Evaluators can each judge with their own model, so the experiment-level card reports the
+  // distinct set rather than one value, and stays empty for experiments only code evaluators
+  // scored. The response's own `evaluator_model` is no fallback: it summarizes these same stats.
   const evaluatorModelIds = useMemo(() => {
     const ids = new Set<string>();
     for (const stat of experimentDetail?.stats ?? []) {
@@ -372,11 +371,8 @@ export const ExperimentDetailPage: React.FC = () => {
         ids.add(stat.evaluator_model.id);
       }
     }
-    if (ids.size === 0 && experimentDetail?.evaluator_model?.id) {
-      ids.add(experimentDetail.evaluator_model.id);
-    }
     return Array.from(ids).sort();
-  }, [experimentDetail?.stats, experimentDetail?.evaluator_model?.id]);
+  }, [experimentDetail?.stats]);
 
   // Live progress derived from the scores already aggregated in Elasticsearch —
   // the same source the results table streams from. The workflow step's own

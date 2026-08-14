@@ -259,7 +259,7 @@ export const ExperimentsListPage: React.FC = () => {
         ) => {
           // Evaluators can each judge with their own model, so a single badge would
           // misattribute the rest.
-          const modelIds = item.evaluator_models?.map(({ id }) => id) ?? [];
+          const modelIds = item.evaluator_models?.map(({ id }) => id).sort() ?? [];
           if (modelIds.length > 1) {
             return (
               <EuiToolTip content={modelIds.join(', ')}>

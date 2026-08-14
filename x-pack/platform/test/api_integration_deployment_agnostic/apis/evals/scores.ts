@@ -45,6 +45,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await adminClient.destroy();
       await viewerClient.destroy();
+      // Scoped to the suite rather than a single experiment id, since this suite ingests
+      // more than one experiment and every request here sets the same unique suite id.
+      // Experiments launched in-tool carry no suite id, so they never match.
       await es
         .deleteByQuery({
           index: EvaluationIndices.SCORES,

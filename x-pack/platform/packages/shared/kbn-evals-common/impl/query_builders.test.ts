@@ -169,17 +169,15 @@ describe('query_builders', () => {
       });
     });
 
-    it('aggregates the judge model within each evaluator bucket', () => {
+    it('aggregates the judge model within each evaluator bucket, family and provider nested under the id', () => {
       const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
 
       expect(aggs.evaluator_model_id).toEqual({
         terms: { field: 'evaluator.model.id', size: 1 },
-      });
-      expect(aggs.evaluator_model_family).toEqual({
-        terms: { field: 'evaluator.model.family', size: 1 },
-      });
-      expect(aggs.evaluator_model_provider).toEqual({
-        terms: { field: 'evaluator.model.provider', size: 1 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
       });
     });
   });
@@ -386,9 +384,6 @@ describe('query_builders', () => {
           'task_model_id',
           'task_model_family',
           'task_model_provider',
-          'evaluator_model_id',
-          'evaluator_model_family',
-          'evaluator_model_provider',
           'evaluator_models',
           'git_branch',
           'git_commit_sha',
@@ -403,7 +398,7 @@ describe('query_builders', () => {
       const agg = buildExperimentsListingAggregation({ page: 1, perPage: 10 });
 
       expect(agg.experiments.aggs.evaluator_models).toEqual({
-        terms: { field: 'evaluator.model.id', size: 5 },
+        terms: { field: 'evaluator.model.id', size: 20 },
         aggs: {
           family: { terms: { field: 'evaluator.model.family', size: 1 } },
           provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
@@ -425,9 +420,6 @@ describe('query_builders', () => {
       task_model_id: { buckets: [{ key: 'gpt-4' }] },
       task_model_family: { buckets: [{ key: 'gpt-4' }] },
       task_model_provider: { buckets: [{ key: 'openai' }] },
-      evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
-      evaluator_model_family: { buckets: [{ key: 'claude-3' }] },
-      evaluator_model_provider: { buckets: [{ key: 'anthropic' }] },
       evaluator_models: {
         buckets: [
           {
@@ -517,9 +509,29 @@ describe('query_builders', () => {
         { id: 'claude-3', family: 'Claude', provider: 'Anthropic' },
         { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
       ]);
+      // The singular reports the most used judge, which is the bucket ES ordered first.
+      expect(result.experiments[0].evaluator_model).toEqual({
+        id: 'claude-3',
+        family: 'Claude',
+        provider: 'Anthropic',
+      });
     });
 
-    it('returns no distinct judge models for documents predating per-evaluator attribution', () => {
+    it('omits the evaluator model for an experiment judged only by code evaluators', () => {
+      const result = parseExperimentsListingResponse(
+        {
+          total_experiments: { value: 1 },
+          experiments: { buckets: [makeBucket({ evaluator_models: { buckets: [] } })] },
+        },
+        { page: 1, perPage: 25 }
+      );
+
+      expect(result.experiments[0].evaluator_models).toEqual([]);
+      expect(result.experiments[0].evaluator_model).toBeUndefined();
+      expect(result.experiments[0].task_model).toBeDefined();
+    });
+
+    it('omits the evaluator model when the evaluator_models agg is absent', () => {
       const { evaluator_models: _omitted, ...bucketWithoutModels } = makeBucket();
       const result = parseExperimentsListingResponse(
         { total_experiments: { value: 1 }, experiments: { buckets: [bucketWithoutModels] } },
@@ -527,11 +539,7 @@ describe('query_builders', () => {
       );
 
       expect(result.experiments[0].evaluator_models).toEqual([]);
-      expect(result.experiments[0].evaluator_model).toEqual({
-        id: 'claude-3',
-        family: 'claude-3',
-        provider: 'anthropic',
-      });
+      expect(result.experiments[0].evaluator_model).toBeUndefined();
     });
 
     it('slices to the correct page window', () => {
@@ -665,25 +673,35 @@ describe('query_builders', () => {
                     key: 'correctness',
                     score_stats: {},
                     score_median: { values: {} },
-                    evaluator_model_id: { buckets: [{ key: 'gpt-4o' }] },
-                    evaluator_model_family: { buckets: [{ key: 'GPT' }] },
-                    evaluator_model_provider: { buckets: [{ key: 'OpenAI' }] },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'gpt-4o',
+                          family: { buckets: [{ key: 'GPT' }] },
+                          provider: { buckets: [{ key: 'OpenAI' }] },
+                        },
+                      ],
+                    },
                   },
                   {
                     key: 'groundedness',
                     score_stats: {},
                     score_median: { values: {} },
-                    evaluator_model_id: { buckets: [{ key: 'claude-sonnet-4' }] },
-                    evaluator_model_family: { buckets: [{ key: 'Claude' }] },
-                    evaluator_model_provider: { buckets: [{ key: 'Anthropic' }] },
+                    evaluator_model_id: {
+                      buckets: [
+                        {
+                          key: 'claude-sonnet-4',
+                          family: { buckets: [{ key: 'Claude' }] },
+                          provider: { buckets: [{ key: 'Anthropic' }] },
+                        },
+                      ],
+                    },
                   },
                   {
                     key: 'latency',
                     score_stats: {},
                     score_median: { values: {} },
                     evaluator_model_id: { buckets: [] },
-                    evaluator_model_family: { buckets: [] },
-                    evaluator_model_provider: { buckets: [] },
                   },
                 ],
               },
@@ -702,7 +720,7 @@ describe('query_builders', () => {
       ]);
     });
 
-    it('omits the judge model when the aggregation predates per-evaluator attribution', () => {
+    it('omits the judge model when the evaluator bucket carries no model sub-aggregation', () => {
       const aggs = {
         by_dataset: {
           buckets: [

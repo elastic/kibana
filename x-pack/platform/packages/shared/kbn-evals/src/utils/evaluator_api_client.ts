@@ -104,7 +104,8 @@ export class EvaluatorApiClient {
 
     return configs.flatMap((config) => {
       // The judge model comes back with the first response for this config and is the
-      // same for every example, since it is derived from the config's own connector.
+      // same for every example, since it is derived from the config's own connector, so
+      // the examples evaluating in parallel all write the same value here.
       let resolvedModel: Model | undefined;
 
       const outputs: ScoreSelector[] = config.subScores

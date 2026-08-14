@@ -16,15 +16,17 @@ import {
   GetEvaluationExperimentRequestParams,
   GetEvaluationExperimentRequestQuery,
 } from '@kbn/evals-common';
+import type { EvaluatorStats } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
+type EvaluatorModel = NonNullable<EvaluatorStats['evaluator_model']>;
+
 interface EvalDocSource {
   experiment_name?: string;
   task?: { model?: { id?: string; family?: string; provider?: string } };
-  evaluator?: { model?: { id?: string; family?: string; provider?: string } };
   metadata?: {
     execution_id?: string;
     suite_id?: string;
@@ -114,6 +116,24 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
             };
           };
 
+          // Evaluators can each judge with their own model, so this summary comes from the
+          // per-evaluator stats: the model the most evaluators used, ties broken by id to keep
+          // the answer stable, and nothing at all when only code evaluators ran. Reading it off
+          // `firstDoc` instead would report whichever judge the unsorted search happened to hit.
+          const evaluatorsPerModel = new Map<string, { model: EvaluatorModel; count: number }>();
+          for (const { evaluator_model: model } of stats) {
+            if (!model?.id) continue;
+            const entry = evaluatorsPerModel.get(model.id);
+            if (entry) {
+              entry.count += 1;
+            } else {
+              evaluatorsPerModel.set(model.id, { model, count: 1 });
+            }
+          }
+          const predominantEvaluatorModel = [...evaluatorsPerModel.values()].sort(
+            (a, b) => b.count - a.count || a.model.id.localeCompare(b.model.id)
+          )[0]?.model;
+
           return response.ok({
             body: {
               experiment_id: experimentId,
@@ -122,7 +142,7 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
               suite_id: firstDoc.metadata?.suite_id ?? null,
               timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
-              evaluator_model: toModelDisplay(firstDoc.evaluator?.model),
+              evaluator_model: predominantEvaluatorModel,
               git_branch: firstDoc.metadata?.git?.branch ?? null,
               git_commit_sha: firstDoc.metadata?.git?.commit_sha ?? null,
               ci: firstDoc.metadata?.ci,

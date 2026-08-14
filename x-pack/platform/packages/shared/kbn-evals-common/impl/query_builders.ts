@@ -50,9 +50,6 @@ interface ExperimentBucket {
   task_model_id?: TermsBucket;
   task_model_family?: TermsBucket;
   task_model_provider?: TermsBucket;
-  evaluator_model_id?: TermsBucket;
-  evaluator_model_family?: TermsBucket;
-  evaluator_model_provider?: TermsBucket;
   evaluator_models?: {
     buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
   };
@@ -79,7 +76,7 @@ export interface ExperimentsListingResult {
     dataset_ids: string[];
     dataset_names: string[];
     task_model: { id: string; family: string | undefined; provider: string | undefined };
-    evaluator_model: { id: string; family: string | undefined; provider: string | undefined };
+    evaluator_model?: { id: string; family: string | undefined; provider: string | undefined };
     evaluator_models: Array<{
       id: string;
       family: string | undefined;
@@ -189,9 +186,16 @@ export const buildStatsAggregation = () => ({
         aggs: {
           score_stats: { extended_stats: { field: 'evaluator.score' } },
           score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
-          evaluator_model_id: { terms: { field: 'evaluator.model.id', size: 1 } },
-          evaluator_model_family: { terms: { field: 'evaluator.model.family', size: 1 } },
-          evaluator_model_provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+          // Family and provider are nested under the id so they stay correlated with their own
+          // model. Sibling terms aggs would pair one judge's id with another's family when a
+          // bucket spans several judges, describing a model that never existed.
+          evaluator_model_id: {
+            terms: { field: 'evaluator.model.id', size: 1 },
+            aggs: {
+              family: { terms: { field: 'evaluator.model.family', size: 1 } },
+              provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+            },
+          },
         },
       },
     },
@@ -314,14 +318,12 @@ export const buildExperimentsListingAggregation = ({
       task_model_id: { terms: { field: 'task.model.id', size: 1 } },
       task_model_family: { terms: { field: 'task.model.family', size: 1 } },
       task_model_provider: { terms: { field: 'task.model.provider', size: 1 } },
-      evaluator_model_id: { terms: { field: 'evaluator.model.id', size: 1 } },
-      evaluator_model_family: { terms: { field: 'evaluator.model.family', size: 1 } },
-      evaluator_model_provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
       // Every distinct judge model, so the listing can tell that an experiment's
       // evaluators differ rather than reporting whichever one sorted first. Family and
-      // provider are nested so they stay correlated with their own model id.
+      // provider are nested so they stay correlated with their own model id, and the
+      // singular `evaluator_model` is the first bucket rather than its own agg.
       evaluator_models: {
-        terms: { field: 'evaluator.model.id', size: 5 },
+        terms: { field: 'evaluator.model.id', size: 20 },
         aggs: {
           family: { terms: { field: 'evaluator.model.family', size: 1 } },
           provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
@@ -358,8 +360,15 @@ export const parseExperimentsListingResponse = (
   const experiments = experimentBuckets.map((bucket) => {
     const taskFamily = firstBucket(bucket.task_model_family);
     const taskProvider = firstBucket(bucket.task_model_provider);
-    const evalFamily = firstBucket(bucket.evaluator_model_family);
-    const evalProvider = firstBucket(bucket.evaluator_model_provider);
+    const evaluatorModels = (bucket.evaluator_models?.buckets ?? []).map((modelBucket) => {
+      const family = firstBucket(modelBucket.family);
+      const provider = firstBucket(modelBucket.provider);
+      return {
+        id: buildModelDisplayId(modelBucket.key, family, provider),
+        family,
+        provider,
+      };
+    });
 
     return {
       execution_id: bucket.key,
@@ -375,20 +384,11 @@ export const parseExperimentsListingResponse = (
         family: taskFamily,
         provider: taskProvider,
       },
-      evaluator_model: {
-        id: buildModelDisplayId(firstBucket(bucket.evaluator_model_id), evalFamily, evalProvider),
-        family: evalFamily,
-        provider: evalProvider,
-      },
-      evaluator_models: (bucket.evaluator_models?.buckets ?? []).map((modelBucket) => {
-        const family = firstBucket(modelBucket.family);
-        const provider = firstBucket(modelBucket.provider);
-        return {
-          id: buildModelDisplayId(modelBucket.key, family, provider),
-          family,
-          provider,
-        };
-      }),
+      // The most used judge, and unset for experiments judged only by code evaluators, which
+      // have no model at all. Reporting them as the "unknown" that buildModelDisplayId
+      // synthesizes for empty buckets would read as an unidentified judge instead of none.
+      ...(evaluatorModels.length > 0 && { evaluator_model: evaluatorModels[0] }),
+      evaluator_models: evaluatorModels,
       git_branch: firstBucket(bucket.git_branch) ?? null,
       git_commit_sha: firstBucket(bucket.git_commit_sha) ?? null,
       total_repetitions: bucket.total_repetitions?.value ?? 1,
@@ -423,9 +423,9 @@ interface StatsAggregations {
             count?: number;
           };
           score_median?: { values?: Record<string, number | null> };
-          evaluator_model_id?: TermsBucket;
-          evaluator_model_family?: TermsBucket;
-          evaluator_model_provider?: TermsBucket;
+          evaluator_model_id?: {
+            buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
+          };
         }>;
       };
     }>;
@@ -468,9 +468,10 @@ export const parseStatsAggregationResponse = (
     return evaluatorBuckets.map((evaluatorBucket) => {
       const scoreStats = evaluatorBucket.score_stats;
       const median = evaluatorBucket.score_median?.values?.['50.0'];
-      const modelId = firstBucket(evaluatorBucket.evaluator_model_id);
-      const modelFamily = firstBucket(evaluatorBucket.evaluator_model_family);
-      const modelProvider = firstBucket(evaluatorBucket.evaluator_model_provider);
+      const modelBucket = evaluatorBucket.evaluator_model_id?.buckets?.[0];
+      const modelId = modelBucket?.key;
+      const modelFamily = firstBucket(modelBucket?.family);
+      const modelProvider = firstBucket(modelBucket?.provider);
 
       return {
         dataset_id: datasetId,

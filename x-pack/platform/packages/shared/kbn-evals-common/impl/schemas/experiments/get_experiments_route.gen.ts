@@ -31,9 +31,9 @@ export const EvaluationExperimentSummary = lazySchema(() =>
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
     /**
-     * Every distinct model the experiment's evaluators judged with, so the listing can show when they differ. `evaluator_model` is the first.
+     * The distinct models the experiment's evaluators judged with, most used first, so the listing can show when they differ. Capped at 20, which no realistic experiment reaches. `evaluator_model` is the first.
      */
-    evaluator_models: z.array(Model).max(5).optional(),
+    evaluator_models: z.array(Model).max(20).optional(),
     git_branch: z.string().max(256).nullable().optional(),
     git_commit_sha: z.string().max(256).nullable().optional(),
     total_repetitions: z.number().int().optional(),
