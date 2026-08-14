@@ -132,6 +132,20 @@ export const getRenderCellValueFn = ({
       return <span className={CELL_CLASS}>-</span>;
     }
 
+    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
+
+    if (isSourceColumn && sourceDisplayMode === 'json') {
+      return (
+        <SourceDocumentJsonMode
+          row={row}
+          dataView={dataView}
+          columnsMeta={columnsMeta}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          fieldFormats={fieldFormats}
+        />
+      );
+    }
+
     if (CustomCellRenderer) {
       return (
         <span className={CELL_CLASS}>
@@ -173,20 +187,6 @@ export const getRenderCellValueFn = ({
         closePopover,
         isPlainRecord,
       });
-    }
-
-    const isSourceColumn = field?.type === '_source' || (isPlainRecord && columnId === '_source');
-
-    if (isSourceColumn && sourceDisplayMode === 'json') {
-      return (
-        <SourceDocumentJsonMode
-          row={row}
-          dataView={dataView}
-          columnsMeta={columnsMeta}
-          shouldShowFieldHandler={shouldShowFieldHandler}
-          fieldFormats={fieldFormats}
-        />
-      );
     }
 
     if (isSourceColumn || useTopLevelObjectColumns) {

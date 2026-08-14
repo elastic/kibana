@@ -327,6 +327,41 @@ describe('Unified data table cell rendering', () => {
     );
   });
 
+  it('renders JSON source mode instead of a custom _source cell renderer', () => {
+    const CustomSourceRenderer = jest.fn(() => <span>custom source</span>);
+    const rows = rowsSource.map(build);
+
+    const DataTableCellValue = getRenderCellValueFn({
+      sourceDisplayMode: 'json',
+      closePopover: jest.fn(),
+      columnsMeta: undefined,
+      dataView: dataViewMock,
+      externalCustomRenderers: {
+        _source: CustomSourceRenderer,
+      },
+      fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
+      maxEntries: 100,
+      rows,
+      shouldShowFieldHandler: () => true,
+    });
+
+    renderWithI18n(
+      <DataTableCellValue
+        colIndex={0}
+        columnId="_source"
+        isDetails={false}
+        isExpandable={true}
+        isExpanded={false}
+        rowIndex={0}
+        setCellProps={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+    expect(CustomSourceRenderer).not.toHaveBeenCalled();
+    expect(screen.queryByText('custom source')).toBeNull();
+  });
+
   it('renders _source column in ES|QL mode even when dataView has no _source field', () => {
     // Avoid object spread: it drops the DataView type shape.
     // We only override getFieldByName for `_source` to simulate ES|QL views.

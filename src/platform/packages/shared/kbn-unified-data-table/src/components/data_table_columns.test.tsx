@@ -484,6 +484,47 @@ describe('Data table columns', function () {
     });
   });
 
+  describe('JSON column', () => {
+    it('does not apply custom grid column configuration to the _source column in JSON mode', () => {
+      const customizeSourceColumn = jest.fn(({ column }) => ({
+        ...column,
+        displayAsText: 'Custom Summary',
+        isExpandable: true,
+      }));
+
+      const actual = getEuiGridColumns({
+        sourceDisplayMode: 'json',
+        columns: ['_source'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: false,
+        isPlainRecord: false,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        onResize: () => {},
+        cellActionsHandling: 'replace',
+        customGridColumnsConfiguration: {
+          _source: customizeSourceColumn,
+        },
+      });
+
+      expect(customizeSourceColumn).not.toHaveBeenCalled();
+      expect(actual[0].id).toBe('_source');
+      expect(actual[0].displayAsText).toBe('JSON');
+      expect(actual[0].isExpandable).toBe(false);
+      expect(actual[0].cellActions).toEqual([]);
+    });
+  });
+
   describe('deserializeHeaderRowHeight', () => {
     it('returns undefined for auto', () => {
       expect(deserializeHeaderRowHeight(ROWS_HEIGHT_OPTIONS.auto)).toBe(undefined);
