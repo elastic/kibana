@@ -13,8 +13,8 @@ import type { RequestHandlerContext } from '@kbn/core-http-request-handler-conte
 import { cacheInScope, Global } from '@kbn/core-di-internal';
 import type { KibanaContainerModuleLoadOptions } from '@kbn/core-di';
 
-export function loadHttp({ bind }: KibanaContainerModuleLoadOptions): void {
-  bind(Route).onSetup(({ inject }, route, router) => {
+export function loadHttp({ bind, onSetup }: KibanaContainerModuleLoadOptions): void {
+  onSetup(Route, Router, ({ inject }, router, route) => {
     const register = router[route.method] as RouteRegistrar<
       typeof route.method,
       RequestHandlerContext
@@ -57,7 +57,7 @@ export function loadHttp({ bind }: KibanaContainerModuleLoadOptions): void {
       },
       handler
     );
-  }, Router);
+  });
 
   bind(Router)
     .toResolvedValue((httpSetup) => httpSetup.createRouter(), [CoreSetup('http')])

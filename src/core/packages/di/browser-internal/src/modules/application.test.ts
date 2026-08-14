@@ -9,7 +9,7 @@
 
 import type { Container } from 'inversify';
 import { inject, injectable } from 'inversify';
-import { KibanaContainerModule, OnSetup } from '@kbn/core-di';
+import { KibanaContainerModule, OnSetup, OnStart } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Application, ApplicationParameters } from '@kbn/core-di-browser';
 import type { App, AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
@@ -38,6 +38,10 @@ describe('application', () => {
 
   function setup() {
     container.get(OnSetup)(container);
+  }
+
+  function start() {
+    container.get(OnStart)(container);
   }
 
   beforeEach(() => {
@@ -90,6 +94,7 @@ describe('application', () => {
       unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
 
       setup();
+      start();
       [{ mount }] = application.register.mock.lastCall!;
     });
 
@@ -98,8 +103,7 @@ describe('application', () => {
     });
 
     it('should mount an application', async () => {
-      const unmount = mount(params);
-      expect(unmount).toBeInstanceOf(Function);
+      await expect(mount(params)).resolves.toBeInstanceOf(Function);
       expect(mountSpy).toHaveBeenCalled();
 
       const [testApplication] = mountSpy.mock.contexts as TestApplication[];
@@ -108,16 +112,16 @@ describe('application', () => {
       expect(unbindAllSpy).not.toHaveBeenCalled();
     });
 
-    it('should unmount an application', () => {
-      const unmount = mount(params);
+    it('should unmount an application', async () => {
+      const unmount = await mount(params);
       (unmount as Function)();
 
       expect(unmountSpy).toHaveBeenCalled();
       expect(unbindAllSpy).toHaveBeenCalled();
     });
 
-    it('should unbind all dependencies when unmount throws', () => {
-      const unmount = mount(params);
+    it('should unbind all dependencies when unmount throws', async () => {
+      const unmount = await mount(params);
       unmountSpy.mockImplementation(() => {
         throw new Error('Unmount error');
       });
@@ -134,6 +138,7 @@ describe('application', () => {
         });
       });
       const unmount = mount(params);
+      await new Promise(process.nextTick);
 
       expect(unbindAllSpy).not.toHaveBeenCalled();
       resolveHandle!();
