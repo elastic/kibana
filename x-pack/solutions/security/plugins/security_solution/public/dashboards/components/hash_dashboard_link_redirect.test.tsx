@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, waitFor } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import type { History } from 'history';
+import { createBrowserHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { useNavigateTo } from '../../common/lib/kibana';
@@ -28,26 +30,27 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return {
-    ...actual,
-    useHistory: jest.fn(),
-  };
-});
+
+const renderWithScopedHistory = (routerBasename: string, initialPath: string) => {
+  window.history.replaceState(null, '', `${routerBasename}${initialPath}`);
+  const history: History = createBrowserHistory({ basename: routerBasename });
+  const rendered = render(
+    <Router history={history}>
+      <HashDashboardLinkRedirect />
+    </Router>
+  );
+  return { history, ...rendered };
+};
 
 describe('HashDashboardLinkRedirect', () => {
   const mockNavigateTo = jest.fn();
-  const mockHistoryReplace = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    window.history.replaceState(null, '', '/app/security/dashboards/current-id');
     (useGetSecuritySolutionUrl as jest.Mock).mockReturnValue(
       ({ path }: { path?: string }) => `/app/security/dashboards/${path}`
     );
     (useNavigateTo as jest.Mock).mockReturnValue({ navigateTo: mockNavigateTo });
-    (useHistory as jest.Mock).mockReturnValue({ replace: mockHistoryReplace });
   });
 
   afterEach(() => {
@@ -55,37 +58,34 @@ describe('HashDashboardLinkRedirect', () => {
   });
 
   it('does not navigate when there is no legacy hash dashboard link', () => {
-    render(<HashDashboardLinkRedirect />);
+    renderWithScopedHistory('/app/security', '/dashboards/current-id');
     expect(mockNavigateTo).not.toHaveBeenCalled();
   });
 
   it('does not inject a hash when mounting with an empty hash', () => {
-    render(<HashDashboardLinkRedirect />);
-    expect(window.location.hash).toBe('');
-    expect(mockHistoryReplace).not.toHaveBeenCalled();
+    const { history } = renderWithScopedHistory('/app/security', '/dashboards/current-id');
+    expect(history.location.hash).toBe('');
+    expect(mockNavigateTo).not.toHaveBeenCalled();
   });
 
   it.each([['#/dashboard/target-dashboard-id'], ['#/view/target-dashboard-id']])(
     'redirects to the security dashboard url and clears the hash for %s',
     async (hash) => {
-      window.history.replaceState(null, '', `/app/security/dashboards/current-id${hash}`);
-
-      render(<HashDashboardLinkRedirect />);
+      const { history } = renderWithScopedHistory('/app/security', `/dashboards/current-id${hash}`);
 
       await waitFor(() =>
         expect(mockNavigateTo).toHaveBeenCalledWith({
           url: '/app/security/dashboards/target-dashboard-id',
         })
       );
-      // The hash must be cleared through the router's own `history` instance (not the raw
-      // `window.history` API) so the router's location stays in sync with the `navigateTo()`
-      // call above.
-      expect(mockHistoryReplace).toHaveBeenCalledWith('/app/security/dashboards/current-id');
+      // The hash must be cleared without ever double-prepending the router's basename.
+      expect(history.location.hash).toBe('');
+      expect(window.location.pathname).toBe('/app/security/dashboards/current-id');
     }
   );
 
   it('redirects when the hash changes after mount', async () => {
-    render(<HashDashboardLinkRedirect />);
+    renderWithScopedHistory('/app/security', '/dashboards/current-id');
     expect(mockNavigateTo).not.toHaveBeenCalled();
 
     act(() => {
@@ -97,5 +97,26 @@ describe('HashDashboardLinkRedirect', () => {
         url: '/app/security/dashboards/late-dashboard-id',
       })
     );
+  });
+
+  it('does not double-prepend a custom server.basePath and space id when clearing the hash', async () => {
+    // The router's basename mirrors a real deployment with `server.basePath: /custom-base` and
+    // a non-default space folded into one prefix, e.g. `/custom-base/s/my-space/app/security`.
+    const routerBasename = '/custom-base/s/my-space/app/security';
+    const { history } = renderWithScopedHistory(
+      routerBasename,
+      '/dashboards/current-id#/dashboard/target-dashboard-id'
+    );
+
+    await waitFor(() =>
+      expect(mockNavigateTo).toHaveBeenCalledWith({
+        url: '/app/security/dashboards/target-dashboard-id',
+      })
+    );
+
+    expect(history.location.hash).toBe('');
+    expect(window.location.pathname).toBe(`${routerBasename}/dashboards/current-id`);
+    // `history.createHref` prepends the router's basename exactly once.
+    expect(history.createHref(history.location)).toBe(`${routerBasename}/dashboards/current-id`);
   });
 });

@@ -42,13 +42,12 @@ export const HashDashboardLinkRedirect = () => {
       if (!dashboardId) {
         return;
       }
-      // Clear the hash immediately so the broken URL doesn't linger in the address bar/history
-      // while we redirect to the correct, path-based Security dashboard URL. This must go
-      // through the same `history` instance the app's router listens to (rather than the raw
-      // `window.history` API) so the router's location stays in sync with the subsequent
-      // `navigateTo()` call below; otherwise the router misses the navigation and the dashboard
-      // never re-renders for the new id.
-      history.replace(window.location.pathname + window.location.search);
+      // Correct the hash in the URL, e.g.
+      // /s/my-space/app/security/dashboards/current-dashboard-id#/dashboard/osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05
+      // → /s/my-space/app/security/dashboards/current-dashboard-id
+      history.replace({ ...history.location, hash: '' });
+
+      // push → /s/my-space/app/security/dashboards/osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05
       navigateTo({
         url: getSecuritySolutionUrl({
           deepLinkId: SecurityPageName.dashboards,

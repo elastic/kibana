@@ -8,6 +8,7 @@
 import { deleteSavedObjects, importSavedObjects } from '../../../tasks/api_calls/saved_objects';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { activateSpace, getSpaceUrl } from '../../../tasks/space';
 import { DASHBOARDS_URL } from '../../../urls/navigation';
 
 const OSQUERY_MANAGER_DASHBOARDS_FIXTURE = 'cypress/dashboards/osquery_manager_dashboards.ndjson';
@@ -58,3 +59,56 @@ describe('Legacy hash-based dashboard links', { tags: ['@ess', '@serverless'] },
     cy.get('#dashboardTitle').should('contain', OSSEC_ROOTKIT_PACK_DASHBOARD_TITLE);
   });
 });
+
+describe(
+  'Legacy hash-based dashboard links in a non-default space',
+  { tags: ['@ess', '@serverless'] },
+  () => {
+    const SPACE_ID = 'legacy-hash-dashboard-link-space';
+
+    before(() => {
+      importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE, SPACE_ID);
+    });
+
+    after(() => {
+      deleteSavedObjects(IMPORTED_SAVED_OBJECTS, SPACE_ID);
+    });
+
+    beforeEach(() => {
+      login();
+      activateSpace(SPACE_ID);
+    });
+
+    it('redirects to the linked dashboard within the same space instead of leaving a broken hash in the url', () => {
+      visit(getSpaceUrl(SPACE_ID, `${DASHBOARDS_URL}/${OSSEC_ROOTKIT_PACK_DASHBOARD_ID}`));
+
+      cy.contains('[data-test-subj="markdownBody"] a', 'Compliance', { timeout: 30000 }).click();
+
+      const expectedPath = getSpaceUrl(
+        SPACE_ID,
+        `${DASHBOARDS_URL}/${COMPLIANCE_PACK_DASHBOARD_ID}`
+      );
+      cy.url().should('include', expectedPath);
+      // Guards against the space+app basename being applied twice, e.g.
+      // `/s/<space>/app/security/s/<space>/app/security/dashboards/<id>`.
+      cy.url().should('not.include', `/s/${SPACE_ID}/app/security/s/${SPACE_ID}`);
+      cy.location('hash').should('eq', '');
+      cy.get('#dashboardTitle').should('contain', COMPLIANCE_PACK_DASHBOARD_TITLE);
+    });
+
+    it('redirects to the same dashboard when clicking its own legacy link', () => {
+      visit(getSpaceUrl(SPACE_ID, `${DASHBOARDS_URL}/${OSSEC_ROOTKIT_PACK_DASHBOARD_ID}`));
+
+      cy.contains('[data-test-subj="markdownBody"] a', 'OSSEC Rootkit', { timeout: 30000 }).click();
+
+      const expectedPath = getSpaceUrl(
+        SPACE_ID,
+        `${DASHBOARDS_URL}/${OSSEC_ROOTKIT_PACK_DASHBOARD_ID}`
+      );
+      cy.url().should('include', expectedPath);
+      cy.url().should('not.include', `/s/${SPACE_ID}/app/security/s/${SPACE_ID}`);
+      cy.location('hash').should('eq', '');
+      cy.get('#dashboardTitle').should('contain', OSSEC_ROOTKIT_PACK_DASHBOARD_TITLE);
+    });
+  }
+);

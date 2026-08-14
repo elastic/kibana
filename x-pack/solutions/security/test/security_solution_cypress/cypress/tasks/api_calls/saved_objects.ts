@@ -6,8 +6,11 @@
  */
 
 import { rootRequest } from './common';
+import { getSpaceUrl } from '../space';
 
 const IMPORT_FORM_BOUNDARY = 'CypressSavedObjectsImportBoundary';
+const SAVED_OBJECTS_IMPORT_PATH = '/api/saved_objects/_import?overwrite=true';
+const SAVED_OBJECTS_BULK_DELETE_PATH = '/api/saved_objects/_bulk_delete?force=true';
 
 /**
  * Imports an ndjson export (created by the saved objects export API) via the
@@ -15,7 +18,7 @@ const IMPORT_FORM_BOUNDARY = 'CypressSavedObjectsImportBoundary';
  * `multipart/form-data` payload, so the body is built by hand: it only needs a
  * single `file` field, which is straightforward since the ndjson content is plain text.
  */
-export const importSavedObjects = (fixturePath: string) => {
+export const importSavedObjects = (fixturePath: string, spaceId?: string) => {
   cy.readFile(fixturePath, 'utf8').then((ndjsonContent: string) => {
     const fileName = fixturePath.split('/').pop();
     if (!fileName) {
@@ -31,19 +34,30 @@ export const importSavedObjects = (fixturePath: string) => {
       '',
     ].join('\r\n');
 
+    const url = spaceId
+      ? getSpaceUrl(spaceId, SAVED_OBJECTS_IMPORT_PATH)
+      : SAVED_OBJECTS_IMPORT_PATH;
+
     rootRequest({
       method: 'POST',
-      url: '/api/saved_objects/_import?overwrite=true',
+      url,
       headers: { 'content-type': `multipart/form-data; boundary=${IMPORT_FORM_BOUNDARY}` },
       body,
     });
   });
 };
 
-export const deleteSavedObjects = (objects: Array<{ type: string; id: string }>) => {
+export const deleteSavedObjects = (
+  objects: Array<{ type: string; id: string }>,
+  spaceId?: string
+) => {
+  const url = spaceId
+    ? getSpaceUrl(spaceId, SAVED_OBJECTS_BULK_DELETE_PATH)
+    : SAVED_OBJECTS_BULK_DELETE_PATH;
+
   rootRequest({
     method: 'POST',
-    url: '/api/saved_objects/_bulk_delete?force=true',
+    url,
     body: objects,
     failOnStatusCode: false,
   });
