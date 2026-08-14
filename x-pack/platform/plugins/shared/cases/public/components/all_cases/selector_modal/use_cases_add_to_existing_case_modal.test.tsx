@@ -121,7 +121,7 @@ describe('use cases add to existing case modal hook', () => {
       },
       { wrapper }
     );
-    result.current.open();
+    result.current.open({ getAttachments: () => [] });
     expect(dispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,

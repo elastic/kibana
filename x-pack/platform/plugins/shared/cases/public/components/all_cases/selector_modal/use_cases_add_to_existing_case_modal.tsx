@@ -78,7 +78,7 @@ export const useCasesAddToExistingCaseModal = ({
   const handleOnRowClick = useCallback(
     async (
       theCase: CaseUI | undefined,
-      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
+      getAttachments: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
       // when the case is undefined in the modal
       // the user clicked "create new case". The case (and its owner) doesn't exist yet,
@@ -88,9 +88,7 @@ export const useCasesAddToExistingCaseModal = ({
       if (theCase === undefined) {
         closeModal();
         openCreateNewCaseFlyout({
-          getAttachments: getAttachments
-            ? (owner: string) => getAttachments({ theCase: { owner } as CaseUI }) ?? []
-            : undefined,
+          getAttachments: (owner: string) => getAttachments({ theCase: { owner } as CaseUI }) ?? [],
         });
         return;
       }
@@ -147,11 +145,7 @@ export const useCasesAddToExistingCaseModal = ({
   );
 
   const openModal = useCallback(
-    ({
-      getAttachments,
-    }: {
-      getAttachments?: GetAttachments;
-    } = {}) => {
+    ({ getAttachments }: { getAttachments: GetAttachments }) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {

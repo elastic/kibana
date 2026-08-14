@@ -6,7 +6,11 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { buildAlertCaseAttachment, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import {
+  buildAlertCaseAttachment,
+  OSQUERY_ATTACHMENT_TYPE,
+  SECURITY_SOLUTION_OWNER,
+} from '@kbn/cases-plugin/common';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -56,8 +60,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
   const rule = useMemo(
-    () =>
-      ecsData ? cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: [] }) : { id: '', name: '' },
+    () => (ecsData ? cases.helpers.getRuleIdFromEvent({ ecs: ecsData, data: [] }) : null),
     [cases.helpers, ecsData]
   );
 
@@ -79,16 +82,15 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
     if (hasCasesPermissions) {
       selectCaseModal.open({
         getAttachments: ({ theCase }) => {
-          const alertAttachment =
-            ecsData?._id && theCase
-              ? [
-                  buildAlertCaseAttachment(theCase.owner, {
-                    alertId: ecsData._id,
-                    index: ecsData._index ?? '',
-                    rule,
-                  }),
-                ]
-              : [];
+          const alertAttachment = ecsData?._id
+            ? [
+                buildAlertCaseAttachment(theCase?.owner ?? SECURITY_SOLUTION_OWNER, {
+                  alertId: ecsData._id,
+                  index: ecsData._index ?? '',
+                  rule,
+                }),
+              ]
+            : [];
 
           return [
             ...alertAttachment,

@@ -7,8 +7,7 @@
 
 import type { Transaction } from '@elastic/apm-rum';
 import { useCallback } from 'react';
-import { AttachmentType } from '../../../common/types/domain';
-import { isAlertAttachmentType } from '../../../common/utils/attachments';
+import { hasLegacyAlertId, isAlertAttachmentType } from '../../../common/utils/attachments';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useStartTransaction } from './use_start_transaction';
 
@@ -94,7 +93,7 @@ const getAlertCount = (attachments: CaseAttachmentsWithoutOwner) => {
     if (!isAlertAttachmentType(attachment.type)) {
       return total;
     }
-    if (attachment.type === AttachmentType.alert && 'alertId' in attachment) {
+    if (hasLegacyAlertId(attachment)) {
       return total + (Array.isArray(attachment.alertId) ? attachment.alertId.length : 1);
     }
     if ('attachmentId' in attachment) {
