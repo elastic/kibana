@@ -49,20 +49,32 @@ See also [Debug Scout test runs](./debugging.md) for other debugging tips.
 
 ## Inspecting serverless project logs in MKI [scout-logging-mki]
 
-<!-- TODO(scout-team): fill in the concrete workflow for inspecting a serverless project's
-     logs via the Overview cluster — which cluster/URL, how to scope to your test project,
-     and which data views/index patterns to use. Confirm whether this should link an
-     internal URL or stay generic in public docs. -->
+::::{note}
+This section is for Elasticians only, and applies when your Scout tests run against a serverless project in MKI rather than a local stack.
+::::
 
-When a Scout test runs against a serverless project in MKI, the project's own logs (Kibana, Elasticsearch, and related components) aren't printed to your local console — they're shipped to Elastic's internal **Overview cluster**. Elasticians can inspect them there by scoping to the test project.
+When a Scout test runs against a serverless project in MKI, the project's own server-side logs aren't printed to your local console — they're shipped to Elastic's internal **Overview cluster**.
 
-*(Details on locating your project and querying its logs in the Overview cluster to follow — pending input from the Scout/QA team.)*
+**Access**: the Overview cluster is a separate organization from your personal QA cloud account, so you likely won't see the relevant data by default. Request readonly access to it (for example, via an internal access-request tool) before you can query it.
+
+**Where to look**: in the Overview cluster's Kibana, open **Discover** and select the `discover-observability-solution-all-logs` data view (broader than the default data view — it's backed by a remote logging cluster via cross-cluster search). Filter to your test project with:
+
+```
+serverless.project.id : "<your-project-id>"
+```
+
+You can cross-check with the equivalent Kubernetes-level fields on the same documents if needed:
+
+```
+kubernetes.labels.k8s_elastic_co/project-id : "<your-project-id>"
+kubernetes.namespace : "project-<your-project-id>"
+```
+
+Retention on this data view is roughly on the order of weeks for Kibana/Elasticsearch logs and longer for UIAM logs, but treat this as approximate — it's governed by ILM policies that can change, so check the actual index list if you need a precise cutoff.
 
 ### Which log types to expect [scout-logging-mki-types]
 
-<!-- TODO(scout-team): confirm dataset/index names per log type in the Overview cluster. -->
-
-- **Kibana logs** — server-side logs from the Kibana instance backing the serverless project.
-- **Elasticsearch logs** — server-side logs from the project's Elasticsearch cluster.
-- **Browser logs** — console output captured during UI test runs. Locally, Scout's UI test fixtures capture browser console errors and attach them to the failure report/test artifacts when a test fails.
-- **UIAM logs** — logs from the Unified Identity and Access Management service, relevant when investigating auth-related test failures in serverless (where UIAM handles API keys and identity, unlike the local environment).
+- **Kibana logs** — server-side logs from the Kibana instance backing the serverless project. Filterable by `serverless.project.id`. Useful fields: `log.level`, `log.logger`, `message`.
+- **Elasticsearch logs** — server-side logs from the project's Elasticsearch cluster, same pipeline/schema as Kibana logs and filterable by `serverless.project.id`.
+- **UIAM logs** — logs from the Unified Identity and Access Management service, useful when investigating auth-related test failures in serverless (where UIAM handles API keys and identity, unlike the local environment). UIAM is a shared regional service, so these logs are **not** tagged with `serverless.project.id` — correlate them to your project via a known user identity or token visible in the log `message` instead.
+- **Browser logs** — console output captured during UI test runs. Locally, Scout's UI test fixtures capture browser console errors and attach them to the failure report/test artifacts when a test fails. The Overview cluster's `discover-observability-solution-all-logs` data view does not currently include raw browser/RUM application logs — only synthetic monitor results, which are a different thing.
