@@ -163,8 +163,3 @@ export const ESQL_MULTI_LAYER_PANEL_IDS = {
   DATA: 'esql-multi-data-panel',
   MIXED_DATA: 'esql-mixed-data-panel',
 } as const;
-
-export const ESQL_MULTI_LAYER_PANEL_IDS = {
-  DATA: 'esql-multi-data-panel',
-  MIXED_DATA: 'esql-mixed-data-panel',
-} as const;
