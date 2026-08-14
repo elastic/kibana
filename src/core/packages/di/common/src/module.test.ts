@@ -36,8 +36,8 @@ describe('KibanaContainerModule', () => {
 
       beforeEach(() => {
         handler = jest.fn();
-        module = new KibanaContainerModule(({ bind }) => {
-          bind(token)[name](handler);
+        module = new KibanaContainerModule(({ [name]: onHook }) => {
+          onHook(token, handler);
         });
 
         container.bind(dependencyToken).toConstantValue('something');
@@ -100,8 +100,8 @@ describe('KibanaContainerModule', () => {
       it('should provide a dependency in the current context', () => {
         container.unload(module);
         container.load(
-          new KibanaContainerModule(({ bind }) => {
-            bind(token)[name](handler, dependencyToken);
+          new KibanaContainerModule(({ [name]: onHook }) => {
+            onHook(token, dependencyToken, handler);
           })
         );
         container.bind(dependencyToken).toConstantValue('something');
@@ -114,8 +114,8 @@ describe('KibanaContainerModule', () => {
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
-          'value2',
-          'overridden'
+          'overridden',
+          'value2'
         );
       });
 
@@ -150,8 +150,8 @@ describe('KibanaContainerModule', () => {
       ])('should provide a dependency when injected as $kind', ({ dependency, expected }) => {
         container.unload(module);
         container.load(
-          new KibanaContainerModule(({ bind }) => {
-            bind(token)[name](handler, dependency);
+          new KibanaContainerModule(({ [name]: onHook }) => {
+            onHook(token, dependency, handler);
           })
         );
         container.bind(token).toConstantValue('value');
@@ -160,8 +160,8 @@ describe('KibanaContainerModule', () => {
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
-          'value',
-          expected
+          expected,
+          'value'
         );
       });
     });
@@ -261,12 +261,12 @@ describe('KibanaContainerModule', () => {
         child.bind(dependencyToken).toConstantValue('something');
       });
 
-      it('onSetup', async () => {
+      it('should inject in the `onSetup` context', async () => {
         let resolved: string | undefined;
 
         container.load(
-          new KibanaContainerModule(({ bind }) => {
-            bind(token).onSetup(({ inject }) =>
+          new KibanaContainerModule(({ onSetup }) => {
+            onSetup(token, ({ inject }) =>
               inject(dependencyToken, (value) => {
                 resolved = value as string;
               })()

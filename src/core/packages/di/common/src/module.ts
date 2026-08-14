@@ -8,7 +8,6 @@
  */
 
 import {
-  type BindToFluentSyntax,
   type Container,
   ContainerModule,
   type ContainerModuleLoadOptions,
@@ -28,9 +27,26 @@ import { OnSetup, OnStart } from './services/plugin';
  */
 export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOptions {
   /**
-   * An extended binding supporting Kibana-specific features.
+   * Registers a handler that will be called after the setup phase against every bound service.
+   * @param serviceIdentifier The service identifier to bind the handler to.
+   * @param dependencies Dependencies to resolve before calling the handler.
+   * @param handler The handler to perform an action with the service instance.
    */
-  bind<T>(serviceIdentifier: ServiceIdentifier<T>): KibanaBindToFluentSyntax<T>;
+  onSetup<T, A extends unknown[] = any[]>(
+    serviceIdentifier: ServiceIdentifier<T>,
+    ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
+  ): void;
+
+  /**
+   * Registers a handler that will be called after the start phase against every bound service.
+   * @param serviceIdentifier The service identifier to bind the handler to.
+   * @param dependencies Dependencies to resolve before calling the handler.
+   * @param handler The handler to perform an action with the service instance.
+   */
+  onStart<T, A extends unknown[] = any[]>(
+    serviceIdentifier: ServiceIdentifier<T>,
+    ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
+  ): void;
 
   /**
    * Wraps a handler that will be called after the start phase injecting the listed dependencies.
@@ -51,32 +67,9 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
   ): (context: Pick<ResolutionContext, 'getAsync' | 'getAllAsync'>, ...args: A) => Promise<R>;
 }
 
-export interface KibanaBindToFluentSyntax<T> extends BindToFluentSyntax<T> {
-  /**
-   * Binds a handler that will be called after the setup phase against every bound service.
-   * @param handler The handler to perform an action with the service instance.
-   * @param dependencies Dependencies to resolve before calling the handler.
-   */
-  onSetup<A extends unknown[] = any[]>(
-    handler: KibanaHandler<T, A>,
-    ...dependencies: MapToResolvedValueInjectOptions<A>
-  ): void;
-
-  /**
-   * Binds a handler that will be called after the start phase against every bound service.
-   * @param handler The handler to perform an action with the service instance.
-   * @param dependencies Dependencies to resolve before calling the handler.
-   */
-  onStart<A extends unknown[] = any[]>(
-    handler: KibanaHandler<T, A>,
-    ...dependencies: MapToResolvedValueInjectOptions<A>
-  ): void;
-}
-
 export type KibanaHandler<T, A extends unknown[] = []> = (
   context: KibanaResolutionContext,
-  injectable: T,
-  ...services: A
+  ...args: [...services: A, injectable: T]
 ) => void;
 
 export interface KibanaResolutionContext extends ResolutionContext {
@@ -183,34 +176,30 @@ function toKibanaContainerModuleLoadOptions(
   function onHook<T, A extends unknown[]>(
     hook: ServiceIdentifier<(container: Container) => void>,
     serviceIdentifier: ServiceIdentifier<T>,
-    handler: KibanaHandler<T, A>,
-    ...dependences: MapToResolvedValueInjectOptions<A>
+    ...definition: [
+      ...dependencies: MapToResolvedValueInjectOptions<A>,
+      handler: KibanaHandler<T, A>
+    ]
   ): void {
     options.onActivation(serviceIdentifier, (context, injectable) => {
-      handler.apply(undefined, [
-        toKibanaResolutionContext(context),
-        injectable,
-        ...resolveSync(context, dependences),
-      ]);
+      const handler = definition[definition.length - 1] as KibanaHandler<T, A>;
+      const dependencies = definition.slice(0, -1) as MapToResolvedValueInjectOptions<A>;
+
+      handler(
+        ...([
+          toKibanaResolutionContext(context),
+          ...resolveSync(context, dependencies),
+          injectable,
+        ] as const)
+      );
 
       return injectable;
     });
-    bind(hook).toConstantValue((container) => {
+    options.bind(hook).toConstantValue((container) => {
       if (container.isCurrentBound(serviceIdentifier)) {
         container.getAll(serviceIdentifier);
       }
     });
-  }
-
-  function bind<T>(serviceIdentifier: ServiceIdentifier<T>): KibanaBindToFluentSyntax<T> {
-    return Object.defineProperties(options.bind(serviceIdentifier), {
-      onSetup: {
-        value: onHook.bind(undefined, OnSetup, serviceIdentifier),
-      },
-      onStart: {
-        value: onHook.bind(undefined, OnStart, serviceIdentifier),
-      },
-    }) as KibanaBindToFluentSyntax<T>;
   }
 
   function inject<R, A extends unknown[], D extends unknown[]>(
@@ -231,8 +220,9 @@ function toKibanaContainerModuleLoadOptions(
 
   return {
     ...options,
-    bind,
     inject,
+    onSetup: onHook.bind(undefined, OnSetup) as KibanaContainerModuleLoadOptions['onSetup'],
+    onStart: onHook.bind(undefined, OnStart) as KibanaContainerModuleLoadOptions['onStart'],
   };
 }
 
