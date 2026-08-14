@@ -27,7 +27,7 @@ import {
   showPublicUrlSwitch,
 } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
-import { getDiscoverLocatorParams } from '../../../../../utils/get_discover_locator_params';
+import { getDiscoverLocatorParams } from '../../../utils/get_discover_locator_params';
 import {
   getExpandedDocLinkability,
   getExpandedDocLinkDisabledReason,

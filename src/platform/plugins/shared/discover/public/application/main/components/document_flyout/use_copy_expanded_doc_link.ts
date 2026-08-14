@@ -11,7 +11,7 @@ import { useCallback, useRef } from 'react';
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDiscoverLocatorParams } from '../../../../utils/get_discover_locator_params';
+import { getDiscoverLocatorParams } from '../../utils/get_discover_locator_params';
 import {
   selectCurrentProfileLocatorState,
   useCurrentTabSelector,

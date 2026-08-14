@@ -12,9 +12,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { DiscoverAppLocatorParams } from '../../common/app_locator';
-import type { ProfileStateMap } from '../../common/context_awareness';
-import type { TabState } from '../application/main/state_management/redux';
+import type { DiscoverAppLocatorParams } from '../../../../common/app_locator';
+import type { ProfileStateMap } from '../../../../common/context_awareness';
+import type { TabState } from '../state_management/redux';
 
 /**
  * Builds shared locator params, including URL-only values spread from the tab's app state.
