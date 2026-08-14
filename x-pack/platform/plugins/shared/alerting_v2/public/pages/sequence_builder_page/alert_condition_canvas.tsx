@@ -208,16 +208,23 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   const removeRule = useCallback(
     (stepId: string, ruleId: string) => {
       setSeqValues((prev) => {
+        const removedIdx = prev.steps.findIndex((s) => s.id === stepId);
         const nextSteps = prev.steps
           .map((s) =>
             s.id === stepId ? { ...s, rules: s.rules.filter((r) => r.ruleId !== ruleId) } : s
           )
           .filter((s) => s.rules.length > 0);
-        const hopWindows = prev.hopWindows.slice(0, Math.max(0, nextSteps.length - 1));
+
+        const hopWindows = [...prev.hopWindows];
+        if (removedIdx !== -1 && nextSteps.length < prev.steps.length) {
+          const hopToRemove = removedIdx > 0 ? removedIdx - 1 : 0;
+          hopWindows.splice(hopToRemove, 1);
+        }
+
         return {
           ...prev,
           steps: nextSteps,
-          hopWindows,
+          hopWindows: hopWindows.slice(0, Math.max(0, nextSteps.length - 1)),
           recoveryStepIndex: Math.max(0, Math.min(prev.recoveryStepIndex, nextSteps.length - 1)),
           recoveryStepIndices: undefined,
         };
