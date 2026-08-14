@@ -390,7 +390,6 @@ react-focus-on@3.9.1
 react-is@16.13.1
 react-is@17.0.2
 react-is@18.1.0
-react-redux@9.2.0
 react-redux@9.3.0
 react-remove-scroll-bar@2.3.4
 react-remove-scroll@2.5.7
