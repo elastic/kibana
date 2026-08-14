@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { McpClient, StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
+import { McpClient, StreamableHTTPError, UnauthorizedError, type FetchLike } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
 import { createFetchResource, type McpFetchResource } from './fetch_resource';
 import { createSseGatedFetch } from './sse_fetch';
 
 const DEFAULT_MCP_CLIENT_VERSION = '1.0.0';
+const USER_ERROR_HTTP_STATUS_CODES = new Set([401, 403]);
 const TERMINAL_UNDICI_CODES = new Set(['UND_ERR_SOCKET', 'UND_ERR_CLOSED', 'UND_ERR_DESTROYED']);
+
+class McpConnectionHttpError extends Error {
+  constructor(public readonly httpStatus: number, cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause), { cause });
+    this.name = 'McpConnectionHttpError';
+  }
+}
 
 /**
  * Tracks the `McpFetchResource` backing each pooled client so `terminate` can close it
@@ -65,7 +73,15 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       getAuthHeaders: () => ctx.credential.getAuthHeaders(),
       ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
     });
-    const customFetch = createSseGatedFetch(resource);
+    const gatedFetch = createSseGatedFetch(resource);
+    let userErrorHttpStatus: number | undefined;
+    const customFetch: FetchLike = async (url, init) => {
+      const response = await gatedFetch(url, init);
+      if (USER_ERROR_HTTP_STATUS_CODES.has(response.status)) {
+        userErrorHttpStatus = response.status;
+      }
+      return response;
+    };
 
     let client: McpClient | undefined;
     try {
@@ -93,6 +109,9 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
       } catch {
         // Preserve the original connection error.
       }
+      if (userErrorHttpStatus !== undefined) {
+        throw new McpConnectionHttpError(userErrorHttpStatus, err);
+      }
       throw err;
     }
   },
@@ -116,6 +135,9 @@ export const createMcpClientType = (deps: McpClientTypeDeps = {}): ClientTypeSpe
 
   isUserError(err: unknown): boolean {
     return matchesErrorOrCause(err, (current) => {
+      if (current instanceof McpConnectionHttpError) {
+        return USER_ERROR_HTTP_STATUS_CODES.has(current.httpStatus);
+      }
       if (current instanceof UnauthorizedError) {
         return true;
       }

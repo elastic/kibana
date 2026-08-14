@@ -187,6 +187,51 @@ describe('createMcpClientType', () => {
       await expect(createMcpClientType().build(makeBuildContext())).rejects.toBe(connectError);
       expect(mockResource.close).toHaveBeenCalled();
     });
+
+    it.each([401, 403])(
+      'classifies a wrapped connect error from an HTTP %i response as a user error',
+      async (httpStatus) => {
+        const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
+          createSseGatedFetch: jest.Mock;
+        };
+        createSseGatedFetch.mockReturnValue(
+          jest.fn().mockResolvedValue(new Response(null, { status: httpStatus }))
+        );
+
+        const connectError = new Error('wrapped connection error');
+        const mockMcpClient = (
+          _logger: ConstructorParameters<typeof McpClient>[0],
+          _clientDetails: ConstructorParameters<typeof McpClient>[1],
+          options: ConstructorParameters<typeof McpClient>[2]
+        ) => {
+          const customFetch = options?.fetch;
+          if (!customFetch) {
+            throw new Error('Expected a custom fetch implementation');
+          }
+          return {
+            connect: jest.fn(async () => {
+              await customFetch('https://mcp.example.com', { method: 'POST' });
+              throw connectError;
+            }),
+            disconnect: jest.fn().mockResolvedValue(undefined),
+          };
+        };
+        (McpClient as unknown as jest.Mock).mockImplementationOnce(mockMcpClient);
+
+        const clientType = createMcpClientType();
+        const error = await clientType
+          .build(makeBuildContext())
+          .catch((buildError: Error): Error => buildError);
+
+        expect(error).toMatchObject({
+          name: 'McpConnectionHttpError',
+          message: connectError.message,
+          httpStatus,
+          cause: connectError,
+        });
+        expect(clientType.isUserError?.(error)).toBe(true);
+      }
+    );
   });
 
   describe('terminate', () => {
