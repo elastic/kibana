@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { type Locator, type ScoutPage, EuiFieldTextWrapper, EuiToastWrapper } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
@@ -193,7 +193,7 @@ export class IndexManagement extends AbstractPageObject {
     await expect(this.page.testSubj.locator('editDataLifecycleFlyoutApplyButton')).toBeHidden({
       timeout: 30_000,
     });
-    await new EuiToastWrapper(this.page, { dataTestSubj: 'globalToastList' }).closeAllToasts();
+    await this.page.components.toast().closeAll();
   }
 
   async stopInheritingDataStreamLifecycle() {
@@ -259,23 +259,19 @@ export class IndexManagement extends AbstractPageObject {
 
   indexTemplateWizard = {
     // `nameField` and `indexPatternsField` carry the test subject on their EuiFormRow wrapper, so
-    // the inner input is driven via the EUI field wrapper.
+    // the inner input is driven via a native locator.
     open: async (name: string, indexPattern: string) => {
       await this.page.testSubj.locator('createTemplateButton').click();
-      await new EuiFieldTextWrapper(this.page, { dataTestSubj: 'nameField' }).fill(name);
-      await new EuiFieldTextWrapper(this.page, { dataTestSubj: 'indexPatternsField' }).fill(
-        indexPattern
-      );
+      await this.page.testSubj.locator('nameField').locator('input').fill(name);
+      await this.page.testSubj.locator('indexPatternsField').locator('input').fill(indexPattern);
     },
 
     completeStepOne: async () => {
-      const nameField = new EuiFieldTextWrapper(this.page, { dataTestSubj: 'nameField' });
-      await nameField.fill('test-index-template');
-
-      const indexPatternsField = new EuiFieldTextWrapper(this.page, {
-        dataTestSubj: 'indexPatternsField',
-      });
-      await indexPatternsField.fill('test-index-pattern');
+      await this.page.testSubj.locator('nameField').locator('input').fill('test-index-template');
+      await this.page.testSubj
+        .locator('indexPatternsField')
+        .locator('input')
+        .fill('test-index-pattern');
 
       await this.clickNextButton();
     },

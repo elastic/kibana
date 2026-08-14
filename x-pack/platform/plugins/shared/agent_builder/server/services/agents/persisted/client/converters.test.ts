@@ -322,7 +322,7 @@ describe('createRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'green',
       avatar_symbol: 'circle',
-      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_id: 'user-id',
       created_by_name: 'test-user',
       updated_by_id: 'user-id',
@@ -403,7 +403,31 @@ describe('createRequestToEs', () => {
       id: 'id',
       name: 'name',
       description: 'description',
-      access_control: { access_mode: AgentAccessControlMode.Private },
+      access_control: { access_mode: AgentAccessControlMode.Shared },
+      configuration: {
+        instructions: 'instructions',
+        tools: [],
+      },
+    };
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: new Date(),
+    });
+
+    expect(docProperties.access_control).toEqual({
+      access_mode: AgentAccessControlMode.Shared,
+      entries: [],
+    });
+  });
+
+  it('defaults access control to private when the create request omits it', () => {
+    const createRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
       configuration: {
         instructions: 'instructions',
         tools: [],
