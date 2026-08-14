@@ -65,5 +65,5 @@ export async function updateRootRefsConfig(log: ToolingLog) {
 }
 
 export async function cleanupRootRefsConfig() {
-  await Fsp.rm(ROOT_REFS_CONFIG_PATH, { force: true });
+  await Fsp.unlink(ROOT_REFS_CONFIG_PATH);
 }
