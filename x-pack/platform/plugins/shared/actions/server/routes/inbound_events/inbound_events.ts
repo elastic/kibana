@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { MAX_CONNECTOR_TYPE_ID_LENGTH } from '@kbn/connector-specs';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
 
-import { CONNECTOR_ID_MAX_LENGTH } from '../../../common';
+import type {
+  IngestEventsRequestParamsV1,
+  IngestEventsRequestQueryV1,
+} from '../../../common/routes/events/apis/ingest';
+import {
+  ingestEventsRequestBodySchemaV1,
+  ingestEventsRequestParamsSchemaV1,
+  ingestEventsRequestQuerySchemaV1,
+} from '../../../common/routes/events/apis/ingest';
+import { ingestEventsResponseSchemaV1 } from '../../../common/routes/events/response';
 import type { ActionsRequestHandlerContext } from '../../types';
 import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
   INBOUND_EVENTS_SECURITY,
-  INBOUND_EVENTS_TOKEN_MAX_LENGTH,
 } from '../../inbound/constants';
 import type { InboundEventsClient } from '../../inbound/client';
 import { mapIngestResultToResponse } from '../../inbound/map_ingest_result_to_response';
@@ -55,36 +61,36 @@ export function inboundEventsRoute({
         version: INBOUND_EVENTS_API_VERSION,
         validate: {
           request: {
-            params: schema.object({
-              // maxLength is pre-normalize; handle rejects if normalize prepends '.' past the cap.
-              connector_type_id: schema.string({
-                minLength: 1,
-                maxLength: MAX_CONNECTOR_TYPE_ID_LENGTH,
-              }),
-              connector_id: schema.string({
-                minLength: 1,
-                maxLength: CONNECTOR_ID_MAX_LENGTH,
-              }),
-            }),
-            query: schema.object(
-              {
-                token: schema.maybe(
-                  schema.string({
-                    minLength: 1,
-                    maxLength: INBOUND_EVENTS_TOKEN_MAX_LENGTH,
-                  })
-                ),
-              },
-              { unknowns: 'allow' }
-            ),
-            body: schema.maybe(schema.any()),
+            params: ingestEventsRequestParamsSchemaV1,
+            query: ingestEventsRequestQuerySchemaV1,
+            body: ingestEventsRequestBodySchemaV1,
+          },
+          response: {
+            202: {
+              description:
+                'The ingress request was accepted. Downstream emit failures may still be partial; see server logs.',
+              body: () => ingestEventsResponseSchemaV1,
+            },
+            403: {
+              description: 'Inbound connector events are disabled.',
+            },
+            404: {
+              description:
+                'Connector, connector type, or ingest token was not found or failed verification.',
+            },
+            500: {
+              description: 'The connector spoke failed to handle or validate the event.',
+            },
           },
         },
       },
       async (_context, request, response) => {
-        const { connector_type_id: connectorTypeId, connector_id: connectorId } = request.params;
+        const {
+          connector_type_id: connectorTypeId,
+          connector_id: connectorId,
+        }: IngestEventsRequestParamsV1 = request.params;
         const result = await inboundEventsClient.ingest({
-          request,
+          request: request as KibanaRequest<unknown, IngestEventsRequestQueryV1, unknown>,
           connectorTypeId,
           connectorId,
           spaceId: getSpaceId(request),

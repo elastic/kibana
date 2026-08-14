@@ -8,7 +8,7 @@
 import { timingSafeEqual } from 'node:crypto';
 
 import { computeIngestTokenHash } from './compute_ingest_token_hash';
-import { INBOUND_EVENTS_TOKEN_MAX_LENGTH } from './constants';
+import { INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH } from '../../common/routes/events/apis/ingest';
 
 const getAuthorizationHeaderValue = (
   headers: Record<string, string | string[] | undefined>
@@ -28,7 +28,7 @@ const extractBearerToken = (authorizationHeader: string): string | undefined => 
   if (!bearerToken || bearerToken.length === 0) {
     return undefined;
   }
-  if (bearerToken.length > INBOUND_EVENTS_TOKEN_MAX_LENGTH) {
+  if (bearerToken.length > INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH) {
     return undefined;
   }
   return bearerToken;
@@ -37,10 +37,12 @@ const extractBearerToken = (authorizationHeader: string): string | undefined => 
 const extractQueryToken = (query: { token?: string | string[] }): string | undefined => {
   const queryToken = query.token;
   if (typeof queryToken === 'string' && queryToken.length > 0) {
-    return queryToken.length <= INBOUND_EVENTS_TOKEN_MAX_LENGTH ? queryToken : undefined;
+    return queryToken.length <= INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH ? queryToken : undefined;
   }
   if (Array.isArray(queryToken) && typeof queryToken[0] === 'string' && queryToken[0].length > 0) {
-    return queryToken[0].length <= INBOUND_EVENTS_TOKEN_MAX_LENGTH ? queryToken[0] : undefined;
+    return queryToken[0].length <= INBOUND_EVENTS_TOKEN_QUERY_MAX_LENGTH
+      ? queryToken[0]
+      : undefined;
   }
   return undefined;
 };

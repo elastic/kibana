@@ -24,8 +24,6 @@ export const INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const INBOUND_EVENTS_TOKEN_MAX_LENGTH = 128;
-
 /**
  * Default / schema default for `xpack.actions.inboundEvents.maxEmitted`.
  */
