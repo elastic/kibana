@@ -758,6 +758,19 @@ describe('GithubConnector', () => {
         expect.any(Object)
       );
     });
+
+    it('rejects path traversal segments in path', () => {
+      const base = { owner: 'elastic', repo: 'kibana', message: 'x', content: 'SGk=' };
+      expect(() =>
+        GithubConnector.actions.createOrUpdateFile.input.parse({ ...base, path: '../../etc/passwd' })
+      ).toThrow();
+      expect(() =>
+        GithubConnector.actions.createOrUpdateFile.input.parse({ ...base, path: 'src/../../../secret' })
+      ).toThrow();
+      expect(() =>
+        GithubConnector.actions.createOrUpdateFile.input.parse({ ...base, path: 'src/./README.md' })
+      ).toThrow();
+    });
   });
 
   describe('updatePullRequest action', () => {

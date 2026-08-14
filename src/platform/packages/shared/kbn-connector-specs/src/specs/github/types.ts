@@ -407,6 +407,9 @@ export const CreateOrUpdateFileInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(1024)
+      .refine((p) => p.split('/').every((s) => s && s !== '.' && s !== '..'), {
+        message: 'path must not contain empty, ".", or ".." segments',
+      })
       .describe('File path within the repository (e.g. "src/README.md")'),
     message: z.string().min(1).max(2000).describe('Commit message for this file change'),
     content: z
