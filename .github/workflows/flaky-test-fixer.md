@@ -80,16 +80,16 @@ steps:
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
   - name: Detect duplicate fix PRs
-    # Deterministically list the in-flight (and recently-merged) `flaky-test-fixer` PRs so
-    # the agent can spot an already-in-flight fix and bail out before spending a full run.
-    # Non-fatal: a detection failure must not block the fix — the agent treats a missing
-    # file as "no in-flight duplicate".
+    # Shortlist the `flaky-test-fixer` PRs whose title looks like it targets the same
+    # test/method as this issue (plus any already closing it), so the agent can spot an
+    # already-in-flight fix and bail out before spending a full run. Non-fatal: a detection
+    # failure must not block the fix — the agent treats a missing file as "no duplicate".
     uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
     with:
       script: |
         const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
         try {
-          await writeDuplicateCandidates({ github, core });
+          await writeDuplicateCandidates({ github, core, issueNumber: Number(process.env.ISSUE_NUMBER) });
         } catch (err) {
           core.warning(`Duplicate detection failed: ${err.message}`);
         }
@@ -259,7 +259,7 @@ timeout-minutes: 90
 
 Open a single draft PR with the smallest possible fix for this flaky-test issue. Fix the root cause where it lives — test code or application code; don't mask a product bug with a test-side workaround. Do not open a PR if any of the following is true:
 
-- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. A pre-step has already listed the in-flight and recently-merged `flaky-test-fixer` PRs in `/tmp/gh-aw/agent/duplicate-candidates.json` — start there (see [Duplicate detection](#duplicate-detection)), then also search for PRs that reference this issue number (in their body or in the issue timeline) and recent PRs touching the failing test's file, since a sibling opened moments ago may not be listed yet;
+- an open PR already covers it: one patching the same test, or the same root cause behind a related failed-test issue. A pre-step has already shortlisted the likely-duplicate `flaky-test-fixer` PRs in `/tmp/gh-aw/agent/duplicate-candidates.json` — start there (see [Duplicate detection](#duplicate-detection)), then also search for PRs that reference this issue number (in their body or in the issue timeline) and recent PRs touching the failing test's file, since a same-root-cause sibling may not be shortlisted;
 - you cannot identify a credible fix within the [Fix guardrails](#fix-guardrails) — a patch that only works by violating them (e.g. by retrying or tolerating the failure instead of fixing it) is not a credible fix; or
 - the fix has to target a version branch (see "Fixes that must target a version branch").
 
@@ -273,9 +273,9 @@ Whatever the outcome, always finish by leaving one concise comment on the issue 
 
 Many `failed-test` issues share a single root cause, so the fixer can open several PRs that change the **same method or spec** — usually within minutes of each other, by parallel runs. Before doing any work, rule out that a fix is already in flight:
 
-- A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ candidates }`): the current `flaky-test-fixer` PRs (every open one, plus those merged in the last 30 days), each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Read it first.
-- **Shortlist** from the candidates' `title` and `linkedIssues` the ones that plausibly target the same test/method/spec as this issue — fixer titles are derived from the test path, so a real match shares title tokens and often references this issue number. Then **open each shortlisted PR's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** — not merely the same file for an unrelated reason (a different method of the same page object is not a duplicate).
-- The list can lag by moments, so a sibling opened seconds ago may not appear yet; still do a quick search for PRs referencing this issue number and recent PRs touching the failing test's file.
+- A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ candidates }`): a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose title looks like it targets the same test/method as this issue, or that already close it. Each has `number`, `title`, `state`, `createdAt`, `url`, `linkedIssues`, and `sharedTokens` (title-token overlap with this issue's title; `0` means it was included only via a shared linked issue), sorted oldest-first. Read it first.
+- The shortlist is a title-based heuristic, so **open each candidate's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** — not merely a similar title or the same file for an unrelated reason (a different method of the same page object is not a duplicate).
+- Because it matches this issue's title (which describes the *test*, not the *fix*), a same-root-cause sibling opened for a different issue may not be shortlisted; also do a quick search for PRs referencing this issue number and recent PRs touching the failing test's file.
 - If a real match exists (open, or already merged), **do not open a PR**: post the "Existing PR already covers it" outcome comment naming that PR, remove the `ai:fix-flaky` label (step 8), and stop. The downstream Flaky Fix Verifier is the backstop that closes any duplicate that still slips through, so when genuinely in doubt, lean toward not opening a second PR.
 
 ## Environment
