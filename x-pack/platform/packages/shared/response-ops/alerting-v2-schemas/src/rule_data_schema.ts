@@ -121,13 +121,28 @@ export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 /**
- * Appendable ES|QL segment (e.g. `WHERE …`). Conceptually a bare command,
- * but a leading `|` is also tolerated — `composeEsqlQuery` strips it before
- * splicing the segment onto `base`. We only enforce structural bounds here
- * (length, non-empty). Full parser validation only runs when the segment is
- * composed with its `base` via `composeEsqlQuery`.
+ * Appendable ES|QL breach segment (e.g. `WHERE …`). Conceptually a bare
+ * command, but a leading `|` is also tolerated — `composeEsqlQuery` strips it
+ * before splicing onto `base`. Empty/whitespace = conditionless (every base
+ * row breaches). Full parser validation only runs when the segment is non-empty
+ * and composed with its `base` via `composeEsqlQuery`.
  */
-export const esqlQuerySegmentSchema = z
+export const composedBreachSegmentSchema = z
+  .string()
+  .max(MAX_ESQL_QUERY_LENGTH)
+  .describe('Appendable ES|QL breach segment. Empty = conditionless (every base row breaches).');
+
+/**
+ * Appendable ES|QL recovery segment (e.g. `WHERE …`). Conceptually a bare
+ * command, but a leading `|` is also tolerated — `composeEsqlQuery` strips it
+ * before splicing onto `base`. Must be non-empty / non-whitespace. Full parser
+ * validation runs when composed with its `base` via `composeEsqlQuery`.
+ *
+ * `.min(1)` and `.refine(trim)` are complementary: `.min(1)` emits
+ * `minLength: 1` into the generated JSON schema (YAML editor / OAS), while
+ * `.refine` rejects whitespace-only strings at parse time.
+ */
+export const composedRecoverySegmentSchema = z
   .string()
   .min(1)
   .max(MAX_ESQL_QUERY_LENGTH)
@@ -137,15 +152,17 @@ export const esqlQuerySegmentSchema = z
 
 const composedBreachSchema = z
   .object({
-    segment: esqlQuerySegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection (required).'
+    segment: composedBreachSegmentSchema.describe(
+      'Appendable ES|QL segment for breach detection. Empty = conditionless (every base row breaches).'
     ),
   })
   .strict();
 
 const composedRecoverySchema = z
   .object({
-    segment: esqlQuerySegmentSchema.describe('Appendable ES|QL segment for recovery detection.'),
+    segment: composedRecoverySegmentSchema.describe(
+      'Appendable ES|QL segment for recovery detection.'
+    ),
   })
   .strict()
   .describe('Recovery query segment. Present only when recovery_strategy is "query".');
@@ -185,16 +202,19 @@ export const composedQuerySchema = z
   })
   .strict()
   .check((ctx) => {
-    const breachError = validateEsqlQuery(
-      composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
-    );
-    if (breachError) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['breach', 'segment'],
-        message: breachError,
-        input: ctx.value.breach.segment,
-      });
+    // Empty/whitespace breach segment = conditionless; base was already validated.
+    if (ctx.value.breach.segment.trim().length > 0) {
+      const breachError = validateEsqlQuery(
+        composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
+      );
+      if (breachError) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['breach', 'segment'],
+          message: breachError,
+          input: ctx.value.breach.segment,
+        });
+      }
     }
     if (ctx.value.recovery) {
       const recoveryError = validateEsqlQuery(
@@ -235,12 +255,17 @@ export type Query = z.infer<typeof querySchema>;
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
  * to detect breaches. For composed queries this is `base` concatenated with
- * `breach.segment`; for standalone it's `breach.query` verbatim.
+ * `breach.segment`, or just `base` when the segment is empty/whitespace
+ * (conditionless). For standalone it's `breach.query` verbatim.
  */
-export const getBreachEsqlQuery = (query: Query): string =>
-  query.format === 'composed'
+export const getBreachEsqlQuery = (query: Query): string => {
+  if (query.format === 'standalone') {
+    return query.breach.query;
+  }
+  return query.breach.segment.trim()
     ? composeEsqlQuery(query.base, query.breach.segment)
-    : query.breach.query;
+    : query.base;
+};
 
 /**
  * Returns the recovery ES|QL query when `recoveryStrategy` is `'query'`,

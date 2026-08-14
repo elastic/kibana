@@ -120,11 +120,12 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 - Every \`set_query\` call **must** include \`format: "composed"\` or \`format: "standalone"\`. Omitting \`format\` will fail validation.
   - **Composed** shares a \`base\` query with appendable \`breach.segment\` and optional \`recovery.segment\`:
     \`{ format: "composed", base: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name", breach: { segment: "WHERE avg_cpu > 0.9" } }\`
+    An empty \`breach.segment\` (\`""\`) is conditionless — every row returned by \`base\` is a breach.
   - **Standalone** uses independent full queries:
     \`{ format: "standalone", breach: { query: "FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name | WHERE avg_cpu > 0.9" } }\`
 - The base query must be a valid ES|QL statement.
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
-- The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
+- The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions (or leave the composed breach segment empty for a conditionless rule).
 - Prefer \`FROM <index-pattern> | STATS ... BY <group-field> | WHERE <condition>\` for threshold-based alerting.
 - **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
