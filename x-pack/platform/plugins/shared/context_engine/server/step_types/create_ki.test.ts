@@ -68,6 +68,28 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('throws ValidationError when the dest is an index pattern', async () => {
+    for (const destValue of ['ai-index-idx-foo*', 'ai-index-idx-foo,ai-index-idx-bar']) {
+      const esClient = { index: jest.fn() };
+      const context = createMockStepContext({
+        input: { ai_index_id: 'my-ai-index', ki: kiInput },
+        esClient,
+      });
+      const service = mockAiIndexService({ type: 'index', value: destValue });
+
+      const { handler } = getCreateKiStepDefinition({
+        getAiIndexService: () => service,
+        isContextEngineEnabled: enabled,
+        checkWritePrivilege: allowed,
+      });
+      const thrown = await handler(context).catch((e) => e);
+
+      expect(thrown).toBeInstanceOf(ExecutionError);
+      expect(thrown.type).toBe('ValidationError');
+      expect(esClient.index).not.toHaveBeenCalled();
+    }
+  });
+
   it('lazily creates the AI index when it does not exist', async () => {
     const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
     const context = createMockStepContext({

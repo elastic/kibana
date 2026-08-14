@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { validateAiIndexId } from '../../common/ai_index_dest';
+import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
@@ -116,6 +116,20 @@ export const resolveOrCreateAiIndexDest = async (
   }
 
   return dest;
+};
+
+/**
+ * Fails the step when the dest is an index pattern (wildcards or a comma
+ * expression), which is a valid AI index config but not a single write target.
+ */
+export const assertWritableDest = (aiIndexId: string, dest: AiIndexDest): void => {
+  if (isIndexPattern(dest.value)) {
+    throw new ExecutionError({
+      type: 'ValidationError',
+      message: `Cannot create a KI in AI index '${aiIndexId}': dest '${dest.value}' is an index pattern, not a single write target`,
+      details: { aiIndexId, destValue: dest.value },
+    });
+  }
 };
 
 /** The typed error for a KI that does not exist in the given AI index. */

@@ -11,6 +11,7 @@ import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
+  assertWritableDest,
   resolveOrCreateAiIndexDest,
 } from './helpers';
 
@@ -29,6 +30,7 @@ export const getCreateKiStepDefinition = ({
       const { ai_index_id: aiIndexId, ki } = context.input;
 
       const dest = await resolveOrCreateAiIndexDest(getAiIndexService, aiIndexId);
+      assertWritableDest(aiIndexId, dest);
       const esClient = context.contextManager.getScopedEsClient();
 
       const response = await esClient.index(

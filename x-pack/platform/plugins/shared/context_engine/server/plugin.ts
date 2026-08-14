@@ -118,16 +118,12 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
-      // Request-scoped like the route gate: the setting is a regular
-      // (space-scoped) UI setting, so it must be read in the request's space.
       isContextEngineEnabled: async (request) => {
         const [coreStart] = await coreSetup.getStartServices();
         const soClient = coreStart.savedObjects.getScopedClient(request);
         const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
         return (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
       },
-      // Mirrors the write routes' requiredPrivileges; when the security plugin
-      // is disabled there is no authorization to enforce.
       checkWritePrivilege: async (request) => {
         const [, startDeps] = await coreSetup.getStartServices();
         const { security, spaces } = startDeps;
