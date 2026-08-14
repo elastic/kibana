@@ -97,3 +97,17 @@ export {
 
 // Export specific types that are commonly used
 export type { BuiltInStepType } from './spec/schema';
+
+export {
+  WORKFLOW_VALIDATION_RULES,
+  WORKFLOW_VALIDATION_RULE_IDS,
+  getDefaultSeverityForRule,
+  getOwnerForRule,
+  isWorkflowValidationRuleId,
+} from './validation/rules';
+export type {
+  WorkflowValidationRuleId,
+  WorkflowValidationRuleOwner,
+  WorkflowValidationRules,
+  WorkflowValidationRuleValues,
+} from './validation/rules';

@@ -56,6 +56,7 @@ function buildValidationResult(
       endLineNumber: stepPropertyItem.endLineNumber,
       endColumn: stepPropertyItem.endColumn,
       owner: 'step-property-validation' as const,
+      ruleId: 'invalidStepProperty' as const,
     };
   }
 
@@ -71,6 +72,7 @@ function buildValidationResult(
     endLineNumber: stepPropertyItem.endLineNumber,
     endColumn: stepPropertyItem.endColumn,
     owner: 'step-property-validation' as const,
+    ruleId: 'stepPropertyResolved' as const,
   };
 }
 

@@ -57,6 +57,7 @@ const createMockValidationResult = (
     severity: 'error',
     message: 'Test error',
     owner: 'yaml',
+    ruleId: 'schemaViolation',
     ...overrides,
   } as YamlValidationResult);
 
@@ -1275,12 +1276,14 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Invalid field',
           startLineNumber: 1,
           startColumn: 1,
         }),
         createMockValidationResult({
           owner: 'step-name-validation',
+          ruleId: 'duplicateStepName',
           message: 'Duplicate step name',
           startLineNumber: 5,
           startColumn: 3,
@@ -1317,6 +1320,7 @@ describe('WorkflowsBaseTelemetry', () => {
         createMockValidationResult({
           severity: 'warning',
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Some warning',
         }),
       ];
@@ -1333,6 +1337,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Invalid field',
           startLineNumber: 1,
           startColumn: 1,
@@ -1359,6 +1364,7 @@ describe('WorkflowsBaseTelemetry', () => {
     it('reports again after a previously reported error is resolved and reappears', () => {
       const errorResult = createMockValidationResult({
         owner: 'yaml',
+        ruleId: 'schemaViolation',
         message: 'Invalid field',
         startLineNumber: 1,
         startColumn: 1,
@@ -1391,12 +1397,14 @@ describe('WorkflowsBaseTelemetry', () => {
     it('reports new errors even when some old ones are still present', () => {
       const error1 = createMockValidationResult({
         owner: 'yaml',
+        ruleId: 'schemaViolation',
         message: 'Error 1',
         startLineNumber: 1,
         startColumn: 1,
       });
       const error2 = createMockValidationResult({
         owner: 'step-name-validation',
+        ruleId: 'duplicateStepName',
         message: 'Error 2',
         startLineNumber: 5,
         startColumn: 3,
@@ -1428,6 +1436,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Error',
           startLineNumber: 1,
           startColumn: 1,
@@ -1453,6 +1462,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Error',
         }),
       ];
@@ -1470,6 +1480,7 @@ describe('WorkflowsBaseTelemetry', () => {
       const validationResults: YamlValidationResult[] = [
         createMockValidationResult({
           owner: 'yaml',
+          ruleId: 'schemaViolation',
           message: 'Error',
         }),
       ];

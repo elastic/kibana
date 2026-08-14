@@ -120,6 +120,7 @@ export function validateVariables(
         message: 'Failed to get context schema for path',
         severity: 'error',
         owner: 'variable-validation',
+        ruleId: 'contextSchemaUnavailable',
         hoverMessage: null,
       });
     }

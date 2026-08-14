@@ -126,6 +126,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
               severity: 'error' as YamlValidationErrorSeverity,
               message: errorValidating.message,
               owner: 'variable-validation' as const,
+              ruleId: 'validationRunFailed' as const,
               startLineNumber: 0,
               startColumn: 0,
               afterMessage: null,

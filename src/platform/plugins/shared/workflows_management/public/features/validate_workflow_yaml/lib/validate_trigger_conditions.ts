@@ -42,6 +42,7 @@ export function validateTriggerConditions(
         item?.startColumn ?? 0
       }`,
       owner: 'trigger-condition-validation' as const,
+      ruleId: 'invalidTriggerCondition' as const,
       message: err.message,
       startLineNumber: item?.startLineNumber ?? 1,
       startColumn: item?.startColumn ?? 1,

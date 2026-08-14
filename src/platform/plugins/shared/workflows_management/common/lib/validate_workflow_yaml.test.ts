@@ -11,6 +11,7 @@
 
 import { readFileSync } from 'fs';
 import Path from 'path';
+import { isWorkflowValidationRuleId } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { validateWorkflowYaml } from './validate_workflow_yaml';
 import { getWorkflowZodSchema } from '../schema';
@@ -483,6 +484,62 @@ steps:
         expect(typeof diag.message).toBe('string');
         expect(diag.message.length).toBeGreaterThan(0);
       }
+    });
+  });
+
+  describe('rule IDs', () => {
+    it('tags every diagnostic with a registered rule ID', () => {
+      const result = validateWorkflowYaml('not: valid: yaml: [[[', schema);
+
+      expect(result.diagnostics.length).toBeGreaterThan(0);
+      for (const diag of result.diagnostics) {
+        expect(diag.ruleId).toBeDefined();
+        expect(isWorkflowValidationRuleId(diag.ruleId!)).toBe(true);
+      }
+    });
+
+    it('identifies a syntax error by rule ID rather than by message', () => {
+      const result = validateWorkflowYaml('not: valid: yaml: [[[', schema);
+
+      expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('yamlSyntaxError');
+    });
+
+    it('identifies a schema violation by rule ID', () => {
+      const result = validateWorkflowYaml(
+        `enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: first
+    type: console
+    with:
+      message: hello`,
+        schema
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('schemaViolation');
+    });
+
+    it('identifies duplicate step names by rule ID', () => {
+      const result = validateWorkflowYaml(
+        `name: duplicate-steps
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: same
+    type: console
+    with:
+      message: one
+  - name: same
+    type: console
+    with:
+      message: two`,
+        schema
+      );
+
+      expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('duplicateStepName');
     });
   });
 });

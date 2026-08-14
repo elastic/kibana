@@ -77,6 +77,7 @@ describe('validateConnectorIds', () => {
         severity: 'error',
         message: 'Dynamic connector types not found',
         owner: 'connector-id-validation',
+        ruleId: 'dynamicConnectorTypesUnavailable',
         startLineNumber: 0,
         startColumn: 0,
         endLineNumber: 0,
@@ -105,6 +106,7 @@ describe('validateConnectorIds', () => {
         severity: 'info',
         message: null,
         owner: 'connector-id-validation',
+        ruleId: 'connectorResolved',
         startLineNumber: 5,
         startColumn: 10,
         endLineNumber: 5,
@@ -133,6 +135,7 @@ describe('validateConnectorIds', () => {
         severity: 'error',
         message: expect.stringContaining('UUID "My Slack Connector" not found'),
         owner: 'connector-id-validation',
+        ruleId: 'connectorNotFound',
         beforeMessage: null,
       });
     });
@@ -154,6 +157,7 @@ describe('validateConnectorIds', () => {
         id: 'test-id-1-2-3-4',
         severity: 'error',
         owner: 'connector-id-validation',
+        ruleId: 'connectorNotFound',
         startLineNumber: 5,
         startColumn: 10,
         endLineNumber: 5,

@@ -35,6 +35,7 @@ jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accord
 const sampleError: YamlValidationResult = {
   id: 'custom-error',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   severity: 'error',
   message: 'Duplicate step name',
   startLineNumber: 2,

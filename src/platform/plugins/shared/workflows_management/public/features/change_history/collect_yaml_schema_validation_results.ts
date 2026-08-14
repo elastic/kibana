@@ -53,6 +53,7 @@ export const collectYamlSchemaValidationResults = (
       endLineNumber: formatted.endLineNumber,
       endColumn: formatted.endColumn,
       owner: 'yaml',
+      ruleId: 'schemaViolation',
       source: formatted.source,
       hoverMessage: null,
       afterMessage: null,

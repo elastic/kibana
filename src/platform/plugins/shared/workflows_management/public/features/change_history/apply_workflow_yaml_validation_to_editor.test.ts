@@ -242,6 +242,7 @@ describe('applyWorkflowYamlValidationToEditor', () => {
     const yamlSchemaResult: YamlValidationResult = {
       id: 'yaml-error',
       owner: 'yaml',
+      ruleId: 'schemaViolation',
       severity: 'error',
       message: 'Schema error',
       startLineNumber: 1,

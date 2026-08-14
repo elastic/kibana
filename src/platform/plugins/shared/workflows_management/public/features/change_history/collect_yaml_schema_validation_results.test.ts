@@ -130,6 +130,7 @@ describe('collectYamlSchemaValidationResults', () => {
       {
         id: 'custom-error',
         owner: 'step-name-validation',
+        ruleId: 'duplicateStepName',
         severity: 'error',
         message: 'Duplicate step name',
         startLineNumber: 2,
@@ -142,6 +143,7 @@ describe('collectYamlSchemaValidationResults', () => {
       {
         id: 'stale-yaml-error',
         owner: 'yaml',
+        ruleId: 'schemaViolation',
         severity: 'error',
         message: 'stale',
         startLineNumber: 1,
@@ -156,6 +158,7 @@ describe('collectYamlSchemaValidationResults', () => {
       {
         id: 'yaml-error',
         owner: 'yaml',
+        ruleId: 'schemaViolation',
         severity: 'error',
         message: 'Missing property "steps".',
         startLineNumber: 1,

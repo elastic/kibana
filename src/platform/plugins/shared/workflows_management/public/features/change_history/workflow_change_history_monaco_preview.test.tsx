@@ -139,6 +139,7 @@ const sampleValidationError: YamlValidationResult = {
   severity: 'error',
   message: 'Invalid workflow step',
   owner: 'step-name-validation',
+  ruleId: 'duplicateStepName',
   startLineNumber: 3,
   startColumn: 5,
   endLineNumber: 3,

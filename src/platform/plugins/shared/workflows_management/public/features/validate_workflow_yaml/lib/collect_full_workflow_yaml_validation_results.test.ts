@@ -12,6 +12,7 @@ import { monaco } from '@kbn/code-editor';
 const structuralResult: YamlValidationResult = {
   id: 'structural-error',
   owner: 'variable-validation',
+  ruleId: 'undefinedVariable',
   severity: 'error',
   message: 'Structural error',
   startLineNumber: 1,
@@ -25,6 +26,7 @@ const structuralResult: YamlValidationResult = {
 const connectorResult: YamlValidationResult = {
   id: 'connector-error',
   owner: 'connector-id-validation',
+  ruleId: 'connectorNotFound',
   severity: 'error',
   message: 'Missing connector',
   startLineNumber: 2,
@@ -38,6 +40,7 @@ const connectorResult: YamlValidationResult = {
 const graphResult: YamlValidationResult = {
   id: 'graph-error',
   owner: 'graph-build-validation',
+  ruleId: 'graphBuildError',
   severity: 'error',
   message: 'Graph build failed',
   startLineNumber: 3,
@@ -51,6 +54,7 @@ const graphResult: YamlValidationResult = {
 const workflowInputResult: YamlValidationResult = {
   id: 'workflow-input-error',
   owner: 'workflow-inputs-validation',
+  ruleId: 'unknownInputKey',
   severity: 'error',
   message: 'Invalid workflow input',
   startLineNumber: 5,
@@ -64,6 +68,7 @@ const workflowInputResult: YamlValidationResult = {
 const stepPropertyResult: YamlValidationResult = {
   id: 'step-property-error',
   owner: 'step-property-validation',
+  ruleId: 'invalidStepProperty',
   severity: 'error',
   message: 'Invalid step property',
   startLineNumber: 4,
@@ -77,6 +82,7 @@ const stepPropertyResult: YamlValidationResult = {
 const esqlResult: YamlValidationResult = {
   id: 'esql-error',
   owner: 'esql-validation',
+  ruleId: 'esqlDiagnostic',
   severity: 'error',
   message: 'Invalid ES|QL',
   startLineNumber: 6,

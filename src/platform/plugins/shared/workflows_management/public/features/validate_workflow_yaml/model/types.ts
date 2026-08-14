@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropertySelectionHandler, SelectionContext } from '@kbn/workflows';
+import type {
+  PropertySelectionHandler,
+  SelectionContext,
+  WorkflowValidationRuleId,
+} from '@kbn/workflows';
 
 interface BaseItem {
   id: string;
@@ -54,6 +58,12 @@ export type YamlValidationErrorSeverity = 'error' | 'warning' | 'info';
 
 interface YamlValidationResultBase {
   id: string;
+  /**
+   * Stable identity of the check that produced this result. `id` is a positional
+   * dedup key and `owner` is the validator, so neither identifies the check; match
+   * on this rather than on `message`, which is translated and reworded freely.
+   */
+  ruleId: WorkflowValidationRuleId;
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;
