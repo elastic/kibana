@@ -27,9 +27,12 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['failsOnMKI']);
 
     const TEST_INDEX = 'user-managed-uiam-key-test-data';
+    const ACTION_INDEX = 'user-managed-uiam-key-action-output';
     let roleAdmin: RoleCredentials;
     let internalReqHeader: InternalRequestHeader;
     let ruleId: string | undefined;
+    let ruleWithActionId: string | undefined;
+    let connectorId: string | undefined;
 
     before(async () => {
       roleAdmin = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
@@ -42,29 +45,35 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      if (ruleId) {
+      for (const idToDelete of [ruleId, ruleWithActionId]) {
+        if (!idToDelete) continue;
         await supertestWithoutAuth
-          .delete(`/api/alerting/rule/${ruleId}`)
+          .delete(`/api/alerting/rule/${idToDelete}`)
           .set(internalReqHeader)
           .set(roleAdmin.apiKeyHeader);
         await esClient.deleteByQuery({
           index: '.kibana-event-log-*',
           conflicts: 'proceed',
-          query: { term: { 'rule.id': ruleId } },
+          query: { term: { 'rule.id': idToDelete } },
         });
       }
+      if (connectorId) {
+        await supertestWithoutAuth
+          .delete(`/api/actions/connector/${connectorId}`)
+          .set(internalReqHeader)
+          .set(roleAdmin.apiKeyHeader);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
+      await esClient.indices.delete({ index: ACTION_INDEX }, { ignore: [404] });
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAdmin);
     });
 
-    // NOTE: this test currently FAILS on the execution assertion and is expected to, until a
-    // gap in core's UIAM credential handling is resolved: the core Elasticsearch cluster client
-    // treats every `essu_` credential on a fake request as Kibana-minted and attaches the UIAM
-    // shared secret (`x-client-authentication`, see
-    // `CoreUiamService.getElasticsearchClientAuthentication` and `ClusterClient.getScopedHeaders`).
-    // UIAM rejects external (user-created) keys presented with client authentication
-    // (`0x1D8502`, "failed client authentication"), so the rule run fails even though the same
-    // credential authenticates directly against Elasticsearch.
+    // Execution success depends on the rule persisting UIAM's externality verdict
+    // (`uiamApiKeyExternal`, captured from `AuthenticatedUser.api_key.internal === false` at
+    // creation) and the rule run's fake request being marked with
+    // `UIAM_EXTERNAL_CREDENTIAL_HEADER` (see `getFakeKibanaRequest` in `rule_loader.ts`): UIAM
+    // rejects external (user-created) API keys presented with client authentication, so the
+    // Elasticsearch cluster client must not attach the UIAM shared secret to this credential.
     it('creates a rule with a raw essu_ API key, reuses the key, and runs the rule successfully', async () => {
       const testStart = new Date();
 
@@ -137,6 +146,72 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body.api_key_created_by_user).to.eql(true);
       expect(response.body.name).to.eql('updated rule with user-managed uiam key');
+    });
+
+    // The connector task authenticates with the rule's raw key too: the `uiamApiKeyExternal`
+    // flag persisted on `action_task_params` makes the actions plugin mark its fake request
+    // with `UIAM_EXTERNAL_CREDENTIAL_HEADER` (see `getFakeRequest` in the actions
+    // `task_runner_factory.ts`), the same way the rule run itself does.
+    it('runs connector actions of a rule created with a raw essu_ API key', async () => {
+      const createdConnector = await alertingApi.helpers.createIndexConnector({
+        roleAuthc: roleAdmin,
+        name: 'index connector for user-managed uiam key test',
+        indexName: ACTION_INDEX,
+      });
+      connectorId = createdConnector.id;
+
+      const response = await supertestWithoutAuth
+        .post('/api/alerting/rule')
+        .set(internalReqHeader)
+        .set(uiamApiKeyHeader)
+        .send({
+          enabled: true,
+          name: 'rule with action and user-managed uiam key',
+          rule_type_id: '.es-query',
+          consumer: 'alerts',
+          schedule: { interval: '1m' },
+          tags: [],
+          actions: [
+            {
+              group: 'query matched',
+              id: connectorId,
+              params: {
+                documents: [{ ruleId: '{{rule.id}}', ruleName: '{{rule.name}}', date: '{{date}}' }],
+              },
+              frequency: {
+                notify_when: 'onActiveAlert',
+                throttle: null,
+                summary: false,
+              },
+            },
+          ],
+          params: {
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            index: [TEST_INDEX],
+            timeField: 'date',
+            esQuery: '{"query":{"match_all":{}}}',
+            timeWindowSize: 20,
+            timeWindowUnit: 's',
+          },
+        });
+
+      expect(response.status).to.eql(200);
+      ruleWithActionId = response.body.id;
+      expect(response.body.api_key_created_by_user).to.eql(true);
+
+      // The connector must execute successfully, authenticating with the raw UIAM key.
+      const documentResponse = await alertingApi.helpers.waitForDocumentInIndex({
+        esClient,
+        indexName: ACTION_INDEX,
+        ruleId: ruleWithActionId!,
+        retryOptions: { retryCount: 12, retryDelay: 2000 },
+      });
+      expect(documentResponse.hits.hits.length).to.be.greaterThan(0);
+      expect((documentResponse.hits.hits[0]._source as { ruleName: string }).ruleName).to.eql(
+        'rule with action and user-managed uiam key'
+      );
     });
   });
 }

@@ -8,6 +8,7 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { isCoreKibanaRequest } from '@kbn/core-http-server-utils';
+import { UIAM_EXTERNAL_CREDENTIAL_HEADER } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -336,6 +337,44 @@ describe('rule_loader', () => {
         'ES API key is not provided to create a fake request, falling back to UIAM API key.',
         expect.objectContaining({ tags: expect.any(Array) })
       );
+    });
+
+    test('marks the fake request as carrying an external credential when the rule persisted uiamApiKeyExternal', async () => {
+      const { fakeRequest } = getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        { uiamApiKey: 'essu_user_created_key', uiamApiKeyExternal: true }
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+        [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
+      });
+    });
+
+    test('marks the fake request as carrying an external credential when config is set to es and the rule has no ES API key', async () => {
+      const esContext = { ...context, logger: mockLogger } as unknown as TaskRunnerContext;
+
+      const { fakeRequest } = getFakeKibanaRequest(esContext, 'default', null, {
+        uiamApiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      });
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+        [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
+      });
+    });
+
+    test('does not mark the fake request when uiamApiKeyExternal is not persisted, even for user-created keys', async () => {
+      const { fakeRequest } = getFakeKibanaRequest(
+        { ...context, shouldGrantUiam: true, apiKeyType: ApiKeyType.UIAM },
+        'default',
+        null,
+        { uiamApiKey: 'essu_user_created_key', apiKeyCreatedByUser: true }
+      );
+      expect(fakeRequest.headers).toEqual({
+        authorization: `ApiKey essu_user_created_key`,
+      });
     });
 
     test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {

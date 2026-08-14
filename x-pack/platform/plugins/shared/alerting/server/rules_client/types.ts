@@ -161,8 +161,14 @@ export type CreateAPIKeyResult =
       apiKeysEnabled: true;
       result?: SecurityPluginGrantAPIKeyResult;
       // `id` is absent for user-created Cloud (UIAM) API keys, which are raw `essu_`
-      // credentials with no key id; alerting never invalidates them.
-      uiamResult?: Omit<SecurityPluginGrantAPIKeyResult, 'id'> & { id?: string };
+      // credentials with no key id; alerting never invalidates them. `external` carries
+      // UIAM's verdict (`AuthenticatedUser.api_key.internal === false`) on whether the key
+      // is an external (user-created Cloud) API key; external keys must not be presented
+      // to Elasticsearch with the UIAM shared secret.
+      uiamResult?: Omit<SecurityPluginGrantAPIKeyResult, 'id'> & {
+        id?: string;
+        external?: boolean;
+      };
     };
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }

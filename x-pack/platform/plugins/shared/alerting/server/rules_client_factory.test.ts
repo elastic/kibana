@@ -874,6 +874,41 @@ describe('RulesClientFactory', () => {
     });
   });
 
+  test('getAuthenticationAPIKey() includes the external verdict when UIAM reports the key as external', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+
+    // UIAM reported the authenticated API key as external (`internal: false`).
+    securityService.authc.getCurrentUser.mockReturnValue({
+      username: 'cloud-user',
+      api_key: { id: '72kse5wBzbyj5dh9Iz13', name: 'org key', internal: false },
+    } as unknown as ReturnType<typeof securityService.authc.getCurrentUser>);
+
+    const request = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey essu_user_created_key`,
+      },
+    });
+
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
+      apiKeysEnabled: true,
+      uiamResult: {
+        name: 'uiam-test',
+        api_key: 'essu_user_created_key',
+        external: true,
+      },
+    });
+  });
+
   test('getAuthenticationAPIKey() throws for a raw essu_ secret in a non-serverless environment', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({

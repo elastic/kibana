@@ -356,6 +356,31 @@ describe('EsAndUiamApiKeyStrategy', () => {
       expect(strategy.getApiKeyIdsForInvalidation(mockTaskInstance({ ...fields }))).toEqual([]);
     });
 
+    test('persists uiamApiKeyExternal when UIAM reports the key as external', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_user_created_key' },
+      });
+
+      hasApiKeyMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+        authentication_type: 'api_key',
+        // UIAM reported the authenticated API key as external
+        api_key: { id: '72kse5wBzbyj5dh9Iz13', name: 'org key', internal: false },
+      });
+      getApiKeyFromRequestMock.mockReturnValue({ api_key: 'essu_user_created_key' });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      const fields = result.get('task-1');
+      expect(mockUiam.grant).not.toHaveBeenCalled();
+      expect(fields?.uiamApiKey).toBe('essu_user_created_key');
+      expect(fields?.userScope.uiamApiKeyExternal).toBe(true);
+      expect(fields?.userScope.apiKeyCreatedByUser).toBe(true);
+    });
+
     test('grants both ES and UIAM keys when request has UIAM credential', async () => {
       const { strategy, coreStart, mockUiam } = createStrategy();
       const request = httpServerMock.createKibanaRequest({

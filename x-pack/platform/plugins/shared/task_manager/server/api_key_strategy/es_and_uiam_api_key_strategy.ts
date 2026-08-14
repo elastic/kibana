@@ -82,6 +82,14 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // apiKeyCreatedByUser must be false (the caller's transient key is not reused).
     const apiKeyCreatedByUser = hasApiKey(user, request) && !cloneApiKey;
 
+    // UIAM's authoritative verdict on whether the request's API key is an external
+    // (user-created Cloud) key, reported by the UIAM authentication provider on the current
+    // user. `internal === false` is the only trustworthy "external" signal: the flag is absent
+    // for session tokens and for fake requests, both of which keep the internal-key treatment
+    // (fail closed). Persisted on `userScope` so task runs can withhold the UIAM shared
+    // secret, which UIAM rejects for external keys.
+    const uiamApiKeyExternal = user?.api_key?.internal === false ? true : undefined;
+
     // Shared shape for the saved-object `userScope`, kept in one place so the
     // clone-UIAM and ES paths below cannot drift apart.
     const toUserScope = (apiKeyId: string, uiamApiKeyId?: string) => ({
@@ -89,6 +97,7 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
       spaceId: request.spaceId,
       apiKeyCreatedByUser,
+      ...(apiKeyCreatedByUser && uiamApiKeyExternal ? { uiamApiKeyExternal } : {}),
       userProfileId: user?.profile_uid,
       userName: user?.username,
     });
@@ -145,7 +154,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
           // User-created keys carry no key id. An empty `apiKeyId` satisfies the task SO
           // schema (required across all model versions) and is already treated as "no id"
           // by consumers (`classifyTaskForUiamProvisioning` skips it, and invalidation is
-          // skipped entirely for user-created keys).
+          // skipped entirely for user-created keys). `uiamApiKeyExternal` (from
+          // `toUserScope`) carries UIAM's verdict for the run-time credential treatment.
           userScope: toUserScope(''),
         });
       });

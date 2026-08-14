@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { UIAM_EXTERNAL_CREDENTIAL_HEADER } from '@kbn/core-security-server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 
 describe('buildTaskFakeRequest', () => {
@@ -30,6 +31,22 @@ describe('buildTaskFakeRequest', () => {
   it('respects a supplied space id', () => {
     const fakeRequest = buildTaskFakeRequest({ apiKey, spaceId: 'team-a' });
     expect(fakeRequest!.spaceId).toBe('team-a');
+  });
+
+  it('marks the fake request as carrying an external credential when uiamApiKeyExternal is persisted', () => {
+    const fakeRequest = buildTaskFakeRequest({
+      apiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: true,
+    });
+    expect(fakeRequest!.headers.authorization).toBe('ApiKey essu_user_created_key');
+    expect(fakeRequest!.headers[UIAM_EXTERNAL_CREDENTIAL_HEADER]).toBe('true');
+  });
+
+  it('does not mark the fake request when uiamApiKeyExternal is absent', () => {
+    const fakeRequest = buildTaskFakeRequest({
+      apiKey: 'essu_framework_granted_key',
+    });
+    expect(fakeRequest!.headers).not.toHaveProperty(UIAM_EXTERNAL_CREDENTIAL_HEADER);
   });
 
   it('does not call the enrichment hook when userProfileId and userName are absent', () => {

@@ -263,6 +263,7 @@ export class PerAlertActionScheduler<
           action: actionToRun,
           apiKey: this.context.apiKey,
           apiKeyId: this.context.apiKeyId,
+          uiamApiKeyExternal: this.context.uiamApiKeyExternal,
           executionId: this.context.executionId,
           priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,

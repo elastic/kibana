@@ -19,6 +19,7 @@ export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKeyOwner',
   'apiKeyCreatedByUser',
   'uiamApiKey',
+  'uiamApiKeyExternal',
 ] as const;
 
 interface ApiKeyRuleProperties {
@@ -26,6 +27,7 @@ interface ApiKeyRuleProperties {
   apiKeyOwner: string | null;
   apiKeyCreatedByUser: boolean | null;
   uiamApiKey?: string | null;
+  uiamApiKeyExternal?: boolean | null;
 }
 
 const encodeApiKey = (id?: string, key?: string): string | null => {
@@ -68,6 +70,12 @@ const getApiKeyRuleProperties = (
     apiKey: encodedApiKey,
     apiKeyCreatedByUser: createdByUser,
     ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
+    // UIAM's verdict on whether the key is an external (user-created Cloud) API key, captured
+    // at authentication time. Rule runs use it to withhold the UIAM shared secret, which UIAM
+    // rejects for external keys.
+    ...(encodedUiamApiKey && apiKey.uiamResult?.external === true
+      ? { uiamApiKeyExternal: true }
+      : {}),
   };
 };
 
@@ -79,7 +87,10 @@ export function apiKeyAsAlertAttributes(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RawRule, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
+): Pick<
+  RawRule,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+> {
   return getApiKeyRuleProperties(apiKey, username, createdByUser);
 }
 
@@ -87,7 +98,10 @@ export function apiKeyAsRuleDomainProperties(
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean
-): Pick<RuleDomain, 'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey'> {
+): Pick<
+  RuleDomain,
+  'apiKey' | 'apiKeyOwner' | 'apiKeyCreatedByUser' | 'uiamApiKey' | 'uiamApiKeyExternal'
+> {
   return getApiKeyRuleProperties(apiKey, username, createdByUser);
 }
 

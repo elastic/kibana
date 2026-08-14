@@ -143,6 +143,29 @@ describe('apiKeyAsAlertAttributes', () => {
     });
   });
 
+  test('persists uiamApiKeyExternal when UIAM reported the key as external', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_user_created_key',
+            external: true,
+          },
+        },
+        'test',
+        true
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: true,
+    });
+  });
+
   test('does not store a UIAM API key without an id when it is not created by the user', () => {
     expect(
       apiKeyAsRuleDomainProperties(

@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import { UIAM_EXTERNAL_CREDENTIAL_HEADER } from '@kbn/core-security-server';
 import { ActionExecutor } from './action_executor';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -195,6 +196,62 @@ describe('Task Runner Factory', () => {
         scheduled: new Date(),
         attempts: 0,
       },
+    });
+  });
+
+  test('marks the fake request as carrying an external credential when uiamApiKeyExternal is persisted', async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: 'essu_user_created_key',
+        uiamApiKeyExternal: true,
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.request.headers).toEqual({
+      authorization: 'ApiKey essu_user_created_key',
+      [UIAM_EXTERNAL_CREDENTIAL_HEADER]: 'true',
+    });
+  });
+
+  test('does not mark the fake request when uiamApiKeyExternal is absent', async () => {
+    const taskRunner = taskRunnerFactory.create(
+      taskManagerMock.createRunContext({ taskInstance: mockedTaskInstance })
+    );
+
+    mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+    spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: 'essu_framework_granted_key',
+      },
+      references: [],
+    });
+
+    await taskRunner.run();
+
+    const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+    expect(executeParams.request.headers).toEqual({
+      authorization: 'ApiKey essu_framework_granted_key',
     });
   });
 

@@ -491,6 +491,14 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
+          // UIAM's authoritative verdict on whether the authenticated API key is an external
+          // (user-created Cloud) key, reported by the UIAM authentication provider on the
+          // current user. `internal === false` is the only trustworthy "external" signal: the
+          // flag is absent for session tokens and for keys Kibana granted itself, both of
+          // which keep the internal-key treatment (fail closed).
+          const isExternalApiKey =
+            securityService.authc.getCurrentUser(request)?.api_key?.internal === false;
+
           // A raw UIAM credential (`essu_...`) means the request was authenticated with a
           // user-created Cloud API key (obtained from the Elastic Cloud UI). Unlike
           // framework-granted UIAM keys (encoded as `base64(id:key)`), it carries no key id,
@@ -506,6 +514,7 @@ export class RulesClientFactory {
               uiamResult: {
                 name: `uiam-${name}`,
                 api_key: authorizationHeader.credentials,
+                ...(isExternalApiKey ? { external: true } : {}),
               },
             };
           }
@@ -531,6 +540,7 @@ export class RulesClientFactory {
                 name: `uiam-${name}`,
                 id: apiKeyId,
                 api_key: apiKey,
+                ...(isExternalApiKey ? { external: true } : {}),
               },
             };
           }

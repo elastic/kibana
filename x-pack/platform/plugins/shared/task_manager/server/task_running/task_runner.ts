@@ -441,6 +441,7 @@ export class TaskManagerRunner implements TaskRunner {
             spaceId: modifiedContext.taskInstance.userScope?.spaceId,
             userProfileId,
             userName,
+            uiamApiKeyExternal: modifiedContext.taskInstance.userScope?.uiamApiKeyExternal,
             enrichFakeRequest: this.enrichFakeRequest,
           });
 
