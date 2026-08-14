@@ -46,6 +46,7 @@ const baseFlyoutState = {
   esqlDataError: null,
   handleFetchData: jest.fn(),
   isRenderLoading: false,
+  hasPreviewedCurrentDraft: false,
   handleRender: jest.fn(),
 };
 
@@ -158,6 +159,16 @@ describe('EditCustomContentFlyout', () => {
       });
       render(<EditCustomContentFlyout {...defaultProps} template="<p>hi</p>" />);
       expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
+    });
+
+    it('is disabled after preview has been applied to the current draft', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM other',
+        hasPreviewedCurrentDraft: true,
+      });
+      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
     });
 
     it('calls handleRender when clicked', async () => {

@@ -26,6 +26,7 @@ export interface EditFlyoutState {
   esqlDataError: string | null;
   handleFetchData: () => Promise<void>;
   isRenderLoading: boolean;
+  hasPreviewedCurrentDraft: boolean;
   handleRender: () => Promise<void>;
 }
 
@@ -61,6 +62,7 @@ export const useEditFlyoutState = ({
     esqlData: null,
     esqlDataError: null,
     isRenderLoading: false,
+    hasPreviewedCurrentDraft: false,
   });
 
   const abortRef = useRef<AbortController | undefined>(undefined);
@@ -172,6 +174,7 @@ export const useEditFlyoutState = ({
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
+        dispatch({ type: 'RENDER_SUCCESS' });
         onRunPreview(applyHtmlTheme(sanitizeHtml(rawHtml), colorMode, euiTheme));
       }
     } catch (err) {
@@ -213,6 +216,7 @@ export const useEditFlyoutState = ({
     esqlDataError: state.esqlDataError,
     handleFetchData,
     isRenderLoading: state.isRenderLoading,
+    hasPreviewedCurrentDraft: state.hasPreviewedCurrentDraft,
     handleRender,
   };
 };
