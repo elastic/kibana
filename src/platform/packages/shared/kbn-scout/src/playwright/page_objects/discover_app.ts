@@ -603,13 +603,30 @@ export class DiscoverApp {
    * panel on a brand-new dashboard, then navigates to that dashboard.
    */
   async saveTableToNewDashboard(title: string) {
+    const saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
-    await expect(this.page.testSubj.locator('savedObjectSaveModal')).toBeVisible();
+    await expect(saveModal).toBeVisible();
     await this.page.testSubj.fill('savedObjectTitle', title);
     // Clicking the EuiRadio wrapper does not toggle the underlying input
     // reliably; clicking the associated label does.
     await this.page.locator('label[for="new-dashboard-option"]').click();
-    await this.confirmSaveModal();
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+
+    // Navigating to the dashboard leaves the current Discover session behind, so a
+    // session with unsaved changes prompts for confirmation first. The prompt does
+    // not appear when there is nothing unsaved, hence the bounded wait.
+    const leaveConfirmModal = this.page.testSubj.locator('appLeaveConfirmModal');
+    const promptAppeared = await leaveConfirmModal
+      .waitFor({ state: 'visible', timeout: 5_000 })
+      .then(
+        () => true,
+        () => false
+      );
+    if (promptAppeared) {
+      await leaveConfirmModal.getByTestId('confirmModalConfirmButton').click();
+    }
+
+    await expect(saveModal).toBeHidden({ timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
   }
 
   async getSharedUrl(): Promise<string> {

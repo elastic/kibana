@@ -18,35 +18,11 @@
  * comes from {@link testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE}.
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../fixtures';
+import { getOnlyControlId, spaceTest, testData } from '../fixtures';
 
 const INITIAL_SELECTION = 'AE';
 const UPDATED_SELECTION = 'CN';
-
-/**
- * All rendered controls, wherever they live.
- *
- * On a dashboard an ES|QL control is stored as a top-level `esql_control` panel
- * rather than a control-group control, so it renders `[data-control-id]` *without*
- * the `control-frame` wrapper that `dashboard.getControlIds()` requires. In
- * Discover the same control does sit inside a control group. Matching on
- * `[data-control-id]` alone therefore works in both places, which is what the FTR
- * suite's `getAllControlIds()` did.
- */
-const getControls = (page: ScoutPage) => page.locator('[data-control-id]');
-
-/** Asserts exactly one control is rendered and returns its id. */
-const getOnlyControlId = async (page: ScoutPage): Promise<string> => {
-  const controls = getControls(page);
-  await expect(controls).toHaveCount(1);
-  const controlId = await controls.getAttribute('data-control-id');
-  if (!controlId) {
-    throw new Error('Control is rendered but has an empty data-control-id');
-  }
-  return controlId;
-};
 
 spaceTest.describe(
   'Discover ES|QL controls - by-value panel editing',

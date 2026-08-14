@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage, ScoutTestFixtures } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import * as testData from './constants';
@@ -108,4 +109,60 @@ export const runCascadeQuery = async (
 ): Promise<boolean> => {
   await pageObjects.discover.writeAndSubmitEsqlQuery(query);
   return pageObjects.discover.isShowingCascadeLayout();
+};
+
+/**
+ * All rendered ES|QL / dashboard controls, wherever they live.
+ *
+ * On a dashboard an ES|QL control is stored as a top-level `esql_control` panel
+ * rather than a control-group control, so it renders `[data-control-id]` *without*
+ * the `control-frame` wrapper that `DashboardApp.getControlIds()` requires. In
+ * Discover the same control does sit inside a control group. Matching on
+ * `[data-control-id]` alone therefore works in both places.
+ */
+export const getControls = (page: ScoutPage) => page.locator('[data-control-id]');
+
+/** Asserts exactly one control is rendered and returns its id. */
+export const getOnlyControlId = async (page: ScoutPage): Promise<string> => {
+  const controls = getControls(page);
+  await expect(controls).toHaveCount(1);
+  const controlId = await controls.getAttribute('data-control-id');
+  if (!controlId) {
+    throw new Error('Control is rendered but has an empty data-control-id');
+  }
+  return controlId;
+};
+
+/**
+ * Creates an ES|QL control from the Discover editor by typing a query that ends in
+ * a variable position, picking "Create control" from the suggestion widget, and
+ * saving the flyout.
+ */
+export const createEsqlControl = async (
+  page: ScoutPage,
+  query: string,
+  { variableName, label }: { variableName?: string; label?: string } = {}
+): Promise<void> => {
+  const codeEditor = new KibanaCodeEditorWrapper(page);
+  await codeEditor.setCodeEditorValue(query);
+  await codeEditor.triggerSuggest(query);
+
+  const suggestionWidget = codeEditor.getCodeEditorSuggestWidget();
+  await suggestionWidget.waitFor({ state: 'visible' });
+  await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
+
+  const flyout = page.testSubj.locator('create_esql_control_flyout');
+  await flyout.waitFor({ state: 'visible' });
+
+  if (variableName !== undefined) {
+    await page.testSubj.fill('esqlVariableName', variableName);
+  }
+  if (label !== undefined) {
+    await page.testSubj.fill('esqlControlLabel', label);
+  }
+
+  const saveButton = page.testSubj.locator('saveEsqlControlsFlyoutButton');
+  await expect(saveButton).toBeEnabled();
+  await saveButton.click();
+  await flyout.waitFor({ state: 'hidden' });
 };
