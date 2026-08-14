@@ -11,7 +11,7 @@ Kibana is the open source interface to query, analyze, visualize, and manage you
 
 ## Getting Started
 
-If you just want to try Kibana out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/docs/get-started) to give it a whirl.
+If you just want to try Kibana out, check out the [Elastic Stack Getting Started Page](https://www.elastic.co/start) to give it a whirl.
 
 If you're interested in diving a bit deeper and getting a taste of Kibana's capabilities, head over to the [Kibana Getting Started Page](https://www.elastic.co/docs/explore-analyze/kibana-data-exploration-learning-tutorial).
 
