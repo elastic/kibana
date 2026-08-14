@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { alertEpisodeToEpisodeAttachment } from './episode_mappers';
 
 const baseEpisode = {
@@ -44,14 +44,25 @@ describe('alertEpisodeToEpisodeAttachment', () => {
     });
   });
 
-  it('normalizes null nullable fields to undefined', () => {
+  it('includes an optional episode name', () => {
+    expect(
+      alertEpisodeToEpisodeAttachment(baseEpisode, { episodeName: 'Host CPU high alert' })
+    ).toEqual(expect.objectContaining({ 'episode.name': 'Host CPU high alert' }));
+  });
+
+  it('normalizes null optional fields from ES|QL to undefined', () => {
     expect(
       alertEpisodeToEpisodeAttachment({
         ...baseEpisode,
+        triggered_at: null,
+        last_ack_action: null,
         last_assignee_uid: null,
+        last_snooze_action: null,
+        snooze_expiry: null,
+        last_tags: null,
         episode_data: null,
         severity: null,
-      })
+      } as AlertEpisode)
     ).toEqual({
       ...baseEpisode,
       triggered_at: undefined,

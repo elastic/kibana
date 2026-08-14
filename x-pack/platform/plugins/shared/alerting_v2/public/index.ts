@@ -237,9 +237,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
           }) => {
             agentBuilder.attachments.addAttachmentType(
               episodeAttachmentType,
-              createEpisodeAttachmentDefinition({
-                container: diContainer,
-              })
+              createEpisodeAttachmentDefinition()
             );
           }
         );

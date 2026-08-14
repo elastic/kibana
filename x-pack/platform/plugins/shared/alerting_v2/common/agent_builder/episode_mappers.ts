@@ -10,24 +10,32 @@ import type { AlertEpisode, EpisodeAttachmentData } from '@kbn/alerting-v2-schem
 /** Normalize null → undefined for attachment storage. */
 const nullishToUndefined = <T>(value: T | null | undefined): T | undefined => value ?? undefined;
 
+export interface AlertEpisodeToAttachmentOptions {
+  episodeName?: string;
+}
+
 /**
  * Maps an {@link AlertEpisode} row to attachment `data`, normalizing nullables to undefined.
  */
-export const alertEpisodeToEpisodeAttachment = (episode: AlertEpisode): EpisodeAttachmentData => ({
+export const alertEpisodeToEpisodeAttachment = (
+  episode: AlertEpisode,
+  options: AlertEpisodeToAttachmentOptions = {}
+): EpisodeAttachmentData => ({
   '@timestamp': episode['@timestamp'],
   'episode.id': episode['episode.id'],
+  ...(options.episodeName ? { 'episode.name': options.episodeName } : {}),
   'episode.status': episode['episode.status'],
   'rule.id': episode['rule.id'],
   group_hash: episode.group_hash,
   first_timestamp: episode.first_timestamp,
   last_timestamp: episode.last_timestamp,
   duration: episode.duration,
-  triggered_at: episode.triggered_at,
-  last_ack_action: episode.last_ack_action,
+  triggered_at: nullishToUndefined(episode.triggered_at),
+  last_ack_action: nullishToUndefined(episode.last_ack_action),
   last_assignee_uid: nullishToUndefined(episode.last_assignee_uid),
-  last_snooze_action: episode.last_snooze_action,
-  snooze_expiry: episode.snooze_expiry,
-  last_tags: episode.last_tags,
+  last_snooze_action: nullishToUndefined(episode.last_snooze_action),
+  snooze_expiry: nullishToUndefined(episode.snooze_expiry),
+  last_tags: nullishToUndefined(episode.last_tags),
   episode_data: nullishToUndefined(episode.episode_data),
   severity: nullishToUndefined(episode.severity),
 });

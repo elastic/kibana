@@ -50,16 +50,31 @@ describe('EpisodeInlineContent', () => {
 });
 
 describe('createEpisodeAttachmentDefinition', () => {
-  it('uses episode id as the label and falls back to origin', () => {
-    const definition = createEpisodeAttachmentDefinition({
-      container: {} as any,
-    });
-    expect(definition.getLabel(createAttachment() as any)).toBe('ep-1');
+  it('uses the episode name as the label', () => {
+    const definition = createEpisodeAttachmentDefinition();
+    expect(
+      definition.getLabel({
+        ...createAttachment(),
+        data: { ...createAttachment().data, 'episode.name': 'Host CPU high alert' },
+      } as any)
+    ).toBe('Host CPU high alert');
+  });
+
+  it('falls back to "Alert episode" when no episode name is available', () => {
+    const definition = createEpisodeAttachmentDefinition();
+    expect(definition.getLabel(createAttachment() as any)).toBe('Alert episode');
     expect(
       definition.getLabel({
         ...createAttachment({ origin: 'origin-only' }),
         data: undefined as any,
       } as any)
-    ).toBe('origin-only');
+    ).toBe('Alert episode');
+  });
+
+  it('omits canvas preview', () => {
+    const definition = createEpisodeAttachmentDefinition();
+    expect(definition.renderCanvasContent).toBeUndefined();
+    expect(definition.getActionButtons).toBeUndefined();
+    expect(definition.canvasWidth).toBeUndefined();
   });
 });

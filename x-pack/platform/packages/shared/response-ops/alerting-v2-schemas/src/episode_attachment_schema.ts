@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { alertEpisodeStatusSchema } from './alert_episode_schema';
 import { tagsSchema } from './common';
-import { ID_MAX_LENGTH, MAX_EPISODE_DATA_LENGTH, MAX_FINGERPRINT_LENGTH } from './constants';
+import {
+  ID_MAX_LENGTH,
+  MAX_EPISODE_DATA_LENGTH,
+  MAX_FINGERPRINT_LENGTH,
+  MAX_NAME_LENGTH,
+} from './constants';
 
 /** Namespaced to match `ALERTING_NAMESPACE` in `@kbn/alerting-v2-constants`. */
 export const EPISODE_ATTACHMENT_TYPE = 'platform.alerting.episode' as const;
@@ -17,6 +22,11 @@ export const episodeAttachmentDataSchema = z
   .object({
     '@timestamp': z.iso.datetime(),
     'episode.id': z.string().min(1).max(ID_MAX_LENGTH),
+    'episode.name': z
+      .string()
+      .min(1)
+      .max(MAX_NAME_LENGTH * 2 + 32)
+      .optional(),
     'episode.status': alertEpisodeStatusSchema,
     'rule.id': z.string().min(1).max(ID_MAX_LENGTH),
     group_hash: z.string().min(1).max(MAX_FINGERPRINT_LENGTH),

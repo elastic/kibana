@@ -40,6 +40,14 @@ describe('episodeAttachmentDataSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts an optional episode name', () => {
+    const result = episodeAttachmentDataSchema.safeParse({
+      ...baseEpisode,
+      'episode.name': 'Host CPU high alert',
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('accepts the required fields only', () => {
     const result = episodeAttachmentDataSchema.safeParse(baseEpisode);
     expect(result.success).toBe(true);
