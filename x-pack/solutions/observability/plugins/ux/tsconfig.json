@@ -71,6 +71,7 @@
     "@kbn/alerting-v2-schemas",
     "@kbn/alerting-v2-constants",
     "@kbn/workflows-management-plugin",
+    "@kbn/slo-plugin"
   ],
   "exclude": ["target/**/*"]
 }

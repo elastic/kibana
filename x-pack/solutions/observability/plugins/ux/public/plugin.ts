@@ -48,6 +48,7 @@ import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -79,6 +80,7 @@ export interface ApmPluginStartDeps {
   spaces?: SpacesPluginStart;
   inference: InferencePublicStart;
   agentBuilder?: AgentBuilderPluginStart;
+  slo?: SLOPublicStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {

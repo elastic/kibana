@@ -41,6 +41,7 @@ import {
   previewRumAlertEsqlRoute,
   upsertRumAlertNotificationsRoute,
 } from './rum/alerts';
+import { generateRumBudgetKqlRoute, listRumBudgetsRoute } from './rum/budgets';
 
 function getTypedUxServerRouteRepository() {
   return {
@@ -73,6 +74,8 @@ function getTypedUxServerRouteRepository() {
     ...generateRumAlertEsqlRoute,
     ...previewRumAlertEsqlRoute,
     ...upsertRumAlertNotificationsRoute,
+    ...listRumBudgetsRoute,
+    ...generateRumBudgetKqlRoute,
   };
 }
 

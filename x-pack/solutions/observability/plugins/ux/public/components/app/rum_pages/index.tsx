@@ -34,6 +34,8 @@ import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumPages } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { TabTrendChart } from '../rum_overview/tab_trend_chart';
+import { BudgetChips } from '../rum_budgets/budget_chips';
+import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
 
 const formatMs = (ms: number | null): string => {
   if (ms == null) {
@@ -211,6 +213,7 @@ export function RumPagesPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<RumPageRow | null>(null);
+  const { items: budgets } = useRumBudgets();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -305,6 +308,13 @@ export function RumPagesPanel() {
       field: 'errorCount',
       name: i18n.translate('xpack.ux.pages.table.errors', { defaultMessage: 'Errors' }),
       width: '90px',
+    },
+    {
+      name: i18n.translate('xpack.ux.pages.table.budgetsLabel', { defaultMessage: 'Budgets' }),
+      width: '220px',
+      render: (item: RumPageRow) => (
+        <BudgetChips items={budgets} pagePath={item.path} includeAppWide={false} />
+      ),
     },
     {
       name: i18n.translate('xpack.ux.pages.table.actions', { defaultMessage: 'Actions' }),

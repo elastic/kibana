@@ -14,12 +14,17 @@ export const OTEL_LONGTASK = 'longtask';
 export const OTEL_EVENT_NAME = 'event_name';
 export const OTEL_EVENT_BROWSER_WEB_VITAL = 'browser.web_vital';
 export const OTEL_EVENT_EXCEPTION = 'exception';
+export const OTEL_EVENT_NAVIGATION = 'browser.navigation';
+export const OTEL_EVENT_RAGE_CLICK = 'browser.frustration.rage_click';
+export const OTEL_EVENT_DEAD_CLICK = 'browser.frustration.dead_click';
+export const OTEL_EVENT_ERROR_CLICK = 'browser.frustration.error_click';
 
 export const OTEL_SERVICE_NAME = 'resource.attributes.service.name';
 export const OTEL_SERVICE_ENVIRONMENT = 'resource.attributes.deployment.environment';
 export const OTEL_BROWSER_NAME = 'resource.attributes.browser.name';
 export const OTEL_BROWSER_OS = 'resource.attributes.browser.platform';
 export const OTEL_PAGE_URL = 'attributes.page.url';
+export const OTEL_PAGE_PATH = 'attributes.page.url.path';
 export const OTEL_HTTP_URL = 'attributes.http.url';
 export const OTEL_URL_FULL = 'attributes.url.full';
 

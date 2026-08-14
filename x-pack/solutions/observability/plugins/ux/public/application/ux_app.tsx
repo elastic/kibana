@@ -190,6 +190,23 @@ function UxAlertsPage() {
   );
 }
 
+function UxBudgetsPage() {
+  useBreadcrumbs([
+    UX_BREADCRUMBS[0],
+    {
+      text: i18n.translate('xpack.ux.breadcrumbs.budgetsTitle', {
+        defaultMessage: 'Budgets',
+      }),
+    },
+  ]);
+
+  return (
+    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
+      <RumHome tab="budgets" />
+    </div>
+  );
+}
+
 function UxReportViewPage() {
   const { path } = useParams('/reports/{templateId}') as unknown as {
     path: { templateId: string };
@@ -249,6 +266,9 @@ const uxRouter = createRouter({
   '/alerts': {
     element: <UxAlertsPage />,
   },
+  '/budgets': {
+    element: <UxBudgetsPage />,
+  },
   '/reports/{templateId}': {
     params: t.type({
       path: t.type({
@@ -295,6 +315,7 @@ export function UXAppRoot({
     lens,
     inference,
     agentBuilder,
+    slo,
   },
   isDev,
   spaceId,
@@ -334,6 +355,7 @@ export function UXAppRoot({
               lens,
               inference,
               agentBuilder,
+              slo,
             }}
           >
             <KibanaThemeProvider

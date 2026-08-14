@@ -15,6 +15,7 @@ import type {
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SLOServerStart } from '@kbn/slo-plugin/server';
 
 export interface UxPluginSetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -30,4 +31,5 @@ export interface UxPluginStartDeps {
   spaces?: SpacesPluginStart;
   inference?: InferenceServerStart;
   alertingVTwo?: AlertingServerStart;
+  slo?: SLOServerStart;
 }

@@ -38,6 +38,9 @@ import { useHasRumData } from '../rum_dashboard/hooks/use_has_rum_data';
 import { TrendMetric } from './trend_metric';
 import { VisitorCountriesPanel } from './visitor_countries';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
+import { useRumBudgetFlyout } from '../rum_budgets/budget_flyout_context';
+import { BudgetChips } from '../rum_budgets/budget_chips';
+import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
 
@@ -53,6 +56,8 @@ export function RumOverviewV2() {
   const { http, docLinks } = useKibanaServices();
   const history = useHistory();
   const { open: openAlert } = useRumAlertFlyout();
+  const { open: openBudget } = useRumBudgetFlyout();
+  const { items: budgets } = useRumBudgets();
   const { hasData, loading: hasDataLoading } = useHasRumData();
   const {
     urlParams: {
@@ -318,6 +323,8 @@ export function RumOverviewV2() {
                 })}
               />
             </EuiLink>
+            <EuiSpacer size="xs" />
+            <BudgetChips items={budgets} templateId="error_rate" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -334,6 +341,8 @@ export function RumOverviewV2() {
                 })}
               />
             </EuiLink>
+            <EuiSpacer size="xs" />
+            <BudgetChips items={budgets} templateId="page_load" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -350,6 +359,8 @@ export function RumOverviewV2() {
                 })}
               />
             </EuiLink>
+            <EuiSpacer size="xs" />
+            <BudgetChips items={budgets} templateId="inp" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -427,6 +438,17 @@ export function RumOverviewV2() {
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="uxOverviewSetBudget"
+            onClick={() => openBudget({ templateId: 'lcp' })}
+          >
+            {i18n.translate('xpack.ux.overview.setBudgetButtonLabel', {
+              defaultMessage: 'Set performance budget',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer />
@@ -448,6 +470,14 @@ export function RumOverviewV2() {
             </EuiTitle>
             <EuiSpacer size="s" />
             {CoreVitals}
+            <EuiSpacer size="s" />
+            <BudgetChips items={budgets} templateId="lcp" pagePath={pageUrl} />
+            <EuiSpacer size="xs" />
+            <BudgetChips items={budgets} templateId="fcp" pagePath={pageUrl} />
+            <EuiSpacer size="xs" />
+            <BudgetChips items={budgets} templateId="cls" pagePath={pageUrl} />
+            <EuiSpacer size="xs" />
+            <BudgetChips items={budgets} templateId="ttfb" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -558,6 +588,8 @@ export function RumOverviewV2() {
                 </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <BudgetChips items={budgets} templateId="frustration" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>

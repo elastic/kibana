@@ -41,7 +41,8 @@
       "spaces",
       "agentBuilder",
       "alertingVTwo",
-      "workflowsManagement"
+      "workflowsManagement",
+      "slo"
     ],
     "requiredBundles": [
       "kibanaReact",

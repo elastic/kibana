@@ -21,7 +21,6 @@ import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
 import { useHistory, useLocation } from 'react-router-dom';
 import { WebApplicationSelect } from './panels/web_application_select';
-import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useHasRumData } from './hooks/use_has_rum_data';
 import { RumDatePicker } from './rum_datepicker';
 import { EmptyStateLoading } from './empty_state_loading';
@@ -38,6 +37,8 @@ import { RumReportView } from '../rum_reports/report_view';
 import { RumAiPanel } from './rum_ai_panel';
 import { RumAlertsPanel } from '../rum_alerts';
 import { RumAlertFlyoutProvider } from '../rum_alerts/alert_flyout_context';
+import { RumBudgetsPanel } from '../rum_budgets';
+import { RumBudgetFlyoutProvider } from '../rum_budgets/budget_flyout_context';
 import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
@@ -75,6 +76,10 @@ const ALERTS_LABEL = i18n.translate('xpack.ux.alerts.tab', {
   defaultMessage: 'Alerts',
 });
 
+const BUDGETS_LABEL = i18n.translate('xpack.ux.budgets.tabLabel', {
+  defaultMessage: 'Budgets',
+});
+
 export type UxHomeTab =
   | 'overview'
   | 'pages'
@@ -83,7 +88,8 @@ export type UxHomeTab =
   | 'journeys'
   | 'reports'
   | 'ai'
-  | 'alerts';
+  | 'alerts'
+  | 'budgets';
 
 export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: string }) {
   const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
@@ -169,17 +175,20 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
         {tab === 'reports' && <RumReportPrintStyles />}
         {isLoading && tab === 'overview' && <EmptyStateLoading />}
         <RumAlertFlyoutProvider>
-          <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
-            {tab === 'overview' && <RumOverviewV2 />}
-            {tab === 'pages' && <RumPagesPanel />}
-            {tab === 'errors' && <RumErrorsPanel />}
-            {tab === 'session-replay' && <SessionReplayPanel />}
-            {tab === 'journeys' && <SessionFunnelPanel />}
-            {tab === 'reports' &&
-              (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
-            {tab === 'ai' && <RumAiPanel />}
-            {tab === 'alerts' && <RumAlertsPanel />}
-          </div>
+          <RumBudgetFlyoutProvider>
+            <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
+              {tab === 'overview' && <RumOverviewV2 />}
+              {tab === 'pages' && <RumPagesPanel />}
+              {tab === 'errors' && <RumErrorsPanel />}
+              {tab === 'session-replay' && <SessionReplayPanel />}
+              {tab === 'journeys' && <SessionFunnelPanel />}
+              {tab === 'reports' &&
+                (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
+              {tab === 'ai' && <RumAiPanel />}
+              {tab === 'alerts' && <RumAlertsPanel />}
+              {tab === 'budgets' && <RumBudgetsPanel />}
+            </div>
+          </RumBudgetFlyoutProvider>
         </RumAlertFlyoutProvider>
       </EuiPageSection>
     </PageTemplateComponent>
@@ -189,9 +198,6 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
 function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
   const history = useHistory();
   const location = useLocation();
-  const sizes = useBreakpoints();
-
-  const datePickerStyle = sizes.isMedium ? {} : { maxWidth: '70%' };
 
   const tabHref = (pathname: string) => ({
     href: history.createHref({ pathname, search: location.search }),
@@ -203,7 +209,7 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
 
   return (
     <div className={tab === 'reports' ? 'uxRumReportNoPrint' : undefined}>
-      <EuiFlexGroup wrap>
+      <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={false}>
           <EuiBetaBadge
             label={i18n.translate('xpack.ux.sessionReplay.experimentalBadge', {
@@ -215,16 +221,17 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
             })}
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ alignItems: 'flex-end', ...datePickerStyle }}>
+        <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
           <RumDatePicker />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <RumKueryBar />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-        <EuiFlexItem grow={false} style={{ minWidth: 240, maxWidth: 360 }}>
+      <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
+        <EuiFlexItem grow={false} style={{ minWidth: 200, maxWidth: 260 }}>
           <WebApplicationSelect />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true} style={{ minWidth: 280 }}>
+          <RumKueryBar />
         </EuiFlexItem>
         <UxEnvironmentFilter />
         <EuiFlexItem grow={false}>
@@ -268,6 +275,13 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
         </EuiTab>
         <EuiTab isSelected={tab === 'alerts'} data-test-subj="uxAlertsTab" {...tabHref('/alerts')}>
           {ALERTS_LABEL}
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'budgets'}
+          data-test-subj="uxBudgetsTab"
+          {...tabHref('/budgets')}
+        >
+          {BUDGETS_LABEL}
         </EuiTab>
       </EuiTabs>
       <EuiSpacer size="m" />
