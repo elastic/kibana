@@ -10,6 +10,7 @@ import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_
 import { SyntheticsService } from '../../../synthetics_service/synthetics_service';
 import { syntheticsMonitorAttributes } from '../../../../common/types/saved_objects';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 
 describe('AddNewMonitorsPublicAPI', () => {
   describe('revertMonitorIfCreated', () => {
@@ -55,6 +56,22 @@ describe('AddNewMonitorsPublicAPI', () => {
         policyIdsToDelete: ['monitor-1-location-1'],
         spaceId: 'default',
       });
+    });
+
+    it('does not delete policies when the monitor SO was created and revert fails', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      jest.spyOn(DeleteMonitorAPI.prototype, 'execute').mockRejectedValue(new Error('forbidden'));
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: true,
+      });
+
+      expect(bulkDelete).not.toHaveBeenCalled();
     });
   });
 

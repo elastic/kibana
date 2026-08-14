@@ -408,12 +408,14 @@ export class AddEditMonitorAPI {
       );
     }
 
-    if (packagePolicyIds.length === 0) {
+    // Saved-monitor policies are owned by DeleteMonitorAPI; orphan cleanup is only for unsaved creates.
+    if (soCreated || packagePolicyIds.length === 0) {
       return;
     }
 
-    const ownedByExistingMonitor =
-      !soCreated && Boolean(await monitorConfigRepository.get(newMonitorId).catch(() => null));
+    const ownedByExistingMonitor = Boolean(
+      await monitorConfigRepository.get(newMonitorId).catch(() => null)
+    );
     if (ownedByExistingMonitor) {
       return;
     }
