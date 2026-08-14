@@ -51,7 +51,10 @@ export const WATCH_TIER_LABELS = Object.freeze({
   deep: i18n.translate('xpack.pnd.conversationCard.watchTier.deep', {
     defaultMessage: 'Deep Watch',
   }),
-  floor: i18n.translate('xpack.pnd.conversationCard.watchTier.floor', {
+  detection: i18n.translate('xpack.pnd.brief.watchTier.detection', {
+    defaultMessage: 'Detection Watch',
+  }),
+  floor: i18n.translate('xpack.pnd.brief.watchTier.floor', {
     defaultMessage: 'Watch Floor',
   }),
 });
