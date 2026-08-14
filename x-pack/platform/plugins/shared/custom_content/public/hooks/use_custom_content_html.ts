@@ -13,26 +13,9 @@ import { stripMarkdownFences } from '@kbn/custom-content-common';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
-import { sanitizeHtml, injectCsp, injectStyleTag } from '../utils/prepare_html';
+import { sanitizeHtml, applyHtmlTheme } from '../utils/prepare_html';
 
 const RENDER_ERROR_MESSAGE = 'Failed to render panel. Try refreshing or rephrasing the request.';
-
-function buildThemeCss(euiTheme: EuiThemeComputed, colorMode: EuiThemeColorModeStandard): string {
-  const isDark = colorMode === 'DARK';
-  const c = euiTheme.colors;
-  const vars: Array<[string, string]> = [
-    ['--cc-color-text', c.textParagraph],
-    ['--cc-color-background', isDark ? c.emptyShade : 'transparent'],
-    ['--cc-color-surface', isDark ? c.lightestShade : c.emptyShade],
-    ['--cc-color-primary', c.primary],
-    ['--cc-color-accent', c.accentSecondary],
-    ['--cc-color-accent-2', c.accent],
-    ['--cc-color-warning', c.warning],
-    ['--cc-color-danger', c.danger],
-    ['--cc-color-border', c.borderBasePlain],
-  ];
-  return `:root{${vars.map(([k, v]) => `${k}:${v}`).join(';')}}`;
-}
 
 export interface UseCustomContentHtmlParams {
   embeddableId: string;
@@ -125,10 +108,7 @@ export function useCustomContentHtml({
   ]);
 
   const html = useMemo(
-    () =>
-      processedHtml
-        ? injectStyleTag(injectCsp(processedHtml, colorMode), buildThemeCss(euiTheme, colorMode))
-        : '',
+    () => (processedHtml ? applyHtmlTheme(processedHtml, colorMode, euiTheme) : ''),
     [processedHtml, colorMode, euiTheme]
   );
 

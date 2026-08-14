@@ -25,6 +25,7 @@ interface CustomContentComponentProps {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   onErrorChange?: (error: string | undefined) => void;
+  previewHtml: string | null;
 }
 
 const iframeContainerCss = css({
@@ -54,6 +55,7 @@ export const CustomContentComponent = ({
   query,
   filters,
   onErrorChange,
+  previewHtml,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, noContent } = useCustomContentHtml({
@@ -100,7 +102,7 @@ export const CustomContentComponent = ({
           {error}
         </KbnDangerCallout>
       )}
-      {!error && noContent && !isLoading && (
+      {!error && noContent && !isLoading && previewHtml == null && (
         <KbnWarningCallout
           announceOnMount
           title={i18n.translate('xpack.customContent.noContent.title', {
@@ -114,10 +116,18 @@ export const CustomContentComponent = ({
           })}
         </KbnWarningCallout>
       )}
-      {!error && !noContent && html && (
+      {previewHtml != null ? (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title="Custom content panel" />
         </div>
+      ) : (
+        !error &&
+        !noContent &&
+        html && (
+          <div css={iframeContainerCss}>
+            <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+          </div>
+        )
       )}
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </div>

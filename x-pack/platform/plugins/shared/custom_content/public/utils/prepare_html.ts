@@ -6,7 +6,7 @@
  */
 
 import DOMPurify from 'dompurify';
-import type { EuiThemeColorModeStandard } from '@elastic/eui';
+import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
@@ -31,6 +31,34 @@ export function injectStyleTag(html: string, style: string): string {
     return html.slice(0, at) + styleTag + html.slice(at);
   }
   return styleTag + html;
+}
+
+export function buildThemeCss(
+  euiTheme: EuiThemeComputed,
+  colorMode: EuiThemeColorModeStandard
+): string {
+  const isDark = colorMode === 'DARK';
+  const c = euiTheme.colors;
+  const vars: Array<[string, string]> = [
+    ['--cc-color-text', c.textParagraph],
+    ['--cc-color-background', isDark ? c.emptyShade : 'transparent'],
+    ['--cc-color-surface', isDark ? c.lightestShade : c.emptyShade],
+    ['--cc-color-primary', c.primary],
+    ['--cc-color-accent', c.accentSecondary],
+    ['--cc-color-accent-2', c.accent],
+    ['--cc-color-warning', c.warning],
+    ['--cc-color-danger', c.danger],
+    ['--cc-color-border', c.borderBasePlain],
+  ];
+  return `:root{${vars.map(([k, v]) => `${k}:${v}`).join(';')}}`;
+}
+
+export function applyHtmlTheme(
+  html: string,
+  colorMode: EuiThemeColorModeStandard,
+  euiTheme: EuiThemeComputed
+): string {
+  return injectStyleTag(injectCsp(html, colorMode), buildThemeCss(euiTheme, colorMode));
 }
 
 export function sanitizeHtml(html: string): string {
