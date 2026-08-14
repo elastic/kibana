@@ -95,7 +95,6 @@ export class LensLayers {
   }
 
   private async activateTab(index: number) {
-    // Click the tab's interactive element rather than its wrapper, which also contains layer actions.
     const tabButton = (await this.layerTabButtonsLocator.all())[index];
     if (!tabButton) {
       throw new Error(`Layer tab button not found at index ${index}`);
