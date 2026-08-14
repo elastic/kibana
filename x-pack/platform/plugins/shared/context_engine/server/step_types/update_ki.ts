@@ -53,7 +53,7 @@ export const getUpdateKiStepDefinition = ({
           { signal: context.abortSignal }
         )
         .catch((error) => {
-          // The KI may have been removed concurrently between the lookup and the update.
+          // The KI may have been removed concurrently.
           if (isResponseError(error) && error.statusCode === 404) {
             throw kiNotFoundError(aiIndexId, kiId);
           }

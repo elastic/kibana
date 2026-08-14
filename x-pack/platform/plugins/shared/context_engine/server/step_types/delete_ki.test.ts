@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AiIndexService } from '../ai_indices/service';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
@@ -12,6 +14,21 @@ import { getDeleteKiStepDefinition } from './delete_ki';
 import { createMockStepContext, mockAiIndexService } from './test_utils';
 
 const searchHit = (index: string) => ({ hits: { hits: [{ _id: 'ki-1', _index: index }] } });
+
+const createNotFoundResponseError = () =>
+  new errors.ResponseError({
+    meta: {
+      aborted: false,
+      attempts: 1,
+      connection: null,
+      context: null,
+      name: 'index_not_found_exception',
+      request: {} as unknown as DiagnosticResult['meta']['request'],
+    },
+    warnings: [],
+    body: 'index_not_found_exception',
+    statusCode: 404,
+  });
 
 const enabled = async () => true;
 const allowed = async () => true;
@@ -82,7 +99,7 @@ describe('getDeleteKiStepDefinition', () => {
         id: 'ki-1',
         refresh: 'wait_for',
       },
-      { signal: context.abortSignal, ignore: [404] }
+      { signal: context.abortSignal }
     );
   });
 
@@ -112,7 +129,7 @@ describe('getDeleteKiStepDefinition', () => {
   it('throws NotFoundError when the KI was removed concurrently', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      delete: jest.fn().mockResolvedValue({ result: 'not_found' }),
+      delete: jest.fn().mockRejectedValue(createNotFoundResponseError()),
     };
     const context = createMockStepContext({
       input: { ai_index_id: 'my-ai-index', ki_id: 'ki-1' },

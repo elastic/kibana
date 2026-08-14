@@ -22,10 +22,7 @@ export interface KiStepDependencies {
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
 }
 
-/**
- * Fails the step when the workflow user lacks the Context Engine write API
- * privilege, mirroring the `requiredPrivileges` on the write HTTP routes.
- */
+/** Fails the step when the workflow user lacks the Context Engine write API privilege. */
 export const assertKiWritePrivilege = async (
   checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>,
   request: KibanaRequest
@@ -38,11 +35,7 @@ export const assertKiWritePrivilege = async (
   }
 };
 
-/**
- * Fails the step when the Context Engine advanced setting is off in the
- * request's space, mirroring the request-time gate on the Context Engine HTTP
- * routes.
- */
+/** Fails the step when the Context Engine setting is off in the request's space. */
 export const assertContextEngineEnabled = async (
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>,
   request: KibanaRequest
@@ -77,8 +70,8 @@ export const resolveAiIndexDest = async (
 
 /**
  * Resolves an AI index id to its backing store, lazily creating the AI index
- * when it does not exist yet. Lazily created AI indices use the index backing
- * store derived from the id, matching the UI create flow's default.
+ * when it does not exist yet with the index dest derived from the id (the UI
+ * create flow's default).
  */
 export const resolveOrCreateAiIndexDest = async (
   getAiIndexService: () => AiIndexService,
@@ -118,10 +111,7 @@ export const resolveOrCreateAiIndexDest = async (
   return dest;
 };
 
-/**
- * Fails the step when the dest is an index pattern (wildcards or a comma
- * expression), which is a valid AI index config but not a single write target.
- */
+/** Fails the step when the dest is an index pattern, which cannot be a write target. */
 export const assertWritableDest = (aiIndexId: string, dest: AiIndexDest): void => {
   if (isIndexPattern(dest.value)) {
     throw new ExecutionError({
@@ -157,8 +147,7 @@ export const findKiBackingIndex = async ({
   kiId: string;
   abortSignal: AbortSignal;
 }): Promise<string> => {
-  // A dest whose backing index was never physically created (no KIs written
-  // yet) must resolve to empty hits, not an index_not_found_exception.
+  // A dest with no physical backing index yet must resolve to empty hits, not an error.
   const response = await esClient.search(
     {
       index: destValue,

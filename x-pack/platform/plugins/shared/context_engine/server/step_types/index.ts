@@ -12,10 +12,8 @@ import { getUpdateKiStepDefinition } from './update_ki';
 import { getDeleteKiStepDefinition } from './delete_ki';
 
 /**
- * Registers the Context Engine KI workflow steps with the workflowsExtensions
- * plugin. Registration is global; the Context Engine advanced setting is
- * space-scoped, so each handler enforces it per request (mirroring the HTTP
- * routes) and the public registration gates editor visibility per space.
+ * Registers the KI workflow steps. Registration is global; the space-scoped
+ * Context Engine setting is enforced per request in each handler.
  */
 export const registerStepDefinitions = ({
   workflowsExtensions,

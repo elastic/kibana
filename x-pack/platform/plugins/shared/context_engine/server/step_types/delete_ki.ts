@@ -6,6 +6,7 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { isResponseError } from '@kbn/es-errors';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
 import type { KiStepDependencies } from './helpers';
 import {
@@ -41,21 +42,22 @@ export const getDeleteKiStepDefinition = ({
         abortSignal: context.abortSignal,
       });
 
-      // `ignore: [404]` resolves a missing document as `result: 'not_found'`
-      // instead of throwing a ResponseError.
-      const response = await esClient.delete(
-        {
-          index: backingIndex,
-          id: kiId,
-          refresh: 'wait_for',
-        },
-        { signal: context.abortSignal, ignore: [404] }
-      );
-
-      // The KI may have been removed concurrently between the lookup and the delete.
-      if (response.result === 'not_found') {
-        throw kiNotFoundError(aiIndexId, kiId);
-      }
+      await esClient
+        .delete(
+          {
+            index: backingIndex,
+            id: kiId,
+            refresh: 'wait_for',
+          },
+          { signal: context.abortSignal }
+        )
+        .catch((error) => {
+          // The KI (or its backing index) may have been removed concurrently.
+          if (isResponseError(error) && error.statusCode === 404) {
+            throw kiNotFoundError(aiIndexId, kiId);
+          }
+          throw error;
+        });
 
       return { output: { id: kiId } };
     },
