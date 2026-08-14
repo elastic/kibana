@@ -171,13 +171,13 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
       await lens.layers.ensureLayerTabIsActive(0);
       await lens.layers.switchToVisualizationSubtype('Percentage');
 
-      expect(await lens.workspace.getErrorCount()).toBe(1);
       await expect(lens.workspace.currentSuggestionError).toBeVisible();
+      expect(await lens.workspace.getErrorCount()).toBe(1);
 
       await lens.layers.switchToVisualizationSubtype('Stacked');
 
-      expect(await lens.workspace.getErrorCount()).toBe(0);
       await expect(lens.workspace.currentSuggestionError).toBeHidden();
+      expect(await lens.workspace.getErrorCount()).toBe(0);
     }
   );
 });

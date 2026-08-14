@@ -137,8 +137,8 @@ export class LensLayers {
 
   /**
    * Switches the XY stacking subtype for the layer at `layerIndex`
-   * (FTR `switchToVisualizationSubtype`). Caller must have a chart that exposes
-   * `lnsStackingOptionsButton` (e.g. bar/area).
+   * Caller must have a chart that exposes lnsStackingOptionsButton` (e.g. bar/area).
+   * Returns once the overlay is gone and the stacking trigger label matches `subType`.
    */
   async switchToVisualizationSubtype(subType: string, layerIndex = 0) {
     const stackingButton = this.page.testSubj.locator(
@@ -146,7 +146,11 @@ export class LensLayers {
     );
     await stackingButton.waitFor({ state: 'visible' });
     await stackingButton.click();
-    await this.page.testSubj.click(`lnsStackingOptionsButton${subType}`);
+    const option = this.page.testSubj.locator(`lnsStackingOptionsButton${subType}`);
+    await option.click();
+    await option.waitFor({ state: 'hidden' });
+    // exact: true — "Stacked" is a substring of "Unstacked"
+    await stackingButton.getByText(subType, { exact: true }).waitFor({ state: 'visible' });
   }
 
   /**
