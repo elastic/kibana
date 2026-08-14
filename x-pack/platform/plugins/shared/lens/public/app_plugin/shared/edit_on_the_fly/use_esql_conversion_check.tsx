@@ -97,23 +97,11 @@ export const useEsqlConversionCheck = (
     // Detect trendline layer from metric visualization state
     const trendlineLayerId = getTrendlineLayerId(state);
 
-    // Guard: layer count (trendline layers don't count — they are auto-included)
-    const dataLayerIds = trendlineLayerId
-      ? layerIds.filter((id) => id !== trendlineLayerId)
-      : layerIds;
-    if (dataLayerIds.length > 1) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages.multi_layer_not_supported
-      );
-    }
-
     // Guard: datasource state exists and has layers
     if (!isValidDatasourceState(datasourceState)) {
       return getEsqlConversionDisabledSettings();
     }
 
-    // Guard: layer access
-    const layerId = dataLayerIds[0];
     const layers = datasourceState.layers as Record<string, FormBasedLayer>;
 
     // Extract column roles from visualization state for semantic ES|QL column naming
@@ -122,7 +110,6 @@ export const useEsqlConversionCheck = (
     if (visState.maxAccessor && typeof visState.maxAccessor === 'string') {
       columnRoles[visState.maxAccessor] = 'max_value';
     }
-
 
     // Iterate over all layers and attempt conversion for each
     const convertibleLayers: ConvertibleLayer[] = [];
