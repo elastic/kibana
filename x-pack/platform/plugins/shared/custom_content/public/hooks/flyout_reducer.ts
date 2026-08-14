@@ -46,7 +46,7 @@ export const flyoutReducer = (
     case 'FETCH_DATA_DONE':
       return { ...state, isDataLoading: false };
     case 'RENDER_START':
-      return { ...state, isRenderLoading: true };
+      return { ...state, isRenderLoading: true, esqlDataError: null };
     case 'RENDER_SUCCESS':
       return { ...state, hasPreviewedCurrentDraft: true };
     case 'RENDER_DONE':

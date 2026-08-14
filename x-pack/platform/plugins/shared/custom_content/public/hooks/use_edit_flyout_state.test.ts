@@ -218,6 +218,57 @@ describe('useEditFlyoutState', () => {
       expect(result.current.esqlDataError).toBe('fetch failed');
     });
 
+    it('clears a stale esqlDataError when a subsequent render succeeds', async () => {
+      mockFetchEsqlData.mockRejectedValueOnce(new Error('fetch failed'));
+      const { result } = renderHook(() => useEditFlyoutState(baseParams));
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+      expect(result.current.esqlDataError).toBe('fetch failed');
+
+      mockFetchEsqlData.mockResolvedValueOnce({ columns: [], values: [], all_columns: [] });
+
+      await act(async () => {
+        await result.current.handleRender();
+      });
+
+      expect(result.current.esqlDataError).toBeNull();
+      expect(mockOnRunPreview).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not apply RENDER_SUCCESS or call onRunPreview when the draft changed mid-flight', async () => {
+      let resolveRender!: () => void;
+      mockFetchEsqlData.mockReturnValue(
+        new Promise((resolve) => {
+          resolveRender = () => resolve({ columns: [], values: [], all_columns: [] });
+        })
+      );
+
+      const { result } = renderHook(() => useEditFlyoutState(baseParams));
+
+      act(() => {
+        result.current.handleRender();
+      });
+      expect(result.current.isRenderLoading).toBe(true);
+
+      // User edits the draft while the fetch is in flight
+      act(() => {
+        result.current.setDraftEsqlQuery('FROM logs | LIMIT 5');
+      });
+      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
+
+      // In-flight render for old draft resolves
+      await act(async () => {
+        resolveRender();
+      });
+
+      // Loading cleared, but stale result must not be applied
+      expect(result.current.isRenderLoading).toBe(false);
+      expect(result.current.hasPreviewedCurrentDraft).toBe(false);
+      expect(mockOnRunPreview).not.toHaveBeenCalled();
+    });
+
     it('shows loading state while rendering', async () => {
       let resolvePromise!: () => void;
       mockFetchEsqlData.mockReturnValue(

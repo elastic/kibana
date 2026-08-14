@@ -56,6 +56,7 @@ export const useEditFlyoutState = ({
 
   const abortRef = useRef<AbortController | undefined>(undefined);
   const runPreviewAbortRef = useRef<AbortController | undefined>(undefined);
+  const draftVersionRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -67,14 +68,14 @@ export const useEditFlyoutState = ({
   const { agentBuilder, core, search } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
 
-  const setDraftEsqlQuery = useCallback(
-    (v: string) => dispatch({ type: 'SET_ESQL_QUERY', payload: v }),
-    []
-  );
-  const setDraftTemplate = useCallback(
-    (v: string) => dispatch({ type: 'SET_TEMPLATE', payload: v }),
-    []
-  );
+  const setDraftEsqlQuery = useCallback((v: string) => {
+    draftVersionRef.current += 1;
+    dispatch({ type: 'SET_ESQL_QUERY', payload: v });
+  }, []);
+  const setDraftTemplate = useCallback((v: string) => {
+    draftVersionRef.current += 1;
+    dispatch({ type: 'SET_TEMPLATE', payload: v });
+  }, []);
 
   const handleFetchData = useCallback(async () => {
     if (!state.draftEsqlQuery) return;
@@ -115,6 +116,7 @@ export const useEditFlyoutState = ({
     const controller = new AbortController();
     runPreviewAbortRef.current = controller;
 
+    const snapVersion = draftVersionRef.current;
     dispatch({ type: 'RENDER_START' });
 
     try {
@@ -132,7 +134,7 @@ export const useEditFlyoutState = ({
       } else {
         rawHtml = state.draftTemplate;
       }
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
         dispatch({ type: 'RENDER_SUCCESS' });
         onRunPreview(prepareHtml(rawHtml, colorMode));
       }
