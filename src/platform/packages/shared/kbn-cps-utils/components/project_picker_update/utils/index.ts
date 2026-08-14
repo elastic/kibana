@@ -8,6 +8,7 @@
  */
 
 import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { getFilterExpressionLookupKey, type FilterExpressionValue } from './filter_input_codec';
 import { projectRoutingCodec, type ProjectRoutingExpression } from './project_routing_codec';
 
@@ -48,9 +49,31 @@ export function reconcileDecodedRouting(
   };
 }
 
+/**
+ * Parses a project routing string into filter expressions and excluded-project overrides.
+ *
+ * Special-cases the legacy `PROJECT_ROUTING.ALL`/`PROJECT_ROUTING.ORIGIN` (`_alias:*`/
+ * `_alias:_origin`) constants before delegating to the codec: the codec only understands
+ * `_id`-based selection, so these would otherwise decode as a stray `_alias` tag filter that
+ * no real project ever matches (aliases are real project names, never literally `*`/`_origin`).
+ * `_alias:_origin` can only be resolved here, not in the codec itself, since it requires
+ * knowing which available project id is the origin project — a codec-external concern.
+ */
 export function parseDefaultProjectRouting(
   routing: ProjectRouting,
-  availableProjectIds: readonly string[]
+  availableProjectIds: readonly string[],
+  originProjectId?: string
 ): { filterExpressions: FilterExpressionValue[]; excludedOverrides: string[] } {
+  if (routing === PROJECT_ROUTING.ALL) {
+    return { filterExpressions: [], excludedOverrides: [] };
+  }
+
+  if (routing === PROJECT_ROUTING.ORIGIN && originProjectId) {
+    return {
+      filterExpressions: [],
+      excludedOverrides: availableProjectIds.filter((id) => id !== originProjectId),
+    };
+  }
+
   return reconcileDecodedRouting(projectRoutingCodec.decode(routing), availableProjectIds);
 }

@@ -197,7 +197,8 @@ export function createStoreReducers() {
             }
           : parseDefaultProjectRouting(
               payload.defaultProjectRouting ?? state.defaultProjectRouting,
-              availableProjectIds
+              availableProjectIds,
+              state.originProjectId
             );
 
       const filterExpressions = createFilterExpressionsMap(parsed.filterExpressions);
@@ -477,7 +478,8 @@ export function createStoreReducers() {
     revertToSpaceDefaults: withUserInteractionMiddleware((state: ProjectPickerState) => {
       const parsed = parseDefaultProjectRouting(
         state.defaultProjectRouting,
-        Array.from(state.availableProjects.keys())
+        Array.from(state.availableProjects.keys()),
+        state.originProjectId
       );
 
       return proposeFilters(state, {

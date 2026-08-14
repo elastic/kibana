@@ -179,7 +179,8 @@ export const ProjectPickerStateProvider = ({
     const defaultProjectRouting = defaultProjectRoutingGetter() ?? '';
     const parsed = parseDefaultProjectRouting(
       currentProjectRouting || defaultProjectRouting,
-      availableProjects.map((project) => project._id)
+      availableProjects.map((project) => project._id),
+      originProjectId
     );
 
     store.actions._setStoreState({
@@ -188,7 +189,13 @@ export const ProjectPickerStateProvider = ({
       filterExpressions: parsed.filterExpressions,
       excludedOverrides: parsed.excludedOverrides,
     });
-  }, [availableProjects, currentProjectRoutingGetter, defaultProjectRoutingGetter, store.actions]);
+  }, [
+    availableProjects,
+    currentProjectRoutingGetter,
+    defaultProjectRoutingGetter,
+    originProjectId,
+    store.actions,
+  ]);
 
   useEffect(() => {
     store.actions._setControlsState({ controlsState });

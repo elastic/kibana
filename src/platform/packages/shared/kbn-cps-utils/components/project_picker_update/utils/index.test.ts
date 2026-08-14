@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { FilterOperator } from './filter_input_codec';
 import { projectRoutingCodec } from './project_routing_codec';
 import { parseDefaultProjectRouting, reconcileDecodedRouting } from '.';
@@ -58,12 +59,12 @@ describe('parseDefaultProjectRouting', () => {
   });
 
   it('parses a single tag filter', () => {
-    expect(parseDefaultProjectRouting('_alias:_origin', availableProjectIds)).toEqual({
+    expect(parseDefaultProjectRouting('_organisation:acme', availableProjectIds)).toEqual({
       filterExpressions: [
         {
           operator: FilterOperator.EQUALS,
-          tagName: '_alias',
-          tagValue: '_origin',
+          tagName: '_organisation',
+          tagValue: 'acme',
         },
       ],
       excludedOverrides: [],
@@ -71,12 +72,41 @@ describe('parseDefaultProjectRouting', () => {
   });
 
   it('parses EXISTS tag filters from wildcard routing', () => {
-    expect(parseDefaultProjectRouting('_alias:*', availableProjectIds)).toEqual({
+    expect(parseDefaultProjectRouting('_organisation:*', availableProjectIds)).toEqual({
       filterExpressions: [
         {
           operator: FilterOperator.EXISTS,
-          tagName: '_alias',
+          tagName: '_organisation',
           tagValue: undefined,
+        },
+      ],
+      excludedOverrides: [],
+    });
+  });
+
+  it('treats the legacy PROJECT_ROUTING.ALL constant as no restriction', () => {
+    expect(parseDefaultProjectRouting(PROJECT_ROUTING.ALL, availableProjectIds)).toEqual({
+      filterExpressions: [],
+      excludedOverrides: [],
+    });
+  });
+
+  it('treats the legacy PROJECT_ROUTING.ORIGIN constant as excluding every project but the origin', () => {
+    expect(
+      parseDefaultProjectRouting(PROJECT_ROUTING.ORIGIN, availableProjectIds, 'origin')
+    ).toEqual({
+      filterExpressions: [],
+      excludedOverrides: ['linked1', 'linked2'],
+    });
+  });
+
+  it('falls back to generic filter decoding for PROJECT_ROUTING.ORIGIN when no origin id is known', () => {
+    expect(parseDefaultProjectRouting(PROJECT_ROUTING.ORIGIN, availableProjectIds)).toEqual({
+      filterExpressions: [
+        {
+          operator: FilterOperator.EQUALS,
+          tagName: '_alias',
+          tagValue: '_origin',
         },
       ],
       excludedOverrides: [],
