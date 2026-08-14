@@ -271,7 +271,7 @@ Whatever the outcome, always finish by leaving one concise comment on the issue 
 
 ## Duplicate detection
 
-Many `failed-test` issues share a single root cause, so the fixer can open several PRs that change the **same method or spec** — usually within minutes of each other, by parallel runs. Before doing any work, rule out that a fix is already in flight:
+Many `failed-test` issues share a single **root cause**, so the fixer can open several PRs that all fix it — usually within minutes of each other, by parallel runs. A duplicate is another PR addressing the **same root cause**, which typically (but not always) surfaces as edits to the same method or spec. The converse does **not** hold: two PRs touching the same method or spec are **not** duplicates when they fix **distinct, unrelated root causes**. Before doing any work, rule out that a fix for *this* root cause is already in flight:
 
 - A pre-step wrote `/tmp/gh-aw/agent/duplicate-candidates.json` (`{ team, candidates }`): `team` is this issue's owning team (from its `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Read it first.
 - Same team means same owning code area, not the same test — so **open each candidate's diff** and treat it as a real match only when it addresses the **same root cause / same method for the same purpose** as this issue's failing test — not merely the same team, a similar file, or the same file for an unrelated reason (a different method of the same page object is not a duplicate).
