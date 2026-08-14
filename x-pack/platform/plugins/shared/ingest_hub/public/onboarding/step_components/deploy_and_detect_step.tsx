@@ -89,14 +89,6 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
-  // ── Agentless section ────────────────────────────────────────────────────
-  const hasStarted = Object.keys(serviceStatuses).length > 0;
-  const allAgentlessSucceeded =
-    hasStarted &&
-    !isDeploying &&
-    failedInstances.length === 0 &&
-    Object.values(serviceStatuses).some((s) => s === 'receiving');
-
   // ── ECF section ──────────────────────────────────────────────────────────
 
   // Derive unique service IDs from persisted instances for ECF filtering.
@@ -141,6 +133,40 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
   const hasEcfOtel = ecfOtelConfigs.length > 0;
   const hasEcfCrowdstrike = ecfCrowdstrikeServices.length > 0;
   const hasAnyEcf = hasEcfUnified || hasEcfOtel || hasEcfCrowdstrike;
+
+  // ── Agentless section ────────────────────────────────────────────────────
+
+  // ECF services are deployed via CloudFormation — filter them out of the agentless status chips
+  // so they don't appear redundantly alongside the ECF panels above.
+  const ecfServiceIds = useMemo(
+    () => new Set([...allEcfConfigs.map((c) => c.serviceId), ...ecfCrowdstrikeServices]),
+    [allEcfConfigs, ecfCrowdstrikeServices]
+  );
+
+  const agentlessStatuses = useMemo(
+    () =>
+      Object.entries(serviceStatuses).filter(([instanceId]) => {
+        const serviceId = instancesById.get(instanceId)?.serviceId ?? instanceId;
+        return !ecfServiceIds.has(serviceId);
+      }),
+    [serviceStatuses, instancesById, ecfServiceIds]
+  );
+
+  const agentlessFailedInstances = useMemo(
+    () =>
+      failedInstances.filter((instanceId) => {
+        const serviceId = instancesById.get(instanceId)?.serviceId ?? instanceId;
+        return !ecfServiceIds.has(serviceId);
+      }),
+    [failedInstances, instancesById, ecfServiceIds]
+  );
+
+  const hasStarted = agentlessStatuses.length > 0;
+  const allAgentlessSucceeded =
+    hasStarted &&
+    !isDeploying &&
+    agentlessFailedInstances.length === 0 &&
+    agentlessStatuses.some(([, state]) => state === 'receiving');
 
   // Whether the agentless section has any content to show
   const hasAgentlessServices = selectedServiceIds.some(
@@ -380,14 +406,14 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
         <>
           {isDeploying && <EuiSpacer size="m" />}
           <EuiFlexGroup wrap gutterSize="s" data-test-subj="deployAndDetectStep-serviceChips">
-            {Object.entries(serviceStatuses).map(([instanceId, state]) => (
+            {agentlessStatuses.map(([instanceId, state]) => (
               <EuiFlexItem grow={false} key={instanceId}>
                 <EuiBadge color={CHIP_COLORS[state]}>{getChipLabel(instanceId)}</EuiBadge>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
 
-          {!isDeploying && failedInstances.length > 0 && (
+          {!isDeploying && agentlessFailedInstances.length > 0 && (
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
@@ -402,7 +428,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                 announceOnMount
                 data-test-subj="deployAndDetectStep-errorCallout"
               >
-                {failedInstances.map((instanceId) => (
+                {agentlessFailedInstances.map((instanceId) => (
                   <EuiText key={instanceId} size="s">
                     {deployErrors[instanceId] ?? getChipLabel(instanceId)}
                   </EuiText>
@@ -411,7 +437,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                 <EuiButton
                   size="s"
                   color="danger"
-                  onClick={() => retryDeploy(failedInstances)}
+                  onClick={() => retryDeploy(agentlessFailedInstances)}
                   data-test-subj="deployAndDetectStep-retryButton"
                 >
                   <FormattedMessage
