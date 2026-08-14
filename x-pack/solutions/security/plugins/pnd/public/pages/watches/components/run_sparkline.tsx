@@ -30,7 +30,7 @@ export const RunSparkline: React.FC<RunSparklineProps> = ({
   seed,
   color,
   bars = 18,
-  width = 56,
+  width = 74,
   height = 18,
 }) => {
   const { euiTheme } = useEuiTheme();

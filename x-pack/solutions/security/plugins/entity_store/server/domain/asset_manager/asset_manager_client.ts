@@ -27,6 +27,7 @@ import {
   stopHistorySnapshotTask,
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
+import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
@@ -62,7 +63,6 @@ import type { LogsExtractionClient } from '../logs_extraction';
 import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import { installEuidStoredScripts, deleteEuidStoredScripts } from './euid_stored_scripts';
 import {
   type TelemetryReporter,
   ENTITY_STORE_DELETION_EVENT,
@@ -162,21 +162,11 @@ export class AssetManagerClient {
         }),
       ]);
 
-      // Phase 2: Initialize engines (and EUID scripts). Descriptors must exist before
-      // namespace-scoped TM schedules are created — those tasks self-delete when they
-      // find zero engines, so scheduling them in parallel with initEntity can tear
-      // down a freshly scheduled status task mid-install.
-      await Promise.all([
-        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
-
-        // Stored scripts are managed assets with no granular ES privilege (only `manage`/`all`),
-        // so create them as the internal user rather than forcing the enabling user to hold
-        // broad cluster `manage`.
-        installEuidStoredScripts({
-          esClient: this.internalEsClient,
-          logger: this.logger,
-        }),
-      ]);
+      // Phase 2: Initialize engines. Descriptors must exist before namespace-scoped TM
+      // schedules are created — those tasks self-delete when they find zero engines,
+      // so scheduling them in parallel with initEntity can tear down a freshly
+      // scheduled status task mid-install.
+      await Promise.all(entityTypes.map((type) => this.initEntity(request, type, logsExtraction)));
 
       // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
       await Promise.all([
@@ -189,6 +179,13 @@ export class AssetManagerClient {
         }),
 
         scheduleStatusReportTask({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+        }),
+
+        scheduleResilienceTask({
           logger: this.logger,
           taskManager: this.taskManager,
           namespace: this.namespace,
@@ -256,10 +253,10 @@ export class AssetManagerClient {
         this.remoteLogExtractionStateClient.delete(type),
       ]);
 
-      // The ES indices/data streams and the EUID stored scripts are shared across all
-      // entity types in the namespace (their names carry the namespace, not the type).
-      // Only remove them once no engine remains — otherwise the surviving engines lose
-      // the read/write targets and scripts their extraction queries still depend on.
+      // The ES indices/data streams are shared across all entity types in the namespace
+      // (their names carry the namespace, not the type). Only remove them once no engine
+      // remains — otherwise the surviving engines lose the read/write targets their
+      // extraction queries still depend on.
       const remainingEngines = await this.engineDescriptorClient.getAll();
       if (remainingEngines.length === 0) {
         this.logger.debug(`Cleaning up namespace because last engine was uninstalled`);
@@ -280,11 +277,8 @@ export class AssetManagerClient {
 
   /**
    * Tears down namespace-scoped Entity Store resources: Task Manager schedules
-   * (history, status, maintainers), Elasticsearch data-plane assets, EUID stored
-   * scripts, and global state.
-   *
-   * EUID script deletion must use the requesting-user ES client: kibana_system
-   * can put managed scripts but not delete them without cluster manage/all.
+   * (history, status, maintainers), Elasticsearch data-plane assets, and global
+   * state.
    */
   public async cleanupNamespace(): Promise<void> {
     await Promise.all([
@@ -294,6 +288,11 @@ export class AssetManagerClient {
         namespace: this.namespace,
       }),
       stopStatusReportTask({
+        taskManager: this.taskManager,
+        logger: this.logger,
+        namespace: this.namespace,
+      }),
+      stopResilienceTask({
         taskManager: this.taskManager,
         logger: this.logger,
         namespace: this.namespace,
@@ -310,16 +309,12 @@ export class AssetManagerClient {
     ]);
 
     // After schedules are gone: remove the ES/SO resources those tasks used so
-    // an in-flight or soon-to-run task cannot hit deleted indices/scripts.
+    // an in-flight or soon-to-run task cannot hit deleted indices.
     await Promise.all([
       uninstallElasticsearchAssets({
         esClient: this.esClient,
         logger: this.logger,
         namespace: this.namespace,
-      }),
-      deleteEuidStoredScripts({
-        esClient: this.esClient,
-        logger: this.logger,
       }),
       this.globalStateClient.delete(),
     ]);
@@ -575,6 +570,49 @@ export class AssetManagerClient {
       }
       throw e;
     }
+  }
+
+  /**
+   * Checks whether the three shared per-namespace assets exist (latest index, updates data stream,
+   * metadata data stream) and reinstalls any that are missing. Returns true if anything was
+   * recreated, false if all assets were already present.
+   *
+   * Safe to call from a running task — the underlying creates use `throwIfExists: false`.
+   */
+  public async reinstallSharedAssetsIfMissing(): Promise<boolean> {
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
+    const metadataDataStream = getMetadataEntitiesDataStreamName(this.namespace);
+
+    const [latestExists, updatesExists, metadataExists] = await Promise.all([
+      this.esClient.indices.exists({ index: latestIndex }),
+      this.esClient.indices
+        .getDataStream({ name: updatesDataStream }, { ignore: [404] })
+        .then((r) => (r?.data_streams?.length ?? 0) > 0),
+      this.esClient.indices
+        .getDataStream({ name: metadataDataStream }, { ignore: [404] })
+        .then((r) => (r?.data_streams?.length ?? 0) > 0),
+    ]);
+
+    if (latestExists && updatesExists && metadataExists) {
+      return false;
+    }
+
+    const missing = [
+      !latestExists && latestIndex,
+      !updatesExists && updatesDataStream,
+      !metadataExists && metadataDataStream,
+    ].filter(Boolean);
+    this.logger.warn(
+      `Recreating missing entity store assets in ${this.namespace}: ${missing.join(', ')}`
+    );
+
+    await installSharedElasticsearchAssets({
+      esClient: this.esClient,
+      logger: this.logger,
+      namespace: this.namespace,
+    });
+    return true;
   }
 
   /**

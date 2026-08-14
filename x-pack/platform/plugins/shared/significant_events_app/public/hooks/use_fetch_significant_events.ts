@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type {
-  SignificantEvent,
+  SignificantEventResponse,
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
@@ -33,13 +33,7 @@ export const useFetchSignificantEvents = ({
   stream,
   search,
 }: UseFetchSignificantEventsParams) => {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   const [pagination, setPagination] = useState({ page: 1, perPage: 25 });
@@ -48,7 +42,7 @@ export const useFetchSignificantEvents = ({
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
   }, [from, to, status, severity, stream, search]);
 
-  const query = useQuery<PaginatedResponse<SignificantEvent>, Error>({
+  const query = useQuery<PaginatedResponse<SignificantEventResponse>, Error>({
     queryKey: [
       'significantEvents',
       pagination.page,
@@ -62,7 +56,7 @@ export const useFetchSignificantEvents = ({
     ],
     queryFn: async ({
       signal,
-    }: QueryFunctionContext): Promise<PaginatedResponse<SignificantEvent>> => {
+    }: QueryFunctionContext): Promise<PaginatedResponse<SignificantEventResponse>> => {
       return significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
         params: {
           query: {

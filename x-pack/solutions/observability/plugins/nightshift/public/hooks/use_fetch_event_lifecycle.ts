@@ -23,15 +23,20 @@ export const useFetchEventLifecycle = (
   eventUuid: string,
   { enabled = true }: { enabled?: boolean } = {}
 ): UseQueryResult<EventLifecycleResponse, Error> => {
-  const { http } = useKibana().services;
+  const {
+    significantEvents: { significantEventsRepositoryClient },
+  } = useKibana().services;
 
   return useQuery<EventLifecycleResponse, Error>({
     queryKey: ['nightshift.eventLifecycle', eventUuid],
     enabled: enabled && Boolean(eventUuid),
     queryFn: async ({ signal }) => {
-      return http.get<EventLifecycleResponse>(
-        `/internal/significant_events/events/${encodeURIComponent(eventUuid)}/lifecycle`,
-        { signal }
+      return significantEventsRepositoryClient.fetch(
+        'GET /internal/significant_events/events/{id}/lifecycle',
+        {
+          params: { path: { id: eventUuid } },
+          signal: signal ?? null,
+        }
       );
     },
     refetchInterval: REFETCH_INTERVAL_MS,

@@ -537,31 +537,11 @@ export const GoogleDriveConnector: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Google Drive test handler');
-      try {
-        const response = await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
-          params: {
-            fields: 'user',
-          },
-        });
-
-        if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Google Drive API' };
-        }
-
-        return {
-          ok: true,
-          message: `Successfully connected to Google Drive API as ${
-            response.data.user?.emailAddress || 'user'
-          }`,
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect to Google Drive API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      await ctx.client.get(`${GOOGLE_DRIVE_API_BASE}/about`, {
+        params: { fields: 'user' },
+      });
+      return {};
     },
+    enabled: true,
   },
 };

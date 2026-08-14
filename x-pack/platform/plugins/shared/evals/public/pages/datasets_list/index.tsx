@@ -39,7 +39,9 @@ import {
   type DatasetMaturity,
   type DatasetSummary,
 } from '@kbn/evals-common';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useCreateDataset, useDatasetTagSuggestions, useDatasets } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
@@ -49,6 +51,13 @@ import {
   DatasetTagFilters,
   DatasetTagsFields,
 } from '../../components/dataset_tags';
+import {
+  DatasetSpacesBadge,
+  DatasetSpacesPicker,
+  useDatasetSharing,
+} from '../../components/dataset_spaces';
+import { useAccessibleSpaces } from '../../hooks/use_spaces';
+import { getErrorMessage } from '../../utils/get_error_message';
 import * as i18n from './translations';
 
 type SortableField = Extract<
@@ -74,9 +83,16 @@ export const DatasetsListPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [maturity, setMaturity] = useState<DatasetMaturity | null>(null);
+  const [spaceIds, setSpaceIds] = useState<string[]>([]);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [spacesError, setSpacesError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
 
   const createDataset = useCreateDataset();
+  const { isEnabled: spacesEnabled, activeSpaceId } = useAccessibleSpaces();
+  const { spaceNamesFor } = useDatasetSharing(spaceIds);
+  const { services } = useKibana<{ notifications?: NotificationsStart }>();
+  const { notifications } = services;
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchText), 300);
@@ -145,6 +161,18 @@ export const DatasetsListPage: React.FC = () => {
         render: (datasetMaturity: DatasetMaturity | undefined) =>
           datasetMaturity ? <DatasetMaturityBadge maturity={datasetMaturity} /> : '-',
       },
+      ...(spacesEnabled
+        ? [
+            {
+              field: 'space_ids',
+              name: i18n.COLUMN_SPACES,
+              width: '120px',
+              render: (datasetSpaceIds: string[] | undefined) => (
+                <DatasetSpacesBadge spaceIds={datasetSpaceIds} />
+              ),
+            } as EuiBasicTableColumn<DatasetSummary>,
+          ]
+        : []),
       {
         field: 'updated_at',
         name: i18n.COLUMN_LAST_UPDATED,
@@ -176,7 +204,7 @@ export const DatasetsListPage: React.FC = () => {
     }
 
     return baseColumns;
-  }, [history, canManage, toggleTagFilter]);
+  }, [history, canManage, spacesEnabled, toggleTagFilter]);
 
   const pagination = {
     pageIndex,
@@ -203,18 +231,25 @@ export const DatasetsListPage: React.FC = () => {
     }
   };
 
+  const clearCreateErrors = () => {
+    setNameError(null);
+    setSpacesError(null);
+    setCreateError(null);
+  };
+
   const openCreateFlyout = () => {
     setName('');
     setDescription('');
     setTags([]);
     setMaturity(null);
-    setCreateError(null);
+    setSpaceIds(activeSpaceId ? [activeSpaceId] : []);
+    clearCreateErrors();
     setIsCreateFlyoutOpen(true);
   };
 
   const closeCreateFlyout = () => {
     setIsCreateFlyoutOpen(false);
-    setCreateError(null);
+    clearCreateErrors();
   };
 
   const clearFilters = () => {
@@ -226,23 +261,49 @@ export const DatasetsListPage: React.FC = () => {
   };
 
   const onCreateDataset = async () => {
+    clearCreateErrors();
+
     if (!name.trim()) {
-      setCreateError(i18n.CREATE_DATASET_NAME_REQUIRED_ERROR);
+      setNameError(i18n.CREATE_DATASET_NAME_REQUIRED_ERROR);
       return;
     }
 
+    if (spacesEnabled && spaceIds.length === 0) {
+      setSpacesError(i18n.CREATE_DATASET_SPACES_REQUIRED_ERROR);
+      return;
+    }
+
+    // The picker starts on the active space, which is also what the server
+    // stamps when the assignment is omitted, so only a real change is sent.
+    const isDefaultSpaceSelection =
+      !spacesEnabled || (spaceIds.length === 1 && spaceIds[0] === activeSpaceId);
+
+    const isVisibleHere =
+      isDefaultSpaceSelection || (activeSpaceId != null && spaceIds.includes(activeSpaceId));
+
     try {
-      setCreateError(null);
+      const datasetName = name.trim();
       const { dataset_id: datasetId } = await createDataset.mutateAsync({
-        name: name.trim(),
+        name: datasetName,
         description: description.trim(),
         ...(tags.length > 0 ? { tags } : {}),
         ...(maturity ? { maturity } : {}),
+        ...(isDefaultSpaceSelection ? {} : { space_ids: spaceIds }),
       });
       closeCreateFlyout();
+
+      // The detail page reads through the active space, so a dataset created
+      // only for other spaces would open on a not-found.
+      if (!isVisibleHere) {
+        notifications?.toasts.addSuccess(
+          i18n.getCreatedInOtherSpacesMessage(datasetName, spaceNamesFor(spaceIds))
+        );
+        return;
+      }
+
       history.push(`/datasets/${datasetId}`);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : String(err));
+      setCreateError(getErrorMessage(err));
     }
   };
 
@@ -309,7 +370,7 @@ export const DatasetsListPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
+                  <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
                     {i18n.CREATE_DATASET_BUTTON}
                   </EuiButton>
                 </EuiFlexItem>
@@ -338,7 +399,7 @@ export const DatasetsListPage: React.FC = () => {
             actions={
               canManage
                 ? [
-                    <EuiButton onClick={openCreateFlyout} fill iconType="plusInCircle">
+                    <EuiButton onClick={openCreateFlyout} fill iconType="plusCircle">
                       {i18n.CREATE_DATASET_BUTTON}
                     </EuiButton>,
                   ]
@@ -347,7 +408,7 @@ export const DatasetsListPage: React.FC = () => {
           />
         ) : showNoMatches ? (
           <EuiEmptyPrompt
-            iconType="search"
+            iconType="magnify"
             title={<h2>{i18n.NO_MATCHES_TITLE}</h2>}
             body={
               <p>
@@ -383,6 +444,7 @@ export const DatasetsListPage: React.FC = () => {
           datasetId={datasetPendingDelete.id}
           datasetName={datasetPendingDelete.name}
           examplesCount={datasetPendingDelete.examples_count}
+          spaceIds={datasetPendingDelete.space_ids}
           onClose={() => setDatasetPendingDelete(null)}
         />
       ) : null}
@@ -394,17 +456,28 @@ export const DatasetsListPage: React.FC = () => {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
+            {createError ? (
+              <>
+                <KbnDangerCallout
+                  announceOnMount
+                  size="s"
+                  title={i18n.CREATE_DATASET_FAILED_TITLE}
+                  text={<p>{createError}</p>}
+                />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             <EuiForm component="form">
               <EuiFormRow
                 label={i18n.CREATE_DATASET_NAME_LABEL}
-                isInvalid={Boolean(createError)}
-                error={createError ?? undefined}
+                isInvalid={Boolean(nameError)}
+                error={nameError ?? undefined}
                 fullWidth
               >
                 <EuiFieldText
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  isInvalid={Boolean(createError)}
+                  isInvalid={Boolean(nameError)}
                   maxLength={MAX_DATASET_NAME_LENGTH}
                   fullWidth
                 />
@@ -424,6 +497,11 @@ export const DatasetsListPage: React.FC = () => {
                 onTagsChange={setTags}
                 onMaturityChange={setMaturity}
                 suggestedTags={suggestedTags}
+              />
+              <DatasetSpacesPicker
+                value={spaceIds}
+                onChange={setSpaceIds}
+                error={spacesError ?? undefined}
               />
             </EuiForm>
           </EuiFlyoutBody>

@@ -59,9 +59,9 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response.body.query).toStrictEqual(created.query);
       // Audit fields: createdAt/createdBy preserved, updatedAt/updatedBy refreshed.
       expect(response.body.id).toBe(created.id);
-      expect(response.body.createdAt).toBe(created.createdAt);
-      expect(response.body.createdBy).toBe(created.createdBy);
-      expect(response.body.updatedAt).not.toBe(created.updatedAt);
+      expect(response.body.created_at).toBe(created.created_at);
+      expect(response.body.created_by).toBe(created.created_by);
+      expect(response.body.updated_at).not.toBe(created.updated_at);
       expect(response.body.metadata.version).toBe(created.metadata.version + 1);
     }
   );
@@ -459,6 +459,57 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('INVALID_STATE_TRANSITION');
+    }
+  );
+
+  const buildSignalRuleData = (name: string) =>
+    buildCreateRuleData({
+      kind: 'signal',
+      state_transition: undefined,
+      recovery_strategy: undefined,
+      query: {
+        format: 'standalone',
+        breach: { query: 'FROM logs-* | LIMIT 10' },
+      },
+      metadata: { name },
+    });
+
+  apiTest(
+    'validation: should reject updating a signal rule query to composed format',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildSignalRuleData('signal-to-composed')
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          query: {
+            format: 'composed',
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
+      // The rejected update must not have persisted: the query stays standalone.
+      const stored = await apiServices.alertingV2.rules.get(created.id);
+      expect(stored.query.format).toBe('standalone');
+    }
+  );
+
+  apiTest(
+    'validation: should reject setting recovery_strategy on a signal rule',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildSignalRuleData('signal-with-recovery')
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { recovery_strategy: 'no_breach' },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_SIGNAL_RULE');
     }
   );
 

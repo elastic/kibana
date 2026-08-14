@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
 import { AlertingEpisodeGroupingTags } from '../grouping/alerting_episode_grouping_tags';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';

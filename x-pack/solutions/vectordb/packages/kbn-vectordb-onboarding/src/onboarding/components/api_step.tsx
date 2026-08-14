@@ -142,7 +142,7 @@ export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: 
                   button={
                     <EuiButtonEmpty
                       size="s"
-                      iconType="arrowDown"
+                      iconType="chevronSingleDown"
                       color="text"
                       iconSide="right"
                       onClick={() => setIsLanguagePopoverOpen(!isLanguagePopoverOpen)}

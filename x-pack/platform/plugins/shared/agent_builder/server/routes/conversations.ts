@@ -10,6 +10,7 @@ import path from 'node:path';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
+  GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
 } from '../../common/http_api/conversations';
@@ -117,7 +118,7 @@ export function registerConversationRoutes({
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
 
-        return response.ok({
+        return response.ok<GetConversationResponse>({
           body: conversation,
         });
       })

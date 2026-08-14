@@ -14,7 +14,7 @@ import type {
   ErrorResponse,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_ERROR_CODES } from '../../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
   getRuleNotFoundMessage,
   getRuleVersionConflictMessage,
@@ -56,10 +56,10 @@ export const RULE_RESPONSE: RuleResponse = {
     ...SAMPLE_RULE_DATA.metadata,
     version: 1,
   },
-  createdBy: 'elastic',
-  createdAt: '2026-01-15T12:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-01-15T12:00:00.000Z',
+  created_by: 'elastic',
+  created_at: '2026-01-15T12:00:00.000Z',
+  updated_by: 'elastic',
+  updated_at: '2026-01-15T12:00:00.000Z',
 };
 
 export const BULK_OPERATION_REQUEST: BulkByIdsParams = {
@@ -117,7 +117,7 @@ export const RULE_NOT_FOUND_RESPONSE: OasExampleEntry = {
   name: 'ruleNotFound',
   summary: 'No rule exists for the given ID',
   value: {
-    code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+    code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
     error: 'Not Found',
     message: getRuleNotFoundMessage(RULE_RESPONSE.id),
     details: { rule_id: RULE_RESPONSE.id },
@@ -129,7 +129,7 @@ export const RULE_VERSION_CONFLICT_RESPONSE: OasExampleEntry = {
   name: 'ruleVersionConflict',
   summary: RULE_VERSION_CONFLICT_DESCRIPTION,
   value: {
-    code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
+    code: ALERTING_ERROR_CODES.RULE_VERSION_CONFLICT,
     error: 'Conflict',
     message: getRuleVersionConflictMessage(RULE_RESPONSE.id),
     details: { rule_id: RULE_RESPONSE.id },
@@ -142,7 +142,7 @@ export const MAX_SCHEDULES_PER_MINUTE_EXCEEDED_RESPONSE: OasExampleEntry = {
   summary:
     'Indicates the request is invalid, for example enabling the rule would exceed the configured schedule limit.',
   value: {
-    code: ALERTING_V2_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+    code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
     error: 'Bad Request',
     message: `Rule schedule of "1m" would exceed the limit of 400 rule runs per minute`,
     details: { interval: '1m', maxScheduledPerMinute: 400 },
@@ -154,7 +154,7 @@ export const RULE_DISABLED_RESPONSE: OasExampleEntry = {
   name: 'ruleDisabled',
   summary: 'Indicates the rule is disabled and cannot be run.',
   value: {
-    code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+    code: ALERTING_ERROR_CODES.RULE_DISABLED,
     error: 'Bad Request',
     message: `Rule with id "${RULE_RESPONSE.id}" is disabled and cannot be run`,
     details: { rule_id: RULE_RESPONSE.id },
@@ -166,7 +166,7 @@ export const RULE_ALREADY_RUNNING_RESPONSE: OasExampleEntry = {
   name: 'ruleAlreadyRunning',
   summary: 'Indicates the rule is already running or the run request conflicted.',
   value: {
-    code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+    code: ALERTING_ERROR_CODES.RULE_ALREADY_RUNNING,
     error: 'Conflict',
     message: `Rule with id "${RULE_RESPONSE.id}" is already running`,
     details: { rule_id: RULE_RESPONSE.id },

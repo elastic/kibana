@@ -25,13 +25,13 @@ import { BehaviorSubject, EMPTY, map, merge, skip, switchMap } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { getServices } from './services';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
 } from '../common/panel_context_attachment';
 import type { CustomContentEmbeddableState } from '../server';
-import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
 import { CustomContentComponent } from './components/custom_content_component';
 
 const EditCustomContentFlyout = lazy(() =>

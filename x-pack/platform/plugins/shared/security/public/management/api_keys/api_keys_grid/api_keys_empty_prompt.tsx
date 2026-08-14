@@ -166,7 +166,7 @@ export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> 
     <KibanaPageTemplate.EmptyPrompt
       iconType="managementApp"
       title={
-        <h1>
+        <h1 data-test-subj="apiKeysEmptyPromptTitle">
           <FormattedMessage
             id="xpack.security.management.apiKeysEmptyPrompt.emptyTitle"
             defaultMessage="Create your first API key"
