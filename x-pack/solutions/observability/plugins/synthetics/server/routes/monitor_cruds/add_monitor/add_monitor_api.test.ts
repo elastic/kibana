@@ -73,6 +73,28 @@ describe('AddNewMonitorsPublicAPI', () => {
 
       expect(bulkDelete).not.toHaveBeenCalled();
     });
+
+    it('deletes the monitor and its policies via DeleteMonitorAPI when the monitor SO was created', async () => {
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      const deleteMonitorExecute = jest
+        .spyOn(DeleteMonitorAPI.prototype, 'execute')
+        .mockResolvedValue(undefined as any);
+      const api = buildApi(jest.fn().mockResolvedValue({ id: 'monitor-1' }));
+
+      await api.revertMonitorIfCreated({
+        newMonitorId: 'monitor-1',
+        packagePolicyIds: ['monitor-1-location-1'],
+        soCreated: true,
+      });
+
+      // The full monitor delete (which tears down its Fleet package policies
+      // too) owns cleanup here; the direct package-policy bulkDelete path is
+      // only for orphan policies from a create that never reached the SO.
+      expect(deleteMonitorExecute).toHaveBeenCalledWith({ monitorIds: ['monitor-1'] });
+      expect(bulkDelete).not.toHaveBeenCalled();
+    });
   });
 
   it('should normalize schedule', async function () {

@@ -9,6 +9,7 @@ import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/p
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
@@ -50,7 +51,7 @@ export interface PrivateConfig {
   globalParams: Record<string, string>;
 }
 
-interface EnrolledAgentHosts {
+interface EnrolledAgents {
   agentIds: string[];
 }
 
@@ -208,7 +209,7 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean,
-    conditionHosts?: EnrolledAgentHosts,
+    conditionHosts?: EnrolledAgents,
     existingCondition?: string | null
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
@@ -291,33 +292,30 @@ export class SyntheticsPrivateLocation {
   /**
    * Resolves enrolled Fleet agents for one scalable location policy. This is
    * deliberately paginated: a large policy must not silently ignore agents
-   * beyond Fleet's first result page.
+   * beyond Fleet's first result page. Pagination stops on a short page
+   * (fewer than `perPage` results) rather than trusting `total`, which some
+   * callers may not populate.
    */
-  private async getEnrolledAgentHosts(agentPolicyId: string): Promise<EnrolledAgentHosts> {
+  private async getEnrolledAgents(agentPolicyId: string): Promise<EnrolledAgents> {
     const agentIds = new Set<string>();
     const perPage = 1000;
     let page = 1;
-    let fetched = 0;
-    let total = Infinity;
 
-    while (fetched < total) {
-      const { agents, total: resultTotal } =
-        await this.server.fleet.agentService.asInternalUser.listAgents({
-          showInactive: false,
-          perPage,
-          page,
-          kuery: `policy_id:"${agentPolicyId}"`,
-        });
+    while (true) {
+      const { agents } = await this.server.fleet.agentService.asInternalUser.listAgents({
+        showInactive: false,
+        perPage,
+        page,
+        kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
+      });
 
-      total = resultTotal ?? fetched + agents.length;
       for (const agent of agents) {
         if (agent.id && isEqlSafeLiteral(agent.id)) {
           agentIds.add(agent.id);
         }
       }
 
-      fetched += agents.length;
-      if (agents.length === 0) {
+      if (agents.length < perPage) {
         break;
       }
       page += 1;
@@ -327,9 +325,9 @@ export class SyntheticsPrivateLocation {
   }
 
   /** Resolves each touched scalable location at most once per monitor batch. */
-  private async getConditionHostsByLocation(
+  private async getScalableAgentsByLocation(
     locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
-  ): Promise<Map<string, EnrolledAgentHosts>> {
+  ): Promise<Map<string, EnrolledAgents>> {
     const conditionLocations = [
       ...new Map(
         locations
@@ -340,7 +338,7 @@ export class SyntheticsPrivateLocation {
     const entries = await Promise.all(
       conditionLocations.map(
         async (location) =>
-          [location.id, await this.getEnrolledAgentHosts(location.agentPolicyId)] as const
+          [location.id, await this.getEnrolledAgents(location.agentPolicyId)] as const
       )
     );
 
@@ -360,7 +358,7 @@ export class SyntheticsPrivateLocation {
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
-    const conditionHostsByLocation = await this.getConditionHostsByLocation(privateLocations);
+    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(privateLocations);
 
     for (const { config, globalParams } of configs) {
       try {
@@ -384,7 +382,7 @@ export class SyntheticsPrivateLocation {
             maintenanceWindows,
             testRunId,
             runOnce,
-            conditionHostsByLocation.get(location.id)
+            scalableAgentsByLocation.get(location.id)
           );
 
           if (!newPolicy) {
@@ -503,7 +501,7 @@ export class SyntheticsPrivateLocation {
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
-    const conditionHostsByLocation = await this.getConditionHostsByLocation(allPrivateLocations);
+    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(allPrivateLocations);
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
@@ -520,11 +518,18 @@ export class SyntheticsPrivateLocation {
 
         try {
           if (hasLocation) {
-            const existingCondition =
-              existingPolicyById.get(newId)?.condition ??
-              legacyPolicyIds
-                .map((id) => existingPolicyById.get(id)?.condition)
-                .find((condition) => condition != null);
+            // Prefer the new-format policy's condition verbatim, including an
+            // explicit `null` left by a location that reverted to classic —
+            // falling back to `??` here would treat that `null` as absent and
+            // resurrect a stale legacy condition. Legacy ids predate condition
+            // sharding, so more than one holding a condition is unexpected; if
+            // it happens, we arbitrarily keep the first one found.
+            const newIdPolicy = existingPolicyById.get(newId);
+            const existingCondition = newIdPolicy
+              ? newIdPolicy.condition
+              : legacyPolicyIds
+                  .map((id) => existingPolicyById.get(id)?.condition)
+                  .find((condition) => condition != null);
             const newPolicy = await this.generateNewPolicy(
               config,
               privateLocation,
@@ -534,7 +539,7 @@ export class SyntheticsPrivateLocation {
               maintenanceWindows,
               undefined,
               undefined,
-              conditionHostsByLocation.get(privateLocation.id),
+              scalableAgentsByLocation.get(privateLocation.id),
               existingCondition
             );
 

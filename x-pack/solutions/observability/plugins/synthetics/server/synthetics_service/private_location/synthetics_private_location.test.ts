@@ -592,10 +592,14 @@ describe('SyntheticsPrivateLocation', () => {
     });
 
     it('resolves a scalable location once per batch and paginates its enrolled agents', async () => {
+      // A full first page (matching the implementation's internal perPage) must
+      // trigger a second request regardless of `total`, since `total` isn't
+      // always trustworthy - see the pagination fix this test guards.
+      const firstPage = Array.from({ length: 1000 }, (_, i) => ({ id: `agent-${i}` }));
       const listAgents = jest
         .fn()
-        .mockResolvedValueOnce({ agents: [{ id: 'agent-a' }], total: 2 })
-        .mockResolvedValueOnce({ agents: [{ id: 'agent-b' }], total: 2 });
+        .mockResolvedValueOnce({ agents: firstPage, total: 1001 })
+        .mockResolvedValueOnce({ agents: [{ id: 'agent-1000' }], total: 1001 });
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
         ...serverMock,
         fleet: {
@@ -603,21 +607,53 @@ describe('SyntheticsPrivateLocation', () => {
           agentService: { asInternalUser: { listAgents } },
         },
       } as unknown as SyntheticsServerSetup);
-      const getConditionHostsByLocation = (
+      const getScalableAgentsByLocation = (
         syntheticsPrivateLocation as unknown as {
-          getConditionHostsByLocation: (
+          getScalableAgentsByLocation: (
             locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
           ) => Promise<Map<string, { agentIds: string[] }>>;
         }
-      ).getConditionHostsByLocation.bind(syntheticsPrivateLocation);
+      ).getScalableAgentsByLocation.bind(syntheticsPrivateLocation);
 
-      const result = await getConditionHostsByLocation([
+      const result = await getScalableAgentsByLocation([
         { id: 'condition-location', agentPolicyId: 'single-agent-policy', isAgentSharding: true },
         { id: 'condition-location', agentPolicyId: 'single-agent-policy', isAgentSharding: true },
       ]);
 
       expect(listAgents).toHaveBeenCalledTimes(2);
-      expect(result.get('condition-location')?.agentIds).toEqual(['agent-a', 'agent-b']);
+      const agentIds = result.get('condition-location')?.agentIds ?? [];
+      expect(agentIds).toHaveLength(1001);
+      expect(agentIds).toEqual(expect.arrayContaining(['agent-0', 'agent-999', 'agent-1000']));
+    });
+
+    it('escapes quotes in the agent policy id before building the agents kuery', async () => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [], total: 0 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const getScalableAgentsByLocation = (
+        syntheticsPrivateLocation as unknown as {
+          getScalableAgentsByLocation: (
+            locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
+          ) => Promise<Map<string, { agentIds: string[] }>>;
+        }
+      ).getScalableAgentsByLocation.bind(syntheticsPrivateLocation);
+
+      await getScalableAgentsByLocation([
+        {
+          id: 'condition-location',
+          agentPolicyId: `agent-policy" or true or "`,
+          isAgentSharding: true,
+        },
+      ]);
+
+      expect(listAgents).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: `policy_id:"agent-policy\\" or true or \\""` })
+      );
     });
   });
 

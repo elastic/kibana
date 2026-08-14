@@ -152,7 +152,9 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         ) {
           const privilegeResponse = await checkPrivileges({
             routeContext,
-            monitorsSpaces: monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? []),
+            monitorsSpaces: [
+              ...new Set(monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? [])),
+            ],
           });
           if (privilegeResponse) {
             return privilegeResponse;
