@@ -188,7 +188,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
         });
 
         expect(firstPage).toHaveStatusCode(200);
-        expect(firstPage.body).toMatchObject({ page: 1, perPage: 2, total: 5 });
+        expect(firstPage.body).toMatchObject({ page: 1, per_page: 2, total: 5 });
         expect(firstPage.body.items).toHaveLength(2);
       });
 
@@ -198,7 +198,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
         });
 
         expect(lastPage).toHaveStatusCode(200);
-        expect(lastPage.body).toMatchObject({ page: 3, perPage: 2, total: 5 });
+        expect(lastPage.body).toMatchObject({ page: 3, per_page: 2, total: 5 });
         expect(lastPage.body.items).toHaveLength(1);
       });
     }

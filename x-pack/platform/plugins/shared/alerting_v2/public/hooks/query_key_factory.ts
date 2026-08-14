@@ -23,7 +23,7 @@ export const ruleKeys = {
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   allTags: () => [...ruleKeys.all, 'tags'] as const,
-  tags: (filter?: string) => [...ruleKeys.allTags(), { filter }] as const,
+  tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
 };
 
 export const workflowKeys = {
