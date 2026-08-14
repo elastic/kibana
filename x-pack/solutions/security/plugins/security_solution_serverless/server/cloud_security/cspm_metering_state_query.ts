@@ -17,8 +17,12 @@ import {
 } from './constants';
 
 const GCP_MIN_RUN_MS = GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS * 60 * 60 * 1000;
-// Sampling window: how far back a scan counts as "active".
-const WINDOW = `now-${ASSETS_SAMPLE_GRANULARITY}`;
+// Sampling window: how far back a scan counts as "active". Exported so the
+// freshness probe in cloud_security_metering_task shares this exact expression
+// by construction — a probe on a wider/narrower window than the billing query
+// could select the state path on data the billing query cannot see.
+export const CSPM_METERING_WINDOW = `now-${ASSETS_SAMPLE_GRANULARITY}`;
+const WINDOW = CSPM_METERING_WINDOW;
 // Minimum attested run duration for a billable GCP instance. Independent of
 // the sampling window even though both resolve to 24h today.
 const GCP_MIN_RUN_WINDOW = `now-${GCP_COMPUTE_MIN_RUNNING_DURATION_HOURS}h`;
