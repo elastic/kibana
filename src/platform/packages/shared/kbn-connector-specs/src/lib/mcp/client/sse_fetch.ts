@@ -43,35 +43,9 @@ export function createSseGatedFetch(resource: McpFetchResource): FetchLike {
     return gate;
   };
 
-  const getSessionId = (headers: Record<string, string>): string => {
-    const lowerName = MCP_SESSION_HEADER.toLowerCase();
-    for (const [key, value] of Object.entries(headers)) {
-      if (key.toLowerCase() === lowerName) return value;
-    }
-    return '';
-  };
-
-  const normalizeHeaders = (init?: RequestInit): Record<string, string> => {
-    const headers: Record<string, string> = {};
-    if (!init?.headers) return headers;
-    if (init.headers instanceof Headers) {
-      init.headers.forEach((value, key) => {
-        headers[key] = value;
-      });
-    } else if (Array.isArray(init.headers)) {
-      for (const [key, value] of init.headers) {
-        headers[key] = value;
-      }
-    } else {
-      Object.assign(headers, init.headers);
-    }
-    return headers;
-  };
-
   return async (url: string | URL, init?: RequestInit): Promise<Response> => {
     const method = (init?.method ?? 'GET').toUpperCase();
-    const headers = normalizeHeaders(init);
-    const sessionId = getSessionId(headers);
+    const sessionId = new Headers(init?.headers).get(MCP_SESSION_HEADER) ?? '';
 
     if (method === 'GET') {
       // Create-or-get so a GET that wins the race with the initialized 202 still opens the gate.

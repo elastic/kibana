@@ -184,6 +184,31 @@ describe('createSseGatedFetch', () => {
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });
 
+    it.each<[string, HeadersInit]>([
+      ['Record', { 'mcp-session-id': 'A' }],
+      ['tuple array', [['mcp-session-id', 'A']]],
+      ['Headers instance', new Headers({ 'mcp-session-id': 'A' })],
+    ])('keys the SSE gate from a %s session header', async (_form, headers) => {
+      mockFetch
+        .mockResolvedValueOnce(makeResponse(200))
+        .mockResolvedValueOnce(makeResponse(202, { 'mcp-session-id': 'A' }))
+        .mockResolvedValueOnce(makeResponse(200));
+
+      await fetch('https://example.com/mcp', { method: 'GET', headers });
+      await fetch('https://example.com/mcp', {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'A' },
+      });
+
+      const toolCall = fetch('https://example.com/mcp', {
+        method: 'POST',
+        headers: { 'mcp-session-id': 'A' },
+      });
+      await toolCall;
+
+      expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
     it('keys gates by Mcp-Session-Id so concurrent sessions do not unblock each other', async () => {
       mockFetch
         .mockResolvedValueOnce(makeResponse(202, { 'mcp-session-id': 'A' })) // POST init session A
