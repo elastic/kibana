@@ -1,5 +1,5 @@
 {
-  "sha1": "35dc3a0673cbc19f3bc13395891adc4a49835d84",
+  "sha1": "bcedd955e4a6ca49e1e766be2701208b22f36f75",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -147,45 +147,6 @@
       }
     },
     {
-      "id": "36fc1fc4383edec-ec0ed097095fb0e",
-      "title": "Lens chart creation creates and saves an XY area chart, then reopens it with the same configuration",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 25,
-        "column": 51
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-e2feb0cd547afef",
-      "title": "Lens chart creation preserves the split field when switching a saved XY chart to filters aggregation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 52,
-        "column": 60
-      }
-    },
-    {
-      "id": "36fc1fc4383edec-42fc5ed07c9cb92",
-      "title": "Lens chart creation switches the first layer to a different data view",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/chart_creation.spec.ts",
-        "line": 71,
-        "column": 15
-      }
-    },
-    {
       "id": "d2815d5da13fdd6-60b241ddf218024",
       "title": "Lens chart data across visualization types renders the same terms + average config across chart types",
       "expectedStatus": "passed",
@@ -272,8 +233,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/chart_filters.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 86,
+        "column": 74
       }
     },
     {
@@ -298,8 +259,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/inspector_and_validation.spec.ts",
-        "line": 52,
-        "column": 20
+        "line": 57,
+        "column": 9
       }
     },
     {
@@ -311,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/inspector_and_validation.spec.ts",
-        "line": 76,
-        "column": 20
+        "line": 78,
+        "column": 25
       }
     },
     {
@@ -350,7 +311,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/panel_actions.spec.ts",
-        "line": 36,
+        "line": 38,
         "column": 26
       }
     },
@@ -363,7 +324,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/panel_actions.spec.ts",
-        "line": 41,
+        "line": 43,
         "column": 13
       }
     },
@@ -1065,7 +1026,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/multiple_data_views.spec.ts",
-        "line": 53,
+        "line": 48,
         "column": 42
       }
     },
@@ -1156,7 +1117,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_dashboard.spec.ts",
-        "line": 119,
+        "line": 122,
         "column": 27
       }
     },
@@ -1169,7 +1130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
-        "line": 32,
+        "line": 39,
         "column": 79
       }
     },
@@ -1182,8 +1143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
-        "line": 41,
-        "column": 37
+        "line": 47,
+        "column": 33
       }
     },
     {
@@ -1195,8 +1156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
-        "line": 53,
-        "column": 51
+        "line": 57,
+        "column": 7
       }
     },
     {
@@ -1208,8 +1169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data_layers.spec.ts",
-        "line": 66,
-        "column": 11
+        "line": 64,
+        "column": 17
       }
     },
     {
@@ -1247,8 +1208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 59,
-        "column": 37
+        "line": 65,
+        "column": 20
       }
     },
     {
@@ -1260,8 +1221,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data.spec.ts",
-        "line": 93,
-        "column": 20
+        "line": 109,
+        "column": 9
       }
     },
     {

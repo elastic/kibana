@@ -80,6 +80,10 @@ export const ALERTING_ERROR_CODES = {
    */
   RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
+  // ────────────────────── Rule templates ─────────────────────
+  /** A rule template with the given identifier does not exist. */
+  RULE_TEMPLATE_NOT_FOUND: 'RULE_TEMPLATE_NOT_FOUND',
+
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
   ACTION_POLICY_NOT_FOUND: 'ACTION_POLICY_NOT_FOUND',
@@ -430,6 +434,13 @@ export const ALERTING_LOG_CODES = {
    * close. The windows were still read; the PIT expires on its own.
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
+
+  // ──────────────── Rule templates (graceful degradation) ────────────────
+  /**
+   * A stored rule template failed schema validation. Find omits it from the
+   * page; get maps it to not-found. Operator should investigate package drift.
+   */
+  RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_episode` failed; tool returns an error result. */
