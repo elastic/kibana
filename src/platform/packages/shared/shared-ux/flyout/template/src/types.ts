@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
 
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
@@ -41,7 +41,7 @@ export interface FlyoutFooterActionBaseProps {
   id?: string;
   /** Button label. */
   label: ReactNode;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  onClick: MouseEventHandler<HTMLButtonElement>;
   iconType?: EuiButtonProps['iconType'];
   color?: EuiButtonProps['color'];
   isLoading?: boolean;
