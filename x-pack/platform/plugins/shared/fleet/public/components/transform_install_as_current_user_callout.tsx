@@ -37,13 +37,13 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
       title={i18n.translate(
         'xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.title',
         {
-          defaultMessage: 'Transforms are installed with current user permissions',
+          defaultMessage: 'Transforms use your privileges',
         }
       )}
       text={
         <FormattedMessage
           id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.text"
-          defaultMessage="This package has {count, plural, one {one} other {#}} {docsLink} which will be created and started with the same roles as the user installing the package."
+          defaultMessage="This package has {count, plural, one {one} other {#}} {docsLink}. They're created and started with your privileges when you install the package."
           values={{
             count,
             docsLink: (
