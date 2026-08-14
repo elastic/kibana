@@ -383,7 +383,7 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts a composed query with an empty breach segment (conditionless)', () => {
+    it('accepts a composed query with an empty breach segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         query: {
@@ -395,7 +395,7 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('accepts a composed query with a whitespace-only breach segment (conditionless)', () => {
+    it('accepts a composed query with a whitespace-only breach segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         query: {
@@ -1433,7 +1433,7 @@ describe('getBreachEsqlQuery', () => {
     expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9');
   });
 
-  it('returns base verbatim for an empty or whitespace-only breach segment (conditionless)', () => {
+  it('returns base verbatim for an empty or whitespace-only breach segment', () => {
     const empty = {
       format: 'composed' as const,
       base: 'FROM metrics-*',

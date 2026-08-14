@@ -123,37 +123,33 @@ export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 /**
  * Appendable ES|QL breach segment (e.g. `WHERE …`). Conceptually a bare
  * command, but a leading `|` is also tolerated — `composeEsqlQuery` strips it
- * before splicing onto `base`. Empty/whitespace = conditionless (every base
- * row breaches). Full parser validation only runs when the segment is non-empty
+ * before splicing onto `base`. Empty = every base row breaches.
+ * Full parser validation only runs when the segment is non-empty
  * and composed with its `base` via `composeEsqlQuery`.
  */
 export const composedBreachSegmentSchema = z
   .string()
   .max(MAX_ESQL_QUERY_LENGTH)
-  .describe('Appendable ES|QL breach segment. Empty = conditionless (every base row breaches).');
+  .describe('Appendable ES|QL breach segment. Empty segment means every base row breaches.');
 
 /**
  * Appendable ES|QL recovery segment (e.g. `WHERE …`). Conceptually a bare
  * command, but a leading `|` is also tolerated — `composeEsqlQuery` strips it
- * before splicing onto `base`. Must be non-empty / non-whitespace. Full parser
+ * before splicing onto `base`. Must be non-empty. Full parser
  * validation runs when composed with its `base` via `composeEsqlQuery`.
- *
- * `.min(1)` and `.refine(trim)` are complementary: `.min(1)` emits
- * `minLength: 1` into the generated JSON schema (YAML editor / OAS), while
- * `.refine` rejects whitespace-only strings at parse time.
  */
 export const composedRecoverySegmentSchema = z
   .string()
   .min(1)
   .max(MAX_ESQL_QUERY_LENGTH)
-  .refine((s) => s.trim().length > 0, { message: 'Segment must not be whitespace-only' });
+  .refine((s) => s.trim().length > 0, { message: 'Segment must contain at least one character.' });
 
 /** Composed wrappers (segment-based, appended to `base`). */
 
 const composedBreachSchema = z
   .object({
     segment: composedBreachSegmentSchema.describe(
-      'Appendable ES|QL segment for breach detection. Empty = conditionless (every base row breaches).'
+      'Appendable ES|QL segment for breach detection. Empty segment means every base row breaches.'
     ),
   })
   .strict();
@@ -202,7 +198,6 @@ export const composedQuerySchema = z
   })
   .strict()
   .check((ctx) => {
-    // Empty/whitespace breach segment = conditionless; base was already validated.
     if (ctx.value.breach.segment.trim().length > 0) {
       const breachError = validateEsqlQuery(
         composeEsqlQuery(ctx.value.base, ctx.value.breach.segment)
@@ -255,8 +250,7 @@ export type Query = z.infer<typeof querySchema>;
 /**
  * Returns the effective breach ES|QL query — what the executor actually runs
  * to detect breaches. For composed queries this is `base` concatenated with
- * `breach.segment`, or just `base` when the segment is empty/whitespace
- * (conditionless). For standalone it's `breach.query` verbatim.
+ * `breach.segment`, or just `base` when the segment is empty. For standalone it's `breach.query` verbatim.
  */
 export const getBreachEsqlQuery = (query: Query): string => {
   if (query.format === 'standalone') {
