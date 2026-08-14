@@ -64,6 +64,13 @@ export function createGetTraceChangePointsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getTraceChangePointsSchema> = {
     id: OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Trace Change Points',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Analyzes traces to detect statistically significant change points in latency, throughput, and failure rate across group (e.g., service, transaction, host).
 Trace metrics:
 - Latency: avg/p95/p99 response time.

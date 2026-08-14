@@ -275,7 +275,7 @@ describe('useApiEndpoints', () => {
       cardTitle: 'Supabase',
       fieldLabel: 'Supabase logs endpoint',
       logo: 'supabase',
-      url: 'https://otlp.example.com:443/supabase/v1/logs',
+      url: 'https://otlp.example.com:443/inputs/supabase/_default_/v1/logs',
     });
   });
 
