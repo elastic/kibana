@@ -30,12 +30,14 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { RulesApp } from './rules_app';
 import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
 import { BreadcrumbProvider } from './breadcrumb_context';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import { FocusedEpisodeService } from '../services/focused_episode_service';
 
 interface AlertingV2MountParams {
   element: HTMLElement;
@@ -118,6 +120,27 @@ export const mountEpisodesApp = async ({
     spaces,
   };
 
+  let cleanupEpisodeAutoAttach: (() => void) | undefined;
+  let stopped = false;
+  const agentBuilderToken = PluginStart('agentBuilder');
+  if (container.isBound(agentBuilderToken)) {
+    const agentBuilder = container.get(agentBuilderToken) as AgentBuilderPluginStart;
+    const focusedEpisodeService = container.get(FocusedEpisodeService);
+    // Async so attachment auto-attach stays off the critical mount path.
+    void import('../agent_builder/episode_auto_attach').then(({ registerEpisodeAutoAttach }) => {
+      const cleanup = registerEpisodeAutoAttach({
+        agentBuilder,
+        chrome: coreStart.chrome,
+        focusedEpisodeService,
+      });
+      if (stopped) {
+        cleanup();
+        return;
+      }
+      cleanupEpisodeAutoAttach = cleanup;
+    });
+  }
+
   ReactDOM.render(
     coreStart.rendering.addContext(
       <KibanaContextProvider services={kibanaReactServices}>
@@ -140,6 +163,9 @@ export const mountEpisodesApp = async ({
   );
 
   return () => {
+    stopped = true;
+    cleanupEpisodeAutoAttach?.();
+    cleanupEpisodeAutoAttach = undefined;
     ReactDOM.unmountComponentAtNode(element);
   };
 };

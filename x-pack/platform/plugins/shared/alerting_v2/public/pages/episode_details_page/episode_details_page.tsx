@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -51,6 +51,7 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { FocusedEpisodeService } from '../../services/focused_episode_service';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -102,6 +103,8 @@ export function EpisodeDetailsPage() {
     services: { data, spaces },
   });
 
+  const focusedEpisodeService = useService(FocusedEpisodeService);
+
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
 
@@ -130,10 +133,25 @@ export function EpisodeDetailsPage() {
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const episodeDataRuleName =
     typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
-  const episodeBreadcrumbTitle =
-    showRuleDependentUi && ruleState.rule.metadata.name
-      ? ruleState.rule.metadata.name
-      : episodeDataRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+  const loadedRuleName = showRuleDependentUi ? ruleState.rule.metadata.name : undefined;
+  const episodeRuleName = loadedRuleName ?? episodeDataRuleName;
+  const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+  const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
+
+  useEffect(() => {
+    if (!episode) {
+      return;
+    }
+
+    focusedEpisodeService.setFocusedEpisode(episode, {
+      ruleName: episodeRuleName,
+      groupingFields,
+    });
+
+    return () => {
+      focusedEpisodeService.clearFocusedEpisode(episode['episode.id']);
+    };
+  }, [episode, episodeRuleName, focusedEpisodeService, groupingFields]);
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
