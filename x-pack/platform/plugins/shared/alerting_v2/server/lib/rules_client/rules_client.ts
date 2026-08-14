@@ -697,7 +697,7 @@ export class RulesClient {
       ),
       total: res.total,
       page,
-      perPage,
+      per_page: perPage,
     };
   }
 
