@@ -36,9 +36,11 @@ export interface BuildRetrieverParams {
  *
  * Excludes:
  *  - tombstoned records (`deleted: true`)
- *  - records past their per-record `expires_at` date (D5)
- *  - records the reconcile task has marked `expired_at`
+ *  - records at or past their per-record `expires_at` date (D5)
+ *  - records marked with `expired_at`
  *  - records under suppression (`suppress_until` in the future)
+ *  - records before their `valid_at` date
+ *  - records at or past their `invalid_at` date
  *
  * Always adds:
  *  - `space_id` scope (G3)
@@ -64,7 +66,7 @@ const buildBeliefFilter = (
       bool: {
         should: [
           { bool: { must_not: { exists: { field: 'expires_at' } } } },
-          { range: { expires_at: { gte: now } } },
+          { range: { expires_at: { gt: now } } },
         ],
         minimum_should_match: 1,
       },
@@ -72,11 +74,7 @@ const buildBeliefFilter = (
     // Reconcile-set expiry marker
     {
       bool: {
-        should: [
-          { bool: { must_not: { exists: { field: 'memory.expired_at' } } } },
-          { range: { 'memory.expired_at': { gte: now } } },
-        ],
-        minimum_should_match: 1,
+        must_not: { exists: { field: 'memory.expired_at' } },
       },
     },
     // Suppression window
@@ -85,6 +83,26 @@ const buildBeliefFilter = (
         should: [
           { bool: { must_not: { exists: { field: 'memory.suppress_until' } } } },
           { range: { 'memory.suppress_until': { lte: now } } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+    // Validity window start
+    {
+      bool: {
+        should: [
+          { bool: { must_not: { exists: { field: 'memory.valid_at' } } } },
+          { range: { 'memory.valid_at': { lte: now } } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+    // Validity window end
+    {
+      bool: {
+        should: [
+          { bool: { must_not: { exists: { field: 'memory.invalid_at' } } } },
+          { range: { 'memory.invalid_at': { gt: now } } },
         ],
         minimum_should_match: 1,
       },

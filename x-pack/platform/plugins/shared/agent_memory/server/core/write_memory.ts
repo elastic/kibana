@@ -103,6 +103,7 @@ export const writeMemory = async ({
   const existing = await client.search({
     size: 1,
     track_total_hits: false,
+    seq_no_primary_term: true,
     query: {
       bool: {
         filter: [
@@ -128,6 +129,7 @@ export const writeMemory = async ({
     const updated: MemoryDocument = {
       ...prev,
       deleted: false,
+      '@timestamp': now,
       title,
       description,
       tags: tags ?? prev.tags,
@@ -135,6 +137,8 @@ export const writeMemory = async ({
       search_embedding: `${title}\n\n${description}`,
       memory: {
         ...prevMemory,
+        scope_kind: prev.memory.scope_kind ?? 'user',
+        scope_id: prev.memory.scope_id ?? identity.author,
         type: type ?? prev.memory.type,
         category: category ?? prev.memory.category,
         entities: entities ?? prev.memory.entities,
@@ -148,8 +152,11 @@ export const writeMemory = async ({
           conversation_ids: conversation_ids ?? prev.memory.provenance.conversation_ids,
           trace_ids: trace_ids ?? prev.memory.provenance.trace_ids,
         },
-        // One level of history — prev.memory no longer contains prior_document.
-        prior_document: prev,
+        // One level of history — use the payload with prior_document stripped.
+        prior_document: {
+          ...prev,
+          memory: prevMemory,
+        },
       },
     };
 
@@ -187,6 +194,7 @@ export const writeMemory = async ({
     deleted: false,
     expires_at,
     search_embedding: `${title}\n\n${description}`,
+    '@timestamp': now,
     created_at: now,
     space_id,
     memory: {
@@ -194,6 +202,8 @@ export const writeMemory = async ({
       category,
       revision: 1,
       content_hash: hash,
+      scope_kind: 'user',
+      scope_id: identity.author,
       entities,
       origin,
       assurance,

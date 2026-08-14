@@ -52,7 +52,7 @@ export const tombstoneMemory = async ({
   let seqNo: number | undefined;
   let primaryTerm: number | undefined;
   try {
-    const hit = await client.get({ id, _source: true });
+    const hit = await client.get({ id, _source: true, seq_no_primary_term: true });
     if (!hit.found) {
       return { result: 'not_found' };
     }
@@ -78,6 +78,7 @@ export const tombstoneMemory = async ({
 
   const updated: MemoryDocument = {
     ...existing,
+    '@timestamp': now,
     deleted: true,
   };
 
