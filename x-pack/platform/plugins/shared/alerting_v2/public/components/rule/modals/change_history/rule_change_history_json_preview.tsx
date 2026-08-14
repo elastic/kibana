@@ -80,8 +80,14 @@ const RuleChangeHistoryJsonPreview = ({
   `;
 
   const diffPartStyles: Record<DiffPartType, { background: string; color: string }> = {
-    added: { background: euiTheme.colors.backgroundBaseSuccess, color: euiTheme.colors.textSuccess },
-    removed: { background: euiTheme.colors.backgroundBaseDanger, color: euiTheme.colors.textDanger },
+    added: {
+      background: euiTheme.colors.backgroundBaseSuccess,
+      color: euiTheme.colors.textSuccess,
+    },
+    removed: {
+      background: euiTheme.colors.backgroundBaseDanger,
+      color: euiTheme.colors.textDanger,
+    },
     context: { background: 'transparent', color: euiTheme.colors.textParagraph },
   };
 
