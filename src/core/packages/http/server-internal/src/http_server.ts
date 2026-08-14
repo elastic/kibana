@@ -64,7 +64,7 @@ import { createCookieSessionStorageFactory } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
-import { getEcsResponseLog } from './logging';
+import { getEcsResponseLog, INFO_RESPONSE_LOG_PATHS } from './logging';
 import { type InternalStaticAssets, StaticAssets } from './static_assets';
 import { createSelfCallPreHandler, createSelfCallPreResponseHandler } from './self_client_observer';
 
@@ -548,8 +548,15 @@ export class HttpServer {
     const log = this.logger.get('http', 'server', 'response');
 
     this.handleServerResponseEvent = (request) => {
-      if (log.isLevelEnabled('debug')) {
-        const { message, meta } = getEcsResponseLog(request, this.log);
+      const logAtInfo = INFO_RESPONSE_LOG_PATHS.has(request.path);
+      if (!logAtInfo && !log.isLevelEnabled('debug')) {
+        return;
+      }
+
+      const { message, meta } = getEcsResponseLog(request, this.log);
+      if (logAtInfo) {
+        log.info(message!, meta);
+      } else {
         log.debug(message!, meta);
       }
     };

@@ -12,7 +12,7 @@ import Boom from '@hapi/boom';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
-import { getEcsResponseLog } from './get_response_log';
+import { getEcsResponseLog, INFO_RESPONSE_LOG_PATHS } from './get_response_log';
 
 jest.mock('./get_payload_size', () => ({
   getResponsePayloadBytes: jest.fn().mockReturnValue(1234),
@@ -65,6 +65,11 @@ describe('getEcsResponseLog', () => {
   beforeEach(() => {
     logger = loggerMock.create();
     jest.clearAllMocks();
+  });
+
+  test('includes agent_status on the info-level response log allowlist', () => {
+    expect(INFO_RESPONSE_LOG_PATHS.has('/internal/api/endpoint/agent_status')).toBe(true);
+    expect(INFO_RESPONSE_LOG_PATHS.has('/ping')).toBe(false);
   });
 
   test('provides correctly formatted message', () => {
@@ -158,6 +163,16 @@ describe('getEcsResponseLog', () => {
     });
     const result = getEcsResponseLog(req, logger);
     expect(result.meta?.trace?.id).toBe('trace_id');
+  });
+
+  test('sets http.request.id from request app storage', () => {
+    const req = createMockHapiRequest({
+      app: {
+        requestId: 'opaque-id',
+      },
+    });
+    const result = getEcsResponseLog(req, logger);
+    expect(result.meta.http?.request?.id).toBe('opaque-id');
   });
 
   test('handles Boom errors in the response', () => {

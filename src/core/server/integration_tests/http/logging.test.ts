@@ -135,6 +135,81 @@ describe('request logging', () => {
         expect(level).toBe('DEBUG');
         expect(logger).toBe('http.server.response');
       });
+
+      it('logs allowlisted paths at info when debug is not enabled', async () => {
+        const optionalAuth = {
+          authc: {
+            enabled: 'optional' as const,
+            reason:
+              'This route is part of an HTTP integration test and supports optional authentication.',
+          },
+          authz: {
+            enabled: false as const,
+            reason:
+              'This route is part of an HTTP integration test and does not require authorization.',
+          },
+        };
+
+        root = createRoot({
+          logging: {
+            appenders: {
+              'test-console': {
+                type: 'console',
+                layout: {
+                  type: 'pattern',
+                  pattern: '%level|%logger|%message|%meta',
+                },
+              },
+            },
+            loggers: [
+              {
+                name: 'http.server.response',
+                appenders: ['test-console'],
+                level: 'info',
+              },
+            ],
+          },
+          plugins: {
+            initialize: false,
+          },
+          elasticsearch: { skipStartupConnectionCheck: true },
+          server: { restrictInternalApis: false },
+        });
+        await root.preboot();
+        const { http } = await root.setup();
+
+        const router = http.createRouter('/');
+        router.get(
+          {
+            path: '/ping',
+            security: optionalAuth,
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'pong' })
+        );
+        router.get(
+          {
+            path: '/internal/api/endpoint/agent_status',
+            security: optionalAuth,
+            validate: false,
+          },
+          (context, req, res) => res.ok({ body: 'ok' })
+        );
+        await root.start();
+
+        await request.get(root, '/ping').expect(200, 'pong');
+        expect(mockConsoleLog).not.toHaveBeenCalled();
+
+        await request.get(root, '/internal/api/endpoint/agent_status').expect(200, 'ok');
+        expect(mockConsoleLog).toHaveBeenCalledTimes(1);
+        const [level, logger, message, meta] = mockConsoleLog.mock.calls[0][0].split('|');
+        expect(level).toBe('INFO');
+        expect(logger).toBe('http.server.response');
+        expect(message.includes('GET /internal/api/endpoint/agent_status 200')).toBe(true);
+        expect(JSON.parse(meta).http.response.status_code).toBe(200);
+        expect(JSON.parse(meta).url.path).toBe('/internal/api/endpoint/agent_status');
+        expect(JSON.parse(meta).http.request.id).toEqual(expect.any(String));
+      });
     });
 
     describe('content', () => {
@@ -205,6 +280,7 @@ describe('request logging', () => {
         // response time, so we are only performing assertions against parts of the string
         expect(message.includes('GET /ping 200')).toBe(true);
         expect(JSON.parse(meta).http.request.method).toBe('GET');
+        expect(JSON.parse(meta).http.request.id).toEqual(expect.any(String));
         expect(JSON.parse(meta).url.path).toBe('/ping');
         expect(JSON.parse(meta).http.response.status_code).toBe(200);
       });

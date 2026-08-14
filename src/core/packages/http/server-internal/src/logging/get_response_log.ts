@@ -28,6 +28,8 @@ const FORBIDDEN_HEADERS = [
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
+export const INFO_RESPONSE_LOG_PATHS = new Set(['/internal/api/endpoint/agent_status']);
+
 type HapiHeaders = Record<string, string | string[] | undefined>;
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
@@ -70,7 +72,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
   const bytes = response ? getResponsePayloadBytes(response, log) : undefined;
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
 
-  const traceId = (request.app as KibanaRequestState).traceId;
+  const { traceId, requestId } = (request.app as KibanaRequestState) ?? {};
 
   const responseLogObj = response
     ? {
@@ -100,6 +102,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
         method,
         mime_type: request.mime,
         referrer: request.info.referrer,
+        ...(requestId !== undefined ? { id: requestId } : {}),
         // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: requestHeaders,
       },
