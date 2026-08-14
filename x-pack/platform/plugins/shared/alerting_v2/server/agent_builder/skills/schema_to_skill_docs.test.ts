@@ -312,7 +312,7 @@ describe('schema_to_skill_docs', () => {
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `groupingMode` | "per_episode" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. (enum: per_episode \\| all \\| per_field) |'
+        '| `grouping_mode` | "per_episode" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. (enum: per_episode \\| all \\| per_field) |'
       );
       expect(doc).not.toContain('per_episode groups by episode lifecycle');
     });
