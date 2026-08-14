@@ -73,7 +73,9 @@ export const getAuditStatus$ = ({
         summary: 'Audit log cannot be written',
         detail: `${writeAccess.code ?? 'Error'} writing to ${writeAccess.path}${
           writeAccess.reason ? `: ${writeAccess.reason}` : ''
-        }. Checked at ${writeAccess.checkedAt}. Audit logging is paused and audit events are being discarded. Restart Kibana after resolving the issue to resume audit logging.`,
+        }. Checked at ${
+          writeAccess.checkedAt
+        }. Audit logging is paused and audit events are being discarded. Restart Kibana after resolving the issue to resume audit logging.`,
         meta: { auditLogWriteAccess: writeAccess },
       };
     })
