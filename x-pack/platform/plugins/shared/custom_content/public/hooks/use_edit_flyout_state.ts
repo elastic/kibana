@@ -7,7 +7,8 @@
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getServices } from '../services';
 import { fetchEsqlData, type EsqlDataResult } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
@@ -34,6 +35,10 @@ export interface UseEditFlyoutStateParams {
   template: string | undefined;
   timeRange: TimeRange | undefined;
   colorMode: EuiThemeColorModeStandard;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   onRunPreview: (html: string) => void;
 }
 
@@ -42,6 +47,10 @@ export const useEditFlyoutState = ({
   template,
   timeRange,
   colorMode,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
   onRunPreview,
 }: UseEditFlyoutStateParams): EditFlyoutState => {
   const [state, dispatch] = useReducer(flyoutReducer, {
@@ -86,13 +95,22 @@ export const useEditFlyoutState = ({
 
     dispatch({ type: 'FETCH_DATA_START' });
 
+    const fetchOptions = {
+      isApproximate,
+      projectRouting,
+      query,
+      filters,
+      esQueryConfig: getEsQueryConfig(core.uiSettings),
+    };
+
     try {
       const result = await fetchEsqlData(
         search,
         core.http,
         state.draftEsqlQuery,
         timeRange,
-        controller.signal
+        controller.signal,
+        fetchOptions
       );
       if (!controller.signal.aborted) {
         dispatch({ type: 'FETCH_DATA_SUCCESS', payload: result });
@@ -109,7 +127,17 @@ export const useEditFlyoutState = ({
         dispatch({ type: 'FETCH_DATA_DONE' });
       }
     }
-  }, [state.draftEsqlQuery, timeRange, core.http, search]);
+  }, [
+    state.draftEsqlQuery,
+    timeRange,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+    core.http,
+    core.uiSettings,
+    search,
+  ]);
 
   const handleRender = useCallback(async () => {
     runPreviewAbortRef.current?.abort();
@@ -119,6 +147,14 @@ export const useEditFlyoutState = ({
     const snapVersion = draftVersionRef.current;
     dispatch({ type: 'RENDER_START' });
 
+    const fetchOptions = {
+      isApproximate,
+      projectRouting,
+      query,
+      filters,
+      esQueryConfig: getEsQueryConfig(core.uiSettings),
+    };
+
     try {
       let rawHtml: string;
       if (state.draftEsqlQuery) {
@@ -127,7 +163,8 @@ export const useEditFlyoutState = ({
           core.http,
           state.draftEsqlQuery,
           timeRange,
-          controller.signal
+          controller.signal,
+          fetchOptions
         );
         if (controller.signal.aborted) return;
         rawHtml = await fillTemplate(state.draftTemplate, result.columns, result.values ?? []);
@@ -154,7 +191,12 @@ export const useEditFlyoutState = ({
     state.draftEsqlQuery,
     state.draftTemplate,
     timeRange,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
     core.http,
+    core.uiSettings,
     search,
     colorMode,
     onRunPreview,

@@ -28,7 +28,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { getServices } from '../services';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
@@ -40,6 +40,10 @@ export interface EditCustomContentFlyoutProps {
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: TimeRange | undefined;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   panelTitle?: string;
   isNewPanel?: boolean;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
@@ -52,6 +56,10 @@ export const EditCustomContentFlyout = ({
   esqlQuery,
   template,
   timeRange,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
   panelTitle,
   isNewPanel,
   onSave,
@@ -74,7 +82,17 @@ export const EditCustomContentFlyout = ({
     isRenderLoading,
     hasPreviewedCurrentDraft,
     handleRender,
-  } = useEditFlyoutState({ esqlQuery, template, timeRange, colorMode, onRunPreview });
+  } = useEditFlyoutState({
+    esqlQuery,
+    template,
+    timeRange,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+    colorMode,
+    onRunPreview,
+  });
 
   const handleGenerateWithChat = useCallback(() => {
     if (!agentBuilder) return;

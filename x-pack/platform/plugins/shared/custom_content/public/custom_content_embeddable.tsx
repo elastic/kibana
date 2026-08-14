@@ -310,6 +310,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   esqlQuery={esqlQuery}
                   template={savedTemplate}
                   timeRange={timeRange}
+                  isApproximate={isApproximate}
+                  projectRouting={projectRouting}
+                  query={query}
+                  filters={filters}
                   panelTitle={panelTitle ?? undefined}
                   onSave={handleFlyoutSave}
                   onClose={handleFlyoutClose}

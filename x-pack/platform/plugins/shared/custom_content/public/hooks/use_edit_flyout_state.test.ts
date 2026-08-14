@@ -11,6 +11,7 @@ jest.mock('../services');
 jest.mock('../utils/fetch_esql_data');
 jest.mock('../utils/fill_template');
 jest.mock('../utils/prepare_html');
+jest.mock('@kbn/data-plugin/public', () => ({ getEsQueryConfig: jest.fn() }));
 
 import type { HttpStart } from '@kbn/core/public';
 import { getServices } from '../services';
@@ -29,7 +30,7 @@ const mockSearch = jest.fn();
 beforeEach(() => {
   jest.clearAllMocks();
   (getServices as jest.Mock).mockReturnValue({
-    core: { http: mockHttp },
+    core: { http: mockHttp, uiSettings: {} },
     search: mockSearch,
     agentBuilder: undefined,
   });
@@ -45,6 +46,10 @@ const baseParams = {
   template: 'hello',
   timeRange: undefined,
   colorMode: 'LIGHT' as const,
+  isApproximate: false,
+  projectRouting: undefined,
+  query: undefined,
+  filters: undefined,
   onRunPreview: mockOnRunPreview,
 };
 
@@ -63,6 +68,10 @@ describe('useEditFlyoutState', () => {
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
+          isApproximate: false,
+          projectRouting: undefined,
+          query: undefined,
+          filters: undefined,
           onRunPreview: mockOnRunPreview,
         })
       );
@@ -127,6 +136,10 @@ describe('useEditFlyoutState', () => {
           template: undefined,
           timeRange: undefined,
           colorMode: 'LIGHT' as const,
+          isApproximate: false,
+          projectRouting: undefined,
+          query: undefined,
+          filters: undefined,
           onRunPreview: mockOnRunPreview,
         })
       );
