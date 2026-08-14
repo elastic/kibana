@@ -46,7 +46,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
     openModal: openRunWorkflowModal,
     closeModal: closeRunWorkflowModal,
     inputs: workflowInputs,
-    sortTriggerTypes: workflowSortTriggerTypes,
+    sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
 
   const openModal = useCallback(() => {
@@ -164,7 +164,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
       {isRunWorkflowModalOpen && (
         <RunCaseWorkflowModal
           inputs={workflowInputs}
-          sortTriggerTypes={workflowSortTriggerTypes}
+          sortWorkflow={workflowSortWorkflow}
           onClose={closeRunWorkflowModal}
         />
       )}

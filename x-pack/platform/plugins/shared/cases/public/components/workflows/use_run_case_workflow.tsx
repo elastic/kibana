@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import {
   CaseCreatedTriggerId,
@@ -22,14 +23,27 @@ import type { CaseUI } from '../../containers/types';
  * All six `cases.*` trigger ids — workflows triggered by any of these are floated to the top of
  * the selector when the user opens "Run workflow" from a case detail page.
  */
-const CASE_TRIGGER_TYPES = [
+const CASE_TRIGGER_TYPES = new Set([
   CaseCreatedTriggerId,
   CaseUpdatedTriggerId,
   CaseStatusUpdatedTriggerId,
   AttachmentsAddedTriggerId,
   CommentsAddedTriggerId,
   ObservablesAddedTriggerId,
-] as const;
+]);
+
+/**
+ * Floats workflows with a `cases.*` trigger above those without one.
+ * Stable module-scoped reference — does not cause WorkflowSelector re-renders.
+ */
+const sortCaseWorkflows = (a: WorkflowListItemDto, b: WorkflowListItemDto): number => {
+  // Cast the Set: the @kbn/workflows trigger type union only knows about built-in types;
+  // cases.* trigger types are runtime extensions not reflected in the TS union.
+  const caseTriggerSet = CASE_TRIGGER_TYPES as Set<string>;
+  const aIsCases = (a.definition?.triggers ?? []).some((t) => caseTriggerSet.has(t.type));
+  const bIsCases = (b.definition?.triggers ?? []).some((t) => caseTriggerSet.has(t.type));
+  return Number(bIsCases) - Number(aIsCases);
+};
 
 interface UseRunCaseWorkflowArgs {
   caseData: CaseUI;
@@ -46,7 +60,8 @@ interface UseRunCaseWorkflowResult {
   closeModal: () => void;
   /** Stable inputs object to pass to RunWorkflowPanel / RunCaseWorkflowModal. */
   inputs: Record<string, unknown>;
-  sortTriggerTypes: readonly string[];
+  /** Comparator that floats `cases.*` workflows to the top of the selector. */
+  sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
   workflowTags: string[] | undefined;
 }
 
@@ -83,7 +98,7 @@ export const useRunCaseWorkflow = ({
     openModal,
     closeModal,
     inputs,
-    sortTriggerTypes: CASE_TRIGGER_TYPES,
+    sortWorkflow: sortCaseWorkflows,
     workflowTags,
   };
 };

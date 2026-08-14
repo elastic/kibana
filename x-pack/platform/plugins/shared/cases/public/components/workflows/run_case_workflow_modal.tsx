@@ -12,7 +12,7 @@ import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import * as i18n from './translations';
 
 interface RunCaseWorkflowModalProps
-  extends Pick<RunWorkflowPanelProps, 'inputs' | 'sortTriggerTypes' | 'tags' | 'onExecute'> {
+  extends Pick<RunWorkflowPanelProps, 'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute'> {
   onClose: () => void;
 }
 
@@ -22,8 +22,8 @@ interface RunCaseWorkflowModalProps
  */
 export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   inputs,
-  sortTriggerTypes,
-  tags,
+  sortWorkflow,
+  filterWorkflow,
   onClose,
   onExecute,
 }) => {
@@ -35,9 +35,8 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
       <EuiModalBody>
         <RunWorkflowPanel
           inputs={inputs}
-          sortTriggerTypes={sortTriggerTypes}
-          tags={tags}
-          executeButtonTestSubj="cases-run-workflow-execute-button"
+          sortWorkflow={sortWorkflow}
+          filterWorkflow={filterWorkflow}
           onClose={onClose}
           onExecute={onExecute}
         />

@@ -65,7 +65,7 @@ export const useCaseViewHeader = ({
     openModal: openRunWorkflowModal,
     closeModal: closeRunWorkflowModal,
     inputs: workflowInputs,
-    sortTriggerTypes: workflowSortTriggerTypes,
+    sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
 
   const shouldDisableStatusFn = useShouldDisableStatus();
@@ -220,7 +220,7 @@ export const useCaseViewHeader = ({
   const runWorkflowModal = isRunWorkflowModalOpen ? (
     <RunCaseWorkflowModal
       inputs={workflowInputs}
-      sortTriggerTypes={workflowSortTriggerTypes}
+      sortWorkflow={workflowSortWorkflow}
       onClose={closeRunWorkflowModal}
     />
   ) : null;

@@ -138,8 +138,20 @@ export const ObservableActionsPopoverButton: React.FC<{
         content: (
           <RunWorkflowPanel
             inputs={workflowInputs}
-            sortTriggerTypes={[ObservablesAddedTriggerId]}
-            executeButtonTestSubj="cases-observables-run-workflow-execute-button"
+            sortWorkflow={(a, b) =>
+              // Cast to string: the @kbn/workflows trigger type union only knows about built-in
+              // types; cases.* trigger types are runtime extensions not reflected there.
+              Number(
+                (b.definition?.triggers ?? []).some(
+                  (t) => (t.type as string) === ObservablesAddedTriggerId
+                )
+              ) -
+              Number(
+                (a.definition?.triggers ?? []).some(
+                  (t) => (t.type as string) === ObservablesAddedTriggerId
+                )
+              )
+            }
             onClose={closePopover}
           />
         ),
