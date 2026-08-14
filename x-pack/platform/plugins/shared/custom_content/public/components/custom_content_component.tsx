@@ -25,6 +25,7 @@ interface CustomContentComponentProps {
   filters: Filter[] | undefined;
   onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
+  previewHtml: string | null;
 }
 
 const iframeContainerCss = css({
@@ -55,6 +56,7 @@ export const CustomContentComponent = ({
   filters,
   onTemplateChange,
   onErrorChange,
+  previewHtml,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, isAiUnavailable } = useCustomContentHtml({
@@ -125,12 +127,20 @@ export const CustomContentComponent = ({
           {error}
         </EuiCallOut>
       )}
-      {!isAiUnavailable && !error && html && (
+      {previewHtml != null ? (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title="Custom content panel" />
         </div>
+      ) : (
+        <>
+          {!isAiUnavailable && !error && html && (
+            <div css={iframeContainerCss}>
+              <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+            </div>
+          )}
+          {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+        </>
       )}
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </div>
   );
 };

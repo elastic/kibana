@@ -14,6 +14,42 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+
+  # e2e suites (FTR, Scout, Cypress) intentionally do not run here; they run
+  # post-merge in kibana-on-merge. Only Jest unit tests gate the queue.
+  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
+    label: 'Pick Test Group Run Order'
+    agents:
+      provider: k8s
+      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
+      imageUID: 1000
+    timeout_in_minutes: 15
+    env:
+      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_UNIT_MAX_MINUTES: '15.0'
+      LIMIT_CONFIG_TYPE: 'unit'
+    plugins:
+      - sparse-checkout#v1.6.0:
+          no_cone: true
+          paths:
+            - '/.buildkite/'
+            - '/.node-version'
+            - '/package.json'
+            - '/tsconfig.base.json'
+            - '/versions.json'
+            - '**/jest.config.js'
+            - '**/*.test.js'
+            - '**/*.test.mjs'
+            - '**/*.test.ts'
+            - '**/*.test.tsx'
+          cleanup_sparse_state: true
+          post_checkout:
+            unshallow: true
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - wait
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
@@ -132,26 +168,6 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  # e2e suites (FTR, Scout, Cypress) intentionally do not run here; they run
-  # post-merge in kibana-on-merge. Only Jest unit tests gate the queue.
-  - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    label: 'Pick Test Group Run Order'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-      diskSizeGb: 105
-    timeout_in_minutes: 15
-    env:
-      JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
-      JEST_UNIT_MAX_MINUTES: '15.0'
-      LIMIT_CONFIG_TYPE: 'unit'
     retry:
       automatic:
         - exit_status: '*'
