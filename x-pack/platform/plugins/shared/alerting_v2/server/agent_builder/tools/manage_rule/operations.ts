@@ -66,7 +66,7 @@ export const setKindOperationSchema = z
     kind: ruleKindSchema,
   })
   .describe(
-    'Use `set_kind` to choose a rule kind matching the user\'s goal: detect and respond (`alert`) or collect evidence (`signal`).'
+    "Use `set_kind` to choose a rule kind matching the user's goal: detect and respond (`alert`) or collect evidence (`signal`)."
   );
 
 export const setScheduleOperationSchema = scheduleSchema
