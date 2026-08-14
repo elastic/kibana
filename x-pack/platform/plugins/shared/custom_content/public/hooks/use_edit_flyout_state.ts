@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useRef } from 'react';
+import { useReducer, useCallback, useRef, useEffect } from 'react';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { getServices } from '../services';
@@ -54,6 +54,13 @@ export const useEditFlyoutState = ({
 
   const abortRef = useRef<AbortController | undefined>(undefined);
   const runPreviewAbortRef = useRef<AbortController | undefined>(undefined);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      runPreviewAbortRef.current?.abort();
+    };
+  }, []);
 
   const { agentBuilder, core, search } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
@@ -126,8 +133,13 @@ export const useEditFlyoutState = ({
       if (!controller.signal.aborted) {
         onRunPreview(prepareHtml(rawHtml, colorMode));
       }
-    } catch {
-      // errors are surfaced via esqlDataError in the ES|QL accordion
+    } catch (err) {
+      if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
+        dispatch({
+          type: 'FETCH_DATA_ERROR',
+          payload: err instanceof Error ? err.message : String(err),
+        });
+      }
     } finally {
       if (!controller.signal.aborted) {
         dispatch({ type: 'RENDER_DONE' });

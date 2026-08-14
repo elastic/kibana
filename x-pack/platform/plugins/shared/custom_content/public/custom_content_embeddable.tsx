@@ -205,6 +205,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isFlyoutOpen$.next(false);
         }, []);
 
+        const handleRunPreview = useCallback((html: string) => previewHtml$.next(html), []);
+
         return (
           <>
             <CustomContentComponent
@@ -227,7 +229,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   panelTitle={panelTitle ?? undefined}
                   onSave={handleFlyoutSave}
                   onClose={handleFlyoutClose}
-                  onRunPreview={(html) => previewHtml$.next(html)}
+                  onRunPreview={handleRunPreview}
                 />
               </Suspense>
             )}

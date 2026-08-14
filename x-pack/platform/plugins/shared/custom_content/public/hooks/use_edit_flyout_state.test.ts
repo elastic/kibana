@@ -170,7 +170,7 @@ describe('useEditFlyoutState', () => {
       expect(mockOnRunPreview).toHaveBeenCalledWith('<html>prepared</html>');
     });
 
-    it('does not call onRunPreview on fetch failure', async () => {
+    it('sets esqlDataError and does not call onRunPreview on fetch failure', async () => {
       mockFetchEsqlData.mockRejectedValue(new Error('fetch failed'));
       const { result } = renderHook(() => useEditFlyoutState(baseParams));
 
@@ -179,6 +179,7 @@ describe('useEditFlyoutState', () => {
       });
 
       expect(mockOnRunPreview).not.toHaveBeenCalled();
+      expect(result.current.esqlDataError).toBe('fetch failed');
     });
 
     it('shows loading state while rendering', async () => {
