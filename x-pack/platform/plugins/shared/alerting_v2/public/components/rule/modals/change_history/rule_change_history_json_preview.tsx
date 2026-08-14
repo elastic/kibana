@@ -19,6 +19,11 @@ const snapshotCodeBlockStyle = css`
   margin: 0;
 `;
 
+type DiffPartType = 'added' | 'removed' | 'context';
+
+const getDiffPartType = (part: Change): DiffPartType =>
+  part.added ? 'added' : part.removed ? 'removed' : 'context';
+
 const RuleChangeHistoryJsonPreview = ({
   change,
   compareSpec,
@@ -74,6 +79,12 @@ const RuleChangeHistoryJsonPreview = ({
     padding: ${euiTheme.size.m};
   `;
 
+  const diffPartStyles: Record<DiffPartType, { background: string; color: string }> = {
+    added: { background: euiTheme.colors.backgroundBaseSuccess, color: euiTheme.colors.textSuccess },
+    removed: { background: euiTheme.colors.backgroundBaseDanger, color: euiTheme.colors.textDanger },
+    context: { background: 'transparent', color: euiTheme.colors.textParagraph },
+  };
+
   if (!diffParts) {
     return (
       <EuiCodeBlock
@@ -110,23 +121,13 @@ const RuleChangeHistoryJsonPreview = ({
       <EuiFlexItem grow css={diffContainerStyle}>
         <div css={diffContentStyle}>
           {diffParts.map((part, index) => {
-            let background = 'transparent';
-            let color = euiTheme.colors.textParagraph;
-
-            if (part.added) {
-              background = euiTheme.colors.backgroundBaseSuccess;
-              color = euiTheme.colors.textSuccess;
-            } else if (part.removed) {
-              background = euiTheme.colors.backgroundBaseDanger;
-              color = euiTheme.colors.textDanger;
-            }
+            const type = getDiffPartType(part);
+            const { background, color } = diffPartStyles[type];
 
             return (
               <span
                 // Diff parts are stable for a given baseline/target pair.
-                key={`${index}-${part.added ? 'a' : ''}${part.removed ? 'r' : ''}-${
-                  part.value.length
-                }`}
+                key={`${index}-${type}-${part.value.length}`}
                 css={css`
                   background: ${background};
                   color: ${color};
