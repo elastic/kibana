@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import type { CpsData } from '@kbn/alerting-plugin/server/types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RuleParams } from '../../rule_schema';
 import {
@@ -28,6 +29,7 @@ export interface RunExecutionValidationParams {
   secondaryTimestamp: string | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   isServerless: boolean;
+  cpsData?: CpsData;
 }
 
 export interface RunExecutionValidationResult {
@@ -37,6 +39,9 @@ export interface RunExecutionValidationResult {
   dateNanosTimestampFields: string[];
   mixedTimestampFields: string[];
 }
+
+const buildRemoteIndexPatterns = (localPatterns: string[], linkedProjectAliases: string[]) =>
+  linkedProjectAliases.flatMap((alias) => localPatterns.map((pattern) => `${alias}:${pattern}`));
 
 /**
  * Runs pre-execution validation for a security rule: index pattern resolution,
@@ -56,7 +61,10 @@ export const runExecutionValidation = async (
     secondaryTimestamp,
     ruleExecutionLogger,
     isServerless,
+    cpsData,
   } = options;
+
+  const linkedProjectAliases = cpsData?.linkedProjects.map(({ alias }) => alias) ?? [];
 
   const warnings: string[] = [];
   let skipExecution = false;
@@ -80,8 +88,13 @@ export const runExecutionValidation = async (
   const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
 
   try {
+    const patternsToCheck =
+      linkedProjectAliases.length > 0
+        ? [...inputIndex, ...buildRemoteIndexPatterns(inputIndex, linkedProjectAliases)]
+        : inputIndex;
+
     const { matchedIndexPatterns, matchedIndices } = await indexPatterns.getIndexPatternMatches(
-      inputIndex
+      patternsToCheck
     );
 
     // Collect rule execution metrics
@@ -99,8 +112,16 @@ export const runExecutionValidation = async (
 
   if (isThreatParams(params)) {
     try {
+      const threatPatternsToCheck =
+        linkedProjectAliases.length > 0
+          ? [
+              ...params.threatIndex,
+              ...buildRemoteIndexPatterns(params.threatIndex, linkedProjectAliases),
+            ]
+          : params.threatIndex;
+
       const { matchedIndexPatterns: matchedThreatIndexPatterns } =
-        await indexPatterns.getIndexPatternMatches(params.threatIndex);
+        await indexPatterns.getIndexPatternMatches(threatPatternsToCheck);
 
       if (matchedThreatIndexPatterns.length === 0) {
         warnings.push(

@@ -11,12 +11,11 @@ import type { RuleParams } from '../../rule_schema';
 import { getQueryRuleParams, getMlRuleParams } from '../../rule_schema/mocks';
 import { runExecutionValidation } from './run_execution_validation';
 
+const mockGetIndexPatternMatches = jest.fn();
+
 jest.mock('@kbn/data-views-plugin/server', () => ({
   IndexPatternsFetcher: jest.fn().mockImplementation(() => ({
-    getIndexPatternMatches: jest.fn().mockResolvedValue({
-      matchedIndexPatterns: ['auditbeat-*'],
-      matchedIndices: ['auditbeat-1'],
-    }),
+    getIndexPatternMatches: mockGetIndexPatternMatches,
   })),
 }));
 
@@ -39,7 +38,8 @@ describe('runExecutionValidation', () => {
 
   const run = (
     params: RuleParams = getQueryRuleParams(),
-    secondaryTimestamp: string | undefined = undefined
+    secondaryTimestamp: string | undefined = undefined,
+    cpsData?: Parameters<typeof runExecutionValidation>[0]['cpsData']
   ) =>
     runExecutionValidation({
       params,
@@ -51,12 +51,49 @@ describe('runExecutionValidation', () => {
       secondaryTimestamp,
       ruleExecutionLogger,
       isServerless: false,
+      cpsData,
     });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetIndexPatternMatches.mockResolvedValue({
+      matchedIndexPatterns: ['auditbeat-*'],
+      matchedIndices: ['auditbeat-1'],
+    });
     scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
+  });
+
+  describe('CPS linked project index patterns', () => {
+    const cpsData = {
+      linkedProjects: [
+        { id: 'proj-1', alias: 'linked_one', type: 'security', organization: 'org-1' },
+        { id: 'proj-2', alias: 'linked_two', type: 'security', organization: 'org-1' },
+      ],
+    };
+
+    it('checks only local patterns when no cpsData is provided', async () => {
+      await run();
+      expect(mockGetIndexPatternMatches).toHaveBeenCalledWith(['auditbeat-*']);
+    });
+
+    it('checks local and remote-qualified patterns when linked projects exist', async () => {
+      await run(getQueryRuleParams(), undefined, cpsData);
+      expect(mockGetIndexPatternMatches).toHaveBeenCalledWith([
+        'auditbeat-*',
+        'linked_one:auditbeat-*',
+        'linked_two:auditbeat-*',
+      ]);
+    });
+
+    it('skips execution when no pattern matches locally or on linked projects', async () => {
+      mockGetIndexPatternMatches.mockResolvedValue({
+        matchedIndexPatterns: [],
+        matchedIndices: [],
+      });
+      const result = await run(getQueryRuleParams(), undefined, cpsData);
+      expect(result.skipExecution).toBe(true);
+    });
   });
 
   describe('dateNanosTimestampFields', () => {
