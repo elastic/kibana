@@ -131,16 +131,13 @@ export class CspPlugin
         // transforms not yet available) is safe and prevents isPluginInitialized from
         // staying false when CI infrastructure is slow to come up.
         if (packageInfo) {
-          pRetry(
-            () => this.initialize(core, plugins.taskManager, packageInfo.install_version),
-            {
-              ...getRetryOptions(this.logger, 'initialize'),
-              // Use longer backoff than the default (1s) so transient ES/transform
-              // failures have time to resolve before the next attempt.
-              minTimeout: 5_000,
-              maxTimeout: 30_000,
-            }
-          ).catch((e) => {
+          pRetry(() => this.initialize(core, plugins.taskManager, packageInfo.install_version), {
+            ...getRetryOptions(this.logger, 'initialize'),
+            // Use longer backoff than the default (1s) so transient ES/transform
+            // failures have time to resolve before the next attempt.
+            minTimeout: 5_000,
+            maxTimeout: 30_000,
+          }).catch((e) => {
             this.logger.error('CSP plugin initialization failed after all retries', e);
           });
         }

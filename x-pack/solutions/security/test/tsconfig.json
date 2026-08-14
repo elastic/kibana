@@ -66,5 +66,6 @@
     "@kbn/securitysolution-list-constants",
     "@kbn/kbn-client",
     "@kbn/entity-store",
+    "@kbn/grouping",
   ]
 }
