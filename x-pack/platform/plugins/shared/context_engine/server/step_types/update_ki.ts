@@ -8,16 +8,23 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { updateKiStepCommonDefinition } from '../../common/step_types/update_ki';
 import type { KiStepDependencies } from './helpers';
-import { assertContextEngineEnabled, findKiBackingIndex, resolveAiIndexDest } from './helpers';
+import {
+  assertContextEngineEnabled,
+  assertKiWritePrivilege,
+  findKiBackingIndex,
+  resolveAiIndexDest,
+} from './helpers';
 
 export const getUpdateKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
+  checkWritePrivilege,
 }: KiStepDependencies) =>
   createServerStepDefinition({
     ...updateKiStepCommonDefinition,
     handler: async (context) => {
       await assertContextEngineEnabled(isContextEngineEnabled);
+      await assertKiWritePrivilege(checkWritePrivilege, context.contextManager.getFakeRequest());
 
       const { ai_index_id: aiIndexId, ki_id: kiId, ki } = context.input;
 

@@ -7,6 +7,7 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -34,5 +35,6 @@ export interface ContextEngineSetupDependencies {
 export interface ContextEngineStartDependencies {
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
+  security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }

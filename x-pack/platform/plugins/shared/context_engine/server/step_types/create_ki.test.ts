@@ -18,6 +18,7 @@ const kiInput = {
 };
 
 const enabled = async () => true;
+const allowed = async () => true;
 
 describe('getCreateKiStepDefinition', () => {
   it('indexes the KI into an index dest and returns the document id', async () => {
@@ -31,6 +32,7 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
     });
     const result = await handler(context);
 
@@ -56,6 +58,7 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
     });
     await handler(context);
 
@@ -79,6 +82,7 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
     });
     const result = await handler(context);
 
@@ -114,6 +118,7 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
     });
     const result = await handler(context);
 
@@ -138,6 +143,7 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
     });
     const thrown = await handler(context).catch((e) => e);
 
@@ -158,11 +164,34 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: async () => false,
+      checkWritePrivilege: allowed,
     });
     const thrown = await handler(context).catch((e) => e);
 
     expect(thrown).toBeInstanceOf(ExecutionError);
     expect(thrown.type).toBe('FeatureDisabledError');
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
+  it('throws PermissionError when the workflow user lacks the write privilege', async () => {
+    const esClient = { index: jest.fn() };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki: kiInput },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+    const checkWritePrivilege = jest.fn().mockResolvedValue(false);
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege,
+    });
+    const thrown = await handler(context).catch((e) => e);
+
+    expect(thrown).toBeInstanceOf(ExecutionError);
+    expect(thrown.type).toBe('PermissionError');
+    expect(checkWritePrivilege).toHaveBeenCalledWith(context.contextManager.getFakeRequest());
     expect(esClient.index).not.toHaveBeenCalled();
   });
 
@@ -177,6 +206,7 @@ describe('getCreateKiStepDefinition', () => {
     const { handler } = getCreateKiStepDefinition({
       getAiIndexService: () => service,
       isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
     });
     const thrown = await handler(context).catch((e) => e);
 

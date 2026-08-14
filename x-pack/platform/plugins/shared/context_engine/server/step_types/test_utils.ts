@@ -24,7 +24,7 @@ export const createMockStepContext = ({
     config: {},
     contextManager: {
       getScopedEsClient: jest.fn().mockReturnValue(esClient),
-      getFakeRequest: jest.fn(),
+      getFakeRequest: jest.fn().mockReturnValue({ headers: {} }),
       getContext: jest.fn(),
       renderInputTemplate: jest.fn(),
     },

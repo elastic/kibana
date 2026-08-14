@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { validateAiIndexId } from '../../common/ai_index_dest';
@@ -17,7 +17,25 @@ import type { AiIndexService } from '../ai_indices/service';
 export interface KiStepDependencies {
   getAiIndexService: () => AiIndexService;
   isContextEngineEnabled: () => Promise<boolean>;
+  /** Whether the request has the Context Engine write API privilege. */
+  checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>;
 }
+
+/**
+ * Fails the step when the workflow user lacks the Context Engine write API
+ * privilege, mirroring the `requiredPrivileges` on the write HTTP routes.
+ */
+export const assertKiWritePrivilege = async (
+  checkWritePrivilege: (request: KibanaRequest) => Promise<boolean>,
+  request: KibanaRequest
+): Promise<void> => {
+  if (!(await checkWritePrivilege(request))) {
+    throw new ExecutionError({
+      type: 'PermissionError',
+      message: 'Insufficient privileges to modify knowledge indicators in AI indices',
+    });
+  }
+};
 
 /**
  * Fails the step when the Context Engine advanced setting is off, mirroring the

@@ -21,6 +21,7 @@ const registerAll = (isContextEngineEnabled: () => Promise<boolean>): StepLoader
     workflowsExtensions,
     getAiIndexService: () => ({} as AiIndexService),
     isContextEngineEnabled,
+    checkWritePrivilege: async () => true,
   });
   return loaders;
 };

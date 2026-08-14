@@ -9,16 +9,23 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
 import type { KiStepDependencies } from './helpers';
-import { assertContextEngineEnabled, findKiBackingIndex, resolveAiIndexDest } from './helpers';
+import {
+  assertContextEngineEnabled,
+  assertKiWritePrivilege,
+  findKiBackingIndex,
+  resolveAiIndexDest,
+} from './helpers';
 
 export const getDeleteKiStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
+  checkWritePrivilege,
 }: KiStepDependencies) =>
   createServerStepDefinition({
     ...deleteKiStepCommonDefinition,
     handler: async (context) => {
       await assertContextEngineEnabled(isContextEngineEnabled);
+      await assertKiWritePrivilege(checkWritePrivilege, context.contextManager.getFakeRequest());
 
       const { ai_index_id: aiIndexId, ki_id: kiId } = context.input;
 
