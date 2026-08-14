@@ -40624,7 +40624,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -40699,7 +40700,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -90452,7 +90454,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -90673,7 +90675,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -90727,6 +90729,8 @@ components:
                 - type: string
                 - not: {}
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -90912,7 +90916,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -91056,7 +91060,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -91976,7 +91980,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -92197,7 +92201,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -92251,6 +92255,8 @@ components:
                 - type: string
                 - not: {}
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -92436,7 +92442,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -92580,7 +92586,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -100598,7 +100604,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -100813,7 +100819,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -100867,6 +100873,8 @@ components:
                 - type: string
                 - not: {}
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -101049,7 +101057,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -101187,7 +101195,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:

@@ -54378,7 +54378,6 @@
     "xpack.synthetics.settings.getParams.failed": "グローバルパラメーターを取得できませんでした。",
     "xpack.synthetics.settings.index": "シンセティック設定",
     "xpack.synthetics.settings.invalid.nanError": "値は整数でなければなりません。",
-    "xpack.synthetics.settings.mws.failed": "保守時間枠の取得に失敗しました。",
     "xpack.synthetics.settings.noSpace.error": "インデックス名にはスペースを使用できません",
     "xpack.synthetics.settings.saveSuccess": "設定が保存されました。",
     "xpack.synthetics.settings.statusRule.inspect": "監視ステータスルールタイプを検査できませんでした。",

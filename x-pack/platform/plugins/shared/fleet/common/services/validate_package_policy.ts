@@ -268,8 +268,7 @@ const isVarRequiredByVarGroup = (
   return false;
 };
 
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
-  /^(logs)|(metrics)|(traces)|(synthetics)|(profiles)-(.*)$/;
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 /*
  * Returns validation information for a given package policy and package info

@@ -344,7 +344,10 @@ export class StreamsApp {
 
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
-    await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
+    const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
+    await expect(button).toBeVisible();
+    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
+    await button.evaluate((el) => (el as HTMLElement).click());
   }
 
   async fillRoutingRuleName(name: string) {

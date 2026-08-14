@@ -53990,7 +53990,6 @@
     "xpack.synthetics.settings.getParams.failed": "Impossible d’obtenir les paramètres globaux.",
     "xpack.synthetics.settings.index": "Paramètres synthétiques",
     "xpack.synthetics.settings.invalid.nanError": "La valeur doit être un entier.",
-    "xpack.synthetics.settings.mws.failed": "Impossible de récupérer les windows de maintenance.",
     "xpack.synthetics.settings.noSpace.error": "Les noms d'index ne doivent pas contenir d'espace",
     "xpack.synthetics.settings.saveSuccess": "Paramètres enregistrés !",
     "xpack.synthetics.settings.statusRule.inspect": "Impossible d'inspecter le type de règle de statut du moniteur.",

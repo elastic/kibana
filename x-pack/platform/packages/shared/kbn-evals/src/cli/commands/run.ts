@@ -21,9 +21,6 @@ import {
   isExportProfileImplicitLocal,
 } from '../profiles';
 
-const EXECUTORS = ['phoenix', 'kibana'] as const;
-type Executor = (typeof EXECUTORS)[number];
-
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
     .map(([key, value]) => {
@@ -74,7 +71,6 @@ export const runSuiteCmd: Command<void> = {
       'suite',
       'config',
       'project',
-      'executor',
       'evaluation-connector-id',
       'repetitions',
       'grep',
@@ -87,8 +83,6 @@ export const runSuiteCmd: Command<void> = {
       'evaluations-es-api-key',
       'evaluations-kbn-url',
       'evaluations-kbn-api-key',
-      'phoenix-base-url',
-      'phoenix-api-key',
     ],
     boolean: ['dry-run'],
     alias: { model: 'project', judge: 'evaluation-connector-id' },
@@ -98,7 +92,6 @@ export const runSuiteCmd: Command<void> = {
     const repoRoot = process.cwd();
     let suiteId = flagsReader.string('suite');
     const configPath = flagsReader.string('config');
-    const executor = flagsReader.enum('executor', EXECUTORS) as Executor | undefined;
 
     if (!suiteId && !configPath) {
       if (isTTY()) {
@@ -182,10 +175,6 @@ export const runSuiteCmd: Command<void> = {
 
     log.info(`Profiles: datasets=${datasetsProfile ?? 'config'} export=${exportProfile ?? 'none'}`);
 
-    if (executor === 'phoenix') {
-      envOverrides.KBN_EVALS_EXECUTOR = 'phoenix';
-    }
-
     const repetitions = flagsReader.string('repetitions');
     if (repetitions) {
       envOverrides.EVALUATION_REPETITIONS = repetitions;
@@ -219,16 +208,6 @@ export const runSuiteCmd: Command<void> = {
     const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
     if (evaluationsKbnApiKey) {
       envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
-    }
-
-    const phoenixBaseUrl = flagsReader.string('phoenix-base-url');
-    if (phoenixBaseUrl) {
-      envOverrides.PHOENIX_BASE_URL = phoenixBaseUrl;
-    }
-
-    const phoenixApiKey = flagsReader.string('phoenix-api-key');
-    if (phoenixApiKey) {
-      envOverrides.PHOENIX_API_KEY = phoenixApiKey;
     }
 
     const args = ['scripts/playwright', 'test', '--config', resolvedConfigPath];
