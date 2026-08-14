@@ -23,7 +23,8 @@ import { ProjectPickerList } from './project_picker_update/blocks/list';
 import type { ProjectsData } from '../types';
 import { useFetchProjects } from './use_fetch_projects';
 
-interface ProjectPickerContentBaseProps {
+interface ProjectPickerContentBaseProps
+  extends Pick<ProjectPickerStateProviderProps, 'projectRoutingStrategy'> {
   projectRouting?: ProjectRouting;
   /**
    * Fetches projects matching a filter-only routing expression.
@@ -59,6 +60,7 @@ export const ProjectPickerContent = ({
   fetchProjectsByRouting,
   controlsState = 'enabled',
   customHeaderText,
+  projectRoutingStrategy,
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const initialProjectRouting = useRef(projectRouting);
@@ -99,6 +101,7 @@ export const ProjectPickerContent = ({
             defaultProjectRoutingGetter={defaultProjectRoutingGetter}
             fetchProjectsByRouting={fetchProjectsByRouting}
             controlsState={controlsState}
+            projectRoutingStrategy={projectRoutingStrategy}
           >
             <ProjectPickerFrame maxBodyHeight={maxListHeight} customHeaderText={customHeaderText}>
               <ProjectPickerList />
