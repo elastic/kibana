@@ -97,12 +97,12 @@ const facetLine = (bucket: RumFacetBucket): string =>
 
 const none = (): string[] => ['None'];
 
-interface EmailSection {
+export interface EmailSection {
   heading: string;
   rows: string[];
 }
 
-interface EmailModel {
+export interface EmailModel {
   title: string;
   meta: string[];
   sections: EmailSection[];
@@ -187,7 +187,7 @@ const scorecardModel = (report: RumScorecardReport): EmailModel => {
   };
 };
 
-const reportModel = (report: RumReportResponse): EmailModel => {
+export const reportModel = (report: RumReportResponse): EmailModel => {
   if (report.templateId === 'scorecard') {
     return scorecardModel(report);
   }

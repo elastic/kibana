@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   canGoToNextCalendarWeek,
@@ -77,6 +77,7 @@ export function RumReportView({ templateId }: { templateId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [aiOpen, setAiOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const captureRef = useRef<HTMLDivElement>(null);
 
   const piiOn = includePii === 'true';
   const compareMode = compare === 'none' ? 'none' : 'previous';
@@ -252,6 +253,7 @@ export function RumReportView({ templateId }: { templateId: string }) {
         includePii={piiOn}
         exactStart={exactStart}
         exactEnd={exactEnd}
+        captureRoot={captureRef}
         onGenerateAi={() => setAiOpen(true)}
         onScheduleEmail={() => setScheduleOpen(true)}
         onCreateAlert={() => openAlert({ templateId: 'web_vital' })}
@@ -282,90 +284,92 @@ export function RumReportView({ templateId }: { templateId: string }) {
           onClose={() => setScheduleOpen(false)}
         />
       )}
-      <AiReportPanel report={data} expanded={aiOpen} />
-      <EuiSpacer size="m" />
-      <ReportCover
-        report={data}
-        filterChips={chips}
-        canNextWeek={canGoToNextCalendarWeek(rangeFrom)}
-        isThisWeek={isCurrentCalendarWeek(rangeFrom)}
-        onPrevWeek={() => {
-          const period = shiftCalendarWeek(rangeFrom, -1);
-          if (period) {
-            pushRumPath(history, `/reports/${templateId}`, period);
-          }
-        }}
-        onNextWeek={() => {
-          const period = shiftCalendarWeek(rangeFrom, 1);
-          if (period) {
-            pushRumPath(history, `/reports/${templateId}`, period);
-          }
-        }}
-      />
-      <EuiSpacer />
-      {noRows ? (
-        <EuiEmptyPrompt
-          title={
-            <h2>
-              {i18n.translate('xpack.ux.reports.emptyPeriodTitle', {
-                defaultMessage: 'No sessions in this range',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.ux.reports.emptyPeriodDescription', {
-                defaultMessage: 'Widen the range or drop filters.',
-              })}
-            </p>
-          }
-          actions={[
-            <EuiButton
-              key="clear"
-              data-test-subj="uxReportClearFilters"
-              fill
-              onClick={() =>
-                pushRumPath(history, `/reports/${templateId}`, {
-                  browser: '',
-                  os: '',
-                  pageUrl: '',
-                  frustration: '',
-                  user: '',
-                  kuery: '',
-                  breakpoint: '',
-                  connection: '',
-                  device: '',
-                  errorGroup: '',
-                })
-              }
-            >
-              {i18n.translate('xpack.ux.reports.clearFiltersButtonLabel', {
-                defaultMessage: 'Clear filters',
-              })}
-            </EuiButton>,
-            <EuiButtonEmpty
-              key="sessions"
-              data-test-subj="uxReportOpenSessions"
-              onClick={() => pushRumPath(history, '/session-replay', sessionsPatch({}))}
-            >
-              {i18n.translate('xpack.ux.reports.openSessionsButtonLabel', {
-                defaultMessage: 'Open Sessions',
-              })}
-            </EuiButtonEmpty>,
-          ]}
+      <div ref={captureRef} className="uxRumReportCapture">
+        <AiReportPanel report={data} expanded={aiOpen} />
+        <EuiSpacer size="m" />
+        <ReportCover
+          report={data}
+          filterChips={chips}
+          canNextWeek={canGoToNextCalendarWeek(rangeFrom)}
+          isThisWeek={isCurrentCalendarWeek(rangeFrom)}
+          onPrevWeek={() => {
+            const period = shiftCalendarWeek(rangeFrom, -1);
+            if (period) {
+              pushRumPath(history, `/reports/${templateId}`, period);
+            }
+          }}
+          onNextWeek={() => {
+            const period = shiftCalendarWeek(rangeFrom, 1);
+            if (period) {
+              pushRumPath(history, `/reports/${templateId}`, period);
+            }
+          }}
         />
-      ) : (
-        <>
-          {data.templateId === 'scorecard' && <ScorecardReport report={data} />}
-          {data.templateId === 'pages' && <PagesReport report={data} />}
-          {data.templateId === 'errors' && <ErrorsReport report={data} />}
-          {data.templateId === 'frustration' && <FrustrationReport report={data} />}
-          {data.templateId === 'funnel' && <FunnelReport report={data} />}
-          {data.templateId === 'clients' && <ClientsReport report={data} />}
-          {data.templateId === 'users' && <UsersReport report={data} />}
-        </>
-      )}
-      <EuiSpacer />
+        <EuiSpacer />
+        {noRows ? (
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                {i18n.translate('xpack.ux.reports.emptyPeriodTitle', {
+                  defaultMessage: 'No sessions in this range',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.ux.reports.emptyPeriodDescription', {
+                  defaultMessage: 'Widen the range or drop filters.',
+                })}
+              </p>
+            }
+            actions={[
+              <EuiButton
+                key="clear"
+                data-test-subj="uxReportClearFilters"
+                fill
+                onClick={() =>
+                  pushRumPath(history, `/reports/${templateId}`, {
+                    browser: '',
+                    os: '',
+                    pageUrl: '',
+                    frustration: '',
+                    user: '',
+                    kuery: '',
+                    breakpoint: '',
+                    connection: '',
+                    device: '',
+                    errorGroup: '',
+                  })
+                }
+              >
+                {i18n.translate('xpack.ux.reports.clearFiltersButtonLabel', {
+                  defaultMessage: 'Clear filters',
+                })}
+              </EuiButton>,
+              <EuiButtonEmpty
+                key="sessions"
+                data-test-subj="uxReportOpenSessions"
+                onClick={() => pushRumPath(history, '/session-replay', sessionsPatch({}))}
+              >
+                {i18n.translate('xpack.ux.reports.openSessionsButtonLabel', {
+                  defaultMessage: 'Open Sessions',
+                })}
+              </EuiButtonEmpty>,
+            ]}
+          />
+        ) : (
+          <>
+            {data.templateId === 'scorecard' && <ScorecardReport report={data} />}
+            {data.templateId === 'pages' && <PagesReport report={data} />}
+            {data.templateId === 'errors' && <ErrorsReport report={data} />}
+            {data.templateId === 'frustration' && <FrustrationReport report={data} />}
+            {data.templateId === 'funnel' && <FunnelReport report={data} />}
+            {data.templateId === 'clients' && <ClientsReport report={data} />}
+            {data.templateId === 'users' && <UsersReport report={data} />}
+          </>
+        )}
+        <EuiSpacer />
+      </div>
       <EuiText size="xs" color="subdued" className="uxRumReportNoPrint">
         {i18n.translate('xpack.ux.reports.footer.generatedLabel', {
           defaultMessage: 'Generated {when}',

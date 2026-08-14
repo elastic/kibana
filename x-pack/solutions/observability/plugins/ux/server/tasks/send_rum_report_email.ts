@@ -13,10 +13,9 @@ import {
   csvFilename,
   reportEmailHtml,
   reportEmailMarkdown,
-  reportToPdfText,
   resolveEmailReportRange,
 } from '../../common/rum_report';
-import { textToPdfBuffer } from '../../common/rum_report_pdf';
+import { buildReportPdfBuffer, textToPdfBuffer } from '../../common/rum_report_pdf';
 import {
   RUM_REPORT_SCHEDULE_SO_TYPE,
   type RumReportScheduleAttributes,
@@ -149,7 +148,7 @@ export const sendRumReportEmail = async ({
   }
   const markdown = reportEmailMarkdown(report, shareUrl, narrative);
   const html = reportEmailHtml(report, shareUrl, narrative);
-  const pdf = textToPdfBuffer(reportToPdfText(report, shareUrl, narrative));
+  const pdf = await buildReportPdfBuffer(report, shareUrl, narrative);
   const filename = csvFilename(schedule.templateId, rangeFrom, rangeTo).replace(/\.csv$/i, '.pdf');
 
   const unsecured = actions.getUnsecuredActionsClient();

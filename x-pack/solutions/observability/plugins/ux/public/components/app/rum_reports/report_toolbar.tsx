@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   csvFilename,
@@ -17,6 +17,7 @@ import {
 } from '../../../../common/rum_report';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { mergeRumSearch } from '../../../utils/rum_search';
+import { exportReportPdf } from './export_report_pdf';
 
 const downloadCsv = (filename: string, csv: string) => {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -36,6 +37,7 @@ export function ReportToolbar({
   onGenerateAi,
   onScheduleEmail,
   onCreateAlert,
+  captureRoot,
 }: {
   report: RumReportResponse;
   includePii: boolean;
@@ -44,10 +46,12 @@ export function ReportToolbar({
   onGenerateAi?: () => void;
   onScheduleEmail?: () => void;
   onCreateAlert?: () => void;
+  captureRoot?: { current: HTMLElement | null };
 }) {
   const { http, notifications } = useKibanaServices();
   const history = useHistory();
   const location = useLocation();
+  const [exporting, setExporting] = useState(false);
 
   const absoluteUrl = useCallback(
     (mode: 'snapshot' | 'live') => {
@@ -141,7 +145,38 @@ export function ReportToolbar({
           <EuiButtonEmpty
             data-test-subj="uxReportPrint"
             iconType="document"
-            onClick={() => window.print()}
+            isLoading={exporting}
+            onClick={() => {
+              const root = captureRoot?.current;
+              if (!root) {
+                window.print();
+                return;
+              }
+              setExporting(true);
+              const filename = csvFilename(
+                report.templateId,
+                report.rangeFrom,
+                report.rangeTo
+              ).replace(/\.csv$/i, '.pdf');
+              void exportReportPdf(root, filename)
+                .then(() => {
+                  notifications.toasts.addSuccess(
+                    i18n.translate('xpack.ux.reports.toolbar.pdfReadyTitle', {
+                      defaultMessage: 'PDF downloaded',
+                    })
+                  );
+                })
+                .catch((err: Error) => {
+                  notifications.toasts.addError(err, {
+                    title: i18n.translate('xpack.ux.reports.toolbar.pdfFailedTitle', {
+                      defaultMessage: 'Unable to export PDF',
+                    }),
+                  });
+                })
+                .finally(() => {
+                  setExporting(false);
+                });
+            }}
           >
             {i18n.translate('xpack.ux.reports.toolbar.printButtonLabel', {
               defaultMessage: 'Export PDF',

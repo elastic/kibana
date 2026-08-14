@@ -270,7 +270,12 @@ export function AiReportPanel({
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiPanel hasBorder paddingSize="none" data-test-subj="uxReportAiPanel">
+      <EuiPanel
+        hasBorder
+        paddingSize="none"
+        data-test-subj="uxReportAiPanel"
+        className={!narrative ? 'uxRumReportNoPrint' : undefined}
+      >
         <div className="uxRumReportNoPrint" css={headerCss}>
           <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={true}>

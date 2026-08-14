@@ -141,6 +141,53 @@ export function RumReportPrintStyles() {
             display: none !important;
           }
         }
+
+        [data-ux-exporting='true'] {
+          color-scheme: light !important;
+          background: #fff !important;
+          color: #1d1e24 !important;
+        }
+
+        [data-ux-exporting='true'] .uxRumReportNoPrint {
+          display: none !important;
+        }
+
+        [data-ux-exporting='true'] .euiPanel,
+        [data-ux-exporting='true'] .euiTable,
+        [data-ux-exporting='true'] [data-test-subj='uxReportAiNarrative'] {
+          background: #fff !important;
+          color: #1d1e24 !important;
+          box-shadow: none !important;
+        }
+
+        [data-ux-exporting='true'] .euiText,
+        [data-ux-exporting='true'] .euiTitle,
+        [data-ux-exporting='true'] .euiStat,
+        [data-ux-exporting='true'] td,
+        [data-ux-exporting='true'] th,
+        [data-ux-exporting='true'] p,
+        [data-ux-exporting='true'] h1,
+        [data-ux-exporting='true'] h2,
+        [data-ux-exporting='true'] h3,
+        [data-ux-exporting='true'] li {
+          color: #1d1e24 !important;
+        }
+
+        [data-ux-exporting='true'] .uxRumRankChip {
+          border: 1px solid #1d1e24 !important;
+          color: #1d1e24 !important;
+          background: #fff !important;
+        }
+
+        [data-ux-exporting='true'] .uxRumCountryMapPrint {
+          display: block !important;
+        }
+
+        [data-ux-exporting='true'] .uxRumCountryMapCanvas,
+        [data-ux-exporting='true'] .maplibregl-map,
+        [data-ux-exporting='true'] .mapEmbeddableContainer {
+          display: none !important;
+        }
       `}
     />
   );
