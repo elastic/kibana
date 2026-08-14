@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
-import { significantEventTableColumns } from '.';
+import { getSignificantEventTableColumns } from '.';
 import { SignificantEventFlyout } from './significant_event_flyout';
 
 jest.mock('../../../../hooks/use_fetch_significant_event_lifecycle', () => ({
@@ -54,9 +54,6 @@ jest.mock('./lifecycle_timeline', () => ({
 jest.mock('./event_investigations', () => ({
   EventInvestigations: () => null,
 }));
-jest.mock('../../../../components/significant_event_details/significant_event_details', () => ({
-  SignificantEventDetails: () => null,
-}));
 
 const event: SignificantEventResponse = {
   '@timestamp': '2026-01-02T00:00:00.000Z',
@@ -73,19 +70,18 @@ const event: SignificantEventResponse = {
 
 describe('Significant Events timestamp rendering', () => {
   it('sorts the Timestamp column by the lineage creation timestamp', () => {
-    expect(significantEventTableColumns[0]).toEqual(
+    const columns = getSignificantEventTableColumns({
+      onToggleEvent: jest.fn(),
+    });
+    expect(columns.find((column) => 'field' in column && column.field === 'created_at')).toEqual(
       expect.objectContaining({ field: 'created_at' })
     );
   });
 
-  it('renders the lineage creation timestamp in the flyout header', () => {
+  it('renders the lineage creation timestamp in general information', () => {
     render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
 
-    expect(
-      screen.getByText(
-        (_, element) => element?.textContent?.startsWith(`formatted:${event.created_at}`) ?? false
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(`formatted:${event.created_at}`)).toBeInTheDocument();
     expect(screen.queryByText(`formatted:${event['@timestamp']}`)).not.toBeInTheDocument();
   });
 });

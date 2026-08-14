@@ -61,12 +61,8 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       const boundedQuery = appendLimitToQuery(effectiveQuery, step.maxAlertsPerRun);
 
       step.logger.debug({
-        message: () =>
-          `[${step.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
-            query: boundedQuery,
-            filter: queryPayload.filter,
-            params: queryPayload.params,
-          })}`,
+        message: 'Executing ES|QL query',
+        labels: { rule_id: input.ruleId, step: step.name },
       });
 
       try {

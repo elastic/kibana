@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
@@ -220,6 +221,18 @@ describe('EvaluateMatchersStep', () => {
 
     expect(matched).toHaveLength(0);
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Policy matcher failed to evaluate; treating as no-match',
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          policy_id: 'p1',
+          episode_id: episode.episode_id,
+          code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+        }),
+      })
+    );
+    const warnMessage = (mockLogger.warn as jest.Mock).mock.calls[0][0] as string;
+    expect(warnMessage).not.toContain('invalid kql (((');
   });
 
   it('continues evaluating sibling policies when one matcher throws', async () => {
@@ -267,7 +280,7 @@ describe('EvaluateMatchersStep', () => {
     expect(mockLogger.warn).toHaveBeenCalledTimes(2);
   });
 
-  it('warn message includes policy id, episode id, and matcher', async () => {
+  it('warn message keeps policy and episode ids in labels and omits the matcher', async () => {
     const episode = createAlertEpisode({ episode_id: 'ep-42', rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
     const policy = createActionPolicy({ id: 'p-broken', matcher: 'invalid kql (((' });
@@ -275,14 +288,24 @@ describe('EvaluateMatchersStep', () => {
     await runStep([episode], new Map([['r1', rule]]), new Map([['p-broken', policy]]));
 
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Policy matcher failed to evaluate; treating as no-match',
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          policy_id: 'p-broken',
+          episode_id: 'ep-42',
+          code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+        }),
+      })
+    );
     const messageArg = mockLogger.warn.mock.calls[0][0];
     const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
-    expect(rendered).toContain('p-broken');
-    expect(rendered).toContain('ep-42');
-    expect(rendered).toContain('invalid kql (((');
+    expect(rendered).not.toContain('invalid kql (((');
+    expect(rendered).not.toContain('p-broken');
+    expect(rendered).not.toContain('ep-42');
   });
 
-  it('truncates matchers longer than 500 chars in the warn message', async () => {
+  it('does not log long matchers at any length', async () => {
     const longMatcher = '('.repeat(600);
     const episode = createAlertEpisode({ rule_id: 'r1' });
     const rule = createRule({ id: 'r1' });
@@ -292,8 +315,8 @@ describe('EvaluateMatchersStep', () => {
 
     const messageArg = mockLogger.warn.mock.calls[0][0];
     const rendered = typeof messageArg === 'function' ? messageArg() : String(messageArg);
-    expect(rendered).toContain(`${longMatcher.slice(0, 500)}…`);
-    expect(rendered).not.toContain(longMatcher);
+    expect(rendered).not.toContain('(');
+    expect(rendered).not.toContain(longMatcher.slice(0, 20));
   });
 
   describe('external episode matching', () => {

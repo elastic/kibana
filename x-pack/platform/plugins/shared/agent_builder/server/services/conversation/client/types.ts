@@ -18,7 +18,10 @@ import type {
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
-import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
+import type {
+  ConversationAccessControl,
+  ConversationInternalState,
+} from '@kbn/agent-builder-common/chat';
 import type {
   AttachmentVersionRef,
   VersionedAttachment,
@@ -28,9 +31,10 @@ import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state'
 
 export type ConversationCreateRequest = Omit<
   Conversation,
-  'id' | 'created_at' | 'updated_at' | 'user'
+  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
 > & {
   id?: string;
+  access_control?: Pick<ConversationAccessControl, 'access_mode'>;
 };
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
@@ -45,6 +49,13 @@ export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
   'id' | 'title' | 'attachments' | 'read' | 'pinned'
 >;
+
+export interface GetEventsOptions {
+  /** Return only events after the one with this id (exclusive). */
+  afterEventId?: string;
+  /** Cap the number of events returned (applied after `afterEventId`). */
+  limit?: number;
+}
 
 /**
  * Persists a single completed round as intent, not end state, so it can be merged into
