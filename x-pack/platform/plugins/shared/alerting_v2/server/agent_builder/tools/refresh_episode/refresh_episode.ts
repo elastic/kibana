@@ -15,9 +15,11 @@ import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
 import { episodeAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { alertEpisodeToEpisodeAttachment } from '../../../../common/agent_builder/episode_mappers';
+import { resolveEpisodeName } from '../../../../common/agent_builder/resolve_episode_name';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { EpisodesClient } from '../../../lib/episodes_client';
+import type { RulesClient } from '../../../lib/rules_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 
@@ -32,6 +34,7 @@ export interface RefreshEpisodeToolParams {
   episodeId: string;
   logger: LoggerServiceContract;
   getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
+  getRulesClient: (context: AttachmentFormatContext) => RulesClient;
   getPrivilegeChecker: (context: {
     request: AttachmentFormatContext['request'];
   }) => PrivilegeChecker;
@@ -42,6 +45,7 @@ export const refreshEpisodeTool = ({
   episodeId,
   logger,
   getEpisodesClient,
+  getRulesClient,
   getPrivilegeChecker,
 }: RefreshEpisodeToolParams): BuiltinAttachmentBoundedTool<typeof refreshEpisodeSchema> => ({
   id: refreshEpisodeToolId(attachmentId),
@@ -78,7 +82,36 @@ export const refreshEpisodeTool = ({
         };
       }
 
-      const data = episodeAttachmentDataSchema.parse(alertEpisodeToEpisodeAttachment(episode));
+      let ruleName: string | undefined;
+      let groupingFields: string[] | undefined;
+      try {
+        const rule = await getRulesClient({
+          request: toolContext.request,
+          spaceId: toolContext.spaceId,
+        }).getRule({ id: episode['rule.id'] });
+        ruleName = rule.metadata.name;
+        groupingFields = rule.grouping?.fields;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        logger.debug({
+          message: `Failed to load rule for episode refresh: ${message}`,
+          labels: {
+            episode_id: episodeId,
+            space_id: toolContext.spaceId,
+            rule_id: episode['rule.id'],
+          },
+        });
+      }
+
+      const data = episodeAttachmentDataSchema.parse(
+        alertEpisodeToEpisodeAttachment(episode, {
+          episodeName: resolveEpisodeName({
+            ruleName,
+            episodeData: episode.episode_data,
+            groupingFields,
+          }),
+        })
+      );
 
       return {
         results: [
