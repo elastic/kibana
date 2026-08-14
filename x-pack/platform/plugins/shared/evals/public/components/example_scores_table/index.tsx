@@ -32,6 +32,66 @@ import * as i18n from './translations';
 const formatScore = (score: number | null | undefined) =>
   score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
 
+/**
+ * Maps a verdict label + numeric score to an EUI badge color.
+ *
+ * Order matters: compound negatives (MISMATCH, INCOHERENT, IRRELEVANT, DISSIMILAR) must be
+ * checked before their positive substrings (MATCH, COHERENT, RELEVANT, SIMILAR).
+ * Unknown/user-defined labels fall back to score-based coloring so they still get a meaningful
+ * signal without requiring an exhaustive keyword list.
+ */
+const getVerdictBadgeColor = (label: string, score: number | null | undefined): string => {
+  // Normalize to uppercase, convert hyphens so 'leak-detected' → 'LEAK_DETECTED'
+  const u = label.toUpperCase().replace(/-/g, '_');
+
+  // Neutral sentinels — shown in muted gray regardless of score
+  if (u === 'NOT_APPLICABLE' || u === 'N_A' || u === 'NA' || u === 'UNAVAILABLE' || u === 'ERROR')
+    return 'default';
+
+  // Negative — check compound forms first to avoid matching their positive substrings
+  if (
+    u.includes('MISMATCH') ||
+    u.includes('INCOHERENT') ||
+    u.includes('IRRELEVANT') ||
+    u.includes('DISSIMILAR') ||
+    u.includes('MAJOR') ||
+    u.includes('SEVERE') ||
+    u === 'POOR' ||
+    u.includes('UNSAFE') ||
+    u.includes('LEAK') ||
+    u === 'OUT_OF_SCOPE'
+  )
+    return 'danger';
+
+  // Middling
+  if (u.includes('MINOR') || u.includes('PARTIAL') || u === 'PARTIAL') return 'warning';
+
+  // Positive — safe to match substrings now that their negative compounds are handled above
+  if (
+    u.includes('MATCH') ||
+    u.includes('CORRECT') ||
+    u.includes('ACCURATE') ||
+    u.includes('COMPLETE') ||
+    u.includes('GROUNDED') ||
+    u.includes('RELEVANT') ||
+    u.includes('SIMILAR') ||
+    u.includes('COHERENT') ||
+    u === 'GOOD' ||
+    u === 'SAFE' ||
+    u === 'IN_SCOPE'
+  )
+    return 'success';
+
+  // Score-based fallback for user-defined or unknown labels
+  if (score != null) {
+    if (score >= 0.8) return 'success';
+    if (score >= 0.5) return 'warning';
+    return 'danger';
+  }
+
+  return 'hollow';
+};
+
 const hasNonEmptyMetadata = (
   metadata: Record<string, unknown> | null | undefined
 ): metadata is Record<string, unknown> => metadata != null && Object.keys(metadata).length > 0;
@@ -145,7 +205,9 @@ const EvaluatorScoreAccordion: React.FC<{
       </EuiFlexItem>
       {evaluator.label && (
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{evaluator.label}</EuiBadge>
+          <EuiBadge color={getVerdictBadgeColor(evaluator.label, evaluator.score)}>
+            {evaluator.label}
+          </EuiBadge>
         </EuiFlexItem>
       )}
       {judgeModelId && (
@@ -236,18 +298,10 @@ const EvaluatorScoreGroupBlock: React.FC<{
 
   return (
     <div css={{ marginBottom: euiTheme.size.s }}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{evaluatorName}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        {showJudge && sharedModelId && (
-          <EuiFlexItem grow={false}>
-            <JudgeLabel modelId={sharedModelId} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        <strong>{evaluatorName}</strong>
+      </EuiText>
+      {showJudge && sharedModelId && <JudgeLabel modelId={sharedModelId} />}
       {/* The rule marks where the evaluator's scores end, so the next top-level score is not
           mistaken for one of them. */}
       <div
@@ -496,16 +550,19 @@ export const ExampleScoresTable: React.FC<ExampleScoresTableProps> = ({
         const scores = getScoresForSelectedRepetition(row);
         // A judge only disambiguates when the cell holds more than one.
         const showJudge = collectModelIds(scores).size > 1;
+        const groups = groupScoresByEvaluator(scores);
         return scores.length > 0 ? (
           <div>
-            {groupScoresByEvaluator(scores).map((group) => (
-              <EvaluatorScoreGroupBlock
-                key={`${row.exampleId}-${group.evaluatorName}`}
-                group={group}
-                exampleId={row.exampleId}
-                showJudge={showJudge}
-                onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
-              />
+            {groups.map((group, idx) => (
+              <React.Fragment key={`${row.exampleId}-${group.evaluatorName}`}>
+                {idx > 0 && <EuiSpacer size="xs" />}
+                <EvaluatorScoreGroupBlock
+                  group={group}
+                  exampleId={row.exampleId}
+                  showJudge={showJudge}
+                  onTraceClick={(traceId) => onTraceClick(traceId, row.exampleId)}
+                />
+              </React.Fragment>
             ))}
           </div>
         ) : (
