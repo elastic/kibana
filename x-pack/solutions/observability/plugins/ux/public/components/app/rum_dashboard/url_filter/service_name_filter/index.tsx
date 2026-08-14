@@ -72,6 +72,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
     <EuiSelect
       data-test-subj="uxServiceNameFilterSelect"
       fullWidth
+      compressed
       prepend={webApplicationLabel}
       aria-label={webApplicationLabel}
       isLoading={loading}

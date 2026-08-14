@@ -96,6 +96,7 @@ export function EnvironmentFilter({
       <EuiSelect
         data-test-subj="uxEnvironmentFilterSelect"
         fullWidth
+        compressed
         prepend={environmentLabel}
         options={options}
         value={environment}

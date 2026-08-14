@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import { useHistory } from 'react-router-dom';
@@ -54,35 +54,30 @@ export function RumKueryBar() {
   });
 
   return (
-    <EuiFormRow
+    <EuiFieldText
       fullWidth
+      compressed
+      prepend={kqlLabel}
+      value={draft}
       isInvalid={!valid}
-      error={
+      title={
         valid
           ? undefined
           : i18n.translate('xpack.ux.filters.kuery.invalid', {
               defaultMessage: 'Invalid KQL',
             })
       }
-    >
-      <EuiFieldText
-        fullWidth
-        prepend={kqlLabel}
-        value={draft}
-        isInvalid={!valid}
-        onChange={(event) => setDraft(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            apply(draft);
-          }
-        }}
-        placeholder={i18n.translate('xpack.ux.filters.kuery.placeholder', {
-          defaultMessage: 'Filter with KQL, e.g. {example}',
-          values: { example: 'resource.attributes.user.name: Hopper' },
-        })}
-        aria-label={kqlLabel}
-        data-test-subj="uxKueryBar"
-      />
-    </EuiFormRow>
+      onChange={(event) => setDraft(event.target.value)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          apply(draft);
+        }
+      }}
+      placeholder={i18n.translate('xpack.ux.filters.kuery.placeholder', {
+        defaultMessage: 'Filter with KQL',
+      })}
+      aria-label={kqlLabel}
+      data-test-subj="uxKueryBar"
+    />
   );
 }
