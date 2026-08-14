@@ -200,13 +200,13 @@ export function ClickMapPanel() {
         </EuiCallOut>
       )}
 
-      {!loading && data && data.clicks.length === 0 && (
+      {!loading && data && !data.snapshot && data.clicks.length === 0 && (
         <EuiEmptyPrompt
           titleSize="xs"
           title={
             <h4>
               {i18n.translate('xpack.ux.overview.clickMap.emptyTitle', {
-                defaultMessage: 'No click coordinates in this range',
+                defaultMessage: 'No replay snapshot in this range',
               })}
             </h4>
           }
@@ -214,14 +214,14 @@ export function ClickMapPanel() {
             <p>
               {i18n.translate('xpack.ux.overview.clickMap.emptyBody', {
                 defaultMessage:
-                  'The SDK records page X/Y on browser.user_action.click. Capture traffic with EDOT Browser, then refresh.',
+                  'The click map uses a session replay snapshot of this page. Open a session with replay for this web app, then refresh.',
               })}
             </p>
           }
         />
       )}
 
-      {data && data.clicks.length > 0 && data.snapshot && (
+      {data && data.snapshot && (
         <>
           <ClickMapStage snapshot={data.snapshot} clicks={data.clicks} />
           <EuiSpacer size="s" />

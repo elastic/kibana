@@ -528,6 +528,10 @@ export function RumOverviewV2() {
 
       <EuiSpacer />
 
+      <ClickMapPanel />
+
+      <EuiSpacer />
+
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel hasBorder paddingSize="m">
@@ -683,10 +687,6 @@ export function RumOverviewV2() {
         activeLocation={locationFilter}
         maxPageViews={Math.max(1, ...data.countries.map((row) => row.pageViews))}
       />
-
-      <EuiSpacer />
-
-      <ClickMapPanel />
 
       <EuiSpacer />
 

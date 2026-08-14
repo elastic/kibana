@@ -8,6 +8,7 @@
 import {
   binClicks,
   extractPageSnapshot,
+  extractReplayClicks,
   inViewportBand,
   isOnSnapshotViewport,
   pathFromHref,
@@ -63,6 +64,21 @@ describe('extractPageSnapshot', () => {
 
   it('returns null without a FullSnapshot', () => {
     expect(extractPageSnapshot([meta('https://shop.example/')])).toBeNull();
+  });
+});
+
+describe('extractReplayClicks', () => {
+  it('keeps MouseInteraction clicks on the matching page', () => {
+    const clicks = extractReplayClicks(
+      [
+        { type: 4, data: { href: 'https://kbn/app/ux', width: 1280, height: 800 } },
+        { type: 3, data: { source: 2, type: 2, x: 40, y: 80 } },
+        { type: 4, data: { href: 'https://kbn/app/discover', width: 1280, height: 800 } },
+        { type: 3, data: { source: 2, type: 2, x: 9, y: 9 } },
+      ],
+      '/app/ux'
+    );
+    expect(clicks).toEqual([{ x: 40, y: 80 }]);
   });
 });
 

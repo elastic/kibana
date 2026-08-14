@@ -15,6 +15,7 @@ import {
 import {
   binClicks,
   extractPageSnapshot,
+  extractReplayClicks,
   inViewportBand,
   isOnSnapshotViewport,
   type RumClickMapResponse,
@@ -26,7 +27,14 @@ import {
   type ReplayEventHitSource,
 } from '../session_replay/reassemble_events';
 import { rumEsSearchOptions } from './es_retry';
-import { facetFromScriptTerms, pagePathTerms, rumBaseFilters, rumListQueryCodec } from './query';
+import {
+  PAGE_VIEW_FILTER,
+  facetFromScriptTerms,
+  luceneEscape,
+  pagePathTerms,
+  rumBaseFilters,
+  rumListQueryCodec,
+} from './query';
 
 const CLICK_FILTER = {
   bool: {
@@ -126,9 +134,27 @@ export const getRumClickMapRoute = createUxServerRoute({
       rumEsSearchOptions
     );
 
-    const pages = facetFromScriptTerms(
+    let pages = facetFromScriptTerms(
       (pagesResult.aggregations as { pages?: unknown } | undefined)?.pages
     );
+
+    if (pages.length === 0) {
+      const pageViews = await client.search(
+        {
+          index: RUM_SESSION_SOURCE_INDEX,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          size: 0,
+          query: { bool: { filter: [...baseFilters, PAGE_VIEW_FILTER] } },
+          aggs: { pages: pagePathTerms(15) },
+        },
+        rumEsSearchOptions
+      );
+      pages = facetFromScriptTerms(
+        (pageViews.aggregations as { pages?: unknown } | undefined)?.pages
+      );
+    }
+
     const pagePath = requestedPage || pages[0]?.key || null;
 
     let clickHits: OtelHit[] = requestedPage ? (pagesResult.hits.hits as OtelHit[]) ?? [] : [];
@@ -164,20 +190,33 @@ export const getRumClickMapRoute = createUxServerRoute({
       ...new Set(parsed.map((point) => point.sessionId).filter((id): id is string => Boolean(id))),
     ].slice(0, 30);
 
-    const snapshot = pagePath
-      ? await loadSnapshot(
+    const replay = pagePath
+      ? await loadReplayBackdrop(
           client as never,
           params.query.rangeFrom,
           params.query.rangeTo,
+          params.query.serviceName,
           pagePath,
           clickSessionIds
         )
-      : null;
+      : { snapshot: null, clicks: [] as Array<{ x: number; y: number }> };
+
+    const snapshot = replay.snapshot;
+    const fromLogs = parsed.map((point) => ({
+      x: point.x,
+      y: point.y,
+      viewportWidth: point.viewportWidth,
+    }));
+    const fromReplay = replay.clicks.map((point) => ({
+      ...point,
+      viewportWidth: snapshot?.width ?? null,
+    }));
+    const merged = fromLogs.length > 0 ? fromLogs : fromReplay;
 
     const viewportMatched = snapshot
-      ? parsed.filter((point) => inViewportBand(point.viewportWidth, snapshot.width))
-      : parsed;
-    const usable = (viewportMatched.length >= 8 || !snapshot ? viewportMatched : parsed).map(
+      ? merged.filter((point) => inViewportBand(point.viewportWidth, snapshot.width))
+      : merged;
+    const usable = (viewportMatched.length >= 8 || !snapshot ? viewportMatched : merged).map(
       (point) => ({ x: point.x, y: point.y })
     );
 
@@ -188,7 +227,7 @@ export const getRumClickMapRoute = createUxServerRoute({
     return {
       pagePath,
       pages,
-      totalClicks: parsed.length,
+      totalClicks: merged.length,
       sampledClicks: onViewport.length,
       hiddenOffViewport: Math.max(0, usable.length - onViewport.length),
       clicks: binClicks(onViewport),
@@ -197,7 +236,36 @@ export const getRumClickMapRoute = createUxServerRoute({
   },
 });
 
-const loadSnapshot = async (
+const replayServiceFilter = (serviceName?: string): object[] => {
+  if (!serviceName) {
+    return [];
+  }
+  return [
+    {
+      bool: {
+        should: [
+          { term: { 'resource.attributes.service.name': serviceName } },
+          { term: { 'attributes.service.name': serviceName } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+};
+
+const replayPageFilter = (pagePath: string): object => {
+  const needle = luceneEscape(pagePath.trim().replace(/[*?]/g, '')).slice(0, 200);
+  return {
+    query_string: {
+      query: `*${needle}*`,
+      fields: ['attributes.page.url.path', 'attributes.page.url', 'page.url.path', 'page.url'],
+      lenient: true,
+      analyze_wildcard: true,
+    },
+  };
+};
+
+const loadReplayBackdrop = async (
   client: {
     search: (
       req: Record<string, unknown>,
@@ -209,13 +277,21 @@ const loadSnapshot = async (
   },
   rangeFrom: string | undefined,
   rangeTo: string | undefined,
+  serviceName: string | undefined,
   pagePath: string,
   clickSessionIds: string[]
-): Promise<RumClickMapResponse['snapshot']> => {
+): Promise<{
+  snapshot: RumClickMapResponse['snapshot'];
+  clicks: Array<{ x: number; y: number }>;
+}> => {
   const timeFilter = {
     range: { '@timestamp': { gte: rangeFrom || 'now-24h', lte: rangeTo || 'now' } },
   };
-  const filters: object[] = [timeFilter];
+  const filters: object[] = [
+    timeFilter,
+    ...replayServiceFilter(serviceName),
+    replayPageFilter(pagePath),
+  ];
   if (clickSessionIds.length > 0) {
     filters.push(sessionIdTerms(clickSessionIds));
   }
@@ -241,14 +317,14 @@ const loadSnapshot = async (
       ?.map((bucket) => String(bucket.key))
       .filter((id) => id.length > 0) ?? [];
 
-  if (sessionIds.length === 0 && clickSessionIds.length > 0) {
+  if (sessionIds.length === 0) {
     const fallback = await client.search(
       {
         index: SESSION_REPLAY_INDEX,
         ignore_unavailable: true,
         allow_no_indices: true,
         size: 0,
-        query: { bool: { filter: [timeFilter] } },
+        query: { bool: { filter: [timeFilter, ...replayServiceFilter(serviceName)] } },
         aggs: {
           sessions: {
             terms: { script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' }, size: 8 },
@@ -262,6 +338,9 @@ const loadSnapshot = async (
         ?.map((bucket) => String(bucket.key))
         .filter((id) => id.length > 0) ?? [];
   }
+
+  const clicks: Array<{ x: number; y: number }> = [];
+  let snapshot: RumClickMapResponse['snapshot'] = null;
 
   for (const sessionId of sessionIds) {
     const eventsResult = await client.search(
@@ -283,18 +362,21 @@ const loadSnapshot = async (
     const events = reassembleReplayEvents(
       (eventsResult.hits?.hits ?? []).map((hit) => (hit._source ?? {}) as ReplayEventHitSource)
     );
-    const extracted = extractPageSnapshot(events, pagePath) ?? extractPageSnapshot(events);
-    if (!extracted) {
-      continue;
+    const replayClicks = extractReplayClicks(events, pagePath);
+    clicks.push(...(replayClicks.length > 0 ? replayClicks : extractReplayClicks(events)));
+    if (!snapshot) {
+      const extracted = extractPageSnapshot(events, pagePath) ?? extractPageSnapshot(events);
+      if (extracted) {
+        snapshot = {
+          sessionId,
+          href: extracted.href,
+          width: extracted.width,
+          height: extracted.height,
+          events: extracted.events,
+        };
+      }
     }
-    return {
-      sessionId,
-      href: extracted.href,
-      width: extracted.width,
-      height: extracted.height,
-      events: extracted.events,
-    };
   }
 
-  return null;
+  return { snapshot, clicks };
 };

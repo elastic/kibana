@@ -38,6 +38,10 @@ interface ReplayEventLike {
     href?: string;
     width?: number;
     height?: number;
+    source?: number;
+    type?: number;
+    x?: number;
+    y?: number;
   };
 }
 
@@ -132,6 +136,39 @@ export const extractPageSnapshot = (
     height,
     href: meta.data?.href ?? null,
   };
+};
+
+const RRWEB_INCREMENTAL = 3;
+const RRWEB_MOUSE_INTERACTION = 2;
+const RRWEB_MOUSE_CLICK = 2;
+
+/** Click positions from rrweb MouseInteraction events, scoped to `pagePath` when set. */
+export const extractReplayClicks = (
+  events: unknown[],
+  pagePath?: string
+): Array<{ x: number; y: number }> => {
+  const clicks: Array<{ x: number; y: number }> = [];
+  let onPage = !pagePath;
+  for (const raw of events) {
+    const event = raw as ReplayEventLike;
+    if (event.type === RRWEB_META && event.data?.href) {
+      onPage = !pagePath || pathsMatch(pathFromHref(event.data.href), pagePath);
+      continue;
+    }
+    if (!onPage) {
+      continue;
+    }
+    if (
+      event.type === RRWEB_INCREMENTAL &&
+      event.data?.source === RRWEB_MOUSE_INTERACTION &&
+      event.data?.type === RRWEB_MOUSE_CLICK &&
+      typeof event.data.x === 'number' &&
+      typeof event.data.y === 'number'
+    ) {
+      clicks.push({ x: event.data.x, y: event.data.y });
+    }
+  }
+  return clicks;
 };
 
 export const binClicks = (
