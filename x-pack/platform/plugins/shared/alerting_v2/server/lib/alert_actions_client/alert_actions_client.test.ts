@@ -752,7 +752,7 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('emits the domain event anchored to the resolved latest episode id', async () => {
+    it('emits the domain event with episode_id null, like the persisted doc', async () => {
       queryServiceEsClient.esql.query.mockResolvedValueOnce(
         getAlertEventESQLResponse([{ episode_id: 'episode-7' }])
       );
@@ -766,7 +766,7 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).toHaveBeenCalledWith(expect.anything(), [
         expect.objectContaining({
           action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-          episode_id: 'episode-7',
+          episode_id: null,
         }),
       ]);
     });
@@ -902,7 +902,7 @@ describe('AlertActionsClient', () => {
       });
     });
 
-    it('rejects activate on a superseded episode with ALERT_EPISODE_NOT_FOUND', async () => {
+    it('rejects activate on a superseded episode with ALERT_EPISODE_NOT_LATEST', async () => {
       queryServiceEsClient.esql.query
         .mockResolvedValueOnce(
           getAlertEventESQLResponse([
@@ -921,7 +921,7 @@ describe('AlertActionsClient', () => {
       ).rejects.toMatchObject({
         output: { statusCode: 404 },
         data: {
-          code: 'ALERT_EPISODE_NOT_FOUND',
+          code: 'ALERT_EPISODE_NOT_LATEST',
           details: { episode_id: 'old-episode', group_hash: 'group-1' },
         },
       });
@@ -937,7 +937,7 @@ describe('AlertActionsClient', () => {
       return operations.filter((_, index) => index % 2 === 1);
     };
 
-    it('persists every action with episode_id null and emits events anchored to each latest episode', async () => {
+    it('persists every action and emits every event with episode_id null', async () => {
       const items: BulkCreateSeriesAlertActionItemBody[] = [
         { group_hash: 'group-1', action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: ['t1'] },
         { group_hash: 'group-2', action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE },
@@ -959,8 +959,8 @@ describe('AlertActionsClient', () => {
       expect(docs[0]).toMatchObject({ group_hash: 'group-1', episode_id: null, tags: ['t1'] });
       expect(docs[1]).toMatchObject({ group_hash: 'group-2', episode_id: null });
       expect(emitEpisodeActionsSpy.mock.calls[0][1]).toEqual([
-        expect.objectContaining({ group_hash: 'group-1', episode_id: 'episode-1' }),
-        expect.objectContaining({ group_hash: 'group-2', episode_id: 'episode-2' }),
+        expect.objectContaining({ group_hash: 'group-1', episode_id: null }),
+        expect.objectContaining({ group_hash: 'group-2', episode_id: null }),
       ]);
     });
 
@@ -1073,7 +1073,7 @@ describe('AlertActionsClient', () => {
         {
           id: 'old-episode',
           error: expect.objectContaining({
-            code: 'ALERT_EPISODE_NOT_FOUND',
+            code: 'ALERT_EPISODE_NOT_LATEST',
             details: { group_hash: 'group-1' },
           }),
         },

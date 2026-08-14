@@ -201,14 +201,10 @@ export class AlertActionsClient {
   /**
    * Creates a series-level action (`tag` / `snooze` / `unsnooze`) for the
    * series identified by `groupHash`. The series' latest event is still
-   * resolved — it anchors `rule_id`, `source` and
-   * `last_series_event_timestamp` on the audit doc — but the persisted
-   * `.alert-actions` document carries `episode_id: null`: the action targets
+   * resolved — it fills `rule_id`, `source` and `last_series_event_timestamp`
+   * on the audit doc — but both the persisted `.alert-actions` document and
+   * the emitted domain event carry `episode_id: null`: the action targets
    * the series as a whole, not whichever episode happened to be current.
-   *
-   * The emitted domain event still carries the resolved latest episode id —
-   * the event envelope (and the workflow triggers built from it) is
-   * episode-anchored by contract.
    */
   public async createSeriesAction(params: {
     groupHash: string;
@@ -228,9 +224,7 @@ export class AlertActionsClient {
     const prepared = this.prepareAction({ action, alertEvent, userProfileUid, docEpisodeId: null });
 
     await this.persistPreparedActions([prepared]);
-    this.eventPublisher.emitEpisodeActions(this.request, [
-      { ...prepared.alertActionDoc, episode_id: alertEvent.episode_id },
-    ]);
+    this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
   }
 
   /**
@@ -240,8 +234,8 @@ export class AlertActionsClient {
    * `group_hash` — the caller never supplies it.
    *
    * Lifecycle actions additionally require the episode to be the latest of
-   * its series (see {@link isLifecycleActionType}); a superseded episode is
-   * rejected with a 404 `ALERT_EPISODE_NOT_FOUND`.
+   * its series (see {@link isLifecycleActionType}); an old episode is
+   * rejected with a 404 `ALERT_EPISODE_NOT_LATEST`.
    */
   public async createEpisodeAction(params: {
     episodeId: string;
@@ -267,7 +261,7 @@ export class AlertActionsClient {
 
       if (latestOfGroup?.episode_id !== episodeId) {
         throw Boom.notFound(getEpisodeNotLatestMessage(episodeId, alertEvent.group_hash), {
-          code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
+          code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
           details: { episode_id: episodeId, group_hash: alertEvent.group_hash },
         });
       }
@@ -424,9 +418,8 @@ export class AlertActionsClient {
   /**
    * Bulk equivalent of {@link AlertActionsClient.createSeriesAction}: one
    * latest-event query for every series referenced in the batch, per-item
-   * `errors[]` for missing series, `episode_id: null` on every persisted
-   * audit doc, and domain events anchored to each series' resolved latest
-   * episode.
+   * `errors[]` for missing series, and `episode_id: null` on every persisted
+   * audit doc and emitted domain event.
    */
   public async createBulkSeriesActions(
     items: BulkCreateSeriesAlertActionItemBody[]
@@ -443,8 +436,7 @@ export class AlertActionsClient {
     const latestEventByGroupHash = new Map(latestEvents.map((event) => [event.group_hash, event]));
 
     const errors: BulkAlertActionError[] = [];
-    const preparedWithEvents: Array<{ prepared: PreparedAction; alertEvent: AlertEventRecord }> =
-      [];
+    const prepared: PreparedAction[] = [];
 
     for (const item of items) {
       const alertEvent = latestEventByGroupHash.get(item.group_hash);
@@ -460,15 +452,14 @@ export class AlertActionsClient {
       }
 
       try {
-        preparedWithEvents.push({
-          prepared: this.prepareAction({
+        prepared.push(
+          this.prepareAction({
             action: item,
             alertEvent,
             userProfileUid,
             docEpisodeId: null,
-          }),
-          alertEvent,
-        });
+          })
+        );
       } catch (error) {
         if (
           Boom.isBoom(error) &&
@@ -481,18 +472,15 @@ export class AlertActionsClient {
       }
     }
 
-    if (preparedWithEvents.length > 0) {
-      await this.persistPreparedActions(preparedWithEvents.map(({ prepared }) => prepared));
+    if (prepared.length > 0) {
+      await this.persistPreparedActions(prepared);
       this.eventPublisher.emitEpisodeActions(
         this.request,
-        preparedWithEvents.map(({ prepared, alertEvent }) => ({
-          ...prepared.alertActionDoc,
-          episode_id: alertEvent.episode_id,
-        }))
+        prepared.map((p) => p.alertActionDoc)
       );
     }
 
-    return { affected_count: preparedWithEvents.length, errors };
+    return { affected_count: prepared.length, errors };
   }
 
   /**
@@ -553,7 +541,7 @@ export class AlertActionsClient {
       ) {
         errors.push(
           toBulkActionError(item.episode_id, {
-            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
+            code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_LATEST,
             message: getEpisodeNotLatestMessage(item.episode_id, alertEvent.group_hash),
             details: { group_hash: alertEvent.group_hash },
           })
