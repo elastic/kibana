@@ -157,9 +157,13 @@ export const findKiBackingIndex = async ({
   kiId: string;
   abortSignal: AbortSignal;
 }): Promise<string> => {
+  // A dest whose backing index was never physically created (no KIs written
+  // yet) must resolve to empty hits, not an index_not_found_exception.
   const response = await esClient.search(
     {
       index: destValue,
+      ignore_unavailable: true,
+      allow_no_indices: true,
       query: { ids: { values: [kiId] } },
       size: 1,
       _source: false,

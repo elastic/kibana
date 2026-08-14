@@ -96,6 +96,8 @@ describe('getUpdateKiStepDefinition', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       {
         index: 'ai-index-ds-my-ai-index',
+        ignore_unavailable: true,
+        allow_no_indices: true,
         query: { ids: { values: ['ki-1'] } },
         size: 1,
         _source: false,
