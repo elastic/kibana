@@ -147,12 +147,10 @@ export class LensLayers {
     seriesType: 'bar' | 'area' | 'line' = 'bar'
   ) {
     const tabsBefore = await this.getLayerCount();
-    const addButton = this.page.testSubj.locator('lnsLayerAddButton');
-    await addButton.waitFor({ state: 'visible' });
-    await addButton.dispatchEvent('click');
+    await this.page.testSubj.click('lnsLayerAddButton');
+    // Nested EUI context-menu items remount while the popover positions.
     const typeButton = this.page.testSubj.locator(`lnsLayerAddButton-${layerType}`);
     await typeButton.waitFor({ state: 'visible' });
-    // Context-menu items remount while the popover positions.
     await typeButton.dispatchEvent('click');
     if (layerType === 'data') {
       const seriesButton = this.page.testSubj.locator(`lnsXY_seriesType-${seriesType}`);
