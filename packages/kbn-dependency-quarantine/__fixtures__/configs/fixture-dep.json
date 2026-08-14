@@ -1,0 +1,5 @@
+{
+  "name": "fixture-dep",
+  "reason": "test reason",
+  "allowed": ["allowed/**"]
+}

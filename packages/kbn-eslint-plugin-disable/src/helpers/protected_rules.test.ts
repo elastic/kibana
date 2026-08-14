@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// this configures the protected eslint rules on our codebase that can't be disabled
-export const PROTECTED_RULES = new Set([
-  '@kbn/disable/no_protected_eslint_disable',
-  '@kbn/disable/no_naked_eslint_disable',
-  '@kbn/imports/no_unused_imports',
-  '@kbn/imports/no_group_crossing_imports',
-  '@kbn/imports/no_group_crossing_manifests',
-  '@kbn/eslint/no_unsafe_hash',
-  '@kbn/imports/no_quarantined_imports',
-]);
+import { PROTECTED_RULES } from './protected_rules';
+
+describe('PROTECTED_RULES', () => {
+  it('includes @kbn/imports/no_quarantined_imports so eslint-disable cannot bypass it', () => {
+    expect(PROTECTED_RULES.has('@kbn/imports/no_quarantined_imports')).toBe(true);
+  });
+});
