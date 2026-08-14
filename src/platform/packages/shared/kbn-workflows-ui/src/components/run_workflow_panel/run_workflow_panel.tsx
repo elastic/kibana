@@ -200,6 +200,7 @@ export const RunWorkflowPanel = ({
         )}
       </div>
       <EuiButton
+        css={{ marginTop: euiTheme.size.xs }}
         data-test-subj="run-workflow-execute-button"
         fullWidth
         size="s"
