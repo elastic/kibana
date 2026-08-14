@@ -274,8 +274,8 @@ const WithHistoryRender = (args: Args): React.JSX.Element => {
   const historyKey = useRef(Symbol('flyoutTemplateHistory')).current;
 
   const [isFlyoutAOpen, setIsFlyoutAOpen] = useState(true);
-  const [isFlyoutBOpen, setIsFlyoutBOpen] = useState(false);
-  const [isFlyoutCOpen, setIsFlyoutCOpen] = useState(false);
+  const [isFlyoutBOpen, setIsFlyoutBOpen] = useState(true);
+  const [isFlyoutCOpen, setIsFlyoutCOpen] = useState(true);
 
   const bodyContent = (label: string) => (
     <>
