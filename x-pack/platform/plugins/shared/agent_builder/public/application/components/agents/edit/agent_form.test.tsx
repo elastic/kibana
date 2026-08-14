@@ -43,6 +43,21 @@ jest.mock('../../../hooks/agents/use_agent_edit', () => ({
   useAgentEdit: jest.fn(),
 }));
 
+// Reads a ui setting, which this test's Kibana context does not provide. The AI indices tab it
+// gates has its own tests; here we only cover whether the tab appears at all.
+let mockIsContextEngineEnabled = false;
+jest.mock('../../../hooks/use_is_context_engine_enabled', () => ({
+  useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
+}));
+
+jest.mock('../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
+  useInheritedAiIndices: () => ({
+    inheritedAiIndicesByAgentId: { 'test-agent-id': ['elastic'] },
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
@@ -101,6 +116,7 @@ const renderWithIntl = (ui: React.ReactElement) => {
 describe('AgentForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsContextEngineEnabled = false;
     (useAgentEdit as jest.Mock).mockImplementation(
       ({ editingAgentId }: { editingAgentId?: string }) => {
         const state: AgentEditState = !editingAgentId ? createModeState : { ...editModeState };
@@ -210,5 +226,47 @@ describe('AgentForm', () => {
     renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
 
     expect(screen.queryByTestId('agentBuilderAgentPreconfiguredTypeBadge')).not.toBeInTheDocument();
+  });
+
+  describe('AI indices tab', () => {
+    const aiIndicesTab = () => screen.queryByRole('tab', { name: /AI indices/ });
+
+    it('is hidden when the Context Engine is off', () => {
+      renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+
+      expect(aiIndicesTab()).not.toBeInTheDocument();
+    });
+
+    it('is shown when the Context Engine is on', () => {
+      mockIsContextEngineEnabled = true;
+
+      renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+
+      expect(aiIndicesTab()).toBeInTheDocument();
+    });
+
+    // The badge counts what the agent actually retrieves from, so it includes the AI indices
+    // contributed by the agent's type, not just the ones stored on the agent.
+    it('counts assigned and inherited AI indices together', () => {
+      mockIsContextEngineEnabled = true;
+      (useAgentEdit as jest.Mock).mockReturnValue({
+        state: {
+          ...editModeState,
+          configuration: { ...editModeState.configuration, ai_indices: ['sales'] },
+        },
+        isLoading: false,
+        isSubmitting: false,
+        submit: mockSubmit,
+        tools: [],
+        skills: [],
+        plugins: [],
+        error: undefined,
+      });
+
+      renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+
+      // 'elastic' from the agent type, plus the assigned 'sales'.
+      expect(aiIndicesTab()).toHaveTextContent('2');
+    });
   });
 });

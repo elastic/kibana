@@ -19,7 +19,7 @@ import {
 
 const allEnabled: RouteAccessConfig = {
   featureFlags: { experimental: true },
-  capabilities: { isUIAMEnabled: true, isContextEngineEnabled: true },
+  capabilities: { isUIAMEnabled: true },
 };
 const enabledRoutesWithExperimental = getEnabledRoutes(allEnabled);
 
@@ -191,7 +191,7 @@ describe('route_config', () => {
 
     const config = (isUIAMEnabled: boolean): RouteAccessConfig => ({
       featureFlags: { experimental: true },
-      capabilities: { isUIAMEnabled, isContextEngineEnabled: true },
+      capabilities: { isUIAMEnabled },
     });
 
     it('includes MCP clients route when UIAM is enabled', () => {
@@ -201,46 +201,29 @@ describe('route_config', () => {
     it('excludes MCP clients route when UIAM is disabled', () => {
       expect(findMcpRoute(getEnabledRoutes(config(false)))).toBeUndefined();
     });
-  });
 
-  describe('Context route gating', () => {
-    const contextPath = '/manage/context';
-
-    const config = (isContextEngineEnabled: boolean): RouteAccessConfig => ({
-      featureFlags: { experimental: true },
-      capabilities: { isUIAMEnabled: true, isContextEngineEnabled },
-    });
-
-    it('includes the Context route when the Context Engine is enabled', () => {
-      expect(getEnabledRoutes(config(true)).find((r) => r.path === contextPath)).toBeDefined();
-    });
-
-    it('excludes the Context route when the Context Engine is disabled', () => {
-      expect(getEnabledRoutes(config(false)).find((r) => r.path === contextPath)).toBeUndefined();
-    });
-
-    it('shows the Context nav item only when the Context Engine is enabled', () => {
-      expect(getManageNavItems(config(true)).map((item) => item.path)).toContain(contextPath);
-      expect(getManageNavItems(config(false)).map((item) => item.path)).not.toContain(contextPath);
-    });
-
-    it('lists Context last in the manage nav so it renders after Agents, Skills and Tools', () => {
-      const navPaths = getManageNavItems(config(true)).map((item) => item.path);
-      expect(navPaths[navPaths.length - 1]).toBe(contextPath);
-    });
-
-    it('does not resolve a viewId for the Context path while the Context Engine is disabled', () => {
-      expect(getViewIdForPathname(contextPath, getEnabledRoutes(config(false)))).toBeUndefined();
-      expect(getViewIdForPathname(contextPath, getEnabledRoutes(config(true)))).toBe(
-        agentBuilderViewIds.manageContext
+    // The route carries no navLabel, so gating it must not add a nav entry either way.
+    it('never puts MCP clients in the manage nav', () => {
+      expect(getManageNavItems(config(true)).map((item) => item.path)).not.toContain(
+        mcpClientsPath
       );
     });
+  });
 
-    // `getSidebarViewForRoute` walks `allRoutes` unfiltered, so it still reports "manage" for a
-    // deep link to a disabled route. This matches how the other gated manage routes behave — the
-    // route itself is simply never registered, so nothing renders inside the manage shell.
-    it('still reports the manage sidebar for a deep link, regardless of gating', () => {
-      expect(getSidebarViewForRoute(contextPath)).toBe('manage');
+  describe('manage nav', () => {
+    const config: RouteAccessConfig = {
+      featureFlags: { experimental: true },
+      capabilities: { isUIAMEnabled: true },
+    };
+
+    it('lists one entry per manage route that declares a nav label', () => {
+      expect(getManageNavItems(config).map((item) => item.path)).toEqual([
+        '/manage/agents',
+        '/manage/skills',
+        '/manage/plugins',
+        '/manage/connectors',
+        '/manage/tools',
+      ]);
     });
   });
 

@@ -29,13 +29,17 @@ import React, { useMemo } from 'react';
 import type { ListAgentResponseItem } from '../../../../../common/http_api/agents';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
+import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
+import { getActiveAiIndices } from '../../../utils/ai_indices';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
+import { AgentAiIndices } from './agent_ai_indices';
 import { AgentAccessControlModeBadge } from './agent_access_control_mode_badge';
 import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
@@ -47,6 +51,9 @@ const columnNames = {
     defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
+  aiIndices: i18n.translate('xpack.agentBuilder.agents.aiIndicesColumn', {
+    defaultMessage: 'AI indices',
+  }),
 };
 
 const actionLabels = {
@@ -70,6 +77,10 @@ const actionLabels = {
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
+  const isContextEngineEnabled = useIsContextEngineEnabled();
+  const { inheritedAiIndicesByAgentId } = useInheritedAiIndices({
+    enabled: isContextEngineEnabled,
+  });
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
@@ -147,6 +158,22 @@ export const AgentsList: React.FC = () => {
         return <Labels labels={labels} />;
       },
       'data-test-subj': 'agentBuilderAgentsListLabels',
+    };
+
+    // Read-only: what an agent retrieves from, assigned and inherited together. Editing lives on
+    // the agent's AI indices tab, where the two can be told apart.
+    const agentAiIndices: EuiTableComputedColumnType<ListAgentResponseItem> = {
+      width: '15%',
+      name: columnNames.aiIndices,
+      render: (agent) => (
+        <AgentAiIndices
+          aiIndices={getActiveAiIndices({
+            assigned: agent.configuration.ai_indices,
+            inherited: inheritedAiIndicesByAgentId[agent.id],
+          })}
+        />
+      ),
+      'data-test-subj': 'agentBuilderAgentsListAiIndices',
     };
 
     const agentAccessControlMode: EuiTableComputedColumnType<ListAgentResponseItem> = {
@@ -238,9 +265,17 @@ export const AgentsList: React.FC = () => {
       agentNameAndDescription,
       agentAccessControlMode,
       agentLabels,
+      ...(isContextEngineEnabled ? [agentAiIndices] : []),
       agentActions,
     ];
-  }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess]);
+  }, [
+    createAgentBuilderUrl,
+    deleteAgent,
+    manageAgents,
+    canManageAgentAccess,
+    isContextEngineEnabled,
+    inheritedAiIndicesByAgentId,
+  ]);
 
   const errorMessage = useMemo(
     () =>
