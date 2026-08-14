@@ -40,6 +40,18 @@ export type DatasetMaturity = z.infer<typeof DatasetMaturity>;
 export type DatasetMaturityEnum = typeof DatasetMaturity.enum;
 export const DatasetMaturityEnum = DatasetMaturity.enum;
 
+/**
+ * Spaces the dataset is assigned to. Each id must name an existing space the caller can manage evaluations in; wildcards are not accepted, so every space is listed. Defaults to the space the request was made in, taken from the URL's `/s/` prefix and the default space without one. Absent in a response means the default space.
+ */
+export const SpaceIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(100));
+export type SpaceIds = z.infer<typeof SpaceIds>;
+
+/**
+ * Spaces the dataset is assigned to, with each id the caller cannot access replaced by `?`, so the entries still count the spaces.
+ */
+export const RedactedSpaceIds = lazySchema(() => z.array(z.string().max(256)).max(100));
+export type RedactedSpaceIds = z.infer<typeof RedactedSpaceIds>;
+
 export const DatasetFacetBucket = lazySchema(() =>
   z.object({
     value: z.string().max(64),

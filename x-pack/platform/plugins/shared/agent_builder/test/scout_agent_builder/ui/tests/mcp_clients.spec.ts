@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   createOAuthClient,
   createUiamAuthHeaders,
+  deleteOAuthClient,
   revokeOAuthClient,
   uniqueClientName,
 } from '../../../scout_agent_builder_shared/lib/oauth_clients_kbn';
@@ -32,7 +33,7 @@ test.describe.skip(
 
     test.afterAll(async ({ apiClient }) => {
       await Promise.all(
-        createdClientIds.map((id) => revokeOAuthClient(apiClient, authHeaders, id))
+        createdClientIds.map((clientId) => deleteOAuthClient(apiClient, authHeaders, clientId))
       );
       createdClientIds.length = 0;
     });
@@ -235,10 +236,10 @@ test.describe.skip(
       await pageObjects.agentBuilder.navigateToMcpClients();
       await pageObjects.agentBuilder.searchMcpClients(clientName);
       await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+      await pageObjects.agentBuilder.openMcpClientActionsMenu(client.id);
 
-      await expect(
-        page.testSubj.locator(`agentBuilderMcpClientsListActions-${client.id}`)
-      ).toBeDisabled();
+      await expect(page.testSubj.locator(`mcpClientDeleteAction-${client.id}`)).toBeVisible();
+      await expect(page.testSubj.locator(`mcpClientEditAction-${client.id}`)).toHaveCount(0);
     });
 
     test('revokes a client through the row actions menu', async ({ apiClient, pageObjects }) => {
@@ -260,6 +261,31 @@ test.describe.skip(
         const status = await pageObjects.agentBuilder.getMcpClientRowStatus(client.id);
         expect(status).toContain('Revoked');
       }).toPass();
+    });
+
+    test('deletes a revoked client through the row actions menu', async ({
+      apiClient,
+      page,
+      pageObjects,
+    }) => {
+      const clientName = uniqueClientName('scout-delete');
+      const client = await createOAuthClient(apiClient, authHeaders, {
+        clientName,
+        clientType: 'public',
+      });
+      createdClientIds.push(client.id);
+      await revokeOAuthClient(apiClient, authHeaders, client.id);
+
+      await pageObjects.agentBuilder.navigateToMcpClients();
+      await pageObjects.agentBuilder.searchMcpClients(clientName);
+      await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
+
+      await pageObjects.agentBuilder.openMcpClientDeleteModal(client.id);
+      await pageObjects.agentBuilder.confirmMcpClientDelete();
+
+      await expect(page.testSubj.locator(`agentBuilderMcpClientsListRow-${client.id}`)).toHaveCount(
+        0
+      );
     });
   }
 );
