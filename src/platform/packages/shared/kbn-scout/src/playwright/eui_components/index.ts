@@ -16,3 +16,7 @@ export {
   EuiGlobalToastListObject,
   EuiSuperSelectObject,
 } from '@elastic/eui-test-helpers';
+
+// Prototype destined for `@elastic/eui-test-helpers`; lives here until it is
+// ported and published.
+export { EuiSelectableObject } from './selectable_object';
