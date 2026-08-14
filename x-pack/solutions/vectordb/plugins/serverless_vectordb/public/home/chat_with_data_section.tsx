@@ -9,12 +9,10 @@ import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
+import { anthropicIcon, cursorIcon, visualStudioCodeIcon } from '@kbn/custom-icons';
 import { useKibana } from '../hooks/use_kibana';
 import { PromptModal } from './prompt_modal';
 import { brandIcon } from './chat_with_data_section_styles';
-import anthropicIcon from './assets/anthropic.svg';
-import cursorIcon from './assets/cursor.svg';
-import vsCodeIcon from './assets/visual_studio_code.svg';
 
 const ADD_SKILLS_PROMPT = [
   'Install the Elastic skills:',
@@ -40,7 +38,7 @@ const BRAND_ICONS = [
   },
   {
     key: 'vsCode',
-    icon: vsCodeIcon,
+    icon: visualStudioCodeIcon,
     title: i18n.translate('xpack.serverlessVectordb.home.chat.vsCodeIcon', {
       defaultMessage: 'Visual Studio Code logo',
     }),
@@ -54,24 +52,24 @@ export const ChatWithYourDataSection = () => {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
 
   return (
-    <>
-      <EuiTitle size="xxs">
-        <h2>
-          {i18n.translate('xpack.serverlessVectordb.home.chat.title', {
-            defaultMessage: 'Build in your IDE',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.serverlessVectordb.home.chat.description', {
-            defaultMessage: 'Code with context using Elastic-certified skills.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
+    <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs">
+          <h2>
+            {i18n.translate('xpack.serverlessVectordb.home.chat.title', {
+              defaultMessage: 'Build in your IDE',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.serverlessVectordb.home.chat.description', {
+              defaultMessage: 'Code with context using Elastic-certified skills.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -95,32 +93,32 @@ export const ChatWithYourDataSection = () => {
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <EuiTitle size="xxs">
+          <h2>
+            {i18n.translate('xpack.serverlessVectordb.home.chat.skipSetupTitle', {
+              defaultMessage: 'Skip the setup and use the Elastic Agent',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <span>
+          <AiButton
+            variant="outlined"
+            iconType="productAgent"
+            onClick={() => agentBuilder.toggleChat()}
+            data-test-subj="openElasticAgentButton"
+            data-telemetry-id="serverlessVectordb-home-chat-openElasticAgent"
+          >
+            {i18n.translate('xpack.serverlessVectordb.home.chat.openAgent', {
+              defaultMessage: 'Chat with AI Agent',
+            })}
+          </AiButton>
+        </span>
+        {isPromptModalOpen && (
+          <PromptModal prompt={ADD_SKILLS_PROMPT} onClose={() => setIsPromptModalOpen(false)} />
+        )}
       </EuiFlexItem>
-      <EuiSpacer size="l" />
-      <EuiTitle size="xxs">
-        <h2>
-          {i18n.translate('xpack.serverlessVectordb.home.chat.skipSetupTitle', {
-            defaultMessage: 'Skip the setup and use the Elastic Agent',
-          })}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <span>
-        <AiButton
-          variant="outlined"
-          iconType="productAgent"
-          onClick={() => agentBuilder.toggleChat()}
-          data-test-subj="openElasticAgentButton"
-          data-telemetry-id="serverlessVectordb-home-chat-openElasticAgent"
-        >
-          {i18n.translate('xpack.serverlessVectordb.home.chat.openAgent', {
-            defaultMessage: 'Chat with AI Agent',
-          })}
-        </AiButton>
-      </span>
-      {isPromptModalOpen && (
-        <PromptModal prompt={ADD_SKILLS_PROMPT} onClose={() => setIsPromptModalOpen(false)} />
-      )}
-    </>
+    </EuiFlexGroup>
   );
 };

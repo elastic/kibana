@@ -151,12 +151,23 @@ export const HomePageStatPanel = ({
         {metrics.map(({ key, label, value, isLoading }) => (
           <EuiFlexItem key={key} grow>
             <EuiStat
-              title={isLoading ? <EuiSkeletonText size="m" lines={1} /> : value}
+              data-test-subj={`${testSubj}-${key}`}
+              title={
+                isLoading ? (
+                  <EuiSkeletonText
+                    size="m"
+                    lines={1}
+                    data-test-subj={`${testSubj}-${key}-loading`}
+                  />
+                ) : (
+                  <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
+                )
+              }
               titleColor="text"
               titleElement="div"
               description={
                 <>
-                  <EuiText size="xs" color="subdued">
+                  <EuiText size="xs" color="subdued" data-test-subj={`${testSubj}-${key}-label`}>
                     {label}
                   </EuiText>
                   <EuiSpacer size="xs" />

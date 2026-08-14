@@ -65,9 +65,10 @@ describe('HomePageStatPanel', () => {
       });
 
       // the label stays visible so the panel does not reflow once the value lands
-      expect(screen.getByText('Total')).toBeInTheDocument();
-      expect(screen.queryByText('12')).not.toBeInTheDocument();
-      expect(screen.getByText('3')).toBeInTheDocument();
+      expect(screen.getByTestId('dashboardsCard-total-label')).toHaveTextContent('Total');
+      expect(screen.getByTestId('dashboardsCard-total-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('dashboardsCard-total-value')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dashboardsCard-starred-value')).toHaveTextContent('3');
     });
   });
 
@@ -79,7 +80,7 @@ describe('HomePageStatPanel', () => {
       expect(screen.queryByTestId('createDashboardAction')).not.toBeInTheDocument();
 
       await openActionsMenu();
-      fireEvent.click(screen.getByText('Create a dashboard'));
+      fireEvent.click(screen.getByTestId('createDashboardAction'));
 
       expect(onCreate).toHaveBeenCalled();
     });
@@ -105,8 +106,8 @@ describe('HomePageStatPanel', () => {
 
       // the promoted action is not repeated inside the overflow menu
       await openActionsMenu();
-      expect(screen.getAllByText('Create a dashboard')).toHaveLength(1);
-      expect(screen.getByText('Manage dashboards')).toBeInTheDocument();
+      expect(screen.getAllByTestId('createDashboardAction')).toHaveLength(1);
+      expect(screen.getByTestId('manageDashboardsAction')).toBeInTheDocument();
     });
 
     it('omits the overflow menu when the only action has been promoted', () => {
@@ -127,12 +128,12 @@ describe('HomePageStatPanel', () => {
       renderPanel({
         actions: [
           action({ key: 'create', label: 'Create a dashboard' }),
-          action({ key: 'manage', label: 'Manage dashboards' }),
+          action({ key: 'manage', label: 'Manage dashboards', testSubj: 'manageDashboardsAction' }),
         ],
       });
 
       await openActionsMenu();
-      const item = screen.getByText('Manage dashboards');
+      const item = screen.getByTestId('manageDashboardsAction');
       fireEvent.click(item);
 
       await waitForElementToBeRemoved(item);
