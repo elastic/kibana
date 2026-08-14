@@ -67,7 +67,7 @@ export interface AwsServiceMatrixEntry {
   dataStream?: string;
   /** Whether the data stream is enabled by default when the integration is installed */
   defaultEnabled: boolean;
-  /** Whether this service should be shown in the AWS onboarding UI */
+  /** Whether this service should be shown in the AWS onboarding UI. Defaults to true. */
   showInUI: boolean;
   badge?: Badge;
 }
@@ -79,11 +79,12 @@ export interface AwsServiceMatrixEntry {
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
-  'deploymentMethods' | 'signalType' | 'defaultEnabled'
+  'deploymentMethods' | 'signalType' | 'defaultEnabled' | 'showInUI'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   signalType?: SignalType;
   defaultEnabled?: boolean;
+  showInUI?: boolean;
 };
 
 const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
@@ -96,7 +97,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'apigateway',
-    showInUI: true,
   },
   {
     id: 'apigateway_metrics',
@@ -105,7 +105,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'apigateway',
-    showInUI: true,
   },
   {
     id: 'lambda',
@@ -114,7 +113,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'lambda',
-    showInUI: true,
   },
   {
     id: 'lambda_logs',
@@ -122,7 +120,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Compute',
     packageName: 'aws',
     policyTemplate: 'lambda',
-    showInUI: true,
   },
 
   // ── aws package — Compute ───────────────────────────────────────────────
@@ -132,7 +129,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Compute',
     packageName: 'aws',
     policyTemplate: 'ec2',
-    showInUI: true,
   },
   {
     id: 'ec2_metrics',
@@ -141,7 +137,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ec2',
-    showInUI: true,
   },
   {
     id: 'ecs_metrics',
@@ -150,7 +145,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ecs',
-    showInUI: true,
   },
   {
     id: 'emr_logs',
@@ -160,7 +154,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'emr',
-    showInUI: true,
   },
   {
     id: 'emr_metrics',
@@ -169,7 +162,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'emr',
-    showInUI: true,
   },
 
   // ── aws package — Management and Governance ──────────────────────────────
@@ -180,7 +172,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'awshealth',
-    showInUI: true,
   },
   {
     id: 'cloudwatch_logs',
@@ -188,7 +179,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Management and Governance',
     packageName: 'aws',
     policyTemplate: 'cloudwatch',
-    showInUI: true,
   },
   {
     id: 'cloudwatch_metrics',
@@ -197,7 +187,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions', 'metrics'],
     packageName: 'aws',
     policyTemplate: 'cloudwatch',
-    showInUI: true,
   },
 
   // ── aws package — Cloud Financial Management ────────────────────────────
@@ -207,7 +196,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Cloud Financial Management',
     packageName: 'aws',
     policyTemplate: 'billing',
-    showInUI: true,
   },
   {
     id: 'usage',
@@ -216,7 +204,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'usage',
-    showInUI: true,
   },
 
   // ── aws package — Management and Governance / Security, Identity and Compliance ──
@@ -228,7 +215,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'cloudtrail',
-    showInUI: true,
   },
   {
     id: 'config',
@@ -236,7 +222,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
     policyTemplate: 'config',
-    showInUI: true,
   },
   {
     id: 'guardduty',
@@ -245,7 +230,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'guardduty',
-    showInUI: true,
   },
   {
     id: 'inspector',
@@ -253,7 +237,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
     policyTemplate: 'inspector',
-    showInUI: true,
   },
   {
     id: 'firewall_logs',
@@ -263,7 +246,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'firewall',
-    showInUI: true,
   },
   {
     id: 'firewall_metrics',
@@ -273,7 +255,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'firewall',
-    showInUI: true,
   },
   {
     id: 'securityhub_findings',
@@ -281,7 +262,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
     policyTemplate: 'securityhub',
-    showInUI: true,
   },
   {
     id: 'securityhub_findings_full_posture',
@@ -289,7 +269,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
     policyTemplate: 'securityhub',
-    showInUI: true,
   },
   {
     id: 'securityhub_insights',
@@ -297,7 +276,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
     policyTemplate: 'securityhub',
-    showInUI: true,
   },
   {
     id: 'waf',
@@ -307,7 +285,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'waf',
-    showInUI: true,
   },
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
@@ -319,7 +296,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'cloudfront',
-    showInUI: true,
   },
   {
     id: 'elb_logs',
@@ -327,7 +303,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Networking and Content Delivery',
     packageName: 'aws',
     policyTemplate: 'elb',
-    showInUI: true,
   },
   {
     id: 'elb_metrics',
@@ -336,7 +311,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'elb',
-    showInUI: true,
   },
   {
     id: 'natgateway',
@@ -345,7 +319,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'natgateway',
-    showInUI: true,
   },
   {
     id: 'route53_public_logs',
@@ -355,7 +328,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'route53',
-    showInUI: true,
   },
   {
     id: 'route53_resolver_logs',
@@ -365,7 +337,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'route53',
-    showInUI: true,
   },
   {
     id: 'transitgateway',
@@ -374,7 +345,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'transitgateway',
-    showInUI: true,
   },
   {
     id: 'vpcflow',
@@ -384,7 +354,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'vpcflow',
-    showInUI: true,
   },
   {
     id: 'vpn',
@@ -393,7 +362,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'vpn',
-    showInUI: true,
   },
 
   // ── aws package — Storage ───────────────────────────────────────────────
@@ -404,7 +372,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ebs',
-    showInUI: true,
   },
   {
     id: 's3_daily_storage',
@@ -413,7 +380,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3',
-    showInUI: true,
   },
   {
     id: 's3_request',
@@ -422,7 +388,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3',
-    showInUI: true,
   },
   {
     id: 's3access',
@@ -431,7 +396,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     policyTemplate: 's3',
-    showInUI: true,
   },
   {
     id: 's3_storage_lens',
@@ -440,7 +404,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3_storage_lens',
-    showInUI: true,
   },
 
   // ── aws package — Databases ──────────────────────────────────────────────
@@ -451,7 +414,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'dynamodb',
-    showInUI: true,
   },
   {
     id: 'rds',
@@ -460,7 +422,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'rds',
-    showInUI: true,
   },
   {
     id: 'redshift',
@@ -469,7 +430,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'redshift',
-    showInUI: true,
   },
 
   // ── aws package — Analytics / Application Integration ───────────────────
@@ -480,7 +440,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'kafka',
-    showInUI: true,
   },
   {
     id: 'kinesis',
@@ -489,7 +448,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'kinesis',
-    showInUI: true,
   },
   {
     id: 'sns',
@@ -498,7 +456,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'sns',
-    showInUI: true,
   },
   {
     id: 'sqs',
@@ -507,7 +464,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'sqs',
-    showInUI: true,
   },
 
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
@@ -521,7 +477,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
-    showInUI: true,
     policyTemplate: 'aws_bedrock',
   },
   {
@@ -535,7 +490,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
-    showInUI: true,
     policyTemplate: 'aws_bedrock',
   },
   {
@@ -548,7 +502,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
-    showInUI: true,
     policyTemplate: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
@@ -577,7 +530,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'awsfargate',
     defaultEnabled: true,
-    showInUI: true,
     policyTemplate: 'awsfargate',
     dataStream: 'task_stats',
   },
@@ -609,7 +561,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     requiredConfig: [],
     packageName: 'aws_cloudtrail_otel',
     defaultEnabled: false,
-    showInUI: true,
     badge: 'technical_preview',
   },
   {
@@ -622,7 +573,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     requiredConfig: [],
     packageName: 'aws_vpcflow_otel',
     defaultEnabled: false,
-    showInUI: true,
     badge: 'technical_preview',
   },
   {
@@ -635,7 +585,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     requiredConfig: [],
     packageName: 'aws_waf_otel',
     defaultEnabled: false,
-    showInUI: true,
     badge: 'technical_preview',
   },
 
@@ -651,7 +600,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_logs',
     defaultEnabled: false,
-    showInUI: true,
     policyTemplate: 'aws_logs',
   },
 ];
@@ -674,6 +622,7 @@ export function buildAwsServiceMatrix(
     let requiredConfig = entry.requiredConfig;
     let mandatoryFields = entry.mandatoryFields;
     let defaultEnabled = entry.defaultEnabled ?? true;
+    const showInUI = entry.showInUI ?? true;
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
 
@@ -762,6 +711,7 @@ export function buildAwsServiceMatrix(
       requiredConfig,
       mandatoryFields,
       defaultEnabled,
+      showInUI,
       identityFederationSupported,
     } as AwsServiceMatrixEntry;
 
@@ -787,6 +737,7 @@ export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
     const base = {
       ...rest,
       deploymentMethods,
+      showInUI: entry.showInUI ?? true,
     } as unknown as AwsServiceMatrixEntry;
     return [entry.id, base];
   })
