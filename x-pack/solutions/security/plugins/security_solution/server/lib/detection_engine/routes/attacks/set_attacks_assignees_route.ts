@@ -17,6 +17,7 @@ import { SetAttacksAssigneesRequestBody } from '../../../../../common/api/detect
 import { DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
 import { searchAlerts } from '../common/operations/search_alerts';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
@@ -33,7 +34,8 @@ import {
 export const setAttacksAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
-  telemetrySender: ITelemetryEventsSender
+  telemetrySender: ITelemetryEventsSender,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -77,13 +79,29 @@ export const setAttacksAssigneesRoute = (
         // Attack indices scope the update by query, so unknown/non-attack ids are
         // filtered out naturally (they never match `terms: { _id }`).
         const attackIndex = await getAttackAlertsIndex({ context });
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         if (!updateRelatedAlerts) {
           return withSiemErrorHandlingAndAttacksTelemetry(
             response,
             telemetrySender,
             telemetryFields,
-            () => updateAlertsAssignees({ context, index: attackIndex, ids, assignees })
+            async () => {
+              const result = await updateAlertsAssignees({
+                context,
+                index: attackIndex,
+                ids,
+                assignees,
+              });
+              void eventBus?.emitAttackAssigneesChanged(request, {
+                attackIds: ids,
+                assigneesToAdd: assignees.add,
+                assigneesToRemove: assignees.remove,
+                spaceId,
+              });
+              return result;
+            }
           );
         }
 
@@ -120,7 +138,27 @@ export const setAttacksAssigneesRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-            return updateAlertsAssignees({ context, index, ids: combinedIds, assignees });
+            const result = await updateAlertsAssignees({
+              context,
+              index,
+              ids: combinedIds,
+              assignees,
+            });
+            void eventBus?.emitAttackAssigneesChanged(request, {
+              attackIds: verifiedAttackIds,
+              assigneesToAdd: assignees.add,
+              assigneesToRemove: assignees.remove,
+              spaceId,
+            });
+            if (relatedAlertIds.length > 0) {
+              void eventBus?.emitAlertAssigneesChanged(request, {
+                alertIds: relatedAlertIds,
+                assigneesToAdd: assignees.add,
+                assigneesToRemove: assignees.remove,
+                spaceId,
+              });
+            }
+            return result;
           }
         );
       }

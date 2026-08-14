@@ -23,6 +23,7 @@ import { ATTACKS_DUPLICATE_ASSIGNEES_VALIDATION_ERROR } from './attacks_ebt_help
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksAssigneesRoute } from './set_attacks_assignees_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -317,6 +318,69 @@ describe('set attacks assignees', () => {
           error: 'Test error',
         })
       );
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: {
+      emitAttackAssigneesChanged: jest.Mock;
+      emitAlertAssigneesChanged: jest.Mock;
+    };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = {
+        emitAttackAssigneesChanged: jest.fn(),
+        emitAlertAssigneesChanged: jest.fn(),
+      };
+      setAttacksAssigneesRoute(
+        server.router,
+        ruleDataClient,
+        telemetrySenderMock,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    test('emits attackAssigneesChanged for non-cascade update', async () => {
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          attackIds: ['attack1', 'attack2'],
+          assigneesToAdd: ['user1'],
+          assigneesToRemove: [],
+        })
+      );
+      expect(mockEventBus.emitAlertAssigneesChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits attackAssigneesChanged and alertAssigneesChanged for cascade update', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        getSearchResponse([{ _id: 'attack1', alertIds: ['alertA'] }])
+      );
+      await server.inject(
+        getRequest({ ...defaultBody, update_related_alerts: true }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack1'] })
+      );
+      expect(mockEventBus.emitAlertAssigneesChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alertA'] })
+      );
+    });
+
+    test('does not emit when validation fails', async () => {
+      await server.inject(
+        getRequest({ ids: ['attack1'], assignees: { add: ['user1'], remove: ['user1'] } }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackAssigneesChanged).not.toHaveBeenCalled();
     });
   });
 });

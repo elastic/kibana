@@ -20,6 +20,7 @@ import {
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import type { RuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../../common/constants';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
@@ -31,6 +32,7 @@ import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import * as insights from '../../../telemetry/insights';
 import { setAttacksStatusRoute } from './set_attacks_status_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -150,7 +152,7 @@ describe('set attacks workflow status', () => {
       expect(context.core.elasticsearch.client.asCurrentUser.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: [SCHEDULED_INDEX, ADHOC_INDEX],
-          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
+          _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS],
         })
       );
     });
@@ -403,6 +405,72 @@ describe('set attacks workflow status', () => {
           update_related_alerts: true,
         })
       );
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: {
+      emitAttackStatusChanged: jest.Mock;
+      emitAlertStatusChanged: jest.Mock;
+    };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = {
+        emitAttackStatusChanged: jest.fn(),
+        emitAlertStatusChanged: jest.fn(),
+      };
+      setAttacksStatusRoute(
+        server.router,
+        ruleDataClient,
+        telemetrySenderMock,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    describe('non-cascade', () => {
+      test('emits attackStatusChanged after updating attack status', async () => {
+        await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            attackIds: ['attack1', 'attack2'],
+            status: 'acknowledged',
+          })
+        );
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('cascade', () => {
+      beforeEach(() => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+          getSearchResponse([{ _id: 'attack1', alertIds: ['alertA', 'alertB'] }])
+        );
+      });
+
+      test('emits attackStatusChanged and alertStatusChanged', async () => {
+        await server.inject(
+          getRequest({ ...defaultBody, update_related_alerts: true }),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            attackIds: ['attack1'],
+            status: 'acknowledged',
+          })
+        );
+        expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            alertIds: ['alertA', 'alertB'],
+            status: 'acknowledged',
+          })
+        );
+      });
     });
   });
 });

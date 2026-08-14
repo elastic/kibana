@@ -23,6 +23,7 @@ import { ATTACKS_DUPLICATE_TAGS_VALIDATION_ERROR } from './attacks_ebt_helpers';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { setAttacksTagsRoute } from './set_attacks_tags_route';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 const SCHEDULED_INDEX = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
 const ADHOC_INDEX = `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`;
@@ -320,6 +321,63 @@ describe('set attacks tags', () => {
           error: 'Test error',
         })
       );
+    });
+  });
+
+  describe('workflow trigger emission', () => {
+    let mockEventBus: { emitAttackTagsChanged: jest.Mock; emitAlertTagsChanged: jest.Mock };
+
+    beforeEach(() => {
+      server = serverMock.create();
+      mockEventBus = { emitAttackTagsChanged: jest.fn(), emitAlertTagsChanged: jest.fn() };
+      setAttacksTagsRoute(
+        server.router,
+        ruleDataClient,
+        telemetrySenderMock,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
+    });
+
+    test('emits attackTagsChanged for non-cascade update', async () => {
+      await server.inject(getRequest(defaultBody), requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          attackIds: ['attack1', 'attack2'],
+          tagsToAdd: defaultTags.tags_to_add,
+          tagsToRemove: defaultTags.tags_to_remove,
+        })
+      );
+      expect(mockEventBus.emitAlertTagsChanged).not.toHaveBeenCalled();
+    });
+
+    test('emits attackTagsChanged and alertTagsChanged for cascade update', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
+        getSearchResponse([{ _id: 'attack1', alertIds: ['alertA'] }])
+      );
+      await server.inject(
+        getRequest({ ...defaultBody, update_related_alerts: true }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['attack1'] })
+      );
+      expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ alertIds: ['alertA'] })
+      );
+    });
+
+    test('does not emit when tag validation fails', async () => {
+      await server.inject(
+        getRequest({ ids: ['attack1'], tags: { tags_to_add: ['dup'], tags_to_remove: ['dup'] } }),
+        requestContextMock.convertContext(context)
+      );
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
     });
   });
 });

@@ -13,10 +13,12 @@ import {
   ALERTS_API_UPDATE_DEPRECATED_PRIVILEGE,
 } from '@kbn/security-solution-features/constants';
 
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { SetAttacksStatusRequestBody } from '../../../../../common/api/detection_engine/attacks';
 import { DETECTION_ENGINE_ATTACKS_STATUS_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
 import {
   createAlertStatusPayloads,
@@ -38,7 +40,8 @@ import {
 export const setAttacksStatusRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
-  telemetrySender: ITelemetryEventsSender
+  telemetrySender: ITelemetryEventsSender,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -102,20 +105,54 @@ export const setAttacksStatusRoute = (
         // Attack indices scope the update by query, so unknown/non-attack ids are
         // filtered out naturally (they never match `terms: { _id }`).
         const attackIndex = await getAttackAlertsIndex({ context });
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         if (!updateRelatedAlerts) {
+          const attackPreviousStatuses: Array<{ id: string; previousStatus: string }> = [];
+          if (eventBus) {
+            try {
+              const esClient = core.elasticsearch.client.asCurrentUser;
+              const mgetResponse = await esClient.mget({
+                index: attackIndex.join(','),
+                ids,
+                _source_includes: [ALERT_WORKFLOW_STATUS],
+              });
+              for (const doc of mgetResponse.docs) {
+                if ('found' in doc && doc.found && doc._id != null) {
+                  attackPreviousStatuses.push({
+                    id: doc._id,
+                    previousStatus:
+                      (doc._source as Record<string, string> | null | undefined)?.[
+                        ALERT_WORKFLOW_STATUS
+                      ] ?? 'open',
+                  });
+                }
+              }
+            } catch {
+              // Non-blocking
+            }
+          }
           return withSiemErrorHandlingAndAttacksTelemetry(
             response,
             telemetrySender,
             telemetryFields,
-            () =>
-              updateAlertsWorkflowStatus({
+            async () => {
+              const result = await updateAlertsWorkflowStatus({
                 context,
                 index: attackIndex,
                 ids,
                 status,
                 reason: closingReason.reason,
-              })
+              });
+              void eventBus?.emitAttackStatusChanged(request, {
+                attackIds: ids,
+                status,
+                previousStatuses: attackPreviousStatuses,
+                spaceId,
+              });
+              return result;
+            }
           );
         }
 
@@ -131,7 +168,7 @@ export const setAttacksStatusRoute = (
               index: attackIndex,
               params: {
                 query: { bool: { filter: { terms: { _id: ids } } } },
-                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS],
+                _source: [ALERT_ATTACK_DISCOVERY_ALERT_IDS, ALERT_WORKFLOW_STATUS],
                 size: ids.length,
               },
             });
@@ -139,6 +176,17 @@ export const setAttacksStatusRoute = (
             const verifiedAttackIds = attackDocs.hits.hits
               .map((hit) => hit._id)
               .filter((id): id is string => id != null);
+
+            const attackPreviousStatuses = attackDocs.hits.hits
+              .filter((hit) => hit._id != null)
+              .map((hit) => ({
+                id: hit._id as string,
+                previousStatus: (() => {
+                  const src = hit._source as Record<string, unknown> | undefined;
+                  const v = src?.[ALERT_WORKFLOW_STATUS];
+                  return typeof v === 'string' ? v : 'open';
+                })(),
+              }));
 
             const relatedAlertIds = attackDocs.hits.hits.flatMap((hit) => {
               const source = hit._source as Record<string, unknown> | undefined;
@@ -152,13 +200,56 @@ export const setAttacksStatusRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-            return updateAlertsWorkflowStatus({
+            const relatedAlertPreviousStatuses: Array<{ id: string; previousStatus: string }> = [];
+            if (eventBus && relatedAlertIds.length > 0) {
+              try {
+                const esClient = core.elasticsearch.client.asCurrentUser;
+                const relatedMgetResponse = await esClient.mget({
+                  index: Array.isArray(index) ? index.join(',') : index,
+                  ids: relatedAlertIds,
+                  _source_includes: [ALERT_WORKFLOW_STATUS],
+                });
+                for (const doc of relatedMgetResponse.docs) {
+                  if ('found' in doc && doc.found && doc._id != null) {
+                    relatedAlertPreviousStatuses.push({
+                      id: doc._id,
+                      previousStatus: (() => {
+                        const src = doc._source as Record<string, unknown> | null | undefined;
+                        const v = src?.[ALERT_WORKFLOW_STATUS];
+                        return typeof v === 'string' ? v : 'open';
+                      })(),
+                    });
+                  }
+                }
+              } catch {
+                // Non-blocking
+              }
+            }
+
+            const result = await updateAlertsWorkflowStatus({
               context,
               index,
               ids: combinedIds,
               status,
               reason: closingReason.reason,
             });
+
+            void eventBus?.emitAttackStatusChanged(request, {
+              attackIds: verifiedAttackIds,
+              status,
+              previousStatuses: attackPreviousStatuses,
+              spaceId,
+            });
+            if (relatedAlertIds.length > 0) {
+              void eventBus?.emitAlertStatusChanged(request, {
+                alertIds: relatedAlertIds,
+                status,
+                previousStatuses: relatedAlertPreviousStatuses,
+                truncated: false,
+                spaceId,
+              });
+            }
+            return result;
           }
         );
       }

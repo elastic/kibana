@@ -17,6 +17,7 @@ import { SetAttacksTagsRequestBody } from '../../../../../common/api/detection_e
 import { DETECTION_ENGINE_ATTACKS_TAGS_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
 import { searchAlerts } from '../common/operations/search_alerts';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
@@ -33,7 +34,8 @@ import {
 export const setAttacksTagsRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null,
-  telemetrySender: ITelemetryEventsSender
+  telemetrySender: ITelemetryEventsSender,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
     .post({
@@ -73,13 +75,24 @@ export const setAttacksTagsRoute = (
         // Attack indices scope the update by query, so unknown/non-attack ids are
         // filtered out naturally (they never match `terms: { _id }`).
         const attackIndex = await getAttackAlertsIndex({ context });
+        const securitySolution = await context.securitySolution;
+        const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         if (!updateRelatedAlerts) {
           return withSiemErrorHandlingAndAttacksTelemetry(
             response,
             telemetrySender,
             telemetryFields,
-            () => updateAlertsTags({ context, index: attackIndex, ids, tags })
+            async () => {
+              const result = await updateAlertsTags({ context, index: attackIndex, ids, tags });
+              void eventBus?.emitAttackTagsChanged(request, {
+                attackIds: ids,
+                tagsToAdd: tags.tags_to_add,
+                tagsToRemove: tags.tags_to_remove,
+                spaceId,
+              });
+              return result;
+            }
           );
         }
 
@@ -116,7 +129,22 @@ export const setAttacksTagsRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-            return updateAlertsTags({ context, index, ids: combinedIds, tags });
+            const result = await updateAlertsTags({ context, index, ids: combinedIds, tags });
+            void eventBus?.emitAttackTagsChanged(request, {
+              attackIds: verifiedAttackIds,
+              tagsToAdd: tags.tags_to_add,
+              tagsToRemove: tags.tags_to_remove,
+              spaceId,
+            });
+            if (relatedAlertIds.length > 0) {
+              void eventBus?.emitAlertTagsChanged(request, {
+                alertIds: relatedAlertIds,
+                tagsToAdd: tags.tags_to_add,
+                tagsToRemove: tags.tags_to_remove,
+                spaceId,
+              });
+            }
+            return result;
           }
         );
       }
