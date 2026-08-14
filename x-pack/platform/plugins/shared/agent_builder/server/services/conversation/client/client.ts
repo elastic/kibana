@@ -14,6 +14,7 @@ import {
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationWithoutRounds,
   type TimelineEvent,
   type TimelineEventInput,
   type EventActor,
@@ -36,15 +37,10 @@ import type {
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
-import type {
-  ConversationWithPermissions,
-  ConversationWithoutRoundsWithPermissions,
-  UpdateConversationAccessControlRequestBody,
-} from '../../../../common/http_api/conversations';
+import type { UpdateConversationAccessControlRequestBody } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,
-  getConversationPermissions,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
@@ -77,7 +73,6 @@ import {
   createRequestToEs,
   updateConversation,
   type Document,
-  type VersionedDocument,
 } from './converters';
 
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
@@ -112,7 +107,7 @@ const buildMetadataFromTemplate = (
 const EVENTS_APPEND_RETRY_ON_CONFLICT = 5;
 
 export interface ConversationClient {
-  get(conversationId: string): Promise<ConversationWithPermissions>;
+  get(conversationId: string): Promise<Conversation>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
@@ -128,7 +123,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
@@ -204,9 +199,7 @@ class ConversationClientImpl implements ConversationClient {
     this.logger = logger;
   }
 
-  async list(
-    options: ConversationListOptions = {}
-  ): Promise<ConversationWithoutRoundsWithPermissions[]> {
+  async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
     const { agentId } = options;
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
@@ -219,6 +212,7 @@ class ConversationClientImpl implements ConversationClient {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
+      seq_no_primary_term: true,
       _source: [
         'agent_id',
         'user_id',
@@ -243,15 +237,13 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) =>
-      this.toResponseConversationWithoutRounds(hit as Document)
-    );
+    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
   }
 
-  async get(conversationId: string): Promise<ConversationWithPermissions> {
+  async get(conversationId: string): Promise<Conversation> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return this.toResponseConversation(document);
+    return fromEs(document);
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -265,6 +257,7 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [
@@ -622,31 +615,7 @@ class ConversationClientImpl implements ConversationClient {
     };
   }
 
-  private toResponseConversation(document: Document): ConversationWithPermissions {
-    return withDeserializedMetadata({
-      ...fromEs(document),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
-  }
-
-  private toResponseConversationWithoutRounds(
-    document: Document
-  ): ConversationWithoutRoundsWithPermissions {
-    return withDeserializedMetadata({
-      ...fromEsWithoutRounds(document),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
-  }
-
-  private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {
+  private async getDocument(conversationId: string): Promise<Document | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
@@ -686,7 +655,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-  }): Promise<VersionedDocument> {
+  }): Promise<Document> {
     const document = await this.getDocument(conversationId);
 
     if (!document) {
@@ -694,7 +663,7 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     let allowed = false;
-    const conversation = document._source!;
+    const conversation = fromEsWithoutRounds(document);
 
     switch (access) {
       case 'converse':
@@ -702,11 +671,11 @@ class ConversationClientImpl implements ConversationClient {
 
         if (allowed) {
           try {
-            await this.agentRegistry.get(conversation.agent_id, { access: 'use' });
+            await this.agentRegistry.get(document._source.agent_id, { access: 'use' });
           } catch (error) {
             if (
               !isAgentNotFoundError(error) &&
-              !isAgentUnavailableError(error, conversation.agent_id)
+              !isAgentUnavailableError(error, document._source.agent_id)
             ) {
               throw error;
             }

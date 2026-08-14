@@ -41,10 +41,14 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 
-export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
-
-export type VersionedDocument = Document &
-  Required<Pick<GetResponse<ConversationProperties>, '_seq_no' | '_primary_term'>>;
+export type Document = Omit<
+  Required<
+    Pick<GetResponse<ConversationProperties>, '_source' | '_id' | '_seq_no' | '_primary_term'>
+  >,
+  '_source'
+> & {
+  _source: ConversationProperties;
+};
 
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {

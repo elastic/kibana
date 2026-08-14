@@ -22,8 +22,10 @@ import type {
   UpdateConversationAccessControlRequestBody,
   UpdateConversationAccessControlResponse,
 } from '../../common/http_api/conversations';
+import { withPermissions } from '../../common/http_api/permissions';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
+import { getConversationPermissions } from '../services/conversation/access_control';
 
 const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   [
@@ -116,10 +118,13 @@ export function registerConversationRoutes({
 
         const client = await conversationsService.getScopedClient({ request });
         const conversations = await client.list({ agentId });
+        const user = await conversationsService.getCurrentUser({ request });
 
         return response.ok<ListConversationsResponse>({
           body: {
-            results: conversations,
+            results: conversations.map((conversation) =>
+              withPermissions(conversation, getConversationPermissions({ conversation, user }))
+            ),
           },
         });
       })
@@ -165,9 +170,10 @@ export function registerConversationRoutes({
 
         const client = await conversationsService.getScopedClient({ request });
         const conversation = await client.get(conversationId);
+        const user = await conversationsService.getCurrentUser({ request });
 
         return response.ok<GetConversationResponse>({
-          body: conversation,
+          body: withPermissions(conversation, getConversationPermissions({ conversation, user })),
         });
       })
     );

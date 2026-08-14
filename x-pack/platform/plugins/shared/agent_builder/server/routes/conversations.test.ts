@@ -60,6 +60,7 @@ describe('registerConversationRoutes', () => {
       ],
     } as Conversation;
     const get = jest.fn().mockResolvedValue(conversation);
+    const getCurrentUser = jest.fn().mockResolvedValue({ id: 'user-1', username: 'bruno' });
 
     const router = {
       versioned: {
@@ -91,6 +92,7 @@ describe('registerConversationRoutes', () => {
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
           getScopedClient: jest.fn().mockResolvedValue({ get }),
+          getCurrentUser,
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -119,7 +121,11 @@ describe('registerConversationRoutes', () => {
     );
 
     expect(get).toHaveBeenCalledWith('conversation-1');
-    expect(result.payload).toBe(conversation);
+    expect(getCurrentUser).toHaveBeenCalled();
+    expect(result.payload).toEqual({
+      ...conversation,
+      permissions: { rename: true, delete: true, update_access_control: true },
+    });
     expect(result.payload.origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     });
@@ -149,6 +155,7 @@ describe('registerConversationRoutes', () => {
       },
     };
     const list = jest.fn().mockResolvedValue([conversation]);
+    const getCurrentUser = jest.fn().mockResolvedValue({ id: 'user-1', username: 'bruno' });
 
     const router = {
       versioned: {
@@ -180,6 +187,7 @@ describe('registerConversationRoutes', () => {
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
           getScopedClient: jest.fn().mockResolvedValue({ list }),
+          getCurrentUser,
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -206,8 +214,14 @@ describe('registerConversationRoutes', () => {
     );
 
     expect(list).toHaveBeenCalledWith({ agentId: undefined });
+    expect(getCurrentUser).toHaveBeenCalled();
     expect(result.payload.results[0].origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+    });
+    expect(result.payload.results[0].permissions).toEqual({
+      rename: true,
+      delete: true,
+      update_access_control: true,
     });
   });
 

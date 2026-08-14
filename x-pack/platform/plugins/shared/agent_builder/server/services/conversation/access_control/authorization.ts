@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { ConversationWithoutRounds, UserIdAndName } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
-import type { ConversationPermissions } from '../../../../common/http_api/conversations';
-import type { ConversationProperties } from '../client/storage';
+import type { ConversationPermissions } from '../../../../common/http_api/permissions';
 
 export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
 
 export const isConversationOwner = ({
-  conversation,
+  owner,
   user,
 }: {
-  conversation: ConversationProperties;
+  owner: { userId?: string; username: string };
   user: UserIdAndName;
 }): boolean => {
-  if (conversation.user_id !== undefined && user.id !== undefined) {
-    return conversation.user_id === user.id;
+  if (owner.userId !== undefined && user.id !== undefined) {
+    return owner.userId === user.id;
   }
 
-  if (conversation.user_id === undefined && user.username !== undefined) {
-    return conversation.user_name === user.username;
+  if (owner.userId === undefined && user.username !== undefined) {
+    return owner.username === user.username;
   }
 
   return false;
@@ -33,7 +32,7 @@ export const isConversationOwner = ({
 const isPublicConversation = ({
   conversation,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
 }): boolean => {
   return conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
 };
@@ -42,7 +41,7 @@ export const isConversationMember = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
   user: UserIdAndName;
 }): boolean => {
   if (user.id === undefined || conversation.access_control?.entries === undefined) {
@@ -58,10 +57,15 @@ export const hasConversationConverseAccess = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
   user: UserIdAndName;
 }): boolean => {
-  if (isConversationOwner({ conversation, user })) {
+  if (
+    isConversationOwner({
+      owner: { userId: conversation.user.id, username: conversation.user.username },
+      user,
+    })
+  ) {
     return true;
   }
 
@@ -72,16 +76,20 @@ export const hasConversationOwnerAccess = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
   user: UserIdAndName;
-}): boolean => isConversationOwner({ conversation, user });
+}): boolean =>
+  isConversationOwner({
+    owner: { userId: conversation.user.id, username: conversation.user.username },
+    user,
+  });
 
 export const hasConversationRenameAccess = ({
   conversation,
   user,
   isAdmin,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
   user: UserIdAndName;
   isAdmin: boolean;
 }): boolean =>
@@ -93,7 +101,7 @@ export const hasConversationDeleteAccess = ({
   user,
   isAdmin,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
   user: UserIdAndName;
   isAdmin: boolean;
 }): boolean =>
@@ -104,7 +112,7 @@ export const hasConversationUpdateAccessControlAccess = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
   user: UserIdAndName;
 }): boolean => hasConversationOwnerAccess({ conversation, user });
 
@@ -113,7 +121,7 @@ export const getConversationPermissions = ({
   user,
   isAdmin,
 }: {
-  conversation: ConversationProperties;
+  conversation: ConversationWithoutRounds;
   user: UserIdAndName;
   isAdmin: boolean;
 }): ConversationPermissions => ({

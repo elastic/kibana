@@ -9,9 +9,9 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   type ConversationAccessControlEntry,
+  type ConversationWithoutRounds,
   type UserIdAndName,
 } from '@kbn/agent-builder-common';
-import type { ConversationProperties } from '../client/storage';
 import {
   getConversationPermissions,
   hasConversationConverseAccess,
@@ -29,15 +29,18 @@ const user: UserIdAndName = {
   username: 'alice',
 };
 
-const conversation = (overrides: Partial<ConversationProperties> = {}): ConversationProperties => ({
+const conversation = (
+  overrides: Partial<ConversationWithoutRounds> = {}
+): ConversationWithoutRounds => ({
+  id: 'conversation-1',
   agent_id: 'agent-1',
-  user_id: 'owner-profile-id',
-  user_name: 'owner',
-  space: 'default',
+  user: {
+    id: 'owner-profile-id',
+    username: 'owner',
+  },
   title: 'Conversation',
   created_at: '2026-06-29T00:00:00.000Z',
   updated_at: '2026-06-29T00:00:00.000Z',
-  conversation_rounds: [],
   ...overrides,
 });
 
@@ -46,7 +49,7 @@ describe('conversation access control', () => {
     it('matches owners by profile id when both sides have one', () => {
       expect(
         isConversationOwner({
-          conversation: conversation({ user_id: user.id, user_name: 'old-alice' }),
+          owner: { userId: user.id, username: 'old-alice' },
           user,
         })
       ).toBe(true);
@@ -55,13 +58,13 @@ describe('conversation access control', () => {
     it('falls back to username for conversations that never stored a user_id', () => {
       expect(
         isConversationOwner({
-          conversation: conversation({ user_id: undefined, user_name: user.username }),
+          owner: { username: user.username },
           user,
         })
       ).toBe(true);
       expect(
         isConversationOwner({
-          conversation: conversation({ user_id: undefined, user_name: user.username }),
+          owner: { username: user.username },
           user: { username: user.username },
         })
       ).toBe(true);
@@ -70,16 +73,13 @@ describe('conversation access control', () => {
     it('does not fall back to username when the conversation stored a user_id', () => {
       expect(
         isConversationOwner({
-          conversation: conversation({ user_id: 'owner-profile-id', user_name: user.username }),
+          owner: { userId: 'owner-profile-id', username: user.username },
           user: { username: user.username },
         })
       ).toBe(false);
       expect(
         isConversationOwner({
-          conversation: conversation({
-            user_id: 'realm:["file","file1","alice"]',
-            user_name: user.username,
-          }),
+          owner: { userId: 'realm:["file","file1","alice"]', username: user.username },
           user: { id: 'realm:["native","native1","alice"]', username: user.username },
         })
       ).toBe(false);
@@ -136,7 +136,7 @@ describe('conversation access control', () => {
       expect(
         isConversationMember({
           conversation: conversation({
-            access_control: { access_mode: ConversationAccessControlMode.Private },
+            access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
           }),
           user,
         })
@@ -156,7 +156,7 @@ describe('conversation access control', () => {
   describe('operation-specific access checks', () => {
     it('allows non-owners to read public conversations', () => {
       const publicConversation = conversation({
-        access_control: { access_mode: ConversationAccessControlMode.Public },
+        access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
       });
 
       expect(hasConversationConverseAccess({ conversation: publicConversation, user })).toBe(true);
@@ -166,7 +166,7 @@ describe('conversation access control', () => {
       expect(
         hasConversationOwnerAccess({
           conversation: conversation({
-            access_control: { access_mode: ConversationAccessControlMode.Public },
+            access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
           }),
           user,
         })
@@ -280,7 +280,7 @@ describe('conversation access control', () => {
     it('grants rename and delete to the owner matched by profile id', () => {
       expect(
         getConversationPermissions({
-          conversation: conversation({ user_id: user.id, user_name: 'old-alice' }),
+          conversation: conversation({ user: { id: user.id, username: 'old-alice' } }),
           user,
           isAdmin: false,
         })
@@ -290,7 +290,7 @@ describe('conversation access control', () => {
     it('grants rename and delete to the owner of a legacy conversation without a profile id', () => {
       expect(
         getConversationPermissions({
-          conversation: conversation({ user_id: undefined, user_name: user.username }),
+          conversation: conversation({ user: { username: user.username } }),
           user,
           isAdmin: false,
         })
@@ -301,7 +301,7 @@ describe('conversation access control', () => {
       expect(
         getConversationPermissions({
           conversation: conversation({
-            access_control: { access_mode: ConversationAccessControlMode.Public },
+            access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
           }),
           user,
           isAdmin: false,
@@ -331,9 +331,11 @@ describe('conversation access control', () => {
       expect(
         getConversationPermissions({
           conversation: conversation({
-            user_id: 'relay-service-account-profile-id',
-            user_name: 'relay-service-account',
-            access_control: { access_mode: ConversationAccessControlMode.Public },
+            user: {
+              id: 'relay-service-account-profile-id',
+              username: 'relay-service-account',
+            },
+            access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
           }),
           user,
           isAdmin: false,
