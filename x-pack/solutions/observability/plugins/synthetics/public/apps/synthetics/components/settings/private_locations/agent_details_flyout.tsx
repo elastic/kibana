@@ -187,7 +187,7 @@ export const AgentDetailsFlyout = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                iconType="popout"
+                iconType="external"
                 href={fleetAgentHref}
                 target="_blank"
                 data-test-subj="syntheticsAgentFlyoutFleetLink"

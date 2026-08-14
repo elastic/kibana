@@ -57,6 +57,14 @@ export const useDataView = (
         // this is due to the fact that many of our tests mock kibana hook and do not provide proper
         // double for dataViews service
         const currDv = await dataViews?.get(dataViewId);
+
+        // In production the dataViews service is always present, so `get` resolves to a DataView.
+        // The only way `currDv` is falsy is an incomplete Kibana mock in tests; bail rather than
+        // store `undefined` so the hook's non-null `DataView` contract stays truthful.
+        if (!currDv) {
+          return;
+        }
+
         if (!loadedForTheFirstTimeRef.current) {
           loadedForTheFirstTimeRef.current = true;
         }

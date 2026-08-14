@@ -61,9 +61,8 @@ export const useTemplateHeaderBreadcrumbs = () => {
     e.preventDefault();
   };
 
-  // Chrome Next already surfaces an origin-aware compatibility Back from breadcrumbs.
-  // Keep the page-local Return only for classic chrome.
-  if (chrome.next.isEnabled) {
+  // The compatibility Back only renders when Chrome Next is active in the project layout.
+  if (chrome.next.isEnabled && chrome.getChromeStyle() === 'project') {
     return { breadcrumbs: [] satisfies EuiBreadcrumbsProps['breadcrumbs'] };
   }
 

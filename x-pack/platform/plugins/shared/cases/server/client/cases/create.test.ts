@@ -1187,6 +1187,56 @@ describe('create', () => {
       expect(createArgs.attributes.extended_fields?.priority_as_keyword).toBe('low');
     });
 
+    it('omits a mirrored customField from Activity when it matches a template default', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+        id: 'so-tpl',
+        type: 'cases-templates',
+        references: [],
+        attributes: {
+          templateId: 'tmpl-ext',
+          name: 'Ext Template',
+          owner: SECURITY_SOLUTION_OWNER,
+          definition: yamlStringify({
+            name: 'Ext Template',
+            fields: [
+              {
+                control: 'INPUT_TEXT',
+                name: 'priority',
+                label: 'Priority',
+                type: 'keyword',
+                metadata: { default: 'medium' },
+              },
+            ],
+          }),
+          templateVersion: 1,
+          deletedAt: null,
+          isLatest: true,
+        },
+      });
+
+      await create(
+        {
+          ...theCase,
+          template: { id: 'tmpl-ext', version: 1 },
+          customFields: [{ key: 'priority', type: CustomFieldTypes.TEXT, value: 'medium' }],
+        },
+        clientArgs,
+        adapterCasesClientMock
+      );
+
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'medium' });
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const userActionsByType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+      expect(userActionsByType.extended_fields).toBeUndefined();
+    });
+
     it('preserves a mirror key for a customField absent from the request (synthetic-null regression)', async () => {
       // FAILURE SCENARIO (before fix): fillMissingCustomFields pads { key: 'priority', value: null }
       // for the absent 'priority' field; the merge then deletes priority_as_keyword — even though
@@ -1349,7 +1399,7 @@ describe('create', () => {
       });
     });
 
-    it('emits template and extended_fields user actions so the audit trail matches the persisted case', async () => {
+    it('emits an applied-template user action without field rows when only defaults are persisted', async () => {
       const clientArgs = createClientArgs();
 
       await create(
@@ -1369,10 +1419,63 @@ describe('create', () => {
       expect(byType.template.payload).toEqual({
         template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
       });
-      // The initial extended_fields are recorded exactly as persisted on the case SO.
-      expect(byType.extended_fields.payload).toEqual({
-        extended_fields: { priority_as_keyword: 'medium' },
+      // Case SO still stores template defaults; Activity omits fields that match those defaults.
+      expect(byType.extended_fields).toBeUndefined();
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'medium' });
+    });
+
+    it('emits extended_fields user actions only for values that differ from template defaults', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp', version: 4 },
+          extended_fields: { priority_as_keyword: 'urgent' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      expect(byType.template.payload).toEqual({
+        template: { id: 'tmpl-exp', version: 4, name: 'Expansion Template' },
       });
+      expect(byType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: 'urgent' },
+      });
+    });
+
+    it('emits an extended_fields user action when the caller clears a non-empty template default', async () => {
+      const clientArgs = createClientArgs();
+
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp', version: 4 },
+          extended_fields: { priority_as_keyword: '' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const byType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+
+      expect(byType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: '' },
+      });
+      const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+      expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: '' });
     });
 
     it('checks the assignCase operation when the template introduces assignees', async () => {
@@ -1488,21 +1591,20 @@ describe('create', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('validates the merged extended_fields (template fetched once)', async () => {
+    it('creates the case and fetches the template once when extended_fields contains an unknown key', async () => {
       const clientArgs = createClientArgs();
 
-      await expect(
-        create(
-          {
-            ...minimalRequest,
-            template: { id: 'tmpl-exp' },
-            extended_fields: { unknown_key_as_keyword: 'x' },
-          },
-          clientArgs,
-          expansionCasesClientMock
-        )
-      ).rejects.toThrow('Unknown extended field key: "unknown_key_as_keyword"');
-      expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+      await create(
+        {
+          ...minimalRequest,
+          template: { id: 'tmpl-exp' },
+          extended_fields: { unknown_key_as_keyword: 'x' },
+        },
+        clientArgs,
+        expansionCasesClientMock
+      );
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledTimes(1);
       // Expansion resolved the template; validation reused it instead of fetching again.
       expect(clientArgs.services.templatesService.getTemplate).toHaveBeenCalledTimes(1);
     });
@@ -1661,6 +1763,12 @@ describe('create', () => {
         priority_as_keyword: 'global-default',
         summary_as_keyword: 'template-summary',
       });
+      const [[bulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const firstUserActionsByType: Record<string, { payload: unknown }> = Object.fromEntries(
+        bulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+      expect(firstUserActionsByType.extended_fields).toBeUndefined();
 
       jest.clearAllMocks();
       clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
@@ -1679,6 +1787,14 @@ describe('create', () => {
       expect(secondCreateArgs.attributes.extended_fields).toEqual({
         priority_as_keyword: 'caller-value',
         summary_as_keyword: 'template-summary',
+      });
+      const [[secondBulkArgs]] =
+        clientArgs.services.userActionService.creator.bulkCreateUserAction.mock.calls;
+      const secondUserActionsByType: Record<string, { payload: unknown }> = Object.fromEntries(
+        secondBulkArgs.userActions.map((ua: { type: string; payload: unknown }) => [ua.type, ua])
+      );
+      expect(secondUserActionsByType.extended_fields.payload).toEqual({
+        extended_fields: { priority_as_keyword: 'caller-value' },
       });
     });
 
