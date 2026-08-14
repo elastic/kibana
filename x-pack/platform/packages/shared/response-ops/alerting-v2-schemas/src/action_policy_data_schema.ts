@@ -43,7 +43,11 @@ export const actionPolicyDestinationSchema = z
   .describe('An action policy destination configuration.');
 
 export const groupingModeSchema = z
-  .enum(['per_episode', 'all', 'per_field'])
+  .union([
+    z.literal('per_episode').describe('one notification per alert episode lifecycle (default).'),
+    z.literal('all').describe('a single notification for all matching episodes.'),
+    z.literal('per_field').describe('group by specified `groupBy` fields.'),
+  ])
   .describe(
     'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
   );
@@ -51,7 +55,18 @@ export const groupingModeSchema = z
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
 
 export const throttleStrategySchema = z
-  .enum(['on_status_change', 'per_status_interval', 'time_interval', 'every_time'])
+  .union([
+    z
+      .literal('on_status_change')
+      .describe('notify only on episode status transitions (default for `per_episode`).'),
+    z.literal('per_status_interval').describe('notify on transitions and at regular intervals.'),
+    z
+      .literal('time_interval')
+      .describe(
+        'notify at regular intervals regardless of status (default for `all`/`per_field`).'
+      ),
+    z.literal('every_time').describe('notify on every evaluation cycle (high volume).'),
+  ])
   .describe('The throttle strategy that controls how often notifications are sent.');
 
 export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;

@@ -23,6 +23,7 @@ import {
   generateThrottleStrategiesDoc,
   generateThrottleGroupingCompatibilityDoc,
   getSeverityValues,
+  getDescribedEnumValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
 } from './schema_to_skill_docs';
@@ -178,10 +179,38 @@ describe('schema_to_skill_docs', () => {
         generateOperationsDoc({
           title: 'Missing Describe',
           schema,
-          operationsFile: 'manage_rule/operations.ts',
         })
-      ).toThrow(
-        /Missing \.describe\(\) on operation variant\(s\): set_name.*manage_rule\/operations\.ts/
+      ).toThrow(/Missing \.describe\(\) on operation variant\(s\): set_name/);
+    });
+  });
+
+  describe('getDescribedEnumValues', () => {
+    it('returns each literal value with its .describe() copy', () => {
+      const schema = z.union([
+        z.literal('inactive').describe('Fully recovered'),
+        z.literal('active').describe('Alert is firing'),
+      ]);
+
+      expect(getDescribedEnumValues(schema, 'exampleStatusSchema')).toEqual([
+        { value: 'inactive', description: 'Fully recovered' },
+        { value: 'active', description: 'Alert is firing' },
+      ]);
+    });
+
+    it('throws when a literal is missing .describe()', () => {
+      const schema = z.union([
+        z.literal('inactive').describe('Fully recovered'),
+        z.literal('pending'),
+      ]);
+
+      expect(() => getDescribedEnumValues(schema, 'exampleStatusSchema')).toThrow(
+        /Missing \.describe\(\) on exampleStatusSchema value\(s\): pending/
+      );
+    });
+
+    it('throws when the schema is not a union of literals', () => {
+      expect(() => getDescribedEnumValues(z.enum(['a', 'b']), 'exampleStatusSchema')).toThrow(
+        /exampleStatusSchema is not a union of described literals/
       );
     });
   });
@@ -402,12 +431,12 @@ describe('schema_to_skill_docs', () => {
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
       ['manage_rule operation .describe()', generateRuleOperationsDoc],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
-      ['generateEnumTable (episode status)', generateEpisodeLifecycleDoc],
-      ['generateEnumTable (no-data strategy)', generateNoDataStrategyDoc],
-      ['generateEnumList (recovery strategy)', generateRecoveryStrategyDoc],
-      ['generateEnumList (grouping modes)', generateGroupingModesDoc],
-      ['generateEnumList (throttle strategies)', generateThrottleStrategiesDoc],
-      ['generateRuleKindDoc kindDescriptions', generateRuleKindDoc],
+      ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
+      ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
+      ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
+      ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],
+      ['generateEnumList (throttle strategies from spec)', generateThrottleStrategiesDoc],
+      ['generateRuleKindDoc from spec', generateRuleKindDoc],
       ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],
       [
         'generateActionPolicyWorkflowPayloadDoc workflow input definition',
