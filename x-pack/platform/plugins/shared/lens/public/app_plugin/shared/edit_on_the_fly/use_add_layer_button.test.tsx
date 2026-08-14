@@ -46,7 +46,10 @@ function AddLayerButtonHarness({
 }
 
 describe('useAddLayerButton', () => {
-  function renderAddLayerButton(query?: Query | AggregateQuery) {
+  function renderAddLayerButton(
+    query?: Query | AggregateQuery,
+    activeDatasourceId: 'formBased' | 'textBased' = 'formBased'
+  ) {
     const visualizationMap = mockVisualizationMap();
     const datasourceMap = mockDatasourceMap();
     visualizationMap.testVis.getAddLayerButtonComponent = (props) => (
@@ -57,6 +60,9 @@ describe('useAddLayerButton', () => {
     const coreStart = coreMock.createStart();
     const startDependencies =
       createMockStartDependencies() as unknown as LensPluginStartDependencies;
+
+    const datasourceState =
+      activeDatasourceId === 'textBased' ? { layers: {}, indexPatternRefs: [] } : 'state';
 
     return renderWithReduxStore(
       <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
@@ -71,12 +77,12 @@ describe('useAddLayerButton', () => {
       {
         preloadedState: {
           datasourceStates: {
-            formBased: {
+            [activeDatasourceId]: {
               isLoading: false,
-              state: 'state',
+              state: datasourceState,
             },
           },
-          activeDatasourceId: 'formBased',
+          activeDatasourceId,
           query,
           visualization: {
             activeId: 'testVis',
@@ -89,9 +95,11 @@ describe('useAddLayerButton', () => {
     );
   }
 
-  it('hides the add layer button for ES|QL queries', () => {
-    renderAddLayerButton({ esql: 'FROM foo' });
-    expect(screen.queryByTestId('lnsLayerAddButton')).not.toBeInTheDocument();
+  // Multi-layer editing is supported for ES|QL charts: the add layer button renders
+  // for text-based queries as well (see "enable layers for esql charts").
+  it('renders the add layer button for ES|QL queries', () => {
+    renderAddLayerButton({ esql: 'FROM foo' }, 'textBased');
+    expect(screen.getByTestId('lnsLayerAddButton')).toBeInTheDocument();
   });
 
   it('renders the add layer button for non-ES|QL queries', () => {
