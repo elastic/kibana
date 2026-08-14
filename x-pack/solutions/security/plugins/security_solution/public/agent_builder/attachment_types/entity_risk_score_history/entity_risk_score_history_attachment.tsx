@@ -13,14 +13,16 @@ import type {
   AttachmentRenderProps,
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import {
   buildEntityLeftPanel,
   buildEntityRightPanel,
@@ -28,38 +30,28 @@ import {
   type SecurityAgentBuilderChrome,
   type EntityAnalyticsFlyoutNavigationState,
 } from '../entity_explore_navigation';
-import type { EntityGraphAttachment, EntityGraphAttachmentData } from './types';
-
-export interface EntityGraphServices {
-  application: ApplicationStart;
-  http: HttpStart;
-  agentBuilder?: AgentBuilderPluginStart;
-  chrome?: SecurityAgentBuilderChrome;
-  searchSession?: ISessionService;
-  experimentalFeatures: ExperimentalFeatures;
-  uiSettings: IUiSettingsClient;
-}
+import type { EntityRiskScoreHistoryAttachment } from './types';
 
 const DEFAULT_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.attachments.entityGraph.label',
-  { defaultMessage: 'Entity graph' }
+  'xpack.securitySolution.agentBuilder.attachments.entityRiskScoreHistory.label',
+  { defaultMessage: 'Risk score history' }
 );
 
-const OPEN_FULL_GRAPH_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.attachments.entityGraph.openFullGraph',
-  { defaultMessage: 'Open full graph' }
+const OPEN_RISK_HISTORY_LABEL = i18n.translate(
+  'xpack.securitySolution.agentBuilder.attachments.entityRiskScoreHistory.openRiskHistory',
+  { defaultMessage: 'Open full risk history' }
 );
 
-const AGENT_BUILDER_ENTITY_GRAPH_SCOPE = 'agent-builder-entity-graph' as const;
+const AGENT_BUILDER_RISK_HISTORY_SCOPE = 'agent-builder-risk-history' as const;
 
-const LazyEntityGraphInlineContent = React.lazy(() =>
-  import('./entity_graph_inline_content').then((module) => ({
-    default: module.EntityGraphInlineContent,
+const LazyEntityRiskScoreHistoryInlineContent = React.lazy(() =>
+  import('./entity_risk_score_history_inline_content').then((module) => ({
+    default: module.EntityRiskScoreHistoryInlineContent,
   }))
 );
 
-const buildEntityGraphFlyout = (
-  data: EntityGraphAttachmentData
+const buildRiskHistoryFlyout = (
+  data: EntityRiskScoreHistoryAttachment['data']
 ): EntityAnalyticsFlyoutNavigationState | null => {
   const identifier = {
     identifierType: data.identifierType,
@@ -73,9 +65,14 @@ const buildEntityGraphFlyout = (
 
   const left = buildEntityLeftPanel({
     identifier,
-    scopeId: AGENT_BUILDER_ENTITY_GRAPH_SCOPE,
-    path: { tab: EntityDetailsLeftPanelTab.GRAPH_VIEW },
-    isRiskScoreExist: false,
+    scopeId: AGENT_BUILDER_RISK_HISTORY_SCOPE,
+    path: {
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+      ...(data.scoreType === 'resolution'
+        ? { subTab: RiskScoreLeftPanelSubTab.RESOLUTION }
+        : { subTab: RiskScoreLeftPanelSubTab.ENTITY }),
+    },
+    isRiskScoreExist: true,
   });
   if (!left) {
     return null;
@@ -84,25 +81,31 @@ const buildEntityGraphFlyout = (
   return { preview: [], right, left };
 };
 
-export const createEntityGraphAttachmentDefinition = ({
+export const createEntityRiskScoreHistoryAttachmentDefinition = ({
   application,
-  http,
   agentBuilder,
   chrome,
-  searchSession,
   experimentalFeatures,
+  searchSession,
   uiSettings,
-}: EntityGraphServices): AttachmentUIDefinition<EntityGraphAttachment> => {
+}: {
+  application: ApplicationStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
+  searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
+}): AttachmentUIDefinition<EntityRiskScoreHistoryAttachment> => {
   return {
     getLabel: (attachment) => attachment?.data?.attachmentLabel ?? DEFAULT_LABEL,
-    getIcon: () => 'graphApp',
-    renderInlineContent: (props: AttachmentRenderProps<EntityGraphAttachment>) => (
+    getIcon: () => 'visLine',
+    renderInlineContent: (props: AttachmentRenderProps<EntityRiskScoreHistoryAttachment>) => (
       <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
-        <LazyEntityGraphInlineContent {...props} http={http} />
+        <LazyEntityRiskScoreHistoryInlineContent {...props} />
       </React.Suspense>
     ),
     getActionButtons: ({ attachment, openSidebarConversation }) => {
-      const flyout = buildEntityGraphFlyout(attachment.data);
+      const flyout = buildRiskHistoryFlyout(attachment.data);
       if (!flyout) {
         return [];
       }
@@ -113,7 +116,7 @@ export const createEntityGraphAttachmentDefinition = ({
 
       return [
         {
-          label: OPEN_FULL_GRAPH_LABEL,
+          label: OPEN_RISK_HISTORY_LABEL,
           icon: 'external',
           type: ActionButtonType.SECONDARY,
           handler: () => {
