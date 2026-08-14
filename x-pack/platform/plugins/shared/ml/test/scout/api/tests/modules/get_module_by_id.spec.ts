@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 import { setupFleetPackages, removeFleetPackages } from '../../fixtures/fleet_helpers';
-import { ALL_MODULE_IDS } from './get_module_list.spec';
+import { ALL_MODULE_IDS } from '../../fixtures/setup_module_helpers';
 
 apiTest.describe('get_module: load each module by ID', { tag: '@local-stateful-classic' }, () => {
   // Fleet packages register apache_data_stream / nginx_data_stream in the ML module registry

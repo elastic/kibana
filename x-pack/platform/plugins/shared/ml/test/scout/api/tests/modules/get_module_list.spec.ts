@@ -8,47 +8,7 @@
 import { expect } from '@kbn/scout/api';
 import { mlApiTest as apiTest, INTERNAL_API_HEADERS } from '../../fixtures';
 import { setupFleetPackages, removeFleetPackages } from '../../fixtures/fleet_helpers';
-
-export const ALL_MODULE_IDS = [
-  'apache_data_stream',
-  'apache_ecs',
-  'apm_transaction',
-  'auditbeat_process_docker_ecs',
-  'logs_ui_analysis',
-  'logs_ui_categories',
-  'metricbeat_system_ecs',
-  'metrics_ui_hosts',
-  'metrics_ui_k8s',
-  'nginx_data_stream',
-  'nginx_ecs',
-  'sample_data_ecommerce',
-  'sample_data_weblogs',
-  'security_auth',
-  'security_azure_activitylogs',
-  'security_cloudtrail',
-  'security_gcp_audit',
-  'security_host',
-  'security_linux_v3',
-  'security_network',
-  'security_packetbeat',
-  'security_windows_v3',
-  'uptime_heartbeat',
-];
-
-const SECURITY_MODULE_IDS = [
-  'auditbeat_process_docker_ecs',
-  'logs_ui_analysis',
-  'logs_ui_categories',
-  'security_auth',
-  'security_azure_activitylogs',
-  'security_cloudtrail',
-  'security_gcp_audit',
-  'security_host',
-  'security_linux_v3',
-  'security_network',
-  'security_packetbeat',
-  'security_windows_v3',
-];
+import { ALL_MODULE_IDS, SECURITY_MODULE_IDS } from '../../fixtures/setup_module_helpers';
 
 apiTest.describe('get_module: list and filter', { tag: '@local-stateful-classic' }, () => {
   // Fleet packages register apache_data_stream / nginx_data_stream in the ML module registry

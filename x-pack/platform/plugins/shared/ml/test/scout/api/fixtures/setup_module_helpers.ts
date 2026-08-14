@@ -12,6 +12,47 @@ import { INTERNAL_API_HEADERS } from './constants';
 import { deleteSavedObject, assertSavedObjectExists } from './general_test_helpers';
 import type { KbnRequestable } from './general_test_helpers';
 
+export const ALL_MODULE_IDS = [
+  'apache_data_stream',
+  'apache_ecs',
+  'apm_transaction',
+  'auditbeat_process_docker_ecs',
+  'logs_ui_analysis',
+  'logs_ui_categories',
+  'metricbeat_system_ecs',
+  'metrics_ui_hosts',
+  'metrics_ui_k8s',
+  'nginx_data_stream',
+  'nginx_ecs',
+  'sample_data_ecommerce',
+  'sample_data_weblogs',
+  'security_auth',
+  'security_azure_activitylogs',
+  'security_cloudtrail',
+  'security_gcp_audit',
+  'security_host',
+  'security_linux_v3',
+  'security_network',
+  'security_packetbeat',
+  'security_windows_v3',
+  'uptime_heartbeat',
+];
+
+export const SECURITY_MODULE_IDS = [
+  'auditbeat_process_docker_ecs',
+  'logs_ui_analysis',
+  'logs_ui_categories',
+  'security_auth',
+  'security_azure_activitylogs',
+  'security_cloudtrail',
+  'security_gcp_audit',
+  'security_host',
+  'security_linux_v3',
+  'security_network',
+  'security_packetbeat',
+  'security_windows_v3',
+];
+
 export interface SetupModuleJobExpected {
   jobId: string;
   jobState: string;
