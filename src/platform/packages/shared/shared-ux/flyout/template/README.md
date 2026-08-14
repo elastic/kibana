@@ -30,7 +30,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 **`FlyoutTemplate.Header`** renders the title row, an optional description, and a full-bleed bottom divider. It accepts only declared header parts as children; free-form content belongs in the Body and triggers a dev warning if placed here.
 
 - `title` — required. Rendered as an `<h3>` with a generated id wired to the flyout's `aria-labelledby`.
-- `titleIcon` — EUI icon type for a decorative icon to the left of the title. Rendered without tooltip.
+- `titleIcon` — EUI icon type for a decorative rendered bside the title, after the title node. Rendered without a tooltip.
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`; defaults to the `info` icon type.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 
