@@ -57,7 +57,7 @@ export const setMetadataOperationSchema = metadataSchema
   .omit({ owner: true })
   .extend({ operation: z.literal('set_metadata') })
   .describe(
-    'Use `set_metadata` to name the rule and add a description or tags so the user can find and recognize it later.'
+    'Use `set_metadata` to name the rule and add a description or tags so the user can filter by it later.'
   );
 
 export const setKindOperationSchema = z

@@ -43,7 +43,6 @@ export const registerSkills = (
       agentBuilder.skills.register(create());
     } catch (e) {
       logger.error({
-        message: 'Failed to register agent builder skill',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
         labels: { skill_id: id },
         error: e,

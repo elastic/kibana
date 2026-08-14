@@ -5,7 +5,7 @@ exports[`schema_to_skill_docs generateActionPolicyOperationsDoc matches the revi
 
 #### \`operation: \\"set_metadata\\"\`
 
-Use \`set_metadata\` to name the action policy and add a description or tags so the user can find and recognize it later.
+Use \`set_metadata\` to name the action policy and add a description or tags so the user can filter by it later.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -196,7 +196,7 @@ exports[`schema_to_skill_docs generateRuleOperationsDoc matches the snapshot 1`]
 
 #### \`operation: \\"set_metadata\\"\`
 
-Use \`set_metadata\` to name the rule and add a description or tags so the user can find and recognize it later.
+Use \`set_metadata\` to name the rule and add a description or tags so the user can filter by it later.
 
 | Field | Type | Required | Description |
 |---|---|---|---|

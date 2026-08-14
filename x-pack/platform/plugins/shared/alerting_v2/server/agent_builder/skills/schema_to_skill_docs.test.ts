@@ -174,8 +174,14 @@ describe('schema_to_skill_docs', () => {
         }),
       ]);
 
-      expect(() => generateOperationsDoc({ title: 'Missing Describe', schema })).toThrow(
-        /missing \.describe\(\)/
+      expect(() =>
+        generateOperationsDoc({
+          title: 'Missing Describe',
+          schema,
+          operationsFile: 'manage_rule/operations.ts',
+        })
+      ).toThrow(
+        /Missing \.describe\(\) on operation variant\(s\): set_name.*manage_rule\/operations\.ts/
       );
     });
   });
@@ -387,6 +393,28 @@ describe('schema_to_skill_docs', () => {
     it('documents the inputs.payload Liquid access pattern', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('inputs.payload');
+    });
+  });
+
+  describe('Alerting v2 agent builder start contract', () => {
+    it.each([
+      ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
+      ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
+      ['manage_rule operation .describe()', generateRuleOperationsDoc],
+      ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
+      ['generateEnumTable (episode status)', generateEpisodeLifecycleDoc],
+      ['generateEnumTable (no-data strategy)', generateNoDataStrategyDoc],
+      ['generateEnumList (recovery strategy)', generateRecoveryStrategyDoc],
+      ['generateEnumList (grouping modes)', generateGroupingModesDoc],
+      ['generateEnumList (throttle strategies)', generateThrottleStrategiesDoc],
+      ['generateRuleKindDoc kindDescriptions', generateRuleKindDoc],
+      ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],
+      [
+        'generateActionPolicyWorkflowPayloadDoc workflow input definition',
+        generateActionPolicyWorkflowPayloadDoc,
+      ],
+    ] as const)('%s does not throw', (_label, generate) => {
+      expect(generate()).toEqual(expect.any(String));
     });
   });
 });

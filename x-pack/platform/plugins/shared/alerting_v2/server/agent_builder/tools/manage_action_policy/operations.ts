@@ -50,7 +50,7 @@ export const setMetadataOperationSchema = z
     tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
   })
   .describe(
-    'Use `set_metadata` to name the action policy and add a description or tags so the user can find and recognize it later.'
+    'Use `set_metadata` to name the action policy and add a description or tags so the user can filter by it later.'
   );
 
 export const setDestinationsOperationSchema = z

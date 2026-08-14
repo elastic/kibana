@@ -78,7 +78,10 @@ function zodToJsonSchema(schema: z.ZodType): unknown {
     return compactLargeEnums(jsonSchema);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    throw new SchemaTranslationError(`Failed to convert Zod schema to JSON Schema: ${message}`, e);
+    throw new SchemaTranslationError(
+      `Failed to convert Zod schema to JSON Schema: ${message}. Check the Zod schema passed to skill-doc generation.`,
+      e
+    );
   }
 }
 
@@ -285,6 +288,14 @@ export const generateRuleSchemaDoc = (): string =>
     },
   });
 
+function operationVariantName(variant: JsonSchemaNode): string {
+  const operation = (variant.properties as JsonSchemaNode | undefined)?.operation as
+    | JsonSchemaNode
+    | undefined;
+  const value = operation?.const ?? (operation?.enum as string[] | undefined)?.[0];
+  return typeof value === 'string' ? value : '(unnamed variant)';
+}
+
 /**
  * Generates markdown for a discriminated-union tool operations schema
  * (e.g. `manage_rule` / `manage_action_policy`).
@@ -292,18 +303,26 @@ export const generateRuleSchemaDoc = (): string =>
 export const generateOperationsDoc = ({
   title,
   schema,
+  operationsFile,
 }: {
   title: string;
   schema: z.ZodType;
+  operationsFile?: string;
 }): string => {
   const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
   const variants = (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined;
-  const missing = (variants ?? []).filter(
-    (variant) => typeof variant.description !== 'string' || variant.description.trim().length === 0
-  );
+  const missing = (variants ?? [])
+    .filter(
+      (variant) =>
+        typeof variant.description !== 'string' || variant.description.trim().length === 0
+    )
+    .map(operationVariantName);
   if (missing.length > 0) {
+    const where = operationsFile ? ` in ${operationsFile}` : '';
     throw new SchemaTranslationError(
-      `${title}: operation variant(s) missing .describe() — add one explaining the field being operated on`
+      `Missing .describe() on operation variant(s): ${missing.join(
+        ', '
+      )}. Add a top-level .describe() explaining the user goal to each listed variant${where} (${title}).`
     );
   }
 
@@ -317,6 +336,7 @@ export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Rule Operations Schema Reference',
     schema: ruleOperationSchema,
+    operationsFile: 'manage_rule/operations.ts',
   });
 
 export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
@@ -338,6 +358,42 @@ const getThrottleStrategyValues = (): string[] =>
   setThrottleOperationSchema.shape.strategy.unwrap().options;
 
 /**
+ * Throws if a hardcoded descriptions map is missing or extra keys vs schema values.
+ */
+const assertDescriptionsMatchSchema = ({
+  schemaValues,
+  descriptions,
+  schemaName,
+  location,
+}: {
+  schemaValues: readonly string[];
+  descriptions: Record<string, unknown>;
+  schemaName: string;
+  location: string;
+}): void => {
+  const descKeys = new Set(Object.keys(descriptions));
+  const missing = schemaValues.filter((v) => !descKeys.has(v));
+  const extra = [...descKeys].filter((k) => !schemaValues.includes(k));
+
+  if (missing.length === 0 && extra.length === 0) {
+    return;
+  }
+
+  const parts: string[] = [];
+  if (missing.length > 0) {
+    parts.push(`missing value(s): ${missing.join(', ')}`);
+  }
+  if (extra.length > 0) {
+    parts.push(`extra key(s) not in schema: ${extra.join(', ')}`);
+  }
+  throw new SchemaTranslationError(
+    `${schemaName} skill-doc descriptions are out of sync (${parts.join(
+      '; '
+    )}). Update the descriptions map in ${location}.`
+  );
+};
+
+/**
  * Builds a markdown table from a schema's values and a descriptions map. Throws
  * if the descriptions map is out of sync with the schema (missing or extra keys).
  */
@@ -346,26 +402,15 @@ const generateEnumTable = ({
   schemaValues,
   descriptions,
   schemaName,
+  location,
 }: {
   header: [string, string];
   schemaValues: readonly string[];
   descriptions: Record<string, string>;
   schemaName: string;
+  location: string;
 }): string => {
-  const descKeys = new Set(Object.keys(descriptions));
-  const schemaKeys = new Set(schemaValues);
-
-  const missing = schemaValues.filter((v) => !descKeys.has(v));
-  const extra = [...descKeys].filter((k) => !schemaKeys.has(k));
-
-  if (missing.length > 0 || extra.length > 0) {
-    const parts: string[] = [];
-    if (missing.length > 0) parts.push(`missing descriptions for: ${missing.join(', ')}`);
-    if (extra.length > 0) parts.push(`extra descriptions not in schema: ${extra.join(', ')}`);
-    throw new SchemaTranslationError(
-      `${schemaName} descriptions out of sync with schema — ${parts.join('; ')}`
-    );
-  }
+  assertDescriptionsMatchSchema({ schemaValues, descriptions, schemaName, location });
 
   const rows = schemaValues.map((v) => `| \`${v}\` | ${descriptions[v]} |`);
   return [`| ${header[0]} | ${header[1]} |`, '|---|---|', ...rows].join('\n');
@@ -379,25 +424,14 @@ const generateEnumList = ({
   schemaValues,
   descriptions,
   schemaName,
+  location,
 }: {
   schemaValues: readonly string[];
   descriptions: Record<string, string>;
   schemaName: string;
+  location: string;
 }): string => {
-  const descKeys = new Set(Object.keys(descriptions));
-  const schemaKeys = new Set(schemaValues);
-
-  const missing = schemaValues.filter((v) => !descKeys.has(v));
-  const extra = [...descKeys].filter((k) => !schemaKeys.has(k));
-
-  if (missing.length > 0 || extra.length > 0) {
-    const parts: string[] = [];
-    if (missing.length > 0) parts.push(`missing descriptions for: ${missing.join(', ')}`);
-    if (extra.length > 0) parts.push(`extra descriptions not in schema: ${extra.join(', ')}`);
-    throw new SchemaTranslationError(
-      `${schemaName} descriptions out of sync with schema — ${parts.join('; ')}`
-    );
-  }
+  assertDescriptionsMatchSchema({ schemaValues, descriptions, schemaName, location });
 
   return schemaValues.map((v) => `- \`${v}\`: ${descriptions[v]}`).join('\n');
 };
@@ -461,14 +495,12 @@ export const generateRuleKindDoc = (): string => {
     ],
   };
 
-  const missing = kinds.filter((k) => !kindDescriptions[k]);
-  if (missing.length > 0) {
-    throw new SchemaTranslationError(
-      `setKindOperationSchema descriptions out of sync — missing descriptions for: ${missing.join(
-        ', '
-      )}`
-    );
-  }
+  assertDescriptionsMatchSchema({
+    schemaValues: kinds,
+    descriptions: kindDescriptions,
+    schemaName: 'setKindOperationSchema',
+    location: 'generateRuleKindDoc',
+  });
 
   return [
     '## Rule Kind: Alert vs Signal',
@@ -493,7 +525,7 @@ export const generateStateTransitionDoc = (): string => {
     const description = prop?.description as string | undefined;
     if (!description) {
       throw new SchemaTranslationError(
-        `setStateTransitionOperationSchema field \`${f}\` is missing a .describe() — add one to the Zod schema`
+        `Missing .describe() on set_state_transition field "${f}". Add .describe() to that field on setStateTransitionOperationSchema in manage_rule/operations.ts.`
       );
     }
     return `- \`${f}\` — ${description}`;
@@ -522,6 +554,7 @@ export const generateEpisodeLifecycleDoc = (): string => {
       recovering: 'Breach stopped but not yet fully recovered',
     },
     schemaName: 'ALERT_EPISODE_STATUS',
+    location: 'generateEpisodeLifecycleDoc',
   });
 
   return [
@@ -572,6 +605,7 @@ export const generateNoDataStrategyDoc = (): string => {
       none: 'No-data situations are ignored (default).',
     },
     schemaName: 'setQueryOperationSchema.no_data_strategy',
+    location: 'generateNoDataStrategyDoc',
   });
 
   return [
@@ -599,6 +633,7 @@ export const generateRecoveryStrategyDoc = (): string => {
       none: 'disables recovery entirely.',
     },
     schemaName: 'setQueryOperationSchema.recovery_strategy',
+    location: 'generateRecoveryStrategyDoc',
   });
 
   return [
@@ -628,6 +663,7 @@ export const generateGroupingModesDoc = (): string => {
       per_field: 'group by specified `groupBy` fields.',
     },
     schemaName: 'setGroupingOperationSchema.groupingMode',
+    location: 'generateGroupingModesDoc',
   });
 
   return ['### Grouping Modes', list].join('\n');
@@ -645,6 +681,7 @@ export const generateThrottleStrategiesDoc = (): string => {
       every_time: 'notify on every evaluation cycle (high volume).',
     },
     schemaName: 'setThrottleOperationSchema.strategy',
+    location: 'generateThrottleStrategiesDoc',
   });
 
   return ['### Throttle Strategies', list].join('\n');
@@ -666,6 +703,7 @@ export const generateActionPolicyOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Action Policy Operations Schema Reference',
     schema: actionPolicyOperationSchema,
+    operationsFile: 'manage_action_policy/operations.ts',
   });
 
 /**
@@ -681,7 +719,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
   if (!jsonSchema) {
     throw new SchemaTranslationError(
-      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}"`
+      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}" required by generateActionPolicyWorkflowPayloadDoc.`
     );
   }
 

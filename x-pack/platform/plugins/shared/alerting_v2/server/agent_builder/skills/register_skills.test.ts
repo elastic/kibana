@@ -93,7 +93,6 @@ describe('registerSkills', () => {
 
     expect(agentBuilder.skills.register).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenCalledWith({
-      message: 'Failed to register agent builder skill',
       code: ALERTING_LOG_CODES.AGENT_BUILDER_SKILL_REGISTER_FAILED,
       labels: { skill_id: ACTION_POLICY_MANAGEMENT_SKILL_ID },
       error: expect.any(Error),
