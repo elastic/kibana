@@ -7,7 +7,6 @@
 
 import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import { CUSTOM_CONTENT_SCRIPT_PATTERN, stripMarkdownFences } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
@@ -34,29 +33,10 @@ export function injectStyleTag(html: string, style: string): string {
   return styleTag + html;
 }
 
-export function prepareHtml(html: string, colorMode?: EuiThemeColorModeStandard): string {
-  return injectCsp(sanitizeHtml(stripMarkdownFences(html)), colorMode);
-}
-
 export function sanitizeHtml(html: string): string {
   return DOMPurify.sanitize(html, {
     FORBID_TAGS: ['a'],
     WHOLE_DOCUMENT: true,
     FORCE_BODY: false,
   }) as string;
-}
-
-// The rendering iframe is scripting-disabled and sanitizeHtml() strips <script> tags outright,
-// so a template relying on one wouldn't error — it would just silently render blank. Catching it
-// here, before that silent stripping, turns it into a clear error instead.
-export function containsScript(template: string): boolean {
-  return CUSTOM_CONTENT_SCRIPT_PATTERN.test(template);
-}
-
-// LLMs can return plain text, markdown, or empty strings — any of which would render blank.
-// Require at least one HTML tag so the retry path kicks in for those non-renderable outputs.
-const HTML_TAG_PATTERN = /<[a-zA-Z]/;
-
-export function isValidTemplate(template: string): boolean {
-  return HTML_TAG_PATTERN.test(template);
 }

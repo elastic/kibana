@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  containsScript,
-  injectCsp,
-  injectStyleTag,
-  sanitizeHtml,
-  isValidTemplate,
-} from './prepare_html';
+import { injectCsp, injectStyleTag, sanitizeHtml } from './prepare_html';
 
 describe('injectStyleTag', () => {
   it('injects a <style> tag after <head>', () => {
@@ -46,32 +40,6 @@ describe('injectCsp', () => {
     const once = injectCsp('<p>hello</p>');
     const twice = injectCsp(once);
     expect(twice.split('Content-Security-Policy').length).toBe(2);
-  });
-});
-
-describe('containsScript', () => {
-  it('detects a script tag regardless of case or attributes', () => {
-    expect(containsScript('<div></div><script>doStuff()</script>')).toBe(true);
-    expect(containsScript('<SCRIPT type="application/json">{}</SCRIPT>')).toBe(true);
-    expect(containsScript('<script/>')).toBe(true);
-  });
-
-  it('returns false for markup with no script tag', () => {
-    expect(containsScript('<div class="script-like">no actual script here</div>')).toBe(false);
-  });
-});
-
-describe('isValidTemplate', () => {
-  it('returns true for strings containing an HTML tag', () => {
-    expect(isValidTemplate('<div>hello</div>')).toBe(true);
-    expect(isValidTemplate('{% for row in rows %}<p>{{ row["x"].value }}</p>{% endfor %}')).toBe(
-      true
-    );
-  });
-
-  it('returns false for plain text with no HTML tag', () => {
-    expect(isValidTemplate('just some text')).toBe(false);
-    expect(isValidTemplate('')).toBe(false);
   });
 });
 
