@@ -26,8 +26,8 @@ export const ONBOARDING_STEPS: OnboardingStepConfig[] = [
   },
   {
     id: 'deploy-settings',
-    title: i18n.translate('xpack.ingestHub.onboarding.steps.connect.title', {
-      defaultMessage: 'Deploy Settings & Auth',
+    title: i18n.translate('xpack.ingestHub.onboarding.steps.deploySettings.title', {
+      defaultMessage: 'Authenticate & Deploy',
     }),
   },
   {
