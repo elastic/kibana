@@ -28,6 +28,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
+
 import { useTransformCapabilities } from '../../../../hooks';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import type { TransformId } from '../../../../../../common/types/transform';
@@ -134,28 +136,7 @@ export const useColumns = (
   const { canStartStopTransform } = useTransformCapabilities();
   const { cps } = useAppDependencies();
   const cpsManager = cps?.cpsManager;
-  const [hasLinkedProjects, setHasLinkedProjects] = React.useState(
-    () => cpsManager?.hasLinkedProjects() ?? false
-  );
-
-  React.useEffect(() => {
-    let isMounted = true;
-    setHasLinkedProjects(cpsManager?.hasLinkedProjects() ?? false);
-
-    if (!cpsManager) {
-      return;
-    }
-
-    cpsManager.whenReady().then(() => {
-      if (isMounted) {
-        setHasLinkedProjects(cpsManager.hasLinkedProjects());
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [cpsManager]);
+  const hasLinkedProjects = useIsCpsMultiProject(cpsManager);
 
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
