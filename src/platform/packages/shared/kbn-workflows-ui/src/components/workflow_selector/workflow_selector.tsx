@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 
 import type { ReactElement } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import * as i18n from './translations';
@@ -66,9 +66,6 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
-  const [scrollToIndex, setScrollToIndex] = useState<number | undefined>(undefined);
-  // Ref used to scroll the non-virtualized list to the selected item after search is cleared.
-  const listContainerRef = useRef<HTMLDivElement>(null);
   const { application } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
@@ -225,10 +222,6 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
           setInputValue(changedOption.name);
           setIsSearching(false);
         } else {
-          // Scroll to the selected item in the full list so it stays in view
-          // after the search is cleared.
-          const idx = workflowOptions.findIndex((w) => w.id === changedOption.id);
-          setScrollToIndex(idx >= 0 ? idx : undefined);
           setInputValue('');
           setIsSearching(true);
         }
@@ -236,10 +229,9 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
         onWorkflowChange('');
         setInputValue('');
         setIsSearching(true);
-        setScrollToIndex(undefined);
       }
     },
-    [finalConfig.showSelectedInSearch, onWorkflowChange, workflowOptions]
+    [finalConfig.showSelectedInSearch, onWorkflowChange]
   );
 
   const handlePopoverClose = useCallback(() => {
@@ -285,18 +277,6 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     }
   }, [selectedWorkflowId, workflowOptions, finalConfig.showSelectedInSearch]);
 
-  // After clearing a search-driven filter, scroll the list to the newly-selected item so it
-  // stays in view. Requires isVirtualized=false so all option nodes are in the DOM.
-  useEffect(() => {
-    if (scrollToIndex === undefined || !listContainerRef.current) return;
-    const options = listContainerRef.current.querySelectorAll<HTMLElement>('[role="option"]');
-    const target = options[scrollToIndex];
-    if (target) {
-      target.scrollIntoView({ block: 'nearest', behavior: 'instant' });
-    }
-    setScrollToIndex(undefined);
-  }, [scrollToIndex]);
-
   // Prioritize selected workflow disabled error over validation errors
   const displayError = selectedWorkflowDisabledError || error;
   const helpText = fetchError
@@ -310,7 +290,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       return (
         <>
           {search}
-          <div ref={listContainerRef}>{list}</div>
+          <div>{list}</div>
           {workflowOptions.length > 0 && !finalConfig.hideViewWorkflowLink && (
             <EuiPanel
               paddingSize="s"
@@ -427,9 +407,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
             <WorkflowSelectorEmptyState createWorkflowHref={workflowManagementLinkProps.href} />
           }
           listProps={{
-            // Non-virtualized so all option nodes are in the DOM — required for scrollIntoView
-            // after a search-then-select to work correctly.
-            isVirtualized: false,
+            rowHeight: ROW_HEIGHT, // Increased height to accommodate secondary content and tags
             showIcons: false,
             css: {
               // Hide the badge when the option is focused
