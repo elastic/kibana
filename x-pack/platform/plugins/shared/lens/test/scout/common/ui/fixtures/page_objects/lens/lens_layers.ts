@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 
 /**
@@ -68,7 +68,7 @@ export class LensLayers {
       throw new Error(`Layer tab not found at index ${index}`);
     }
 
-    await this.activateTab(tab, index);
+    await this.activateTab(index);
   }
 
   /**
@@ -89,13 +89,26 @@ export class LensLayers {
     if ((await tab.getAttribute('aria-selected')) === 'true') {
       return;
     }
-    await this.activateTab(tab, index);
+    await this.activateTab(index);
   }
 
-  private async activateTab(tab: Locator, index: number) {
-    // Pointer clicks can land on the delete action that overlays the tab while it is focused.
-    // Keyboard activation targets the tab itself and avoids opening the confirmation modal.
-    await tab.press('Enter');
+  private async activateTab(index: number) {
+    // Pointer clicks can land on the delete action that overlays the selected tab.
+    // Unified Tabs activates adjacent tabs with arrow keys without touching overlay actions.
+    const tabs = await this.layerTabsLocator.all();
+    const selectedStates = await Promise.all(
+      tabs.map((candidate) => candidate.getAttribute('aria-selected'))
+    );
+    const selectedIndex = selectedStates.findIndex((selected) => selected === 'true');
+    if (selectedIndex < 0) {
+      throw new Error('Selected layer tab not found');
+    }
+
+    await tabs[selectedIndex]?.focus();
+    const direction = index > selectedIndex ? 'ArrowRight' : 'ArrowLeft';
+    for (let step = 0; step < Math.abs(index - selectedIndex); step++) {
+      await this.page.keyboard.press(direction);
+    }
     await this.page.testSubj.locator(`lns-layerPanel-${index}`).waitFor({ state: 'visible' });
   }
 
