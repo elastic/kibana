@@ -216,8 +216,6 @@ export async function openXyVisWithTermsSplit(
   await visualize.openSavedVisualization(LENS_BASIC_TITLES.XY_VIS, { waitFor: 'lens' });
   await lens.waitForVisualization(XY_CHART);
 
-  // Saved `lnsXYvis` ships split by `ip`. Reconfigure the existing terms dimension
-  // (FTR group4) rather than remove-and-readd, which can leave the split slot empty.
   await lens.configureDimension({
     dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
     operation: 'terms',

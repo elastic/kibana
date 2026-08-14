@@ -106,10 +106,9 @@ spaceTest.describe('Lens dashboard chart filters', { tag: '@local-stateful-class
   spaceTest(
     'carries pinned dashboard filters into a new Lens panel, but not unpinned ones',
     async ({ pageObjects }) => {
-      const { dashboard, datePicker, filterBar } = pageObjects;
+      const { dashboard, filterBar } = pageObjects;
 
       await dashboard.openNewDashboard();
-      await datePicker.setAbsoluteRange(testData.LOGSTASH_IN_RANGE_DATES);
 
       // Add a panel to populate data views before filters can be added.
       await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.PIE_VIS);

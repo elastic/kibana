@@ -88,6 +88,7 @@ spaceTest.describe(
 
         await spaceTest.step('the drilldown survives a save and reload', async () => {
           await dashboard.saveDashboard(dashboardTitle);
+          await expect(dashboard.getAppTitle()).toContainText(dashboardTitle);
           await dashboard.goto();
           await dashboard.clickDashboardTitleLink(dashboardTitle);
           await dashboard.waitForRenderComplete();

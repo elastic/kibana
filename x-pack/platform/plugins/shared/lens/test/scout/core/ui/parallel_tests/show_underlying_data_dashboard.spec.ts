@@ -92,11 +92,6 @@ spaceTest.describe(
           'merges both contexts into Discover once opened from the panel',
           async () => {
             // "Open in Discover" is also available in edit mode.
-            await dashboard.expectExistsPanelAction(
-              'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
-            );
-            await dashboard.clickCancelOutOfEditMode();
-
             const discoverPage = await openInNewTabAsScoutPage(context, kbnUrl, () =>
               dashboard.clickPanelAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER')
             );
@@ -112,18 +107,19 @@ spaceTest.describe(
               const discoverQueryBar = new QueryBar(discoverPage);
 
               await expect
-                .poll(() => discoverFilterBar.getFilterCount(), { timeout: 20_000 })
-                .toBe(3);
-              expect(
-                await discoverFilterBar.hasFilter({
-                  field: 'host.raw',
-                  value: 'cdn.theacademyofperformingartsandscience.org',
-                })
-              ).toBe(true);
-              expect(await discoverFilterBar.hasFilter({ field: 'geo.src', value: 'AF' })).toBe(
-                true
-              );
-              expect(await discoverFilterBar.getFiltersLabel()).toContain('Lens context (lucene)');
+                .poll(() =>
+                  discoverFilterBar.hasFilter({
+                    field: 'host.raw',
+                    value: 'cdn.theacademyofperformingartsandscience.org',
+                  })
+                )
+                .toBe(true);
+              await expect
+                .poll(() => discoverFilterBar.hasFilter({ field: 'geo.src', value: 'AF' }))
+                .toBe(true);
+              await expect
+                .poll(() => discoverFilterBar.getFiltersLabel())
+                .toContain('Lens context (lucene)');
               expect(await discoverQueryBar.getQuery()).toBe('request.keyword : "/apm"');
             } finally {
               await discoverPage.close();

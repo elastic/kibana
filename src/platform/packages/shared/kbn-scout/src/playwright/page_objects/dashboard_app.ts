@@ -341,6 +341,10 @@ export class DashboardApp {
 
   async clickQuickSave() {
     await this.clickAppMenuItem('dashboardQuickSaveMenuItem');
+    // Save is async; disabled control means the dashboard finished persisting.
+    await this.page
+      .locator('[data-test-subj="dashboardQuickSaveMenuItem"][disabled]')
+      .waitFor({ state: 'visible' });
   }
 
   async clearUnsavedChanges() {
@@ -1153,8 +1157,10 @@ export class DashboardApp {
     const actionInMenu = this.page.testSubj.locator(actionTestSubj);
     const count = await actionInMenu.count();
 
-    // Close menu by pressing Escape
     await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('embeddablePanelContextMenuOpen').waitFor({
+      state: 'hidden',
+    });
     return count > 0;
   }
 

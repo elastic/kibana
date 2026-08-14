@@ -51,7 +51,8 @@ export class QueryBar {
     const menuPanel = this.page.testSubj.locator('queryBarMenuPanel');
     await menuToggle.click();
     await menuPanel.waitFor({ state: 'visible' });
-    await this.page.testSubj.click('switchQueryLanguageButton');
+    // EUI context menu remounts while Playwright waits for stability.
+    await this.page.testSubj.locator('switchQueryLanguageButton').dispatchEvent('click');
     const languageItem = this.page.testSubj.locator(`${language}LanguageMenuItem`);
     await languageItem.waitFor({ state: 'visible' });
     await languageItem.click();
