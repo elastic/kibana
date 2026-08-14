@@ -290,17 +290,8 @@ export const useEsqlConversionCheck = (
       );
     }
 
-    const nonConvertibleDataLayer = convertibleLayers.find(
-      (layer) => layer.type === layerTypes.DATA && !layer.isConvertibleToEsql
-    );
-    if (nonConvertibleDataLayer) {
-      return getEsqlConversionDisabledSettings(
-        esqlConversionFailureReasonMessages[nonConvertibleDataLayer.failureReason ?? 'unknown']
-      );
-    }
-
     // Trendline is auto-included in the conversion but not shown in the modal.
-    // Non-data helper layers (reference lines/annotations) remain in their original datasource.
+    // Unsupported data and non-data layers remain in their original datasource.
     const convertibleDataLayers = convertibleLayers.filter(
       (layer) => layer.type === layerTypes.DATA && layer.isConvertibleToEsql
     );
