@@ -105,6 +105,7 @@ export function ServiceIconBadge({
       aria-labelledby={popoverTitleId}
       anchorPosition="downCenter"
       ownFocus={false}
+      data-test-subj={iconKey}
       button={
         <EuiToolTip content={title} disableScreenReaderOutput>
           <EuiBadge

@@ -19,7 +19,7 @@ export class TransactionsOverviewPage {
       { timeout: EXTENDED_TIMEOUT }
     );
     await this.page
-      .getByTestId('apmMainTemplateHeaderServiceName')
+      .getByTestId('appHeaderTitle')
       .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 

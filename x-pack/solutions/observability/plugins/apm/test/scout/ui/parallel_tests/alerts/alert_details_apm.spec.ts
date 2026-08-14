@@ -64,7 +64,7 @@ function createExploreInApmTest(alertIndex: string) {
 
       await expect(async () => {
         expect(page.url()).toContain(`/apm/services/${SERVICE_NAME}/overview`);
-        await expect(page.testSubj.locator('apmMainTemplateHeaderServiceName')).toHaveText(
+        await expect(page.testSubj.locator('appHeaderTitle')).toHaveText(
           SERVICE_NAME
         );
       }).toPass({ timeout: 60_000, intervals: [2_000] });

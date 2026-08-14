@@ -47,7 +47,7 @@ test.describe(
 
     test('Renders the page with expected content', async ({ page }) => {
       await test.step('Renders headings', async () => {
-        await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
+        await expect(page.getByTestId('appHeaderTitle')).toHaveText(
           testData.SERVICE_OPBEANS_JAVA
         );
         await expect(
