@@ -9,6 +9,8 @@ import React, { type ReactNode } from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
+import type { EditAction } from '../../transform_management/components/action_edit';
+
 import { getTransformConfigMock } from '../state_management/__mocks__/transform_config';
 
 import { EditTransformFlyout } from './edit_transform_flyout';
@@ -54,6 +56,7 @@ jest.mock(
 
 describe('EditTransformFlyout', () => {
   const defaultProps = {
+    action: {} as EditAction['action'],
     closeFlyout: jest.fn(),
     config: getTransformConfigMock(),
     dataViewId: 'data-view-id',
