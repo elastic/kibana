@@ -68,6 +68,9 @@ describe('generateAllComputedFeatures', () => {
       codeAnalysisGenerator,
     ].forEach((generator) => jest.spyOn(generator, 'generate').mockResolvedValue(undefined));
 
-    await expect(generateAllComputedFeatures(options)).resolves.toEqual({ features: [], errors: [] });
+    await expect(generateAllComputedFeatures(options)).resolves.toEqual({
+      features: [],
+      errors: [],
+    });
   });
 });
