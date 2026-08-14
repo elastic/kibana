@@ -24,6 +24,16 @@ const FIRST_CARD_DESC = `${
   ALPHABETICALLY_SORTED_METRICS[ALPHABETICALLY_SORTED_METRICS.length - 1].name
 }-0`;
 
+/**
+ * Returns the decoded `_p` (profile state) segment of a Discover URL, or an empty string when the
+ * URL carries none. Scoping to `_p` keeps the sort assertions from matching any other part of the
+ * URL, and the rison payload may be percent-encoded, so it is decoded before matching.
+ */
+const getSortState = (url: string): string => {
+  const [, profileState] = url.match(/_p=([^&]*)/) ?? [];
+  return profileState ? decodeURIComponent(profileState) : '';
+};
+
 spaceTest.describe(
   'Metrics in Discover - Sorting',
   {
@@ -122,6 +132,55 @@ spaceTest.describe(
         // The grid only mounts once the post-reload metrics fetch resolves, and a cold
         // Discover re-init plus that fetch regularly exceeds the default 10s on serverless CI
         // (matching `waitForDiscoverPage`'s own 30s allowance for the same reason).
+        await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+    });
+
+    spaceTest('reflects a non-default sort in the URL', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await spaceTest.step('a fresh session carries no sort in the URL', async () => {
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+        expect(getSortState(page.url())).not.toContain('sortDirection');
+      });
+
+      await spaceTest.step('changing the sort writes it to the URL', async () => {
+        await metricsExperience.setSortDirection('desc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+        // The URL is written through `kbnUrlControls`, which batches asynchronously and so is
+        // not settled by the time the grid has re-rendered.
+        await expect.poll(() => getSortState(page.url())).toContain('sortDirection:desc');
+      });
+
+      await spaceTest.step('restoring the default sort strips it from the URL', async () => {
+        await metricsExperience.setSortDirection('asc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+        await expect.poll(() => getSortState(page.url())).not.toContain('sortDirection');
+      });
+    });
+
+    spaceTest('applies a sort supplied by the URL', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await metricsExperience.setSortDirection('desc');
+      await expect.poll(() => getSortState(page.url())).toContain('sortDirection:desc');
+      const descendingUrl = page.url();
+
+      await spaceTest.step('return the locally persisted sort to the default', async () => {
+        // Locally persisted state must disagree with the URL, otherwise a passing assertion
+        // below could be explained by local tab storage rather than by the URL.
+        await metricsExperience.setSortDirection('asc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+        await expect.poll(() => getSortState(page.url())).not.toContain('sortDirection');
+      });
+
+      await spaceTest.step('opening the captured URL applies its sort', async () => {
+        await page.goto(descendingUrl);
+        // See the reload test above for why a cold Discover re-init needs the longer timeout.
         await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
       });
