@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  checkForTripleQuotesAndEsqlQuery,
-  findRequestLineNumber,
-  getFallbackRequestStartPosition,
-  isInsideTripleQuotedJsonValue,
-  isRequestLineWithUrl,
-  unescapeInvalidChars,
-} from './autocomplete';
+/**
+ * This function unescapes chars that are invalid in a Console string.
+ */
+export const unescapeInvalidChars = (str: string): string => {
+  return str.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+};
