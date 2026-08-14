@@ -305,24 +305,6 @@ describe('ConversationClient timeline events', () => {
       expect(started.execution_id).toBe(completed.execution_id);
     });
 
-    it('emits prompt_requested as the terminal event when the round awaits a prompt', async () => {
-      await client.appendRoundTimelineEvents(
-        conversation,
-        round({ status: ConversationRoundStatus.awaitingPrompt, pending_prompts: [] }),
-        { resumed: false }
-      );
-
-      const events = appendedEvents();
-      expect(events[events.length - 1].type).toBe(TimelineEventType.promptRequested);
-    });
-
-    it('emits only the terminal event for a resumed round', async () => {
-      await client.appendRoundTimelineEvents(conversation, round(), { resumed: true });
-
-      const events = appendedEvents();
-      expect(events.map((e) => e.type)).toEqual([TimelineEventType.executionCompleted]);
-    });
-
     it('is best-effort: a failed append is swallowed, not thrown', async () => {
       esClient.update.mockRejectedValueOnce(new Error('es down'));
       await expect(

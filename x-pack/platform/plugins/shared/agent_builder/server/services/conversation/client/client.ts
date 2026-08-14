@@ -428,53 +428,43 @@ class ConversationClientImpl implements ConversationClient {
     round: ConversationRound,
     options: { resumed: boolean }
   ): Promise<void> {
-    const executionId = uuidv4();
-    const agent = agentActor(conversation);
-    const events: TimelineEventInput[] = [];
-
-    let triggerEventId: string | undefined;
-
-    if (!options.resumed) {
-      triggerEventId = uuidv4();
-      events.push({
-        id: triggerEventId,
-        created_at: round.started_at,
-        actor: userMessageActor(conversation, round),
-        type: TimelineEventType.userMessage,
-        data: userMessageData(round),
-      });
-      events.push({
-        created_at: round.started_at,
-        actor: agent,
-        execution_id: executionId,
-        trigger_event_id: triggerEventId,
-        type: TimelineEventType.executionStarted,
-        data: { trigger_type: TimelineTriggerType.userMessage },
-      });
-    }
-
-    const terminal = {
-      created_at: new Date().toISOString(),
-      actor: agent,
-      execution_id: executionId,
-      ...(triggerEventId ? { trigger_event_id: triggerEventId } : {}),
-    };
-
-    if (round.status === ConversationRoundStatus.awaitingPrompt) {
-      events.push({
-        ...terminal,
-        type: TimelineEventType.promptRequested,
-        data: { prompts: round.pending_prompts ?? [] },
-      });
-    } else {
-      events.push({
-        ...terminal,
-        type: TimelineEventType.executionCompleted,
-        data: executionCompletedData(round),
-      });
+    // Only a fresh, completed round produces timeline events for now. Resumed rounds and
+    // paused (awaiting_prompt) rounds are HITL and land in a follow-up.
+    if (options.resumed || round.status !== ConversationRoundStatus.completed) {
+      return;
     }
 
     try {
+      const executionId = uuidv4();
+      const userMessageId = uuidv4();
+      const agent = agentActor(conversation);
+
+      const events: TimelineEventInput[] = [
+        {
+          id: userMessageId,
+          created_at: round.started_at,
+          actor: userMessageActor(conversation, round),
+          type: TimelineEventType.userMessage,
+          data: userMessageData(round),
+        },
+        {
+          created_at: round.started_at,
+          actor: agent,
+          execution_id: executionId,
+          trigger_event_id: userMessageId,
+          type: TimelineEventType.executionStarted,
+          data: { trigger_type: TimelineTriggerType.userMessage },
+        },
+        {
+          created_at: new Date().toISOString(),
+          actor: agent,
+          execution_id: executionId,
+          trigger_event_id: userMessageId,
+          type: TimelineEventType.executionCompleted,
+          data: executionCompletedData(round),
+        },
+      ];
+
       await this.appendEvents(conversation.id, events);
     } catch (error) {
       this.logger.warn(
