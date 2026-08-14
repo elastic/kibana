@@ -320,26 +320,19 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const misconfigurationsFlyout = createFlyoutObject('rightSection');
 
-  // Display label for the "no grouping" option — mirrors the i18n defaultMessage in
-  // @kbn/grouping/src/components/translations.ts (grouping.noneGroupByOptionName).
-  const NO_GROUPING_LABEL = 'None';
-
   const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {
       return await testSubjects.find(testSubj);
     },
-    async setValue(
-      value: string,
-      { expectsGrouping = value !== NO_GROUPING_LABEL }: { expectsGrouping?: boolean } = {}
-    ) {
+    async setValue(value: string) {
       const contextMenu = await testSubjects.find('groupByContextMenu');
       const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
       const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
       const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
       await menuItems[menuItemValueIndex].click();
       await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
-      // "None" renders a flat table, not accordion rows — skip the accordion wait.
-      if (expectsGrouping) {
+      // 'None' renders a flat table, not accordion rows — skip the accordion wait.
+      if (value !== 'None') {
         await testSubjects.existOrFail('grouping-accordion', { timeout: 5000 });
       }
     },
