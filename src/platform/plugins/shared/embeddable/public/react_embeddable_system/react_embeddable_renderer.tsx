@@ -100,9 +100,9 @@ export const EmbeddableRenderer = <
       });
     }
 
-    loadValue().catch((error) => {
+    loadValue().catch((loadError) => {
       if (!canceled) {
-        setError(error);
+        setError(loadError);
       }
     });
 
@@ -112,6 +112,7 @@ export const EmbeddableRenderer = <
 
     // Ancestry chain is expected to use 'key' attribute to reset DOM and state
     // when unwrappedComponent needs to be re-loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type]);
 
   useEffect(() => {
