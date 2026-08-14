@@ -203,8 +203,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       name: 'GroupBy Policy',
       description: 'Groups by host.name',
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      groupBy: ['data.host.name'],
-      groupingMode: 'per_field',
+      group_by: ['data.host.name'],
+      grouping_mode: 'per_field',
     });
 
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_GROUPBY_ID);
@@ -242,7 +242,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
       throttle: null,
-      groupingMode: 'per_episode',
+      grouping_mode: 'per_episode',
     });
 
     await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_ID);
@@ -1047,7 +1047,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'groups episodes by the specified data fields when the action policy has groupBy fields',
+    'groups episodes by the specified data fields when the action policy has group_by fields',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_ID);
       await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_GROUPBY_ID);
@@ -1056,7 +1056,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       });
 
       // 4 episodes across 4 series, but grouped into 2 hosts. With
-      // `groupBy: ['data.host.name']`, the dispatcher should produce 2 action
+      // `group_by: ['data.host.name']`, the dispatcher should produce 2 action
       // groups (one notified per host).
       await apiServices.alertingV2.ruleEvents.seed([
         buildAlertEvent({
@@ -1307,7 +1307,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     'throttle strategies / all + time_interval digest groups all episodes and stays throttled on subsequent dispatches',
     async ({ apiServices }) => {
       await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
-        groupingMode: 'all',
+        grouping_mode: 'all',
         throttle: { strategy: 'time_interval', interval: '1h' },
       });
 
