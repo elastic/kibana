@@ -8,19 +8,23 @@
  */
 
 /*
- * Narrowed list of likely-duplicate Flaky Test Fixer PRs, for the fixer/verifier agent.
+ * Same-team shortlist of Flaky Test Fixer PRs, for the fixer/verifier agent.
  *
  * The fixer opens one PR per `failed-test` issue, but many issues share a single root cause
  * (the same page-object method or spec), so it opens several PRs touching the same code —
  * usually within minutes, by parallel runs, before any sibling PR exists. Rather than hand
- * the agent every open fixer PR (hundreds), this shortlists the ones whose title looks like
- * it targets the same test/method as the target, plus any sharing its linked issue, so the
- * agent has a short, relevant set to confirm against the diffs. Matching the changed files
- * is left to the agent, which already has its own diff. Titles are the signal because fixer
- * PR titles are derived from the test being fixed, so siblings share distinctive tokens
- * (measured ~98% recall on the known duplicate groups). The verifier — which runs per PR,
- * comparing PR title to PR title — is the reliable chokepoint; the fixer's issue-titled
- * target is best-effort, with the verifier as backstop for anything it misses.
+ * the agent every open fixer PR (hundreds), this shortlists the ones whose `failed-test`
+ * issue is owned by the same team as the target, so the agent has a short, relevant set to
+ * confirm against the diffs.
+ *
+ * Team is the signal because the fixer PRs themselves carry no `Team:` label, but the
+ * `failed-test` issues they close reliably do (the reporter labels them from CODEOWNERS).
+ * Two fixes for the same root cause touch the same file, which has one owning team, so their
+ * issues share a `Team:` label — regardless of how the PR titles are worded. We read the
+ * target's team from its issue, then find the team's `failed-test` issues in one search and
+ * intersect with the linked-issue numbers we already parse from each PR — no per-issue fetch.
+ * Matching the changed files (same method vs merely same file/team) is left to the agent,
+ * which already has its own diff.
  */
 
 const fs = require('fs');
@@ -29,53 +33,14 @@ const path = require('path');
 const OWNER = 'elastic';
 const REPO = 'kibana';
 const FIXER_LABEL = 'flaky-test-fixer';
+const FAILED_TEST_LABEL = 'failed-test';
 // A merged fix means the root cause already landed; older merges aren't in flight.
 const MERGED_LOOKBACK_DAYS = 30;
-// Shortlist rules: enough shared meaningful title tokens, or one shared token rare enough
-// across all fixer PRs to stand alone (a distinctive component/method name, e.g. `editform`).
-const MIN_SHARED_TOKENS = 2;
-const RARE_DF = 3;
-
-// Generic fix/flaky vocabulary and stopwords carry no root-cause signal, so they never seed
-// a match — only the test/method/component words that distinguish one fix from another do.
-const STOP = new Set(
-  (
-    'the a an to in on of by via and or for before after fix fixes fixed flaky flakiness test ' +
-    'tests wait waits waiting make makes making resilient deterministic deterministically ' +
-    'stabilize stabilise ensure ensures avoid avoids handle handles when with that this closes ' +
-    'resolves failing e2e ftr ui spec already not up out first then also more its it be is are ' +
-    'was were has have selection run runs running check checks checked retry retries via'
-  ).split(/\s+/)
-);
-
-// Meaningful title tokens: drop the leading `[Area]`, lowercase, split on non-alphanumerics,
-// then drop stopwords, pure numbers, and very short tokens.
-const tokenize = (title) =>
-  (title || '')
-    .toLowerCase()
-    .replace(/^\[[^\]]*\]\s*/, '')
-    .split(/[^a-z0-9]+/)
-    .filter((token) => token.length >= 3 && !/^\d+$/.test(token) && !STOP.has(token));
-
-// Tokens match when equal, or when one contains the other (>=5 chars), so morphological
-// variants still count (commit/committing, dimension/configureDimension).
-const tokensMatch = (a, b) =>
-  a === b || (a.length >= 5 && b.includes(a)) || (b.length >= 5 && a.includes(b));
-
-const sharedTokenCount = (a, b) => {
-  const used = new Set();
-  let count = 0;
-  for (const tokenA of a) {
-    for (let i = 0; i < b.length; i++) {
-      if (!used.has(i) && tokensMatch(tokenA, b[i])) {
-        used.add(i);
-        count++;
-        break;
-      }
-    }
-  }
-  return count;
-};
+// Buffer subtracted from the oldest in-flight PR's date to bound the team-issue search: a
+// `failed-test` issue is created shortly before its fix PR, so this window covers every issue
+// our PRs link while keeping the result under GitHub search's 1000-hit cap (busy teams have
+// thousands of `failed-test` issues all-time, but only a few hundred in any recent window).
+const TEAM_ISSUE_BUFFER_DAYS = 14;
 
 const linkedIssuesFromBody = (body) => [
   ...new Set(
@@ -85,11 +50,11 @@ const linkedIssuesFromBody = (body) => [
   ),
 ];
 
+const searchIssues = async (github, q) =>
+  github.paginate(github.rest.search.issuesAndPullRequests, { q, per_page: 100 });
+
 const searchPrs = async (github, q, state) => {
-  const items = await github.paginate(github.rest.search.issuesAndPullRequests, {
-    q,
-    per_page: 100,
-  });
+  const items = await searchIssues(github, q);
   return items.map((item) => ({
     number: item.number,
     title: item.title,
@@ -112,30 +77,37 @@ const fetchFixerPrs = async (github) => {
   return [...open, ...merged];
 };
 
+const teamLabelsOf = (labels) =>
+  (labels ?? [])
+    .map((label) => (typeof label === 'string' ? label : label.name))
+    .filter((name) => name?.startsWith('Team:'));
+
+// Numbers of the `failed-test` issues owned by any of `teamLabels`, created since `sinceDate`.
+const fetchTeamIssueNumbers = async (github, teamLabels, sinceDate) => {
+  const numbers = new Set();
+  for (const teamLabel of teamLabels) {
+    const q = `repo:${OWNER}/${REPO} is:issue label:${FAILED_TEST_LABEL} label:"${teamLabel}" created:>=${sinceDate}`;
+    for (const issue of await searchIssues(github, q)) {
+      numbers.add(issue.number);
+    }
+  }
+  return numbers;
+};
+
 /**
- * Shortlist the `flaky-test-fixer` PRs that likely duplicate a target. Pass `prNumber`
- * (verifier: match its PR title) or `issueNumber` (fixer: match the issue title, and always
- * include PRs that close this issue). Returns `{ candidates }` sorted oldest-first, each with
- * `number`, `title`, `state`, `createdAt`, `url`, `linkedIssues`, and the `sharedTokens`
- * count that shortlisted it (0 when included only via a shared linked issue).
+ * Shortlist the `flaky-test-fixer` PRs likely to duplicate a target, by owning team. Pass
+ * `prNumber` (verifier) or `issueNumber` (fixer). Reads the target's `failed-test` issue to
+ * get its `Team:` label(s), then returns every fixer PR whose linked issue belongs to the
+ * same team (or is the target's own issue), as `{ team, candidates }` sorted oldest-first.
+ * Falls back to just the shared-linked-issue matches when the target has no team label.
  */
 const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
   const fixerPrs = await fetchFixerPrs(github);
 
-  // Document frequency across all fixer PRs, so a rare shared token can stand on its own.
-  const df = {};
-  for (const pr of fixerPrs) {
-    for (const token of new Set(tokenize(pr.title))) {
-      df[token] = (df[token] || 0) + 1;
-    }
-  }
-
-  let targetTitle = '';
-  let targetIssues = [];
+  let targetIssues;
   if (prNumber != null) {
     const self = fixerPrs.find((pr) => pr.number === prNumber);
     if (self) {
-      targetTitle = self.title;
       targetIssues = self.linkedIssues;
     } else {
       // A just-opened PR may not be search-indexed yet; fall back to a direct read.
@@ -144,43 +116,55 @@ const findDuplicateCandidates = async ({ github, prNumber, issueNumber }) => {
         repo: REPO,
         pull_number: prNumber,
       });
-      targetTitle = data.title;
       targetIssues = linkedIssuesFromBody(data.body);
     }
   } else if (issueNumber != null) {
     targetIssues = [issueNumber];
-    const { data } = await github.rest.issues.get({
-      owner: OWNER,
-      repo: REPO,
-      issue_number: issueNumber,
-    });
-    targetTitle = data.title;
   } else {
     throw new Error('findDuplicateCandidates requires either prNumber or issueNumber');
   }
 
-  const targetTokens = tokenize(targetTitle);
-  const sharesRareToken = (tokens) =>
-    targetTokens.some(
-      (token) =>
-        token.length >= 6 &&
-        (df[token] || 0) <= RARE_DF &&
-        tokens.some((other) => tokensMatch(token, other))
+  // The target's owning team comes from its failed-test issue (fixer PRs carry no Team label).
+  let teamLabels = [];
+  const targetIssue = issueNumber ?? targetIssues[0];
+  if (targetIssue != null) {
+    const { data } = await github.rest.issues.get({
+      owner: OWNER,
+      repo: REPO,
+      issue_number: targetIssue,
+    });
+    teamLabels = teamLabelsOf(data.labels);
+  }
+
+  let teamIssues = new Set();
+  if (teamLabels.length > 0 && fixerPrs.length > 0) {
+    const oldest = fixerPrs.reduce(
+      (min, pr) => (pr.createdAt < min ? pr.createdAt : min),
+      fixerPrs[0].createdAt
     );
+    const since = new Date(new Date(oldest).getTime() - TEAM_ISSUE_BUFFER_DAYS * 864e5)
+      .toISOString()
+      .slice(0, 10);
+    teamIssues = await fetchTeamIssueNumbers(github, teamLabels, since);
+  }
 
   const candidates = fixerPrs
-    .filter((pr) => pr.number !== prNumber)
-    .map((pr) => {
-      const sharedTokens = sharedTokenCount(targetTokens, tokenize(pr.title));
-      const sharesIssue = pr.linkedIssues.some((issue) => targetIssues.includes(issue));
-      const related =
-        sharesIssue || sharedTokens >= MIN_SHARED_TOKENS || sharesRareToken(tokenize(pr.title));
-      return related ? { ...pr, sharedTokens } : null;
-    })
-    .filter(Boolean)
+    .filter(
+      (pr) =>
+        pr.number !== prNumber &&
+        pr.linkedIssues.some((issue) => teamIssues.has(issue) || targetIssues.includes(issue))
+    )
+    .map(({ number, title, state, createdAt, url, linkedIssues }) => ({
+      number,
+      title,
+      state,
+      createdAt,
+      url,
+      linkedIssues,
+    }))
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
-  return { candidates };
+  return { team: teamLabels, candidates };
 };
 
 // Workflow pre-step: run the shortlist and drop the result where the agent can read it.
@@ -198,8 +182,9 @@ const writeDuplicateCandidates = async ({
     `${JSON.stringify(result, null, 2)}\n`
   );
   const target = prNumber != null ? `PR #${prNumber}` : `issue #${issueNumber}`;
+  const team = result.team.length ? result.team.join(', ') : 'unknown';
   (core?.info ?? console.log)(
-    `Duplicate detector: ${result.candidates.length} candidate(s) shortlisted for ${target}.`
+    `Duplicate detector: ${result.candidates.length} candidate(s) for ${target} (team: ${team}).`
   );
   return result;
 };

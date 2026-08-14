@@ -166,10 +166,10 @@ steps:
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
   - name: Detect duplicate fix PRs
-    # Shortlist the `flaky-test-fixer` PRs whose title looks like it targets the same
-    # test/method as this PR (plus any sharing its linked issue), so the agent triages a
-    # short, relevant set instead of blind-searching. Non-fatal: a detection failure must
-    # not block verification — the agent treats a missing file as "no candidates".
+    # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same
+    # team as this PR, so the agent triages a short, relevant set instead of blind-searching.
+    # Non-fatal: a detection failure must not block verification — the agent treats a missing
+    # file as "no candidates".
     uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
     with:
       script: |
@@ -372,7 +372,7 @@ A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer 
 - `pr-issue-comments.json` — every PR comment, including prior `## Flaky Test Runner Stats` result comments and the `/flaky` comments this workflow posted.
 - `flaky-run-count.json` — `{ triggeredByBot }`: the deterministic, pre-computed number of `/flaky` runs `kibanamachine` has already triggered on this PR (see [Number of runs](#number-of-runs)).
 - `pr-review-comments.json`, `pr-reviews.json` — review threads and reviews.
-- `duplicate-candidates.json` — `{ candidates }`: a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose title looks like it targets the same test/method as this PR, or that share its linked issue. Each has `number`, `title`, `state`, `createdAt`, `url`, `linkedIssues`, and `sharedTokens` (title-token overlap; `0` means it was included only via a shared linked issue), sorted oldest-first. This is a title-based heuristic, so confirm each against the diffs. See [Duplicate detection](#duplicate-detection). Absent if detection failed — treat that as "no candidates".
+- `duplicate-candidates.json` — `{ team, candidates }`: `team` is this PR's owning team (read from its `failed-test` issue's `Team:` label). `candidates` is a shortlist of `flaky-test-fixer` PRs (open, or merged in the last 30 days) whose `failed-test` issue belongs to that same team, each with `number`, `title`, `state`, `createdAt`, `url`, and `linkedIssues`, sorted oldest-first. Same team means same owning code area, not necessarily the same test — so confirm each against the diffs. See [Duplicate detection](#duplicate-detection). Absent if detection failed — treat that as "no candidates".
 
 Only fetch data live when it is not in these files. In particular, the linked `failed-test` issue's investigator comment lives on a **different** issue (not this PR), so fetch it directly.
 
@@ -385,10 +385,10 @@ You run in one of two modes, selected from the triggering event:
 
 ## Duplicate detection
 
-The fixer opens one PR per `failed-test` issue, but many issues share a single root cause, so several fixer PRs can end up changing the **same method or spec**. They are usually opened within minutes of each other by parallel runs, so the fixer's own pre-open search can't see them. This verifier is the chokepoint that catches them: it runs once per PR, after the PRs exist. A pre-step has already written `duplicate-candidates.json` (see [Prefetched PR context](#prefetched-pr-context)) — a title-based shortlist of `flaky-test-fixer` PRs that look like they target the same test/method as this one. Run this check **first in `kickoff` mode**, before screening the patch or spending any runs — and **only** in `kickoff` mode, never in `process_results`:
+The fixer opens one PR per `failed-test` issue, but many issues share a single root cause, so several fixer PRs can end up changing the **same method or spec**. They are usually opened within minutes of each other by parallel runs, so the fixer's own pre-open search can't see them. This verifier is the chokepoint that catches them: it runs once per PR, after the PRs exist. A pre-step has already written `duplicate-candidates.json` (see [Prefetched PR context](#prefetched-pr-context)) — a shortlist of `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same team as this one. Run this check **first in `kickoff` mode**, before screening the patch or spending any runs — and **only** in `kickoff` mode, never in `process_results`:
 
 1. Read `duplicate-candidates.json`. If it is missing or `candidates` is empty, there is no duplicate — continue with the normal kickoff steps.
-2. **Confirm true duplicates.** This PR's own changes are in `pr-diff.txt` / `pr-files.json`. The candidates are a title-based shortlist, so verify each: fetch its diff and keep only those that change the **same method / same code for the same purpose** as this PR — not merely a similar title or the same file for an unrelated reason (two PRs hardening *different* methods of the same page object are **not** duplicates). If none survives, continue with the normal kickoff steps.
+2. **Confirm true duplicates.** This PR's own changes are in `pr-diff.txt` / `pr-files.json`. The candidates only share this PR's *team*, so verify each: fetch its diff and keep only those that change the **same method / same code for the same purpose** as this PR — not merely the same team, a similar file, or the same file for an unrelated reason (two PRs hardening *different* methods of the same page object are **not** duplicates). If none survives, continue with the normal kickoff steps.
 3. **Find the canonical PR** the group should collapse onto, considering this PR together with its confirmed true duplicates:
    - if any confirmed duplicate is **merged**, the fix has already landed, so this PR is redundant and the merged one is canonical;
    - otherwise the canonical is the **earliest-created open** PR (compare `createdAt`; the list is sorted oldest-first).
