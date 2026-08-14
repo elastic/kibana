@@ -24,7 +24,11 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type { ConversationTemplate, SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
+import type {
+  ConversationTemplate,
+  SerializedMetadataValue,
+  MetadataFieldValue,
+} from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -290,12 +294,7 @@ class ConversationClientImpl implements ConversationClient {
           const def = template.fields[key];
           return [
             key,
-            def
-              ? serializeMetadataValue(
-                  value as MetadataFieldValue,
-                  def.input_type
-                )
-              : value,
+            def ? serializeMetadataValue(value as MetadataFieldValue, def.input_type) : value,
           ];
         })
       );

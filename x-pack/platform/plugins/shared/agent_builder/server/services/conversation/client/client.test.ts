@@ -1486,9 +1486,9 @@ describe('ConversationClient', () => {
         },
       });
 
-      await expect(
-        client.patchMetadata('conversation-1', { x: 'value' })
-      ).rejects.toMatchObject({ message: expect.stringContaining('conversation-1') });
+      await expect(client.patchMetadata('conversation-1', { x: 'value' })).rejects.toMatchObject({
+        message: expect.stringContaining('conversation-1'),
+      });
     });
   });
 

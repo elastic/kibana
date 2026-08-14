@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import {
   getSkillsInstructions,
   getRelevantSkillsPointerInstructions,
@@ -21,7 +22,6 @@ import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './ty
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
 import { getTemplate } from '../../../conversation/templates/registry';
-import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
