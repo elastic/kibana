@@ -92,6 +92,28 @@ describe('useCustomContentHtml', () => {
       expect(result.current.html).toBe('');
       expect(result.current.noContent).toBe(true);
     });
+
+    it('clears a stale error and html when savedTemplate transitions to undefined', async () => {
+      mockFetchEsqlData.mockRejectedValueOnce(new Error('index not found'));
+
+      const { result, rerender } = renderHook(
+        ({ savedTemplate }: { savedTemplate: string | undefined }) =>
+          useCustomContentHtml({
+            ...baseParams,
+            esqlQuery: 'FROM logs | LIMIT 10',
+            savedTemplate,
+          }),
+        { initialProps: { savedTemplate: 'hello' as string | undefined } }
+      );
+
+      await waitFor(() => expect(result.current.error).toBe('index not found'));
+
+      rerender({ savedTemplate: undefined });
+
+      await waitFor(() => expect(result.current.error).toBeUndefined());
+      expect(result.current.html).toBe('');
+      expect(result.current.noContent).toBe(true);
+    });
   });
 
   describe('fast path — static panel with stored template', () => {

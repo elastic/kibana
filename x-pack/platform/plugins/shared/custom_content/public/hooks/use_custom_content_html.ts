@@ -109,6 +109,8 @@ export function useCustomContentHtml({
       return () => controller.abort();
     }
 
+    setProcessedHtml('');
+    setError(undefined);
     setIsLoading(false);
   }, [
     embeddableId,
