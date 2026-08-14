@@ -15,11 +15,7 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
-import type { RunWorkflowResponseDto } from '@kbn/workflows';
-import {
-  getManagedWorkflowSelectorVisibilityContext,
-  getManagedWorkflowSolutionVisibilityContext,
-} from '@kbn/workflows';
+import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
@@ -28,7 +24,6 @@ import { useRunWorkflow } from '../../hooks/use_run_workflow';
 import { useWorkflows } from '../../hooks/use_workflows';
 import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
 import { WorkflowSelector } from '../workflow_selector/workflow_selector';
-import type { WorkflowSelectorVisibility } from '../workflow_selector/workflow_utils';
 
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
@@ -44,11 +39,11 @@ export interface RunWorkflowPanelProps {
    */
   tags?: string[];
   /**
-   * Managed workflows are excluded from the list unless the caller opts in with a matching
-   * visibility. Pass the selector(s)/solution(s) the surfacing context maps to (e.g.
-   * `{ selectors: ['rule_action'] }`) to include managed workflows tagged with that context.
+   * Called for each workflow in the list. Return false to hide it.
+   * Use this to include or exclude managed workflows, filter by trigger type, tags, etc.
+   * When omitted all enabled workflows (user-created and managed) are shown.
    */
-  visibility?: WorkflowSelectorVisibility;
+  filterWorkflow?: (workflow: WorkflowListItemDto) => boolean;
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -65,7 +60,7 @@ export const RunWorkflowPanel = ({
   inputs,
   sortTriggerTypes,
   tags,
-  visibility,
+  filterWorkflow,
   onClose,
   onExecute,
 }: RunWorkflowPanelProps) => {
@@ -80,25 +75,13 @@ export const RunWorkflowPanel = ({
   const [isInputsModalOpen, setIsInputsModalOpen] = React.useState<boolean>(false);
 
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
-  // Mirror the visibility-context derivation WorkflowSelector runs internally so both queries share
-  // a react-query cache key (one fetch) and the selected managed workflow resolves below.
-  const visibilityContext = useMemo(() => {
-    if (!visibility) return undefined;
-    const contexts = [
-      ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
-      ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
-    ];
-    return contexts.length > 0 ? contexts : undefined;
-  }, [visibility]);
 
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
   const { data: workflowsData } = useWorkflows({
     size: 1000,
     page: 1,
     query: '',
-    ...(visibilityContext && canReadManagedWorkflow
-      ? { managed: 'all' as const, visibilityContext }
-      : {}),
+    ...(canReadManagedWorkflow ? { managed: 'all' as const } : {}),
   });
   const selectedWorkflow = useMemo(
     () => workflowsData?.results.find((w) => w.id === selectedId),
@@ -181,11 +164,13 @@ export const RunWorkflowPanel = ({
     () => (
       <WorkflowSelector
         config={{
-          visibility,
           filterFunction: (workflows) => {
             const enabled = workflows.filter((w) => w.enabled);
-            if (!tags || tags.length === 0) return enabled;
-            return enabled.filter((w) => tags.some((tag) => w.tags?.includes(tag)));
+            const tagFiltered =
+              !tags || tags.length === 0
+                ? enabled
+                : enabled.filter((w) => tags.some((tag) => w.tags?.includes(tag)));
+            return filterWorkflow ? tagFiltered.filter(filterWorkflow) : tagFiltered;
           },
           sortFunction: (workflows) =>
             workflows.sort((a, b) => {
@@ -205,7 +190,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, triggerTypes, visibility, tags]
+    [selectedId, triggerTypes, filterWorkflow, tags]
   );
 
   return (
