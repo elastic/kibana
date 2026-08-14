@@ -145,7 +145,7 @@ For changes to tags, severity, risk_score, schedule, name, description, MITRE ma
 
 1. **Parse** the \`text\` field from the attachment (stringified JSON of the rule).
 2. **Modify** only the fields the user asked to change. Do not add or remove other fields.
-3. **Re-stringify the ENTIRE rule object** — never send partial updates.
+3. **Re-stringify the ENTIRE rule object** — never send partial updates. New lines inside string values (e.g. a rule \`description\`) must always be escaped with double backslashes, i.e. \`\\\\n\`, to ensure valid JSON — never embed a raw line break.
 4. **Call \`attachment_update\`** to persist the change. Always include \`attachmentLabel\` (the rule \`name\`) and \`description\` so the chat label stays visible. The card's link to its saved rule is tracked separately (on the attachment, not in \`text\`) and persists automatically — you do not need to carry it through.
 \`\`\`
 attachment_update({
@@ -402,7 +402,7 @@ Pre-check: user wants to modify existing rule → edit path → proceed to Step 
 1. "The rule" ALWAYS refers to the rule attachment. Any request to add, edit, change, or update the rule means modifying the attachment — unless no attachment exists and none can be found via \`attachment_list\`, in which case tell the user to open the rule first.
 2. NEVER just suggest or describe changes — ALWAYS apply them by calling \`attachment_update\` or \`security.create_detection_rule\`. The user expects the rule to be updated, not a description of what to update.
 3. ALWAYS read the attachment before modifying it (edit path only — skip for fresh creation).
-4. For \`attachment_update\` edits, ALWAYS re-stringify the FULL rule object — never send partial updates. On the creation path, pass natural language to \`security.create_detection_rule\`, not JSON.
+4. For \`attachment_update\` edits, ALWAYS re-stringify the FULL rule object — never send partial updates, and always escape new lines inside string values with double backslashes (i.e. \`\\\\n\`) so the stored JSON stays valid. On the creation path, pass natural language to \`security.create_detection_rule\`, not JSON.
 5. **ALWAYS render the attachment inline after EVERY modification** — this is the most important rule. Every single call to \`security.create_detection_rule\` or \`attachment_update\` MUST be followed by \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\` using the version from the tool result. NEVER omit this. The user cannot see changes without it.
 6. When creating a **fresh, separate** rule: use \`security.create_detection_rule\` with \`user_query\` only — do NOT include \`attachment_id\`. When **rewriting the query** of an existing rule — including follow-up refinements to a rule you created earlier in this conversation (e.g., "update it to only alert when...", "change the threshold to...") — use \`security.create_detection_rule\` WITH \`attachment_id\` — never omit it.
 7. ALWAYS use \`security.create_detection_rule\` with \`attachment_id\` when rewriting the query.
