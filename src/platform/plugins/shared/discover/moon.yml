@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/dom-drag-drop'
   - '@kbn/ebt-tools'
+  - '@kbn/ebt-click'
   - '@kbn/unified-field-list'
   - '@kbn/cell-actions'
   - '@kbn/shared-ux-utility'
