@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const KNOWN_LOCALE_IDS = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'] as const;
+const KNOWN_LOCALE_IDS = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE', 'ru-RU'] as const;
 
 const KNOWN_LOCALE_LIST: ReadonlyArray<{ id: string }> = KNOWN_LOCALE_IDS.map((id) => ({ id }));
 

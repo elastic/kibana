@@ -1,0 +1,32 @@
+[
+  {
+    "key": "discover.tabsView.tabMenu.inspectTitle",
+    "reason": "\"Inspect\" can mean inspect/investigate (проверить) or refer to the dev tool panel. Used as menu item label — imperative form applied.",
+    "english": "Inspect",
+    "translation": "Проверить"
+  },
+  {
+    "key": "discover.localMenu.inspectTitle",
+    "reason": "\"Inspect\" as menu action — same ambiguity as above. Could also be \"Инспектировать\" if it refers specifically to the Inspect dev tool panel.",
+    "english": "Inspect tab",
+    "translation": "Проверить вкладку"
+  },
+  {
+    "key": "discover.advancedSettings.searchOnPageLoadText",
+    "reason": "Source string is truncated — ends with 'This setting does not ' without completing the sentence. Translation mirrors the truncation.",
+    "english": "Controls whether a search is executed when Discover first loads. This setting does not ",
+    "translation": "Определяет, выполняется ли поиск при первой загрузке Discover. Этот параметр не "
+  },
+  {
+    "key": "unifiedFieldList.fieldStats.displayToggleLegend",
+    "reason": "Короткая фраза без контекста; предполагается переключение между двумя вариантами отображения",
+    "english": "Toggle either the",
+    "translation": "Переключите один из следующих параметров:"
+  },
+  {
+    "key": "data.search.aggs.buckets.terms.otherBucketDescription",
+    "reason": "Текст обрезан в оригинале — перевод сохраняет усечение",
+    "english": "This request counts the number of documents that fall ",
+    "translation": "Этот запрос подсчитывает количество документов, попадающих "
+  }
+]

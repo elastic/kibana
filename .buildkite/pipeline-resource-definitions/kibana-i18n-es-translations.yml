@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-i18n-es-translations
+  description: Weekly generation of Spanish (es) translations for Discover, 24h before serverless QA promotion
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-i18n-es-translations'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-localization'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / i18n / es translations
+      description: Weekly generation of Spanish (es) translations for Discover
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-i18n'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/i18n_generate_es_translations.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-localization:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Weekly pre-promotion translation update:
+          cronline: 0 6 * * 0
+          message: Weekly Spanish translation update (24h before Monday QA promotion)
+          branch: main
+      tags:
+        - kibana
+        - i18n

@@ -1,0 +1,13 @@
+agents:
+  image: family/kibana-ubuntu-2404
+  imageProject: elastic-images-prod
+  provider: gcp
+  machineType: n2-standard-2
+
+steps:
+  - label: ':flag-es: Generate Spanish translations'
+    key: generate-es-translations
+    command: .buildkite/scripts/steps/i18n_generate_es_translations.sh
+    timeout_in_minutes: 30
+    env:
+      ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
