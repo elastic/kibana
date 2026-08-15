@@ -185,10 +185,25 @@ export class TransactionDetailsPage {
   }
 
   /**
+   * Locate a custom link by its label, expanding the "Show all" overflow when the link
+   * sits past the first few entries the Investigate menu renders directly (on a shared
+   * deployment sibling suites can push a link into the collapsed overflow).
+   */
+  async revealCustomLink(label: string) {
+    const link = this.page.getByRole('link', { name: label });
+    const showAllButton = this.page.getByTestId('apmBottomSectionButton');
+    await link.or(showAllButton).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    if (!(await link.isVisible()) && (await showAllButton.isVisible())) {
+      await showAllButton.click();
+    }
+    return link;
+  }
+
+  /**
    * Get the href attribute of a custom link by its label
    */
   async getCustomLinkHref(label: string): Promise<string | null> {
-    const link = this.page.getByRole('link', { name: label });
+    const link = await this.revealCustomLink(label);
     await link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     return await link.getAttribute('href');
   }
