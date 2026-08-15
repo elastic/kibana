@@ -25,36 +25,46 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 </FlyoutTemplate>
 ```
 
+## Root props
+
+The root forwards a fixed subset of `EuiFlyoutProps` — `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
+
 ## Zones
 
-**`FlyoutTemplate.Header`** renders the title row, an optional description, and a full-bleed bottom divider. It accepts only declared header parts as children; free-form content belongs in the Body and triggers a dev warning if placed here.
+**`FlyoutTemplate.Header`** renders the title row, an optional description, and a full-bleed bottom divider.
 
-- `title` — required. Rendered as an `<h3>` with a generated id wired to the flyout's `aria-labelledby`.
-- `titleIcon` — EUI icon type for a decorative rendered bside the title, after the title node. Rendered without a tooltip.
-- `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`; defaults to the `info` icon type.
+- `title` — required `ReactNode`. Rendered as an `<h3>` carrying a generated id.
+- `titleIcon` — EUI icon type rendered after the title. Without `titleTooltip` it is decorative (`aria-hidden`).
+- `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
+- `children` — reserved for future header parts. No header parts exist yet, so any child is dropped and logs a dev warning naming it.
 
 **`FlyoutTemplate.Body`** renders arbitrary children inside `EuiFlyoutBody` in source order, with no sectioning, titling, or dividers added by the template. Each child manages its own layout.
 
-**`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`. If neither action resolves, the footer is omitted entirely — no default Cancel button is added.
+**`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`, secondary first. If neither action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered.
 
-- `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`.
+- `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled unless `fill={false}`.
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
+
+Both actions take `label`, `onClick`, and optional `iconType`, `color`, `isLoading`, `isDisabled`, `data-test-subj`.
 
 ## Behavior
 
-- The header title is an `<h3>` with a generated id. That id is passed to `EuiFlyout`'s `aria-labelledby`, so the flyout is accessible without a separate `aria-label`. A string title is also forwarded to EUI's flyout menu as the history entry title.
+- The generated header title id is used for `EuiFlyout`'s `aria-labelledby` only as a fallback: an explicit `aria-labelledby` wins, and an explicit `aria-label` suppresses it. With no labeling props and a header present, the flyout is labeled by the title without a separate `aria-label`.
+- A string `title` is forwarded to EUI's flyout menu as the history entry title, and is used as the `aria-label` fallback when the flyout is not labeled by the title id. An explicit `flyoutMenuProps.title` overrides it. A non-string `title` does neither.
 - The header's bottom divider bleeds to the flyout edges using the root `paddingSize`; it aligns with the flyout chrome regardless of which padding size is active.
-- `FlyoutTemplate.Body` is required. Omitting it logs a dev warning.
+- `FlyoutTemplate.Body` is required. Omitting it logs a dev warning. The header and footer are optional.
 - Duplicate zones (e.g. two `FlyoutTemplate.Header` children) log a dev warning and render only the first.
-- The three zone components (`Header`, `Body`, `Footer`) render nothing when used outside a `FlyoutTemplate` root.
+- The zone components (`Header`, `Body`, `Footer`) and the footer action parts render nothing when used outside a `FlyoutTemplate` root.
 
 ## Test subjects
 
-Zone subjects derive from the root `data-test-subj` prop with a zone suffix, and each zone's own `data-test-subj` overrides it:
+Zone subjects derive from the root `data-test-subj` prop with a zone suffix, and each zone's own `data-test-subj` overrides it. With no root `data-test-subj`, zones get none unless set explicitly.
 
 | Zone | Default subject | Override prop |
 | --- | --- | --- |
 | Header | `${root}Header` | `FlyoutTemplate.Header` `data-test-subj` |
 | Body | `${root}Body` | `FlyoutTemplate.Body` `data-test-subj` |
 | Footer | `${root}Footer` | `FlyoutTemplate.Footer` `data-test-subj` |
+
+Footer action buttons are not derived; their `data-test-subj` passes through to the button as given.

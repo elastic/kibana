@@ -130,6 +130,8 @@ export const HeaderZone = ({
   const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
   const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
 
+  // `supportsOtherChildren` suppresses the parser's generic passthrough warning so
+  // `warnOnUnstructuredChildren` below is the only message; the header still drops these children.
   const items = useMemo(
     () => headerAssembly.parseChildren(children, { supportsOtherChildren: true }),
     [children]
