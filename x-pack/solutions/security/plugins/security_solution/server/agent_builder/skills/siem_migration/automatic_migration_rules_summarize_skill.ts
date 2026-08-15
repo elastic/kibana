@@ -13,7 +13,11 @@ import {
   SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
 } from '../../tools/siem_migrations';
-import { AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK, NAME_NEVER_ID_BLOCK } from './shared/content';
+import {
+  AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
+  AUTOMATIC_MIGRATION_NAVIGATION_BLOCK,
+  NAME_NEVER_ID_BLOCK,
+} from './shared/content';
 
 export const automaticMigrationRulesSummarizeSkill = defineSkillType({
   id: 'automatic-migration-rules-summarize',
@@ -70,6 +74,8 @@ ${NAME_NEVER_ID_BLOCK}
   show connector id, started_at, and any error.
 - **Rules**: a table of original title, translated title (or "—"), translation result, status.
   State the page number and that more pages exist when \`total\` exceeds the rows shown.
+
+${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
 ## Grounding
 

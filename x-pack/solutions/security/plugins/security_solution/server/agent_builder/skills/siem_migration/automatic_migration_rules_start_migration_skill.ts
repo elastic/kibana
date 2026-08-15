@@ -17,6 +17,7 @@ import {
 } from '../../tools/siem_migrations';
 import {
   AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
+  AUTOMATIC_MIGRATION_NAVIGATION_BLOCK,
   NAME_NEVER_ID_BLOCK,
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
@@ -117,6 +118,8 @@ between them.
 
 - Don't ask a question again if you have already got the answer from the user in previous steps. For example, if you have already asked for connector_id and skip_prebuilt_rules_matching, don't ask again.
 - Show users complete all the parameters in form of table before running the tool in all cases i.e. START, REPROCESS and RESUME.
+
+${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
 If the user asks to install rules, delete a migration, or update an index
 pattern, route them to the relevant sibling skill — this skill only starts/reprocesses/resumes.

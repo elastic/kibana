@@ -91,6 +91,14 @@ attribute that separates them):
    Do not ask the user to type the id.
 `;
 
+export const AUTOMATIC_MIGRATION_NAVIGATION_BLOCK = `
+## Navigation
+
+The Automatic Migration feature is accessible via **LaunchPad → Manage Automatic Migrations** in the
+Kibana UI. When directing the user to the UI (e.g. to upload rules or create a new migration), always
+reference this path. Do not invent or guess alternative navigation paths.
+`;
+
 export const MIGRATION_TYPE_DISAMBIGUATION_BLOCK = `
 Automatic Migrations are of 2 types:
 - **Rule Migration** — translates third-party (Sentinel, QRadar, Splunk) rules into Elastic detection rules. This is the most common type and the one that uses the Automatic Migration sibling skills.

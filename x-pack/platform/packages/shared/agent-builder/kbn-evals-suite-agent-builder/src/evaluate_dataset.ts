@@ -310,75 +310,74 @@ function configureExperiment({
           return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
         }
 
-        const traceId = (output as Record<string, unknown>)?.traceId as string | undefined;
-        if (!traceId) {
-          return {
-            score: null,
-            label: 'unavailable',
-            explanation: 'No traceId available for skill invocation check',
-          };
-        }
-        if (!/^[a-zA-Z0-9_-]+$/.test(traceId)) {
-          return {
-            score: null,
-            label: 'error',
-            explanation: `Invalid traceId for skill invocation check: ${traceId}`,
-          };
-        }
-
         // Build the set of skill names to check: the expected/should-not single name, plus any
-        // from the array form. Each is queried against the trace separately.
+        // from the array form.
         const skillsToCheck = new Set<string>();
         if (skillName) skillsToCheck.add(skillName);
         for (const s of shouldNotActivateList) skillsToCheck.add(s);
 
-        const checkInvoked = async (name: string): Promise<boolean> => {
-          const query = `FROM traces-*
-| WHERE trace_id == "${traceId}"
-| STATS skill_invoked = COUNT(
-    CASE(
-      attributes.gen_ai.tool.name == "filestore.read"
-        AND attributes.gen_ai.tool.call.arguments LIKE "*/${name}/SKILL.md*",
-      1,
-      NULL
-    )
-  )`;
-          const response = (await traceEsClient.esql.query({ query })) as unknown as {
-            values: number[][];
-          };
-          return (response.values?.[0]?.[0] ?? 0) > 0;
+        const loadedNames = (() => {
+          const toolCalls = getToolCallSteps(output as TaskOutput);
+          const seen: string[] = [];
+
+          for (const step of toolCalls) {
+            const stepRecord = step as Record<string, unknown>;
+            const stepParams =
+              (stepRecord.params as Record<string, unknown> | undefined) ??
+              (stepRecord.arguments as Record<string, unknown> | undefined);
+
+            if (step.tool_id === 'load_skill') {
+              const skillParam = stepParams?.skill;
+              if (typeof skillParam === 'string') seen.push(skillParam);
+
+              for (const result of step.results ?? []) {
+                const skill = (result as { data?: { skill?: { name?: string; id?: string; path?: string } } })
+                  ?.data?.skill;
+                if (typeof skill?.name === 'string') seen.push(skill.name);
+                if (typeof skill?.id === 'string') seen.push(skill.id);
+                if (typeof skill?.path === 'string') seen.push(skill.path);
+              }
+            }
+
+            if (step.tool_id === 'read_file' || step.tool_id === 'filestore.read') {
+              const path = stepParams?.path;
+              if (typeof path === 'string') seen.push(path);
+            }
+          }
+
+          return [...new Set(seen.filter(Boolean))];
+        })();
+
+        const skillIsPresent = (name: string): boolean => {
+          const lower = name.toLowerCase();
+          const pathSegment = lower.replace(/\./g, '/');
+          return loadedNames.some((n) => {
+            const nl = n.toLowerCase();
+            return nl === lower || nl.endsWith(`.${lower}`) || nl.includes(`/${pathSegment}/skill.md`);
+          });
         };
 
-        try {
-          const results = await Promise.all(
-            [...skillsToCheck].map(async (name) => [name, await checkInvoked(name)] as const)
-          );
-          const invokedMap = Object.fromEntries(results);
+        const invokedMap = Object.fromEntries(
+          [...skillsToCheck].map((name) => [name, skillIsPresent(name)])
+        );
 
-          if (expectedSkill) {
-            return {
-              score: invokedMap[expectedSkill] ? 1 : 0,
-              metadata: { expectedSkill, invoked: invokedMap[expectedSkill] },
-            };
-          }
-          // shouldNotActivate (single or list): score 1 only when NONE were invoked.
-          const anyInvoked = Object.values(invokedMap).some((v) => v);
+        if (expectedSkill) {
           return {
-            score: anyInvoked ? 0 : 1,
-            metadata: {
-              shouldNotActivateSkill: shouldNotActivate,
-              shouldNotActivateSkills: shouldNotActivateList,
-              invoked: invokedMap,
-            },
+            score: invokedMap[expectedSkill] ? 1 : 0,
+            metadata: { expectedSkill, invoked: invokedMap[expectedSkill], loadedNames },
           };
-        } catch (error) {
-          log.warning(
-            `ExpectedSkillInvocation failed for trace ${traceId}: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          return { score: null, label: 'error' };
         }
+        // shouldNotActivate (single or list): score 1 only when NONE were invoked.
+        const anyInvoked = Object.values(invokedMap).some((v) => v);
+        return {
+          score: anyInvoked ? 0 : 1,
+          metadata: {
+            shouldNotActivateSkill: shouldNotActivate,
+            shouldNotActivateSkills: shouldNotActivateList,
+            invoked: invokedMap,
+            loadedNames,
+          },
+        };
       },
     },
   ]);
