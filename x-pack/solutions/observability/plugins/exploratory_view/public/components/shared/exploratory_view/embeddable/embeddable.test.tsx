@@ -173,6 +173,27 @@ describe('Embeddable', () => {
     );
   });
 
+  it('forwards onBeforeBadgesRender to the Lens embeddable', () => {
+    const onBeforeBadgesRender = jest.fn((messages) => messages);
+
+    render(
+      <Embeddable
+        caseOwner={mockOwner}
+        customTimeRange={mockTimeRange}
+        dataViewState={mockDataViews}
+        lens={mockLens}
+        reportType={mockReportType}
+        withActions={mockActions}
+        attributes={[]}
+        onBeforeBadgesRender={onBeforeBadgesRender}
+      />
+    );
+
+    expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].onBeforeBadgesRender).toBe(
+      onBeforeBadgesRender
+    );
+  });
+
   it('disables the built-in cases action to avoid a duplicate "Add to case" entry', () => {
     render(
       <Embeddable
