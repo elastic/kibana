@@ -200,6 +200,7 @@ export const putOrReplaceTransform = async ({
   version,
   body,
   onUnchanged,
+  deleteDestOnReplace = false,
 }: {
   client: ElasticsearchClient;
   logger?: Logger;
@@ -207,6 +208,7 @@ export const putOrReplaceTransform = async ({
   version: number;
   body: PutTransformBody;
   onUnchanged?: (currentDelay?: string) => Promise<void>;
+  deleteDestOnReplace?: boolean;
 }): Promise<void> => {
   try {
     await client.transform.putTransform({
@@ -219,9 +221,14 @@ export const putOrReplaceTransform = async ({
       throw error;
     }
     const current = await client.transform.getTransform({ transform_id: transformId });
-    const meta = current.transforms[0]?._meta as { version?: number } | undefined;
-    if (meta?.version !== version) {
-      logger?.info(`Replacing ${transformId} after version change`);
+    const meta = current.transforms[0]?._meta as { version?: number; spec?: number } | undefined;
+    const nextSpec = (body._meta as { spec?: number } | undefined)?.spec;
+    if (meta?.version !== version || (nextSpec != null && meta?.spec !== nextSpec)) {
+      logger?.info(
+        `Replacing ${transformId} after version/spec change${
+          deleteDestOnReplace ? ' (dest wiped)' : ''
+        }`
+      );
       await client.transform.stopTransform({
         transform_id: transformId,
         force: true,
@@ -229,7 +236,7 @@ export const putOrReplaceTransform = async ({
       });
       await client.transform.deleteTransform({
         transform_id: transformId,
-        delete_dest_index: false,
+        delete_dest_index: deleteDestOnReplace,
       });
       await client.transform.putTransform({
         transform_id: transformId,

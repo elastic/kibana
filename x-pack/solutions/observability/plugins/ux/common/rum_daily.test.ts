@@ -92,8 +92,12 @@ describe('canUseDailyRollup', () => {
     expect(canUseDailyRollup({ errorGroup: undefined })).toBe(true);
   });
 
+  it('allows browser-only (browser-daily) but not browser+page', () => {
+    expect(canUseDailyRollup({ browser: 'Chrome' })).toBe(true);
+    expect(canUseDailyRollup({ browser: 'Chrome', pageUrl: '/app' })).toBe(false);
+  });
+
   it('rejects facets that are not in the rollup', () => {
-    expect(canUseDailyRollup({ browser: 'Chrome' })).toBe(false);
     expect(canUseDailyRollup({ os: 'Mac' })).toBe(false);
     expect(canUseDailyRollup({ location: 'US' })).toBe(false);
     expect(canUseDailyRollup({ user: 'ada' })).toBe(false);

@@ -9,12 +9,9 @@ import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
 import type { RumTrendPoint } from '../../../common/rum_app';
-import { rangeSpanMs } from '../../../common/rum_daily';
-import { canUseSessionIndex } from '../../../common/rum_sessions';
 import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
 import { queryDailyOverview } from '../../transforms/rum_daily_query';
-import { querySessionIndexTrends } from '../../transforms/rum_sessions_query';
 import { rumEsSearchOptions } from './es_retry';
 import {
   EXCEPTION_FILTER,
@@ -26,30 +23,6 @@ import {
   termsBuckets,
 } from './query';
 
-const sessionIndexOpts = (
-  installed: boolean,
-  query: {
-    analyticsMode?: string;
-    rangeFrom?: string;
-    rangeTo?: string;
-    kuery?: string;
-    connection?: string;
-    device?: string;
-    errorGroup?: string;
-  },
-  lookbackDays?: number
-) =>
-  canUseSessionIndex({
-    installed,
-    analyticsMode: query.analyticsMode,
-    rangeMs: rangeSpanMs(query.rangeFrom, query.rangeTo),
-    kuery: query.kuery,
-    connection: query.connection,
-    device: query.device,
-    errorGroup: query.errorGroup,
-    lookbackDays,
-  });
-
 export const getRumTrendsRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/rum/trends',
   options: { access: 'internal' },
@@ -60,28 +33,10 @@ export const getRumTrendsRoute = createUxServerRoute({
     const client = elasticsearch.client.asCurrentUser;
     const status = await getRumAnalyticsStatus(client);
     const query = params.query;
-    if (sessionIndexOpts(status.installed, query, status.sourceLookbackDays)) {
-      return {
-        trends: await querySessionIndexTrends({
-          client,
-          rangeFrom: query.rangeFrom || 'now-24h',
-          rangeTo: query.rangeTo || 'now',
-          watermark: status.watermark,
-          serviceName: query.serviceName,
-          browser: query.browser,
-          os: query.os,
-          location: query.location,
-          pageUrl: query.pageUrl,
-          user: query.user,
-          frustration: query.frustration,
-          breakpoint: query.breakpoint,
-        }),
-      };
-    }
-
     const daily = resolveRumDaily({
       pagesDaily: status.pagesDaily,
       serviceDaily: status.serviceDaily,
+      browserDaily: status.browserDaily,
       analyticsMode: query.analyticsMode,
       rangeFrom: query.rangeFrom,
       rangeTo: query.rangeTo,
@@ -95,18 +50,22 @@ export const getRumTrendsRoute = createUxServerRoute({
       connection: query.connection,
       device: query.device,
       errorGroup: query.errorGroup,
+      pageUrl: query.pageUrl,
     });
-    if (daily.usePages || daily.useService) {
+    if (daily.usePages || daily.useService || daily.useBrowser) {
       const result = await queryDailyOverview({
         client,
         rangeFrom: query.rangeFrom || 'now-24h',
         rangeTo: query.rangeTo || 'now',
         serviceName: query.serviceName,
         pageUrl: query.pageUrl,
+        browser: query.browser,
         usePages: daily.usePages,
         useService: daily.useService,
+        useBrowser: daily.useBrowser,
         pagesWatermark: status.pagesDaily?.watermark,
         serviceWatermark: status.serviceDaily?.watermark,
+        browserWatermark: status.browserDaily?.watermark,
       });
       return { trends: result.trends };
     }

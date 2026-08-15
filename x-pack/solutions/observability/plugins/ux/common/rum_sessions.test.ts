@@ -73,7 +73,7 @@ describe('canUseSessionIndex', () => {
     ).toBe(true);
   });
 
-  it('stays off raw, year-long, and unsupported facets', () => {
+  it('stays off raw, year-long, and kuery', () => {
     expect(canUseSessionIndex({ installed: true, rangeMs: 30 * day, analyticsMode: 'raw' })).toBe(
       false
     );

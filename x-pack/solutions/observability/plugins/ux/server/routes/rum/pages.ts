@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
@@ -21,12 +22,14 @@ import { groupingFromSettings } from '../../../common/session_replay_settings';
 import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
 import { queryDailyPages } from '../../transforms/rum_daily_query';
+import { rumEsSearchOptions } from './es_retry';
 import { readSessionReplaySettings } from '../session_replay/settings';
 import {
   DOCUMENT_LOAD_FILTER,
   EXCEPTION_FILTER,
   PAGE_VIEW_FILTER,
   WEB_VITAL_FILTER,
+  boundedString,
   cardValue,
   frustrationEventFilter,
   pagePathTerms,
@@ -132,6 +135,84 @@ const resourcesFromBucket = (bucket: Record<string, unknown>): RumResourceRow[] 
     .filter((row) => row.url.length > 0);
 };
 
+export const queryRawPageDetail = async ({
+  client,
+  query,
+}: {
+  client: ElasticsearchClient;
+  query: t.TypeOf<typeof rumListQueryCodec>;
+}): Promise<{ attribution: RumVitalAttribution; resources: RumResourceRow[] }> => {
+  const result = await client.search(
+    {
+      index: RUM_SESSION_SOURCE_INDEX,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: 0,
+      query: { bool: { filter: rumBaseFilters(query) } },
+      aggs: {
+        lcp_element: attrTerms('attributes.browser.web_vital.lcp.element'),
+        lcp_url: attrTerms('attributes.browser.web_vital.lcp.url'),
+        lcp_ttfb: avgField('attributes.browser.web_vital.lcp.ttfb'),
+        lcp_rld: avgField('attributes.browser.web_vital.lcp.resource_load_delay'),
+        lcp_rldur: avgField('attributes.browser.web_vital.lcp.resource_load_duration'),
+        lcp_erd: avgField('attributes.browser.web_vital.lcp.element_render_delay'),
+        inp_target: attrTerms('attributes.browser.web_vital.inp.target'),
+        inp_type: attrTerms('attributes.browser.web_vital.inp.type'),
+        inp_input: avgField('attributes.browser.web_vital.inp.input_delay'),
+        inp_proc: avgField('attributes.browser.web_vital.inp.processing_duration'),
+        inp_pres: avgField('attributes.browser.web_vital.inp.presentation_delay'),
+        cls_source: attrTerms('attributes.browser.web_vital.cls.source'),
+        resources: {
+          filter: RESOURCE_FILTER,
+          aggs: {
+            by_url: {
+              terms: {
+                script: { source: RESOURCE_URL_SCRIPT, lang: 'painless' },
+                size: 8,
+                exclude: '',
+              },
+              aggs: {
+                avg_ns: { avg: { field: 'duration' } },
+                avg_us: { avg: { field: 'attributes.transaction.duration.us' } },
+                blocking: attrTerms('attributes.http.render_blocking_status'),
+                status: attrTerms('attributes.http.response.status_code'),
+                dns: avgField('attributes.http.dns.duration'),
+                tcp: avgField('attributes.http.tcp.duration'),
+                tls: avgField('attributes.http.tls.duration'),
+                request: avgField('attributes.http.request.duration'),
+                response: avgField('attributes.http.response.duration'),
+                queue: avgField('attributes.http.queue.duration'),
+              },
+            },
+          },
+        },
+      },
+    },
+    rumEsSearchOptions
+  );
+  const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
+  return {
+    attribution: attributionFromBucket(aggs),
+    resources: resourcesFromBucket(aggs),
+  };
+};
+
+export const getRumPageDetailRoute = createUxServerRoute({
+  endpoint: 'GET /internal/ux/rum/pages/detail',
+  options: { access: 'internal' },
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  params: t.type({
+    query: t.intersection([rumListQueryCodec, t.type({ pageUrl: boundedString(512) })]),
+  }),
+  handler: async ({ context, params }) => {
+    const { elasticsearch } = await context.core;
+    return queryRawPageDetail({
+      client: elasticsearch.client.asCurrentUser,
+      query: params.query,
+    });
+  },
+});
+
 export const getRumPagesRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/rum/pages',
   options: { access: 'internal' },
@@ -148,6 +229,7 @@ export const getRumPagesRoute = createUxServerRoute({
     const daily = resolveRumDaily({
       pagesDaily: status.pagesDaily,
       serviceDaily: status.serviceDaily,
+      browserDaily: status.browserDaily,
       analyticsMode: params.query.analyticsMode,
       rangeFrom: params.query.rangeFrom,
       rangeTo: params.query.rangeTo,
@@ -161,6 +243,7 @@ export const getRumPagesRoute = createUxServerRoute({
       connection: params.query.connection,
       device: params.query.device,
       errorGroup: params.query.errorGroup,
+      pageUrl: params.query.pageUrl,
     });
     if (daily.usePages) {
       const result = await queryDailyPages({

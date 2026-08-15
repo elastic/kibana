@@ -7,7 +7,7 @@
 
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import {
-  RUM_CANONICAL_SERVICE_NAME_FIELD,
+  RUM_CANONICAL_ERROR_GROUP_FIELD,
   RUM_CANONICAL_SESSION_ID_FIELD,
   RUM_HAS_REPLAY_FIELD,
   RUM_SESSIONS_INDEX,
@@ -15,6 +15,7 @@ import {
   RUM_SESSIONS_LOOKBACK_DAYS,
   RUM_SESSIONS_MANAGED_BY,
   RUM_SESSIONS_PIPELINE_NAME,
+  RUM_SESSIONS_SPEC,
   RUM_SESSIONS_SYNC_DELAY,
   RUM_SESSIONS_TRANSFORM_ID,
   RUM_SESSIONS_VERSION,
@@ -60,6 +61,41 @@ const CLICK_FILTER = {
 const HAS_REPLAY_FILTER = {
   term: { [RUM_HAS_REPLAY_FIELD]: true },
 };
+
+const PAGE_VIEW_FILTER = {
+  bool: {
+    should: [
+      { term: { name: 'documentLoad' } },
+      { term: { event_name: 'browser.navigation' } },
+      { term: { name: 'browser.navigation' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
+const WEB_VITAL_FILTER = {
+  bool: {
+    should: [
+      { term: { event_name: 'browser.web_vital' } },
+      { term: { name: 'browser.web_vital' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
+const vitalValue = 'attributes.browser.web_vital.value';
+
+const sessionVitalAgg = (name: 'lcp' | 'inp' | 'cls') => ({
+  filter: {
+    bool: {
+      filter: [WEB_VITAL_FILTER, { term: { 'attributes.browser.web_vital.name': name } }],
+    },
+  },
+  aggs: {
+    p75: { percentiles: { field: vitalValue, percents: [75] } },
+    samples: { value_count: { field: vitalValue } },
+  },
+});
 
 /** Keep the earliest tokens per shard so reduce can still take the first 30 globally. */
 const SEQUENCE_MAP_CAP = 40;
@@ -182,6 +218,23 @@ const SEQUENCE_MAP_SCRIPT = `
   if (doc.containsKey('attributes.browser.breakpoint') && doc['attributes.browser.breakpoint'].size() > 0) {
     state.breakpoint = doc['attributes.browser.breakpoint'].value.toString();
   }
+  if (doc.containsKey('resource.attributes.service.name') && doc['resource.attributes.service.name'].size() > 0) {
+    state.service = doc['resource.attributes.service.name'].value.toString();
+  } else if (doc.containsKey('attributes.service.name') && doc['attributes.service.name'].size() > 0) {
+    state.service = doc['attributes.service.name'].value.toString();
+  }
+  if (doc.containsKey('attributes.network.connection.type') && doc['attributes.network.connection.type'].size() > 0) {
+    state.connection = doc['attributes.network.connection.type'].value.toString();
+  }
+  if (doc.containsKey('attributes.device.memory') && doc['attributes.device.memory'].size() > 0) {
+    state.device = doc['attributes.device.memory'].value.toString();
+  } else if (
+    state.device == '' &&
+    doc.containsKey('resource.attributes.device.memory') &&
+    doc['resource.attributes.device.memory'].size() > 0
+  ) {
+    state.device = doc['resource.attributes.device.memory'].value.toString();
+  }
 `;
 
 const SEQUENCE_REDUCE_SCRIPT = `
@@ -194,6 +247,9 @@ const SEQUENCE_REDUCE_SCRIPT = `
   def os = '';
   def country = '';
   def breakpoint = '';
+  def service = '';
+  def connection = '';
+  def device = '';
   for (s in states) {
     if (s == null) { continue; }
     if (s.pages != null) { pages.addAll(s.pages); }
@@ -205,6 +261,9 @@ const SEQUENCE_REDUCE_SCRIPT = `
     if (s.os != null && s.os != '') { os = s.os; }
     if (s.country != null && s.country != '') { country = s.country; }
     if (s.breakpoint != null && s.breakpoint != '') { breakpoint = s.breakpoint; }
+    if (s.service != null && s.service != '') { service = s.service; }
+    if (s.connection != null && s.connection != '') { connection = s.connection; }
+    if (s.device != null && s.device != '') { device = s.device; }
   }
   pages.sort((a, b) -> a[0].compareTo(b[0]));
   clicks.sort((a, b) -> a[0].compareTo(b[0]));
@@ -277,7 +336,10 @@ const SEQUENCE_REDUCE_SCRIPT = `
     'browser': browser,
     'os': os,
     'country': country,
-    'breakpoint': breakpoint
+    'breakpoint': breakpoint,
+    'service': service,
+    'connection': connection,
+    'device': device
   ];
 `;
 
@@ -301,11 +363,23 @@ export const rumSessionsIndexMappings = {
     event_count: { type: 'long' },
     error_count: { type: 'long' },
     click_count: { type: 'long' },
+    page_view_count: { type: 'long' },
     replay_event_count: { type: 'long' },
     has_replay: { type: 'boolean' },
+    has_error: { type: 'boolean' },
+    bounced: { type: 'boolean' },
     rage_click_count: { type: 'long' },
     dead_click_count: { type: 'long' },
     page_count: { type: 'integer' },
+    error_groups: { type: 'keyword' },
+    connection: { type: 'keyword' },
+    device: { type: 'keyword' },
+    lcp_p75: { type: 'double' },
+    lcp_samples: { type: 'long' },
+    inp_p75: { type: 'double' },
+    inp_samples: { type: 'long' },
+    cls_p75: { type: 'double' },
+    cls_samples: { type: 'long' },
     entry_page: { type: 'keyword' },
     exit_page: { type: 'keyword' },
     path_key: { type: 'keyword' },
@@ -398,15 +472,56 @@ export const rumNormalizePipeline = {
 
 export const rumSessionsDestPipeline = {
   description: 'Flatten ux-rum-sessions transform output and stamp session.partition.',
-  _meta: { managed_by: RUM_SESSIONS_MANAGED_BY, version: RUM_SESSIONS_VERSION },
+  _meta: {
+    managed_by: RUM_SESSIONS_MANAGED_BY,
+    version: RUM_SESSIONS_VERSION,
+    spec: RUM_SESSIONS_SPEC,
+  },
   processors: [
     {
       script: {
         lang: 'painless',
         source: `
-          if (ctx.error_count instanceof Map) { ctx.error_count = ctx.error_count.doc_count; }
-          if (ctx.click_count instanceof Map) { ctx.click_count = ctx.click_count.doc_count; }
-          if (ctx.replay_event_count instanceof Map) { ctx.replay_event_count = ctx.replay_event_count.doc_count; }
+          def countOf(def v) {
+            if (v instanceof Map && v.doc_count != null) { return v.doc_count; }
+            return v;
+          }
+          def valueOf(def v) {
+            if (v instanceof Map && v.value != null) { return v.value; }
+            return v;
+          }
+          def p75Of(def v) {
+            if (v == null || v instanceof Number) { return v; }
+            if (v instanceof Map) {
+              def values = v.values;
+              if (values instanceof Map) {
+                if (values['75.0'] != null) { return values['75.0']; }
+                if (values['75'] != null) { return values['75']; }
+              }
+              if (v['75.0'] != null) { return v['75.0']; }
+              if (v['75'] != null) { return v['75']; }
+              return null;
+            }
+            return null;
+          }
+          def samplesOf(def bucket) {
+            if ((bucket instanceof Map) == false) { return null; }
+            def samples = valueOf(bucket.samples);
+            if (samples != null) { return samples; }
+            return bucket.doc_count;
+          }
+          def millisOf(def v) {
+            v = valueOf(v);
+            if (v instanceof Number) { return ((Number) v).longValue(); }
+            if (v instanceof String) {
+              return ZonedDateTime.parse(v.toString()).toInstant().toEpochMilli();
+            }
+            return null;
+          }
+          ctx.error_count = countOf(ctx.error_count);
+          ctx.click_count = countOf(ctx.click_count);
+          ctx.page_view_count = countOf(ctx.page_view_count);
+          ctx.replay_event_count = countOf(ctx.replay_event_count);
           boolean replay = false;
           if (ctx.has_replay instanceof Map) {
             def n = ctx.has_replay.doc_count;
@@ -417,6 +532,38 @@ export const rumSessionsDestPipeline = {
             replay = ((Number) ctx.has_replay).doubleValue() > 0;
           }
           ctx.has_replay = replay;
+          def errors = ctx.error_count;
+          ctx.has_error = errors instanceof Number && ((Number) errors).intValue() > 0;
+          def views = ctx.page_view_count;
+          ctx.bounced = views instanceof Number && ((Number) views).intValue() <= 1;
+          def startMs = millisOf(ctx.start_time);
+          def endMs = millisOf(ctx.end_time);
+          if (startMs != null && endMs != null) {
+            ctx.duration_ms = endMs - startMs;
+          }
+          if (ctx.lcp instanceof Map) {
+            ctx.lcp_p75 = p75Of(ctx.lcp.p75);
+            ctx.lcp_samples = samplesOf(ctx.lcp);
+          }
+          if (ctx.inp instanceof Map) {
+            ctx.inp_p75 = p75Of(ctx.inp.p75);
+            ctx.inp_samples = samplesOf(ctx.inp);
+          }
+          if (ctx.cls instanceof Map) {
+            ctx.cls_p75 = p75Of(ctx.cls.p75);
+            ctx.cls_samples = samplesOf(ctx.cls);
+          }
+          def groups = ctx.error_groups;
+          if (groups instanceof Map && groups.groups instanceof Map) {
+            def keys = [];
+            def buckets = groups.groups.buckets;
+            if (buckets instanceof List) {
+              for (b in buckets) {
+                if (b.key != null && b.key.toString() != '') { keys.add(b.key.toString()); }
+              }
+            }
+            ctx.error_groups = keys;
+          }
           def seq = ctx.sequences;
           if (seq instanceof Map) {
             ctx.page_sequence = seq.page_sequence;
@@ -438,6 +585,12 @@ export const rumSessionsDestPipeline = {
             if (ctx.os == null) { ctx.os = new HashMap(); }
             ctx.os.name = seq.os;
             ctx.country_iso = seq.country;
+            ctx.connection = seq.connection;
+            ctx.device = seq.device;
+            if (seq.service != null && seq.service != '') {
+              if (ctx.service == null) { ctx.service = new HashMap(); }
+              ctx.service.name = seq.service;
+            }
           }
           def pages = ctx.pages;
           ctx.page_count = pages instanceof List ? pages.size() : 0;
@@ -452,6 +605,9 @@ export const rumSessionsDestPipeline = {
             ctx.session.partition = partition;
           }
           ctx.remove('sequences');
+          ctx.remove('lcp');
+          ctx.remove('inp');
+          ctx.remove('cls');
         `,
       },
     },
@@ -510,14 +666,12 @@ export const buildRumSessionsTransformBody = (
   _meta: {
     managed_by: RUM_SESSIONS_MANAGED_BY,
     version: RUM_SESSIONS_VERSION,
+    spec: RUM_SESSIONS_SPEC,
   },
   pivot: {
     group_by: {
       'session.id': {
         terms: { field: RUM_CANONICAL_SESSION_ID_FIELD },
-      },
-      'service.name': {
-        terms: { field: RUM_CANONICAL_SERVICE_NAME_FIELD },
       },
     },
     aggregations: {
@@ -526,11 +680,21 @@ export const buildRumSessionsTransformBody = (
       event_count: { value_count: { field: '@timestamp' } },
       error_count: { filter: EXCEPTION_FILTER },
       click_count: { filter: CLICK_FILTER },
+      page_view_count: { filter: PAGE_VIEW_FILTER },
       has_replay: { filter: HAS_REPLAY_FILTER },
+      error_groups: {
+        filter: EXCEPTION_FILTER,
+        aggs: {
+          groups: { terms: { field: RUM_CANONICAL_ERROR_GROUP_FIELD, size: 5, exclude: '' } },
+        },
+      },
+      lcp: sessionVitalAgg('lcp'),
+      inp: sessionVitalAgg('inp'),
+      cls: sessionVitalAgg('cls'),
       sequences: {
         scripted_metric: {
           init_script:
-            "state.pages = []; state.clicks = []; state.rage = 0; state.dead = 0; state.user = ''; state.browser = ''; state.os = ''; state.country = ''; state.breakpoint = '';",
+            "state.pages = []; state.clicks = []; state.rage = 0; state.dead = 0; state.user = ''; state.browser = ''; state.os = ''; state.country = ''; state.breakpoint = ''; state.service = ''; state.connection = ''; state.device = '';",
           map_script: SEQUENCE_MAP_SCRIPT,
           combine_script: 'return state;',
           reduce_script: SEQUENCE_REDUCE_SCRIPT,

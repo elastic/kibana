@@ -33,7 +33,10 @@ import {
 import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
 import { queryDailyOverview } from '../../transforms/rum_daily_query';
-import { querySessionIndexKpis } from '../../transforms/rum_sessions_query';
+import {
+  querySessionIndexFilters,
+  querySessionIndexKpis,
+} from '../../transforms/rum_sessions_query';
 import { rumEsSearchOptions } from './es_retry';
 import {
   BROWSER_SCRIPT,
@@ -82,28 +85,47 @@ const overlaySessionIndex = async (
       analyticsMode: query.analyticsMode,
       rangeMs: rangeSpanMs(query.rangeFrom, query.rangeTo),
       kuery: query.kuery,
-      connection: query.connection,
-      device: query.device,
-      errorGroup: query.errorGroup,
       lookbackDays,
     })
   ) {
     return result;
   }
-  const slice = await querySessionIndexKpis({
-    client,
-    rangeFrom: query.rangeFrom || 'now-24h',
-    rangeTo: query.rangeTo || 'now',
-    watermark,
-    serviceName: query.serviceName,
-    browser: query.browser,
-    os: query.os,
-    location: query.location,
-    pageUrl: query.pageUrl,
-    user: query.user,
-    frustration: query.frustration,
-    breakpoint: query.breakpoint,
-  });
+  const [slice, facets] = await Promise.all([
+    querySessionIndexKpis({
+      client,
+      rangeFrom: query.rangeFrom || 'now-24h',
+      rangeTo: query.rangeTo || 'now',
+      watermark,
+      serviceName: query.serviceName,
+      browser: query.browser,
+      os: query.os,
+      location: query.location,
+      pageUrl: query.pageUrl,
+      user: query.user,
+      frustration: query.frustration,
+      breakpoint: query.breakpoint,
+      connection: query.connection,
+      device: query.device,
+      errorGroup: query.errorGroup,
+    }),
+    querySessionIndexFilters({
+      client,
+      rangeFrom: query.rangeFrom || 'now-24h',
+      rangeTo: query.rangeTo || 'now',
+      watermark,
+      serviceName: query.serviceName,
+      browser: query.browser,
+      os: query.os,
+      location: query.location,
+      pageUrl: query.pageUrl,
+      user: query.user,
+      frustration: query.frustration,
+      breakpoint: query.breakpoint,
+      connection: query.connection,
+      device: query.device,
+      errorGroup: query.errorGroup,
+    }),
+  ]);
   return {
     ...result,
     kpis: {
@@ -112,13 +134,25 @@ const overlaySessionIndex = async (
       errorSessions: slice.errorSessions,
       errorRate: slice.sessions > 0 ? slice.errorSessions / slice.sessions : 0,
     },
-    trends: slice.trends,
     frustration: {
       ...result.frustration,
       rageSessions: slice.rageSessions,
       errorSessions: slice.errorSessions,
       deadClickSessions: slice.deadSessions,
     },
+    browsers: facets.browsers.length > 0 ? facets.browsers : result.browsers,
+    os: facets.os.length > 0 ? facets.os : result.os,
+    countries:
+      facets.countries.length > 0
+        ? facets.countries.map((row) => ({
+            isoCode: row.key,
+            name: row.key,
+            pageViews: 0,
+            sessions: row.count,
+            errorCount: 0,
+            p75Lcp: null,
+          }))
+        : result.countries,
   };
 };
 
@@ -151,6 +185,7 @@ export const getRumOverviewRoute = createUxServerRoute({
     const daily = resolveRumDaily({
       pagesDaily: status.pagesDaily,
       serviceDaily: status.serviceDaily,
+      browserDaily: status.browserDaily,
       analyticsMode: params.query.analyticsMode,
       rangeFrom: params.query.rangeFrom,
       rangeTo: params.query.rangeTo,
@@ -164,8 +199,9 @@ export const getRumOverviewRoute = createUxServerRoute({
       connection: params.query.connection,
       device: params.query.device,
       errorGroup: params.query.errorGroup,
+      pageUrl: params.query.pageUrl,
     });
-    if (daily.usePages || daily.useService) {
+    if (daily.usePages || daily.useService || daily.useBrowser) {
       const coreStart = await core.start();
       const settings = await readSessionReplaySettings(
         coreStart.savedObjects.createInternalRepository()
@@ -176,10 +212,13 @@ export const getRumOverviewRoute = createUxServerRoute({
         rangeTo: params.query.rangeTo || 'now',
         serviceName: params.query.serviceName,
         pageUrl: params.query.pageUrl,
+        browser: params.query.browser,
         usePages: daily.usePages,
         useService: daily.useService,
+        useBrowser: daily.useBrowser,
         pagesWatermark: status.pagesDaily?.watermark,
         serviceWatermark: status.serviceDaily?.watermark,
+        browserWatermark: status.browserDaily?.watermark,
       });
       return overlaySessionIndex(
         {

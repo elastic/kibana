@@ -196,7 +196,7 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
     actionCount: asNumber(source.click_count),
     rageClickCount: asNumber(source.rage_click_count),
     deadClickCount: asNumber(source.dead_click_count),
-    errorGroups: [],
+    errorGroups: asStringArray(source.error_groups),
     activeMs: asNumber(source.duration_ms) || Math.max(0, endMs - startMs),
     durationMs: asNumber(source.duration_ms) || Math.max(0, endMs - startMs),
     pageCount: asNumber(source.page_count) || pages.length,
@@ -209,12 +209,12 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
     client: {
       browser: asString(browser.name),
       os: asString(os.name),
-      device: null,
+      device: asString(source.device),
       mobile: null,
       country: asString(source.country_iso),
       countryIso: asString(source.country_iso),
       breakpoint: asString(browser.breakpoint),
-      connection: null,
+      connection: asString(source.connection),
     },
     hasReplay: sourceHasReplay(source),
     replayEventCount: asNumber(source.replay_event_count),
@@ -261,6 +261,9 @@ export interface SessionIndexFilterParams {
   hasDead?: string;
   minDurationMs?: number;
   maxDurationMs?: number;
+  connection?: string;
+  device?: string;
+  errorGroup?: string;
 }
 
 export const buildSessionIndexFilters = ({
@@ -285,6 +288,9 @@ export const buildSessionIndexFilters = ({
   hasDead,
   minDurationMs,
   maxDurationMs,
+  connection,
+  device,
+  errorGroup,
 }: SessionIndexFilterParams): object[] => {
   const filters: object[] = [
     sessionIndexTimeFilter(rangeFrom, rangeTo, watermark ?? undefined),
@@ -337,6 +343,15 @@ export const buildSessionIndexFilters = ({
   if (maxDurationMs != null) {
     filters.push({ range: { duration_ms: { lte: maxDurationMs } } });
   }
+  if (connection) {
+    filters.push({ term: { connection } });
+  }
+  if (device) {
+    filters.push({ term: { device } });
+  }
+  if (errorGroup) {
+    filters.push({ term: { error_groups: errorGroup } });
+  }
   return filters;
 };
 
@@ -367,7 +382,7 @@ export const querySessionIndexTrends = async ({
       trends: {
         auto_date_histogram: { field: 'start_time', buckets: 24 },
         aggs: {
-          page_views: { sum: { field: 'page_count' } },
+          page_views: { sum: { field: 'page_view_count' } },
           errors: { sum: { field: 'error_count' } },
         },
       },
@@ -394,6 +409,8 @@ export const querySessionIndexFilters = async ({
       pages: { terms: { field: 'pages', size: 30, exclude: '' } },
       breakpoints: { terms: { field: 'browser.breakpoint', size: 10, exclude: '' } },
       countries: { terms: { field: 'country_iso', size: 30, exclude: '' } },
+      connections: { terms: { field: 'connection', size: 10, exclude: '' } },
+      devices: { terms: { field: 'device', size: 10, exclude: '' } },
     },
   });
   const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
@@ -402,8 +419,8 @@ export const querySessionIndexFilters = async ({
     os: facetBuckets(aggs.os),
     pages: facetBuckets(aggs.pages),
     breakpoints: facetBuckets(aggs.breakpoints),
-    connections: [],
-    devices: [],
+    connections: facetBuckets(aggs.connections),
+    devices: facetBuckets(aggs.devices),
     countries: facetBuckets(aggs.countries),
   };
 };
@@ -432,7 +449,7 @@ export const querySessionIndexKpis = async ({
       trends: {
         auto_date_histogram: { field: 'start_time', buckets: 24 },
         aggs: {
-          page_views: { sum: { field: 'page_count' } },
+          page_views: { sum: { field: 'page_view_count' } },
           errors: { sum: { field: 'error_count' } },
         },
       },

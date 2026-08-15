@@ -320,6 +320,7 @@ export const rumBaseFilters = (params: RumQueryParams): object[] => {
         query_string: {
           query: `*${needle}*`,
           fields: [
+            'attributes.url.path.grouped',
             'attributes.page.url.path',
             'attributes.page.url',
             'attributes.url.full',

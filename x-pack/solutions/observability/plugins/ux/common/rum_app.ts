@@ -113,6 +113,12 @@ export const CWV_THRESHOLDS = {
   cls: { good: 0.1, ni: 0.25 },
 } as const;
 
+/** Same buckets as Overview `percentile_ranks` (includes FCP). */
+export const VITAL_RANK_THRESHOLDS = {
+  ...CWV_THRESHOLDS,
+  fcp: { good: 1800, ni: 3000 },
+} as const;
+
 export const rateVital = (
   vital: keyof typeof CWV_THRESHOLDS,
   value: number | null
@@ -456,4 +462,16 @@ export const ranksFromPercentileRanks = (
     ni: Math.max(0, Math.min(100, upToNiRounded - goodRounded)),
     poor: Math.max(0, Math.min(100, 100 - upToNiRounded)),
   };
+};
+
+/** Weighted good / NI / poor percents from stored daily counts. */
+export const ranksFromCounts = (good: number, ni: number, poor: number): RumVitalRanks | null => {
+  const total = good + ni + poor;
+  if (total <= 0) {
+    return null;
+  }
+  return ranksFromPercentileRanks({
+    good: (good / total) * 100,
+    ni: ((good + ni) / total) * 100,
+  });
 };

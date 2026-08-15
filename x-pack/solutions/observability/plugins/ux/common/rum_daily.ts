@@ -19,6 +19,8 @@ export type { RumRollupStatus };
 export { emptyRumRollupStatus };
 
 export const RUM_DAILY_VERSION = RUM_SESSIONS_VERSION;
+/** Dest-pipeline / pivot revision. Replace + wipe dest when this changes. */
+export const RUM_DAILY_SPEC = 4;
 export const RUM_PAGES_DAILY_TRANSFORM_ID = `ux-rum-pages-daily-${RUM_DAILY_VERSION}`;
 export const RUM_PAGES_DAILY_INDEX = `ux-rum-pages-daily-${RUM_DAILY_VERSION}`;
 export const RUM_PAGES_DAILY_INDEX_PATTERN = 'ux-rum-pages-daily-*';
@@ -29,6 +31,11 @@ export const RUM_SERVICE_DAILY_INDEX = `ux-rum-service-daily-${RUM_DAILY_VERSION
 export const RUM_SERVICE_DAILY_INDEX_PATTERN = 'ux-rum-service-daily-*';
 export const RUM_SERVICE_DAILY_TEMPLATE_NAME = 'ux-rum-service-daily';
 export const RUM_SERVICE_DAILY_PIPELINE_NAME = 'ux-rum-service-daily-dest';
+export const RUM_BROWSER_DAILY_TRANSFORM_ID = `ux-rum-browser-daily-${RUM_DAILY_VERSION}`;
+export const RUM_BROWSER_DAILY_INDEX = `ux-rum-browser-daily-${RUM_DAILY_VERSION}`;
+export const RUM_BROWSER_DAILY_INDEX_PATTERN = 'ux-rum-browser-daily-*';
+export const RUM_BROWSER_DAILY_TEMPLATE_NAME = 'ux-rum-browser-daily';
+export const RUM_BROWSER_DAILY_PIPELINE_NAME = 'ux-rum-browser-daily-dest';
 export const RUM_DAILY_MANAGED_BY = RUM_SESSIONS_MANAGED_BY;
 export const RUM_DAILY_SYNC_DELAY = RUM_SESSIONS_SYNC_DELAY;
 export const RUM_DAILY_RETENTION = '400d';
@@ -42,6 +49,9 @@ export const emptyPagesDailyStatus = (): RumRollupStatus =>
 
 export const emptyServiceDailyStatus = (): RumRollupStatus =>
   emptyRumRollupStatus(RUM_SERVICE_DAILY_TRANSFORM_ID, RUM_SERVICE_DAILY_INDEX);
+
+export const emptyBrowserDailyStatus = (): RumRollupStatus =>
+  emptyRumRollupStatus(RUM_BROWSER_DAILY_TRANSFORM_ID, RUM_BROWSER_DAILY_INDEX);
 
 export const rangeSpanMs = (rangeFrom?: string, rangeTo?: string): number | null => {
   const from = dateMath.parse(rangeFrom || 'now-24h');
@@ -73,7 +83,7 @@ export const shouldQueryDailyIndex = ({
   return span != null && span > RUM_DAILY_LONG_RANGE_MS;
 };
 
-/** Daily rollups only have service + date + optional page. Extra facets stay on raw. */
+/** Daily rollups: service + date + optional page, or browser-daily when only browser is set. */
 export const canUseDailyRollup = (params: {
   browser?: string;
   os?: string;
@@ -85,14 +95,23 @@ export const canUseDailyRollup = (params: {
   connection?: string;
   device?: string;
   errorGroup?: string;
-}): boolean =>
-  !params.browser &&
-  !params.os &&
-  !params.location &&
-  !params.user &&
-  !params.kuery &&
-  !params.frustration &&
-  !params.breakpoint &&
-  !params.connection &&
-  !params.device &&
-  !params.errorGroup;
+  pageUrl?: string;
+}): boolean => {
+  if (
+    params.os ||
+    params.location ||
+    params.user ||
+    params.kuery ||
+    params.frustration ||
+    params.breakpoint ||
+    params.connection ||
+    params.device ||
+    params.errorGroup
+  ) {
+    return false;
+  }
+  if (params.browser && params.pageUrl) {
+    return false;
+  }
+  return true;
+};

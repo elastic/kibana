@@ -26,7 +26,7 @@ import { getRumFiltersRoute } from './rum/filters';
 import { getRumOverviewRoute } from './rum/overview';
 import { getRumTrendsRoute } from './rum/trends';
 import { getRumClickMapRoute } from './rum/click_map';
-import { getRumPagesRoute } from './rum/pages';
+import { getRumPageDetailRoute, getRumPagesRoute } from './rum/pages';
 import { getRumErrorsRoute } from './rum/errors';
 import { getRumReportRoute } from './rum/reports';
 import {
@@ -71,6 +71,7 @@ function getTypedUxServerRouteRepository() {
     ...getRumOverviewRoute,
     ...getRumTrendsRoute,
     ...getRumClickMapRoute,
+    ...getRumPageDetailRoute,
     ...getRumPagesRoute,
     ...getRumErrorsRoute,
     ...getRumReportRoute,

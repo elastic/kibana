@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { emptyPagesDailyStatus, emptyServiceDailyStatus } from '../../common/rum_daily';
+import {
+  emptyBrowserDailyStatus,
+  emptyPagesDailyStatus,
+  emptyServiceDailyStatus,
+} from '../../common/rum_daily';
 import { resolveRumDaily } from './rum_daily';
 import { weightedAverage } from './rum_daily_query';
 
-const ready = (index: 'pages' | 'service') => ({
-  ...(index === 'pages' ? emptyPagesDailyStatus() : emptyServiceDailyStatus()),
+const ready = (index: 'pages' | 'service' | 'browser') => ({
+  ...(index === 'pages'
+    ? emptyPagesDailyStatus()
+    : index === 'browser'
+    ? emptyBrowserDailyStatus()
+    : emptyServiceDailyStatus()),
   installed: true,
   watermark: '2026-08-15T00:00:00.000Z',
   state: 'started' as const,
@@ -25,7 +33,7 @@ describe('resolveRumDaily', () => {
         rangeFrom: 'now-90d',
         rangeTo: 'now',
       })
-    ).toEqual({ usePages: true, useService: true });
+    ).toEqual({ usePages: true, useService: true, useBrowser: false });
   });
 
   it('stays on raw for short ranges or extra filters', () => {
@@ -36,16 +44,29 @@ describe('resolveRumDaily', () => {
         rangeFrom: 'now-24h',
         rangeTo: 'now',
       })
-    ).toEqual({ usePages: false, useService: false });
+    ).toEqual({ usePages: false, useService: false, useBrowser: false });
     expect(
       resolveRumDaily({
         pagesDaily: ready('pages'),
         serviceDaily: ready('service'),
         rangeFrom: 'now-90d',
         rangeTo: 'now',
+        os: 'Mac',
+      })
+    ).toEqual({ usePages: false, useService: false, useBrowser: false });
+  });
+
+  it('uses browser-daily when only browser is set', () => {
+    expect(
+      resolveRumDaily({
+        pagesDaily: ready('pages'),
+        serviceDaily: ready('service'),
+        browserDaily: ready('browser'),
+        rangeFrom: 'now-90d',
+        rangeTo: 'now',
         browser: 'Chrome',
       })
-    ).toEqual({ usePages: false, useService: false });
+    ).toEqual({ usePages: false, useService: false, useBrowser: true });
   });
 
   it('can use one rollup when the other is still warming', () => {
@@ -56,7 +77,7 @@ describe('resolveRumDaily', () => {
         rangeFrom: 'now-90d',
         rangeTo: 'now',
       })
-    ).toEqual({ usePages: true, useService: false });
+    ).toEqual({ usePages: true, useService: false, useBrowser: false });
   });
 });
 

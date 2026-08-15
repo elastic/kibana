@@ -43,7 +43,7 @@ import {
 } from '../../../../common/rum_app';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
-import { fetchRumPages } from '../../../services/rest/rum_api';
+import { fetchRumPageDetail, fetchRumPages } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { Sparkline } from '../../session_replay/session_ui';
 import { TabTrendChart } from '../rum_overview/tab_trend_chart';
@@ -333,6 +333,7 @@ export function RumPagesPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<RumPageRow | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
   const { items: budgets } = useRumBudgets();
 
   const load = useCallback(async () => {
@@ -384,6 +385,75 @@ export function RumPagesPanel() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const selectedPath = selected?.path;
+
+  useEffect(() => {
+    if (!selectedPath) {
+      return;
+    }
+    const path = selectedPath;
+    let cancelled = false;
+    setDetailLoading(true);
+    void fetchRumPageDetail({
+      http,
+      rangeFrom,
+      rangeTo,
+      serviceName: typeof serviceName === 'string' ? serviceName : undefined,
+      browser,
+      os,
+      pageUrl: path,
+      user,
+      includeBots,
+      kuery,
+      breakpoint,
+      connection,
+      device,
+      analyticsMode,
+    })
+      .then((detail) => {
+        if (cancelled) {
+          return;
+        }
+        setSelected((current) => {
+          if (!current || current.path !== path) {
+            return current;
+          }
+          const hasAttribution =
+            Boolean(detail.attribution.lcpElement) ||
+            Boolean(detail.attribution.inpTarget) ||
+            Boolean(detail.attribution.clsSource);
+          return {
+            ...current,
+            attribution: hasAttribution ? detail.attribution : current.attribution,
+            resources: detail.resources.length > 0 ? detail.resources : current.resources,
+          };
+        });
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setDetailLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    selectedPath,
+    http,
+    rangeFrom,
+    rangeTo,
+    serviceName,
+    browser,
+    os,
+    user,
+    includeBots,
+    kuery,
+    breakpoint,
+    connection,
+    device,
+    analyticsMode,
+  ]);
 
   const columns: Array<EuiBasicTableColumn<RumPageRow>> = [
     {
@@ -670,7 +740,11 @@ export function RumPagesPanel() {
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <WhySlow attribution={selected.attribution} />
+              {detailLoading ? (
+                <EuiLoadingSpinner size="m" />
+              ) : (
+                <WhySlow attribution={selected.attribution} />
+              )}
               <EuiSpacer />
               <EuiTitle size="xxs">
                 <h3>
@@ -680,7 +754,11 @@ export function RumPagesPanel() {
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <ResourcePanel resources={selected.resources} />
+              {detailLoading ? (
+                <EuiLoadingSpinner size="m" />
+              ) : (
+                <ResourcePanel resources={selected.resources} />
+              )}
               <EuiSpacer />
               <EuiButton
                 data-test-subj="uxRumPagesPanelViewSessionsOnThisPageButton"

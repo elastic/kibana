@@ -13,6 +13,7 @@ import {
 import {
   buildRumPagesDailyTransformBody,
   buildRumServiceDailyTransformBody,
+  rumBrowserDailyTransformBody,
   rumDailyDestPipeline,
   rumPagesDailyTransformBody,
   rumServiceDailyTransformBody,
@@ -68,7 +69,40 @@ describe('rum daily transform specs', () => {
     expect(source).toContain('ctx.page_views = countOf');
     expect(source).toContain('ctx.load_p75');
     expect(source).toContain('ctx.lcp_samples = samplesOf(ctx.lcp)');
+    expect(source).toContain('ctx.lcp_good = countOf(ctx.lcp.good)');
+    expect(source).toContain('ctx.lcp_element = topKey(ctx.lcp.element)');
+    expect(source).toContain('v.entrySet()');
     expect(source).toContain('ctx.load_samples = samplesOf(load)');
+  });
+
+  it('stores good / NI / poor counts on each vital', () => {
+    const lcp = rumPagesDailyTransformBody.pivot.aggregations.lcp;
+    expect(lcp.aggs).toEqual(
+      expect.objectContaining({
+        good: { filter: { range: { 'attributes.browser.web_vital.value': { lte: 2500 } } } },
+        ni: {
+          filter: { range: { 'attributes.browser.web_vital.value': { gt: 2500, lte: 4000 } } },
+        },
+        poor: { filter: { range: { 'attributes.browser.web_vital.value': { gt: 4000 } } } },
+      })
+    );
+    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 4 }));
+    expect(lcp.aggs.element).toEqual(
+      expect.objectContaining({
+        terms: expect.objectContaining({
+          field: 'attributes.browser.web_vital.lcp.element',
+          size: 1,
+        }),
+      })
+    );
+  });
+
+  it('groups browser daily by day, service, and browser name', () => {
+    const { group_by: groupBy } = rumBrowserDailyTransformBody.pivot;
+    expect(groupBy['browser.name']).toEqual({
+      terms: { field: 'attributes.browser.name' },
+    });
+    expect(groupBy).not.toHaveProperty('url.path.grouped');
   });
 
   it('counts load samples as a sub-agg because filter dest docs drop doc_count', () => {

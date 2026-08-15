@@ -6,6 +6,8 @@
  */
 
 export const RUM_SESSIONS_VERSION = 3;
+/** Pivot / dest-pipeline revision. Replace + wipe dest when this changes. */
+export const RUM_SESSIONS_SPEC = 2;
 export const RUM_SESSIONS_TRANSFORM_ID = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
 export const RUM_SESSIONS_INDEX = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
 export const RUM_SESSIONS_INDEX_PATTERN = 'ux-rum-sessions-*';
@@ -15,6 +17,8 @@ export const RUM_NORMALIZE_PIPELINE_NAME = 'ux-rum-normalize';
 export const RUM_CANONICAL_SESSION_ID_FIELD = 'resource.attributes.session.id';
 export const RUM_CANONICAL_SERVICE_NAME_FIELD = 'resource.attributes.service.name';
 export const RUM_CANONICAL_URL_PATH_GROUPED_FIELD = 'attributes.url.path.grouped';
+export const RUM_CANONICAL_BROWSER_NAME_FIELD = 'attributes.browser.name';
+export const RUM_CANONICAL_ERROR_GROUP_FIELD = 'attributes.error.group';
 export const RUM_HAS_REPLAY_FIELD = 'attributes.rum.has_replay';
 export const RUM_SESSIONS_MANAGED_BY = 'ux';
 export const RUM_SESSIONS_SYNC_DELAY = '5m';
@@ -126,6 +130,7 @@ export interface RumAnalyticsStatus {
   sourceLookbackDays: number;
   pagesDaily?: RumRollupStatus;
   serviceDaily?: RumRollupStatus;
+  browserDaily?: RumRollupStatus;
 }
 
 export const emptyRumAnalyticsStatus = (): RumAnalyticsStatus => ({
@@ -170,28 +175,19 @@ export const canUseSessionIndex = ({
   analyticsMode,
   rangeMs,
   kuery,
-  connection,
-  device,
-  errorGroup,
   lookbackDays,
 }: {
   installed: boolean;
   analyticsMode?: string;
   rangeMs?: number | null;
   kuery?: string;
-  connection?: string;
-  device?: string;
-  errorGroup?: string;
   lookbackDays?: number;
 }): boolean =>
   installed &&
   analyticsMode !== 'raw' &&
   rangeMs != null &&
   rangeMs <= sessionsIndexWindowMs(lookbackDays) &&
-  !kuery &&
-  !connection &&
-  !device &&
-  !errorGroup;
+  !kuery;
 
 export const parseIncludeRaw = (value: string | boolean | undefined): boolean =>
   value === true || value === 'true';

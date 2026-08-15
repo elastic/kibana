@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import { VITAL_RANK_THRESHOLDS } from '../../common/rum_app';
 import {
+  RUM_BROWSER_DAILY_INDEX,
+  RUM_BROWSER_DAILY_INDEX_PATTERN,
+  RUM_BROWSER_DAILY_PIPELINE_NAME,
   RUM_DAILY_MANAGED_BY,
   RUM_DAILY_RETENTION,
   RUM_DAILY_SOURCE_LOOKBACK,
+  RUM_DAILY_SPEC,
   RUM_DAILY_SYNC_DELAY,
   RUM_DAILY_VERSION,
   RUM_PAGES_DAILY_INDEX,
@@ -19,6 +24,7 @@ import {
   RUM_SERVICE_DAILY_PIPELINE_NAME,
 } from '../../common/rum_daily';
 import {
+  RUM_CANONICAL_BROWSER_NAME_FIELD,
   RUM_CANONICAL_SERVICE_NAME_FIELD,
   RUM_CANONICAL_SESSION_ID_FIELD,
   RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
@@ -80,13 +86,37 @@ const sessionCardinality = {
   cardinality: { field: RUM_CANONICAL_SESSION_ID_FIELD },
 };
 
-const vitalAgg = (name: 'lcp' | 'inp' | 'cls' | 'fcp') => ({
-  filter: vitalFilter(name),
-  aggs: {
-    p75: { percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] } },
-    samples: { value_count: { field: 'attributes.browser.web_vital.value' } },
-  },
-});
+const vitalValue = 'attributes.browser.web_vital.value';
+
+const vitalRankFilters = (name: keyof typeof VITAL_RANK_THRESHOLDS) => {
+  const { good, ni } = VITAL_RANK_THRESHOLDS[name];
+  return {
+    good: { filter: { range: { [vitalValue]: { lte: good } } } },
+    ni: { filter: { range: { [vitalValue]: { gt: good, lte: ni } } } },
+    poor: { filter: { range: { [vitalValue]: { gt: ni } } } },
+  };
+};
+
+const vitalElementField: Partial<Record<keyof typeof VITAL_RANK_THRESHOLDS, string>> = {
+  lcp: 'attributes.browser.web_vital.lcp.element',
+  inp: 'attributes.browser.web_vital.inp.target',
+  cls: 'attributes.browser.web_vital.cls.source',
+};
+
+const vitalAgg = (name: keyof typeof VITAL_RANK_THRESHOLDS) => {
+  const elementField = vitalElementField[name];
+  return {
+    filter: vitalFilter(name),
+    aggs: {
+      p75: { percentiles: { field: vitalValue, percents: [75] } },
+      samples: { value_count: { field: vitalValue } },
+      ...vitalRankFilters(name),
+      ...(elementField
+        ? { element: { terms: { field: elementField, size: 1, exclude: '' } } }
+        : {}),
+    },
+  };
+};
 
 const dailyAggregations = {
   page_views: { filter: PAGE_VIEW_FILTER },
@@ -130,12 +160,27 @@ const dailyMetricMappings = {
   error_sessions: { type: 'long' },
   lcp_p75: { type: 'double' },
   lcp_samples: { type: 'long' },
+  lcp_good: { type: 'long' },
+  lcp_ni: { type: 'long' },
+  lcp_poor: { type: 'long' },
+  lcp_element: { type: 'keyword' },
+  inp_target: { type: 'keyword' },
+  cls_source: { type: 'keyword' },
   inp_p75: { type: 'double' },
   inp_samples: { type: 'long' },
+  inp_good: { type: 'long' },
+  inp_ni: { type: 'long' },
+  inp_poor: { type: 'long' },
   cls_p75: { type: 'double' },
   cls_samples: { type: 'long' },
+  cls_good: { type: 'long' },
+  cls_ni: { type: 'long' },
+  cls_poor: { type: 'long' },
   fcp_p75: { type: 'double' },
   fcp_samples: { type: 'long' },
+  fcp_good: { type: 'long' },
+  fcp_ni: { type: 'long' },
+  fcp_poor: { type: 'long' },
   load_p75: { type: 'double' },
   load_avg: { type: 'double' },
   load_samples: { type: 'long' },
@@ -151,6 +196,11 @@ export const rumDailyIndexMappings = {
   properties: {
     '@timestamp': { type: 'date' },
     service: {
+      properties: {
+        name: { type: 'keyword' },
+      },
+    },
+    browser: {
       properties: {
         name: { type: 'keyword' },
       },
@@ -171,7 +221,7 @@ export const rumDailyIndexMappings = {
 /** Flatten filter / cardinality / percentile maps into numeric dest fields. */
 export const rumDailyDestPipeline = {
   description: 'Flatten ux-rum daily transform output.',
-  _meta: { managed_by: RUM_DAILY_MANAGED_BY, version: RUM_DAILY_VERSION },
+  _meta: { managed_by: RUM_DAILY_MANAGED_BY, version: RUM_DAILY_VERSION, spec: RUM_DAILY_SPEC },
   processors: [
     {
       script: {
@@ -218,6 +268,29 @@ export const rumDailyDestPipeline = {
             if (samples != null) { return samples; }
             return bucket.doc_count;
           }
+          def topKey(def v) {
+            if ((v instanceof Map) == false) { return null; }
+            if (v.buckets instanceof List && v.buckets.length > 0) {
+              def k = v.buckets[0].key;
+              return k == null || k.toString() == '' ? null : k.toString();
+            }
+            // Transform dest writes terms as { "key": count }, not { buckets: [...] }.
+            def best = null;
+            def bestN = -1;
+            for (e in v.entrySet()) {
+              def key = e.getKey();
+              if (key == 'buckets' || key == 'doc_count_error_upper_bound' || key == 'sum_other_doc_count') {
+                continue;
+              }
+              def n = e.getValue();
+              def count = n instanceof Number ? ((Number) n).longValue() : -1;
+              if (count > bestN && key != null && key.toString() != '') {
+                bestN = count;
+                best = key.toString();
+              }
+            }
+            return best;
+          }
           ctx.page_views = countOf(ctx.page_views);
           ctx.sessions = valueOf(ctx.sessions);
           ctx.error_count = countOf(ctx.error_count);
@@ -225,18 +298,33 @@ export const rumDailyDestPipeline = {
           if (ctx.lcp instanceof Map) {
             ctx.lcp_p75 = p75Of(ctx.lcp.p75);
             ctx.lcp_samples = samplesOf(ctx.lcp);
+            ctx.lcp_good = countOf(ctx.lcp.good);
+            ctx.lcp_ni = countOf(ctx.lcp.ni);
+            ctx.lcp_poor = countOf(ctx.lcp.poor);
+            ctx.lcp_element = topKey(ctx.lcp.element);
           }
           if (ctx.inp instanceof Map) {
             ctx.inp_p75 = p75Of(ctx.inp.p75);
             ctx.inp_samples = samplesOf(ctx.inp);
+            ctx.inp_good = countOf(ctx.inp.good);
+            ctx.inp_ni = countOf(ctx.inp.ni);
+            ctx.inp_poor = countOf(ctx.inp.poor);
+            ctx.inp_target = topKey(ctx.inp.element);
           }
           if (ctx.cls instanceof Map) {
             ctx.cls_p75 = p75Of(ctx.cls.p75);
             ctx.cls_samples = samplesOf(ctx.cls);
+            ctx.cls_good = countOf(ctx.cls.good);
+            ctx.cls_ni = countOf(ctx.cls.ni);
+            ctx.cls_poor = countOf(ctx.cls.poor);
+            ctx.cls_source = topKey(ctx.cls.element);
           }
           if (ctx.fcp instanceof Map) {
             ctx.fcp_p75 = p75Of(ctx.fcp.p75);
             ctx.fcp_samples = samplesOf(ctx.fcp);
+            ctx.fcp_good = countOf(ctx.fcp.good);
+            ctx.fcp_ni = countOf(ctx.fcp.ni);
+            ctx.fcp_poor = countOf(ctx.fcp.poor);
           }
           def load = ctx.load;
           if (load instanceof Map) {
@@ -271,7 +359,7 @@ export const rumDailyDestPipeline = {
 
 const dailyIndexTemplate = (indexPattern: string, pipeline: string) => ({
   index_patterns: [indexPattern],
-  _meta: { managed_by: RUM_DAILY_MANAGED_BY, version: RUM_DAILY_VERSION },
+  _meta: { managed_by: RUM_DAILY_MANAGED_BY, version: RUM_DAILY_VERSION, spec: RUM_DAILY_SPEC },
   template: {
     settings: {
       number_of_shards: 1,
@@ -290,6 +378,11 @@ export const rumPagesDailyIndexTemplate = dailyIndexTemplate(
 export const rumServiceDailyIndexTemplate = dailyIndexTemplate(
   RUM_SERVICE_DAILY_INDEX_PATTERN,
   RUM_SERVICE_DAILY_PIPELINE_NAME
+);
+
+export const rumBrowserDailyIndexTemplate = dailyIndexTemplate(
+  RUM_BROWSER_DAILY_INDEX_PATTERN,
+  RUM_BROWSER_DAILY_PIPELINE_NAME
 );
 
 const sourceQuery = (extraFilters: object[] = []) => ({
@@ -342,6 +435,7 @@ export const buildRumPagesDailyTransformBody = (syncDelay = RUM_DAILY_SYNC_DELAY
   _meta: {
     managed_by: RUM_DAILY_MANAGED_BY,
     version: RUM_DAILY_VERSION,
+    spec: RUM_DAILY_SPEC,
   },
   pivot: {
     group_by: {
@@ -384,6 +478,7 @@ export const buildRumServiceDailyTransformBody = (syncDelay = RUM_DAILY_SYNC_DEL
   _meta: {
     managed_by: RUM_DAILY_MANAGED_BY,
     version: RUM_DAILY_VERSION,
+    spec: RUM_DAILY_SPEC,
   },
   pivot: {
     group_by: {
@@ -394,5 +489,49 @@ export const buildRumServiceDailyTransformBody = (syncDelay = RUM_DAILY_SYNC_DEL
   },
 });
 
+export const buildRumBrowserDailyTransformBody = (syncDelay = RUM_DAILY_SYNC_DELAY) => ({
+  source: {
+    index: [RUM_SESSION_SOURCE_INDEX],
+    query: sourceQuery([{ exists: { field: RUM_CANONICAL_BROWSER_NAME_FIELD } }]),
+  },
+  dest: {
+    index: RUM_BROWSER_DAILY_INDEX,
+    pipeline: RUM_BROWSER_DAILY_PIPELINE_NAME,
+  },
+  frequency: '1h',
+  sync: {
+    time: {
+      field: '@timestamp',
+      delay: syncDelay,
+    },
+  },
+  retention_policy: {
+    time: {
+      field: '@timestamp',
+      max_age: RUM_DAILY_RETENTION,
+    },
+  },
+  settings: {
+    unattended: true,
+    max_page_search_size: 1000,
+  },
+  _meta: {
+    managed_by: RUM_DAILY_MANAGED_BY,
+    version: RUM_DAILY_VERSION,
+    spec: RUM_DAILY_SPEC,
+  },
+  pivot: {
+    group_by: {
+      '@timestamp': dateHistogramGroup,
+      'service.name': serviceNameGroup,
+      'browser.name': {
+        terms: { field: RUM_CANONICAL_BROWSER_NAME_FIELD },
+      },
+    },
+    aggregations: dailyAggregations,
+  },
+});
+
 export const rumPagesDailyTransformBody = buildRumPagesDailyTransformBody();
 export const rumServiceDailyTransformBody = buildRumServiceDailyTransformBody();
+export const rumBrowserDailyTransformBody = buildRumBrowserDailyTransformBody();

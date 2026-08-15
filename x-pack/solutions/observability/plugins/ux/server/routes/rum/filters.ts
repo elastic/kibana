@@ -41,9 +41,6 @@ export const getRumFiltersRoute = createUxServerRoute({
         analyticsMode: params.query.analyticsMode,
         rangeMs: rangeSpanMs(params.query.rangeFrom, params.query.rangeTo),
         kuery: params.query.kuery,
-        connection: params.query.connection,
-        device: params.query.device,
-        errorGroup: params.query.errorGroup,
         lookbackDays: status.sourceLookbackDays,
       })
     ) {
@@ -60,6 +57,9 @@ export const getRumFiltersRoute = createUxServerRoute({
         user: params.query.user,
         frustration: params.query.frustration,
         breakpoint: params.query.breakpoint,
+        connection: params.query.connection,
+        device: params.query.device,
+        errorGroup: params.query.errorGroup,
       });
     }
 

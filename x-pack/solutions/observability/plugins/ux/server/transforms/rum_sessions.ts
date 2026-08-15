@@ -24,6 +24,7 @@ import {
   type RumAnalyticsStatus,
 } from '../../common/rum_sessions';
 import {
+  RUM_BROWSER_DAILY_TRANSFORM_ID,
   RUM_PAGES_DAILY_TRANSFORM_ID,
   RUM_SERVICE_DAILY_TRANSFORM_ID,
 } from '../../common/rum_daily';
@@ -269,6 +270,7 @@ export const ensureRumSessionsTransform = async ({
     logger,
     transformId: RUM_SESSIONS_TRANSFORM_ID,
     version: RUM_SESSIONS_VERSION,
+    deleteDestOnReplace: true,
     body: buildRumSessionsTransformBody(delay, lookbackDays),
     onUnchanged: async (currentDelay) => {
       await updateTransformSyncDelay({
@@ -389,6 +391,12 @@ export const applyRumAnalyticsSettings = async ({
     client,
     logger,
     transformId: RUM_SERVICE_DAILY_TRANSFORM_ID,
+    delay,
+  });
+  await applySyncDelayToInstalled({
+    client,
+    logger,
+    transformId: RUM_BROWSER_DAILY_TRANSFORM_ID,
     delay,
   });
   await updateTransformSourceWindow({

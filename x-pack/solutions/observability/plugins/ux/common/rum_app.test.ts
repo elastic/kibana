@@ -15,6 +15,7 @@ import {
   makeErrorGroupKey,
   mergeRumPageRows,
   pagePassesCwv,
+  ranksFromCounts,
   ranksFromPercentileRanks,
   rateVital,
   stackErrorTrends,
@@ -46,6 +47,13 @@ describe('durationToMs', () => {
 
   it('passes through millisecond values', () => {
     expect(durationToMs(2500)).toBe(2500);
+  });
+});
+
+describe('ranksFromCounts', () => {
+  it('converts stored daily counts to the same integer percents as percentile_ranks', () => {
+    expect(ranksFromCounts(70, 20, 10)).toEqual({ good: 70, ni: 20, poor: 10 });
+    expect(ranksFromCounts(0, 0, 0)).toBeNull();
   });
 });
 

@@ -39,6 +39,23 @@ describe('buildSessionIndexFilters', () => {
       ])
     );
   });
+
+  it('filters connection, device, and error group on dest fields', () => {
+    const filters = buildSessionIndexFilters({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+      connection: '4g',
+      device: '8',
+      errorGroup: 'TypeError',
+    });
+    expect(filters).toEqual(
+      expect.arrayContaining([
+        { term: { connection: '4g' } },
+        { term: { device: '8' } },
+        { term: { error_groups: 'TypeError' } },
+      ])
+    );
+  });
 });
 
 describe('trendsFromSessionHistogram', () => {

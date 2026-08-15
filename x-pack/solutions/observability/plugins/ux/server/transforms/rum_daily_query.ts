@@ -10,13 +10,18 @@ import {
   durationToMs,
   emptyPageImpact,
   emptyVitalAttribution,
+  ranksFromCounts,
   summarizePagesKpis,
   type RumOverviewResponse,
   type RumPageRow,
   type RumPagesResponse,
   type RumVitalSummary,
 } from '../../common/rum_app';
-import { RUM_PAGES_DAILY_INDEX, RUM_SERVICE_DAILY_INDEX } from '../../common/rum_daily';
+import {
+  RUM_BROWSER_DAILY_INDEX,
+  RUM_PAGES_DAILY_INDEX,
+  RUM_SERVICE_DAILY_INDEX,
+} from '../../common/rum_daily';
 import { rumEsSearchOptions } from '../routes/rum/es_retry';
 import { termsBuckets } from '../routes/rum/query';
 
@@ -67,25 +72,36 @@ const dailyBaseFilters = ({
   rangeTo,
   serviceName,
   pageUrl,
+  browser,
   watermark,
 }: {
   rangeFrom: string;
   rangeTo: string;
   serviceName?: string;
   pageUrl?: string;
+  browser?: string;
   watermark?: string | null;
 }): object[] => {
   const filters: object[] = [dailyTimeFilter(rangeFrom, rangeTo, watermark)];
   if (serviceName) {
     filters.push({ term: { 'service.name': serviceName } });
   }
+  if (browser) {
+    filters.push({ term: { 'browser.name': browser } });
+  }
   filters.push(...dailyPageUrlFilter(pageUrl));
   return filters;
 };
 
-const vitalFromDaily = (p75: number | null, samples: number): RumVitalSummary => ({
+const vitalFromDaily = (
+  p75: number | null,
+  samples: number,
+  good: number,
+  ni: number,
+  poor: number
+): RumVitalSummary => ({
   p75,
-  ranks: null,
+  ranks: ranksFromCounts(good, ni, poor),
   samples,
 });
 
@@ -99,10 +115,10 @@ const emptyOverview = (): RumOverviewResponse => ({
     p75Inp: null,
   },
   vitals: {
-    lcp: vitalFromDaily(null, 0),
-    inp: vitalFromDaily(null, 0),
-    cls: vitalFromDaily(null, 0),
-    fcp: vitalFromDaily(null, 0),
+    lcp: vitalFromDaily(null, 0, 0, 0, 0),
+    inp: vitalFromDaily(null, 0, 0, 0, 0),
+    cls: vitalFromDaily(null, 0, 0, 0, 0),
+    fcp: vitalFromDaily(null, 0, 0, 0, 0),
   },
   trends: [],
   frustration: {
@@ -130,9 +146,21 @@ const kpiAggs = {
   rage_sessions: { sum: { field: 'rage_sessions' } },
   dead_sessions: { sum: { field: 'dead_sessions' } },
   lcp_samples: { sum: { field: 'lcp_samples' } },
+  lcp_good: { sum: { field: 'lcp_good' } },
+  lcp_ni: { sum: { field: 'lcp_ni' } },
+  lcp_poor: { sum: { field: 'lcp_poor' } },
   inp_samples: { sum: { field: 'inp_samples' } },
+  inp_good: { sum: { field: 'inp_good' } },
+  inp_ni: { sum: { field: 'inp_ni' } },
+  inp_poor: { sum: { field: 'inp_poor' } },
   cls_samples: { sum: { field: 'cls_samples' } },
+  cls_good: { sum: { field: 'cls_good' } },
+  cls_ni: { sum: { field: 'cls_ni' } },
+  cls_poor: { sum: { field: 'cls_poor' } },
   fcp_samples: { sum: { field: 'fcp_samples' } },
+  fcp_good: { sum: { field: 'fcp_good' } },
+  fcp_ni: { sum: { field: 'fcp_ni' } },
+  fcp_poor: { sum: { field: 'fcp_poor' } },
   load_samples: { sum: { field: 'load_samples' } },
   lcp_p75: {
     weighted_avg: { value: { field: 'lcp_p75' }, weight: { field: 'lcp_samples' } },
@@ -169,6 +197,9 @@ const pageRowAggs = {
   inp: { weighted_avg: { value: { field: 'inp_p75' }, weight: { field: 'inp_samples' } } },
   cls: { weighted_avg: { value: { field: 'cls_p75' }, weight: { field: 'cls_samples' } } },
   load: { weighted_avg: { value: { field: 'load_avg' }, weight: { field: 'load_samples' } } },
+  lcp_element: { terms: { field: 'lcp_element', size: 1, exclude: '' } },
+  inp_target: { terms: { field: 'inp_target', size: 1, exclude: '' } },
+  cls_source: { terms: { field: 'cls_source', size: 1, exclude: '' } },
 };
 
 const pageRowFromBucket = (bucket: {
@@ -182,21 +213,35 @@ const pageRowFromBucket = (bucket: {
   inp?: unknown;
   cls?: unknown;
   load?: unknown;
-}): RumPageRow => ({
-  path: String(bucket.key),
-  views: sumValue(bucket.views),
-  errorCount: sumValue(bucket.errors),
-  p75Lcp: weightedValue(bucket.lcp),
-  p75Inp: weightedValue(bucket.inp),
-  p75Cls: weightedValue(bucket.cls),
-  avgDurationMs: durationToMs(weightedValue(bucket.load)),
-  ...emptyPageImpact(),
-  sessionCount: sumValue(bucket.sessions),
-  rageClicks: sumValue(bucket.rage),
-  deadClicks: sumValue(bucket.dead),
-  attribution: emptyVitalAttribution(),
-  resources: [],
-});
+  lcp_element?: unknown;
+  inp_target?: unknown;
+  cls_source?: unknown;
+}): RumPageRow => {
+  const top = (agg: unknown): string | null => {
+    const key = termsBuckets(agg)[0]?.key;
+    return key != null && String(key).length > 0 ? String(key) : null;
+  };
+  return {
+    path: String(bucket.key),
+    views: sumValue(bucket.views),
+    errorCount: sumValue(bucket.errors),
+    p75Lcp: weightedValue(bucket.lcp),
+    p75Inp: weightedValue(bucket.inp),
+    p75Cls: weightedValue(bucket.cls),
+    avgDurationMs: durationToMs(weightedValue(bucket.load)),
+    ...emptyPageImpact(),
+    sessionCount: sumValue(bucket.sessions),
+    rageClicks: sumValue(bucket.rage),
+    deadClicks: sumValue(bucket.dead),
+    attribution: {
+      ...emptyVitalAttribution(),
+      lcpElement: top(bucket.lcp_element),
+      inpTarget: top(bucket.inp_target),
+      clsSource: top(bucket.cls_source),
+    },
+    resources: [],
+  };
+};
 
 const overviewFromAggs = (
   aggs: Record<string, unknown>,
@@ -217,10 +262,34 @@ const overviewFromAggs = (
       p75Inp: weightedValue(aggs.inp_p75),
     },
     vitals: {
-      lcp: vitalFromDaily(weightedValue(aggs.lcp_p75), sumValue(aggs.lcp_samples)),
-      inp: vitalFromDaily(weightedValue(aggs.inp_p75), sumValue(aggs.inp_samples)),
-      cls: vitalFromDaily(weightedValue(aggs.cls_p75), sumValue(aggs.cls_samples)),
-      fcp: vitalFromDaily(weightedValue(aggs.fcp_p75), sumValue(aggs.fcp_samples)),
+      lcp: vitalFromDaily(
+        weightedValue(aggs.lcp_p75),
+        sumValue(aggs.lcp_samples),
+        sumValue(aggs.lcp_good),
+        sumValue(aggs.lcp_ni),
+        sumValue(aggs.lcp_poor)
+      ),
+      inp: vitalFromDaily(
+        weightedValue(aggs.inp_p75),
+        sumValue(aggs.inp_samples),
+        sumValue(aggs.inp_good),
+        sumValue(aggs.inp_ni),
+        sumValue(aggs.inp_poor)
+      ),
+      cls: vitalFromDaily(
+        weightedValue(aggs.cls_p75),
+        sumValue(aggs.cls_samples),
+        sumValue(aggs.cls_good),
+        sumValue(aggs.cls_ni),
+        sumValue(aggs.cls_poor)
+      ),
+      fcp: vitalFromDaily(
+        weightedValue(aggs.fcp_p75),
+        sumValue(aggs.fcp_samples),
+        sumValue(aggs.fcp_good),
+        sumValue(aggs.fcp_ni),
+        sumValue(aggs.fcp_poor)
+      ),
     },
     trends: termsBuckets(aggs.trends).map((bucket) => ({
       timestamp:
@@ -248,33 +317,52 @@ export const queryDailyOverview = async ({
   rangeTo,
   serviceName,
   pageUrl,
+  browser,
   usePages,
   useService,
+  useBrowser,
   pagesWatermark,
   serviceWatermark,
+  browserWatermark,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
   rangeTo: string;
   serviceName?: string;
   pageUrl?: string;
+  browser?: string;
   usePages: boolean;
   useService: boolean;
+  useBrowser?: boolean;
   pagesWatermark?: string | null;
   serviceWatermark?: string | null;
+  browserWatermark?: string | null;
 }): Promise<RumOverviewResponse> => {
-  const kpiFromPages = Boolean(pageUrl) || !useService;
+  const kpiFromBrowser = Boolean(useBrowser);
+  const kpiFromPages = !kpiFromBrowser && (Boolean(pageUrl) || !useService);
   if (kpiFromPages && !usePages) {
     return emptyOverview();
   }
+  if (kpiFromBrowser && !useBrowser) {
+    return emptyOverview();
+  }
 
-  const kpiIndex = kpiFromPages ? RUM_PAGES_DAILY_INDEX : RUM_SERVICE_DAILY_INDEX;
-  const kpiWatermark = kpiFromPages ? pagesWatermark : serviceWatermark;
+  const kpiIndex = kpiFromBrowser
+    ? RUM_BROWSER_DAILY_INDEX
+    : kpiFromPages
+    ? RUM_PAGES_DAILY_INDEX
+    : RUM_SERVICE_DAILY_INDEX;
+  const kpiWatermark = kpiFromBrowser
+    ? browserWatermark
+    : kpiFromPages
+    ? pagesWatermark
+    : serviceWatermark;
   const kpiFilters = dailyBaseFilters({
     rangeFrom,
     rangeTo,
     serviceName,
     pageUrl: kpiFromPages ? pageUrl : undefined,
+    browser: kpiFromBrowser ? browser : undefined,
     watermark: kpiWatermark,
   });
 

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  RUM_CANONICAL_SERVICE_NAME_FIELD,
-  RUM_CANONICAL_SESSION_ID_FIELD,
-} from '../../common/rum_sessions';
+import { RUM_CANONICAL_SESSION_ID_FIELD } from '../../common/rum_sessions';
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import {
   buildRumSessionsTransformBody,
@@ -23,9 +20,20 @@ describe('rumSessionsTransformBody', () => {
     expect(groupBy['session.id']).toEqual({
       terms: { field: RUM_CANONICAL_SESSION_ID_FIELD },
     });
-    expect(groupBy['service.name']).toEqual({
-      terms: { field: RUM_CANONICAL_SERVICE_NAME_FIELD },
+    expect(groupBy).not.toHaveProperty('service.name');
+  });
+
+  it('stores page views, connection, device, error groups, and session vitals', () => {
+    const { aggregations } = rumSessionsTransformBody.pivot;
+    expect(aggregations.page_view_count).toEqual({
+      filter: expect.objectContaining({
+        bool: expect.objectContaining({ minimum_should_match: 1 }),
+      }),
     });
+    expect(aggregations.error_groups.aggs.groups.terms.size).toBe(5);
+    expect(aggregations.lcp.aggs.p75).toBeDefined();
+    expect(aggregations.sequences.scripted_metric.init_script).toContain('state.connection');
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 2 }));
   });
 
   it('defaults sync delay to 5m and accepts an override', () => {
@@ -73,6 +81,9 @@ describe('rumSessionsDestPipeline', () => {
     const source = rumSessionsDestPipeline.processors[0].script.source;
     expect(source).toContain('ctx.has_replay instanceof Number');
     expect(source).toContain('boolean replay = false');
+    expect(source).toContain('ctx.duration_ms');
+    expect(source).toContain('ctx.page_view_count');
+    expect(source).toContain('ctx.connection = seq.connection');
   });
 });
 

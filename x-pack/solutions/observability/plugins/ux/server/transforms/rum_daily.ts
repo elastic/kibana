@@ -8,8 +8,13 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   canUseDailyRollup,
+  emptyBrowserDailyStatus,
   emptyPagesDailyStatus,
   emptyServiceDailyStatus,
+  RUM_BROWSER_DAILY_INDEX,
+  RUM_BROWSER_DAILY_PIPELINE_NAME,
+  RUM_BROWSER_DAILY_TEMPLATE_NAME,
+  RUM_BROWSER_DAILY_TRANSFORM_ID,
   RUM_DAILY_VERSION,
   RUM_PAGES_DAILY_INDEX,
   RUM_PAGES_DAILY_PIPELINE_NAME,
@@ -23,8 +28,10 @@ import {
   type RumRollupStatus,
 } from '../../common/rum_daily';
 import {
+  buildRumBrowserDailyTransformBody,
   buildRumPagesDailyTransformBody,
   buildRumServiceDailyTransformBody,
+  rumBrowserDailyIndexTemplate,
   rumDailyDestPipeline,
   rumPagesDailyIndexTemplate,
   rumServiceDailyIndexTemplate,
@@ -45,8 +52,12 @@ import {
 
 export const getRumDailyStatuses = async (
   client: ElasticsearchClient
-): Promise<{ pagesDaily: RumRollupStatus; serviceDaily: RumRollupStatus }> => {
-  const [pagesDaily, serviceDaily] = await Promise.all([
+): Promise<{
+  pagesDaily: RumRollupStatus;
+  serviceDaily: RumRollupStatus;
+  browserDaily: RumRollupStatus;
+}> => {
+  const [pagesDaily, serviceDaily, browserDaily] = await Promise.all([
     readRollupStatus(client, {
       transformId: RUM_PAGES_DAILY_TRANSFORM_ID,
       index: RUM_PAGES_DAILY_INDEX,
@@ -55,8 +66,12 @@ export const getRumDailyStatuses = async (
       transformId: RUM_SERVICE_DAILY_TRANSFORM_ID,
       index: RUM_SERVICE_DAILY_INDEX,
     }),
+    readRollupStatus(client, {
+      transformId: RUM_BROWSER_DAILY_TRANSFORM_ID,
+      index: RUM_BROWSER_DAILY_INDEX,
+    }),
   ]);
-  return { pagesDaily, serviceDaily };
+  return { pagesDaily, serviceDaily, browserDaily };
 };
 
 const ensureOneDailyTransform = async ({
@@ -103,6 +118,7 @@ const ensureOneDailyTransform = async ({
     logger,
     transformId,
     version: RUM_DAILY_VERSION,
+    deleteDestOnReplace: true,
     body,
     onUnchanged: async (currentDelay) => {
       await updateTransformSyncDelay({
@@ -125,7 +141,11 @@ export const ensureRumDailyTransforms = async ({
   client: ElasticsearchClient;
   logger?: Logger;
   syncDelay: string;
-}): Promise<{ pagesDaily: RumRollupStatus; serviceDaily: RumRollupStatus }> => {
+}): Promise<{
+  pagesDaily: RumRollupStatus;
+  serviceDaily: RumRollupStatus;
+  browserDaily: RumRollupStatus;
+}> => {
   await ensureOneDailyTransform({
     client,
     logger,
@@ -148,6 +168,17 @@ export const ensureRumDailyTransforms = async ({
     body: buildRumServiceDailyTransformBody(syncDelay),
     syncDelay,
   });
+  await ensureOneDailyTransform({
+    client,
+    logger,
+    transformId: RUM_BROWSER_DAILY_TRANSFORM_ID,
+    index: RUM_BROWSER_DAILY_INDEX,
+    templateName: RUM_BROWSER_DAILY_TEMPLATE_NAME,
+    template: rumBrowserDailyIndexTemplate,
+    pipelineName: RUM_BROWSER_DAILY_PIPELINE_NAME,
+    body: buildRumBrowserDailyTransformBody(syncDelay),
+    syncDelay,
+  });
   return getRumDailyStatuses(client);
 };
 
@@ -160,8 +191,8 @@ export const reconcileRumDailyTransforms = async ({
   logger: Logger;
   syncDelay: string;
 }): Promise<void> => {
-  const { pagesDaily, serviceDaily } = await getRumDailyStatuses(client);
-  for (const status of [pagesDaily, serviceDaily]) {
+  const { pagesDaily, serviceDaily, browserDaily } = await getRumDailyStatuses(client);
+  for (const status of [pagesDaily, serviceDaily, browserDaily]) {
     if (!status.installed) {
       continue;
     }
@@ -186,6 +217,7 @@ export const reconcileRumDailyTransforms = async ({
 export const resolveRumDaily = ({
   pagesDaily,
   serviceDaily,
+  browserDaily,
   analyticsMode,
   rangeFrom,
   rangeTo,
@@ -193,6 +225,7 @@ export const resolveRumDaily = ({
 }: {
   pagesDaily?: RumRollupStatus;
   serviceDaily?: RumRollupStatus;
+  browserDaily?: RumRollupStatus;
   analyticsMode?: string;
   rangeFrom?: string;
   rangeTo?: string;
@@ -206,9 +239,23 @@ export const resolveRumDaily = ({
   connection?: string;
   device?: string;
   errorGroup?: string;
-}): { usePages: boolean; useService: boolean } => {
+  pageUrl?: string;
+}): { usePages: boolean; useService: boolean; useBrowser: boolean } => {
   if (!canUseDailyRollup(filters)) {
-    return { usePages: false, useService: false };
+    return { usePages: false, useService: false, useBrowser: false };
+  }
+  if (filters.browser) {
+    return {
+      usePages: false,
+      useService: false,
+      useBrowser: shouldQueryDailyIndex({
+        installed: browserDaily?.installed ?? false,
+        watermark: browserDaily?.watermark,
+        analyticsMode,
+        rangeFrom,
+        rangeTo,
+      }),
+    };
   }
   return {
     usePages: shouldQueryDailyIndex({
@@ -225,13 +272,16 @@ export const resolveRumDaily = ({
       rangeFrom,
       rangeTo,
     }),
+    useBrowser: false,
   };
 };
 
 export const emptyDailyStatuses = (): {
   pagesDaily: RumRollupStatus;
   serviceDaily: RumRollupStatus;
+  browserDaily: RumRollupStatus;
 } => ({
   pagesDaily: emptyPagesDailyStatus(),
   serviceDaily: emptyServiceDailyStatus(),
+  browserDaily: emptyBrowserDailyStatus(),
 });

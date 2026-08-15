@@ -11,7 +11,9 @@ import type {
   RumFiltersResponse,
   RumOverviewResponse,
   RumPagesResponse,
+  RumResourceRow,
   RumTrendPoint,
+  RumVitalAttribution,
 } from '../../../common/rum_app';
 import type { RumClickMapResponse } from '../../../common/rum_click_map';
 import type {
@@ -111,6 +113,19 @@ export const fetchRumPages = async ({
   ...params
 }: RumQueryParams): Promise<RumPagesResponse> => {
   return http.get<RumPagesResponse>('/internal/ux/rum/pages', { query: rumQuery(params) });
+};
+
+export const fetchRumPageDetail = async ({
+  http,
+  pageUrl,
+  ...params
+}: RumQueryParams & { pageUrl: string }): Promise<{
+  attribution: RumVitalAttribution;
+  resources: RumResourceRow[];
+}> => {
+  return http.get('/internal/ux/rum/pages/detail', {
+    query: rumQuery({ ...params, pageUrl }),
+  });
 };
 
 export const fetchRumErrors = async ({
