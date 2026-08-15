@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AGG_TYPE } from '../../../common/constants';
+import { LAYER_STYLE_TYPE } from '../constants';
+import type { StyleDescriptor } from '../descriptor_types';
 
-export function isMetricCountable(aggType: AGG_TYPE): boolean {
-  return [AGG_TYPE.COUNT, AGG_TYPE.SUM, AGG_TYPE.UNIQUE_COUNT].includes(aggType);
+export function createTileStyleDescriptor(): StyleDescriptor {
+  return { type: LAYER_STYLE_TYPE.TILE };
 }

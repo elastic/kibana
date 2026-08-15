@@ -19,12 +19,19 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { distinctUntilChanged, type Subscription } from 'rxjs';
+import type { PanelTypeMigration } from '@kbn/embeddable-plugin/server';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
 import { getFlightsSavedObjects } from './sample_data/flights_saved_objects';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects';
 import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
+import {
+  LEGACY_MAPS_PANEL_MIGRATION_DEFAULT,
+  LEGACY_MAPS_PANEL_MIGRATION_FEATURE_FLAG,
+} from './dashboard_panel_migrations/constants';
 import type { MapsXPackConfig } from './config';
 import { setStartServices } from './kibana_server_services';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
@@ -35,10 +42,13 @@ import { registerIntegrations } from './register_integrations';
 import type { StartDeps, SetupDeps } from './types';
 import { MapsStorage } from './content_management';
 import { getTransforms } from '../common/embeddable/transforms/get_transforms';
+import { migrateLegacyTileAndRegionMapPanels } from './dashboard_panel_migrations/migrate_legacy_maps_panels';
 
 export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
   private readonly _logger: Logger;
+  private legacyMapsPanelMigrationEnabled = LEGACY_MAPS_PANEL_MIGRATION_DEFAULT;
+  private legacyMapsPanelMigrationSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {
     this._logger = initializerContext.logger.get();
@@ -272,6 +282,17 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
       getTransforms,
     });
 
+    const legacyMapsMigration: PanelTypeMigration = {
+      from: VISUALIZE_EMBEDDABLE_TYPE,
+      to: MAP_SAVED_OBJECT_TYPE,
+      migrateOut: async (panels, { savedObjectsClient, allowMissingTargetSchema }) => {
+        if (!allowMissingTargetSchema) return [];
+        if (!this.legacyMapsPanelMigrationEnabled) return [];
+        return await migrateLegacyTileAndRegionMapPanels(panels, savedObjectsClient);
+      },
+    };
+    plugins.embeddable.registerPanelTypeMigration(legacyMapsMigration);
+
     return {
       config: config$,
     };
@@ -279,5 +300,20 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
   start(core: CoreStart, plugins: StartDeps) {
     setStartServices(core);
+
+    this.legacyMapsPanelMigrationSubscription = core.featureFlags
+      .getBooleanValue$(
+        LEGACY_MAPS_PANEL_MIGRATION_FEATURE_FLAG,
+        LEGACY_MAPS_PANEL_MIGRATION_DEFAULT
+      )
+      .pipe(distinctUntilChanged())
+      .subscribe((enabled) => {
+        this.legacyMapsPanelMigrationEnabled = enabled;
+      });
+  }
+
+  stop() {
+    this.legacyMapsPanelMigrationSubscription?.unsubscribe();
+    this.legacyMapsPanelMigrationSubscription = undefined;
   }
 }

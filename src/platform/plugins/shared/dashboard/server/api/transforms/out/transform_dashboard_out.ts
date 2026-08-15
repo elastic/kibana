@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { PanelTypeMigrationContext } from '@kbn/embeddable-plugin/server';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 
 import { DEFAULT_DASHBOARD_STATE } from '../../../../common/default_dashboard_state';
@@ -20,16 +21,17 @@ import { transformPinnedPanelsOut } from './transform_pinned_panels_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { logger } from '../../../kibana_services';
 
-export function transformDashboardOut(
+export async function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined = undefined,
   isDashboardAppRequest: boolean = false,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
-  useGASchemas?: boolean
-): {
+  useGASchemas?: boolean,
+  migrationContext?: PanelTypeMigrationContext
+): Promise<{
   dashboardState: DashboardState;
   warnings: Warnings;
-} {
+}> {
   const {
     pinned_panels,
     controlGroupInput: legacyControls,
@@ -49,12 +51,13 @@ export function transformDashboardOut(
 
   const { tags } = toAsCodeTags(references);
 
-  const { panels, warnings } = transformPanelsOut(
+  const { panels, warnings } = await transformPanelsOut(
     panelsJSON,
     sections,
     references,
     isDashboardAppRequest,
-    useGASchemas
+    useGASchemas,
+    migrationContext
   );
 
   const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(

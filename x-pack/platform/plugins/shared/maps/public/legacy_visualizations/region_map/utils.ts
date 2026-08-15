@@ -6,43 +6,47 @@
  */
 
 import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { AggConfigSerialized } from '@kbn/data-plugin/common';
+import { extractRegionMapLayerDescriptorParams } from '../../../common/legacy_maps_conversion';
 import type { RegionMapVisParams } from './types';
 import { title } from './region_map_vis_type';
 
-function getEmsLayerId(id: string | number, layerId: string) {
-  if (typeof id === 'string') {
-    return id;
-  }
-
-  // Region maps from 6.x will have numerical EMS id refering to S3 bucket id.
-  // In this case, use layerId with contains the EMS layer name.
-  const split = layerId.split('.');
-  return split.length === 2 ? split[1] : undefined;
-}
-
-export function extractLayerDescriptorParams(vis: Vis<RegionMapVisParams>) {
-  const params: { [key: string]: any } = {
-    label: vis.title ? vis.title : title,
-    emsLayerId: vis.params.selectedLayer.isEMS
-      ? getEmsLayerId(vis.params.selectedLayer.id, vis.params.selectedLayer.layerId)
-      : undefined,
-    leftFieldName: vis.params.selectedLayer.isEMS ? vis.params.selectedJoinField.name : undefined,
-    colorSchema: vis.params.colorSchema,
-    indexPatternId: vis.data.indexPattern?.id,
-    metricAgg: 'count',
-  };
-
-  const bucketAggs = vis.data?.aggs?.byType('buckets');
-  if (bucketAggs?.length && bucketAggs[0].type.dslName === 'terms') {
-    params.termsFieldName = bucketAggs[0].getField()?.name;
-    params.termsSize = bucketAggs[0].getParam('size');
-  }
+function toLegacyAggs(vis: Vis<RegionMapVisParams>): AggConfigSerialized[] {
+  const aggs: AggConfigSerialized[] = [];
 
   const metricAggs = vis.data?.aggs?.byType('metrics');
   if (metricAggs?.length) {
-    params.metricAgg = metricAggs[0].type.dslName;
-    params.metricFieldName = metricAggs[0].getField()?.name;
+    aggs.push({
+      type: metricAggs[0].type.dslName,
+      schema: 'metric',
+      params: {
+        field: metricAggs[0].getField()?.name,
+      },
+    });
   }
 
-  return params;
+  const bucketAggs = vis.data?.aggs?.byType('buckets');
+  if (bucketAggs?.length) {
+    aggs.push({
+      type: bucketAggs[0].type.dslName,
+      schema: 'segment',
+      params: {
+        field: bucketAggs[0].getField()?.name,
+        size: bucketAggs[0].getParam('size'),
+      },
+    });
+  }
+
+  return aggs;
+}
+
+export function extractLayerDescriptorParams(vis: Vis<RegionMapVisParams>) {
+  return extractRegionMapLayerDescriptorParams({
+    label: vis.title ? vis.title : title,
+    colorSchema: vis.params.colorSchema,
+    indexPatternId: vis.data.indexPattern?.id,
+    selectedLayer: vis.params.selectedLayer,
+    selectedJoinField: vis.params.selectedJoinField,
+    aggs: toLegacyAggs(vis),
+  });
 }

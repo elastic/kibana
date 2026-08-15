@@ -10,8 +10,9 @@ import type { ReactElement } from 'react';
 import _ from 'lodash';
 import type { Writable } from '@kbn/utility-types';
 import { AbstractLayer } from '../layer';
-import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
 import type { LayerDescriptor, RasterLayerDescriptor } from '../../../../common/descriptor_types';
+import { createTileStyleDescriptor } from '../../../../common/descriptor_factories';
 import { TileStyle } from '../../styles/tile/tile_style';
 import type { DataRequestContext } from '../../../actions';
 
@@ -22,7 +23,7 @@ export class RasterTileLayer extends AbstractLayer {
     const tileLayerDescriptor = super.createDescriptor(options) as Writable<LayerDescriptor>;
     tileLayerDescriptor.type = LAYER_TYPE.RASTER_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
-    tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
+    tileLayerDescriptor.style = createTileStyleDescriptor();
     return tileLayerDescriptor as RasterLayerDescriptor;
   }
 

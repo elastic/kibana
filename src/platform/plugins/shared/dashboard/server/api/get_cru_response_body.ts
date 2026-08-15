@@ -10,6 +10,8 @@
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PanelTypeMigrationContext } from '@kbn/embeddable-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
@@ -17,7 +19,7 @@ import { transformDashboardOut } from './transforms';
 import type { DashboardState, Operation, Warnings } from './types';
 
 // CRU is Create, Read, Update
-export function getDashboardCRUResponseBody(
+export async function getDashboardCRUResponseBody(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
@@ -25,7 +27,8 @@ export function getDashboardCRUResponseBody(
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false,
   serverTiming?: RequestTiming,
-  useGASchemas?: boolean
+  useGASchemas?: boolean,
+  savedObjectsClient?: SavedObjectsClientContract
 ) {
   const timer = serverTiming?.start('transform-dashboard-out');
 
@@ -33,12 +36,18 @@ export function getDashboardCRUResponseBody(
   const warnings: Warnings = [];
   try {
     let dashboardStateWarnings;
-    ({ dashboardState, warnings: dashboardStateWarnings } = transformDashboardOut(
+    const migrationContext: PanelTypeMigrationContext | undefined =
+      operation === 'read' && savedObjectsClient
+        ? { savedObjectsClient, allowMissingTargetSchema: isDashboardAppRequest }
+        : undefined;
+
+    ({ dashboardState, warnings: dashboardStateWarnings } = await transformDashboardOut(
       savedObject.attributes,
       savedObject.references,
       isDashboardAppRequest,
       strictValidationSchema,
-      useGASchemas
+      useGASchemas,
+      migrationContext
     ));
     warnings.push(...dashboardStateWarnings);
     if (!isDashboardAppRequest && operation === 'read') {

@@ -18,7 +18,7 @@ import { AGG_TYPE, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
-import { isMetricCountable } from '../../util/is_metric_countable';
+import { isMetricCountable } from '../../../../common/is_metric_countable';
 import { RenderAsSelect } from './render_as_select';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';

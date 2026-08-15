@@ -15,6 +15,7 @@ import { WmsClient } from './wms_client';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import type { IRasterSource, RasterTileSourceData } from '../raster_source';
 import type { WMSSourceDescriptor } from '../../../../common/descriptor_types';
+import { createWmsSourceDescriptor } from '../../../../common/descriptor_factories';
 export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });
@@ -23,12 +24,7 @@ export class WMSSource extends AbstractSource implements IRasterSource {
   static type = SOURCE_TYPES.WMS;
   readonly _descriptor: WMSSourceDescriptor;
   static createDescriptor({ serviceUrl, layers, styles }: Partial<WMSSourceDescriptor>) {
-    return {
-      type: WMSSource.type,
-      serviceUrl,
-      layers,
-      styles,
-    } as WMSSourceDescriptor;
+    return createWmsSourceDescriptor({ serviceUrl, layers, styles });
   }
   constructor(sourceDescriptor: WMSSourceDescriptor) {
     super(sourceDescriptor);

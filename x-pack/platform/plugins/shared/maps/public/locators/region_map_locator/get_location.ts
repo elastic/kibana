@@ -7,7 +7,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LayerDescriptor } from '../../../common/descriptor_types';
-import { createRegionMapLayerDescriptor } from '../../classes/layers/create_region_map_layer_descriptor';
+import { createRegionMapLayerDescriptor } from '../../../common/legacy_maps_conversion';
 import type { MapsAppRegionMapLocatorParams, MapsAppRegionMapLocatorDependencies } from './types';
 
 export async function getLocation(

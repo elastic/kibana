@@ -14,6 +14,7 @@ import { HeatmapLegend } from './components/legend/heatmap_legend';
 import { DEFAULT_HEATMAP_COLOR_RAMP_NAME, getOrdinalMbColorRampStops } from '../color_palettes';
 import { LAYER_STYLE_TYPE, GRID_RESOLUTION } from '../../../../common/constants';
 import type { HeatmapStyleDescriptor, StyleDescriptor } from '../../../../common/descriptor_types';
+import { createHeatmapStyleDescriptor } from '../../../../common/descriptor_factories';
 import type { IField } from '../../fields/field';
 
 // The heatmap range chosen hear runs from 0 to 1. It is arbitrary.
@@ -35,10 +36,9 @@ export class HeatmapStyle implements IStyle {
   static createDescriptor(
     colorRampName?: HeatmapStyleDescriptor['colorRampName']
   ): Required<HeatmapStyleDescriptor> {
-    return {
-      type: LAYER_STYLE_TYPE.HEATMAP,
-      colorRampName: colorRampName ? colorRampName : DEFAULT_HEATMAP_COLOR_RAMP_NAME,
-    };
+    return createHeatmapStyleDescriptor(
+      colorRampName ? colorRampName : DEFAULT_HEATMAP_COLOR_RAMP_NAME
+    );
   }
 
   getType() {

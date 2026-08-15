@@ -63,7 +63,12 @@ export function registerSanitizeRoute(
       try {
         const { core } = await ctx.resolve(['core']);
         const useGASchemas = await getUseGASchemas(core);
-        const result = await sanitize(getCachedDashboardStateSchema(), req.body, useGASchemas);
+        const result = await sanitize(
+          getCachedDashboardStateSchema(),
+          req.body,
+          core.savedObjects.client,
+          useGASchemas
+        );
         return res.ok({ body: result });
       } catch (e) {
         const message = e.stack ?? e.message;
