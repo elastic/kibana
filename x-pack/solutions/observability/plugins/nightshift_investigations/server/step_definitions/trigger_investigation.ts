@@ -28,7 +28,9 @@ const inputSchema = z.object({
 
 type TriggerInvestigationInput = z.infer<typeof inputSchema>;
 
-export const triggerInvestigationStepDefinition = (getInvestigationsClient: GetInvestigationsClient) =>
+export const triggerInvestigationStepDefinition = (
+  getInvestigationsClient: GetInvestigationsClient
+) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
     description:
