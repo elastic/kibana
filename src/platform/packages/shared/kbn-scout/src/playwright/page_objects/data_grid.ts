@@ -512,9 +512,27 @@ export class DataGrid {
     );
 
     await expandButton.waitFor({ state: 'visible' });
-    await expandButton.scrollIntoViewIfNeeded();
-    await expandButton.hover();
-    await expandButton.click({ delay: 50 });
+    await expandButton.focus();
+    await expandButton.press('Enter');
+  }
+
+  async scrollToRow(rowIndex: number): Promise<void> {
+    const scrollContainer = this.page.testSubj
+      .locator('discoverDocTable')
+      .locator('.euiDataGrid__virtualized');
+    const targetRow = this.page.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+
+    for (let attempt = 0; attempt <= rowIndex; attempt++) {
+      try {
+        await targetRow.waitFor({ state: 'attached', timeout: 100 });
+        await targetRow.scrollIntoViewIfNeeded();
+        return;
+      } catch {
+        await scrollContainer.evaluate((element) => element.scrollBy(0, element.clientHeight));
+      }
+    }
+
+    throw new Error(`Unable to scroll data grid row ${rowIndex} into view`);
   }
 
   async openGridDisplaySettings() {
