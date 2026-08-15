@@ -90,7 +90,10 @@ describe(
 
       cy.contains('[data-test-subj="markdownBody"] a', 'Compliance', { timeout: 30000 }).click();
 
-      const expectedPath = getSpaceUrl(SPACE_ID, `${DASHBOARDS_URL}/${COMPLIANCE_PACK_DASHBOARD_ID}`);
+      const expectedPath = getSpaceUrl(
+        SPACE_ID,
+        `${DASHBOARDS_URL}/${COMPLIANCE_PACK_DASHBOARD_ID}`
+      );
       cy.url().should('include', expectedPath);
       // Guards against the space+app basename being applied twice, e.g.
       // `/s/<space>/app/security/s/<space>/app/security/dashboards/<id>`.
