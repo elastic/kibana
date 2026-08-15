@@ -11,6 +11,7 @@ import {
   type NightshiftInvestigationsRepositoryClient,
 } from './api';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NightshiftInvestigationsPublicSetup {}
 
 export interface NightshiftInvestigationsPublicStart {

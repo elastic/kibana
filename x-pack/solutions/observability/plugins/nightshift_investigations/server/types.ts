@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface NightshiftInvestigationsServerSetup {}
 
 export interface NightshiftInvestigationsServerStart {
