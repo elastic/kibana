@@ -1291,7 +1291,10 @@
     "core.euiFlyoutManaged.defaultTitle": "Volet inconnu",
     "core.euiFlyoutMenu.back": "Retour",
     "core.euiFlyoutMenu.history": "Historique",
+    "core.euiFlyoutMenu.history.tooltip": "Récemment visité",
     "core.euiFlyoutMenu.pagination.counter": "{position} sur {total}",
+    "core.euiFlyoutMenu.pagination.first": "Premier",
+    "core.euiFlyoutMenu.pagination.last": "Dernier",
     "core.euiFlyoutMenu.pagination.next": "Suivant",
     "core.euiFlyoutMenu.pagination.previous": "Précédent",
     "core.euiForm.addressFormErrors": "Veuillez remédier aux erreurs signalées en surbrillance.",
@@ -60256,9 +60259,6 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Le port webhook est requis.",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "Le nom d'utilisateur est requis.",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "Ce champ est requis.",
-    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes.",
-    "core.euiFlyoutMenu.history.tooltip": "Récemment visité",
-    "core.euiFlyoutMenu.pagination.first": "Premier",
-    "core.euiFlyoutMenu.pagination.last": "Dernier"
+    "xpack.watcher.watcherDescription": "Détectez les modifications survenant dans vos données en créant, gérant et monitorant des alertes."
   }
 }

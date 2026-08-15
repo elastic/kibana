@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -30,7 +30,8 @@ import { useRule } from '../rule_context';
 import { useFetchSignalFirings } from '../../../hooks/use_fetch_signal_firings';
 import { getDiscoverHrefForRuleQuery } from '../../../utils/discover_href_for_episode';
 import { useAlertTimelineUrlState } from './alert_timeline/use_alert_timeline_url_state';
-import { DEFAULT_ACTIVITY_TIME_RANGE, resolveGteLte } from './time_range';
+import { DEFAULT_ACTIVITY_TIME_RANGE } from './time_range';
+import { useResolvedActivityWindow } from './use_resolved_activity_window';
 import { StatsRow, type StatItem } from './stats_row';
 import { SignalFiringsChart } from './signal_activity/signal_firings_chart';
 import { deriveSignalFiringKpis } from './signal_activity/signal_firing_kpis';
@@ -61,12 +62,11 @@ export const SignalRuleOverview: React.FC = () => {
     [setTimeRange]
   );
 
-  const [refreshTick, setRefreshTick] = useState(0);
-
-  const { windowStartMs: gteMs, windowEndMs: lteMs } = useMemo(() => {
-    void refreshTick;
-    return resolveGteLte(timeRange.from, timeRange.to);
-  }, [timeRange.from, timeRange.to, refreshTick]);
+  const {
+    windowStartMs: gteMs,
+    windowEndMs: lteMs,
+    applyRefresh,
+  } = useResolvedActivityWindow(timeRange.from, timeRange.to);
 
   const { buckets, interval, lastFiringMs, isLoading, isHistogramError, isSummaryError, refetch } =
     useFetchSignalFirings({
@@ -75,11 +75,6 @@ export const SignalRuleOverview: React.FC = () => {
       lteMs,
       data,
     });
-
-  const handleRefresh = useCallback(() => {
-    setRefreshTick((n) => n + 1);
-    refetch();
-  }, [refetch]);
 
   const intervalMs = useMemo(() => intervalToMs(interval), [interval]);
 
@@ -257,7 +252,8 @@ export const SignalRuleOverview: React.FC = () => {
             to={timeRange.to}
             onChange={setTimeRange}
             services={{ data, notifications, http, application, uiSettings, featureFlags }}
-            onRefresh={handleRefresh}
+            onRefresh={() => applyRefresh(refetch)}
+            showRefreshButton
             isLoading={isLoading}
             showTimeWindowButtons
             width="auto"

@@ -7,7 +7,14 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
-import { EuiSuperDatePicker } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type {
   ApplicationStart,
   FeatureFlagsStart,
@@ -44,6 +51,10 @@ const DEFAULT_AUTO_REFRESH: AutoRefreshSettings = {
 const toRecentRanges = (ranges: Array<{ from: string; to: string }>): PresetItem[] =>
   ranges.map(({ from, to }) => ({ start: from, end: to }));
 
+const REFRESH_LABEL = i18n.translate('xpack.alertingV2.dateRangePicker.refreshButtonLabel', {
+  defaultMessage: 'Refresh',
+});
+
 export interface AlertingDateRangePickerServices {
   data: DataPublicPluginStart;
   notifications: NotificationsStart;
@@ -60,6 +71,11 @@ export interface AlertingDateRangePickerProps {
   services: AlertingDateRangePickerServices;
   /** When provided, wires the picker's built-in auto-refresh control. */
   onRefresh?: () => void;
+  /**
+   * Renders a manual "refresh now" icon button beside the picker. Requires `onRefresh`.
+   * @default false
+   */
+  showRefreshButton?: boolean;
   isLoading?: boolean;
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
@@ -87,6 +103,7 @@ export const AlertingDateRangePicker = ({
   onChange,
   services: { data, notifications, http, application, uiSettings, featureFlags },
   onRefresh,
+  showRefreshButton = false,
   isLoading = false,
   showTimeWindowButtons = false,
   width = 'auto',
@@ -175,6 +192,8 @@ export const AlertingDateRangePicker = ({
     [onChange, timeHistory]
   );
 
+  const canManuallyRefresh = Boolean(showRefreshButton && onRefresh);
+
   if (!isDateRangePickerEnabled) {
     return (
       <EuiSuperDatePicker
@@ -183,8 +202,8 @@ export const AlertingDateRangePicker = ({
         onTimeChange={handleLegacyTimeChange}
         onRefresh={onRefresh}
         isLoading={isLoading}
-        showUpdateButton={onRefresh ? 'iconOnly' : false}
-        updateButtonProps={onRefresh ? { fill: false } : undefined}
+        showUpdateButton={canManuallyRefresh ? 'iconOnly' : false}
+        updateButtonProps={canManuallyRefresh ? { fill: false } : undefined}
         width={width === 'restricted' ? 'auto' : width}
         compressed={compressed}
         dateFormat={dateFormat}
@@ -193,7 +212,7 @@ export const AlertingDateRangePicker = ({
     );
   }
 
-  return (
+  const picker = (
     <DateRangePicker
       value={value}
       onChange={handleChange}
@@ -216,5 +235,28 @@ export const AlertingDateRangePicker = ({
       canAccessAdvancedSettings={canAccessAdvancedSettings}
       data-test-subj={dataTestSubj}
     />
+  );
+
+  if (!canManuallyRefresh) {
+    return picker;
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>{picker}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={REFRESH_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="refresh"
+            display="base"
+            size="s"
+            aria-label={REFRESH_LABEL}
+            onClick={onRefresh}
+            isLoading={isLoading}
+            data-test-subj={dataTestSubj ? `${dataTestSubj}-refresh` : 'alertingDateRangeRefresh'}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

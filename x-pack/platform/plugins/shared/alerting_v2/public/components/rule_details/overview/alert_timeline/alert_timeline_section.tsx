@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -34,7 +34,8 @@ import { AlertTimelineChart } from './alert_timeline_chart';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
 import { AlertTimelineViewAllButton } from './alert_timeline_view_all_button';
 import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
-import { DEFAULT_ACTIVITY_TIME_RANGE, resolveGteLte } from '../time_range';
+import { DEFAULT_ACTIVITY_TIME_RANGE } from '../time_range';
+import { useResolvedActivityWindow } from '../use_resolved_activity_window';
 
 export const AlertTimelineSection: React.FC = () => {
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
@@ -50,22 +51,20 @@ export const AlertTimelineSection: React.FC = () => {
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
   const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
-  const [refreshTick, setRefreshTick] = useState(0);
+  const { windowStartMs, windowEndMs, applyRefresh } = useResolvedActivityWindow(
+    timeRange.from,
+    timeRange.to
+  );
 
-  const handleRefresh = useCallback(() => setRefreshTick((n) => n + 1), []);
-
-  const { windowStartMs, windowEndMs } = useMemo(() => {
-    void refreshTick;
-    return resolveGteLte(timeRange.from, timeRange.to);
-  }, [timeRange.from, timeRange.to, refreshTick]);
-
-  const { phases, groupingValuesByHash, summary, isLoading, isError } = useFetchRuleEvents({
-    ruleId: rule.id,
-    windowStartMs,
-    windowEndMs,
-    groupingFields,
-    data,
-  });
+  const { phases, groupingValuesByHash, summary, isLoading, isError, refetch } = useFetchRuleEvents(
+    {
+      ruleId: rule.id,
+      windowStartMs,
+      windowEndMs,
+      groupingFields,
+      data,
+    }
+  );
 
   const timelineData = useMemo(
     () =>
@@ -140,7 +139,8 @@ export const AlertTimelineSection: React.FC = () => {
             to={timeRange.to}
             onChange={setTimeRange}
             services={{ data, notifications, http, application, uiSettings, featureFlags }}
-            onRefresh={handleRefresh}
+            onRefresh={() => applyRefresh(refetch)}
+            showRefreshButton
             isLoading={isLoading}
             showTimeWindowButtons
             width="auto"
