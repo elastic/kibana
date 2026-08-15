@@ -91,6 +91,9 @@ export interface StoreOpts {
   apiKeyStrategy: ApiKeyStrategy;
 }
 
+/** Omitted from claim-time search hits; runners load them via bulkGet after claim. */
+export const TASK_SEARCH_SOURCE_EXCLUDES = ['task.state', 'task.params'];
+
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
@@ -1080,6 +1083,7 @@ export class TaskStore {
       {
         index: this.index,
         ignore_unavailable: true,
+        _source_excludes: TASK_SEARCH_SOURCE_EXCLUDES,
         searches,
       },
       { retryOnTimeout: false }
@@ -1102,11 +1106,8 @@ export class TaskStore {
       allTasks = allTasks.concat(this.filterTasks(tasks));
     }
 
-    const allSortedTasks = claimSort(this.definitions, allTasks);
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-      allSortedTasks
-    );
-    return { docs: tasksWithDecryptedApiKeys, versionMap };
+    // Claim does not need state/params/keys; post-claim bulkGet loads those.
+    return { docs: claimSort(this.definitions, allTasks), versionMap };
   }
 
   public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {
@@ -1128,7 +1129,7 @@ export class TaskStore {
           ignore_unavailable: true,
           ...opts,
           query,
-          ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
+          ...(limitResponse ? { _source_excludes: TASK_SEARCH_SOURCE_EXCLUDES } : {}),
         },
         { retryOnTimeout: false }
       );

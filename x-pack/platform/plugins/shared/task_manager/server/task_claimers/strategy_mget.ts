@@ -7,7 +7,8 @@
 
 // Basic operation of this task claimer:
 // - search for candidate tasks to run, more than we actually can run
-// - initial search returns a slimmer task document for I/O efficiency (no params or state)
+// - initial search returns a slimmer task document (no params or state) and
+//   does not decrypt API keys; bulkGet after claim loads the full docs
 // - for each task found, do an mget to get the current seq_no and primary_term
 // - if the mget result doesn't match the search result, the task is stale
 // - from the non-stale search results, return as many as we can run based on available

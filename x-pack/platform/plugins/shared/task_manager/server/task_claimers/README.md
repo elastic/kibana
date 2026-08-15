@@ -17,7 +17,5 @@ The idea is to get more tasks than we have workers for with a search,
 and then validate that they are still valid (not been claimed) with an
 mget, since they may be stale.
 
-There are lots of interesting potential things we can do here, like maybe
-skipping polling completely for a round (think single Kibana, and the earlier
-poll got 2 * workers tasks out).  But we'll probably start with the bare
-minimum to get it working.
+The claim `msearch` omits `state` and `params` and does not decrypt API keys.
+Those fields are loaded only for the tasks we actually claim, via `bulkGet`.
