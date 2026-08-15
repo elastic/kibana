@@ -230,13 +230,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('updates the details flyout when a new hostname is selected from the list', async () => {
             // display flyout for the first endpoint in the list
-            await (await testSubjects.findAll('hostnameCellLink'))[0].click();
+            await (await testSubjects.findAllOrFail('hostnameCellLink'))[0].click();
             await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
             const endpointDetailTitle0 = await testSubjects.getVisibleText(
               'endpointDetailsFlyoutTitle'
             );
             // select the 2nd endpoint in the endpoint list
-            await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+            await (await testSubjects.findAllOrFail('hostnameCellLink', { min: 2 }))[1].click();
             await pageObjects.endpoint.waitForVisibleTextToChange(
               'endpointDetailsFlyoutTitle',
               endpointDetailTitle0
@@ -249,13 +249,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('has the same flyout info when the same hostname is selected', async () => {
             // display flyout for the first endpoint in the list
-            await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+            await (await testSubjects.findAllOrFail('hostnameCellLink', { min: 2 }))[1].click();
             await testSubjects.existOrFail('endpointDetailsFlyoutTitle');
             const endpointDetailTitleInitial = await testSubjects.getVisibleText(
               'endpointDetailsFlyoutTitle'
             );
             // select the same endpoint in the endpoint list
-            await (await testSubjects.findAll('hostnameCellLink'))[1].click();
+            await (await testSubjects.findAllOrFail('hostnameCellLink', { min: 2 }))[1].click();
             await retry.waitForWithTimeout(
               'endpoint details flyout title to exist',
               1500,

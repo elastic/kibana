@@ -1594,7 +1594,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async hoverOverDimensionButton(index = 0) {
-      const dimensionButton = (await testSubjects.findAll('lns-dimensionTrigger'))[index];
+      const dimensionButtons = await testSubjects.findAllOrFail('lns-dimensionTrigger', {
+        min: index + 1,
+      });
+      const dimensionButton = dimensionButtons[index];
       await dimensionButton.moveMouseTo();
     },
 

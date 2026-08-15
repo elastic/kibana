@@ -63,7 +63,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await testSubjects.existOrFail('reportJobListing');
 
-        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        await (await testSubjects.findAllOrFail('euiCollapsedItemActionsButton'))[0].click();
 
         await (await testSubjects.find('reportViewInfoLink')).click();
 
@@ -122,7 +122,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       it('allows user to view schedule config in flyout', async () => {
         await testSubjects.existOrFail('reportSchedulesTable');
-        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        await (await testSubjects.findAllOrFail('euiCollapsedItemActionsButton'))[0].click();
         const viewConfigButton = await find.byCssSelector(`[data-test-subj*="reportEditConfig-"]`);
 
         await viewConfigButton.click();
@@ -134,7 +134,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       it('allows user to disable schedule', async () => {
         await testSubjects.existOrFail('reportSchedulesTable');
-        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        await (await testSubjects.findAllOrFail('euiCollapsedItemActionsButton'))[0].click();
         const disableButton = await find.byCssSelector(
           `[data-test-subj*="reportDisableSchedule-"]`
         );
@@ -154,7 +154,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       it('allows user to open dashboard', async () => {
         await testSubjects.existOrFail('reportSchedulesTable');
-        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        await (await testSubjects.findAllOrFail('euiCollapsedItemActionsButton'))[0].click();
         const openDashboardButton = await find.byCssSelector(
           `[data-test-subj*="reportOpenDashboard-"]`
         );
@@ -182,7 +182,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('allows user to delete schedule', async () => {
         await (await testSubjects.find('reportingTabs-schedules')).click();
         await testSubjects.existOrFail('reportSchedulesTable');
-        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        await (await testSubjects.findAllOrFail('euiCollapsedItemActionsButton'))[0].click();
         const deleteButton = await find.byCssSelector(`[data-test-subj*="reportDeleteSchedule-"]`);
         await deleteButton.click();
 

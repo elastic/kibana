@@ -77,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await PageObjects.common.sleep(3000); // Wait an amount of time for auto-polling to refresh the jobs
 
-      const [firstTitleElem] = await testSubjects.findAll('reportingListItemObjectTitle');
+      const [firstTitleElem] = await testSubjects.findAllOrFail('reportingListItemObjectTitle');
       const tableCellText = await firstTitleElem.getVisibleText();
       expect(tableCellText).to.be(`Tiểu thuyết`);
     });

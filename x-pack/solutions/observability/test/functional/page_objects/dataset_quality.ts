@@ -493,7 +493,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     getIntegrationDashboardButtons() {
-      return testSubjects.findAll(
+      return testSubjects.findAllOrFail(
         testSubjectSelectors.datasetQualityDetailsIntegrationAction('Dashboard')
       );
     },
