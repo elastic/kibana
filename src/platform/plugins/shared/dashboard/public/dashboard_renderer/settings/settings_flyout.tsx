@@ -332,6 +332,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                           defaultMessage: 'Sync color palettes across panels',
                         }
                       )}{' '}
+                      <span aria-hidden="true">
                       <EuiIconTip
                         color="subdued"
                         content={
@@ -363,6 +364,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
                         size="s"
                         type="question"
                       />
+                      </span>
                     </EuiText>
                   }
                   checked={localSettings.sync_colors}
