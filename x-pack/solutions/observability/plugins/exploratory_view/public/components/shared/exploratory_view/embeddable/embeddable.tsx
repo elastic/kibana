@@ -30,6 +30,9 @@ import { useEmbeddableAttributes } from './use_embeddable_attributes';
 // disable the built-in one to avoid a duplicate menu entry (see issue #231475).
 const DISABLED_ACTIONS = ['embeddable_addToExistingCase'];
 
+// Compact KPI/sparkline embeddables cannot surface Lens inspector warnings usefully.
+const hideLensWarningBadges = () => [];
+
 export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
@@ -215,7 +218,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         extraActions={actions}
         viewMode={'view'}
         searchSessionId={searchSessionId}
-        onBeforeBadgesRender={onBeforeBadgesRender}
+        onBeforeBadgesRender={onBeforeBadgesRender ?? hideLensWarningBadges}
         onLoad={(loading, inspectorAdapters) => {
           reportEvent(inspectorAdapters);
           onLoad?.(loading);

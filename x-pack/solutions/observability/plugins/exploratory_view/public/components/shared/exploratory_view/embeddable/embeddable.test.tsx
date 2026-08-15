@@ -171,6 +171,9 @@ describe('Embeddable', () => {
     expect((mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].withDefaultActions).toEqual(
       true
     );
+    expect(
+      (mockLens.EmbeddableComponent as jest.Mock).mock.calls[0][0].onBeforeBadgesRender()
+    ).toEqual([]);
   });
 
   it('forwards onBeforeBadgesRender to the Lens embeddable', () => {

@@ -14,15 +14,11 @@ import type { Subject } from 'rxjs';
 import type { Store } from 'redux-v4';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import type { ExploratoryEmbeddableProps } from '@kbn/exploratory-view-plugin/public';
 import { SyntheticsRefreshContextProvider } from './synthetics_refresh_context';
 import { SyntheticsDataViewContextProvider } from './synthetics_data_view_context';
 import type { SyntheticsAppProps } from './synthetics_settings_context';
 import { storage, store } from '../state';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
-
-// Compact KPI/sparkline widgets cannot surface Lens inspector warnings usefully.
-const hideLensWarningBadges = () => [];
 
 export const SyntheticsSharedContext: React.FC<
   React.PropsWithChildren<SyntheticsAppProps & { reload$?: Subject<boolean>; reduxStore?: Store }>
@@ -36,19 +32,6 @@ export const SyntheticsSharedContext: React.FC<
       spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
-
-  const exploratoryView = useMemo(() => {
-    const Embeddable = startPlugins.exploratoryView.ExploratoryViewEmbeddable;
-    return {
-      ...startPlugins.exploratoryView,
-      ExploratoryViewEmbeddable: (props: ExploratoryEmbeddableProps) => (
-        <Embeddable
-          {...props}
-          onBeforeBadgesRender={props.onBeforeBadgesRender ?? hideLensWarningBadges}
-        />
-      ),
-    };
-  }, [startPlugins.exploratoryView]);
 
   return (
     <KibanaContextProvider
@@ -64,7 +47,7 @@ export const SyntheticsSharedContext: React.FC<
         observability: startPlugins.observability,
         observabilityShared: startPlugins.observabilityShared,
         observabilityAIAssistant: startPlugins.observabilityAIAssistant,
-        exploratoryView,
+        exploratoryView: startPlugins.exploratoryView,
         cases: startPlugins.cases,
         spaces: startPlugins.spaces,
         fleet: startPlugins.fleet,
