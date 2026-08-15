@@ -6,7 +6,7 @@
  */
 
 import { deflateSync } from 'zlib';
-import { reassembleReplayEvents } from './reassemble_events';
+import { reassembleReplayEvents, reassembleReplayEventsWithCursor } from './reassemble_events';
 
 describe('reassembleReplayEvents', () => {
   it('reassembles single-chunk events in sort order', () => {
@@ -79,6 +79,29 @@ describe('reassembleReplayEvents', () => {
     ]);
 
     expect(events).toEqual([]);
+  });
+
+  it('returns the last complete event key and ignores trailing incomplete chunks', () => {
+    const assembled = reassembleReplayEventsWithCursor([
+      {
+        body: JSON.stringify({ type: 4, timestamp: 1 }),
+        attributes: { 'rr-web.event': 1, 'rr-web.chunk': 1, 'rr-web.total-chunks': 1 },
+      },
+      {
+        body: JSON.stringify({ type: 2, timestamp: 2 }),
+        attributes: { 'rr-web.event': 2, 'rr-web.chunk': 1, 'rr-web.total-chunks': 1 },
+      },
+      {
+        body: '{"partial"',
+        attributes: { 'rr-web.event': 3, 'rr-web.chunk': 1, 'rr-web.total-chunks': 2 },
+      },
+    ]);
+
+    expect(assembled.events).toEqual([
+      { type: 4, timestamp: 1 },
+      { type: 2, timestamp: 2 },
+    ]);
+    expect(assembled.lastCompleteEvent).toBe(2);
   });
 
   it('reads nested rr-web attribute objects', () => {

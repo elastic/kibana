@@ -49,6 +49,7 @@ import {
   SessionReplayInjectButton,
   SessionReplayInjectFlyout,
 } from './session_replay_inject_flyout';
+import { LiveSessionsPanel } from './live_sessions_panel';
 import {
   JourneyTrail,
   SignalBadges,
@@ -662,6 +663,8 @@ export function SessionReplayPanel() {
   return (
     <>
       <TabTrendChart accessor="sessions" />
+      <EuiSpacer />
+      <LiveSessionsPanel />
       <EuiSpacer />
       <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
         {injectOpen && (

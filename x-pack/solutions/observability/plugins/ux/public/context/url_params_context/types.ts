@@ -38,6 +38,7 @@ export type UrlParams = {
   device?: string;
   compare?: string;
   includePii?: string;
+  goalId?: string;
 } & Partial<Record<UxLocalUIFilterName, string>>;
 
 type StringifyAll<T> = { [K in keyof T]: string };

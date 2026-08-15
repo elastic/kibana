@@ -58,10 +58,23 @@ const getBodyText = (body: ReplayEventHitSource['body']): string | undefined => 
   return undefined;
 };
 
+export interface ReassembledReplayEvents {
+  events: unknown[];
+  lastCompleteEvent: number | null;
+}
+
 /**
  * Reassemble chunked rrweb OTLP log documents into ordered event objects.
  */
-export const reassembleReplayEvents = (hits: ReplayEventHitSource[]): unknown[] => {
+export const reassembleReplayEvents = (hits: ReplayEventHitSource[]): unknown[] =>
+  reassembleReplayEventsWithCursor(hits).events;
+
+/**
+ * Same as reassembleReplayEvents, plus the last complete `rr-web.event` key for incremental tailing.
+ */
+export const reassembleReplayEventsWithCursor = (
+  hits: ReplayEventHitSource[]
+): ReassembledReplayEvents => {
   const chunks = new Map<number, ChunkEntry>();
 
   for (const hit of hits) {
@@ -89,21 +102,26 @@ export const reassembleReplayEvents = (hits: ReplayEventHitSource[]): unknown[] 
   }
 
   const events: unknown[] = [];
+  let lastCompleteEvent: number | null = null;
   const sortedKeys = [...chunks.keys()].sort((a, b) => a - b);
   for (const key of sortedKeys) {
-    const entry = chunks.get(key)!;
+    const entry = chunks.get(key);
+    if (!entry) {
+      continue;
+    }
     const filled = entry.parts.filter((part): part is string => typeof part === 'string');
     if (filled.length !== entry.total) {
       continue;
     }
     try {
       events.push(unpackReplayPayload(JSON.parse(filled.join('')), entry.packed));
+      lastCompleteEvent = key;
     } catch {
       // skip malformed payloads
     }
   }
 
-  return events;
+  return { events, lastCompleteEvent };
 };
 
 /** Undo rrweb `@rrweb/packer` payloads (`fflate` zlib as a latin1 string). */

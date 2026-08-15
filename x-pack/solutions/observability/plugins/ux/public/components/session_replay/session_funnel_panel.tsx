@@ -5,43 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  EuiAccordion,
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
   EuiEmptyPrompt,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiProgress,
-  EuiSelect,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import {
-  DEFAULT_FUNNEL_STEPS,
-  FUNNEL_MAX_STEPS,
-  FUNNEL_MIN_STEPS,
-  FUNNEL_STEP_VALUE_MAX_LENGTH,
-  type FunnelStepDef,
-  type FunnelStepType,
-  type SessionFunnelResponse,
-} from '../../../common/session_funnel';
+import { FUNNEL_MIN_STEPS, type FunnelStepDef } from '../../../common/session_funnel';
 import type {
   ExitPattern,
   FrictionPattern,
@@ -51,29 +36,12 @@ import type {
 } from '../../../common/session_patterns';
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
-import { fetchSessionFunnel, fetchSessionPatterns } from '../../services/rest/session_replay_api';
+import { fetchSessionPatterns } from '../../services/rest/session_replay_api';
+import { ConversionGoalPanel } from './conversion_goal_panel';
 import { shortenPath } from './session_ui';
 import { pushRumPath, sessionsPatch } from '../../utils/rum_search';
 
-const STEP_TYPE_OPTIONS = [
-  {
-    value: 'page',
-    text: i18n.translate('xpack.ux.funnels.stepTypePageDropDownOptionLabel', {
-      defaultMessage: 'Page',
-    }),
-  },
-  {
-    value: 'activity',
-    text: i18n.translate('xpack.ux.funnels.stepTypeActivityDropDownOptionLabel', {
-      defaultMessage: 'Activity',
-    }),
-  },
-];
-
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
-
-const usableSteps = (steps: FunnelStepDef[]): FunnelStepDef[] =>
-  steps.filter((step) => step.value.trim().length > 0);
 
 const toFunnelSteps = (kind: PathPatternKind, steps: string[]): FunnelStepDef[] =>
   steps.map((step) => ({
@@ -223,7 +191,6 @@ export function SessionFunnelPanel() {
   const [patterns, setPatterns] = useState<SessionPatternsResponse | null>(null);
   const [patternsLoading, setPatternsLoading] = useState(true);
   const [patternsError, setPatternsError] = useState<string | null>(null);
-  const [customOpen, setCustomOpen] = useState(false);
   const [presetSteps, setPresetSteps] = useState<FunnelStepDef[] | null>(null);
 
   const loadPatterns = useCallback(async () => {
@@ -252,7 +219,6 @@ export function SessionFunnelPanel() {
 
   const inspect = (kind: PathPatternKind, steps: string[]) => {
     setPresetSteps(toFunnelSteps(kind, steps));
-    setCustomOpen(true);
   };
 
   const viewSessions = (ids: string[]) => {
@@ -280,11 +246,16 @@ export function SessionFunnelPanel() {
         <p>
           {i18n.translate('xpack.ux.journeys.pageDescription', {
             defaultMessage:
-              'Recurring journeys mined from recent sessions. Open a pattern to land on those sessions, or inspect it as an ordered funnel.',
+              'Save conversion sequences with a dollar value, then mine recurring journeys from recent sessions. Inspect a pattern to load it as a goal.',
           })}
         </p>
       </EuiText>
       <EuiSpacer size="m" />
+      <ConversionGoalPanel
+        presetSteps={presetSteps}
+        onPresetConsumed={() => setPresetSteps(null)}
+      />
+      <EuiSpacer size="l" />
 
       {patternsError && (
         <>
@@ -335,6 +306,15 @@ export function SessionFunnelPanel() {
         />
       ) : patterns ? (
         <>
+          <EuiHorizontalRule margin="l" />
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.ux.patterns.minedTitle', {
+                defaultMessage: 'Mined from sessions',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
           <EuiStat
             title={String(patterns.sessionsConsidered)}
             description={i18n.translate('xpack.ux.patterns.scannedDescription', {
@@ -430,23 +410,6 @@ export function SessionFunnelPanel() {
           )}
         </>
       ) : null}
-
-      <EuiSpacer size="l" />
-      <EuiAccordion
-        id="uxCustomFunnel"
-        arrowDisplay="left"
-        forceState={customOpen ? 'open' : 'closed'}
-        onToggle={(isOpen) => setCustomOpen(isOpen)}
-        buttonContent={i18n.translate('xpack.ux.patterns.customFunnelButtonLabel', {
-          defaultMessage: 'Custom conversion funnel',
-        })}
-        paddingSize="m"
-      >
-        <CustomFunnelEditor
-          presetSteps={presetSteps}
-          onPresetConsumed={() => setPresetSteps(null)}
-        />
-      </EuiAccordion>
     </EuiPanel>
   );
 }
@@ -492,327 +455,6 @@ function PatternSection({
           />
         ))
       )}
-    </>
-  );
-}
-
-function CustomFunnelEditor({
-  presetSteps,
-  onPresetConsumed,
-}: {
-  presetSteps: FunnelStepDef[] | null;
-  onPresetConsumed: () => void;
-}) {
-  const { http } = useKibanaServices();
-  const history = useHistory();
-  const {
-    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery },
-  } = useLegacyUrlParams();
-
-  const [steps, setSteps] = useState<FunnelStepDef[]>(DEFAULT_FUNNEL_STEPS);
-  const [result, setResult] = useState<SessionFunnelResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const stepsRef = useRef(steps);
-  stepsRef.current = steps;
-
-  const runFunnel = useCallback(async () => {
-    const toRun = usableSteps(stepsRef.current);
-    if (toRun.length < FUNNEL_MIN_STEPS) {
-      setResult(null);
-      setError(
-        i18n.translate('xpack.ux.funnels.minStepsErrorMessage', {
-          defaultMessage: 'Add at least two steps with a page path or activity name.',
-        })
-      );
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchSessionFunnel({
-        http,
-        rangeFrom,
-        rangeTo,
-        serviceName: typeof serviceName === 'string' ? serviceName : undefined,
-        steps: toRun,
-        kuery,
-      });
-      setResult(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-      setResult(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [http, rangeFrom, rangeTo, serviceName, kuery]);
-
-  useEffect(() => {
-    if (!presetSteps) {
-      return;
-    }
-    setSteps(presetSteps);
-    stepsRef.current = presetSteps;
-    onPresetConsumed();
-    void runFunnel();
-  }, [onPresetConsumed, presetSteps, runFunnel]);
-
-  const startCount = result?.steps[0]?.count ?? 0;
-  const lastCount = result?.steps.at(-1)?.count ?? 0;
-  const maxCount = Math.max(startCount, 1);
-
-  const updateStep = (index: number, patch: Partial<FunnelStepDef>) => {
-    setSteps((current) => current.map((step, i) => (i === index ? { ...step, ...patch } : step)));
-  };
-
-  return (
-    <>
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.ux.funnels.description', {
-            defaultMessage:
-              'Count sessions that completed each step in order. Page matches URL path or hash; activity matches click targets (for example Add to cart, Checkout).',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-
-      {steps.map((step, index) => (
-        <EuiFlexGroup key={`step-${index}`} gutterSize="s" alignItems="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false} style={{ width: 140 }}>
-            <EuiFormRow
-              label={
-                index === 0
-                  ? i18n.translate('xpack.ux.funnels.stepTypeLabel', { defaultMessage: 'Type' })
-                  : undefined
-              }
-            >
-              <EuiSelect
-                options={STEP_TYPE_OPTIONS}
-                value={step.type}
-                onChange={(e) => updateStep(index, { type: e.target.value as FunnelStepType })}
-                compressed
-                data-test-subj={`uxFunnelStepType-${index}`}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={
-                index === 0
-                  ? i18n.translate('xpack.ux.funnels.stepValueLabel', {
-                      defaultMessage: 'Page or activity',
-                    })
-                  : undefined
-              }
-            >
-              <EuiFieldText
-                compressed
-                value={step.value}
-                maxLength={FUNNEL_STEP_VALUE_MAX_LENGTH}
-                placeholder={
-                  step.type === 'page'
-                    ? i18n.translate('xpack.ux.funnels.pagePlaceholder', {
-                        defaultMessage: 'catalog',
-                      })
-                    : i18n.translate('xpack.ux.funnels.activityPlaceholder', {
-                        defaultMessage: 'Checkout',
-                      })
-                }
-                onChange={(e) =>
-                  updateStep(index, { value: e.target.value, label: e.target.value })
-                }
-                data-test-subj={`uxFunnelStepValue-${index}`}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.ux.funnels.removeStepTooltip', {
-                defaultMessage: 'Remove step',
-              })}
-            >
-              <EuiButtonIcon
-                data-test-subj={`uxFunnelRemoveStep-${index}`}
-                aria-label={i18n.translate('xpack.ux.funnels.removeStepAriaLabel', {
-                  defaultMessage: 'Remove step',
-                })}
-                iconType="trash"
-                color="danger"
-                disabled={steps.length <= FUNNEL_MIN_STEPS}
-                onClick={() => setSteps((current) => current.filter((_, i) => i !== index))}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="uxSessionFunnelPanelAddStepButton"
-            size="s"
-            iconType="plusInCircle"
-            isDisabled={steps.length >= FUNNEL_MAX_STEPS}
-            onClick={() =>
-              setSteps((current) => [...current, { type: 'page', value: '', label: '' }])
-            }
-          >
-            {i18n.translate('xpack.ux.funnels.addStepButtonLabel', { defaultMessage: 'Add step' })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            onClick={() => setSteps(DEFAULT_FUNNEL_STEPS)}
-            data-test-subj="uxFunnelResetButton"
-          >
-            {i18n.translate('xpack.ux.funnels.resetButtonLabel', {
-              defaultMessage: 'Shop preset',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            fill
-            onClick={() => void runFunnel()}
-            isLoading={loading}
-            data-test-subj="uxFunnelRunButton"
-          >
-            {i18n.translate('xpack.ux.funnels.runButtonLabel', { defaultMessage: 'Run funnel' })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
-      {error && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            size="s"
-            title={i18n.translate('xpack.ux.funnels.errorTitle', {
-              defaultMessage: 'Could not compute the funnel',
-            })}
-          >
-            <p>{error}</p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {loading && !result ? (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18n.translate('xpack.ux.funnels.loadingLabel', {
-                defaultMessage: 'Computing funnel…',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : result && result.steps.length > 0 ? (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                title={String(startCount)}
-                description={i18n.translate('xpack.ux.funnels.enteredStat', {
-                  defaultMessage: 'Entered funnel',
-                })}
-                titleSize="s"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                title={percent(startCount === 0 ? 0 : lastCount / startCount)}
-                description={i18n.translate('xpack.ux.funnels.convertedStat', {
-                  defaultMessage: 'Completed all steps',
-                })}
-                titleSize="s"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                title={String(result.sessionsConsidered)}
-                description={i18n.translate('xpack.ux.funnels.consideredStat', {
-                  defaultMessage: 'Sessions scanned',
-                })}
-                titleSize="s"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-
-          {result.steps.map((step, index) => (
-            <div key={`${step.type}-${step.value}-${index}`}>
-              {index > 0 && (
-                <EuiText size="xs" color="subdued" style={{ margin: '4px 0 8px 0' }}>
-                  {i18n.translate('xpack.ux.funnels.dropOffLabel', {
-                    defaultMessage: '{count} dropped off ({rate} of previous step)',
-                    values: {
-                      count: step.dropOffCount,
-                      rate: percent(1 - step.conversionFromPrevious),
-                    },
-                  })}
-                  {step.sampleDroppedSessionIds.length > 0 && (
-                    <>
-                      {' · '}
-                      {step.sampleDroppedSessionIds.map((sessionId, sIdx) => (
-                        <span key={sessionId}>
-                          {sIdx > 0 ? ', ' : ''}
-                          <EuiLink
-                            data-test-subj={`uxFunnelDroppedSession-${sessionId}`}
-                            href={history.createHref({
-                              pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
-                            })}
-                            onClick={(e: React.MouseEvent) => {
-                              e.preventDefault();
-                              history.push({
-                                pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
-                              });
-                            }}
-                          >
-                            {sessionId.slice(0, 8)}
-                          </EuiLink>
-                        </span>
-                      ))}
-                    </>
-                  )}
-                </EuiText>
-              )}
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false} style={{ width: 160 }}>
-                  <EuiText size="s">
-                    <strong>{step.label}</strong>
-                  </EuiText>
-                  <EuiBadge color="hollow">
-                    {step.type === 'page' ? STEP_TYPE_OPTIONS[0].text : STEP_TYPE_OPTIONS[1].text}
-                  </EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiProgress value={step.count} max={maxCount} color="primary" size="l" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ minWidth: 120, textAlign: 'right' }}>
-                  <EuiText size="s">
-                    <strong>{step.count}</strong>
-                    {' · '}
-                    {percent(step.conversionFromStart)}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-            </div>
-          ))}
-        </>
-      ) : null}
     </>
   );
 }

@@ -9,7 +9,14 @@ import type { EndpointOf, ServerRouteRepository } from '@kbn/server-route-reposi
 import { listSessionReplaySessionsRoute } from './session_replay/list_sessions';
 import { getSessionRoute } from './session_replay/get_session';
 import { getSessionReplayEventsRoute } from './session_replay/get_events';
+import { listLiveReplaySessionsRoute } from './session_replay/live';
 import { getSessionFunnelRoute } from './session_replay/funnel';
+import {
+  createConversionGoalRoute,
+  deleteConversionGoalRoute,
+  listConversionGoalsRoute,
+  updateConversionGoalRoute,
+} from './session_replay/goals';
 import { getSessionPatternsRoute } from './session_replay/patterns';
 import {
   getSessionReplaySettingsRoute,
@@ -49,7 +56,12 @@ function getTypedUxServerRouteRepository() {
     ...listSessionReplaySessionsRoute,
     ...getSessionRoute,
     ...getSessionReplayEventsRoute,
+    ...listLiveReplaySessionsRoute,
     ...getSessionFunnelRoute,
+    ...listConversionGoalsRoute,
+    ...createConversionGoalRoute,
+    ...updateConversionGoalRoute,
+    ...deleteConversionGoalRoute,
     ...getSessionPatternsRoute,
     ...getSessionReplaySettingsRoute,
     ...updateSessionReplaySettingsRoute,

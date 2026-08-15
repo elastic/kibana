@@ -30,6 +30,12 @@ describe('mergeRumSearch', () => {
     expect(mergeRumSearch('?rangeFrom=now-24h', { t: '1500' })).toBe('rangeFrom=now-24h&t=1500');
   });
 
+  it('stores a conversion goal id', () => {
+    expect(mergeRumSearch('?rangeFrom=now-24h', { goalId: 'goal-1' })).toBe(
+      'rangeFrom=now-24h&goalId=goal-1'
+    );
+  });
+
   it('stores session find params', () => {
     expect(
       mergeRumSearch('?rangeFrom=now-24h', {

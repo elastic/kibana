@@ -17,3 +17,21 @@ export const SESSION_ID_SCRIPT = `
   if (asid != null && asid.size() > 0) { return asid.value; }
   return '';
 `;
+
+/** Session id on rrweb OTLP logs (`logs-rum.replay-*`). */
+export const REPLAY_SESSION_ID_SCRIPT = `
+  def rum = doc.containsKey('attributes.rum.sessionId') ? doc['attributes.rum.sessionId'] : null;
+  if (rum != null && rum.size() > 0) { return rum.value; }
+  def sid = doc.containsKey('attributes.session.id') ? doc['attributes.session.id'] : null;
+  if (sid != null && sid.size() > 0) { return sid.value; }
+  return '';
+`;
+
+/** Service name on rrweb OTLP logs. */
+export const REPLAY_SERVICE_NAME_SCRIPT = `
+  def resource = doc.containsKey('resource.attributes.service.name') ? doc['resource.attributes.service.name'] : null;
+  if (resource != null && resource.size() > 0) { return resource.value; }
+  def attr = doc.containsKey('attributes.service.name') ? doc['attributes.service.name'] : null;
+  if (attr != null && attr.size() > 0) { return attr.value; }
+  return '';
+`;

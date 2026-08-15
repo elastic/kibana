@@ -181,4 +181,18 @@ export interface SessionReplayEventsResponse {
   sessionId: string;
   events: unknown[];
   total: number;
+  /** Highest complete `rr-web.event` key in this response (or prior cursor). */
+  lastCompleteEvent: number | null;
+}
+
+export interface LiveReplaySession {
+  sessionId: string;
+  lastSeen: string | null;
+  eventCount: number;
+  serviceName: string | null;
+}
+
+export interface LiveReplaySessionsResponse {
+  sessions: LiveReplaySession[];
+  lookbackSeconds: number;
 }

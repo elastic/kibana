@@ -7,6 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type {
+  LiveReplaySessionsResponse,
   RumSessionDetail,
   SessionListResponse,
   SessionReplayEventsResponse,
@@ -135,13 +136,43 @@ export const fetchSessionDetail = async ({
 export const fetchSessionReplayEvents = async ({
   http,
   sessionId,
+  afterEvent,
+  size,
 }: {
   http: HttpStart;
   sessionId: string;
+  afterEvent?: number;
+  size?: number;
 }): Promise<SessionReplayEventsResponse> => {
   return http.get<SessionReplayEventsResponse>(
-    `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}/events`
+    `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}/events`,
+    {
+      query: {
+        ...(afterEvent != null ? { afterEvent: String(afterEvent) } : {}),
+        ...(size != null ? { size: String(size) } : {}),
+      },
+    }
   );
+};
+
+export const fetchLiveReplaySessions = async ({
+  http,
+  serviceName,
+  lookbackSeconds,
+  size,
+}: {
+  http: HttpStart;
+  serviceName?: string;
+  lookbackSeconds?: number;
+  size?: number;
+}): Promise<LiveReplaySessionsResponse> => {
+  return http.get<LiveReplaySessionsResponse>('/internal/ux/session_replay/live', {
+    query: {
+      ...(serviceName ? { serviceName } : {}),
+      ...(lookbackSeconds != null ? { lookbackSeconds: String(lookbackSeconds) } : {}),
+      ...(size != null ? { size: String(size) } : {}),
+    },
+  });
 };
 
 export const fetchSessionFunnel = async ({

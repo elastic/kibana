@@ -12,46 +12,89 @@ import {
   SESSION_REPLAY_INDEX,
   type SessionReplayEventsResponse,
 } from '../../../common/session_replay';
-import { reassembleReplayEvents, type ReplayEventHitSource } from './reassemble_events';
+import {
+  FULL_REPLAY_EVENT_PAGE_SIZE,
+  LIVE_EVENT_PAGE_SIZE,
+  LIVE_EVENT_PAGE_SIZE_MAX,
+} from '../../../common/session_replay_live';
+import { boundedString } from '../rum/query';
+import { rumEsSearchOptions } from '../rum/es_retry';
+import { reassembleReplayEventsWithCursor, type ReplayEventHitSource } from './reassemble_events';
+
+const parseOptionalInt = (raw: string | undefined): number | undefined => {
+  if (raw == null || raw === '') {
+    return undefined;
+  }
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 0) {
+    return undefined;
+  }
+  return value;
+};
 
 export const getSessionReplayEventsRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/session_replay/sessions/{sessionId}/events',
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
-  params: t.type({
-    path: t.type({
-      sessionId: t.string,
+  params: t.intersection([
+    t.type({
+      path: t.type({
+        sessionId: t.string,
+      }),
     }),
-  }),
+    t.partial({
+      query: t.partial({
+        afterEvent: boundedString(16),
+        size: boundedString(8),
+      }),
+    }),
+  ]),
   handler: async ({ context, params }): Promise<SessionReplayEventsResponse> => {
     const { sessionId } = params.path;
+    const afterEvent = parseOptionalInt(params.query?.afterEvent);
+    const requestedSize = parseOptionalInt(params.query?.size);
+    const incremental = afterEvent != null;
+    const size = incremental
+      ? Math.min(requestedSize ?? LIVE_EVENT_PAGE_SIZE, LIVE_EVENT_PAGE_SIZE_MAX)
+      : FULL_REPLAY_EVENT_PAGE_SIZE;
     const { elasticsearch } = await context.core;
 
-    const result = await elasticsearch.client.asCurrentUser.search({
-      index: SESSION_REPLAY_INDEX,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 10000,
-      query: {
+    const filters: object[] = [
+      {
         bool: {
           should: SESSION_ID_FIELDS.map((field) => ({ term: { [field]: sessionId } })),
           minimum_should_match: 1,
         },
       },
-      sort: [
-        { 'attributes.rr-web.event': { order: 'asc', unmapped_type: 'long' } },
-        { 'attributes.rr-web.chunk': { order: 'asc', unmapped_type: 'long' } },
-      ],
-      _source: ['body', 'attributes', '@timestamp'],
-    });
+    ];
+    if (afterEvent != null) {
+      filters.push({ range: { 'attributes.rr-web.event': { gt: afterEvent } } });
+    }
+
+    const result = await elasticsearch.client.asCurrentUser.search(
+      {
+        index: SESSION_REPLAY_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size,
+        query: { bool: { filter: filters } },
+        sort: [
+          { 'attributes.rr-web.event': { order: 'asc', unmapped_type: 'long' } },
+          { 'attributes.rr-web.chunk': { order: 'asc', unmapped_type: 'long' } },
+        ],
+        _source: ['body', 'attributes', '@timestamp'],
+      },
+      rumEsSearchOptions
+    );
 
     const hits = result.hits.hits.map((hit) => (hit._source ?? {}) as ReplayEventHitSource);
-    const events = reassembleReplayEvents(hits);
+    const assembled = reassembleReplayEventsWithCursor(hits);
 
     return {
       sessionId,
-      events,
-      total: events.length,
+      events: assembled.events,
+      total: assembled.events.length,
+      lastCompleteEvent: assembled.lastCompleteEvent ?? afterEvent ?? null,
     };
   },
 });

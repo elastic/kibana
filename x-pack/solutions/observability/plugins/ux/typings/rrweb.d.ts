@@ -14,10 +14,17 @@ declare module 'rrweb' {
         skipInactive?: boolean;
         speed?: number;
         mouseTail?: boolean;
+        liveMode?: boolean;
+        useVirtualDom?: boolean;
       }
     );
     play(timeOffset?: number): void;
-    pause(): void;
+    pause(timeOffset?: number): void;
+    startLive(baselineTime?: number): void;
+    addEvent(event: unknown): void;
+    getCurrentTime(): number;
+    getMetaData(): { startTime: number; endTime: number; totalTime: number };
+    on(event: string, handler: (...args: unknown[]) => void): this;
     setConfig(config: { speed?: number }): void;
     destroy?(): void;
   }
