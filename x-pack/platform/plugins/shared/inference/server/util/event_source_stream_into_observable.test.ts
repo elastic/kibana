@@ -51,4 +51,20 @@ describe('eventSourceStreamIntoObservable', () => {
 
     expect(results).toEqual(['42', '9000', '51']);
   });
+
+  it('destroys the underlying stream on unsubscribe', async () => {
+    const stream = new Readable({ read() {} });
+    stream.push(`data: hello\n\n`);
+
+    const observable = eventSourceStreamIntoObservable(stream);
+    const subscription = observable.subscribe({
+      next: () => {
+        subscription.unsubscribe();
+      },
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    expect(stream.destroyed).toBe(true);
+  });
 });

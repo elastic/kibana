@@ -31,5 +31,14 @@ export function eventSourceStreamIntoObservable(readable: Readable) {
         subscriber.error(error);
       }
     );
+
+    // Teardown: destroy the underlying stream when the Observable is
+    // unsubscribed (e.g. on abort or error). Without this, the ES
+    // transport stream stays open until TCP timeout or garbage collection,
+    // consuming server resources and contributing to event-loop pressure
+    // during SSE retry loops.
+    return () => {
+      readable.destroy();
+    };
   });
 }

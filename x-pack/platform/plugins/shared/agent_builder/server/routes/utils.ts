@@ -13,9 +13,19 @@ export const getTechnicalPreviewWarning = (featureName: string) => {
 };
 
 /**
- * Timeout for agentic HTTP APIs - 15 mins
+ * Timeout for agentic HTTP APIs - 20 mins
+ *
+ * Raised from 15 minutes to accommodate multi-turn Agent Builder conversations
+ * with reasoning models (e.g. GLM-5.2) where a single inference call can take
+ * up to 5 minutes (matching the default inference endpoint timeout). A 3-4
+ * turn conversation with a reasoning model can legitimately take 15-20 minutes.
+ *
+ * This is the idle socket timeout — it only fires if no data (including SSE
+ * keep-alive comments) is received for this duration. The SSE stream already
+ * sends keep-alive comments every 10 seconds, so this timeout only triggers
+ * when the entire Node.js event loop is wedged.
  */
-export const AGENT_SOCKET_TIMEOUT_MS = 15 * 60 * 1000;
+export const AGENT_SOCKET_TIMEOUT_MS = 20 * 60 * 1000;
 
 /**
  * Returns the headers needed for SSE streaming responses.
