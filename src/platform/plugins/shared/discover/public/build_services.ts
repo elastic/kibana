@@ -76,7 +76,6 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
-  EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
@@ -98,7 +97,6 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
-  getEmbeddableTransformsEnabled: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -221,8 +219,6 @@ export const buildServices = ({
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
       getIsEsqlDefault: () =>
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
-      getEmbeddableTransformsEnabled: () =>
-        core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
