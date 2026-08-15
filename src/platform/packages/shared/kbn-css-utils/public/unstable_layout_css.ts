@@ -151,10 +151,29 @@ export interface UnstableRowOrStackOptions {
   /** Gap between children. Usually a `euiTheme.size.*` token. */
   gap?: string;
   /**
+   * Cross-axis alignment while the children share a row. Defaults to `'stretch'`.
+   *
+   * Has no effect once stacked, where each child is alone on its line.
+   *
+   * @default "stretch"
+   */
+  align?: Align;
+  /**
    * Above this many children, always stack. Guards lists whose length varies at runtime
    * from rendering as a single row of hairlines.
    */
   limit?: number;
+  /**
+   * Whether children stretch to fill the line. Defaults to `true`, which is what panels and
+   * cards want.
+   *
+   * Pass `false` for a row of leaf content (buttons, badges) that should keep its own width
+   * and sit at the start of the line. Note that this also applies once stacked, so each
+   * child stays content-sized rather than becoming full width.
+   *
+   * @default true
+   */
+  growItems?: boolean;
 }
 
 /**
@@ -164,15 +183,24 @@ export interface UnstableRowOrStackOptions {
  * Prefer this over `unstableAutoGridCss` for a small set of *peer* items, where a ragged
  * trailing row would imply a hierarchy the design does not intend.
  */
-export const unstableRowOrStackCss = ({ threshold, gap, limit }: UnstableRowOrStackOptions) =>
+export const unstableRowOrStackCss = ({
+  threshold,
+  gap,
+  align = 'stretch',
+  limit,
+  growItems = true,
+}: UnstableRowOrStackOptions) =>
   css({
     display: 'flex',
     flexWrap: 'wrap',
     gap,
+    alignItems: ALIGN_ITEMS[align],
     '& > *': {
       flexGrow: 1,
       flexBasis: `calc((${threshold} - 100%) * 999)`,
     },
+    // `&&` doubles specificity; a single `&` only ties with EUI's base styles on the child.
+    ...(growItems ? {} : { '&& > *': { maxInlineSize: 'min(max-content, 100%)' } }),
     ...(limit
       ? {
           [`& > :nth-last-child(n + ${limit + 1}), & > :nth-last-child(n + ${limit + 1}) ~ *`]: {
