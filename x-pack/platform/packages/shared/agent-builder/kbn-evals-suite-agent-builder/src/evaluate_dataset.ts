@@ -331,8 +331,9 @@ function configureExperiment({
               if (typeof skillParam === 'string') seen.push(skillParam);
 
               for (const result of step.results ?? []) {
-                const skill = (result as { data?: { skill?: { name?: string; id?: string; path?: string } } })
-                  ?.data?.skill;
+                const skill = (
+                  result as { data?: { skill?: { name?: string; id?: string; path?: string } } }
+                )?.data?.skill;
                 if (typeof skill?.name === 'string') seen.push(skill.name);
                 if (typeof skill?.id === 'string') seen.push(skill.id);
                 if (typeof skill?.path === 'string') seen.push(skill.path);
@@ -353,7 +354,9 @@ function configureExperiment({
           const pathSegment = lower.replace(/\./g, '/');
           return loadedNames.some((n) => {
             const nl = n.toLowerCase();
-            return nl === lower || nl.endsWith(`.${lower}`) || nl.includes(`/${pathSegment}/skill.md`);
+            return (
+              nl === lower || nl.endsWith(`.${lower}`) || nl.includes(`/${pathSegment}/skill.md`)
+            );
           });
         };
 
