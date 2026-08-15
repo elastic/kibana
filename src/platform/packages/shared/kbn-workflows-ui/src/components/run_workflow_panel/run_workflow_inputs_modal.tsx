@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
 import type { JSONSchema7 } from 'json-schema';
+import React, { useMemo } from 'react';
 import type { StepContext } from '@kbn/workflows';
 import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { ResumeExecutionModal } from '../resume_execution_modal/resume_execution_modal';
-import { generateSampleFromJsonSchema } from '../../lib/generate_sample_from_json_schema';
 import { getProvideInputsResumeMessage } from './translations';
+import { generateSampleFromJsonSchema } from '../../lib/generate_sample_from_json_schema';
+import { ResumeExecutionModal } from '../resume_execution_modal/resume_execution_modal';
 
 export interface RunWorkflowInputsModalProps {
   /** Display name of the workflow shown in the modal header. */

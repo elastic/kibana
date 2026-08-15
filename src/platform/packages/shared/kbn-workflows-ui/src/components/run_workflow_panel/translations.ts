@@ -30,12 +30,9 @@ export const WORKFLOW_START_FAILED_TOAST = i18n.translate(
   }
 );
 
-export const RUN_WORKFLOW_BUTTON = i18n.translate(
-  'xpack.workflowsUi.runWorkflowPanel.run.button',
-  {
-    defaultMessage: 'Run workflow',
-  }
-);
+export const RUN_WORKFLOW_BUTTON = i18n.translate('xpack.workflowsUi.runWorkflowPanel.run.button', {
+  defaultMessage: 'Run workflow',
+});
 
 /** Returns the localised message shown at the top of the inputs modal. */
 export const getProvideInputsResumeMessage = (workflowName: string) =>
