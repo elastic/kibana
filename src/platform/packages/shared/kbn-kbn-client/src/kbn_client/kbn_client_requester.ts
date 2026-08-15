@@ -124,6 +124,14 @@ interface Options {
 // had no equivalent socket-connect cutoff. Restore that headroom.
 const FETCH_CONNECT_TIMEOUT_MS = 60_000;
 
+// undici defaults `headersTimeout`/`bodyTimeout` to 300s. Agent-builder converse
+// calls (multi-tool security workflows, reasoning models) routinely exceed that,
+// and the abort surfaces as an opaque `fetch failed` with no server-side trace
+// because the request never completes. Previously only https:// got an Agent, so
+// http:// callers (every local eval stack) silently inherited the 300s cap.
+const KBN_CLIENT_HEADERS_TIMEOUT_MS =
+  Number(process.env.KBN_CLIENT_HEADERS_TIMEOUT_MS ?? '') || 1_800_000;
+
 export class KbnClientRequester {
   // `url` retains any `user:pass@` from the original config - `resolveUrl()` is
   // a public API used by FTR tests (e.g. http connector tests) that pluck
@@ -149,16 +157,19 @@ export class KbnClientRequester {
     }
     this.urlForFetch = parsed.toString();
 
-    this.dispatcher =
-      parsed.protocol === 'https:'
-        ? new Agent({
+    this.dispatcher = new Agent({
+      headersTimeout: KBN_CLIENT_HEADERS_TIMEOUT_MS,
+      bodyTimeout: KBN_CLIENT_HEADERS_TIMEOUT_MS,
+      ...(parsed.protocol === 'https:'
+        ? {
             connect: {
               ca: options.certificateAuthorities,
               rejectUnauthorized: false,
               timeout: FETCH_CONNECT_TIMEOUT_MS,
             },
-          })
-        : null;
+          }
+        : {}),
+    });
   }
 
   public resolveUrl(relativeUrl = '/') {
