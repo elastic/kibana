@@ -12,7 +12,7 @@ import type {
   RouteRepositoryClient,
 } from '@kbn/server-route-repository';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import type { NightshiftInvestigationsRouteRepository } from '../../server/routes';
+import type { NightshiftInvestigationsRouteRepository } from '../../server';
 
 type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
   body?: unknown;

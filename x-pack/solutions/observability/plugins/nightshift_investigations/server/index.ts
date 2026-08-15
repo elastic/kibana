@@ -16,3 +16,5 @@ export type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
 } from './types';
+
+export type { NightshiftInvestigationsRouteRepository } from './routes';

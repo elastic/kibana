@@ -6,6 +6,9 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -16,10 +19,10 @@ export interface NightshiftInvestigationsServerStart {
 }
 
 export interface NightshiftInvestigationsSetupDeps {
-  workflowsExtensions?: import('@kbn/workflows-extensions/server').WorkflowsExtensionsServerPluginSetup;
-  workflowsManagement?: import('@kbn/workflows-management-plugin/server').WorkflowsServerPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface NightshiftInvestigationsStartDeps {
-  spaces?: import('@kbn/spaces-plugin/server').SpacesPluginStart;
+  spaces?: SpacesPluginStart;
 }
