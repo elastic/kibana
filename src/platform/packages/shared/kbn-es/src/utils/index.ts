@@ -19,6 +19,12 @@ export {
 } from './native_realm';
 export { buildSnapshot } from './build_snapshot';
 export { archiveForPlatform } from './build_snapshot';
+export {
+  loadEsConfigEsArgs,
+  loadEsDevConfigEsArgs,
+  ES_CONFIG_PATH,
+  ES_DEV_CONFIG_PATH,
+} from './es_config';
 export * from './parse_timeout_to_ms';
 export * from './docker';
 export * from './serverless_file_realm';

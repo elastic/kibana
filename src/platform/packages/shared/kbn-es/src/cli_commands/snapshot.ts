@@ -46,6 +46,7 @@ export const snapshot: Command = {
       --plugins         Comma seperated list of Elasticsearch plugins to install
       --secure-files     Comma seperated list of secure_setting_name=/path pairs
       --eis             Enable EIS mode: sets trial license, EIS inference URL, resolves and sets CCM API key
+      --no-dev-config   Prevents loading the config/es.dev.yml file, if present
 
     Example:
 
@@ -73,12 +74,13 @@ export const snapshot: Command = {
         readyTimeout: 'ready-timeout',
         esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
+        devConfig: 'dev-config',
       },
 
       string: ['version', 'ready-timeout', 'es-log-level'],
       boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill', 'eis'],
 
-      default: defaults,
+      default: { ...defaults, devConfig: true },
     });
 
     // --eis implies trial license and the EIS inference URL ES argument.
