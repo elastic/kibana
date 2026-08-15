@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogDocument } from '@kbn/synthtrace-client';
-import type { FailureMap, InfraDependency, ServiceFailure, ServiceGraph } from '../types';
+import type {
+  FailureMap,
+  InfraDependency,
+  RequestResult,
+  ServiceFailure,
+  ServiceGraph,
+  ServiceNamesOf,
+} from '../types';
 import { ERROR_TYPE_STATUS } from '../types';
 import { mulberry32 } from '../placeholders';
 import { resolveEffectiveSeed } from '../utils/seed';
 import { type ServiceGraphOptions } from './shared';
 import { simulateRequest } from './simulate_request';
 
-function resolveServiceFailures(
-  serviceGraph: ServiceGraph,
+function resolveServiceFailures<TServiceGraph extends ServiceGraph>(
+  serviceGraph: TServiceGraph,
   failures: FailureMap
 ): Record<string, ServiceFailure> {
   const resolved: Record<string, ServiceFailure> = {};
@@ -56,13 +62,14 @@ function resolveServiceFailures(
   return resolved;
 }
 
-export interface RequestDocsOptions extends ServiceGraphOptions {
-  entryService: string;
+export interface RequestDocsOptions<TServiceGraph extends ServiceGraph = ServiceGraph>
+  extends ServiceGraphOptions<TServiceGraph> {
+  entryService: ServiceNamesOf<TServiceGraph>;
   index?: number;
   failures?: FailureMap;
 }
 
-export function generateServiceDocs({
+export function generateServiceDocs<TServiceGraph extends ServiceGraph>({
   serviceGraph,
   entryService,
   index,
@@ -70,7 +77,7 @@ export function generateServiceDocs({
   failures,
   timestamp,
   metadataCache,
-}: RequestDocsOptions): Array<Partial<LogDocument>> {
+}: RequestDocsOptions<TServiceGraph>): RequestResult {
   const tickSeed = resolveEffectiveSeed(seed, index ?? 0, timestamp);
   const resolvedFailures = failures ? resolveServiceFailures(serviceGraph, failures) : undefined;
   const rng = mulberry32(tickSeed);

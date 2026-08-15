@@ -18,7 +18,8 @@ import {
   resolveOsType,
   type MetadataCache,
 } from '../utils/metadata';
-import { buildLogDoc, resolveLogLevel, type ServicePhaseOptions } from './shared';
+import { buildLogDoc } from '../log_builder';
+import { resolveLogLevel, type ServicePhaseOptions } from './shared';
 import {
   DEP_TO_CATEGORY,
   INFRA_FAIL_CONDITION,

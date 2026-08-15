@@ -35,7 +35,7 @@ const GRAPH: ServiceGraph = {
 
 describe('simulateRequest — outbound log level', () => {
   it('outbound log is error when downstream call fails (rate: 1)', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: GRAPH,
       entryService: 'caller',
       seed: SEED,
@@ -54,7 +54,7 @@ describe('simulateRequest — outbound log level', () => {
   });
 
   it('outbound log is info when downstream call succeeds', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: GRAPH,
       entryService: 'caller',
       seed: SEED,
@@ -72,7 +72,7 @@ describe('simulateRequest — outbound log level', () => {
   });
 
   it('service self-log is error when a failure is active', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: GRAPH,
       entryService: 'callee',
       seed: SEED,
@@ -86,7 +86,7 @@ describe('simulateRequest — outbound log level', () => {
   });
 
   it('service self-log is info when no failure is active', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: GRAPH,
       entryService: 'callee',
       seed: SEED,
@@ -101,7 +101,7 @@ describe('simulateRequest — outbound log level', () => {
 
 describe('simulateRequest — JSON validity of outbound messages', () => {
   it('node runtime outbound failure message is valid JSON (status is a numeric HTTP code)', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: GRAPH,
       entryService: 'caller',
       seed: SEED,
@@ -121,7 +121,7 @@ describe('simulateRequest — JSON validity of outbound messages', () => {
   });
 
   it('node runtime outbound success message is valid JSON', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: GRAPH,
       entryService: 'caller',
       seed: SEED,
@@ -147,7 +147,7 @@ describe('simulateRequest — stability contract', () => {
       seed,
       index,
       timestamp: BASE_TS,
-    });
+    }).docs;
 
   const getCallerDoc = (index: number, seed = SEED) => {
     const doc = getDocs(index, seed).find(
@@ -211,7 +211,7 @@ describe('simulateRequest — diamond graph (shared downstream visited via both 
   };
 
   it('generates docs for the shared service from both paths (not just one)', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: DIAMOND,
       entryService: 'entry',
       seed: SEED,
@@ -226,7 +226,7 @@ describe('simulateRequest — diamond graph (shared downstream visited via both 
   });
 
   it('emits an outbound log from both left and right toward shared', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: DIAMOND,
       entryService: 'entry',
       seed: SEED,
@@ -246,7 +246,7 @@ describe('simulateRequest — diamond graph (shared downstream visited via both 
   });
 
   it('propagates shared service failures via both left and right legs', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: DIAMOND,
       entryService: 'entry',
       seed: SEED,
@@ -293,7 +293,7 @@ describe('simulateRequest — cycle detection', () => {
   });
 
   it('generates docs for both services despite the cycle', () => {
-    const docs = generateServiceDocs({
+    const { docs } = generateServiceDocs({
       serviceGraph: CYCLIC,
       entryService: 'svc-a',
       seed: SEED,
@@ -312,7 +312,7 @@ describe('simulateRequest — warn emission', () => {
     // emitWarn fires on ~21% of non-error ticks with rate:0.7 — scan 200 indices to hit one.
     let foundWarnDoc: Record<string, unknown> | undefined;
     for (let i = 0; i < 200 && !foundWarnDoc; i++) {
-      const docs = generateServiceDocs({
+      const { docs } = generateServiceDocs({
         serviceGraph: GRAPH,
         entryService: 'callee',
         seed: SEED,
