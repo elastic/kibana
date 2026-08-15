@@ -121,12 +121,19 @@ type ExpandedDocPayload = TabActionPayload<{
   expandedDocOwner?: string;
   initialDocViewerTabId?: string;
   initialDocViewerTabState?: object;
+  shouldUpdateUrl?: boolean;
 }>;
 
 /** Sets the expanded document and synchronizes its URL reference. */
 export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
   function setExpandedDocThunkFn(dispatch, getState) {
-    dispatch(internalStateSlice.actions.setExpandedDoc(payload));
+    const { shouldUpdateUrl = true, ...expandedDocPayload } = payload;
+
+    dispatch(internalStateSlice.actions.setExpandedDoc(expandedDocPayload));
+
+    if (!shouldUpdateUrl) {
+      return;
+    }
 
     const { tabId, expandedDoc, expandedDocOwner = DEFAULT_EXPANDED_DOC_OWNER } = payload;
 

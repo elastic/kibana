@@ -440,6 +440,33 @@ describe('DiscoverDocumentFlyout', () => {
     });
   });
 
+  it('clears the current document when the reference changes to a missing document', async () => {
+    const services = createDiscoverServicesMock();
+    jest
+      .mocked(services.data.search.search)
+      .mockImplementationOnce(() => from(searchResponseFor(outOfResultsHit)))
+      .mockImplementationOnce(() => from(Promise.resolve({ rawResponse: { hits: { hits: [] } } })));
+    const { toolkit } = await setup({ services });
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().expandedDoc?.raw._id).toBe(outOfResultsHit._id);
+    });
+
+    act(() => {
+      toolkit.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: toolkit.getCurrentTab().id,
+          appState: { expandedDoc: { id: 'missing', index: outOfResultsHit._index } },
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().expandedDoc).toBeUndefined();
+      expect(screen.getByTestId('docViewerFlyoutNotFound')).toBeVisible();
+    });
+  });
+
   it('clears a restored reference for a transformational ES|QL query without fetching', async () => {
     const { toolkit, services } = await setup({
       query: { esql: 'FROM logs METADATA _id, _index | STATS count() BY host' },
