@@ -136,8 +136,7 @@ export const ProjectScopeSelector = ({
   );
 
   const availableProjects = useMemo(() => {
-    const sortedLinkedProjects = linkedProjects.sort((a, b) => a._alias.localeCompare(b._alias));
-    return originProject ? [originProject, ...sortedLinkedProjects] : sortedLinkedProjects;
+    return originProject ? [originProject, ...linkedProjects] : linkedProjects;
   }, [linkedProjects, originProject]);
 
   const fetchProjectsByRouting = useCallback(
@@ -195,6 +194,7 @@ export const ProjectScopeSelector = ({
             onProjectRoutingChange={onProjectRoutingChange}
             projectRouting={effectiveProjectRouting.current!}
             fetchProjectsByRouting={fetchProjectsByRouting}
+            projectRoutingStrategy="snapshot"
           />
         )}
       </EuiPopover>
