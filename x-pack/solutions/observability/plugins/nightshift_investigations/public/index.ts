@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
+import { NightshiftInvestigationsPublicPlugin } from './plugin';
 
-export async function plugin(_ctx: PluginInitializerContext) {
-  const { NightshiftInvestigationsPublicPlugin } = await import('./plugin');
+export function plugin() {
   return new NightshiftInvestigationsPublicPlugin();
 }
 
