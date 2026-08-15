@@ -593,7 +593,23 @@ export class LensVisService {
         ) ?? [];
       if (suggestions.length) {
         const suggestion = suggestions[0];
-        const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+        let suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+
+        // Force right legend position for ES|QL in Discover (matching regular Discover behavior)
+        // Only apply to XY visualizations
+        if (suggestion.visualizationId === 'lnsXY') {
+          const xyState = suggestionVisualizationState as XYVisualizationState;
+          if (xyState?.legend) {
+            suggestionVisualizationState = {
+              ...xyState,
+              legend: {
+                ...xyState.legend,
+                position: 'right',
+              },
+            };
+          }
+        }
+
         // the suggestions api will suggest a numeric column as a metric and not as a breakdown,
         // so we need to adjust it here
         if (
@@ -617,7 +633,10 @@ export class LensVisService {
             },
           };
         }
-        return suggestion;
+        return {
+          ...suggestion,
+          visualizationState: suggestionVisualizationState,
+        };
       }
     }
 
@@ -686,15 +705,35 @@ export class LensVisService {
       query,
     };
 
-    return (
+    const suggestions =
       this.lensSuggestionsApi(
         context,
         dataView,
         ['lnsDatatable'],
         preferredChartType,
         visAttributes
-      ) ?? []
-    );
+      ) ?? [];
+
+    console.log('in suggestion 2', suggestions[0]);
+    // Force right legend position for ES|QL in Discover (matching regular Discover behavior)
+    return suggestions.map((suggestion) => {
+      if (suggestion.visualizationId === 'lnsXY') {
+        const xyState = suggestion.visualizationState as XYVisualizationState;
+        if (xyState?.legend) {
+          return {
+            ...suggestion,
+            visualizationState: {
+              ...xyState,
+              legend: {
+                ...xyState.legend,
+                position: 'right',
+              },
+            },
+          };
+        }
+      }
+      return suggestion;
+    });
   };
 
   private getLensAttributesState = ({
