@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type {
   EntityStoreApiRequestHandlerContext,
   EntityStoreCoreSetup,
@@ -16,16 +15,13 @@ import type {
 import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
-import {
-  EngineDescriptorClient,
-  EntityStoreGlobalStateClient,
-  EntityStorePreferencesClient,
-} from './domain/saved_objects';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
 import { EntityMetadataClient } from './domain/entity_metadata';
+import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { ResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
@@ -73,18 +69,6 @@ export async function createRequestHandlerContext({
 
   const globalStateClient = new EntityStoreGlobalStateClient(
     core.savedObjects.client,
-    namespace,
-    logger
-  );
-
-  // The preferences saved object is plugin-internal (not in the security feature's saved-object
-  // types and hidden from the generic SO HTTP API). Access it with a client that skips the
-  // security extension so it doesn't require per-type saved-object privileges; the `/preferences`
-  // routes gate access via the Entity Store feature privilege instead.
-  const preferencesClient = new EntityStorePreferencesClient(
-    coreStart.savedObjects.getScopedClient(request, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-    }),
     namespace,
     logger
   );
@@ -158,9 +142,13 @@ export async function createRequestHandlerContext({
       coreStart,
       licensing: startPlugins.licensing,
     }),
-    preferencesClient,
     crudClient,
     entityMetadataClient,
+    relationshipsClient: new RelationshipsClient({
+      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      namespace,
+    }),
     resolutionClient: new ResolutionClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,

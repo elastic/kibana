@@ -33,12 +33,13 @@ jest.mock('@kbn/investigation-output', () => ({
 
 jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeatures: () => ({
-    data: [],
-    isLoading: false,
+    features: [],
+    failedStreamNames: [],
+    isInitialLoading: false,
+    isFetching: false,
     isError: false,
     refetch: jest.fn(),
   }),
-  useFetchStreamFeaturesByStream: () => new Map<string, never[]>(),
 }));
 
 jest.mock('../detection/change_point_lens_chart', () => ({
@@ -88,7 +89,7 @@ const mockOpenChat = jest.fn();
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      http: { get: jest.fn(), basePath: { prepend: (path: string) => path } },
+      http: { basePath: { prepend: (path: string) => path } },
       agentBuilder: { openChat: mockOpenChat },
       notifications: {
         toasts: {

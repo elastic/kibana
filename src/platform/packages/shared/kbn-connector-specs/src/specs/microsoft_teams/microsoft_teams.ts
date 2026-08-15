@@ -364,31 +364,18 @@ export const MicrosoftTeams: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Microsoft Teams test handler');
-
-      try {
-        const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
-        const url = isAppOnly
-          ? 'https://graph.microsoft.com/v1.0/teams'
-          : 'https://graph.microsoft.com/v1.0/me/joinedTeams'; // bearer and oauth_authorization_code use delegated /me path
-
-        const response = await ctx.client.get(url, {
-          params: { $select: 'id,displayName' },
-        });
-        if (!response?.data || !Array.isArray(response.data.value)) {
-          return {
-            ok: false,
-            message: 'Unexpected Graph API response: missing value array',
-          };
-        }
-        const numOfTeams = response.data.value.length;
-        return {
-          ok: true,
-          message: `Successfully connected to Microsoft Teams: found ${numOfTeams} teams`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
+      const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
+      const url = isAppOnly
+        ? 'https://graph.microsoft.com/v1.0/teams'
+        : 'https://graph.microsoft.com/v1.0/me/joinedTeams';
+      const response = await ctx.client.get(url, {
+        params: { $select: 'id,displayName' },
+      });
+      if (!response?.data || !Array.isArray(response.data.value)) {
+        throw new Error('Unexpected Graph API response: missing value array');
       }
+      return {};
     },
+    enabled: true,
   },
 };

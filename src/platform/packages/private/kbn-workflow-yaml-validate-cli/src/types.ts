@@ -11,8 +11,12 @@
 export const VARIANTS = ['strict', 'template'] as const;
 export type ValidationVariant = (typeof VARIANTS)[number];
 
-/** The `--variant` flag: `auto` picks per file, otherwise force a variant. */
-export type VariantMode = 'auto' | ValidationVariant;
+/**
+ * The `--variant` flag: `auto` picks per file, `strict`/`template` force a real
+ * schema variant, and `managed` validates against `strict` while additionally
+ * tolerating install-time `__SOMETHING__` placeholder tokens (see `validate_file.ts`).
+ */
+export type VariantMode = 'auto' | ValidationVariant | 'managed';
 
 /**
  * Where a single validation issue originated.
@@ -21,6 +25,10 @@ export type VariantMode = 'auto' | ValidationVariant;
  * *syntax* error (from `validateLiquid`), while the former marks a schema
  * constraint that was intentionally skipped because the value is a whole-value
  * LiquidJS expression (see `validate_file.ts`).
+ *
+ * `managed-placeholder` is the analogue for managed-variant validation: a schema
+ * constraint skipped because the value carries an install-time `__SOMETHING__`
+ * token that is exact-token-replaced before the workflow ever runs.
  */
 export type IssueSource =
   | 'yaml-syntax'
@@ -29,7 +37,8 @@ export type IssueSource =
   | 'step-name'
   | 'graph'
   | 'liquid'
-  | 'liquidjs-expression';
+  | 'liquidjs-expression'
+  | 'managed-placeholder';
 
 /** Severity of a single issue. An absent severity is treated as an error. */
 export type IssueSeverity = 'error' | 'warning';

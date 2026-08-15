@@ -65,3 +65,14 @@ export interface PutAiIndexResponse {
 export interface DeleteAiIndexResponse {
   acknowledged: boolean;
 }
+
+export interface KiTypeCount {
+  type: string;
+  count: number;
+}
+
+export interface GetAiIndexKiSummaryResponse {
+  count: number;
+  dest: AiIndexDest;
+  counts_by_type: KiTypeCount[];
+}

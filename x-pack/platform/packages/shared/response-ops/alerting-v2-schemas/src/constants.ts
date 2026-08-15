@@ -49,7 +49,7 @@ export const BULK_QUERY_SAMPLE_SIZE = 100;
 /** Maximum length for an Elasticsearch field name (e.g. `host.name`, `service.environment`). */
 export const MAX_FIELD_NAME_LENGTH = 256;
 
-/** Maximum number of fields used to group alerts (rule grouping, action policy groupBy). */
+/** Maximum number of fields used to group alerts (rule grouping, action policy group_by). */
 export const MAX_GROUPING_FIELDS = 16;
 
 /** Maximum number of items processed in a single bulk-action request body. */
@@ -70,6 +70,14 @@ export const MAX_FINGERPRINT_FIELDS = 10;
 /** Maximum number of keys in the open `data` bag on external alert ingest. */
 export const MAX_ALERT_EVENT_DATA_KEYS = 100;
 
+/**
+ * Maximum number of fields in an artifact's `data` record. Well above what any
+ * artifact type needs today, but it keeps the record bounded so the per-field
+ * limits cannot be sidestepped by sending many small fields instead of one
+ * large one.
+ */
+export const MAX_ARTIFACT_DATA_FIELDS = 32;
+
 /** Maximum number of destinations per action policy. */
 export const ACTION_POLICY_MAX_DESTINATIONS = 10;
 
@@ -82,7 +90,7 @@ export const VERSION_MAX_LENGTH = 256;
 /** Maximum number of execution-history events returned per page (rule + action policy streams). */
 export const EXECUTION_HISTORY_MAX_PER_PAGE = 100;
 
-/** Default number of execution-history events returned per page when `perPage` is omitted. */
+/** Default number of execution-history events returned per page when `per_page` is omitted. */
 export const EXECUTION_HISTORY_DEFAULT_PER_PAGE = 20;
 
 /**
@@ -95,3 +103,23 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  * filter.
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
+
+/** Maximum number of rule templates returned per page. */
+export const RULE_TEMPLATE_MAX_PER_PAGE = 100;
+
+/**
+ * Maximum length of the `episode_data` JSON string snapshotted into an episode
+ * attachment. Bounds open-ended user JSON so attachment payloads stay finite.
+ */
+export const MAX_EPISODE_DATA_LENGTH = 32_000;
+
+/** Maximum number of rule change-history events returned per page. */
+export const RULE_CHANGE_HISTORY_MAX_PER_PAGE = 100;
+
+/** Default number of rule change-history events returned per page when `per_page` is omitted. */
+export const RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE = 20;
+
+/**
+ * Maximum number of rule change-history events that can be paged through.
+ */
+export const RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW = 10_000;

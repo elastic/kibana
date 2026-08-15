@@ -17,5 +17,4 @@ export {
 export { useBackNavTargets } from './use_back_navigation';
 export type { BackNavigation } from './use_back_navigation';
 export { useResolvedBadges } from './use_app_badges';
-export { useAppHeaderStaticItems, useShareAction } from './use_app_header_menu';
-export type { ShareAction } from './use_app_header_menu';
+export { useAppHeaderStaticItems } from './use_app_header_menu';
