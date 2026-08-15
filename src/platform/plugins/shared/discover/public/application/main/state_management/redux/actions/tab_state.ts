@@ -136,16 +136,11 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
     }
 
     const { tabId, expandedDoc, expandedDocOwner = DEFAULT_EXPANDED_DOC_OWNER } = payload;
-
-    // The restore path cannot reconstruct documents from cascade grids.
-    if (expandedDoc && expandedDocOwner !== DEFAULT_EXPANDED_DOC_OWNER) {
-      return;
-    }
-
     const { appState } = selectTab(getState(), tabId);
 
-    // Require both a refetchable query and stable document metadata.
+    // The restore path cannot reconstruct documents from cascade grids.
     const nextExpandedDocRef =
+      expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER &&
       getExpandedDocLinkability(appState.query, expandedDoc) === ExpandedDocLinkability.Linkable
         ? getExpandedDocRef(expandedDoc)
         : undefined;

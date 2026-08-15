@@ -165,6 +165,27 @@ describe('tab_state actions', () => {
       expect(tab.appState.expandedDoc).toBeUndefined();
     });
 
+    it('should clear the previous reference for cascade owned flyouts', async () => {
+      const { internalState, tabId } = await setup();
+      const cascadeExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewMockWithTimeField);
+
+      setQuery(internalState, tabId, { query: '', language: 'kuery' });
+      internalState.dispatch(internalStateActions.setExpandedDoc({ tabId, expandedDoc }));
+      internalState.dispatch(
+        internalStateActions.setExpandedDoc({
+          tabId,
+          expandedDoc: cascadeExpandedDoc,
+          expandedDocOwner: 'cascade_node_1',
+        })
+      );
+
+      const tab = selectTab(internalState.getState(), tabId);
+
+      expect(tab.expandedDoc).toBe(cascadeExpandedDoc);
+      expect(tab.expandedDocOwner).toBe('cascade_node_1');
+      expect(tab.appState.expandedDoc).toBeUndefined();
+    });
+
     it('should not write a reference for records without a stable identity', async () => {
       const { internalState, tabId } = await setup();
       const esqlRecord = buildDataTableRecord(
