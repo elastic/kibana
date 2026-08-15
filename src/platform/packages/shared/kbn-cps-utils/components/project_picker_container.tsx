@@ -27,14 +27,22 @@ interface ProjectPickerContainerProps {
  */
 export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
   const access = useObservable(cpsManager.getProjectPickerAccess$(), ProjectRoutingAccess.DISABLED);
+  const totalProjectCount = useObservable(
+    cpsManager.getTotalProjectCount$(),
+    cpsManager.getTotalProjectCount()
+  );
 
   if (access === ProjectRoutingAccess.DISABLED) {
-    return <DisabledProjectPicker totalProjectCount={cpsManager.getTotalProjectCount()} />;
+    return <DisabledProjectPicker totalProjectCount={totalProjectCount} />;
   }
 
   return (
     <ActiveProjectPicker
+      // Linking or unlinking invalidates the projects the picker has listed, so start over
+      // instead of showing counts from a mix of the old and new project sets
+      key={totalProjectCount}
       cpsManager={cpsManager}
+      totalProjectCount={totalProjectCount}
       isReadonly={access === ProjectRoutingAccess.READONLY}
     />
   );
@@ -42,10 +50,15 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
 
 interface ActiveProjectPickerProps {
   cpsManager: ICPSManager;
+  totalProjectCount: number;
   isReadonly: boolean;
 }
 
-const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({ cpsManager, isReadonly }) => {
+const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({
+  cpsManager,
+  totalProjectCount,
+  isReadonly,
+}) => {
   const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
 
   const fetchProjects = useCallback(
@@ -66,7 +79,7 @@ const ActiveProjectPicker: React.FC<ActiveProjectPickerProps> = ({ cpsManager, i
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
       projects={projects}
-      totalProjectCount={cpsManager.getTotalProjectCount()}
+      totalProjectCount={totalProjectCount}
       isReadonly={isReadonly}
       settingsComponent={<ProjectPickerSettings onResetToDefaults={resetProjectPicker} />}
     />

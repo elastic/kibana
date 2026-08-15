@@ -10,7 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
+import { type CPSAppAccessResolver } from '@kbn/cps-utils';
 import { CPS_TIER_ELIGIBLE_FEATURE_ID } from '@kbn/cps-common';
 import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
 import { CPSManager } from './services/cps_manager';
@@ -18,6 +18,7 @@ import { CPSManager } from './services/cps_manager';
 export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
   private readonly initializerContext: PluginInitializerContext<CPSConfigType>;
   private readonly appAccessResolvers = new Map<string, CPSAppAccessResolver>();
+  private cpsManager?: CPSManager;
 
   constructor(initializerContext: PluginInitializerContext<CPSConfigType>) {
     this.initializerContext = initializerContext;
@@ -36,7 +37,6 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
 
   public start(core: CoreStart): CPSPluginStart {
     const { cpsEnabled } = this.initializerContext.config.get();
-    let cpsManager: ICPSManager | undefined;
 
     if (cpsEnabled) {
       const manager = new CPSManager({
@@ -69,16 +69,18 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
           });
         })
       );
-      cpsManager = manager;
+      this.cpsManager = manager;
     }
 
     const isTierEligible = core.pricing.isFeatureAvailable(CPS_TIER_ELIGIBLE_FEATURE_ID);
 
     return {
-      cpsManager,
+      cpsManager: this.cpsManager,
       isTierEligible,
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.cpsManager?.stop();
+  }
 }
