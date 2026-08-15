@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/inference-common'
   - '@kbn/es-snapshot-loader'
+  - '@kbn/agent-builder-common'
 tags:
   - functional-tests
   - package
