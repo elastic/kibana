@@ -1998,10 +1998,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@115.0.0":
-  version "115.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-115.0.0.tgz#a946565fc1fa336c1b02834584a879e02bdc2efe"
-  integrity sha512-jbkoTnfF9qYTzLoDsudREIlhLXTpg1vB7uPoytpoZlUkxkxE4773BiUgtcyDzNInZ00KUFlY/NzgI8Wy6IW5eA==
+"@elastic/eui@115.0.0-backport.0":
+  version "115.0.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-115.0.0-backport.0.tgz#6510c3ef4c42a1c0de7561535e15d285abd43506"
+  integrity sha512-6tncPpxzWNpYbvPE+SdbtLB+GaEpn7Rtx5wHTAWVt6XIL2HtKb/1CWl6iGRWoe/W7uAiwq0PP2Fj330bvT7omQ==
   dependencies:
     "@elastic/eui-theme-common" "9.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -2037,7 +2037,7 @@
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
     use-sync-external-store "^1.6.0"
-    uuid "^8.3.0"
+    uuid "^14.0.0"
     vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
@@ -34023,7 +34023,7 @@ uuid@^11.1.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.1.1.tgz#f6d81d2e1c65d00762e5e29b16c5d2d995e208ad"
   integrity sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==
 
-uuid@^8.3.0, uuid@^8.3.2:
+uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
