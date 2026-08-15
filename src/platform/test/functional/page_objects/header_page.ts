@@ -15,6 +15,7 @@ export class HeaderPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly appsMenu = this.ctx.getService('appsMenu');
+  private readonly loadingIndicator = this.ctx.getService('loadingIndicator');
   private readonly common = this.ctx.getPageObject('common');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
@@ -54,28 +55,15 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async waitUntilLoadingHasFinished() {
-    try {
-      await this.isGlobalLoadingIndicatorVisible();
-    } catch (exception) {
-      if (exception.name === 'ElementNotVisible') {
-        // selenium might just have been too slow to catch it
-      } else {
-        throw exception;
-      }
-    }
-    await this.awaitGlobalLoadingIndicatorHidden();
+    await this.loadingIndicator.waitUntilLoadingHasFinished();
   }
 
   public async isGlobalLoadingIndicatorVisible() {
-    this.log.debug('isGlobalLoadingIndicatorVisible');
-    return await this.testSubjects.exists('globalLoadingIndicator', { timeout: 1500 });
+    return await this.loadingIndicator.isGlobalLoadingIndicatorVisible();
   }
 
   public async awaitGlobalLoadingIndicatorHidden() {
-    await this.testSubjects.existOrFail('globalLoadingIndicator-hidden', {
-      allowHidden: true,
-      timeout: this.defaultFindTimeout * 10,
-    });
+    await this.loadingIndicator.awaitGlobalLoadingIndicatorHidden();
   }
 
   public async awaitKibanaChrome() {
