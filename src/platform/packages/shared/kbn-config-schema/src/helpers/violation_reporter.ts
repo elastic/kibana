@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { offeringBasedSchema } from './offering_based_schema';
-export type { SchemaHelper } from './schema_helpers';
-export {
-  savedObjectId,
-  spaceId,
-  displayName,
-  description,
-  searchFilter,
-  aggregation,
-  unboundedString,
-} from './schema_helpers';
+export interface SchemaViolationReporter {
+  report(info: { helper: string; length: number; maxLength: number; label?: string }): void;
+}
+
+let reporter: SchemaViolationReporter = { report: () => {} };
+
+export function registerSchemaViolationReporter(r: SchemaViolationReporter): void {
+  reporter = r;
+}
+
+export function getReporter(): SchemaViolationReporter {
+  return reporter;
+}

@@ -13,6 +13,15 @@ import type { Stream } from 'stream';
 import type { ByteSizeValue } from './src/byte_size_value';
 import type { Reference } from './src/references';
 import { ContextReference, SiblingReference } from './src/references';
+import {
+  savedObjectId,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  unboundedString,
+} from './src/helpers';
 import type {
   ArrayOptions,
   ByteSizeOptions,
@@ -69,6 +78,7 @@ export { ByteSizeValue } from './src/byte_size_value';
 export { SchemaTypeError, ValidationError } from './src/errors';
 export { isConfigSchema } from './src/typeguards';
 export { offeringBasedSchema } from './src/helpers';
+export type { SchemaHelper } from './src/helpers';
 
 function any(options?: TypeOptions<any>) {
   return new AnyType(options);
@@ -771,6 +781,14 @@ export const schema = {
   siblingRef,
   string,
   uri,
+  // Named string helpers
+  savedObjectId,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  unboundedString,
 };
 
 export type Schema = typeof schema;
