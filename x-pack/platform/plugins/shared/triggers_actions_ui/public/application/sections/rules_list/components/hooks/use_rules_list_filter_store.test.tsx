@@ -125,6 +125,48 @@ describe('useRulesListFilterStore', () => {
     expect(result.current.numberOfFiltersStore).toEqual(8);
   });
 
+  it('Should return props (not localStorage) when persistFiltersInLocalStorage is false and url is empty', () => {
+    jest.spyOn(useLocalStorage, 'default').mockImplementation(() => [
+      {
+        actionTypes: ['localStorage-actionType-filter'],
+        lastResponse: ['localStorage-lastResponse-filter'],
+        params: { localStorageRuleParams: 'localStorage-ruleParams-filter' },
+        search: 'localStorage-search-filter',
+        status: ['disabled'],
+        tags: ['localStorage-tag-filter'],
+        type: ['localStorage-ruleType-filter'],
+      },
+      () => null,
+      () => {},
+    ]);
+    const { result } = renderHook(() =>
+      useRulesListFilterStore({
+        lastResponseFilter: ['props-lastResponse-filter'],
+        lastRunOutcomeFilter: ['props-lastRunOutcome-filter'],
+        persistFiltersInLocalStorage: false,
+        rulesListKey: LOCAL_STORAGE_KEY,
+        ruleParamFilter: { propsRuleParams: 'props-ruleParams-filter' },
+        statusFilter: ['enabled'],
+        searchFilter: 'props-search-filter',
+        typeFilter: ['ruleType-filter'],
+      })
+    );
+    expect(result.current.filters).toEqual({
+      actionTypes: [],
+      kueryNode: undefined,
+      ruleExecutionStatuses: ['props-lastResponse-filter'],
+      ruleLastRunOutcomes: ['props-lastRunOutcome-filter'],
+      ruleParams: {
+        propsRuleParams: 'props-ruleParams-filter',
+      },
+      ruleStatuses: ['enabled'],
+      searchText: 'props-search-filter',
+      tags: [],
+      types: ['ruleType-filter'],
+    });
+    expect(result.current.numberOfFiltersStore).toEqual(6);
+  });
+
   it('Should return the url params as filter when url query param is empty', () => {
     jest.spyOn(useLocalStorage, 'default').mockImplementation(() => [
       {
