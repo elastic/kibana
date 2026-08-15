@@ -23,6 +23,12 @@ describe('getExpandedDocRef', () => {
     expect(getExpandedDocRef(doc)).toEqual({ id: '1', index: 'i' });
   });
 
+  it('includes routing in the document reference', () => {
+    const doc = buildDataTableRecord({ _id: '1', _index: 'i', _routing: 'route-1' }, dataViewMock);
+
+    expect(getExpandedDocRef(doc)).toEqual({ id: '1', index: 'i', routing: 'route-1' });
+  });
+
   it('returns undefined for a record without a stable identity', () => {
     const esqlRow = buildDataTableRecord({ _source: { message: 'no metadata' } }, dataViewMock);
 
@@ -36,6 +42,8 @@ describe('matchesExpandedDocRef', () => {
     const doc = buildDataTableRecord({ _id: '1', _index: 'i', _routing: 'r' }, dataViewMock);
 
     expect(matchesExpandedDocRef(doc, { id: '1', index: 'i' })).toBe(true);
+    expect(matchesExpandedDocRef(doc, { id: '1', index: 'i', routing: 'r' })).toBe(true);
+    expect(matchesExpandedDocRef(doc, { id: '1', index: 'i', routing: 'other' })).toBe(false);
     expect(matchesExpandedDocRef(doc, { id: '1', index: 'other' })).toBe(false);
     expect(matchesExpandedDocRef(doc, { id: '2', index: 'i' })).toBe(false);
   });

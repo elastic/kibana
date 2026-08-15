@@ -44,6 +44,7 @@ const fetchDslExpandedDoc = async ({
       {
         params: {
           index: dataView.getIndexPattern(),
+          ...(ref.routing ? { routing: ref.routing } : {}),
           ...buildSearchBody(ref.id, ref.index, dataView),
         },
       },

@@ -135,6 +135,7 @@ export const useExpandedDocSync = ({
   // Primitive dependencies avoid refetching when app state reparses an equivalent query object.
   const docId = expandedDocRef?.id;
   const docIndex = expandedDocRef?.index;
+  const docRouting = expandedDocRef?.routing;
   const esqlQueryText = isOfAggregateQueryType(query) ? query.esql : undefined;
 
   useEffect(() => {
@@ -149,7 +150,7 @@ export const useExpandedDocSync = ({
     const resolveExpandedDoc = async () => {
       try {
         const record = await fetchExpandedDoc({
-          ref: { id: docId, index: docIndex },
+          ref: { id: docId, index: docIndex, ...(docRouting ? { routing: docRouting } : {}) },
           dataView,
           esqlQueryText,
           data,
@@ -180,7 +181,16 @@ export const useExpandedDocSync = ({
     return () => {
       abortController.abort();
     };
-  }, [data, dataView, docId, docIndex, esqlQueryText, scopedProfilesManager, shouldFetch]);
+  }, [
+    data,
+    dataView,
+    docId,
+    docIndex,
+    docRouting,
+    esqlQueryText,
+    scopedProfilesManager,
+    shouldFetch,
+  ]);
 
   // One writer preserves result-row preference regardless of request ordering.
   useEffect(() => {

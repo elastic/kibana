@@ -14,24 +14,27 @@ import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 
 /**
- * Identifies a document in a shareable link. Keeping `_id` and `_index` separate
- * supports direct querying and maps to ES|QL metadata columns.
+ * Identifies a document in a shareable link. Keeping `_id`, `_index`, and optional
+ * `_routing` separate supports direct querying and maps to document metadata.
  */
 export interface ExpandedDocRef extends SerializableRecord {
   id: string;
   index: string;
+  routing?: string;
 }
 
 /** Builds a reference when the record has the `_id` and `_index` needed for a stable identity. */
 export const getExpandedDocRef = (doc: DataTableRecord | undefined): ExpandedDocRef | undefined => {
-  const { _id: id, _index: index } = doc?.raw ?? {};
+  const { _id: id, _index: index, _routing: routing } = doc?.raw ?? {};
 
-  return id && index ? { id, index } : undefined;
+  return id && index ? { id, index, ...(routing ? { routing } : {}) } : undefined;
 };
 
 /** Matches a record against a reference, comparing the raw fields. */
 export const matchesExpandedDocRef = (doc: DataTableRecord, ref: ExpandedDocRef) =>
-  doc.raw._id === ref.id && doc.raw._index === ref.index;
+  doc.raw._id === ref.id &&
+  doc.raw._index === ref.index &&
+  (ref.routing === undefined || doc.raw._routing === ref.routing);
 
 /**
  * Whether documents returned by a query can be captured in a shareable link, and if not, why.

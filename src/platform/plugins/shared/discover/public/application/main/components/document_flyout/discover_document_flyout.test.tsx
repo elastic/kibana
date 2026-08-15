@@ -285,6 +285,25 @@ describe('DiscoverDocumentFlyout', () => {
     expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
   });
 
+  it('preserves document routing when fetching from a reference', async () => {
+    const routing = 'route-1';
+    const routedHit = { ...outOfResultsHit, _routing: routing };
+    const { toolkit, services } = await setup({
+      searchResult: searchResponseFor(routedHit),
+      initialFlyout: {
+        type: 'restoreFromRef',
+        ref: { ...expandedDocRef, routing },
+      },
+    });
+
+    await waitFor(() => {
+      expect(toolkit.getCurrentTab().expandedDoc?.raw._routing).toBe(routing);
+    });
+
+    const searchRequest = jest.mocked(services.data.search.search).mock.calls[0][0];
+    expect(searchRequest.params.routing).toBe(routing);
+  });
+
   it('uses the instance from the results without fetching when they already contain it', async () => {
     const { toolkit, services } = await setup({
       searchResult: searchResponseFor(outOfResultsHit),

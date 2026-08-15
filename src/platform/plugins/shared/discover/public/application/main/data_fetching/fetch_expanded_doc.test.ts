@@ -59,6 +59,20 @@ describe('fetchExpandedDoc', () => {
 
       expect(record).toBeUndefined();
     });
+
+    it('routes the request to the document shard', async () => {
+      const { data, getSearchParams } = setup({ rawResponse: { hits: { hits: [] } } });
+
+      await fetchExpandedDoc({
+        ref: { ...ref, routing: 'route-1' },
+        dataView: dataViewMock,
+        esqlQueryText: undefined,
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      expect(getSearchParams().params.routing).toBe('route-1');
+    });
   });
 
   describe('ES|QL mode', () => {
