@@ -39,6 +39,27 @@ const isIndexNotFoundError = (err: unknown): boolean => {
   return message.includes('index_not_found_exception');
 };
 
+const MEMORY_URI_PREFIX = 'memory://';
+const toMemoryUri = (id: string): string => `${MEMORY_URI_PREFIX}${id}`;
+const fromMemoryUri = (uri: string): string =>
+  uri.startsWith(MEMORY_URI_PREFIX) ? uri.slice(MEMORY_URI_PREFIX.length) : uri;
+
+const storedPageToMemoryEntry = (page: StoredMemoryPage): MemoryEntry => ({
+  id: page.id,
+  name: page.name,
+  title: page.title,
+  content: page.content,
+  categories: page.categories,
+  references: page.references.map(({ uri }) => fromMemoryUri(uri)),
+  version: page.version,
+  tags: page.tags,
+  created_at: page.created_at,
+  updated_at: page.updated_at,
+  created_by: page.created_by,
+  updated_by: page.updated_by,
+  is_deleted: page.is_deleted,
+});
+
 type MemoryCollapseField = 'name' | 'id';
 
 /** Upper bound on distinct pages resolved in a single search (Elasticsearch's default max result window). */
@@ -46,7 +67,7 @@ const MAX_PAGES = 10000;
 
 /**
  * MemoryServiceImpl backed by two append-only data streams:
- *   - .significant_events-memories  (pages, latest version resolved via field collapse)
+ *   - ai-nightshift-memory  (pages, latest version resolved via field collapse)
  *   - .significant_events-memory-history  (version history, append-only)
  *
  * Pages are written by indexing a new document with the current @timestamp.
@@ -88,8 +109,7 @@ export class MemoryServiceImpl implements MemoryService {
     await bulkCreateWithInferenceFallback(this.logger, ({ includeEmbedding }) => {
       const document: StoredMemoryPage = {
         '@timestamp': entry.updated_at,
-        id: entry.id,
-        name: entry.name,
+        type: 'memory',
         title: entry.title,
         content: entry.content,
         // Populate search_embedding for live pages so semantic/hybrid search can rank them.
@@ -99,12 +119,16 @@ export class MemoryServiceImpl implements MemoryService {
           !entry.is_deleted && {
             search_embedding: `${entry.title}\n\n${entry.content}`,
           }),
-        categories: entry.categories,
         tags: entry.tags,
-        references: entry.references,
-        version: entry.version,
+        references: entry.references.map((id) => ({ uri: toMemoryUri(id) })),
+        origin: { uri: toMemoryUri(entry.id) },
         created_at: entry.created_at,
         updated_at: entry.updated_at,
+        user_id: entry.updated_by,
+        id: entry.id,
+        name: entry.name,
+        categories: entry.categories,
+        version: entry.version,
         created_by: entry.created_by,
         updated_by: entry.updated_by,
         is_deleted: entry.is_deleted ?? false,
@@ -134,7 +158,7 @@ export class MemoryServiceImpl implements MemoryService {
     size?: number;
   }): Promise<Array<{ _id: string; _source: MemoryEntry }>> {
     try {
-      const response = await this.esClient.search<MemoryEntry>({
+      const response = await this.esClient.search<StoredMemoryPage>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         size,
@@ -143,7 +167,9 @@ export class MemoryServiceImpl implements MemoryService {
         sort: [{ version: { order: 'desc' } }, { updated_at: { order: 'desc' } }],
       });
       return response.hits.hits.flatMap((hit) =>
-        typeof hit._id === 'string' && hit._source ? [{ _id: hit._id, _source: hit._source }] : []
+        typeof hit._id === 'string' && hit._source
+          ? [{ _id: hit._id, _source: storedPageToMemoryEntry(hit._source) }]
+          : []
       );
     } catch (err) {
       if (isIndexNotFoundError(err)) return [];
@@ -449,7 +475,7 @@ export class MemoryServiceImpl implements MemoryService {
     // referenced `id`. Phase 1: gather candidate page ids. Phase 2: resolve their current latest
     // versions and keep only those that STILL reference `id`.
     const candidateIds = await this._collectCandidateIds({
-      bool: { filter: [{ term: { references: id } }] },
+      bool: { filter: [{ term: { 'references.uri': toMemoryUri(id) } }] },
     });
     const latest = await this._resolveLatestByIds(candidateIds);
     return latest.map((hit) => hit._source).filter((entry) => entry.references.includes(id));
@@ -465,7 +491,9 @@ export class MemoryServiceImpl implements MemoryService {
     const structuredFilters: QueryDslQueryContainer[] = [];
     if (tags?.length) structuredFilters.push({ terms: { tags } });
     if (categories?.length) structuredFilters.push({ terms: { categories } });
-    if (references?.length) structuredFilters.push({ terms: { references } });
+    if (references?.length) {
+      structuredFilters.push({ terms: { 'references.uri': references.map(toMemoryUri) } });
+    }
 
     const fuzzyMatch: QueryDslQueryContainer = {
       bool: {
@@ -630,7 +658,7 @@ export class MemoryServiceImpl implements MemoryService {
 
     try {
       if (retriever) {
-        return await this.esClient.search<MemoryEntry>({
+        return await this.esClient.search<StoredMemoryPage>({
           index: MEMORIES_DATA_STREAM,
           track_total_hits: false,
           retriever,
@@ -642,7 +670,7 @@ export class MemoryServiceImpl implements MemoryService {
       }
 
       // keyword mode: plain bool query, no retriever
-      return await this.esClient.search<MemoryEntry>({
+      return await this.esClient.search<StoredMemoryPage>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         query: { bool: { filter: allFilters, must: [fuzzyMatch] } },
@@ -658,7 +686,7 @@ export class MemoryServiceImpl implements MemoryService {
         this.logger.warn(
           `Memory search mode "${mode}" failed, falling back to keyword: ${(err as Error).message}`
         );
-        return this.esClient.search<MemoryEntry>({
+        return this.esClient.search<StoredMemoryPage>({
           index: MEMORIES_DATA_STREAM,
           track_total_hits: false,
           query: { bool: { filter: allFilters, must: [fuzzyMatch] } },
@@ -679,7 +707,7 @@ export class MemoryServiceImpl implements MemoryService {
       // `hits.total` counts pre-collapse documents (every version of every page), so it can't tell
       // us how many distinct pages exist. Instead, detect truncation from the number of collapsed
       // hits returned: hitting `MAX_PAGES` distinct pages means there may be more we didn't fetch.
-      const response = await this.esClient.search<MemoryEntry>({
+      const response = await this.esClient.search<StoredMemoryPage>({
         index: MEMORIES_DATA_STREAM,
         track_total_hits: false,
         query: { match_all: {} },
@@ -689,11 +717,9 @@ export class MemoryServiceImpl implements MemoryService {
       });
 
       const hits = response.hits.hits;
-      const entries = hits
-        .map((hit) => hit._source)
-        .filter(
-          (source): source is MemoryEntry => source !== undefined && source.is_deleted !== true
-        );
+      const entries = hits.flatMap((hit) =>
+        hit._source && !hit._source.is_deleted ? [storedPageToMemoryEntry(hit._source)] : []
+      );
 
       // We only hit a wall if the search filled the entire window — then distinct pages beyond
       // `MAX_PAGES` were silently dropped. Tombstoned pages count toward the window too, so report

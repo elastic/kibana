@@ -8,4 +8,4 @@
 /**
  * Sigevents memory data stream backing MemoryServiceImpl.
  */
-export const MEMORIES_DATA_STREAM = '.significant_events-memories';
+export const MEMORIES_DATA_STREAM = 'ai-nightshift-memory';

@@ -56,6 +56,7 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
           { names: ['.streams*'], privileges: ['all'] },
           { names: ['.kibana_streams*'], privileges: ['all'] },
           { names: ['.significant_events*'], privileges: ['all'] },
+          { names: ['ai-nightshift-memory'], privileges: ['all'] },
         ],
       },
     },
@@ -75,6 +76,10 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
           { names: ['.ds-logs*'], privileges: ['read', 'view_index_metadata'] },
           { names: ['.kibana_streams*'], privileges: ['read', 'view_index_metadata'] },
           { names: ['.significant_events*'], privileges: ['read', 'view_index_metadata'] },
+          {
+            names: ['ai-nightshift-memory'],
+            privileges: ['read', 'view_index_metadata'],
+          },
         ],
       },
     },
