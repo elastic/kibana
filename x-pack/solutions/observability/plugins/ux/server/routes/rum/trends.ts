@@ -36,7 +36,8 @@ const sessionIndexOpts = (
     connection?: string;
     device?: string;
     errorGroup?: string;
-  }
+  },
+  lookbackDays?: number
 ) =>
   canUseSessionIndex({
     installed,
@@ -46,6 +47,7 @@ const sessionIndexOpts = (
     connection: query.connection,
     device: query.device,
     errorGroup: query.errorGroup,
+    lookbackDays,
   });
 
 export const getRumTrendsRoute = createUxServerRoute({
@@ -58,7 +60,7 @@ export const getRumTrendsRoute = createUxServerRoute({
     const client = elasticsearch.client.asCurrentUser;
     const status = await getRumAnalyticsStatus(client);
     const query = params.query;
-    if (sessionIndexOpts(status.installed, query)) {
+    if (sessionIndexOpts(status.installed, query, status.sourceLookbackDays)) {
       return {
         trends: await querySessionIndexTrends({
           client,

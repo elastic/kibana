@@ -44,6 +44,7 @@ export const getRumFiltersRoute = createUxServerRoute({
         connection: params.query.connection,
         device: params.query.device,
         errorGroup: params.query.errorGroup,
+        lookbackDays: status.sourceLookbackDays,
       })
     ) {
       return querySessionIndexFilters({

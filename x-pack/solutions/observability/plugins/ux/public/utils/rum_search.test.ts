@@ -65,6 +65,7 @@ describe('sessionsPatch', () => {
       account: '',
       sessionQuery: '',
       location: '',
+      hasReplay: '',
     });
   });
 
@@ -79,6 +80,22 @@ describe('sessionsPatch', () => {
       account: '',
       sessionQuery: '',
       location: '',
+      hasReplay: '',
+    });
+  });
+
+  it('can set the replay filter after clearing exclusive keys', () => {
+    expect(sessionsPatch({ errorGroup: 'TypeError|x', hasReplay: 'true' })).toEqual({
+      frustration: '',
+      pageUrl: '',
+      errorGroup: 'TypeError|x',
+      sessionIds: '',
+      user: '',
+      click: '',
+      account: '',
+      sessionQuery: '',
+      location: '',
+      hasReplay: 'true',
     });
   });
 });

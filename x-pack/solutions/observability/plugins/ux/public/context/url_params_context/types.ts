@@ -41,6 +41,7 @@ export type UrlParams = {
   goalId?: string;
   includeRaw?: string;
   analyticsMode?: string;
+  hasReplay?: string;
 } & Partial<Record<UxLocalUIFilterName, string>>;
 
 type StringifyAll<T> = { [K in keyof T]: string };

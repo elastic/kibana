@@ -18,7 +18,12 @@ import {
   URL_GROUPING_RULES_MAX_LENGTH,
   SYNC_DELAY_MAX_LENGTH,
 } from '../../common/session_replay_settings';
-import { RUM_SESSIONS_SYNC_DELAY } from '../../common/rum_sessions';
+import {
+  RUM_SESSIONS_LOOKBACK_DAYS,
+  RUM_SESSIONS_LOOKBACK_DAYS_MAX,
+  RUM_SESSIONS_LOOKBACK_DAYS_MIN,
+  RUM_SESSIONS_SYNC_DELAY,
+} from '../../common/rum_sessions';
 
 const attributesSchemaV1 = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
@@ -49,6 +54,14 @@ const attributesSchemaV3 = attributesSchemaV2.extends({
         return 'must be a positive Elasticsearch time value such as 5m, 30s, or 1h';
       }
     },
+  }),
+});
+
+const attributesSchemaV4 = attributesSchemaV3.extends({
+  sourceLookbackDays: schema.number({
+    defaultValue: RUM_SESSIONS_LOOKBACK_DAYS,
+    min: RUM_SESSIONS_LOOKBACK_DAYS_MIN,
+    max: RUM_SESSIONS_LOOKBACK_DAYS_MAX,
   }),
 });
 
@@ -115,6 +128,27 @@ export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: attributesSchemaV3.extends({}, { unknowns: 'ignore' }),
         create: attributesSchemaV3,
+      },
+    },
+    4: {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => ({
+            attributes: {
+              sourceLookbackDays:
+                typeof doc.attributes.sourceLookbackDays === 'number' &&
+                doc.attributes.sourceLookbackDays >= RUM_SESSIONS_LOOKBACK_DAYS_MIN &&
+                doc.attributes.sourceLookbackDays <= RUM_SESSIONS_LOOKBACK_DAYS_MAX
+                  ? doc.attributes.sourceLookbackDays
+                  : RUM_SESSIONS_LOOKBACK_DAYS,
+            },
+          }),
+        },
+      ],
+      schemas: {
+        forwardCompatibility: attributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+        create: attributesSchemaV4,
       },
     },
   },

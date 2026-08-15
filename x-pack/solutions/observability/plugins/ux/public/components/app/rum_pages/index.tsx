@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
@@ -17,25 +18,39 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
+  EuiStat,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import type { RumPageRow, RumResourceRow, RumVitalAttribution } from '../../../../common/rum_app';
+import {
+  emptyPagesKpis,
+  rateVital,
+  type RumPageRow,
+  type RumPagesKpis,
+  type RumResourceRow,
+  type RumVitalAttribution,
+  type RumVitalRating,
+} from '../../../../common/rum_app';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumPages } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { Sparkline } from '../../session_replay/session_ui';
 import { TabTrendChart } from '../rum_overview/tab_trend_chart';
 import { BudgetChips } from '../rum_budgets/budget_chips';
 import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
+
+const ERROR_RATE_WARN = 0.05;
 
 const formatMs = (ms: number | null): string => {
   if (ms == null) {
@@ -44,11 +59,114 @@ const formatMs = (ms: number | null): string => {
   return ms >= 1000 ? `${(ms / 1000).toFixed(2)}s` : `${Math.round(ms)}ms`;
 };
 
+const percent = (ratio: number | null): string =>
+  ratio == null ? '—' : `${Math.round(ratio * 1000) / 10}%`;
+
 const dash = (value: string | number | null | undefined): string => {
   if (value == null || value === '') {
     return '—';
   }
   return String(value);
+};
+
+const vitalBadge = (
+  rating: RumVitalRating
+): { color: 'success' | 'warning' | 'danger'; label: string; tooltip: string } => {
+  if (rating === 'good') {
+    return {
+      color: 'success',
+      label: i18n.translate('xpack.ux.pages.vital.goodBadge', { defaultMessage: 'Good' }),
+      tooltip: i18n.translate('xpack.ux.pages.vital.goodTooltip', { defaultMessage: 'Good' }),
+    };
+  }
+  if (rating === 'ni') {
+    return {
+      color: 'warning',
+      label: i18n.translate('xpack.ux.pages.vital.niBadge', { defaultMessage: 'NI' }),
+      tooltip: i18n.translate('xpack.ux.pages.vital.niTooltip', {
+        defaultMessage: 'Needs improvement',
+      }),
+    };
+  }
+  return {
+    color: 'danger',
+    label: i18n.translate('xpack.ux.pages.vital.poorBadge', { defaultMessage: 'Poor' }),
+    tooltip: i18n.translate('xpack.ux.pages.vital.poorTooltip', { defaultMessage: 'Poor' }),
+  };
+};
+
+const VitalCell = ({
+  vital,
+  value,
+  format,
+}: {
+  vital: 'lcp' | 'inp' | 'cls';
+  value: number | null;
+  format: (next: number | null) => string;
+}) => {
+  const rating = rateVital(vital, value);
+  if (rating == null) {
+    return <EuiText size="s">—</EuiText>;
+  }
+  const badge = vitalBadge(rating);
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">{format(value)}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={badge.tooltip}>
+          <EuiBadge color={badge.color} tabIndex={0}>
+            {badge.label}
+          </EuiBadge>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const PagesKpiStrip = ({ kpis }: { kpis: RumPagesKpis }) => {
+  const items: Array<{ title: string; description: string }> = [
+    {
+      title: String(kpis.views),
+      description: i18n.translate('xpack.ux.pages.kpi.viewsLabel', { defaultMessage: 'Views' }),
+    },
+    {
+      title: String(kpis.sessions),
+      description: i18n.translate('xpack.ux.pages.kpi.sessionsLabel', {
+        defaultMessage: 'Sessions',
+      }),
+    },
+    {
+      title: percent(kpis.passingCwvPct),
+      description: i18n.translate('xpack.ux.pages.kpi.passingCwvLabel', {
+        defaultMessage: 'Views passing CWV',
+      }),
+    },
+    {
+      title: String(kpis.poorLcpPages),
+      description: i18n.translate('xpack.ux.pages.kpi.poorLcpLabel', {
+        defaultMessage: 'Pages with poor LCP',
+      }),
+    },
+  ];
+
+  return (
+    <EuiPanel hasShadow={false} hasBorder paddingSize="m" data-test-subj="uxRumPagesKpis">
+      <EuiFlexGroup responsive={false} gutterSize="l" wrap>
+        {items.map((item) => (
+          <EuiFlexItem grow={false} key={item.description}>
+            <EuiStat
+              title={item.title}
+              description={item.description}
+              titleSize="s"
+              textAlign="left"
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
 };
 
 const WhySlow = ({ attribution }: { attribution: RumVitalAttribution }) => {
@@ -211,6 +329,7 @@ export function RumPagesPanel() {
   } = useLegacyUrlParams();
 
   const [pages, setPages] = useState<RumPageRow[]>([]);
+  const [kpis, setKpis] = useState<RumPagesKpis>(emptyPagesKpis());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<RumPageRow | null>(null);
@@ -237,9 +356,11 @@ export function RumPagesPanel() {
         analyticsMode,
       });
       setPages(result.pages);
+      setKpis(result.kpis ?? emptyPagesKpis());
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setPages([]);
+      setKpis(emptyPagesKpis());
     } finally {
       setLoading(false);
     }
@@ -281,47 +402,134 @@ export function RumPagesPanel() {
     {
       field: 'views',
       name: i18n.translate('xpack.ux.pages.table.views', { defaultMessage: 'Views' }),
-      width: '100px',
+      width: '80px',
+    },
+    {
+      field: 'trend',
+      name: i18n.translate('xpack.ux.pages.table.trendLabel', { defaultMessage: 'Trend' }),
+      width: '90px',
+      render: (trend: number[]) => (
+        <Sparkline buckets={trend.map((count) => ({ count, hasError: false }))} />
+      ),
     },
     {
       field: 'avgDurationMs',
       name: i18n.translate('xpack.ux.pages.table.duration', { defaultMessage: 'Avg load' }),
-      width: '110px',
+      width: '100px',
       render: (value: number | null) => formatMs(value),
     },
     {
       field: 'p75Lcp',
       name: i18n.translate('xpack.ux.pages.table.lcp', { defaultMessage: 'LCP p75' }),
-      width: '100px',
-      render: (value: number | null) => formatMs(value),
+      width: '130px',
+      render: (value: number | null) => <VitalCell vital="lcp" value={value} format={formatMs} />,
     },
     {
       field: 'p75Inp',
       name: i18n.translate('xpack.ux.pages.table.inp', { defaultMessage: 'INP p75' }),
-      width: '100px',
-      render: (value: number | null) => formatMs(value),
+      width: '120px',
+      render: (value: number | null) => <VitalCell vital="inp" value={value} format={formatMs} />,
     },
     {
       field: 'p75Cls',
       name: i18n.translate('xpack.ux.pages.table.cls', { defaultMessage: 'CLS p75' }),
-      width: '100px',
-      render: (value: number | null) => (value == null ? '—' : value.toFixed(3)),
+      width: '120px',
+      render: (value: number | null) => (
+        <VitalCell
+          vital="cls"
+          value={value}
+          format={(next) => (next == null ? '—' : next.toFixed(3))}
+        />
+      ),
     },
     {
-      field: 'errorCount',
-      name: i18n.translate('xpack.ux.pages.table.errors', { defaultMessage: 'Errors' }),
-      width: '90px',
+      name: i18n.translate('xpack.ux.pages.table.frustrationLabel', {
+        defaultMessage: 'Frustration',
+      }),
+      width: '150px',
+      render: (item: RumPageRow) =>
+        item.rageClicks === 0 && item.deadClicks === 0 ? (
+          <EuiText size="xs" color="subdued">
+            —
+          </EuiText>
+        ) : (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {item.rageClicks > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color="warning"
+                  onClick={() =>
+                    pushRumPath(
+                      history,
+                      '/session-replay',
+                      sessionsPatch({ pageUrl: item.path, frustration: 'rage' })
+                    )
+                  }
+                  onClickAriaLabel={i18n.translate('xpack.ux.pages.rageAriaLabel', {
+                    defaultMessage: 'View rage-click sessions on {path}',
+                    values: { path: item.path },
+                  })}
+                >
+                  {i18n.translate('xpack.ux.pages.rageBadge', {
+                    defaultMessage: '{count} rage',
+                    values: { count: item.rageClicks },
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {item.deadClicks > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color="hollow"
+                  onClick={() =>
+                    pushRumPath(
+                      history,
+                      '/session-replay',
+                      sessionsPatch({ pageUrl: item.path, frustration: 'dead' })
+                    )
+                  }
+                  onClickAriaLabel={i18n.translate('xpack.ux.pages.deadAriaLabel', {
+                    defaultMessage: 'View dead-click sessions on {path}',
+                    values: { path: item.path },
+                  })}
+                >
+                  {i18n.translate('xpack.ux.pages.deadBadge', {
+                    defaultMessage: '{count} dead',
+                    values: { count: item.deadClicks },
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
+    },
+    {
+      name: i18n.translate('xpack.ux.pages.table.errorRateLabel', { defaultMessage: 'Error rate' }),
+      width: '110px',
+      render: (item: RumPageRow) => {
+        const rate = item.views > 0 ? item.errorCount / item.views : 0;
+        return (
+          <EuiLink
+            data-test-subj="uxPagesErrorRateLink"
+            onClick={() => pushRumPath(history, '/errors', { pageUrl: item.path })}
+          >
+            <EuiText size="s" color={rate >= ERROR_RATE_WARN ? 'danger' : undefined}>
+              {item.errorCount} · {percent(rate)}
+            </EuiText>
+          </EuiLink>
+        );
+      },
     },
     {
       name: i18n.translate('xpack.ux.pages.table.budgetsLabel', { defaultMessage: 'Budgets' }),
-      width: '220px',
+      width: '180px',
       render: (item: RumPageRow) => (
         <BudgetChips items={budgets} pagePath={item.path} includeAppWide={false} />
       ),
     },
     {
       name: i18n.translate('xpack.ux.pages.table.actions', { defaultMessage: 'Actions' }),
-      width: '140px',
+      width: '80px',
       actions: [
         {
           name: i18n.translate('xpack.ux.pages.table.sessions', { defaultMessage: 'Sessions' }),
@@ -339,6 +547,8 @@ export function RumPagesPanel() {
 
   return (
     <>
+      <PagesKpiStrip kpis={kpis} />
+      <EuiSpacer />
       <TabTrendChart accessor="pageViews" />
       <EuiSpacer />
       <EuiPanel paddingSize="m" data-test-subj="uxRumPagesPanel">
@@ -349,7 +559,7 @@ export function RumPagesPanel() {
           <p>
             {i18n.translate('xpack.ux.pages.description', {
               defaultMessage:
-                'Routes grouped from documentLoad spans and browser.navigation events. Open a row for vitals, or jump to the sessions that hit that page.',
+                'Routes grouped from documentLoad spans and browser.navigation events. Web vitals are p75 with good / needs-improvement / poor thresholds.',
             })}
           </p>
         </EuiText>
@@ -412,6 +622,12 @@ export function RumPagesPanel() {
                       defaultMessage: 'Views',
                     }),
                     description: String(selected.views),
+                  },
+                  {
+                    title: i18n.translate('xpack.ux.pages.detail.sessionsLabel', {
+                      defaultMessage: 'Sessions',
+                    }),
+                    description: String(selected.sessionCount),
                   },
                   {
                     title: i18n.translate('xpack.ux.pages.detail.errors', {

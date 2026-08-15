@@ -6,18 +6,20 @@
  */
 
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
-import { RUM_SESSIONS_SOURCE_LOOKBACK } from '../../common/rum_daily';
 import {
   RUM_CANONICAL_SERVICE_NAME_FIELD,
   RUM_CANONICAL_SESSION_ID_FIELD,
   RUM_HAS_REPLAY_FIELD,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_INDEX_PATTERN,
+  RUM_SESSIONS_LOOKBACK_DAYS,
   RUM_SESSIONS_MANAGED_BY,
   RUM_SESSIONS_PIPELINE_NAME,
   RUM_SESSIONS_SYNC_DELAY,
   RUM_SESSIONS_TRANSFORM_ID,
   RUM_SESSIONS_VERSION,
+  sessionsRetentionMaxAge,
+  sessionsSourceLookback,
 } from '../../common/rum_sessions';
 
 export const SERVICE_NAME_SCRIPT = `
@@ -59,30 +61,33 @@ const HAS_REPLAY_FILTER = {
   term: { [RUM_HAS_REPLAY_FIELD]: true },
 };
 
-/** Collect ordered page/click tokens plus last-known client/user from each session's events. */
+/** Keep the earliest tokens per shard so reduce can still take the first 30 globally. */
+const SEQUENCE_MAP_CAP = 40;
+
+const keywordFromDoc = (fields: string): string => `
+  def value = null;
+  for (field in ${fields}) {
+    if (doc.containsKey(field) && doc[field].size() > 0) {
+      value = doc[field].value;
+      break;
+    }
+  }
+`;
+
+/** Collect ordered page/click tokens plus last-known client/user from doc values. */
 const SEQUENCE_MAP_SCRIPT = `
-  def src = params._source;
-  if (src == null) { return; }
-  def ts = src['@timestamp'];
-  if (ts == null) { return; }
-  def attrs = src.attributes;
-  def resource = src.resource;
-  def rattrs = resource != null ? resource.attributes : null;
-  def page = null;
-  if (attrs != null) {
-    page = attrs['url.path.grouped'];
-    if (page == null) { page = attrs['page.url.path']; }
-    if (page == null) { page = attrs['url.full']; }
-    if (page == null) { page = attrs['page.url']; }
-    if (page == null) { page = attrs['http.url']; }
+  if (doc.containsKey('@timestamp') == false || doc['@timestamp'].size() == 0) { return; }
+  def ts = doc['@timestamp'].value.millis;
+  ${keywordFromDoc(
+    "['attributes.url.path.grouped', 'attributes.page.url.path', 'attributes.url.full', 'attributes.page.url', 'attributes.http.url', 'resource.attributes.page.url.path', 'resource.attributes.url.full']"
+  )}
+  def page = value;
+  def nameStr = '';
+  if (doc.containsKey('event_name') && doc['event_name'].size() > 0) {
+    nameStr = doc['event_name'].value.toString();
+  } else if (doc.containsKey('name') && doc['name'].size() > 0) {
+    nameStr = doc['name'].value.toString();
   }
-  if (page == null && rattrs != null) {
-    page = rattrs['page.url.path'];
-    if (page == null) { page = rattrs['url.full']; }
-  }
-  def name = src.event_name;
-  if (name == null) { name = src.name; }
-  def nameStr = name == null ? '' : name.toString();
   def isClick = nameStr.contains('click');
   def isRage = nameStr.contains('rage');
   def isDead = nameStr.contains('dead');
@@ -93,38 +98,89 @@ const SEQUENCE_MAP_SCRIPT = `
     else if (s.startsWith('#')) { s = s.substring(1); }
     else if (s.startsWith('/')) { s = s.substring(1); }
     s = s.replace(' ', '_');
-    if (s.length() > 0) { state.pages.add([ts, s]); }
+    if (s.length() > 0) {
+      if (state.pages.length < ${SEQUENCE_MAP_CAP}) {
+        state.pages.add([ts, s]);
+      } else {
+        int latest = 0;
+        for (int i = 1; i < state.pages.length; i++) {
+          if (state.pages[i][0] > state.pages[latest][0]) { latest = i; }
+        }
+        if (ts < state.pages[latest][0]) { state.pages[latest] = [ts, s]; }
+      }
+    }
   }
   if (isClick) {
     def target = null;
-    if (attrs != null) {
-      target = attrs['browser.css_selector'];
-      if (target == null) { target = attrs['target_xpath']; }
+    if (doc.containsKey('attributes.browser.css_selector') && doc['attributes.browser.css_selector'].size() > 0) {
+      target = doc['attributes.browser.css_selector'].value;
+    } else if (doc.containsKey('attributes.target_xpath') && doc['attributes.target_xpath'].size() > 0) {
+      target = doc['attributes.target_xpath'].value;
     }
     if (target != null) {
       def s = target.toString().trim().toLowerCase().replace(' ', '_');
-      if (s.length() > 0) { state.clicks.add([ts, s]); }
+      if (s.length() > 0) {
+        if (state.clicks.length < ${SEQUENCE_MAP_CAP}) {
+          state.clicks.add([ts, s]);
+        } else {
+          int latest = 0;
+          for (int i = 1; i < state.clicks.length; i++) {
+            if (state.clicks[i][0] > state.clicks[latest][0]) { latest = i; }
+          }
+          if (ts < state.clicks[latest][0]) { state.clicks[latest] = [ts, s]; }
+        }
+      }
     }
     if (isRage) { state.rage += 1; }
     if (isDead) { state.dead += 1; }
   }
-  if (attrs != null) {
-    if (attrs['user.id'] != null) { state.user = attrs['user.id'].toString(); }
-    else if (attrs['user.email'] != null) { state.user = attrs['user.email'].toString(); }
-    else if (attrs['user.name'] != null) { state.user = attrs['user.name'].toString(); }
-    if (attrs['browser.name'] != null) { state.browser = attrs['browser.name'].toString(); }
-    if (attrs['browser.platform'] != null) { state.os = attrs['browser.platform'].toString(); }
-    else if (attrs['os.name'] != null) { state.os = attrs['os.name'].toString(); }
-    if (attrs['client.geo.country_iso_code'] != null) { state.country = attrs['client.geo.country_iso_code'].toString(); }
-    if (attrs['browser.breakpoint'] != null) { state.breakpoint = attrs['browser.breakpoint'].toString(); }
+  if (doc.containsKey('attributes.user.id') && doc['attributes.user.id'].size() > 0) {
+    state.user = doc['attributes.user.id'].value.toString();
+  } else if (doc.containsKey('attributes.user.email') && doc['attributes.user.email'].size() > 0) {
+    state.user = doc['attributes.user.email'].value.toString();
+  } else if (doc.containsKey('attributes.user.name') && doc['attributes.user.name'].size() > 0) {
+    state.user = doc['attributes.user.name'].value.toString();
+  } else if (
+    state.user == '' &&
+    doc.containsKey('resource.attributes.user.id') &&
+    doc['resource.attributes.user.id'].size() > 0
+  ) {
+    state.user = doc['resource.attributes.user.id'].value.toString();
   }
-  if (rattrs != null) {
-    if (state.user == '' && rattrs['user.id'] != null) { state.user = rattrs['user.id'].toString(); }
-    if (state.browser == '' && rattrs['browser.name'] != null) { state.browser = rattrs['browser.name'].toString(); }
-    if (state.os == '' && rattrs['browser.platform'] != null) { state.os = rattrs['browser.platform'].toString(); }
-    if (state.country == '' && rattrs['client.geo.country_iso_code'] != null) {
-      state.country = rattrs['client.geo.country_iso_code'].toString();
-    }
+  if (doc.containsKey('attributes.browser.name') && doc['attributes.browser.name'].size() > 0) {
+    state.browser = doc['attributes.browser.name'].value.toString();
+  } else if (
+    state.browser == '' &&
+    doc.containsKey('resource.attributes.browser.name') &&
+    doc['resource.attributes.browser.name'].size() > 0
+  ) {
+    state.browser = doc['resource.attributes.browser.name'].value.toString();
+  }
+  if (doc.containsKey('attributes.browser.platform') && doc['attributes.browser.platform'].size() > 0) {
+    state.os = doc['attributes.browser.platform'].value.toString();
+  } else if (doc.containsKey('attributes.os.name') && doc['attributes.os.name'].size() > 0) {
+    state.os = doc['attributes.os.name'].value.toString();
+  } else if (
+    state.os == '' &&
+    doc.containsKey('resource.attributes.browser.platform') &&
+    doc['resource.attributes.browser.platform'].size() > 0
+  ) {
+    state.os = doc['resource.attributes.browser.platform'].value.toString();
+  }
+  if (
+    doc.containsKey('attributes.client.geo.country_iso_code') &&
+    doc['attributes.client.geo.country_iso_code'].size() > 0
+  ) {
+    state.country = doc['attributes.client.geo.country_iso_code'].value.toString();
+  } else if (
+    state.country == '' &&
+    doc.containsKey('resource.attributes.client.geo.country_iso_code') &&
+    doc['resource.attributes.client.geo.country_iso_code'].size() > 0
+  ) {
+    state.country = doc['resource.attributes.client.geo.country_iso_code'].value.toString();
+  }
+  if (doc.containsKey('attributes.browser.breakpoint') && doc['attributes.browser.breakpoint'].size() > 0) {
+    state.breakpoint = doc['attributes.browser.breakpoint'].value.toString();
   }
 `;
 
@@ -351,7 +407,16 @@ export const rumSessionsDestPipeline = {
           if (ctx.error_count instanceof Map) { ctx.error_count = ctx.error_count.doc_count; }
           if (ctx.click_count instanceof Map) { ctx.click_count = ctx.click_count.doc_count; }
           if (ctx.replay_event_count instanceof Map) { ctx.replay_event_count = ctx.replay_event_count.doc_count; }
-          if (ctx.has_replay instanceof Map) { ctx.has_replay = ctx.has_replay.doc_count > 0; }
+          boolean replay = false;
+          if (ctx.has_replay instanceof Map) {
+            def n = ctx.has_replay.doc_count;
+            replay = n != null && n > 0;
+          } else if (ctx.has_replay instanceof Boolean) {
+            replay = ctx.has_replay;
+          } else if (ctx.has_replay instanceof Number) {
+            replay = ((Number) ctx.has_replay).doubleValue() > 0;
+          }
+          ctx.has_replay = replay;
           def seq = ctx.sequences;
           if (seq instanceof Map) {
             ctx.page_sequence = seq.page_sequence;
@@ -406,13 +471,16 @@ export const rumSessionsIndexTemplate = {
   },
 };
 
-export const buildRumSessionsTransformBody = (syncDelay = RUM_SESSIONS_SYNC_DELAY) => ({
+export const buildRumSessionsTransformBody = (
+  syncDelay = RUM_SESSIONS_SYNC_DELAY,
+  lookbackDays = RUM_SESSIONS_LOOKBACK_DAYS
+) => ({
   source: {
     index: [RUM_SESSION_SOURCE_INDEX],
     query: {
       bool: {
         filter: [
-          { range: { '@timestamp': { gte: RUM_SESSIONS_SOURCE_LOOKBACK } } },
+          { range: { '@timestamp': { gte: sessionsSourceLookback(lookbackDays) } } },
           { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } },
         ],
       },
@@ -432,7 +500,7 @@ export const buildRumSessionsTransformBody = (syncDelay = RUM_SESSIONS_SYNC_DELA
   retention_policy: {
     time: {
       field: 'end_time',
-      max_age: '93d',
+      max_age: sessionsRetentionMaxAge(lookbackDays),
     },
   },
   settings: {

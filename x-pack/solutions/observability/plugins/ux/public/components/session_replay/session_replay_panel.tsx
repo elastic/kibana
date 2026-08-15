@@ -273,6 +273,7 @@ export function SessionReplayPanel() {
       connection,
       device,
       analyticsMode,
+      hasReplay: urlHasReplay,
     },
   } = useLegacyUrlParams();
 
@@ -290,7 +291,7 @@ export function SessionReplayPanel() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const [onlyReplay, setOnlyReplay] = useState(false);
+  const [onlyReplay, setOnlyReplay] = useState(urlHasReplay === 'true');
   const [onlyErrors, setOnlyErrors] = useState(false);
   const [onlyRage, setOnlyRage] = useState(false);
   const [browser, setBrowser] = useState<string | undefined>();
@@ -301,6 +302,10 @@ export function SessionReplayPanel() {
     setSearchInput(sessionQuery ?? '');
     setSearch(sessionQuery ?? '');
   }, [sessionQuery]);
+
+  useEffect(() => {
+    setOnlyReplay(urlHasReplay === 'true');
+  }, [urlHasReplay]);
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -785,7 +790,18 @@ export function SessionReplayPanel() {
             <EuiFilterGroup>
               <EuiFilterButton
                 hasActiveFilters={onlyReplay}
-                onClick={() => resetPage(() => setOnlyReplay((v) => !v))}
+                onClick={() =>
+                  resetPage(() => {
+                    const next = !onlyReplay;
+                    setOnlyReplay(next);
+                    history.replace({
+                      ...history.location,
+                      search: mergeRumSearch(history.location.search, {
+                        hasReplay: next ? 'true' : '',
+                      }),
+                    });
+                  })
+                }
                 numFilters={facets.hasReplay}
                 data-test-subj="uxSessionFilterReplay"
               >

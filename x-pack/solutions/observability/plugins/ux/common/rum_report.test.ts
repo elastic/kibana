@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_FUNNEL_STEPS } from './session_funnel';
-import type { RumPageRow } from './rum_app';
+import { emptyErrorImpact, emptyPageImpact, type RumPageRow } from './rum_app';
 import {
   CSV_ROW_CAP,
   computeDelta,
@@ -255,6 +255,7 @@ describe('joinPageRows / poorLcpShare / joinCountryRows', () => {
     p75Inp: null,
     p75Cls: null,
     avgDurationMs: null,
+    ...emptyPageImpact(),
     attribution: {
       lcpElement: null,
       lcpUrl: null,
@@ -361,6 +362,7 @@ describe('scorecardMarkdown / reportPrimaryCsv', () => {
         p75Inp: 300,
         p75Cls: 0.1,
         avgDurationMs: null,
+        ...emptyPageImpact(),
         attribution: {
           lcpElement: null,
           lcpUrl: null,
@@ -391,6 +393,7 @@ describe('scorecardMarkdown / reportPrimaryCsv', () => {
         sampleStack: null,
         groupingKey: null,
         trend: [],
+        ...emptyErrorImpact(),
         samplePage: null,
         sampleAction: null,
         sampleTraceId: null,

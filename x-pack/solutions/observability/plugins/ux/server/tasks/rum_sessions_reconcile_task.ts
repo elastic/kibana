@@ -45,6 +45,7 @@ export const registerRumSessionsReconcileTask = ({
             client: coreStart.elasticsearch.client.asInternalUser,
             logger,
             syncDelay: settings.syncDelay,
+            sourceLookbackDays: settings.sourceLookbackDays,
           });
         },
       }),

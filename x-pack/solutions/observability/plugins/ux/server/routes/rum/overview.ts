@@ -73,7 +73,8 @@ const overlaySessionIndex = async (
     errorGroup?: string;
   },
   installed: boolean,
-  watermark?: string | null
+  watermark?: string | null,
+  lookbackDays?: number
 ): Promise<RumOverviewResponse> => {
   if (
     !canUseSessionIndex({
@@ -84,6 +85,7 @@ const overlaySessionIndex = async (
       connection: query.connection,
       device: query.device,
       errorGroup: query.errorGroup,
+      lookbackDays,
     })
   ) {
     return result;
@@ -187,7 +189,8 @@ export const getRumOverviewRoute = createUxServerRoute({
         client,
         params.query,
         status.installed,
-        status.watermark
+        status.watermark,
+        status.sourceLookbackDays
       );
     }
     const filters = rumBaseFilters(params.query);
@@ -431,6 +434,10 @@ export const getRumOverviewRoute = createUxServerRoute({
           durationToMs(loadAgg?.avg_us?.value ?? undefined),
         attribution: emptyVitalAttribution(),
         resources: [],
+        sessionCount: 0,
+        rageClicks: 0,
+        deadClicks: 0,
+        trend: [],
       };
     });
 
@@ -540,7 +547,8 @@ export const getRumOverviewRoute = createUxServerRoute({
       client,
       params.query,
       status.installed,
-      status.watermark
+      status.watermark,
+      status.sourceLookbackDays
     );
   },
 });

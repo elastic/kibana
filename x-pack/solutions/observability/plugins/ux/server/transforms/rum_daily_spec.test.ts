@@ -62,7 +62,23 @@ describe('rum daily transform specs', () => {
   it('flattens percentile and filter maps in the dest pipeline', () => {
     const source = rumDailyDestPipeline.processors[0].script.source;
     expect(source).toContain("values['75.0']");
+    expect(source).toContain("v['75']");
+    expect(source).toContain('inner instanceof Number');
+    expect(source).toContain('ctx.inp_p75 = p75Of(ctx.inp_p75)');
     expect(source).toContain('ctx.page_views = countOf');
     expect(source).toContain('ctx.load_p75');
+    expect(source).toContain('ctx.lcp_samples = samplesOf(ctx.lcp)');
+    expect(source).toContain('ctx.load_samples = samplesOf(load)');
+  });
+
+  it('counts load samples as a sub-agg because filter dest docs drop doc_count', () => {
+    const load = rumPagesDailyTransformBody.pivot.aggregations.load;
+    expect(load).toEqual(
+      expect.objectContaining({
+        aggs: expect.objectContaining({
+          samples: { value_count: { field: '@timestamp' } },
+        }),
+      })
+    );
   });
 });

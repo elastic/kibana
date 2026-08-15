@@ -20,6 +20,10 @@ export const RUM_SESSIONS_MANAGED_BY = 'ux';
 export const RUM_SESSIONS_SYNC_DELAY = '5m';
 export const RUM_SESSIONS_LAG_SLACK_SECONDS = 15 * 60;
 export const RUM_SESSIONS_PARTITION_COUNT = 16;
+export const RUM_SESSIONS_LOOKBACK_DAYS = 90;
+export const RUM_SESSIONS_LOOKBACK_DAYS_MIN = 1;
+export const RUM_SESSIONS_LOOKBACK_DAYS_MAX = 400;
+export const RUM_SESSIONS_RETENTION_SLACK_DAYS = 3;
 
 const ES_TIME_VALUE = /^([1-9]\d*)([smh])$/;
 
@@ -44,6 +48,43 @@ export const parseEsTimeValueSeconds = (value: string): number => {
 
 export const rumSessionsLagWarnSeconds = (syncDelay = RUM_SESSIONS_SYNC_DELAY): number =>
   parseEsTimeValueSeconds(syncDelay) + RUM_SESSIONS_LAG_SLACK_SECONDS;
+
+export const clampLookbackDays = (value: unknown): number => {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n)) {
+    return RUM_SESSIONS_LOOKBACK_DAYS;
+  }
+  return Math.min(RUM_SESSIONS_LOOKBACK_DAYS_MAX, Math.max(RUM_SESSIONS_LOOKBACK_DAYS_MIN, n));
+};
+
+export const isValidLookbackDays = (value: unknown): value is number => {
+  const n = Number(value);
+  return (
+    Number.isInteger(n) &&
+    n >= RUM_SESSIONS_LOOKBACK_DAYS_MIN &&
+    n <= RUM_SESSIONS_LOOKBACK_DAYS_MAX
+  );
+};
+
+/** Calendar-day rounding so the range is cacheable (transforms-at-scale). */
+export const sessionsSourceLookback = (days = RUM_SESSIONS_LOOKBACK_DAYS): string =>
+  `now-${clampLookbackDays(days)}d/d`;
+
+export const sessionsRetentionMaxAge = (days = RUM_SESSIONS_LOOKBACK_DAYS): string =>
+  `${clampLookbackDays(days) + RUM_SESSIONS_RETENTION_SLACK_DAYS}d`;
+
+export const sessionsIndexWindowMs = (days = RUM_SESSIONS_LOOKBACK_DAYS): number =>
+  (clampLookbackDays(days) + RUM_SESSIONS_RETENTION_SLACK_DAYS) * 24 * 60 * 60 * 1000;
+
+const LOOKBACK_GTE = /^now-(\d+)d(?:\/d)?$/;
+
+export const parseLookbackDays = (gte?: string): number | undefined => {
+  const match = gte ? LOOKBACK_GTE.exec(gte) : undefined;
+  if (!match) {
+    return undefined;
+  }
+  return Number(match[1]);
+};
 
 export const RUM_SESSIONS_LAG_WARN_SECONDS = rumSessionsLagWarnSeconds();
 
@@ -82,6 +123,7 @@ export interface RumAnalyticsStatus {
   transformId: string;
   index: string;
   syncDelay: string;
+  sourceLookbackDays: number;
   pagesDaily?: RumRollupStatus;
   serviceDaily?: RumRollupStatus;
 }
@@ -94,6 +136,7 @@ export const emptyRumAnalyticsStatus = (): RumAnalyticsStatus => ({
   transformId: RUM_SESSIONS_TRANSFORM_ID,
   index: RUM_SESSIONS_INDEX,
   syncDelay: RUM_SESSIONS_SYNC_DELAY,
+  sourceLookbackDays: RUM_SESSIONS_LOOKBACK_DAYS,
 });
 
 export const isRumAnalyticsMode = (value: string | undefined): value is RumAnalyticsMode =>
@@ -130,6 +173,7 @@ export const canUseSessionIndex = ({
   connection,
   device,
   errorGroup,
+  lookbackDays,
 }: {
   installed: boolean;
   analyticsMode?: string;
@@ -138,11 +182,12 @@ export const canUseSessionIndex = ({
   connection?: string;
   device?: string;
   errorGroup?: string;
+  lookbackDays?: number;
 }): boolean =>
   installed &&
   analyticsMode !== 'raw' &&
   rangeMs != null &&
-  rangeMs <= 93 * 24 * 60 * 60 * 1000 &&
+  rangeMs <= sessionsIndexWindowMs(lookbackDays) &&
   !kuery &&
   !connection &&
   !device &&

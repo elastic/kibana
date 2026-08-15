@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
@@ -21,22 +22,30 @@ import {
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  EuiStat,
   EuiText,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import type { RumErrorGroup } from '../../../../common/rum_app';
+import {
+  emptyErrorsKpis,
+  type RumErrorGroup,
+  type RumErrorsKpis,
+} from '../../../../common/rum_app';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumErrors } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
-import { TabTrendChart } from '../rum_overview/tab_trend_chart';
+import { formatRelativeTime, formatTime, shortenPath } from '../../session_replay/session_ui';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
+import { ErrorsOverTimeChart } from './errors_over_time_chart';
+
+type ErrorSortField = 'count' | 'sessionCount' | 'userCount' | 'firstSeen' | 'lastSeen';
 
 const MiniTrend = ({ values }: { values: number[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -50,6 +59,9 @@ const MiniTrend = ({ values }: { values: number[] }) => {
         height: 24px;
         width: 72px;
       `}
+      aria-label={i18n.translate('xpack.ux.errors.table.trendAriaLabel', {
+        defaultMessage: 'Occurrences over time',
+      })}
     >
       {values.map((value, index) => (
         <div
@@ -66,24 +78,96 @@ const MiniTrend = ({ values }: { values: number[] }) => {
   );
 };
 
+const percent = (part: number, total: number): string =>
+  total > 0 ? `${Math.round((part / total) * 100)}%` : '0%';
+
+const SeenCell = ({ value }: { value: string | null }) => (
+  <EuiToolTip content={formatTime(value)}>
+    <EuiText size="xs" tabIndex={0}>
+      {formatRelativeTime(value)}
+    </EuiText>
+  </EuiToolTip>
+);
+
+const ErrorsKpiStrip = ({ kpis }: { kpis: RumErrorsKpis }) => {
+  const items: Array<{ title: string; description: string }> = [
+    {
+      title: String(kpis.errorEvents),
+      description: i18n.translate('xpack.ux.errors.kpi.eventsLabel', {
+        defaultMessage: 'Error events',
+      }),
+    },
+    {
+      title: percent(kpis.impactedSessions, kpis.totalSessions),
+      description: i18n.translate('xpack.ux.errors.kpi.impactedSessionsLabel', {
+        defaultMessage: 'Impacted sessions',
+      }),
+    },
+    {
+      title: String(kpis.impactedUsers),
+      description: i18n.translate('xpack.ux.errors.kpi.impactedUsersLabel', {
+        defaultMessage: 'Impacted users',
+      }),
+    },
+    {
+      title: String(kpis.newGroups),
+      description: i18n.translate('xpack.ux.errors.kpi.newIssuesLabel', {
+        defaultMessage: 'New issues',
+      }),
+    },
+  ];
+
+  return (
+    <EuiPanel hasShadow={false} hasBorder paddingSize="m" data-test-subj="uxRumErrorsKpis">
+      <EuiFlexGroup responsive={false} gutterSize="l" wrap>
+        {items.map((item) => (
+          <EuiFlexItem grow={false} key={item.description}>
+            <EuiStat
+              title={item.title}
+              description={item.description}
+              titleSize="s"
+              textAlign="left"
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
 const ErrorDetailFlyout = ({
   group,
   apmHref,
   traceHref,
   onClose,
   onViewSessions,
+  onWatchReplay,
+  onOpenPage,
 }: {
   group: RumErrorGroup;
   apmHref: string | null;
   traceHref: string | null;
   onClose: () => void;
   onViewSessions: () => void;
+  onWatchReplay: () => void;
+  onOpenPage: (path: string) => void;
 }) => (
   <EuiFlyout size="m" onClose={onClose} aria-labelledby="uxErrorDetailTitle">
     <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="s">
-        <h2 id="uxErrorDetailTitle">{group.type}</h2>
-      </EuiTitle>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h2 id="uxErrorDetailTitle">{group.type}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {group.isNew && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="accent">
+              {i18n.translate('xpack.ux.errors.newBadge', { defaultMessage: 'New' })}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <EuiText size="s" color="subdued">
         {group.message}
       </EuiText>
@@ -95,6 +179,56 @@ const ErrorDetailFlyout = ({
           values: { count: group.count, sessions: group.sessionCount, users: group.userCount },
         })}
       </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="l" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.ux.errors.detail.firstSeenLabel', {
+              defaultMessage: 'First seen',
+            })}
+          </EuiText>
+          <SeenCell value={group.firstSeen} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.ux.errors.detail.lastSeenLabel', {
+              defaultMessage: 'Last seen',
+            })}
+          </EuiText>
+          <SeenCell value={group.lastSeen} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {group.trend.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <MiniTrend values={group.trend} />
+        </>
+      )}
+      {group.affectedPages.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.ux.errors.detail.pagesLabel', {
+              defaultMessage: 'Affected pages',
+            })}
+          </EuiText>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {group.affectedPages.map((page) => (
+              <EuiFlexItem grow={false} key={page.path}>
+                <EuiBadge
+                  onClick={() => onOpenPage(page.path)}
+                  onClickAriaLabel={i18n.translate('xpack.ux.errors.detail.pageAriaLabel', {
+                    defaultMessage: 'Open {path} on the Pages tab',
+                    values: { path: page.path },
+                  })}
+                >
+                  {shortenPath(page.path, 28)}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
       {(group.sampleAction || group.samplePage) && (
         <>
           <EuiSpacer size="s" />
@@ -126,10 +260,17 @@ const ErrorDetailFlyout = ({
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
-            data-test-subj="uxRumErrorsPanelViewSessionsButton"
+            data-test-subj="uxRumErrorsPanelWatchReplayButton"
             fill
-            onClick={onViewSessions}
+            onClick={onWatchReplay}
           >
+            {i18n.translate('xpack.ux.errors.watchReplayButtonLabel', {
+              defaultMessage: 'Watch replay',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton data-test-subj="uxRumErrorsPanelViewSessionsButton" onClick={onViewSessions}>
             {i18n.translate('xpack.ux.errors.detail.sessions', {
               defaultMessage: 'View sessions',
             })}
@@ -188,9 +329,12 @@ export function RumErrorsPanel() {
   } = useLegacyUrlParams();
 
   const [groups, setGroups] = useState<RumErrorGroup[]>([]);
+  const [kpis, setKpis] = useState<RumErrorsKpis>(emptyErrorsKpis());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<RumErrorGroup | null>(null);
+  const [sortField, setSortField] = useState<ErrorSortField>('sessionCount');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -212,9 +356,11 @@ export function RumErrorsPanel() {
         device,
       });
       setGroups(result.groups);
+      setKpis(result.kpis ?? emptyErrorsKpis());
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setGroups([]);
+      setKpis(emptyErrorsKpis());
     } finally {
       setLoading(false);
     }
@@ -238,6 +384,20 @@ export function RumErrorsPanel() {
     void load();
   }, [load]);
 
+  const sortedGroups = useMemo(() => {
+    const copy = [...groups];
+    copy.sort((left, right) => {
+      const direction = sortDirection === 'asc' ? 1 : -1;
+      if (sortField === 'firstSeen' || sortField === 'lastSeen') {
+        const leftMs = left[sortField] ? Date.parse(left[sortField] as string) : 0;
+        const rightMs = right[sortField] ? Date.parse(right[sortField] as string) : 0;
+        return (leftMs - rightMs) * direction;
+      }
+      return (left[sortField] - right[sortField]) * direction;
+    });
+    return copy;
+  }, [groups, sortDirection, sortField]);
+
   const apmTraceHref = (group: RumErrorGroup): string | null => {
     if (!group.sampleTraceId) {
       return null;
@@ -258,19 +418,42 @@ export function RumErrorsPanel() {
     );
   };
 
+  const openSessions = (item: RumErrorGroup, withReplay: boolean) =>
+    pushRumPath(
+      history,
+      '/session-replay',
+      sessionsPatch({
+        errorGroup: item.key,
+        sessionQuery: item.type ? `error:${item.type}` : '',
+        pageUrl: pageUrl || '',
+        hasReplay: withReplay ? 'true' : '',
+      })
+    );
+
   const columns: Array<EuiBasicTableColumn<RumErrorGroup>> = [
     {
       field: 'message',
       name: i18n.translate('xpack.ux.errors.table.error', { defaultMessage: 'Error' }),
       render: (_: string, item) => (
         <div>
-          <EuiButtonEmpty
-            data-test-subj="uxColumnsButton"
-            flush="left"
-            onClick={() => setSelected(item)}
-          >
-            {item.type}
-          </EuiButtonEmpty>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="uxColumnsButton"
+                flush="left"
+                onClick={() => setSelected(item)}
+              >
+                {item.type}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {item.isNew && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="accent">
+                  {i18n.translate('xpack.ux.errors.newBadge', { defaultMessage: 'New' })}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           <EuiText size="xs" color="subdued" className="eui-textTruncate">
             {item.message}
           </EuiText>
@@ -281,32 +464,61 @@ export function RumErrorsPanel() {
       field: 'count',
       name: i18n.translate('xpack.ux.errors.table.count', { defaultMessage: 'Events' }),
       width: '90px',
+      sortable: true,
     },
     {
       field: 'sessionCount',
       name: i18n.translate('xpack.ux.errors.table.sessions', { defaultMessage: 'Sessions' }),
       width: '100px',
+      sortable: true,
     },
     {
       field: 'userCount',
       name: i18n.translate('xpack.ux.errors.table.users', { defaultMessage: 'Affected users' }),
-      width: '130px',
+      width: '120px',
+      sortable: true,
     },
     {
-      name: i18n.translate('xpack.ux.errors.table.context', { defaultMessage: 'Context' }),
-      width: '180px',
-      render: (item: RumErrorGroup) => (
-        <EuiText size="xs" color="subdued" className="eui-textTruncate">
-          {item.sampleAction && item.samplePage
-            ? i18n.translate('xpack.ux.errors.table.contextBoth', {
-                defaultMessage: '{action} · {page}',
-                values: { action: item.sampleAction, page: item.samplePage },
-              })
-            : item.samplePage ||
-              item.sampleAction ||
-              i18n.translate('xpack.ux.errors.table.contextNone', { defaultMessage: '—' })}
-        </EuiText>
-      ),
+      field: 'firstSeen',
+      name: i18n.translate('xpack.ux.errors.table.firstSeenLabel', {
+        defaultMessage: 'First seen',
+      }),
+      width: '110px',
+      sortable: true,
+      render: (value: string | null) => <SeenCell value={value} />,
+    },
+    {
+      field: 'lastSeen',
+      name: i18n.translate('xpack.ux.errors.table.lastSeenLabel', { defaultMessage: 'Last seen' }),
+      width: '110px',
+      sortable: true,
+      render: (value: string | null) => <SeenCell value={value} />,
+    },
+    {
+      name: i18n.translate('xpack.ux.errors.table.pagesLabel', { defaultMessage: 'Pages' }),
+      width: '160px',
+      render: (item: RumErrorGroup) =>
+        item.affectedPages.length === 0 ? (
+          <EuiText size="xs" color="subdued">
+            —
+          </EuiText>
+        ) : (
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {item.affectedPages.map((page) => (
+              <EuiFlexItem grow={false} key={page.path}>
+                <EuiBadge
+                  onClick={() => pushRumPath(history, '/pages', { pageUrl: page.path })}
+                  onClickAriaLabel={i18n.translate('xpack.ux.errors.table.pageAriaLabel', {
+                    defaultMessage: 'Open {path} on the Pages tab',
+                    values: { path: page.path },
+                  })}
+                >
+                  {shortenPath(page.path, 20)}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ),
     },
     {
       field: 'trend',
@@ -316,33 +528,26 @@ export function RumErrorsPanel() {
     },
     {
       name: i18n.translate('xpack.ux.errors.table.actions', { defaultMessage: 'Actions' }),
-      width: '160px',
+      width: '200px',
       render: (item: RumErrorGroup) => {
         const apmHref = apmErrorHref(item);
         return (
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiToolTip
-                content={i18n.translate('xpack.ux.errors.viewSessionsTip', {
-                  defaultMessage: 'View sessions with this error',
+                content={i18n.translate('xpack.ux.errors.watchReplayTooltip', {
+                  defaultMessage: 'Open sessions with this error that have a replay',
                 })}
               >
                 <EuiButtonEmpty
-                  data-test-subj="uxColumnsSessionsButton"
+                  data-test-subj="uxColumnsWatchReplayButton"
                   size="s"
-                  onClick={() =>
-                    pushRumPath(
-                      history,
-                      '/session-replay',
-                      sessionsPatch({
-                        errorGroup: item.key,
-                        sessionQuery: item.type ? `error:${item.type}` : '',
-                        pageUrl: pageUrl || '',
-                      })
-                    )
-                  }
+                  iconType="play"
+                  onClick={() => openSessions(item, true)}
                 >
-                  {i18n.translate('xpack.ux.errors.viewSessions', { defaultMessage: 'Sessions' })}
+                  {i18n.translate('xpack.ux.errors.watchReplayButtonLabel', {
+                    defaultMessage: 'Watch replay',
+                  })}
                 </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
@@ -377,7 +582,9 @@ export function RumErrorsPanel() {
 
   return (
     <>
-      <TabTrendChart accessor="errors" />
+      <ErrorsKpiStrip kpis={kpis} />
+      <EuiSpacer />
+      <ErrorsOverTimeChart groups={groups} />
       <EuiSpacer />
       <EuiPanel paddingSize="m" data-test-subj="uxRumErrorsPanel">
         <EuiTitle size="xs">
@@ -387,7 +594,7 @@ export function RumErrorsPanel() {
           <p>
             {i18n.translate('xpack.ux.errors.description', {
               defaultMessage:
-                'JavaScript exceptions grouped by type and message. Open a group to see a sample stack, or jump to the sessions (and APM, when a grouping key is present).',
+                'JavaScript exceptions grouped by type and message, ranked by impacted sessions. New means the group was not present at the start of this range.',
             })}
           </p>
         </EuiText>
@@ -426,9 +633,18 @@ export function RumErrorsPanel() {
             tableCaption={i18n.translate('xpack.ux.errors.tableCaption', {
               defaultMessage: 'JavaScript error groups',
             })}
-            items={groups}
+            items={sortedGroups}
             columns={columns}
             loading={loading}
+            sorting={{
+              sort: { field: sortField, direction: sortDirection },
+            }}
+            onChange={({ sort }: Criteria<RumErrorGroup>) => {
+              if (sort?.field) {
+                setSortField(sort.field as ErrorSortField);
+                setSortDirection(sort.direction);
+              }
+            }}
             noItemsMessage={i18n.translate('xpack.ux.errors.empty', {
               defaultMessage: 'No exceptions in this range',
             })}
@@ -441,17 +657,9 @@ export function RumErrorsPanel() {
             apmHref={apmErrorHref(selected)}
             traceHref={apmTraceHref(selected)}
             onClose={() => setSelected(null)}
-            onViewSessions={() =>
-              pushRumPath(
-                history,
-                '/session-replay',
-                sessionsPatch({
-                  errorGroup: selected.key,
-                  sessionQuery: selected.type ? `error:${selected.type}` : '',
-                  pageUrl: pageUrl || '',
-                })
-              )
-            }
+            onViewSessions={() => openSessions(selected, false)}
+            onWatchReplay={() => openSessions(selected, true)}
+            onOpenPage={(path) => pushRumPath(history, '/pages', { pageUrl: path })}
           />
         )}
       </EuiPanel>

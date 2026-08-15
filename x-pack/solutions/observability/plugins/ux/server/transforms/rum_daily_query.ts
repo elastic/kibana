@@ -8,7 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   durationToMs,
+  emptyPageImpact,
   emptyVitalAttribution,
+  summarizePagesKpis,
   type RumOverviewResponse,
   type RumPageRow,
   type RumPagesResponse,
@@ -160,6 +162,9 @@ const kpiAggs = {
 const pageRowAggs = {
   views: { sum: { field: 'page_views' } },
   errors: { sum: { field: 'error_count' } },
+  sessions: { sum: { field: 'sessions' } },
+  rage: { sum: { field: 'rage_clicks' } },
+  dead: { sum: { field: 'dead_clicks' } },
   lcp: { weighted_avg: { value: { field: 'lcp_p75' }, weight: { field: 'lcp_samples' } } },
   inp: { weighted_avg: { value: { field: 'inp_p75' }, weight: { field: 'inp_samples' } } },
   cls: { weighted_avg: { value: { field: 'cls_p75' }, weight: { field: 'cls_samples' } } },
@@ -170,6 +175,9 @@ const pageRowFromBucket = (bucket: {
   key: string | number;
   views?: unknown;
   errors?: unknown;
+  sessions?: unknown;
+  rage?: unknown;
+  dead?: unknown;
   lcp?: unknown;
   inp?: unknown;
   cls?: unknown;
@@ -182,6 +190,10 @@ const pageRowFromBucket = (bucket: {
   p75Inp: weightedValue(bucket.inp),
   p75Cls: weightedValue(bucket.cls),
   avgDurationMs: durationToMs(weightedValue(bucket.load)),
+  ...emptyPageImpact(),
+  sessionCount: sumValue(bucket.sessions),
+  rageClicks: sumValue(bucket.rage),
+  deadClicks: sumValue(bucket.dead),
   attribution: emptyVitalAttribution(),
   resources: [],
 });
@@ -353,9 +365,14 @@ export const queryDailyPages = async ({
     rumEsSearchOptions
   );
 
+  const pages = termsBuckets((result.aggregations as { pages?: unknown } | undefined)?.pages).map(
+    (bucket) => pageRowFromBucket(bucket)
+  );
   return {
-    pages: termsBuckets((result.aggregations as { pages?: unknown } | undefined)?.pages).map(
-      (bucket) => pageRowFromBucket(bucket)
+    pages,
+    kpis: summarizePagesKpis(
+      pages,
+      pages.reduce((sum, page) => sum + page.sessionCount, 0)
     ),
   };
 };

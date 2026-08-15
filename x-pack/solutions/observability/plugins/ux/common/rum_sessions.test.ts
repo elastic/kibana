@@ -8,15 +8,20 @@
 import {
   emptyRumAnalyticsStatus,
   canUseSessionIndex,
+  clampLookbackDays,
   eventSequenceToken,
   normalizeSequenceToken,
   isValidEsTimeValue,
+  isValidLookbackDays,
   newSessionIds,
   parseEsTimeValueSeconds,
   parseIncludeRaw,
+  parseLookbackDays,
   rangeIncludesOpenTail,
   rumAnalyticsHealth,
   rumSessionsLagWarnSeconds,
+  sessionsRetentionMaxAge,
+  sessionsSourceLookback,
   shouldMergeRawTail,
   shouldQuerySessionIndex,
 } from './rum_sessions';
@@ -78,6 +83,15 @@ describe('canUseSessionIndex', () => {
     );
     expect(canUseSessionIndex({ installed: false, rangeMs: 30 * day })).toBe(false);
   });
+
+  it('widens the index window when lookback is longer', () => {
+    expect(canUseSessionIndex({ installed: true, rangeMs: 180 * day, lookbackDays: 180 })).toBe(
+      true
+    );
+    expect(canUseSessionIndex({ installed: true, rangeMs: 180 * day, lookbackDays: 90 })).toBe(
+      false
+    );
+  });
 });
 
 describe('parseIncludeRaw', () => {
@@ -133,6 +147,21 @@ describe('rumAnalyticsHealth', () => {
         lagSeconds: 2 * 60 * 60,
       })
     ).toBe('recovering');
+  });
+});
+
+describe('session lookback helpers', () => {
+  it('clamps and formats lookback and retention', () => {
+    expect(clampLookbackDays(180)).toBe(180);
+    expect(clampLookbackDays(0)).toBe(1);
+    expect(clampLookbackDays(999)).toBe(400);
+    expect(isValidLookbackDays(90)).toBe(true);
+    expect(isValidLookbackDays(0)).toBe(false);
+    expect(sessionsSourceLookback(90)).toBe('now-90d/d');
+    expect(sessionsRetentionMaxAge(90)).toBe('93d');
+    expect(parseLookbackDays('now-30d')).toBe(30);
+    expect(parseLookbackDays('now-90d/d')).toBe(90);
+    expect(parseLookbackDays('now-5m')).toBeUndefined();
   });
 });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { emptyVitalAttribution } from './rum_app';
+import { emptyErrorImpact, emptyPageImpact, emptyVitalAttribution } from './rum_app';
 import type {
   RumClientsReport,
   RumErrorsReport,
@@ -39,6 +39,7 @@ const page = {
   p75Inp: 300,
   p75Cls: 0.1,
   avgDurationMs: null,
+  ...emptyPageImpact(),
   attribution: emptyVitalAttribution(),
   resources: [],
   viewsDelta: { current: 4, previous: null, abs: null, pct: null },
@@ -84,6 +85,7 @@ const scorecard: RumScorecardReport = {
       sampleStack: null,
       groupingKey: null,
       trend: [],
+      ...emptyErrorImpact(),
       samplePage: null,
       sampleAction: null,
       sampleTraceId: null,

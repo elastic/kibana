@@ -11,6 +11,7 @@ import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
 import {
   durationToMs,
   mergeRumPageRows,
+  summarizePagesKpis,
   type RumPageRow,
   type RumPagesResponse,
   type RumResourceRow,
@@ -26,10 +27,13 @@ import {
   EXCEPTION_FILTER,
   PAGE_VIEW_FILTER,
   WEB_VITAL_FILTER,
+  cardValue,
+  frustrationEventFilter,
   pagePathTerms,
   percentileValue,
   rumBaseFilters,
   rumListQueryCodec,
+  sessionCardinality,
   termsBuckets,
 } from './query';
 
@@ -167,7 +171,11 @@ export const getRumPagesRoute = createUxServerRoute({
         pageUrl: params.query.pageUrl,
         watermark: status.pagesDaily?.watermark,
       });
-      return { pages: mergeRumPageRows(result.pages, groupingFromSettings(settings)) };
+      const pages = mergeRumPageRows(result.pages, groupingFromSettings(settings));
+      return {
+        pages,
+        kpis: summarizePagesKpis(pages, result.kpis.sessions),
+      };
     }
 
     const result = await client.search({
@@ -177,11 +185,19 @@ export const getRumPagesRoute = createUxServerRoute({
       size: 0,
       query: { bool: { filter: rumBaseFilters(params.query) } },
       aggs: {
+        sessions: sessionCardinality,
         pages: {
           ...pagePathTerms(80),
           aggs: {
             views: { filter: PAGE_VIEW_FILTER },
             errors: { filter: EXCEPTION_FILTER },
+            sessions: sessionCardinality,
+            rage: { filter: frustrationEventFilter('rage_click') },
+            dead: { filter: frustrationEventFilter('dead_click') },
+            trend: {
+              auto_date_histogram: { field: '@timestamp', buckets: 12 },
+              aggs: { views: { filter: PAGE_VIEW_FILTER } },
+            },
             lcp: pageVitals('lcp'),
             inp: pageVitals('inp'),
             cls: pageVitals('cls'),
@@ -249,11 +265,24 @@ export const getRumPagesRoute = createUxServerRoute({
         avgDurationMs:
           durationToMs(loadAgg?.avg_ns?.value ?? undefined) ??
           durationToMs(loadAgg?.avg_us?.value ?? undefined),
+        sessionCount: cardValue(bucket.sessions),
+        rageClicks: (bucket.rage as { doc_count?: number } | undefined)?.doc_count ?? 0,
+        deadClicks: (bucket.dead as { doc_count?: number } | undefined)?.doc_count ?? 0,
+        trend: termsBuckets(
+          (bucket.trend as { buckets?: unknown } | undefined) ?? bucket.trend
+        ).map((point) => (point.views as { doc_count?: number } | undefined)?.doc_count ?? 0),
         attribution: attributionFromBucket(bucket),
         resources: resourcesFromBucket(bucket),
       };
     });
 
-    return { pages: mergeRumPageRows(pages, groupingFromSettings(settings)) };
+    const merged = mergeRumPageRows(pages, groupingFromSettings(settings));
+    return {
+      pages: merged,
+      kpis: summarizePagesKpis(
+        merged,
+        cardValue((result.aggregations as { sessions?: unknown } | undefined)?.sessions)
+      ),
+    };
   },
 });

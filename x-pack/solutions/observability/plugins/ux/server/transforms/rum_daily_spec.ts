@@ -107,6 +107,7 @@ const dailyAggregations = {
       p75_us: { percentiles: { field: 'attributes.transaction.duration.us', percents: [75] } },
       avg_ns: { avg: { field: 'duration' } },
       avg_us: { avg: { field: 'attributes.transaction.duration.us' } },
+      samples: { value_count: { field: '@timestamp' } },
     },
   },
   rage_clicks: { filter: frustrationFilter('rage_click') },
@@ -185,20 +186,37 @@ export const rumDailyDestPipeline = {
             return v;
           }
           def p75Of(def v) {
+            if (v == null || v instanceof Number) { return v; }
             if (v instanceof Map) {
               def values = v.values;
-              if (values instanceof Map && values['75.0'] != null) { return values['75.0']; }
+              if (values instanceof Map) {
+                if (values['75.0'] != null) { return values['75.0']; }
+                if (values['75'] != null) { return values['75']; }
+              }
               if (v['75.0'] != null) { return v['75.0']; }
+              if (v['75'] != null) { return v['75']; }
+              return null;
             }
-            return v;
+            return null;
           }
           def sessionsOf(def v) {
+            if (v instanceof Number) { return v; }
             if (v instanceof Map) {
               def inner = v.sessions;
+              if (inner instanceof Number) { return inner; }
               if (inner instanceof Map && inner.value != null) { return inner.value; }
+              if (v.value != null) { return v.value; }
               if (v.doc_count != null) { return v.doc_count; }
+              return null;
             }
-            return v;
+            return null;
+          }
+          // Transform filter+sub-aggs: { p75, samples: N }, no doc_count.
+          def samplesOf(def bucket) {
+            if ((bucket instanceof Map) == false) { return null; }
+            def samples = valueOf(bucket.samples);
+            if (samples != null) { return samples; }
+            return bucket.doc_count;
           }
           ctx.page_views = countOf(ctx.page_views);
           ctx.sessions = valueOf(ctx.sessions);
@@ -206,23 +224,19 @@ export const rumDailyDestPipeline = {
           ctx.error_sessions = sessionsOf(ctx.error_sessions);
           if (ctx.lcp instanceof Map) {
             ctx.lcp_p75 = p75Of(ctx.lcp.p75);
-            def lcpSamples = ctx.lcp.samples;
-            ctx.lcp_samples = lcpSamples instanceof Map && lcpSamples.value != null ? lcpSamples.value : ctx.lcp.doc_count;
+            ctx.lcp_samples = samplesOf(ctx.lcp);
           }
           if (ctx.inp instanceof Map) {
             ctx.inp_p75 = p75Of(ctx.inp.p75);
-            def inpSamples = ctx.inp.samples;
-            ctx.inp_samples = inpSamples instanceof Map && inpSamples.value != null ? inpSamples.value : ctx.inp.doc_count;
+            ctx.inp_samples = samplesOf(ctx.inp);
           }
           if (ctx.cls instanceof Map) {
             ctx.cls_p75 = p75Of(ctx.cls.p75);
-            def clsSamples = ctx.cls.samples;
-            ctx.cls_samples = clsSamples instanceof Map && clsSamples.value != null ? clsSamples.value : ctx.cls.doc_count;
+            ctx.cls_samples = samplesOf(ctx.cls);
           }
           if (ctx.fcp instanceof Map) {
             ctx.fcp_p75 = p75Of(ctx.fcp.p75);
-            def fcpSamples = ctx.fcp.samples;
-            ctx.fcp_samples = fcpSamples instanceof Map && fcpSamples.value != null ? fcpSamples.value : ctx.fcp.doc_count;
+            ctx.fcp_samples = samplesOf(ctx.fcp);
           }
           def load = ctx.load;
           if (load instanceof Map) {
@@ -232,13 +246,18 @@ export const rumDailyDestPipeline = {
             def avg = valueOf(load.avg_ns);
             if (avg == null) { avg = valueOf(load.avg_us); }
             ctx.load_avg = avg;
-            ctx.load_samples = load.doc_count;
+            ctx.load_samples = samplesOf(load);
           }
           ctx.rage_clicks = countOf(ctx.rage_clicks);
           ctx.dead_clicks = countOf(ctx.dead_clicks);
           ctx.error_clicks = countOf(ctx.error_clicks);
           ctx.rage_sessions = sessionsOf(ctx.rage_sessions);
           ctx.dead_sessions = sessionsOf(ctx.dead_sessions);
+          ctx.lcp_p75 = p75Of(ctx.lcp_p75);
+          ctx.inp_p75 = p75Of(ctx.inp_p75);
+          ctx.cls_p75 = p75Of(ctx.cls_p75);
+          ctx.fcp_p75 = p75Of(ctx.fcp_p75);
+          ctx.load_p75 = p75Of(ctx.load_p75);
           ctx.remove('lcp');
           ctx.remove('inp');
           ctx.remove('cls');

@@ -28,6 +28,7 @@ export const getRumAnalyticsStatusRoute = createUxServerRoute({
       );
       return await getRumAnalyticsStatus(elasticsearch.client.asCurrentUser, {
         syncDelay: settings.syncDelay,
+        sourceLookbackDays: settings.sourceLookbackDays,
       });
     } catch {
       return emptyRumAnalyticsStatus();
@@ -50,6 +51,7 @@ export const installRumSessionsTransformRoute = createUxServerRoute({
         client: elasticsearch.client.asCurrentUser,
         logger,
         syncDelay: settings.syncDelay,
+        sourceLookbackDays: settings.sourceLookbackDays,
       });
     } catch (error) {
       const message = extractEsErrorMessage(error);

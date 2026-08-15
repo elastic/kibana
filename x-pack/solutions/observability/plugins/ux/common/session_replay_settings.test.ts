@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
+import { RUM_SESSIONS_LOOKBACK_DAYS, RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
 import { normalizeSessionReplaySettings } from './session_replay_settings';
 
 describe('normalizeSessionReplaySettings', () => {
@@ -18,5 +18,16 @@ describe('normalizeSessionReplaySettings', () => {
       RUM_SESSIONS_SYNC_DELAY
     );
     expect(normalizeSessionReplaySettings({}).syncDelay).toBe(RUM_SESSIONS_SYNC_DELAY);
+  });
+
+  it('clamps session lookback days', () => {
+    expect(normalizeSessionReplaySettings({ sourceLookbackDays: 180 }).sourceLookbackDays).toBe(
+      180
+    );
+    expect(normalizeSessionReplaySettings({ sourceLookbackDays: 0 }).sourceLookbackDays).toBe(1);
+    expect(normalizeSessionReplaySettings({ sourceLookbackDays: 999 }).sourceLookbackDays).toBe(
+      400
+    );
+    expect(normalizeSessionReplaySettings({}).sourceLookbackDays).toBe(RUM_SESSIONS_LOOKBACK_DAYS);
   });
 });

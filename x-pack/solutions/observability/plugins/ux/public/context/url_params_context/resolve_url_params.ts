@@ -51,6 +51,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     goalId,
     includeRaw,
     analyticsMode,
+    hasReplay,
   } = query;
 
   const localUIFilters = pickKeys(query, ...uxLocalUIFilterNames);
@@ -89,6 +90,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     goalId: toString(goalId),
     includeRaw: toString(includeRaw),
     analyticsMode: toString(analyticsMode),
+    hasReplay: toString(hasReplay),
 
     ...localUIFilters,
   });

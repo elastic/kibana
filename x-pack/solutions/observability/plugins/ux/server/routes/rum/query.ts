@@ -77,6 +77,16 @@ export const WEB_VITAL_FILTER = {
 
 export const DOCUMENT_LOAD_FILTER = { term: { name: 'documentLoad' } };
 
+export const frustrationEventFilter = (kind: 'rage_click' | 'dead_click' | 'error_click') => ({
+  bool: {
+    should: [
+      { term: { name: `browser.frustration.${kind}` } },
+      { term: { event_name: `browser.frustration.${kind}` } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 export const PAGE_PATH_SCRIPT = `
   def grouped = null;
   if (doc.containsKey('attributes.url.path.grouped') && doc['attributes.url.path.grouped'].size() > 0) {

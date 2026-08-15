@@ -8,6 +8,10 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   emptyRumRollupStatus,
+  parseLookbackDays,
+  RUM_CANONICAL_SESSION_ID_FIELD,
+  sessionsRetentionMaxAge,
+  sessionsSourceLookback,
   type RumRollupStatus,
   type RumSessionsTransformState,
 } from '../../common/rum_sessions';
@@ -53,6 +57,69 @@ export const installedSyncDelay = (current: unknown): string | undefined => {
   ).transforms?.[0]?.sync?.time?.delay;
   return delay == null ? undefined : String(delay);
 };
+
+export const installedSourceIndex = (current: unknown): string | string[] | undefined =>
+  (
+    current as {
+      transforms?: Array<{ source?: { index?: string | string[] } }>;
+    }
+  ).transforms?.[0]?.source?.index;
+
+export const installedSourceLookbackGte = (current: unknown): string | undefined => {
+  const filters = (
+    current as {
+      transforms?: Array<{
+        source?: { query?: { bool?: { filter?: unknown[] } } };
+      }>;
+    }
+  ).transforms?.[0]?.source?.query?.bool?.filter;
+  if (!Array.isArray(filters)) {
+    return undefined;
+  }
+  for (const filter of filters) {
+    const gte = (filter as { range?: { '@timestamp'?: { gte?: string } } }).range?.['@timestamp']
+      ?.gte;
+    if (typeof gte === 'string') {
+      return gte;
+    }
+  }
+  return undefined;
+};
+
+export const installedRetentionMaxAge = (current: unknown): string | undefined =>
+  (
+    current as {
+      transforms?: Array<{ retention_policy?: { time?: { max_age?: string } } }>;
+    }
+  ).transforms?.[0]?.retention_policy?.time?.max_age;
+
+export const transformSourceWindowUpdate = ({
+  index,
+  lookbackGte,
+  retentionMaxAge,
+}: {
+  index: string | string[];
+  lookbackGte: string;
+  retentionMaxAge: string;
+}) => ({
+  source: {
+    index,
+    query: {
+      bool: {
+        filter: [
+          { range: { '@timestamp': { gte: lookbackGte } } },
+          { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } },
+        ],
+      },
+    },
+  },
+  retention_policy: {
+    time: {
+      field: 'end_time',
+      max_age: retentionMaxAge,
+    },
+  },
+});
 
 export const readRollupStatus = async (
   client: ElasticsearchClient,
@@ -215,6 +282,49 @@ export const updateTransformSyncDelay = async ({
       },
     },
   });
+};
+
+export const updateTransformSourceWindow = async ({
+  client,
+  logger,
+  transformId,
+  lookbackDays,
+  resetIfIncreased,
+}: {
+  client: ElasticsearchClient;
+  logger?: Logger;
+  transformId: string;
+  lookbackDays: number;
+  resetIfIncreased: boolean;
+}): Promise<void> => {
+  const current = await client.transform.getTransform({ transform_id: transformId });
+  const index = installedSourceIndex(current);
+  if (index == null) {
+    return;
+  }
+  const lookbackGte = sessionsSourceLookback(lookbackDays);
+  const retentionMaxAge = sessionsRetentionMaxAge(lookbackDays);
+  const currentGte = installedSourceLookbackGte(current);
+  const currentRetention = installedRetentionMaxAge(current);
+  if (currentGte === lookbackGte && currentRetention === retentionMaxAge) {
+    return;
+  }
+  const currentDays = parseLookbackDays(currentGte);
+  logger?.info(`Updating ${transformId} lookback from ${currentGte ?? 'unset'} to ${lookbackGte}`);
+  await client.transform.stopTransform({
+    transform_id: transformId,
+    force: true,
+    wait_for_completion: true,
+  });
+  await client.transform.updateTransform({
+    transform_id: transformId,
+    ...transformSourceWindowUpdate({ index, lookbackGte, retentionMaxAge }),
+  });
+  if (resetIfIncreased && (currentDays == null || lookbackDays > currentDays)) {
+    logger?.info(`Resetting ${transformId} to backfill ${lookbackDays}d`);
+    await client.transform.resetTransform({ transform_id: transformId });
+  }
+  await startTransformIgnoreRunning(client, transformId);
 };
 
 export const restartUnhealthyTransform = async ({

@@ -7,10 +7,13 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  clampLookbackDays,
   emptyRumAnalyticsStatus,
   isValidEsTimeValue,
+  parseLookbackDays,
   RUM_NORMALIZE_PIPELINE_NAME,
   RUM_SESSIONS_INDEX,
+  RUM_SESSIONS_LOOKBACK_DAYS,
   RUM_SESSIONS_PIPELINE_NAME,
   RUM_SESSIONS_SYNC_DELAY,
   RUM_SESSIONS_TEMPLATE_NAME,
@@ -40,17 +43,20 @@ import {
   ensureDestIndex,
   installedSyncDelay,
   isEsNotFound,
+  installedSourceLookbackGte,
   putOrReplaceTransform,
   removePreviousTransform,
   restartUnhealthyTransform,
   startTransformIgnoreRunning,
   toTransformState,
+  updateTransformSourceWindow,
   updateTransformSyncDelay,
 } from './rum_transform_utils';
 
 const STATUS_TTL_MS = 30_000;
 
 let configuredSyncDelay = RUM_SESSIONS_SYNC_DELAY;
+let configuredLookbackDays = RUM_SESSIONS_LOOKBACK_DAYS;
 let cachedStatus: { at: number; value: RumAnalyticsStatus } | null = null;
 let inflightStatus: Promise<RumAnalyticsStatus> | null = null;
 
@@ -59,13 +65,25 @@ const clearStatusCache = (): void => {
   inflightStatus = null;
 };
 
-export const configureRumSessionsTransform = ({ syncDelay }: { syncDelay: string }): void => {
+export const configureRumSessionsTransform = ({
+  syncDelay,
+  sourceLookbackDays,
+}: {
+  syncDelay: string;
+  sourceLookbackDays?: number;
+}): void => {
   configuredSyncDelay = syncDelay;
+  if (sourceLookbackDays != null) {
+    configuredLookbackDays = clampLookbackDays(sourceLookbackDays);
+  }
   clearStatusCache();
 };
 
 export const getRumSessionsSyncDelay = (settingsDelay?: string): string =>
   isValidEsTimeValue(settingsDelay) ? settingsDelay : configuredSyncDelay;
+
+export const getRumSessionsLookbackDays = (settingsDays?: number): number =>
+  settingsDays != null ? clampLookbackDays(settingsDays) : configuredLookbackDays;
 
 export const extractEsErrorMessage = (error: unknown): string => {
   if (typeof error === 'object' && error != null) {
@@ -103,17 +121,22 @@ const withDailyStatuses = async (
 
 const loadRumAnalyticsStatus = async (
   client: ElasticsearchClient,
-  resolvedDelay: string
+  resolvedDelay: string,
+  resolvedLookbackDays: number
 ): Promise<RumAnalyticsStatus> => {
   try {
-    const stats = await client.transform.getTransformStats({
-      transform_id: RUM_SESSIONS_TRANSFORM_ID,
-    });
+    const [stats, current] = await Promise.all([
+      client.transform.getTransformStats({
+        transform_id: RUM_SESSIONS_TRANSFORM_ID,
+      }),
+      client.transform.getTransform({ transform_id: RUM_SESSIONS_TRANSFORM_ID }).catch(() => null),
+    ]);
     const row = stats.transforms[0];
     if (!row) {
       return withDailyStatuses(client, {
         ...emptyRumAnalyticsStatus(),
         syncDelay: resolvedDelay,
+        sourceLookbackDays: resolvedLookbackDays,
       });
     }
     const checkpoint = row.checkpointing?.last as
@@ -126,6 +149,7 @@ const loadRumAnalyticsStatus = async (
         : null;
     const lagSeconds =
       watermarkMs != null ? Math.max(0, Math.round((Date.now() - watermarkMs) / 1000)) : null;
+    const installedDays = parseLookbackDays(installedSourceLookbackGte(current));
     return withDailyStatuses(client, {
       installed: true,
       state: toTransformState(row.state),
@@ -134,12 +158,14 @@ const loadRumAnalyticsStatus = async (
       transformId: RUM_SESSIONS_TRANSFORM_ID,
       index: RUM_SESSIONS_INDEX,
       syncDelay: resolvedDelay,
+      sourceLookbackDays: installedDays ?? resolvedLookbackDays,
     });
   } catch (error) {
     if (isEsNotFound(error)) {
       return withDailyStatuses(client, {
         ...emptyRumAnalyticsStatus(),
         syncDelay: resolvedDelay,
+        sourceLookbackDays: resolvedLookbackDays,
       });
     }
     throw error;
@@ -148,9 +174,14 @@ const loadRumAnalyticsStatus = async (
 
 export const getRumAnalyticsStatus = async (
   client: ElasticsearchClient,
-  { refresh = false, syncDelay }: { refresh?: boolean; syncDelay?: string } = {}
+  {
+    refresh = false,
+    syncDelay,
+    sourceLookbackDays,
+  }: { refresh?: boolean; syncDelay?: string; sourceLookbackDays?: number } = {}
 ): Promise<RumAnalyticsStatus> => {
   const resolvedDelay = getRumSessionsSyncDelay(syncDelay);
+  const resolvedLookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
   if (
     !refresh &&
     cachedStatus &&
@@ -162,7 +193,7 @@ export const getRumAnalyticsStatus = async (
   if (!refresh && inflightStatus) {
     return inflightStatus;
   }
-  const pending = loadRumAnalyticsStatus(client, resolvedDelay)
+  const pending = loadRumAnalyticsStatus(client, resolvedDelay, resolvedLookbackDays)
     .then((value) => {
       cachedStatus = { at: Date.now(), value };
       return value;
@@ -202,10 +233,12 @@ export const ensureRumSessionsTransform = async ({
   client,
   logger,
   syncDelay,
+  sourceLookbackDays,
 }: {
   client: ElasticsearchClient;
   logger?: Logger;
   syncDelay?: string;
+  sourceLookbackDays?: number;
 }): Promise<RumAnalyticsStatus> => {
   await client.ingest.putPipeline({
     id: RUM_NORMALIZE_PIPELINE_NAME,
@@ -230,12 +263,13 @@ export const ensureRumSessionsTransform = async ({
   }
 
   const delay = getRumSessionsSyncDelay(syncDelay);
+  const lookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
   await putOrReplaceTransform({
     client,
     logger,
     transformId: RUM_SESSIONS_TRANSFORM_ID,
     version: RUM_SESSIONS_VERSION,
-    body: buildRumSessionsTransformBody(delay),
+    body: buildRumSessionsTransformBody(delay, lookbackDays),
     onUnchanged: async (currentDelay) => {
       await updateTransformSyncDelay({
         client,
@@ -246,11 +280,22 @@ export const ensureRumSessionsTransform = async ({
       });
     },
   });
+  await updateTransformSourceWindow({
+    client,
+    logger,
+    transformId: RUM_SESSIONS_TRANSFORM_ID,
+    lookbackDays,
+    resetIfIncreased: true,
+  });
   await startTransformIgnoreRunning(client, RUM_SESSIONS_TRANSFORM_ID);
   await attachDailyTransforms({ client, logger, syncDelay: delay });
 
   clearStatusCache();
-  return getRumAnalyticsStatus(client, { refresh: true, syncDelay: delay });
+  return getRumAnalyticsStatus(client, {
+    refresh: true,
+    syncDelay: delay,
+    sourceLookbackDays: lookbackDays,
+  });
 };
 
 export const resolveRumAnalytics = async (
@@ -305,18 +350,26 @@ const applySyncDelayToInstalled = async ({
   }
 };
 
-/** Push the current settings (sync delay) onto any installed session/daily transforms. */
+/** Push the current settings (sync delay, session lookback) onto installed transforms. */
 export const applyRumAnalyticsSettings = async ({
   client,
   logger,
   syncDelay,
+  sourceLookbackDays,
 }: {
   client: ElasticsearchClient;
   logger?: Logger;
   syncDelay?: string;
+  sourceLookbackDays?: number;
 }): Promise<RumAnalyticsStatus> => {
   const delay = getRumSessionsSyncDelay(syncDelay);
-  const status = await getRumAnalyticsStatus(client, { refresh: true, syncDelay: delay });
+  const lookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
+  configuredLookbackDays = lookbackDays;
+  const status = await getRumAnalyticsStatus(client, {
+    refresh: true,
+    syncDelay: delay,
+    sourceLookbackDays: lookbackDays,
+  });
   if (!status.installed) {
     return status;
   }
@@ -338,21 +391,40 @@ export const applyRumAnalyticsSettings = async ({
     transformId: RUM_SERVICE_DAILY_TRANSFORM_ID,
     delay,
   });
+  await updateTransformSourceWindow({
+    client,
+    logger,
+    transformId: RUM_SESSIONS_TRANSFORM_ID,
+    lookbackDays,
+    resetIfIncreased: true,
+  });
   clearStatusCache();
-  return getRumAnalyticsStatus(client, { refresh: true, syncDelay: delay });
+  return getRumAnalyticsStatus(client, {
+    refresh: true,
+    syncDelay: delay,
+    sourceLookbackDays: lookbackDays,
+  });
 };
 
 export const reconcileRumSessionsTransform = async ({
   client,
   logger,
   syncDelay,
+  sourceLookbackDays,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
   syncDelay?: string;
+  sourceLookbackDays?: number;
 }): Promise<void> => {
   const delay = getRumSessionsSyncDelay(syncDelay);
-  const status = await getRumAnalyticsStatus(client, { refresh: true, syncDelay: delay });
+  const lookbackDays = getRumSessionsLookbackDays(sourceLookbackDays);
+  configuredLookbackDays = lookbackDays;
+  const status = await getRumAnalyticsStatus(client, {
+    refresh: true,
+    syncDelay: delay,
+    sourceLookbackDays: lookbackDays,
+  });
   if (!status.installed) {
     return;
   }
@@ -361,6 +433,13 @@ export const reconcileRumSessionsTransform = async ({
     logger,
     transformId: RUM_SESSIONS_TRANSFORM_ID,
     delay,
+  });
+  await updateTransformSourceWindow({
+    client,
+    logger,
+    transformId: RUM_SESSIONS_TRANSFORM_ID,
+    lookbackDays,
+    resetIfIncreased: false,
   });
   await restartUnhealthyTransform({ client, logger, status });
   await attachDailyTransforms({ client, logger, syncDelay: delay });

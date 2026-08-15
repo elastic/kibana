@@ -40,7 +40,12 @@ import {
   normalizeSessionReplaySettings,
   type SessionReplaySettings,
 } from '../../../common/session_replay_settings';
-import { isValidEsTimeValue } from '../../../common/rum_sessions';
+import {
+  isValidEsTimeValue,
+  isValidLookbackDays,
+  RUM_SESSIONS_LOOKBACK_DAYS_MAX,
+  RUM_SESSIONS_LOOKBACK_DAYS_MIN,
+} from '../../../common/rum_sessions';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import {
   fetchSessionReplaySettings,
@@ -137,8 +142,8 @@ export function SessionReplaySettingsPage() {
         nextAnalytics && rumAnalyticsHealth(nextAnalytics) !== 'missing'
           ? i18n.translate('xpack.ux.sessionReplaySettings.savedWithTransforms', {
               defaultMessage:
-                'Settings saved. Session analytics transforms now use a {syncDelay} delay. Reload Kibana pages to apply capture changes.',
-              values: { syncDelay: saved.syncDelay },
+                'Settings saved. Session analytics now use a {syncDelay} delay and {lookbackDays} days of history. Reload Kibana pages to apply capture changes.',
+              values: { syncDelay: saved.syncDelay, lookbackDays: saved.sourceLookbackDays },
             })
           : i18n.translate('xpack.ux.sessionReplaySettings.saved', {
               defaultMessage: 'Session replay settings saved. Reload Kibana pages to apply.',
@@ -187,6 +192,8 @@ export function SessionReplaySettingsPage() {
 
   const endpointInvalid = settings.enabled && settings.otlpEndpoint.trim().length === 0;
   const syncDelayInvalid = !isValidEsTimeValue(settings.syncDelay);
+  const lookbackDaysInvalid = !isValidLookbackDays(settings.sourceLookbackDays);
+  const analyticsInvalid = syncDelayInvalid || lookbackDaysInvalid;
   const analyticsHealth = analytics ? rumAnalyticsHealth(analytics) : 'missing';
 
   return (
@@ -430,7 +437,7 @@ export function SessionReplaySettingsPage() {
                     fill
                     onClick={onSave}
                     isLoading={saving}
-                    isDisabled={endpointInvalid || syncDelayInvalid}
+                    isDisabled={endpointInvalid || analyticsInvalid}
                     data-test-subj="uxSessionReplaySaveButton"
                   >
                     {i18n.translate('xpack.ux.sessionReplaySettings.save', {
@@ -499,6 +506,34 @@ export function SessionReplaySettingsPage() {
               data-test-subj="uxSessionReplaySyncDelayField"
             />
           </EuiFormRow>
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.sessionReplaySettings.lookbackDaysLabel', {
+              defaultMessage: 'Session history (days)',
+            })}
+            helpText={i18n.translate('xpack.ux.sessionReplaySettings.lookbackDaysHelp', {
+              defaultMessage:
+                'How far back the session index keeps history (1–400). Retention is three days longer. Increasing this rebuilds older sessions and can take a while.',
+            })}
+            isInvalid={lookbackDaysInvalid}
+            error={i18n.translate('xpack.ux.sessionReplaySettings.lookbackDaysError', {
+              defaultMessage: 'Use a whole number of days between {min} and {max}.',
+              values: {
+                min: RUM_SESSIONS_LOOKBACK_DAYS_MIN,
+                max: RUM_SESSIONS_LOOKBACK_DAYS_MAX,
+              },
+            })}
+          >
+            <EuiFieldNumber
+              value={settings.sourceLookbackDays}
+              min={RUM_SESSIONS_LOOKBACK_DAYS_MIN}
+              max={RUM_SESSIONS_LOOKBACK_DAYS_MAX}
+              isInvalid={lookbackDaysInvalid}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, sourceLookbackDays: Number(e.target.value) }))
+              }
+              data-test-subj="uxSessionReplayLookbackDaysField"
+            />
+          </EuiFormRow>
           {analyticsHealth !== 'missing' && (
             <>
               <EuiSpacer size="s" />
@@ -506,7 +541,7 @@ export function SessionReplaySettingsPage() {
                 size="s"
                 onClick={() => void onSave()}
                 isLoading={saving}
-                isDisabled={syncDelayInvalid}
+                isDisabled={analyticsInvalid}
                 data-test-subj="uxSessionAnalyticsApplyButton"
               >
                 {i18n.translate('xpack.ux.sessionReplaySettings.applyTransforms', {
@@ -520,7 +555,7 @@ export function SessionReplaySettingsPage() {
             <EuiButton
               fill
               isLoading={installing}
-              isDisabled={syncDelayInvalid}
+              isDisabled={analyticsInvalid}
               onClick={() => void onInstallAnalytics()}
               data-test-subj="uxSessionAnalyticsInstallButton"
             >

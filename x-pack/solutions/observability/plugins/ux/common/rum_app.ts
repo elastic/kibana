@@ -105,6 +105,58 @@ export const emptyVitalAttribution = (): RumVitalAttribution => ({
   clsSource: null,
 });
 
+export type RumVitalRating = 'good' | 'ni' | 'poor';
+
+export const CWV_THRESHOLDS = {
+  lcp: { good: 2500, ni: 4000 },
+  inp: { good: 200, ni: 500 },
+  cls: { good: 0.1, ni: 0.25 },
+} as const;
+
+export const rateVital = (
+  vital: keyof typeof CWV_THRESHOLDS,
+  value: number | null
+): RumVitalRating | null => {
+  if (value == null || !Number.isFinite(value)) {
+    return null;
+  }
+  const threshold = CWV_THRESHOLDS[vital];
+  if (value <= threshold.good) {
+    return 'good';
+  }
+  if (value <= threshold.ni) {
+    return 'ni';
+  }
+  return 'poor';
+};
+
+export const pagePassesCwv = (page: {
+  p75Lcp: number | null;
+  p75Inp: number | null;
+  p75Cls: number | null;
+}): boolean =>
+  rateVital('lcp', page.p75Lcp) === 'good' &&
+  rateVital('inp', page.p75Inp) === 'good' &&
+  rateVital('cls', page.p75Cls) === 'good';
+
+/** True when the group's earliest in-range event is after the start of the window (not present at range open). */
+export const isNewInRange = (
+  firstSeenMs: number,
+  rangeFromMs: number,
+  rangeToMs: number
+): boolean => {
+  if (
+    !Number.isFinite(firstSeenMs) ||
+    !Number.isFinite(rangeFromMs) ||
+    !Number.isFinite(rangeToMs)
+  ) {
+    return false;
+  }
+  const span = Math.max(rangeToMs - rangeFromMs, 1);
+  const slack = Math.min(span * 0.1, 60 * 60 * 1000);
+  return firstSeenMs > rangeFromMs + slack;
+};
+
 export interface RumPageRow {
   path: string;
   views: number;
@@ -113,9 +165,44 @@ export interface RumPageRow {
   p75Inp: number | null;
   p75Cls: number | null;
   avgDurationMs: number | null;
+  sessionCount: number;
+  rageClicks: number;
+  deadClicks: number;
+  trend: number[];
   attribution: RumVitalAttribution;
   resources: RumResourceRow[];
 }
+
+export const emptyPageImpact = (): Pick<
+  RumPageRow,
+  'sessionCount' | 'rageClicks' | 'deadClicks' | 'trend'
+> => ({
+  sessionCount: 0,
+  rageClicks: 0,
+  deadClicks: 0,
+  trend: [],
+});
+
+export interface RumPagesKpis {
+  views: number;
+  sessions: number;
+  passingCwvPct: number | null;
+  poorLcpPages: number;
+}
+
+export const summarizePagesKpis = (
+  pages: Array<Pick<RumPageRow, 'views' | 'p75Lcp' | 'p75Inp' | 'p75Cls'>>,
+  totalSessions: number
+): RumPagesKpis => {
+  const views = pages.reduce((sum, page) => sum + page.views, 0);
+  const passingViews = pages.reduce((sum, page) => sum + (pagePassesCwv(page) ? page.views : 0), 0);
+  return {
+    views,
+    sessions: totalSessions,
+    passingCwvPct: views > 0 ? passingViews / views : null,
+    poorLcpPages: pages.filter((page) => rateVital('lcp', page.p75Lcp) === 'poor').length,
+  };
+};
 
 /** Collapse page rows with the current URL grouping settings. */
 export const mergeRumPageRows = (
@@ -131,10 +218,18 @@ export const mergeRumPageRows = (
       continue;
     }
     const views = existing.views + page.views;
+    const trendLen = Math.max(existing.trend.length, page.trend.length);
     merged.set(path, {
       ...existing,
       views,
       errorCount: existing.errorCount + page.errorCount,
+      sessionCount: existing.sessionCount + page.sessionCount,
+      rageClicks: existing.rageClicks + page.rageClicks,
+      deadClicks: existing.deadClicks + page.deadClicks,
+      trend: Array.from(
+        { length: trendLen },
+        (_, index) => (existing.trend[index] ?? 0) + (page.trend[index] ?? 0)
+      ),
       p75Lcp: existing.p75Lcp ?? page.p75Lcp,
       p75Inp: existing.p75Inp ?? page.p75Inp,
       p75Cls: existing.p75Cls ?? page.p75Cls,
@@ -176,6 +271,17 @@ export interface RumOverviewResponse {
 
 export interface RumPagesResponse {
   pages: RumPageRow[];
+  kpis: RumPagesKpis;
+}
+
+export interface RumErrorAffectedPage {
+  path: string;
+  count: number;
+}
+
+export interface RumErrorTrendPoint {
+  timestamp: string;
+  count: number;
 }
 
 export interface RumErrorGroup {
@@ -189,14 +295,98 @@ export interface RumErrorGroup {
   sampleStack: string | null;
   groupingKey: string | null;
   trend: number[];
+  trendPoints: RumErrorTrendPoint[];
+  firstSeen: string | null;
+  lastSeen: string | null;
+  isNew: boolean;
+  affectedPages: RumErrorAffectedPage[];
   samplePage: string | null;
   sampleAction: string | null;
   sampleTraceId: string | null;
 }
 
+export interface RumErrorsKpis {
+  errorEvents: number;
+  impactedSessions: number;
+  totalSessions: number;
+  impactedUsers: number;
+  newGroups: number;
+}
+
+export const emptyErrorsKpis = (): RumErrorsKpis => ({
+  errorEvents: 0,
+  impactedSessions: 0,
+  totalSessions: 0,
+  impactedUsers: 0,
+  newGroups: 0,
+});
+
+export const emptyPagesKpis = (): RumPagesKpis => ({
+  views: 0,
+  sessions: 0,
+  passingCwvPct: null,
+  poorLcpPages: 0,
+});
+
+export const emptyErrorImpact = (): Pick<
+  RumErrorGroup,
+  'trendPoints' | 'firstSeen' | 'lastSeen' | 'isNew' | 'affectedPages'
+> => ({
+  trendPoints: [],
+  firstSeen: null,
+  lastSeen: null,
+  isNew: false,
+  affectedPages: [],
+});
+
+export const OTHER_ERROR_TREND_ID = '__other__';
+
+export interface RumErrorTrendSeries {
+  id: string;
+  name: string;
+  points: RumErrorTrendPoint[];
+}
+
+/** Stack the top N groups; remaining counts roll into a single Other series. */
+export const stackErrorTrends = (
+  groups: Array<Pick<RumErrorGroup, 'key' | 'type' | 'count' | 'trendPoints'>>,
+  topN = 5
+): RumErrorTrendSeries[] => {
+  const ranked = [...groups].sort((a, b) => b.count - a.count);
+  const top = ranked.slice(0, topN);
+  const rest = ranked.slice(topN);
+  const timestamps = new Set<string>();
+  for (const group of ranked) {
+    for (const point of group.trendPoints) {
+      timestamps.add(point.timestamp);
+    }
+  }
+  const times = [...timestamps].sort();
+  const countAt = (group: Pick<RumErrorGroup, 'trendPoints'>, timestamp: string): number =>
+    group.trendPoints.find((point) => point.timestamp === timestamp)?.count ?? 0;
+
+  const series: RumErrorTrendSeries[] = top.map((group) => ({
+    id: group.key,
+    name: group.type,
+    points: times.map((timestamp) => ({ timestamp, count: countAt(group, timestamp) })),
+  }));
+  if (rest.length > 0) {
+    series.push({
+      id: OTHER_ERROR_TREND_ID,
+      name: 'Other',
+      points: times.map((timestamp) => ({
+        timestamp,
+        count: rest.reduce((sum, group) => sum + countAt(group, timestamp), 0),
+      })),
+    });
+  }
+  return series;
+};
+
 export interface RumErrorsResponse {
   groups: RumErrorGroup[];
   total: number;
+  kpis: RumErrorsKpis;
 }
 
 /**

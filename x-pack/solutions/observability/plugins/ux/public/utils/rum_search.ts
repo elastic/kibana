@@ -34,6 +34,7 @@ export interface RumFilterPatch {
   goalId?: string;
   includeRaw?: string;
   analyticsMode?: string;
+  hasReplay?: string;
 }
 
 /** Merge filter params into the current search string. Empty values remove the key. */
@@ -86,6 +87,7 @@ export const sessionsPatch = (patch: RumFilterPatch): RumFilterPatch => ({
   account: '',
   sessionQuery: '',
   location: '',
+  hasReplay: '',
   ...patch,
 });
 

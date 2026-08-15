@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { isValidEsTimeValue, RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
+import {
+  clampLookbackDays,
+  isValidEsTimeValue,
+  RUM_SESSIONS_LOOKBACK_DAYS,
+  RUM_SESSIONS_SYNC_DELAY,
+} from './rum_sessions';
 import { parseGroupingRules, parseIgnoreUrls, type UrlGroupingConfig } from './url_grouping';
 
 /**
@@ -25,6 +30,8 @@ export interface SessionReplaySettings {
   captureGraphql: boolean;
   /** Elasticsearch time value applied to session and daily transforms (`5m`, `30s`, `1h`). */
   syncDelay: string;
+  /** Days of session-index history (`now-Nd` source lookback; retention is N+3 days). */
+  sourceLookbackDays: number;
 }
 
 export const SESSION_REPLAY_SETTINGS_SO_TYPE = 'ux-session-replay-settings';
@@ -54,6 +61,7 @@ export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   maskTextSelector: '',
   captureGraphql: false,
   syncDelay: RUM_SESSIONS_SYNC_DELAY,
+  sourceLookbackDays: RUM_SESSIONS_LOOKBACK_DAYS,
 };
 
 const clampDepth = (value: unknown): number => {
@@ -82,6 +90,9 @@ export const normalizeSessionReplaySettings = (
   syncDelay: isValidEsTimeValue(input.syncDelay)
     ? input.syncDelay
     : DEFAULT_SESSION_REPLAY_SETTINGS.syncDelay,
+  sourceLookbackDays: clampLookbackDays(
+    input.sourceLookbackDays ?? DEFAULT_SESSION_REPLAY_SETTINGS.sourceLookbackDays
+  ),
 });
 
 export const groupingFromSettings = (settings: SessionReplaySettings): UrlGroupingConfig => ({

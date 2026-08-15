@@ -87,6 +87,7 @@ const settingsBody = t.intersection([
     maskTextSelector: boundedString(MASK_TEXT_SELECTOR_MAX_LENGTH),
     captureGraphql: t.boolean,
     syncDelay: boundedString(SYNC_DELAY_MAX_LENGTH),
+    sourceLookbackDays: t.number,
   }),
 ]);
 
@@ -117,6 +118,7 @@ export const updateSessionReplaySettingsRoute = createUxServerRoute({
         client: elasticsearch.client.asCurrentUser,
         logger,
         syncDelay: saved.syncDelay,
+        sourceLookbackDays: saved.sourceLookbackDays,
       });
     } catch (error) {
       logger.warn(
