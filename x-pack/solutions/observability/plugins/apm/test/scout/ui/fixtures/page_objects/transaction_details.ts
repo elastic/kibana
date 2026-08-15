@@ -192,7 +192,9 @@ export class TransactionDetailsPage {
   async revealCustomLink(label: string) {
     const link = this.page.getByRole('link', { name: label });
     const showAllButton = this.page.getByTestId('apmBottomSectionButton');
-    await link.or(showAllButton).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    // `.first()` avoids a strict-mode violation when the link is already among the
+    // directly-rendered entries and the overflow toggle is also present (both match).
+    await link.or(showAllButton).first().waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     if (!(await link.isVisible()) && (await showAllButton.isVisible())) {
       await showAllButton.click();
     }
