@@ -24,7 +24,7 @@ describe('fetchComponentData', () => {
     await fetchComponentData({ httpService: mockHttpService, fileName });
 
     expect(mockHttpService.post).toHaveBeenCalledWith('/internal/inspect_component/inspect', {
-      body: JSON.stringify({ path: fileName }),
+      body: JSON.stringify({ path: fileName, lineNumber: undefined, columnNumber: undefined }),
     });
   });
 
@@ -33,6 +33,8 @@ describe('fetchComponentData', () => {
       codeowners: ['team1', 'team2'],
       relativePath: 'src/path/to/component.tsx',
       baseFileName: 'component.tsx',
+      explicitProps: [],
+      mtime: 0,
     };
 
     mockHttpService.post.mockResolvedValueOnce(mockResponse);

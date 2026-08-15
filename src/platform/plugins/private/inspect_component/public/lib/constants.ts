@@ -12,6 +12,10 @@ import type { ReactHTML } from 'react';
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';
 export const INSPECT_OVERLAY_ID = 'inspectOverlay';
 export const INSPECT_FLYOUT_ID = 'inspectComponentFlyout';
+// data-test-subj on the toggle button. Used at runtime by the inspector
+// overlay to recognize clicks on the button and let them through unimpeded,
+// so the user can toggle inspect mode off while it's active.
+export const INSPECT_BUTTON_TEST_SUBJ = 'inspectComponentButton';
 export const EUI_PORTAL_ATTRIBUTE = '[data-euiportal="true"]';
 export const EUI_DOCS_BASE = 'https://eui.elastic.co/docs';
 export const INSPECT_FLYOUT_MAX_WIDTH = 480;

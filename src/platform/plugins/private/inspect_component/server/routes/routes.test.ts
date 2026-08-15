@@ -42,7 +42,7 @@ describe('registerInspectComponentRoutes', () => {
         logger: mockLogger,
       });
 
-      expect(mockRouter.post).toHaveBeenCalledTimes(1);
+      expect(mockRouter.post).toHaveBeenCalledTimes(2);
       expect(mockRouter.post).toHaveBeenCalledWith(
         expect.objectContaining({
           path: '/internal/inspect_component/inspect',

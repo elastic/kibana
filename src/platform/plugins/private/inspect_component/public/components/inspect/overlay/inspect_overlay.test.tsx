@@ -86,7 +86,7 @@ describe('InspectOverlay', () => {
     expect(overlay).toBeInTheDocument();
   });
 
-  it('should open flyout when clicking on an element', async () => {
+  it('should open flyout when clicking on an element and keep inspect mode active', async () => {
     const setFlyoutOverlayRef = jest.fn();
     const setIsInspecting = jest.fn();
 
@@ -111,11 +111,47 @@ describe('InspectOverlay', () => {
     await waitFor(() => {
       expect(mockCoreStart.overlays.openFlyout).toHaveBeenCalledTimes(1);
       expect(setFlyoutOverlayRef).toHaveBeenCalledWith(flyoutMock);
-      expect(setIsInspecting).toHaveBeenCalledWith(false);
     });
+    // Inspector must remain active so the user can keep hovering / clicking
+    // additional elements; the flyout only replaces, not toggles inspect mode.
+    expect(setIsInspecting).not.toHaveBeenCalled();
   });
 
-  it('should set inspecting to false if no element is found on click', async () => {
+  it('should exit inspect mode when the flyout is closed by the user', async () => {
+    const setFlyoutOverlayRef = jest.fn();
+    const setIsInspecting = jest.fn();
+
+    const fakeTarget = document.createElement('div');
+    (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
+    (getInspectedElementData as jest.Mock).mockResolvedValue({ some: 'data' });
+
+    const flyoutMock = { close: jest.fn(), onClose: Promise.resolve() };
+    const openFlyout = jest.fn().mockReturnValue(flyoutMock);
+    mockCoreStart.overlays.openFlyout = openFlyout;
+
+    renderWithI18n(
+      <InspectOverlay
+        core={mockCoreStart}
+        setFlyoutOverlayRef={setFlyoutOverlayRef}
+        setIsInspecting={setIsInspecting}
+        branch={mockBranch}
+      />
+    );
+
+    fireEvent.click(document, { target: fakeTarget });
+
+    // Grab the `onClose` option that the overlay handed to openFlyout, then
+    // simulate EuiFlyout calling it (X-button / Escape).
+    await waitFor(() => expect(openFlyout).toHaveBeenCalledTimes(1));
+    const passedOptions = openFlyout.mock.calls[0][1];
+    (passedOptions as { onClose: (f: unknown) => void }).onClose(flyoutMock);
+
+    expect(flyoutMock.close).toHaveBeenCalled();
+    expect(setFlyoutOverlayRef).toHaveBeenLastCalledWith(null);
+    expect(setIsInspecting).toHaveBeenCalledWith(false);
+  });
+
+  it('should stay in inspect mode if no inspectable element is under the cursor', async () => {
     const setFlyoutOverlayRef = jest.fn();
     const setIsInspecting = jest.fn();
 
@@ -133,7 +169,10 @@ describe('InspectOverlay', () => {
     fireEvent.click(document, { target: document.body });
 
     await waitFor(() => {
-      expect(setIsInspecting).toHaveBeenCalledWith(false);
+      // Click on a non-inspectable region (e.g. the flyout itself) should be
+      // a no-op now — the only way to exit inspect mode is via the flyout
+      // close button, Escape, or toggling the inspect button.
+      expect(setIsInspecting).not.toHaveBeenCalled();
       expect(setFlyoutOverlayRef).not.toHaveBeenCalled();
     });
   });

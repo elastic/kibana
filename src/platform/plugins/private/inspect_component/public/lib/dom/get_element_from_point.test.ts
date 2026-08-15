@@ -8,7 +8,7 @@
  */
 
 import { getElementFromPoint } from './get_element_from_point';
-import { INSPECT_OVERLAY_ID } from '../constants';
+import { INSPECT_FLYOUT_ID, INSPECT_OVERLAY_ID } from '../constants';
 
 describe('getElementFromPoint', () => {
   let originalElementsFromPoint: typeof document.elementsFromPoint;
@@ -89,5 +89,23 @@ describe('getElementFromPoint', () => {
     const result = getElementFromPoint(mockEvent);
 
     expect(result).toBeNull();
+  });
+
+  it('should skip elements inside the inspector flyout', () => {
+    const flyoutRoot = document.createElement('div');
+    flyoutRoot.id = INSPECT_FLYOUT_ID;
+    const flyoutChild = document.createElement('button');
+    flyoutRoot.appendChild(flyoutChild);
+    document.body.appendChild(flyoutRoot);
+
+    const validElement = document.createElement('div');
+
+    document.elementsFromPoint = jest.fn().mockReturnValue([flyoutChild, validElement]);
+
+    const result = getElementFromPoint(mockEvent);
+
+    expect(result).toBe(validElement);
+
+    document.body.removeChild(flyoutRoot);
   });
 });

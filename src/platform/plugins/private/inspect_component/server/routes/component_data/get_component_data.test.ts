@@ -53,6 +53,8 @@ describe('getComponentData', () => {
         codeowners: ['@user1', '@team/owners'],
         relativePath: expectedPath,
         baseFileName: 'test-file.tsx',
+        explicitProps: [],
+        mtime: 0,
       },
     });
   });
@@ -77,6 +79,8 @@ describe('getComponentData', () => {
         codeowners: ['@user1', '@team/owners'],
         relativePath: expectedPath,
         baseFileName: 'component.tsx',
+        explicitProps: [],
+        mtime: 0,
       },
     });
   });
@@ -100,6 +104,8 @@ describe('getComponentData', () => {
         codeowners: ['@user1', '@team/owners'],
         relativePath: expectedPath,
         baseFileName: '',
+        explicitProps: [],
+        mtime: 0,
       },
     });
   });

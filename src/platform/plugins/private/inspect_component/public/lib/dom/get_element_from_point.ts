@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { INSPECT_OVERLAY_ID } from '../constants';
+import { INSPECT_FLYOUT_ID, INSPECT_OVERLAY_ID } from '../constants';
 
 /**
  * Get the topmost HTML element at the given mouse event's coordinates.
@@ -22,8 +22,12 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
     const isOverlay = el.id === INSPECT_OVERLAY_ID;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
     const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
+    // Skip any element that lives inside the inspector flyout — the flyout
+    // is part of the inspector UI and should not be highlighted or treated as
+    // a click target for inspection.
+    const isInFlyout = el instanceof HTMLElement && el.closest(`#${INSPECT_FLYOUT_ID}`) !== null;
 
-    if (isNotInspectable || isOverlay || isPath) continue;
+    if (isNotInspectable || isOverlay || isPath || isInFlyout) continue;
 
     return isSvg ? el.parentElement : el;
   }

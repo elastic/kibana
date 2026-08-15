@@ -35,7 +35,15 @@ export class InspectComponentPluginServer implements Plugin {
           registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
         })
         .catch(() => {
-          this.logger.error('Failed to import plugin files.');
+          this.logger.error('Failed to import plugin route files.');
+        });
+
+      // Initialize the docgen cache asynchronously so the ts.Program is warm
+      // by the time the first /docgen request arrives.
+      import('./lib/docgen_cache')
+        .then(({ initDocgenCache }) => initDocgenCache(this.logger))
+        .catch(() => {
+          this.logger.warn('[docgen] Failed to initialize docgen cache.');
         });
     }
 

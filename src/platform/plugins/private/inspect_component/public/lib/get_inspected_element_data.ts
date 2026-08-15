@@ -48,11 +48,6 @@ export interface GetInspectedElementDataOptions {
 /**
  * Fetches and compiles data about the inspected component.
  * @async
- * @param {GetInspectedElementDataOptions} options
- * @param {HttpStart} options.httpService {@link HttpStart}
- * @param {string | null} options.sourceComponent {@link SourceComponent}
- * @param {ReactFiberNode | null} options.targetFiberNodeWithHtmlElement {@link ReactFiberNode}
- * @returns {Promise<ComponentData | null>} Resolves with {@link ComponentData component data} if found, otherwise null.
  */
 export const getInspectedElementData = async ({
   httpService,
@@ -64,19 +59,32 @@ export const getInspectedElementData = async ({
   if (!debugSource || !element || !sourceComponent) {
     return null;
   }
+
+  const { fileName, lineNumber, columnNumber } = debugSource;
+
   const response = await fetchComponentData({
     httpService,
-    fileName: debugSource.fileName,
+    fileName,
+    lineNumber,
+    columnNumber,
   });
 
   if (!response) {
     return null;
   }
 
-  const { baseFileName, codeowners, relativePath } = response;
-  const { columnNumber, lineNumber, fileName } = debugSource;
+  const { baseFileName, codeowners, relativePath, explicitProps, mtime } = response;
 
-  const fileData = { columnNumber, lineNumber, fileName, baseFileName, codeowners, relativePath };
+  const fileData: FileData = {
+    columnNumber,
+    lineNumber,
+    fileName,
+    baseFileName,
+    codeowners,
+    relativePath,
+    explicitProps,
+    mtime,
+  };
 
   const iconType = getIconType(element);
   const euiComponentType = findFirstEuiComponent(targetFiberNode);

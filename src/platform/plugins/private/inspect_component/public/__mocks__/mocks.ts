@@ -17,6 +17,8 @@ export const mockComponentData: ComponentData = {
     relativePath: 'src/plugins/shared/zoo/hot_spring/capybara.tsx',
     baseFileName: 'capybara.tsx',
     codeowners: ['@elastic/team-capybara'],
+    explicitProps: [],
+    mtime: 0,
   },
   euiData: {
     componentType: 'EuiButton',
