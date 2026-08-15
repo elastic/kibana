@@ -102,5 +102,12 @@ export type {
   ResolveDashboardsResult,
 } from './form/field_groups/search_related_dashboards';
 
+// Shared DateRangePicker wrapper for Alerting v2 surfaces
+export { AlertingDateRangePicker } from './date_range_picker';
+export type {
+  AlertingDateRangePickerProps,
+  AlertingDateRangePickerServices,
+} from './date_range_picker';
+
 export { getRunbookContent, getDashboardId } from './form';
 export type { RunbookArtifactData, DashboardArtifactData } from './form';

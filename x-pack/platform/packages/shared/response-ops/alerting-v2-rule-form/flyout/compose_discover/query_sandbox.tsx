@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiTabs,
   EuiText,
   EuiToolTip,
@@ -29,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
+import { AlertingDateRangePicker } from '../../date_range_picker';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 import {
@@ -163,6 +163,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
   const isReadOnly = !onQueryChange;
   const hasTabs = Boolean(tabProps?.tabs?.length);
   const skipTimeFieldResolution = timeFieldOptionsProp !== undefined;
+
+  const handleDateRangeChange = useCallback(
+    ({ from, to }: { from: string; to: string }) => {
+      onDateRangeChange({ dateStart: from, dateEnd: to });
+    },
+    [onDateRangeChange]
+  );
 
   const splitTabs = useMemo(() => {
     if (!tabProps?.tabs?.length) return [];
@@ -352,7 +359,8 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       </div>
 
       <EuiPanel hasBorder paddingSize="m" data-test-subj="querySandboxEditorPanel">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+          <CpsPicker />
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate(
@@ -375,7 +383,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} css={timeFieldSelectCss}>
+          <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
             <EuiSelect
               options={timeFieldOptions}
               value={currentTimeFieldIsOption ? timeField : ''}
@@ -396,15 +404,13 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={dateRange.dateStart}
-              end={dateRange.dateEnd}
-              onTimeChange={({ start, end }) => {
-                onDateRangeChange({ dateStart: start, dateEnd: end });
-              }}
-              showUpdateButton={false}
-              compressed
+            <AlertingDateRangePicker
+              from={dateRange.dateStart}
+              to={dateRange.dateEnd}
+              onChange={handleDateRangeChange}
+              services={services}
               width="auto"
+              data-test-subj="querySandboxDatePicker"
             />
           </EuiFlexItem>
           {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
