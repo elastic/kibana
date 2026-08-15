@@ -7,9 +7,8 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AiButton } from '@kbn/shared-ux-ai-components';
 
 export interface GenerateConfigButtonProps {
   connectorId: string;
@@ -26,12 +25,12 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
   return (
     <EuiFlexGroup direction="row" gutterSize="xs" responsive={false} alignItems="center">
       <EuiFlexItem grow={false}>
-        <AiButton
+        <EuiButton
           data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
           data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
           isDisabled={disabled}
-          variant="accent"
-          iconType="sparkles"
+          fill
+          iconType="listCheck"
           isLoading={isGenerateLoading}
           onClick={() => {
             generateConfiguration({ connectorId });
@@ -43,7 +42,7 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
               defaultMessage: 'Generate configuration',
             }
           )}
-        </AiButton>
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -316,7 +316,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                         !canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)
                       }
                       fill
-                      iconType="sparkles"
+                      iconType="listCheck"
                       isLoading={isGenerateLoading || isCreateLoading}
                       onClick={() => {
                         setFormDirty(true);
