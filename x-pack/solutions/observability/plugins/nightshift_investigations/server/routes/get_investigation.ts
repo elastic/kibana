@@ -28,7 +28,7 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string().min(1),
+      id: z.string().min(1).max(500),
     }),
   }),
   handler: async ({ request, params, getClient }) => {

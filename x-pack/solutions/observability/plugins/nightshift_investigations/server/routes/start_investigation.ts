@@ -30,9 +30,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     body: z.object({
       subject: z.object({
         type: z.enum(['significant_event', 'alert']),
-        id: z.string().min(1),
+        id: z.string().min(1).max(500),
       }),
-      concurrency_key: z.string().optional(),
+      concurrency_key: z.string().max(500).optional(),
       context: z
         .record(z.string().max(128), z.unknown())
         .refine((v) => Object.keys(v).length <= 50, { message: 'context exceeds 50 key limit' })
