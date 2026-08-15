@@ -153,10 +153,10 @@ export class NightshiftInvestigationsClient {
 
     // input/output are untyped in WorkflowExecutionDto; they are populated only when
     // includeInput/includeOutput is passed to getWorkflowExecution.
-    const rawInput = (execution as Record<string, unknown>).input as
+    const rawInput = (execution as unknown as Record<string, unknown>).input as
       | Record<string, unknown>
       | undefined;
-    const rawOutput = (execution as Record<string, unknown>).output as
+    const rawOutput = (execution as unknown as Record<string, unknown>).output as
       | Record<string, unknown>
       | undefined;
 
