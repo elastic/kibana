@@ -27,6 +27,29 @@ describe('getModelDefinition', () => {
     );
   });
 
+  it('resolves the EIS Anthropic 4.5 model ids to context window sizes', () => {
+    expect(getModelDefinition('anthropic-claude-4.5-sonnet')).toMatchObject({
+      id: 'claude-4.5-sonnet',
+      contextWindow: 1000000,
+    });
+    expect(getModelDefinition('anthropic-claude-4.5-opus')).toMatchObject({
+      id: 'claude-4.5-opus',
+      contextWindow: 200000,
+    });
+    expect(getModelDefinition('anthropic-claude-4.5-haiku')).toMatchObject({
+      id: 'claude-4.5-haiku',
+      contextWindow: 200000,
+    });
+    expect(getModelDefinition('anthropic-claude-4.7-opus')).toMatchObject({
+      id: 'claude-4.7-opus',
+      contextWindow: 200000,
+    });
+    expect(getModelDefinition('anthropic-claude-4.8-opus')).toMatchObject({
+      id: 'claude-4.8-opus',
+      contextWindow: 200000,
+    });
+  });
+
   it('returns the expected models for common google full model names', () => {
     expect(getModelDefinition('gemini-1.5-pro-preview-0409')!.id).toBe('gemini-1.5-pro');
     expect(getModelDefinition('gemini-2.0-flash-001')!.id).toBe('gemini-2.0-flash');

@@ -156,6 +156,18 @@ export const knownModels: ModelDefinition[] = [
     contextWindow: 1000000,
   },
   {
+    id: 'claude-4.5-opus',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
+  {
+    id: 'claude-4.5-haiku',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
+  {
     id: 'claude-4.6-sonnet',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
@@ -163,6 +175,18 @@ export const knownModels: ModelDefinition[] = [
   },
   {
     id: 'claude-4.6-opus',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
+  {
+    id: 'claude-4.7-opus',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+  },
+  {
+    id: 'claude-4.8-opus',
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,

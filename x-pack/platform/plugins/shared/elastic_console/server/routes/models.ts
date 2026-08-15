@@ -47,6 +47,7 @@ export const registerModelsRoute = ({
           permission: [],
           root: connector.connectorId,
           parent: null,
+          context_window_size: connector.capabilities.contextWindowSize,
         }));
 
         return response.ok({

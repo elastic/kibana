@@ -12,6 +12,7 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import {
   isSupportedConnector,
   connectorToInference,
+  getContextWindowSize,
   InferenceConnectorType,
 } from '@kbn/inference-common';
 import type { ActionsClientProvider } from '../types';
@@ -79,31 +80,39 @@ export const getConnectorList = async (
   );
 
   const inferenceEndpointConnectors: (InferenceConnector & { creator?: string })[] = endpoints.map(
-    (ep) => ({
-      ...ep,
-      type: InferenceConnectorType.Inference,
-      name:
-        ep.metadata?.display?.name ??
-        stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
-        ep.inferenceId,
-      creator: ep.metadata?.display?.model_creator,
-      connectorId: ep.inferenceId,
-      config: {
-        inferenceId: ep.inferenceId,
-        providerConfig: {
-          model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+    (ep) => {
+      const connector: InferenceConnector & { creator?: string } = {
+        ...ep,
+        type: InferenceConnectorType.Inference,
+        name:
+          ep.metadata?.display?.name ??
+          stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
+          ep.inferenceId,
+        creator: ep.metadata?.display?.model_creator,
+        connectorId: ep.inferenceId,
+        config: {
+          inferenceId: ep.inferenceId,
+          providerConfig: {
+            model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+          },
+          taskType: ep.taskType,
+          service: ep.service,
+          serviceSettings: ep.serviceSettings,
+          modelCreator: ep.metadata?.display?.model_creator,
         },
-        taskType: ep.taskType,
-        service: ep.service,
-        serviceSettings: ep.serviceSettings,
-        modelCreator: ep.metadata?.display?.model_creator,
-      },
-      capabilities: {},
-      isInferenceEndpoint: true,
-      isPreconfigured: !!ep.metadata?.display?.name,
-      isEis: ep.service === 'elastic',
-      metadata: ep.metadata,
-    })
+        capabilities: {},
+        isInferenceEndpoint: true,
+        isPreconfigured: !!ep.metadata?.display?.name,
+        isEis: ep.service === 'elastic',
+        metadata: ep.metadata,
+      };
+
+      // Inference endpoints are built inline (not via `connectorToInference`), so
+      // populate the context window size the same way the stack-connector path does.
+      connector.capabilities.contextWindowSize = getContextWindowSize(connector);
+
+      return connector;
+    }
   );
 
   // Exclude .inference stack connectors that have a corresponding ES inference endpoint,
