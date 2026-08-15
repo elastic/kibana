@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
 import type { RunWorkflowPanelProps } from './run_workflow_panel';
 import * as i18n from './translations';
-import type { WorkflowListItemDto } from '@kbn/workflows';
 
 const mockMutate = jest.fn();
 const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: mockWorkflowsData } }));
@@ -156,7 +156,9 @@ describe('RunWorkflowPanel', () => {
     renderComponent();
 
     expect(screen.getByTestId('run-workflow-execute-button')).toBeInTheDocument();
-    expect(screen.getByTestId('run-workflow-execute-button')).toHaveTextContent(i18n.RUN_WORKFLOW_BUTTON);
+    expect(screen.getByTestId('run-workflow-execute-button')).toHaveTextContent(
+      i18n.RUN_WORKFLOW_BUTTON
+    );
   });
 
   it('should disable the execute button when no workflow is selected', () => {
@@ -273,17 +275,9 @@ describe('RunWorkflowPanel', () => {
   });
 
   describe('managed workflow fetching', () => {
-    it('always fetches managed workflows when canReadManagedWorkflow is true', () => {
-      renderComponent();
-
-      expect(mockUseWorkflows).toHaveBeenCalledWith(
-        expect.objectContaining({ managed: 'all' })
-      );
-    });
-
-    it('does not fetch managed workflows when canReadManagedWorkflow is false', () => {
-      mockUseWorkflowsCapabilities.mockReturnValue({ canReadManagedWorkflow: false });
-
+    it('does not fetch managed workflows when no visibility is provided', () => {
+      // Without a visibility prop the server would return all managed workflows regardless of
+      // context — gate it server-side so only the caller's relevant slice is fetched.
       renderComponent();
 
       expect(mockUseWorkflows).toHaveBeenCalledWith(
@@ -291,7 +285,28 @@ describe('RunWorkflowPanel', () => {
       );
     });
 
-    it('applies filterWorkflow to hide workflows the caller excludes', () => {
+    it('fetches managed workflows when visibility is provided and canReadManagedWorkflow is true', () => {
+      renderComponent({ visibility: { selectors: ['rule_action'] } });
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          managed: 'all',
+          visibilityContext: ['selector:rule_action'],
+        })
+      );
+    });
+
+    it('does not fetch managed workflows when canReadManagedWorkflow is false, even with visibility', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({ canReadManagedWorkflow: false });
+
+      renderComponent({ visibility: { selectors: ['rule_action'] } });
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.not.objectContaining({ managed: expect.anything() })
+      );
+    });
+
+    it('applies filterWorkflow as a client-side post-filter after server results are returned', () => {
       const managedWorkflow = {
         ...noInputsWorkflow,
         id: 'managed-wf',
@@ -300,13 +315,14 @@ describe('RunWorkflowPanel', () => {
       };
       mockWorkflowsData = [noInputsWorkflow, managedWorkflow];
 
-      // Filter out managed workflows
-      renderComponent({ filterWorkflow: (w) => !w.managed });
+      // WorkflowSelector is mocked, so we confirm the component renders without error when
+      // filterWorkflow is provided. The actual client-side filtering is exercised in the
+      // WorkflowSelector unit tests via processWorkflowsToOptions.
+      renderComponent({
+        visibility: { selectors: ['rule_action'] },
+        filterWorkflow: (w) => !w.managed,
+      });
 
-      // The managed workflow should not appear as a selectable option.
-      // WorkflowSelector is mocked, so we verify the filterFunction is passed via the prop
-      // by checking that only the non-managed workflow ends up selectable (tested in WorkflowSelector unit tests).
-      // Here we just confirm the component renders without error when filterWorkflow is provided.
       expect(screen.getByTestId('workflow-selector-mock')).toBeInTheDocument();
     });
   });

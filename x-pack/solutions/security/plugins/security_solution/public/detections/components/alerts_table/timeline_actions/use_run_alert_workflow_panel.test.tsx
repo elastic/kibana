@@ -239,7 +239,7 @@ describe('useRunAlertWorkflowPanel', () => {
       await waitFor(() => {
         expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
       });
-      expect(getByTestId('execute-alert-workflow-button')).toBeInTheDocument();
+      expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
     });
   });
 });

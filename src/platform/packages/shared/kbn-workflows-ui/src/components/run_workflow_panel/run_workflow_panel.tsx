@@ -16,6 +16,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
 import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
@@ -25,6 +29,7 @@ import { useRunWorkflow } from '../../hooks/use_run_workflow';
 import { useWorkflows } from '../../hooks/use_workflows';
 import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
 import { WorkflowSelector } from '../workflow_selector/workflow_selector';
+import type { WorkflowSelectorVisibility } from '../workflow_selector/workflow_utils';
 
 /**
  * The inputs payload forwarded verbatim to the workflow execution API.
@@ -36,14 +41,20 @@ export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: WorkflowRunInputs;
   /**
+   * Server-side managed workflow visibility filter. Only managed workflows tagged with a
+   * matching managedVisibilityContexts value (selector or solution) are returned by the server.
+   * When omitted, no managed workflows are fetched — only user-created workflows are shown.
+   */
+  visibility?: WorkflowSelectorVisibility;
+  /**
    * Comparator passed directly to Array.sort — return negative to rank `a` before `b`.
    * When omitted the list order is unchanged.
    */
   sortWorkflow?: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
   /**
-   * Called for each workflow in the list. Return false to hide it.
-   * Use this to include or exclude managed workflows, filter by trigger type, tags, etc.
-   * When omitted all enabled workflows (user-created and managed) are shown.
+   * Client-side predicate applied after the server returns its visibility-filtered results.
+   * Return false to hide a workflow from the list.
+   * When omitted all fetched workflows that are enabled are shown.
    */
   filterWorkflow?: (workflow: WorkflowListItemDto) => boolean;
   onClose: () => void;
@@ -60,6 +71,7 @@ interface RunWorkflowPanelServices {
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
+  visibility,
   sortWorkflow,
   filterWorkflow,
   onClose,
@@ -77,12 +89,25 @@ export const RunWorkflowPanel = ({
 
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
+  // Mirror WorkflowSelector's visibilityContext derivation exactly so both components hit the
+  // same react-query cache entry — no second fetch.
+  const visibilityContext = useMemo(() => {
+    if (!visibility) return undefined;
+    const contexts = [
+      ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+      ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+    ];
+    return contexts.length === 0 ? undefined : contexts;
+  }, [visibility]);
+
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
   const { data: workflowsData } = useWorkflows({
     size: 1000,
     page: 1,
     query: '',
-    ...(canReadManagedWorkflow ? { managed: 'all' as const } : {}),
+    ...(visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext }
+      : {}),
   });
   const selectedWorkflow = useMemo(
     () => workflowsData?.results.find((w) => w.id === selectedId),
@@ -160,6 +185,7 @@ export const RunWorkflowPanel = ({
     () => (
       <WorkflowSelector
         config={{
+          visibility,
           filterFunction: (workflows) => {
             const enabled = workflows.filter((w) => w.enabled);
             return filterWorkflow ? enabled.filter(filterWorkflow) : enabled;
@@ -175,7 +201,7 @@ export const RunWorkflowPanel = ({
         onWorkflowChange={setSelectedId}
       />
     ),
-    [selectedId, sortWorkflow, filterWorkflow]
+    [selectedId, visibility, sortWorkflow, filterWorkflow]
   );
 
   return (

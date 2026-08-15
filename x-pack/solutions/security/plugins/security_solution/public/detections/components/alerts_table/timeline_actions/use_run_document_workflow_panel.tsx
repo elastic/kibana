@@ -11,9 +11,12 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import {
+  RunWorkflowPanel,
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+} from '@kbn/workflows-ui';
 import * as i18n from '../translations';
-import { RunWorkflowPanel } from '@kbn/workflows-ui';
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
