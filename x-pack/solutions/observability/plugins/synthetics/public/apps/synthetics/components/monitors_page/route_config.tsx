@@ -82,6 +82,10 @@ export const getMonitorsRoute = (
       dataTestSubj: 'syntheticsErrorPage',
       pageHeader: {
         ...sharedProps,
+        // ErrorsTab renders a full-width <SyntheticsDatePicker /> whose built-in
+        // refresh replaces the shared <RefreshButton /> — drop it to avoid two
+        // refresh controls (same approach as the overview route above).
+        rightSideItems: [<CreateMonitorButton />],
         tabs: getMonitorsTabs(syntheticsPath, 'errors', location),
       },
     },
