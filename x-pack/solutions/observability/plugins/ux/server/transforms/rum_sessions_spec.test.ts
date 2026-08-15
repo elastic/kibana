@@ -9,6 +9,7 @@ import {
   RUM_CANONICAL_SERVICE_NAME_FIELD,
   RUM_CANONICAL_SESSION_ID_FIELD,
 } from '../../common/rum_sessions';
+import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import {
   buildRumSessionsTransformBody,
   rumNormalizePipeline,
@@ -37,6 +38,14 @@ describe('rumSessionsTransformBody', () => {
     });
     expect(rumSessionsTransformBody.retention_policy.time.max_age).toBe('93d');
   });
+
+  it('reads has_replay from RUM attributes and does not scan replay streams', () => {
+    expect(rumSessionsTransformBody.source.index).toEqual([RUM_SESSION_SOURCE_INDEX]);
+    expect(rumSessionsTransformBody.pivot.aggregations.has_replay).toEqual({
+      filter: { term: { 'attributes.rum.has_replay': true } },
+    });
+    expect(rumSessionsTransformBody.pivot.aggregations).not.toHaveProperty('replay_event_count');
+  });
 });
 
 describe('rumNormalizePipeline', () => {
@@ -44,6 +53,7 @@ describe('rumNormalizePipeline', () => {
     const source = rumNormalizePipeline.processors[0].script.source;
     expect(source).toContain("r['session.id'] == null");
     expect(source).toContain("a['user.key'] == null");
+    expect(source).toContain("a['rum.has_replay'] == null");
     expect(source).not.toContain('ctx.remove');
   });
 });

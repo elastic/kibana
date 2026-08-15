@@ -9,7 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   emptyRumAnalyticsStatus,
   isValidEsTimeValue,
-  parseIncludeRaw,
   RUM_NORMALIZE_PIPELINE_NAME,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_PIPELINE_NAME,
@@ -17,6 +16,7 @@ import {
   RUM_SESSIONS_TEMPLATE_NAME,
   RUM_SESSIONS_TRANSFORM_ID,
   RUM_SESSIONS_VERSION,
+  shouldMergeRawTail,
   shouldQuerySessionIndex,
   type RumAnalyticsStatus,
 } from '../../common/rum_sessions';
@@ -51,16 +51,21 @@ import {
 const STATUS_TTL_MS = 30_000;
 
 let configuredSyncDelay = RUM_SESSIONS_SYNC_DELAY;
+let cachedStatus: { at: number; value: RumAnalyticsStatus } | null = null;
+let inflightStatus: Promise<RumAnalyticsStatus> | null = null;
+
+const clearStatusCache = (): void => {
+  cachedStatus = null;
+  inflightStatus = null;
+};
 
 export const configureRumSessionsTransform = ({ syncDelay }: { syncDelay: string }): void => {
   configuredSyncDelay = syncDelay;
-  cachedStatus = null;
+  clearStatusCache();
 };
 
 export const getRumSessionsSyncDelay = (settingsDelay?: string): string =>
   isValidEsTimeValue(settingsDelay) ? settingsDelay : configuredSyncDelay;
-
-let cachedStatus: { at: number; value: RumAnalyticsStatus } | null = null;
 
 export const extractEsErrorMessage = (error: unknown): string => {
   if (typeof error === 'object' && error != null) {
@@ -96,6 +101,51 @@ const withDailyStatuses = async (
   }
 };
 
+const loadRumAnalyticsStatus = async (
+  client: ElasticsearchClient,
+  resolvedDelay: string
+): Promise<RumAnalyticsStatus> => {
+  try {
+    const stats = await client.transform.getTransformStats({
+      transform_id: RUM_SESSIONS_TRANSFORM_ID,
+    });
+    const row = stats.transforms[0];
+    if (!row) {
+      return withDailyStatuses(client, {
+        ...emptyRumAnalyticsStatus(),
+        syncDelay: resolvedDelay,
+      });
+    }
+    const checkpoint = row.checkpointing?.last as
+      | { time_upper_bound_millis?: number; timestamp_millis?: number }
+      | undefined;
+    const watermarkMs = checkpoint?.time_upper_bound_millis ?? checkpoint?.timestamp_millis;
+    const watermark =
+      typeof watermarkMs === 'number' && Number.isFinite(watermarkMs)
+        ? new Date(watermarkMs).toISOString()
+        : null;
+    const lagSeconds =
+      watermarkMs != null ? Math.max(0, Math.round((Date.now() - watermarkMs) / 1000)) : null;
+    return withDailyStatuses(client, {
+      installed: true,
+      state: toTransformState(row.state),
+      watermark,
+      lagSeconds,
+      transformId: RUM_SESSIONS_TRANSFORM_ID,
+      index: RUM_SESSIONS_INDEX,
+      syncDelay: resolvedDelay,
+    });
+  } catch (error) {
+    if (isEsNotFound(error)) {
+      return withDailyStatuses(client, {
+        ...emptyRumAnalyticsStatus(),
+        syncDelay: resolvedDelay,
+      });
+    }
+    throw error;
+  }
+};
+
 export const getRumAnalyticsStatus = async (
   client: ElasticsearchClient,
   { refresh = false, syncDelay }: { refresh?: boolean; syncDelay?: string } = {}
@@ -109,51 +159,23 @@ export const getRumAnalyticsStatus = async (
   ) {
     return cachedStatus.value;
   }
-  try {
-    const stats = await client.transform.getTransformStats({
-      transform_id: RUM_SESSIONS_TRANSFORM_ID,
-    });
-    const row = stats.transforms[0];
-    if (!row) {
-      const value = await withDailyStatuses(client, {
-        ...emptyRumAnalyticsStatus(),
-        syncDelay: resolvedDelay,
-      });
-      cachedStatus = { at: Date.now(), value };
-      return value;
-    }
-    const checkpoint = row.checkpointing?.last as
-      | { time_upper_bound_millis?: number; timestamp_millis?: number }
-      | undefined;
-    const watermarkMs = checkpoint?.time_upper_bound_millis ?? checkpoint?.timestamp_millis;
-    const watermark =
-      typeof watermarkMs === 'number' && Number.isFinite(watermarkMs)
-        ? new Date(watermarkMs).toISOString()
-        : null;
-    const lagSeconds =
-      watermarkMs != null ? Math.max(0, Math.round((Date.now() - watermarkMs) / 1000)) : null;
-    const value = await withDailyStatuses(client, {
-      installed: true,
-      state: toTransformState(row.state),
-      watermark,
-      lagSeconds,
-      transformId: RUM_SESSIONS_TRANSFORM_ID,
-      index: RUM_SESSIONS_INDEX,
-      syncDelay: resolvedDelay,
-    });
-    cachedStatus = { at: Date.now(), value };
-    return value;
-  } catch (error) {
-    if (isEsNotFound(error)) {
-      const value = await withDailyStatuses(client, {
-        ...emptyRumAnalyticsStatus(),
-        syncDelay: resolvedDelay,
-      });
-      cachedStatus = { at: Date.now(), value };
-      return value;
-    }
-    throw error;
+  if (!refresh && inflightStatus) {
+    return inflightStatus;
   }
+  const pending = loadRumAnalyticsStatus(client, resolvedDelay)
+    .then((value) => {
+      cachedStatus = { at: Date.now(), value };
+      return value;
+    })
+    .finally(() => {
+      if (inflightStatus === pending) {
+        inflightStatus = null;
+      }
+    });
+  if (!refresh) {
+    inflightStatus = pending;
+  }
+  return pending;
 };
 
 const attachDailyTransforms = async ({
@@ -227,7 +249,7 @@ export const ensureRumSessionsTransform = async ({
   await startTransformIgnoreRunning(client, RUM_SESSIONS_TRANSFORM_ID);
   await attachDailyTransforms({ client, logger, syncDelay: delay });
 
-  cachedStatus = null;
+  clearStatusCache();
   return getRumAnalyticsStatus(client, { refresh: true, syncDelay: delay });
 };
 
@@ -235,10 +257,10 @@ export const resolveRumAnalytics = async (
   client: ElasticsearchClient,
   {
     analyticsMode,
-    includeRaw,
+    rangeTo,
   }: {
     analyticsMode?: string;
-    includeRaw?: string | boolean;
+    rangeTo?: string;
   } = {}
 ): Promise<{
   status: RumAnalyticsStatus;
@@ -254,7 +276,7 @@ export const resolveRumAnalytics = async (
   return {
     status,
     useIndex,
-    mergeRaw: useIndex && parseIncludeRaw(includeRaw) && Boolean(status.watermark),
+    mergeRaw: shouldMergeRawTail({ status, analyticsMode, rangeTo }),
   };
 };
 
@@ -316,7 +338,7 @@ export const applyRumAnalyticsSettings = async ({
     transformId: RUM_SERVICE_DAILY_TRANSFORM_ID,
     delay,
   });
-  cachedStatus = null;
+  clearStatusCache();
   return getRumAnalyticsStatus(client, { refresh: true, syncDelay: delay });
 };
 
@@ -351,5 +373,5 @@ export const reconcileRumSessionsTransform = async ({
   } catch (error) {
     logger.error(`Failed to reconcile daily RUM rollups: ${extractEsErrorMessage(error)}`);
   }
-  cachedStatus = null;
+  clearStatusCache();
 };

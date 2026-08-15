@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { RUM_SESSION_SOURCE_INDEX, SESSION_REPLAY_INDEX } from '../../common/session_replay';
+import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import { RUM_SESSIONS_SOURCE_LOOKBACK } from '../../common/rum_daily';
 import {
   RUM_CANONICAL_SERVICE_NAME_FIELD,
   RUM_CANONICAL_SESSION_ID_FIELD,
+  RUM_HAS_REPLAY_FIELD,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_INDEX_PATTERN,
   RUM_SESSIONS_MANAGED_BY,
@@ -54,14 +55,8 @@ const CLICK_FILTER = {
   },
 };
 
-const REPLAY_FILTER = {
-  bool: {
-    should: [
-      { prefix: { 'data_stream.dataset': 'rum.replay' } },
-      { prefix: { 'data_stream.dataset': 'rum.session_replay' } },
-    ],
-    minimum_should_match: 1,
-  },
+const HAS_REPLAY_FILTER = {
+  term: { [RUM_HAS_REPLAY_FIELD]: true },
 };
 
 /** Collect ordered page/click tokens plus last-known client/user from each session's events. */
@@ -251,6 +246,7 @@ export const rumSessionsIndexMappings = {
     error_count: { type: 'long' },
     click_count: { type: 'long' },
     replay_event_count: { type: 'long' },
+    has_replay: { type: 'boolean' },
     rage_click_count: { type: 'long' },
     dead_click_count: { type: 'long' },
     page_count: { type: 'integer' },
@@ -335,6 +331,9 @@ export const rumNormalizePipeline = {
           if (a['error.group'] == null && a['exception.type'] != null) {
             a['error.group'] = a['exception.type'].toString();
           }
+          if (a['rum.has_replay'] == null && r['rum.has_replay'] != null) {
+            a['rum.has_replay'] = r['rum.has_replay'];
+          }
         `,
       },
     },
@@ -352,6 +351,7 @@ export const rumSessionsDestPipeline = {
           if (ctx.error_count instanceof Map) { ctx.error_count = ctx.error_count.doc_count; }
           if (ctx.click_count instanceof Map) { ctx.click_count = ctx.click_count.doc_count; }
           if (ctx.replay_event_count instanceof Map) { ctx.replay_event_count = ctx.replay_event_count.doc_count; }
+          if (ctx.has_replay instanceof Map) { ctx.has_replay = ctx.has_replay.doc_count > 0; }
           def seq = ctx.sequences;
           if (seq instanceof Map) {
             ctx.page_sequence = seq.page_sequence;
@@ -408,7 +408,7 @@ export const rumSessionsIndexTemplate = {
 
 export const buildRumSessionsTransformBody = (syncDelay = RUM_SESSIONS_SYNC_DELAY) => ({
   source: {
-    index: [RUM_SESSION_SOURCE_INDEX, SESSION_REPLAY_INDEX],
+    index: [RUM_SESSION_SOURCE_INDEX],
     query: {
       bool: {
         filter: [
@@ -458,7 +458,7 @@ export const buildRumSessionsTransformBody = (syncDelay = RUM_SESSIONS_SYNC_DELA
       event_count: { value_count: { field: '@timestamp' } },
       error_count: { filter: EXCEPTION_FILTER },
       click_count: { filter: CLICK_FILTER },
-      replay_event_count: { filter: REPLAY_FILTER },
+      has_replay: { filter: HAS_REPLAY_FILTER },
       sequences: {
         scripted_metric: {
           init_script:

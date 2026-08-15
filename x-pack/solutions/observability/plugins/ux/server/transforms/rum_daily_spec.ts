@@ -200,20 +200,30 @@ export const rumDailyDestPipeline = {
             }
             return v;
           }
-          def flattenVital(def v, def p75Key, def samplesKey) {
-            if (!(v instanceof Map)) { return; }
-            ctx[p75Key] = p75Of(v.p75);
-            def samples = v.samples;
-            ctx[samplesKey] = samples instanceof Map && samples.value != null ? samples.value : v.doc_count;
-          }
           ctx.page_views = countOf(ctx.page_views);
           ctx.sessions = valueOf(ctx.sessions);
           ctx.error_count = countOf(ctx.error_count);
           ctx.error_sessions = sessionsOf(ctx.error_sessions);
-          flattenVital(ctx.lcp, 'lcp_p75', 'lcp_samples');
-          flattenVital(ctx.inp, 'inp_p75', 'inp_samples');
-          flattenVital(ctx.cls, 'cls_p75', 'cls_samples');
-          flattenVital(ctx.fcp, 'fcp_p75', 'fcp_samples');
+          if (ctx.lcp instanceof Map) {
+            ctx.lcp_p75 = p75Of(ctx.lcp.p75);
+            def lcpSamples = ctx.lcp.samples;
+            ctx.lcp_samples = lcpSamples instanceof Map && lcpSamples.value != null ? lcpSamples.value : ctx.lcp.doc_count;
+          }
+          if (ctx.inp instanceof Map) {
+            ctx.inp_p75 = p75Of(ctx.inp.p75);
+            def inpSamples = ctx.inp.samples;
+            ctx.inp_samples = inpSamples instanceof Map && inpSamples.value != null ? inpSamples.value : ctx.inp.doc_count;
+          }
+          if (ctx.cls instanceof Map) {
+            ctx.cls_p75 = p75Of(ctx.cls.p75);
+            def clsSamples = ctx.cls.samples;
+            ctx.cls_samples = clsSamples instanceof Map && clsSamples.value != null ? clsSamples.value : ctx.cls.doc_count;
+          }
+          if (ctx.fcp instanceof Map) {
+            ctx.fcp_p75 = p75Of(ctx.fcp.p75);
+            def fcpSamples = ctx.fcp.samples;
+            ctx.fcp_samples = fcpSamples instanceof Map && fcpSamples.value != null ? fcpSamples.value : ctx.fcp.doc_count;
+          }
           def load = ctx.load;
           if (load instanceof Map) {
             def p75 = p75Of(load.p75_ns);

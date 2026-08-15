@@ -83,7 +83,7 @@ const summary = (sessionId: string): RumSessionSummary => ({
 });
 
 describe('mergeSessionListResponses', () => {
-  it('prefers live rows and sums totals', () => {
+  it('prepends new tail rows and sums disjoint totals', () => {
     const settled: SessionListResponse = {
       sessions: [summary('a'), summary('b')],
       total: 20,
@@ -91,13 +91,13 @@ describe('mergeSessionListResponses', () => {
       stats: { total: 20, withReplay: 3, withErrors: 1, rageClicks: 2, medianDurationMs: 1000 },
     };
     const live: SessionListResponse = {
-      sessions: [summary('b'), summary('c')],
+      sessions: [summary('c'), summary('d')],
       total: 2,
       facets: { ...emptyFacets, hasReplay: 1 },
       stats: { total: 2, withReplay: 1, withErrors: 0, rageClicks: 0, medianDurationMs: 10 },
     };
     const merged = mergeSessionListResponses(settled, live, 25);
-    expect(merged.sessions.map((session) => session.sessionId)).toEqual(['b', 'c', 'a']);
+    expect(merged.sessions.map((session) => session.sessionId)).toEqual(['c', 'd', 'a', 'b']);
     expect(merged.total).toBe(22);
     expect(merged.facets.hasReplay).toBe(4);
     expect(merged.stats.medianDurationMs).toBe(1000);

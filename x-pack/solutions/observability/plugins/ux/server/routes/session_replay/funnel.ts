@@ -23,6 +23,8 @@ import { activitySearchTokens } from './session_attributes';
 import { kueryFilters } from '../rum/kuery';
 import { resolveRumAnalytics } from '../../transforms/rum_sessions';
 import { mergeFunnelResponses, querySessionIndexFunnel } from '../../transforms/rum_sessions_query';
+import { resolveNewTailSessionIds } from '../../transforms/rum_sessions_tail';
+import { sessionIdTermsFilter } from '../../../common/session_find';
 
 const boundedString = (max: number) =>
   new t.Type<string, string, unknown>(
@@ -123,6 +125,7 @@ export const queryRawFunnel = async ({
   serviceName,
   kuery,
   steps,
+  sessionIds,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
@@ -130,7 +133,11 @@ export const queryRawFunnel = async ({
   serviceName?: string;
   kuery?: string;
   steps: FunnelStepDef[];
+  sessionIds?: string[];
 }): Promise<SessionFunnelResponse> => {
+  if (sessionIds && sessionIds.length === 0) {
+    return { sessionsConsidered: 0, steps: [] };
+  }
   const timeFilter = { range: { '@timestamp': { gte: rangeFrom, lte: rangeTo } } };
   const serviceFilters = serviceName
     ? [
@@ -145,6 +152,7 @@ export const queryRawFunnel = async ({
         },
       ]
     : [];
+  const idFilters = sessionIds && sessionIds.length > 0 ? [sessionIdTermsFilter(sessionIds)] : [];
 
   const stepAggs = Object.fromEntries(
     steps.map((step, i) => [
@@ -163,7 +171,7 @@ export const queryRawFunnel = async ({
     size: 0,
     query: {
       bool: {
-        filter: [timeFilter, ...serviceFilters, ...kueryFilters(kuery)],
+        filter: [timeFilter, ...serviceFilters, ...kueryFilters(kuery), ...idFilters],
       },
     },
     aggs: {
@@ -218,7 +226,7 @@ export const getSessionFunnelRoute = createUxServerRoute({
     ]),
   }),
   handler: async ({ context, params }): Promise<SessionFunnelResponse> => {
-    const { rangeFrom, rangeTo, serviceName, kuery, includeRaw, analyticsMode } = params.body;
+    const { rangeFrom, rangeTo, serviceName, kuery, analyticsMode } = params.body;
     const steps = params.body.steps
       .map((step) => ({
         ...step,
@@ -234,7 +242,7 @@ export const getSessionFunnelRoute = createUxServerRoute({
 
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
-    const analytics = await resolveRumAnalytics(client, { analyticsMode, includeRaw });
+    const analytics = await resolveRumAnalytics(client, { analyticsMode, rangeTo });
 
     if (!analytics.useIndex) {
       return queryRawFunnel({ client, rangeFrom, rangeTo, serviceName, kuery, steps });
@@ -251,6 +259,16 @@ export const getSessionFunnelRoute = createUxServerRoute({
     if (!analytics.mergeRaw || !analytics.status.watermark) {
       return settled;
     }
+    const newIds = await resolveNewTailSessionIds({
+      client,
+      rangeFrom: analytics.status.watermark,
+      rangeTo,
+      serviceName,
+      kuery,
+    });
+    if (newIds.length === 0) {
+      return settled;
+    }
     const live = await queryRawFunnel({
       client,
       rangeFrom: analytics.status.watermark,
@@ -258,6 +276,7 @@ export const getSessionFunnelRoute = createUxServerRoute({
       serviceName,
       kuery,
       steps,
+      sessionIds: newIds,
     });
     return mergeFunnelResponses(settled, live);
   },

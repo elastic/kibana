@@ -26,6 +26,8 @@ import {
   mergePatternResponses,
   querySessionIndexPatterns,
 } from '../../transforms/rum_sessions_query';
+import { resolveNewTailSessionIds } from '../../transforms/rum_sessions_tail';
+import { sessionIdTermsFilter } from '../../../common/session_find';
 
 const boundedString = (max: number) =>
   new t.Type<string, string, unknown>(
@@ -58,12 +60,12 @@ export const getSessionPatternsRoute = createUxServerRoute({
   handler: async ({ context, core, params }): Promise<SessionPatternsResponse> => {
     const rangeFrom = params.query.rangeFrom || 'now-24h';
     const rangeTo = params.query.rangeTo || 'now';
-    const { serviceName, kuery, includeRaw, analyticsMode } = params.query;
+    const { serviceName, kuery, analyticsMode } = params.query;
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
     const coreStart = await core.start();
     const soClient = coreStart.savedObjects.createInternalRepository();
-    const analytics = await resolveRumAnalytics(client, { analyticsMode, includeRaw });
+    const analytics = await resolveRumAnalytics(client, { analyticsMode, rangeTo });
 
     if (!analytics.useIndex) {
       return queryRawPatterns({ client, soClient, rangeFrom, rangeTo, serviceName, kuery });
@@ -79,6 +81,16 @@ export const getSessionPatternsRoute = createUxServerRoute({
     if (!analytics.mergeRaw || !analytics.status.watermark) {
       return settled;
     }
+    const newIds = await resolveNewTailSessionIds({
+      client,
+      rangeFrom: analytics.status.watermark,
+      rangeTo,
+      serviceName,
+      kuery,
+    });
+    if (newIds.length === 0) {
+      return settled;
+    }
     const live = await queryRawPatterns({
       client,
       soClient,
@@ -86,6 +98,7 @@ export const getSessionPatternsRoute = createUxServerRoute({
       rangeTo,
       serviceName,
       kuery,
+      sessionIds: newIds,
     });
     return mergePatternResponses(settled, live);
   },
@@ -98,6 +111,7 @@ const queryRawPatterns = async ({
   rangeTo,
   serviceName,
   kuery,
+  sessionIds,
 }: {
   client: ElasticsearchClient;
   soClient: ISavedObjectsRepository;
@@ -105,7 +119,11 @@ const queryRawPatterns = async ({
   rangeTo: string;
   serviceName?: string;
   kuery?: string;
+  sessionIds?: string[];
 }): Promise<SessionPatternsResponse> => {
+  if (sessionIds && sessionIds.length === 0) {
+    return computePatterns([]);
+  }
   const grouping = groupingFromSettings(await readSessionReplaySettings(soClient));
 
   const timeFilter = { range: { '@timestamp': { gte: rangeFrom, lte: rangeTo } } };
@@ -122,13 +140,16 @@ const queryRawPatterns = async ({
         },
       ]
     : [];
+  const idFilters = sessionIds && sessionIds.length > 0 ? [sessionIdTermsFilter(sessionIds)] : [];
 
   const result = await client.search({
     index: RUM_SESSION_SOURCE_INDEX,
     ignore_unavailable: true,
     allow_no_indices: true,
     size: 0,
-    query: { bool: { filter: [timeFilter, ...serviceFilters, ...kueryFilters(kuery)] } },
+    query: {
+      bool: { filter: [timeFilter, ...serviceFilters, ...kueryFilters(kuery), ...idFilters] },
+    },
     aggs: {
       sessions: {
         terms: {

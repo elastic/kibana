@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
@@ -19,6 +20,8 @@ import {
   type RumVitalSummary,
 } from '../../../common/rum_app';
 import { groupingFromSettings } from '../../../common/session_replay_settings';
+import { rangeSpanMs } from '../../../common/rum_daily';
+import { canUseSessionIndex } from '../../../common/rum_sessions';
 import { readSessionReplaySettings } from '../session_replay/settings';
 import { SAMPLE_SOURCE } from '../session_replay/list_sessions';
 import { SESSION_ID_SCRIPT } from '../session_replay/session_id_script';
@@ -30,6 +33,7 @@ import {
 import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
 import { queryDailyOverview } from '../../transforms/rum_daily_query';
+import { querySessionIndexKpis } from '../../transforms/rum_sessions_query';
 import { rumEsSearchOptions } from './es_retry';
 import {
   BROWSER_SCRIPT,
@@ -47,6 +51,74 @@ import {
   sessionCardinality,
   termsBuckets,
 } from './query';
+
+const overlaySessionIndex = async (
+  result: RumOverviewResponse,
+  client: ElasticsearchClient,
+  query: {
+    rangeFrom?: string;
+    rangeTo?: string;
+    serviceName?: string;
+    browser?: string;
+    os?: string;
+    location?: string;
+    pageUrl?: string;
+    user?: string;
+    frustration?: string;
+    breakpoint?: string;
+    analyticsMode?: string;
+    kuery?: string;
+    connection?: string;
+    device?: string;
+    errorGroup?: string;
+  },
+  installed: boolean,
+  watermark?: string | null
+): Promise<RumOverviewResponse> => {
+  if (
+    !canUseSessionIndex({
+      installed,
+      analyticsMode: query.analyticsMode,
+      rangeMs: rangeSpanMs(query.rangeFrom, query.rangeTo),
+      kuery: query.kuery,
+      connection: query.connection,
+      device: query.device,
+      errorGroup: query.errorGroup,
+    })
+  ) {
+    return result;
+  }
+  const slice = await querySessionIndexKpis({
+    client,
+    rangeFrom: query.rangeFrom || 'now-24h',
+    rangeTo: query.rangeTo || 'now',
+    watermark,
+    serviceName: query.serviceName,
+    browser: query.browser,
+    os: query.os,
+    location: query.location,
+    pageUrl: query.pageUrl,
+    user: query.user,
+    frustration: query.frustration,
+    breakpoint: query.breakpoint,
+  });
+  return {
+    ...result,
+    kpis: {
+      ...result.kpis,
+      sessions: slice.sessions,
+      errorSessions: slice.errorSessions,
+      errorRate: slice.sessions > 0 ? slice.errorSessions / slice.sessions : 0,
+    },
+    trends: slice.trends,
+    frustration: {
+      ...result.frustration,
+      rageSessions: slice.rageSessions,
+      errorSessions: slice.errorSessions,
+      deadClickSessions: slice.deadSessions,
+    },
+  };
+};
 
 const emptyVital = (): RumVitalSummary => ({ p75: null, ranks: null, samples: 0 });
 
@@ -107,10 +179,16 @@ export const getRumOverviewRoute = createUxServerRoute({
         pagesWatermark: status.pagesDaily?.watermark,
         serviceWatermark: status.serviceDaily?.watermark,
       });
-      return {
-        ...result,
-        topPages: mergeRumPageRows(result.topPages, groupingFromSettings(settings)),
-      };
+      return overlaySessionIndex(
+        {
+          ...result,
+          topPages: mergeRumPageRows(result.topPages, groupingFromSettings(settings)),
+        },
+        client,
+        params.query,
+        status.installed,
+        status.watermark
+      );
     }
     const filters = rumBaseFilters(params.query);
 
@@ -417,46 +495,52 @@ export const getRumOverviewRoute = createUxServerRoute({
       errorClicks += errClicks;
     }
 
-    return {
-      kpis: {
-        sessions,
-        pageViews,
-        errorSessions,
-        errorRate: sessions > 0 ? errorSessions / sessions : 0,
-        p75LoadMs,
-        p75Inp: percentileValue(inpBucket?.p75 ?? undefined),
+    return overlaySessionIndex(
+      {
+        kpis: {
+          sessions,
+          pageViews,
+          errorSessions,
+          errorRate: sessions > 0 ? errorSessions / sessions : 0,
+          p75LoadMs,
+          p75Inp: percentileValue(inpBucket?.p75 ?? undefined),
+        },
+        vitals: {
+          lcp: {
+            ...vitalFromBucket(lcpBucket),
+            ranks: ranksFromPercentileRanks(lcpBucket?.ranks_lcp?.values),
+          },
+          inp: {
+            ...vitalFromBucket(inpBucket),
+            ranks: ranksFromPercentileRanks(inpBucket?.ranks_inp?.values),
+          },
+          cls: {
+            ...vitalFromBucket(clsBucket),
+            ranks: ranksFromPercentileRanks(clsBucket?.ranks_cls?.values),
+          },
+          fcp: {
+            ...vitalFromBucket(fcpBucket),
+            ranks: ranksFromPercentileRanks(fcpBucket?.ranks_fcp?.values),
+          },
+        },
+        trends,
+        frustration: {
+          rageSessions,
+          errorSessions,
+          deadClickSessions,
+          rageClicks,
+          deadClicks,
+          errorClicks,
+        },
+        topPages,
+        browsers: facetFromScriptTerms(aggs.browsers),
+        os: facetFromScriptTerms(aggs.os),
+        countries,
       },
-      vitals: {
-        lcp: {
-          ...vitalFromBucket(lcpBucket),
-          ranks: ranksFromPercentileRanks(lcpBucket?.ranks_lcp?.values),
-        },
-        inp: {
-          ...vitalFromBucket(inpBucket),
-          ranks: ranksFromPercentileRanks(inpBucket?.ranks_inp?.values),
-        },
-        cls: {
-          ...vitalFromBucket(clsBucket),
-          ranks: ranksFromPercentileRanks(clsBucket?.ranks_cls?.values),
-        },
-        fcp: {
-          ...vitalFromBucket(fcpBucket),
-          ranks: ranksFromPercentileRanks(fcpBucket?.ranks_fcp?.values),
-        },
-      },
-      trends,
-      frustration: {
-        rageSessions,
-        errorSessions,
-        deadClickSessions,
-        rageClicks,
-        deadClicks,
-        errorClicks,
-      },
-      topPages,
-      browsers: facetFromScriptTerms(aggs.browsers),
-      os: facetFromScriptTerms(aggs.os),
-      countries,
-    };
+      client,
+      params.query,
+      status.installed,
+      status.watermark
+    );
   },
 });

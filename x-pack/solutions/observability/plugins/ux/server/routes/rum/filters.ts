@@ -9,6 +9,10 @@ import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
 import type { RumFiltersResponse } from '../../../common/rum_app';
+import { rangeSpanMs } from '../../../common/rum_daily';
+import { canUseSessionIndex } from '../../../common/rum_sessions';
+import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
+import { querySessionIndexFilters } from '../../transforms/rum_sessions_query';
 import {
   BROWSER_SCRIPT,
   BREAKPOINT_SCRIPT,
@@ -30,6 +34,33 @@ export const getRumFiltersRoute = createUxServerRoute({
   handler: async ({ context, params }): Promise<RumFiltersResponse> => {
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
+    const status = await getRumAnalyticsStatus(client);
+    if (
+      canUseSessionIndex({
+        installed: status.installed,
+        analyticsMode: params.query.analyticsMode,
+        rangeMs: rangeSpanMs(params.query.rangeFrom, params.query.rangeTo),
+        kuery: params.query.kuery,
+        connection: params.query.connection,
+        device: params.query.device,
+        errorGroup: params.query.errorGroup,
+      })
+    ) {
+      return querySessionIndexFilters({
+        client,
+        rangeFrom: params.query.rangeFrom || 'now-24h',
+        rangeTo: params.query.rangeTo || 'now',
+        watermark: status.watermark,
+        serviceName: params.query.serviceName,
+        browser: params.query.browser,
+        os: params.query.os,
+        location: params.query.location,
+        pageUrl: params.query.pageUrl,
+        user: params.query.user,
+        frustration: params.query.frustration,
+        breakpoint: params.query.breakpoint,
+      });
+    }
 
     const result = await client.search({
       index: RUM_SESSION_SOURCE_INDEX,

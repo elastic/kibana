@@ -102,7 +102,6 @@ export function ConversionGoalPanel({
       serviceName,
       kuery,
       goalId,
-      includeRaw,
       analyticsMode,
     },
   } = useLegacyUrlParams();
@@ -193,7 +192,6 @@ export function ConversionGoalPanel({
         serviceName: typeof serviceName === 'string' ? serviceName : undefined,
         steps: draft.steps,
         kuery,
-        includeRaw: includeRaw === 'true',
         analyticsMode,
       });
       setResult(data);
@@ -203,7 +201,7 @@ export function ConversionGoalPanel({
     } finally {
       setLoading(false);
     }
-  }, [http, kuery, rangeFrom, rangeTo, serviceName, includeRaw, analyticsMode]);
+  }, [http, kuery, rangeFrom, rangeTo, serviceName, analyticsMode]);
 
   useEffect(() => {
     if (hydratedRef.current || goalsLoading) {

@@ -7,13 +7,17 @@
 
 import {
   emptyRumAnalyticsStatus,
+  canUseSessionIndex,
   eventSequenceToken,
   normalizeSequenceToken,
   isValidEsTimeValue,
+  newSessionIds,
   parseEsTimeValueSeconds,
   parseIncludeRaw,
+  rangeIncludesOpenTail,
   rumAnalyticsHealth,
   rumSessionsLagWarnSeconds,
+  shouldMergeRawTail,
   shouldQuerySessionIndex,
 } from './rum_sessions';
 
@@ -49,6 +53,30 @@ describe('shouldQuerySessionIndex', () => {
     ).toBe(false);
     expect(shouldQuerySessionIndex({ installed: true, watermark: null })).toBe(false);
     expect(shouldQuerySessionIndex({ installed: false })).toBe(false);
+  });
+});
+
+describe('canUseSessionIndex', () => {
+  const day = 24 * 60 * 60 * 1000;
+
+  it('covers 30d session-shaped reads when the index is installed', () => {
+    expect(
+      canUseSessionIndex({
+        installed: true,
+        rangeMs: 30 * day,
+      })
+    ).toBe(true);
+  });
+
+  it('stays off raw, year-long, and unsupported facets', () => {
+    expect(canUseSessionIndex({ installed: true, rangeMs: 30 * day, analyticsMode: 'raw' })).toBe(
+      false
+    );
+    expect(canUseSessionIndex({ installed: true, rangeMs: 400 * day })).toBe(false);
+    expect(canUseSessionIndex({ installed: true, rangeMs: 30 * day, kuery: 'foo:bar' })).toBe(
+      false
+    );
+    expect(canUseSessionIndex({ installed: false, rangeMs: 30 * day })).toBe(false);
   });
 });
 
@@ -132,5 +160,66 @@ describe('rumSessionsLagWarnSeconds', () => {
   it('adds slack on top of the configured delay', () => {
     expect(rumSessionsLagWarnSeconds('5m')).toBe(20 * 60);
     expect(rumSessionsLagWarnSeconds('1m')).toBe(16 * 60);
+  });
+});
+
+describe('newSessionIds', () => {
+  it('keeps only tail ids the index has never seen', () => {
+    expect(newSessionIds(['a', 'b', 'c', ''], new Set(['b']))).toEqual(['a', 'c']);
+  });
+});
+
+describe('rangeIncludesOpenTail', () => {
+  const watermark = '2026-08-15T12:00:00.000Z';
+
+  it('treats now and empty as open-ended', () => {
+    expect(rangeIncludesOpenTail('now', watermark)).toBe(true);
+    expect(rangeIncludesOpenTail(undefined, watermark)).toBe(true);
+    expect(rangeIncludesOpenTail('now/d', watermark)).toBe(true);
+  });
+
+  it('rejects ranges that ended before now', () => {
+    expect(rangeIncludesOpenTail('now-1h', watermark)).toBe(false);
+    expect(rangeIncludesOpenTail('2026-08-15T11:00:00.000Z', watermark)).toBe(false);
+  });
+
+  it('keeps an absolute end after the watermark', () => {
+    expect(rangeIncludesOpenTail('2026-08-15T12:05:00.000Z', watermark)).toBe(true);
+  });
+});
+
+describe('shouldMergeRawTail', () => {
+  const healthy = {
+    ...emptyRumAnalyticsStatus(),
+    installed: true,
+    state: 'started' as const,
+    watermark: '2026-08-15T12:00:00.000Z',
+    lagSeconds: 8 * 60,
+  };
+
+  it('merges when the transform is healthy and the range includes now', () => {
+    expect(shouldMergeRawTail({ status: healthy, rangeTo: 'now' })).toBe(true);
+  });
+
+  it('does not merge a lagged or failed transform', () => {
+    expect(
+      shouldMergeRawTail({
+        status: { ...healthy, lagSeconds: 2 * 60 * 60 },
+        rangeTo: 'now',
+      })
+    ).toBe(false);
+    expect(
+      shouldMergeRawTail({
+        status: { ...healthy, state: 'failed' },
+        rangeTo: 'now',
+      })
+    ).toBe(false);
+  });
+
+  it('does not merge forced raw or historical ranges', () => {
+    expect(shouldMergeRawTail({ status: healthy, analyticsMode: 'raw', rangeTo: 'now' })).toBe(
+      false
+    );
+    expect(shouldMergeRawTail({ status: healthy, rangeTo: 'now-7d' })).toBe(false);
   });
 });

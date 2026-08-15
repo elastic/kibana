@@ -185,14 +185,7 @@ export function SessionFunnelPanel() {
   const { http } = useKibanaServices();
   const history = useHistory();
   const {
-    urlParams: {
-      rangeFrom = 'now-24h',
-      rangeTo = 'now',
-      serviceName,
-      kuery,
-      includeRaw,
-      analyticsMode,
-    },
+    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery, analyticsMode },
   } = useLegacyUrlParams();
 
   const [patterns, setPatterns] = useState<SessionPatternsResponse | null>(null);
@@ -210,7 +203,6 @@ export function SessionFunnelPanel() {
         rangeTo,
         serviceName: typeof serviceName === 'string' ? serviceName : undefined,
         kuery,
-        includeRaw: includeRaw === 'true',
         analyticsMode,
       });
       setPatterns(data);
@@ -220,7 +212,7 @@ export function SessionFunnelPanel() {
     } finally {
       setPatternsLoading(false);
     }
-  }, [http, rangeFrom, rangeTo, serviceName, kuery, includeRaw, analyticsMode]);
+  }, [http, rangeFrom, rangeTo, serviceName, kuery, analyticsMode]);
 
   useEffect(() => {
     void loadPatterns();

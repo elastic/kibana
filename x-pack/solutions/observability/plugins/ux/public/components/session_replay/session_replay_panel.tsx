@@ -272,7 +272,6 @@ export function SessionReplayPanel() {
       breakpoint,
       connection,
       device,
-      includeRaw,
       analyticsMode,
     },
   } = useLegacyUrlParams();
@@ -362,7 +361,6 @@ export function SessionReplayPanel() {
         breakpoint,
         connection,
         device,
-        includeRaw: includeRaw === 'true',
         analyticsMode,
       });
       setSessions(result.sessions);
@@ -407,7 +405,6 @@ export function SessionReplayPanel() {
     breakpoint,
     connection,
     device,
-    includeRaw,
     analyticsMode,
   ]);
 
@@ -569,18 +566,26 @@ export function SessionReplayPanel() {
       width: '100px',
       render: (hasReplay: boolean, item) =>
         hasReplay ? (
-          <EuiToolTip
-            content={i18n.translate('xpack.ux.sessions.table.replayEventsTooltip', {
-              defaultMessage: '{count} replay events',
-              values: { count: item.replayEventCount },
-            })}
-          >
+          item.replayEventCount > 0 ? (
+            <EuiToolTip
+              content={i18n.translate('xpack.ux.sessions.table.replayEventsTooltip', {
+                defaultMessage: '{count} replay events',
+                values: { count: item.replayEventCount },
+              })}
+            >
+              <EuiBadge color="success" iconType="playFilled" tabIndex={0}>
+                {i18n.translate('xpack.ux.sessions.table.hasReplay', {
+                  defaultMessage: 'Available',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
+          ) : (
             <EuiBadge color="success" iconType="playFilled" tabIndex={0}>
               {i18n.translate('xpack.ux.sessions.table.hasReplay', {
                 defaultMessage: 'Available',
               })}
             </EuiBadge>
-          </EuiToolTip>
+          )
         ) : (
           <EuiText size="s" color="subdued">
             {i18n.translate('xpack.ux.sessions.table.noReplay', { defaultMessage: 'None' })}

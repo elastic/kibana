@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { resolveRumAnalytics } from '../../transforms/rum_sessions';
+import { resolveNewTailSessionIds } from '../../transforms/rum_sessions_tail';
 import {
   mergeSessionListResponses,
   querySessionIndexSessions,
@@ -165,7 +166,11 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
   handler: async ({ context, params }): Promise<SessionListResponse> => {
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
-    const analytics = await resolveRumAnalytics(client, params.query);
+    const rangeTo = params.query.rangeTo || 'now';
+    const analytics = await resolveRumAnalytics(client, {
+      analyticsMode: params.query.analyticsMode,
+      rangeTo,
+    });
     const perPage = Math.min(Math.max(Number(params.query.perPage) || 25, 1), 100);
     const page = Math.max(Number(params.query.page) || 0, 0);
 
@@ -173,7 +178,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       const settled = await querySessionIndexSessions({
         client,
         rangeFrom: params.query.rangeFrom || 'now-24h',
-        rangeTo: params.query.rangeTo || 'now',
+        rangeTo,
         serviceName: params.query.serviceName,
         watermark: analytics.status.watermark ?? undefined,
         sortField: params.query.sortField as SessionSortField | undefined,
@@ -200,11 +205,23 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       if (!analytics.mergeRaw || !analytics.status.watermark || page > 0) {
         return settled;
       }
+      const newIds = await resolveNewTailSessionIds({
+        client,
+        rangeFrom: analytics.status.watermark,
+        rangeTo,
+        serviceName: params.query.serviceName,
+        kuery: params.query.kuery,
+      });
+      if (newIds.length === 0) {
+        return settled;
+      }
       const live = await queryRawSessions(client, {
         ...params.query,
         rangeFrom: analytics.status.watermark,
+        rangeTo,
         page: '0',
         perPage: String(perPage),
+        restrictToSessionIds: newIds,
       });
       return mergeSessionListResponses(settled, live, perPage);
     }
@@ -215,10 +232,18 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
 
 const queryRawSessions = async (
   client: ElasticsearchClient,
-  query: Record<string, string | undefined>
+  query: Record<string, string | undefined> & { restrictToSessionIds?: string[] }
 ): Promise<SessionListResponse> => {
   const params = { query };
   const { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery } = params.query;
+  if (query.restrictToSessionIds && query.restrictToSessionIds.length === 0) {
+    return {
+      sessions: [],
+      total: 0,
+      facets: computeFacets([]),
+      stats: computeStats([]),
+    };
+  }
   // Server-side sort/paginate/search operate over a bounded candidate window derived
   // from the terms aggregation. Sufficient for the POC; true scale needs a composite agg.
   const candidateSize = 200;
@@ -270,6 +295,9 @@ const queryRawSessions = async (
         minimum_should_match: 1,
       },
     });
+  }
+  if (query.restrictToSessionIds && query.restrictToSessionIds.length > 0) {
+    filters.push(sessionIdTermsFilter(query.restrictToSessionIds));
   }
 
   const find = mergeSessionFind(parseSessionFind(params.query.query), {

@@ -85,6 +85,7 @@ const mergeStats = (left: SessionListStats, right: SessionListStats): SessionLis
   medianDurationMs: left.medianDurationMs,
 });
 
+/** Live must already be S_new (IDs not in the session index). Totals add. */
 export const mergeSessionListResponses = (
   settled: SessionListResponse,
   live: SessionListResponse,

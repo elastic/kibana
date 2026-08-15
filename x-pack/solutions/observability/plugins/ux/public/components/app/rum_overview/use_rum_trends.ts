@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { RumTrendPoint } from '../../../../common/rum_app';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
-import { fetchRumOverview } from '../../../services/rest/rum_api';
+import { fetchRumTrends } from '../../../services/rest/rum_api';
 
 export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
   const { http } = useKibanaServices();
@@ -41,7 +41,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await fetchRumOverview({
+      const result = await fetchRumTrends({
         http,
         rangeFrom,
         rangeTo,

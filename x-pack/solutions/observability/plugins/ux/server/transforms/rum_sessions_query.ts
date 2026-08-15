@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { RumFiltersResponse, RumTrendPoint } from '../../common/rum_app';
 import { eventSequenceToken, RUM_SESSIONS_INDEX } from '../../common/rum_sessions';
 import {
   extraPathsForFind,
@@ -215,10 +216,20 @@ const toSummary = (source: Record<string, unknown>, id: string): RumSessionSumma
       breakpoint: asString(browser.breakpoint),
       connection: null,
     },
-    hasReplay: asNumber(source.replay_event_count) > 0,
+    hasReplay: sourceHasReplay(source),
     replayEventCount: asNumber(source.replay_event_count),
   };
 };
+
+const sourceHasReplay = (source: Record<string, unknown>): boolean =>
+  source.has_replay === true || asNumber(source.replay_event_count) > 0;
+
+export const sessionIndexHasReplayQuery = (): object => ({
+  bool: {
+    should: [{ term: { has_replay: true } }, { range: { replay_event_count: { gt: 0 } } }],
+    minimum_should_match: 1,
+  },
+});
 
 const facetBuckets = (agg: unknown): Array<{ key: string; count: number }> => {
   const buckets = (agg as { buckets?: Array<{ key?: string; doc_count?: number }> } | undefined)
@@ -228,42 +239,11 @@ const facetBuckets = (agg: unknown): Array<{ key: string; count: number }> => {
     .filter((bucket) => bucket.key.length > 0);
 };
 
-export const querySessionIndexSessions = async ({
-  client,
-  rangeFrom,
-  rangeTo,
-  serviceName,
-  watermark,
-  sortField,
-  sortDirection,
-  page,
-  perPage,
-  browser,
-  os,
-  location,
-  pageUrl,
-  user,
-  click,
-  account,
-  query,
-  sessionIds,
-  frustration,
-  hasReplay,
-  hasErrors,
-  hasRage,
-  hasDead,
-  minDurationMs,
-  maxDurationMs,
-}: {
-  client: ElasticsearchClient;
+export interface SessionIndexFilterParams {
   rangeFrom: string;
   rangeTo: string;
+  watermark?: string | null;
   serviceName?: string;
-  watermark?: string;
-  sortField?: SessionSortField;
-  sortDirection?: string;
-  page: number;
-  perPage: number;
   browser?: string;
   os?: string;
   location?: string;
@@ -274,15 +254,40 @@ export const querySessionIndexSessions = async ({
   query?: string;
   sessionIds?: string;
   frustration?: string;
+  breakpoint?: string;
   hasReplay?: string;
   hasErrors?: string;
   hasRage?: string;
   hasDead?: string;
   minDurationMs?: number;
   maxDurationMs?: number;
-}): Promise<SessionListResponse> => {
+}
+
+export const buildSessionIndexFilters = ({
+  rangeFrom,
+  rangeTo,
+  watermark,
+  serviceName,
+  browser,
+  os,
+  location,
+  pageUrl,
+  user,
+  click,
+  account,
+  query,
+  sessionIds,
+  frustration,
+  breakpoint,
+  hasReplay,
+  hasErrors,
+  hasRage,
+  hasDead,
+  minDurationMs,
+  maxDurationMs,
+}: SessionIndexFilterParams): object[] => {
   const filters: object[] = [
-    sessionIndexTimeFilter(rangeFrom, rangeTo, watermark),
+    sessionIndexTimeFilter(rangeFrom, rangeTo, watermark ?? undefined),
     ...serviceFilter(serviceName),
   ];
   if (browser) {
@@ -293,6 +298,9 @@ export const querySessionIndexSessions = async ({
   }
   if (location) {
     filters.push({ term: { country_iso: location } });
+  }
+  if (breakpoint) {
+    filters.push({ term: { 'browser.breakpoint': breakpoint } });
   }
   const find = mergeSessionFind(parseSessionFind(query), {
     path: pageUrl,
@@ -312,7 +320,7 @@ export const querySessionIndexSessions = async ({
     }
   }
   if (hasReplay === 'true') {
-    filters.push({ range: { replay_event_count: { gt: 0 } } });
+    filters.push(sessionIndexHasReplayQuery());
   }
   if (hasErrors === 'true' || frustration === 'error') {
     filters.push({ range: { error_count: { gt: 0 } } });
@@ -329,6 +337,134 @@ export const querySessionIndexSessions = async ({
   if (maxDurationMs != null) {
     filters.push({ range: { duration_ms: { lte: maxDurationMs } } });
   }
+  return filters;
+};
+
+export const trendsFromSessionHistogram = (agg: unknown): RumTrendPoint[] => {
+  const buckets = (agg as { buckets?: Array<Record<string, unknown>> } | undefined)?.buckets ?? [];
+  return buckets.map((bucket) => ({
+    timestamp:
+      typeof bucket.key_as_string === 'string'
+        ? bucket.key_as_string
+        : new Date(Number(bucket.key)).toISOString(),
+    sessions: asNumber(bucket.doc_count),
+    pageViews: asNumber((bucket.page_views as { value?: number } | undefined)?.value),
+    errors: asNumber((bucket.errors as { value?: number } | undefined)?.value),
+  }));
+};
+
+export const querySessionIndexTrends = async ({
+  client,
+  ...params
+}: SessionIndexFilterParams & { client: ElasticsearchClient }): Promise<RumTrendPoint[]> => {
+  const result = await client.search({
+    index: RUM_SESSIONS_INDEX,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: 0,
+    query: { bool: { filter: buildSessionIndexFilters(params) } },
+    aggs: {
+      trends: {
+        auto_date_histogram: { field: 'start_time', buckets: 24 },
+        aggs: {
+          page_views: { sum: { field: 'page_count' } },
+          errors: { sum: { field: 'error_count' } },
+        },
+      },
+    },
+  });
+  return trendsFromSessionHistogram(
+    (result.aggregations as { trends?: unknown } | undefined)?.trends
+  );
+};
+
+export const querySessionIndexFilters = async ({
+  client,
+  ...params
+}: SessionIndexFilterParams & { client: ElasticsearchClient }): Promise<RumFiltersResponse> => {
+  const result = await client.search({
+    index: RUM_SESSIONS_INDEX,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: 0,
+    query: { bool: { filter: buildSessionIndexFilters(params) } },
+    aggs: {
+      browsers: { terms: { field: 'browser.name', size: 20, exclude: '' } },
+      os: { terms: { field: 'os.name', size: 20, exclude: '' } },
+      pages: { terms: { field: 'pages', size: 30, exclude: '' } },
+      breakpoints: { terms: { field: 'browser.breakpoint', size: 10, exclude: '' } },
+      countries: { terms: { field: 'country_iso', size: 30, exclude: '' } },
+    },
+  });
+  const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
+  return {
+    browsers: facetBuckets(aggs.browsers),
+    os: facetBuckets(aggs.os),
+    pages: facetBuckets(aggs.pages),
+    breakpoints: facetBuckets(aggs.breakpoints),
+    connections: [],
+    devices: [],
+    countries: facetBuckets(aggs.countries),
+  };
+};
+
+export const querySessionIndexKpis = async ({
+  client,
+  ...params
+}: SessionIndexFilterParams & { client: ElasticsearchClient }): Promise<{
+  sessions: number;
+  errorSessions: number;
+  rageSessions: number;
+  deadSessions: number;
+  trends: RumTrendPoint[];
+}> => {
+  const result = await client.search({
+    index: RUM_SESSIONS_INDEX,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: 0,
+    track_total_hits: true,
+    query: { bool: { filter: buildSessionIndexFilters(params) } },
+    aggs: {
+      error_sessions: { filter: { range: { error_count: { gt: 0 } } } },
+      rage_sessions: { filter: { range: { rage_click_count: { gt: 0 } } } },
+      dead_sessions: { filter: { range: { dead_click_count: { gt: 0 } } } },
+      trends: {
+        auto_date_histogram: { field: 'start_time', buckets: 24 },
+        aggs: {
+          page_views: { sum: { field: 'page_count' } },
+          errors: { sum: { field: 'error_count' } },
+        },
+      },
+    },
+  });
+  const total =
+    typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
+  const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
+  return {
+    sessions: total,
+    errorSessions: (aggs.error_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
+    rageSessions: (aggs.rage_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
+    deadSessions: (aggs.dead_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
+    trends: trendsFromSessionHistogram(aggs.trends),
+  };
+};
+
+export const querySessionIndexSessions = async ({
+  client,
+  sortField,
+  sortDirection,
+  page,
+  perPage,
+  ...params
+}: SessionIndexFilterParams & {
+  client: ElasticsearchClient;
+  sortField?: SessionSortField;
+  sortDirection?: string;
+  page: number;
+  perPage: number;
+}): Promise<SessionListResponse> => {
+  const filters = buildSessionIndexFilters(params);
 
   const result = await client.search({
     index: RUM_SESSIONS_INDEX,
@@ -349,7 +485,7 @@ export const querySessionIndexSessions = async ({
       os: { terms: { field: 'os.name', size: 12, exclude: '' } },
       countries: { terms: { field: 'country_iso', size: 12, exclude: '' } },
       users: { terms: { field: 'user.key', size: 12, exclude: '' } },
-      has_replay: { filter: { range: { replay_event_count: { gt: 0 } } } },
+      has_replay: { filter: sessionIndexHasReplayQuery() },
       has_errors: { filter: { range: { error_count: { gt: 0 } } } },
       has_rage: { filter: { range: { rage_click_count: { gt: 0 } } } },
       rage_clicks: { sum: { field: 'rage_click_count' } },

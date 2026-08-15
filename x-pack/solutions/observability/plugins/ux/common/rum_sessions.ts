@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RUM_SESSIONS_VERSION = 2;
+export const RUM_SESSIONS_VERSION = 3;
 export const RUM_SESSIONS_TRANSFORM_ID = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
 export const RUM_SESSIONS_INDEX = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
 export const RUM_SESSIONS_INDEX_PATTERN = 'ux-rum-sessions-*';
@@ -15,6 +15,7 @@ export const RUM_NORMALIZE_PIPELINE_NAME = 'ux-rum-normalize';
 export const RUM_CANONICAL_SESSION_ID_FIELD = 'resource.attributes.session.id';
 export const RUM_CANONICAL_SERVICE_NAME_FIELD = 'resource.attributes.service.name';
 export const RUM_CANONICAL_URL_PATH_GROUPED_FIELD = 'attributes.url.path.grouped';
+export const RUM_HAS_REPLAY_FIELD = 'attributes.rum.has_replay';
 export const RUM_SESSIONS_MANAGED_BY = 'ux';
 export const RUM_SESSIONS_SYNC_DELAY = '5m';
 export const RUM_SESSIONS_LAG_SLACK_SECONDS = 15 * 60;
@@ -120,8 +121,60 @@ export const shouldQuerySessionIndex = ({
   watermark?: string | null;
 }): boolean => installed && analyticsMode !== 'raw' && Boolean(watermark);
 
+/** Session-shaped reads (trends, filters, session KPIs) within the 90d index window. */
+export const canUseSessionIndex = ({
+  installed,
+  analyticsMode,
+  rangeMs,
+  kuery,
+  connection,
+  device,
+  errorGroup,
+}: {
+  installed: boolean;
+  analyticsMode?: string;
+  rangeMs?: number | null;
+  kuery?: string;
+  connection?: string;
+  device?: string;
+  errorGroup?: string;
+}): boolean =>
+  installed &&
+  analyticsMode !== 'raw' &&
+  rangeMs != null &&
+  rangeMs <= 93 * 24 * 60 * 60 * 1000 &&
+  !kuery &&
+  !connection &&
+  !device &&
+  !errorGroup;
+
 export const parseIncludeRaw = (value: string | boolean | undefined): boolean =>
   value === true || value === 'true';
+
+/** Tail session IDs that are not already in the session index. */
+export const newSessionIds = (
+  tailIds: readonly string[],
+  indexedIds: ReadonlySet<string>
+): string[] => tailIds.filter((id) => id.length > 0 && !indexedIds.has(id));
+
+/** True when the selected range still includes time after the transform watermark. */
+export const rangeIncludesOpenTail = (rangeTo: string | undefined, watermark: string): boolean => {
+  if (rangeTo == null || rangeTo === '' || rangeTo === 'now') {
+    return true;
+  }
+  if (rangeTo.startsWith('now-') || rangeTo.startsWith('now+')) {
+    return false;
+  }
+  if (rangeTo.startsWith('now')) {
+    return true;
+  }
+  const endMs = Date.parse(rangeTo);
+  const waterMs = Date.parse(watermark);
+  if (!Number.isFinite(endMs) || !Number.isFinite(waterMs)) {
+    return false;
+  }
+  return endMs > waterMs;
+};
 
 export type RumAnalyticsHealth = 'missing' | 'healthy' | 'recovering';
 
@@ -142,4 +195,29 @@ export const rumAnalyticsHealth = (status: RumAnalyticsStatus): RumAnalyticsHeal
     return 'recovering';
   }
   return 'healthy';
+};
+
+/** Auto-merge the raw tail only when the transform is healthy and the range includes now. */
+export const shouldMergeRawTail = ({
+  status,
+  analyticsMode,
+  rangeTo,
+}: {
+  status: RumAnalyticsStatus;
+  analyticsMode?: string;
+  rangeTo?: string;
+}): boolean => {
+  if (
+    !shouldQuerySessionIndex({
+      installed: status.installed,
+      analyticsMode,
+      watermark: status.watermark,
+    })
+  ) {
+    return false;
+  }
+  if (rumAnalyticsHealth(status) !== 'healthy' || !status.watermark) {
+    return false;
+  }
+  return rangeIncludesOpenTail(rangeTo, status.watermark);
 };
