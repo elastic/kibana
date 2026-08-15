@@ -17,9 +17,8 @@ import {
 } from '../oas_meta_fields';
 import type { ExtendsDeepOptions } from './type';
 import { Type } from './type';
-import type { ObjectResultType, Props } from './object_type';
-import type { ObjectType } from './object_type';
-import type { UnionTypeOptions } from './union_type';
+import { ObjectType, type ObjectResultType, type Props } from './object_type';
+import { UnionType, type UnionTypeOptions } from './union_type';
 
 export type ObjectResultUnionType<T> = T extends Props ? ObjectResultType<T> : never;
 
@@ -30,30 +29,137 @@ export type PropsWithDiscriminator<Discriminator extends string, T extends Props
   [Key in Discriminator]: Type<string>;
 };
 
+type DiscriminatedUnionBranch = ObjectType<any> | UnionType<any, any>;
+
 export class DiscriminatedUnionType<
   Discriminator extends string,
-  RTS extends Array<ObjectType<any>>,
   T extends PropsWithDiscriminator<Discriminator, Props>
 > extends Type<T> {
   private readonly discriminator: Discriminator;
   private readonly discriminatedValues: string[];
-  private readonly unionTypes: RTS;
+  private readonly unionTypes: ReadonlyArray<DiscriminatedUnionBranch>;
   private readonly typeOptions?: UnionTypeOptions<T>;
 
-  constructor(discriminator: Discriminator, types: RTS, options?: UnionTypeOptions<T>) {
+  constructor(
+    discriminator: Discriminator,
+    types: ReadonlyArray<DiscriminatedUnionBranch>,
+    options?: UnionTypeOptions<T>
+  ) {
     const discriminators = new Set<string>();
+
+    const flattenUnionTypes = (type: Type<any>): Array<Type<any>> => {
+      if (type instanceof UnionType) {
+        return type.getTypes().flatMap(flattenUnionTypes);
+      }
+      return [type];
+    };
+
+    const getTypeDebugName = (type: unknown): string => {
+      if (type && typeof type === 'object') {
+        const ctorName = (type as any).constructor?.name;
+        if (typeof ctorName === 'string' && ctorName.length > 0) {
+          return ctorName;
+        }
+      }
+      return typeof type;
+    };
+
+    const resolveBranchDiscriminator = (
+      branch: DiscriminatedUnionBranch,
+      index: number
+    ): { discriminatorValue: unknown; thenSchema: Schema } => {
+      if (branch instanceof UnionType) {
+        const alternatives = branch.getTypes().flatMap(flattenUnionTypes);
+        if (alternatives.length === 0) {
+          throw new Error(`oneOf schema at index ${index} must include at least one type`);
+        }
+
+        const values = new Set<string>();
+        let hasFallback = false;
+
+        for (const [altIndex, alt] of alternatives.entries()) {
+          if (!(alt instanceof ObjectType)) {
+            throw new Error(
+              `oneOf schema at index ${index} must only include object schemas, got ${getTypeDebugName(
+                alt
+              )} at index ${altIndex}`
+            );
+          }
+
+          const discriminatorSchema = alt.getPropSchemas()[discriminator];
+          if (discriminatorSchema == null) {
+            throw new Error(
+              `Discriminator property "${discriminator}" is required for schema at index ${index} (oneOf alternative ${altIndex})`
+            );
+          }
+
+          const discriminatorValue = discriminatorSchema.getExpectedValue();
+          if (discriminatorValue == null) {
+            hasFallback = true;
+            continue;
+          }
+
+          if (typeof discriminatorValue !== 'string') {
+            throw new Error(
+              `Discriminator for schema at index ${index} must be a string type, got ${typeof discriminatorValue}`
+            );
+          }
+
+          values.add(discriminatorValue);
+        }
+
+        if (values.size > 1) {
+          const prettyValues = Array.from(values)
+            .map((v) => JSON.stringify(v))
+            .join(', ');
+          throw new Error(
+            `Discriminator for schema at index ${index} must resolve to a single value, got [${prettyValues}]`
+          );
+        }
+
+        if (values.size === 1 && hasFallback) {
+          throw new Error(
+            `Discriminator for schema at index ${index} must not mix literal and fallback discriminators within oneOf`
+          );
+        }
+
+        return {
+          discriminatorValue: values.size === 1 ? Array.from(values)[0] : undefined,
+          thenSchema: branch.getSchema(),
+        };
+      }
+
+      if (!(branch instanceof ObjectType)) {
+        throw new Error(
+          `Schema at index ${index} must be an object schema or oneOf of object schemas, got ${getTypeDebugName(
+            branch
+          )}`
+        );
+      }
+
+      const discriminatorSchema = branch.getPropSchemas()[discriminator];
+      if (discriminatorSchema == null) {
+        throw new Error(
+          `Discriminator property "${discriminator}" is required for schema at index ${index}`
+        );
+      }
+
+      return {
+        discriminatorValue: discriminatorSchema.getExpectedValue(),
+        thenSchema: branch.getSchema(),
+      };
+    };
 
     let otherwise: Schema | undefined;
     const switchCases = types.reduce<SwitchCases[]>((acc, type, index) => {
-      const discriminatorSchema = type.getPropSchemas()[discriminator];
-      const discriminatorValue = discriminatorSchema.expectedValue;
+      const { discriminatorValue, thenSchema } = resolveBranchDiscriminator(type, index);
 
       if (discriminatorValue == null) {
         if (otherwise) {
           throw new Error(`Only one fallback schema is allowed`);
         }
 
-        otherwise = type.getSchema().meta({ [META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE]: true });
+        otherwise = thenSchema.meta({ [META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE]: true });
         return acc;
       } else {
         if (typeof discriminatorValue !== 'string') {
@@ -73,7 +179,7 @@ export class DiscriminatedUnionType<
 
       acc.push({
         is: discriminatorValue,
-        then: type.getSchema(),
+        then: thenSchema,
       });
 
       return acc;
