@@ -215,14 +215,17 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       if (newIds.length === 0) {
         return settled;
       }
-      const live = await queryRawSessions(client, {
-        ...params.query,
-        rangeFrom: analytics.status.watermark,
-        rangeTo,
-        page: '0',
-        perPage: String(perPage),
-        restrictToSessionIds: newIds,
-      });
+      const live = await queryRawSessions(
+        client,
+        {
+          ...params.query,
+          rangeFrom: analytics.status.watermark,
+          rangeTo,
+          page: '0',
+          perPage: String(perPage),
+        },
+        newIds
+      );
       return mergeSessionListResponses(settled, live, perPage);
     }
 
@@ -232,11 +235,12 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
 
 const queryRawSessions = async (
   client: ElasticsearchClient,
-  query: Record<string, string | undefined> & { restrictToSessionIds?: string[] }
+  query: Record<string, string | undefined>,
+  restrictToSessionIds?: string[]
 ): Promise<SessionListResponse> => {
   const params = { query };
   const { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery } = params.query;
-  if (query.restrictToSessionIds && query.restrictToSessionIds.length === 0) {
+  if (restrictToSessionIds && restrictToSessionIds.length === 0) {
     return {
       sessions: [],
       total: 0,
@@ -296,8 +300,8 @@ const queryRawSessions = async (
       },
     });
   }
-  if (query.restrictToSessionIds && query.restrictToSessionIds.length > 0) {
-    filters.push(sessionIdTermsFilter(query.restrictToSessionIds));
+  if (restrictToSessionIds && restrictToSessionIds.length > 0) {
+    filters.push(sessionIdTermsFilter(restrictToSessionIds));
   }
 
   const find = mergeSessionFind(parseSessionFind(params.query.query), {
