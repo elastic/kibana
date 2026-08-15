@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { InvestigationNotFoundError } from '../client/investigations_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
@@ -32,11 +33,11 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
     }),
   }),
   handler: async ({ request, params, getClient }) => {
-    const client = getClient(request);
+    const investigationClient = getClient(request);
     try {
-      return await client.get(params.path.id);
+      return await investigationClient.get(params.path.id);
     } catch (err) {
-      if (err instanceof Error && err.message.includes('not found')) {
+      if (err instanceof InvestigationNotFoundError) {
         throw notFound(err.message);
       }
       throw err;
