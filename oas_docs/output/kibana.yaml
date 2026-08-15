@@ -4466,7 +4466,9 @@ paths:
                       - configuration:
                           params:
                             limit:
+                              defaultValue: 10
                               description: Maximum number of results to return
+                              optional: true
                               type: integer
                             startTime:
                               description: Start time for the analysis in ISO format
@@ -4482,6 +4484,7 @@ paths:
                           type: object
                           properties:
                             limit:
+                              default: 10
                               description: Maximum number of results to return
                               type: integer
                             startTime:
@@ -4490,7 +4493,6 @@ paths:
                               type: string
                           required:
                             - startTime
-                            - limit
                         tags:
                           - analytics
                           - finance
@@ -4554,12 +4556,14 @@ paths:
           application/json:
             examples:
               createEsqlToolRequest:
-                description: Example request to create an ESQL query tool with a pre-defined query
+                description: Example request to create an ES|QL query tool with a pre-defined query and a default fallback value for an optional parameter
                 value:
                   configuration:
                     params:
                       limit:
+                        defaultValue: 10
                         description: Maximum number of results to return
+                        optional: true
                         type: integer
                       startTime:
                         description: Start time for the analysis in ISO format
@@ -4639,7 +4643,9 @@ paths:
                     configuration:
                       params:
                         limit:
+                          defaultValue: 10
                           description: Maximum number of results to return
+                          optional: true
                           type: integer
                         startTime:
                           description: Start time for the analysis in ISO format
@@ -4655,6 +4661,7 @@ paths:
                       type: object
                       properties:
                         limit:
+                          default: 10
                           description: Maximum number of results to return
                           type: integer
                         startTime:
@@ -4663,7 +4670,6 @@ paths:
                           type: string
                       required:
                         - startTime
-                        - limit
                     tags:
                       - analytics
                       - finance
@@ -4716,7 +4722,9 @@ paths:
                    },
                    "limit": {
                      "type": "integer",
-                     "description": "Maximum number of results to return"
+                     "description": "Maximum number of results to return",
+                     "optional": true,
+                     "defaultValue": 10
                    }
                  }
                }
@@ -4738,7 +4746,9 @@ paths:
                   },
                   "limit": {
                     "type": "integer",
-                    "description": "Maximum number of results to return"
+                    "description": "Maximum number of results to return",
+                    "optional": true,
+                    "defaultValue": 10
                   }
                 }
               }
@@ -5105,7 +5115,9 @@ paths:
                     configuration:
                       params:
                         limit:
+                          defaultValue: 10
                           description: Maximum number of results to return
+                          optional: true
                           type: integer
                         startTime:
                           description: Start time for the analysis in ISO format
@@ -5121,6 +5133,7 @@ paths:
                       type: object
                       properties:
                         limit:
+                          default: 10
                           description: Maximum number of results to return
                           type: integer
                         startTime:
@@ -5129,7 +5142,6 @@ paths:
                           type: string
                       required:
                         - startTime
-                        - limit
                     tags:
                       - analytics
                       - finance
@@ -5207,14 +5219,16 @@ paths:
                   configuration:
                     params:
                       limit:
+                        defaultValue: 10
                         description: Maximum number of results to return
+                        optional: true
                         type: integer
                       startTime:
                         description: Start time for the analysis in ISO format
                         type: date
                       symbolPattern:
                         description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
-                        type: keyword
+                        type: string
                     query: FROM financial_trades | WHERE execution_timestamp >= ?startTime AND symbol LIKE ?symbolPattern | STATS trade_count=COUNT(*), avg_price=AVG(execution_price), total_volume=SUM(quantity) BY symbol | SORT trade_count DESC | LIMIT ?limit
                   description: Updated ES|QL query tool for comprehensive financial analysis with enhanced filtering
                   tags:
@@ -5270,14 +5284,16 @@ paths:
                     configuration:
                       params:
                         limit:
+                          defaultValue: 10
                           description: Maximum number of results to return
+                          optional: true
                           type: integer
                         startTime:
                           description: Start time for the analysis in ISO format
                           type: date
                         symbolPattern:
                           description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
-                          type: keyword
+                          type: string
                       query: FROM financial_trades | WHERE execution_timestamp >= ?startTime AND symbol LIKE ?symbolPattern | STATS trade_count=COUNT(*), avg_price=AVG(execution_price), total_volume=SUM(quantity) BY symbol | SORT trade_count DESC | LIMIT ?limit
                     description: Updated ES|QL query tool for comprehensive financial analysis with enhanced filtering
                     id: example-esql-tool
@@ -5289,6 +5305,7 @@ paths:
                       type: object
                       properties:
                         limit:
+                          default: 10
                           description: Maximum number of results to return
                           type: integer
                         startTime:
@@ -5301,7 +5318,6 @@ paths:
                       required:
                         - startTime
                         - symbolPattern
-                        - limit
                     tags:
                       - analytics
                       - finance
@@ -5353,9 +5369,15 @@ paths:
                      "type": "date",
                      "description": "Start time for the analysis in ISO format"
                    },
+                   "symbolPattern": {
+                     "type": "string",
+                     "description": "Pattern to filter symbols (e.g., 'US_*' for US instruments)"
+                   },
                    "limit": {
                      "type": "integer",
-                     "description": "Maximum number of results to return"
+                     "description": "Maximum number of results to return",
+                     "optional": true,
+                     "defaultValue": 10
                    }
                  }
                }
@@ -5373,9 +5395,15 @@ paths:
                     "type": "date",
                     "description": "Start time for the analysis in ISO format"
                   },
+                  "symbolPattern": {
+                    "type": "string",
+                    "description": "Pattern to filter symbols (e.g., 'US_*' for US instruments)"
+                  },
                   "limit": {
                     "type": "integer",
-                    "description": "Maximum number of results to return"
+                    "description": "Maximum number of results to return",
+                    "optional": true,
+                    "defaultValue": 10
                   }
                 }
               }

@@ -17,11 +17,13 @@ requestBody:
                   type: date
                   description: Start time for the analysis in ISO format
                 symbolPattern:
-                  type: keyword
+                  type: string
                   description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
                 limit:
                   type: integer
                   description: Maximum number of results to return
+                  optional: true
+                  defaultValue: 10
         updateIndexSearchToolRequest:
           description: "Example request to update the custom Search tool"
           value:
@@ -54,11 +56,13 @@ responses:
                     type: date
                     description: Start time for the analysis in ISO format
                   symbolPattern:
-                    type: keyword
+                    type: string
                     description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
                   limit:
                     type: integer
                     description: Maximum number of results to return
+                    optional: true
+                    defaultValue: 10
               readonly: false
               schema:
                 type: object
@@ -72,11 +76,11 @@ responses:
                     description: Pattern to filter symbols (e.g., 'US_*' for US instruments)
                   limit:
                     type: integer
+                    default: 10
                     description: Maximum number of results to return
                 required:
                   - startTime
                   - symbolPattern
-                  - limit
                 additionalProperties: false
                 description: Parameters needed to execute the enhanced query
                 "$schema": http://json-schema.org/draft-07/schema#
@@ -122,9 +126,15 @@ x-codeSamples:
              "type": "date",
              "description": "Start time for the analysis in ISO format"
            },
+           "symbolPattern": {
+             "type": "string",
+             "description": "Pattern to filter symbols (e.g., 'US_*' for US instruments)"
+           },
            "limit": {
              "type": "integer",
-             "description": "Maximum number of results to return"
+             "description": "Maximum number of results to return",
+             "optional": true,
+             "defaultValue": 10
            }
          }
        }
@@ -142,9 +152,15 @@ x-codeSamples:
             "type": "date",
             "description": "Start time for the analysis in ISO format"
           },
+          "symbolPattern": {
+            "type": "string",
+            "description": "Pattern to filter symbols (e.g., 'US_*' for US instruments)"
+          },
           "limit": {
             "type": "integer",
-            "description": "Maximum number of results to return"
+            "description": "Maximum number of results to return",
+            "optional": true,
+            "defaultValue": 10
           }
         }
       }
