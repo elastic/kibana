@@ -14,6 +14,7 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ContinuityPayload,
   CoveragePayload,
+  PlatformReadinessPayload,
   QualityPayload,
   RetentionInfo,
   RetentionPayload,
@@ -126,6 +127,26 @@ export const siemReadinessRetentionDataSchema = securityAttachmentDataSchema.ext
   actionableFindings: z.array(actionableFindingSchema),
 });
 
+// ---- Platform ----
+
+export const siemReadinessPlatformDataSchema = securityAttachmentDataSchema.extend({
+  dimension: z.literal('platform'),
+  status: z.enum(['healthy', 'actionsRequired', 'noData']),
+  summary: z.string().max(8000),
+  platforms: z.array(
+    z.object({
+      platform: z.string().max(200),
+      primaryCategory: z.string().max(100).optional(),
+      activeStreams: z.number(),
+      enabledRules: z.number(),
+      mitreTactics: z.number(),
+      status: z.enum(['healthy', 'actionsRequired', 'noData']),
+      topFinding: z.string().max(5000).optional(),
+      findings: z.array(actionableFindingSchema),
+    })
+  ),
+});
+
 // ---- Union schema ----
 
 export const siemReadinessAttachmentDataSchema = z.discriminatedUnion('dimension', [
@@ -133,6 +154,7 @@ export const siemReadinessAttachmentDataSchema = z.discriminatedUnion('dimension
   siemReadinessQualityDataSchema,
   siemReadinessContinuityDataSchema,
   siemReadinessRetentionDataSchema,
+  siemReadinessPlatformDataSchema,
 ]);
 
 export type SiemReadinessAttachmentData = z.infer<typeof siemReadinessAttachmentDataSchema>;
@@ -303,6 +325,31 @@ const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retentio
   return lines.join('\n');
 };
 
+const formatPlatformForAgent = (
+  data: PlatformReadinessPayload & { dimension: 'platform' }
+): string => {
+  const lines = [`SIEM Platform Readiness — ${formatStatus(data.status)}`, data.summary];
+
+  data.platforms.forEach((platform) => {
+    const issue = platform.topFinding ? ` (${platform.topFinding})` : '';
+    lines.push(
+      `- ${platform.platform}: Streams ${platform.activeStreams} active. Enabled rules: ${
+        platform.enabledRules
+      }. MITRE tactics: ${platform.mitreTactics}. Status: ${formatStatus(platform.status)}${issue}.`
+    );
+    if (platform.findings.length > 0) {
+      lines.push('  Findings:');
+      platform.findings.forEach((finding) => {
+        lines.push(
+          ...formatFindingWithBlastRadius(finding as z.infer<typeof actionableFindingSchema>)
+        );
+      });
+    }
+  });
+
+  return lines.join('\n');
+};
+
 const getAgentDescription = (): string => `
 You have access to SIEM readiness data for one dimension (coverage, quality, continuity, or retention).
 The attachment contains:
@@ -338,6 +385,8 @@ Field mapping (tool output camelCase → attachment snake_case):
 - policy name: policyName → policy_name
 
 Use the blast radius information to prioritize findings by impact. Always structure your response using the four-section format: Status → Summary → Findings by dimension then by category → Suggested Actions.
+
+Platform rollup attachments group readiness by ECS-derived platform labels (for example "AWS account 123456789012", "windows Endpoints") and include per-platform stream, rule, and tactic counts plus nested findings.
 `;
 
 // ---- Attachment type definition ----
@@ -374,6 +423,11 @@ export const createSiemReadinessAttachmentType = (): AttachmentTypeDefinition =>
             break;
           case 'retention':
             text = formatRetentionForAgent(data as RetentionPayload & { dimension: 'retention' });
+            break;
+          case 'platform':
+            text = formatPlatformForAgent(
+              data as PlatformReadinessPayload & { dimension: 'platform' }
+            );
             break;
         }
         return { type: 'text', value: text };

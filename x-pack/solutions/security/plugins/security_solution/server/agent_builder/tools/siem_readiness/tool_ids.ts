@@ -11,3 +11,6 @@ export const SIEM_READINESS_COVERAGE_TOOL_ID = securityTool('siem_readiness.get_
 export const SIEM_READINESS_QUALITY_TOOL_ID = securityTool('siem_readiness.get_quality');
 export const SIEM_READINESS_CONTINUITY_TOOL_ID = securityTool('siem_readiness.get_continuity');
 export const SIEM_READINESS_RETENTION_TOOL_ID = securityTool('siem_readiness.get_retention');
+export const SIEM_READINESS_PLATFORM_TOOL_ID = securityTool(
+  'siem_readiness.get_platform_readiness'
+);

@@ -95,6 +95,32 @@ const retentionData = {
   ],
 };
 
+const platformData = {
+  dimension: 'platform' as const,
+  status: 'actionsRequired' as const,
+  summary: 'AWS account needs attention.',
+  platforms: [
+    {
+      platform: 'AWS account 123456789012',
+      primaryCategory: 'Cloud',
+      activeStreams: 2,
+      enabledRules: 5,
+      mitreTactics: 3,
+      status: 'actionsRequired' as const,
+      topFinding: 'Data stream serving pipeline cloudtrail-pipeline has gone silent',
+      findings: [
+        {
+          category: 'Cloud',
+          severity: 'CRITICAL' as const,
+          message: 'Data stream serving pipeline cloudtrail-pipeline has gone silent',
+          resource: 'cloudtrail-pipeline',
+          affectedPlatform: 'AWS account 123456789012',
+        },
+      ],
+    },
+  ],
+};
+
 // ---- tests ----
 
 describe('siemReadinessAttachmentDataSchema', () => {
@@ -112,6 +138,10 @@ describe('siemReadinessAttachmentDataSchema', () => {
 
   it('validates retention data', () => {
     expect(siemReadinessAttachmentDataSchema.safeParse(retentionData).success).toBe(true);
+  });
+
+  it('validates platform data', () => {
+    expect(siemReadinessAttachmentDataSchema.safeParse(platformData).success).toBe(true);
   });
 
   it('rejects data with an unknown dimension', () => {
@@ -192,6 +222,16 @@ describe('createSiemReadinessAttachmentType', () => {
       expect(rep?.type).toBe('text');
       expect(rep?.value).toContain('Actions Required'); // not 'actionsRequired'
       expect(rep?.value).toContain('logs-cloud-default');
+    });
+
+    it('formats platform as text containing platform rollup details', async () => {
+      const formatted = await Promise.resolve(
+        attachmentType.format(makeAttachment(platformData), mockFormatContext)
+      );
+      const rep = await Promise.resolve(formatted.getRepresentation?.());
+      expect(rep?.type).toBe('text');
+      expect(rep?.value).toContain('AWS account 123456789012');
+      expect(rep?.value).toContain('Streams 2 active');
     });
 
     it('throws when data does not match any dimension schema', () => {
