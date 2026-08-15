@@ -38,6 +38,7 @@ import {
   buildRumBudgetSlo,
   defaultBudgetName,
   isRumBudgetAiTemplate,
+  isRumSessionBudgetTemplate,
   rumBudgetHasThreshold,
   RUM_BUDGET_TEMPLATE_IDS,
   rumBudgetDefaults,
@@ -50,6 +51,7 @@ import {
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumAlertStatus } from '../../../services/rest/rum_alerts_api';
+import { fetchRumAnalyticsStatus } from '../../../services/rest/rum_analytics_api';
 import { createRumBudget, generateRumBudgetKql } from '../../../services/rest/rum_budgets_api';
 import type { RumBudgetDraft } from './budget_flyout_context';
 
@@ -96,6 +98,7 @@ export function CreateBudgetFlyout({
   const [aiIndex, setAiIndex] = useState('');
   const [generating, setGenerating] = useState(false);
   const [aiAvailable, setAiAvailable] = useState(true);
+  const [sessionAnalyticsReady, setSessionAnalyticsReady] = useState(false);
 
   const filters = useMemo(
     () => ({
@@ -146,13 +149,24 @@ export function CreateBudgetFlyout({
   useEffect(() => {
     void (async () => {
       try {
-        const status = await fetchRumAlertStatus(http);
+        const [status, analytics] = await Promise.all([
+          fetchRumAlertStatus(http),
+          fetchRumAnalyticsStatus({ http }),
+        ]);
         setAiAvailable(status.aiAvailable !== false);
+        setSessionAnalyticsReady(Boolean(analytics.installed && analytics.watermark));
       } catch {
         setAiAvailable(false);
+        setSessionAnalyticsReady(false);
       }
     })();
   }, [http]);
+
+  useEffect(() => {
+    if (isRumSessionBudgetTemplate(templateId) && scope === 'groupByPage') {
+      setScope('app');
+    }
+  }, [scope, templateId]);
 
   const generate = async () => {
     setGenerating(true);
@@ -287,6 +301,26 @@ export function CreateBudgetFlyout({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
+            {!sessionAnalyticsReady && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="primary"
+                  size="s"
+                  title={i18n.translate('xpack.ux.budgets.create.sessionAnalyticsTitle', {
+                    defaultMessage: 'Session-outcome budgets need session analytics',
+                  })}
+                >
+                  <p>
+                    {i18n.translate('xpack.ux.budgets.create.sessionAnalyticsDescription', {
+                      defaultMessage:
+                        'Enable session analytics in Capture settings so error-free, rage-free, and bounce-free budgets can read the session index.',
+                    })}
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
             <div
               css={css`
                 display: grid;
@@ -304,6 +338,7 @@ export function CreateBudgetFlyout({
                   name="ux-budget-template"
                   label={rumBudgetTemplateLabel(id)}
                   checked={templateId === id}
+                  disabled={isRumSessionBudgetTemplate(id) && !sessionAnalyticsReady}
                   onChange={() => setTemplateId(id)}
                 >
                   <EuiText size="xs" color="subdued">
@@ -501,6 +536,7 @@ export function CreateBudgetFlyout({
                     text: i18n.translate('xpack.ux.budgets.create.scopeGroupDropDownOptionLabel', {
                       defaultMessage: 'Each page (group by path)',
                     }),
+                    disabled: isRumSessionBudgetTemplate(templateId),
                   },
                 ]}
                 value={scope}
@@ -580,7 +616,10 @@ export function CreateBudgetFlyout({
               data-test-subj="uxBudgetSave"
               fill
               isLoading={saving}
-              disabled={isAi && isPlaceholderRumBudgetKql(built.filter, built.good)}
+              disabled={
+                (isAi && isPlaceholderRumBudgetKql(built.filter, built.good)) ||
+                (isRumSessionBudgetTemplate(templateId) && !sessionAnalyticsReady)
+              }
               onClick={() => void save()}
             >
               {i18n.translate('xpack.ux.budgets.create.saveButtonLabel', {

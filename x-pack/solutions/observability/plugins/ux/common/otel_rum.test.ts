@@ -8,27 +8,15 @@
 import { uxSearchIndex } from './otel_rum';
 
 describe('uxSearchIndex', () => {
-  it('returns OTel streams when the APM data view title is empty', () => {
+  it('returns only OTel RUM streams', () => {
     expect(uxSearchIndex()).toBe('traces-*.otel-*,logs-*.otel-*');
     expect(uxSearchIndex('')).toBe('traces-*.otel-*,logs-*.otel-*');
   });
 
-  it('appends OTel streams to an APM-only pattern', () => {
-    expect(uxSearchIndex('traces-apm*,apm-*')).toBe(
-      'traces-apm*,apm-*,traces-*.otel-*,logs-*.otel-*'
-    );
-  });
-
-  it('does not duplicate patterns already present', () => {
-    expect(uxSearchIndex('traces-apm*,apm-*,traces-*.otel-*,logs-*.otel-*')).toBe(
-      'traces-apm*,apm-*,traces-*.otel-*,logs-*.otel-*'
-    );
-  });
-
-  it('drops remote_cluster CCS hops when the data already lives locally', () => {
+  it('ignores the APM data view (classic apm / metrics / logs-apm)', () => {
     expect(
       uxSearchIndex(
-        'remote_cluster:traces-*.otel-*,traces-*.otel-*,remote_cluster:logs-*.otel-*,logs-*.otel-*'
+        'apm-*,logs-*.otel-*,logs-apm*,metrics-*.otel-*,metrics-apm*,traces-*.otel-*,traces-apm*'
       )
     ).toBe('traces-*.otel-*,logs-*.otel-*');
   });

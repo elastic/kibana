@@ -28,6 +28,12 @@ import {
 } from './agent_builder';
 import type { UxPluginSetupDeps, UxPluginStartDeps } from './plugin_types';
 import { registerRumReportEmailTask } from './tasks/rum_report_email_task';
+import {
+  registerRumSessionsReconcileTask,
+  scheduleRumSessionsReconcileTask,
+} from './tasks/rum_sessions_reconcile_task';
+import type { UXConfig } from '../common/config';
+import { configureRumSessionsTransform } from './transforms/rum_sessions';
 
 export type { UxPluginSetupDeps, UxPluginStartDeps } from './plugin_types';
 
@@ -41,6 +47,9 @@ export class Plugin implements PluginType {
   }
 
   public setup(core: CoreSetup<UxPluginStartDeps>, plugins: UxPluginSetupDeps = {}) {
+    const config = this.initContext.config.get<UXConfig>();
+    configureRumSessionsTransform({ syncDelay: config.sessionAnalytics.syncDelay });
+
     core.savedObjects.registerType(sessionReplaySettingsSavedObjectType);
     core.savedObjects.registerType(rumReportScheduleSavedObjectType);
     core.savedObjects.registerType(rumAlertNotificationsSavedObjectType);
@@ -81,12 +90,22 @@ export class Plugin implements PluginType {
         logger: this.logger,
         taskManager: plugins.taskManager,
       });
+      registerRumSessionsReconcileTask({
+        core,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
+      });
     }
 
     return {};
   }
 
   public start(_coreStart: CoreStart, plugins: UxPluginStartDeps = {}) {
+    if (plugins.taskManager) {
+      scheduleRumSessionsReconcileTask(plugins.taskManager).catch((error) => {
+        this.logger.error(`Failed to schedule rum-sessions reconcile: ${error}`);
+      });
+    }
     if (plugins.agentBuilder) {
       installRumAnalystAgent({
         agentBuilder: plugins.agentBuilder,

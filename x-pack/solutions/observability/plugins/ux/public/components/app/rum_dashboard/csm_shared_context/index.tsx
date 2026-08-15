@@ -9,7 +9,6 @@ import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { uxSearchIndex } from '../../../../../common/otel_rum';
-import { useDynamicDataViewTitle } from '../../../../hooks/use_dynamic_data_view';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 
 interface SharedData {
@@ -43,8 +42,7 @@ export function CsmSharedContextProvider({ children }: { children: JSX.Element }
     services: { dataViews },
   } = useKibana<{ dataViews: DataViewsPublicPluginStart }>();
 
-  const { dataViewTitle } = useDynamicDataViewTitle();
-  const searchIndex = uxSearchIndex(dataViewTitle);
+  const searchIndex = uxSearchIndex();
 
   const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     if (!dataViews) {

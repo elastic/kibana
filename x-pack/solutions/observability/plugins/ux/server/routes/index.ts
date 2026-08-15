@@ -50,6 +50,7 @@ import {
   upsertRumAlertNotificationsRoute,
 } from './rum/alerts';
 import { generateRumBudgetKqlRoute, listRumBudgetsRoute } from './rum/budgets';
+import { getRumAnalyticsStatusRoute, installRumSessionsTransformRoute } from './rum/analytics';
 
 function getTypedUxServerRouteRepository() {
   return {
@@ -90,6 +91,8 @@ function getTypedUxServerRouteRepository() {
     ...upsertRumAlertNotificationsRoute,
     ...listRumBudgetsRoute,
     ...generateRumBudgetKqlRoute,
+    ...getRumAnalyticsStatusRoute,
+    ...installRumSessionsTransformRoute,
   };
 }
 

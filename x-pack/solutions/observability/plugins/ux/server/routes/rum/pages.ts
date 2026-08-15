@@ -10,13 +10,16 @@ import { createUxServerRoute } from '../create_ux_server_route';
 import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
 import {
   durationToMs,
+  mergeRumPageRows,
   type RumPageRow,
   type RumPagesResponse,
   type RumResourceRow,
   type RumVitalAttribution,
 } from '../../../common/rum_app';
 import { groupingFromSettings } from '../../../common/session_replay_settings';
-import { groupUrlPath } from '../../../common/url_grouping';
+import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
+import { resolveRumDaily } from '../../transforms/rum_daily';
+import { queryDailyPages } from '../../transforms/rum_daily_query';
 import { readSessionReplaySettings } from '../session_replay/settings';
 import {
   DOCUMENT_LOAD_FILTER,
@@ -125,36 +128,6 @@ const resourcesFromBucket = (bucket: Record<string, unknown>): RumResourceRow[] 
     .filter((row) => row.url.length > 0);
 };
 
-const mergePages = (
-  pages: RumPageRow[],
-  grouping: { depth?: number; rules?: string[] }
-): RumPageRow[] => {
-  const merged = new Map<string, RumPageRow>();
-  for (const page of pages) {
-    const path = groupUrlPath(page.path, grouping) || page.path;
-    const existing = merged.get(path);
-    if (!existing) {
-      merged.set(path, { ...page, path });
-      continue;
-    }
-    const views = existing.views + page.views;
-    merged.set(path, {
-      ...existing,
-      views,
-      errorCount: existing.errorCount + page.errorCount,
-      p75Lcp: existing.p75Lcp ?? page.p75Lcp,
-      p75Inp: existing.p75Inp ?? page.p75Inp,
-      p75Cls: existing.p75Cls ?? page.p75Cls,
-      avgDurationMs: existing.avgDurationMs ?? page.avgDurationMs,
-      attribution: existing.attribution.lcpElement ? existing.attribution : page.attribution,
-      resources: [...existing.resources, ...page.resources]
-        .sort((a, b) => (b.avgDurationMs ?? 0) - (a.avgDurationMs ?? 0))
-        .slice(0, 8),
-    });
-  }
-  return [...merged.values()].sort((a, b) => b.views - a.views);
-};
-
 export const getRumPagesRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/rum/pages',
   options: { access: 'internal' },
@@ -167,6 +140,35 @@ export const getRumPagesRoute = createUxServerRoute({
     const settings = await readSessionReplaySettings(
       coreStart.savedObjects.createInternalRepository()
     );
+    const status = await getRumAnalyticsStatus(client);
+    const daily = resolveRumDaily({
+      pagesDaily: status.pagesDaily,
+      serviceDaily: status.serviceDaily,
+      analyticsMode: params.query.analyticsMode,
+      rangeFrom: params.query.rangeFrom,
+      rangeTo: params.query.rangeTo,
+      browser: params.query.browser,
+      os: params.query.os,
+      location: params.query.location,
+      user: params.query.user,
+      kuery: params.query.kuery,
+      frustration: params.query.frustration,
+      breakpoint: params.query.breakpoint,
+      connection: params.query.connection,
+      device: params.query.device,
+      errorGroup: params.query.errorGroup,
+    });
+    if (daily.usePages) {
+      const result = await queryDailyPages({
+        client,
+        rangeFrom: params.query.rangeFrom || 'now-24h',
+        rangeTo: params.query.rangeTo || 'now',
+        serviceName: params.query.serviceName,
+        pageUrl: params.query.pageUrl,
+        watermark: status.pagesDaily?.watermark,
+      });
+      return { pages: mergeRumPageRows(result.pages, groupingFromSettings(settings)) };
+    }
 
     const result = await client.search({
       index: RUM_SESSION_SOURCE_INDEX,
@@ -252,6 +254,6 @@ export const getRumPagesRoute = createUxServerRoute({
       };
     });
 
-    return { pages: mergePages(pages, groupingFromSettings(settings)) };
+    return { pages: mergeRumPageRows(pages, groupingFromSettings(settings)) };
   },
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
@@ -20,6 +21,8 @@ import {
 import { SESSION_ID_SCRIPT } from './list_sessions';
 import { activitySearchTokens } from './session_attributes';
 import { kueryFilters } from '../rum/kuery';
+import { resolveRumAnalytics } from '../../transforms/rum_sessions';
+import { mergeFunnelResponses, querySessionIndexFunnel } from '../../transforms/rum_sessions_query';
 
 const boundedString = (max: number) =>
   new t.Type<string, string, unknown>(
@@ -113,6 +116,88 @@ interface StepMinAgg {
   first?: { value?: number | null };
 }
 
+export const queryRawFunnel = async ({
+  client,
+  rangeFrom,
+  rangeTo,
+  serviceName,
+  kuery,
+  steps,
+}: {
+  client: ElasticsearchClient;
+  rangeFrom: string;
+  rangeTo: string;
+  serviceName?: string;
+  kuery?: string;
+  steps: FunnelStepDef[];
+}): Promise<SessionFunnelResponse> => {
+  const timeFilter = { range: { '@timestamp': { gte: rangeFrom, lte: rangeTo } } };
+  const serviceFilters = serviceName
+    ? [
+        {
+          bool: {
+            should: [
+              { term: { 'resource.attributes.service.name': serviceName } },
+              { term: { 'attributes.service.name': serviceName } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ]
+    : [];
+
+  const stepAggs = Object.fromEntries(
+    steps.map((step, i) => [
+      `step_${i}`,
+      {
+        filter: stepQuery(step),
+        aggs: { first: { min: { field: '@timestamp' } } },
+      },
+    ])
+  );
+
+  const result = await client.search({
+    index: RUM_SESSION_SOURCE_INDEX,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [timeFilter, ...serviceFilters, ...kueryFilters(kuery)],
+      },
+    },
+    aggs: {
+      sessions: {
+        terms: {
+          script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
+          size: 500,
+        },
+        aggs: stepAggs,
+      },
+    },
+  });
+
+  const buckets =
+    (
+      result.aggregations as {
+        sessions?: { buckets?: Array<Record<string, unknown> & { key?: string }> };
+      }
+    )?.sessions?.buckets ?? [];
+
+  const sessions = buckets
+    .filter((bucket) => Boolean(bucket.key))
+    .map((bucket) => ({
+      sessionId: String(bucket.key),
+      firstTs: steps.map((_, i) => {
+        const agg = bucket[`step_${i}`] as StepMinAgg | undefined;
+        const value = agg?.first?.value;
+        return typeof value === 'number' && Number.isFinite(value) ? value : null;
+      }),
+    }));
+
+  return computeFunnel(sessions, steps);
+};
+
 export const getSessionFunnelRoute = createUxServerRoute({
   endpoint: 'POST /internal/ux/session_replay/funnel',
   options: { access: 'internal' },
@@ -127,11 +212,13 @@ export const getSessionFunnelRoute = createUxServerRoute({
       t.partial({
         serviceName: boundedString(256),
         kuery: boundedString(4096),
+        includeRaw: t.union([t.boolean, t.string]),
+        analyticsMode: boundedString(16),
       }),
     ]),
   }),
   handler: async ({ context, params }): Promise<SessionFunnelResponse> => {
-    const { rangeFrom, rangeTo, serviceName, kuery } = params.body;
+    const { rangeFrom, rangeTo, serviceName, kuery, includeRaw, analyticsMode } = params.body;
     const steps = params.body.steps
       .map((step) => ({
         ...step,
@@ -147,71 +234,31 @@ export const getSessionFunnelRoute = createUxServerRoute({
 
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
+    const analytics = await resolveRumAnalytics(client, { analyticsMode, includeRaw });
 
-    const timeFilter = { range: { '@timestamp': { gte: rangeFrom, lte: rangeTo } } };
-    const serviceFilters = serviceName
-      ? [
-          {
-            bool: {
-              should: [
-                { term: { 'resource.attributes.service.name': serviceName } },
-                { term: { 'attributes.service.name': serviceName } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ]
-      : [];
+    if (!analytics.useIndex) {
+      return queryRawFunnel({ client, rangeFrom, rangeTo, serviceName, kuery, steps });
+    }
 
-    const stepAggs = Object.fromEntries(
-      steps.map((step, i) => [
-        `step_${i}`,
-        {
-          filter: stepQuery(step),
-          aggs: { first: { min: { field: '@timestamp' } } },
-        },
-      ])
-    );
-
-    const result = await client.search({
-      index: RUM_SESSION_SOURCE_INDEX,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: [timeFilter, ...serviceFilters, ...kueryFilters(kuery)],
-        },
-      },
-      aggs: {
-        sessions: {
-          terms: {
-            script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
-            size: 500,
-          },
-          aggs: stepAggs,
-        },
-      },
+    const settled = await querySessionIndexFunnel({
+      client,
+      rangeFrom,
+      rangeTo,
+      serviceName,
+      steps,
+      watermark: analytics.status.watermark ?? undefined,
     });
-
-    const buckets =
-      (
-        result.aggregations as {
-          sessions?: { buckets?: Array<Record<string, unknown> & { key?: string }> };
-        }
-      )?.sessions?.buckets ?? [];
-
-    const sessions = buckets
-      .filter((bucket) => Boolean(bucket.key))
-      .map((bucket) => ({
-        sessionId: String(bucket.key),
-        firstTs: steps.map((_, i) => {
-          const agg = bucket[`step_${i}`] as StepMinAgg | undefined;
-          const value = agg?.first?.value;
-          return typeof value === 'number' && Number.isFinite(value) ? value : null;
-        }),
-      }));
-
-    return computeFunnel(sessions, steps);
+    if (!analytics.mergeRaw || !analytics.status.watermark) {
+      return settled;
+    }
+    const live = await queryRawFunnel({
+      client,
+      rangeFrom: analytics.status.watermark,
+      rangeTo,
+      serviceName,
+      kuery,
+      steps,
+    });
+    return mergeFunnelResponses(settled, live);
   },
 });

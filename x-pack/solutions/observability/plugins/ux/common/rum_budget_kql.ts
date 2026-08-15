@@ -17,8 +17,8 @@ Return JSON only:
 Rules:
 - This is an occurrences SLO: filter selects the population, good selects successful events in that population.
 - KQL only. No ES|QL, no FROM, no pipes, no aggregations, no scripts.
-- index must be logs-*.otel-* and/or traces-*.otel-* (comma-separated). No other patterns.
-- Known fields:
+- index must be logs-*.otel-*, traces-*.otel-*, and/or ux-rum-sessions-* (comma-separated). No other patterns.
+- Known event fields:
   - resource.attributes.service.name
   - resource.attributes.browser.name
   - attributes.page.url.path
@@ -32,12 +32,15 @@ Rules:
   - attributes.transaction.duration.us (page-load duration, microseconds)
   - duration (OTel span duration, nanoseconds)
   - attributes.longtask.duration (ms)
-- Web vitals live on logs-*.otel-*. Page loads live on traces-*.otel-* (name: "documentLoad").
+- Known session-index fields (ux-rum-sessions-*, timestamp start_time):
+  - service.name, entry_page, user.key, error_count, rage_click_count, dead_click_count, page_count, duration_ms
+- Web vitals live on logs-*.otel-*. Page loads live on traces-*.otel-* (name: "documentLoad"). Session outcomes live on ux-rum-sessions-*.
 - Do not invent fields. Quote string values.
 - Examples:
   - LCP: filter event_name: "browser.web_vital" and attributes.browser.web_vital.name: "lcp"; good attributes.browser.web_vital.value <= 2500; index logs-*.otel-*
   - Page load: filter name: "documentLoad"; good attributes.transaction.duration.us <= 3000000; index traces-*.otel-*
-  - JS errors: filter (event_name: "exception" or name: "documentLoad"); good not event_name: "exception"; index logs-*.otel-*,traces-*.otel-*`;
+  - JS errors: filter (event_name: "exception" or name: "documentLoad"); good not event_name: "exception"; index logs-*.otel-*,traces-*.otel-*
+  - Error-free sessions: filter session.id: *; good error_count: 0; index ux-rum-sessions-*`;
 
 export const isPlaceholderRumBudgetKql = (filter: string, good: string): boolean =>
   !filter.trim() || !good.trim() || good.trim() === RUM_BUDGET_AI_PLACEHOLDER_GOOD;
@@ -55,12 +58,18 @@ export const normalizeRumBudgetIndex = (raw: string): string => {
       if (lower === 'traces-*' || /^traces-.*otel/.test(lower)) {
         return 'traces-*.otel-*' as const;
       }
+      if (/^ux-rum-sessions/.test(lower)) {
+        return 'ux-rum-sessions-*' as const;
+      }
       return undefined;
     })
-    .filter((source): source is 'logs-*.otel-*' | 'traces-*.otel-*' => source != null);
+    .filter(
+      (source): source is 'logs-*.otel-*' | 'traces-*.otel-*' | 'ux-rum-sessions-*' =>
+        source != null
+    );
   const unique = [...new Set(sources)];
   if (unique.length === 0) {
-    throw new Error('Index must be logs-*.otel-* and/or traces-*.otel-*');
+    throw new Error('Index must be logs-*.otel-*, traces-*.otel-*, and/or ux-rum-sessions-*');
   }
   return unique.join(',');
 };

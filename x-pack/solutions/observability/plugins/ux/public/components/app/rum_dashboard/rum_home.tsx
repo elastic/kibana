@@ -43,6 +43,7 @@ import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
 import { RumKueryBar } from '../rum_filters/rum_kuery_bar';
+import { AnalyticsStatusBanner } from './analytics_status_banner';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.overview.tab', {
   defaultMessage: 'Overview',
@@ -177,6 +178,7 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
         <RumAlertFlyoutProvider>
           <RumBudgetFlyoutProvider>
             <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
+              <AnalyticsStatusBanner />
               {tab === 'overview' && <RumOverviewV2 />}
               {tab === 'pages' && <RumPagesPanel />}
               {tab === 'errors' && <RumErrorsPanel />}

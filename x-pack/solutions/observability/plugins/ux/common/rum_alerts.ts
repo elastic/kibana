@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { rumAlertGroupingFieldsFromQuery } from './rum_alert_esql';
+import { RUM_SESSIONS_INDEX_PATTERN } from './rum_sessions';
 
 export const RUM_ALERT_TAG = 'ux-rum';
 export const RUM_ALERT_TEMPLATE_TAG_PREFIX = 'ux-rum:';
@@ -20,16 +21,36 @@ export const RUM_ALERT_TEMPLATE_IDS = [
   'frustration',
   'traffic_drop',
   'traffic_spike',
+  'session_error_rate',
+  'session_frustration',
+  'session_traffic_drop',
+  'session_traffic_spike',
   'ai',
 ] as const;
 
 export type RumAlertTemplateId = (typeof RUM_ALERT_TEMPLATE_IDS)[number];
 
+export const RUM_SESSION_ALERT_TEMPLATE_IDS = [
+  'session_error_rate',
+  'session_frustration',
+  'session_traffic_drop',
+  'session_traffic_spike',
+] as const;
+export type RumSessionAlertTemplateId = (typeof RUM_SESSION_ALERT_TEMPLATE_IDS)[number];
+
 export const isRumAlertTemplateId = (value: string): value is RumAlertTemplateId =>
   (RUM_ALERT_TEMPLATE_IDS as readonly string[]).includes(value);
 
 export const isRumTrafficAlertTemplate = (templateId: RumAlertTemplateId): boolean =>
-  templateId === 'traffic_drop' || templateId === 'traffic_spike';
+  templateId === 'traffic_drop' ||
+  templateId === 'traffic_spike' ||
+  templateId === 'session_traffic_drop' ||
+  templateId === 'session_traffic_spike';
+
+export const isRumSessionAlertTemplate = (
+  templateId: RumAlertTemplateId
+): templateId is RumSessionAlertTemplateId =>
+  (RUM_SESSION_ALERT_TEMPLATE_IDS as readonly string[]).includes(templateId);
 
 export const isRumAiAlertTemplate = (templateId: RumAlertTemplateId): boolean =>
   templateId === 'ai';
@@ -84,6 +105,10 @@ const DEFAULTS: Record<
   frustration: { threshold: 5, minSamples: 1, lookback: '15m', every: '5m' },
   traffic_drop: { threshold: 5, minSamples: 1, lookback: '30m', every: '5m' },
   traffic_spike: { threshold: 50, minSamples: 1, lookback: '15m', every: '5m' },
+  session_error_rate: { threshold: 0.05, minSamples: 10, lookback: '15m', every: '5m' },
+  session_frustration: { threshold: 5, minSamples: 1, lookback: '15m', every: '5m' },
+  session_traffic_drop: { threshold: 5, minSamples: 1, lookback: '30m', every: '5m' },
+  session_traffic_spike: { threshold: 50, minSamples: 1, lookback: '15m', every: '5m' },
   ai: { threshold: 0, minSamples: 1, lookback: '15m', every: '5m' },
 };
 
@@ -116,6 +141,22 @@ export const rumAlertTemplateLabel = (templateId: RumAlertTemplateId): string =>
     case 'traffic_spike':
       return i18n.translate('xpack.ux.alerts.template.trafficSpikeLabel', {
         defaultMessage: 'Traffic spike',
+      });
+    case 'session_error_rate':
+      return i18n.translate('xpack.ux.alerts.template.sessionErrorRateLabel', {
+        defaultMessage: 'Session error rate',
+      });
+    case 'session_frustration':
+      return i18n.translate('xpack.ux.alerts.template.sessionFrustrationLabel', {
+        defaultMessage: 'Frustrated sessions',
+      });
+    case 'session_traffic_drop':
+      return i18n.translate('xpack.ux.alerts.template.sessionTrafficDropLabel', {
+        defaultMessage: 'Session traffic drop',
+      });
+    case 'session_traffic_spike':
+      return i18n.translate('xpack.ux.alerts.template.sessionTrafficSpikeLabel', {
+        defaultMessage: 'Session traffic spike',
       });
     case 'ai':
       return i18n.translate('xpack.ux.alerts.template.aiLabel', {
@@ -150,6 +191,22 @@ export const rumAlertTemplateDescription = (templateId: RumAlertTemplateId): str
       return i18n.translate('xpack.ux.alerts.template.trafficSpikeDescription', {
         defaultMessage: 'Alert when distinct sessions exceed a ceiling.',
       });
+    case 'session_error_rate':
+      return i18n.translate('xpack.ux.alerts.template.sessionErrorRateDescription', {
+        defaultMessage: 'Alert when the share of sessions with a JS exception exceeds a rate.',
+      });
+    case 'session_frustration':
+      return i18n.translate('xpack.ux.alerts.template.sessionFrustrationDescription', {
+        defaultMessage: 'Alert when too many sessions have a rage or dead click.',
+      });
+    case 'session_traffic_drop':
+      return i18n.translate('xpack.ux.alerts.template.sessionTrafficDropDescription', {
+        defaultMessage: 'Alert when settled session count falls below a floor.',
+      });
+    case 'session_traffic_spike':
+      return i18n.translate('xpack.ux.alerts.template.sessionTrafficSpikeDescription', {
+        defaultMessage: 'Alert when settled session count exceeds a ceiling.',
+      });
     case 'ai':
       return i18n.translate('xpack.ux.alerts.template.aiDescription', {
         defaultMessage: 'Type the condition in plain language. AI writes the ES|QL.',
@@ -181,6 +238,23 @@ const filterClauses = (filters: RumAlertFilters): string[] => {
 
 const pageExpr = 'COALESCE(`attributes.page.url.path`, `attributes.url.full`)';
 
+const sessionFilterClauses = (filters: RumAlertFilters): string[] => {
+  const clauses: string[] = [];
+  if (filters.serviceName) {
+    clauses.push(`\`service.name\` == ${esqlString(filters.serviceName)}`);
+  }
+  if (filters.pageUrl) {
+    clauses.push(`\`entry_page\` == ${esqlString(filters.pageUrl)}`);
+  }
+  if (filters.browser) {
+    clauses.push(`\`browser.name\` == ${esqlString(filters.browser)}`);
+  }
+  if (filters.location) {
+    clauses.push(`\`country_iso\` == ${esqlString(filters.location)}`);
+  }
+  return clauses;
+};
+
 const whereLine = (clauses: string[]): string =>
   clauses.length > 0 ? `| WHERE ${andJoin(clauses)}` : '';
 
@@ -193,9 +267,14 @@ export const buildRumAlertEsql = (params: RumAlertParams): RumAlertEsqlBuild => 
   const every = normalizeDuration(params.every, defaults.every);
   const threshold = Number.isFinite(params.threshold) ? params.threshold : defaults.threshold;
   const minSamples = Math.max(1, Math.trunc(params.minSamples || defaults.minSamples));
-  const filters = filterClauses(params.filters);
+  const filters = isRumSessionAlertTemplate(params.templateId)
+    ? sessionFilterClauses(params.filters)
+    : filterClauses(params.filters);
   const tags = [RUM_ALERT_TAG, `${RUM_ALERT_TEMPLATE_TAG_PREFIX}${params.templateId}`];
-  const groupByPage = params.groupByPage && !isRumTrafficAlertTemplate(params.templateId);
+  const groupByPage =
+    params.groupByPage &&
+    !isRumTrafficAlertTemplate(params.templateId) &&
+    !isRumSessionAlertTemplate(params.templateId);
 
   if (params.templateId === 'web_vital') {
     const vital = params.vital && isRumAlertVital(params.vital) ? params.vital : 'lcp';
@@ -314,6 +393,88 @@ export const buildRumAlertEsql = (params: RumAlertParams): RumAlertEsqlBuild => 
         defaultMessage: 'Frustration clicks >= {threshold}',
         values: { threshold },
       }),
+      tags,
+    };
+  }
+
+  if (params.templateId === 'session_error_rate') {
+    const query = [
+      `FROM ${RUM_SESSIONS_INDEX_PATTERN}`,
+      whereLine(filters),
+      '| STATS errors = COUNT(*) WHERE error_count > 0, sessions = COUNT(*)',
+      '| EVAL error_rate = TO_DOUBLE(errors) / sessions',
+      `| WHERE sessions >= ${minSamples} AND error_rate > ${threshold}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    return {
+      query,
+      groupingFields: [],
+      every,
+      lookback,
+      recoveryStrategy: 'no_breach',
+      noDataStrategy: 'none',
+      description: i18n.translate('xpack.ux.alerts.desc.sessionErrorRate', {
+        defaultMessage: 'Session error rate > {threshold} (min {minSamples} sessions)',
+        values: { threshold, minSamples },
+      }),
+      tags,
+    };
+  }
+
+  if (params.templateId === 'session_frustration') {
+    const query = [
+      `FROM ${RUM_SESSIONS_INDEX_PATTERN}`,
+      whereLine(filters),
+      '| STATS frustrated = COUNT(*) WHERE rage_click_count > 0 OR dead_click_count > 0',
+      `| WHERE frustrated >= ${threshold}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    return {
+      query,
+      groupingFields: [],
+      every,
+      lookback,
+      recoveryStrategy: 'no_breach',
+      noDataStrategy: 'none',
+      description: i18n.translate('xpack.ux.alerts.desc.sessionFrustration', {
+        defaultMessage: 'Frustrated sessions >= {threshold}',
+        values: { threshold },
+      }),
+      tags,
+    };
+  }
+
+  if (
+    params.templateId === 'session_traffic_drop' ||
+    params.templateId === 'session_traffic_spike'
+  ) {
+    const isSpike = params.templateId === 'session_traffic_spike';
+    const query = [
+      `FROM ${RUM_SESSIONS_INDEX_PATTERN}`,
+      whereLine(filters),
+      '| STATS sessions = COUNT(*)',
+      `| WHERE sessions ${isSpike ? '>' : '<'} ${threshold}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    return {
+      query,
+      groupingFields: [],
+      every,
+      lookback,
+      recoveryStrategy: 'no_breach',
+      noDataStrategy: 'none',
+      description: isSpike
+        ? i18n.translate('xpack.ux.alerts.desc.sessionTrafficSpike', {
+            defaultMessage: 'Sessions > {threshold}',
+            values: { threshold },
+          })
+        : i18n.translate('xpack.ux.alerts.desc.sessionTrafficDrop', {
+            defaultMessage: 'Sessions < {threshold}',
+            values: { threshold },
+          }),
       tags,
     };
   }

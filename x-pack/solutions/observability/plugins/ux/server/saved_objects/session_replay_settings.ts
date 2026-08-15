@@ -16,7 +16,9 @@ import {
   URL_GROUPING_DEPTH_MAX,
   URL_GROUPING_DEPTH_MIN,
   URL_GROUPING_RULES_MAX_LENGTH,
+  SYNC_DELAY_MAX_LENGTH,
 } from '../../common/session_replay_settings';
+import { RUM_SESSIONS_SYNC_DELAY } from '../../common/rum_sessions';
 
 const attributesSchemaV1 = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
@@ -35,6 +37,19 @@ const attributesSchemaV2 = attributesSchemaV1.extends({
   urlGroupingRules: schema.string({ defaultValue: '', maxLength: URL_GROUPING_RULES_MAX_LENGTH }),
   maskTextSelector: schema.string({ defaultValue: '', maxLength: MASK_TEXT_SELECTOR_MAX_LENGTH }),
   captureGraphql: schema.boolean({ defaultValue: false }),
+});
+
+const attributesSchemaV3 = attributesSchemaV2.extends({
+  syncDelay: schema.string({
+    defaultValue: RUM_SESSIONS_SYNC_DELAY,
+    minLength: 2,
+    maxLength: SYNC_DELAY_MAX_LENGTH,
+    validate: (value: string) => {
+      if (!/^[1-9]\d*[smh]$/.test(value)) {
+        return 'must be a positive Elasticsearch time value such as 5m, 30s, or 1h';
+      }
+    },
+  }),
 });
 
 export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
@@ -81,6 +96,25 @@ export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: attributesSchemaV2.extends({}, { unknowns: 'ignore' }),
         create: attributesSchemaV2,
+      },
+    },
+    3: {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => ({
+            attributes: {
+              syncDelay:
+                typeof doc.attributes.syncDelay === 'string' && doc.attributes.syncDelay
+                  ? doc.attributes.syncDelay
+                  : RUM_SESSIONS_SYNC_DELAY,
+            },
+          }),
+        },
+      ],
+      schemas: {
+        forwardCompatibility: attributesSchemaV3.extends({}, { unknowns: 'ignore' }),
+        create: attributesSchemaV3,
       },
     },
   },

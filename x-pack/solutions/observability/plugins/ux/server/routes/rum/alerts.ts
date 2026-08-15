@@ -23,6 +23,7 @@ import {
   isRumAiAlertTemplate,
   isRumAlertTemplateId,
   isRumAlertVital,
+  isRumSessionAlertTemplate,
   RUM_ALERT_NOTIFICATIONS_SO_ID,
   RUM_ALERT_NOTIFICATIONS_SO_TYPE,
   RUM_ALERT_TAG,
@@ -36,8 +37,10 @@ import {
   isPlaceholderRumAlertEsql,
   RUM_ALERT_AI_SYSTEM_PROMPT,
   rumAlertGroupingFieldsFromQuery,
+  rumAlertTimeField,
   stripFinalWhere,
 } from '../../../common/rum_alert_esql';
+import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { parseRecipientList } from '../../../common/rum_report_schedule';
 import type { RumAlertNotificationsAttributes } from '../../saved_objects/rum_alert_notifications';
 import { createUxServerRoute } from '../create_ux_server_route';
@@ -244,6 +247,17 @@ export const createRumAlertRoute = createUxServerRoute({
       built.query = assertRumAlertEsql(built.query);
       built.groupingFields = rumAlertGroupingFieldsFromQuery(built.query);
     }
+    const usesSessionIndex =
+      isRumSessionAlertTemplate(body.templateId) || rumAlertTimeField(built.query) === 'start_time';
+    if (usesSessionIndex) {
+      const { elasticsearch } = await resources.context.core;
+      const analytics = await getRumAnalyticsStatus(elasticsearch.client.asCurrentUser);
+      if (!analytics.installed) {
+        throw new Error(
+          'Session analytics must be installed before creating a session-level alert'
+        );
+      }
+    }
     const alerting = await requireAlerting(resources);
     const rulesClient = await alerting.getRulesClientWithRequest(resources.request);
     const data: CreateRuleData = {
@@ -267,7 +281,7 @@ export const createRumAlertRoute = createUxServerRoute({
         tags: built.tags,
         builder_type: 'ux_rum',
       },
-      time_field: '@timestamp',
+      time_field: usesSessionIndex ? 'start_time' : '@timestamp',
       schedule: { every: built.every, lookback: built.lookback },
       query: {
         format: 'standalone',
@@ -508,8 +522,14 @@ export const previewRumAlertEsqlRoute = createUxServerRoute({
       return { columns: [], rows: [], wouldFire: false, chartQuery: query };
     }
     const lookback = resources.params.body.lookback || '15m';
-    const chartQuery = injectLookbackAfterFrom(stripFinalWhere(query), lookback);
-    const breachQuery = injectLookbackAfterFrom(query, lookback);
+    const { elasticsearch } = await resources.context.core;
+    const analytics =
+      rumAlertTimeField(query) === 'start_time'
+        ? await getRumAnalyticsStatus(elasticsearch.client.asCurrentUser)
+        : undefined;
+    const watermark = analytics?.watermark ?? undefined;
+    const chartQuery = injectLookbackAfterFrom(stripFinalWhere(query), lookback, { watermark });
+    const breachQuery = injectLookbackAfterFrom(query, lookback, { watermark });
     try {
       const chart = await runRumEsql(resources, `${chartQuery}\n| LIMIT 25`);
       let wouldFire = chart.rows.length > 0;

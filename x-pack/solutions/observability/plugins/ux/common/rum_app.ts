@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { groupUrlPath } from './url_grouping';
+
 export type RumFrustrationKind = 'rage' | 'error' | 'dead';
 
 export interface RumFacetBucket {
@@ -114,6 +116,37 @@ export interface RumPageRow {
   attribution: RumVitalAttribution;
   resources: RumResourceRow[];
 }
+
+/** Collapse page rows with the current URL grouping settings. */
+export const mergeRumPageRows = (
+  pages: RumPageRow[],
+  grouping: { depth?: number; rules?: string[] }
+): RumPageRow[] => {
+  const merged = new Map<string, RumPageRow>();
+  for (const page of pages) {
+    const path = groupUrlPath(page.path, grouping) || page.path;
+    const existing = merged.get(path);
+    if (!existing) {
+      merged.set(path, { ...page, path });
+      continue;
+    }
+    const views = existing.views + page.views;
+    merged.set(path, {
+      ...existing,
+      views,
+      errorCount: existing.errorCount + page.errorCount,
+      p75Lcp: existing.p75Lcp ?? page.p75Lcp,
+      p75Inp: existing.p75Inp ?? page.p75Inp,
+      p75Cls: existing.p75Cls ?? page.p75Cls,
+      avgDurationMs: existing.avgDurationMs ?? page.avgDurationMs,
+      attribution: existing.attribution.lcpElement ? existing.attribution : page.attribution,
+      resources: [...existing.resources, ...page.resources]
+        .sort((a, b) => (b.avgDurationMs ?? 0) - (a.avgDurationMs ?? 0))
+        .slice(0, 8),
+    });
+  }
+  return [...merged.values()].sort((a, b) => b.views - a.views);
+};
 
 /** Country rollup for the Overview visitors panel (ISO code joins EMS / filters). */
 export interface RumCountryRow {

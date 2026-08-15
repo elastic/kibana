@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import {
-  rumBudgetBreachKuery,
+  rumBudgetInvestigatePatch,
   rumBudgetTemplateLabel,
   type RumBudgetItem,
 } from '../../../../common/rum_budgets';
@@ -167,10 +167,7 @@ export function RumBudgetsPanel() {
                   pushRumPath(
                     history,
                     '/session-replay',
-                    sessionsPatch({
-                      pageUrl: item.pagePath || '',
-                      kuery: rumBudgetBreachKuery(item),
-                    })
+                    sessionsPatch(rumBudgetInvestigatePatch(item))
                   )
                 }
               >
@@ -271,7 +268,7 @@ export function RumBudgetsPanel() {
             <p>
               {i18n.translate('xpack.ux.budgets.headingDescription', {
                 defaultMessage:
-                  'Contracts on Core Web Vitals and JS errors, tracked as 30-day occurrence SLOs. Burn-rate alerts fire on sustained regression.',
+                  'Contracts on Core Web Vitals, JS errors, and session outcomes, tracked as 30-day occurrence SLOs. Burn-rate alerts fire on sustained regression.',
               })}
             </p>
           </EuiText>

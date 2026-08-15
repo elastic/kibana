@@ -25,13 +25,16 @@ import {
   UX_OTEL_INDEX_PATTERNS,
 } from './otel_rum';
 import { RUM_BUDGET_AI_PLACEHOLDER_GOOD } from './rum_budget_kql';
+import { RUM_SESSIONS_INDEX_PATTERN } from './rum_sessions';
 
 export const RUM_BUDGET_TAG = 'ux-rum-budget';
 export const RUM_BUDGET_TEMPLATE_TAG_PREFIX = 'ux-rum-budget:';
 export const RUM_BUDGET_INDEX = 'logs-*.otel-*';
 export const RUM_BUDGET_TRACES_INDEX = 'traces-*.otel-*';
 export const RUM_BUDGET_COMBINED_INDEX = UX_OTEL_INDEX_PATTERNS.join(',');
+export const RUM_BUDGET_SESSIONS_INDEX = RUM_SESSIONS_INDEX_PATTERN;
 export const RUM_BUDGET_TIMESTAMP_FIELD = '@timestamp';
+export const RUM_BUDGET_SESSIONS_TIMESTAMP_FIELD = 'start_time';
 export const RUM_BUDGET_GROUP_BY_PATH = OTEL_PAGE_PATH;
 
 export const RUM_BUDGET_TEMPLATE_IDS = [
@@ -43,9 +46,19 @@ export const RUM_BUDGET_TEMPLATE_IDS = [
   'page_load',
   'error_rate',
   'frustration',
+  'session_error_free',
+  'session_rage_free',
+  'session_bounce',
   'ai',
 ] as const;
 export type RumBudgetTemplateId = (typeof RUM_BUDGET_TEMPLATE_IDS)[number];
+
+export const RUM_SESSION_BUDGET_TEMPLATE_IDS = [
+  'session_error_free',
+  'session_rage_free',
+  'session_bounce',
+] as const;
+export type RumSessionBudgetTemplateId = (typeof RUM_SESSION_BUDGET_TEMPLATE_IDS)[number];
 
 export const RUM_BUDGET_VITAL_IDS = ['lcp', 'inp', 'cls', 'ttfb', 'fcp'] as const;
 export type RumBudgetVitalId = (typeof RUM_BUDGET_VITAL_IDS)[number];
@@ -60,6 +73,11 @@ export const isRumBudgetVitalTemplate = (
 
 export const isRumBudgetAiTemplate = (templateId: RumBudgetTemplateId): boolean =>
   templateId === 'ai';
+
+export const isRumSessionBudgetTemplate = (
+  templateId: RumBudgetTemplateId
+): templateId is RumSessionBudgetTemplateId =>
+  (RUM_SESSION_BUDGET_TEMPLATE_IDS as readonly string[]).includes(templateId);
 
 export const rumBudgetHasThreshold = (templateId: RumBudgetTemplateId): boolean =>
   isRumBudgetVitalTemplate(templateId) || templateId === 'page_load';
@@ -175,6 +193,9 @@ const DEFAULT_THRESHOLDS: Record<RumBudgetTemplateId, number> = {
   page_load: 3000,
   error_rate: 0,
   frustration: 0,
+  session_error_free: 0,
+  session_rage_free: 0,
+  session_bounce: 0,
   ai: 0,
 };
 
@@ -227,6 +248,18 @@ export const rumBudgetTemplateLabel = (templateId: RumBudgetTemplateId): string 
       return i18n.translate('xpack.ux.budgets.template.frustrationLabel', {
         defaultMessage: 'Frustration budget',
       });
+    case 'session_error_free':
+      return i18n.translate('xpack.ux.budgets.template.sessionErrorFreeLabel', {
+        defaultMessage: 'Error-free sessions',
+      });
+    case 'session_rage_free':
+      return i18n.translate('xpack.ux.budgets.template.sessionRageFreeLabel', {
+        defaultMessage: 'Rage-free sessions',
+      });
+    case 'session_bounce':
+      return i18n.translate('xpack.ux.budgets.template.sessionBounceLabel', {
+        defaultMessage: 'Bounce-free sessions',
+      });
     case 'ai':
       return i18n.translate('xpack.ux.budgets.template.aiLabel', {
         defaultMessage: 'Describe with AI',
@@ -268,6 +301,18 @@ export const rumBudgetTemplateDescription = (templateId: RumBudgetTemplateId): s
       return i18n.translate('xpack.ux.budgets.template.frustrationDescription', {
         defaultMessage: 'Page views without rage, dead, or error clicks stay above the target.',
       });
+    case 'session_error_free':
+      return i18n.translate('xpack.ux.budgets.template.sessionErrorFreeDescription', {
+        defaultMessage: 'Sessions with no JS exception stay above the target.',
+      });
+    case 'session_rage_free':
+      return i18n.translate('xpack.ux.budgets.template.sessionRageFreeDescription', {
+        defaultMessage: 'Sessions with no rage or dead click stay above the target.',
+      });
+    case 'session_bounce':
+      return i18n.translate('xpack.ux.budgets.template.sessionBounceDescription', {
+        defaultMessage: 'Sessions that view more than one page stay above the target.',
+      });
     case 'ai':
       return i18n.translate('xpack.ux.budgets.template.aiDescription', {
         defaultMessage: 'Type the contract in plain language. AI writes the KQL SLO.',
@@ -292,13 +337,20 @@ const pageClause = (pageUrl: string): string => {
   return `${field}: ${kqlQuote(pageUrl)}`;
 };
 
-const scopeClauses = (scope: RumBudgetScope, filters: RumBudgetFilters): string[] => {
+const scopeClauses = (
+  scope: RumBudgetScope,
+  filters: RumBudgetFilters,
+  options?: { session?: boolean }
+): string[] => {
   const clauses: string[] = [];
   if (filters.serviceName) {
-    clauses.push(`${OTEL_SERVICE_NAME}: ${kqlQuote(filters.serviceName)}`);
+    const field = options?.session ? 'service.name' : OTEL_SERVICE_NAME;
+    clauses.push(`${field}: ${kqlQuote(filters.serviceName)}`);
   }
   if (scope === 'page' && filters.pageUrl) {
-    clauses.push(pageClause(filters.pageUrl));
+    clauses.push(
+      options?.session ? `entry_page: ${kqlQuote(filters.pageUrl)}` : pageClause(filters.pageUrl)
+    );
   }
   return clauses;
 };
@@ -342,7 +394,7 @@ export const parseRumBudgetThreshold = (
 
 export const rumBudgetPageFromFilter = (filter: string): string | undefined => {
   const match = filter.match(
-    /attributes\.(?:page\.url(?:\.path)?|url\.path):\s*"((?:\\.|[^"\\])*)"/
+    /(?:attributes\.(?:page\.url(?:\.path)?|url\.path)|entry_page):\s*"((?:\\.|[^"\\])*)"/
   );
   return match ? match[1].replace(/\\"/g, '"').replace(/\\\\/g, '\\') : undefined;
 };
@@ -459,6 +511,9 @@ const rumBudgetIndex = (params: RumBudgetParams): string => {
   if (isRumBudgetAiTemplate(params.templateId) && params.index?.trim()) {
     return params.index.trim();
   }
+  if (isRumSessionBudgetTemplate(params.templateId)) {
+    return RUM_BUDGET_SESSIONS_INDEX;
+  }
   if (params.templateId === 'page_load') {
     return RUM_BUDGET_TRACES_INDEX;
   }
@@ -496,6 +551,24 @@ const rumBudgetSloDescription = (
       values: { percent },
     });
   }
+  if (params.templateId === 'session_error_free') {
+    return i18n.translate('xpack.ux.budgets.slo.sessionErrorFreeDescription', {
+      defaultMessage: '{percent}% of sessions have no JS exception over 30 days.',
+      values: { percent },
+    });
+  }
+  if (params.templateId === 'session_rage_free') {
+    return i18n.translate('xpack.ux.budgets.slo.sessionRageFreeDescription', {
+      defaultMessage: '{percent}% of sessions have no rage or dead click over 30 days.',
+      values: { percent },
+    });
+  }
+  if (params.templateId === 'session_bounce') {
+    return i18n.translate('xpack.ux.budgets.slo.sessionBounceDescription', {
+      defaultMessage: '{percent}% of sessions view more than one page over 30 days.',
+      values: { percent },
+    });
+  }
   if (params.templateId === 'ai') {
     return (
       params.prompt?.trim().slice(0, 300) ||
@@ -518,12 +591,23 @@ export const buildRumBudgetSlo = (params: RumBudgetParams): RumBudgetBuild => {
       ? params.target
       : defaults.target;
   const tags = rumBudgetTags(params.templateId);
-  const extras = scopeClauses(params.scope, params.filters);
-  const groupBy = params.scope === 'groupByPage' ? [RUM_BUDGET_GROUP_BY_PATH] : undefined;
+  const session = isRumSessionBudgetTemplate(params.templateId);
+  const extras = scopeClauses(params.scope, params.filters, { session });
+  const groupBy =
+    params.scope === 'groupByPage' && !session ? [RUM_BUDGET_GROUP_BY_PATH] : undefined;
 
   let filter: string;
   let good: string;
-  if (isRumBudgetVitalTemplate(params.templateId)) {
+  if (session) {
+    filter = andJoin(extras) || 'session.id: *';
+    if (params.templateId === 'session_error_free') {
+      good = 'error_count: 0';
+    } else if (params.templateId === 'session_rage_free') {
+      good = 'rage_click_count: 0 and dead_click_count: 0';
+    } else {
+      good = 'page_count > 1';
+    }
+  } else if (isRumBudgetVitalTemplate(params.templateId)) {
     filter = andJoin([
       `${OTEL_EVENT_NAME}: ${kqlQuote(OTEL_EVENT_BROWSER_WEB_VITAL)}`,
       `${OTEL_WEB_VITAL_NAME}: ${kqlQuote(params.templateId)}`,
@@ -570,7 +654,9 @@ export const buildRumBudgetSlo = (params: RumBudgetParams): RumBudgetBuild => {
         type: 'sli.kql.custom',
         params: {
           index,
-          timestampField: RUM_BUDGET_TIMESTAMP_FIELD,
+          timestampField: session
+            ? RUM_BUDGET_SESSIONS_TIMESTAMP_FIELD
+            : RUM_BUDGET_TIMESTAMP_FIELD,
           filter,
           good,
           total: '',
@@ -625,10 +711,36 @@ export const rumBudgetBurnRateWindows = (): RumBudgetBurnRateWindow[] => [
   },
 ];
 
+export const rumBudgetInvestigatePatch = (
+  item: Pick<RumBudgetItem, 'templateId'> &
+    Partial<Pick<RumBudgetItem, 'pagePath' | 'filter' | 'good' | 'threshold'>>
+): { pageUrl: string; frustration: string; kuery: string } => {
+  const pageUrl = item.pagePath ?? '';
+  if (item.templateId === 'session_error_free') {
+    return { pageUrl, frustration: 'error', kuery: '' };
+  }
+  if (item.templateId === 'session_rage_free') {
+    return { pageUrl, frustration: 'rage', kuery: '' };
+  }
+  if (item.templateId === 'session_bounce') {
+    return { pageUrl, frustration: '', kuery: '' };
+  }
+  return { pageUrl, frustration: '', kuery: rumBudgetBreachKuery(item) };
+};
+
 export const rumBudgetBreachKuery = (
-  item: Pick<RumBudgetItem, 'templateId' | 'threshold'> &
-    Partial<Pick<RumBudgetItem, 'filter' | 'good'>>
+  item: Pick<RumBudgetItem, 'templateId'> &
+    Partial<Pick<RumBudgetItem, 'threshold' | 'filter' | 'good'>>
 ): string => {
+  if (item.templateId === 'session_error_free') {
+    return 'error_count > 0';
+  }
+  if (item.templateId === 'session_rage_free') {
+    return 'rage_click_count > 0 or dead_click_count > 0';
+  }
+  if (item.templateId === 'session_bounce') {
+    return 'page_count: 1';
+  }
   if (item.templateId === 'ai') {
     return andJoin([item.filter ?? '', item.good ? `not (${item.good})` : '']);
   }

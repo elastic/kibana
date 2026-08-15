@@ -33,6 +33,7 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
+import { userGroupKey } from '../../../common/rum_report';
 import type {
   RumSessionSummary,
   SessionListFacets,
@@ -58,7 +59,6 @@ import {
   formatDurationMs,
   formatRelativeTime,
   formatTime,
-  userDisplayName,
 } from './session_ui';
 
 const EMPTY_FACETS: SessionListFacets = {
@@ -272,6 +272,8 @@ export function SessionReplayPanel() {
       breakpoint,
       connection,
       device,
+      includeRaw,
+      analyticsMode,
     },
   } = useLegacyUrlParams();
 
@@ -360,6 +362,8 @@ export function SessionReplayPanel() {
         breakpoint,
         connection,
         device,
+        includeRaw: includeRaw === 'true',
+        analyticsMode,
       });
       setSessions(result.sessions);
       setTotal(result.total);
@@ -403,6 +407,8 @@ export function SessionReplayPanel() {
     breakpoint,
     connection,
     device,
+    includeRaw,
+    analyticsMode,
   ]);
 
   useEffect(() => {
@@ -480,7 +486,7 @@ export function SessionReplayPanel() {
       name: i18n.translate('xpack.ux.sessions.table.user', { defaultMessage: 'User' }),
       width: '210px',
       render: (_: RumSessionSummary['user'], item) => {
-        const userKey = userDisplayName(item.user);
+        const userKey = userGroupKey(item.user);
         return (
           <UserCell
             user={item.user}
@@ -623,6 +629,8 @@ export function SessionReplayPanel() {
     Boolean(sessionIds) ||
     Boolean(frustration) ||
     Boolean(urlUser) ||
+    Boolean(urlClick) ||
+    Boolean(urlAccount) ||
     Boolean(urlBrowser) ||
     Boolean(urlOs) ||
     Boolean(urlLocation) ||
@@ -649,6 +657,9 @@ export function SessionReplayPanel() {
         os: '',
         location: '',
         user: '',
+        click: '',
+        account: '',
+        sessionQuery: '',
         includeBots: '',
       }),
     });
@@ -745,7 +756,7 @@ export function SessionReplayPanel() {
           <p>
             {i18n.translate('xpack.ux.sessions.intro', {
               defaultMessage:
-                'Each row is a browser visit. Find replays with path:/checkout, click:#buy, error:TypeError, user:ada, or account:acme. Journey shows page path changes (A → B → C), or in-page activity when the URL does not change.',
+                'Each row is a browser visit. Find a person with an email or user id, or use path:/checkout, click:#buy, error:TypeError, user:ada, or account:acme. Journey shows page path changes (A → B → C), or in-page activity when the URL does not change.',
             })}
           </p>
         </EuiText>
@@ -757,7 +768,7 @@ export function SessionReplayPanel() {
               fullWidth
               placeholder={i18n.translate('xpack.ux.sessions.searchPlaceholder', {
                 defaultMessage:
-                  'path:/checkout  click:#buy  error:TypeError  user:ada  — or user / page / session id',
+                  'ada@elastic.co  path:/checkout  click:#buy  error:TypeError  — or user / page / session id',
               })}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -896,6 +907,37 @@ export function SessionReplayPanel() {
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
+
+        {!loading && !error && total === 1 && sessions[0]?.hasReplay && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="success"
+              iconType="play"
+              title={i18n.translate('xpack.ux.sessions.singleReplayTitle', {
+                defaultMessage: 'One matching session has a replay',
+              })}
+            >
+              <EuiButtonEmpty
+                size="s"
+                iconType="play"
+                data-test-subj="uxSessionOpenOnlyReplay"
+                onClick={() => {
+                  const sessionId = sessions[0]?.sessionId;
+                  if (sessionId) {
+                    openPlayer(sessionId);
+                  }
+                }}
+              >
+                {i18n.translate('xpack.ux.sessions.openOnlyReplayButtonLabel', {
+                  defaultMessage: 'Open replay',
+                })}
+              </EuiButtonEmpty>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
 
         {error ? (
           <EuiEmptyPrompt

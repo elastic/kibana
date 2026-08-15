@@ -52,6 +52,8 @@ export interface FetchSessionsParams {
   breakpoint?: string;
   connection?: string;
   device?: string;
+  includeRaw?: boolean;
+  analyticsMode?: string;
 }
 
 export const fetchSessionReplaySessions = async ({
@@ -85,6 +87,8 @@ export const fetchSessionReplaySessions = async ({
   breakpoint,
   connection,
   device,
+  includeRaw,
+  analyticsMode,
 }: FetchSessionsParams): Promise<SessionListResponse> => {
   return http.get<SessionListResponse>('/internal/ux/session_replay/sessions', {
     query: {
@@ -117,6 +121,8 @@ export const fetchSessionReplaySessions = async ({
       ...(breakpoint ? { breakpoint } : {}),
       ...(connection ? { connection } : {}),
       ...(device ? { device } : {}),
+      ...(includeRaw ? { includeRaw: 'true' } : {}),
+      ...(analyticsMode ? { analyticsMode } : {}),
     },
   });
 };
@@ -182,6 +188,8 @@ export const fetchSessionFunnel = async ({
   serviceName,
   steps,
   kuery,
+  includeRaw,
+  analyticsMode,
 }: {
   http: HttpStart;
   rangeFrom: string;
@@ -189,6 +197,8 @@ export const fetchSessionFunnel = async ({
   serviceName?: string;
   steps: FunnelStepDef[];
   kuery?: string;
+  includeRaw?: boolean;
+  analyticsMode?: string;
 }): Promise<SessionFunnelResponse> => {
   return http.post<SessionFunnelResponse>('/internal/ux/session_replay/funnel', {
     body: JSON.stringify({
@@ -197,6 +207,8 @@ export const fetchSessionFunnel = async ({
       serviceName: serviceName || undefined,
       steps,
       ...(kuery ? { kuery } : {}),
+      ...(includeRaw ? { includeRaw: true } : {}),
+      ...(analyticsMode ? { analyticsMode } : {}),
     }),
   });
 };
@@ -207,12 +219,16 @@ export const fetchSessionPatterns = async ({
   rangeTo,
   serviceName,
   kuery,
+  includeRaw,
+  analyticsMode,
 }: {
   http: HttpStart;
   rangeFrom: string;
   rangeTo: string;
   serviceName?: string;
   kuery?: string;
+  includeRaw?: boolean;
+  analyticsMode?: string;
 }): Promise<SessionPatternsResponse> => {
   return http.get<SessionPatternsResponse>('/internal/ux/session_replay/patterns', {
     query: {
@@ -220,6 +236,8 @@ export const fetchSessionPatterns = async ({
       rangeTo,
       ...(serviceName ? { serviceName } : {}),
       ...(kuery ? { kuery } : {}),
+      ...(includeRaw ? { includeRaw: 'true' } : {}),
+      ...(analyticsMode ? { analyticsMode } : {}),
     },
   });
 };

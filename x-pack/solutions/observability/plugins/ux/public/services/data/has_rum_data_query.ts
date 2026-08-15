@@ -9,7 +9,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
-import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { OTEL_SERVICE_NAME } from '../../../common/otel_rum';
 import { rangeQuery } from './range_query';
 import { rumPageLoadFilter } from './rum_otel_filters';
@@ -37,12 +36,11 @@ export function formatHasRumResult<T>(
   indices?: string
 ) {
   if (!esResult) return esResult;
-  const classicBucket = esResult.aggregations?.services?.mostTraffic?.buckets?.[0]?.key;
   const otelBucket = esResult.aggregations?.otelServices?.mostTraffic?.buckets?.[0]?.key;
   return {
     indices,
     hasData: esResult.hits.total.value > 0,
-    serviceName: classicBucket ?? otelBucket,
+    serviceName: otelBucket,
   };
 }
 
@@ -82,17 +80,6 @@ export function hasRumDataWithServiceNameQuery({
   return {
     ...hasRumDataBaseQuery({ dataTiers }),
     aggs: {
-      services: {
-        filter: rangeQuery(start, end)[0],
-        aggs: {
-          mostTraffic: {
-            terms: {
-              field: SERVICE_NAME,
-              size: 1,
-            },
-          },
-        },
-      },
       otelServices: {
         filter: rangeQuery(start, end)[0],
         aggs: {

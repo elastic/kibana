@@ -18,8 +18,10 @@ import {
   IGNORE_URLS_MAX_LENGTH,
   URL_GROUPING_RULES_MAX_LENGTH,
   MASK_TEXT_SELECTOR_MAX_LENGTH,
+  SYNC_DELAY_MAX_LENGTH,
   type SessionReplaySettings,
 } from '../../../common/session_replay_settings';
+import { applyRumAnalyticsSettings, extractEsErrorMessage } from '../../transforms/rum_sessions';
 
 const isNotFound = (error: unknown): boolean =>
   typeof error === 'object' &&
@@ -84,6 +86,7 @@ const settingsBody = t.intersection([
     urlGroupingRules: boundedString(URL_GROUPING_RULES_MAX_LENGTH),
     maskTextSelector: boundedString(MASK_TEXT_SELECTOR_MAX_LENGTH),
     captureGraphql: t.boolean,
+    syncDelay: boundedString(SYNC_DELAY_MAX_LENGTH),
   }),
 ]);
 
@@ -92,7 +95,7 @@ export const updateSessionReplaySettingsRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ body: settingsBody }),
-  handler: async ({ core, params }): Promise<SessionReplaySettings> => {
+  handler: async ({ context, core, logger, params }): Promise<SessionReplaySettings> => {
     const coreStart = await core.start();
     const repo = coreStart.savedObjects.createInternalRepository();
     const attributes = normalizeSessionReplaySettings(params.body);
@@ -104,6 +107,24 @@ export const updateSessionReplaySettingsRoute = createUxServerRoute({
         overwrite: true,
       }
     );
-    return normalizeSessionReplaySettings({ ...DEFAULT_SESSION_REPLAY_SETTINGS, ...so.attributes });
+    const saved = normalizeSessionReplaySettings({
+      ...DEFAULT_SESSION_REPLAY_SETTINGS,
+      ...so.attributes,
+    });
+    try {
+      const { elasticsearch } = await context.core;
+      await applyRumAnalyticsSettings({
+        client: elasticsearch.client.asCurrentUser,
+        logger,
+        syncDelay: saved.syncDelay,
+      });
+    } catch (error) {
+      logger.warn(
+        `Saved session replay settings but could not update transforms: ${extractEsErrorMessage(
+          error
+        )}`
+      );
+    }
+    return saved;
   },
 });

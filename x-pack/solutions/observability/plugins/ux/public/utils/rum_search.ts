@@ -32,6 +32,8 @@ export interface RumFilterPatch {
   compare?: string;
   includePii?: string;
   goalId?: string;
+  includeRaw?: string;
+  analyticsMode?: string;
 }
 
 /** Merge filter params into the current search string. Empty values remove the key. */

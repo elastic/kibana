@@ -36,6 +36,12 @@ describe('mergeRumSearch', () => {
     );
   });
 
+  it('stores session analytics flags', () => {
+    expect(mergeRumSearch('?rangeFrom=now-24h', { includeRaw: 'true', analyticsMode: 'raw' })).toBe(
+      'rangeFrom=now-24h&includeRaw=true&analyticsMode=raw'
+    );
+  });
+
   it('stores session find params', () => {
     expect(
       mergeRumSearch('?rangeFrom=now-24h', {

@@ -39,21 +39,12 @@ export const OTEL_EXCEPTION_TYPE = 'attributes.exception.type';
 export const OTEL_EXCEPTION_MESSAGE = 'attributes.exception.message';
 export const OTEL_EXCEPTION_GROUPING = 'attributes.exception.type.keyword'; // may fall back to type field
 
-/** Always union the APM data view with EDOT Browser OTel streams. */
+/** EDOT Browser RUM lives on OTel traces + logs. Do not union the APM data view. */
 export const UX_OTEL_INDEX_PATTERNS = ['traces-*.otel-*', 'logs-*.otel-*'] as const;
 
 export const RUM_PAGE_LOAD_KQL =
   '(transaction.type: page-load and processor.event: transaction) or name: documentLoad';
 
-export function uxSearchIndex(dataViewTitle?: string): string {
-  const parts = (dataViewTitle ?? '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s && !s.startsWith('remote_cluster:'));
-  for (const pattern of UX_OTEL_INDEX_PATTERNS) {
-    if (!parts.includes(pattern)) {
-      parts.push(pattern);
-    }
-  }
-  return parts.join(',');
+export function uxSearchIndex(_dataViewTitle?: string): string {
+  return UX_OTEL_INDEX_PATTERNS.join(',');
 }

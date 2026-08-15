@@ -38,6 +38,7 @@ import {
   buildRumAlertEsql,
   defaultAlertName,
   isRumAiAlertTemplate,
+  isRumSessionAlertTemplate,
   isRumTrafficAlertTemplate,
   RUM_ALERT_TEMPLATE_IDS,
   rumAlertDefaults,
@@ -55,6 +56,7 @@ import {
   generateRumAlertEsql,
   upsertRumAlertNotifications,
 } from '../../../services/rest/rum_alerts_api';
+import { fetchRumAnalyticsStatus } from '../../../services/rest/rum_analytics_api';
 import { fetchRumEmailConnectors } from '../../../services/rest/rum_schedule_api';
 import { AlertEsqlPreview } from './alert_esql_preview';
 import type { RumAlertDraft } from './alert_flyout_context';
@@ -97,6 +99,7 @@ export function CreateAlertFlyout({
   const [aiQuery, setAiQuery] = useState('');
   const [generating, setGenerating] = useState(false);
   const [aiAvailable, setAiAvailable] = useState(true);
+  const [sessionAnalyticsReady, setSessionAnalyticsReady] = useState(false);
   const [connectorId, setConnectorId] = useState('');
   const [recipients, setRecipients] = useState('');
   const [connectors, setConnectors] = useState<Array<{ id: string; name: string }>>([]);
@@ -149,18 +152,24 @@ export function CreateAlertFlyout({
       draft.templateId === templateId && draft.threshold != null ? draft.threshold : next.threshold
     );
     setMinSamples(next.minSamples);
-    setGroupByPage(!isRumTrafficAlertTemplate(templateId) && !isRumAiAlertTemplate(templateId));
+    setGroupByPage(
+      !isRumTrafficAlertTemplate(templateId) &&
+        !isRumAiAlertTemplate(templateId) &&
+        !isRumSessionAlertTemplate(templateId)
+    );
   }, [draft.templateId, draft.threshold, templateId]);
 
   useEffect(() => {
     void (async () => {
       try {
-        const [list, status] = await Promise.all([
+        const [list, status, analytics] = await Promise.all([
           fetchRumEmailConnectors(http),
           fetchRumAlertStatus(http),
+          fetchRumAnalyticsStatus({ http }).catch(() => null),
         ]);
         setConnectors(list);
         setAiAvailable(status.aiAvailable !== false);
+        setSessionAnalyticsReady(Boolean(analytics?.installed && analytics.watermark));
         if (status.connectorId) {
           setConnectorId(status.connectorId);
         } else if (list[0]) {
@@ -171,6 +180,7 @@ export function CreateAlertFlyout({
         }
       } catch {
         setConnectors([]);
+        setSessionAnalyticsReady(false);
       }
     })();
   }, [http]);
@@ -294,6 +304,26 @@ export function CreateAlertFlyout({
               </h3>
             </EuiTitle>
             <EuiSpacer size="m" />
+            {!sessionAnalyticsReady && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="primary"
+                  size="s"
+                  title={i18n.translate('xpack.ux.alerts.create.sessionAnalyticsTitle', {
+                    defaultMessage: 'Session-level alerts need session analytics',
+                  })}
+                >
+                  <p>
+                    {i18n.translate('xpack.ux.alerts.create.sessionAnalyticsDescription', {
+                      defaultMessage:
+                        'Enable session analytics in Capture settings so session error, frustration, and traffic alerts can read the session index.',
+                    })}
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
             <div
               css={css`
                 display: grid;
@@ -311,6 +341,7 @@ export function CreateAlertFlyout({
                   name="ux-alert-template"
                   label={rumAlertTemplateLabel(id)}
                   checked={templateId === id}
+                  disabled={isRumSessionAlertTemplate(id) && !sessionAnalyticsReady}
                   onChange={() => setTemplateId(id)}
                 >
                   <EuiText size="xs" color="subdued">
@@ -450,7 +481,13 @@ export function CreateAlertFlyout({
                   data-test-subj="uxAlertThreshold"
                   value={threshold}
                   onChange={(event) => setThreshold(Number(event.target.value))}
-                  step={templateId === 'error_rate' || vital === 'cls' ? 0.01 : 1}
+                  step={
+                    templateId === 'error_rate' ||
+                    templateId === 'session_error_rate' ||
+                    vital === 'cls'
+                      ? 0.01
+                      : 1
+                  }
                 />
               </EuiFormRow>
             )}
@@ -484,18 +521,21 @@ export function CreateAlertFlyout({
                 </EuiFormRow>
               </>
             )}
-            {templateId !== 'error_spike' && !isRumTrafficAlertTemplate(templateId) && !isAi && (
-              <EuiFormRow>
-                <EuiSwitch
-                  data-test-subj="uxAlertGroupByPage"
-                  label={i18n.translate('xpack.ux.alerts.create.groupByPageLabel', {
-                    defaultMessage: 'Group by page',
-                  })}
-                  checked={groupByPage}
-                  onChange={(event) => setGroupByPage(event.target.checked)}
-                />
-              </EuiFormRow>
-            )}
+            {templateId !== 'error_spike' &&
+              !isRumTrafficAlertTemplate(templateId) &&
+              !isRumSessionAlertTemplate(templateId) &&
+              !isAi && (
+                <EuiFormRow>
+                  <EuiSwitch
+                    data-test-subj="uxAlertGroupByPage"
+                    label={i18n.translate('xpack.ux.alerts.create.groupByPageLabel', {
+                      defaultMessage: 'Group by page',
+                    })}
+                    checked={groupByPage}
+                    onChange={(event) => setGroupByPage(event.target.checked)}
+                  />
+                </EuiFormRow>
+              )}
             <EuiFormRow
               fullWidth
               label={i18n.translate('xpack.ux.alerts.create.esqlLabel', {
@@ -589,6 +629,7 @@ export function CreateAlertFlyout({
               data-test-subj="uxAlertSave"
               fill
               isLoading={saving}
+              disabled={isRumSessionAlertTemplate(templateId) && !sessionAnalyticsReady}
               onClick={() => void save()}
             >
               {i18n.translate('xpack.ux.alerts.create.save', { defaultMessage: 'Create alert' })}

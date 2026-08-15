@@ -34,7 +34,12 @@ describe('normalizeRumBudgetIndex', () => {
   });
 
   it('rejects other patterns', () => {
-    expect(() => normalizeRumBudgetIndex('.kibana-*')).toThrow(/logs-\*\.otel-\*/);
+    expect(() => normalizeRumBudgetIndex('.kibana-*')).toThrow(/ux-rum-sessions-\*/);
+  });
+
+  it('accepts the session index', () => {
+    expect(normalizeRumBudgetIndex('ux-rum-sessions-2')).toBe('ux-rum-sessions-*');
+    expect(normalizeRumBudgetIndex('*:ux-rum-sessions-*')).toBe('ux-rum-sessions-*');
   });
 });
 

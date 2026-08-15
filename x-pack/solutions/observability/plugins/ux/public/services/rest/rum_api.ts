@@ -36,6 +36,7 @@ export interface RumQueryParams {
   connection?: string;
   device?: string;
   errorGroup?: string;
+  analyticsMode?: string;
 }
 
 const rumQuery = ({
@@ -54,6 +55,7 @@ const rumQuery = ({
   connection,
   device,
   errorGroup,
+  analyticsMode,
 }: Omit<RumQueryParams, 'http'>) => ({
   rangeFrom,
   rangeTo,
@@ -70,6 +72,7 @@ const rumQuery = ({
   ...(connection ? { connection } : {}),
   ...(device ? { device } : {}),
   ...(errorGroup ? { errorGroup } : {}),
+  ...(analyticsMode ? { analyticsMode } : {}),
 });
 
 export const fetchRumFilters = async ({

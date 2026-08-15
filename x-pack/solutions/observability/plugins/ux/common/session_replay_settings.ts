@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isValidEsTimeValue, RUM_SESSIONS_SYNC_DELAY } from './rum_sessions';
 import { parseGroupingRules, parseIgnoreUrls, type UrlGroupingConfig } from './url_grouping';
 
 /**
@@ -22,6 +23,8 @@ export interface SessionReplaySettings {
   urlGroupingRules: string;
   maskTextSelector: string;
   captureGraphql: boolean;
+  /** Elasticsearch time value applied to session and daily transforms (`5m`, `30s`, `1h`). */
+  syncDelay: string;
 }
 
 export const SESSION_REPLAY_SETTINGS_SO_TYPE = 'ux-session-replay-settings';
@@ -38,6 +41,7 @@ export const URL_GROUPING_RULES_MAX_LENGTH = 2048;
 export const MASK_TEXT_SELECTOR_MAX_LENGTH = 512;
 export const URL_GROUPING_DEPTH_MIN = 1;
 export const URL_GROUPING_DEPTH_MAX = 8;
+export const SYNC_DELAY_MAX_LENGTH = 8;
 
 export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   enabled: false,
@@ -49,6 +53,7 @@ export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   urlGroupingRules: '',
   maskTextSelector: '',
   captureGraphql: false,
+  syncDelay: RUM_SESSIONS_SYNC_DELAY,
 };
 
 const clampDepth = (value: unknown): number => {
@@ -74,6 +79,9 @@ export const normalizeSessionReplaySettings = (
   urlGroupingRules: String(input.urlGroupingRules ?? '').slice(0, URL_GROUPING_RULES_MAX_LENGTH),
   maskTextSelector: String(input.maskTextSelector ?? '').slice(0, MASK_TEXT_SELECTOR_MAX_LENGTH),
   captureGraphql: Boolean(input.captureGraphql),
+  syncDelay: isValidEsTimeValue(input.syncDelay)
+    ? input.syncDelay
+    : DEFAULT_SESSION_REPLAY_SETTINGS.syncDelay,
 });
 
 export const groupingFromSettings = (settings: SessionReplaySettings): UrlGroupingConfig => ({

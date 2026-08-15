@@ -36,6 +36,7 @@ export const rumListQueryCodec = t.partial({
   breakpoint: boundedString(32),
   connection: boundedString(64),
   device: boundedString(64),
+  analyticsMode: boundedString(16),
 });
 
 export const luceneEscape = (raw: string): string =>

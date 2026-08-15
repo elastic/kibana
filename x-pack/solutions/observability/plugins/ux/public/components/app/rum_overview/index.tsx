@@ -76,6 +76,7 @@ export function RumOverviewV2() {
       breakpoint,
       connection,
       device,
+      analyticsMode,
     },
   } = useLegacyUrlParams();
 
@@ -105,6 +106,7 @@ export function RumOverviewV2() {
         breakpoint,
         connection,
         device,
+        analyticsMode,
       });
       setData(result);
     } catch (err) {
@@ -129,6 +131,7 @@ export function RumOverviewV2() {
     breakpoint,
     connection,
     device,
+    analyticsMode,
   ]);
 
   useEffect(() => {

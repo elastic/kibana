@@ -36,14 +36,25 @@ import {
   URL_GROUPING_DEPTH_MAX,
   URL_GROUPING_DEPTH_MIN,
   URL_GROUPING_RULES_MAX_LENGTH,
+  SYNC_DELAY_MAX_LENGTH,
   normalizeSessionReplaySettings,
   type SessionReplaySettings,
 } from '../../../common/session_replay_settings';
+import { isValidEsTimeValue } from '../../../common/rum_sessions';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import {
   fetchSessionReplaySettings,
   updateSessionReplaySettings,
 } from '../../services/rest/session_replay_api';
+import {
+  fetchRumAnalyticsStatus,
+  installRumSessionsTransform,
+} from '../../services/rest/rum_analytics_api';
+import {
+  RUM_SESSIONS_SYNC_DELAY,
+  rumAnalyticsHealth,
+  type RumAnalyticsStatus,
+} from '../../../common/rum_sessions';
 
 export function SessionReplaySettingsPage() {
   const { http, notifications, observabilityShared } = useKibanaServices();
@@ -78,6 +89,8 @@ export function SessionReplaySettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [analytics, setAnalytics] = useState<RumAnalyticsStatus | null>(null);
+  const [installing, setInstalling] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,9 +98,13 @@ export function SessionReplaySettingsPage() {
       setLoading(true);
       setLoadError(null);
       try {
-        const result = await fetchSessionReplaySettings({ http });
+        const [result, status] = await Promise.all([
+          fetchSessionReplaySettings({ http }),
+          fetchRumAnalyticsStatus({ http }).catch(() => null),
+        ]);
         if (!cancelled) {
           setSettings(result);
+          setAnalytics(status);
         }
       } catch (err) {
         if (!cancelled) {
@@ -112,10 +129,20 @@ export function SessionReplaySettingsPage() {
         settings: normalizeSessionReplaySettings(settings),
       });
       setSettings(saved);
+      const nextAnalytics = await fetchRumAnalyticsStatus({ http }).catch(() => analytics);
+      if (nextAnalytics) {
+        setAnalytics(nextAnalytics);
+      }
       notifications.toasts.addSuccess(
-        i18n.translate('xpack.ux.sessionReplaySettings.saved', {
-          defaultMessage: 'Session replay settings saved. Reload Kibana pages to apply.',
-        })
+        nextAnalytics && rumAnalyticsHealth(nextAnalytics) !== 'missing'
+          ? i18n.translate('xpack.ux.sessionReplaySettings.savedWithTransforms', {
+              defaultMessage:
+                'Settings saved. Session analytics transforms now use a {syncDelay} delay. Reload Kibana pages to apply capture changes.',
+              values: { syncDelay: saved.syncDelay },
+            })
+          : i18n.translate('xpack.ux.sessionReplaySettings.saved', {
+              defaultMessage: 'Session replay settings saved. Reload Kibana pages to apply.',
+            })
       );
     } catch (err) {
       notifications.toasts.addDanger({
@@ -127,9 +154,40 @@ export function SessionReplaySettingsPage() {
     } finally {
       setSaving(false);
     }
+  }, [analytics, http, notifications, settings]);
+
+  const onInstallAnalytics = useCallback(async () => {
+    setInstalling(true);
+    try {
+      const saved = await updateSessionReplaySettings({
+        http,
+        settings: normalizeSessionReplaySettings(settings),
+      });
+      setSettings(saved);
+      const next = await installRumSessionsTransform({ http });
+      setAnalytics(next);
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.ux.sessionReplaySettings.analyticsInstalled', {
+          defaultMessage:
+            'Session analytics transform installed. First results appear after a {syncDelay} delay.',
+          values: { syncDelay: next.syncDelay },
+        })
+      );
+    } catch (err) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.ux.sessionReplaySettings.analyticsInstallError', {
+          defaultMessage: 'Could not install session analytics',
+        }),
+        text: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setInstalling(false);
+    }
   }, [http, notifications, settings]);
 
   const endpointInvalid = settings.enabled && settings.otlpEndpoint.trim().length === 0;
+  const syncDelayInvalid = !isValidEsTimeValue(settings.syncDelay);
+  const analyticsHealth = analytics ? rumAnalyticsHealth(analytics) : 'missing';
 
   return (
     <div data-test-subj="uxSessionReplaySettingsPage">
@@ -372,7 +430,7 @@ export function SessionReplaySettingsPage() {
                     fill
                     onClick={onSave}
                     isLoading={saving}
-                    isDisabled={endpointInvalid}
+                    isDisabled={endpointInvalid || syncDelayInvalid}
                     data-test-subj="uxSessionReplaySaveButton"
                   >
                     {i18n.translate('xpack.ux.sessionReplaySettings.save', {
@@ -392,6 +450,101 @@ export function SessionReplaySettingsPage() {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiForm>
+          )}
+        </EuiPanel>
+        <EuiSpacer size="l" />
+        <EuiPanel
+          paddingSize="l"
+          hasShadow={false}
+          hasBorder
+          css={{ maxWidth: 720 }}
+          data-test-subj="uxSessionAnalyticsSettings"
+        >
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.ux.sessionReplaySettings.analyticsTitle', {
+                defaultMessage: 'Session analytics',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.ux.sessionReplaySettings.analyticsDescription', {
+                defaultMessage:
+                  'Builds a cluster-wide session index and daily page/service rollups from RUM events so funnels, journeys, the session list, and long date ranges (90d, 1y) stay fast. Requires manage_transform. The first checkpoint waits {syncDelay} so sessions are mostly complete.',
+                values: { syncDelay: analytics?.syncDelay ?? RUM_SESSIONS_SYNC_DELAY },
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.sessionReplaySettings.syncDelayLabel', {
+              defaultMessage: 'Transform sync delay',
+            })}
+            helpText={i18n.translate('xpack.ux.sessionReplaySettings.syncDelayHelp', {
+              defaultMessage:
+                'How long session and daily transforms wait before a checkpoint is settled (5m, 30s, or 1h). Save applies this to running transforms immediately.',
+            })}
+            isInvalid={syncDelayInvalid}
+            error={i18n.translate('xpack.ux.sessionReplaySettings.syncDelayError', {
+              defaultMessage: 'Use a positive Elasticsearch time value such as 5m, 30s, or 1h.',
+            })}
+          >
+            <EuiFieldText
+              value={settings.syncDelay}
+              maxLength={SYNC_DELAY_MAX_LENGTH}
+              isInvalid={syncDelayInvalid}
+              onChange={(e) => setSettings((s) => ({ ...s, syncDelay: e.target.value }))}
+              data-test-subj="uxSessionReplaySyncDelayField"
+            />
+          </EuiFormRow>
+          {analyticsHealth !== 'missing' && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiButton
+                size="s"
+                onClick={() => void onSave()}
+                isLoading={saving}
+                isDisabled={syncDelayInvalid}
+                data-test-subj="uxSessionAnalyticsApplyButton"
+              >
+                {i18n.translate('xpack.ux.sessionReplaySettings.applyTransforms', {
+                  defaultMessage: 'Apply to transforms',
+                })}
+              </EuiButton>
+            </>
+          )}
+          <EuiSpacer size="m" />
+          {analyticsHealth === 'missing' ? (
+            <EuiButton
+              fill
+              isLoading={installing}
+              isDisabled={syncDelayInvalid}
+              onClick={() => void onInstallAnalytics()}
+              data-test-subj="uxSessionAnalyticsInstallButton"
+            >
+              {i18n.translate('xpack.ux.sessionReplaySettings.analyticsEnable', {
+                defaultMessage: 'Enable session analytics',
+              })}
+            </EuiButton>
+          ) : (
+            <EuiCallOut
+              announceOnMount
+              color={analyticsHealth === 'healthy' ? 'success' : 'warning'}
+              size="s"
+              title={
+                analyticsHealth === 'healthy'
+                  ? i18n.translate('xpack.ux.sessionReplaySettings.analyticsHealthy', {
+                      defaultMessage: 'Session index is running ({transformId})',
+                      values: { transformId: analytics?.transformId ?? '' },
+                    })
+                  : i18n.translate('xpack.ux.sessionReplaySettings.analyticsRecovering', {
+                      defaultMessage: 'Session index needs attention ({state})',
+                      values: { state: analytics?.state ?? 'unknown' },
+                    })
+              }
+            />
           )}
         </EuiPanel>
       </PageTemplateComponent>

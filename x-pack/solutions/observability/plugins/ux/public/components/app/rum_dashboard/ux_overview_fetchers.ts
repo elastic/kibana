@@ -23,7 +23,6 @@ import {
   transformCoreWebVitalsResponse,
   DEFAULT_RANKS,
 } from '../../../services/data/core_web_vitals_query';
-import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import {
   formatHasRumResult,
   hasRumDataWithServiceNameQuery,
@@ -40,14 +39,12 @@ async function getCoreWebVitalsResponse({
   serviceName,
   dataStartPlugin,
 }: WithDataPlugin<FetchDataParams>) {
-  const dataViewResponse = await callApmApi('GET /internal/apm/data_view/index_pattern', {
-    signal: null,
-  });
+  const index = uxSearchIndex();
 
   return await Promise.all([
     esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
       params: {
-        index: uxSearchIndex(dataViewResponse.apmDataViewIndexPattern),
+        index,
         ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
           serviceName: serviceName ? [serviceName] : undefined,
         }),
@@ -55,7 +52,7 @@ async function getCoreWebVitalsResponse({
     }),
     esQuery<ReturnType<typeof inpQuery>>(dataStartPlugin, {
       params: {
-        index: uxSearchIndex(dataViewResponse.apmDataViewIndexPattern),
+        index,
         ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
           serviceName: serviceName ? [serviceName] : undefined,
         }),
@@ -93,11 +90,7 @@ export const fetchUxOverviewDate = async (
 export async function hasRumData(
   params: WithDataPlugin<HasDataParams>
 ): Promise<UXHasDataResponse> {
-  const dataViewResponse = await callApmApi('GET /internal/apm/data_view/index_pattern', {
-    signal: null,
-  });
-
-  const index = uxSearchIndex(dataViewResponse.apmDataViewIndexPattern);
+  const index = uxSearchIndex();
   const runHasRumDataQuery = async (dataTiers?: DataTier[]): Promise<UXHasDataResponse> =>
     formatHasRumResult(
       await esQuery<ReturnType<typeof hasRumDataWithServiceNameQuery>>(params.dataStartPlugin, {

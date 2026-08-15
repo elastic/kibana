@@ -25,8 +25,16 @@ describe('assertRumAlertEsql', () => {
 
   it('rejects other index patterns', () => {
     expect(() => assertRumAlertEsql('FROM .kibana-event-log-*\n| LIMIT 1')).toThrow(
-      /traces-\*\.otel-\*/
+      /ux-rum-sessions-\*/
     );
+  });
+
+  it('accepts the session index', () => {
+    expect(
+      assertRumAlertEsql(
+        'FROM ux-rum-sessions-2\n| STATS sessions = COUNT(*)\n| WHERE sessions < 5'
+      )
+    ).toContain('FROM ux-rum-sessions-*');
   });
 
   it('rejects ENRICH', () => {
@@ -84,6 +92,17 @@ describe('injectLookbackAfterFrom', () => {
     expect(next).toContain('FROM logs-*.otel-*');
     expect(next).toContain('NOW() - 15 minutes');
     expect(next).toContain('STATS events');
+    expect(next).toContain('@timestamp');
+  });
+
+  it('uses start_time and the watermark on the session index', () => {
+    const next = injectLookbackAfterFrom(
+      'FROM ux-rum-sessions-*\n| STATS sessions = COUNT(*)',
+      '15m',
+      { watermark: '2026-08-15T10:00:00.000Z' }
+    );
+    expect(next).toContain('`start_time` >= NOW() - 15 minutes');
+    expect(next).toContain('`start_time` <= "2026-08-15T10:00:00.000Z"');
   });
 });
 

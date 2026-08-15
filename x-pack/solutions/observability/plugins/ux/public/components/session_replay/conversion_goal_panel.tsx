@@ -96,7 +96,15 @@ export function ConversionGoalPanel({
   const { http, notifications } = useKibanaServices();
   const history = useHistory();
   const {
-    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery, goalId },
+    urlParams: {
+      rangeFrom = 'now-24h',
+      rangeTo = 'now',
+      serviceName,
+      kuery,
+      goalId,
+      includeRaw,
+      analyticsMode,
+    },
   } = useLegacyUrlParams();
 
   const [goals, setGoals] = useState<ConversionGoal[]>([]);
@@ -185,6 +193,8 @@ export function ConversionGoalPanel({
         serviceName: typeof serviceName === 'string' ? serviceName : undefined,
         steps: draft.steps,
         kuery,
+        includeRaw: includeRaw === 'true',
+        analyticsMode,
       });
       setResult(data);
     } catch (err) {
@@ -193,7 +203,7 @@ export function ConversionGoalPanel({
     } finally {
       setLoading(false);
     }
-  }, [http, kuery, rangeFrom, rangeTo, serviceName]);
+  }, [http, kuery, rangeFrom, rangeTo, serviceName, includeRaw, analyticsMode]);
 
   useEffect(() => {
     if (hydratedRef.current || goalsLoading) {

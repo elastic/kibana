@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
+import { resolveRumAnalytics } from '../../transforms/rum_sessions';
+import {
+  mergeSessionListResponses,
+  querySessionIndexSessions,
+} from '../../transforms/rum_sessions_query';
 import {
   RUM_SESSION_SOURCE_INDEX,
   SESSION_REPLAY_INDEX,
@@ -152,380 +158,430 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       breakpoint: t.string,
       connection: t.string,
       device: t.string,
+      includeRaw: t.string,
+      analyticsMode: t.string,
     }),
   }),
   handler: async ({ context, params }): Promise<SessionListResponse> => {
-    const { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery } = params.query;
-    // Server-side sort/paginate/search operate over a bounded candidate window derived
-    // from the terms aggregation. Sufficient for the POC; true scale needs a composite agg.
-    const candidateSize = 200;
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
-
-    const timeFilter = { range: { '@timestamp': { gte: rangeFrom, lte: rangeTo } } };
-    const serviceFilters = serviceName
-      ? [
-          {
-            bool: {
-              should: [
-                { term: { 'resource.attributes.service.name': serviceName } },
-                { term: { 'attributes.service.name': serviceName } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        ]
-      : [];
-    const filters = [
-      timeFilter,
-      ...serviceFilters,
-      ...botExclusionFilters(params.query.includeBots),
-      ...kueryFilters(kuery),
-    ];
-    if (params.query.breakpoint) {
-      filters.push({ term: { 'attributes.browser.breakpoint': params.query.breakpoint } });
-    }
-    if (params.query.connection) {
-      filters.push({ term: { 'attributes.network.connection.type': params.query.connection } });
-    }
-    if (params.query.device) {
-      filters.push({
-        bool: {
-          should: [
-            { term: { 'attributes.device.memory': params.query.device } },
-            { term: { 'resource.attributes.device.memory': params.query.device } },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-    }
-    if (params.query.location) {
-      filters.push({
-        bool: {
-          should: [
-            { term: { 'client.geo.country_iso_code': params.query.location } },
-            { term: { 'resource.attributes.client.geo.country_iso_code': params.query.location } },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-    }
-
-    const find = mergeSessionFind(parseSessionFind(params.query.query), {
-      path: params.query.pageUrl,
-      click: params.query.click,
-      user: params.query.user,
-      account: params.query.account,
-    });
-    const findClauses = sessionFindClauses(find, extraPathsForFind(find, params.query.pageUrl));
-    if (findClauses.length > 0) {
-      const idSets = await Promise.all(
-        findClauses.map(async (clause) => {
-          const result = await client.search(
-            {
-              index: RUM_SESSION_SOURCE_INDEX,
-              ignore_unavailable: true,
-              allow_no_indices: true,
-              size: 0,
-              query: { bool: { filter: [...filters, ...clause] } },
-              aggs: {
-                sessions: {
-                  terms: {
-                    script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
-                    size: candidateSize,
-                    exclude: '',
-                  },
-                },
-              },
-            },
-            rumEsSearchOptions
-          );
-          const buckets =
-            (result.aggregations as { sessions?: { buckets?: Array<{ key?: string | number }> } })
-              ?.sessions?.buckets ?? [];
-          return buckets.map((bucket) => String(bucket.key ?? '')).filter(Boolean);
-        })
-      );
-      const matchingIds = intersectSessionIds(idSets);
-      if (matchingIds.length === 0) {
-        return {
-          sessions: [],
-          total: 0,
-          facets: computeFacets([]),
-          stats: computeStats([]),
-        };
-      }
-      filters.push(sessionIdTermsFilter(matchingIds));
-    }
-
-    const [rumResult, replayResult] = await Promise.all([
-      client.search(
-        {
-          index: RUM_SESSION_SOURCE_INDEX,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          size: 0,
-          query: { bool: { filter: filters } },
-          aggs: {
-            sessions: {
-              terms: {
-                script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
-                size: candidateSize,
-                order: { start_time: 'desc' },
-              },
-              aggs: {
-                start_time: { min: { field: '@timestamp' } },
-                end_time: { max: { field: '@timestamp' } },
-                error_count: {
-                  filter: {
-                    bool: {
-                      should: [
-                        { term: { event_name: 'exception' } },
-                        { term: { name: 'exception' } },
-                        { term: { 'attributes.event.outcome': 'failure' } },
-                        { term: { 'attributes.log.level': 'ERROR' } },
-                      ],
-                      minimum_should_match: 1,
-                    },
-                  },
-                },
-                click_count: { filter: { term: { name: 'click' } } },
-                sample: {
-                  top_hits: {
-                    size: 100,
-                    sort: [{ '@timestamp': 'asc' as const }],
-                    _source: SAMPLE_SOURCE,
-                  },
-                },
-              },
-            },
-          },
-        },
-        rumEsSearchOptions
-      ),
-      client.search(
-        {
-          index: SESSION_REPLAY_INDEX,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          size: 0,
-          query: { bool: { filter: filters } },
-          aggs: {
-            sessions: {
-              terms: {
-                script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' },
-                size: candidateSize,
-                order: { start_time: 'desc' },
-              },
-              aggs: {
-                start_time: { min: { field: '@timestamp' } },
-                end_time: { max: { field: '@timestamp' } },
-                sample: {
-                  top_hits: {
-                    size: 20,
-                    sort: [{ '@timestamp': 'asc' as const }],
-                    _source: SAMPLE_SOURCE,
-                  },
-                },
-              },
-            },
-          },
-        },
-        rumEsSearchOptions
-      ),
-    ]);
-
-    const rumBuckets =
-      (rumResult.aggregations as { sessions?: { buckets?: SessionBucket[] } })?.sessions?.buckets ??
-      [];
-    const replayBuckets =
-      (replayResult.aggregations as { sessions?: { buckets?: SessionBucket[] } })?.sessions
-        ?.buckets ?? [];
-
-    const replayById = new Map(
-      replayBuckets
-        .filter((bucket) => Boolean(bucket.key))
-        .map((bucket) => {
-          const startTime = toIso(bucket.start_time);
-          const endTime = toIso(bucket.end_time);
-          const startMs = startTime ? Date.parse(startTime) : 0;
-          const endMs = endTime ? Date.parse(endTime) : startMs + 1;
-          const derived = deriveFromSample(bucket.sample?.hits?.hits ?? [], startMs, endMs);
-          return [
-            String(bucket.key),
-            { eventCount: bucket.doc_count, startTime, endTime, derived },
-          ] as const;
-        })
-    );
-
-    const sessionsById = new Map<string, RumSessionSummary>();
-
-    for (const bucket of rumBuckets) {
-      if (!bucket.key) {
-        continue;
-      }
-      const sessionId = String(bucket.key);
-      const replay = replayById.get(sessionId);
-      const startTime = toIso(bucket.start_time);
-      const endTime = toIso(bucket.end_time);
-      const startMs = startTime ? Date.parse(startTime) : 0;
-      const endMs = endTime ? Date.parse(endTime) : startMs + 1;
-      const derived = deriveFromSample(bucket.sample?.hits?.hits ?? [], startMs, endMs);
-
-      sessionsById.set(sessionId, {
-        sessionId,
-        startTime,
-        endTime,
-        eventCount: bucket.doc_count,
-        errorCount: bucket.error_count?.doc_count ?? 0,
-        actionCount: bucket.click_count?.doc_count ?? 0,
-        rageClickCount: derived.rageClickCount,
-        deadClickCount: derived.deadClickCount,
-        errorGroups: derived.errorGroups,
-        activeMs: derived.activeMs,
-        durationMs: Math.max(0, endMs - startMs),
-        pageCount: derived.pageCount > 0 ? derived.pageCount : replay?.derived.pageCount ?? 0,
-        entryPage: derived.entryPage ?? replay?.derived.entryPage ?? null,
-        exitPage: derived.exitPage ?? replay?.derived.exitPage ?? null,
-        pagePath: derived.pagePath.length > 0 ? derived.pagePath : replay?.derived.pagePath ?? [],
-        activityPath: derived.activityPath,
-        sparkline: derived.sparkline,
-        user: derived.user,
-        client: derived.client,
-        hasReplay: Boolean(replay),
-        replayEventCount: replay?.eventCount ?? 0,
-      });
-    }
-
-    // Replay-only sessions (SDK stamped session on replay docs but not yet on traces/logs).
-    for (const [sessionId, replay] of replayById) {
-      if (sessionsById.has(sessionId)) {
-        continue;
-      }
-      sessionsById.set(sessionId, {
-        sessionId,
-        startTime: replay.startTime,
-        endTime: replay.endTime,
-        eventCount: 0,
-        errorCount: 0,
-        actionCount: 0,
-        rageClickCount: replay.derived.rageClickCount,
-        deadClickCount: replay.derived.deadClickCount,
-        errorGroups: replay.derived.errorGroups,
-        activeMs: replay.derived.activeMs,
-        durationMs: (() => {
-          const s = replay.startTime ? Date.parse(replay.startTime) : 0;
-          const e = replay.endTime ? Date.parse(replay.endTime) : s;
-          return Math.max(0, e - s);
-        })(),
-        pageCount: replay.derived.pageCount,
-        entryPage: replay.derived.entryPage,
-        exitPage: replay.derived.exitPage,
-        pagePath: replay.derived.pagePath,
-        activityPath: replay.derived.activityPath,
-        sparkline: replay.derived.sparkline,
-        user: replay.derived.user,
-        client: replay.derived.client,
-        hasReplay: true,
-        replayEventCount: replay.eventCount,
-      });
-    }
-
-    const all = [...sessionsById.values()];
-
-    // Unprefixed remainder only — structured path/click/error/user already ran in ES.
-    const term = (find.text ?? '').trim().toLowerCase().slice(0, 200);
-    const searchFiltered = term
-      ? all.filter((session) => {
-          const name = session.user.name || session.user.email || session.user.id || '';
-          const haystack = [
-            session.sessionId,
-            name,
-            session.client.browser ?? '',
-            session.client.os ?? '',
-            ...session.pagePath,
-            ...session.activityPath,
-          ]
-            .join(' ')
-            .toLowerCase();
-          return haystack.includes(term);
-        })
-      : all;
-
-    const facets = computeFacets(searchFiltered);
-
-    // Facet filters.
-    const {
-      hasReplay,
-      hasErrors,
-      hasRage,
-      hasDead,
-      browser,
-      os,
-      location,
-      minDurationMs,
-      maxDurationMs,
-      errorGroup,
-      sessionIds,
-      frustration,
-    } = params.query;
-    const minDur = minDurationMs ? Number(minDurationMs) : undefined;
-    const maxDur = maxDurationMs ? Number(maxDurationMs) : undefined;
-    const idSet =
-      sessionIds && sessionIds.trim()
-        ? new Set(
-            sessionIds
-              .split(',')
-              .map((id) => id.trim())
-              .filter(Boolean)
-              .slice(0, 50)
-          )
-        : null;
-    const wantRage = hasRage === 'true' || frustration === 'rage';
-    const wantErrors = hasErrors === 'true' || frustration === 'error';
-    const wantDead = hasDead === 'true' || frustration === 'dead';
-    const filtered = searchFiltered.filter((session) => {
-      if (hasReplay === 'true' && !session.hasReplay) return false;
-      if (wantErrors && session.errorCount === 0) return false;
-      if (wantRage && session.rageClickCount === 0) return false;
-      if (wantDead && session.deadClickCount === 0) return false;
-      if (browser && session.client.browser !== browser) return false;
-      if (os && session.client.os !== os) return false;
-      if (
-        location &&
-        session.client.countryIso !== location &&
-        session.client.country !== location
-      ) {
-        return false;
-      }
-      if (minDur != null && session.durationMs < minDur) return false;
-      if (maxDur != null && session.durationMs > maxDur) return false;
-      if (errorGroup && !session.errorGroups.includes(errorGroup)) return false;
-      if (idSet && !idSet.has(session.sessionId)) return false;
-      return true;
-    });
-
-    const stats = computeStats(filtered);
-
-    // Sort.
-    const sortField = (params.query.sortField as SessionSortField) || 'startTime';
-    const direction = params.query.sortDirection === 'asc' ? 1 : -1;
-    const sortValue = (session: RumSessionSummary): number =>
-      sortField === 'startTime'
-        ? session.startTime
-          ? Date.parse(session.startTime)
-          : 0
-        : session[sortField];
-    filtered.sort((a, b) => (sortValue(a) - sortValue(b)) * direction);
-
-    // Paginate.
+    const analytics = await resolveRumAnalytics(client, params.query);
     const perPage = Math.min(Math.max(Number(params.query.perPage) || 25, 1), 100);
     const page = Math.max(Number(params.query.page) || 0, 0);
-    const sessions = filtered.slice(page * perPage, page * perPage + perPage);
 
-    return { sessions, total: filtered.length, facets, stats };
+    if (analytics.useIndex) {
+      const settled = await querySessionIndexSessions({
+        client,
+        rangeFrom: params.query.rangeFrom || 'now-24h',
+        rangeTo: params.query.rangeTo || 'now',
+        serviceName: params.query.serviceName,
+        watermark: analytics.status.watermark ?? undefined,
+        sortField: params.query.sortField as SessionSortField | undefined,
+        sortDirection: params.query.sortDirection,
+        page,
+        perPage,
+        browser: params.query.browser,
+        os: params.query.os,
+        location: params.query.location,
+        pageUrl: params.query.pageUrl,
+        user: params.query.user,
+        click: params.query.click,
+        account: params.query.account,
+        query: params.query.query,
+        sessionIds: params.query.sessionIds,
+        frustration: params.query.frustration,
+        hasReplay: params.query.hasReplay,
+        hasErrors: params.query.hasErrors,
+        hasRage: params.query.hasRage,
+        hasDead: params.query.hasDead,
+        minDurationMs: params.query.minDurationMs ? Number(params.query.minDurationMs) : undefined,
+        maxDurationMs: params.query.maxDurationMs ? Number(params.query.maxDurationMs) : undefined,
+      });
+      if (!analytics.mergeRaw || !analytics.status.watermark || page > 0) {
+        return settled;
+      }
+      const live = await queryRawSessions(client, {
+        ...params.query,
+        rangeFrom: analytics.status.watermark,
+        page: '0',
+        perPage: String(perPage),
+      });
+      return mergeSessionListResponses(settled, live, perPage);
+    }
+
+    return queryRawSessions(client, params.query);
   },
 });
+
+const queryRawSessions = async (
+  client: ElasticsearchClient,
+  query: Record<string, string | undefined>
+): Promise<SessionListResponse> => {
+  const params = { query };
+  const { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery } = params.query;
+  // Server-side sort/paginate/search operate over a bounded candidate window derived
+  // from the terms aggregation. Sufficient for the POC; true scale needs a composite agg.
+  const candidateSize = 200;
+
+  const timeFilter = { range: { '@timestamp': { gte: rangeFrom, lte: rangeTo } } };
+  const serviceFilters = serviceName
+    ? [
+        {
+          bool: {
+            should: [
+              { term: { 'resource.attributes.service.name': serviceName } },
+              { term: { 'attributes.service.name': serviceName } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ]
+    : [];
+  const filters = [
+    timeFilter,
+    ...serviceFilters,
+    ...botExclusionFilters(params.query.includeBots),
+    ...kueryFilters(kuery),
+  ];
+  if (params.query.breakpoint) {
+    filters.push({ term: { 'attributes.browser.breakpoint': params.query.breakpoint } });
+  }
+  if (params.query.connection) {
+    filters.push({ term: { 'attributes.network.connection.type': params.query.connection } });
+  }
+  if (params.query.device) {
+    filters.push({
+      bool: {
+        should: [
+          { term: { 'attributes.device.memory': params.query.device } },
+          { term: { 'resource.attributes.device.memory': params.query.device } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  }
+  if (params.query.location) {
+    filters.push({
+      bool: {
+        should: [
+          { term: { 'client.geo.country_iso_code': params.query.location } },
+          { term: { 'resource.attributes.client.geo.country_iso_code': params.query.location } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  }
+
+  const find = mergeSessionFind(parseSessionFind(params.query.query), {
+    path: params.query.pageUrl,
+    click: params.query.click,
+    user: params.query.user,
+    account: params.query.account,
+  });
+  const findClauses = sessionFindClauses(find, extraPathsForFind(find, params.query.pageUrl));
+  if (findClauses.length > 0) {
+    const idSets = await Promise.all(
+      findClauses.map(async (clause) => {
+        const result = await client.search(
+          {
+            index: RUM_SESSION_SOURCE_INDEX,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            size: 0,
+            query: { bool: { filter: [...filters, ...clause] } },
+            aggs: {
+              sessions: {
+                terms: {
+                  script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
+                  size: candidateSize,
+                  exclude: '',
+                },
+              },
+            },
+          },
+          rumEsSearchOptions
+        );
+        const buckets =
+          (result.aggregations as { sessions?: { buckets?: Array<{ key?: string | number }> } })
+            ?.sessions?.buckets ?? [];
+        return buckets.map((bucket) => String(bucket.key ?? '')).filter(Boolean);
+      })
+    );
+    const matchingIds = intersectSessionIds(idSets);
+    if (matchingIds.length === 0) {
+      return {
+        sessions: [],
+        total: 0,
+        facets: computeFacets([]),
+        stats: computeStats([]),
+      };
+    }
+    filters.push(sessionIdTermsFilter(matchingIds));
+  }
+
+  const [rumResult, replayResult] = await Promise.all([
+    client.search(
+      {
+        index: RUM_SESSION_SOURCE_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        query: { bool: { filter: filters } },
+        aggs: {
+          sessions: {
+            terms: {
+              script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
+              size: candidateSize,
+              order: { start_time: 'desc' },
+            },
+            aggs: {
+              start_time: { min: { field: '@timestamp' } },
+              end_time: { max: { field: '@timestamp' } },
+              error_count: {
+                filter: {
+                  bool: {
+                    should: [
+                      { term: { event_name: 'exception' } },
+                      { term: { name: 'exception' } },
+                      { term: { 'attributes.event.outcome': 'failure' } },
+                      { term: { 'attributes.log.level': 'ERROR' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              },
+              click_count: { filter: { term: { name: 'click' } } },
+              sample: {
+                top_hits: {
+                  size: 100,
+                  sort: [{ '@timestamp': 'asc' as const }],
+                  _source: SAMPLE_SOURCE,
+                },
+              },
+            },
+          },
+        },
+      },
+      rumEsSearchOptions
+    ),
+    client.search(
+      {
+        index: SESSION_REPLAY_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        query: { bool: { filter: filters } },
+        aggs: {
+          sessions: {
+            terms: {
+              script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' },
+              size: candidateSize,
+              order: { start_time: 'desc' },
+            },
+            aggs: {
+              start_time: { min: { field: '@timestamp' } },
+              end_time: { max: { field: '@timestamp' } },
+              sample: {
+                top_hits: {
+                  size: 20,
+                  sort: [{ '@timestamp': 'asc' as const }],
+                  _source: SAMPLE_SOURCE,
+                },
+              },
+            },
+          },
+        },
+      },
+      rumEsSearchOptions
+    ),
+  ]);
+
+  const rumBuckets =
+    (rumResult.aggregations as { sessions?: { buckets?: SessionBucket[] } })?.sessions?.buckets ??
+    [];
+  const replayBuckets =
+    (replayResult.aggregations as { sessions?: { buckets?: SessionBucket[] } })?.sessions
+      ?.buckets ?? [];
+
+  const replayById = new Map(
+    replayBuckets
+      .filter((bucket) => Boolean(bucket.key))
+      .map((bucket) => {
+        const startTime = toIso(bucket.start_time);
+        const endTime = toIso(bucket.end_time);
+        const startMs = startTime ? Date.parse(startTime) : 0;
+        const endMs = endTime ? Date.parse(endTime) : startMs + 1;
+        const derived = deriveFromSample(bucket.sample?.hits?.hits ?? [], startMs, endMs);
+        return [
+          String(bucket.key),
+          { eventCount: bucket.doc_count, startTime, endTime, derived },
+        ] as const;
+      })
+  );
+
+  const sessionsById = new Map<string, RumSessionSummary>();
+
+  for (const bucket of rumBuckets) {
+    if (!bucket.key) {
+      continue;
+    }
+    const sessionId = String(bucket.key);
+    const replay = replayById.get(sessionId);
+    const startTime = toIso(bucket.start_time);
+    const endTime = toIso(bucket.end_time);
+    const startMs = startTime ? Date.parse(startTime) : 0;
+    const endMs = endTime ? Date.parse(endTime) : startMs + 1;
+    const derived = deriveFromSample(bucket.sample?.hits?.hits ?? [], startMs, endMs);
+
+    sessionsById.set(sessionId, {
+      sessionId,
+      startTime,
+      endTime,
+      eventCount: bucket.doc_count,
+      errorCount: bucket.error_count?.doc_count ?? 0,
+      actionCount: bucket.click_count?.doc_count ?? 0,
+      rageClickCount: derived.rageClickCount,
+      deadClickCount: derived.deadClickCount,
+      errorGroups: derived.errorGroups,
+      activeMs: derived.activeMs,
+      durationMs: Math.max(0, endMs - startMs),
+      pageCount: derived.pageCount > 0 ? derived.pageCount : replay?.derived.pageCount ?? 0,
+      entryPage: derived.entryPage ?? replay?.derived.entryPage ?? null,
+      exitPage: derived.exitPage ?? replay?.derived.exitPage ?? null,
+      pagePath: derived.pagePath.length > 0 ? derived.pagePath : replay?.derived.pagePath ?? [],
+      activityPath: derived.activityPath,
+      sparkline: derived.sparkline,
+      user: derived.user,
+      client: derived.client,
+      hasReplay: Boolean(replay),
+      replayEventCount: replay?.eventCount ?? 0,
+    });
+  }
+
+  // Replay-only sessions (SDK stamped session on replay docs but not yet on traces/logs).
+  for (const [sessionId, replay] of replayById) {
+    if (sessionsById.has(sessionId)) {
+      continue;
+    }
+    sessionsById.set(sessionId, {
+      sessionId,
+      startTime: replay.startTime,
+      endTime: replay.endTime,
+      eventCount: 0,
+      errorCount: 0,
+      actionCount: 0,
+      rageClickCount: replay.derived.rageClickCount,
+      deadClickCount: replay.derived.deadClickCount,
+      errorGroups: replay.derived.errorGroups,
+      activeMs: replay.derived.activeMs,
+      durationMs: (() => {
+        const s = replay.startTime ? Date.parse(replay.startTime) : 0;
+        const e = replay.endTime ? Date.parse(replay.endTime) : s;
+        return Math.max(0, e - s);
+      })(),
+      pageCount: replay.derived.pageCount,
+      entryPage: replay.derived.entryPage,
+      exitPage: replay.derived.exitPage,
+      pagePath: replay.derived.pagePath,
+      activityPath: replay.derived.activityPath,
+      sparkline: replay.derived.sparkline,
+      user: replay.derived.user,
+      client: replay.derived.client,
+      hasReplay: true,
+      replayEventCount: replay.eventCount,
+    });
+  }
+
+  const all = [...sessionsById.values()];
+
+  // Unprefixed remainder only — structured path/click/error/user already ran in ES.
+  const term = (find.text ?? '').trim().toLowerCase().slice(0, 200);
+  const searchFiltered = term
+    ? all.filter((session) => {
+        const name = session.user.name || session.user.email || session.user.id || '';
+        const haystack = [
+          session.sessionId,
+          name,
+          session.client.browser ?? '',
+          session.client.os ?? '',
+          ...session.pagePath,
+          ...session.activityPath,
+        ]
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(term);
+      })
+    : all;
+
+  const facets = computeFacets(searchFiltered);
+
+  // Facet filters.
+  const {
+    hasReplay,
+    hasErrors,
+    hasRage,
+    hasDead,
+    browser,
+    os,
+    location,
+    minDurationMs,
+    maxDurationMs,
+    errorGroup,
+    sessionIds,
+    frustration,
+  } = params.query;
+  const minDur = minDurationMs ? Number(minDurationMs) : undefined;
+  const maxDur = maxDurationMs ? Number(maxDurationMs) : undefined;
+  const idSet =
+    sessionIds && sessionIds.trim()
+      ? new Set(
+          sessionIds
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean)
+            .slice(0, 50)
+        )
+      : null;
+  const wantRage = hasRage === 'true' || frustration === 'rage';
+  const wantErrors = hasErrors === 'true' || frustration === 'error';
+  const wantDead = hasDead === 'true' || frustration === 'dead';
+  const filtered = searchFiltered.filter((session) => {
+    if (hasReplay === 'true' && !session.hasReplay) return false;
+    if (wantErrors && session.errorCount === 0) return false;
+    if (wantRage && session.rageClickCount === 0) return false;
+    if (wantDead && session.deadClickCount === 0) return false;
+    if (browser && session.client.browser !== browser) return false;
+    if (os && session.client.os !== os) return false;
+    if (location && session.client.countryIso !== location && session.client.country !== location) {
+      return false;
+    }
+    if (minDur != null && session.durationMs < minDur) return false;
+    if (maxDur != null && session.durationMs > maxDur) return false;
+    if (errorGroup && !session.errorGroups.includes(errorGroup)) return false;
+    if (idSet && !idSet.has(session.sessionId)) return false;
+    return true;
+  });
+
+  const stats = computeStats(filtered);
+
+  // Sort.
+  const sortField = (params.query.sortField as SessionSortField) || 'startTime';
+  const direction = params.query.sortDirection === 'asc' ? 1 : -1;
+  const sortValue = (session: RumSessionSummary): number =>
+    sortField === 'startTime'
+      ? session.startTime
+        ? Date.parse(session.startTime)
+        : 0
+      : session[sortField];
+  filtered.sort((a, b) => (sortValue(a) - sortValue(b)) * direction);
+
+  // Paginate.
+  const perPage = Math.min(Math.max(Number(params.query.perPage) || 25, 1), 100);
+  const page = Math.max(Number(params.query.page) || 0, 0);
+  const sessions = filtered.slice(page * perPage, page * perPage + perPage);
+
+  return { sessions, total: filtered.length, facets, stats };
+};
 
 const topBuckets = (
   sessions: RumSessionSummary[],

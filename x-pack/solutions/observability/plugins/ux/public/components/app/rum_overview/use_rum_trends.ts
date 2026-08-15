@@ -29,6 +29,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
       breakpoint,
       connection,
       device,
+      analyticsMode,
     },
   } = useLegacyUrlParams();
 
@@ -56,6 +57,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
         breakpoint,
         connection,
         device,
+        analyticsMode,
       });
       setPoints(result.trends);
     } catch {
@@ -79,6 +81,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
     breakpoint,
     connection,
     device,
+    analyticsMode,
   ]);
 
   useEffect(() => {

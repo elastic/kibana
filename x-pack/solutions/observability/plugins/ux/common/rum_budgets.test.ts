@@ -12,6 +12,7 @@ import {
   parseRumBudgetTemplate,
   parseRumBudgetThreshold,
   rumBudgetBreachKuery,
+  rumBudgetInvestigatePatch,
   rumBudgetPageFromFilter,
   rumBudgetTags,
   toRumBudgetItem,
@@ -126,6 +127,41 @@ describe('buildRumBudgetSlo', () => {
     expect(built.slo.indicator.params.good).toContain('browser.frustration.dead_click');
   });
 
+  it('builds session-outcome budgets on the session index', () => {
+    const errorFree = buildRumBudgetSlo({
+      templateId: 'session_error_free',
+      threshold: 0,
+      target: 0.95,
+      scope: 'app',
+      filters: { serviceName: 'shop' },
+    });
+    expect(errorFree.slo.indicator.params.index).toBe('ux-rum-sessions-*');
+    expect(errorFree.slo.indicator.params.timestampField).toBe('start_time');
+    expect(errorFree.slo.indicator.params.filter).toContain('service.name: "shop"');
+    expect(errorFree.slo.indicator.params.good).toBe('error_count: 0');
+    expect(errorFree.slo.groupBy).toBeUndefined();
+
+    const rageFree = buildRumBudgetSlo({
+      templateId: 'session_rage_free',
+      threshold: 0,
+      target: 0.95,
+      scope: 'page',
+      filters: { pageUrl: '/checkout' },
+    });
+    expect(rageFree.slo.indicator.params.good).toBe('rage_click_count: 0 and dead_click_count: 0');
+    expect(rageFree.slo.indicator.params.filter).toContain('entry_page: "/checkout"');
+
+    const bounce = buildRumBudgetSlo({
+      templateId: 'session_bounce',
+      threshold: 0,
+      target: 0.95,
+      scope: 'groupByPage',
+      filters: {},
+    });
+    expect(bounce.slo.indicator.params.good).toBe('page_count > 1');
+    expect(bounce.slo.groupBy).toBeUndefined();
+  });
+
   it('uses generated KQL for an AI budget', () => {
     const built = buildRumBudgetSlo({
       templateId: 'ai',
@@ -165,6 +201,7 @@ describe('parsers', () => {
         'event_name: "browser.web_vital" and attributes.page.url.path: "/checkout"'
       )
     ).toBe('/checkout');
+    expect(rumBudgetPageFromFilter('session.id: * and entry_page: "/checkout"')).toBe('/checkout');
   });
 });
 
@@ -214,6 +251,24 @@ describe('investigation helpers', () => {
     );
     expect(rumBudgetBreachKuery({ templateId: 'frustration', threshold: 0 })).toContain(
       'browser.frustration.rage_click'
+    );
+  });
+
+  it('routes session-outcome budgets to session list filters', () => {
+    expect(rumBudgetInvestigatePatch({ templateId: 'session_error_free' })).toEqual({
+      pageUrl: '',
+      frustration: 'error',
+      kuery: '',
+    });
+    expect(
+      rumBudgetInvestigatePatch({ templateId: 'session_rage_free', pagePath: '/checkout' })
+    ).toEqual({
+      pageUrl: '/checkout',
+      frustration: 'rage',
+      kuery: '',
+    });
+    expect(rumBudgetInvestigatePatch({ templateId: 'lcp', threshold: 2500 }).kuery).toContain(
+      'browser.web_vital'
     );
   });
 

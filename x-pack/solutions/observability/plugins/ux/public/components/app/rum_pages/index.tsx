@@ -206,6 +206,7 @@ export function RumPagesPanel() {
       breakpoint,
       connection,
       device,
+      analyticsMode,
     },
   } = useLegacyUrlParams();
 
@@ -233,6 +234,7 @@ export function RumPagesPanel() {
         breakpoint,
         connection,
         device,
+        analyticsMode,
       });
       setPages(result.pages);
     } catch (err) {
@@ -255,6 +257,7 @@ export function RumPagesPanel() {
     breakpoint,
     connection,
     device,
+    analyticsMode,
   ]);
 
   useEffect(() => {

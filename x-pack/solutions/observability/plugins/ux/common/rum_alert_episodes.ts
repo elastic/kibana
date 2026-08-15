@@ -94,9 +94,14 @@ export const rumAlertInvestigateTarget = (
     case 'web_vital':
       return { pathname: '/pages' };
     case 'frustration':
+    case 'session_frustration':
       return { pathname: '/session-replay', frustration: 'rage' };
+    case 'session_error_rate':
+      return { pathname: '/session-replay', frustration: 'error' };
     case 'traffic_drop':
     case 'traffic_spike':
+    case 'session_traffic_drop':
+    case 'session_traffic_spike':
       return { pathname: '/session-replay' };
     case 'ai':
       return { pathname: '/' };

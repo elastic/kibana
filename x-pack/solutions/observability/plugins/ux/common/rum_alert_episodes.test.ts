@@ -86,6 +86,18 @@ describe('rumAlertInvestigateTarget', () => {
   it('routes traffic templates to sessions', () => {
     expect(rumAlertInvestigateTarget('traffic_drop').pathname).toBe('/session-replay');
     expect(rumAlertInvestigateTarget('traffic_spike').pathname).toBe('/session-replay');
+    expect(rumAlertInvestigateTarget('session_traffic_drop').pathname).toBe('/session-replay');
+  });
+
+  it('routes session error and frustration templates to the session list', () => {
+    expect(rumAlertInvestigateTarget('session_error_rate')).toEqual({
+      pathname: '/session-replay',
+      frustration: 'error',
+    });
+    expect(rumAlertInvestigateTarget('session_frustration')).toEqual({
+      pathname: '/session-replay',
+      frustration: 'rage',
+    });
   });
 });
 

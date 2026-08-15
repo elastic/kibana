@@ -11,12 +11,15 @@ import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
 import {
   durationToMs,
   emptyVitalAttribution,
+  mergeRumPageRows,
   ranksFromPercentileRanks,
   type RumCountryRow,
   type RumOverviewResponse,
   type RumPageRow,
   type RumVitalSummary,
 } from '../../../common/rum_app';
+import { groupingFromSettings } from '../../../common/session_replay_settings';
+import { readSessionReplaySettings } from '../session_replay/settings';
 import { SAMPLE_SOURCE } from '../session_replay/list_sessions';
 import { SESSION_ID_SCRIPT } from '../session_replay/session_id_script';
 import {
@@ -24,6 +27,9 @@ import {
   countDeadAndErrorClicks,
   type OtelHit,
 } from '../session_replay/session_attributes';
+import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
+import { resolveRumDaily } from '../../transforms/rum_daily';
+import { queryDailyOverview } from '../../transforms/rum_daily_query';
 import { rumEsSearchOptions } from './es_retry';
 import {
   BROWSER_SCRIPT,
@@ -64,9 +70,48 @@ export const getRumOverviewRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, params }): Promise<RumOverviewResponse> => {
+  handler: async ({ context, core, params }): Promise<RumOverviewResponse> => {
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
+    const status = await getRumAnalyticsStatus(client);
+    const daily = resolveRumDaily({
+      pagesDaily: status.pagesDaily,
+      serviceDaily: status.serviceDaily,
+      analyticsMode: params.query.analyticsMode,
+      rangeFrom: params.query.rangeFrom,
+      rangeTo: params.query.rangeTo,
+      browser: params.query.browser,
+      os: params.query.os,
+      location: params.query.location,
+      user: params.query.user,
+      kuery: params.query.kuery,
+      frustration: params.query.frustration,
+      breakpoint: params.query.breakpoint,
+      connection: params.query.connection,
+      device: params.query.device,
+      errorGroup: params.query.errorGroup,
+    });
+    if (daily.usePages || daily.useService) {
+      const coreStart = await core.start();
+      const settings = await readSessionReplaySettings(
+        coreStart.savedObjects.createInternalRepository()
+      );
+      const result = await queryDailyOverview({
+        client,
+        rangeFrom: params.query.rangeFrom || 'now-24h',
+        rangeTo: params.query.rangeTo || 'now',
+        serviceName: params.query.serviceName,
+        pageUrl: params.query.pageUrl,
+        usePages: daily.usePages,
+        useService: daily.useService,
+        pagesWatermark: status.pagesDaily?.watermark,
+        serviceWatermark: status.serviceDaily?.watermark,
+      });
+      return {
+        ...result,
+        topPages: mergeRumPageRows(result.topPages, groupingFromSettings(settings)),
+      };
+    }
     const filters = rumBaseFilters(params.query);
 
     const [aggResult, sessionSample] = await Promise.all([

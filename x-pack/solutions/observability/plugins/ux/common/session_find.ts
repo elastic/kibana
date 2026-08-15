@@ -28,6 +28,7 @@ export interface SessionFind {
 const PREFIX_RE = /\b(path|click|error|user|account):(?:"([^"]+)"|(\S+))/gi;
 const FIND_MAX = 128;
 const REGEXP_META = /[.+*?|()[\]{}^$]/;
+const EMAIL_LIKE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const PAGE_URL_FIELDS = [
   'attributes.page.url.path',
@@ -68,6 +69,20 @@ export const FIND_SESSION_ID_FIELDS = [
   'resource.attributes.session.id',
   'resource.attributes.rum.sessionId',
 ] as const;
+
+export const SESSION_INDEX_USER_FIELDS = ['user.key'] as const;
+export const SESSION_INDEX_PAGE_FIELDS = ['pages', 'entry_page', 'exit_page'] as const;
+export const SESSION_INDEX_CLICK_FIELDS = ['clicks'] as const;
+export const SESSION_INDEX_HAYSTACK_FIELDS = [
+  'user.key',
+  'session.id',
+  'pages',
+  'clicks',
+  'entry_page',
+  'exit_page',
+] as const;
+
+export const isEmailLike = (raw: string): boolean => EMAIL_LIKE.test(raw.trim());
 
 const CLICK_EVENT_FILTER = {
   bool: {
@@ -139,6 +154,10 @@ export const parseSessionFind = (raw?: string): SessionFind => {
   }
   if (!find.click && /^[.#[]/.test(leftover)) {
     find.click = bound(leftover);
+    return find;
+  }
+  if (!find.user && isEmailLike(leftover)) {
+    find.user = bound(leftover);
     return find;
   }
   find.text = leftover.slice(0, 200);
@@ -285,4 +304,29 @@ export const extraPathsForFind = (find: SessionFind, pageUrl?: string): string[]
     return [];
   }
   return [pageUrl.trim()];
+};
+
+/** Session-index filters for the same find tokens used on raw events. */
+export const sessionIndexFindFilters = (find: SessionFind, extraPaths: string[] = []): object[] => {
+  const filters: object[] = [];
+  const identity = find.account ?? find.user;
+  if (identity) {
+    filters.push(wildcardContains(SESSION_INDEX_USER_FIELDS, identity));
+  }
+  if (find.path) {
+    filters.push(wildcardContains(SESSION_INDEX_PAGE_FIELDS, find.path));
+  }
+  for (const path of extraPaths) {
+    filters.push(wildcardContains(SESSION_INDEX_PAGE_FIELDS, path));
+  }
+  if (find.click) {
+    filters.push(wildcardContains(SESSION_INDEX_CLICK_FIELDS, find.click));
+  }
+  if (find.error) {
+    filters.push({ range: { error_count: { gt: 0 } } });
+  }
+  if (find.text) {
+    filters.push(wildcardContains(SESSION_INDEX_HAYSTACK_FIELDS, find.text));
+  }
+  return filters;
 };

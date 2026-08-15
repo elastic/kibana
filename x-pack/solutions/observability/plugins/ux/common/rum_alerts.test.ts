@@ -110,6 +110,37 @@ describe('buildRumAlertEsql', () => {
     expect(built.description).toContain('> 80');
   });
 
+  it('builds session-level queries on the session index', () => {
+    const errorRate = buildRumAlertEsql({
+      templateId: 'session_error_rate',
+      threshold: 0.1,
+      minSamples: 20,
+      groupByPage: true,
+      lookback: '15m',
+      every: '5m',
+      filters: { serviceName: 'shop' },
+    });
+    expect(errorRate.query).toContain('FROM ux-rum-sessions-*');
+    expect(errorRate.query).toContain('error_count > 0');
+    expect(errorRate.query).toContain('service.name');
+    expect(errorRate.query).toContain('error_rate > 0.1');
+    expect(errorRate.groupingFields).toEqual([]);
+
+    const traffic = buildRumAlertEsql({
+      templateId: 'session_traffic_drop',
+      threshold: 3,
+      minSamples: 1,
+      groupByPage: true,
+      lookback: '30m',
+      every: '5m',
+      filters: { location: 'DE' },
+    });
+    expect(traffic.query).toContain('STATS sessions = COUNT(*)');
+    expect(traffic.query).toContain('sessions < 3');
+    expect(traffic.query).toContain('country_iso');
+    expect(traffic.query).not.toContain('COUNT_DISTINCT');
+  });
+
   it('uses a placeholder query until AI ES|QL is supplied', () => {
     const built = buildRumAlertEsql({
       templateId: 'ai',

@@ -9,11 +9,13 @@ import {
   extraPathsForFind,
   hasStructuredFind,
   intersectSessionIds,
+  isEmailLike,
   mergeSessionFind,
   pagePathFilter,
   parseSessionFind,
   sessionFindClauses,
   sessionIdTermsFilter,
+  sessionIndexFindFilters,
   wildcardContains,
 } from './session_find';
 
@@ -40,8 +42,14 @@ describe('parseSessionFind', () => {
     expect(parseSessionFind('.btn-primary')).toEqual({ click: '.btn-primary' });
   });
 
+  it('treats a bare email as a user filter', () => {
+    expect(parseSessionFind('ada@elastic.co')).toEqual({ user: 'ada@elastic.co' });
+    expect(isEmailLike('ada@elastic.co')).toBe(true);
+    expect(isEmailLike('not-an-email')).toBe(false);
+  });
+
   it('keeps unprefixed text for the haystack search', () => {
-    expect(parseSessionFind('ada@elastic.co')).toEqual({ text: 'ada@elastic.co' });
+    expect(parseSessionFind('ada')).toEqual({ text: 'ada' });
   });
 });
 
@@ -117,5 +125,27 @@ describe('helpers', () => {
 
   it('escapes wildcard metacharacters', () => {
     expect(JSON.stringify(wildcardContains(['f'], 'a*b'))).toContain('a\\\\*b');
+  });
+});
+
+describe('sessionIndexFindFilters', () => {
+  it('maps user and email onto user.key', () => {
+    const encoded = JSON.stringify(sessionIndexFindFilters({ user: 'ada@elastic.co' }));
+    expect(encoded).toContain('user.key');
+    expect(encoded).toContain('*ada@elastic.co*');
+    expect(encoded).toContain('case_insensitive');
+  });
+
+  it('maps path, click, error, and leftover text onto session fields', () => {
+    const filters = sessionIndexFindFilters(
+      { path: '/checkout', click: '#buy', error: 'TypeError', text: 'sess-1' },
+      ['/other']
+    );
+    const encoded = JSON.stringify(filters);
+    expect(encoded).toContain('pages');
+    expect(encoded).toContain('clicks');
+    expect(encoded).toContain('error_count');
+    expect(encoded).toContain('session.id');
+    expect(encoded).toContain('/other');
   });
 });
