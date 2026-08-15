@@ -138,7 +138,7 @@ export class NightshiftInvestigationsClient {
     const execution = await this.workflowsManagement.management.getWorkflowExecution(
       investigationId,
       spaceId,
-      { includeInput: true, includeOutput: true }
+      { includeOutput: true }
     );
 
     if (!execution) {
@@ -158,14 +158,22 @@ export class NightshiftInvestigationsClient {
     const status = toInvestigationStatus(execution.status);
     const isTerminal = status === 'completed' || status === 'failed' || status === 'cancelled';
 
-    // input/output are untyped in WorkflowExecutionDto; they are populated only when
-    // includeInput/includeOutput is passed to getWorkflowExecution.
-    const rawInput = (execution as unknown as Record<string, unknown>).input as
-      | Record<string, unknown>
-      | undefined;
-    const rawOutput = (execution as unknown as Record<string, unknown>).output as
-      | Record<string, unknown>
-      | undefined;
+    // runWorkflow stores inputs at context.inputs in the execution document.
+    const rawInput = execution.context?.inputs as Record<string, unknown> | undefined;
+
+    // Step-level output is populated when includeOutput: true. Search in reverse for
+    // the last step that produced a conclusion or summary field.
+    const conclusionStep = execution.stepExecutions
+      ?.slice()
+      .reverse()
+      .find(
+        (s) =>
+          s.output != null &&
+          typeof s.output === 'object' &&
+          !Array.isArray(s.output) &&
+          ('conclusion' in s.output || 'summary' in s.output)
+      );
+    const rawOutput = conclusionStep?.output as Record<string, unknown> | undefined;
 
     const subject = recoverSubjectFromInput(rawInput);
 
