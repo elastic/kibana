@@ -10,6 +10,7 @@ import {
   extractPageSnapshot,
   extractReplayClicks,
   inViewportBand,
+  isClickMapLongRange,
   isOnSnapshotViewport,
   pathFromHref,
 } from './rum_click_map';
@@ -109,5 +110,26 @@ describe('inViewportBand / isOnSnapshotViewport', () => {
   it('keeps above-the-fold clicks', () => {
     expect(isOnSnapshotViewport({ x: 100, y: 200 }, 1280, 800)).toBe(true);
     expect(isOnSnapshotViewport({ x: 100, y: 4000 }, 1280, 800)).toBe(false);
+  });
+});
+
+describe('isClickMapLongRange', () => {
+  it('is false for ranges of 30 days or less', () => {
+    expect(isClickMapLongRange('2026-07-16T00:00:00.000Z', '2026-08-15T00:00:00.000Z')).toBe(false);
+    expect(isClickMapLongRange('2026-08-14T00:00:00.000Z', '2026-08-15T00:00:00.000Z')).toBe(false);
+  });
+
+  it('is true when the range is longer than 30 days', () => {
+    expect(isClickMapLongRange('2026-07-15T00:00:00.000Z', '2026-08-15T00:00:00.000Z')).toBe(true);
+  });
+
+  it('is false when either bound is missing or invalid', () => {
+    expect(isClickMapLongRange(undefined, '2026-08-15T00:00:00.000Z')).toBe(false);
+    expect(isClickMapLongRange('not-a-date', '2026-08-15T00:00:00.000Z')).toBe(false);
+  });
+
+  it('understands datemath ranges', () => {
+    expect(isClickMapLongRange('now-24h', 'now')).toBe(false);
+    expect(isClickMapLongRange('now-90d', 'now')).toBe(true);
   });
 });

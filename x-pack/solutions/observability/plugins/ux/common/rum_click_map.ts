@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import type { RumFacetBucket } from './rum_app';
 
 export interface RumClickPoint {
@@ -204,6 +205,36 @@ export const inViewportBand = (
     return true;
   }
   return Math.abs(viewportWidth - snapshotWidth) / snapshotWidth <= slack;
+};
+
+/** Skip autoload when the selected range is longer than this. */
+export const CLICK_MAP_AUTOLOAD_MAX_MS = 30 * 24 * 60 * 60 * 1000;
+
+const parseRangeBound = (value?: string): number | null => {
+  if (!value) {
+    return null;
+  }
+  const ms = Date.parse(value);
+  if (Number.isFinite(ms)) {
+    return ms;
+  }
+  if (!/now/i.test(value)) {
+    return null;
+  }
+  const parsed = dateMath.parse(value);
+  if (!parsed?.isValid()) {
+    return null;
+  }
+  return parsed.valueOf();
+};
+
+export const isClickMapLongRange = (start?: string, end?: string): boolean => {
+  const from = parseRangeBound(start);
+  const to = parseRangeBound(end);
+  if (from == null || to == null) {
+    return false;
+  }
+  return to - from > CLICK_MAP_AUTOLOAD_MAX_MS;
 };
 
 export const isOnSnapshotViewport = (

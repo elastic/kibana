@@ -29,7 +29,7 @@ describe('rum daily transform specs', () => {
       terms: { field: RUM_CANONICAL_SERVICE_NAME_FIELD },
     });
     expect(groupBy['url.path.grouped']).toEqual({
-      terms: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD },
+      terms: { script: { source: expect.stringContaining('url.full'), lang: 'painless' } },
     });
   });
 
@@ -55,6 +55,16 @@ describe('rum daily transform specs', () => {
     const filters = rumPagesDailyTransformBody.source.query.bool.filter;
     expect(filters).toEqual(
       expect.arrayContaining([{ exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } }])
+    );
+    expect(filters).not.toContainEqual({
+      exists: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD },
+    });
+    expect(filters).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          bool: expect.objectContaining({ minimum_should_match: 1 }),
+        }),
+      ])
     );
     expect(rumPagesDailyTransformBody.frequency).toBe('1h');
     expect(rumServiceDailyTransformBody.frequency).toBe('1h');
@@ -86,7 +96,7 @@ describe('rum daily transform specs', () => {
         poor: { filter: { range: { 'attributes.browser.web_vital.value': { gt: 4000 } } } },
       })
     );
-    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 4 }));
+    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 5 }));
     expect(lcp.aggs.element).toEqual(
       expect.objectContaining({
         terms: expect.objectContaining({

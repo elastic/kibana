@@ -35,13 +35,15 @@ import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumOverview } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { useHasRumData } from '../rum_dashboard/hooks/use_has_rum_data';
-import { TrendMetric } from './trend_metric';
+import { TrendChartTypeGroup, TrendMetric, useTrendChartType } from './trend_metric';
 import { VisitorCountriesPanel } from './visitor_countries';
 import { ClickMapPanel } from './click_map_panel';
+import { FrustrationSignalsPanel } from './frustration_signals';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { useRumBudgetFlyout } from '../rum_budgets/budget_flyout_context';
 import { BudgetChips } from '../rum_budgets/budget_chips';
 import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
+import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
 
@@ -60,6 +62,7 @@ export function RumOverviewV2() {
   const { open: openBudget } = useRumBudgetFlyout();
   const { items: budgets } = useRumBudgets();
   const { hasData, loading: hasDataLoading } = useHasRumData();
+  const [trendChartType, setTrendChartType] = useTrendChartType();
   const {
     urlParams: {
       rangeFrom = 'now-24h',
@@ -83,6 +86,7 @@ export function RumOverviewV2() {
   const [data, setData] = useState<RumOverviewResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  useRumPageLoading('overview', loading);
 
   const locationFilter = typeof location === 'string' ? location : undefined;
 
@@ -159,6 +163,7 @@ export function RumOverviewV2() {
       loading,
       totalPageViews: data.kpis.pageViews,
       displayTrafficMetric: true,
+      layout: 'column',
     });
   }, [data, loading]);
 
@@ -369,97 +374,105 @@ export function RumOverviewV2() {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" wrap>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            data-test-subj="uxOverviewAlertSessions"
-            onClick={() =>
-              openAlert({
-                templateId: 'traffic_drop',
-                threshold: Math.max(1, Math.round(data.kpis.sessions * 0.5)),
-              })
-            }
-          >
-            {i18n.translate('xpack.ux.overview.alertSessions', {
-              defaultMessage: 'Alert on traffic',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            data-test-subj="uxOverviewAlertTrafficSpike"
-            onClick={() =>
-              openAlert({
-                templateId: 'traffic_spike',
-                threshold: Math.max(10, Math.round(data.kpis.sessions * 2)),
-              })
-            }
-          >
-            {i18n.translate('xpack.ux.overview.alertTrafficSpikeButtonLabel', {
-              defaultMessage: 'Alert on spike',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            data-test-subj="uxOverviewAlertErrors"
-            onClick={() =>
-              openAlert({
-                templateId: 'error_rate',
-                threshold: Math.max(0.01, Number((data.kpis.errorRate + 0.02).toFixed(2))),
-              })
-            }
-          >
-            {i18n.translate('xpack.ux.overview.alertErrors', { defaultMessage: 'Alert on errors' })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            data-test-subj="uxOverviewAlertInp"
-            onClick={() =>
-              openAlert({
-                templateId: 'web_vital',
-                vital: 'inp',
-                threshold: data.kpis.p75Inp ?? 200,
-              })
-            }
-          >
-            {i18n.translate('xpack.ux.overview.alertInp', { defaultMessage: 'Alert on INP' })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            data-test-subj="uxOverviewAlertFrustration"
-            onClick={() => openAlert({ templateId: 'frustration' })}
-          >
-            {i18n.translate('xpack.ux.overview.alertFrustration', {
-              defaultMessage: 'Alert on frustration',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            data-test-subj="uxOverviewSetBudget"
-            onClick={() => openBudget({ templateId: 'lcp' })}
-          >
-            {i18n.translate('xpack.ux.overview.setBudgetButtonLabel', {
-              defaultMessage: 'Set performance budget',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiPanel hasBorder paddingSize="s">
+        <EuiFlexGroup gutterSize="s" wrap>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="uxOverviewAlertSessions"
+              onClick={() =>
+                openAlert({
+                  templateId: 'traffic_drop',
+                  threshold: Math.max(1, Math.round(data.kpis.sessions * 0.5)),
+                })
+              }
+            >
+              {i18n.translate('xpack.ux.overview.alertSessions', {
+                defaultMessage: 'Alert on traffic',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="uxOverviewAlertTrafficSpike"
+              onClick={() =>
+                openAlert({
+                  templateId: 'traffic_spike',
+                  threshold: Math.max(10, Math.round(data.kpis.sessions * 2)),
+                })
+              }
+            >
+              {i18n.translate('xpack.ux.overview.alertTrafficSpikeButtonLabel', {
+                defaultMessage: 'Alert on spike',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="uxOverviewAlertErrors"
+              onClick={() =>
+                openAlert({
+                  templateId: 'error_rate',
+                  threshold: Math.max(0.01, Number((data.kpis.errorRate + 0.02).toFixed(2))),
+                })
+              }
+            >
+              {i18n.translate('xpack.ux.overview.alertErrors', {
+                defaultMessage: 'Alert on errors',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="uxOverviewAlertInp"
+              onClick={() =>
+                openAlert({
+                  templateId: 'web_vital',
+                  vital: 'inp',
+                  threshold: data.kpis.p75Inp ?? 200,
+                })
+              }
+            >
+              {i18n.translate('xpack.ux.overview.alertInp', { defaultMessage: 'Alert on INP' })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="uxOverviewAlertFrustration"
+              onClick={() => openAlert({ templateId: 'frustration' })}
+            >
+              {i18n.translate('xpack.ux.overview.alertFrustration', {
+                defaultMessage: 'Alert on frustration',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="uxOverviewSetBudget"
+              onClick={() => openBudget({ templateId: 'lcp' })}
+            >
+              {i18n.translate('xpack.ux.overview.setBudgetButtonLabel', {
+                defaultMessage: 'Set performance budget',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
 
       <EuiSpacer />
 
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
+        <EuiFlexItem grow={2} style={{ display: 'flex' }}>
+          <EuiPanel
+            hasBorder
+            paddingSize="m"
+            style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+          >
             <EuiTitle size="xs">
               <h3>
                 <EuiLink
@@ -473,7 +486,9 @@ export function RumOverviewV2() {
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {CoreVitals}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              {CoreVitals}
+            </div>
             <EuiSpacer size="s" />
             <BudgetChips items={budgets} templateId="lcp" pagePath={pageUrl} />
             <EuiSpacer size="xs" />
@@ -484,18 +499,29 @@ export function RumOverviewV2() {
             <BudgetChips items={budgets} templateId="ttfb" pagePath={pageUrl} />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('xpack.ux.overview.trendsTitle', { defaultMessage: 'Trends' })}
-              </h3>
-            </EuiTitle>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.ux.overview.trendsSubtitle', {
-                defaultMessage: 'Volume over the selected range',
-              })}
-            </EuiText>
+        <EuiFlexItem grow={5} style={{ display: 'flex' }}>
+          <EuiPanel
+            hasBorder
+            paddingSize="m"
+            style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+          >
+            <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="s">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate('xpack.ux.overview.trendsTitle', { defaultMessage: 'Trends' })}
+                  </h3>
+                </EuiTitle>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.ux.overview.trendsSubtitle', {
+                    defaultMessage: 'Volume over the selected range',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TrendChartTypeGroup chartType={trendChartType} onChange={setTrendChartType} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="m" />
             <TrendMetric
               id="sessions"
@@ -505,6 +531,8 @@ export function RumOverviewV2() {
               points={data.trends}
               accessor="sessions"
               color={euiTheme.colors.vis.euiColorVis0}
+              chartType={trendChartType}
+              chartHeight={128}
             />
             <EuiSpacer size="s" />
             <TrendMetric
@@ -515,6 +543,8 @@ export function RumOverviewV2() {
               points={data.trends}
               accessor="pageViews"
               color={euiTheme.colors.vis.euiColorVis1}
+              chartType={trendChartType}
+              chartHeight={128}
             />
             <EuiSpacer size="s" />
             <TrendMetric
@@ -524,6 +554,8 @@ export function RumOverviewV2() {
               accessor="errors"
               color={euiTheme.colors.danger}
               invertDelta
+              chartType={trendChartType}
+              chartHeight={128}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -536,72 +568,20 @@ export function RumOverviewV2() {
       <EuiSpacer />
 
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('xpack.ux.overview.frustrationTitle', {
-                  defaultMessage: 'Frustration signals',
-                })}
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiLink
-                  data-test-subj="uxRumOverviewV2Link"
-                  onClick={() =>
-                    pushRumPath(history, '/session-replay', sessionsPatch({ frustration: 'rage' }))
-                  }
-                >
-                  <EuiStat
-                    title={String(data.frustration.rageSessions)}
-                    description={i18n.translate('xpack.ux.overview.frustration.rage', {
-                      defaultMessage: 'Rage-click sessions',
-                    })}
-                    titleSize="s"
-                  />
-                </EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLink
-                  data-test-subj="uxRumOverviewV2Link"
-                  onClick={() =>
-                    pushRumPath(history, '/session-replay', sessionsPatch({ frustration: 'error' }))
-                  }
-                >
-                  <EuiStat
-                    title={String(data.frustration.errorSessions)}
-                    description={i18n.translate('xpack.ux.overview.frustration.errors', {
-                      defaultMessage: 'Sessions with errors',
-                    })}
-                    titleSize="s"
-                  />
-                </EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLink
-                  data-test-subj="uxRumOverviewV2Link"
-                  onClick={() =>
-                    pushRumPath(history, '/session-replay', sessionsPatch({ frustration: 'dead' }))
-                  }
-                >
-                  <EuiStat
-                    title={String(data.frustration.deadClickSessions)}
-                    description={i18n.translate('xpack.ux.overview.frustration.dead', {
-                      defaultMessage: 'Dead-click sessions',
-                    })}
-                    titleSize="s"
-                  />
-                </EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <BudgetChips items={budgets} templateId="frustration" pagePath={pageUrl} />
-          </EuiPanel>
+        <EuiFlexItem style={{ display: 'flex' }}>
+          <FrustrationSignalsPanel
+            frustration={data.frustration}
+            sessions={data.kpis.sessions}
+            budgets={budgets}
+            pageUrl={pageUrl}
+          />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel hasBorder paddingSize="m">
+        <EuiFlexItem style={{ display: 'flex' }}>
+          <EuiPanel
+            hasBorder
+            paddingSize="m"
+            style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
+          >
             <EuiTitle size="xs">
               <h3>
                 {i18n.translate('xpack.ux.overview.breakdownTitle', {

@@ -42,6 +42,25 @@ describe('CoreVitalItem', () => {
     expect(getByTestId(`${LEGEND_POOR_LABEL}-5`)).toBeInTheDocument();
   });
 
+  it('hides rank legends when showLegend is false', () => {
+    const { queryByTestId, getByText } = render(
+      <CoreVitalItem
+        title={title}
+        value={value}
+        ranks={[85, 10, 5]}
+        loading={loading}
+        thresholds={thresholds}
+        helpLabel={helpLabel}
+        showLegend={false}
+      />
+    );
+
+    expect(getByText(title)).toBeInTheDocument();
+    expect(queryByTestId(`${LEGEND_GOOD_LABEL}-85`)).not.toBeInTheDocument();
+    expect(queryByTestId(`${LEGEND_NEEDS_IMPROVEMENT_LABEL}-10`)).not.toBeInTheDocument();
+    expect(queryByTestId(`${LEGEND_POOR_LABEL}-5`)).not.toBeInTheDocument();
+  });
+
   it('renders loading state when loading is truthy', () => {
     const { queryByText, getByText } = render(
       <CoreVitalItem

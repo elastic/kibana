@@ -430,6 +430,7 @@ export const querySessionIndexKpis = async ({
   ...params
 }: SessionIndexFilterParams & { client: ElasticsearchClient }): Promise<{
   sessions: number;
+  pageViews: number;
   errorSessions: number;
   rageSessions: number;
   deadSessions: number;
@@ -443,6 +444,7 @@ export const querySessionIndexKpis = async ({
     track_total_hits: true,
     query: { bool: { filter: buildSessionIndexFilters(params) } },
     aggs: {
+      page_views: { sum: { field: 'page_view_count' } },
       error_sessions: { filter: { range: { error_count: { gt: 0 } } } },
       rage_sessions: { filter: { range: { rage_click_count: { gt: 0 } } } },
       dead_sessions: { filter: { range: { dead_click_count: { gt: 0 } } } },
@@ -460,6 +462,7 @@ export const querySessionIndexKpis = async ({
   const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
   return {
     sessions: total,
+    pageViews: asNumber((aggs.page_views as { value?: number } | undefined)?.value),
     errorSessions: (aggs.error_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
     rageSessions: (aggs.rage_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
     deadSessions: (aggs.dead_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,

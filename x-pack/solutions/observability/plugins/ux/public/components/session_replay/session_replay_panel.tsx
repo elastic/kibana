@@ -50,6 +50,7 @@ import {
   SessionReplayInjectButton,
   SessionReplayInjectFlyout,
 } from './session_replay_inject_flyout';
+import { useRumPageLoading } from '../app/rum_dashboard/rum_page_loading';
 import { LiveSessionsPanel } from './live_sessions_panel';
 import {
   JourneyTrail,
@@ -283,6 +284,7 @@ export function SessionReplayPanel() {
   const [stats, setStats] = useState<SessionListStats>(EMPTY_STATS);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  useRumPageLoading('sessions', loading);
 
   const [searchInput, setSearchInput] = useState(sessionQuery ?? '');
   const [search, setSearch] = useState(sessionQuery ?? '');

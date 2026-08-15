@@ -9,7 +9,7 @@ import { EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { RumTrendPoint } from '../../../../common/rum_app';
-import { TrendMetric } from './trend_metric';
+import { TrendChartTypeGroup, TrendMetric, useTrendChartType } from './trend_metric';
 import { useRumTrends } from './use_rum_trends';
 
 type TrendAccessor = Exclude<keyof RumTrendPoint, 'timestamp'>;
@@ -23,6 +23,7 @@ const LABELS: Record<TrendAccessor, string> = {
 export function TabTrendChart({ accessor }: { accessor: TrendAccessor }) {
   const { euiTheme } = useEuiTheme();
   const { points, loading } = useRumTrends();
+  const [chartType, setChartType] = useTrendChartType();
   const color =
     accessor === 'errors'
       ? euiTheme.colors.danger
@@ -42,6 +43,8 @@ export function TabTrendChart({ accessor }: { accessor: TrendAccessor }) {
           accessor={accessor}
           color={color}
           invertDelta={accessor === 'errors'}
+          chartType={chartType}
+          headerExtra={<TrendChartTypeGroup chartType={chartType} onChange={setChartType} />}
         />
       )}
     </EuiPanel>

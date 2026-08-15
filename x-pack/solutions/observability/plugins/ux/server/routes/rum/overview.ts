@@ -131,6 +131,7 @@ const overlaySessionIndex = async (
     kpis: {
       ...result.kpis,
       sessions: slice.sessions,
+      pageViews: slice.pageViews,
       errorSessions: slice.errorSessions,
       errorRate: slice.sessions > 0 ? slice.errorSessions / slice.sessions : 0,
     },
@@ -219,18 +220,13 @@ export const getRumOverviewRoute = createUxServerRoute({
         pagesWatermark: status.pagesDaily?.watermark,
         serviceWatermark: status.serviceDaily?.watermark,
         browserWatermark: status.browserDaily?.watermark,
+        uniqueFromRaw: true,
+        includeBots: params.query.includeBots,
       });
-      return overlaySessionIndex(
-        {
-          ...result,
-          topPages: mergeRumPageRows(result.topPages, groupingFromSettings(settings)),
-        },
-        client,
-        params.query,
-        status.installed,
-        status.watermark,
-        status.sourceLookbackDays
-      );
+      return {
+        ...result,
+        topPages: mergeRumPageRows(result.topPages, groupingFromSettings(settings)),
+      };
     }
     const filters = rumBaseFilters(params.query);
 

@@ -39,11 +39,13 @@ export function WebCoreVitalsTitle({
   coreVitalPages,
   totalPageViews = 0,
   displayTrafficMetric,
+  hideHeading = false,
 }: {
   loading: boolean;
   coreVitalPages?: number;
   totalPageViews?: number;
   displayTrafficMetric: boolean;
+  hideHeading?: boolean;
 }) {
   const [isBrowserPopoverOpen, setIsBrowserPopoverOpen] = useState(false);
 
@@ -57,11 +59,13 @@ export function WebCoreVitalsTitle({
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{CORE_WEB_VITALS}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
+        {!hideHeading && (
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>{CORE_WEB_VITALS}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <EuiLink

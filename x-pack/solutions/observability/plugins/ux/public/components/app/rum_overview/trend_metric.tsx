@@ -8,6 +8,7 @@
 import {
   AreaSeries,
   Axis,
+  BarSeries,
   Chart,
   CurveType,
   Position,
@@ -16,12 +17,82 @@ import {
   Tooltip,
   niceTimeFormatter,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { RumTrendPoint } from '../../../../common/rum_app';
+
+export type TrendChartType = 'area' | 'bar';
+
+const TREND_CHART_TYPE_KEY = 'ux.rum.trendChartType';
+
+export const useTrendChartType = (): [TrendChartType, (next: TrendChartType) => void] => {
+  const [chartType, setChartType] = useState<TrendChartType>(() => {
+    try {
+      return window.localStorage.getItem(TREND_CHART_TYPE_KEY) === 'bar' ? 'bar' : 'area';
+    } catch {
+      return 'area';
+    }
+  });
+  return [
+    chartType,
+    (next) => {
+      setChartType(next);
+      try {
+        window.localStorage.setItem(TREND_CHART_TYPE_KEY, next);
+      } catch {
+        // ignore quota / private-mode failures
+      }
+    },
+  ];
+};
+
+export function TrendChartTypeGroup({
+  chartType,
+  onChange,
+}: {
+  chartType: TrendChartType;
+  onChange: (next: TrendChartType) => void;
+}) {
+  return (
+    <EuiButtonGroup
+      legend={i18n.translate('xpack.ux.overview.trends.chartTypeAriaLabel', {
+        defaultMessage: 'Trend chart type',
+      })}
+      type="single"
+      buttonSize="compressed"
+      isIconOnly
+      idSelected={chartType}
+      options={[
+        {
+          id: 'area',
+          label: i18n.translate('xpack.ux.overview.trends.areaChartButtonLabel', {
+            defaultMessage: 'Area',
+          }),
+          iconType: 'visArea',
+        },
+        {
+          id: 'bar',
+          label: i18n.translate('xpack.ux.overview.trends.barChartButtonLabel', {
+            defaultMessage: 'Bar',
+          }),
+          iconType: 'visBarVertical',
+        },
+      ]}
+      onChange={(id) => onChange(id === 'bar' ? 'bar' : 'area')}
+      data-test-subj="uxTrendChartType"
+    />
+  );
+}
 
 const formatCount = (value: number): string => {
   if (value >= 1_000_000) {
@@ -56,6 +127,9 @@ export function TrendMetric({
   accessor,
   color,
   invertDelta,
+  chartType = 'area',
+  chartHeight = 88,
+  headerExtra,
 }: {
   id: string;
   label: string;
@@ -63,6 +137,9 @@ export function TrendMetric({
   accessor: Exclude<keyof RumTrendPoint, 'timestamp'>;
   color: string;
   invertDelta?: boolean;
+  chartType?: TrendChartType;
+  chartHeight?: number;
+  headerExtra?: React.ReactNode;
 }) {
   const { baseTheme, theme } = useChartThemes();
 
@@ -80,6 +157,19 @@ export function TrendMetric({
   const xExtents: [number, number] =
     series.length > 0 ? [series[0].x, series[series.length - 1].x] : [0, 1];
   const tickFormat = niceTimeFormatter(xExtents);
+  const axisTickFormat = (value: number): string => {
+    const span = xExtents[1] - xExtents[0];
+    const date = new Date(value);
+    if (span <= 2 * 24 * 60 * 60 * 1000) {
+      return new Intl.DateTimeFormat(i18n.getLocale(), {
+        hour: 'numeric',
+        minute: '2-digit',
+      }).format(date);
+    }
+    return new Intl.DateTimeFormat(i18n.getLocale(), { month: 'short', day: 'numeric' }).format(
+      date
+    );
+  };
 
   const deltaIsUp = change != null && change > 0;
   const deltaIsDown = change != null && change < 0;
@@ -124,10 +214,11 @@ export function TrendMetric({
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
+        {headerExtra ? <EuiFlexItem grow={false}>{headerExtra}</EuiFlexItem> : null}
       </EuiFlexGroup>
       <div
         css={css`
-          height: 88px;
+          height: ${chartHeight}px;
           width: 100%;
         `}
       >
@@ -138,14 +229,15 @@ export function TrendMetric({
             })}
           </EuiText>
         ) : (
-          <Chart size={{ height: 88, width: '100%' }}>
+          <Chart size={{ height: chartHeight, width: '100%' }}>
             <Settings
               baseTheme={baseTheme}
               theme={[
                 {
-                  chartMargins: { left: 0, right: 4, top: 8, bottom: 0 },
+                  chartMargins: { left: 0, right: 4, top: 8, bottom: 10 },
                   chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
                   background: { color: 'transparent' },
+                  scales: { barsPadding: 0.18 },
                 },
                 ...theme,
               ]}
@@ -168,29 +260,46 @@ export function TrendMetric({
               id={`${id}-x`}
               position={Position.Bottom}
               ticks={3}
-              tickFormat={tickFormat}
-              timeAxisLayerCount={1}
+              timeAxisLayerCount={0}
+              tickFormat={(value) => axisTickFormat(Number(value))}
               style={{
                 tickLine: { visible: false },
                 axisLine: { visible: false },
               }}
             />
-            <AreaSeries
-              id={id}
-              name={label}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={series}
-              color={color}
-              curve={CurveType.CURVE_MONOTONE_X}
-              areaSeriesStyle={{
-                line: { strokeWidth: 1.5 },
-                area: { opacity: 0.18 },
-                point: { visible: 'never' },
-              }}
-            />
+            {chartType === 'bar' ? (
+              <BarSeries
+                id={id}
+                name={label}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={series}
+                color={color}
+                enableHistogramMode
+                barSeriesStyle={{
+                  rect: { opacity: 0.85 },
+                }}
+              />
+            ) : (
+              <AreaSeries
+                id={id}
+                name={label}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={series}
+                color={color}
+                curve={CurveType.CURVE_MONOTONE_X}
+                areaSeriesStyle={{
+                  line: { strokeWidth: 1.5 },
+                  area: { opacity: 0.18 },
+                  point: { visible: 'never' },
+                }}
+              />
+            )}
           </Chart>
         )}
       </div>

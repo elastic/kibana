@@ -30,6 +30,7 @@ import {
   RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
 } from '../../common/rum_sessions';
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
+import { PAGE_PATH_SCRIPT } from '../routes/rum/query';
 
 const EXCEPTION_FILTER = {
   bool: {
@@ -385,6 +386,37 @@ export const rumBrowserDailyIndexTemplate = dailyIndexTemplate(
   RUM_BROWSER_DAILY_PIPELINE_NAME
 );
 
+/** Page-shaped events only — do not pull resource spans that merely have url.full. */
+const PAGE_EVENT_FILTER = {
+  bool: {
+    should: [
+      PAGE_VIEW_FILTER,
+      WEB_VITAL_FILTER,
+      {
+        bool: {
+          filter: [
+            EXCEPTION_FILTER,
+            {
+              bool: {
+                should: [
+                  { exists: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD } },
+                  { exists: { field: 'attributes.url.full' } },
+                  { exists: { field: 'attributes.page.url' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+      frustrationFilter('rage_click'),
+      frustrationFilter('dead_click'),
+      frustrationFilter('error_click'),
+    ],
+    minimum_should_match: 1,
+  },
+};
+
 const sourceQuery = (extraFilters: object[] = []) => ({
   bool: {
     filter: [
@@ -409,7 +441,7 @@ const serviceNameGroup = {
 export const buildRumPagesDailyTransformBody = (syncDelay = RUM_DAILY_SYNC_DELAY) => ({
   source: {
     index: [RUM_SESSION_SOURCE_INDEX],
-    query: sourceQuery([{ exists: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD } }]),
+    query: sourceQuery([PAGE_EVENT_FILTER]),
   },
   dest: {
     index: RUM_PAGES_DAILY_INDEX,
@@ -442,7 +474,7 @@ export const buildRumPagesDailyTransformBody = (syncDelay = RUM_DAILY_SYNC_DELAY
       '@timestamp': dateHistogramGroup,
       'service.name': serviceNameGroup,
       'url.path.grouped': {
-        terms: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD },
+        terms: { script: { source: PAGE_PATH_SCRIPT, lang: 'painless' } },
       },
     },
     aggregations: dailyAggregations,

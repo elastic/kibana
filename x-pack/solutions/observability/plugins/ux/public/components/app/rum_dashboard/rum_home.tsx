@@ -43,6 +43,7 @@ import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
 import { RumKueryBar } from '../rum_filters/rum_kuery_bar';
+import { RumPageLoadingBar, RumPageLoadingProvider } from './rum_page_loading';
 
 export const DASHBOARD_LABEL = i18n.translate('xpack.ux.overview.tab', {
   defaultMessage: 'Overview',
@@ -155,58 +156,49 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
   }, [hasData, observabilityAIAssistant?.service, screenDescription]);
 
   return (
-    <PageTemplateComponent
-      noDataConfig={isLoading ? undefined : noDataConfig}
-      isPageDataLoaded={isLoading === false}
-      pageSectionProps={{
-        paddingSize: 'none',
-      }}
-    >
-      <AppHeader
-        title={i18n.translate('xpack.ux.home.title', {
-          defaultMessage: 'User Experience',
-        })}
-        menu={appMenu}
-        spacing="standard"
-      />
+    <RumPageLoadingProvider>
+      <PageTemplateComponent
+        noDataConfig={isLoading ? undefined : noDataConfig}
+        isPageDataLoaded={isLoading === false}
+        pageSectionProps={{
+          paddingSize: 'none',
+        }}
+      >
+        <AppHeader
+          title={i18n.translate('xpack.ux.home.title', {
+            defaultMessage: 'User Experience',
+          })}
+          menu={appMenu}
+          spacing="standard"
+        />
 
-      <EuiPageSection paddingSize="m" restrictWidth={false}>
-        <DashboardToolbar tab={tab} />
-        {tab === 'reports' && <RumReportPrintStyles />}
-        {isLoading && tab === 'overview' && <EmptyStateLoading />}
-        <RumAlertFlyoutProvider>
-          <RumBudgetFlyoutProvider>
-            <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
-              {tab === 'overview' && <RumOverviewV2 />}
-              {tab === 'pages' && <RumPagesPanel />}
-              {tab === 'errors' && <RumErrorsPanel />}
-              {tab === 'session-replay' && <SessionReplayPanel />}
-              {tab === 'journeys' && <SessionFunnelPanel />}
-              {tab === 'reports' &&
-                (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
-              {tab === 'ai' && <RumAiPanel />}
-              {tab === 'alerts' && <RumAlertsPanel />}
-              {tab === 'budgets' && <RumBudgetsPanel />}
-            </div>
-          </RumBudgetFlyoutProvider>
-        </RumAlertFlyoutProvider>
-      </EuiPageSection>
-    </PageTemplateComponent>
+        <EuiPageSection paddingSize="m" restrictWidth={false}>
+          <DashboardToolbar tab={tab} />
+          {tab === 'reports' && <RumReportPrintStyles />}
+          {isLoading && tab === 'overview' && <EmptyStateLoading />}
+          <RumAlertFlyoutProvider>
+            <RumBudgetFlyoutProvider>
+              <div style={{ visibility: isLoading && tab === 'overview' ? 'hidden' : 'initial' }}>
+                {tab === 'overview' && <RumOverviewV2 />}
+                {tab === 'pages' && <RumPagesPanel />}
+                {tab === 'errors' && <RumErrorsPanel />}
+                {tab === 'session-replay' && <SessionReplayPanel />}
+                {tab === 'journeys' && <SessionFunnelPanel />}
+                {tab === 'reports' &&
+                  (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
+                {tab === 'ai' && <RumAiPanel />}
+                {tab === 'alerts' && <RumAlertsPanel />}
+                {tab === 'budgets' && <RumBudgetsPanel />}
+              </div>
+            </RumBudgetFlyoutProvider>
+          </RumAlertFlyoutProvider>
+        </EuiPageSection>
+      </PageTemplateComponent>
+    </RumPageLoadingProvider>
   );
 }
 
 function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
-  const history = useHistory();
-  const location = useLocation();
-
-  const tabHref = (pathname: string) => ({
-    href: history.createHref({ pathname, search: location.search }),
-    onClick: (e: React.MouseEvent) => {
-      e.preventDefault();
-      history.push({ pathname, search: location.search });
-    },
-  });
-
   return (
     <div className={tab === 'reports' ? 'uxRumReportNoPrint' : undefined}>
       <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween" wrap>
@@ -239,52 +231,64 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiTabs>
-        <EuiTab isSelected={tab === 'overview'} data-test-subj="uxDashboardTab" {...tabHref('/')}>
-          {DASHBOARD_LABEL}
-        </EuiTab>
-        <EuiTab isSelected={tab === 'pages'} data-test-subj="uxPagesTab" {...tabHref('/pages')}>
-          {PAGES_LABEL}
-        </EuiTab>
-        <EuiTab isSelected={tab === 'errors'} data-test-subj="uxErrorsTab" {...tabHref('/errors')}>
-          {ERRORS_LABEL}
-        </EuiTab>
-        <EuiTab
-          isSelected={tab === 'session-replay'}
-          data-test-subj="uxSessionReplayTab"
-          {...tabHref('/session-replay')}
-        >
-          {SESSIONS_LABEL}
-        </EuiTab>
-        <EuiTab
-          isSelected={tab === 'journeys'}
-          data-test-subj="uxFunnelsTab"
-          {...tabHref('/journeys')}
-        >
-          {JOURNEYS_LABEL}
-        </EuiTab>
-        <EuiTab
-          isSelected={tab === 'reports'}
-          data-test-subj="uxReportsTab"
-          {...tabHref('/reports')}
-        >
-          {REPORTS_LABEL}
-        </EuiTab>
-        <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
-          {AI_LABEL}
-        </EuiTab>
-        <EuiTab isSelected={tab === 'alerts'} data-test-subj="uxAlertsTab" {...tabHref('/alerts')}>
-          {ALERTS_LABEL}
-        </EuiTab>
-        <EuiTab
-          isSelected={tab === 'budgets'}
-          data-test-subj="uxBudgetsTab"
-          {...tabHref('/budgets')}
-        >
-          {BUDGETS_LABEL}
-        </EuiTab>
-      </EuiTabs>
+      <div style={{ position: 'relative' }}>
+        <UxHomeTabs tab={tab} />
+        <RumPageLoadingBar />
+      </div>
       <EuiSpacer size="m" />
     </div>
+  );
+}
+
+function UxHomeTabs({ tab }: { tab: UxHomeTab }) {
+  const history = useHistory();
+  const location = useLocation();
+
+  const tabHref = (pathname: string) => ({
+    href: history.createHref({ pathname, search: location.search }),
+    onClick: (e: React.MouseEvent) => {
+      e.preventDefault();
+      history.push({ pathname, search: location.search });
+    },
+  });
+
+  return (
+    <EuiTabs>
+      <EuiTab isSelected={tab === 'overview'} data-test-subj="uxDashboardTab" {...tabHref('/')}>
+        {DASHBOARD_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'pages'} data-test-subj="uxPagesTab" {...tabHref('/pages')}>
+        {PAGES_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'errors'} data-test-subj="uxErrorsTab" {...tabHref('/errors')}>
+        {ERRORS_LABEL}
+      </EuiTab>
+      <EuiTab
+        isSelected={tab === 'session-replay'}
+        data-test-subj="uxSessionReplayTab"
+        {...tabHref('/session-replay')}
+      >
+        {SESSIONS_LABEL}
+      </EuiTab>
+      <EuiTab
+        isSelected={tab === 'journeys'}
+        data-test-subj="uxFunnelsTab"
+        {...tabHref('/journeys')}
+      >
+        {JOURNEYS_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'reports'} data-test-subj="uxReportsTab" {...tabHref('/reports')}>
+        {REPORTS_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
+        {AI_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'alerts'} data-test-subj="uxAlertsTab" {...tabHref('/alerts')}>
+        {ALERTS_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'budgets'} data-test-subj="uxBudgetsTab" {...tabHref('/budgets')}>
+        {BUDGETS_LABEL}
+      </EuiTab>
+    </EuiTabs>
   );
 }

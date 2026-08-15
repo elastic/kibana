@@ -49,6 +49,7 @@ import { Sparkline } from '../../session_replay/session_ui';
 import { TabTrendChart } from '../rum_overview/tab_trend_chart';
 import { BudgetChips } from '../rum_budgets/budget_chips';
 import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
+import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 
 const ERROR_RATE_WARN = 0.05;
 
@@ -332,6 +333,7 @@ export function RumPagesPanel() {
   const [kpis, setKpis] = useState<RumPagesKpis>(emptyPagesKpis());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  useRumPageLoading('pages', loading);
   const [selected, setSelected] = useState<RumPageRow | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const { items: budgets } = useRumBudgets();

@@ -43,6 +43,7 @@ import { fetchRumErrors } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { formatRelativeTime, formatTime, shortenPath } from '../../session_replay/session_ui';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
+import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 import { ErrorsOverTimeChart } from './errors_over_time_chart';
 
 type ErrorSortField = 'count' | 'sessionCount' | 'userCount' | 'firstSeen' | 'lastSeen';
@@ -332,6 +333,7 @@ export function RumErrorsPanel() {
   const [kpis, setKpis] = useState<RumErrorsKpis>(emptyErrorsKpis());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  useRumPageLoading('errors', loading);
   const [selected, setSelected] = useState<RumErrorGroup | null>(null);
   const [sortField, setSortField] = useState<ErrorSortField>('sessionCount');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');

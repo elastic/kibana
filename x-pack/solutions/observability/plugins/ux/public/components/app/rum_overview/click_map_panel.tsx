@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiAccordion,
   EuiButtonEmpty,
   EuiCallOut,
   EuiEmptyPrompt,
@@ -20,15 +21,75 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
 import { useHistory } from 'react-router-dom';
-import type { RumClickMapResponse } from '../../../../common/rum_click_map';
+import { isClickMapLongRange, type RumClickMapResponse } from '../../../../common/rum_click_map';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumClickMap } from '../../../services/rest/rum_api';
 import { pushRumPath } from '../../../utils/rum_search';
+import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 import { ClickMapStage } from './click_map_stage';
 
+const clickMapTitle = i18n.translate('xpack.ux.overview.clickMap.title', {
+  defaultMessage: 'Click map',
+});
+
+const clickMapSubtitle = i18n.translate('xpack.ux.overview.clickMap.subtitle', {
+  defaultMessage:
+    'Where users clicked on this page, over a session replay snapshot of the same viewport.',
+});
+
 export function ClickMapPanel() {
+  const {
+    urlParams: { start, end, rangeFrom, rangeTo },
+  } = useLegacyUrlParams();
+  const isLongRange = isClickMapLongRange(start ?? rangeFrom, end ?? rangeTo);
+  const [isOpen, setIsOpen] = useState(!isLongRange);
+
+  useEffect(() => {
+    setIsOpen(!isLongRange);
+  }, [isLongRange]);
+
+  return (
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="uxClickMapPanel">
+      <EuiAccordion
+        id="uxClickMapAccordion"
+        data-test-subj="uxClickMapAccordion"
+        forceState={isOpen ? 'open' : 'closed'}
+        onToggle={setIsOpen}
+        buttonContent={
+          <div>
+            <EuiTitle size="xs">
+              <h3>{clickMapTitle}</h3>
+            </EuiTitle>
+            <EuiText size="xs" color="subdued">
+              {clickMapSubtitle}
+            </EuiText>
+          </div>
+        }
+        extraAction={
+          isLongRange && !isOpen ? (
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.ux.overview.clickMap.longRangeDescription', {
+                defaultMessage: 'Longer than 30 days — expand to load.',
+              })}
+            </EuiText>
+          ) : undefined
+        }
+      >
+        <EuiSpacer size="m" />
+        {isOpen && (
+          <LoadWhenInView initialHeight={420} placeholderTitle={clickMapTitle}>
+            <ClickMapContent />
+          </LoadWhenInView>
+        )}
+      </EuiAccordion>
+    </EuiPanel>
+  );
+}
+
+function ClickMapContent() {
   const { http } = useKibanaServices();
   const history = useHistory();
   const {
@@ -57,6 +118,8 @@ export function ClickMapPanel() {
   const [data, setData] = useState<RumClickMapResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const cancelledRef = useRef(false);
+  useRumPageLoading('click-map', loading);
 
   useEffect(() => {
     setUserPage('');
@@ -83,12 +146,20 @@ export function ClickMapPanel() {
         connection,
         device,
       });
+      if (cancelledRef.current) {
+        return;
+      }
       setData(result);
     } catch (err) {
+      if (cancelledRef.current) {
+        return;
+      }
       setError(err instanceof Error ? err.message : String(err));
       setData(null);
     } finally {
-      setLoading(false);
+      if (!cancelledRef.current) {
+        setLoading(false);
+      }
     }
   }, [
     http,
@@ -109,7 +180,11 @@ export function ClickMapPanel() {
   ]);
 
   useEffect(() => {
+    cancelledRef.current = false;
     void load();
+    return () => {
+      cancelledRef.current = true;
+    };
   }, [load]);
 
   const pageOptions = useMemo(() => {
@@ -125,23 +200,8 @@ export function ClickMapPanel() {
   const lockedToFilter = Boolean(globalPage);
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="uxClickMapPanel">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m" wrap>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.ux.overview.clickMap.title', {
-                defaultMessage: 'Click map',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.ux.overview.clickMap.subtitle', {
-              defaultMessage:
-                'Where users clicked on this page, over a session replay snapshot of the same viewport.',
-            })}
-          </EuiText>
-        </EuiFlexItem>
+    <>
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m" wrap>
         {pageOptions.options.length > 0 && (
           <EuiFlexItem grow={false} style={{ minWidth: 220 }}>
             <EuiSelect
@@ -178,7 +238,7 @@ export function ClickMapPanel() {
         )}
       </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+      {(pageOptions.options.length > 0 || data?.snapshot?.sessionId) && <EuiSpacer size="m" />}
 
       {loading && !data && (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
@@ -258,6 +318,6 @@ export function ClickMapPanel() {
           </p>
         </EuiCallOut>
       )}
-    </EuiPanel>
+    </>
   );
 }

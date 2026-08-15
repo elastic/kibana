@@ -10,6 +10,7 @@ import type { RumTrendPoint } from '../../../../common/rum_app';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumTrends } from '../../../services/rest/rum_api';
+import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 
 export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
   const { http } = useKibanaServices();
@@ -35,6 +36,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
 
   const [points, setPoints] = useState<RumTrendPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  useRumPageLoading('trends', loading);
 
   const locationFilter = typeof location === 'string' ? location : undefined;
 

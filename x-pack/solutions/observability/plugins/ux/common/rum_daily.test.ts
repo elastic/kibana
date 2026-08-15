@@ -5,7 +5,57 @@
  * 2.0.
  */
 
-import { canUseDailyRollup, rangeSpanMs, shouldQueryDailyIndex } from './rum_daily';
+import {
+  canUseDailyRollup,
+  dailyIndexTimeRange,
+  dailyRangeGte,
+  rangeSpanMs,
+  shouldQueryDailyIndex,
+} from './rum_daily';
+
+describe('dailyRangeGte', () => {
+  it('floors an absolute start to UTC midnight', () => {
+    expect(dailyRangeGte('2026-05-17T21:00:00.000Z')).toBe('2026-05-17T00:00:00.000Z');
+  });
+
+  it('floors now-90d so the first daily bucket is included', () => {
+    expect(dailyRangeGte('now-90d', new Date('2026-08-15T21:00:00.000Z'))).toBe(
+      '2026-05-17T00:00:00.000Z'
+    );
+  });
+});
+
+describe('dailyIndexTimeRange', () => {
+  const now = new Date('2026-08-15T21:00:00.000Z');
+
+  it('keeps complete UTC days and leaves today for the raw tail', () => {
+    expect(
+      dailyIndexTimeRange({
+        rangeFrom: 'now-1y',
+        rangeTo: 'now',
+        watermark: '2026-08-15T00:00:00.000Z',
+        now,
+      })
+    ).toEqual({
+      gte: '2025-08-15T00:00:00.000Z',
+      lt: '2026-08-15T00:00:00.000Z',
+    });
+  });
+
+  it('clips a closed historical range at the watermark', () => {
+    expect(
+      dailyIndexTimeRange({
+        rangeFrom: 'now-90d',
+        rangeTo: 'now-1d',
+        watermark: '2026-08-14T00:00:00.000Z',
+        now,
+      })
+    ).toEqual({
+      gte: '2026-05-17T00:00:00.000Z',
+      lte: '2026-08-14T00:00:00.000Z',
+    });
+  });
+});
 
 describe('rangeSpanMs', () => {
   it('reads datemath windows', () => {

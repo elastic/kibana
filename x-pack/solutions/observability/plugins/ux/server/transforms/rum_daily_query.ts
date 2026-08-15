@@ -12,18 +12,40 @@ import {
   emptyVitalAttribution,
   ranksFromCounts,
   summarizePagesKpis,
+  VITAL_RANK_THRESHOLDS,
+  type RumCountryRow,
+  type RumFacetBucket,
   type RumOverviewResponse,
   type RumPageRow,
   type RumPagesResponse,
   type RumVitalSummary,
 } from '../../common/rum_app';
 import {
+  dailyIndexTimeRange,
+  dailyRangeGte,
   RUM_BROWSER_DAILY_INDEX,
   RUM_PAGES_DAILY_INDEX,
   RUM_SERVICE_DAILY_INDEX,
 } from '../../common/rum_daily';
+import { rangeIncludesOpenTail } from '../../common/rum_sessions';
+import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import { rumEsSearchOptions } from '../routes/rum/es_retry';
-import { termsBuckets } from '../routes/rum/query';
+import {
+  BROWSER_SCRIPT,
+  DOCUMENT_LOAD_FILTER,
+  EXCEPTION_FILTER,
+  OS_SCRIPT,
+  PAGE_VIEW_FILTER,
+  WEB_VITAL_FILTER,
+  cardValue,
+  facetFromScriptTerms,
+  frustrationEventFilter,
+  pagePathTerms,
+  percentileValue,
+  rumBaseFilters,
+  sessionCardinality,
+  termsBuckets,
+} from '../routes/rum/query';
 
 const escapeWildcard = (raw: string): string => raw.replace(/[?*\\]/g, '\\$&');
 
@@ -51,9 +73,551 @@ const weightedValue = (agg: unknown): number | null => {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 };
 
-const dailyTimeFilter = (rangeFrom: string, rangeTo: string, watermark?: string | null) => {
-  const lte = watermark && watermark < rangeTo ? watermark : rangeTo;
-  return { range: { '@timestamp': { gte: rangeFrom, lte } } };
+const dailyTimeFilter = (rangeFrom: string, rangeTo: string, watermark?: string | null) => ({
+  range: { '@timestamp': dailyIndexTimeRange({ rangeFrom, rangeTo, watermark }) },
+});
+
+export interface RumOpenDayVitalTail {
+  samples: number;
+  good: number;
+  ni: number;
+  poor: number;
+  p75: number | null;
+}
+
+/** Additive raw counts for the open UTC day. Session uniques are for the trend point only. */
+export interface RumOpenDayTail {
+  pageViews: number;
+  errorCount: number;
+  sessions: number;
+  errorSessions: number;
+  rageClicks: number;
+  deadClicks: number;
+  errorClicks: number;
+  rageSessions: number;
+  deadSessions: number;
+  lcp: RumOpenDayVitalTail;
+  inp: RumOpenDayVitalTail;
+  cls: RumOpenDayVitalTail;
+  fcp: RumOpenDayVitalTail;
+  loadSamples: number;
+  loadP75: number | null;
+  pages: RumPageRow[];
+}
+
+export interface RumUniqueSessionKpis {
+  sessions: number;
+  errorSessions: number;
+  rageSessions: number;
+  deadSessions: number;
+}
+
+export interface RumRawOverviewSlice {
+  unique: RumUniqueSessionKpis;
+  browsers: RumFacetBucket[];
+  os: RumFacetBucket[];
+  countries: RumCountryRow[];
+}
+
+const filterDocCount = (agg: unknown): number => {
+  const n = (agg as { doc_count?: number } | undefined)?.doc_count;
+  return typeof n === 'number' && Number.isFinite(n) ? n : 0;
+};
+
+const emptyVitalTail = (): RumOpenDayVitalTail => ({
+  samples: 0,
+  good: 0,
+  ni: 0,
+  poor: 0,
+  p75: null,
+});
+
+export const emptyOpenDayTail = (): RumOpenDayTail => ({
+  pageViews: 0,
+  errorCount: 0,
+  sessions: 0,
+  errorSessions: 0,
+  rageClicks: 0,
+  deadClicks: 0,
+  errorClicks: 0,
+  rageSessions: 0,
+  deadSessions: 0,
+  lcp: emptyVitalTail(),
+  inp: emptyVitalTail(),
+  cls: emptyVitalTail(),
+  fcp: emptyVitalTail(),
+  loadSamples: 0,
+  loadP75: null,
+  pages: [],
+});
+
+const vitalTailFromAgg = (agg: unknown): RumOpenDayVitalTail => {
+  if (!agg || typeof agg !== 'object') {
+    return emptyVitalTail();
+  }
+  const bucket = agg as {
+    samples?: unknown;
+    good?: unknown;
+    ni?: unknown;
+    poor?: unknown;
+    p75?: unknown;
+  };
+  return {
+    samples: cardValue(bucket.samples),
+    good: filterDocCount(bucket.good),
+    ni: filterDocCount(bucket.ni),
+    poor: filterDocCount(bucket.poor),
+    p75: percentileValue(bucket.p75),
+  };
+};
+
+const nestedSessionCount = (agg: unknown): number =>
+  cardValue((agg as { sessions?: unknown } | undefined)?.sessions);
+
+const rawOverviewFilters = ({
+  rangeFrom,
+  rangeTo,
+  serviceName,
+  pageUrl,
+  browser,
+  includeBots,
+}: {
+  rangeFrom: string;
+  rangeTo: string;
+  serviceName?: string;
+  pageUrl?: string;
+  browser?: string;
+  includeBots?: string;
+}): object[] =>
+  rumBaseFilters({
+    rangeFrom,
+    rangeTo,
+    serviceName,
+    pageUrl,
+    browser,
+    includeBots,
+  });
+
+const vitalFilter = (name: keyof typeof VITAL_RANK_THRESHOLDS) => ({
+  bool: {
+    filter: [WEB_VITAL_FILTER, { term: { 'attributes.browser.web_vital.name': name } }],
+  },
+});
+
+const vitalTailAggs = (name: keyof typeof VITAL_RANK_THRESHOLDS) => {
+  const { good, ni } = VITAL_RANK_THRESHOLDS[name];
+  const field = 'attributes.browser.web_vital.value';
+  return {
+    filter: vitalFilter(name),
+    aggs: {
+      samples: { value_count: { field } },
+      p75: { percentiles: { field, percents: [75] } },
+      good: { filter: { range: { [field]: { lte: good } } } },
+      ni: { filter: { range: { [field]: { gt: good, lte: ni } } } },
+      poor: { filter: { range: { [field]: { gt: ni } } } },
+    },
+  };
+};
+
+const uniqueSessionAggs = {
+  sessions: sessionCardinality,
+  error_sessions: {
+    filter: EXCEPTION_FILTER,
+    aggs: { sessions: sessionCardinality },
+  },
+  rage_sessions: {
+    filter: frustrationEventFilter('rage_click'),
+    aggs: { sessions: sessionCardinality },
+  },
+  dead_sessions: {
+    filter: frustrationEventFilter('dead_click'),
+    aggs: { sessions: sessionCardinality },
+  },
+};
+
+const uniqueKpisFromAggs = (aggs: Record<string, unknown>): RumUniqueSessionKpis => ({
+  sessions: cardValue(aggs.sessions),
+  errorSessions: nestedSessionCount(aggs.error_sessions),
+  rageSessions: nestedSessionCount(aggs.rage_sessions),
+  deadSessions: nestedSessionCount(aggs.dead_sessions),
+});
+
+export const hasOpenDayActivity = (tail: RumOpenDayTail): boolean =>
+  tail.pageViews > 0 ||
+  tail.errorCount > 0 ||
+  tail.sessions > 0 ||
+  tail.rageClicks > 0 ||
+  tail.deadClicks > 0 ||
+  tail.errorClicks > 0 ||
+  tail.lcp.samples > 0 ||
+  tail.inp.samples > 0 ||
+  tail.cls.samples > 0 ||
+  tail.fcp.samples > 0 ||
+  tail.loadSamples > 0 ||
+  tail.pages.length > 0;
+
+/** Add today's event counts. Do not add session uniques — daily sums already overcount those. */
+export const mergeOpenDayTailIntoAggs = (
+  aggs: Record<string, unknown>,
+  tail: RumOpenDayTail
+): Record<string, unknown> => {
+  const add = (name: string, n: number) => ({ value: sumValue(aggs[name]) + n });
+  const mergeP75 = (p75Name: string, samplesName: string, p75: number | null, samples: number) => ({
+    value: weightedAverage([
+      { value: weightedValue(aggs[p75Name]), weight: sumValue(aggs[samplesName]) },
+      { value: p75, weight: samples },
+    ]),
+  });
+  return {
+    ...aggs,
+    page_views: add('page_views', tail.pageViews),
+    error_count: add('error_count', tail.errorCount),
+    rage_clicks: add('rage_clicks', tail.rageClicks),
+    dead_clicks: add('dead_clicks', tail.deadClicks),
+    error_clicks: add('error_clicks', tail.errorClicks),
+    lcp_samples: add('lcp_samples', tail.lcp.samples),
+    lcp_good: add('lcp_good', tail.lcp.good),
+    lcp_ni: add('lcp_ni', tail.lcp.ni),
+    lcp_poor: add('lcp_poor', tail.lcp.poor),
+    lcp_p75: mergeP75('lcp_p75', 'lcp_samples', tail.lcp.p75, tail.lcp.samples),
+    inp_samples: add('inp_samples', tail.inp.samples),
+    inp_good: add('inp_good', tail.inp.good),
+    inp_ni: add('inp_ni', tail.inp.ni),
+    inp_poor: add('inp_poor', tail.inp.poor),
+    inp_p75: mergeP75('inp_p75', 'inp_samples', tail.inp.p75, tail.inp.samples),
+    cls_samples: add('cls_samples', tail.cls.samples),
+    cls_good: add('cls_good', tail.cls.good),
+    cls_ni: add('cls_ni', tail.cls.ni),
+    cls_poor: add('cls_poor', tail.cls.poor),
+    cls_p75: mergeP75('cls_p75', 'cls_samples', tail.cls.p75, tail.cls.samples),
+    fcp_samples: add('fcp_samples', tail.fcp.samples),
+    fcp_good: add('fcp_good', tail.fcp.good),
+    fcp_ni: add('fcp_ni', tail.fcp.ni),
+    fcp_poor: add('fcp_poor', tail.fcp.poor),
+    fcp_p75: mergeP75('fcp_p75', 'fcp_samples', tail.fcp.p75, tail.fcp.samples),
+    load_samples: add('load_samples', tail.loadSamples),
+    load_p75: mergeP75('load_p75', 'load_samples', tail.loadP75, tail.loadSamples),
+  };
+};
+
+export const applyUniqueSessionKpis = (
+  overview: RumOverviewResponse,
+  unique: RumUniqueSessionKpis
+): RumOverviewResponse => ({
+  ...overview,
+  kpis: {
+    ...overview.kpis,
+    sessions: unique.sessions,
+    errorSessions: unique.errorSessions,
+    errorRate: unique.sessions > 0 ? unique.errorSessions / unique.sessions : 0,
+  },
+  frustration: {
+    ...overview.frustration,
+    rageSessions: unique.rageSessions,
+    errorSessions: unique.errorSessions,
+    deadClickSessions: unique.deadSessions,
+  },
+});
+
+export const applyRawOverviewSlice = (
+  overview: RumOverviewResponse,
+  slice: RumRawOverviewSlice
+): RumOverviewResponse => ({
+  ...applyUniqueSessionKpis(overview, slice.unique),
+  browsers: slice.browsers,
+  os: slice.os,
+  countries: slice.countries,
+});
+
+export const mergePageRowsByPath = (left: RumPageRow[], right: RumPageRow[]): RumPageRow[] => {
+  const merged = new Map<string, RumPageRow>();
+  for (const page of [...left, ...right]) {
+    if (!page.path) {
+      continue;
+    }
+    const existing = merged.get(page.path);
+    if (!existing) {
+      merged.set(page.path, page);
+      continue;
+    }
+    merged.set(page.path, {
+      ...existing,
+      views: existing.views + page.views,
+      errorCount: existing.errorCount + page.errorCount,
+      sessionCount: existing.sessionCount + page.sessionCount,
+      rageClicks: existing.rageClicks + page.rageClicks,
+      deadClicks: existing.deadClicks + page.deadClicks,
+      p75Lcp: existing.p75Lcp ?? page.p75Lcp,
+      p75Inp: existing.p75Inp ?? page.p75Inp,
+      p75Cls: existing.p75Cls ?? page.p75Cls,
+      avgDurationMs: existing.avgDurationMs ?? page.avgDurationMs,
+      attribution: existing.attribution.lcpElement ? existing.attribution : page.attribution,
+    });
+  }
+  return [...merged.values()].sort((a, b) => b.views - a.views);
+};
+
+const pageVitalP75 = (name: 'lcp' | 'inp' | 'cls') => ({
+  filter: {
+    bool: {
+      filter: [WEB_VITAL_FILTER, { term: { 'attributes.browser.web_vital.name': name } }],
+    },
+  },
+  aggs: {
+    p75: { percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] } },
+  },
+});
+
+const openDayPageAggs = (size: number) => ({
+  pages: {
+    ...pagePathTerms(size),
+    aggs: {
+      views: { filter: PAGE_VIEW_FILTER },
+      errors: { filter: EXCEPTION_FILTER },
+      sessions: sessionCardinality,
+      rage: { filter: frustrationEventFilter('rage_click') },
+      dead: { filter: frustrationEventFilter('dead_click') },
+      lcp: pageVitalP75('lcp'),
+      inp: pageVitalP75('inp'),
+      cls: pageVitalP75('cls'),
+      load: {
+        filter: DOCUMENT_LOAD_FILTER,
+        aggs: {
+          avg_ns: { avg: { field: 'duration' } },
+          avg_us: { avg: { field: 'attributes.transaction.duration.us' } },
+        },
+      },
+      lcp_element: {
+        terms: { field: 'attributes.browser.web_vital.lcp.element', size: 1, exclude: '' },
+      },
+      inp_target: {
+        terms: { field: 'attributes.browser.web_vital.inp.target', size: 1, exclude: '' },
+      },
+      cls_source: {
+        terms: { field: 'attributes.browser.web_vital.cls.source', size: 1, exclude: '' },
+      },
+    },
+  },
+});
+
+const topKeyword = (agg: unknown): string | null => {
+  const key = termsBuckets(agg)[0]?.key;
+  return key != null && String(key).length > 0 ? String(key) : null;
+};
+
+const pageRowFromRawBucket = (bucket: {
+  key: string | number;
+  views?: unknown;
+  errors?: unknown;
+  sessions?: unknown;
+  rage?: unknown;
+  dead?: unknown;
+  lcp?: unknown;
+  inp?: unknown;
+  cls?: unknown;
+  load?: unknown;
+  lcp_element?: unknown;
+  inp_target?: unknown;
+  cls_source?: unknown;
+}): RumPageRow => {
+  const load = bucket.load as
+    | { avg_ns?: { value?: number | null }; avg_us?: { value?: number | null } }
+    | undefined;
+  return {
+    path: String(bucket.key),
+    views: filterDocCount(bucket.views),
+    errorCount: filterDocCount(bucket.errors),
+    p75Lcp: percentileValue((bucket.lcp as { p75?: unknown } | undefined)?.p75),
+    p75Inp: percentileValue((bucket.inp as { p75?: unknown } | undefined)?.p75),
+    p75Cls: percentileValue((bucket.cls as { p75?: unknown } | undefined)?.p75),
+    avgDurationMs:
+      durationToMs(load?.avg_ns?.value ?? undefined) ??
+      durationToMs(load?.avg_us?.value ?? undefined),
+    ...emptyPageImpact(),
+    sessionCount: cardValue(bucket.sessions),
+    rageClicks: filterDocCount(bucket.rage),
+    deadClicks: filterDocCount(bucket.dead),
+    attribution: {
+      ...emptyVitalAttribution(),
+      lcpElement: topKeyword(bucket.lcp_element),
+      inpTarget: topKeyword(bucket.inp_target),
+      clsSource: topKeyword(bucket.cls_source),
+    },
+    resources: [],
+  };
+};
+
+const countriesFromAgg = (agg: unknown): RumCountryRow[] =>
+  termsBuckets(agg)
+    .filter((bucket) => String(bucket.key).length > 0)
+    .map((bucket) => {
+      const nameBucket = termsBuckets(bucket.country_name)[0];
+      return {
+        isoCode: String(bucket.key),
+        name: nameBucket ? String(nameBucket.key) : String(bucket.key),
+        pageViews: filterDocCount(bucket.views),
+        sessions: cardValue(bucket.sessions),
+        errorCount: filterDocCount(bucket.errors),
+        p75Lcp: percentileValue((bucket.lcp as { p75?: unknown } | undefined)?.p75),
+      };
+    })
+    .sort((a, b) => b.pageViews - a.pageViews || b.sessions - a.sessions);
+
+const facetAggs = {
+  browsers: {
+    terms: { script: { source: BROWSER_SCRIPT, lang: 'painless' }, size: 8, exclude: '' },
+  },
+  os: {
+    terms: { script: { source: OS_SCRIPT, lang: 'painless' }, size: 8, exclude: '' },
+  },
+  countries: {
+    terms: { field: 'client.geo.country_iso_code', size: 12, missing: '' },
+    aggs: {
+      country_name: { terms: { field: 'client.geo.country_name', size: 1 } },
+      views: { filter: PAGE_VIEW_FILTER },
+      errors: { filter: EXCEPTION_FILTER },
+      sessions: sessionCardinality,
+      lcp: pageVitalP75('lcp'),
+    },
+  },
+};
+
+const sliceFromAggs = (aggs: Record<string, unknown>): RumRawOverviewSlice => ({
+  unique: uniqueKpisFromAggs(aggs),
+  browsers: facetFromScriptTerms(aggs.browsers),
+  os: facetFromScriptTerms(aggs.os),
+  countries: countriesFromAgg(aggs.countries),
+});
+
+const queryRawOpenDayTail = async ({
+  client,
+  rangeTo,
+  serviceName,
+  pageUrl,
+  browser,
+  includeBots,
+  pageSize,
+}: {
+  client: ElasticsearchClient;
+  rangeTo: string;
+  serviceName?: string;
+  pageUrl?: string;
+  browser?: string;
+  includeBots?: string;
+  pageSize?: number;
+}): Promise<RumOpenDayTail> => {
+  const result = await client.search(
+    {
+      index: RUM_SESSION_SOURCE_INDEX,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: 0,
+      query: {
+        bool: {
+          filter: rawOverviewFilters({
+            rangeFrom: dailyRangeGte('now'),
+            rangeTo,
+            serviceName,
+            pageUrl,
+            browser,
+            includeBots,
+          }),
+        },
+      },
+      aggs: {
+        page_views: { filter: PAGE_VIEW_FILTER },
+        error_count: { filter: EXCEPTION_FILTER },
+        rage_clicks: { filter: frustrationEventFilter('rage_click') },
+        dead_clicks: { filter: frustrationEventFilter('dead_click') },
+        error_clicks: { filter: frustrationEventFilter('error_click') },
+        lcp: vitalTailAggs('lcp'),
+        inp: vitalTailAggs('inp'),
+        cls: vitalTailAggs('cls'),
+        fcp: vitalTailAggs('fcp'),
+        load: {
+          filter: DOCUMENT_LOAD_FILTER,
+          aggs: {
+            samples: { value_count: { field: '@timestamp' } },
+            p75_ns: { percentiles: { field: 'duration', percents: [75] } },
+            p75_us: {
+              percentiles: { field: 'attributes.transaction.duration.us', percents: [75] },
+            },
+          },
+        },
+        ...uniqueSessionAggs,
+        ...(pageSize && pageSize > 0 ? openDayPageAggs(pageSize) : {}),
+      },
+    },
+    rumEsSearchOptions
+  );
+  const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
+  const load = aggs.load as { samples?: unknown; p75_ns?: unknown; p75_us?: unknown } | undefined;
+  const unique = uniqueKpisFromAggs(aggs);
+  return {
+    pageViews: filterDocCount(aggs.page_views),
+    errorCount: filterDocCount(aggs.error_count),
+    sessions: unique.sessions,
+    errorSessions: unique.errorSessions,
+    rageClicks: filterDocCount(aggs.rage_clicks),
+    deadClicks: filterDocCount(aggs.dead_clicks),
+    errorClicks: filterDocCount(aggs.error_clicks),
+    rageSessions: unique.rageSessions,
+    deadSessions: unique.deadSessions,
+    lcp: vitalTailFromAgg(aggs.lcp),
+    inp: vitalTailFromAgg(aggs.inp),
+    cls: vitalTailFromAgg(aggs.cls),
+    fcp: vitalTailFromAgg(aggs.fcp),
+    loadSamples: cardValue(load?.samples),
+    loadP75: percentileValue(load?.p75_ns) ?? percentileValue(load?.p75_us),
+    pages: termsBuckets(aggs.pages)
+      .filter((bucket) => String(bucket.key).length > 0)
+      .map((bucket) => pageRowFromRawBucket(bucket)),
+  };
+};
+
+const queryRawOverviewSlice = async ({
+  client,
+  rangeFrom,
+  rangeTo,
+  serviceName,
+  pageUrl,
+  browser,
+  includeBots,
+}: {
+  client: ElasticsearchClient;
+  rangeFrom: string;
+  rangeTo: string;
+  serviceName?: string;
+  pageUrl?: string;
+  browser?: string;
+  includeBots?: string;
+}): Promise<RumRawOverviewSlice> => {
+  const result = await client.search(
+    {
+      index: RUM_SESSION_SOURCE_INDEX,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: 0,
+      query: {
+        bool: {
+          filter: rawOverviewFilters({
+            rangeFrom,
+            rangeTo,
+            serviceName,
+            pageUrl,
+            browser,
+            includeBots,
+          }),
+        },
+      },
+      aggs: {
+        ...uniqueSessionAggs,
+        ...facetAggs,
+      },
+    },
+    rumEsSearchOptions
+  );
+  return sliceFromAggs((result.aggregations ?? {}) as Record<string, unknown>);
 };
 
 const dailyPageUrlFilter = (pageUrl?: string): object[] => {
@@ -324,6 +888,8 @@ export const queryDailyOverview = async ({
   pagesWatermark,
   serviceWatermark,
   browserWatermark,
+  uniqueFromRaw,
+  includeBots,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
@@ -337,6 +903,8 @@ export const queryDailyOverview = async ({
   pagesWatermark?: string | null;
   serviceWatermark?: string | null;
   browserWatermark?: string | null;
+  uniqueFromRaw?: boolean;
+  includeBots?: string;
 }): Promise<RumOverviewResponse> => {
   const kpiFromBrowser = Boolean(useBrowser);
   const kpiFromPages = !kpiFromBrowser && (Boolean(pageUrl) || !useService);
@@ -357,16 +925,19 @@ export const queryDailyOverview = async ({
     : kpiFromPages
     ? pagesWatermark
     : serviceWatermark;
+  const pageUrlForKpis = kpiFromPages ? pageUrl : undefined;
+  const browserForKpis = kpiFromBrowser ? browser : undefined;
   const kpiFilters = dailyBaseFilters({
     rangeFrom,
     rangeTo,
     serviceName,
-    pageUrl: kpiFromPages ? pageUrl : undefined,
-    browser: kpiFromBrowser ? browser : undefined,
+    pageUrl: pageUrlForKpis,
+    browser: browserForKpis,
     watermark: kpiWatermark,
   });
 
-  const [kpiResult, pagesResult] = await Promise.all([
+  const fillTail = rangeIncludesOpenTail(rangeTo, kpiWatermark ?? '');
+  const [kpiResult, pagesResult, tail, unique] = await Promise.all([
     client.search(
       {
         index: kpiIndex,
@@ -406,15 +977,59 @@ export const queryDailyOverview = async ({
           rumEsSearchOptions
         )
       : Promise.resolve(null),
+    fillTail
+      ? queryRawOpenDayTail({
+          client,
+          rangeTo,
+          serviceName,
+          pageUrl: pageUrlForKpis,
+          browser: browserForKpis,
+          includeBots,
+          pageSize: 8,
+        })
+      : Promise.resolve(emptyOpenDayTail()),
+    uniqueFromRaw
+      ? queryRawOverviewSlice({
+          client,
+          rangeFrom,
+          rangeTo,
+          serviceName,
+          pageUrl: pageUrlForKpis,
+          browser: browserForKpis,
+          includeBots,
+        })
+      : Promise.resolve(null),
   ]);
 
   const topPages = pagesResult
-    ? termsBuckets((pagesResult.aggregations as { pages?: unknown } | undefined)?.pages).map(
-        (bucket) => pageRowFromBucket(bucket)
-      )
+    ? termsBuckets((pagesResult.aggregations as { pages?: unknown } | undefined)?.pages)
+        .filter((bucket) => String(bucket.key).length > 0)
+        .map((bucket) => pageRowFromBucket(bucket))
     : [];
 
-  return overviewFromAggs((kpiResult.aggregations ?? {}) as Record<string, unknown>, topPages);
+  const dailyAggs = (kpiResult.aggregations ?? {}) as Record<string, unknown>;
+  const mergedAggs = hasOpenDayActivity(tail)
+    ? mergeOpenDayTailIntoAggs(dailyAggs, tail)
+    : dailyAggs;
+  const overview = overviewFromAggs(
+    mergedAggs,
+    mergePageRowsByPath(topPages, tail.pages).slice(0, 8)
+  );
+  const withTailTrend = hasOpenDayActivity(tail)
+    ? {
+        ...overview,
+        trends: [
+          ...overview.trends,
+          {
+            timestamp: dailyRangeGte('now'),
+            sessions: tail.sessions,
+            pageViews: tail.pageViews,
+            errors: tail.errorCount,
+          },
+        ],
+      }
+    : overview;
+  return unique ? applyRawOverviewSlice(withTailTrend, unique) : withTailTrend;
 };
 
 export const queryDailyPages = async ({
@@ -424,6 +1039,7 @@ export const queryDailyPages = async ({
   serviceName,
   pageUrl,
   watermark,
+  includeBots,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
@@ -431,30 +1047,47 @@ export const queryDailyPages = async ({
   serviceName?: string;
   pageUrl?: string;
   watermark?: string | null;
+  includeBots?: string;
 }): Promise<RumPagesResponse> => {
-  const result = await client.search(
-    {
-      index: RUM_PAGES_DAILY_INDEX,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 0,
-      query: {
-        bool: {
-          filter: dailyBaseFilters({ rangeFrom, rangeTo, serviceName, pageUrl, watermark }),
+  const fillTail = rangeIncludesOpenTail(rangeTo, watermark ?? '');
+  const [result, tail] = await Promise.all([
+    client.search(
+      {
+        index: RUM_PAGES_DAILY_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: dailyBaseFilters({ rangeFrom, rangeTo, serviceName, pageUrl, watermark }),
+          },
+        },
+        aggs: {
+          pages: {
+            terms: { field: 'url.path.grouped', size: 80, order: { views: 'desc' as const } },
+            aggs: pageRowAggs,
+          },
         },
       },
-      aggs: {
-        pages: {
-          terms: { field: 'url.path.grouped', size: 80, order: { views: 'desc' as const } },
-          aggs: pageRowAggs,
-        },
-      },
-    },
-    rumEsSearchOptions
-  );
+      rumEsSearchOptions
+    ),
+    fillTail
+      ? queryRawOpenDayTail({
+          client,
+          rangeTo,
+          serviceName,
+          pageUrl,
+          includeBots,
+          pageSize: 80,
+        })
+      : Promise.resolve(emptyOpenDayTail()),
+  ]);
 
-  const pages = termsBuckets((result.aggregations as { pages?: unknown } | undefined)?.pages).map(
-    (bucket) => pageRowFromBucket(bucket)
+  const pages = mergePageRowsByPath(
+    termsBuckets((result.aggregations as { pages?: unknown } | undefined)?.pages)
+      .filter((bucket) => String(bucket.key).length > 0)
+      .map((bucket) => pageRowFromBucket(bucket)),
+    tail.pages
   );
   return {
     pages,
