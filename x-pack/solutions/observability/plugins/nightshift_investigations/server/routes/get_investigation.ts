@@ -32,8 +32,8 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
       id: z.string().min(1).max(500),
     }),
   }),
-  handler: async ({ request, params, getClient }) => {
-    const investigationClient = getClient(request);
+  handler: async ({ request, params, getInvestigationsClient }) => {
+    const investigationClient = getInvestigationsClient(request);
     try {
       return await investigationClient.get(params.path.id);
     } catch (err) {

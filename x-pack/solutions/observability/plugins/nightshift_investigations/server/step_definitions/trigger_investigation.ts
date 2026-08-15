@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import type { GetClient } from '../routes/types';
+import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
   subject_type: z
@@ -28,7 +28,7 @@ const inputSchema = z.object({
 
 type TriggerInvestigationInput = z.infer<typeof inputSchema>;
 
-export const triggerInvestigationStepDefinition = (getClient: GetClient) =>
+export const triggerInvestigationStepDefinition = (getInvestigationsClient: GetInvestigationsClient) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
     description:
@@ -44,7 +44,7 @@ export const triggerInvestigationStepDefinition = (getClient: GetClient) =>
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
       const spaceId = context.contextManager.getContext().workflow.spaceId;
-      const client = getClient(request, spaceId);
+      const client = getInvestigationsClient(request, spaceId);
       const input = context.input as TriggerInvestigationInput;
       const result = await client.start({
         subject: {

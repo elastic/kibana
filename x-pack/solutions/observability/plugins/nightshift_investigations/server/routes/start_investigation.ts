@@ -39,8 +39,8 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         .optional(),
     }),
   }),
-  handler: async ({ request, params, getClient }) => {
-    const client = getClient(request);
+  handler: async ({ request, params, getInvestigationsClient }) => {
+    const client = getInvestigationsClient(request);
     const result = await client.start(params.body);
     return result;
   },

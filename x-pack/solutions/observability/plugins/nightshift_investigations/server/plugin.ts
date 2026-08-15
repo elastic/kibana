@@ -46,8 +46,8 @@ export class NightshiftInvestigationsPlugin
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
 
-    const getClient = (
-      request: Parameters<NightshiftInvestigationsServerStart['getClient']>[0],
+    const getInvestigationsClient = (
+      request: Parameters<NightshiftInvestigationsServerStart['getInvestigationsClient']>[0],
       spaceId?: string
     ) =>
       new NightshiftInvestigationsClient(
@@ -61,13 +61,13 @@ export class NightshiftInvestigationsPlugin
     if (plugins.workflowsManagement) {
       if (plugins.workflowsExtensions) {
         plugins.workflowsExtensions.registerStepDefinition(
-          triggerInvestigationStepDefinition(getClient)
+          triggerInvestigationStepDefinition(getInvestigationsClient)
         );
       }
 
       registerRoutes({
         repository: nightshiftInvestigationsRouteRepository,
-        dependencies: { getClient },
+        dependencies: { getInvestigationsClient },
         core,
         logger: this.logger,
         runDevModeChecks: false,
@@ -88,7 +88,7 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
 
     return {
-      getClient: (request) =>
+      getInvestigationsClient: (request) =>
         new NightshiftInvestigationsClient(
           request,
           this.workflowsManagement,

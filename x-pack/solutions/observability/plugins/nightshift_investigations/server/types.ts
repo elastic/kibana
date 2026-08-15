@@ -15,7 +15,7 @@ import type { NightshiftInvestigationsClient } from './client/investigations_cli
 export interface NightshiftInvestigationsServerSetup {}
 
 export interface NightshiftInvestigationsServerStart {
-  getClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
+  getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;
 }
 
 export interface NightshiftInvestigationsSetupDeps {
