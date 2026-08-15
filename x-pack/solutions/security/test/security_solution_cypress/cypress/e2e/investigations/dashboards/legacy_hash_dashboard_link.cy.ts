@@ -21,18 +21,21 @@ const COMPLIANCE_PACK_DASHBOARD_TITLE = '[Osquery Manager] Compliance pack';
 const OSSEC_ROOTKIT_PACK_DASHBOARD_ID = 'osquery_manager-c0a7ce90-f4aa-11e7-8647-534bb4c21040';
 const OSSEC_ROOTKIT_PACK_DASHBOARD_TITLE = '[Osquery Manager] OSSEC rootkit pack';
 
-const IMPORTED_SAVED_OBJECTS = [
-  { type: 'dashboard', id: COMPLIANCE_PACK_DASHBOARD_ID },
-  { type: 'dashboard', id: OSSEC_ROOTKIT_PACK_DASHBOARD_ID },
-];
-
 describe('Legacy hash-based dashboard links', { tags: ['@ess', '@serverless'] }, () => {
+  // `dashboard` is a multi-namespace-isolated saved object type, so Kibana tracks a global
+  // "origin" per literal id. Deleting by whatever id importSavedObjects actually returns (rather
+  // than assuming the literal fixture id) ensures the origin is fully released, so the
+  // "non-default space" describe block below can re-import these same literal ids cleanly.
+  let importedSavedObjects: Array<{ type: string; id: string }> = [];
+
   before(() => {
-    importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE);
+    importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE).then((objects) => {
+      importedSavedObjects = objects;
+    });
   });
 
   after(() => {
-    deleteSavedObjects(IMPORTED_SAVED_OBJECTS);
+    deleteSavedObjects(importedSavedObjects);
   });
 
   beforeEach(() => {
@@ -65,13 +68,16 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     const SPACE_ID = 'legacy-hash-dashboard-link-space';
+    let importedSavedObjects: Array<{ type: string; id: string }> = [];
 
     before(() => {
-      importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE, SPACE_ID);
+      importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE, SPACE_ID).then((objects) => {
+        importedSavedObjects = objects;
+      });
     });
 
     after(() => {
-      deleteSavedObjects(IMPORTED_SAVED_OBJECTS, SPACE_ID);
+      deleteSavedObjects(importedSavedObjects, SPACE_ID);
     });
 
     beforeEach(() => {
@@ -84,10 +90,7 @@ describe(
 
       cy.contains('[data-test-subj="markdownBody"] a', 'Compliance', { timeout: 30000 }).click();
 
-      const expectedPath = getSpaceUrl(
-        SPACE_ID,
-        `${DASHBOARDS_URL}/${COMPLIANCE_PACK_DASHBOARD_ID}`
-      );
+      const expectedPath = getSpaceUrl(SPACE_ID, `${DASHBOARDS_URL}/${COMPLIANCE_PACK_DASHBOARD_ID}`);
       cy.url().should('include', expectedPath);
       // Guards against the space+app basename being applied twice, e.g.
       // `/s/<space>/app/security/s/<space>/app/security/dashboards/<id>`.
