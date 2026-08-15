@@ -1,0 +1,18 @@
+{
+  "index_patterns": ["perf-dex-prebuilt-rules-memory"],
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "run_id": { "type": "keyword" },
+        "environment_id": { "type": "keyword" },
+        "scenario": { "type": "keyword" },
+        "iteration": { "type": "integer" },
+        "rss_mb": { "type": "double" },
+        "heap_used_mb": { "type": "double" },
+        "heap_total_mb": { "type": "double" },
+        "event_loop_delay_ms": { "type": "double" }
+      }
+    }
+  }
+}
