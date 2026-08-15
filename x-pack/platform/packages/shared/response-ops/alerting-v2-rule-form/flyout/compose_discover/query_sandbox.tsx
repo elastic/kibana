@@ -148,7 +148,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     headerBlockCss,
     editorBodyCss,
     editorResizeHandleCss,
-    timeFieldSelectCss,
     loadingCenterCss,
     resultsSectionCss,
   } = useQuerySandboxStyles(euiThemeContext);
