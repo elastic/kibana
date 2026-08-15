@@ -247,8 +247,10 @@ export const percentileOperation: OperationDefinition<
 
     const termsFuncs = aggs
       .map((agg) => agg.functions[0])
-      .filter((func) => func.name === 'aggTerms') as Array<
-      ExpressionAstFunctionBuilder<AggFunctionsMapping['aggTerms']>
+      .filter((func) => func.name === 'aggTerms' || func.name === 'aggMultiTerms') as Array<
+      ExpressionAstFunctionBuilder<
+        AggFunctionsMapping['aggTerms'] | AggFunctionsMapping['aggMultiTerms']
+      >
     >;
 
     // collapse each group of matching aggs into a single agg expression
