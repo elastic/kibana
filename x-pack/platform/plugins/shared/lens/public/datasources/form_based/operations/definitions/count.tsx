@@ -230,7 +230,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         (newField.type === 'document' ||
           (supportedTypes.has(newField.type) &&
             newField.aggregatable &&
-            (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)))
+            (!newField.aggregationRestrictions || newField.aggregationRestrictions.value_count)))
     );
   },
   timeScalingMode: 'optional',
