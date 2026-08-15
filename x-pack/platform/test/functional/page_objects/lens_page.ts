@@ -246,11 +246,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
       if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
-        // Field must commit to Lens state before close, or close discards the transition.
-        await retry.waitFor('field selection to commit', async () => {
-          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
-          return await comboBox.isOptionSelected(fieldCombo, opts.field!);
+        const fieldToSelect = opts.field;
+        // Retry the full select + verify cycle instead of only polling for the
+        // commit. If the combo box selection is lost to a transient UI race (e.g.
+        // the field list re-renders mid-click), waiting alone will never succeed
+        // since the click never actually landed; re-issuing the selection does.
+        await retry.try(async () => {
+          await this.selectOptionFromComboBox('indexPattern-dimension-field', fieldToSelect);
+          // Field must commit to Lens state before close, or close discards the transition.
+          await retry.waitFor('field selection to commit', async () => {
+            const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+            return await comboBox.isOptionSelected(fieldCombo, fieldToSelect);
+          });
         });
       }
 
