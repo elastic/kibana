@@ -17,6 +17,7 @@ import {
   AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
   AUTOMATIC_MIGRATION_NAVIGATION_BLOCK,
   NAME_NEVER_ID_BLOCK,
+  AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './shared/content';
 
 export const automaticMigrationRulesSummarizeSkill = defineSkillType({
@@ -29,11 +30,13 @@ Use when the user asks "how are my rule migrations doing", wants an overview, or
 
 Read-only. Automatic Migration also covers dashboards — this skill handles rule migrations only.`,
   content: `
-# Summarize an Automatic Migration
+# When to use this skill
 
 Use this skill when the user wants an **overview of Automatic Migrations** — the feature that
 translates third-party (Sentinel, QRadar, Splunk) rules into Elastic detection rules. This skill
 is read-only: it inspects and summarizes, it does not mutate.
+
+${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
 
 ${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
 

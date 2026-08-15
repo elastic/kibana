@@ -32,12 +32,6 @@ does not auto-load its tools, the user must move to that workflow.
   status and rule counts. Use when the user asks "how are my migrations doing" or wants a summary.
 - **automatic-migration-rules-start-migration** — Start, reprocess, or resume a migration's translation run.
   Resolves the AI connector, confirms the mutating action, and picks START vs REPROCESS vs RESUME.
-- **get-automatic-migration-resources** — Inspect the original (third-party) rules and integrations
-  loaded into a migration, and what's still missing. Use when advising on migration readiness.
-- **install-automatic-migration-rules** — Install translated rules into Elastic as detection rules.
-- **stop-automatic-migration** — Stop a running migration task.
-- **update-automatic-migration** — Update a migration's index pattern (and other editable fields).
-- **delete-automatic-migration** — Delete a migration and all of its data.
 `;
 
 /**
@@ -106,4 +100,11 @@ Automatic Migrations are of 2 types:
 
 This skill only supports **Rule Migrations**.  IF user has not specified the migration type, ask them to clarify if they are talking about Dashboard or Rule Migration.  If they say Dashboard, tell them that this skill only supports Rule Migrations and that Dashboard Migrations are not supported today.  If they say Rule Migration, continue with the workflow.
 
+`;
+
+export const AUTOMATIC_MIGRATION_GENERAL_GUIDELINES = `
+## General Guidelines
+
+- Detection Rules is different from Automatic Rule Migration or SIEM Rule Migration. You must not confused between them. This skill is ONLY about Automatic Rule Migration and NOT for Detection Rules.
+- When responding to the user, highlight important information in code segments(\`\`) or code blocks in case of multiline (\`\`\`) or bold text (**).  For example, migration name, rule titles, statuses, counts, queries, prebuilt rule Id or integration ID. Do not do highlighting in the table.
 `;

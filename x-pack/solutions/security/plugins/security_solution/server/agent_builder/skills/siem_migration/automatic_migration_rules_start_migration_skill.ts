@@ -21,6 +21,7 @@ import {
   NAME_NEVER_ID_BLOCK,
   MIGRATION_NAME_DISAMBIGUATION_BLOCK,
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
+  AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './shared/content';
 
 export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
@@ -37,6 +38,8 @@ Resolves the AI connector, confirms the mutating action with the user, and picks
 
 - When user wants to **start**, **reprocess**, or **resume** an Automatic Rule Migration translation run.
 - ${MIGRATION_TYPE_DISAMBIGUATION_BLOCK}
+
+${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
 
 ${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
 
