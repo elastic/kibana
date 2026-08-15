@@ -222,6 +222,22 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
                 </EuiFilterButton>
                 <EuiFilterButton
                   isToggle
+                  isSelected={activeFilter === 'expired'}
+                  withNext
+                  onClick={() => {
+                    setPagination({ ...pagination, currentPage: 1 });
+                    clearSelection();
+                    setActiveFilter(activeFilter === 'expired' ? 'all' : 'expired');
+                  }}
+                  data-test-subj="enrollmentTokensList.filterExpired"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.enrollmentTokensList.filterExpired"
+                    defaultMessage="Expired"
+                  />
+                </EuiFilterButton>
+                <EuiFilterButton
+                  isToggle
                   isSelected={activeFilter === 'inactive'}
                   onClick={() => {
                     setPagination({ ...pagination, currentPage: 1 });
