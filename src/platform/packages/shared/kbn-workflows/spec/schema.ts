@@ -1158,7 +1158,9 @@ export const WorkflowStepTokenUsageSchema = WorkflowTokenUsageSchema.extend({
 export const WorkflowExecutionContextSchema = z.object({
   id: z.string(),
   isTestRun: z.boolean(),
-  startedAt: z.date(),
+  startedAt: z
+    .string()
+    .describe('ISO 8601 timestamp when the execution started (ES-date-safe for Liquid templates)'),
   url: z.string(),
   executedBy: z.string().optional(),
   triggeredBy: z.string().optional(),
@@ -1243,7 +1245,7 @@ export const WorkflowContextSchema = z.object({
     )
     .optional(),
   consts: z.record(z.string(), z.any()).optional(),
-  now: z.date().optional(),
+  now: z.string().optional().describe('Current time as an ISO 8601 timestamp'),
   parent: z
     .object({
       workflowId: z.string(),

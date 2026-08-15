@@ -22,10 +22,13 @@ GitHub connectors have the following configuration properties:
 MCP Server URL
 :   The URL of the GitHub MCP server. Defaults to `https://api.githubcopilot.com/mcp/`.
 
+GraphQL API URL
+:   The GitHub GraphQL endpoint used by workflow ingest actions. Defaults to `https://api.github.com/graphql`.
+
 Authentication
 :   Choose one of the following authentication methods:
     - **Bearer Token**: A GitHub personal access token. Refer to [Get API credentials](#github-api-credentials) for instructions.
-    - **OAuth Authorization Code**: Connects via GitHub's OAuth flow. Requires a GitHub OAuth App with an authorization URL (`https://github.com/login/oauth/authorize`) and token URL (`https://github.com/login/oauth/access_token`). The default scope is `repo`. Refer to [OAuth credentials](#github-oauth-credentials) for setup instructions.
+    - **OAuth Authorization Code**: Connects via GitHub's OAuth flow. Requires a GitHub OAuth App with an authorization URL (`https://github.com/login/oauth/authorize`) and token URL (`https://github.com/login/oauth/access_token`). The default scope is `read:org read:project repo`. Refer to [OAuth credentials](#github-oauth-credentials) for setup instructions.
 
 ## Test connectors [github-action-configuration]
 
@@ -86,6 +89,15 @@ The GitHub connector exposes the following actions:
 
 `getIssueComments`
 :   Get comments for a specific issue in a repository.
+
+`graphqlQuery`
+:   Execute a read-only GitHub GraphQL query for workflow ingest. Mutations and subscriptions are rejected. Returns `data`, optional `pageInfo`, `rateLimit`, and `shouldBackoff`. Not exposed to agents.
+
+`runQueryTemplate`
+:   Run a named read-only GraphQL query template for workflow ingest. Templates include `orgCatalog.repos`, `orgCatalog.teams`, `orgCatalog.members`, `activity.searchIssues`, `activity.searchPullRequests`, `graph.issueGraph`, and `graph.pullRequestGraph`. Supports `first` and `after` pagination overrides.
+
+`listQueryTemplates`
+:   List available read-only GraphQL query templates for `runQueryTemplate`.
 
 `listTools`
 :   List all tools available on the GitHub MCP server. Use this to discover available capabilities.

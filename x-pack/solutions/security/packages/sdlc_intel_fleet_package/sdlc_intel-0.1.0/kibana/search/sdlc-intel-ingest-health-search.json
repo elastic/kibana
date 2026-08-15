@@ -1,0 +1,22 @@
+{
+  "attributes": {
+    "columns": ["sync.source", "entity_type", "org.login", "lag_hours", "last_run_status", "last_run_at"],
+    "description": "Ingest checkpoint lag from *-intel-sync-state indices",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["lag_hours", "desc"]],
+    "title": "SDLC ingest health",
+    "version": 1
+  },
+  "id": "sdlc-intel-ingest-health-search",
+  "references": [
+    {
+      "id": "sdlc-ingest-health-view",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

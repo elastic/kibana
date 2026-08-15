@@ -507,6 +507,11 @@ export class WorkflowContextManager {
         ...stepContext.execution,
         ...(contextOverride.execution || {}),
       };
+      // Context overrides may still supply Date objects; normalize for Liquid/ES.
+      const overrideStartedAt = stepContext.execution.startedAt as unknown;
+      if (overrideStartedAt instanceof Date) {
+        stepContext.execution.startedAt = overrideStartedAt.toISOString();
+      }
 
       stepContext.workflow = {
         ...stepContext.workflow,
