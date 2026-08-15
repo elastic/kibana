@@ -168,20 +168,14 @@ describe('FieldInput', () => {
     expect(getLabelElement()).toBeInvalid();
   });
 
-  it.each([
-    ['reference-based operation', getReferenceBasedOperationColumn()],
-    ['managed references operation', getManagedBasedOperationColumn()],
-  ])(
-    'should mark the field as invalid but not show any error message for a %s when only an incomplete column is set',
-    (_, col: ReferenceBasedIndexPatternColumn) => {
-      const { container } = renderFieldInput({
-        incompleteOperation: 'terms',
-      });
+  it('should mark the field as invalid and show an error message when only an incomplete column is set', () => {
+    const { container } = renderFieldInput({
+      incompleteOperation: 'terms',
+    });
 
-      expect(getLabelElement()).toBeInvalid();
-      expect(getErrorElement(container)).not.toBeInTheDocument();
-    }
-  );
+    expect(getLabelElement()).toBeInvalid();
+    expect(getErrorElement(container)).toHaveTextContent('To use this function, select a field.');
+  });
 
   it.each([
     ['reference-based operation', getReferenceBasedOperationColumn()],
@@ -368,6 +362,12 @@ describe('getErrorMessage', () => {
       expect(getErrorMessage(undefined, false, type, false)).toBeUndefined();
     }
   );
+
+  it('should return a field required message when no column exists but an incomplete operation is set', () => {
+    expect(getErrorMessage(undefined, true, undefined, false)).toBe(
+      'To use this function, select a field.'
+    );
+  });
 
   it('should return the invalid message', () => {
     expect(getErrorMessage(undefined, false, 'none', true)).toBe(
