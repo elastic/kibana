@@ -468,8 +468,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
               stops: stops.map(({ stop }) => stop),
               gradient: false,
               range: defaultPalette.params?.rangeType ?? 'percent',
-              rangeMin: dataBounds.min,
-              rangeMax: dataBounds.max,
+              // rangeMin/rangeMax must be in the same space as the stops (percent by default),
+              // not in absolute data space
+              rangeMin: defaultPalette.params?.rangeMin ?? dataBounds.min,
+              rangeMax: defaultPalette.params?.rangeMax ?? dataBounds.max,
               continuity: defaultPalette.params?.continuity,
             },
           };
