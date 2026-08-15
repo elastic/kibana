@@ -153,6 +153,24 @@ export const allowedExperimentalValues = Object.freeze({
   aiRuleCreationEnabled: true,
 
   /**
+   * Enables the managed MITRE ATT&CK source: a Kibana-managed `.kibana-mitre-attack`
+   * index hydrated from the bundled `@kbn/security-mitre-attack-common` artifact.
+   * When enabled the rule create form (and AI rule creation, in a follow-up PR)
+   * read MITRE data from this source instead of the legacy
+   * `mitre_tactics_techniques.ts` blob.
+   */
+  managedMitreSourceEnabled: false,
+
+  /**
+   * Embeds MITRE entities into a `semantic_text` field on the managed index and
+   * switches search to hybrid (BM25 + ELSER) retrieval. Requires
+   * `managedMitreSourceEnabled`. Falls back to keyword-only search when the
+   * inference endpoint is unavailable, so enabling this can degrade but not
+   * break MITRE lookups.
+   */
+  managedMitreSemanticSearchEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,

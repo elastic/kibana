@@ -56,6 +56,7 @@ import {
   APP_UI_ID,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
+  DEFAULT_SPACE_ID,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
 } from '../common/constants';
@@ -142,11 +143,12 @@ import {
   latestRiskScoreIndexPattern,
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
-import { assistantTools } from './assistant/tools';
+import { assistantTools, buildAdditionalAssistantTools } from './assistant/tools';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { MitreAttackDataService, registerMitreAttackRoutes } from './lib/mitre_attack';
 import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/constants';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
@@ -186,6 +188,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly ruleMonitoringService: IRuleMonitoringService;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly siemMigrationsService: SiemMigrationsService;
+  private readonly mitreAttackDataService: MitreAttackDataService;
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
@@ -224,6 +227,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     this.siemMigrationsService = new SiemMigrationsService(
       this.config,
+      this.pluginContext.logger,
+      this.pluginContext.env.packageInfo.version
+    );
+    this.mitreAttackDataService = new MitreAttackDataService(
       this.pluginContext.logger,
       this.pluginContext.env.packageInfo.version
     );
@@ -293,7 +300,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       },
       this.isServerless,
       this.pluginContext.env.packageInfo.version,
-      plugins.encryptedSavedObjects?.canEncrypt === true
+      plugins.encryptedSavedObjects?.canEncrypt === true,
+      { mitreAttackDataService: this.mitreAttackDataService }
     );
     registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
@@ -488,6 +496,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointAppContextService: this.endpointAppContextService,
       ruleMonitoringService: this.ruleMonitoringService,
       siemMigrationsService: this.siemMigrationsService,
+      mitreAttackDataService: this.mitreAttackDataService,
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
@@ -681,6 +690,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerEndpointExceptionsRoutes(router, this.endpointContext);
     registerScriptsLibraryRoutes(router, this.endpointContext);
 
+    if (experimentalFeatures.managedMitreSourceEnabled) {
+      registerMitreAttackRoutes(router, this.logger.get('mitreAttackRoutes'));
+    }
+
     if (plugins.alerting != null) {
       const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
 
@@ -764,6 +777,26 @@ export class Plugin implements ISecuritySolutionPlugin {
         );
 
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
+
+        if (config.experimentalFeatures.managedMitreSourceEnabled) {
+          this.mitreAttackDataService
+            .setup({
+              esClient: coreStart.elasticsearch.client.asInternalUser,
+              semantic: {
+                enabled: config.experimentalFeatures.managedMitreSemanticSearchEnabled,
+              },
+            })
+            .then(() =>
+              // Eager hydration for the default space mirrors `RuleMigrationsDataService`.
+              // Other spaces hydrate lazily on first read, see `MitreAttackDataClient`.
+              this.mitreAttackDataService.hydrate(DEFAULT_SPACE_ID)
+            )
+            .catch((err) => {
+              this.logger.error(
+                `Failed to set up MITRE ATT&CK data service: ${err.message ?? String(err)}`
+              );
+            });
+        }
       })
       .catch(() => {}); // it shouldn't reject, but just in case
 
@@ -897,9 +930,16 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.anonymization.registerProfileInitializer(securityAlertsProfileInitializer);
 
     // Assistant Tool and Feature Registration
-    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
+    const baseTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
       ? assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID)
       : assistantTools;
+    const additionalTools = buildAdditionalAssistantTools({
+      mitreAttackDataService: this.mitreAttackDataService,
+      getSpaceId: (request) =>
+        plugins.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      managedMitreSourceEnabled: config.experimentalFeatures.managedMitreSourceEnabled,
+    });
+    const filteredTools = [...baseTools, ...additionalTools];
 
     plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {
@@ -1167,6 +1207,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryWatcher?.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
+    this.mitreAttackDataService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
   }

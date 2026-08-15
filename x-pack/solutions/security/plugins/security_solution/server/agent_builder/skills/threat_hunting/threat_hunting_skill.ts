@@ -7,6 +7,7 @@
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { SECURITY_MITRE_ATTACK_TOOL_ID } from '../../tools/mitre_attack_tool';
 
 export const threatHuntingSkill = defineSkillType({
   id: 'threat-hunting',
@@ -34,6 +35,7 @@ Use this skill when:
 - Start with a specific, testable hypothesis tied to a MITRE ATT&CK technique or known threat actor TTPs
 - Examples: "Attackers are using living-off-the-land binaries for lateral movement", "There is C2 beaconing to low-reputation domains"
 - Define the expected data sources and time window (7-30 days for behavioral patterns)
+- When the user asks about a specific MITRE ATT&CK tactic, technique, or sub-technique (by ID such as T1671, or by name such as "credential dumping"), or about adversary behaviors and TTPs, ALWAYS call 'security.mitre_attack' first to retrieve authoritative tactic/technique data (id, name, description, tactic mappings) before proceeding. Prefer this tool over relying on model knowledge for MITRE ATT&CK lookups, especially for newer techniques (added in v18 or later).
 
 ### 2. Identify Data Sources
 - Use 'platform.core.list_indices' to discover available security indices
@@ -206,5 +208,6 @@ FROM logs-endpoint.events.process-*
     platformCoreTools.listIndices,
     platformCoreTools.getIndexMapping,
     platformCoreTools.cases,
+    SECURITY_MITRE_ATTACK_TOOL_ID,
   ],
 });

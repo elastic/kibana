@@ -14,7 +14,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { camelCase, isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
@@ -25,20 +25,9 @@ import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
 import { MitreAttackTechniqueFields } from './technique_fields';
-import type { MitreTactic } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
+import { useMitreConfiguration } from './hooks/use_mitre_configuration';
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
@@ -82,16 +71,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     }
   }, [field]);
 
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setTacticsOptions(mitreConfig.tactics);
-    }
-
-    getMitre();
-  }, []);
+  const { tactics: tacticsOptions } = useMitreConfiguration();
 
   const updateTactic = useCallback(
     (index: number, value: string) => {

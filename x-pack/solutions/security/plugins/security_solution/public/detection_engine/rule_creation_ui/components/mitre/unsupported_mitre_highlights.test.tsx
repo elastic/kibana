@@ -14,9 +14,12 @@ import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 
 // Ghost options, "renamed from" hints, and form-row errors are gated behind
 // the mitreAttackUpdatesUIEnabled feature flag, which is off by default.
-// Force it on for this test suite.
+// Force it on for this test suite, while keeping the MITRE dataset on the
+// legacy blob mocked below rather than the managed index.
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+  useIsExperimentalFeatureEnabled: jest.fn(
+    (feature: string) => feature !== 'managedMitreSourceEnabled'
+  ),
 }));
 
 jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({

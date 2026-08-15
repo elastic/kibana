@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { AddMitreAttackThreat } from '.';
-import { useFormFieldMock } from '../../../../common/mock';
+import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
@@ -29,8 +29,8 @@ describe('AddMitreThreat', () => {
         />
       );
     };
-    const wrapper = shallow(<Component />);
+    render(<Component />, { wrapper: TestProviders });
 
-    expect(wrapper.dive().find('[data-test-subj="addMitreAttackTactic"]')).toHaveLength(1);
+    expect(screen.getByTestId('addMitreAttackTactic')).toBeInTheDocument();
   });
 });

@@ -1,0 +1,374 @@
+[
+  {
+    "prompt": "give me something that covers how they first get a foothold in the environment",
+    "expansion": "The intruder gets their first code or session inside: a mail attachment or link opened, an office or browser process spawning a script interpreter, an internet-facing VPN or web application exploited so w3wp.exe or httpd spawns a shell, valid credentials replayed against OWA from a new ASN, or removable media autorun. Defenders see first-seen parent-child chains, new binaries in temp, and unexpected egress from DMZ hosts."
+  },
+  {
+    "prompt": "i need rules for when an attacker is already inside and starts hopping between hosts",
+    "expansion": "An operator with working credentials authenticates from one endpoint to another that never talks to it: network logons of type 3 and 10, connections to ADMIN$ and IPC$ shares, an executable written over SMB into C:\\Windows, then a remote service install logged as 7045, wmic /node invocations, remote scheduled task registration, and RDP sessions between unusual host pairs."
+  },
+  {
+    "prompt": "coverage for the part where they're just looking around figuring out what we have",
+    "expansion": "A burst of built-in enumeration inside one process tree: whoami /all, net user /domain, net localgroup administrators, nltest /dclist, systeminfo, ipconfig /all, arp -a, tasklist, quser, LDAP queries from a workstation, Get-ADComputer, plus ping sweeps and TCP connect attempts to many hosts, or cloud describe and list API calls in rapid sequence."
+  },
+  {
+    "prompt": "need detections for anything where they're trying to stay hidden from our tooling",
+    "expansion": "Sensor services stopped or their drivers unloaded, tamper-protection registry values flipped, scanner exclusion paths added through Set-MpPreference, script-scanning and inline instrumentation patched in memory, event channels disabled and the Security log cleared, binaries renamed to blend in and their timestamps backdated, execution from C:\\Windows\\Temp through signed OS utilities, and heavily encoded command lines."
+  },
+  {
+    "prompt": "build me something for the stage where they're stealing logins",
+    "expansion": "Processes open handles to the authentication subsystem and write minidumps to temp, reg save exports of the SAM and SYSTEM hives appear, ntds.dit is copied off a domain controller, /etc/shadow is read by a non-login process, browser Login Data SQLite files and .aws/credentials are copied, and bulk service tickets are requested with weak encryption."
+  },
+  {
+    "prompt": "i want alerts around data leaving the org, generally, not one specific method — we just failed an audit on this and leadership wants to see something in place by friday",
+    "expansion": "Sustained outbound transfers far above host baseline: multi-hundred-megabyte HTTPS uploads to file-sharing sites and paste services, rclone, curl or wget PUT commands, SFTP to unfamiliar hosts, archives built locally then pushed out, encoded payloads riding DNS queries, storage objects copied to an external cloud account, mail with oversized attachments to personal domains, and bulk writes to removable volumes."
+  },
+  {
+    "prompt": "detections for how malware phones home",
+    "expansion": "Repeated outbound sessions on a fixed cadence with small jitter and uniform payload sizes, long-lived TLS with a rare client fingerprint, plain HTTP to raw IP addresses or domains registered days earlier, odd user agents, algorithmically generated hostnames resolved with very low TTLs, callbacks continuing after logoff, and network activity from processes that should never reach the internet."
+  },
+  {
+    "prompt": "what can we do to catch them digging in so a reboot doesnt kick them out",
+    "expansion": "New Run and RunOnce values, Winlogon Shell and Userinit edits, service creation events pointing at binaries in user-writable paths, task registration logged as 4698, WMI event filter and consumer bindings, shortcuts dropped in the Startup folder, LaunchAgent plists on macOS, systemd units and crontab entries, shell profile edits, and appended SSH authorized_keys lines."
+  },
+  {
+    "prompt": "we have nothing for when a low priv account ends up with admin, want broad coverage there",
+    "expansion": "A standard user's process tree suddenly produces a SYSTEM or root child: a token duplicated from a service process, a vulnerable signed driver loaded then used for kernel writes, a weak or unquoted service path replaced, registry hijacks under HKCU driving an auto-elevating binary, sudoers edits and new setuid files, group additions logged as 4728 and 4732, or an IAM policy granting full access."
+  },
+  {
+    "prompt": "rules for the destructive endgame stuff, when they're actually doing damage to us",
+    "expansion": "Thousands of files rewritten per minute with entropy jumps and changed extensions, note files repeated in every directory, shadow copies and backup catalogs removed, boot recovery disabled, database and backup services stopped, block devices overwritten, master boot record writes, cloud snapshots and buckets deleted, virtual machines destroyed, and accounts disabled or locked out domain-wide."
+  },
+  {
+    "prompt": "i want coverage for attackers gathering up stuff they care about before they take it",
+    "expansion": "Recursive searches for documents, spreadsheets, keys and password vaults, robocopy or xcopy moving results into one staging directory such as C:\\Users\\Public, archive utilities invoked with recursion, splitting and password flags, mailbox and database exports written to disk, screenshot and clipboard capture, and one account crawling file shares it has never touched."
+  },
+  {
+    "prompt": "anything covering how code actually gets run on our endpoints by an attacker",
+    "expansion": "Interpreters launched from documents, browsers or services: powershell.exe with encoded arguments, cmd /c one-liners, wscript and cscript running dropped .js or .vbs files, mshta fetching a remote page, rundll32 calling an export, regsvr32 and installutil proxying a payload, python or bash pipelines on Linux, and unsigned executables started from temp directories."
+  },
+  {
+    "prompt": "we need broad detections for supplier and vendor angles, like when the way in isn't us it's someone we trust, contractors, msp, third party integrations, whatever",
+    "expansion": "Activity arriving through trusted outside parties: remote support agents such as ScreenConnect, AnyDesk or TeamViewer executing shell commands, managed-provider accounts signing in from new geographies at odd hours, contractor identities touching systems outside their scope, a signed updater writing extra executables and spawning a shell, OAuth consent granted to an external tenant, and pipeline tokens used from unfamiliar addresses."
+  },
+  {
+    "prompt": "give me something for the reconnaissance side, before they even touch prod",
+    "expansion": "External probing and profiling of the organization: sweeps across public address space, scanner signatures against web applications, directory brute forcing producing bursts of 404s, subdomain and DNS enumeration, certificate transparency and registration lookups, harvesting of staff names to derive the mail address format, test messages checking delivery, and slow credential attempts against gateways."
+  },
+  {
+    "prompt": "coverage for the phase where they set up infra to use against us",
+    "expansion": "Attacker-controlled staging appears before the intrusion: domains registered days earlier that mimic the brand, fresh certificates and mail records for those names, sender infrastructure warming up against employees, virtual private servers rented and used almost immediately, redirectors hidden behind content delivery networks, payloads staged in public code repositories, and legitimate sites quietly turned into download hosts."
+  },
+  {
+    "prompt": "we got hit last month, everything got scrambled and there was a note asking for money. never want that again",
+    "expansion": "One process enumerates shares then reads and overwrites files at machine speed, extensions change en masse, entropy of written content spikes, a text file demanding payment lands in every folder, volume shadow copies are removed, boot recovery is disabled, database and backup services are stopped, and the file server records an abnormal rename and write rate from a single client."
+  },
+  {
+    "prompt": "someone is snooping around in places they have no business being",
+    "expansion": "An account reads shares, mailboxes and finance or HR folders it has never opened before: object access auditing spikes for that user, SharePoint and OneDrive file view bursts, database SELECTs across tables outside the person's role, administrative consoles browsed with no corresponding change activity, and access occurring off-hours from a workstation the account does not normally use."
+  },
+  {
+    "prompt": "i'm worried about a dev walking out the door with our source code on their last day",
+    "expansion": "An engineer clones far more repositories than usual in a short window, creates a personal access token, pushes branches to a remote outside the org, bundles trees to disk, writes large archives to a newly attached USB volume, syncs folders to a personal cloud client, and mails compressed source to an outside address during their final weeks."
+  },
+  {
+    "prompt": "our helpdesk got social engineered into resetting an exec's password and the attacker got in that way, can you make something that would have caught it",
+    "expansion": "A support-initiated password reset or second-factor re-registration on a privileged mailbox, logged as 4724 or as an authentication method change, followed within minutes by an interactive sign-in from a device, IP and user agent never associated with that identity, a fresh refresh token issued, and an inbox rule created shortly afterward."
+  },
+  {
+    "prompt": "how do i know if my cloud bill spike is actually someone mining crypto in our account",
+    "expansion": "Many large compute or GPU instances launched in regions the org never uses, long-running processes pinned at full CPU, outbound sessions to pool ports such as 3333 and 14444 speaking stratum, xmrig-style binaries or container images pulled onto hosts, instance creation by an access key rather than the usual pipeline role, and cost concentrated in one account."
+  },
+  {
+    "prompt": "detect if our security stack goes quiet",
+    "expansion": "Telemetry stops while the machine is clearly alive: agent heartbeats missing, a sharp drop in endpoint and Sysmon event volume from a host that still authenticates and transfers data, the log forwarder service stopped, syslog to the collector ceasing, audit policy cleared, auditd or rsyslog killed, and cloud trail logging stopped or deleted."
+  },
+  {
+    "prompt": "i want to know when an account is behaving like it's not the same person anymore",
+    "expansion": "Authentication and activity diverge from the account's own baseline: sign-ins from a new country, hosting provider and device, two locations too far apart for the elapsed time, first-ever use of administrative tooling, legacy protocols on an identity that only used modern clients, unfamiliar command lines, off-hours bursts, new mail rules, and sudden mass file reads."
+  },
+  {
+    "prompt": "basically catch the thing where an email leads to the whole company being owned",
+    "expansion": "A message is opened, the mail client or office application spawns a script interpreter, a payload is written to %APPDATA% and calls out to a domain registered days earlier, cached logon material is harvested, remote administration tools and new services appear on servers, a domain controller is accessed, and the chain ends in bulk uploads or mass file encryption."
+  },
+  {
+    "prompt": "our backups got wiped during an incident at a partner org and we'd be dead if that happened here",
+    "expansion": "Backup jobs and repositories deleted, vendor backup services stopped or their agents uninstalled, vssadmin and wbadmin invoked to remove restore points and catalogs, snapshots and recovery points deleted through cloud APIs, object versioning or immutability switched off, retention shortened abruptly, the archive share emptied, and the backup service account authenticating from an ordinary workstation."
+  },
+  {
+    "prompt": "there's a rogue admin somewhere problem i keep thinking about, someone with keys quietly setting themselves up so they still have access after we offboard them",
+    "expansion": "A privileged insider quietly builds spare doors: secondary accounts and service principals created, API keys and personal tokens minted, public keys appended to authorized_keys on servers, mailbox delegate rights granted, their own identity added to privileged groups, a VPN certificate issued, break-glass secrets read from the vault, and a scheduled job calling out to personal infrastructure."
+  },
+  {
+    "prompt": "something is talking to the internet that shouldnt be and i cant tell what",
+    "expansion": "Egress from a host or process with no business reason: a segmented server reaching public addresses, a signed system utility opening direct TLS to a raw IP, connections bypassing the proxy, non-standard destination ports, resolution of domains registered within the past week, and small uniform payloads repeating on a steady interval regardless of user presence."
+  },
+  {
+    "prompt": "can you catch a supply chain thing, like when an update we trusted turns out to be bad",
+    "expansion": "A signed installer or auto-updater writes an extra library or executable beside the legitimate product, the updater process spawns cmd or powershell, the host reaches a brand new destination immediately after the version changes, the shipped binary hash differs from prior stable builds, the package is pulled from an unusual mirror, and build agents modify artifacts after compilation."
+  },
+  {
+    "prompt": "i need to know if someone is quietly reading the ceo's mailbox",
+    "expansion": "Full-access or delegate rights granted on the executive mailbox, non-owner access recorded in the mailbox audit log, MailItemsAccessed entries showing sync-level retrieval, a compliance search scoped to that single user, IMAP or EWS pulls from a client the person never uses, hidden inbox rules, and reading sessions from addresses absent from the executive's own sign-in history."
+  },
+  {
+    "prompt": "alert when a process opens up the windows process that holds all the logon secrets and reads it out of memory",
+    "expansion": "A non-system process obtains a handle to the authentication subsystem with read and memory-read rights, then a .dmp file appears under a temp path. Look for process-access events with granted masks like 0x1010 or 0x1410, procdump usage, rundll32 invoking the comsvcs MiniDump export, task manager dumps by unexpected users, and reads issued through direct syscalls."
+  },
+  {
+    "prompt": "catch it when someone adds a cron entry on a linux server so their thing runs again after reboot",
+    "expansion": "Writes to /etc/crontab, files dropped in /etc/cron.d, or edits to /var/spool/cron/crontabs for a service account, crontab invoked interactively outside package management, entries containing curl piped into a shell, base64 blobs, or paths under /tmp and /dev/shm, an @reboot trigger, and audit watches firing on those paths from an unexpected parent process."
+  },
+  {
+    "prompt": "someone deleted the security event log on a windows box, i want that alerted immediately, also if they just clear it rather than delete",
+    "expansion": "Event 1102 recorded in the Security channel and 104 in others, wevtutil cl or Clear-EventLog run from a shell, .evtx files under C:\\Windows\\System32\\winevt\\Logs deleted or truncated, the event log service stopped or set to disabled, audit policy wiped with auditpol, and a sudden gap in forwarded records while the host keeps generating network and logon activity."
+  },
+  {
+    "prompt": "detect when a script gets run from a signed microsoft binary so it doesnt look like an exe, like using the built in windows utilities to pull down and execute stuff",
+    "expansion": "Trusted operating system executables act as launchers and downloaders: mshta pointed at an http URL, rundll32 with a javascript argument, regsvr32 loading scrobj.dll from a remote script, msiexec installing a package over the network, certutil with urlcache and decode flags, bitsadmin transfers, cmstp consuming an INF, and wmic formatting output through a remote XSL."
+  },
+  {
+    "prompt": "when a service account in aws suddenly generates a new long lived access key for another user",
+    "expansion": "A CreateAccessKey call in the audit trail where the calling principal is an automation role or machine identity and the target user name is someone else, with no matching change record, quickly followed by use of that key from an address and user agent outside normal ranges, plus related UpdateLoginProfile or policy attachment calls from the same principal."
+  },
+  {
+    "prompt": "i want to see when a user gets flooded with mfa prompts until they finally hit approve",
+    "expansion": "Dozens of second-factor push challenges for a single identity within minutes, repeated denials and timeouts recorded with failure codes such as 500121, all sourced from the same suspicious address, then one success from that same address, followed immediately by a new device registration or refresh token issued from an unfamiliar network."
+  },
+  {
+    "prompt": "flag anyone dumping the whole active directory password database off a domain controller",
+    "expansion": "The directory database file is copied off a controller: ntdsutil invoked to create an install-from-media set, a shadow copy created then the .dit and SYSTEM hive copied out, esentutl used against the file, the result archived and moved to a share. Also watch directory access events showing replication extended rights requested by an account that is not a controller."
+  },
+  {
+    "prompt": "a forwarding rule gets added to a mailbox that sends everything to an outside address, we've had this happen twice in o365 and both times we found out from the customer which is embarrassing",
+    "expansion": "New-InboxRule or a mailbox setting change adding an external forwarding address, audit entries for UpdateInboxRules or Set-Mailbox, rules that relay then move messages to a rarely used folder or delete them, created minutes after a sign-in from an unfamiliar network, with message tracing showing every inbound item copied outbound to a consumer domain."
+  },
+  {
+    "prompt": "catch someone using the remote management stuff built into windows to run commands on another machine with stolen creds",
+    "expansion": "Sessions to ports 5985 and 5986, wsmprovhost.exe spawning cmd or powershell on the target, Enter-PSSession and Invoke-Command issued from an ordinary workstation, wmiprvse.exe parenting new processes, explicit credential use logged as 4648, and network logons on servers from a source host that has never administered them."
+  },
+  {
+    "prompt": "detect a launch agent plist getting dropped in the user library folder on a mac",
+    "expansion": "A new property list written under ~/Library/LaunchAgents or /Library/LaunchDaemons followed by launchctl load or bootstrap, RunAtLoad and KeepAlive keys set true, ProgramArguments pointing at a script or binary in a hidden directory or /tmp, a label imitating Apple naming, and the file created by something other than a package installer."
+  },
+  {
+    "prompt": "someone is tunneling data out over dns queries in little chunks",
+    "expansion": "One internal client generates a high rate of lookups beneath a single parent domain with long randomized labels carrying base32 or base64 content, requests TXT and NULL record types, produces unique subdomain and NXDOMAIN counts far above every other host, queries at a machine-regular interval, and resolves against a name server on recently registered infrastructure."
+  },
+  {
+    "prompt": "when a new federated identity provider or trust gets added to our tenant so someone can mint their own tokens",
+    "expansion": "A domain is switched to federated authentication or its token-signing certificate is replaced, a new issuer or trusted realm is registered, credentials are added to an existing service principal, directory audit records show federation settings changed by an administrator outside the identity team, and afterward accounts authenticate through that issuer without ever contacting the usual sign-in flow."
+  },
+  {
+    "prompt": "i need an alert if the endpoint agent service gets stopped or uninstalled on a host",
+    "expansion": "The sensor service is stopped or deleted with sc or net commands, msiexec runs an uninstall or the vendor removal tool executes from a shell, the kernel driver is unloaded, service registry keys are changed to disabled at boot, tamper protection is switched off, and the agent stops checking in while the machine continues to authenticate and transfer data."
+  },
+  {
+    "prompt": "an ec2 instance querying the metadata endpoint from inside a web app process and then those creds showing up somewhere else",
+    "expansion": "A web application process issues HTTP requests to 169.254.169.254 under the instance identity credentials path, then the resulting temporary session token appears in the audit trail being used from an address outside cloud ranges, from a different region, starting with identity and enumeration calls that the instance role has never made before."
+  },
+  {
+    "prompt": "office app spawns a command shell, that's basically never legit for us",
+    "expansion": "winword.exe, excel.exe, powerpnt.exe or outlook.exe appears as the parent of cmd.exe, powershell.exe, wscript.exe, mshta.exe or rundll32.exe, typically with encoded arguments or a URL, preceded by a document written into the mail client temp directory and followed within seconds by a file drop in %APPDATA% and an outbound connection."
+  },
+  {
+    "prompt": "create me a rule that covers stealth tactics",
+    "expansion": "Actions taken purely to avoid inspection: binaries renamed after trusted components and their timestamps backdated, execution from user-writable directories, scanner exclusions written into product registry keys, payloads unpacked only into memory, script inspection and event tracing switched off, data hidden in alternate data streams or registry values, and callbacks blended into approved cloud service domains."
+  },
+  {
+    "prompt": "write a detection for defense evasion",
+    "expansion": "Monitoring is degraded before anything noisy happens: sensor services stopped and drivers unloaded, exclusion paths and process exceptions added, script block logging and inline scanning disabled, tracing providers patched, the Security channel cleared, payloads reflectively loaded rather than written to disk, obfuscated command lines, trusted operating system executables used as launchers, and staging in temp and recycle paths."
+  },
+  {
+    "prompt": "I need coverage for defence evasion techniques",
+    "expansion": "Protection features are toggled off through Set-MpPreference and registry switches, firewall rules are added to block vendor update traffic, monitoring packages are uninstalled from a command shell, payloads carry fresh or stolen code-signing certificates, executables show packed high-entropy sections, parent-child chains route through trusted system binaries, and prefetch entries and shell history are removed afterward."
+  },
+  {
+    "prompt": "build a rule for adversaries trying to hide and blend in",
+    "expansion": "The operator uses only administrative tooling already present, works during business hours under a valid account, names dropped files after operating system components and places them in plausible directories, stores payload bytes in registry values or management objects instead of files, moves over 443 and name resolution, mimics service account behavior, and clears artifacts after each step."
+  },
+  {
+    "prompt": "detect attackers breaking or blinding our security tooling",
+    "expansion": "A signed but vulnerable driver is loaded and used to terminate protected processes, service configuration is set to disabled at boot, sensor binaries are renamed or deleted, the machine is rebooted into safe mode with minimal services, hosts file entries blackhole vendor update domains, new firewall rules block the management cloud, and host telemetry volume collapses."
+  },
+  {
+    "prompt": "I want coverage for defense impairment",
+    "expansion": "Audit configuration is rewritten: policy subcategories disabled, transcription and module logging registry values set to zero, the logging daemon and audit subsystem killed on Linux, cloud trails stopped or deleted, flow logs turned off, detection rules removed from the analytics platform, and monitoring service credentials rotated by a principal that does not own them."
+  },
+  {
+    "prompt": "rule for credential theft",
+    "expansion": "Memory belonging to the authentication subsystem is read and dumped, account and security hives are exported, master keys used to protect stored secrets are accessed, browser credential stores and .ssh private keys are copied by unrelated processes, service tickets are requested in bulk with weak encryption, keyboard hooks are installed, fake sign-in prompts appear, and dump files are staged in temp."
+  },
+  {
+    "prompt": "detect someone stealing account names and passwords",
+    "expansion": "Tooling writes dump files then moves them off the host: hive exports of the account database, distinctive command strings referencing sekurlsa or logonpasswords, handles opened against the process holding cached logon material, directory replication requested from a workstation, group policy XML scraped for embedded passwords, config files searched for connection strings, and password manager vault files suddenly read."
+  },
+  {
+    "prompt": "cover lateral movement across my network",
+    "expansion": "Authenticated connections appear between endpoints that normally never communicate: an executable written to a remote administrative share then a service created to run it, interactive remote desktop sessions chained server to server, remote command execution over management protocols, tasks registered on other machines, SSH from a workstation to many servers, and hash-based network logons under a privileged account."
+  },
+  {
+    "prompt": "alert when an attacker is looking around the environment",
+    "expansion": "A tight sequence of inventory commands under one process tree: identity and group queries, host and patch level dumps, network configuration and neighbor tables, running process and session listings, installed software queries against the registry, directory searches for computers and administrators, and cloud inventory calls, often accompanied by many failed TCP connections from one source address."
+  },
+  {
+    "prompt": "detect data being stolen out of the network",
+    "expansion": "Archives assembled locally and then pushed outward, sustained outbound flows far beyond the host's normal volume, uploads to consumer file-sharing services or attacker-owned storage, transfer utilities invoked with PUT or copy syntax, SFTP to unknown endpoints, payload chunks embedded in name lookups or ICMP, and objects duplicated into a storage account outside the organization."
+  },
+  {
+    "prompt": "rule for attackers keeping access across reboots",
+    "expansion": "Autorun registry values, freshly created services, registered tasks, management event subscriptions, startup folder shortcuts, planted libraries on a program's search path and hijacked component registrations on Windows; timer and service units, cron entries, init scripts, shell profile edits, appended authorized keys and launch daemons elsewhere, all written by processes that are not legitimate installers."
+  },
+  {
+    "prompt": "I need privilege escalation coverage",
+    "expansion": "A weakly permissioned or unquoted service binary is replaced, a vulnerable signed driver is loaded then used to write kernel memory, a token is stolen from a service process, a registry hijack under the user hive drives an auto-elevating system binary, sudo rules and setuid files are altered, exploit attempts leave crash traces, and a limited user's process tree emerges as SYSTEM or root."
+  },
+  {
+    "prompt": "detect command and control beaconing",
+    "expansion": "Connections repeat at a near-constant interval with small variance, request bodies stay uniformly small, sessions stay open unusually long, sleep and jitter patterns emerge in flow timing, the same URI path is requested repeatedly, the TLS fingerprint is rare or self-signed, domains resolve with very low TTLs, and the pattern continues while no user is logged on."
+  },
+  {
+    "prompt": "cover destructive ransomware style activity",
+    "expansion": "Share enumeration is followed by thousands of file writes per minute, content entropy jumps and extensions change uniformly, payment instruction files appear in every directory, restore points and backup catalogs are deleted, boot recovery is disabled, database and security services are stopped, the desktop background is replaced, and one client drives an abnormal write and rename rate on the file server."
+  },
+  {
+    "prompt": "detect initial access attempts against my org",
+    "expansion": "Weaponized attachments and links delivered by mail, exploitation of internet-facing services where the web service account spawns a shell, valid credentials used against VPN and webmail from unfamiliar geography, drive-by downloads where a browser writes and launches an executable, removable media autorun, and remote support software appearing on a host for the very first time."
+  },
+  {
+    "prompt": "cover the reconnaissance phase before an attack",
+    "expansion": "Public address space is swept, login and API endpoints are probed repeatedly, subdomains and name records are enumerated, certificate and registration records are pulled, employee names are scraped to derive the address format, small test messages check mail routing and filtering, and slow authentication attempts are spread across many accounts from many source addresses."
+  },
+  {
+    "prompt": "rule for malicious code execution on endpoints",
+    "expansion": "Script interpreters run encoded or freshly downloaded content, unsigned executables launch from user-writable directories, libraries are invoked through export-calling utilities, document applications parent child processes, services and registered tasks invoke one-liners, remote management protocols trigger process creation, and web server or database processes spawn shells."
+  },
+  {
+    "prompt": "detect adversaries gathering data they plan to steal",
+    "expansion": "Recursive searches for documents, keys and credential files, results copied into a single staging directory, compression utilities invoked with recursion and password protection, mailbox and database exports written to disk, screen and clipboard capture, one account crawling many shares, and large temporary files appearing shortly before a big outbound transfer begins."
+  },
+  {
+    "prompt": "create a rule that catches someone covering their tracks on a linux server",
+    "expansion": "Shell history disabled or truncated by unsetting the history file or clearing it, files under /var/log removed or zeroed, the audit daemon and logging service stopped, wtmp and btmp tampered with, files destroyed with shred, timestamps rewritten using touch with a reference file, and a login session that shows process activity but leaves no recorded commands."
+  },
+  {
+    "prompt": "detect malware that runs entirely in memory and never touches disk",
+    "expansion": "An interpreter fetches content and executes it without writing a file: a downloaded string passed straight to an evaluation call, a .NET assembly loaded from a byte array, memory allocated read-write-execute inside a running process, module loads with no file backing them, and outbound connections from a process whose image path looks entirely benign."
+  },
+  {
+    "prompt": "I am worried about ransomware, give me a rule",
+    "expansion": "A single process touches thousands of files in a read-then-overwrite pattern, extensions change uniformly, instruction files repeat across directories, restore points are deleted, boot recovery is disabled, backup and database services are stopped, network shares are enumerated immediately before the writes start, and file rename events surge on the server hosting those shares."
+  },
+  {
+    "prompt": "something that alerts when a user account is used from somewhere it should not be",
+    "expansion": "A successful authentication arrives from a country, hosting provider or network the identity has never used, two sessions occur farther apart than travel time allows, the source is an anonymizing or datacenter address, the device and user agent are new, and an outdated authentication protocol is used by an account otherwise limited to modern clients."
+  },
+  {
+    "prompt": "catch attackers guessing passwords over and over",
+    "expansion": "Many failed logons against one account with bad-password status codes, or one password tried across hundreds of accounts inside a short window, repeated remote desktop and file sharing failures from one source, authentication failures piling up in the Linux auth log, cloud sign-in failure bursts, then a single success followed immediately by session activity."
+  },
+  {
+    "prompt": "we keep getting emails with bad attachments, write a detection",
+    "expansion": "Messages carry archives, disk images, shortcut files, notebook documents or macro-enabled files from senders never seen before; when opened, the child process chain starts in the mail client temp directory, a script interpreter runs, a library is sideloaded from the extracted folder, and a network request leaves the host within seconds of the user double-clicking."
+  },
+  {
+    "prompt": "alert me when someone pulls a big pile of files together before sending them out",
+    "expansion": "Many files copied from network shares into one local folder, a compression tool invoked with recursion and volume splitting, the output growing to hundreds of megabytes under a temp or public directory, and that archive then opened by a transfer utility or attached to a browser upload session shortly afterward."
+  },
+  {
+    "prompt": "detect a backdoor left behind on our public web server",
+    "expansion": "A new script file appears under the web root written by the web service account, the web server process starts spawning command shells, POST requests hit one unfamiliar path repeatedly with varying parameters and 200 responses, the file contains obfuscated evaluation and encoded blobs, and access comes from a handful of addresses at unusual hours."
+  },
+  {
+    "prompt": "I want to know when malware downloads more malware onto the box",
+    "expansion": "An already-running suspicious process retrieves additional binaries using certutil, bitsadmin, curl or a web request cmdlet, writes new executable files into %TEMP% or %APPDATA%, launches them immediately as child processes, and reaches a second network destination distinct from the original callback, often with a different domain and port."
+  },
+  {
+    "prompt": "catch programs that pretend to be legitimate windows binaries",
+    "expansion": "An executable named after a core operating system component runs from a path outside System32, is unsigned or carries an unexpected certificate, has the wrong parent process, lacks the command-line arguments the genuine service always uses, shows subtly misspelled variants of the real name, and carries file version metadata that does not match the authentic component."
+  },
+  {
+    "prompt": "alert when someone sets up something to run automatically on a schedule",
+    "expansion": "Task registration events and schtasks create command lines, tasks marked hidden or configured to run as SYSTEM, triggers set for logon or repeating every few minutes, actions pointing at scripts in temp directories or encoded interpreter arguments, XML definitions written under the system Tasks folder, and equivalent job creation on Linux by a non-administrative process."
+  },
+  {
+    "prompt": "detect data leaving over an unusual channel",
+    "expansion": "Payload is smuggled through protocols never used for transfer on that host: encoded content in name lookups, data in ICMP payloads, oversized time or mail protocol messages, WebDAV uploads, posts to messaging APIs and paste services, a collaboration platform used as a relay, and outbound flows on destination ports absent from the host's history."
+  },
+  {
+    "prompt": "I need to catch hands on keyboard activity where they poke around the machine",
+    "expansion": "An interactive shell shows human-paced commands with typos and corrections, directory listings interleaved with identity and network queries, files read one at a time, utilities present that IT never deployed, output redirected into temp files, and the whole session running at odd hours under a service account that should never log in interactively."
+  },
+  {
+    "prompt": "write me something for attackers hiding commands so they are hard to read",
+    "expansion": "Interpreter arguments carry base64 and compressed blobs, strings are concatenated, reversed or built from array elements before invocation, caret escaping and environment variable substitution break up keywords in the command shell, payloads are decoded with XOR at runtime, and process arguments become extremely long single lines with unusually high character entropy."
+  },
+  {
+    "prompt": "detect remote logins being used to hop between machines",
+    "expansion": "Chains of interactive and network sessions: a desktop session opened to a server, then another opened onward from that server, one account authenticating to many hosts within minutes, explicit credentials supplied from a machine that is not the user's own, and SSH connections originating from a host that itself just received an inbound session."
+  },
+  {
+    "prompt": "we had an incident where they turned off the av, cover that",
+    "expansion": "Real-time scanning disabled through a preference cmdlet or a registry value, exclusion paths and process exceptions added, signature updates blocked, the protection service stopped or its driver unloaded, an uninstall executed from a command shell, protection status change entries appearing in the product's own operational log, and scan coverage on that host dropping to nothing."
+  },
+  {
+    "prompt": "rule for when a process reads the memory of the windows process that holds credentials",
+    "expansion": "Something other than the operating system opens a handle with read and memory-read rights to the process storing cached logon material, a minidump lands in a temp path, a dumping utility or task manager writes it under an unexpected user, a loaded driver performs the read on the caller's behalf, or the read bypasses the usual API through direct syscalls."
+  },
+  {
+    "prompt": "detect a machine pretending to be a domain controller to pull password hashes",
+    "expansion": "Replication is requested by something that is not a controller: directory service access events citing the replicate-changes and replicate-changes-all extended rights from a workstation account, DsGetNCChanges calls over the directory replication interface on the wire, a computer object registered with controller-like service principal names, and replication permissions newly granted to an ordinary principal."
+  },
+  {
+    "prompt": "alert on scripts run through the built in windows shell that automates administration",
+    "expansion": "Script block logging records downloads, encoded commands and reflective loading, engine start events appear inside an unusual host process, arguments include execution policy bypass and hidden window flags, .ps1 files execute from temp directories or network shares, and the interpreter is parented by an office application, a browser, a service, or a remote management host process."
+  },
+  {
+    "prompt": "catch remote code execution using the windows management service",
+    "expansion": "New processes appear with wmiprvse.exe as parent, command lines show wmic targeting a remote node with process call create, cmdlets invoke methods against another host, distributed component traffic hits port 135 and a high ephemeral port, and permanent subscriptions are registered in the subscription namespace on the target machine."
+  },
+  {
+    "prompt": "detect when the attacker deletes the shadow copies so you cannot roll back",
+    "expansion": "vssadmin invoked with delete shadows and quiet flags, wmic used to delete shadowcopy objects, a management query piped into a delete call, storage association resized to nothing, boot configuration edited to disable automatic repair and ignore failures, backup catalogs deleted, and the copy service stopped, typically seconds before mass file modification begins."
+  },
+  {
+    "prompt": "find when someone dumps the local windows password database from the registry",
+    "expansion": "reg save or reg export writes the account, system and security hives into files under a temp directory, a shadow copy or database utility is used to grab locked hive files, the resulting saved hives are archived and copied to a share, and a process opens those keys with backup privilege enabled outside any legitimate maintenance window."
+  },
+  {
+    "prompt": "alert when code is written into another running program and executed there",
+    "expansion": "One process allocates memory inside another, writes a buffer, then starts a remote thread or queues asynchronous work to run it. Look for cross-process access with write rights, remote thread creation events, read-write-execute regions with no backing image, module loads from unbacked memory, and a benign host process suddenly opening network connections."
+  },
+  {
+    "prompt": "rule for tunneling traffic out disguised as normal name lookups",
+    "expansion": "Hostnames carry unusually long encoded labels, one second-level domain receives a very high query rate from a single internal client, TXT and NULL answers return payload-sized data, unique subdomain counts dwarf every other host, TTLs are minimal, queries arrive at machine-regular intervals, and the authoritative server sits on infrastructure registered very recently."
+  },
+  {
+    "prompt": "detect an attacker asking the directory service for all the user accounts",
+    "expansion": "Broad LDAP searches filtering on the user object class with no size limit issued from a workstation, net user against the domain, a cmdlet enumerating every account, dsquery and scripted directory objects, bulk group membership retrieval, account enumeration over the file sharing pipe, and one client producing far more directory queries than any real application."
+  },
+  {
+    "prompt": "catch a scheduled job created on a linux host for persistence",
+    "expansion": "New files in /etc/cron.d or /var/spool/cron, a crontab modified by something other than package management, a timer and matching service unit written under /etc/systemd/system followed by a daemon reload and enable, one-shot jobs queued with at, entries launching shells with network one-liners, and recurring execution of a binary living in /tmp."
+  },
+  {
+    "prompt": "alert when someone clears the windows security event log",
+    "expansion": "Event 1102 written to the Security channel and 104 for other channels, wevtutil cl issued against security, a clearing cmdlet run from a shell, .evtx files removed from the winevt log directory, the event log service stopped or disabled, and a sudden hole in forwarded records while the host keeps producing logon and network activity."
+  },
+  {
+    "prompt": "detect a malicious library placed so a trusted signed program loads it instead",
+    "expansion": "An unsigned library is written into the same folder as a legitimate signed executable that has been copied out of System32 into a user-writable directory, image load events show a Microsoft-signed process loading a module from %APPDATA% or temp, a commonly missing library name is planted on the search path, and manifests or path redirection steer resolution."
+  },
+  {
+    "prompt": "rule for bypassing the windows prompt that asks for admin approval",
+    "expansion": "Registry keys under the current user's class hive are written for handlers that auto-elevating system binaries consult, then fodhelper.exe, eventvwr.exe, computerdefaults.exe or sdclt.exe launches, producing a high-integrity child process with no consent dialog, and the planted keys are deleted moments afterward leaving a short-lived registry artifact."
+  },
+  {
+    "prompt": "find attackers using stolen kerberos tickets to authenticate",
+    "expansion": "Tickets appear in a session that the key distribution center never issued to it: host-side listings showing tickets with no corresponding service ticket request on the domain controller, weak RC4 encryption where the domain enforces AES, implausible ticket lifetimes and renewal windows, and a machine authenticating as an account that has never worked from it."
+  },
+  {
+    "prompt": "detect an attempt to read the linux shadow file with the password hashes",
+    "expansion": "A process that is not a login, password change or authentication utility opens /etc/shadow for reading, shell history shows the file being printed, copied or encoded, an audit watch on that path fires, a copy appears under /tmp, an archive of /etc includes it, and unprivileged accounts generate permission denied entries against the same path."
+  }
+]
