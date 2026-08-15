@@ -99,15 +99,12 @@ export {
 export type { BuiltInStepType } from './spec/schema';
 
 export {
-  WORKFLOW_VALIDATION_RULES,
-  WORKFLOW_VALIDATION_RULE_IDS,
-  getDefaultSeverityForRule,
-  getOwnerForRule,
   isWorkflowValidationRuleId,
+  WORKFLOW_VALIDATION_RULE_IDS,
+  WORKFLOW_VALIDATION_RULES,
 } from './validation/rules';
 export type {
   WorkflowValidationRuleId,
   WorkflowValidationRuleOwner,
   WorkflowValidationRules,
-  WorkflowValidationRuleValues,
 } from './validation/rules';

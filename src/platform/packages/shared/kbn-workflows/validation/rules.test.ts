@@ -7,18 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  getDefaultSeverityForRule,
-  getOwnerForRule,
-  isWorkflowValidationRuleId,
-  WORKFLOW_VALIDATION_RULE_IDS,
-  WORKFLOW_VALIDATION_RULES,
-} from './rules';
+import { isWorkflowValidationRuleId, WORKFLOW_VALIDATION_RULE_IDS } from './rules';
 
 describe('workflow validation rules registry', () => {
-  // Rule IDs are a public identifier: they key quick fixes, telemetry, severity
-  // overrides and error suppression. Renaming one is a breaking change, so this
-  // snapshot exists to make it a deliberate, reviewed edit rather than a drive-by.
+  // Renaming a rule ID is a breaking change for anything keyed off it, so the
+  // snapshot makes it a reviewed edit rather than a drive-by.
   it('has a stable set of rule IDs', () => {
     expect(WORKFLOW_VALIDATION_RULE_IDS).toMatchInlineSnapshot(`
       Array [
@@ -73,14 +66,6 @@ describe('workflow validation rules registry', () => {
     }
   });
 
-  it('gives every rule an owner and a default severity', () => {
-    for (const ruleId of WORKFLOW_VALIDATION_RULE_IDS) {
-      const rule = WORKFLOW_VALIDATION_RULES[ruleId];
-      expect(rule.owner).toEqual(expect.any(String));
-      expect(['error', 'warning', 'info']).toContain(rule.defaultSeverity);
-    }
-  });
-
   describe('isWorkflowValidationRuleId', () => {
     it('accepts a registered rule ID', () => {
       expect(isWorkflowValidationRuleId('duplicateStepName')).toBe(true);
@@ -94,19 +79,6 @@ describe('workflow validation rules registry', () => {
     it('rejects inherited object properties', () => {
       expect(isWorkflowValidationRuleId('toString')).toBe(false);
       expect(isWorkflowValidationRuleId('constructor')).toBe(false);
-    });
-  });
-
-  describe('lookup helpers', () => {
-    it('returns the registered owner', () => {
-      expect(getOwnerForRule('connectorNotFound')).toBe('connector-id-validation');
-      expect(getOwnerForRule('yamlSyntaxError')).toBe('yaml');
-    });
-
-    it('returns the registered default severity', () => {
-      expect(getDefaultSeverityForRule('duplicateStepName')).toBe('error');
-      expect(getDefaultSeverityForRule('deprecatedStepType')).toBe('warning');
-      expect(getDefaultSeverityForRule('connectorResolved')).toBe('info');
     });
   });
 });

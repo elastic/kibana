@@ -8,51 +8,19 @@
  */
 
 /**
- * The validator that produces a rule's diagnostics. Groups rules; not an identity.
+ * Every workflow validation rule, keyed by its stable rule ID. A rule ID is the
+ * machine-readable identity of a check: it is not translated and does not change when
+ * the message is reworded, so quick fixes, telemetry and suppression can key off it.
  *
- * `yaml` covers diagnostics we do not author ourselves: the `yaml` parser and the
- * JSON Schema layer behind `monaco-yaml`.
- */
-export type WorkflowValidationRuleOwner =
-  | 'connector-id-validation'
-  | 'deprecated-step-validation'
-  | 'esql-validation'
-  | 'graph-build-validation'
-  | 'if-condition-validation'
-  | 'json-schema-default-validation'
-  | 'liquid-template-validation'
-  | 'parallel-fan-out-validation'
-  | 'parallel-mode-validation'
-  | 'step-name-validation'
-  | 'step-property-validation'
-  | 'trigger-condition-validation'
-  | 'trigger-validation'
-  | 'variable-validation'
-  | 'workflow-inputs-validation'
-  | 'workflow-output-validation'
-  | 'yaml';
-
-/**
- * Every workflow validation rule, keyed by its stable rule ID.
- *
- * A rule ID is the machine-readable identity of a check. It is not translated and
- * does not change when the user-facing message is reworded, which is what makes it
- * safe to key quick fixes, telemetry, severity overrides, and error suppression off.
- *
- * `values` documents the interpolation parameters the rule's message needs. It is
- * declared here so message construction can be type-checked against the registry;
- * call sites are converted incrementally.
- *
- * `defaultSeverity` is the registry default. Severity is deliberately orthogonal to
- * rule identity, so an emitter may report the same rule at a different severity when
- * context calls for it.
+ * `owner` is the validator that emits the rule, `defaultSeverity` is a default an
+ * emitter may override, and `values` documents the message's interpolation parameters
+ * (not yet enforced at call sites).
  *
  * Adding a check means adding an entry here first: `WorkflowValidationRuleId` is
  * derived from these keys, so an unregistered rule ID does not compile.
  */
 export interface WorkflowValidationRules {
   // -- yaml ---------------------------------------------------------------------
-  /** The document is not parseable as YAML. */
   yamlSyntaxError: {
     owner: 'yaml';
     defaultSeverity: 'error';
@@ -66,7 +34,6 @@ export interface WorkflowValidationRules {
   };
 
   // -- step names ---------------------------------------------------------------
-  /** Two or more steps share a name. */
   duplicateStepName: {
     owner: 'step-name-validation';
     defaultSeverity: 'error';
@@ -82,11 +49,10 @@ export interface WorkflowValidationRules {
   };
 
   // -- variables ----------------------------------------------------------------
-  /** A referenced variable does not exist in the current context. */
   undefinedVariable: {
     owner: 'variable-validation';
     defaultSeverity: 'error';
-    values: {};
+    values: Record<string, never>;
   };
   /** The variable may be fine, but the workflow schema is too broken to tell. */
   variableUncheckableInvalidSchema: {
@@ -100,13 +66,11 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'warning';
     values: { description: string };
   };
-  /** The variable path is syntactically invalid. */
   invalidVariablePath: {
     owner: 'variable-validation';
     defaultSeverity: 'error';
     values: { key: string };
   };
-  /** The variable path could not be parsed. */
   variablePathParseError: {
     owner: 'variable-validation';
     defaultSeverity: 'error';
@@ -128,7 +92,7 @@ export interface WorkflowValidationRules {
   contextSchemaUnavailable: {
     owner: 'variable-validation';
     defaultSeverity: 'error';
-    values: {};
+    values: Record<string, never>;
   };
   /** A `{% for %}` collection path that does not resolve to something iterable. */
   invalidCollectionPath: {
@@ -156,7 +120,6 @@ export interface WorkflowValidationRules {
   };
 
   // -- liquid templates ---------------------------------------------------------
-  /** The Liquid template does not parse. */
   liquidSyntaxError: {
     owner: 'liquid-template-validation';
     defaultSeverity: 'error';
@@ -180,9 +143,8 @@ export interface WorkflowValidationRules {
   dynamicConnectorTypesUnavailable: {
     owner: 'connector-id-validation';
     defaultSeverity: 'error';
-    values: {};
+    values: Record<string, never>;
   };
-  /** The referenced connector ID does not exist. */
   connectorNotFound: {
     owner: 'connector-id-validation';
     defaultSeverity: 'error';
@@ -196,7 +158,6 @@ export interface WorkflowValidationRules {
   };
 
   // -- step properties ----------------------------------------------------------
-  /** A step property failed its own validation. */
   invalidStepProperty: {
     owner: 'step-property-validation';
     defaultSeverity: 'error';
@@ -206,7 +167,7 @@ export interface WorkflowValidationRules {
   stepPropertyResolved: {
     owner: 'step-property-validation';
     defaultSeverity: 'info';
-    values: {};
+    values: Record<string, never>;
   };
 
   // -- workflow inputs ----------------------------------------------------------
@@ -222,13 +183,11 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: { inputName: string; expectedType: string; actualType: string };
   };
-  /** A required input of the target workflow was not supplied. */
   missingRequiredInput: {
     owner: 'workflow-inputs-validation';
     defaultSeverity: 'error';
     values: { inputName: string; workflowName: string };
   };
-  /** The referenced target workflow does not exist. */
   targetWorkflowNotFound: {
     owner: 'workflow-inputs-validation';
     defaultSeverity: 'error';
@@ -236,7 +195,6 @@ export interface WorkflowValidationRules {
   };
 
   // -- workflow outputs ---------------------------------------------------------
-  /** A workflow output declaration is invalid. */
   invalidWorkflowOutput: {
     owner: 'workflow-output-validation';
     defaultSeverity: 'error';
@@ -248,19 +206,19 @@ export interface WorkflowValidationRules {
   invalidEqualityOperator: {
     owner: 'if-condition-validation';
     defaultSeverity: 'error';
-    values: {};
+    values: Record<string, never>;
   };
   /** An unsupported inequality operator. */
   invalidInequalityOperator: {
     owner: 'if-condition-validation';
     defaultSeverity: 'error';
-    values: {};
+    values: Record<string, never>;
   };
   /** Assignment used inside a condition. */
   invalidAssignmentOperator: {
     owner: 'if-condition-validation';
     defaultSeverity: 'error';
-    values: {};
+    values: Record<string, never>;
   };
   /** The condition is not parseable as KQL. */
   invalidIfConditionSyntax: {
@@ -270,7 +228,6 @@ export interface WorkflowValidationRules {
   };
 
   // -- trigger conditions -------------------------------------------------------
-  /** A trigger condition failed validation. */
   invalidTriggerCondition: {
     owner: 'trigger-condition-validation';
     defaultSeverity: 'error';
@@ -309,11 +266,10 @@ export interface WorkflowValidationRules {
   invalidParallelMode: {
     owner: 'parallel-mode-validation';
     defaultSeverity: 'error';
-    values: {};
+    values: Record<string, never>;
   };
 
   // -- deprecations -------------------------------------------------------------
-  /** The step type is deprecated. */
   deprecatedStepType: {
     owner: 'deprecated-step-validation';
     defaultSeverity: 'warning';
@@ -332,16 +288,12 @@ export interface WorkflowValidationRules {
 /** The stable identity of a validation check. Never translated. */
 export type WorkflowValidationRuleId = keyof WorkflowValidationRules;
 
-/** The interpolation parameters a rule's message needs. */
-export type WorkflowValidationRuleValues<K extends WorkflowValidationRuleId> =
-  WorkflowValidationRules[K]['values'];
-
 /**
- * Severities a rule may declare as its default. Derived from the registry rather than
- * imported, so this module stays a leaf that the diagnostic types can depend on.
+ * The validator that emits a rule. `yaml` covers diagnostics we do not author: the
+ * `yaml` parser and the JSON Schema layer behind `monaco-yaml`.
  */
-export type WorkflowValidationRuleSeverity =
-  WorkflowValidationRules[WorkflowValidationRuleId]['defaultSeverity'];
+export type WorkflowValidationRuleOwner =
+  WorkflowValidationRules[WorkflowValidationRuleId]['owner'];
 
 interface WorkflowValidationRuleDefinition<K extends WorkflowValidationRuleId> {
   owner: WorkflowValidationRules[K]['owner'];
@@ -426,16 +378,4 @@ export const WORKFLOW_VALIDATION_RULE_IDS = (
 /** Narrow an arbitrary string to a registered rule ID. */
 export function isWorkflowValidationRuleId(value: string): value is WorkflowValidationRuleId {
   return Object.hasOwn(WORKFLOW_VALIDATION_RULES, value);
-}
-
-/** The registry default severity for a rule. Emitters may report a different one. */
-export function getDefaultSeverityForRule(
-  ruleId: WorkflowValidationRuleId
-): WorkflowValidationRuleSeverity {
-  return WORKFLOW_VALIDATION_RULES[ruleId].defaultSeverity;
-}
-
-/** The validator that owns a rule. */
-export function getOwnerForRule(ruleId: WorkflowValidationRuleId): WorkflowValidationRuleOwner {
-  return WORKFLOW_VALIDATION_RULES[ruleId].owner;
 }
