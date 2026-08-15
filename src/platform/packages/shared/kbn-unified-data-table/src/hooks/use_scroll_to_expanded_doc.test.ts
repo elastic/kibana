@@ -148,6 +148,33 @@ describe('useScrollToExpandedDoc', () => {
     expect(window.cancelAnimationFrame).toHaveBeenCalled();
   });
 
+  it('scrolls again when the same document is closed and reopened', () => {
+    const scrollToItem = jest.fn();
+    const dataGridRef: RefObject<EuiDataGridRefProps> = {
+      current: {
+        setIsFullScreen: jest.fn(),
+        setFocusedCell: jest.fn(),
+        openCellPopover: jest.fn(),
+        closeCellPopover: jest.fn(),
+        scrollToItem,
+      },
+    };
+    const dataGridWrapper = document.createElement('div');
+    const props = getProps({ dataGridRef, dataGridWrapper });
+    const { rerender } = renderHook(({ hookProps }) => useScrollToExpandedDoc(hookProps), {
+      initialProps: { hookProps: props },
+    });
+
+    runNextFrame();
+    expect(scrollToItem).toHaveBeenCalledTimes(1);
+
+    rerender({ hookProps: { ...props, expandedDoc: undefined } });
+    rerender({ hookProps: props });
+    runNextFrame();
+
+    expect(scrollToItem).toHaveBeenCalledTimes(2);
+  });
+
   it('stops retrying when the grid remains unavailable', () => {
     const dataGridRef: RefObject<EuiDataGridRefProps> = {
       current: {

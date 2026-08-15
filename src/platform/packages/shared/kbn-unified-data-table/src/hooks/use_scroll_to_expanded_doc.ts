@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import type { EuiDataGridRefProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { VIRTUALIZED_SELECTOR } from '../constants';
+import { useRestorableRef } from '../restorable_state';
 import type { DataGridPaginationMode } from '../types';
 
 /** Retry while the virtualized grid renders after the expanded document is known. */
@@ -51,7 +52,7 @@ export const useScrollToExpandedDoc = ({
   dataGridRef,
   dataGridWrapper,
 }: UseScrollToExpandedDocProps) => {
-  const scrolledToDocId = useRef<string>();
+  const scrolledToDocId = useRestorableRef('scrolledToExpandedDocId', undefined);
   const isPaginated = paginationMode === 'multiPage' && isPaginationEnabled;
 
   // Let later retries see the committed page rather than the page where scrolling started.
@@ -146,5 +147,5 @@ export const useScrollToExpandedDoc = ({
     frameId = requestAnimationFrame(attemptScroll);
 
     return stop;
-  }, [centerExpandedRow, dataGridWrapper, expandedDoc]);
+  }, [centerExpandedRow, dataGridWrapper, expandedDoc, scrolledToDocId]);
 };

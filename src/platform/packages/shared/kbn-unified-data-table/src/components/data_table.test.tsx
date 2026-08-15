@@ -1834,6 +1834,26 @@ describe('UnifiedDataTable', () => {
       expect(onChangePageMock).not.toHaveBeenCalled();
     });
 
+    it('should not page to an expanded document again after restoring the table state', async () => {
+      const expandedDoc = rows[2];
+      const props = {
+        ...getPagedProps(),
+        expandedDoc,
+        initialState: {
+          pageIndex: 1,
+          scrolledToExpandedDocId: expandedDoc.id,
+        },
+      };
+
+      await renderComponent(props);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
     it('should not page when the expanded document is not part of the results', async () => {
       const props = getPagedProps();
       const { rerender } = await renderComponent(props);
