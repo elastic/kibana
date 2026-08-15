@@ -26,13 +26,13 @@ import { allChangedFilesInScope } from '../../affected-packages';
  * in `kbn-scout-info` fails CI if the copies drift.
  */
 
-const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
+export const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
   '**/README*',
   '**/*.md',
   '**/CHANGELOG*',
 ];
 
-const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
+export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
   '**/test/scout{_*,}/{api,ui}/**',
   '**/test/scout{_*,}/*/{api,ui}/**',
   '**/test/scout{_*,}/.meta/{api,ui}/**',

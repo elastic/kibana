@@ -12,10 +12,10 @@ import { Minimatch } from 'minimatch';
 // Don't annotate the return type as `Minimatch[]`: the installed
 // @types/minimatch exports `Minimatch` as a value (not a type), and ts-node
 // will reject it. Inference + `ReturnType` keeps the file ts-node-clean.
-const compileMatchers = (patterns: readonly string[]) =>
+export const compileMatchers = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 
-const matchesAny = (file: string, matchers: ReturnType<typeof compileMatchers>): boolean =>
+export const matchesAny = (file: string, matchers: ReturnType<typeof compileMatchers>): boolean =>
   matchers.some((m) => m.match(file));
 
 /**

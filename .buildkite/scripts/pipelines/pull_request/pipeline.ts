@@ -25,6 +25,7 @@ import {
   emitPipeline,
   getPipeline,
   getPrChangesCached,
+  isCypressRelevantPath,
   isScoutTestsOnlyDiff,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
@@ -64,18 +65,41 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       return;
     }
 
-    // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
-    const scoutTestsOnly = isScoutTestsOnlyDiff(
-      prChanges.flatMap((change) =>
-        change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
-      )
+    const prChangedPaths = prChanges.flatMap((change) =>
+      change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
     );
+
+    // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
+    const scoutTestsOnly = isScoutTestsOnlyDiff(prChangedPaths);
     if (scoutTestsOnly) {
       console.warn(
         'Scout-tests-only diff detected — skipping OAS Snapshot, API Contracts, and Saved Objects checks'
       );
     }
+
+    // Scout/FTR test trees can't affect Cypress, but the Cypress suites' path matchers
+    // below cover whole plugin directories, so those matchers are evaluated only against
+    // changes that can affect Cypress. Labels still force suites on. Past 3000 files the
+    // GitHub file list is truncated, so keep it unfiltered and let doAnyChangesMatch's
+    // own safety valve run everything.
+    const cypressRelevantChanges =
+      prChanges.length >= 3000
+        ? prChanges
+        : prChanges.filter(
+            (change) =>
+              isCypressRelevantPath(change.filename) ||
+              (!!change.previous_filename && isCypressRelevantPath(change.previous_filename))
+          );
+    if (cypressRelevantChanges.length < prChanges.length) {
+      console.warn(
+        `Cypress trigger evaluation ignores ${
+          prChanges.length - cypressRelevantChanges.length
+        } of ${prChanges.length} changed file(s) (Scout/FTR test trees or docs)`
+      );
+    }
+    const doAnyCypressRelevantChangesMatch = (matchers: RegExp[]) =>
+      doAnyChangesMatch(matchers, cypressRelevantChanges);
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
 
@@ -126,7 +150,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
@@ -142,7 +166,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/cases/,
         /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml/,
       ])) ||
@@ -155,7 +179,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
         /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml/,
@@ -305,7 +329,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
@@ -321,7 +345,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -342,7 +366,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
@@ -405,7 +429,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^src\/platform\/packages\/shared\/kbn-doc-links/,
@@ -475,7 +499,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^src\/platform\/packages\/shared\/kbn-doc-links/,
@@ -545,7 +569,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      ((await doAnyChangesMatch([
+      ((await doAnyCypressRelevantChangesMatch([
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -564,7 +588,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^x-pack\/packages\/kbn-cloud-security-posture/,
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -629,7 +653,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([
+      (await doAnyCypressRelevantChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,

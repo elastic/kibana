@@ -214,6 +214,120 @@ describe('pull_request pipeline generation', () => {
     );
   });
 
+  describe('Cypress suite triggers ignore Scout/FTR-test-tree changes', () => {
+    const CYPRESS_STEP_SCRIPTS = [
+      'response_ops.sh',
+      'response_ops_cases.sh',
+      'fleet_cypress.sh',
+      'defend_workflows.sh',
+      'security_solution_explore.sh',
+      'security_solution_investigations.sh',
+      'osquery_cypress.sh',
+    ];
+
+    // The Cypress suite conditions pass an explicit (filtered) changes array to
+    // doAnyChangesMatch; delegate those calls to the real matcher implementation
+    // while keeping every other doAnyChangesMatch call inert. Require the concrete
+    // github module (not the #pipeline-utils index) to avoid re-entering the
+    // module mock while it is being constructed.
+    const delegateCypressMatchesToActual = () => {
+      const { doAnyChangesMatch: actualDoAnyChangesMatch } = jest.requireActual(
+        '#pipeline-utils/github/github'
+      );
+      mockDoAnyChangesMatch.mockImplementation((regexes, changes) =>
+        changes ? actualDoAnyChangesMatch(regexes, changes) : Promise.resolve(false)
+      );
+    };
+
+    it('omits Cypress suites when the diff only touches Scout/FTR test trees, even though plugin matchers would hit', async () => {
+      delegateCypressMatchesToActual();
+      mockGetPrChangesCached.mockResolvedValue([
+        { filename: 'x-pack/platform/test/functional/apps/index_management/home_page.ts' },
+        {
+          filename:
+            'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/foo.spec.ts',
+        },
+        { filename: '.buildkite/ftr-manifests/ftr_platform_stateful_configs.yml' },
+      ]);
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Cypress trigger evaluation ignores 3 of 3 changed file(s)')
+      );
+      for (const script of CYPRESS_STEP_SCRIPTS) {
+        expect(output).not.toContain(script);
+      }
+    });
+
+    it('keeps Cypress suites on for a test-tree-only diff when ci:all-cypress-suites is set', async () => {
+      process.env.GITHUB_PR_LABELS = 'ci:all-cypress-suites';
+      delegateCypressMatchesToActual();
+      mockGetPrChangesCached.mockResolvedValue([
+        { filename: 'x-pack/platform/test/functional/apps/index_management/home_page.ts' },
+      ]);
+      jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      for (const script of CYPRESS_STEP_SCRIPTS) {
+        expect(output).toContain(script);
+      }
+    });
+
+    it('keeps Cypress suites on when the diff also touches matching source code', async () => {
+      delegateCypressMatchesToActual();
+      mockGetPrChangesCached.mockResolvedValue([
+        { filename: 'x-pack/platform/test/functional/apps/index_management/home_page.ts' },
+        { filename: 'src/platform/plugins/shared/data/public/index.ts' },
+        { filename: 'x-pack/platform/plugins/shared/cases/server/plugin.ts' },
+        { filename: 'x-pack/platform/plugins/shared/fleet/server/plugin.ts' },
+        {
+          filename:
+            'x-pack/solutions/security/plugins/security_solution/public/asset_inventory/index.tsx',
+        },
+      ]);
+      jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      for (const script of CYPRESS_STEP_SCRIPTS) {
+        expect(output).toContain(script);
+      }
+    });
+
+    it('only triggers the suites matched by Cypress-relevant files in a mixed diff', async () => {
+      delegateCypressMatchesToActual();
+      mockGetPrChangesCached.mockResolvedValue([
+        // Scout tree inside security_solution: must NOT trigger the security suites
+        {
+          filename:
+            'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/tests/foo.spec.ts',
+        },
+        // Fleet source: triggers fleet_cypress only
+        { filename: 'x-pack/platform/plugins/shared/fleet/server/plugin.ts' },
+      ]);
+      jest.spyOn(console, 'warn').mockImplementation();
+      const emitted = waitForEmission();
+
+      await importPipelineModule();
+      const output = await emitted;
+
+      expect(output).toContain('fleet_cypress.sh');
+      expect(output).not.toContain('security_solution_explore.sh');
+      expect(output).not.toContain('security_solution_investigations.sh');
+      expect(output).not.toContain('defend_workflows.sh');
+      expect(output).not.toContain('osquery_cypress.sh');
+    });
+  });
+
   it('emits empty pipeline for automated version bump PRs from kibanamachine', async () => {
     mockIsAutomatedVersionBumpPR.mockResolvedValueOnce(true);
     const emitted = waitForEmission();
