@@ -323,10 +323,13 @@
     "get": "getCaseTagsDefaultSpace"
   },
   "/api/cases/templates": {
-    "get": "getCaseTemplatesDefaultSpace"
+    "get": "getCaseTemplatesDefaultSpace",
+    "post": "createCaseTemplateDefaultSpace"
   },
   "/api/cases/templates/{template_id}": {
-    "get": "getCaseTemplateDefaultSpace"
+    "get": "getCaseTemplateDefaultSpace",
+    "put": "updateCaseTemplateDefaultSpace",
+    "delete": "deleteCaseTemplateDefaultSpace"
   },
   "/api/dashboards": {
     "get": "get-dashboards-redirect",
@@ -1602,6 +1605,9 @@
   },
   "/api/workflows/workflow/{workflowId}/executions/steps": {
     "get": "get-workflows-workflow-workflowid-executions-steps"
+  },
+  "/api/workflows/workflow/executions": {
+    "get": "get-workflows-workflow-executions"
   },
   "/s/{spaceId}/api/observability/slos": {
     "get": "findSlosOp",
