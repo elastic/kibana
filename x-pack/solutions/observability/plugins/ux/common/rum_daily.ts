@@ -21,7 +21,7 @@ export { emptyRumRollupStatus };
 
 export const RUM_DAILY_VERSION = RUM_SESSIONS_VERSION;
 /** Dest-pipeline / pivot revision. Replace + wipe dest when this changes. */
-export const RUM_DAILY_SPEC = 6;
+export const RUM_DAILY_SPEC = 7;
 export const RUM_PAGES_DAILY_TRANSFORM_ID = `ux-rum-pages-daily-${RUM_DAILY_VERSION}`;
 export const RUM_PAGES_DAILY_INDEX = `ux-rum-pages-daily-${RUM_DAILY_VERSION}`;
 export const RUM_PAGES_DAILY_INDEX_PATTERN = 'ux-rum-pages-daily-*';
@@ -42,8 +42,11 @@ export const RUM_DAILY_SYNC_DELAY = RUM_SESSIONS_SYNC_DELAY;
 export const RUM_DAILY_RETENTION = '400d';
 export const RUM_DAILY_SOURCE_LOOKBACK = 'now-400d';
 export const RUM_SESSIONS_SOURCE_LOOKBACK = sessionsSourceLookback();
-/** Use daily rollups once the requested window is longer than a week. */
-export const RUM_DAILY_LONG_RANGE_MS = 7 * 24 * 60 * 60 * 1000;
+/**
+ * Daily rollups only after a week. Kibana "Last 7 days" is `now-7d/d` (up to
+ * just under 8d), which must stay on raw.
+ */
+export const RUM_DAILY_LONG_RANGE_MS = 8 * 24 * 60 * 60 * 1000;
 
 export const emptyPagesDailyStatus = (): RumRollupStatus =>
   emptyRumRollupStatus(RUM_PAGES_DAILY_TRANSFORM_ID, RUM_PAGES_DAILY_INDEX);

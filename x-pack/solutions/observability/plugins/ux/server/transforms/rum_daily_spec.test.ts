@@ -23,7 +23,7 @@ describe('rum daily transform specs', () => {
   it('groups pages by day, service, and grouped path fields', () => {
     const { group_by: groupBy } = rumPagesDailyTransformBody.pivot;
     expect(groupBy['@timestamp']).toEqual({
-      date_histogram: { field: '@timestamp', calendar_interval: '1d' },
+      date_histogram: { field: '@timestamp', calendar_interval: '1d', missing_bucket: true },
     });
     expect(groupBy['service.name']).toEqual({
       terms: { field: RUM_CANONICAL_SERVICE_NAME_FIELD },
@@ -36,7 +36,7 @@ describe('rum daily transform specs', () => {
   it('groups service daily by day and service only', () => {
     const { group_by: groupBy } = rumServiceDailyTransformBody.pivot;
     expect(groupBy['@timestamp']).toEqual({
-      date_histogram: { field: '@timestamp', calendar_interval: '1d' },
+      date_histogram: { field: '@timestamp', calendar_interval: '1d', missing_bucket: true },
     });
     expect(groupBy['service.name']).toEqual({
       terms: { field: RUM_CANONICAL_SERVICE_NAME_FIELD },
@@ -96,7 +96,7 @@ describe('rum daily transform specs', () => {
         poor: { filter: { range: { 'attributes.browser.web_vital.value': { gt: 4000 } } } },
       })
     );
-    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 6 }));
+    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 7 }));
     expect(lcp.aggs.element).toEqual(
       expect.objectContaining({
         terms: expect.objectContaining({

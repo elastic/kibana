@@ -86,6 +86,14 @@ describe('shouldQueryDailyIndex', () => {
         rangeTo: 'now',
       })
     ).toBe(false);
+    expect(
+      shouldQueryDailyIndex({
+        installed: true,
+        watermark,
+        rangeFrom: 'now-7d/d',
+        rangeTo: 'now',
+      })
+    ).toBe(false);
   });
 
   it('uses daily rollups for 90d and 1y', () => {

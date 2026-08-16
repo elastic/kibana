@@ -426,10 +426,12 @@ const sourceQuery = (extraFilters: object[] = []) => ({
   },
 });
 
+// Disables the match-all composite skip on logsdb index sort (order is not a transform field).
 const dateHistogramGroup = {
   date_histogram: {
     field: '@timestamp',
     calendar_interval: '1d' as const,
+    missing_bucket: true,
   },
 };
 
