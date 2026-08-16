@@ -1101,5 +1101,13 @@
       "team": "elastic/platform-analytics",
       "label": "Team:Platform Analytics"
     }
+  },
+  {
+    "id": "trade",
+    "name": "Threat Research and Detection Engineering Team",
+    "github": {
+      "team": "elastic/threat-research-and-detection-engineering",
+      "label": "Team:TRaDE"
+    }
   }
 ]

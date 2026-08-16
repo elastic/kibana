@@ -8,7 +8,10 @@
  */
 
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  WorkflowsManagementApiActions,
+  WorkflowsManagementOperationPrivileges,
+} from '@kbn/workflows';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
 import { ManagedWorkflowReadForbiddenError } from '../../managed_workflow_read_error';
 import type { GetWorkflowsParams } from '../../workflows_management_api';
@@ -24,17 +27,22 @@ interface ManagedResource {
 /**
  * Security configuration objects ready to be used in route definitions.
  *
+ * The privileges each operation requires are defined in
+ * `WorkflowsManagementOperationPrivileges` (`@kbn/workflows`), shared with the other plugins that
+ * perform the same operations through the server-side API. These objects only add the
+ * route-specific composition on top (`anyRequired` / `extendedPrivileges`).
+ *
  * Privilege model:
  * - Routes that return workflow data to the caller require `read`.
  * - Routes that return execution data require `readExecution`.
- * - Mutating routes (update / delete) perform internal reads as part of the
- *   write operation (merge, space-scoping). These reads are implementation
- *   details and do NOT require the `read` privilege.
+ * - Routes that mutate or execute perform internal reads as part of the operation
+ *   (merge, space-scoping, loading the definition to run it). These reads are
+ *   implementation details and do NOT require the `read` privilege.
  * - `get_workflows` and `get_stats` use `extendedPrivileges` for optional
  *   execution/managed privileges checked via `authzResult` without gating access.
  */
 export const WORKFLOW_READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.read] },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.read] },
 };
 /**
  * Allows either base read or managed read through platform authz so handlers can
@@ -42,14 +50,7 @@ export const WORKFLOW_READ_SECURITY: RouteSecurity = {
  */
 export const WORKFLOW_READ_WITH_MANAGED_SECURITY: RouteSecurity = {
   authz: {
-    requiredPrivileges: [
-      {
-        anyRequired: [
-          WorkflowsManagementApiActions.read,
-          WorkflowsManagementApiActions.readManaged,
-        ],
-      },
-    ],
+    requiredPrivileges: [{ anyRequired: [...WorkflowsManagementOperationPrivileges.readManaged] }],
   },
 };
 /**
@@ -59,7 +60,7 @@ export const WORKFLOW_READ_WITH_MANAGED_SECURITY: RouteSecurity = {
  */
 export const WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY: RouteSecurity = {
   authz: {
-    requiredPrivileges: [WorkflowsManagementApiActions.read],
+    requiredPrivileges: [...WorkflowsManagementOperationPrivileges.read],
     extendedPrivileges: [
       WorkflowsManagementApiActions.readManaged,
       WorkflowsManagementApiActions.readExecution,
@@ -68,42 +69,28 @@ export const WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY: RouteSecurity = {
   },
 };
 export const WORKFLOW_CREATE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.create] },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.create] },
 };
 export const WORKFLOW_CLONE_SECURITY: RouteSecurity = {
-  authz: {
-    requiredPrivileges: [WorkflowsManagementApiActions.create, WorkflowsManagementApiActions.read],
-  },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.clone] },
 };
 export const WORKFLOW_BULK_CREATE_SECURITY: RouteSecurity = {
-  authz: {
-    requiredPrivileges: [
-      WorkflowsManagementApiActions.create,
-      WorkflowsManagementApiActions.update,
-    ],
-  },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.bulkCreate] },
 };
 export const WORKFLOW_UPDATE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.update] },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.update] },
 };
 export const WORKFLOW_MANAGED_UPDATE_SECURITY: RouteSecurity = {
-  authz: {
-    requiredPrivileges: [
-      WorkflowsManagementApiActions.update,
-      WorkflowsManagementApiActions.updateManaged,
-    ],
-  },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.updateManaged] },
 };
 export const WORKFLOW_DELETE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.delete] },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.delete] },
 };
 export const WORKFLOW_EXECUTE_SECURITY: RouteSecurity = {
-  authz: {
-    requiredPrivileges: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.read],
-  },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.execute] },
 };
 export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.readExecution] },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.readExecution] },
 };
 /**
  * Allows either base execution read or managed execution read through platform
@@ -113,20 +100,15 @@ export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
 export const WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [
-      {
-        anyRequired: [
-          WorkflowsManagementApiActions.readExecution,
-          WorkflowsManagementApiActions.readManagedExecution,
-        ],
-      },
+      { anyRequired: [...WorkflowsManagementOperationPrivileges.readManagedExecution] },
     ],
   },
 };
 export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.cancelExecution] },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.cancelExecution] },
 };
 export const WORKFLOW_EXECUTION_RESUME_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [WorkflowsManagementApiActions.execute] },
+  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.resumeExecution] },
 };
 
 const hasPrivilege = (request: AuthzRequest, action: WorkflowsManagementApiActions): boolean =>
