@@ -479,9 +479,15 @@ describe('Discover url generator', () => {
   describe('when expandedDoc is used', () => {
     test('should include expandedDoc in appState', async () => {
       const { locator } = await setup();
+      const expandedDoc = {
+        id: 'doc-1',
+        index: 'logs-2024.01.01',
+        routing: 'route-1',
+        extraKey: 'discarded',
+      };
       const { path } = await locator.getLocation({
         dataViewId,
-        expandedDoc: { id: 'doc-1', index: 'logs-2024.01.01', routing: 'route-1' },
+        expandedDoc,
       });
       const { _a } = getStatesFromKbnUrl(path, ['_a']);
 
