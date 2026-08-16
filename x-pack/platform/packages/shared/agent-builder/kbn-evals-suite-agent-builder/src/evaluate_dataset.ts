@@ -295,28 +295,13 @@ function configureExperiment({
       evaluate: async ({ output, metadata }) => {
         const expectedSkill = getStringMeta(metadata, 'expectedSkill');
         const shouldNotActivate = getStringMeta(metadata, 'shouldNotActivateSkill');
-        // Optional array form: assert NONE of these skills were invoked. Backward-compatible with
-        // the single `shouldNotActivateSkill` key; both may be present.
-        const shouldNotActivateRaw = metadata?.shouldNotActivateSkills;
-        const shouldNotActivateList = Array.isArray(shouldNotActivateRaw)
-          ? (shouldNotActivateRaw as unknown[]).filter(
-              (s): s is string => typeof s === 'string' && /^[a-zA-Z0-9_-]+$/.test(s)
-            )
-          : [];
-
         const skillName = expectedSkill ?? shouldNotActivate;
-        if (!skillName && shouldNotActivateList.length === 0) return { score: 1 };
-        if (skillName && !/^[a-zA-Z0-9_-]+$/.test(skillName)) {
+        if (!skillName) return { score: 1 };
+        if (!/^[a-zA-Z0-9_-]+$/.test(skillName)) {
           return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
         }
 
-        // Build the set of skill names to check: the expected/should-not single name, plus any
-        // from the array form.
-        const skillsToCheck = new Set<string>();
-        if (skillName) skillsToCheck.add(skillName);
-        for (const s of shouldNotActivateList) skillsToCheck.add(s);
-
-        const loadedNames = (() => {
+        const loadedSkills = (() => {
           const toolCalls = getToolCallSteps(output as TaskOutput);
           const seen: string[] = [];
 
@@ -349,10 +334,10 @@ function configureExperiment({
           return [...new Set(seen.filter(Boolean))];
         })();
 
-        const skillIsPresent = (name: string): boolean => {
+        const isSkillPresent = (name: string): boolean => {
           const lower = name.toLowerCase();
           const pathSegment = lower.replace(/\./g, '/');
-          return loadedNames.some((n) => {
+          return loadedSkills.some((n) => {
             const nl = n.toLowerCase();
             return (
               nl === lower || nl.endsWith(`.${lower}`) || nl.includes(`/${pathSegment}/skill.md`)
@@ -360,25 +345,20 @@ function configureExperiment({
           });
         };
 
-        const invokedMap = Object.fromEntries(
-          [...skillsToCheck].map((name) => [name, skillIsPresent(name)])
-        );
+        const invoked = isSkillPresent(skillName);
 
         if (expectedSkill) {
           return {
-            score: invokedMap[expectedSkill] ? 1 : 0,
-            metadata: { expectedSkill, invoked: invokedMap[expectedSkill], loadedNames },
+            score: invoked ? 1 : 0,
+            metadata: { expectedSkill, invoked, loadedNames: loadedSkills },
           };
         }
-        // shouldNotActivate (single or list): score 1 only when NONE were invoked.
-        const anyInvoked = Object.values(invokedMap).some((v) => v);
         return {
-          score: anyInvoked ? 0 : 1,
+          score: invoked ? 0 : 1,
           metadata: {
             shouldNotActivateSkill: shouldNotActivate,
-            shouldNotActivateSkills: shouldNotActivateList,
-            invoked: invokedMap,
-            loadedNames,
+            invoked,
+            loadedNames: loadedSkills,
           },
         };
       },

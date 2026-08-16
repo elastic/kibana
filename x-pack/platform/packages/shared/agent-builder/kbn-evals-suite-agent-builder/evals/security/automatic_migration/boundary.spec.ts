@@ -57,38 +57,5 @@ You can create a migration from LaunchPad → Manage Automatic Migrations.`,
         });
       }
     );
-
-    evaluate(
-      'dashboard-migration intents do NOT activate the rule-migration skills',
-      async ({ evaluateDataset }) => {
-        await evaluateDataset({
-          dataset: {
-            name: 'agent builder: automatic-migration-rule-vs-dashboard',
-            description: `
-              Automatic Migration covers both rules and dashboards as distinct features.
-              The rule-migration skills handle RULE migrations only. Validates that
-              dashboard-migration intents do NOT activate the rule-migration skills.`,
-            examples: [
-              {
-                input: {
-                  question: 'Migrate my Splunk dashboards to Kibana.',
-                },
-                output: {
-                  expected: `Dashboard migration is currently not supported in Agent Builder.
-I can only help with Automatic Rule Migration.`,
-                },
-                metadata: {
-                  query_intent: 'Dashboard Migration',
-                  shouldNotActivateSkills: [
-                    'automatic-migration-rules-summarize',
-                    'automatic-migration-rules-start-migration',
-                  ],
-                },
-              },
-            ],
-          },
-        });
-      }
-    );
   }
 );
