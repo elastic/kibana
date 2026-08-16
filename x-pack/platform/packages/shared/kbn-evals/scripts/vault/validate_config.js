@@ -82,7 +82,7 @@ function redact(message) {
   if (!message) return message;
   return (
     String(message)
-      // LiteLLM virtual keys
+      // OpenRouter / LiteLLM provider API keys (sk-or-v1-..., sk-...)
       .replace(/sk-[A-Za-z0-9_-]+/g, '<redacted>')
       // base64 blobs (avoid leaking via error messages)
       .replace(/[A-Za-z0-9+/]{50,}={0,2}/g, '<redacted>')

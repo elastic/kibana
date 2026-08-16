@@ -84,12 +84,16 @@ const configSchema = schema.object(
     openrouter: schema.maybe(
       schema.object(
         {
+          /**
+           * OpenRouter base URL. Optional — defaults to `https://openrouter.ai/api/v1`.
+           * Override only when pointing at a self-hosted or staging OpenRouter endpoint.
+           */
           baseUrl: schema.string({
             minLength: 1,
             defaultValue: 'https://openrouter.ai/api/v1',
           }),
           /**
-           * OpenRouter API key used for non-EIS model evals and triage.
+           * OpenRouter API key (`sk-or-v1-...`) used for non-EIS model evals and triage.
            */
           apiKey: schema.string({ minLength: 1 }),
         },

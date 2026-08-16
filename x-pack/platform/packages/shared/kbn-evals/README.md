@@ -83,9 +83,22 @@ node scripts/evals start --suite agent-builder --repetitions 3
 #### Advanced options
 
 <details>
-<summary>LiteLLM setup</summary>
+<summary>OpenRouter setup (preferred)</summary>
 
-If you have access to the internal LiteLLM gateway:
+OpenRouter is the default provider for non-EIS model evals and CI triage. To use it locally:
+
+1. Obtain an OpenRouter API key from [openrouter.ai/keys](https://openrouter.ai/keys).
+2. Run `node scripts/evals init` and enter the key when prompted.
+3. Connectors are generated automatically on `node scripts/evals start`.
+
+</details>
+
+<details>
+<summary>LiteLLM setup (legacy — use OpenRouter instead)</summary>
+
+> **Deprecated.** LiteLLM support remains for backwards compatibility while older branches are retired. New setups should use OpenRouter.
+
+If you still have access to the internal LiteLLM gateway:
 
 ```bash
 bash x-pack/platform/packages/shared/kbn-evals/scripts/litellm/dev_env.sh
@@ -189,7 +202,7 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
 | `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
 
-Model groups follow the pattern `eis/<modelId>` for EIS or `llm-gateway/<model>` for LiteLLM.
+Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<model>` for OpenRouter (legacy: `llm-gateway/<model>` for LiteLLM).
 
 PRs touching the eval framework get `evals:smoke-tests` automatically
 ([`.github/paths-labeller.yml`](../../../../../.github/paths-labeller.yml)). Add
