@@ -242,6 +242,7 @@ describe('DiscoverDocumentFlyout', () => {
     await waitFor(() => {
       expect(services.toastNotifications.addDanger).toHaveBeenCalledWith({
         title: 'Unable to copy link',
+        text: 'Request failed',
       });
     });
     expect(copyToClipboard).not.toHaveBeenCalled();

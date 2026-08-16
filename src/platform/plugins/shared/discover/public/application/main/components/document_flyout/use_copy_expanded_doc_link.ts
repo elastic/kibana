@@ -77,11 +77,12 @@ export const useCopyExpandedDocLink = ({ dataView }: { dataView: DataView }) => 
           defaultMessage: 'Link copied to clipboard',
         }),
       });
-    } catch {
+    } catch (error) {
       toastNotifications.addDanger({
         title: i18n.translate('discover.docViews.flyout.copyLinkErrorTitle', {
           defaultMessage: 'Unable to copy link',
         }),
+        text: error instanceof Error ? error.message : String(error),
       });
     }
   }, [currentTab, dataView, persistedDiscoverSession, runtimeStateManager, services]);
