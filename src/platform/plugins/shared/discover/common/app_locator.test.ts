@@ -481,13 +481,14 @@ describe('Discover url generator', () => {
       const { locator } = await setup();
       const { path } = await locator.getLocation({
         dataViewId,
-        expandedDoc: { id: 'doc-1', index: 'logs-2024.01.01' },
+        expandedDoc: { id: 'doc-1', index: 'logs-2024.01.01', routing: 'route-1' },
       });
       const { _a } = getStatesFromKbnUrl(path, ['_a']);
 
       expect((_a as Record<string, unknown>).expandedDoc).toEqual({
         id: 'doc-1',
         index: 'logs-2024.01.01',
+        routing: 'route-1',
       });
     });
   });

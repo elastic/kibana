@@ -140,7 +140,7 @@ export const parseAppLocatorParams = (
   if (typeof hideSidebar === 'boolean') appState.hideSidebar = hideSidebar;
   if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
   if (typeof isApproximate === 'boolean') appState.isApproximate = isApproximate;
-  if (expandedDoc) appState.expandedDoc = { id: expandedDoc.id, index: expandedDoc.index };
+  if (expandedDoc) appState.expandedDoc = expandedDoc;
 
   const state: MainHistoryLocationState = {};
 
