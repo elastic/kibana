@@ -21,7 +21,7 @@ export { emptyRumRollupStatus };
 
 export const RUM_DAILY_VERSION = RUM_SESSIONS_VERSION;
 /** Dest-pipeline / pivot revision. Replace + wipe dest when this changes. */
-export const RUM_DAILY_SPEC = 5;
+export const RUM_DAILY_SPEC = 6;
 export const RUM_PAGES_DAILY_TRANSFORM_ID = `ux-rum-pages-daily-${RUM_DAILY_VERSION}`;
 export const RUM_PAGES_DAILY_INDEX = `ux-rum-pages-daily-${RUM_DAILY_VERSION}`;
 export const RUM_PAGES_DAILY_INDEX_PATTERN = 'ux-rum-pages-daily-*';

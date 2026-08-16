@@ -161,6 +161,8 @@ describe('session lookback helpers', () => {
     expect(sessionsRetentionMaxAge(90)).toBe('93d');
     expect(parseLookbackDays('now-30d')).toBe(30);
     expect(parseLookbackDays('now-90d/d')).toBe(90);
+    expect(parseLookbackDays('now-1y/d')).toBe(365);
+    expect(parseLookbackDays('now-1M')).toBe(30);
     expect(parseLookbackDays('now-5m')).toBeUndefined();
   });
 });

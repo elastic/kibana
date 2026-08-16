@@ -6,8 +6,14 @@
  */
 
 export const RUM_SESSIONS_VERSION = 3;
-/** Pivot / dest-pipeline revision. Replace + wipe dest when this changes. */
-export const RUM_SESSIONS_SPEC = 2;
+/** Pivot / dest-pipeline revision. Replace transform when this changes; dest stays. */
+export const RUM_SESSIONS_SPEC = 3;
+/**
+ * Transform dest only persists the first `top_metrics` hit (ES #74420).
+ * Size 1 is the only value that lands on the session index.
+ */
+export const RUM_SEQUENCE_TOP_SIZE = 1;
+export const RUM_CLICK_TARGET_FIELD = 'attributes.browser.css_selector';
 export const RUM_SESSIONS_TRANSFORM_ID = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
 export const RUM_SESSIONS_INDEX = `ux-rum-sessions-${RUM_SESSIONS_VERSION}`;
 export const RUM_SESSIONS_INDEX_PATTERN = 'ux-rum-sessions-*';
@@ -15,6 +21,15 @@ export const RUM_SESSIONS_TEMPLATE_NAME = 'ux-rum-sessions';
 export const RUM_SESSIONS_PIPELINE_NAME = 'ux-rum-sessions-dest';
 export const RUM_NORMALIZE_PIPELINE_NAME = 'ux-rum-normalize';
 export const RUM_CANONICAL_SESSION_ID_FIELD = 'resource.attributes.session.id';
+/** Dest list default is start_time desc. Sort is create-time only. */
+export const RUM_SESSIONS_INDEX_SORT_FIELD = ['start_time', 'session.id'] as const;
+export const RUM_SESSIONS_INDEX_SORT_ORDER = ['desc', 'asc'] as const;
+/**
+ * OTel logsdb source sort. session.id alone drops in-session time locality;
+ * Elasticsearch wants @timestamp last (desc) on a custom logsdb sort.
+ */
+export const RUM_OTEL_INDEX_SORT_FIELD = [RUM_CANONICAL_SESSION_ID_FIELD, '@timestamp'] as const;
+export const RUM_OTEL_INDEX_SORT_ORDER = ['asc', 'desc'] as const;
 export const RUM_CANONICAL_SERVICE_NAME_FIELD = 'resource.attributes.service.name';
 export const RUM_CANONICAL_URL_PATH_GROUPED_FIELD = 'attributes.url.path.grouped';
 export const RUM_CANONICAL_BROWSER_NAME_FIELD = 'attributes.browser.name';
@@ -80,14 +95,22 @@ export const sessionsRetentionMaxAge = (days = RUM_SESSIONS_LOOKBACK_DAYS): stri
 export const sessionsIndexWindowMs = (days = RUM_SESSIONS_LOOKBACK_DAYS): number =>
   (clampLookbackDays(days) + RUM_SESSIONS_RETENTION_SLACK_DAYS) * 24 * 60 * 60 * 1000;
 
-const LOOKBACK_GTE = /^now-(\d+)d(?:\/d)?$/;
+const LOOKBACK_GTE = /^now-(\d+)([dMy])(?:\/d)?$/;
 
 export const parseLookbackDays = (gte?: string): number | undefined => {
   const match = gte ? LOOKBACK_GTE.exec(gte) : undefined;
   if (!match) {
     return undefined;
   }
-  return Number(match[1]);
+  const amount = Number(match[1]);
+  const unit = match[2];
+  if (unit === 'y') {
+    return amount * 365;
+  }
+  if (unit === 'M') {
+    return amount * 30;
+  }
+  return amount;
 };
 
 export const RUM_SESSIONS_LAG_WARN_SECONDS = rumSessionsLagWarnSeconds();

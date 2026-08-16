@@ -11,6 +11,7 @@ import {
   buildRumSessionsTransformBody,
   rumNormalizePipeline,
   rumSessionsDestPipeline,
+  rumSessionsIndexTemplate,
   rumSessionsTransformBody,
 } from './rum_sessions_spec';
 
@@ -32,8 +33,14 @@ describe('rumSessionsTransformBody', () => {
     });
     expect(aggregations.error_groups.aggs.groups.terms.size).toBe(5);
     expect(aggregations.lcp.aggs.p75).toBeDefined();
-    expect(aggregations.sequences.scripted_metric.init_script).toContain('state.connection');
-    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 2 }));
+    expect(aggregations).not.toHaveProperty('sequences');
+    expect(JSON.stringify(aggregations)).not.toContain('scripted_metric');
+    expect(aggregations.page_first.aggs.token.top_metrics.size).toBe(1);
+    expect(aggregations.click_first.aggs.token.top_metrics.metrics.field).toBe(
+      'attributes.browser.css_selector'
+    );
+    expect(aggregations.last_seen.top_metrics.metrics).toHaveLength(8);
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 3 }));
   });
 
   it('defaults sync delay to 5m and accepts an override', () => {
@@ -56,15 +63,20 @@ describe('rumSessionsTransformBody', () => {
     expect(body.retention_policy.time.max_age).toBe('183d');
   });
 
-  it('reads sequence fields from doc values and caps per-shard state', () => {
-    const mapScript =
-      rumSessionsTransformBody.pivot.aggregations.sequences.scripted_metric.map_script;
-    expect(mapScript).toContain("doc['@timestamp'].value.millis");
-    expect(mapScript).toContain('attributes.url.path.grouped');
-    expect(mapScript).toContain('doc.containsKey(field)');
-    expect(mapScript).toContain('state.pages.length < 40');
-    expect(mapScript).not.toContain('params._source');
-    expect(mapScript).not.toContain('def src =');
+  it('builds sequences from native top_metrics, not scripted_metric', () => {
+    const { aggregations } = rumSessionsTransformBody.pivot;
+    expect(aggregations.page_first.filter).toEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({ minimum_should_match: 1 }),
+      })
+    );
+    expect(aggregations.page_first.aggs.token.top_metrics.sort).toEqual({
+      '@timestamp': 'asc',
+    });
+    expect(aggregations.page_last.aggs.token.top_metrics.sort).toEqual({ '@timestamp': 'desc' });
+    expect(aggregations.last_seen.top_metrics.sort).toEqual({ '@timestamp': 'desc' });
+    expect(aggregations.rage_clicks.filter).toBeDefined();
+    expect(aggregations.dead_clicks.filter).toBeDefined();
   });
 
   it('reads has_replay from RUM attributes and does not scan replay streams', () => {
@@ -83,7 +95,19 @@ describe('rumSessionsDestPipeline', () => {
     expect(source).toContain('boolean replay = false');
     expect(source).toContain('ctx.duration_ms');
     expect(source).toContain('ctx.page_view_count');
-    expect(source).toContain('ctx.connection = seq.connection');
+    expect(source).toContain("ctx.user.key = fieldOf(last, 'attributes.user.key')");
+    expect(source).toContain('ctx.page_first');
+    expect(source).not.toContain('ctx.sequences');
+  });
+});
+
+describe('rumSessionsIndexTemplate', () => {
+  it('sorts dest by start_time desc then session.id', () => {
+    expect(rumSessionsIndexTemplate.template.settings).toEqual({
+      'index.default_pipeline': 'ux-rum-sessions-dest',
+      'index.sort.field': ['start_time', 'session.id'],
+      'index.sort.order': ['desc', 'asc'],
+    });
   });
 });
 

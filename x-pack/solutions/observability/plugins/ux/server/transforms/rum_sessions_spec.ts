@@ -7,11 +7,18 @@
 
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import {
+  RUM_CANONICAL_BROWSER_NAME_FIELD,
   RUM_CANONICAL_ERROR_GROUP_FIELD,
+  RUM_CANONICAL_SERVICE_NAME_FIELD,
   RUM_CANONICAL_SESSION_ID_FIELD,
+  RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
+  RUM_CLICK_TARGET_FIELD,
   RUM_HAS_REPLAY_FIELD,
+  RUM_SEQUENCE_TOP_SIZE,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_INDEX_PATTERN,
+  RUM_SESSIONS_INDEX_SORT_FIELD,
+  RUM_SESSIONS_INDEX_SORT_ORDER,
   RUM_SESSIONS_LOOKBACK_DAYS,
   RUM_SESSIONS_MANAGED_BY,
   RUM_SESSIONS_PIPELINE_NAME,
@@ -97,251 +104,60 @@ const sessionVitalAgg = (name: 'lcp' | 'inp' | 'cls') => ({
   },
 });
 
-/** Keep the earliest tokens per shard so reduce can still take the first 30 globally. */
-const SEQUENCE_MAP_CAP = 40;
+const RAGE_FILTER = {
+  bool: {
+    should: [
+      { term: { event_name: 'browser.frustration.rage_click' } },
+      { term: { name: 'browser.frustration.rage_click' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
 
-const keywordFromDoc = (fields: string): string => `
-  def value = null;
-  for (field in ${fields}) {
-    if (doc.containsKey(field) && doc[field].size() > 0) {
-      value = doc[field].value;
-      break;
-    }
-  }
-`;
+const DEAD_FILTER = {
+  bool: {
+    should: [
+      { term: { event_name: 'browser.frustration.dead_click' } },
+      { term: { name: 'browser.frustration.dead_click' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
 
-/** Collect ordered page/click tokens plus last-known client/user from doc values. */
-const SEQUENCE_MAP_SCRIPT = `
-  if (doc.containsKey('@timestamp') == false || doc['@timestamp'].size() == 0) { return; }
-  def ts = doc['@timestamp'].value.millis;
-  ${keywordFromDoc(
-    "['attributes.url.path.grouped', 'attributes.page.url.path', 'attributes.url.full', 'attributes.page.url', 'attributes.http.url', 'resource.attributes.page.url.path', 'resource.attributes.url.full']"
-  )}
-  def page = value;
-  def nameStr = '';
-  if (doc.containsKey('event_name') && doc['event_name'].size() > 0) {
-    nameStr = doc['event_name'].value.toString();
-  } else if (doc.containsKey('name') && doc['name'].size() > 0) {
-    nameStr = doc['name'].value.toString();
-  }
-  def isClick = nameStr.contains('click');
-  def isRage = nameStr.contains('rage');
-  def isDead = nameStr.contains('dead');
-  def isPage = nameStr == 'documentLoad' || nameStr.contains('navigation');
-  if (isPage && page != null) {
-    def s = page.toString().trim().toLowerCase();
-    if (s.startsWith('#/')) { s = s.substring(2); }
-    else if (s.startsWith('#')) { s = s.substring(1); }
-    else if (s.startsWith('/')) { s = s.substring(1); }
-    s = s.replace(' ', '_');
-    if (s.length() > 0) {
-      if (state.pages.length < ${SEQUENCE_MAP_CAP}) {
-        state.pages.add([ts, s]);
-      } else {
-        int latest = 0;
-        for (int i = 1; i < state.pages.length; i++) {
-          if (state.pages[i][0] > state.pages[latest][0]) { latest = i; }
-        }
-        if (ts < state.pages[latest][0]) { state.pages[latest] = [ts, s]; }
-      }
-    }
-  }
-  if (isClick) {
-    def target = null;
-    if (doc.containsKey('attributes.browser.css_selector') && doc['attributes.browser.css_selector'].size() > 0) {
-      target = doc['attributes.browser.css_selector'].value;
-    } else if (doc.containsKey('attributes.target_xpath') && doc['attributes.target_xpath'].size() > 0) {
-      target = doc['attributes.target_xpath'].value;
-    }
-    if (target != null) {
-      def s = target.toString().trim().toLowerCase().replace(' ', '_');
-      if (s.length() > 0) {
-        if (state.clicks.length < ${SEQUENCE_MAP_CAP}) {
-          state.clicks.add([ts, s]);
-        } else {
-          int latest = 0;
-          for (int i = 1; i < state.clicks.length; i++) {
-            if (state.clicks[i][0] > state.clicks[latest][0]) { latest = i; }
-          }
-          if (ts < state.clicks[latest][0]) { state.clicks[latest] = [ts, s]; }
-        }
-      }
-    }
-    if (isRage) { state.rage += 1; }
-    if (isDead) { state.dead += 1; }
-  }
-  if (doc.containsKey('attributes.user.id') && doc['attributes.user.id'].size() > 0) {
-    state.user = doc['attributes.user.id'].value.toString();
-  } else if (doc.containsKey('attributes.user.email') && doc['attributes.user.email'].size() > 0) {
-    state.user = doc['attributes.user.email'].value.toString();
-  } else if (doc.containsKey('attributes.user.name') && doc['attributes.user.name'].size() > 0) {
-    state.user = doc['attributes.user.name'].value.toString();
-  } else if (
-    state.user == '' &&
-    doc.containsKey('resource.attributes.user.id') &&
-    doc['resource.attributes.user.id'].size() > 0
-  ) {
-    state.user = doc['resource.attributes.user.id'].value.toString();
-  }
-  if (doc.containsKey('attributes.browser.name') && doc['attributes.browser.name'].size() > 0) {
-    state.browser = doc['attributes.browser.name'].value.toString();
-  } else if (
-    state.browser == '' &&
-    doc.containsKey('resource.attributes.browser.name') &&
-    doc['resource.attributes.browser.name'].size() > 0
-  ) {
-    state.browser = doc['resource.attributes.browser.name'].value.toString();
-  }
-  if (doc.containsKey('attributes.browser.platform') && doc['attributes.browser.platform'].size() > 0) {
-    state.os = doc['attributes.browser.platform'].value.toString();
-  } else if (doc.containsKey('attributes.os.name') && doc['attributes.os.name'].size() > 0) {
-    state.os = doc['attributes.os.name'].value.toString();
-  } else if (
-    state.os == '' &&
-    doc.containsKey('resource.attributes.browser.platform') &&
-    doc['resource.attributes.browser.platform'].size() > 0
-  ) {
-    state.os = doc['resource.attributes.browser.platform'].value.toString();
-  }
-  if (
-    doc.containsKey('attributes.client.geo.country_iso_code') &&
-    doc['attributes.client.geo.country_iso_code'].size() > 0
-  ) {
-    state.country = doc['attributes.client.geo.country_iso_code'].value.toString();
-  } else if (
-    state.country == '' &&
-    doc.containsKey('resource.attributes.client.geo.country_iso_code') &&
-    doc['resource.attributes.client.geo.country_iso_code'].size() > 0
-  ) {
-    state.country = doc['resource.attributes.client.geo.country_iso_code'].value.toString();
-  }
-  if (doc.containsKey('attributes.browser.breakpoint') && doc['attributes.browser.breakpoint'].size() > 0) {
-    state.breakpoint = doc['attributes.browser.breakpoint'].value.toString();
-  }
-  if (doc.containsKey('resource.attributes.service.name') && doc['resource.attributes.service.name'].size() > 0) {
-    state.service = doc['resource.attributes.service.name'].value.toString();
-  } else if (doc.containsKey('attributes.service.name') && doc['attributes.service.name'].size() > 0) {
-    state.service = doc['attributes.service.name'].value.toString();
-  }
-  if (doc.containsKey('attributes.network.connection.type') && doc['attributes.network.connection.type'].size() > 0) {
-    state.connection = doc['attributes.network.connection.type'].value.toString();
-  }
-  if (doc.containsKey('attributes.device.memory') && doc['attributes.device.memory'].size() > 0) {
-    state.device = doc['attributes.device.memory'].value.toString();
-  } else if (
-    state.device == '' &&
-    doc.containsKey('resource.attributes.device.memory') &&
-    doc['resource.attributes.device.memory'].size() > 0
-  ) {
-    state.device = doc['resource.attributes.device.memory'].value.toString();
-  }
-`;
+const lastSeen = (field: string) => ({
+  top_metrics: {
+    metrics: { field },
+    sort: { '@timestamp': 'desc' as const },
+    size: RUM_SEQUENCE_TOP_SIZE,
+  },
+});
 
-const SEQUENCE_REDUCE_SCRIPT = `
-  def pages = [];
-  def clicks = [];
-  def rage = 0;
-  def dead = 0;
-  def user = '';
-  def browser = '';
-  def os = '';
-  def country = '';
-  def breakpoint = '';
-  def service = '';
-  def connection = '';
-  def device = '';
-  for (s in states) {
-    if (s == null) { continue; }
-    if (s.pages != null) { pages.addAll(s.pages); }
-    if (s.clicks != null) { clicks.addAll(s.clicks); }
-    if (s.rage != null) { rage += s.rage; }
-    if (s.dead != null) { dead += s.dead; }
-    if (s.user != null && s.user != '') { user = s.user; }
-    if (s.browser != null && s.browser != '') { browser = s.browser; }
-    if (s.os != null && s.os != '') { os = s.os; }
-    if (s.country != null && s.country != '') { country = s.country; }
-    if (s.breakpoint != null && s.breakpoint != '') { breakpoint = s.breakpoint; }
-    if (s.service != null && s.service != '') { service = s.service; }
-    if (s.connection != null && s.connection != '') { connection = s.connection; }
-    if (s.device != null && s.device != '') { device = s.device; }
-  }
-  pages.sort((a, b) -> a[0].compareTo(b[0]));
-  clicks.sort((a, b) -> a[0].compareTo(b[0]));
-  def pageTokens = [];
-  def lastPage = '';
-  for (item in pages) {
-    def token = item[1].toString();
-    if (token != lastPage) {
-      pageTokens.add(token);
-      lastPage = token;
-    }
-    if (pageTokens.length >= 30) { break; }
-  }
-  def clickTokens = [];
-  def lastClick = '';
-  for (item in clicks) {
-    def token = item[1].toString();
-    if (token != lastClick) {
-      clickTokens.add(token);
-      lastClick = token;
-    }
-    if (clickTokens.length >= 30) { break; }
-  }
-  def events = [];
-  def pi = 0;
-  def ci = 0;
-  while (pi < pages.length || ci < clicks.length) {
-    def usePage = ci >= clicks.length || (pi < pages.length && pages[pi][0].compareTo(clicks[ci][0]) <= 0);
-    if (usePage) {
-      events.add('p:' + pages[pi][1].toString());
-      pi += 1;
-    } else {
-      events.add('a:' + clicks[ci][1].toString());
-      ci += 1;
-    }
-    if (events.length >= 40) { break; }
-  }
-  def pageSeq = '';
-  def clickSeq = '';
-  def eventSeq = '';
-  def pathKey = '';
-  def clickPathKey = '';
-  for (int i = 0; i < pageTokens.length; i++) {
-    if (i > 0) { pageSeq += ' '; pathKey += '>'; }
-    pageSeq += pageTokens[i];
-    pathKey += pageTokens[i];
-  }
-  for (int i = 0; i < clickTokens.length; i++) {
-    if (i > 0) { clickSeq += ' '; clickPathKey += '>'; }
-    clickSeq += clickTokens[i];
-    clickPathKey += clickTokens[i];
-  }
-  for (int i = 0; i < events.length; i++) {
-    if (i > 0) { eventSeq += ' '; }
-    eventSeq += events[i];
-  }
-  return [
-    'page_sequence': pageSeq,
-    'click_sequence': clickSeq,
-    'event_sequence': eventSeq,
-    'path_key': pathKey,
-    'click_path_key': clickPathKey,
-    'pages': pageTokens,
-    'clicks': clickTokens,
-    'entry_page': pageTokens.length > 0 ? pageTokens[0] : '',
-    'exit_page': pageTokens.length > 0 ? pageTokens[pageTokens.length - 1] : '',
-    'rage': rage,
-    'dead': dead,
-    'user': user,
-    'browser': browser,
-    'os': os,
-    'country': country,
-    'breakpoint': breakpoint,
-    'service': service,
-    'connection': connection,
-    'device': device
-  ];
-`;
+const earliestSeen = (field: string) => ({
+  top_metrics: {
+    metrics: { field },
+    sort: { '@timestamp': 'asc' as const },
+    size: RUM_SEQUENCE_TOP_SIZE,
+  },
+});
+
+const LAST_SEEN_FIELDS = [
+  'attributes.user.key',
+  RUM_CANONICAL_BROWSER_NAME_FIELD,
+  'attributes.os.name',
+  'attributes.client.geo.country_iso_code',
+  'attributes.browser.breakpoint',
+  RUM_CANONICAL_SERVICE_NAME_FIELD,
+  'attributes.network.connection.type',
+  'attributes.device.memory',
+] as const;
+
+const lastSeenMany = {
+  top_metrics: {
+    metrics: LAST_SEEN_FIELDS.map((field) => ({ field })),
+    sort: { '@timestamp': 'desc' as const },
+    size: RUM_SEQUENCE_TOP_SIZE,
+  },
+};
 
 export const rumSessionsIndexMappings = {
   dynamic: false,
@@ -518,6 +334,41 @@ export const rumSessionsDestPipeline = {
             }
             return null;
           }
+          def normalize(def raw) {
+            if (raw == null) { return ''; }
+            def s = raw.toString().trim().toLowerCase();
+            if (s == 'null') { return ''; }
+            while (s.startsWith('#') || s.startsWith('/')) {
+              s = s.substring(1);
+            }
+            s = s.replace(' ', '_');
+            if (s.length() > 80) { s = s.substring(0, 80); }
+            return s;
+          }
+          def fieldOf(def bag, def field) {
+            if ((bag instanceof Map) == false) { return ''; }
+            return normalize(bag[field]);
+          }
+          def tokenFrom(def bucket, def field) {
+            if ((bucket instanceof Map) == false) { return ''; }
+            def token = fieldOf(bucket.token, field);
+            if (token != '') { return token; }
+            return fieldOf(bucket.first, field);
+          }
+          def addToken(def tokens, def token) {
+            if (token == '') { return tokens; }
+            if (tokens.length > 0 && tokens[tokens.length - 1] == token) { return tokens; }
+            tokens.add(token);
+            return tokens;
+          }
+          def joinTokens(def tokens, def sep) {
+            def out = '';
+            for (int i = 0; i < tokens.length; i++) {
+              if (i > 0) { out += sep; }
+              out += tokens[i];
+            }
+            return out;
+          }
           ctx.error_count = countOf(ctx.error_count);
           ctx.click_count = countOf(ctx.click_count);
           ctx.page_view_count = countOf(ctx.page_view_count);
@@ -556,44 +407,57 @@ export const rumSessionsDestPipeline = {
           def groups = ctx.error_groups;
           if (groups instanceof Map && groups.groups instanceof Map) {
             def keys = [];
-            def buckets = groups.groups.buckets;
+            def inner = groups.groups;
+            def buckets = inner.buckets;
             if (buckets instanceof List) {
               for (b in buckets) {
                 if (b.key != null && b.key.toString() != '') { keys.add(b.key.toString()); }
               }
+            } else {
+              for (entry in inner.entrySet()) {
+                def k = entry.getKey();
+                if (k != null && k.toString() != '') { keys.add(k.toString()); }
+              }
             }
             ctx.error_groups = keys;
           }
-          def seq = ctx.sequences;
-          if (seq instanceof Map) {
-            ctx.page_sequence = seq.page_sequence;
-            ctx.click_sequence = seq.click_sequence;
-            ctx.event_sequence = seq.event_sequence;
-            ctx.path_key = seq.path_key;
-            ctx.click_path_key = seq.click_path_key;
-            ctx.pages = seq.pages;
-            ctx.clicks = seq.clicks;
-            ctx.entry_page = seq.entry_page;
-            ctx.exit_page = seq.exit_page;
-            ctx.rage_click_count = seq.rage;
-            ctx.dead_click_count = seq.dead;
-            if (ctx.user == null) { ctx.user = new HashMap(); }
-            ctx.user.key = seq.user;
-            if (ctx.browser == null) { ctx.browser = new HashMap(); }
-            ctx.browser.name = seq.browser;
-            ctx.browser.breakpoint = seq.breakpoint;
-            if (ctx.os == null) { ctx.os = new HashMap(); }
-            ctx.os.name = seq.os;
-            ctx.country_iso = seq.country;
-            ctx.connection = seq.connection;
-            ctx.device = seq.device;
-            if (seq.service != null && seq.service != '') {
-              if (ctx.service == null) { ctx.service = new HashMap(); }
-              ctx.service.name = seq.service;
-            }
+          def pageTokens = [];
+          addToken(pageTokens, tokenFrom(ctx.page_first, 'attributes.url.path.grouped'));
+          addToken(pageTokens, tokenFrom(ctx.page_last, 'attributes.url.path.grouped'));
+          def clickTokens = [];
+          addToken(clickTokens, tokenFrom(ctx.click_first, 'attributes.browser.css_selector'));
+          addToken(clickTokens, tokenFrom(ctx.click_last, 'attributes.browser.css_selector'));
+          ctx.pages = pageTokens;
+          ctx.clicks = clickTokens;
+          ctx.page_sequence = joinTokens(pageTokens, ' ');
+          ctx.click_sequence = joinTokens(clickTokens, ' ');
+          ctx.path_key = joinTokens(pageTokens, '>');
+          ctx.click_path_key = joinTokens(clickTokens, '>');
+          ctx.entry_page = pageTokens.length > 0 ? pageTokens[0] : '';
+          ctx.exit_page = pageTokens.length > 0 ? pageTokens[pageTokens.length - 1] : '';
+          def events = [];
+          for (token in pageTokens) { events.add('p:' + token); }
+          for (token in clickTokens) { events.add('a:' + token); }
+          ctx.event_sequence = joinTokens(events, ' ');
+          ctx.rage_click_count = countOf(ctx.rage_clicks);
+          ctx.dead_click_count = countOf(ctx.dead_clicks);
+          def last = ctx.last_seen;
+          if (ctx.user == null) { ctx.user = new HashMap(); }
+          ctx.user.key = fieldOf(last, 'attributes.user.key');
+          if (ctx.browser == null) { ctx.browser = new HashMap(); }
+          ctx.browser.name = fieldOf(last, 'attributes.browser.name');
+          ctx.browser.breakpoint = fieldOf(last, 'attributes.browser.breakpoint');
+          if (ctx.os == null) { ctx.os = new HashMap(); }
+          ctx.os.name = fieldOf(last, 'attributes.os.name');
+          ctx.country_iso = fieldOf(last, 'attributes.client.geo.country_iso_code');
+          ctx.connection = fieldOf(last, 'attributes.network.connection.type');
+          ctx.device = fieldOf(last, 'attributes.device.memory');
+          def service = fieldOf(last, 'resource.attributes.service.name');
+          if (service != '') {
+            if (ctx.service == null) { ctx.service = new HashMap(); }
+            ctx.service.name = service;
           }
-          def pages = ctx.pages;
-          ctx.page_count = pages instanceof List ? pages.size() : 0;
+          ctx.page_count = pageTokens.size();
           def sid = ctx['session.id'];
           if (sid == null && ctx.session instanceof Map) { sid = ctx.session.id; }
           if (sid != null) {
@@ -604,7 +468,13 @@ export const rumSessionsDestPipeline = {
             if (partition < 0) { partition += 16; }
             ctx.session.partition = partition;
           }
-          ctx.remove('sequences');
+          ctx.remove('page_first');
+          ctx.remove('page_last');
+          ctx.remove('click_first');
+          ctx.remove('click_last');
+          ctx.remove('rage_clicks');
+          ctx.remove('dead_clicks');
+          ctx.remove('last_seen');
           ctx.remove('lcp');
           ctx.remove('inp');
           ctx.remove('cls');
@@ -619,9 +489,9 @@ export const rumSessionsIndexTemplate = {
   _meta: { managed_by: RUM_SESSIONS_MANAGED_BY, version: RUM_SESSIONS_VERSION },
   template: {
     settings: {
-      number_of_shards: 1,
-      number_of_replicas: 1,
       'index.default_pipeline': RUM_SESSIONS_PIPELINE_NAME,
+      'index.sort.field': [...RUM_SESSIONS_INDEX_SORT_FIELD],
+      'index.sort.order': [...RUM_SESSIONS_INDEX_SORT_ORDER],
     },
     mappings: rumSessionsIndexMappings,
   },
@@ -691,15 +561,25 @@ export const buildRumSessionsTransformBody = (
       lcp: sessionVitalAgg('lcp'),
       inp: sessionVitalAgg('inp'),
       cls: sessionVitalAgg('cls'),
-      sequences: {
-        scripted_metric: {
-          init_script:
-            "state.pages = []; state.clicks = []; state.rage = 0; state.dead = 0; state.user = ''; state.browser = ''; state.os = ''; state.country = ''; state.breakpoint = ''; state.service = ''; state.connection = ''; state.device = '';",
-          map_script: SEQUENCE_MAP_SCRIPT,
-          combine_script: 'return state;',
-          reduce_script: SEQUENCE_REDUCE_SCRIPT,
-        },
+      page_first: {
+        filter: PAGE_VIEW_FILTER,
+        aggs: { token: earliestSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },
       },
+      page_last: {
+        filter: PAGE_VIEW_FILTER,
+        aggs: { token: lastSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },
+      },
+      click_first: {
+        filter: CLICK_FILTER,
+        aggs: { token: earliestSeen(RUM_CLICK_TARGET_FIELD) },
+      },
+      click_last: {
+        filter: CLICK_FILTER,
+        aggs: { token: lastSeen(RUM_CLICK_TARGET_FIELD) },
+      },
+      rage_clicks: { filter: RAGE_FILTER },
+      dead_clicks: { filter: DEAD_FILTER },
+      last_seen: lastSeenMany,
     },
   },
 });

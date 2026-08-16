@@ -270,7 +270,7 @@ export const ensureRumSessionsTransform = async ({
     logger,
     transformId: RUM_SESSIONS_TRANSFORM_ID,
     version: RUM_SESSIONS_VERSION,
-    deleteDestOnReplace: true,
+    deleteDestOnReplace: false,
     body: buildRumSessionsTransformBody(delay, lookbackDays),
     onUnchanged: async (currentDelay) => {
       await updateTransformSyncDelay({

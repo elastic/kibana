@@ -29,7 +29,7 @@ describe('rum daily transform specs', () => {
       terms: { field: RUM_CANONICAL_SERVICE_NAME_FIELD },
     });
     expect(groupBy['url.path.grouped']).toEqual({
-      terms: { script: { source: expect.stringContaining('url.full'), lang: 'painless' } },
+      terms: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD },
     });
   });
 
@@ -96,7 +96,7 @@ describe('rum daily transform specs', () => {
         poor: { filter: { range: { 'attributes.browser.web_vital.value': { gt: 4000 } } } },
       })
     );
-    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 5 }));
+    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 6 }));
     expect(lcp.aggs.element).toEqual(
       expect.objectContaining({
         terms: expect.objectContaining({
