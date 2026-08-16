@@ -16,7 +16,6 @@ import {
   EntityStoreGlobalStateOverrides,
   HistorySnapshotState,
   LogExtractionConfig,
-  getLatestLogExtractionOverrides,
 } from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
 import { getLegacyLogExtractionOverrides } from './legacy_defaults';
@@ -34,15 +33,6 @@ const getWithLatestDefaults = (state?: EntityStoreGlobalStateOverrides): EntityS
   });
 };
 
-// Write path: effective config in, only overrides out.
-const getOverridesWithoutDefaults = (
-  state?: EntityStoreGlobalStateOverrides
-): EntityStoreGlobalStateOverrides =>
-  EntityStoreGlobalStateOverrides.parse({
-    defaultsVersion: 'latest',
-    historySnapshot: state?.historySnapshot ?? {},
-    logsExtraction: getLatestLogExtractionOverrides(state?.logsExtraction ?? {}),
-  });
 
 export class EntityStoreGlobalStateClient {
   constructor(
@@ -85,7 +75,7 @@ export class EntityStoreGlobalStateClient {
 
     const { attributes } = await this.soClient.create<EntityStoreGlobalStateOverrides>(
       EntityStoreGlobalStateTypeName,
-      getOverridesWithoutDefaults(initialState),
+      EntityStoreGlobalStateOverrides.parse({ ...initialState, defaultsVersion: 'latest' }),
       { id }
     );
 
@@ -104,12 +94,20 @@ export class EntityStoreGlobalStateClient {
           );
         }
 
+        const storedLogsOverrides =
+          raw.attributes.defaultsVersion === 'latest'
+            ? (raw.attributes.logsExtraction ?? {})
+            : getLegacyLogExtractionOverrides(raw.attributes.logsExtraction ?? {});
         const existing = getWithLatestDefaults(raw.attributes);
-        const overrides = getOverridesWithoutDefaults({
-          historySnapshot: { ...existing.historySnapshot, ...partial.historySnapshot },
-          logsExtraction: { ...existing.logsExtraction, ...partial.logsExtraction },
-        });
-        return this.replace(this.getSavedObjectId(), overrides, raw.version);
+        return this.replace(
+          this.getSavedObjectId(),
+          EntityStoreGlobalStateOverrides.parse({
+            defaultsVersion: 'latest',
+            historySnapshot: { ...existing.historySnapshot, ...partial.historySnapshot },
+            logsExtraction: { ...storedLogsOverrides, ...partial.logsExtraction },
+          }),
+          raw.version
+        );
       },
       { logger: this.logger }
     );
