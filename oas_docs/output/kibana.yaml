@@ -2987,6 +2987,7 @@ paths:
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
                   type: string
                 prompts:
                   additionalProperties:
@@ -3463,6 +3464,7 @@ paths:
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
                   type: string
                 prompts:
                   additionalProperties:
