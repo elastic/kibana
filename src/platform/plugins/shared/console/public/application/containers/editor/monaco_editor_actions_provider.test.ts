@@ -1784,6 +1784,144 @@ describe('Editor actions provider', () => {
       const endpoints = completionItems?.suggestions.map((suggestion) => suggestion.label);
       expect((endpoints as string[]).sort()).toEqual(['_cat', '_search']);
     });
+
+    it.each([
+      'GET _search?q=http://example.com/path&size=',
+      'GET _search?q=tag#1&size=',
+      'GET _search?q=value/*pattern&size=',
+    ])('returns URL parameter completions after comment-like text: %s', async (line) => {
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: 0,
+          endOffset: line.length,
+          method: 'GET',
+          url: line.slice(4),
+        },
+      ]);
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [{ name: 'size' }];
+      });
+      const model = createModel([line]);
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        model,
+        { lineNumber: 1, column: line.length + 1 } as monaco.Position,
+        mockContext
+      );
+
+      expect(completionItems.suggestions.map(({ label }) => label)).toEqual(['size']);
+    });
+
+    it('returns URL parameter completions after a multiline block-comment prefix', async () => {
+      const lines = ['/* docs', '*/ GET _search?q=http://example.com/path&size='];
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: lines[0].length + 1 + '*/ '.length,
+          endOffset: lines.join('\n').length,
+          method: 'GET',
+          url: '_search?q=http://example.com/path&size=',
+        },
+      ]);
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = [{ name: 'size' }];
+      });
+      const model = createModel(lines);
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        model,
+        { lineNumber: 2, column: lines[1].length + 1 } as monaco.Position,
+        mockContext
+      );
+
+      expect(completionItems.suggestions.map(({ label }) => label)).toEqual(['size']);
+    });
+
+    describe('WHEN body completion follows a comment-prefixed request', () => {
+      it('SHOULD parse the request from its start column', async () => {
+        mockPopulateContext.mockClear();
+        const prefix = '/* docs */ ';
+        const lines = [
+          `${prefix}POST _ingest/pipeline/_simulate`,
+          '{',
+          '  "pipeline": {',
+          '    "processors": [',
+          '      {"a',
+        ];
+        mockGetParsedRequests.mockResolvedValue([
+          {
+            startOffset: prefix.length,
+            endOffset: lines.join('\n').length,
+            method: 'POST',
+            url: '_ingest/pipeline/_simulate',
+          },
+        ]);
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'append', template: { field: '', value: [] } }];
+        });
+        const model = createModel(lines);
+
+        const completionItems = await editorActionsProvider.provideCompletionItems(
+          model,
+          { lineNumber: 5, column: lines[4].length + 1 } as monaco.Position,
+          mockContext
+        );
+
+        const contextCall = mockPopulateContext.mock.calls[0]?.[0];
+        expect(contextCall?.[1].method).toBe('POST');
+        expect(completionItems.suggestions.map(({ label }) => label)).toContain('append');
+      });
+    });
+
+    it.each([0, 1])(
+      'replaces the whole method at offset %d inside a comment-prefixed request',
+      async (cursorOffset) => {
+        const prefix = '/* docs */ ';
+        const line = `${prefix}GET _search`;
+        mockGetParsedRequests.mockResolvedValue([
+          {
+            startOffset: prefix.length,
+            endOffset: line.length,
+            method: 'GET',
+            url: '_search',
+          },
+        ]);
+        const model = createModel([line]);
+        const completionItems = await editorActionsProvider.provideCompletionItems(
+          model,
+          { lineNumber: 1, column: prefix.length + 1 + cursorOffset } as monaco.Position,
+          mockContext
+        );
+
+        expect(completionItems.suggestions.find(({ label }) => label === 'GET')?.range).toEqual({
+          startColumn: prefix.length + 1,
+          startLineNumber: 1,
+          endColumn: prefix.length + 4,
+          endLineNumber: 1,
+        });
+      }
+    );
+
+    it('does not offer a method before a comment-prefixed request', async () => {
+      const prefix = '/* docs */ ';
+      const line = `${prefix}GET _search`;
+      mockGetParsedRequests.mockResolvedValue([
+        {
+          startOffset: prefix.length,
+          endOffset: line.length,
+          method: 'GET',
+          url: '_search',
+        },
+      ]);
+      const model = createModel([line]);
+      const completionItems = await editorActionsProvider.provideCompletionItems(
+        model,
+        { lineNumber: 1, column: prefix.length } as monaco.Position,
+        mockContext
+      );
+
+      expect(completionItems.suggestions).toEqual([]);
+    });
   });
 
   describe('triggerSuggestions', () => {

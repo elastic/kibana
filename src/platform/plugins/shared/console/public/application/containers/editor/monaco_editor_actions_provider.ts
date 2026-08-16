@@ -667,6 +667,20 @@ export class MonacoEditorActionsProvider {
     return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }
 
+  // Column where the request starts on the given line, or 1 when the request does not
+  // start there. Skips prefixes before the method, e.g. `/* note */ GET _search`.
+  private getRequestStartColumn(
+    model: monaco.editor.ITextModel,
+    request: AdjustedParsedRequest | undefined,
+    lineNumber: number
+  ): number {
+    if (!request) {
+      return 1;
+    }
+    const requestStartPosition = model.getPositionAt(request.startOffset);
+    return requestStartPosition.lineNumber === lineNumber ? requestStartPosition.column : 1;
+  }
+
   private isPositionInsideComment(
     model: monaco.editor.ITextModel,
     position: monaco.IPosition
@@ -702,14 +716,18 @@ export class MonacoEditorActionsProvider {
     // if on the 1st line of the request, suggest method, url or url_params depending on the content
     const { startLineNumber: requestStartLineNumber } = currentRequest;
     if (lineNumber === requestStartLineNumber) {
+      const startColumn = this.getRequestStartColumn(model, currentRequest, lineNumber);
+      const fullLineContent = model.getLineContent(lineNumber).slice(startColumn - 1);
+      if (column < startColumn && fullLineContent.trim()) {
+        return null;
+      }
       // get the content on the line up until the position
       const lineContent = model.getValueInRange({
         startLineNumber: lineNumber,
-        startColumn: 1,
+        startColumn,
         endLineNumber: lineNumber,
         endColumn: column,
       });
-      const fullLineContent = model.getLineContent(lineNumber);
       const lineTokens = getLineTokens(lineContent);
       // if there is 1 or fewer tokens, suggest method — but only when the
       // full line could plausibly start a request. The parser produces a
@@ -769,15 +787,25 @@ export class MonacoEditorActionsProvider {
         suggestions: getMethodCompletionItems(model, position),
       };
     }
-    if (autocompleteType === AutocompleteType.PATH) {
+    if (
+      autocompleteType === AutocompleteType.PATH ||
+      autocompleteType === AutocompleteType.URL_PARAMS
+    ) {
+      const requests = await this.getRequestsBetweenLines(
+        model,
+        position.lineNumber,
+        position.lineNumber
+      );
+      const requestStartColumn = this.getRequestStartColumn(
+        model,
+        requests.at(0),
+        position.lineNumber
+      );
       return {
-        suggestions: getUrlPathCompletionItems(model, position),
-      };
-    }
-
-    if (autocompleteType === AutocompleteType.URL_PARAMS) {
-      return {
-        suggestions: getUrlParamsCompletionItems(model, position),
+        suggestions:
+          autocompleteType === AutocompleteType.PATH
+            ? getUrlPathCompletionItems(model, position, requestStartColumn)
+            : getUrlParamsCompletionItems(model, position, requestStartColumn),
       };
     }
 
@@ -791,12 +819,14 @@ export class MonacoEditorActionsProvider {
         position.lineNumber,
         position.lineNumber
       );
+      const request = requests.at(0);
       const requestStartLineNumber = requests[0].startLineNumber;
       const suggestions = await getBodyCompletionItems(
         model,
         position,
         requestStartLineNumber,
-        this
+        this,
+        this.getRequestStartColumn(model, request, requestStartLineNumber)
       );
       return {
         suggestions,

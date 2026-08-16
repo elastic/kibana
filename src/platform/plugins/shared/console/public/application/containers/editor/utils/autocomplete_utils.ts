@@ -8,7 +8,11 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { isInsideConsoleString } from '@kbn/monaco/src/languages/console/utils';
+import {
+  getLineRemainderWithoutConsoleComments,
+  isEscaped,
+  isInsideConsoleString,
+} from '@kbn/monaco/src/languages/console/utils';
 import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
@@ -75,8 +79,10 @@ export const getMethodCompletionItems = (
   model: monaco.editor.ITextModel,
   position: monaco.Position
 ): monaco.languages.CompletionItem[] => {
-  // get the word before suggestions to replace when selecting a suggestion from the list
-  const wordUntilPosition = model.getWordUntilPosition(position);
+  // Replace the whole method even when the cursor is at its start or in its middle.
+  const wordAtPosition = model.getWordAtPosition(position);
+  const startColumn = wordAtPosition?.startColumn ?? position.column;
+  const endColumn = wordAtPosition?.endColumn ?? position.column;
   return autocompleteMethods.map((method, index) => ({
     label: method,
     insertText: method,
@@ -86,9 +92,9 @@ export const getMethodCompletionItems = (
     sortText: String(index),
     range: {
       // replace the whole word with the suggestion
-      startColumn: wordUntilPosition.startColumn,
+      startColumn,
       startLineNumber: position.lineNumber,
-      endColumn: position.column,
+      endColumn,
       endLineNumber: position.lineNumber,
     },
   }));
@@ -113,21 +119,30 @@ const populateContextForMethodAndUrl = (method: string, urlTokenPath: string[]) 
   return context;
 };
 
+// Line content from the request start (`requestStartColumn` skips a block-comment prefix such as
+// `/* note */ GET _search`, so `parseLine` sees the method first) up to the cursor.
+const getRequestLineContentBeforePosition = (
+  model: monaco.editor.ITextModel,
+  { lineNumber, column }: monaco.Position,
+  requestStartColumn: number
+): string =>
+  model.getValueInRange({
+    startLineNumber: lineNumber,
+    startColumn: Math.min(requestStartColumn, column),
+    endLineNumber: lineNumber,
+    endColumn: column,
+  });
+
 /*
  * This function returns an array of completion items for the request method and the url path
  */
 export const getUrlPathCompletionItems = (
   model: monaco.editor.ITextModel,
-  position: monaco.Position
+  position: monaco.Position,
+  requestStartColumn = 1
 ): monaco.languages.CompletionItem[] => {
   const { lineNumber, column } = position;
-  // get the content of the line up until the current position
-  const lineContent = model.getValueInRange({
-    startLineNumber: lineNumber,
-    startColumn: 1,
-    endLineNumber: lineNumber,
-    endColumn: column,
-  });
+  const lineContent = getRequestLineContentBeforePosition(model, position, requestStartColumn);
 
   // flag to only suggest index names
   let onlyIndexNames = false;
@@ -211,16 +226,10 @@ export const getUrlPathCompletionItems = (
  */
 export const getUrlParamsCompletionItems = (
   model: monaco.editor.ITextModel,
-  position: monaco.Position
+  position: monaco.Position,
+  requestStartColumn = 1
 ): monaco.languages.CompletionItem[] => {
-  const { lineNumber, column } = position;
-  // get the content of the line up until the current position
-  const lineContent = model.getValueInRange({
-    startLineNumber: lineNumber,
-    startColumn: 1,
-    endLineNumber: lineNumber,
-    endColumn: column,
-  });
+  const lineContent = getRequestLineContentBeforePosition(model, position, requestStartColumn);
 
   // get the method and previous url parts for context
   const { method, urlPathTokens, urlParamsTokens } = parseLine(lineContent);
@@ -274,12 +283,15 @@ export const getBodyCompletionItems = async (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
   requestStartLineNumber: number,
-  editor: MonacoEditorActionsProvider
+  editor: MonacoEditorActionsProvider,
+  // Column where the request starts on its first line; skips a block-comment prefix
+  // (e.g. `/* note */ GET _search`) so `parseLine` sees the method first.
+  requestStartColumn = 1
 ): Promise<monaco.languages.CompletionItem[]> => {
   const { lineNumber, column } = position;
 
-  // get the content on the method+url line
-  const lineContent = model.getLineContent(requestStartLineNumber);
+  // get the content on the method+url line, starting at the request itself
+  const lineContent = model.getLineContent(requestStartLineNumber).slice(requestStartColumn - 1);
   // get the method and previous url parts for context
   const { method, urlPathTokens } = parseLine(lineContent);
   urlPathTokens.push(END_OF_URL_TOKEN);
@@ -334,14 +346,54 @@ const getStructuralSnippet = (token: string) => {
 const usesStructuralSnippet = ({ name }: Pick<ResultTerm, 'name'>): boolean =>
   typeof name === 'string' && getStructuralSnippet(name) !== undefined;
 
-const getSuggestions = (
+const findUnescapedQuoteIndex = (
+  lineContentBeforePosition: string,
+  lineContentAfterPosition: string
+): number => {
+  const lineContent = lineContentBeforePosition + lineContentAfterPosition;
+  const positionIndex = lineContentBeforePosition.length;
+  for (let index = positionIndex; index < lineContent.length; index++) {
+    if (lineContent[index] === '"' && !isEscaped(lineContent, index)) {
+      return index - positionIndex;
+    }
+  }
+  return -1;
+};
+
+// If there is a closing `"` after the cursor, include it in the replacement range so accepting
+// a suggestion replaces the rest of the token instead of duplicating the quote.
+const getCompletionEndColumn = (
+  positionColumn: number,
+  lineContentBeforePosition: string,
+  lineContentAfterPosition: string,
+  isInsideQuotedString: boolean,
+  canInsertTemplate: boolean
+): number => {
+  const closingQuoteIndex = findUnescapedQuoteIndex(
+    lineContentBeforePosition,
+    lineContentAfterPosition
+  );
+  const whitespaceBeforeQuote =
+    closingQuoteIndex > 0 && !lineContentAfterPosition.slice(0, closingQuoteIndex).trim();
+  const shouldReplaceClosingQuote =
+    closingQuoteIndex === 0 ||
+    (closingQuoteIndex > 0 &&
+      (isInsideQuotedString || (canInsertTemplate && whitespaceBeforeQuote)));
+
+  return shouldReplaceClosingQuote ? positionColumn + closingQuoteIndex + 1 : positionColumn;
+};
+
+const getCompletionLineState = (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
-  autocompleteSet: ResultTerm[],
-  context: AutoCompleteContext,
   bodyContentBeforePosition: string
 ) => {
-  const wordUntilPosition = model.getWordUntilPosition(position);
+  const lineContentBeforePosition = model.getValueInRange({
+    startLineNumber: position.lineNumber,
+    startColumn: 1,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column,
+  });
   const lineContentAfterPosition = model.getValueInRange({
     startLineNumber: position.lineNumber,
     startColumn: position.column,
@@ -349,24 +401,38 @@ const getSuggestions = (
     endColumn: model.getLineMaxColumn(position.lineNumber),
   });
   // Expand templates only when nothing except an auto-closed quote and closing delimiters follows.
-  const canInsertTemplate = shouldInsertAutocompleteTemplate(lineContentAfterPosition);
+  const canInsertTemplate = shouldInsertAutocompleteTemplate(
+    getLineRemainderWithoutConsoleComments(bodyContentBeforePosition, lineContentAfterPosition)
+  );
+  const isInsideQuotedString = isInsideConsoleString(bodyContentBeforePosition);
+
+  return {
+    canInsertTemplate,
+    isInsideQuotedString,
+    lineContentBeforePosition,
+    endColumn: getCompletionEndColumn(
+      position.column,
+      lineContentBeforePosition,
+      lineContentAfterPosition,
+      isInsideQuotedString,
+      canInsertTemplate
+    ),
+  };
+};
+
+const getSuggestions = (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  autocompleteSet: ResultTerm[],
+  context: AutoCompleteContext,
+  bodyContentBeforePosition: string
+) => {
+  // get the word before suggestions to replace when selecting a suggestion from the list
+  const wordUntilPosition = model.getWordUntilPosition(position);
+  const { canInsertTemplate, endColumn, isInsideQuotedString, lineContentBeforePosition } =
+    getCompletionLineState(model, position, bodyContentBeforePosition);
   context.addTemplate = canInsertTemplate;
-
-  // if there is " after the cursor, include it in the insert range
-  let endColumn = position.column;
-  const closingQuoteIndex = lineContentAfterPosition.indexOf('"');
-
-  if (closingQuoteIndex === 0 || (canInsertTemplate && closingQuoteIndex > 0)) {
-    endColumn = endColumn + closingQuoteIndex + 1;
-  }
   // Check if we're typing a field name with a trailing dot
-  const lineContentBeforePosition = model.getValueInRange({
-    startLineNumber: position.lineNumber,
-    startColumn: 1,
-    endLineNumber: position.lineNumber,
-    endColumn: position.column,
-  });
-
   // Check if we're typing a nested field name (contains a dot)
   // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
   const quotedFieldWithDotMatch = lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
@@ -380,10 +446,6 @@ const getSuggestions = (
     ? unquotedFieldWithDotMatch[1]
     : null;
   const isQuotedField = !!quotedFieldWithDotMatch;
-  const bodyContentLines = bodyContentBeforePosition.split('\n');
-  const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
-  const isInsideQuotedString = hasUnclosedQuote(currentContentLine);
-
   // Adjust the range start column if we have a field with a dot
   let startColumn = wordUntilPosition.startColumn;
   if (fieldBeingTyped) {
@@ -426,15 +488,22 @@ const getSuggestions = (
       })
       // map autocomplete items to completion items
       .map((item) => {
-        const suggestion = {
+        const insertText = getInsertText(item, bodyContentBeforePosition, context);
+        // When the accepted snippet leaves the cursor inside an empty container,
+        // re-open the suggestions widget so the user can keep completing without typing `"`.
+        const endsInsideEmptyContainer = insertText.endsWith('{$0}') || insertText.endsWith('[$0]');
+        const suggestion: monaco.languages.CompletionItem = {
           // convert name to a string
           label: item.name + '',
-          insertText: getInsertText(item, bodyContentBeforePosition, context),
+          insertText,
           detail: i18nTexts.api,
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
           range,
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          ...(endsInsideEmptyContainer
+            ? { command: { id: 'editor.action.triggerSuggest', title: '' } }
+            : {}),
         };
         return suggestion;
       })
@@ -456,9 +525,7 @@ export const getInsertText = (
     if (structuralSnippet) {
       insertText = structuralSnippet;
     } else {
-      const bodyContentLines = bodyContent.split('\n');
-      const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
-      if (hasUnclosedQuote(currentContentLine)) {
+      if (isInsideConsoleString(bodyContent)) {
         // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
         insertText = '';
       } else {
@@ -566,22 +633,4 @@ export const shouldTriggerSuggestions = (lineContent: string, insideString?: boo
  */
 export const shouldInsertAutocompleteTemplate = (lineContentAfterPosition: string): boolean => {
   return onlyBodyClosingTokensRegex.test(lineContentAfterPosition.trim());
-};
-
-export const hasUnclosedQuote = (lineContent: string): boolean => {
-  let insideString = false;
-  let prevChar = '';
-  for (let i = 0; i < lineContent.length; i++) {
-    const char = lineContent[i];
-
-    if (!insideString && char === '"') {
-      insideString = true;
-    } else if (insideString && char === '"' && prevChar !== '\\') {
-      insideString = false;
-    }
-
-    prevChar = char;
-  }
-
-  return insideString;
 };
