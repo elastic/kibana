@@ -225,6 +225,29 @@ describe('DiscoverDocumentFlyout', () => {
     expect(copyToClipboard).toHaveBeenCalledWith('https://example.com/s/short-link');
   });
 
+  it('shows an error when a document link cannot be created', async () => {
+    const user = userEvent.setup();
+    const services = createDiscoverServicesMock();
+    const share = sharePluginMock.createStartContract();
+    const shortUrlClient = share.url.shortUrls.get(null);
+    jest.spyOn(share.url.shortUrls, 'get').mockReturnValue(shortUrlClient);
+    jest.spyOn(shortUrlClient, 'createWithLocator').mockRejectedValue(new Error('Request failed'));
+    services.share = share;
+    services.capabilities.discover_v2.createShortUrl = true;
+
+    await setup({ hits: esHitsMock, services });
+
+    await user.click(await screen.findByRole('button', { name: 'Share direct link' }));
+
+    await waitFor(() => {
+      expect(services.toastNotifications.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to copy link',
+      });
+    });
+    expect(copyToClipboard).not.toHaveBeenCalled();
+    expect(services.toastNotifications.addSuccess).not.toHaveBeenCalled();
+  });
+
   it.each([
     {
       name: 'an ES|QL result without document metadata',

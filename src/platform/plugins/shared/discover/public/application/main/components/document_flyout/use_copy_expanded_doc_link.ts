@@ -59,23 +59,31 @@ export const useCopyExpandedDocLink = ({ dataView }: { dataView: DataView }) => 
       }),
     });
 
-    let url: string;
+    try {
+      let url: string;
 
-    if (capabilities.discover_v2.createShortUrl && share) {
-      const shortUrl = await share.url.shortUrls.get(null).createWithLocator({ locator, params });
-      url = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
-    } else {
-      const link = document.createElement('a');
-      link.setAttribute('href', locator.getRedirectUrl(params));
-      url = link.href;
+      if (capabilities.discover_v2.createShortUrl && share) {
+        const shortUrl = await share.url.shortUrls.get(null).createWithLocator({ locator, params });
+        url = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+      } else {
+        const link = document.createElement('a');
+        link.setAttribute('href', locator.getRedirectUrl(params));
+        url = link.href;
+      }
+
+      copyToClipboard(url);
+      toastNotifications.addSuccess({
+        title: i18n.translate('discover.docViews.flyout.copyLinkSuccessTitle', {
+          defaultMessage: 'Link copied to clipboard',
+        }),
+      });
+    } catch {
+      toastNotifications.addDanger({
+        title: i18n.translate('discover.docViews.flyout.copyLinkErrorTitle', {
+          defaultMessage: 'Unable to copy link',
+        }),
+      });
     }
-
-    copyToClipboard(url);
-    toastNotifications.addSuccess({
-      title: i18n.translate('discover.docViews.flyout.copyLinkSuccessTitle', {
-        defaultMessage: 'Link copied to clipboard',
-      }),
-    });
   }, [currentTab, dataView, persistedDiscoverSession, runtimeStateManager, services]);
 
   const copyLinkOnce = useCallback(async () => {
