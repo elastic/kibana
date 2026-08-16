@@ -15,10 +15,9 @@ import {
 } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
-import { parseDurationInSeconds } from '../../util/parse_duration';
+import { lifecycleToRetentionMs } from '../../util/lifecycle_to_retention_ms';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs', 'ingestionRate', 'storageBytes'] as const;
 
@@ -185,15 +184,7 @@ const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] =
 };
 
 export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
-  let retentionMs = 0;
-  const lc = node.effective_lifecycle!;
-  if (isDslLifecycle(lc)) {
-    retentionMs = lc.dsl.data_retention
-      ? parseDurationInSeconds(lc.dsl.data_retention) * 1000
-      : Number.POSITIVE_INFINITY;
-  } else if (isIlmLifecycle(lc)) {
-    retentionMs = Number.POSITIVE_INFINITY;
-  }
+  const retentionMs = lifecycleToRetentionMs(node.effective_lifecycle);
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`

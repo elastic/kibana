@@ -68,7 +68,8 @@ export class StreamsApp {
   // Streams layout
   public readonly streamsLayoutSourcesPlaceholder;
   public readonly streamsLayoutPipelinesPlaceholder;
-  public readonly streamsLayoutDestinationsPlaceholder;
+  public readonly streamsDestinationsTable;
+  public readonly streamsDestinationsSearch;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = this.page.components.comboBox(
@@ -135,9 +136,8 @@ export class StreamsApp {
     this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
       'streamsLayoutPipelinesPlaceholder'
     );
-    this.streamsLayoutDestinationsPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutDestinationsPlaceholder'
-    );
+    this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
+    this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
   }
 
   async goto() {
