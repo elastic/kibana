@@ -30,6 +30,26 @@ export const RUM_SESSIONS_INDEX_SORT_ORDER = ['desc', 'asc'] as const;
  */
 export const RUM_OTEL_INDEX_SORT_FIELD = [RUM_CANONICAL_SESSION_ID_FIELD, '@timestamp'] as const;
 export const RUM_OTEL_INDEX_SORT_ORDER = ['asc', 'desc'] as const;
+export const RUM_OTEL_TRACES_CUSTOM_TEMPLATE = 'traces-otel@custom';
+export const RUM_OTEL_LOGS_CUSTOM_TEMPLATE = 'logs-otel@custom';
+export const RUM_OTEL_DATA_STREAM_PATTERN = 'traces-*.otel-*,logs-*.otel-*';
+export const RUM_REPLAY_DATA_STREAM_PREFIX = 'logs-rum.replay-';
+export const RUM_OTEL_CUSTOM_PURPOSE = 'otel-session-id-index-sort';
+export const RUM_OTEL_SESSION_ID_KEYWORD = {
+  type: 'keyword',
+  ignore_above: 1024,
+  time_series_dimension: true,
+} as const;
+export const RUM_OTEL_CUSTOM_COMPONENTS = [
+  {
+    name: RUM_OTEL_TRACES_CUSTOM_TEMPLATE,
+    simulateIndex: 'traces-generic.otel-default',
+  },
+  {
+    name: RUM_OTEL_LOGS_CUSTOM_TEMPLATE,
+    simulateIndex: 'logs-generic.otel-default',
+  },
+] as const;
 export const RUM_CANONICAL_SERVICE_NAME_FIELD = 'resource.attributes.service.name';
 export const RUM_CANONICAL_URL_PATH_GROUPED_FIELD = 'attributes.url.path.grouped';
 export const RUM_CANONICAL_BROWSER_NAME_FIELD = 'attributes.browser.name';

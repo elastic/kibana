@@ -41,7 +41,11 @@ import {
   rumSessionsIndexTemplate,
 } from './rum_sessions_spec';
 import {
-  ensureDestIndex,
+  ensureOtelSessionSort,
+  ensureSessionsDestSorted,
+  resetSessionsTransformAfterDestRecreate,
+} from './rum_index_sort';
+import {
   installedSyncDelay,
   isEsNotFound,
   installedSourceLookbackGte,
@@ -253,7 +257,7 @@ export const ensureRumSessionsTransform = async ({
     name: RUM_SESSIONS_TEMPLATE_NAME,
     ...rumSessionsIndexTemplate,
   });
-  await ensureDestIndex(client, RUM_SESSIONS_INDEX);
+  const { destRecreated } = await ensureSessionsDestSorted({ client, logger });
 
   if (RUM_SESSIONS_VERSION > 1) {
     await removePreviousTransform({
@@ -282,6 +286,7 @@ export const ensureRumSessionsTransform = async ({
       });
     },
   });
+  await resetSessionsTransformAfterDestRecreate({ client, logger, destRecreated });
   await updateTransformSourceWindow({
     client,
     logger,
@@ -290,6 +295,11 @@ export const ensureRumSessionsTransform = async ({
     resetIfIncreased: true,
   });
   await startTransformIgnoreRunning(client, RUM_SESSIONS_TRANSFORM_ID);
+  try {
+    await ensureOtelSessionSort({ client, logger });
+  } catch (error) {
+    logger?.error(`Failed to apply OTel session sort: ${extractEsErrorMessage(error)}`);
+  }
   await attachDailyTransforms({ client, logger, syncDelay: delay });
 
   clearStatusCache();
@@ -433,32 +443,49 @@ export const reconcileRumSessionsTransform = async ({
     syncDelay: delay,
     sourceLookbackDays: lookbackDays,
   });
-  if (!status.installed) {
-    return;
-  }
-  await applySyncDelayToInstalled({
-    client,
-    logger,
-    transformId: RUM_SESSIONS_TRANSFORM_ID,
-    delay,
-  });
-  await updateTransformSourceWindow({
-    client,
-    logger,
-    transformId: RUM_SESSIONS_TRANSFORM_ID,
-    lookbackDays,
-    resetIfIncreased: false,
-  });
-  await restartUnhealthyTransform({ client, logger, status });
-  await attachDailyTransforms({ client, logger, syncDelay: delay });
   try {
-    await reconcileRumDailyTransforms({
-      client,
-      logger,
-      syncDelay: delay,
+    await client.indices.putIndexTemplate({
+      name: RUM_SESSIONS_TEMPLATE_NAME,
+      ...rumSessionsIndexTemplate,
     });
   } catch (error) {
-    logger.error(`Failed to reconcile daily RUM rollups: ${extractEsErrorMessage(error)}`);
+    logger.error(`Failed to put ${RUM_SESSIONS_TEMPLATE_NAME}: ${extractEsErrorMessage(error)}`);
+  }
+  if (status.installed) {
+    const { destRecreated } = await ensureSessionsDestSorted({ client, logger });
+    if (destRecreated) {
+      await resetSessionsTransformAfterDestRecreate({ client, logger, destRecreated });
+      await startTransformIgnoreRunning(client, RUM_SESSIONS_TRANSFORM_ID);
+    }
+    await applySyncDelayToInstalled({
+      client,
+      logger,
+      transformId: RUM_SESSIONS_TRANSFORM_ID,
+      delay,
+    });
+    await updateTransformSourceWindow({
+      client,
+      logger,
+      transformId: RUM_SESSIONS_TRANSFORM_ID,
+      lookbackDays,
+      resetIfIncreased: false,
+    });
+    await restartUnhealthyTransform({ client, logger, status });
+    await attachDailyTransforms({ client, logger, syncDelay: delay });
+    try {
+      await reconcileRumDailyTransforms({
+        client,
+        logger,
+        syncDelay: delay,
+      });
+    } catch (error) {
+      logger.error(`Failed to reconcile daily RUM rollups: ${extractEsErrorMessage(error)}`);
+    }
+  }
+  try {
+    await ensureOtelSessionSort({ client, logger });
+  } catch (error) {
+    logger.error(`Failed to apply OTel session sort: ${extractEsErrorMessage(error)}`);
   }
   clearStatusCache();
 };
