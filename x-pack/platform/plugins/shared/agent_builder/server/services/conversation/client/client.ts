@@ -424,8 +424,6 @@ class ConversationClientImpl implements ConversationClient {
     round: ConversationRound,
     options: { resumed: boolean }
   ): Promise<void> {
-    // Only a fresh, completed round produces timeline events for now. Resumed rounds and
-    // paused (awaiting_prompt) rounds are HITL and land in a follow-up.
     if (options.resumed || round.status !== ConversationRoundStatus.completed) {
       return;
     }
