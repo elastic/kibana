@@ -11,6 +11,12 @@ import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
 import type { ConsoleParsedRequestsProvider, ParsedRequest } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import {
+  endsWithConsoleBodyContinuation,
+  getLineRemainderWithoutConsoleComments,
+  isInsideConsoleComment,
+  isInsideConsoleString,
+} from '@kbn/monaco/src/languages/console/utils';
 import { i18n } from '@kbn/i18n';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
@@ -49,17 +55,79 @@ import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import type { ContextValue } from '../../contexts';
 import { containsComments, removeCommentsFromData } from './utils/requests_utils';
+import { onlyBodyClosingTokensRegex } from './utils/constants';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
 const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
 const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
+type BodyTriggerLine = 'current' | 'previous';
+interface AutocompleteTriggerSnapshot {
+  generation: number;
+  model: monaco.editor.ITextModel;
+  modelVersionId: number;
+  position: monaco.Position;
+}
 const { collapseLiteralStrings } = XJson;
+
+const BODY_PUNCTUATION_KEYS = new Set(['{', '[', ',', ':']);
+
+const getContentThroughPosition = (
+  model: monaco.editor.ITextModel,
+  { lineNumber, column }: monaco.IPosition
+): string =>
+  model.getValueInRange({
+    startLineNumber: 1,
+    startColumn: 1,
+    endLineNumber: lineNumber,
+    endColumn: column,
+  });
+
+const getLineContentBeforePosition = (
+  model: monaco.editor.ITextModel,
+  { lineNumber, column }: monaco.IPosition
+): string => model.getLineContent(lineNumber).slice(0, column - 1);
+
+const getBodyTriggerLineAfterIndentation = (
+  model: monaco.editor.ITextModel,
+  position: monaco.IPosition
+): BodyTriggerLine | undefined => {
+  const lineContentBefore = getLineContentBeforePosition(model, position);
+  const contentBeforePosition = getContentThroughPosition(model, position);
+  if (shouldTriggerSuggestions(lineContentBefore, isInsideConsoleString(contentBeforePosition))) {
+    return 'current';
+  }
+  if (lineContentBefore.trim() || position.lineNumber === 1) {
+    return;
+  }
+
+  const previousLinePosition = {
+    lineNumber: position.lineNumber - 1,
+    column: model.getLineMaxColumn(position.lineNumber - 1),
+  };
+  return endsWithConsoleBodyContinuation(getContentThroughPosition(model, previousLinePosition))
+    ? 'previous'
+    : undefined;
+};
+
+const hasOnlyBodyClosingTokensAfterPosition = (
+  model: monaco.editor.ITextModel,
+  { lineNumber, column }: monaco.IPosition
+): boolean => {
+  const lineContentAfterPosition = model.getLineContent(lineNumber).slice(column - 1);
+  return onlyBodyClosingTokensRegex.test(
+    getLineRemainderWithoutConsoleComments(
+      getContentThroughPosition(model, { lineNumber, column }),
+      lineContentAfterPosition
+    ).trim()
+  );
+};
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
+  private autocompleteTriggerGeneration = 0;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void,
@@ -87,8 +155,8 @@ export class MonacoEditorActionsProvider {
     );
 
     const debouncedTriggerSuggestions = debounce(
-      () => {
-        this.triggerSuggestions();
+      (snapshot: AutocompleteTriggerSnapshot, bodyTriggerLine?: BodyTriggerLine) => {
+        this.triggerSuggestions(snapshot, bodyTriggerLine);
       },
       DEBOUNCE_AUTOCOMPLETE_WAIT_MS,
       {
@@ -96,6 +164,38 @@ export class MonacoEditorActionsProvider {
         trailing: true,
       }
     );
+    const cancelTriggerSuggestions = () => {
+      this.autocompleteTriggerGeneration++;
+      debouncedTriggerSuggestions.cancel();
+    };
+    const scheduleTriggerSuggestions = (
+      bodyTriggerLine?: BodyTriggerLine,
+      snapshot = this.getAutocompleteTriggerSnapshot(this.autocompleteTriggerGeneration)
+    ) => {
+      if (snapshot) {
+        debouncedTriggerSuggestions(snapshot, bodyTriggerLine);
+      }
+    };
+    const scheduleBodySuggestionsAfterIndentation = () => {
+      const snapshot = this.getAutocompleteTriggerSnapshot(this.autocompleteTriggerGeneration);
+      if (!snapshot) {
+        return;
+      }
+      const { model, position } = snapshot;
+      const bodyTriggerLine = getBodyTriggerLineAfterIndentation(model, position);
+      if (bodyTriggerLine) {
+        scheduleTriggerSuggestions(bodyTriggerLine, snapshot);
+      }
+    };
+    const scheduleBodySuggestionsAfterTab = () => {
+      const generation = this.autocompleteTriggerGeneration;
+      // Defer until Monaco applies the Tab indentation.
+      void Promise.resolve().then(() => {
+        if (generation === this.autocompleteTriggerGeneration) {
+          scheduleBodySuggestionsAfterIndentation();
+        }
+      });
+    };
 
     // init all listeners
     editor.onDidChangeCursorPosition(async (event) => {
@@ -110,19 +210,39 @@ export class MonacoEditorActionsProvider {
     editor.onDidContentSizeChange(async (event) => {
       await debouncedHighlightRequests();
     });
+    editor.onKeyDown((event) => {
+      if (event.keyCode === monaco.KeyCode.Escape) {
+        cancelTriggerSuggestions();
+      }
+      if (
+        event.keyCode === monaco.KeyCode.Tab &&
+        !editor.getOption(monaco.editor.EditorOption.tabFocusMode)
+      ) {
+        scheduleBodySuggestionsAfterTab();
+      }
+    });
 
     editor.onKeyUp((event) => {
+      if (event.keyCode === monaco.KeyCode.Escape) {
+        cancelTriggerSuggestions();
+        return;
+      }
       // trigger autocomplete on backspace
       if (event.keyCode === monaco.KeyCode.Backspace) {
-        debouncedTriggerSuggestions();
+        scheduleTriggerSuggestions();
       }
       // trigger autocomplete on dot (period) for nested field suggestions
       if (event.keyCode === monaco.KeyCode.Period) {
-        debouncedTriggerSuggestions();
+        scheduleTriggerSuggestions();
       }
-      // trigger body autocomplete after opening an object
-      if (event.browserEvent?.key === '{') {
-        debouncedTriggerSuggestions();
+      // trigger body autocomplete after punctuation that opens a new value position
+      const typedKey = event.browserEvent?.key;
+      if (typedKey && BODY_PUNCTUATION_KEYS.has(typedKey)) {
+        scheduleTriggerSuggestions('current');
+      }
+      // Space and Enter move the cursor to a body completion position.
+      if (event.browserEvent?.key === ' ' || event.keyCode === monaco.KeyCode.Enter) {
+        scheduleBodySuggestionsAfterIndentation();
       }
     });
   }
@@ -223,6 +343,15 @@ export class MonacoEditorActionsProvider {
       return [];
     }
     const requests = parsedRequests ?? (await this.parsedRequestsProvider.getRequests());
+    return this.filterRequestsBetweenLines(model, startLineNumber, endLineNumber, requests);
+  }
+
+  private filterRequestsBetweenLines(
+    model: monaco.editor.ITextModel,
+    startLineNumber: number,
+    endLineNumber: number,
+    requests: ParsedRequest[]
+  ): AdjustedParsedRequest[] {
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of requests.entries()) {
       const requestStartLineNumber = getRequestStartLineNumber(parsedRequest, model);
@@ -538,32 +667,11 @@ export class MonacoEditorActionsProvider {
     return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }
 
-  private isInsideMultilineComment(model: monaco.editor.ITextModel, lineNumber: number): boolean {
-    let insideComment = false;
-    for (let i = 1; i <= lineNumber; i++) {
-      const lineContent = model.getLineContent(i).trim();
-      if (lineContent.startsWith('/*')) {
-        insideComment = true;
-      }
-      if (lineContent.includes('*/')) {
-        insideComment = false;
-      }
-    }
-    return insideComment;
-  }
-
-  private isPositionInsideComment(model: monaco.editor.ITextModel, lineNumber: number): boolean {
-    // Get the content of the current line up until the cursor position
-    const trimmedContent = model.getLineContent(lineNumber).trim();
-
-    return (
-      trimmedContent.startsWith('#') ||
-      trimmedContent.startsWith('//') ||
-      trimmedContent.startsWith('/*') ||
-      trimmedContent.startsWith('*') ||
-      trimmedContent.includes('*/') ||
-      this.isInsideMultilineComment(model, lineNumber)
-    );
+  private isPositionInsideComment(
+    model: monaco.editor.ITextModel,
+    position: monaco.IPosition
+  ): boolean {
+    return isInsideConsoleComment(getContentThroughPosition(model, position));
   }
 
   private async getAutocompleteType(
@@ -571,7 +679,7 @@ export class MonacoEditorActionsProvider {
     { lineNumber, column }: monaco.Position
   ): Promise<AutocompleteType | null> {
     // If we are positioned inside a comment block, no autocomplete should be provided
-    if (this.isPositionInsideComment(model, lineNumber)) {
+    if (this.isPositionInsideComment(model, { lineNumber, column })) {
       return null;
     }
 
@@ -896,12 +1004,12 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
-  private async isPositionInsideTripleQuotesAndQuery(
+  private resolveTripleQuoteContext(
     model: monaco.editor.ITextModel,
-    position: monaco.Position
-  ): Promise<TripleQuoteContext> {
-    const parsedRequests = await this.parsedRequestsProvider.getRequests();
-    const requestsAtPosition = await this.getRequestsBetweenLines(
+    position: monaco.Position,
+    parsedRequests: ParsedRequest[]
+  ): TripleQuoteContext {
+    const requestsAtPosition = this.filterRequestsBetweenLines(
       model,
       position.lineNumber,
       position.lineNumber,
@@ -910,69 +1018,137 @@ export class MonacoEditorActionsProvider {
     return getTripleQuoteContext(model, position, requestsAtPosition, parsedRequests);
   }
 
-  /**
-   * True when the editor moved on (model swapped, content edited, or cursor moved) since the
-   * given snapshot was taken, so an async answer computed for it must not be acted upon.
-   */
-  private hasEditorStateChanged(
+  private async isPositionInsideTripleQuotesAndQuery(
     model: monaco.editor.ITextModel,
-    modelVersionId: number,
     position: monaco.Position
-  ): boolean {
+  ): Promise<TripleQuoteContext> {
+    const parsedRequests = await this.parsedRequestsProvider.getRequests();
+    return this.resolveTripleQuoteContext(model, position, parsedRequests);
+  }
+
+  private async getTripleQuoteContextForTrigger(
+    snapshot: AutocompleteTriggerSnapshot
+  ): Promise<TripleQuoteContext | undefined> {
+    const { model, position } = snapshot;
+    try {
+      const parsedRequests = await this.parsedRequestsProvider.getRequests();
+      if (this.isAutocompleteTriggerStale(snapshot)) {
+        return;
+      }
+      return this.resolveTripleQuoteContext(model, position, parsedRequests);
+    } catch {
+      // Ignore parser/model races while the debounced trigger is pending.
+      return;
+    }
+  }
+
+  private getAutocompleteTriggerSnapshot(
+    generation: number
+  ): AutocompleteTriggerSnapshot | undefined {
+    const model = this.editor.getModel();
+    const position = this.editor.getPosition();
+    if (!model || !position) {
+      return;
+    }
+    return { generation, model, modelVersionId: model.getVersionId(), position };
+  }
+
+  /**
+   * True when the editor moved on (trigger cancelled, model swapped/disposed, content edited,
+   * or cursor moved) since the snapshot was taken, so an async answer computed for it must
+   * not be acted upon.
+   */
+  private isAutocompleteTriggerStale({
+    generation,
+    model,
+    modelVersionId,
+    position,
+  }: AutocompleteTriggerSnapshot): boolean {
     const currentPosition = this.editor.getPosition();
     return (
+      generation !== this.autocompleteTriggerGeneration ||
       this.editor.getModel() !== model ||
+      model.isDisposed() ||
       model.getVersionId() !== modelVersionId ||
       !currentPosition ||
       !monaco.Position.equals(currentPosition, position)
     );
   }
 
-  private triggerSuggestions() {
-    const model = this.editor.getModel();
-    const position = this.editor.getPosition();
-    if (!model || !position) {
+  private async canTriggerBodySuggestions(
+    snapshot: AutocompleteTriggerSnapshot,
+    bodyTriggerLine: BodyTriggerLine,
+    insideString: boolean
+  ): Promise<boolean> {
+    if (insideString) {
+      return false;
+    }
+
+    const { model, position } = snapshot;
+    const lineNumber =
+      bodyTriggerLine === 'previous' ? position.lineNumber - 1 : position.lineNumber;
+    try {
+      const requests = await this.getRequestsBetweenLines(model, lineNumber, lineNumber);
+      return (
+        !this.isAutocompleteTriggerStale(snapshot) &&
+        requests.every(({ startLineNumber }) => startLineNumber !== lineNumber)
+      );
+    } catch {
+      // The parser can briefly reference removed lines while it catches up with an edit.
+      return false;
+    }
+  }
+
+  private async triggerSuggestions(
+    snapshot = this.getAutocompleteTriggerSnapshot(this.autocompleteTriggerGeneration),
+    bodyTriggerLine?: BodyTriggerLine
+  ): Promise<void> {
+    if (!snapshot || this.isAutocompleteTriggerStale(snapshot)) {
       return;
     }
-    const modelVersionId = model.getVersionId();
+    const { model, position } = snapshot;
+
+    if (bodyTriggerLine && !hasOnlyBodyClosingTokensAfterPosition(model, position)) {
+      return;
+    }
 
     // Don't trigger (and visually open) the suggestions widget inside comments.
     // Even when our completion provider returns 0 results, Monaco can still surface
     // an empty suggestions widget, which breaks user expectations and our UI tests.
-    if (this.isPositionInsideComment(model, position.lineNumber)) {
+    if (this.isPositionInsideComment(model, position)) {
       return;
     }
 
-    this.isPositionInsideTripleQuotesAndQuery(model, position).then(
-      ({ insideTripleQuotes, insideEsqlQuery }) => {
-        if (this.hasEditorStateChanged(model, modelVersionId, position)) {
-          return;
-        }
+    const tripleQuoteContext = await this.getTripleQuoteContextForTrigger(snapshot);
+    if (!tripleQuoteContext || this.isAutocompleteTriggerStale(snapshot)) {
+      return;
+    }
+    const { insideTripleQuotes, insideEsqlQuery, insideString } = tripleQuoteContext;
+    const insideStringAtPosition =
+      insideString ?? isInsideConsoleString(getContentThroughPosition(model, position));
+    // Don't trigger autocomplete suggestions inside scripts and strings
+    if (insideTripleQuotes && !insideEsqlQuery) {
+      return;
+    }
+    if (
+      bodyTriggerLine &&
+      !(await this.canTriggerBodySuggestions(snapshot, bodyTriggerLine, insideStringAtPosition))
+    ) {
+      return;
+    }
 
-        if (insideTripleQuotes && !insideEsqlQuery) {
-          // Don't trigger autocomplete suggestions inside scripts and strings
-          return;
-        }
-
-        const lineContentBefore = model.getValueInRange({
-          startLineNumber: position.lineNumber,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-        // Trigger suggestions if the line:
-        // - is empty
-        // - matches specified regex
-        // - is inside an ESQL query
-        if (
-          !lineContentBefore.trim() ||
-          shouldTriggerSuggestions(lineContentBefore) ||
-          insideEsqlQuery
-        ) {
-          this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
-        }
-      }
-    );
+    const lineContentBefore = getLineContentBeforePosition(model, position);
+    // Trigger suggestions if the line:
+    // - is empty
+    // - matches specified regex
+    // - is inside an ESQL query
+    if (
+      !lineContentBefore.trim() ||
+      shouldTriggerSuggestions(lineContentBefore, insideStringAtPosition) ||
+      insideEsqlQuery
+    ) {
+      this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+    }
   }
 
   /*
