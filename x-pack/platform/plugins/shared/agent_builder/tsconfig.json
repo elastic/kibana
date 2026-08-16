@@ -143,5 +143,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/storybook",
     "@kbn/context-engine-plugin",
+    "@kbn/ui-callout",
   ]
 }

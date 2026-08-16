@@ -42,7 +42,9 @@ export const alertActionSchema = z.object({
   actor: z.string().nullable(),
   assignee_uid: z.string().nullable().optional(),
   action_type: z.string(),
-  episode_id: z.string().optional(),
+  // Null for series-level actions (tag/snooze/unsnooze): they target the
+  // series as a whole, not one episode.
+  episode_id: z.string().nullable().optional(),
   episode_status: z.string().optional(),
   rule_id: z.string().nullable(),
   action_group_id: z.string().optional(),

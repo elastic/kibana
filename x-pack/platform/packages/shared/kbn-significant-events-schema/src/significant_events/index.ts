@@ -17,6 +17,7 @@ export {
   signalEntrySchema,
   severitySchema,
   SEVERITY_OPTIONS,
+  SEVERITY_CONTRACT_RULE,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,
