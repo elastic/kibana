@@ -77,6 +77,43 @@ export const WEB_VITAL_FILTER = {
 
 export const DOCUMENT_LOAD_FILTER = { term: { name: 'documentLoad' } };
 
+/** Client fetch/XHR spans. Excludes resource-timing (`resourceFetch`). */
+export const EXTERNAL_HTTP_FILTER = {
+  bool: {
+    should: [
+      { term: { name: 'external.http' } },
+      { term: { event_name: 'external.http' } },
+      { exists: { field: 'attributes.http.request.method' } },
+    ],
+    must_not: [
+      { term: { name: 'resourceFetch' } },
+      { exists: { field: 'attributes.http.render_blocking_status' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
+export const HTTP_FAIL_FILTER = {
+  range: { 'attributes.http.response.status_code': { gte: 400 } },
+};
+
+/** Scheme + host + port from `url.full` / `http.url`, else `server.address`. */
+export const HTTP_ORIGIN_SCRIPT = `
+  def u = '';
+  if (doc.containsKey('attributes.url.full') && doc['attributes.url.full'].size() > 0) {
+    u = doc['attributes.url.full'].value.toString();
+  } else if (doc.containsKey('attributes.http.url') && doc['attributes.http.url'].size() > 0) {
+    u = doc['attributes.http.url'].value.toString();
+  } else if (doc.containsKey('attributes.server.address') && doc['attributes.server.address'].size() > 0) {
+    return doc['attributes.server.address'].value.toString();
+  }
+  if (u.length() == 0) { return ''; }
+  int scheme = u.indexOf('://');
+  if (scheme < 0) { return u; }
+  int path = u.indexOf('/', scheme + 3);
+  return path < 0 ? u : u.substring(0, path);
+`;
+
 export const frustrationEventFilter = (kind: 'rage_click' | 'dead_click' | 'error_click') => ({
   bool: {
     should: [

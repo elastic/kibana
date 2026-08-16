@@ -19,6 +19,7 @@ import {
   RUM_PAGES_DAILY_INDEX,
   RUM_PAGES_DAILY_INDEX_PATTERN,
   RUM_PAGES_DAILY_PIPELINE_NAME,
+  RUM_PAGES_DAILY_SPEC,
   RUM_SERVICE_DAILY_INDEX,
   RUM_SERVICE_DAILY_INDEX_PATTERN,
   RUM_SERVICE_DAILY_PIPELINE_NAME,
@@ -30,6 +31,7 @@ import {
   RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
 } from '../../common/rum_sessions';
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
+import { PAGE_PATH_SCRIPT } from '../routes/rum/query';
 
 const EXCEPTION_FILTER = {
   bool: {
@@ -468,14 +470,17 @@ export const buildRumPagesDailyTransformBody = (syncDelay = RUM_DAILY_SYNC_DELAY
   _meta: {
     managed_by: RUM_DAILY_MANAGED_BY,
     version: RUM_DAILY_VERSION,
-    spec: RUM_DAILY_SPEC,
+    spec: RUM_PAGES_DAILY_SPEC,
   },
   pivot: {
     group_by: {
       '@timestamp': dateHistogramGroup,
       'service.name': serviceNameGroup,
       'url.path.grouped': {
-        terms: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD },
+        terms: {
+          script: { source: PAGE_PATH_SCRIPT, lang: 'painless' },
+          missing_bucket: true,
+        },
       },
     },
     aggregations: dailyAggregations,

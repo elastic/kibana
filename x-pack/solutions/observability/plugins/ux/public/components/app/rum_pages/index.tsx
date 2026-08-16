@@ -35,12 +35,14 @@ import { useHistory } from 'react-router-dom';
 import {
   emptyPagesKpis,
   rateVital,
+  UNGROUPED_PAGE_PATH,
   type RumPageRow,
   type RumPagesKpis,
   type RumResourceRow,
   type RumVitalAttribution,
   type RumVitalRating,
 } from '../../../../common/rum_app';
+import type { RumBackendCall } from '../../../../common/rum_backend';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumPageDetail, fetchRumPages } from '../../../services/rest/rum_api';
@@ -50,8 +52,16 @@ import { TabTrendChart } from '../rum_overview/tab_trend_chart';
 import { BudgetChips } from '../rum_budgets/budget_chips';
 import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
 import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
+import { BackendCallsPanel } from '../../trace/backend_calls_panel';
+import { SyntheticsMonitorChip } from '../../trace/synthetics_monitor_chip';
+import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../../trace/trace_waterfall_flyout';
 
 const ERROR_RATE_WARN = 0.05;
+
+const displayPagePath = (path: string): string =>
+  path === UNGROUPED_PAGE_PATH || path === ''
+    ? i18n.translate('xpack.ux.pages.ungroupedPath', { defaultMessage: 'Ungrouped' })
+    : path;
 
 const formatMs = (ms: number | null): string => {
   if (ms == null) {
@@ -336,6 +346,8 @@ export function RumPagesPanel() {
   useRumPageLoading('pages', loading);
   const [selected, setSelected] = useState<RumPageRow | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [backendCalls, setBackendCalls] = useState<RumBackendCall[]>([]);
+  const [traceTarget, setTraceTarget] = useState<TraceFlyoutTarget | null>(null);
   const { items: budgets } = useRumBudgets();
 
   const load = useCallback(async () => {
@@ -392,11 +404,13 @@ export function RumPagesPanel() {
 
   useEffect(() => {
     if (!selectedPath) {
+      setBackendCalls([]);
       return;
     }
     const path = selectedPath;
     let cancelled = false;
     setDetailLoading(true);
+    setBackendCalls([]);
     void fetchRumPageDetail({
       http,
       rangeFrom,
@@ -417,6 +431,7 @@ export function RumPagesPanel() {
         if (cancelled) {
           return;
         }
+        setBackendCalls(detail.backendCalls ?? []);
         setSelected((current) => {
           if (!current || current.path !== path) {
             return current;
@@ -467,7 +482,7 @@ export function RumPagesPanel() {
           flush="left"
           onClick={() => setSelected(item)}
         >
-          {path}
+          {displayPagePath(path)}
         </EuiButtonEmpty>
       ),
     },
@@ -539,7 +554,7 @@ export function RumPagesPanel() {
                   }
                   onClickAriaLabel={i18n.translate('xpack.ux.pages.rageAriaLabel', {
                     defaultMessage: 'View rage-click sessions on {path}',
-                    values: { path: item.path },
+                    values: { path: displayPagePath(item.path) },
                   })}
                 >
                   {i18n.translate('xpack.ux.pages.rageBadge', {
@@ -562,7 +577,7 @@ export function RumPagesPanel() {
                   }
                   onClickAriaLabel={i18n.translate('xpack.ux.pages.deadAriaLabel', {
                     defaultMessage: 'View dead-click sessions on {path}',
-                    values: { path: item.path },
+                    values: { path: displayPagePath(item.path) },
                   })}
                 >
                   {i18n.translate('xpack.ux.pages.deadBadge', {
@@ -683,7 +698,7 @@ export function RumPagesPanel() {
           <EuiFlyout size="m" onClose={() => setSelected(null)} aria-labelledby="uxPageDetailTitle">
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="s">
-                <h2 id="uxPageDetailTitle">{selected.path}</h2>
+                <h2 id="uxPageDetailTitle">{displayPagePath(selected.path)}</h2>
               </EuiTitle>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
@@ -762,6 +777,27 @@ export function RumPagesPanel() {
                 <ResourcePanel resources={selected.resources} />
               )}
               <EuiSpacer />
+              {detailLoading ? (
+                <EuiLoadingSpinner size="m" />
+              ) : (
+                <BackendCallsPanel
+                  calls={backendCalls}
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  onViewTrace={setTraceTarget}
+                />
+              )}
+              <EuiSpacer />
+              <SyntheticsMonitorChip
+                pagePath={selected.path}
+                showCreateCheck={
+                  rateVital('lcp', selected.p75Lcp) === 'poor' ||
+                  rateVital('inp', selected.p75Inp) === 'poor' ||
+                  rateVital('cls', selected.p75Cls) === 'poor' ||
+                  (selected.views > 0 && selected.errorCount / selected.views >= ERROR_RATE_WARN)
+                }
+              />
+              <EuiSpacer />
               <EuiButton
                 data-test-subj="uxRumPagesPanelViewSessionsOnThisPageButton"
                 fill
@@ -775,6 +811,14 @@ export function RumPagesPanel() {
               </EuiButton>
             </EuiFlyoutBody>
           </EuiFlyout>
+        )}
+        {traceTarget && (
+          <TraceWaterfallFlyout
+            target={traceTarget}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            onClose={() => setTraceTarget(null)}
+          />
         )}
       </EuiPanel>
     </>

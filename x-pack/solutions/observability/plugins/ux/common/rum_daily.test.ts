@@ -86,6 +86,9 @@ describe('shouldQueryDailyIndex', () => {
         rangeTo: 'now',
       })
     ).toBe(false);
+  });
+
+  it('uses daily for the picker Last 7 days (now-7d/d)', () => {
     expect(
       shouldQueryDailyIndex({
         installed: true,
@@ -93,7 +96,7 @@ describe('shouldQueryDailyIndex', () => {
         rangeFrom: 'now-7d/d',
         rangeTo: 'now',
       })
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('uses daily rollups for 90d and 1y', () => {

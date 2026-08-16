@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { RUM_DAILY_SPEC, RUM_PAGES_DAILY_SPEC } from '../../common/rum_daily';
 import {
   RUM_CANONICAL_SERVICE_NAME_FIELD,
   RUM_CANONICAL_SESSION_ID_FIELD,
   RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
 } from '../../common/rum_sessions';
+import { PAGE_PATH_SCRIPT } from '../routes/rum/query';
 import {
   buildRumPagesDailyTransformBody,
   buildRumServiceDailyTransformBody,
@@ -20,7 +22,7 @@ import {
 } from './rum_daily_spec';
 
 describe('rum daily transform specs', () => {
-  it('groups pages by day, service, and grouped path fields', () => {
+  it('groups pages by day, service, and the raw page-path script', () => {
     const { group_by: groupBy } = rumPagesDailyTransformBody.pivot;
     expect(groupBy['@timestamp']).toEqual({
       date_histogram: { field: '@timestamp', calendar_interval: '1d', missing_bucket: true },
@@ -29,7 +31,10 @@ describe('rum daily transform specs', () => {
       terms: { field: RUM_CANONICAL_SERVICE_NAME_FIELD },
     });
     expect(groupBy['url.path.grouped']).toEqual({
-      terms: { field: RUM_CANONICAL_URL_PATH_GROUPED_FIELD },
+      terms: {
+        script: { source: PAGE_PATH_SCRIPT, lang: 'painless' },
+        missing_bucket: true,
+      },
     });
   });
 
@@ -96,7 +101,12 @@ describe('rum daily transform specs', () => {
         poor: { filter: { range: { 'attributes.browser.web_vital.value': { gt: 4000 } } } },
       })
     );
-    expect(rumPagesDailyTransformBody._meta).toEqual(expect.objectContaining({ spec: 7 }));
+    expect(rumPagesDailyTransformBody._meta).toEqual(
+      expect.objectContaining({ spec: RUM_PAGES_DAILY_SPEC })
+    );
+    expect(rumServiceDailyTransformBody._meta).toEqual(
+      expect.objectContaining({ spec: RUM_DAILY_SPEC })
+    );
     expect(lcp.aggs.element).toEqual(
       expect.objectContaining({
         terms: expect.objectContaining({

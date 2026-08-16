@@ -49,6 +49,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
+import type { ApmSharedPluginStart } from '@kbn/apm-shared/public';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -81,6 +82,7 @@ export interface ApmPluginStartDeps {
   inference: InferencePublicStart;
   agentBuilder?: AgentBuilderPluginStart;
   slo?: SLOPublicStart;
+  apmShared: ApmSharedPluginStart;
 }
 
 async function getDataStartPlugin(core: CoreSetup) {

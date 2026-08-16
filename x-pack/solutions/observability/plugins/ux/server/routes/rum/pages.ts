@@ -18,6 +18,7 @@ import {
   type RumResourceRow,
   type RumVitalAttribution,
 } from '../../../common/rum_app';
+import type { RumBackendCall } from '../../../common/rum_backend';
 import { groupingFromSettings } from '../../../common/session_replay_settings';
 import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
@@ -27,6 +28,9 @@ import { readSessionReplaySettings } from '../session_replay/settings';
 import {
   DOCUMENT_LOAD_FILTER,
   EXCEPTION_FILTER,
+  EXTERNAL_HTTP_FILTER,
+  HTTP_FAIL_FILTER,
+  HTTP_ORIGIN_SCRIPT,
   PAGE_VIEW_FILTER,
   WEB_VITAL_FILTER,
   boundedString,
@@ -135,13 +139,53 @@ const resourcesFromBucket = (bucket: Record<string, unknown>): RumResourceRow[] 
     .filter((row) => row.url.length > 0);
 };
 
+const backendCallsFromBucket = (bucket: Record<string, unknown>): RumBackendCall[] => {
+  const httpAgg = bucket.backend as { by_origin?: unknown } | undefined;
+  return termsBuckets(httpAgg?.by_origin)
+    .map((row) => ({
+      origin: String(row.key),
+      count: row.doc_count,
+      failCount: (row.fails as { doc_count?: number } | undefined)?.doc_count ?? 0,
+      avgDurationMs:
+        durationToMs((row.avg_ns as { value?: number | null } | undefined)?.value ?? undefined) ??
+        durationToMs((row.avg_us as { value?: number | null } | undefined)?.value ?? undefined),
+      sampleTraceId: topString(row.trace),
+      serviceName: topString(row.peer),
+    }))
+    .filter((row) => row.origin.length > 0);
+};
+
+const BACKEND_CALLS_AGG = {
+  filter: EXTERNAL_HTTP_FILTER,
+  aggs: {
+    by_origin: {
+      terms: {
+        script: { source: HTTP_ORIGIN_SCRIPT, lang: 'painless' },
+        size: 8,
+        exclude: '',
+      },
+      aggs: {
+        avg_ns: { avg: { field: 'duration' } },
+        avg_us: { avg: { field: 'attributes.transaction.duration.us' } },
+        fails: { filter: HTTP_FAIL_FILTER },
+        trace: attrTerms('trace.id'),
+        peer: attrTerms('attributes.peer.service'),
+      },
+    },
+  },
+};
+
 export const queryRawPageDetail = async ({
   client,
   query,
 }: {
   client: ElasticsearchClient;
   query: t.TypeOf<typeof rumListQueryCodec>;
-}): Promise<{ attribution: RumVitalAttribution; resources: RumResourceRow[] }> => {
+}): Promise<{
+  attribution: RumVitalAttribution;
+  resources: RumResourceRow[];
+  backendCalls: RumBackendCall[];
+}> => {
   const result = await client.search(
     {
       index: RUM_SESSION_SOURCE_INDEX,
@@ -186,6 +230,7 @@ export const queryRawPageDetail = async ({
             },
           },
         },
+        backend: BACKEND_CALLS_AGG,
       },
     },
     rumEsSearchOptions
@@ -194,6 +239,7 @@ export const queryRawPageDetail = async ({
   return {
     attribution: attributionFromBucket(aggs),
     resources: resourcesFromBucket(aggs),
+    backendCalls: backendCallsFromBucket(aggs),
   };
 };
 
@@ -253,12 +299,17 @@ export const getRumPagesRoute = createUxServerRoute({
         serviceName: params.query.serviceName,
         pageUrl: params.query.pageUrl,
         watermark: status.pagesDaily?.watermark,
+        serviceWatermark: status.serviceDaily?.watermark,
+        useService: daily.useService,
         includeBots: params.query.includeBots,
       });
       const pages = mergeRumPageRows(result.pages, groupingFromSettings(settings));
       return {
         pages,
-        kpis: summarizePagesKpis(pages, result.kpis.sessions),
+        kpis: {
+          ...summarizePagesKpis(pages, result.kpis.sessions),
+          views: result.kpis.views,
+        },
       };
     }
 

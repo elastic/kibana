@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
 import {
+  applySessionIndexTrendSessions,
   durationToMs,
   emptyVitalAttribution,
   mergeRumPageRows,
@@ -34,8 +35,10 @@ import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
 import { queryDailyOverview } from '../../transforms/rum_daily_query';
 import {
+  overlaySessionTrendSessions,
   querySessionIndexFilters,
   querySessionIndexKpis,
+  sessionIndexParamsFromQuery,
 } from '../../transforms/rum_sessions_query';
 import { rumEsSearchOptions } from './es_retry';
 import {
@@ -90,44 +93,20 @@ const overlaySessionIndex = async (
   ) {
     return result;
   }
+  const sessionParams = sessionIndexParamsFromQuery(query, watermark);
   const [slice, facets] = await Promise.all([
     querySessionIndexKpis({
       client,
-      rangeFrom: query.rangeFrom || 'now-24h',
-      rangeTo: query.rangeTo || 'now',
-      watermark,
-      serviceName: query.serviceName,
-      browser: query.browser,
-      os: query.os,
-      location: query.location,
-      pageUrl: query.pageUrl,
-      user: query.user,
-      frustration: query.frustration,
-      breakpoint: query.breakpoint,
-      connection: query.connection,
-      device: query.device,
-      errorGroup: query.errorGroup,
+      ...sessionParams,
     }),
     querySessionIndexFilters({
       client,
-      rangeFrom: query.rangeFrom || 'now-24h',
-      rangeTo: query.rangeTo || 'now',
-      watermark,
-      serviceName: query.serviceName,
-      browser: query.browser,
-      os: query.os,
-      location: query.location,
-      pageUrl: query.pageUrl,
-      user: query.user,
-      frustration: query.frustration,
-      breakpoint: query.breakpoint,
-      connection: query.connection,
-      device: query.device,
-      errorGroup: query.errorGroup,
+      ...sessionParams,
     }),
   ]);
   return {
     ...result,
+    trends: applySessionIndexTrendSessions(result.trends, slice.trends, '1h'),
     kpis: {
       ...result.kpis,
       sessions: slice.sessions,
@@ -223,9 +202,29 @@ export const getRumOverviewRoute = createUxServerRoute({
         uniqueFromRaw: true,
         includeBots: params.query.includeBots,
       });
-      return {
+      const withPages = {
         ...result,
         topPages: mergeRumPageRows(result.topPages, groupingFromSettings(settings)),
+      };
+      if (
+        !canUseSessionIndex({
+          installed: status.installed,
+          analyticsMode: params.query.analyticsMode,
+          rangeMs: rangeSpanMs(params.query.rangeFrom, params.query.rangeTo),
+          kuery: params.query.kuery,
+          lookbackDays: status.sourceLookbackDays,
+        })
+      ) {
+        return withPages;
+      }
+      return {
+        ...withPages,
+        trends: await overlaySessionTrendSessions({
+          client,
+          trends: withPages.trends,
+          align: '1d',
+          ...sessionIndexParamsFromQuery(params.query, status.watermark),
+        }),
       };
     }
     const filters = rumBaseFilters(params.query);

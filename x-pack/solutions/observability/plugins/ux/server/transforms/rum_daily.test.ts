@@ -10,7 +10,11 @@ import {
   emptyPagesDailyStatus,
   emptyServiceDailyStatus,
 } from '../../common/rum_daily';
-import { emptyVitalAttribution, type RumOverviewResponse } from '../../common/rum_app';
+import {
+  emptyVitalAttribution,
+  UNGROUPED_PAGE_PATH,
+  type RumOverviewResponse,
+} from '../../common/rum_app';
 import { resolveRumDaily } from './rum_daily';
 import {
   applyRawOverviewSlice,
@@ -310,5 +314,29 @@ describe('mergePageRowsByPath', () => {
       })
     );
     expect(merged[1]?.path).toBe('/today');
+  });
+
+  it('keeps the ungrouped sentinel instead of dropping empty paths', () => {
+    const merged = mergePageRowsByPath(
+      [
+        {
+          path: UNGROUPED_PAGE_PATH,
+          views: 84,
+          errorCount: 0,
+          p75Lcp: null,
+          p75Inp: null,
+          p75Cls: null,
+          avgDurationMs: null,
+          sessionCount: 6,
+          rageClicks: 0,
+          deadClicks: 0,
+          trend: [],
+          attribution: emptyVitalAttribution(),
+          resources: [],
+        },
+      ],
+      []
+    );
+    expect(merged).toEqual([expect.objectContaining({ path: UNGROUPED_PAGE_PATH, views: 84 })]);
   });
 });

@@ -52,6 +52,36 @@ export interface RumTrendPoint {
   errors: number;
 }
 
+export type SessionTrendAlign = '1d' | '1h';
+
+export const sessionTrendAlignKey = (timestamp: string, align: SessionTrendAlign): string => {
+  const ms = Date.parse(timestamp);
+  if (!Number.isFinite(ms)) {
+    return timestamp;
+  }
+  const iso = new Date(ms).toISOString();
+  return align === '1d' ? iso.slice(0, 10) : iso.slice(0, 13);
+};
+
+/** Session-dest started counts on an existing series. Keeps page views / errors. */
+export const applySessionIndexTrendSessions = (
+  trends: RumTrendPoint[],
+  sessionTrends: RumTrendPoint[],
+  align: SessionTrendAlign
+): RumTrendPoint[] => {
+  if (sessionTrends.length === 0) {
+    return trends;
+  }
+  const sessionsByKey = new Map<string, number>();
+  for (const point of sessionTrends) {
+    sessionsByKey.set(sessionTrendAlignKey(point.timestamp, align), point.sessions);
+  }
+  return trends.map((point) => ({
+    ...point,
+    sessions: sessionsByKey.get(sessionTrendAlignKey(point.timestamp, align)) ?? 0,
+  }));
+};
+
 export interface RumFrustrationCounts {
   rageSessions: number;
   errorSessions: number;
@@ -208,6 +238,37 @@ export const summarizePagesKpis = (
     passingCwvPct: views > 0 ? passingViews / views : null,
     poorLcpPages: pages.filter((page) => rateVital('lcp', page.p75Lcp) === 'poor').length,
   };
+};
+
+/** Dest / terms key when the page path script resolves to empty. */
+export const UNGROUPED_PAGE_PATH = '(ungrouped)';
+
+export const pagePathFromKey = (key: string | number | null | undefined): string => {
+  if (key == null) {
+    return UNGROUPED_PAGE_PATH;
+  }
+  const path = String(key);
+  return path.length > 0 ? path : UNGROUPED_PAGE_PATH;
+};
+
+/** Service daily page_views match Overview; path-row sums undercount missing grouped paths. */
+export const pagesViewsKpi = ({
+  pageUrl,
+  useService,
+  servicePageViews,
+  rowViews,
+  tailPageViews,
+}: {
+  pageUrl?: string;
+  useService: boolean;
+  servicePageViews: number;
+  rowViews: number;
+  tailPageViews: number;
+}): number => {
+  if (pageUrl || !useService) {
+    return rowViews;
+  }
+  return servicePageViews + tailPageViews;
 };
 
 /** Collapse page rows with the current URL grouping settings. */

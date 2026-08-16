@@ -316,6 +316,7 @@ export function UXAppRoot({
     inference,
     agentBuilder,
     slo,
+    apmShared,
   },
   isDev,
   spaceId,
@@ -356,6 +357,7 @@ export function UXAppRoot({
               inference,
               agentBuilder,
               slo,
+              apmShared,
             }}
           >
             <KibanaThemeProvider

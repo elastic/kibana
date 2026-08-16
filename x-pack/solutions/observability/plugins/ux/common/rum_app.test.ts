@@ -7,6 +7,7 @@
 
 import {
   OTHER_ERROR_TREND_ID,
+  applySessionIndexTrendSessions,
   durationToMs,
   emptyPageImpact,
   emptyVitalAttribution,
@@ -15,11 +16,15 @@ import {
   makeErrorGroupKey,
   mergeRumPageRows,
   pagePassesCwv,
+  pagePathFromKey,
+  pagesViewsKpi,
   ranksFromCounts,
   ranksFromPercentileRanks,
   rateVital,
+  sessionTrendAlignKey,
   stackErrorTrends,
   summarizePagesKpis,
+  UNGROUPED_PAGE_PATH,
   type RumPageRow,
 } from './rum_app';
 
@@ -202,6 +207,39 @@ describe('summarizePagesKpis', () => {
   });
 });
 
+describe('pagePathFromKey', () => {
+  it('maps empty dest keys to the ungrouped sentinel', () => {
+    expect(pagePathFromKey('')).toBe(UNGROUPED_PAGE_PATH);
+    expect(pagePathFromKey(null)).toBe(UNGROUPED_PAGE_PATH);
+    expect(pagePathFromKey('/app')).toBe('/app');
+  });
+});
+
+describe('pagesViewsKpi', () => {
+  it('uses service daily plus the open-day tail when no page filter is set', () => {
+    expect(
+      pagesViewsKpi({
+        useService: true,
+        servicePageViews: 898,
+        rowViews: 440,
+        tailPageViews: 71,
+      })
+    ).toBe(969);
+  });
+
+  it('keeps the path-row sum when a page filter is set', () => {
+    expect(
+      pagesViewsKpi({
+        pageUrl: '/app',
+        useService: true,
+        servicePageViews: 898,
+        rowViews: 12,
+        tailPageViews: 3,
+      })
+    ).toBe(12);
+  });
+});
+
 describe('mergeRumPageRows', () => {
   it('sums impact fields and aligns trend buckets', () => {
     const merged = mergeRumPageRows(
@@ -266,5 +304,41 @@ describe('stackErrorTrends', () => {
     );
     expect(series[0].points.map((point) => point.count)).toEqual([2, 0]);
     expect(series[1].points.map((point) => point.count)).toEqual([0, 1]);
+  });
+});
+
+describe('applySessionIndexTrendSessions', () => {
+  it('replaces daily sessions and keeps page views', () => {
+    expect(sessionTrendAlignKey('2026-08-14T12:30:00.000Z', '1d')).toBe('2026-08-14');
+    expect(
+      applySessionIndexTrendSessions(
+        [
+          {
+            timestamp: '2026-08-14T00:00:00.000Z',
+            sessions: 19,
+            pageViews: 808,
+            errors: 15,
+          },
+          {
+            timestamp: '2026-08-15T00:00:00.000Z',
+            sessions: 4,
+            pageViews: 6,
+            errors: 0,
+          },
+        ],
+        [{ timestamp: '2026-08-14T00:00:00.000Z', sessions: 17, pageViews: 0, errors: 0 }],
+        '1d'
+      )
+    ).toEqual([
+      { timestamp: '2026-08-14T00:00:00.000Z', sessions: 17, pageViews: 808, errors: 15 },
+      { timestamp: '2026-08-15T00:00:00.000Z', sessions: 0, pageViews: 6, errors: 0 },
+    ]);
+  });
+
+  it('leaves the series alone when the session index is empty', () => {
+    const trends = [
+      { timestamp: '2026-08-16T10:00:00.000Z', sessions: 3, pageViews: 10, errors: 1 },
+    ];
+    expect(applySessionIndexTrendSessions(trends, [], '1h')).toBe(trends);
   });
 });

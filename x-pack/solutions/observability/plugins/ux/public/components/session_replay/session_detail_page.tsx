@@ -31,11 +31,14 @@ import { useHistory } from 'react-router-dom';
 import { useParams } from '@kbn/typed-react-router-config';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { PageVisit, RumSessionDetail, SessionAction } from '../../../common/session_replay';
+import { summarizeBackendCallsFromActions } from '../../../common/rum_backend';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionDetail } from '../../services/rest/session_replay_api';
 import { UserCell, WebVitalBadges, formatDurationMs, formatTime } from './session_ui';
 import { mergeRumSearch, pushRumPath, sessionsPatch } from '../../utils/rum_search';
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
+import { BackendCallsPanel } from '../trace/backend_calls_panel';
+import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../trace/trace_waterfall_flyout';
 
 const ACTION_ICON: Record<SessionAction['kind'], string> = {
   click: 'clickLeft',
@@ -237,12 +240,12 @@ const SessionWaterfall = ({
 
 const ActionRow = ({
   action,
-  apmHref,
+  onViewTrace,
   onOpenError,
   onSeek,
 }: {
   action: SessionAction;
-  apmHref?: string;
+  onViewTrace?: (target: TraceFlyoutTarget) => void;
   onOpenError?: (errorGroup: string) => void;
   onSeek?: (offsetMs: number) => void;
 }) => {
@@ -350,16 +353,24 @@ const ActionRow = ({
           </EuiLink>
         </EuiFlexItem>
       )}
-      {apmHref && (
+      {action.traceId && onViewTrace && (
         <EuiFlexItem grow={false}>
           <EuiLink
-            data-test-subj="uxActionRowViewInApmLink"
-            href={apmHref}
-            target="_blank"
-            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            data-test-subj="uxActionRowViewTraceLink"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              if (action.traceId) {
+                onViewTrace({
+                  traceId: action.traceId,
+                  spanId: action.spanId,
+                  timestamp: action.timestamp,
+                  title: action.label,
+                });
+              }
+            }}
           >
-            {i18n.translate('xpack.ux.sessionDetail.viewInApm', {
-              defaultMessage: 'View in APM',
+            {i18n.translate('xpack.ux.sessionDetail.viewTrace', {
+              defaultMessage: 'View trace',
             })}
           </EuiLink>
         </EuiFlexItem>
@@ -379,7 +390,7 @@ const PageVisitNode = ({
   color,
   isLast,
   registerRef,
-  apmHrefFor,
+  onViewTrace,
   onOpenError,
   onSeek,
 }: {
@@ -388,7 +399,7 @@ const PageVisitNode = ({
   color: string;
   isLast: boolean;
   registerRef: (index: number, node: HTMLDivElement | null) => void;
-  apmHrefFor: (action: SessionAction) => string | undefined;
+  onViewTrace: (target: TraceFlyoutTarget) => void;
   onOpenError: (errorGroup: string) => void;
   onSeek?: (offsetMs: number) => void;
 }) => {
@@ -560,7 +571,7 @@ const PageVisitNode = ({
                 <ActionRow
                   key={index}
                   action={action}
-                  apmHref={apmHrefFor(action)}
+                  onViewTrace={onViewTrace}
                   onOpenError={onOpenError}
                   onSeek={onSeek}
                 />
@@ -638,6 +649,7 @@ export function SessionDetailPage() {
   const [detail, setDetail] = useState<RumSessionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [traceTarget, setTraceTarget] = useState<TraceFlyoutTarget | null>(null);
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const registerRef = useCallback((index: number, node: HTMLDivElement | null) => {
@@ -717,19 +729,12 @@ export function SessionDetailPage() {
 
   const pageColors = usePageColors(detail?.pageVisits ?? []);
 
-  const apmHrefFor = useCallback(
-    (action: SessionAction): string | undefined => {
-      if (!action.traceId) {
-        return undefined;
-      }
-      return observabilityShared.locators.apm.transactionDetailsByTraceId.getRedirectUrl({
-        traceId: action.traceId,
-        waterfallItemId: action.spanId ?? undefined,
-        rangeFrom,
-        rangeTo,
-      });
-    },
-    [observabilityShared, rangeFrom, rangeTo]
+  const backendCalls = useMemo(
+    () =>
+      summarizeBackendCallsFromActions(
+        (detail?.pageVisits ?? []).flatMap((visit) => visit.actions)
+      ),
+    [detail]
   );
 
   const onOpenError = useCallback(
@@ -924,6 +929,20 @@ export function SessionDetailPage() {
               </>
             )}
 
+            {backendCalls.length > 0 && (
+              <>
+                <EuiSpacer size="l" />
+                <EuiPanel hasBorder paddingSize="m">
+                  <BackendCallsPanel
+                    calls={backendCalls}
+                    rangeFrom={rangeFrom}
+                    rangeTo={rangeTo}
+                    onViewTrace={setTraceTarget}
+                  />
+                </EuiPanel>
+              </>
+            )}
+
             <EuiSpacer size="l" />
 
             <EuiTitle size="xs">
@@ -954,7 +973,7 @@ export function SessionDetailPage() {
                     color={pageColors.get(visit.path) ?? euiTheme.colors.primary}
                     isLast={index === detail.pageVisits.length - 1}
                     registerRef={registerRef}
-                    apmHrefFor={apmHrefFor}
+                    onViewTrace={setTraceTarget}
                     onOpenError={onOpenError}
                     onSeek={detail.hasReplay ? openPlayer : undefined}
                   />
@@ -964,6 +983,14 @@ export function SessionDetailPage() {
           </>
         )}
       </PageTemplateComponent>
+      {traceTarget && (
+        <TraceWaterfallFlyout
+          target={traceTarget}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          onClose={() => setTraceTarget(null)}
+        />
+      )}
     </div>
   );
 }

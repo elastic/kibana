@@ -15,6 +15,7 @@ import type {
   RumTrendPoint,
   RumVitalAttribution,
 } from '../../../common/rum_app';
+import type { RumBackendCall } from '../../../common/rum_backend';
 import type { RumClickMapResponse } from '../../../common/rum_click_map';
 import type {
   RumReportCompareMode,
@@ -122,6 +123,7 @@ export const fetchRumPageDetail = async ({
 }: RumQueryParams & { pageUrl: string }): Promise<{
   attribution: RumVitalAttribution;
   resources: RumResourceRow[];
+  backendCalls: RumBackendCall[];
 }> => {
   return http.get('/internal/ux/rum/pages/detail', {
     query: rumQuery({ ...params, pageUrl }),

@@ -8,6 +8,8 @@
 import {
   buildSessionIndexFilters,
   sessionIndexHasReplayQuery,
+  sessionIndexParamsFromQuery,
+  sessionTrendsAggregation,
   trendsFromSessionHistogram,
 } from './rum_sessions_query';
 
@@ -55,6 +57,30 @@ describe('buildSessionIndexFilters', () => {
         { term: { error_groups: 'TypeError' } },
       ])
     );
+  });
+});
+
+describe('sessionTrendsAggregation', () => {
+  it('uses calendar days when aligning to daily dest', () => {
+    expect(sessionTrendsAggregation('1d')).toEqual({
+      date_histogram: { field: 'start_time', calendar_interval: '1d' },
+      aggs: {
+        page_views: { sum: { field: 'page_view_count' } },
+        errors: { sum: { field: 'error_count' } },
+      },
+    });
+  });
+});
+
+describe('sessionIndexParamsFromQuery', () => {
+  it('copies the overview filters onto session dest fields', () => {
+    expect(
+      sessionIndexParamsFromQuery({ rangeFrom: 'now-7d/d', serviceName: 'shop' }, '2026-08-15')
+    ).toMatchObject({
+      rangeFrom: 'now-7d/d',
+      serviceName: 'shop',
+      watermark: '2026-08-15',
+    });
   });
 });
 

@@ -45,6 +45,7 @@ import { formatRelativeTime, formatTime, shortenPath } from '../../session_repla
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 import { ErrorsOverTimeChart } from './errors_over_time_chart';
+import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../../trace/trace_waterfall_flyout';
 
 type ErrorSortField = 'count' | 'sessionCount' | 'userCount' | 'firstSeen' | 'lastSeen';
 
@@ -144,6 +145,7 @@ const ErrorDetailFlyout = ({
   onViewSessions,
   onWatchReplay,
   onOpenPage,
+  onViewTrace,
 }: {
   group: RumErrorGroup;
   apmHref: string | null;
@@ -152,6 +154,7 @@ const ErrorDetailFlyout = ({
   onViewSessions: () => void;
   onWatchReplay: () => void;
   onOpenPage: (path: string) => void;
+  onViewTrace?: (target: TraceFlyoutTarget) => void;
 }) => (
   <EuiFlyout size="m" onClose={onClose} aria-labelledby="uxErrorDetailTitle">
     <EuiFlyoutHeader hasBorder>
@@ -290,6 +293,24 @@ const ErrorDetailFlyout = ({
             </EuiButton>
           </EuiFlexItem>
         )}
+        {group.sampleTraceId && onViewTrace && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="uxRumErrorsPanelViewTraceButton"
+              onClick={() =>
+                onViewTrace({
+                  traceId: group.sampleTraceId as string,
+                  timestamp: group.lastSeen,
+                  title: group.type,
+                })
+              }
+            >
+              {i18n.translate('xpack.ux.errors.detail.viewTrace', {
+                defaultMessage: 'View backend trace',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
         {traceHref && (
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -335,6 +356,7 @@ export function RumErrorsPanel() {
   const [error, setError] = useState<string | null>(null);
   useRumPageLoading('errors', loading);
   const [selected, setSelected] = useState<RumErrorGroup | null>(null);
+  const [traceTarget, setTraceTarget] = useState<TraceFlyoutTarget | null>(null);
   const [sortField, setSortField] = useState<ErrorSortField>('sessionCount');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -530,7 +552,7 @@ export function RumErrorsPanel() {
     },
     {
       name: i18n.translate('xpack.ux.errors.table.actions', { defaultMessage: 'Actions' }),
-      width: '200px',
+      width: '240px',
       render: (item: RumErrorGroup) => {
         const apmHref = apmErrorHref(item);
         return (
@@ -569,6 +591,22 @@ export function RumErrorsPanel() {
                 {i18n.translate('xpack.ux.errors.alert', { defaultMessage: 'Alert' })}
               </EuiButtonEmpty>
             </EuiFlexItem>
+            {item.sampleTraceId && (
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  data-test-subj="uxColumnsViewTraceLink"
+                  onClick={() =>
+                    setTraceTarget({
+                      traceId: item.sampleTraceId as string,
+                      timestamp: item.lastSeen,
+                      title: item.type,
+                    })
+                  }
+                >
+                  {i18n.translate('xpack.ux.errors.viewTrace', { defaultMessage: 'Trace' })}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
             {apmHref && (
               <EuiFlexItem grow={false}>
                 <EuiLink data-test-subj="uxColumnsApmLink" href={apmHref} target="_blank">
@@ -662,6 +700,15 @@ export function RumErrorsPanel() {
             onViewSessions={() => openSessions(selected, false)}
             onWatchReplay={() => openSessions(selected, true)}
             onOpenPage={(path) => pushRumPath(history, '/pages', { pageUrl: path })}
+            onViewTrace={setTraceTarget}
+          />
+        )}
+        {traceTarget && (
+          <TraceWaterfallFlyout
+            target={traceTarget}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            onClose={() => setTraceTarget(null)}
           />
         )}
       </EuiPanel>

@@ -25,6 +25,7 @@
       "embeddable",
       "inspector",
       "apm",
+      "apmShared",
       "inference"
     ],
     "optionalPlugins": [

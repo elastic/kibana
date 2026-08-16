@@ -6,7 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { RumFiltersResponse, RumTrendPoint } from '../../common/rum_app';
+import {
+  applySessionIndexTrendSessions,
+  type RumFiltersResponse,
+  type RumTrendPoint,
+  type SessionTrendAlign,
+} from '../../common/rum_app';
 import { eventSequenceToken, RUM_SESSIONS_INDEX } from '../../common/rum_sessions';
 import {
   extraPathsForFind,
@@ -266,6 +271,40 @@ export interface SessionIndexFilterParams {
   errorGroup?: string;
 }
 
+export const sessionIndexParamsFromQuery = (
+  query: {
+    rangeFrom?: string;
+    rangeTo?: string;
+    serviceName?: string;
+    browser?: string;
+    os?: string;
+    location?: string;
+    pageUrl?: string;
+    user?: string;
+    frustration?: string;
+    breakpoint?: string;
+    connection?: string;
+    device?: string;
+    errorGroup?: string;
+  },
+  watermark?: string | null
+): SessionIndexFilterParams => ({
+  rangeFrom: query.rangeFrom || 'now-24h',
+  rangeTo: query.rangeTo || 'now',
+  watermark,
+  serviceName: query.serviceName,
+  browser: query.browser,
+  os: query.os,
+  location: query.location,
+  pageUrl: query.pageUrl,
+  user: query.user,
+  frustration: query.frustration,
+  breakpoint: query.breakpoint,
+  connection: query.connection,
+  device: query.device,
+  errorGroup: query.errorGroup,
+});
+
 export const buildSessionIndexFilters = ({
   rangeFrom,
   rangeTo,
@@ -355,6 +394,22 @@ export const buildSessionIndexFilters = ({
   return filters;
 };
 
+const sessionTrendMetricAggs = {
+  page_views: { sum: { field: 'page_view_count' } },
+  errors: { sum: { field: 'error_count' } },
+};
+
+export const sessionTrendsAggregation = (calendarInterval?: '1d') =>
+  calendarInterval
+    ? {
+        date_histogram: { field: 'start_time', calendar_interval: calendarInterval },
+        aggs: sessionTrendMetricAggs,
+      }
+    : {
+        auto_date_histogram: { field: 'start_time', buckets: 24 },
+        aggs: sessionTrendMetricAggs,
+      };
+
 export const trendsFromSessionHistogram = (agg: unknown): RumTrendPoint[] => {
   const buckets = (agg as { buckets?: Array<Record<string, unknown>> } | undefined)?.buckets ?? [];
   return buckets.map((bucket) => ({
@@ -370,8 +425,12 @@ export const trendsFromSessionHistogram = (agg: unknown): RumTrendPoint[] => {
 
 export const querySessionIndexTrends = async ({
   client,
+  calendarInterval,
   ...params
-}: SessionIndexFilterParams & { client: ElasticsearchClient }): Promise<RumTrendPoint[]> => {
+}: SessionIndexFilterParams & {
+  client: ElasticsearchClient;
+  calendarInterval?: '1d';
+}): Promise<RumTrendPoint[]> => {
   const result = await client.search({
     index: RUM_SESSIONS_INDEX,
     ignore_unavailable: true,
@@ -379,18 +438,30 @@ export const querySessionIndexTrends = async ({
     size: 0,
     query: { bool: { filter: buildSessionIndexFilters(params) } },
     aggs: {
-      trends: {
-        auto_date_histogram: { field: 'start_time', buckets: 24 },
-        aggs: {
-          page_views: { sum: { field: 'page_view_count' } },
-          errors: { sum: { field: 'error_count' } },
-        },
-      },
+      trends: sessionTrendsAggregation(calendarInterval),
     },
   });
   return trendsFromSessionHistogram(
     (result.aggregations as { trends?: unknown } | undefined)?.trends
   );
+};
+
+export const overlaySessionTrendSessions = async ({
+  client,
+  trends,
+  align,
+  ...params
+}: SessionIndexFilterParams & {
+  client: ElasticsearchClient;
+  trends: RumTrendPoint[];
+  align: SessionTrendAlign;
+}): Promise<RumTrendPoint[]> => {
+  const sessionTrends = await querySessionIndexTrends({
+    client,
+    calendarInterval: align === '1d' ? '1d' : undefined,
+    ...params,
+  });
+  return applySessionIndexTrendSessions(trends, sessionTrends, align);
 };
 
 export const querySessionIndexFilters = async ({
@@ -448,13 +519,7 @@ export const querySessionIndexKpis = async ({
       error_sessions: { filter: { range: { error_count: { gt: 0 } } } },
       rage_sessions: { filter: { range: { rage_click_count: { gt: 0 } } } },
       dead_sessions: { filter: { range: { dead_click_count: { gt: 0 } } } },
-      trends: {
-        auto_date_histogram: { field: 'start_time', buckets: 24 },
-        aggs: {
-          page_views: { sum: { field: 'page_view_count' } },
-          errors: { sum: { field: 'error_count' } },
-        },
-      },
+      trends: sessionTrendsAggregation(),
     },
   });
   const total =

@@ -10,6 +10,8 @@ import {
   durationToMs,
   emptyPageImpact,
   emptyVitalAttribution,
+  pagePathFromKey,
+  pagesViewsKpi,
   ranksFromCounts,
   summarizePagesKpis,
   VITAL_RANK_THRESHOLDS,
@@ -1002,9 +1004,9 @@ export const queryDailyOverview = async ({
   ]);
 
   const topPages = pagesResult
-    ? termsBuckets((pagesResult.aggregations as { pages?: unknown } | undefined)?.pages)
-        .filter((bucket) => String(bucket.key).length > 0)
-        .map((bucket) => pageRowFromBucket(bucket))
+    ? termsBuckets((pagesResult.aggregations as { pages?: unknown } | undefined)?.pages).map(
+        (bucket) => pageRowFromBucket({ ...bucket, key: pagePathFromKey(bucket.key) })
+      )
     : [];
 
   const dailyAggs = (kpiResult.aggregations ?? {}) as Record<string, unknown>;
@@ -1039,6 +1041,8 @@ export const queryDailyPages = async ({
   serviceName,
   pageUrl,
   watermark,
+  serviceWatermark,
+  useService,
   includeBots,
 }: {
   client: ElasticsearchClient;
@@ -1047,10 +1051,13 @@ export const queryDailyPages = async ({
   serviceName?: string;
   pageUrl?: string;
   watermark?: string | null;
+  serviceWatermark?: string | null;
+  useService?: boolean;
   includeBots?: string;
 }): Promise<RumPagesResponse> => {
   const fillTail = rangeIncludesOpenTail(rangeTo, watermark ?? '');
-  const [result, tail] = await Promise.all([
+  const useServiceViews = Boolean(useService) && !pageUrl;
+  const [result, tail, serviceResult] = await Promise.all([
     client.search(
       {
         index: RUM_PAGES_DAILY_INDEX,
@@ -1081,19 +1088,54 @@ export const queryDailyPages = async ({
           pageSize: 80,
         })
       : Promise.resolve(emptyOpenDayTail()),
+    useServiceViews
+      ? client.search(
+          {
+            index: RUM_SERVICE_DAILY_INDEX,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+            size: 0,
+            query: {
+              bool: {
+                filter: dailyBaseFilters({
+                  rangeFrom,
+                  rangeTo,
+                  serviceName,
+                  watermark: serviceWatermark,
+                }),
+              },
+            },
+            aggs: { page_views: { sum: { field: 'page_views' } } },
+          },
+          rumEsSearchOptions
+        )
+      : Promise.resolve(null),
   ]);
 
   const pages = mergePageRowsByPath(
-    termsBuckets((result.aggregations as { pages?: unknown } | undefined)?.pages)
-      .filter((bucket) => String(bucket.key).length > 0)
-      .map((bucket) => pageRowFromBucket(bucket)),
-    tail.pages
+    termsBuckets((result.aggregations as { pages?: unknown } | undefined)?.pages).map((bucket) =>
+      pageRowFromBucket({ ...bucket, key: pagePathFromKey(bucket.key) })
+    ),
+    tail.pages.map((page) => ({ ...page, path: pagePathFromKey(page.path) }))
   );
+  const kpis = summarizePagesKpis(
+    pages,
+    pages.reduce((sum, page) => sum + page.sessionCount, 0)
+  );
+  const servicePageViews = serviceResult
+    ? sumValue((serviceResult.aggregations as { page_views?: unknown } | undefined)?.page_views)
+    : 0;
   return {
     pages,
-    kpis: summarizePagesKpis(
-      pages,
-      pages.reduce((sum, page) => sum + page.sessionCount, 0)
-    ),
+    kpis: {
+      ...kpis,
+      views: pagesViewsKpi({
+        pageUrl,
+        useService: Boolean(useService),
+        servicePageViews,
+        rowViews: kpis.views,
+        tailPageViews: fillTail && hasOpenDayActivity(tail) ? tail.pageViews : 0,
+      }),
+    },
   };
 };
