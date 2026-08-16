@@ -93,6 +93,21 @@ const feedbackSubmittedEventSchema: RootSchema<FeedbackSubmittedEventData> = {
       optional: false,
     },
   },
+  context: {
+    properties: {
+      isEsql: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether Discover was in ES|QL mode when feedback was submitted',
+          optional: true,
+        },
+      },
+    },
+    _meta: {
+      description: 'Optional app-specific context for the feedback submission',
+      optional: true,
+    },
+  },
 };
 
 export const feedbackSubmittedEventType: EventTypeOpts<FeedbackSubmittedEventData> = {

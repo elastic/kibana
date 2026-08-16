@@ -6,6 +6,39 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
+
+const DISCOVER_APP_ID = 'discover';
+
+interface DiscoverAppState {
+  dataSource?: {
+    type?: string;
+  };
+  query?: {
+    esql?: unknown;
+  };
+}
+
+const isDiscoverEsqlMode = (): boolean => {
+  try {
+    const appState = getStateFromKbnUrl<DiscoverAppState>('_a');
+
+    if (!appState || typeof appState !== 'object') {
+      return false;
+    }
+
+    if (appState.dataSource?.type === 'esql') {
+      return true;
+    }
+
+    return Boolean(
+      appState.query && typeof appState.query === 'object' && 'esql' in appState.query
+    );
+  } catch {
+    return false;
+  }
+};
 
 /**
  * Apps listed here will not have their category prefix in the satisfaction question.
@@ -69,15 +102,26 @@ export const getAppDetails = (core: CoreStart) => {
   }
 
   let title = match?.title;
+  const id = match?.id;
   const category = match?.category;
 
   if (category && !APPS_WITHOUT_CATEGORY_PREFIX.includes(match?.id)) {
     title = `${category.label} - ${match?.title}`;
   }
 
+  const isEsql = id === DISCOVER_APP_ID && isDiscoverEsqlMode();
+
+  if (isEsql && title) {
+    title = i18n.translate('feedback.getAppDetails.discoverEsqlTitle', {
+      defaultMessage: '{appTitle} ES|QL',
+      values: { appTitle: title },
+    });
+  }
+
   return {
     title: title ?? 'Kibana',
-    id: match?.id ?? 'Kibana',
+    id: id ?? 'Kibana',
     url: currentPath,
+    ...(isEsql && { context: { isEsql: true } }),
   };
 };

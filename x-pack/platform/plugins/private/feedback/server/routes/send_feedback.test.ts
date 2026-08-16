@@ -88,6 +88,43 @@ describe('registerSendFeedbackRoute', () => {
     });
   });
 
+  it('should include optional context in the analytics event', async () => {
+    registerSendFeedbackRoute(router, mockAnalytics);
+
+    const [, handler] = router.post.mock.calls[0];
+
+    const coreContext = coreMock.createRequestHandlerContext();
+    coreContext.userProfile.getCurrentProfileId.mockResolvedValue(mockUserProfileId);
+
+    const mockContext = {
+      core: Promise.resolve(coreContext),
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: {
+        app_id: 'discover',
+        solution: 'classic',
+        allow_email_contact: false,
+        url: '/app/discover',
+        context: { isEsql: true },
+      },
+    });
+
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await handler(mockContext, mockRequest, mockResponse);
+
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(FEEDBACK_SUBMITTED_EVENT_TYPE, {
+      app_id: 'discover',
+      solution: 'classic',
+      allow_email_contact: false,
+      url: '/app/discover',
+      context: { isEsql: true },
+      user_id: 'test-user-id',
+      source: 'kibana',
+    });
+  });
+
   it('reports user_id as undefined when no current profile is resolved', async () => {
     registerSendFeedbackRoute(router, mockAnalytics);
 

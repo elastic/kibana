@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export type { FeedbackQuestion, FeedbackSubmittedData, FeedbackFormData } from './types';
+export type {
+  FeedbackQuestion,
+  FeedbackContext,
+  FeedbackSubmittedData,
+  FeedbackFormData,
+} from './types';

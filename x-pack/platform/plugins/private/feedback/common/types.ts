@@ -11,6 +11,10 @@ export interface FeedbackQuestion {
   answer: string;
 }
 
+export interface FeedbackContext {
+  isEsql?: boolean;
+}
+
 export interface FeedbackSubmittedData {
   app_id: string;
   solution: string;
@@ -20,6 +24,7 @@ export interface FeedbackSubmittedData {
   csat_score?: number;
   questions?: FeedbackQuestion[];
   organization_id?: string;
+  context?: FeedbackContext;
 }
 
 export type FeedbackFormData = Omit<FeedbackSubmittedData, 'solution' | 'organization_id'>;

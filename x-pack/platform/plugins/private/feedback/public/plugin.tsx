@@ -12,7 +12,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { FeedbackRegistryEntry } from '@kbn/ui-feedback';
+import type { AppDetails, FeedbackRegistryEntry } from '@kbn/ui-feedback';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +32,7 @@ interface FeedbackPluginStartDependencies {
 
 interface FeedbackDeps {
   getQuestions: (appId: string) => Promise<FeedbackRegistryEntry[]>;
-  getAppDetails: () => { title: string; id: string; url: string };
+  getAppDetails: () => AppDetails;
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
   showToast: (title: string, color: 'success' | 'error') => void;

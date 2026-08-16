@@ -24,6 +24,11 @@ const feedbackBodySchema = schema.object({
   organization_id: schema.maybe(schema.string({ maxLength: 256 })),
   allow_email_contact: schema.boolean(),
   url: schema.string({ maxLength: 2048 }),
+  context: schema.maybe(
+    schema.object({
+      isEsql: schema.maybe(schema.boolean()),
+    })
+  ),
 });
 
 export function registerSendFeedbackRoute(router: IRouter, analytics: AnalyticsServiceSetup) {

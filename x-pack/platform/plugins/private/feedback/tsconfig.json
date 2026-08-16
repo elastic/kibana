@@ -20,6 +20,7 @@
     "@kbn/core-chrome-feature-flags",
     "@kbn/react-kibana-mount",
     "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
     "@kbn/core-http-router-server-mocks"
   ],
   "exclude": [

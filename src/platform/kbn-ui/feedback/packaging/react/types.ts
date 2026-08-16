@@ -41,6 +41,11 @@ export interface FeedbackQuestion {
   answer: string;
 }
 
+/** Optional app-specific context recorded with the feedback payload. */
+export interface FeedbackContext {
+  isEsql?: boolean;
+}
+
 /** The full feedback payload recorded in telemetry. */
 export interface FeedbackSubmittedData {
   app_id: string;
@@ -51,6 +56,7 @@ export interface FeedbackSubmittedData {
   csat_score?: number;
   questions?: FeedbackQuestion[];
   organization_id?: string;
+  context?: FeedbackContext;
 }
 
 /** The subset of feedback data collected from the form. */
@@ -61,6 +67,7 @@ interface AppDetails {
   title: string;
   id: string;
   url: string;
+  context?: FeedbackContext;
 }
 
 /** Props accepted by the `FeedbackTriggerButton` component. */
