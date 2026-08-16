@@ -512,8 +512,9 @@ export class DataGrid {
     );
 
     await expandButton.waitFor({ state: 'visible' });
-    await expandButton.focus();
-    await expandButton.press('Enter');
+    await expandButton.scrollIntoViewIfNeeded();
+    await expandButton.hover();
+    await expandButton.click();
   }
 
   async scrollToRow(rowIndex: number): Promise<void> {
@@ -524,11 +525,12 @@ export class DataGrid {
 
     for (let attempt = 0; attempt <= rowIndex; attempt++) {
       try {
-        await targetRow.waitFor({ state: 'attached', timeout: 100 });
-        await targetRow.scrollIntoViewIfNeeded();
+        await targetRow.waitFor({ state: 'visible', timeout: 100 });
         return;
       } catch {
-        await scrollContainer.evaluate((element) => element.scrollBy(0, element.clientHeight));
+        await scrollContainer.evaluate((element) =>
+          element.scrollBy(0, Math.round(element.clientHeight / 2))
+        );
       }
     }
 

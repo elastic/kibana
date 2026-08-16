@@ -37,6 +37,7 @@ const queryModes: Array<{
     name: 'classic',
     prepareDocument: async (dataGrid) => {
       await dataGrid.getPageButton(1).click();
+      await dataGrid.waitForLoad();
     },
     getPageState: async (dataGrid) => ({
       pageNumber: await dataGrid.getCurrentPageNumber(),
