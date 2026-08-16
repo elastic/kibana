@@ -18,6 +18,10 @@ import { DETECTION_ENGINE_ATTACKS_TAGS_URL } from '../../../../../common/constan
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  MAX_ALERTS_PER_TRIGGER,
+  MAX_TAGS_PER_OPERATION,
+} from '../../../../../common/workflows/triggers';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
 import { searchAlerts } from '../common/operations/search_alerts';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
@@ -84,9 +88,9 @@ export const setAttacksTagsRoute = (
             async () => {
               const result = await updateAlertsTags({ context, index: attackIndex, ids, tags });
               void eventBus?.emitAttackTagsChanged(request, {
-                attackIds: ids,
-                tagsToAdd: tags.tags_to_add,
-                tagsToRemove: tags.tags_to_remove,
+                attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
+                tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
+                tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
               });
               return result;
             }
@@ -128,15 +132,15 @@ export const setAttacksTagsRoute = (
 
             const result = await updateAlertsTags({ context, index, ids: combinedIds, tags });
             void eventBus?.emitAttackTagsChanged(request, {
-              attackIds: verifiedAttackIds,
-              tagsToAdd: tags.tags_to_add,
-              tagsToRemove: tags.tags_to_remove,
+              attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+              tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
+              tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertTagsChanged(request, {
-                alertIds: relatedAlertIds,
-                tagsToAdd: tags.tags_to_add,
-                tagsToRemove: tags.tags_to_remove,
+                alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
+                tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
               });
             }
             return result;

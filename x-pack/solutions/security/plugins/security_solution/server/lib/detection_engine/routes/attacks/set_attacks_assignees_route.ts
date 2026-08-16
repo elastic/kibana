@@ -18,6 +18,10 @@ import { DETECTION_ENGINE_ATTACKS_ASSIGNEES_URL } from '../../../../../common/co
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  MAX_ALERTS_PER_TRIGGER,
+  MAX_ASSIGNEES_PER_OPERATION,
+} from '../../../../../common/workflows/triggers';
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
 import { searchAlerts } from '../common/operations/search_alerts';
 import { validateAlertAssigneesArrays } from '../common/validators/validate_alert_arrays';
@@ -93,9 +97,9 @@ export const setAttacksAssigneesRoute = (
                 assignees,
               });
               void eventBus?.emitAttackAssigneesChanged(request, {
-                attackIds: ids,
-                assigneesToAdd: assignees.add,
-                assigneesToRemove: assignees.remove,
+                attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
+                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
               });
               return result;
             }
@@ -142,15 +146,15 @@ export const setAttacksAssigneesRoute = (
               assignees,
             });
             void eventBus?.emitAttackAssigneesChanged(request, {
-              attackIds: verifiedAttackIds,
-              assigneesToAdd: assignees.add,
-              assigneesToRemove: assignees.remove,
+              attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+              assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+              assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertAssigneesChanged(request, {
-                alertIds: relatedAlertIds,
-                assigneesToAdd: assignees.add,
-                assigneesToRemove: assignees.remove,
+                alertIds: relatedAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+                assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+                assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
               });
             }
             return result;

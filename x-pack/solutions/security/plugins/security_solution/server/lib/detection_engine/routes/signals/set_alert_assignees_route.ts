@@ -21,6 +21,10 @@ import { validateAlertAssigneesArrays } from '../common/validators/validate_aler
 import { updateAlertsAssignees } from '../common/operations/update_alerts_assignees';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  MAX_ALERTS_PER_TRIGGER,
+  MAX_ASSIGNEES_PER_OPERATION,
+} from '../../../../../common/workflows/triggers';
 
 export const setAlertAssigneesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -63,9 +67,9 @@ export const setAlertAssigneesRoute = (
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsAssignees({ context, index, ids, assignees });
           void eventBus?.emitAlertAssigneesChanged(request, {
-            alertIds: ids,
-            assigneesToAdd: assignees.add,
-            assigneesToRemove: assignees.remove,
+            alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
+            assigneesToAdd: assignees.add.slice(0, MAX_ASSIGNEES_PER_OPERATION),
+            assigneesToRemove: assignees.remove.slice(0, MAX_ASSIGNEES_PER_OPERATION),
           });
           return result;
         });

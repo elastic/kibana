@@ -21,6 +21,10 @@ import { validateAlertTagsArrays } from '../common/validators/validate_alert_arr
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
+import {
+  MAX_ALERTS_PER_TRIGGER,
+  MAX_TAGS_PER_OPERATION,
+} from '../../../../../common/workflows/triggers';
 
 export const setAlertTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -67,9 +71,9 @@ export const setAlertTagsRoute = (
         return withSiemErrorHandling(response, async () => {
           const result = await updateAlertsTags({ context, index, ids, tags });
           void eventBus?.emitAlertTagsChanged(request, {
-            alertIds: ids,
-            tagsToAdd: tags.tags_to_add,
-            tagsToRemove: tags.tags_to_remove,
+            alertIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
+            tagsToAdd: tags.tags_to_add.slice(0, MAX_TAGS_PER_OPERATION),
+            tagsToRemove: tags.tags_to_remove.slice(0, MAX_TAGS_PER_OPERATION),
           });
           return result;
         });
