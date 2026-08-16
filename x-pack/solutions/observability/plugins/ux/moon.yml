@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/inspector-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/apm-plugin'
+  - '@kbn/apm-shared'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/maps-plugin'
