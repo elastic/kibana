@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, CONNECTORS_APP_PATH } from '../fixtures';
+import { test, navigateToConnectors } from '../fixtures';
 
 const CONNECTOR_TYPE_ID = '.alienvault-otx';
 const CONNECTOR_NAME = `web-${Date.now()}`;
@@ -17,7 +17,7 @@ test.describe('Create connector from connector spec', { tag: tags.stateful.class
 
   test.beforeEach(async ({ browserAuth, page, kbnUrl }) => {
     await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+    await navigateToConnectors(page, kbnUrl);
   });
 
   test.afterAll(async ({ apiServices }) => {

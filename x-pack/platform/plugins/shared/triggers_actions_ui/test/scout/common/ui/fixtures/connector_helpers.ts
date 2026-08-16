@@ -40,7 +40,7 @@ export const getMonacoValue = async (page: ScoutPage): Promise<string> => {
 };
 
 export const navigateToConnectors = async (page: ScoutPage, kbnUrl: KibanaUrl) => {
-  await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+  await page.goto(kbnUrl.get(CONNECTORS_APP_PATH), { waitUntil: 'domcontentloaded' });
   // Accept either the loaded table (connectors exist) or the empty-state prompt
   // (zero connectors). The table selector never appears when the page is empty.
   await page
