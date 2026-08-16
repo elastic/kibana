@@ -8,6 +8,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import { isInsideConsoleString } from '@kbn/monaco/src/languages/console/utils';
 import type { MonacoEditorActionsProvider } from '../monaco_editor_actions_provider';
 import {
   getEndpointBodyCompleteComponents,
@@ -24,9 +25,11 @@ import { isRecord } from '../../../../../common/utils/record_utils';
 import {
   END_OF_URL_TOKEN,
   i18nTexts,
+  lineEndsWithBodyContinuationRegex,
   methodWhitespaceRegex,
   methodWithUrlRegex,
   newLineRegex,
+  onlyBodyClosingTokensRegex,
   propertyNameRegex,
   propertyValueRegex,
 } from './constants';
@@ -535,37 +538,34 @@ const getConditionalTemplate = (
 };
 
 /*
+ * Whether the line ends with an object/array opening or comma that is not part of a string.
+ */
+const endsWithBodyContinuationOutsideString = (
+  contentBeforePosition: string,
+  insideString = isInsideConsoleString(contentBeforePosition)
+): boolean => lineEndsWithBodyContinuationRegex.test(contentBeforePosition) && !insideString;
+
+const autocompleteTriggerPatterns = [
+  methodWhitespaceRegex,
+  methodWithUrlRegex,
+  propertyNameRegex,
+  propertyValueRegex,
+];
+
+/*
  * This function checks the content of the line before the cursor and decides if the autocomplete
  * suggestions should be triggered
  */
-export const shouldTriggerSuggestions = (lineContent: string): boolean => {
-  return (
-    methodWhitespaceRegex.test(lineContent) ||
-    methodWithUrlRegex.test(lineContent) ||
-    propertyNameRegex.test(lineContent) ||
-    propertyValueRegex.test(lineContent) ||
-    /^\s*\{\s*$/.test(lineContent)
-  );
-};
-
-/*
- * This function checks if the content of the line after the cursor is either empty
- * or it only has a double quote.
- */
-export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
-  lineContent = lineContent.trim();
-  return !lineContent || lineContent === '"';
-};
+export const shouldTriggerSuggestions = (lineContent: string, insideString?: boolean): boolean =>
+  autocompleteTriggerPatterns.some((pattern) => pattern.test(lineContent)) ||
+  endsWithBodyContinuationOutsideString(lineContent, insideString);
 
 /*
  * Whether selecting a body suggestion may expand its __template based on
  * the remainder of the line after the cursor.
  */
 export const shouldInsertAutocompleteTemplate = (lineContentAfterPosition: string): boolean => {
-  return (
-    isEmptyOrDoubleQuote(lineContentAfterPosition) ||
-    /^"?[}\]]+$/.test(lineContentAfterPosition.trim())
-  );
+  return onlyBodyClosingTokensRegex.test(lineContentAfterPosition.trim());
 };
 
 export const hasUnclosedQuote = (lineContent: string): boolean => {

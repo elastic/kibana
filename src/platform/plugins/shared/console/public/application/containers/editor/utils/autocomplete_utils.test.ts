@@ -151,6 +151,12 @@ describe('autocomplete_utils', () => {
       const actual = shouldTriggerSuggestions(' "propertyName": "');
       expect(actual).toBe(true);
     });
+    it.each(['{"ignore_failure": ', '["ignore_failure": ', '"enabled": true, "ignore_failure": '])(
+      'triggers suggestions for an inline property value after a body delimiter',
+      (line) => {
+        expect(shouldTriggerSuggestions(line)).toBe(true);
+      }
+    );
     it('triggers no suggestions for the property value when the value is typed (string)', () => {
       const actual = shouldTriggerSuggestions(' "propertyName": "value');
       expect(actual).toBe(false);
@@ -160,17 +166,49 @@ describe('autocomplete_utils', () => {
       expect(actual).toBe(false);
     });
 
-    // #259250 C1: opening `{` leaves the cursor inside `{}` and should trigger suggestions.
-    it('triggers suggestions after an opening curly brace', () => {
+    // #259250 C1: a body delimiter leaves the cursor at a new value position.
+    it('triggers suggestions after a body continuation delimiter', () => {
       expect(shouldTriggerSuggestions('{')).toBe(true);
       expect(shouldTriggerSuggestions('  {')).toBe(true);
       expect(shouldTriggerSuggestions('\t{')).toBe(true);
+      expect(shouldTriggerSuggestions('  "fields": [')).toBe(true);
+      expect(shouldTriggerSuggestions('  "field",')).toBe(true);
     });
 
     it('does not treat a brace followed by object content as a trigger position', () => {
       expect(shouldTriggerSuggestions('{ "already": 1')).toBe(false);
       expect(shouldTriggerSuggestions('{foo')).toBe(false);
       expect(shouldTriggerSuggestions('{"partial')).toBe(false);
+    });
+
+    // #284530 review: `{` typed after a property name should also auto-trigger.
+    it('triggers suggestions when the line ends with an opening brace after content', () => {
+      expect(shouldTriggerSuggestions('"query": {')).toBe(true);
+      expect(shouldTriggerSuggestions('  "pipeline": {')).toBe(true);
+      expect(shouldTriggerSuggestions('"query": {  ')).toBe(true);
+    });
+
+    it('does not trigger for a body delimiter inside an unclosed string', () => {
+      expect(shouldTriggerSuggestions('"foo": "bar {')).toBe(false);
+      expect(shouldTriggerSuggestions('"regex": "a{')).toBe(false);
+      expect(shouldTriggerSuggestions('"description": "value,')).toBe(false);
+    });
+
+    it('handles even backslashes before a closing quote', () => {
+      expect(shouldTriggerSuggestions('{"path":"C:\\\\","nested": {')).toBe(true);
+      expect(shouldTriggerSuggestions('{"path":"C:\\\\","description":"a{')).toBe(false);
+    });
+
+    it('handles a completed triple-quoted string before an opening brace', () => {
+      expect(shouldTriggerSuggestions('{"script": """def quote = \'"\';""", "query": {')).toBe(
+        true
+      );
+    });
+
+    it('handles a multiline triple-quoted string before an opening brace', () => {
+      expect(shouldTriggerSuggestions('{"script": """\ndef quote = \'"\';\n""", "query": {')).toBe(
+        true
+      );
     });
   });
 
@@ -193,12 +231,19 @@ describe('autocomplete_utils', () => {
       expect(shouldInsertAutocompleteTemplate('"already": 1')).toBe(false);
     });
 
+    describe('WHEN only a trailing comma follows the cursor', () => {
+      it.each([',', '",', ' , '])('SHOULD allow template insertion for %p', (suffix) => {
+        expect(shouldInsertAutocompleteTemplate(suffix)).toBe(true);
+      });
+    });
+
     // #259250 C2: Monaco auto-closes `"` inside `{}`, leaving `"}` after the cursor.
     it('allows template when Monaco auto-closed quote sits before closing braces', () => {
       expect(shouldInsertAutocompleteTemplate('"}')).toBe(true);
       expect(shouldInsertAutocompleteTemplate('  "}')).toBe(true);
       expect(shouldInsertAutocompleteTemplate('"}]')).toBe(true);
       expect(shouldInsertAutocompleteTemplate('"}}}')).toBe(true);
+      expect(shouldInsertAutocompleteTemplate('"} ],')).toBe(true);
     });
   });
 
