@@ -319,13 +319,13 @@ export function LiveSessionPlayer({ http, sessionId, pollMs, active }: Props) {
     setFollowingLive(atEdge);
     setTotalMs(total);
     setCurrentMs(offset);
-      if (atEdge || !shouldPlay) {
-        replayer.pause(atEdge ? total + 1 : offset);
-        playingRef.current = false;
-        setPlaying(false);
-        setBuffering(atEdge);
-        return;
-      }
+    if (atEdge || !shouldPlay) {
+      replayer.pause(atEdge ? total + 1 : offset);
+      playingRef.current = false;
+      setPlaying(false);
+      setBuffering(atEdge);
+      return;
+    }
     setBuffering(false);
     playingRef.current = true;
     setPlaying(true);
