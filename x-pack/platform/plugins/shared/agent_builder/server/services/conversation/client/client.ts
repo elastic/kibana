@@ -100,9 +100,7 @@ export interface ConversationClient {
   /** Read the conversation's timeline, in order. */
   getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
   /**
-   * Dual-write: translate a completed round into coarse timeline events and append them. Called
-   * by the execution pipeline right after the round is written. Best-effort — the timeline is
-   * additive to rounds, so a failure here is logged and swallowed rather than failing the run.
+   * Dual-write: translate a completed round into coarse timeline events and append them.
    */
   appendRoundTimelineEvents(
     conversation: Conversation,
