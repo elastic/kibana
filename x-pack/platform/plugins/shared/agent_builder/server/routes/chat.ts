@@ -104,6 +104,7 @@ export const conversePayloadSchema = schema.object({
   ),
   project_routing: schema.maybe(
     schema.string({
+      maxLength: 2048,
       meta: {
         description:
           "Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.",
