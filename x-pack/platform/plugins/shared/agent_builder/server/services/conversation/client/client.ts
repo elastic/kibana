@@ -99,9 +99,7 @@ export interface ConversationClient {
   appendEvents(conversationId: string, events: TimelineEventInput[]): Promise<TimelineEvent[]>;
   /** Read the conversation's timeline, in order. */
   getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
-  /**
-   * Dual-write: translate a completed round into coarse timeline events and append them.
-   */
+  /** Dual-write: translate a completed round into coarse timeline events and append them. */
   appendRoundTimelineEvents(
     conversation: Conversation,
     round: ConversationRound,
