@@ -31,6 +31,8 @@ export interface RecognizerModule {
 
 export interface GetModulesProps {
   moduleId?: string;
+  /** When set, limits modules to those matching the tag (e.g. `security`). Omit for all modules. */
+  filter?: string;
   signal?: AbortSignal;
 }
 
@@ -39,7 +41,12 @@ export interface Module {
   title: string;
   description: string;
   type: string;
-  logoFile: string;
+  /** Present on file-based (stack) modules; omitted on Fleet `ml-module` saved objects. */
+  logoFile?: string;
+  /** Present on Fleet `ml-module` saved objects (e.g. `{ icon: 'logoNginx' }`). */
+  logo?: {
+    icon: string;
+  };
   defaultIndexPattern: string;
   query: Record<string, object>;
   jobs: ModuleJob[];
@@ -75,6 +82,9 @@ export interface ModuleJob {
       created_by: string;
       custom_urls: CustomURL[];
       security_app_display_name?: string;
+      /** Incremented when the packaged job definition changes. */
+      job_revision?: number;
+      managed?: boolean;
     };
     job_type: string;
   };
@@ -122,8 +132,19 @@ export interface SecurityJob extends MlSummaryJob {
   isCompatible: boolean;
   isInstalled: boolean;
   isElasticJob: boolean;
+  /** Job comes from a Fleet package `ml-module` saved object. */
+  isIntegrationJob?: boolean;
+  /** Packaged `custom_settings.job_revision` from get_module / Fleet ml-module. */
+  packagedJobRevision?: number;
+  /** Installed job's `customSettings.job_revision` from jobs_summary. */
+  installedJobRevision?: number;
+  /** True when packaged revision is newer than the installed job. */
+  isUpdateAvailable?: boolean;
   customSettings?: {
     security_app_display_name?: string;
+    job_revision?: number;
+    created_by?: string;
+    managed?: boolean;
   };
 }
 
@@ -132,6 +153,8 @@ export interface AugmentedSecurityJobFields {
   defaultIndexPattern: string;
   isCompatible: boolean;
   isElasticJob: boolean;
+  isIntegrationJob?: boolean;
+  packagedJobRevision?: number;
 }
 
 export interface SetupMlResponseJob {
@@ -178,9 +201,12 @@ export interface CloseJobsResponse {
   };
 }
 
+export type MlJobsTab = 'prebuilt' | 'integration';
+
 export interface JobsFilters {
   filterQuery: string;
   showCustomJobs: boolean;
   showElasticJobs: boolean;
   selectedGroups: string[];
+  selectedTab: MlJobsTab;
 }

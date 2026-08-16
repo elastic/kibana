@@ -6,19 +6,22 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import {
-  EuiFilterButton,
+  EuiButtonGroup,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSearchBar,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { EuiSearchBarQuery } from '../../../../../timelines/components/open_timeline/types';
 import * as i18n from './translations';
 import type { JobsFilters, SecurityJob } from '../../types';
 import { GroupsFilterPopover } from './groups_filter_popover';
+
+type PrebuiltJobsFilter = 'elastic' | 'custom';
 
 interface JobsTableFiltersProps {
   securityJobs: SecurityJob[];
@@ -26,11 +29,7 @@ interface JobsTableFiltersProps {
 }
 
 /**
- * Collection of filters for filtering data within the JobsTable. Contains search bar, Elastic/Custom
- * Jobs filter button toggle, and groups selection
- *
- * @param securityJobs jobs to fetch groups from to display for filtering
- * @param onFilterChanged change listener to be notified on filter changes
+ * Filters for the Pre-built jobs tab: search, groups, and Elastic / Custom button group.
  */
 export const JobsTableFiltersComponent = ({
   securityJobs,
@@ -38,12 +37,19 @@ export const JobsTableFiltersComponent = ({
 }: JobsTableFiltersProps) => {
   const [filterQuery, setFilterQuery] = useState<string>('');
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [showCustomJobs, setShowCustomJobs] = useState<boolean>(false);
-  const [showElasticJobs, setShowElasticJobs] = useState<boolean>(false);
+  const [prebuiltFilter, setPrebuiltFilter] = useState<PrebuiltJobsFilter>('elastic');
 
-  // Propagate filter changes to parent
+  const showElasticJobs = prebuiltFilter === 'elastic';
+  const showCustomJobs = prebuiltFilter === 'custom';
+
   useEffect(() => {
-    onFilterChanged({ filterQuery, showCustomJobs, showElasticJobs, selectedGroups });
+    onFilterChanged((current) => ({
+      ...current,
+      filterQuery,
+      showCustomJobs,
+      showElasticJobs,
+      selectedGroups,
+    }));
   }, [filterQuery, selectedGroups, showCustomJobs, showElasticJobs, onFilterChanged]);
 
   const handleChange = useCallback(
@@ -51,62 +57,59 @@ export const JobsTableFiltersComponent = ({
     [setFilterQuery]
   );
 
-  const handleElasticJobsClick = useCallback(() => {
-    setShowElasticJobs(!showElasticJobs);
-    setShowCustomJobs(false);
-  }, [setShowElasticJobs, showElasticJobs, setShowCustomJobs]);
-
-  const handleCustomJobsClick = useCallback(() => {
-    setShowCustomJobs(!showCustomJobs);
-    setShowElasticJobs(false);
-  }, [setShowElasticJobs, showCustomJobs, setShowCustomJobs]);
+  const prebuiltFilterOptions = useMemo(
+    () => [
+      {
+        id: 'elastic',
+        label: i18n.SHOW_ELASTIC_JOBS,
+        'data-test-subj': 'show-elastic-jobs-filter-button',
+      },
+      {
+        id: 'custom',
+        label: i18n.SHOW_CUSTOM_JOBS,
+        'data-test-subj': 'show-custom-jobs-filter-button',
+      },
+    ],
+    []
+  );
 
   return (
-    <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-      <EuiFlexItem grow={true}>
-        <EuiSearchBar
-          data-test-subj="jobs-filter-bar"
-          box={{
-            placeholder: i18n.FILTER_PLACEHOLDER,
-            incremental: true,
-          }}
-          onChange={handleChange}
-        />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <GroupsFilterPopover
-            securityJobs={securityJobs}
-            onSelectedGroupsChanged={setSelectedGroups}
+    <>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={true}>
+          <EuiSearchBar
+            data-test-subj="jobs-filter-bar"
+            box={{
+              placeholder: i18n.FILTER_PLACEHOLDER,
+              incremental: true,
+              fullWidth: true,
+            }}
+            onChange={handleChange}
           />
-        </EuiFilterGroup>
-      </EuiFlexItem>
+        </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <EuiFilterButton
-            isToggle
-            isSelected={showElasticJobs}
-            hasActiveFilters={showElasticJobs}
-            onClick={handleElasticJobsClick}
-            data-test-subj="show-elastic-jobs-filter-button"
-            withNext
-          >
-            {i18n.SHOW_ELASTIC_JOBS}
-          </EuiFilterButton>
-          <EuiFilterButton
-            isToggle
-            isSelected={showCustomJobs}
-            hasActiveFilters={showCustomJobs}
-            onClick={handleCustomJobsClick}
-            data-test-subj="show-custom-jobs-filter-button"
-          >
-            {i18n.SHOW_CUSTOM_JOBS}
-          </EuiFilterButton>
-        </EuiFilterGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFilterGroup>
+            <GroupsFilterPopover
+              securityJobs={securityJobs}
+              onSelectedGroupsChanged={setSelectedGroups}
+            />
+          </EuiFilterGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+
+      <EuiButtonGroup
+        legend={i18n.SHOW_PREBUILT_JOBS}
+        options={prebuiltFilterOptions}
+        idSelected={prebuiltFilter}
+        onChange={(id) => setPrebuiltFilter(id as PrebuiltJobsFilter)}
+        buttonSize="compressed"
+        color="text"
+        data-test-subj="prebuilt-jobs-filter-button-group"
+      />
+    </>
   );
 };
 

@@ -14,7 +14,7 @@ import { TestProviders } from '../../mock';
 jest.mock('../../lib/kibana');
 
 describe('MlPopover', () => {
-  test('shows upgrade popover on mouse click', async () => {
+  test('shows upgrade flyout on mouse click', async () => {
     const { getByTestId } = render(<MlPopover />, {
       wrapper: TestProviders,
     });

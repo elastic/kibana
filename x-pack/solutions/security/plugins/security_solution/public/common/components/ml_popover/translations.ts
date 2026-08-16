@@ -48,3 +48,18 @@ export const ANOMALY_DETECTION_DOCS = i18n.translate(
     defaultMessage: 'Anomaly Detection with Machine Learning',
   }
 );
+
+export const JOB_UPDATES_AVAILABLE_TITLE = (count: number) =>
+  i18n.translate('xpack.securitySolution.components.mlPopup.jobUpdatesAvailableTitle', {
+    values: { count },
+    defaultMessage:
+      '{count} {count, plural, =1 {job has} other {jobs have}} a newer definition available',
+  });
+
+export const JOB_UPDATES_AVAILABLE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.components.mlPopup.jobUpdatesAvailableDescription',
+  {
+    defaultMessage:
+      'Recreate outdated jobs to pick up enhancements and fixes from the latest packaged revision. Recreating a job removes previously detected anomalies for that job.',
+  }
+);

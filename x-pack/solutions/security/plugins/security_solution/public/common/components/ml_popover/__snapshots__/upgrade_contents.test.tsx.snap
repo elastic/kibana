@@ -1,12 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`JobsTableFilters renders correctly against snapshot 1`] = `
-<PopoverContentsDiv
+<div
   data-test-subj="ml-popover-upgrade-contents"
 >
-  <EuiPopoverTitle>
-    Upgrade to Elastic Platinum
-  </EuiPopoverTitle>
   <EuiText
     size="s"
   >
@@ -57,5 +54,5 @@ exports[`JobsTableFilters renders correctly against snapshot 1`] = `
       </EuiButton>
     </EuiFlexItem>
   </EuiFlexGroup>
-</PopoverContentsDiv>
+</div>
 `;

@@ -65,7 +65,8 @@ const RULE_NAME_COLUMN: TableColumn = {
   ),
   sortable: true,
   truncateText: true,
-  width: '60%',
+  minWidth: '12em',
+  width: '18em',
   align: 'left',
 };
 
@@ -236,7 +237,7 @@ const createUpgradeButtonColumn = (
       </EuiButtonEmpty>
     );
   },
-  width: '10%',
+  width: '120px',
   align: 'center',
 });
 
@@ -277,7 +278,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         sortable: ({ current_rule: { severity } }: RuleUpgradeState) =>
           getNormalizedSeverity(severity),
         truncateText: true,
-        width: '10%',
+        width: '100px',
       },
       ...(canEditRules
         ? [

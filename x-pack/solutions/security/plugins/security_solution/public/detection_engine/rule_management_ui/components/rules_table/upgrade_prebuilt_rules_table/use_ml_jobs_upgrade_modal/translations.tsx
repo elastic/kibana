@@ -5,66 +5,123 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { MlJobCompatibilityLink } from '../../../../../../common/components/links_to_docs';
 
-export const ML_JOB_UPGRADE_MODAL_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mlJobUpgradeModal.messageTitle',
+export const ML_RULE_JOB_UPGRADE_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.title',
   {
-    defaultMessage: 'ML rule updates may override your existing rules',
+    defaultMessage: 'Update rules and ML jobs together',
   }
 );
 
-export const ML_JOB_UPGRADE_MODAL_CANCEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mlJobUpgradeModal.cancelTitle',
+export const ML_RULE_JOB_UPGRADE_MODAL_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.description',
+  {
+    defaultMessage:
+      'These detection rule updates change the linked ML jobs. Update the jobs in the same flow so rules and jobs stay in sync — separate job notifications should not be required.',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_BREAKING_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.breakingTitle',
+  {
+    defaultMessage: 'Breaking job changes',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_BREAKING_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.breakingBody',
+  {
+    defaultMessage:
+      'Some jobs move to Entity Analytics (`_ea`) variants. Influencers and anomaly behavior can change. Existing anomaly history on the old jobs will not carry over to the new jobs.',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_AUTO_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.autoTitle',
+  {
+    defaultMessage: 'Automated job update',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_AUTO_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.autoBody',
+  {
+    defaultMessage:
+      'Compatible settings (index patterns, query filters, and model memory limits when possible) will be carried over from the current jobs to the new ones.',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_DUPLICATE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.duplicateLabel',
+  {
+    defaultMessage: 'Duplicate existing jobs to preserve current configuration and anomaly history',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_DUPLICATE_HELP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.duplicateHelp',
+  {
+    defaultMessage:
+      'When selected, the system duplicates the old jobs for you before creating the updated ones. You do not need to recreate them manually.',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_JOBS_SECTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.jobsSection',
+  {
+    defaultMessage: 'Jobs linked to this update',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_CURRENT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.currentJobs',
+  {
+    defaultMessage: 'Current',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_TARGET = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.targetJobs',
+  {
+    defaultMessage: 'After update',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_BREAKING_BADGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.breakingBadge',
+  {
+    defaultMessage: 'Breaking',
+  }
+);
+
+export const ML_RULE_JOB_UPGRADE_MODAL_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.cancel',
   {
     defaultMessage: 'Cancel',
   }
 );
 
-export const ML_JOB_UPGRADE_MODAL_CONFIRM = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mlJobUpgradeModal.confirmTitle',
+export const ML_RULE_JOB_UPGRADE_MODAL_RULES_ONLY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.rulesOnly',
   {
-    defaultMessage: 'Load rules',
+    defaultMessage: 'Update rules only',
   }
 );
 
-export const ML_JOB_UPGRADE_MODAL_AFFECTED_JOBS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.mlJobUpgradeModal.affectedJobsTitle',
+export const ML_RULE_JOB_UPGRADE_MODAL_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.confirm',
   {
-    defaultMessage: 'Affected jobs:',
+    defaultMessage: 'Update rules and jobs',
   }
 );
 
-export const MlJobUpgradeModalBody = () => (
-  <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.mlJobUpgradeModal.messageBody"
-    defaultMessage="{summary} Documentation: {docs}"
-    values={{
-      summary: (
-        <p>
-          <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.mlJobUpgradeModal.messageBody.summary"
-            defaultMessage="New V3 machine learning jobs have been released,
-            and the latest corresponding prebuilt detection rules now use these
-            new ML jobs. You're currently running one or more V1/V2 jobs, which
-            only work with legacy prebuilt rules. To ensure continued coverage using
-            V1/V2 jobs, you may need to duplicate or create new rules before
-            updating your Elastic prebuilt detection rules. Check the documentation
-            below for instructions on how to keep using the V1/V2 jobs, and how to
-            start using the new V3 jobs."
-          />
-        </p>
-      ),
-      docs: (
-        <ul>
-          <li>
-            <MlJobCompatibilityLink />
-          </li>
-        </ul>
-      ),
-    }}
-  />
-);
+export const jobIdsLabel = (jobIds: string[]) =>
+  jobIds.length > 0
+    ? jobIds.join(', ')
+    : i18n.translate(
+        'xpack.securitySolution.detectionEngine.mlRuleJobUpgradeModal.noJobs',
+        {
+          defaultMessage: 'None',
+        }
+      );

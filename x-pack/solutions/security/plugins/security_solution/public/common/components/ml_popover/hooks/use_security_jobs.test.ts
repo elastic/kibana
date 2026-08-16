@@ -12,7 +12,7 @@ import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../hooks/use_app_toasts.mock';
 import { TestProviders } from '../../../mock';
 import { getJobsSummary } from '../../ml/api/get_jobs_summary';
-import { checkRecognizer, getModules } from '../api';
+import { checkRecognizer, getFleetMlModules, getModules } from '../api';
 import {
   checkRecognizerSuccess,
   mockGetModuleResponse,
@@ -43,6 +43,7 @@ describe('useSecurityJobs', () => {
       (hasMlLicense as jest.Mock).mockReturnValue(true);
       (getJobsSummary as jest.Mock).mockResolvedValue(mockJobsSummaryResponse);
       (getModules as jest.Mock).mockResolvedValue(mockGetModuleResponse);
+      (getFleetMlModules as jest.Mock).mockResolvedValue([]);
       (checkRecognizer as jest.Mock).mockResolvedValue(checkRecognizerSuccess);
     });
 
@@ -60,6 +61,7 @@ describe('useSecurityJobs', () => {
         isCompatible: true,
         isElasticJob: false,
         isInstalled: true,
+        isIntegrationJob: false,
         isSingleMetricViewerJob: true,
         jobState: 'closed',
         jobTags: {},
@@ -116,6 +118,8 @@ describe('useSecurityJobs', () => {
       });
 
       expect(result.current.jobs).toEqual([]);
+      expect(result.current.integrationJobs).toEqual([]);
+      expect(result.current.fleetModules).toEqual([]);
       expect(result.current.isMlAdmin).toEqual(false);
       expect(result.current.isLicensed).toEqual(false);
     });
