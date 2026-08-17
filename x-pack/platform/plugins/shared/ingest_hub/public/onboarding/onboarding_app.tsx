@@ -32,7 +32,7 @@ function RootRedirect() {
 }
 
 /**
- * Returns true when session storage should be cleared on app mount.
+ * Returns the integration id when session storage should be cleared on app mount, null otherwise.
  *
  * Conditions:
  * - An integration id is present in the pathname (not the root redirect).
@@ -44,12 +44,12 @@ export function shouldClearSession(location: {
   pathname: string;
   search: string;
   state: unknown;
-}): boolean {
+}): string | null {
   const integrationId = location.pathname.split('/').filter(Boolean)[0];
   const isNewSession =
     (location.state as { newSession?: boolean } | undefined)?.newSession === true;
   const hasDeploymentId = new URLSearchParams(location.search).has('deploymentId');
-  return Boolean(integrationId && isNewSession && !hasDeploymentId);
+  return integrationId && isNewSession && !hasDeploymentId ? integrationId : null;
 }
 
 export function renderOnboardingApp(
@@ -62,9 +62,9 @@ export function renderOnboardingApp(
   // every render, so clearing from inside the tree is too late — the hooks' React state
   // already holds the old values and immediately rewrites them.
   const { pathname, search, hash, state } = params.history.location;
-  const integrationId = pathname.split('/').filter(Boolean)[0];
+  const integrationId = shouldClearSession({ pathname, search, state });
 
-  if (shouldClearSession({ pathname, search, state })) {
+  if (integrationId) {
     clearOnboardingSession(integrationId);
     // Consume the flag so a reload does not trigger another clear and wipe an in-progress flow.
     // window.history.state survives a reload, so leaving it in place would re-clear every time.

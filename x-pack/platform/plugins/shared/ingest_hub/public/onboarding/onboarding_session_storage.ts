@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// Keep this list in sync with every useSessionStorage call that uses getOnboardingSessionKey.
 export const SESSION_KEY_SUFFIXES = [
   'deploySettingsStep',
   'servicesStep',
