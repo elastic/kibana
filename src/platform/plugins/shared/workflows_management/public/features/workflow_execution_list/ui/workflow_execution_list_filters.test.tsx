@@ -65,6 +65,17 @@ describe('ExecutionListFilters', () => {
     });
   });
 
+  it('shows distinct labels for wait-related statuses', async () => {
+    renderComponent();
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Waiting')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for input')).toBeInTheDocument();
+      expect(screen.getByText('Waiting for child workflow')).toBeInTheDocument();
+    });
+  });
+
   it('does not show "Executed by" section when showExecutor is false', async () => {
     renderComponent({ showExecutor: false });
     const filterButton = screen.getByLabelText('Filter executions');
