@@ -58,7 +58,6 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
     refresh();
   }, [refresh]);
 
-  const createCaseFlyout = cases?.hooks?.useCasesAddToNewCaseFlyout({ onSuccess });
   const selectCaseModal = cases?.hooks?.useCasesAddToExistingCaseModal({ onSuccess });
 
   const closeActionsPopover = () => {
@@ -69,12 +68,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
     setIsPopoverOpen(!isPopoverOpen);
   };
 
-  const handleAddToNewCaseClick = () => {
-    createCaseFlyout?.open({ attachments: caseAttachments });
-    closeActionsPopover();
-  };
-
-  const handleAddToExistingCaseClick = () => {
+  const handleAddToCaseClick = () => {
     selectCaseModal?.open({ getAttachments: () => caseAttachments });
     closeActionsPopover();
   };
@@ -94,24 +88,19 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
   );
 
   const actionsMenuItems = [
-    ...(casesPrivileges && casesPrivileges?.create && casesPrivileges.read
+    ...(casesPrivileges &&
+    casesPrivileges.read &&
+    casesPrivileges.createComment &&
+    (casesPrivileges.create || casesPrivileges.update)
       ? [
           <EuiContextMenuItem
-            data-test-subj="add-to-existing-case-action"
-            key="addToExistingCase"
-            onClick={handleAddToExistingCaseClick}
+            key="addToCase"
+            data-test-subj="add-to-case-action"
+            icon="briefcase"
+            onClick={handleAddToCaseClick}
           >
             {i18n.translate('xpack.ml.alerts.actions.addToCase', {
-              defaultMessage: 'Add to existing case',
-            })}
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem
-            data-test-subj="add-to-new-case-action"
-            key="addToNewCase"
-            onClick={handleAddToNewCaseClick}
-          >
-            {i18n.translate('xpack.ml.alerts.actions.addToNewCase', {
-              defaultMessage: 'Add to new case',
+              defaultMessage: 'Add to case',
             })}
           </EuiContextMenuItem>,
         ]
