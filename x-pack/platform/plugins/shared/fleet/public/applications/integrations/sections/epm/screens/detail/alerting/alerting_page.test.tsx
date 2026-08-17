@@ -118,14 +118,14 @@ describe('AlertingPage', () => {
           'template-1': {
             id: 'template-1',
             type: 'alerting_rule_template',
-            attributes: { title: '[System] Logs template' },
+            attributes: { title: '[System] Logs template', engine: 'v1' },
             appLink:
               '/app/management/insightsAndAlerting/triggersActions/create/template/template-1',
           },
           'template-2': {
             id: 'template-2',
             type: 'alerting_rule_template',
-            attributes: { title: '[System] Metrics template' },
+            attributes: { title: '[System] Metrics template', engine: 'v2' },
             appLink:
               '/app/management/insightsAndAlerting/triggersActions/create/template/template-2',
           },
@@ -166,6 +166,9 @@ describe('AlertingPage', () => {
       expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
       expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('v1');
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('v2');
   });
 
   it('should render user-created rules from the alerting API', async () => {

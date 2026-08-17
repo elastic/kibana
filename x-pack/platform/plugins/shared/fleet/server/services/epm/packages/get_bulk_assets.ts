@@ -21,6 +21,13 @@ import type { SimpleSOAssetAttributes } from '../../../types';
 
 type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
+  engine?: 'v1' | 'v2';
+  rule?: {
+    metadata?: {
+      name?: string;
+      description?: string;
+    };
+  };
 };
 
 const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): string => {
@@ -110,6 +117,12 @@ export async function getBulkAssets(
         types[obj.type]?.management?.getTitle?.(obj) ??
         obj.attributes?.title ??
         obj.attributes?.name;
+      const engine =
+        obj.attributes?.engine === 'v1' || obj.attributes?.engine === 'v2'
+          ? obj.attributes.engine
+          : undefined;
+      const description =
+        obj.attributes?.description ?? obj.attributes?.rule?.metadata?.description;
 
       return {
         id: obj.id,
@@ -117,7 +130,8 @@ export async function getBulkAssets(
         updatedAt: obj.updated_at,
         attributes: {
           title,
-          description: obj.attributes?.description,
+          description,
+          ...(engine && { engine }),
         },
         appLink,
       };
