@@ -47,6 +47,7 @@ import type {
   PublishingSubject,
   TrackContentfulRender,
   ViewMode,
+  PublishesFetchOnlyVisible,
 } from '@kbn/presentation-publishing';
 import { type TracksOverlays } from '@kbn/presentation-util';
 import type { startTrackingHistory } from '@kbn/rxjs-history';
@@ -179,7 +180,8 @@ export type DashboardApi = CanExpandPanels &
   PublishesEditablePauseFetch &
   TrackContentfulRender &
   TracksOverlays &
-  PublishesOnSave & {
+  PublishesOnSave &
+  PublishesFetchOnlyVisible & {
     /*
      * Emits on any dashboard state change
      *

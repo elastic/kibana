@@ -1,3 +1,4 @@
+@eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
 knip
@@ -62,3 +63,4 @@ redux-v4
 reselect-v4
 @swc/plugin-emotion
 graphql
+@cfworker/json-schema
