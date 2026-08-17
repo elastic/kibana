@@ -315,7 +315,6 @@ export type LensDocShape860<VisualizationState = unknown> = Omit<
 > & {
   state: Omit<LensDocShape850<VisualizationState>['state'], 'datasourceStates'> & {
     datasourceStates: {
-      // This is hardcoded as our only datasource
       formBased: {
         currentIndexPatternId: string;
         layers: Record<
@@ -326,6 +325,8 @@ export type LensDocShape860<VisualizationState = unknown> = Omit<
           }
         >;
       };
+      // experimental SQL datasource state from 8.4/8.5, persisted as `textBasedLanguages` and renamed in 8.6
+      textBased?: unknown;
     };
   };
 };

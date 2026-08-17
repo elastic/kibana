@@ -479,12 +479,18 @@ export const commonMigrateMetricIds = (
 export const commonMigrateIndexPatternDatasource = (
   attributes: LensDocShape850<unknown>
 ): LensDocShape860<unknown> => {
+  // 8.4/8.5 documents can also carry the experimental SQL datasource state, persisted
+  // under `textBasedLanguages`, which was renamed to `textBased` in 8.6
+  const { textBasedLanguages } = attributes.state.datasourceStates as {
+    textBasedLanguages?: unknown;
+  };
   const newAttrs = {
     ...attributes,
     state: {
       ...attributes.state,
       datasourceStates: {
         formBased: attributes.state.datasourceStates.indexpattern,
+        ...(textBasedLanguages !== undefined ? { textBased: textBasedLanguages } : {}),
       },
     },
   };
