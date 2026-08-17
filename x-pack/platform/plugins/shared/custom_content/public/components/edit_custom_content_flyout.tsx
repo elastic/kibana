@@ -202,9 +202,13 @@ export const EditCustomContentFlyout = ({
           {isAiAvailable && (
             <EuiFlexItem grow={false}>
               <AiButton size="s" iconType="sparkles" onClick={handleGenerateWithChat}>
-                {i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
-                  defaultMessage: 'Refine with chat',
-                })}
+                {draftTemplate
+                  ? i18n.translate('xpack.customContent.editFlyout.refineWithChatButton', {
+                      defaultMessage: 'Refine with chat',
+                    })
+                  : i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
+                      defaultMessage: 'Generate with chat',
+                    })}
               </AiButton>
             </EuiFlexItem>
           )}

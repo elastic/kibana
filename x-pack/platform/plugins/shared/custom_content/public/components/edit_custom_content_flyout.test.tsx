@@ -186,11 +186,26 @@ describe('EditCustomContentFlyout', () => {
     });
   });
 
-  describe('Refine with chat', () => {
+  describe('chat button', () => {
     it('is hidden when AI is not available', () => {
       mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, isAiAvailable: false });
       render(<EditCustomContentFlyout {...defaultProps} />);
-      expect(screen.queryByRole('button', { name: 'Refine with chat' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /with chat/i })).not.toBeInTheDocument();
+    });
+
+    it('shows "Generate with chat" when the template is empty', () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftTemplate: '' });
+      render(<EditCustomContentFlyout {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Generate with chat' })).toBeInTheDocument();
+    });
+
+    it('shows "Refine with chat" when the template has content', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftTemplate: '<p>hi</p>',
+      });
+      render(<EditCustomContentFlyout {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Refine with chat' })).toBeInTheDocument();
     });
 
     it('sets the chat config and opens the chat when clicked', async () => {
@@ -220,7 +235,7 @@ describe('EditCustomContentFlyout', () => {
       const onClose = jest.fn();
       render(<EditCustomContentFlyout {...defaultProps} onClose={onClose} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Generate with chat' }));
 
       expect(onClose).toHaveBeenCalled();
     });
