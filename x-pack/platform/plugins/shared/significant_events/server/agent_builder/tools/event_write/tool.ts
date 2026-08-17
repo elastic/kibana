@@ -163,6 +163,13 @@ export function createEventsWriteTool({
 
       **neither**: a synthetic event_id is generated.
     `,
+    annotations: {
+      title: 'Write Significant Events',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: eventsWriteSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
