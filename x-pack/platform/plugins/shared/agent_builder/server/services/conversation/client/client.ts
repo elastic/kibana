@@ -575,7 +575,6 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<TimelineEvent[]> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-
     let events: TimelineEvent[] =
       document._source!.events !== undefined
         ? document._source!.events
@@ -841,10 +840,8 @@ class ConversationClientImpl implements ConversationClient {
     // cannot round-trip them. A whole-document `index` would drop the event timeline. Capture
     // them on read and re-emit them on write. Refreshed per attempt because `readModifyWrite`
     // re-reads on retry, so a concurrent append is picked up before the next write.
-    let preserved: Pick<
-      ConversationProperties,
-      'events' | 'active_execution' | 'schema_version'
-    > = {};
+    let preserved: Pick<ConversationProperties, 'events' | 'active_execution' | 'schema_version'> =
+      {};
 
     return new OccWriter<Conversation>({
       get: async (id) => {
@@ -855,9 +852,7 @@ class ConversationClientImpl implements ConversationClient {
           ...(source.active_execution !== undefined
             ? { active_execution: source.active_execution }
             : {}),
-          ...(source.schema_version !== undefined
-            ? { schema_version: source.schema_version }
-            : {}),
+          ...(source.schema_version !== undefined ? { schema_version: source.schema_version } : {}),
         };
 
         return {
