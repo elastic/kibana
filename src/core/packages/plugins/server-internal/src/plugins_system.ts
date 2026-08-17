@@ -356,6 +356,13 @@ export class PluginsSystem<T extends PluginType> {
     // Unblock all setup fibers that have no plugin-level deps.
     this.cordisCtx.provide('core.setup', { ready: true });
 
+    // Stage 4: core services as stable Cordis service keys.
+    // Preboot plugins have no deprecations service.
+    if (this.type !== PluginType.preboot) {
+      const { deprecations } = deps as PluginsServiceSetupDeps;
+      this.cordisCtx.provide('core.deprecations', deprecations);
+    }
+
     for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
 
