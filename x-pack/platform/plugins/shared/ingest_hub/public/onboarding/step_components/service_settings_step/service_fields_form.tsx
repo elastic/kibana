@@ -23,6 +23,7 @@ import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
   getMandatoryBooleanFields,
+  getRequiredBooleanFields,
   getRequiredTextFields,
   hasTransportChoice,
 } from './field_config';
@@ -63,6 +64,7 @@ export function ServiceFieldsForm({
 }: ServiceFieldsFormProps) {
   const hasTransport = hasTransportChoice(service);
   const requiredTextFields = getRequiredTextFields(service, draftTransport);
+  const requiredBoolFields = getRequiredBooleanFields(service, draftTransport);
   const requiredTextFieldSet = new Set(requiredTextFields);
   const flyoutFields = getFlyoutFields(service, draftTransport);
   const otherFlyoutFields = flyoutFields.filter(
@@ -146,6 +148,25 @@ export function ServiceFieldsForm({
                   placeholder={meta.placeholder}
                   isInvalid={isInvalid}
                   data-test-subj={`serviceSettingsFlyout-field-${fieldName}`}
+                />
+              </EuiFormRow>
+            );
+          })}
+        </>
+      )}
+
+      {requiredBoolFields.length > 0 && (
+        <>
+          <EuiSpacer size="m" />
+          {requiredBoolFields.map((fieldName) => {
+            const meta = FIELD_CONFIG[fieldName];
+            if (!meta) return null;
+            return (
+              <EuiFormRow key={fieldName} display="rowCompressed" helpText={meta.helpText}>
+                <EuiSwitch
+                  label={meta.label}
+                  checked={getBoolValue(fieldName)}
+                  onChange={(e) => onFieldChange(fieldName, e.target.checked ? 'true' : 'false')}
                 />
               </EuiFormRow>
             );

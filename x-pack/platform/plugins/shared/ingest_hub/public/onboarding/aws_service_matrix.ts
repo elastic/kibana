@@ -60,6 +60,8 @@ export interface AwsServiceMatrixEntry {
   optionalConfig?: string[];
   /** Boolean manifest vars that are required: true in the package but have default values */
   mandatoryFields?: string[];
+  /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
+  varTypes?: Record<string, string>;
   packageName: string;
   /** Fleet policy template name (policy_templates[].name in the package manifest) */
   policyTemplate?: string;
@@ -625,6 +627,7 @@ export function buildAwsServiceMatrix(
     const showInUI = entry.showInUI ?? true;
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
+    const varTypes: Record<string, string> = {};
 
     const packageInfo = packages[entry.packageName];
     if (packageInfo) {
@@ -649,6 +652,10 @@ export function buildAwsServiceMatrix(
       }
 
       const allVars: any[] = ((ds as any)?.streams ?? []).flatMap((s: any) => s.vars ?? []);
+
+      for (const v of allVars) {
+        if (v.name && v.type) varTypes[v.name as string] = v.type as string;
+      }
 
       const reqVars: string[] = [
         ...new Set(
@@ -710,6 +717,7 @@ export function buildAwsServiceMatrix(
       inputs,
       requiredConfig,
       mandatoryFields,
+      varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
       defaultEnabled,
       showInUI,
       identityFederationSupported,

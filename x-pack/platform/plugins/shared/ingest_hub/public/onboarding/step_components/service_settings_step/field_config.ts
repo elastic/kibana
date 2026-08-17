@@ -25,7 +25,7 @@ export const AWS_REGION_OPTIONS = [
 export interface FieldMeta {
   label: string;
   placement: 'inline' | 'flyout';
-  type?: 'text' | 'boolean';
+  /** Default value for boolean vars — used when no draft value is set yet. */
   defaultValue?: boolean;
   transport?: TransportType;
   placeholder?: string;
@@ -104,7 +104,6 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Preserve original event',
     }),
     placement: 'flyout',
-    type: 'boolean',
     defaultValue: false,
     helpText: i18n.translate(
       'xpack.ingestHub.serviceSettingsStep.field.preserveOriginalEvent.helpText',
@@ -116,7 +115,6 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Collect S3 logs',
     }),
     placement: 'flyout',
-    type: 'boolean',
     defaultValue: false,
     transport: 'aws-s3',
     helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.collectS3Logs.helpText', {
@@ -129,7 +127,6 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       { defaultMessage: 'Preserve duplicate custom fields' }
     ),
     placement: 'flyout',
-    type: 'boolean',
     defaultValue: false,
     helpText: i18n.translate(
       'xpack.ingestHub.serviceSettingsStep.field.preserveDuplicateCustomFields.helpText',
@@ -144,7 +141,6 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Collect enhanced monitoring metrics',
     }),
     placement: 'flyout',
-    type: 'boolean',
     defaultValue: false,
     helpText: i18n.translate(
       'xpack.ingestHub.serviceSettingsStep.field.collectEsmMetrics.helpText',
@@ -156,7 +152,6 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Leader election',
     }),
     placement: 'flyout',
-    type: 'boolean',
     defaultValue: false,
     helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.leaderelection.helpText', {
       defaultMessage:
@@ -214,6 +209,7 @@ export function getMandatoryBooleanFields(
   return (service.mandatoryFields ?? []).filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
+    if (service.varTypes?.[f] !== 'bool') return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
@@ -226,6 +222,7 @@ export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boo
   if (hasTransportChoice(service)) return true;
   const defaultTransport = getDefaultTransport(service);
   if (getRequiredTextFields(service, defaultTransport).length > 0) return true;
+  if (getRequiredBooleanFields(service, defaultTransport).length > 0) return true;
   if (getMandatoryBooleanFields(service, defaultTransport).length > 0) return true;
   const flyoutFields = getFlyoutFields(service, defaultTransport);
   const requiredSet = new Set(getRequiredTextFields(service, defaultTransport));
@@ -252,8 +249,21 @@ export function getRequiredTextFields(
   return (service.requiredConfig ?? []).filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
-    if (meta.type === 'boolean') return false;
+    if (service.varTypes?.[f] === 'bool') return false;
     if (REGION_FIELD_NAMES.has(f)) return false;
+    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
+    return true;
+  });
+}
+
+export function getRequiredBooleanFields(
+  service: AwsServiceMatrixEntry,
+  activeTransport: TransportType | null
+): string[] {
+  return (service.requiredConfig ?? []).filter((f) => {
+    const meta = FIELD_CONFIG[f];
+    if (!meta) return false;
+    if (service.varTypes?.[f] !== 'bool') return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
