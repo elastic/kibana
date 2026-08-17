@@ -14,7 +14,8 @@ export const converter = new usng.Converter();
 
 export function withinRange(value: string | number, min: number, max: number) {
   const numericValue = Number(value);
-  const isInvalid = value === '' || numericValue > max || numericValue < min;
+  const isInvalid =
+    value === '' || !Number.isFinite(numericValue) || numericValue > max || numericValue < min;
   const error = isInvalid
     ? i18n.translate('fieldFormats.geoUtils.outOfRangeErrorMsg', {
         defaultMessage: `Must be between {min} and {max}`,
