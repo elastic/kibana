@@ -7,18 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps } from 'react';
+import React, { useCallback, useRef, type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { faker } from '@faker-js/faker';
 import { action } from '@storybook/addon-actions';
+import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerList } from './list';
 import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
 
-export default {
-  title: 'Project Picker/Blocks/List',
-  component: ProjectPickerList,
-} satisfies Meta<typeof ProjectPickerList>;
+/**
+ * Emulates a well-behaved consumer: every routing reported through `onProjectRoutingChange`
+ * is fed back into `currentProjectRoutingGetter`, matching the provider's contract. With a
+ * frozen getter, changes that re-encode to the getter's value (e.g. select-all after
+ * exclusions) would be deduped and never reported.
+ */
+const RoutingRoundTripStateProvider = ({
+  currentProjectRoutingGetter,
+  onProjectRoutingChange,
+  ...rest
+}: ProjectPickerStateProviderProps) => {
+  const routingRef = useRef<ProjectRouting | undefined>(currentProjectRoutingGetter());
+
+  const roundTrippedGetter = useCallback(() => routingRef.current, []);
+
+  const handleProjectRoutingChange = useCallback(
+    (routing: ProjectRouting) => {
+      routingRef.current = routing;
+      onProjectRoutingChange(routing);
+    },
+    [onProjectRoutingChange]
+  );
+
+  return (
+    <ProjectPickerStateProvider
+      {...rest}
+      currentProjectRoutingGetter={roundTrippedGetter}
+      onProjectRoutingChange={handleProjectRoutingChange}
+    />
+  );
+};
 
 const createProjects = (projectCount: number = 100): CPSProject[] => {
   return Array.from({ length: projectCount }, () => ({
@@ -30,6 +58,11 @@ const createProjects = (projectCount: number = 100): CPSProject[] => {
     _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
   }));
 };
+
+export default {
+  title: 'Project Picker/Blocks/List',
+  component: ProjectPickerList,
+} satisfies Meta<typeof ProjectPickerList>;
 
 export const ProjectPickerListItemStory: StoryObj<
   Pick<
@@ -63,7 +96,7 @@ export const ProjectPickerListItemStory: StoryObj<
     originProjectId,
     ...props
   }) => (
-    <ProjectPickerStateProvider
+    <RoutingRoundTripStateProvider
       availableProjects={availableProjects}
       controlsState={controlsState}
       originProjectId={originProjectId}
@@ -76,7 +109,7 @@ export const ProjectPickerListItemStory: StoryObj<
       })}
     >
       <ProjectPickerList {...props} />
-    </ProjectPickerStateProvider>
+    </RoutingRoundTripStateProvider>
   ),
 };
 

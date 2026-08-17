@@ -7,13 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type ComponentProps } from 'react';
+import React, { useCallback, useState, type ComponentProps } from 'react';
 import type { StoryObj, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { faker } from '@faker-js/faker';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { CPSProject } from '../../types';
 import { ProjectPicker } from './project_picker';
+
+/**
+ * Emulates a well-behaved consumer: every routing reported through `onProjectRoutingChange`
+ * is fed back into `projectRouting`.
+ */
+const RoutingRoundTripProjectPicker = ({
+  projectRouting,
+  onProjectRoutingChange,
+  ...rest
+}: ComponentProps<typeof ProjectPicker>) => {
+  const [projectRoutingString, setProjectRoutingString] =
+    useState<NonNullable<ProjectRouting>>(projectRouting);
+
+  const handleProjectRoutingChange = useCallback(
+    (routing: ProjectRouting) => {
+      setProjectRoutingString(routing!);
+      onProjectRoutingChange(routing);
+    },
+    [onProjectRoutingChange]
+  );
+
+  return (
+    <ProjectPicker
+      {...rest}
+      projectRouting={projectRoutingString}
+      onProjectRoutingChange={handleProjectRoutingChange}
+    />
+  );
+};
 
 const createProjects = (projectCount: number = 100): CPSProject[] => {
   return Array.from({ length: projectCount }, () => {
@@ -67,7 +96,7 @@ export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> 
       action('fetchProjectsByRouting')(routing);
 
       return {
-        origin: faker.helpers.arrayElement([projectPickerStoryProjects[0], null]),
+        origin: projectPickerStoryProjects[0],
         // TODO: attempt to filter from the actual routing value on the client
         linkedProjects: faker.helpers.arrayElements(projectPickerStoryProjects, {
           min: 10,
@@ -77,7 +106,7 @@ export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> 
     },
     originProjectId: projectPickerStoryProjects[0]._id,
   },
-  render: (props) => <ProjectPicker {...props} />,
+  render: (props) => <RoutingRoundTripProjectPicker {...props} />,
 };
 
 const projectPickerReadOnlyStoryProjects = createProjects(50);
@@ -99,7 +128,7 @@ export const ProjectPickerReadOnlyStory: StoryObj<ComponentProps<typeof ProjectP
       action('fetchProjectsByRouting')(routing);
 
       return {
-        origin: faker.helpers.arrayElement([projectPickerReadOnlyStoryProjects[0], null]),
+        origin: projectPickerReadOnlyStoryProjects[0],
         linkedProjects: faker.helpers.arrayElements(projectPickerReadOnlyStoryProjects, {
           min: 5,
           max: 35,
@@ -108,5 +137,5 @@ export const ProjectPickerReadOnlyStory: StoryObj<ComponentProps<typeof ProjectP
     },
     originProjectId: projectPickerReadOnlyStoryProjects[0]._id,
   },
-  render: (props) => <ProjectPicker {...props} />,
+  render: (props) => <RoutingRoundTripProjectPicker {...props} />,
 };

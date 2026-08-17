@@ -48,6 +48,20 @@ export const ProjectPickerButtonStory: StoryObj<
   },
   args: {
     size: 's',
+    availableProjects: Array.from({ length: 10 }, () => ({
+      _id: faker.string.uuid(),
+      _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
+      _alias: faker.company.name(),
+      _organisation: faker.company.name(),
+      _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
+      _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
+    })),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    currentProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    get originProjectId(): string {
+      return this.availableProjects![0]._id;
+    },
   },
   render: ({
     availableProjects,
