@@ -31,7 +31,7 @@ The log level is resolved in this order:
 3. The `LOG_LEVEL` environment variable
 4. The default level, `info`
 
-The value is case-insensitive. The accepted values are `silent`, `quiet` (normalized to `error`), `info`, `debug`, and `verbose`; other `ToolingLog` levels such as `error`, `warning`, and `success` are not recognized here and fall back to the default `info`.
+The value is case-insensitive. The recognized values are `silent`, `info`, `debug`, and `verbose`; other `ToolingLog` levels such as `error`, `warning`, and `success` are not recognized here and fall back to the default `info`. Note that `quiet` is normalized to `error` internally, but because `error` itself is not recognized, `SCOUT_LOG_LEVEL=quiet` also currently falls back to `info` rather than restricting output to errors.
 
 **Default locally and in CI**: `info`. There is no CI-specific override — Buildkite pipelines don't set `SCOUT_LOG_LEVEL`, so CI runs use the same `info` default as a local run unless you set the variable yourself.
 
