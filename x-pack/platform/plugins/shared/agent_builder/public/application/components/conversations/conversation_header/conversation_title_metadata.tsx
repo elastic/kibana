@@ -22,7 +22,7 @@ import { FormattedDate } from '@kbn/i18n-react';
 import { AGENT_BUILDER_UI_EBT, ConversationAccessControlMode } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
-import { useConversation } from '../../../hooks/use_conversation';
+import { useConversation, useConversationPermissions } from '../../../hooks/use_conversation';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -101,6 +101,7 @@ export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps>
   ariaLabelledBy,
 }) => {
   const { conversation, isLoading: isLoadingTitle } = useConversation();
+  const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -217,49 +218,55 @@ export const ConversationTitleMetadata: React.FC<ConversationTitleMetadataProps>
           </div>
         )}
 
-        <EuiPopoverFooter paddingSize="none" css={popoverFooterStyles}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="danger"
-                iconType="trash"
-                size="s"
-                flush="left"
-                onClick={() => {
-                  setIsPopoverOpen(false);
-                  setIsDeleteModalOpen(true);
-                }}
-                data-test-subj="agentBuilderConversationDeleteButton"
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
-                  detail: 'conversation',
-                })}
-              >
-                {labels.delete}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="pencil"
-                size="s"
-                flush="right"
-                onClick={() => {
-                  setIsPopoverOpen(false);
-                  setIsRenameModalOpen(true);
-                }}
-                data-test-subj="agentBuilderConversationRenameButton"
-                {...getEbtProps({
-                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                  action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME,
-                  detail: 'conversation',
-                })}
-              >
-                {labels.editTitle}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
+        {(canDelete || canRename) && (
+          <EuiPopoverFooter paddingSize="none" css={popoverFooterStyles}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+              {canDelete && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="danger"
+                    iconType="trash"
+                    size="s"
+                    flush="left"
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    data-test-subj="agentBuilderConversationDeleteButton"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE,
+                      detail: 'conversation',
+                    })}
+                  >
+                    {labels.delete}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {canRename && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="pencil"
+                    size="s"
+                    flush="right"
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      setIsRenameModalOpen(true);
+                    }}
+                    data-test-subj="agentBuilderConversationRenameButton"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME,
+                      detail: 'conversation',
+                    })}
+                  >
+                    {labels.editTitle}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiPopoverFooter>
+        )}
       </EuiPopover>
 
       <RenameConversationModal
