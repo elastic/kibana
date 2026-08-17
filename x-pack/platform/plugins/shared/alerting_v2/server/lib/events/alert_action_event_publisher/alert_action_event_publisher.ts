@@ -143,7 +143,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
     return {
       occurredAt: action['@timestamp'] ?? new Date().toISOString(),
       groupHash: action.group_hash,
-      episodeId: action.episode_id!,
+      episodeId: action.episode_id ?? null,
       ruleId: action.rule_id,
       spaceId: action.space_id,
       actorUid: action.actor,

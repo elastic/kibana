@@ -23,7 +23,7 @@ dependsOn:
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/core-application-common'
-  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/app-menu'
   - '@kbn/core-chrome-browser'
   - '@kbn/core-chrome-browser-navigation-utils'
   - '@kbn/core-chrome-browser-context'
