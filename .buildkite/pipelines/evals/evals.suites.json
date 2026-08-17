@@ -140,7 +140,7 @@
     {
       "id": "llm-tasks",
       "name": "LLM Tasks",
-      "slackChannel": "#appex-ai-infra-alerts",
+      "slackChannel": "#search-ml-ux-team",
       "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",
       "tags": [
         "ai-infra"
