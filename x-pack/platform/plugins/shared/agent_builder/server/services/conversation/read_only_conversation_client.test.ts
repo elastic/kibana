@@ -104,9 +104,7 @@ describe('createConversationPublicClient', () => {
     it('throws conversationAlreadyExists when the supplied id is already taken', async () => {
       internalClient.exists.mockResolvedValue(true);
 
-      const err = await publicClient
-        .create({ id: 'dup-id' })
-        .catch((e: unknown) => e);
+      const err = await publicClient.create({ id: 'dup-id' }).catch((e: unknown) => e);
 
       expect(isConversationAlreadyExistsError(err)).toBe(true);
       expect(internalClient.create).not.toHaveBeenCalled();
