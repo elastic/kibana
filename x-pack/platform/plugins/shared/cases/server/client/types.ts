@@ -89,6 +89,10 @@ export type CasesSearchParams = Partial<
   > & { authorizationFilter?: KueryNode }
 >;
 
+/**
+ * The source that created a cases client.
+ * - `plugin_contract`: called via another plugin's contract (e.g. Security Solution, Fleet).
+ */
 export type CasesClientSource =
   | 'rest_api'
   | 'connector'
