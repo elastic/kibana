@@ -22,6 +22,7 @@ import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { agentIdCondition, assignAgentById, UNASSIGNED_CONDITION } from './assign_by_condition';
+import { PackagePolicyService } from './package_policy_service';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
@@ -472,6 +473,10 @@ describe('SyntheticsPrivateLocation', () => {
       isAgentSharding: true,
     } as unknown as PrivateLocationAttributes;
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it('keeps the single agent policy binding and assigns a new monitor to one enrolled agent', async () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
       const agentIds = ['agent-a', 'agent-b', 'agent-c'];
@@ -653,6 +658,99 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(listAgents).toHaveBeenCalledWith(
         expect.objectContaining({ kuery: `policy_id:"agent-policy\\" or true or \\""` })
+      );
+    });
+    it('does not resolve agents for scalable locations unused by monitor creation', async () => {
+      const listAgents = jest.fn();
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+
+      await syntheticsPrivateLocation.createPackagePolicies(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation, conditionLocation],
+        'default',
+        []
+      );
+
+      expect(listAgents).not.toHaveBeenCalled();
+    });
+
+    it('does not resolve agents for scalable locations unused by monitor edits', async () => {
+      const listAgents = jest.fn();
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      jest.spyOn(syntheticsPrivateLocation, 'getExistingPolicies').mockResolvedValue({
+        policies: [],
+        allSpaces: new Set(['default']),
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
+      jest.spyOn(PackagePolicyService.prototype, 'bulkUpdate').mockResolvedValue([]);
+      jest.spyOn(PackagePolicyService.prototype, 'bulkDelete').mockResolvedValue(undefined);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config: testConfig, globalParams: {} }],
+        [mockPrivateLocation, conditionLocation],
+        'default',
+        []
+      );
+
+      expect(listAgents).not.toHaveBeenCalled();
+    });
+
+    it('uses an enrolled agent condition when inspecting a scalable location', async () => {
+      const listAgents = jest.fn().mockResolvedValue({ agents: [{ id: 'agent-a' }], total: 1 });
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          agentService: { asInternalUser: { listAgents } },
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+      } as unknown as SyntheticsServerSetup);
+      const inspect = jest.spyOn(PackagePolicyService.prototype, 'inspect').mockResolvedValue({});
+
+      await syntheticsPrivateLocation.inspectPackagePolicy({
+        privateConfig: {
+          config: { ...testConfig, locations: [conditionLocation] },
+          globalParams: {},
+        },
+        allPrivateLocations: [conditionLocation],
+        maintenanceWindows: [],
+        spaceId: 'default',
+      });
+
+      expect(inspect).toHaveBeenCalledWith(
+        expect.objectContaining({
+          packagePolicy: expect.objectContaining({ condition: agentIdCondition('agent-a') }),
+        })
       );
     });
   });

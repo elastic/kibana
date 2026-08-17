@@ -345,6 +345,19 @@ export class SyntheticsPrivateLocation {
     return new Map(entries);
   }
 
+  private getReferencedPrivateLocations(
+    configs: Array<{ config: Pick<HeartbeatConfig, 'locations'> }>,
+    privateLocations: SyntheticsPrivateLocations
+  ): SyntheticsPrivateLocations {
+    const locationIds = new Set(
+      configs.flatMap(({ config }) =>
+        config.locations.filter((location) => !location.isServiceManaged).map(({ id }) => id)
+      )
+    );
+
+    return privateLocations.filter((location) => locationIds.has(location.id));
+  }
+
   async createPackagePolicies(
     configs: PrivateConfig[],
     privateLocations: SyntheticsPrivateLocations,
@@ -358,7 +371,13 @@ export class SyntheticsPrivateLocation {
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
-    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(privateLocations);
+    const referencedPrivateLocations = this.getReferencedPrivateLocations(
+      configs,
+      privateLocations
+    );
+    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
+      referencedPrivateLocations
+    );
 
     for (const { config, globalParams } of configs) {
       try {
@@ -452,6 +471,9 @@ export class SyntheticsPrivateLocation {
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
+      const conditionHosts = isConditionShardedLocation(location)
+        ? await this.getEnrolledAgents(location.agentPolicyId)
+        : undefined;
 
       const newPolicy = await this.generateNewPolicy(
         config,
@@ -459,7 +481,10 @@ export class SyntheticsPrivateLocation {
         newPolicyTemplate,
         spaceId,
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        undefined,
+        conditionHosts
       );
 
       const pkgPolicy = {
@@ -501,7 +526,13 @@ export class SyntheticsPrivateLocation {
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
-    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(allPrivateLocations);
+    const referencedPrivateLocations = this.getReferencedPrivateLocations(
+      configs,
+      allPrivateLocations
+    );
+    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
+      referencedPrivateLocations
+    );
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
