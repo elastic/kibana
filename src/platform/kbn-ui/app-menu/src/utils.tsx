@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type MouseEvent, type ReactNode } from 'react';
+import React, { type MouseEvent } from 'react';
 import { css } from '@emotion/react';
 import { isArray, isFunction, upperFirst } from 'lodash';
 import {
@@ -23,6 +23,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { AppMenuBadge } from './components/app_menu_badge';
+import { AppMenuItemLabel } from './components/app_menu_item_label';
 import { AppMenuPopoverActionButtons } from './components/app_menu_popover_action_buttons';
 import type {
   AppMenuConfig,
@@ -273,10 +274,11 @@ export const mapAppMenuItemToPanelItem = (
       : { onClick: hasClickHandler ? handleClick : undefined };
 
   const itemTestSubj = item.testId ?? getAppMenuItemTestSubj(item.id);
+  const itemDisabled = isDisabled(item?.disableButton) || loading;
 
   const showAsSelected = Boolean(item.isSelected);
 
-  const itemName: ReactNode = item.labelBadgeText ? (
+  const labelNode = item.labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -287,10 +289,24 @@ export const mapAppMenuItemToPanelItem = (
     upperFirst(item.label)
   );
 
+  const itemLabel = item.description ? (
+    <AppMenuItemLabel
+      label={upperFirst(item.label)}
+      description={item.description}
+      labelBadgeText={item.labelBadgeText}
+      iconType={item.iconType}
+      isDisabled={itemDisabled}
+      isLoading={loading}
+      testId={itemTestSubj}
+    />
+  ) : (
+    labelNode
+  );
+
   return {
     key: item.id,
-    name: itemName,
-    icon: loading ? (
+    name: itemLabel,
+    icon: item.description ? undefined : loading ? (
       <EuiLoadingSpinner size="m" data-test-subj={`${itemTestSubj}-loading`} />
     ) : (
       item?.iconType
@@ -298,7 +314,7 @@ export const mapAppMenuItemToPanelItem = (
     ...linkProps,
     href: item?.href,
     target: item?.href ? item?.target : undefined,
-    disabled: isDisabled(item?.disableButton) || loading,
+    disabled: itemDisabled,
     'data-test-subj': itemTestSubj,
     ...getAppMenuEbtDomProps(item.ebt),
     toolTipContent: content,
