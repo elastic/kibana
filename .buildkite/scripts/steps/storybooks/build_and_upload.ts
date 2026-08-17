@@ -9,13 +9,21 @@
 
 import { execSync, spawn } from 'child_process';
 import fs from 'fs';
+import { createRequire } from 'node:module';
 import path from 'path';
 import os from 'os';
 import pLimit from 'p-limit';
-import { buildDocsArchive, buildDocsAssets, buildDocsRegistry } from '@kbn/storybook';
 import type { BuildDocsArchiveResult, BuildDocsRegistryResult } from '@kbn/storybook';
-import { storybookAliases } from '@kbn/dev/storybook/aliases';
 import { getKibanaDir } from '#pipeline-utils';
+
+const requireKibana = createRequire(path.join(getKibanaDir(), 'package.json'));
+requireKibana('@kbn/setup-node-env');
+const { buildDocsArchive, buildDocsAssets, buildDocsRegistry } = requireKibana(
+  '@kbn/storybook'
+) as typeof import('@kbn/storybook');
+const { storybookAliases } = requireKibana(
+  '@kbn/dev/storybook/aliases'
+) as typeof import('@kbn/dev/storybook/aliases');
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
 

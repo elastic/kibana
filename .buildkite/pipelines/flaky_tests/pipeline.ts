@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
 import { TestSuiteType } from './constants.ts';
+import { loadBuildkiteJson } from '../../pipeline-utils/load_buildkite_json.ts';
 import type { BuildkiteStep } from '#pipeline-utils';
 import {
   expandAgentQueue,
@@ -18,10 +17,9 @@ import {
   retryOnPreemption,
 } from '#pipeline-utils';
 
-const requireJson = createRequire(
-  resolve(process.cwd(), '.buildkite/pipelines/flaky_tests/pipeline.ts')
+const { groups } = loadBuildkiteJson<typeof import('./groups.json')>(
+  'pipelines/flaky_tests/groups.json'
 );
-const { groups } = requireJson('./groups.json') as typeof import('./groups.json');
 
 const TEST_STEP_TIMEOUT_MINUTES = 80;
 

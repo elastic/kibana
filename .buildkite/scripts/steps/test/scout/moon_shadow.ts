@@ -14,8 +14,7 @@
  * See `affected-packages/README.md`.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import { expandWithImplicitConsumers, type ScoutLog } from './scout_implicit_consumers.ts';
 import { getAffectedProjectsMoon } from '#pipeline-utils';
 
 export interface MoonShadowResult {
@@ -36,7 +35,7 @@ export function computeMoonShadow({
   mergeBase: string;
   gitChangedFiles: readonly string[];
   gitAffectedModules: ReadonlySet<string>;
-  log: ToolingLog;
+  log: ScoutLog;
 }): MoonShadowResult | null {
   try {
     const moonAffectedModules = expandWithImplicitConsumers(

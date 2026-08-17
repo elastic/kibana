@@ -8,21 +8,14 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
 import { parse as loadYaml } from 'yaml';
 
+import { loadBuildkiteJson } from '../../load_buildkite_json.ts';
 import { type FTRTestChannel, ftrTestChannel, ftrTestChannels } from './test_channels.ts';
 
-const requireJson = createRequire(
-  resolve(
-    process.cwd(),
-    '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/ftr_manifests.ts'
-  )
-);
-const ftrConfigManifestPaths = requireJson(
-  '../../../ftr-manifests/ftr_configs_manifests.json'
-) as typeof import('../../../ftr-manifests/ftr_configs_manifests.json');
+const ftrConfigManifestPaths = loadBuildkiteJson<
+  typeof import('../../../ftr-manifests/ftr_configs_manifests.json')
+>('ftr-manifests/ftr_configs_manifests.json');
 const { serverless: serverlessFTRManifestPaths, stateful: statefulFTRManifestPaths } =
   ftrConfigManifestPaths;
 

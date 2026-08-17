@@ -37,13 +37,16 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import { expandWithImplicitConsumers, type ScoutLog } from './scout_implicit_consumers.ts';
 import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
 import { computeMoonShadow } from './moon_shadow.ts';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
-const log = new ToolingLog({ level: 'info', writeTo: process.stderr });
+const writeLog = (message: string) => process.stderr.write(`${message}\n`);
+const log: ScoutLog = {
+  info: writeLog,
+  warning: writeLog,
+};
 
 const [mergeBase, outPath] = process.argv.slice(2);
 
