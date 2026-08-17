@@ -117,6 +117,12 @@ const MAX_CACHE_SIZE_MB = 10;
 const DEFAULT_MULTIPLEXING_POLL_LENGTH = '30s';
 
 export class SearchInterceptor {
+  /**
+   * Maximum response size in bytes that we'll attempt to parse (600MB).
+   * Responses larger than this will be rejected to prevent memory issues.
+   */
+  private static readonly MAX_RESPONSE_BYTES = 700 * 1024 * 1024;
+
   private uiSettingsSubs: Subscription[] = [];
   private searchTimeout: number;
   private readonly responseCache: SearchResponseCache = new SearchResponseCache(
@@ -554,6 +560,7 @@ export class SearchInterceptor {
       });
 
       const decoder = new TextDecoder();
+      let totalBytes = 0;
 
       // Read chunks and feed to oboe
       const processStream = async () => {
@@ -561,11 +568,27 @@ export class SearchInterceptor {
           while (true) {
             const { done, value } = await reader.read();
             if (done) {
-              // Signal end of stream by calling emit with empty string
-              // oboe will finalize parsing
               break;
             }
             if (value) {
+              totalBytes += value.length;
+
+              // Check if response exceeds size limit
+              if (totalBytes > SearchInterceptor.MAX_RESPONSE_BYTES) {
+                reader.cancel();
+                stream.abort();
+                reject(
+                  new Error(
+                    `Response size (${Math.round(
+                      totalBytes / 1024 / 1024
+                    )}MB) exceeds maximum allowed size (${Math.round(
+                      SearchInterceptor.MAX_RESPONSE_BYTES / 1024 / 1024
+                    )}MB). Consider adding filters or a LIMIT clause to reduce the result set.`
+                  )
+                );
+                return;
+              }
+
               // Decode chunk and feed to oboe
               const text = decoder.decode(value, { stream: true });
               stream.emit('data', text);
