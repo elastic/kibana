@@ -7,6 +7,18 @@
 
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
 import { MAX_READ_IDS, READ_ALL_BEFORE_KEY, READ_KEY } from '../storage/user_storage';
+import type { NotificationReadState } from './query_notifications';
+
+/**
+ * Fetch the user's read state for annotating the notification list.
+ */
+export const getReadState = async (client: IUserStorageClient): Promise<NotificationReadState> => {
+  const [read, readAllBefore] = await Promise.all([
+    client.get<string[]>(READ_KEY),
+    client.get<string>(READ_ALL_BEFORE_KEY),
+  ]);
+  return { read, readAllBefore };
+};
 
 /**
  * Append a notification id to the user's individually-read list.

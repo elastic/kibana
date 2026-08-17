@@ -7,6 +7,7 @@
 
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
 import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
 import { severityTTLBoundary } from './severity_ttl_query';
 
@@ -19,6 +20,15 @@ const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) =>
   description: 'Your endpoint model is deprecated.',
   severity: 'info',
   ...overrides,
+});
+
+/** Mock hit carrying the collapse `inner_hits` for the group's earliest in-horizon copy. */
+const hitWithEarliest = (source: Record<string, unknown>, earliest: string, i: number) => ({
+  _id: `doc-${i}`,
+  _source: source,
+  inner_hits: {
+    earliest: { hits: { hits: [{ _source: { '@timestamp': earliest } }] } },
+  },
 });
 
 const setup = (docs: Array<Record<string, unknown>> = []) => {
@@ -94,15 +104,13 @@ describe('queryNotifications', () => {
     });
   });
 
-  it('composes namespace, type, severity, and time-range filters', async () => {
+  it('composes namespace, type, and severity filters', async () => {
     const { deps, search } = setup();
 
     await queryNotifications(deps, {
       namespace: 'inference',
       type: 'modelStatus',
       severity: ['warning', 'error'],
-      from: '2026-07-01T00:00:00.000Z',
-      to: '2026-07-20T00:00:00.000Z',
     });
 
     const [{ query }] = search.mock.calls[0];
@@ -111,13 +119,27 @@ describe('queryNotifications', () => {
         { term: { namespace: 'inference' } },
         { term: { type: 'modelStatus' } },
         { terms: { severity: ['warning', 'error'] } },
-        {
-          range: {
-            '@timestamp': { gte: '2026-07-01T00:00:00.000Z', lte: '2026-07-20T00:00:00.000Z' },
-          },
-        },
       ])
     );
+  });
+
+  it('applies the from/to window in-memory instead of as a doc-level filter', async () => {
+    const { deps, search } = setup([
+      doc('late', '2026-07-20T00:00:00.000Z'),
+      doc('in', '2026-07-10T00:00:00.000Z'),
+      doc('early', '2026-07-01T00:00:00.000Z'),
+    ]);
+
+    const result = await queryNotifications(deps, {
+      from: '2026-07-05T00:00:00.000Z',
+      to: '2026-07-15T00:00:00.000Z',
+    });
+
+    expect(result.items.map(({ notification_id: id }) => id)).toEqual(['in']);
+    // Only the severity-TTL horizon: a doc-level range would change which copy is
+    // the group's earliest visible one and destabilize the read-state anchor.
+    const [{ query }] = search.mock.calls[0];
+    expect(query.bool.filter).toHaveLength(1);
   });
 
   it('omits attribute filters that are not provided', async () => {
@@ -190,5 +212,114 @@ describe('queryNotifications', () => {
     const result = await queryNotifications(deps);
 
     expect(result.items[0].severity).toBe('info');
+  });
+
+  describe('read-state annotation', () => {
+    it('marks an individually-read id as read', async () => {
+      const { deps } = setup([
+        doc('a', '2026-07-15T00:00:00.000Z'),
+        doc('b', '2026-07-14T00:00:00.000Z'),
+      ]);
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        { read: ['a'], readAllBefore: READ_ALL_BEFORE_DEFAULT }
+      );
+
+      expect(result.items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
+        ['b', false],
+        ['a', true],
+      ]);
+    });
+
+    it('anchors readAllBefore on the earliest in-horizon copy, not the latest re-push', async () => {
+      // Re-pushed after mark-all-read: latest copy is newer than readAllBefore,
+      // but the earliest visible copy predates it, so it must stay read.
+      const search = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            hitWithEarliest(doc('a', '2026-07-20T00:00:00.000Z'), '2026-07-10T00:00:00.000Z', 0),
+            hitWithEarliest(doc('b', '2026-07-20T00:00:00.000Z'), '2026-07-16T00:00:00.000Z', 1),
+          ],
+        },
+      });
+      const dataStreams = dataStreamServiceMock.createStartContract();
+      dataStreams.initializeClient.mockResolvedValue({ search } as never);
+      const deps = { dataStreams, logger: loggingSystemMock.createLogger() };
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        { read: [], readAllBefore: '2026-07-15T00:00:00.000Z' }
+      );
+
+      expect(result.items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
+        ['b', false],
+        ['a', true],
+      ]);
+    });
+
+    it('requests the earliest in-horizon copy per group only when annotating', async () => {
+      const { deps, search } = setup();
+
+      await queryNotifications(deps, {}, { read: [], readAllBefore: READ_ALL_BEFORE_DEFAULT });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          collapse: {
+            field: 'notification_id',
+            inner_hits: {
+              name: 'earliest',
+              size: 1,
+              sort: [{ '@timestamp': 'asc' }],
+              _source: ['@timestamp'],
+            },
+          },
+        })
+      );
+    });
+
+    it('sorts unread before read, newest first within each', async () => {
+      const { deps } = setup([
+        doc('read-new', '2026-07-20T00:00:00.000Z'),
+        doc('unread-new', '2026-07-15T00:00:00.000Z'),
+        doc('read-old', '2026-07-10T00:00:00.000Z'),
+        doc('unread-old', '2026-07-05T00:00:00.000Z'),
+      ]);
+
+      const result = await queryNotifications(
+        deps,
+        {},
+        { read: ['read-new', 'read-old'], readAllBefore: READ_ALL_BEFORE_DEFAULT }
+      );
+
+      expect(result.items.map(({ notification_id: id }) => id)).toEqual([
+        'unread-new',
+        'unread-old',
+        'read-new',
+        'read-old',
+      ]);
+    });
+
+    it('does not fetch inner hits for profile-less callers', async () => {
+      const { deps, search } = setup();
+
+      await queryNotifications(deps);
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({ collapse: { field: 'notification_id' } })
+      );
+    });
+
+    // Locked decision on search-team#14979: listing stays open to API-key/headless
+    // callers, which have no profile — they get the list without read state, not a 403.
+    it('omits isRead entirely when no read state is provided', async () => {
+      const { deps } = setup([doc('a', '2026-07-15T00:00:00.000Z')]);
+
+      const result = await queryNotifications(deps);
+
+      expect(result.items[0]).not.toHaveProperty('isRead');
+    });
   });
 });

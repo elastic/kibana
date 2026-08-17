@@ -9,11 +9,14 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { GET_NOTIFICATIONS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
 import { notificationQueryParamsSchema } from '../../common/notification_schema';
 import { queryNotifications } from '../lib/query_notifications';
+import { getReadState } from '../lib/read_state';
 import { NC_AUTHZ_OPT_OUT_REASON, type NotificationRouteDeps } from './route_deps';
 
 /**
  * `GET /internal/notification_center/notifications`
  * Validates the query params and calls the internal queryNotifications function.
+ * Items carry the caller's `isRead` state; callers without a user profile get the
+ * list without it.
  */
 export const registerGetNotificationsRoute = ({ router, core, logger }: NotificationRouteDeps) => {
   router.versioned
@@ -30,8 +33,11 @@ export const registerGetNotificationsRoute = ({ router, core, logger }: Notifica
         },
       },
       async (_context, request, response) => {
-        const [{ dataStreams }] = await core.getStartServices();
-        const result = await queryNotifications({ dataStreams, logger }, request.query);
+        const [{ dataStreams, userStorage }] = await core.getStartServices();
+        // Profile-less callers (e.g. API keys) still get the list, just without `isRead`
+        const client = userStorage.asScoped(request);
+        const readState = client ? await getReadState(client) : undefined;
+        const result = await queryNotifications({ dataStreams, logger }, request.query, readState);
         return response.ok({ body: result });
       }
     );

@@ -40,8 +40,10 @@ describe('queryNotifications [integration]', () => {
   let dataStreams: DataStreamsStart;
   const logger = loggingSystemMock.createLogger();
 
-  const query = (params: Parameters<typeof queryNotifications>[1] = {}) =>
-    queryNotifications({ dataStreams, logger }, params);
+  const query = (
+    params: Parameters<typeof queryNotifications>[1] = {},
+    readState?: Parameters<typeof queryNotifications>[2]
+  ) => queryNotifications({ dataStreams, logger }, params, readState);
 
   beforeAll(async () => {
     jest.setTimeout(120_000);
@@ -72,6 +74,9 @@ describe('queryNotifications [integration]', () => {
         doc('old-error', daysAgo(40), { severity: 'error' }),
         doc('recent-warning', daysAgo(1), { severity: 'warning' }),
         doc('other-type', daysAgo(3), { type: 'other' }),
+        // one copy past the info TTL, one inside: only the in-horizon copy may anchor read state
+        doc('revived', daysAgo(40), { title: 'revived v1' }),
+        doc('revived', daysAgo(1.5), { title: 'revived v2' }),
       ],
     });
     await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
@@ -86,6 +91,7 @@ describe('queryNotifications [integration]', () => {
 
     expect(items.map(({ notification_id: id }) => id)).toEqual([
       'recent-warning',
+      'revived',
       'dup',
       'other-type',
       'old-error',
@@ -111,5 +117,21 @@ describe('queryNotifications [integration]', () => {
 
     const byNamespace = await query({ namespace: 'nonexistent' });
     expect(byNamespace.items).toEqual([]);
+  });
+
+  it('annotates isRead from the earliest in-horizon copy and sorts unread first', async () => {
+    const { items } = await query({}, { read: ['other-type'], readAllBefore: daysAgo(3) });
+
+    expect(items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
+      // Unread, newest first. `revived` has a pre-marker copy, but it is out of horizon
+      // and must not anchor; its earliest visible copy postdates the marker.
+      ['recent-warning', false],
+      ['revived', false],
+      // Read, newest first. `dup`'s latest copy postdates the marker (a producer re-push),
+      // but its earliest in-horizon copy predates it, so mark-all-read holds.
+      ['dup', true],
+      ['other-type', true], // individually read
+      ['old-error', true],
+    ]);
   });
 });

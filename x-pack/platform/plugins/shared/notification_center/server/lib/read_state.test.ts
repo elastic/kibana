@@ -7,7 +7,7 @@
 
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
 import { MAX_READ_IDS, READ_ALL_BEFORE_KEY, READ_KEY } from '../storage/user_storage';
-import { markRead, markAllRead } from './read_state';
+import { getReadState, markRead, markAllRead } from './read_state';
 
 const createClient = (initial: { read?: string[]; readAllBefore?: string } = {}) => {
   const store: Record<string, unknown> = {
@@ -71,5 +71,16 @@ describe('markAllRead', () => {
 
     const setKeys = (client.set as jest.Mock).mock.calls.map(([key]) => key);
     expect(setKeys).toEqual([READ_ALL_BEFORE_KEY, READ_KEY]);
+  });
+});
+
+describe('getReadState', () => {
+  it('returns the read list and readAllBefore marker', async () => {
+    const { client } = createClient({ read: ['a'], readAllBefore: '2026-07-01T00:00:00.000Z' });
+
+    await expect(getReadState(client)).resolves.toEqual({
+      read: ['a'],
+      readAllBefore: '2026-07-01T00:00:00.000Z',
+    });
   });
 });

@@ -58,6 +58,7 @@ export type {
   NotificationSubmitInput,
   NotificationQueryParams,
   NotificationQueryResult,
+  NotificationListItem,
   StateSubmitIdParts,
   TimeseriesSubmitIdParts,
   Severity,
