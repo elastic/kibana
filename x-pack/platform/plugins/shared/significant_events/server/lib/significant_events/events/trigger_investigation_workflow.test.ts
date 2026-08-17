@@ -152,6 +152,23 @@ describe('triggerInvestigationWorkflow', () => {
     expect(inputs.context.source).toBe('significant_event');
   });
 
+  it('passes detected_at from the event @timestamp so the agent can anchor time-scoped queries', async () => {
+    const event = createEvent({ '@timestamp': '2026-08-17T18:42:41.000Z' });
+    const workflowsManagement = createWorkflowsManagement();
+
+    await triggerInvestigationWorkflow({
+      workflowsManagement: workflowsManagement as never,
+      agentBuilder: createAgentBuilder(),
+      spaces: createSpaces() as never,
+      request: createRequest(),
+      logger: createLogger(),
+      event,
+    });
+
+    const [, , inputs] = workflowsManagement.management.runWorkflow.mock.calls[0];
+    expect(inputs.context.detected_at).toBe('2026-08-17T18:42:41.000Z');
+  });
+
   it('returns undefined when workflowsManagement is not available', async () => {
     const result = await triggerInvestigationWorkflow({
       workflowsManagement: undefined,

@@ -59,8 +59,17 @@ export const triggerInvestigationWorkflow = async ({
     return undefined;
   }
 
-  const { title, summary, stream_names, event_uuid, event_id, status, severity, confidence } =
-    event;
+  const {
+    title,
+    summary,
+    stream_names,
+    event_uuid,
+    event_id,
+    status,
+    severity,
+    confidence,
+    '@timestamp': detected_at,
+  } = event;
 
   const inputs = {
     message: `${title}\n\n${summary}`,
@@ -74,6 +83,7 @@ export const triggerInvestigationWorkflow = async ({
       severity,
       summary,
       confidence,
+      detected_at,
     },
   };
 

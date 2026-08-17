@@ -227,6 +227,12 @@ and make analysis harder:
 - Good: `FROM index | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) BY service.name | SORT errors DESC | LIMIT 20`
 - Good: `FROM index | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND log.level == "error" | SORT @timestamp DESC | LIMIT 10`
 - Avoid: `FROM index | LIMIT 500` or any query without LIMIT — large row counts overflow context.
+- **Default time window.** The kickoff "Additional context" includes a `detected_at` field (ISO
+  8601) marking when the significant event was first observed. Use it as the anchor for all queries:
+  default to `detected_at − 4h` → `detected_at + 1h` to capture both the onset and immediate
+  aftermath. Widen if signals suggest the incident started earlier; do not narrow below ±30 minutes
+  without evidence the incident was that short. When `detected_at` is absent, default to `now − 4h`
+  → `now`.
 - **Mandatory time scope on every data query.** Always use `?_tstart` and `?_tend` placeholders
   with `time_range`; unbounded STATS/scans are forbidden. If the tool warns that your `time_range`
   was not applied, the numbers are NOT time-scoped — add the placeholders and re-run before using

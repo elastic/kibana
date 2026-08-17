@@ -421,6 +421,7 @@ steps:
                                   event_uuid: '{{ foreach.item.event_uuid }}'
                                   event_id: '{{ foreach.item.event_id }}'
                                   status: '{{ foreach.item.status }}'
+                                  detected_at: '{{ steps.resolve_open_event.output.hits.hits[0]._source["@timestamp"] }}'
 
   - name: output_result
     type: workflow.output
