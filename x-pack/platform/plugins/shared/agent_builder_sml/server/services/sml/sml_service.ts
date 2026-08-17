@@ -132,6 +132,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           logger,
           constraints,
           filters,
+          registeredTypeIds: this.registry.list().map(({ id }) => id),
         });
         return filterResultsByPermissions({
           searchResult: rawResults,
@@ -982,12 +983,18 @@ const buildTitlePrefixClause = (text: string): Record<string, unknown> => ({
 
 /**
  * `type` is a low-cardinality keyword, so a `prefix` query is cheap. The typed
- * text is lowercased because keyword prefix matching is case-sensitive and every
- * registered type id is lowercase.
+ * text is lowercased so matching stays case-insensitive on indices created before
+ * `type` carried the lowercase normalizer.
  */
 const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
   prefix: { type: text.toLowerCase() },
 });
+
+/** Whether the typed text could still grow into one of the registered type ids. */
+const looksLikeType = (text: string, registeredTypeIds: string[]): boolean => {
+  const lowered = text.toLowerCase();
+  return registeredTypeIds.some((id) => id.toLowerCase().startsWith(lowered));
+};
 
 /**
  * Build the autocomplete query: `match_bool_prefix` against `title`, requiring
@@ -999,9 +1006,16 @@ const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
  * so it doesn't skew ranking. A bare trailing slash ("connector/") matches on
  * type alone.
  *
+ * A slash only means "type/name" when the text before it names a registered
+ * type. Otherwise it is punctuation inside a title (e.g. "sales/marketing"), so
+ * the whole string is matched against `title` — the analyzer splits on the slash.
+ *
  * After trim: empty string or `*` → `match_all`.
  */
-const buildSmlAutocompleteQuery = (query: string): Record<string, unknown> => {
+const buildSmlAutocompleteQuery = (
+  query: string,
+  registeredTypeIds: string[]
+): Record<string, unknown> => {
   const trimmed = query.trim();
   if (trimmed === '' || trimmed === '*') {
     return { match_all: {} };
@@ -1028,12 +1042,16 @@ const buildSmlAutocompleteQuery = (query: string): Record<string, unknown> => {
     return { match_all: {} };
   }
 
-  if (namePart === '') {
-    return { bool: { filter: [buildTypePrefixClause(typePart)] } };
-  }
-
   if (typePart === '') {
     return buildTitlePrefixClause(namePart);
+  }
+
+  if (!looksLikeType(typePart, registeredTypeIds)) {
+    return buildTitlePrefixClause(trimmed);
+  }
+
+  if (namePart === '') {
+    return { bool: { filter: [buildTypePrefixClause(typePart)] } };
   }
 
   return {
@@ -1055,6 +1073,7 @@ const autocompleteSml = async ({
   logger,
   constraints,
   filters,
+  registeredTypeIds,
 }: {
   query: string;
   size: number;
@@ -1063,6 +1082,8 @@ const autocompleteSml = async ({
   logger: Logger;
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
+  /** Used to tell a "type/name" query apart from a title that contains a slash. */
+  registeredTypeIds: string[];
 }): Promise<{ results: SmlAutocompleteResult[] }> => {
   logger.debug(
     `SML autocomplete: query=${JSON.stringify(
@@ -1071,7 +1092,7 @@ const autocompleteSml = async ({
   );
 
   try {
-    const smlQuery = buildSmlAutocompleteQuery(query);
+    const smlQuery = buildSmlAutocompleteQuery(query, registeredTypeIds);
 
     const filterClauses: Array<Record<string, unknown>> = [
       {
@@ -1100,6 +1121,14 @@ const autocompleteSml = async ({
           filter: filterClauses,
         },
       },
+      /**
+       * Relevance first, then a stable tiebreak. Several query shapes score every
+       * hit identically — a type-only query ("connector/") runs in filter context,
+       * `match_all` scores 1.0 for everything, and `match_bool_prefix` scores the
+       * trailing partial token as a constant — which would otherwise leave the
+       * menu ordered by internal doc id.
+       */
+      sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
       _source: ['id', 'type', 'title', 'origin', 'permissions'],
     });
 

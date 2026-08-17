@@ -43,10 +43,12 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   const searchOriginId = `sml-origin-${searchRunId}`;
   const searchIndexedTitle = `sml autocomplete pacific bluefin ${searchRunId}`;
 
-  // Two titles sharing a leading token but differing later, so a multi-token
-  // prefix query must match one and exclude the other.
   const longTitleEntryId = `sml-multitoken-long-${searchRunId}`;
   const shortTitleEntryId = `sml-multitoken-short-${searchRunId}`;
+
+  // "sales" is not a registered SML type, so the slash here is part of the title.
+  const slashTitleEntryId = `sml-slash-title-${searchRunId}`;
+  const slashTitle = `sales/marketing overview ${searchRunId}`;
 
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -84,6 +86,19 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
 
     await sysEsClient.index({
       index: smlIndexName,
+      id: slashTitleEntryId,
+      document: {
+        ...baseDocument,
+        id: slashTitleEntryId,
+        type: 'dashboard',
+        title: slashTitle,
+        origin: { uri: `dashboard://${slashTitleEntryId}` },
+        content: 'sales and marketing overview for sml scout',
+      },
+    });
+
+    await sysEsClient.index({
+      index: smlIndexName,
       id: longTitleEntryId,
       document: {
         ...baseDocument,
@@ -111,7 +126,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   });
 
   apiTest.afterAll(async () => {
-    for (const id of [searchEntryId, longTitleEntryId, shortTitleEntryId]) {
+    for (const id of [searchEntryId, longTitleEntryId, shortTitleEntryId, slashTitleEntryId]) {
       try {
         await sysEsClient.delete({ index: smlIndexName, id, refresh: true });
       } catch {
@@ -211,6 +226,16 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       // other than connector, so the visualization entry must drop out.
       const wrongType = await autocomplete(apiClient, 'connector/pacif');
       expect(wrongType.some((r) => r.id === searchEntryId)).toBe(false);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete finds a title that contains a slash',
+    async ({ apiClient }) => {
+      // "sales" names no registered type, so this must be matched against the
+      // title rather than filtered to a type that cannot exist.
+      const results = await autocomplete(apiClient, 'sales/mark');
+      expect(results.some((r) => r.id === slashTitleEntryId)).toBe(true);
     }
   );
 

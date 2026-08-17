@@ -25,7 +25,12 @@ const SEMANTIC_MULTI_FIELD = {
  */
 const smlStorageSchemaProperties = {
   id: types.keyword({}),
-  type: types.keyword({}),
+  /**
+   * The lowercase normalizer applies at index and search time, so the @ menu's
+   * `prefix` query on `type` is case-insensitive regardless of how a type writer
+   * cases its id.
+   */
+  type: types.keyword({ normalizer: 'lowercase' }),
   title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   origin: types.object({
     properties: {
