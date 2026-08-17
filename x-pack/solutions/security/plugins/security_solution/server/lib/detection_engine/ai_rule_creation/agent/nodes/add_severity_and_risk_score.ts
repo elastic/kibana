@@ -39,13 +39,13 @@ const sanitizeRiskScore = (raw: unknown): number | undefined => {
 };
 
 /**
- * Accepts the model's risk score when it is within ±15 of the canonical default
+ * Accepts the model's risk score when it is within ±10 of the canonical default
  * for the given severity; otherwise falls back to the canonical value.
  */
 const resolveRiskScore = (severity: Severity, rawScore: number | undefined): number => {
   const canonical = defaultRiskScoreBySeverity[severity];
   if (rawScore === undefined) return canonical;
-  return Math.abs(rawScore - canonical) <= 15 ? rawScore : canonical;
+  return Math.abs(rawScore - canonical) <= 10 ? rawScore : canonical;
 };
 
 export const addSeverityAndRiskScoreNode = ({
