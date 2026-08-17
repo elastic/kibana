@@ -372,7 +372,7 @@ await taskManager.ensureScheduled({
 Even on first scheduling, the empty `state` you pass MUST be valid input to `stateSchemaByVersion[1].schema`. Schedule with `state: {}` only when the v1 schema accepts an empty object.
 
 ## 10.`taskTypeGroup` — only set for alerting and action tasks
-**Rule:** Default value is undefined. This property should only be set for actions and alerting tasks that are not maintenance or cleanup tasks.
+**Rule:** Default value is undefined. This property should only be set for actions and alerting tasks that are rule and connector executors, not maintenance or cleanup tasks.
 
 ## 11. CI gate — update the registered task types assertion
 
