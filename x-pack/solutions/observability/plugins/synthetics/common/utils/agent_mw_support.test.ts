@@ -25,4 +25,13 @@ describe('isAgentVersionMwCompatible', () => {
     expect(isAgentVersionMwCompatible('')).toBe(true);
     expect(isAgentVersionMwCompatible('not-a-version')).toBe(true);
   });
+
+  it('is true for a compatible prerelease/build version, since a prerelease ranks below its release', () => {
+    expect(isAgentVersionMwCompatible('8.19.0-SNAPSHOT')).toBe(true);
+    expect(isAgentVersionMwCompatible('9.0.0-beta1')).toBe(true);
+  });
+
+  it('is false for an incompatible prerelease/build version', () => {
+    expect(isAgentVersionMwCompatible('8.17.2-SNAPSHOT')).toBe(false);
+  });
 });
