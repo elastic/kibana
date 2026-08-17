@@ -169,7 +169,8 @@ For source-data indices use \`platform.core.execute_esql\` instead.
 
 ## API documentation
 - ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
-- ML anomaly detection APIs: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-ml`,
+- Anomaly detection guide: https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection
+- Anomaly detection APIs: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-ml-anomaly`,
   annotations: {
     title: 'Query Anomalies',
     readOnlyHint: true,
