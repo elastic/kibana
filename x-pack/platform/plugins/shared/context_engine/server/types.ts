@@ -35,6 +35,6 @@ export interface ContextEngineSetupDependencies {
 export interface ContextEngineStartDependencies {
   actions: ActionsPluginStart;
   taskManager: TaskManagerStartContract;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
 }
