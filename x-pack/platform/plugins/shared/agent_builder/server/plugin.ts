@@ -9,10 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
-import {
-  agentBuilderDefaultAgentId,
-  createConversationAlreadyExistsError,
-} from '@kbn/agent-builder-common';
+import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -305,32 +302,7 @@ export class AgentBuilderPlugin
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
           const agentRegistry = await agents.getRegistry({ request });
-          return {
-            get: client.get.bind(client),
-            list: client.list.bind(client),
-            create: async ({ agentId, id, title, accessControl }) => {
-              const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
-
-              // Validate agent before writing — avoids creating an orphaned document
-              // when the internal create() would otherwise persist first and fail on get().
-              // AgentBuilderErrors propagate as-is; callers handle them by error code / statusCode.
-              await agentRegistry.get(effectiveAgentId, { access: 'use' });
-
-              // Guard against duplicate IDs — internal create() maps ES version-conflict
-              // to a 404 (createConversationNotFoundError), indistinguishable from other failures
-              if (id && (await client.exists(id))) {
-                throw createConversationAlreadyExistsError({ conversationId: id });
-              }
-
-              return client.create({
-                agent_id: effectiveAgentId,
-                id,
-                title: title ?? 'New conversation',
-                access_control: accessControl,
-                rounds: [],
-              });
-            },
-          };
+          return createConversationPublicClient({ client, agentRegistry });
         },
       },
     };

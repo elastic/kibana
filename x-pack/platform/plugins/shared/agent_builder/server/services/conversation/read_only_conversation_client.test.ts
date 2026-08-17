@@ -5,53 +5,35 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import type { ConversationPublicClient, ConversationsStart } from '../../types';
+import {
+  agentBuilderDefaultAgentId,
+  createAgentNotFoundError,
+  isConversationAlreadyExistsError,
+} from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { AgentRegistry } from '../agents/agent_registry';
 import {
   createConversationClientMock,
   createEmptyConversation,
   type ConversationClientMock,
 } from '../../test_utils/conversations';
-import type { ConversationService } from './conversation_service';
+import { createConversationPublicClient } from './conversation_public_client';
 
-/**
- * Builds a `ConversationsStart` that wraps the internal ConversationService
- * the same way `plugin.ts` does, so we can verify the wrapping logic in
- * isolation without booting the full plugin.
- */
-const createConversationsStart = (internalService: ConversationService): ConversationsStart => ({
-  getScopedClient: async ({ request }) => {
-    const client = await internalService.getScopedClient({ request });
-    return {
-      get: client.get.bind(client),
-      list: client.list.bind(client),
-      create: ({ agentId, id, title, accessControl }) =>
-        client.create({
-          agent_id: agentId ?? agentBuilderDefaultAgentId,
-          id,
-          title: title ?? 'New conversation',
-          access_control: accessControl,
-          rounds: [],
-        }),
-    };
-  },
-});
-
-describe('ConversationPublicClient', () => {
-  let conversationsStart: ConversationsStart;
+describe('createConversationPublicClient', () => {
   let internalClient: ConversationClientMock;
+  let agentRegistry: jest.Mocked<Pick<AgentRegistry, 'get' | 'getIds'>>;
   let publicClient: ConversationPublicClient;
-  const request = {} as KibanaRequest;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     internalClient = createConversationClientMock();
-    const internalService: ConversationService = {
-      getScopedClient: jest.fn().mockResolvedValue(internalClient),
-      getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
+    agentRegistry = {
+      get: jest.fn().mockResolvedValue({ id: agentBuilderDefaultAgentId }),
+      getIds: jest.fn().mockResolvedValue([agentBuilderDefaultAgentId]),
     };
-    conversationsStart = createConversationsStart(internalService);
-    publicClient = await conversationsStart.getScopedClient({ request });
+    publicClient = createConversationPublicClient({
+      client: internalClient,
+      agentRegistry: agentRegistry as unknown as AgentRegistry,
+    });
   });
 
   it('delegates get() to the internal conversation client', async () => {
@@ -77,20 +59,64 @@ describe('ConversationPublicClient', () => {
     expect(result).toEqual(conversations);
   });
 
-  it('delegates create() to the internal conversation client with defaults', async () => {
-    const conversation = createEmptyConversation({ id: 'conv-1' });
-    internalClient.create.mockResolvedValue(conversation);
-
-    const result = await publicClient.create({ agentId: 'agent-1', id: 'conv-1' });
-
-    expect(internalClient.create).toHaveBeenCalledWith({
-      agent_id: 'agent-1',
-      id: 'conv-1',
-      title: 'New conversation',
-      access_control: undefined,
-      rounds: [],
+  describe('create()', () => {
+    beforeEach(() => {
+      internalClient.exists.mockResolvedValue(false);
+      internalClient.create.mockResolvedValue(createEmptyConversation({ id: 'conv-1' }));
     });
-    expect(result).toEqual(conversation);
+
+    it('uses the default agent and title when not specified', async () => {
+      await publicClient.create({});
+
+      expect(internalClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agent_id: agentBuilderDefaultAgentId,
+          title: 'New conversation',
+          rounds: [],
+        })
+      );
+    });
+
+    it('passes agent_id, id, title, and access_control through to the internal client', async () => {
+      await publicClient.create({
+        agentId: 'custom-agent',
+        id: 'conv-1',
+        title: 'My chat',
+        accessControl: { access_mode: 'private' },
+      });
+
+      expect(internalClient.create).toHaveBeenCalledWith({
+        agent_id: 'custom-agent',
+        id: 'conv-1',
+        title: 'My chat',
+        access_control: { access_mode: 'private' },
+        rounds: [],
+      });
+    });
+
+    it('validates agent access before writing', async () => {
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'bad-agent' }));
+
+      await expect(publicClient.create({ agentId: 'bad-agent' })).rejects.toThrow();
+      expect(internalClient.create).not.toHaveBeenCalled();
+    });
+
+    it('throws conversationAlreadyExists when the supplied id is already taken', async () => {
+      internalClient.exists.mockResolvedValue(true);
+
+      const err = await publicClient
+        .create({ id: 'dup-id' })
+        .catch((e: unknown) => e);
+
+      expect(isConversationAlreadyExistsError(err)).toBe(true);
+      expect(internalClient.create).not.toHaveBeenCalled();
+    });
+
+    it('skips the exists check when no id is provided', async () => {
+      await publicClient.create({});
+
+      expect(internalClient.exists).not.toHaveBeenCalled();
+    });
   });
 
   it('does not expose update, delete, upsertRound, or exists methods', () => {

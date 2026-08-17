@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  agentBuilderDefaultAgentId,
+  createConversationAlreadyExistsError,
+} from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
+import type { ConversationClient } from './client/client';
+import type { AgentRegistry } from '../agents/agent_registry';
+
+/**
+ * Wraps the internal ConversationClient into the public ConversationPublicClient
+ * contract exposed on AgentBuilderPluginStart.conversations.
+ */
+export const createConversationPublicClient = ({
+  client,
+  agentRegistry,
+}: {
+  client: ConversationClient;
+  agentRegistry: AgentRegistry;
+}): ConversationPublicClient => {
+  return {
+    get: client.get.bind(client),
+    list: client.list.bind(client),
+    create: async ({ agentId, id, title, accessControl }) => {
+      const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
+
+      await agentRegistry.get(effectiveAgentId, { access: 'use' });
+
+      if (id && (await client.exists(id))) {
+        throw createConversationAlreadyExistsError({ conversationId: id });
+      }
+
+      return client.create({
+        agent_id: effectiveAgentId,
+        id,
+        title: title ?? 'New conversation',
+        access_control: accessControl,
+        rounds: [],
+      });
+    },
+  };
+};
