@@ -25,6 +25,8 @@ export const AWS_REGION_OPTIONS = [
 export interface FieldMeta {
   label: string;
   placement: 'inline' | 'flyout';
+  /** True when the var is boolean — authoritative fallback when varTypes is not yet populated. */
+  isBool?: boolean;
   /** Default value for boolean vars — used when no draft value is set yet. */
   defaultValue?: boolean;
   transport?: TransportType;
@@ -98,12 +100,13 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Optional. Specify custom CloudWatch metrics to collect.',
     }),
   },
-  // ── Boolean mandatory fields ────────────────────────────────────────────
+  // ── Boolean fields ──────────────────────────────────────────────────────
   preserve_original_event: {
     label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.preserveOriginalEvent.label', {
       defaultMessage: 'Preserve original event',
     }),
     placement: 'flyout',
+    isBool: true,
     defaultValue: false,
     helpText: i18n.translate(
       'xpack.ingestHub.serviceSettingsStep.field.preserveOriginalEvent.helpText',
@@ -115,6 +118,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Collect S3 logs',
     }),
     placement: 'flyout',
+    isBool: true,
     defaultValue: false,
     transport: 'aws-s3',
     helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.collectS3Logs.helpText', {
@@ -127,6 +131,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       { defaultMessage: 'Preserve duplicate custom fields' }
     ),
     placement: 'flyout',
+    isBool: true,
     defaultValue: false,
     helpText: i18n.translate(
       'xpack.ingestHub.serviceSettingsStep.field.preserveDuplicateCustomFields.helpText',
@@ -141,6 +146,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Collect enhanced monitoring metrics',
     }),
     placement: 'flyout',
+    isBool: true,
     defaultValue: false,
     helpText: i18n.translate(
       'xpack.ingestHub.serviceSettingsStep.field.collectEsmMetrics.helpText',
@@ -152,6 +158,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Leader election',
     }),
     placement: 'flyout',
+    isBool: true,
     defaultValue: false,
     helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.leaderelection.helpText', {
       defaultMessage:
@@ -197,6 +204,8 @@ export function getFlyoutFields(
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
     if (meta.placement !== 'flyout') return false;
+    // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
+    if (service.varTypes?.[f] === 'bool' || meta.isBool) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
@@ -209,7 +218,7 @@ export function getMandatoryBooleanFields(
   return (service.mandatoryFields ?? []).filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
-    if (service.varTypes?.[f] !== 'bool') return false;
+    if (service.varTypes?.[f] !== 'bool' && !meta.isBool) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
@@ -249,7 +258,7 @@ export function getRequiredTextFields(
   return (service.requiredConfig ?? []).filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
-    if (service.varTypes?.[f] === 'bool') return false;
+    if (service.varTypes?.[f] === 'bool' || meta.isBool) return false;
     if (REGION_FIELD_NAMES.has(f)) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
@@ -263,7 +272,7 @@ export function getRequiredBooleanFields(
   return (service.requiredConfig ?? []).filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
-    if (service.varTypes?.[f] !== 'bool') return false;
+    if (service.varTypes?.[f] !== 'bool' && !meta.isBool) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });
