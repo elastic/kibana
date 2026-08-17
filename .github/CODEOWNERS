@@ -1494,15 +1494,15 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/entity-analytics-monitoring-entity-source @elastic/security-entity-analytics
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/entity-engine-descriptor-v2 @elastic/core-analysis
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/entity-store-global-state @elastic/core-analysis
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/epm-packages @elastic/fleet
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-agent-policies @elastic/fleet
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-cloud-connector @elastic/fleet
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-package-policies @elastic/fleet
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/epm-packages @elastic/streams-ui
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-agent-policies @elastic/streams-ui
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-cloud-connector @elastic/streams-ui
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/fleet-package-policies @elastic/streams-ui
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/gap_auto_fill_scheduler @elastic/response-ops
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-agent-policies @elastic/fleet
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-outputs @elastic/fleet
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-package-policies @elastic/fleet
-/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest_manager_settings @elastic/fleet
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-agent-policies @elastic/streams-ui
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-outputs @elastic/streams-ui
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest-package-policies @elastic/streams-ui
+/packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/ingest_manager_settings @elastic/streams-ui
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/integration-config @elastic/cloud-services
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/maintenance-window @elastic/response-ops
 /packages/kbn-check-saved-objects-cli/src/migrations/__fixtures__/markdown @elastic/kibana-presentation
@@ -1998,21 +1998,21 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
-/x-pack/platform/test/api_integration/services/ingest_manager.ts @elastic/fleet
-/x-pack/platform/test/fixtures/es_archives/fleet @elastic/fleet
-/x-pack/platform/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
-/x-pack/solutions/security/test/fleet_api_integration @elastic/fleet
-/x-pack/platform/test/fleet_api_integration @elastic/fleet
-/x-pack/platform/test/fleet_packages @elastic/fleet
-/x-pack/platform/test/fleet_tasks @elastic/fleet
-/src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/fleet
-/x-pack/platform/test/fleet_cypress @elastic/fleet
-/x-pack/platform/test/fleet_functional @elastic/fleet
-/x-pack/platform/test/fleet_multi_cluster @elastic/fleet
-/x-pack/platform/plugins/shared/fleet/server/services/elastic_agent_manifest.ts @elastic/fleet @elastic/obs-cloudnative-monitoring
-/x-pack/solutions/**/test/serverless/**/test_suites/fleet/ @elastic/fleet
-/x-pack/platform/test/serverless/**/test_suites/fleet/ @elastic/fleet
-/x-pack/platform/test/serverless/api_integration/services/default_fleet_setup.ts @elastic/fleet
+/x-pack/platform/test/api_integration/services/ingest_manager.ts @elastic/streams-ui
+/x-pack/platform/test/fixtures/es_archives/fleet @elastic/streams-ui
+/x-pack/platform/test/api_integration/services/fleet_and_agents.ts @elastic/streams-ui
+/x-pack/solutions/security/test/fleet_api_integration @elastic/streams-ui
+/x-pack/platform/test/fleet_api_integration @elastic/streams-ui
+/x-pack/platform/test/fleet_packages @elastic/streams-ui
+/x-pack/platform/test/fleet_tasks @elastic/streams-ui
+/src/platform/test/api_integration/apis/custom_integration/*.ts @elastic/streams-ui
+/x-pack/platform/test/fleet_cypress @elastic/streams-ui
+/x-pack/platform/test/fleet_functional @elastic/streams-ui
+/x-pack/platform/test/fleet_multi_cluster @elastic/streams-ui
+/x-pack/platform/plugins/shared/fleet/server/services/elastic_agent_manifest.ts @elastic/streams-ui @elastic/obs-cloudnative-monitoring
+/x-pack/solutions/**/test/serverless/**/test_suites/fleet/ @elastic/streams-ui
+/x-pack/platform/test/serverless/**/test_suites/fleet/ @elastic/streams-ui
+/x-pack/platform/test/serverless/api_integration/services/default_fleet_setup.ts @elastic/streams-ui
 
 # APM
 /x-pack/platform/test/stack_functional_integration/apps/apm @elastic/obs-signals-traces-team
@@ -3616,13 +3616,13 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/session_view @elastic/contextual-security-apps
 
 ## Fleet plugin (co-owned with Fleet team)
-x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/fleet @elastic/cloud-services
-x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/fleet @elastic/cloud-services
-x-pack/platform/plugins/shared/fleet/server/routes/cloud_connector @elastic/fleet @elastic/cloud-services
-x-pack/platform/plugins/shared/fleet/server/services/cloud_connectors @elastic/fleet @elastic/cloud-services
-x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/streams-ui @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/streams-ui @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/server/routes/cloud_connector @elastic/streams-ui @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/server/services/cloud_connectors @elastic/streams-ui @elastic/cloud-services
+x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/streams-ui @elastic/contextual-security-apps
 ## SessionView tests
 x-pack/solutions/security/test/fixtures/es_archives/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/test/fixtures/es_archives/kubernetes_security @elastic/contextual-security-apps
@@ -3767,7 +3767,7 @@ src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @
 x-pack/platform/plugins/shared/actions/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts @elastic/response-ops @elastic/kibana-security
 x-pack/platform/plugins/shared/anonymization/server/saved_objects/register_anonymization_salt_saved_object_type.ts @elastic/workchat-eng @elastic/security-threat-hunting @elastic/kibana-security
-x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/fleet @elastic/kibana-security
+x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts @elastic/streams-ui @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/saved_objects.ts @elastic/actionable-obs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_monitor/legacy_synthetics_monitor.ts @elastic/actionable-obs-team @elastic/kibana-security
 x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetics_param.ts @elastic/actionable-obs-team @elastic/kibana-security
