@@ -36,6 +36,15 @@ const getUpdateBody = (
   };
 };
 
+const isPartialProjectRoutingUpdate = ({ source }: PostTransformsUpdateRequestSchema): boolean => {
+  return (
+    source?.project_routing !== undefined &&
+    source.index === undefined &&
+    source.query === undefined &&
+    source.runtime_mappings === undefined
+  );
+};
+
 export const updateTransform = async ({
   body,
   esClient,
@@ -45,7 +54,7 @@ export const updateTransform = async ({
   esClient: ElasticsearchClient;
   transformId: TransformId;
 }) => {
-  const existingTransform = body.source
+  const existingTransform = isPartialProjectRoutingUpdate(body)
     ? await getExistingTransform(esClient, transformId)
     : undefined;
   const updateBody = getUpdateBody(body, existingTransform);

@@ -16,6 +16,15 @@ describe('updateTransform', () => {
             {
               source: {
                 index: ['source-index'],
+                query: { term: { status: 'active' } },
+                runtime_mappings: {
+                  runtime_field: {
+                    type: 'keyword',
+                    script: {
+                      source: "emit('old')",
+                    },
+                  },
+                },
               },
             },
           ],
@@ -50,7 +59,37 @@ describe('updateTransform', () => {
     });
 
     expect(esClient.transform.updateTransform).toHaveBeenCalledWith({
-      body: { source: { index: ['source-index'], project_routing: '_id:linked-id' } },
+      body: {
+        source: {
+          index: ['source-index'],
+          query: { term: { status: 'active' } },
+          runtime_mappings: {
+            runtime_field: {
+              type: 'keyword',
+              script: {
+                source: "emit('old')",
+              },
+            },
+          },
+          project_routing: '_id:linked-id',
+        },
+      },
+      transform_id: 'transform-id',
+    });
+  });
+
+  it('preserves full source replacement behavior when source index is provided', async () => {
+    const esClient = createEsClient();
+
+    await updateTransform({
+      body: { source: { index: ['new-source-index'] } },
+      esClient,
+      transformId: 'transform-id',
+    });
+
+    expect(esClient.transform.getTransform).not.toHaveBeenCalled();
+    expect(esClient.transform.updateTransform).toHaveBeenCalledWith({
+      body: { source: { index: ['new-source-index'] } },
       transform_id: 'transform-id',
     });
   });
