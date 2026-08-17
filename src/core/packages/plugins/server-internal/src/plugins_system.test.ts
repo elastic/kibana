@@ -683,6 +683,11 @@ describe('start', () => {
 
     await pluginsSystem.setupPlugins(setupDeps);
     const promise = pluginsSystem.startPlugins(startDeps);
+    // Cordis defers apply() via two internal `await Promise.resolve()` hops before calling
+    // plugin.start() and registering the withTimeout timer.  Flush those microtask ticks
+    // so the timer exists when jest.runAllTimers() fires it.
+    await Promise.resolve();
+    await Promise.resolve();
     jest.runAllTimers();
 
     await expect(promise).rejects.toMatchInlineSnapshot(

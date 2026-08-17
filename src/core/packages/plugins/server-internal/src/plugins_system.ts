@@ -42,7 +42,7 @@ export class PluginsSystem<T extends PluginType> {
   private sortedPluginNames?: Set<string>;
 
   /** Selects the plugin lifecycle driver. Set by PluginsService before calling setupPlugins. */
-  public runtime: 'legacy' | 'cordis' = 'legacy';
+  public runtime: 'legacy' | 'cordis' = 'cordis';
   /** Root Cordis Context; initialised lazily by the Cordis driver in setupPlugins. */
   private cordisCtx?: Context;
 
@@ -347,7 +347,7 @@ export class PluginsSystem<T extends PluginType> {
 
     this.cordisCtx = createCordisRoot();
     this.log.info(
-      `Setting up [${sortedPlugins.size}] plugins (Cordis): [${[...sortedPlugins.keys()].join(',')}]`
+      `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
     );
 
     const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
@@ -414,7 +414,7 @@ export class PluginsSystem<T extends PluginType> {
     }
 
     this.log.info(
-      `Starting [${this.satupPlugins.length}] plugins (Cordis): [${[...this.satupPlugins]}]`
+      `Starting [${this.satupPlugins.length}] plugins: [${[...this.satupPlugins]}]`
     );
 
     // Unblock all start fibers.

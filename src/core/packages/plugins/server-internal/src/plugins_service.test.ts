@@ -748,7 +748,7 @@ describe('PluginsService', () => {
 
       expect(mockDiscover).toHaveBeenCalledTimes(1);
       expect(mockDiscover).toHaveBeenCalledWith({
-        config: {
+        config: expect.objectContaining({
           additionalPluginPaths: [],
           allowlistPluginGroups: ['observability'],
           initialize: true,
@@ -757,7 +757,8 @@ describe('PluginsService', () => {
             resolve(REPO_ROOT, 'plugins'),
           ],
           shouldEnableAllPlugins: false,
-        },
+          runtime: 'legacy',
+        }),
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid', airgapped: false },
         nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },

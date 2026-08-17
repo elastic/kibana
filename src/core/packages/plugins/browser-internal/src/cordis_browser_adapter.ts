@@ -53,6 +53,16 @@ export const createBrowserSetupAdapter = ({
         const contract = plugin.setup(setupContext as any, depContracts as any);
         capturedContract = contract;
         ctx.provide(`${plugin.name}.setup`, { contract });
+
+        // Wire plugin.stop() into the Cordis disposal chain for reverse-topological teardown.
+        ctx.effect(() => async () => {
+          try {
+            await plugin.stop();
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.warn(`[Cordis] plugin "${plugin.name}" threw during stop:`, e);
+          }
+        });
       } catch (e) {
         capturedError = e;
         throw e;

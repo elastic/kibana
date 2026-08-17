@@ -22,14 +22,13 @@ const configSchema = schema.object({
   /**
    * Selects the plugin lifecycle driver.
    *
-   * 'legacy'  – original sequential Map-based driver (default).
-   * 'cordis'  – Cordis fiber driver; experimental, must be explicitly opted in.
+   * 'cordis'  – Cordis fiber driver (default).
+   * 'legacy'  – original sequential Map-based driver; kept for one release as a fallback.
    *
    * Both produce identical plugin ordering and contract shapes.
-   * Flip to 'cordis' for integration testing or incremental rollout.
    */
-  runtime: schema.oneOf([schema.literal('legacy'), schema.literal('cordis')], {
-    defaultValue: 'legacy',
+  runtime: schema.oneOf([schema.literal('cordis'), schema.literal('legacy')], {
+    defaultValue: 'cordis',
   }),
 
   /**

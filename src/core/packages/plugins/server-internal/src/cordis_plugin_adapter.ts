@@ -91,6 +91,23 @@ export const createSetupAdapter = ({
         // Publish the contract as a Cordis service so dependent fibers can activate.
         // Notification fires when this fiber transitions to ACTIVE (after apply returns).
         ctx.provide(`${plugin.name}.setup`, { contract: capturedContract });
+
+        // Wire plugin.stop() into the Cordis disposal chain so that
+        // cordisCtx.fiber.dispose() (the Cordis teardown path) calls stop automatically
+        // in the correct reverse-topological order.
+        ctx.effect(() => async () => {
+          try {
+            const resultMaybe = await withTimeout({
+              promise: Promise.resolve(plugin.stop()),
+              timeoutMs: STOP_TIMEOUT_MS,
+            });
+            if (resultMaybe?.timedout) {
+              log.warn(`"${plugin.name}" plugin didn't stop in 15sec., move on to the next.`);
+            }
+          } catch (e) {
+            log.warn(`"${plugin.name}" thrown during stop: ${e}`);
+          }
+        });
       } catch (e) {
         capturedError = e;
         throw e; // Cordis marks this fiber FAILED; error goes to logger bridge too
