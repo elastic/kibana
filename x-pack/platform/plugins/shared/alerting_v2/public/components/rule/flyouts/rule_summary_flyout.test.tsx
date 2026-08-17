@@ -22,7 +22,15 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
-  RuleActionsMenu: ({ rule, onEdit, onClone, onDelete, onToggleEnabled, onRun }: any) => (
+  RuleActionsMenu: ({
+    rule,
+    onEdit,
+    onClone,
+    onDelete,
+    onToggleEnabled,
+    onRun,
+    onUpdateApiKey,
+  }: any) => (
     <div data-test-subj={`ruleActionsMenu-${rule.id}`}>
       <button data-test-subj="mockEdit" onClick={() => onEdit(rule)}>
         Edit
@@ -39,6 +47,11 @@ jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
       <button data-test-subj="mockRun" onClick={() => onRun(rule)}>
         Run
       </button>
+      {onUpdateApiKey ? (
+        <button data-test-subj="mockUpdateApiKey" onClick={() => onUpdateApiKey(rule)}>
+          Update API key
+        </button>
+      ) : null}
     </div>
   ),
 }));
@@ -185,5 +198,19 @@ describe('RuleSummaryFlyout', () => {
 
     fireEvent.click(screen.getByTestId('mockRun'));
     expect(props.onRun).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('forwards onUpdateApiKey to the RuleActionsMenu when provided', () => {
+    const onUpdateApiKey = jest.fn();
+    renderFlyout({ onUpdateApiKey });
+
+    fireEvent.click(screen.getByTestId('mockUpdateApiKey'));
+    expect(onUpdateApiKey).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('omits the update API key action when onUpdateApiKey is not provided', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('mockUpdateApiKey')).not.toBeInTheDocument();
   });
 });
