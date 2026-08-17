@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 
 // Light lavender-white tint used for card header bands, matched to the
 // design reference (Step 14.svg / Deploy & Detect mockups).
@@ -42,7 +50,11 @@ export const CardHeader: React.FunctionComponent<{
         </EuiFlexItem>
         {servicesCount !== undefined && (
           <EuiFlexItem grow={false}>
-            <EuiLink>{`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}</EuiLink>
+            <EuiText size="s">
+              <EuiTextColor color="primary">
+                {`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}
+              </EuiTextColor>
+            </EuiText>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
