@@ -18,6 +18,7 @@ import {
   CUSTOM_CONTENT_CSS_VARS_GUIDANCE,
   CUSTOM_CONTENT_SANDBOX_GUIDANCE,
   CUSTOM_CONTENT_LIQUID_DATA_MODEL_GUIDANCE,
+  stripMarkdownFences,
 } from '@kbn/custom-content-common';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -95,7 +96,8 @@ Set \`template\` to replace the HTML, \`esqlQuery\` to change the data source (p
       | undefined;
 
     const newData: CustomContentContextAttachmentData = {
-      panel_template: template ?? currentData?.panel_template ?? '',
+      panel_template:
+        template !== undefined ? stripMarkdownFences(template) : currentData?.panel_template ?? '',
       esql_query: esqlQuery === null ? undefined : esqlQuery ?? currentData?.esql_query,
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
