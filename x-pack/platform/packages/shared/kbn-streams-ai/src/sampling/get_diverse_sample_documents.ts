@@ -11,17 +11,15 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { get } from 'lodash';
-import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import {
+  getEsqlColumnSchema,
+  parseEsqlSourceDocuments,
+  getEsqlDocumentId,
   categorizeWithNoiseExclusion,
   columnPath,
   type CategorizeWithSampleRow,
-} from '../../utils/esql_categorize';
-import {
-  getEsqlDocumentId,
-  parseEsqlSourceDocuments,
-} from '../../utils/parse_esql_source_documents';
+} from '@kbn/ai-tools';
+import { get } from 'lodash';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
 const MAX_DOCS_TO_SAMPLE = 100_000;
