@@ -11,15 +11,30 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => `/base${p}` } };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+const mockFocusedRuleService = {
+  setFocusedRule: jest.fn(),
+  clearFocusedRule: jest.fn(),
+  getFocusedRule: jest.fn(),
+  focusedRule$: { subscribe: jest.fn() },
+};
+
+jest.mock('@kbn/core-di-browser', () => {
+  const { FocusedRuleService: ActualFocusedRuleService } = jest.requireActual(
+    '../../../services/focused_rule_service'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === 'http') {
+        return { basePath: { prepend: (p: string) => `/base${p}` } };
+      }
+      if (token === ActualFocusedRuleService) {
+        return mockFocusedRuleService;
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 jest.mock('../../../pages/rules_list_page/rule_actions_menu', () => ({
   RuleActionsMenu: ({
@@ -212,5 +227,21 @@ describe('RuleSummaryFlyout', () => {
     renderFlyout();
 
     expect(screen.queryByTestId('mockUpdateApiKey')).not.toBeInTheDocument();
+  });
+
+  describe('Agent Builder focus', () => {
+    it('sets the focused rule when the flyout renders', () => {
+      renderFlyout();
+
+      expect(mockFocusedRuleService.setFocusedRule).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('clears the focused rule on unmount with the rule id', () => {
+      const { unmount } = renderFlyout();
+
+      unmount();
+
+      expect(mockFocusedRuleService.clearFocusedRule).toHaveBeenCalledWith('rule-1');
+    });
   });
 });

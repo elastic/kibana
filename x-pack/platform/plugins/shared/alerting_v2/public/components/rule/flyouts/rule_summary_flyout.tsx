@@ -32,6 +32,7 @@ import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/r
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
 import { RuleMetadata } from '../../rule_details/sidebar/rule_metadata';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { FocusedRuleService } from '../../../services/focused_rule_service';
 
 const FLYOUT_TITLE_ID = 'ruleSummaryFlyoutTitle';
 
@@ -67,7 +68,15 @@ export const RuleSummaryFlyout = ({
   hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
+  const focusedRuleService = useService(FocusedRuleService);
   const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
+
+  React.useEffect(() => {
+    focusedRuleService.setFocusedRule(rule);
+    return () => {
+      focusedRuleService.clearFocusedRule(rule.id);
+    };
+  }, [rule, focusedRuleService]);
 
   return (
     <RuleProvider rule={rule}>

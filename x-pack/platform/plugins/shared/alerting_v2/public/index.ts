@@ -35,6 +35,7 @@ import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { UserCapabilities } from './services/user_capabilities';
+import { FocusedRuleService } from './services/focused_rule_service';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
@@ -62,6 +63,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
   bind(UserCapabilities).toSelf().inSingletonScope();
+  bind(FocusedRuleService).toSelf().inSingletonScope();
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();

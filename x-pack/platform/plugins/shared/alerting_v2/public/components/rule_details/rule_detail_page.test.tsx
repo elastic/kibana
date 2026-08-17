@@ -26,23 +26,41 @@ jest.mock('react-router-dom', () => ({
 
 let mockCanWriteRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => p } };
-    }
-    if (typeof token === 'function') {
-      // UserCapabilities service token
-      return {
-        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
-        canRead: () => true,
-        can: () => mockCanWriteRules,
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
-}));
+const mockFocusedRuleService = {
+  setFocusedRule: jest.fn(),
+  clearFocusedRule: jest.fn(),
+  getFocusedRule: jest.fn(),
+  focusedRule$: { subscribe: jest.fn() },
+};
+
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../services/user_capabilities'
+  );
+  const { FocusedRuleService: ActualFocusedRuleService } = jest.requireActual(
+    '../../services/focused_rule_service'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === 'http') {
+        return { basePath: { prepend: (p: string) => p } };
+      }
+      if (token === ActualFocusedRuleService) {
+        return mockFocusedRuleService;
+      }
+      if (typeof token === 'function') {
+        // UserCapabilities service token
+        return {
+          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canRead: () => true,
+          can: () => mockCanWriteRules,
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 const mockUseBreadcrumbs = jest.fn();
 jest.mock('../../hooks/use_breadcrumbs', () => ({
@@ -409,5 +427,52 @@ describe('RuleDetailPage', () => {
     const menuAfterToggle =
       mockAppHeaderRender.mock.calls[mockAppHeaderRender.mock.calls.length - 1][0];
     expect(menuAfterToggle).toBe(menuBeforeToggle);
+  });
+
+  describe('Agent Builder focus', () => {
+    it('sets the focused rule when the page renders', () => {
+      renderPage(baseRule);
+
+      expect(mockFocusedRuleService.setFocusedRule).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('clears the focused rule on unmount with the rule id', () => {
+      const { unmount } = renderPage(baseRule);
+
+      unmount();
+
+      expect(mockFocusedRuleService.clearFocusedRule).toHaveBeenCalledWith('rule-1');
+    });
+
+    it('re-sets focus when the rule id changes', () => {
+      const { rerender } = render(
+        <MemoryRouter>
+          <I18nProvider>
+            <MockChromeContextProvider>
+              <RuleProvider rule={baseRule}>
+                <RuleDetailPage />
+              </RuleProvider>
+            </MockChromeContextProvider>
+          </I18nProvider>
+        </MemoryRouter>
+      );
+
+      const nextRule = { ...baseRule, id: 'rule-2', metadata: { ...baseRule.metadata, name: 'Next' } };
+
+      rerender(
+        <MemoryRouter>
+          <I18nProvider>
+            <MockChromeContextProvider>
+              <RuleProvider rule={nextRule}>
+                <RuleDetailPage />
+              </RuleProvider>
+            </MockChromeContextProvider>
+          </I18nProvider>
+        </MemoryRouter>
+      );
+
+      expect(mockFocusedRuleService.clearFocusedRule).toHaveBeenCalledWith('rule-1');
+      expect(mockFocusedRuleService.setFocusedRule).toHaveBeenLastCalledWith(nextRule);
+    });
   });
 });
