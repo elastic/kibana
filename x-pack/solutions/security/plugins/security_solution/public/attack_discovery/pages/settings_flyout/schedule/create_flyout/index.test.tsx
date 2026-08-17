@@ -32,6 +32,15 @@ jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
     status: 'ready',
   }),
 }));
+// Stub the heavy RuleActionsField subtree. It renders the triggers_actions_ui
+// `ActionForm` via `React.lazy`/`Suspense` (`getActionFormLazy`), whose first
+// mount pays a large one-time lazy-import cost and whose connector/action-type
+// loads never settle under jsdom. That subtree — not `AlertSelection` — is the
+// dominant cost and the source of the "not wrapped in act(...)" churn that
+// tripped Jest's 5s per-test timeout in CI.
+jest.mock('../../../../../common/components/rule_actions_field', () => ({
+  RuleActionsField: () => <div data-test-subj="mockRuleActionsField" />,
+}));
 // Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
 // alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
 // stub keeps the `alertSelection` marker and an `alertsRange` control wired to
@@ -285,7 +294,7 @@ describe('CreateFlyout', () => {
       await renderComponent();
 
       await waitFor(() => {
-        expect(screen.getByText('Select a connector type')).toBeInTheDocument();
+        expect(screen.getByTestId('mockRuleActionsField')).toBeInTheDocument();
       });
     });
 

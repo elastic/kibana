@@ -81,7 +81,9 @@ describe('useChromeAppHeaderRegistration', () => {
       badges: undefined,
       menu: undefined,
       favorite: undefined,
+      share: undefined,
       metadata: [{ type: 'text', label: 'Updated by: analyst' }],
+      spacing: undefined,
     });
   });
 });

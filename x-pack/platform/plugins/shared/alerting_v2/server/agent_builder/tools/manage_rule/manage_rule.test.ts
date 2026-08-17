@@ -301,11 +301,9 @@ describe('manageRuleTool', () => {
       await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
 
       expect(logger.debug).toHaveBeenCalledWith({
-        message: expect.any(Function),
+        message: 'Invalid manage_rule input',
         labels: { space_id: ctx.spaceId },
       });
-      const debugMessage = (logger.debug as jest.Mock).mock.calls[0][0].message as () => string;
-      expect(debugMessage()).toContain('Invalid manage_rule input');
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
     });

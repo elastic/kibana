@@ -10,7 +10,7 @@
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
@@ -95,7 +95,7 @@ export interface AppHeaderTabAction {
  * @remarks
  * Actions are intentionally flat (a single level of items). Nested submenus, modals/flyouts and
  * focus return are not supported yet; when a use case arises, mirror the AppMenu approach
- * (`AppMenuRunActionParams` in `@kbn/core-chrome-app-menu-components`) by adding a nested `items`
+ * (`AppMenuRunActionParams` in `@kbn/app-menu`) by adding a nested `items`
  * prop and passing an anchor/`returnFocus` handler down to `onClick`.
  *
  * @public
@@ -236,6 +236,21 @@ export interface AppHeaderFavoriteAction {
 }
 
 /**
+ * Share action for the app-header title-actions area.
+ * Apps own behavior and menu placement; App Header owns title presentation.
+ *
+ * @public
+ */
+export interface AppHeaderShareAction {
+  onClick: (context: { returnFocus: () => void }) => void | Promise<void>;
+  isDisabled?: boolean;
+  tooltip?: {
+    content: string;
+    title?: string;
+  };
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  *
@@ -255,6 +270,7 @@ interface AppHeaderConfigBase {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: AppHeaderFavoriteAction;
+  share?: AppHeaderShareAction;
   spacing?: AppHeaderSpacing;
 }
 
