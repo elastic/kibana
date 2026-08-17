@@ -71,6 +71,11 @@ export const servers: ScoutServerConfig = {
       // event loop wedges. Reporting FTR configs use 600000 for the same
       // reason — match them here.
       '--elasticsearch.requestTimeout=600000',
+      // Reasoning models (GLM 5.2, Gemini 3.7 Flash) generate long responses
+      // that, combined with the judge's full-context groundedness evaluation,
+      // produce request payloads exceeding Kibana's default 1 MiB maxPayload.
+      // Raise to 100 MiB to avoid HTTP 413 Payload Too Large.
+      '--server.maxPayload=104857600',
     ],
   },
 };
