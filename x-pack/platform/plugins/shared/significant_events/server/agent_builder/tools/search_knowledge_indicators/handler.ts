@@ -234,10 +234,12 @@ export async function searchKnowledgeIndicatorsToolHandler({
       return streams.map((stream) => stream.name);
     },
     getFeatures: async (streamName, { searchText, featureTypes, featureIds }) => {
-      const result = searchText
-        ? await kiClient.findFeatures(streamName, searchText, { featureTypes, featureIds })
-        : await kiClient.getFeatures(streamName, { type: featureTypes, featureIds });
-      return result.hits;
+      if (searchText) {
+        return (await kiClient.findFeatures(streamName, searchText, { featureTypes, featureIds }))
+          .hits;
+      }
+
+      return (await kiClient.getFeatures(streamName, { type: featureTypes })).hits;
     },
     getQueries: async (streamNames, { searchText, queryTypes, queryIds, ruleIds, ruleBacked }) => {
       const ruleUnbacked: RuleUnbackedFilter =
