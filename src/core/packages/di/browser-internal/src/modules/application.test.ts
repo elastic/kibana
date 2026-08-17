@@ -9,8 +9,8 @@
 
 import type { Container } from 'inversify';
 import { inject, injectable } from 'inversify';
-import { KibanaContainerModule, OnSetup, OnStart } from '@kbn/core-di';
-import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { KibanaContainerModule } from '@kbn/core-di';
+import { injectionServiceMock, setup, start } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Application, ApplicationParameters } from '@kbn/core-di-browser';
 import type { App, AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
 import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-browser';
@@ -36,14 +36,6 @@ describe('application', () => {
   let container: Container;
   let application: jest.Mocked<TCoreSetup['application']>;
 
-  function setup() {
-    container.get(OnSetup)(container);
-  }
-
-  function start() {
-    container.get(OnStart)(container);
-  }
-
   beforeEach(() => {
     injection = injectionServiceMock.createStartContract();
     application = { register: jest.fn() } as unknown as typeof application;
@@ -57,7 +49,7 @@ describe('application', () => {
 
   describe('OnSetup', () => {
     it('should register an application', () => {
-      setup();
+      setup(container);
 
       expect(application.register).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -72,7 +64,7 @@ describe('application', () => {
     it('should not register an application if there are no corresponding bindings', () => {
       container.unbind(Application);
 
-      expect(setup).not.toThrow();
+      expect(() => setup(container)).not.toThrow();
       expect(application.register).not.toHaveBeenCalled();
     });
   });
@@ -93,8 +85,8 @@ describe('application', () => {
       unmountSpy = jest.spyOn(TestApplication.prototype, 'unmount');
       unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
 
-      setup();
-      start();
+      setup(container);
+      start(container);
       [{ mount }] = application.register.mock.lastCall!;
     });
 

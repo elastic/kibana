@@ -9,8 +9,8 @@
 
 import { type Container } from 'inversify';
 import { inject, injectable, optional } from 'inversify';
-import { createToken, KibanaContainerModule, OnSetup, OnStart } from '@kbn/core-di';
-import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { createToken, KibanaContainerModule } from '@kbn/core-di';
+import { injectionServiceMock, setup, start } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-server';
@@ -60,14 +60,6 @@ describe('http', () => {
   let http: jest.Mocked<TCoreSetup['http']>;
   let router: jest.Mocked<ReturnType<typeof http.createRouter>>;
 
-  function setup() {
-    container.get(OnSetup)(container);
-  }
-
-  function start() {
-    container.get(OnStart)(container);
-  }
-
   beforeEach(() => {
     jest.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
@@ -96,7 +88,7 @@ describe('http', () => {
 
   it('should register a route', () => {
     container.bind(Route).toConstantValue(TestRoute);
-    setup();
+    setup(container);
 
     expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
   });
@@ -104,13 +96,13 @@ describe('http', () => {
   it('should not register a route if there are no corresponding bindings ', () => {
     container.unbind(Route);
 
-    expect(setup).not.toThrow();
+    expect(() => setup(container)).not.toThrow();
     expect(router.post).not.toHaveBeenCalled();
   });
 
   it('should handle a request', async () => {
-    setup();
-    start();
+    setup(container);
+    start(container);
 
     const handleSpy = jest.spyOn(TestRoute.prototype, 'handle');
     expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
@@ -134,8 +126,8 @@ describe('http', () => {
 
   it('should handle a request with an asynchronously bound dependency', async () => {
     container.bind(AsyncValue).toResolvedValue(async () => 'resolved-value');
-    setup();
-    start();
+    setup(container);
+    start(container);
 
     const [, handler] = router.post.mock.lastCall!;
     const response = {
@@ -153,7 +145,7 @@ describe('http', () => {
     router.handleLegacyErrors.mockReturnValue(wrapper);
     TestRoute.handleLegacyErrors = true;
     container.bind(Route).toConstantValue(TestRoute);
-    setup();
+    setup(container);
     TestRoute.handleLegacyErrors = false;
 
     expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, wrapper);
