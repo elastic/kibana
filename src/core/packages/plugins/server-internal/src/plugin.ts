@@ -27,9 +27,18 @@ import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-serv
 import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
+import type { Plugin as CordisComponent, Service } from '@kbn/cordis';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
+
+/**
+ * A native Cordis plugin component — either a plain `{ inject?, apply }` object or a
+ * `Service` subclass constructor.  Exported from `server/index.ts` as `cordisPlugin`.
+ */
+export type CordisPluginDef =
+  | CordisComponent
+  | (new (ctx: any, ...args: any[]) => Service);
 
 interface PluginDefinition<
   TSetup = unknown,
@@ -40,6 +49,8 @@ interface PluginDefinition<
   readonly config?: PluginConfigDescriptor;
   readonly module?: ContainerModule;
   readonly plugin?: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  /** Native Cordis component — Stage 5 authoring style. */
+  readonly cordisPlugin?: CordisPluginDef;
 }
 
 /**
@@ -109,13 +120,34 @@ export class PluginWrapper<
     this.log.debug('Initializing plugin');
 
     this.definition = await this.getPluginDefinition();
-    this.instance = await this.createPluginInstance();
 
-    if (!('plugin' in this.definition || 'module' in this.definition)) {
+    if (
+      !('plugin' in this.definition || 'module' in this.definition || 'cordisPlugin' in this.definition)
+    ) {
       throw new Error(
-        `Plugin "${this.name}" does not export the "plugin" definition or "module" (${this.path}).`
+        `Plugin "${this.name}" does not export "plugin", "module", or "cordisPlugin" (${this.path}).`
       );
     }
+
+    // Native Cordis plugins don't go through createPluginInstance — the component
+    // is registered directly by the Cordis driver.
+    if (!('cordisPlugin' in this.definition)) {
+      this.instance = await this.createPluginInstance();
+    }
+  }
+
+  /** True when the plugin exports a native Cordis component (`cordisPlugin`). */
+  public get isCordisNative(): boolean {
+    return !!this.definition?.cordisPlugin;
+  }
+
+  /** Returns the native Cordis component.  Throws if not a native plugin. */
+  public getCordisComponent(): CordisPluginDef {
+    const component = this.definition?.cordisPlugin;
+    if (!component) {
+      throw new Error(`Plugin "${this.name}" is not a native Cordis plugin.`);
+    }
+    return component;
   }
 
   /**

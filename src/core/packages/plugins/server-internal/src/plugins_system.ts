@@ -12,7 +12,7 @@ import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
-import type { Context } from '@kbn/cordis';
+import { type Context, type Fiber, FiberState } from '@kbn/cordis';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -45,6 +45,8 @@ export class PluginsSystem<T extends PluginType> {
   public runtime: 'legacy' | 'cordis' = 'cordis';
   /** Root Cordis Context; initialised lazily by the Cordis driver in setupPlugins. */
   private cordisCtx?: Context;
+  /** Fibers for start-phase native Cordis plugins that are PENDING after setup. */
+  private readonly nativePendingFibers = new Map<PluginName, Fiber>();
 
   constructor(private readonly coreContext: CoreContext, public readonly type: T) {
     this.log = coreContext.logger.get('plugins-system', this.type);
@@ -382,40 +384,76 @@ export class PluginsSystem<T extends PluginType> {
     for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
 
-      let pluginSetupContext;
-      if (this.type === PluginType.preboot) {
-        pluginSetupContext = createPluginPrebootSetupContext({
-          deps: deps as PluginsServicePrebootSetupDeps,
-          plugin,
-        });
-      } else {
-        pluginSetupContext = createPluginSetupContext({
-          deps: deps as PluginsServiceSetupDeps,
-          plugin,
-          runtimeResolver: this.runtimeResolver,
-        });
-      }
-
       await plugin.init();
 
-      const { component, getContract, getCapturedError } = createSetupAdapter({
-        plugin,
-        plugins: this.plugins,
-        setupContext: pluginSetupContext,
-        contracts,
-        isDevMode: this.coreContext.env.mode.dev,
-        log: this.log,
-      });
+      if (plugin.isCordisNative) {
+        // ── Native Cordis plugin ──────────────────────────────────────────────
+        // The component is registered directly.  No legacy setup/start/stop
+        // lifecycle is involved.  If the component injects only setup-phase keys
+        // (e.g. 'core.http') it activates immediately.  If it injects start-phase
+        // keys it stays PENDING until those are provided in cordisStartPlugins.
+        const nativeComponent = plugin.getCordisComponent();
+        const fiber = await this.cordisCtx.plugin(nativeComponent);
+        // Cast to number to avoid TS2367 nominal mismatch between cordis's
+        // const-enum FiberState and our re-declared regular enum FiberState.
+        const fiberState = fiber.state as number;
 
-      // Spawn and await.  Since all inject keys for this plugin are already
-      // provided (sequential driver), the fiber immediately transitions to
-      // LOADING → apply() → ACTIVE.  The await resolves after apply completes.
-      const fiber = await this.cordisCtx.plugin(component);
-      assertActive(fiber, getCapturedError(), pluginName, 'setup');
+        if (fiberState === (FiberState.ACTIVE as number)) {
+          // Setup-phase native plugin: activated immediately.
+          const contract = this.cordisCtx.get(pluginName);
+          // Provide legacy-compat keys so legacy plugins that declare this as a
+          // requiredPlugin can inject '${id}.setup' and '${id}.start'.
+          this.cordisCtx.provide(`${pluginName}.setup`, { contract });
+          contracts.set(pluginName, contract);
+          this.satupPlugins.push(pluginName);
+        } else if (fiberState === (FiberState.PENDING as number)) {
+          // Start-phase native plugin: its inject keys (e.g. core.elasticsearch.start)
+          // are not yet resolved.  It will activate in cordisStartPlugins after the
+          // start-phase core keys are provided.
+          this.log.debug(
+            `Native plugin "${pluginName}" is start-phase; will activate after core.start.`
+          );
+          this.nativePendingFibers.set(pluginName, fiber);
+        } else {
+          throw new Error(
+            `Native Cordis plugin "${pluginName}" entered unexpected fiber state ${fiberState} during setup.`
+          );
+        }
+      } else {
+        // ── Legacy plugin ─────────────────────────────────────────────────────
+        let pluginSetupContext;
+        if (this.type === PluginType.preboot) {
+          pluginSetupContext = createPluginPrebootSetupContext({
+            deps: deps as PluginsServicePrebootSetupDeps,
+            plugin,
+          });
+        } else {
+          pluginSetupContext = createPluginSetupContext({
+            deps: deps as PluginsServiceSetupDeps,
+            plugin,
+            runtimeResolver: this.runtimeResolver,
+          });
+        }
 
-      const contract = getContract();
-      contracts.set(pluginName, contract);
-      this.satupPlugins.push(pluginName);
+        const { component, getContract, getCapturedError } = createSetupAdapter({
+          plugin,
+          plugins: this.plugins,
+          setupContext: pluginSetupContext,
+          contracts,
+          isDevMode: this.coreContext.env.mode.dev,
+          log: this.log,
+        });
+
+        // Spawn and await.  Since all inject keys for this plugin are already
+        // provided (sequential driver), the fiber immediately transitions to
+        // LOADING → apply() → ACTIVE.  The await resolves after apply completes.
+        const fiber = await this.cordisCtx.plugin(component);
+        assertActive(fiber, getCapturedError(), pluginName, 'setup');
+
+        const contract = getContract();
+        contracts.set(pluginName, contract);
+        this.satupPlugins.push(pluginName);
+      }
     }
 
     this.cordisCtx.provide('core.setupComplete', { complete: true });
@@ -451,9 +489,31 @@ export class PluginsSystem<T extends PluginType> {
     this.cordisCtx.provide('core.savedObjects.start', savedObjects);
     this.cordisCtx.provide('core.uiSettings.start', uiSettings);
 
+    // Activate start-phase native plugins: their inject keys are now resolved.
+    for (const [pluginName, fiber] of this.nativePendingFibers) {
+      this.log.debug(`Activating start-phase native plugin "${pluginName}"...`);
+      await fiber.await();
+      assertActive(fiber, undefined, pluginName, 'start');
+      const contract = this.cordisCtx.get(pluginName);
+      this.cordisCtx.provide(`${pluginName}.setup`, { contract });
+      this.cordisCtx.provide(`${pluginName}.start`, { contract });
+      contracts.set(pluginName, contract);
+      this.satupPlugins.push(pluginName);
+    }
+    this.nativePendingFibers.clear();
+
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
       const plugin = this.plugins.get(pluginName)!;
+
+      if (plugin.isCordisNative) {
+        // Native plugins have no start() lifecycle.  Provide the compat key so
+        // legacy plugins that depend on this one can inject '${id}.start'.
+        const contract = contracts.get(pluginName); // already set during setup
+        this.cordisCtx.provide(`${pluginName}.start`, { contract });
+        contracts.set(pluginName, contract);
+        continue;
+      }
 
       const { component, getContract, getCapturedError } = createStartAdapter({
         plugin,

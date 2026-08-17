@@ -210,7 +210,7 @@ test('`init` fails if no `plugin` initializer nor `module` is exported', async (
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"some-plugin-id\\" does not export the \\"plugin\\" definition or \\"module\\" (plugin-without-initializer-path)."`
+    `"Plugin \\"some-plugin-id\\" does not export \\"plugin\\", \\"module\\", or \\"cordisPlugin\\" (plugin-without-initializer-path)."`
   );
 });
 
