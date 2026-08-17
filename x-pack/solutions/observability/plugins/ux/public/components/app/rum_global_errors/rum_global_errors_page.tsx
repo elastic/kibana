@@ -648,7 +648,7 @@ function GlobalErrorsBody() {
             <EuiSpacer size="m" />
             {sortedGroups.length === 0 && !loading ? (
               <EuiEmptyPrompt
-                iconType="checkInCircleFilled"
+                iconType="checkCircleFill"
                 title={
                   <h3>
                     {groups.length === 0

@@ -172,7 +172,7 @@ export function RumReportView({ templateId }: { templateId: string }) {
   if (!hasDataLoading && !hasData) {
     return (
       <EuiEmptyPrompt
-        iconType="visArea"
+        iconType="chartArea"
         title={
           <h2>
             {i18n.translate('xpack.ux.reports.noRumDataTitle', { defaultMessage: 'Add RUM data' })}

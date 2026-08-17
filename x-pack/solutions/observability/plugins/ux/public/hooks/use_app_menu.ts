@@ -38,6 +38,14 @@ const APP_SETTINGS_MESSAGE = i18n.translate('xpack.ux.headerSettingsButtonLabel.
   defaultMessage: 'Settings for this application.',
 });
 
+const INJECT_SNIPPET_LABEL = i18n.translate('xpack.ux.headerInjectSnippetLinkText', {
+  defaultMessage: 'Inject snippet',
+});
+
+const INJECT_SNIPPET_MESSAGE = i18n.translate('xpack.ux.headerInjectSnippetTooltip', {
+  defaultMessage: 'Load the browser SDK from the collector, or copy a CSP-safe console snippet.',
+});
+
 export function useAppMenu(enableInspector: boolean) {
   const { application, http, inspector } = useKibanaServices();
   const { search } = useLocation();
@@ -69,6 +77,11 @@ export function useAppMenu(enableInspector: boolean) {
       serviceName,
       suffix: uxSettingsSuffix(serviceName),
     });
+    const uxInjectHref = uxAppHref(http.basePath.prepend, {
+      search,
+      serviceName,
+      suffix: '/settings/inject',
+    });
 
     const items = [
       {
@@ -78,6 +91,14 @@ export function useAppMenu(enableInspector: boolean) {
         iconType: 'gear',
         testId: 'uxHeaderSettingsLink',
         tooltipContent: serviceName ? APP_SETTINGS_MESSAGE : SETTINGS_MESSAGE,
+      },
+      {
+        id: 'injectSnippet',
+        label: INJECT_SNIPPET_LABEL,
+        href: uxInjectHref,
+        iconType: 'code',
+        testId: 'uxHeaderInjectSnippetLink',
+        tooltipContent: INJECT_SNIPPET_MESSAGE,
       },
       {
         id: 'addData',

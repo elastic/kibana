@@ -46,10 +46,6 @@ import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplaySessions } from '../../services/rest/session_replay_api';
 import { mergeRumSearch, pushRumPath } from '../../utils/rum_search';
 import { TabTrendChart } from '../app/rum_overview/tab_trend_chart';
-import {
-  SessionReplayInjectButton,
-  SessionReplayInjectFlyout,
-} from './session_replay_inject_flyout';
 import { useRumPageLoading } from '../app/rum_dashboard/rum_page_loading';
 import { LiveSessionsPanel } from './live_sessions_panel';
 import {
@@ -577,14 +573,14 @@ export function SessionReplayPanel() {
                 values: { count: item.replayEventCount },
               })}
             >
-              <EuiBadge color="success" iconType="playFilled" tabIndex={0}>
+              <EuiBadge color="success" iconType="play" tabIndex={0}>
                 {i18n.translate('xpack.ux.sessions.table.hasReplay', {
                   defaultMessage: 'Available',
                 })}
               </EuiBadge>
             </EuiToolTip>
           ) : (
-            <EuiBadge color="success" iconType="playFilled" tabIndex={0}>
+            <EuiBadge color="success" iconType="play" tabIndex={0}>
               {i18n.translate('xpack.ux.sessions.table.hasReplay', {
                 defaultMessage: 'Available',
               })}
@@ -674,12 +670,6 @@ export function SessionReplayPanel() {
     });
   }, [history]);
 
-  const [injectOpen, setInjectOpen] = useState(false);
-
-  const openSettings = useCallback(() => {
-    pushRumPath(history, '/settings');
-  }, [history]);
-
   return (
     <>
       <TabTrendChart accessor="sessions" />
@@ -687,9 +677,6 @@ export function SessionReplayPanel() {
       <LiveSessionsPanel />
       <EuiSpacer />
       <EuiPanel paddingSize="m" data-test-subj="uxSessionReplayListPage">
-        {injectOpen && (
-          <SessionReplayInjectFlyout http={http} onClose={() => setInjectOpen(false)} />
-        )}
         {(pageUrl || errorGroup || sessionIds || frustration || urlUser || urlLocation) && (
           <>
             <EuiCallOut
@@ -740,24 +727,6 @@ export function SessionReplayPanel() {
             <EuiSpacer size="s" />
           </>
         )}
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <SessionReplayInjectButton onClick={() => setInjectOpen(true)} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="gear"
-              onClick={openSettings}
-              data-test-subj="uxSessionReplaySettingsButton"
-            >
-              {i18n.translate('xpack.ux.sessions.settingsButton', {
-                defaultMessage: 'Settings',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
         <KpiStrip stats={stats} />
         <EuiSpacer size="m" />
 

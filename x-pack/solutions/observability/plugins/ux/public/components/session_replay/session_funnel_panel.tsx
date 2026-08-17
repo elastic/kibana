@@ -293,7 +293,7 @@ export function SessionFunnelPanel() {
         </EuiFlexGroup>
       ) : patterns && patterns.sessionsConsidered === 0 ? (
         <EuiEmptyPrompt
-          iconType="visBarHorizontal"
+          iconType="chartBarHorizontal"
           title={
             <h3>
               {i18n.translate('xpack.ux.patterns.emptyTitle', {

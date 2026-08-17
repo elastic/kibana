@@ -71,12 +71,12 @@ const goalIcon = (goal: { name: string; steps: FunnelStepDef[] }): string => {
     return 'user';
   }
   if (hay.includes('search')) {
-    return 'search';
+    return 'magnify';
   }
   if (/(cart|check|buy|purchase|order)/.test(hay)) {
-    return 'currency';
+    return 'money';
   }
-  return goal.steps[0]?.type === 'activity' ? 'tokenEvent' : 'cheer';
+  return goal.steps[0]?.type === 'activity' ? 'tokenEvent' : 'popper';
 };
 
 const toDraft = (goal: ConversionGoalDraft): ConversionGoalDraft => ({
@@ -367,7 +367,7 @@ export function ConversionGoalPanel({
     <div css={shellCss} data-test-subj="uxConversionGoalPanel">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="cheer" color="success" size="l" aria-hidden={true} />
+          <EuiIcon type="popper" color="success" size="l" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -450,7 +450,7 @@ export function ConversionGoalPanel({
               <EuiButtonEmpty
                 data-test-subj="uxGoalNewButton"
                 size="s"
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={() => setPresetOpen((open) => !open)}
               >
                 {i18n.translate('xpack.ux.goals.newButtonLabel', { defaultMessage: 'New goal' })}
@@ -515,7 +515,7 @@ export function ConversionGoalPanel({
               min={0}
               max={CONVERSION_GOAL_VALUE_MAX}
               value={editor.value}
-              prepend={<EuiIcon type="currency" size="s" aria-hidden={true} />}
+              prepend={<EuiIcon type="money" size="s" aria-hidden={true} />}
               onChange={(event) =>
                 setEditor((current) => ({
                   ...current,

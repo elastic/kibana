@@ -186,7 +186,7 @@ export function ReportToolbar({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="uxReportCsv"
-            iconType="exportAction"
+            iconType="download"
             onClick={() =>
               downloadCsv(
                 csvFilename(report.templateId, report.rangeFrom, report.rangeTo),
@@ -202,7 +202,7 @@ export function ReportToolbar({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="uxReportMarkdown"
-            iconType="editorComment"
+            iconType="comment"
             onClick={() => void copyMarkdown()}
           >
             {i18n.translate('xpack.ux.reports.toolbar.markdownButtonLabel', {
@@ -227,7 +227,7 @@ export function ReportToolbar({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="uxReportScheduleEmail"
-              iconType="email"
+              iconType="mail"
               onClick={onScheduleEmail}
             >
               {i18n.translate('xpack.ux.reports.toolbar.scheduleEmailButtonLabel', {

@@ -48,7 +48,7 @@ export function RumGithubLinks({
             size="s"
             href={links.fileHref}
             target="_blank"
-            iconType="popout"
+            iconType="external"
             data-test-subj="uxGithubOpenFileButton"
             aria-label={links.fileLabel ? `${openFileLabel}: ${links.fileLabel}` : openFileLabel}
           >
@@ -63,7 +63,7 @@ export function RumGithubLinks({
             fill={fillIssue}
             href={links.issueHref}
             target="_blank"
-            iconType="popout"
+            iconType="external"
             data-test-subj="uxGithubFileIssueButton"
           >
             {fileIssueLabel}

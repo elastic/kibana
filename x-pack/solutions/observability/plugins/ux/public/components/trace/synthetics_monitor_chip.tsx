@@ -67,7 +67,7 @@ export const SyntheticsMonitorChip = ({
         <EuiBadge
           href={href}
           color="hollow"
-          iconType="visLine"
+          iconType="chartLine"
           data-test-subj="uxSyntheticsMonitorChip"
         >
           {match.name}
@@ -86,7 +86,7 @@ export const SyntheticsMonitorChip = ({
         <EuiButtonEmpty
           data-test-subj="uxSyntheticsCreateCheck"
           size="s"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           href={addHref}
         >
           {i18n.translate('xpack.ux.synthetics.createCheck', {

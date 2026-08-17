@@ -24,7 +24,7 @@ export function RumOverview() {
     return (
       <EuiEmptyPrompt
         data-test-subj="rumNoDataCard"
-        iconType="visArea"
+        iconType="chartArea"
         title={
           <h2>
             {i18n.translate('xpack.ux.overview.beatsCard.title', {

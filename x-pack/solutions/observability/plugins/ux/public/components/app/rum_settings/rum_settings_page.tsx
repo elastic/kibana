@@ -20,6 +20,7 @@ import {
 } from '../../../utils/ux_app_path';
 import { WebApplicationSelect } from '../rum_dashboard/panels/web_application_select';
 import { CaptureSettingsPanel } from './capture_settings_panel';
+import { InjectSnippetPanel } from './inject_snippet_panel';
 import { RemoteClustersSettingsPanel } from './remote_clusters_settings_panel';
 import { RepositorySettingsPanel } from './repository_settings_panel';
 
@@ -33,6 +34,10 @@ const REPOSITORY_TAB_LABEL = i18n.translate('xpack.ux.settings.repositoryTabLabe
 
 const CAPTURE_TAB_LABEL = i18n.translate('xpack.ux.settings.captureTabLabel', {
   defaultMessage: 'Capture',
+});
+
+const INJECT_TAB_LABEL = i18n.translate('xpack.ux.settings.injectTabLabel', {
+  defaultMessage: 'Inject snippet',
 });
 
 const REMOTE_CLUSTERS_TAB_LABEL = i18n.translate('xpack.ux.settings.remoteClustersTabLabel', {
@@ -89,7 +94,7 @@ export function RumSettingsPage() {
               })
             : SETTINGS_LABEL,
           rightSideItems:
-            tab === 'repository' && serviceName
+            tab === 'inject' || (tab === 'repository' && serviceName)
               ? [
                   <div key="application" css={{ minWidth: 280, maxWidth: 360 }}>
                     <WebApplicationSelect />
@@ -112,6 +117,13 @@ export function RumSettingsPage() {
               ...tabHref('capture'),
             },
             {
+              id: 'inject',
+              label: INJECT_TAB_LABEL,
+              isSelected: tab === 'inject',
+              'data-test-subj': 'uxSettingsInjectTab',
+              ...tabHref('inject'),
+            },
+            {
               id: 'remote-clusters',
               label: REMOTE_CLUSTERS_TAB_LABEL,
               isSelected: tab === 'remote-clusters',
@@ -125,6 +137,8 @@ export function RumSettingsPage() {
           <RepositorySettingsPanel serviceName={serviceName} />
         ) : tab === 'remote-clusters' ? (
           <RemoteClustersSettingsPanel />
+        ) : tab === 'inject' ? (
+          <InjectSnippetPanel defaultServiceName={serviceName} />
         ) : (
           <CaptureSettingsPanel />
         )}

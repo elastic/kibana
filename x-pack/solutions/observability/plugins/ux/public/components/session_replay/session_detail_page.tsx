@@ -34,6 +34,7 @@ import { summarizeBackendCallsFromActions } from '../../../common/rum_backend';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionDetail } from '../../services/rest/session_replay_api';
 import { UserCell, WebVitalBadges, formatDurationMs, formatTime } from './session_ui';
+import { ReplayThumbnail } from './replay_thumbnail';
 import { uxAppHref, mergeRumSearch, pushRumPath, sessionsPatch } from '../../utils/rum_search';
 import { serviceNameFromPath, uxAppPath, uxSessionIdFromPath } from '../../utils/ux_app_path';
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
@@ -746,33 +747,6 @@ export function SessionDetailPage() {
     [history]
   );
 
-  const rightSideItems = useMemo(() => {
-    const items: React.ReactNode[] = [
-      <EuiButtonEmpty
-        key="back"
-        iconType="arrowLeft"
-        data-test-subj="uxSessionDetailBack"
-        onClick={() => pushRumPath(history, '/session-replay')}
-      >
-        {i18n.translate('xpack.ux.sessionDetail.back', { defaultMessage: 'Back to sessions' })}
-      </EuiButtonEmpty>,
-    ];
-    if (detail?.hasReplay) {
-      items.unshift(
-        <EuiButton
-          key="play"
-          fill
-          iconType="playFilled"
-          data-test-subj="uxSessionDetailPlay"
-          onClick={() => openPlayer()}
-        >
-          {i18n.translate('xpack.ux.sessionDetail.play', { defaultMessage: 'Play replay' })}
-        </EuiButton>
-      );
-    }
-    return items;
-  }, [detail?.hasReplay, history, openPlayer]);
-
   return (
     <div data-test-subj="uxSessionDetailPage">
       <PageTemplateComponent
@@ -781,25 +755,18 @@ export function SessionDetailPage() {
           pageTitle: i18n.translate('xpack.ux.sessionDetail.title', {
             defaultMessage: 'Session details',
           }),
-          description: detail ? (
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
-              <EuiFlexItem grow={false}>
-                <UserCell user={detail.user} client={detail.client} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  css={css`
-                    font-family: ${euiTheme.font.familyCode};
-                  `}
-                >
-                  {sessionId}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : undefined,
-          rightSideItems,
+          rightSideItems: [
+            <EuiButtonEmpty
+              key="back"
+              iconType="chevronSingleLeft"
+              data-test-subj="uxSessionDetailBack"
+              onClick={() => pushRumPath(history, '/session-replay')}
+            >
+              {i18n.translate('xpack.ux.sessionDetail.back', {
+                defaultMessage: 'Back to sessions',
+              })}
+            </EuiButtonEmpty>,
+          ],
         }}
       >
         {loading && (
@@ -837,76 +804,128 @@ export function SessionDetailPage() {
         {detail && !loading && !error && (
           <>
             <EuiPanel hasBorder paddingSize="l">
-              <EuiFlexGroup gutterSize="xl" wrap responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <SummaryStat
-                    icon="clock"
-                    iconColor={euiTheme.colors.primary}
-                    value={formatDurationMs(detail.durationMs)}
-                    label={i18n.translate('xpack.ux.sessionDetail.stat.duration', {
-                      defaultMessage: 'Duration',
-                    })}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SummaryStat
-                    icon="documents"
-                    iconColor={euiTheme.colors.accent}
-                    value={String(detail.pageCount)}
-                    label={i18n.translate('xpack.ux.sessionDetail.stat.pages', {
-                      defaultMessage: 'Pages visited',
-                    })}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SummaryStat
-                    icon="clickLeft"
-                    iconColor={euiTheme.colors.success}
-                    value={String(detail.actionCount)}
-                    label={i18n.translate('xpack.ux.sessionDetail.stat.actions', {
-                      defaultMessage: 'Actions',
-                    })}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SummaryStat
-                    icon="warning"
-                    iconColor={
-                      detail.errorCount > 0 ? euiTheme.colors.danger : euiTheme.colors.mediumShade
-                    }
-                    value={String(detail.errorCount)}
-                    valueColor={detail.errorCount > 0 ? euiTheme.colors.danger : undefined}
-                    label={i18n.translate('xpack.ux.sessionDetail.stat.errors', {
-                      defaultMessage: 'Errors',
-                    })}
-                  />
-                </EuiFlexItem>
-                {detail.rageClickCount > 0 && (
-                  <EuiFlexItem grow={false}>
-                    <SummaryStat
-                      icon="bolt"
-                      iconColor={euiTheme.colors.warning}
-                      value={String(detail.rageClickCount)}
-                      label={i18n.translate('xpack.ux.sessionDetail.stat.rage', {
-                        defaultMessage: 'Rage clicks',
-                      })}
-                    />
+              <EuiFlexGroup gutterSize="l" alignItems="flexStart" wrap>
+                {detail.hasReplay && (
+                  <EuiFlexItem grow={false} css={{ width: 380, maxWidth: '100%' }}>
+                    <ReplayThumbnail sessionId={sessionId} onOpen={() => openPlayer()} />
                   </EuiFlexItem>
                 )}
-              </EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFlexGroup
+                    gutterSize="m"
+                    alignItems="center"
+                    justifyContent="spaceBetween"
+                    wrap
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow>
+                      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+                        <EuiFlexItem grow={false}>
+                          <UserCell user={detail.user} client={detail.client} />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText
+                            size="xs"
+                            color="subdued"
+                            css={css`
+                              font-family: ${euiTheme.font.familyCode};
+                            `}
+                          >
+                            {sessionId}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    {detail.hasReplay && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          fill
+                          iconType="play"
+                          data-test-subj="uxSessionDetailPlay"
+                          onClick={() => openPlayer()}
+                        >
+                          {i18n.translate('xpack.ux.sessionDetail.play', {
+                            defaultMessage: 'Play replay',
+                          })}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                  <EuiSpacer size="l" />
+                  <EuiFlexGroup gutterSize="xl" wrap responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <SummaryStat
+                        icon="clock"
+                        iconColor={euiTheme.colors.primary}
+                        value={formatDurationMs(detail.durationMs)}
+                        label={i18n.translate('xpack.ux.sessionDetail.stat.duration', {
+                          defaultMessage: 'Duration',
+                        })}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <SummaryStat
+                        icon="documents"
+                        iconColor={euiTheme.colors.accent}
+                        value={String(detail.pageCount)}
+                        label={i18n.translate('xpack.ux.sessionDetail.stat.pages', {
+                          defaultMessage: 'Pages visited',
+                        })}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <SummaryStat
+                        icon="clickLeft"
+                        iconColor={euiTheme.colors.success}
+                        value={String(detail.actionCount)}
+                        label={i18n.translate('xpack.ux.sessionDetail.stat.actions', {
+                          defaultMessage: 'Actions',
+                        })}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <SummaryStat
+                        icon="warning"
+                        iconColor={
+                          detail.errorCount > 0
+                            ? euiTheme.colors.danger
+                            : euiTheme.colors.mediumShade
+                        }
+                        value={String(detail.errorCount)}
+                        valueColor={detail.errorCount > 0 ? euiTheme.colors.danger : undefined}
+                        label={i18n.translate('xpack.ux.sessionDetail.stat.errors', {
+                          defaultMessage: 'Errors',
+                        })}
+                      />
+                    </EuiFlexItem>
+                    {detail.rageClickCount > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <SummaryStat
+                          icon="bolt"
+                          iconColor={euiTheme.colors.warning}
+                          value={String(detail.rageClickCount)}
+                          label={i18n.translate('xpack.ux.sessionDetail.stat.rage', {
+                            defaultMessage: 'Rage clicks',
+                          })}
+                        />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
 
-              {hasVitals(detail.webVitals) && (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('xpack.ux.sessionDetail.coreWebVitals', {
-                      defaultMessage: 'Core Web Vitals',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <WebVitalBadges vitals={detail.webVitals} />
-                </>
-              )}
+                  {hasVitals(detail.webVitals) && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiText size="xs" color="subdued">
+                        {i18n.translate('xpack.ux.sessionDetail.coreWebVitals', {
+                          defaultMessage: 'Core Web Vitals',
+                        })}
+                      </EuiText>
+                      <EuiSpacer size="xs" />
+                      <WebVitalBadges vitals={detail.webVitals} />
+                    </>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiPanel>
 
             {detail.pageVisits.length > 1 && (

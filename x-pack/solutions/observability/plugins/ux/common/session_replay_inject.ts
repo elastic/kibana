@@ -9,6 +9,9 @@
 export const SESSION_REPLAY_VENDOR_BUNDLE_PATH =
   '/plugins/ux/assets/elastic_otel_browser_replay.min.js';
 
+/** Filename served by the collector tunnel next to OTLP `/v1/*`. */
+export const SESSION_REPLAY_SDK_SCRIPT_FILE = 'elastic-otel-browser-replay.min.js';
+
 export interface SessionReplayInjectSnippetParams {
   agentSource: string;
   otlpEndpoint: string;
@@ -21,6 +24,11 @@ export interface SessionReplayInjectSnippetParams {
   sampleRate?: number;
 }
 
+export const sessionReplaySdkScriptUrl = (otlpEndpoint: string): string => {
+  const base = otlpEndpoint.trim().replace(/\/+$/, '');
+  return base.length === 0 ? '' : `${base}/${SESSION_REPLAY_SDK_SCRIPT_FILE}`;
+};
+
 const injectConfig = ({
   otlpEndpoint,
   serviceName,
@@ -30,7 +38,8 @@ const injectConfig = ({
   maskTextSelector,
   captureGraphql,
   sampleRate,
-}: Omit<SessionReplayInjectSnippetParams, 'agentSource'>) => {
+  persistent = false,
+}: Omit<SessionReplayInjectSnippetParams, 'agentSource'> & { persistent?: boolean }) => {
   const capture: Record<string, unknown> = {};
   if (ignoreUrls.length) {
     capture.ignoreUrls = ignoreUrls;
@@ -51,9 +60,13 @@ const injectConfig = ({
   return {
     serviceName,
     otlpEndpoint,
-    resourceAttributes: {
-      'deployment.environment': 'devtools-inject',
-    },
+    ...(persistent
+      ? {}
+      : {
+          resourceAttributes: {
+            'deployment.environment': 'devtools-inject',
+          },
+        }),
     ...(Object.keys(capture).length ? { capture } : {}),
     replay: {
       enabled: true,
@@ -91,6 +104,18 @@ export const buildSessionReplayInjectPreview = ({
   // Paste the copied snippet into the DevTools console — do not load a remote <script>.
   window.edotBrowser = startBrowserSdk(CFG);
 })();`;
+};
+
+/** Page install: load the collector IIFE, then start the SDK. */
+export const buildSessionReplaySdkHtmlSnippet = (
+  params: Omit<SessionReplayInjectSnippetParams, 'agentSource'>
+): string => {
+  const scriptUrl = sessionReplaySdkScriptUrl(params.otlpEndpoint);
+  const cfg = injectConfig({ ...params, persistent: true });
+  return `<script src="${scriptUrl}"></script>
+<script>
+  window.edotBrowser = startBrowserSdk(${JSON.stringify(cfg, null, 2)});
+</script>`;
 };
 
 /**

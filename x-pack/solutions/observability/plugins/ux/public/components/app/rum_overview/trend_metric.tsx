@@ -78,14 +78,14 @@ export function TrendChartTypeGroup({
           label: i18n.translate('xpack.ux.overview.trends.areaChartButtonLabel', {
             defaultMessage: 'Area',
           }),
-          iconType: 'visArea',
+          iconType: 'chartArea',
         },
         {
           id: 'bar',
           label: i18n.translate('xpack.ux.overview.trends.barChartButtonLabel', {
             defaultMessage: 'Bar',
           }),
-          iconType: 'visBarVertical',
+          iconType: 'chartBarVertical',
         },
       ]}
       onChange={(id) => onChange(id === 'bar' ? 'bar' : 'area')}

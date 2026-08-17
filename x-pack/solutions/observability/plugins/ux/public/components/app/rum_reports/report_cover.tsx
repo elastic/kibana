@@ -85,7 +85,7 @@ export function ReportCover({
                 <EuiToolTip content={prevWeekLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="uxReportPrevWeek"
-                    iconType="arrowLeft"
+                    iconType="chevronSingleLeft"
                     size="s"
                     aria-label={prevWeekLabel}
                     onClick={onPrevWeek}
@@ -105,7 +105,7 @@ export function ReportCover({
                 <EuiToolTip content={nextWeekLabel} disableScreenReaderOutput>
                   <EuiButtonIcon
                     data-test-subj="uxReportNextWeek"
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                     size="s"
                     aria-label={nextWeekLabel}
                     onClick={onNextWeek}

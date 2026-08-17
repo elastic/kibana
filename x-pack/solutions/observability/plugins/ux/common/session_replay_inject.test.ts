@@ -8,6 +8,8 @@
 import {
   buildSessionReplayInjectPreview,
   buildSessionReplayInjectSnippet,
+  buildSessionReplaySdkHtmlSnippet,
+  sessionReplaySdkScriptUrl,
 } from './session_replay_inject';
 
 const FAKE_AGENT = 'globalThis.startBrowserSdk=function(cfg){return {sessionId:"x",cfg};};';
@@ -39,6 +41,34 @@ describe('buildSessionReplayInjectSnippet', () => {
 
     expect(snippet).toContain(JSON.stringify('https://otlp.test/"break'));
     expect(snippet).toContain(JSON.stringify("svc'name"));
+  });
+});
+
+describe('sessionReplaySdkScriptUrl', () => {
+  it('joins the collector host and IIFE filename', () => {
+    expect(sessionReplaySdkScriptUrl('https://abc.trycloudflare.com')).toBe(
+      'https://abc.trycloudflare.com/elastic-otel-browser-replay.min.js'
+    );
+    expect(sessionReplaySdkScriptUrl('https://abc.trycloudflare.com/')).toBe(
+      'https://abc.trycloudflare.com/elastic-otel-browser-replay.min.js'
+    );
+    expect(sessionReplaySdkScriptUrl('')).toBe('');
+  });
+});
+
+describe('buildSessionReplaySdkHtmlSnippet', () => {
+  it('loads the collector IIFE then starts the SDK', () => {
+    const html = buildSessionReplaySdkHtmlSnippet({
+      otlpEndpoint: 'https://abc.trycloudflare.com',
+      serviceName: 'colleague-app',
+    });
+
+    expect(html).toContain(
+      'src="https://abc.trycloudflare.com/elastic-otel-browser-replay.min.js"'
+    );
+    expect(html).toContain('window.edotBrowser = startBrowserSdk(');
+    expect(html).toContain('colleague-app');
+    expect(html).not.toContain('devtools-inject');
   });
 });
 

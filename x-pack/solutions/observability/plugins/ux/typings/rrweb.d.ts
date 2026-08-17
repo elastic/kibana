@@ -25,7 +25,7 @@ declare module 'rrweb' {
     getCurrentTime(): number;
     getMetaData(): { startTime: number; endTime: number; totalTime: number };
     on(event: string, handler: (...args: unknown[]) => void): this;
-    setConfig(config: { speed?: number }): void;
+    setConfig(config: { speed?: number; skipInactive?: boolean }): void;
     destroy?(): void;
   }
 }

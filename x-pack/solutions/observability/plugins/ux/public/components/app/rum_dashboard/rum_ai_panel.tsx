@@ -51,7 +51,7 @@ const PRESETS: Array<{
   },
   {
     id: 'slow_pages',
-    icon: 'visMapRegion',
+    icon: 'map',
     title: i18n.translate('xpack.ux.ai.presets.slowPagesTitle', {
       defaultMessage: 'Where is the site slow?',
     }),
@@ -81,7 +81,7 @@ const PRESETS: Array<{
   },
   {
     id: 'compare',
-    icon: 'visArea',
+    icon: 'chartArea',
     title: i18n.translate('xpack.ux.ai.presets.compareTitle', {
       defaultMessage: 'Compare vs last period',
     }),
@@ -294,7 +294,7 @@ export function RumAiPanel() {
         <EuiCallOut
           announceOnMount
           size="s"
-          iconType="iInCircle"
+          iconType="info"
           title={i18n.translate('xpack.ux.ai.chatHintTitle', {
             defaultMessage: 'Ask anything about this range — or pick a preset above.',
           })}

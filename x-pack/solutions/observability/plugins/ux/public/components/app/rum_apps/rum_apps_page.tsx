@@ -973,7 +973,7 @@ export function RumAppsPage() {
             ) : !loading && apps.length === 0 ? (
               <EuiEmptyPrompt
                 data-test-subj="uxAppsEmptyPrompt"
-                iconType="visArea"
+                iconType="chartArea"
                 title={
                   <h2>
                     {i18n.translate('xpack.ux.inventory.emptyTitle', {

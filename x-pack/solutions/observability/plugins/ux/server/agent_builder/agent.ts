@@ -32,7 +32,7 @@ export const rumAnalystAgentType = {
   name: 'RUM Analyst',
   description:
     'Investigates real-user performance, errors, frustration, and writes UX reports from RUM data.',
-  avatar_icon: 'visMapRegion',
+  avatar_icon: 'map',
   baseConfiguration: {
     instructions: RUM_ANALYST_INSTRUCTIONS,
     enable_elastic_capabilities: false,

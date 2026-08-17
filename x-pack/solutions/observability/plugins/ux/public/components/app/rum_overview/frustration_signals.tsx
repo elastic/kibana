@@ -70,7 +70,7 @@ const SIGNALS: Array<{
   },
   {
     kind: 'dead',
-    icon: 'minusInCircle',
+    icon: 'minusCircle',
     color: 'subdued',
     progress: 'subdued',
     testSubj: 'uxOverviewFrustrationDead',

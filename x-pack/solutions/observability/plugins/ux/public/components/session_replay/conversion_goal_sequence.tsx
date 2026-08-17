@@ -202,7 +202,7 @@ function StepCard({
               aria-label={i18n.translate('xpack.ux.goals.moveStepEarlierAriaLabel', {
                 defaultMessage: 'Move earlier',
               })}
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               size="s"
               disabled={index === 0}
               onClick={onMoveLeft}
@@ -220,7 +220,7 @@ function StepCard({
               aria-label={i18n.translate('xpack.ux.goals.moveStepLaterAriaLabel', {
                 defaultMessage: 'Move later',
               })}
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               size="s"
               disabled={index === total - 1}
               onClick={onMoveRight}
@@ -310,7 +310,7 @@ function AddStepCard({ onClick }: { onClick: () => void }) {
       <EuiButtonEmpty
         data-test-subj="uxGoalAddStepButton"
         size="s"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onClick}
       >
         {i18n.translate('xpack.ux.goals.addStepButtonLabel', { defaultMessage: 'Add step' })}

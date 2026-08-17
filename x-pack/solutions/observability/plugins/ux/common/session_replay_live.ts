@@ -18,6 +18,8 @@ export const LIVE_SESSION_LIST_SIZE_MAX = 25;
 export const LIVE_EVENT_PAGE_SIZE = 500;
 export const LIVE_EVENT_PAGE_SIZE_MAX = 2000;
 export const FULL_REPLAY_EVENT_PAGE_SIZE = 10000;
+/** First-page docs for a paused thumbnail (meta + full snapshot, possibly chunked). */
+export const PREVIEW_REPLAY_EVENT_PAGE_SIZE = 2000;
 
 export const RRWEB_EVENT_META = 4;
 export const RRWEB_EVENT_FULL_SNAPSHOT = 2;

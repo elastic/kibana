@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -34,6 +35,7 @@ import {
   pushRumPath,
 } from '../../utils/rum_search';
 import { serviceNameFromPath, uxSessionIdFromPath } from '../../utils/ux_app_path';
+import { skipIdleSeekMs } from '../../../common/session_replay_skip_idle';
 
 interface ReplayerMirror {
   getId: (node: Node) => number;
@@ -43,7 +45,7 @@ interface ReplayerMirror {
 interface ReplayerInstance {
   play: (timeOffset?: number) => void;
   pause: (timeOffset?: number) => void;
-  setConfig: (config: { speed?: number }) => void;
+  setConfig: (config: { speed?: number; skipInactive?: boolean }) => void;
   getCurrentTime: () => number;
   getMetaData: () => { startTime: number; endTime: number; totalTime: number };
   getMirror?: () => ReplayerMirror;
@@ -226,7 +228,7 @@ const InspectorPanel = ({ node }: { node: InspectedNode }) => {
             >
               <EuiButtonIcon
                 data-test-subj="uxInspectorPanelButton"
-                iconType="copyClipboard"
+                iconType="copy"
                 size="xs"
                 onClick={copy}
                 aria-label={i18n.translate('xpack.ux.sessionReplay.player.inspector.copySelector', {
@@ -357,6 +359,7 @@ export function SessionPlayerPage() {
   const shellRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const replayerRef = useRef<ReplayerInstance | null>(null);
+  const eventsRef = useRef<ReplayEventLike[]>([]);
   const playingRef = useRef(false);
 
   const [loading, setLoading] = useState(true);
@@ -364,6 +367,7 @@ export function SessionPlayerPage() {
   const [eventCount, setEventCount] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState('1');
+  const [skipIdle, setSkipIdle] = useState(false);
   const [currentMs, setCurrentMs] = useState(0);
   const [totalMs, setTotalMs] = useState(0);
   const [pageUrl, setPageUrl] = useState<string | null>(null);
@@ -374,6 +378,8 @@ export function SessionPlayerPage() {
   const [inspected, setInspected] = useState<InspectedNode | null>(null);
   const speedRef = useRef(speed);
   speedRef.current = speed;
+  const skipIdleRef = useRef(skipIdle);
+  skipIdleRef.current = skipIdle;
   const finishedRef = useRef(false);
   const lastSeekMsRef = useRef<number | null>(null);
   const lastTWriteRef = useRef(0);
@@ -637,6 +643,7 @@ export function SessionPlayerPage() {
       }
     }
     replayerRef.current = null;
+    eventsRef.current = [];
     if (containerRef.current) {
       containerRef.current.innerHTML = '';
     }
@@ -782,10 +789,10 @@ export function SessionPlayerPage() {
           setPageUrl(firstMeta.data.href);
         }
 
+        eventsRef.current = playableEvents;
         const replayer = new ReplayerCtor(playableEvents as never[], {
           root: containerRef.current,
           speed: Number(speedRef.current),
-          // Keep real-time pacing; skipInactive can look "stuck" on short demos.
           skipInactive: false,
         }) as unknown as ReplayerInstance;
 
@@ -878,9 +885,36 @@ export function SessionPlayerPage() {
     }
   }, [shellHeight, fitReplayToStage]);
 
+  const seekPastIdle = useCallback(() => {
+    if (!skipIdleRef.current) {
+      return;
+    }
+    const replayer = replayerRef.current;
+    if (!replayer) {
+      return;
+    }
+    const next = skipIdleSeekMs(eventsRef.current, replayer.getCurrentTime());
+    if (next == null) {
+      return;
+    }
+    if (playingRef.current) {
+      replayer.play(next);
+    } else {
+      replayer.pause(next);
+    }
+    setCurrentMs(next);
+    replaceSeekParam(next);
+  }, [replaceSeekParam]);
+
   useEffect(() => {
     replayerRef.current?.setConfig({ speed: Number(speed) });
   }, [speed]);
+
+  useEffect(() => {
+    if (skipIdle) {
+      seekPastIdle();
+    }
+  }, [skipIdle, seekPastIdle]);
 
   useEffect(() => {
     const stage = containerRef.current;
@@ -1077,6 +1111,7 @@ export function SessionPlayerPage() {
         return;
       }
       syncProgress(replayer);
+      seekPastIdle();
       const now = Date.now();
       if (now - lastTWriteRef.current >= 1000) {
         lastTWriteRef.current = now;
@@ -1084,7 +1119,7 @@ export function SessionPlayerPage() {
       }
     }, 100);
     return () => window.clearInterval(id);
-  }, [playing, syncProgress, replaceSeekParam]);
+  }, [playing, syncProgress, replaceSeekParam, seekPastIdle]);
 
   const progressPct = totalMs > 0 ? Math.min(100, (currentMs / totalMs) * 100) : 0;
   const controlsDisabled = loading || Boolean(error) || !ready;
@@ -1127,7 +1162,7 @@ export function SessionPlayerPage() {
             <EuiButtonEmpty
               data-test-subj="uxSessionPlayerPageBackToSessionsButton"
               key="back"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={() =>
                 pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`)
               }
@@ -1345,6 +1380,24 @@ export function SessionPlayerPage() {
                   buttonSize="compressed"
                   isDisabled={controlsDisabled}
                 />
+
+                <EuiToolTip
+                  content={i18n.translate('xpack.ux.sessionReplay.player.skipIdleTooltip', {
+                    defaultMessage:
+                      'Jump over gaps longer than 2 seconds with no recorded activity',
+                  })}
+                >
+                  <EuiSwitch
+                    compressed
+                    label={i18n.translate('xpack.ux.sessionReplay.player.skipIdleToggleSwitch', {
+                      defaultMessage: 'Skip idle',
+                    })}
+                    checked={skipIdle}
+                    onChange={(event) => setSkipIdle(event.target.checked)}
+                    disabled={controlsDisabled}
+                    data-test-subj="uxSessionReplaySkipIdle"
+                  />
+                </EuiToolTip>
 
                 <div css={styles.metaSpacer} />
 
