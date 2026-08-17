@@ -14,10 +14,19 @@ import { primaryActionPart } from './part';
 
 /** Declarative `FlyoutTemplate.Footer.PrimaryAction`. */
 export const PrimaryAction = primaryActionPart.createComponent<FlyoutFooterPrimaryActionProps>({
-  resolve: ({ label, onClick, iconType, isLoading, isDisabled, 'data-test-subj': dataTestSubj }) =>
+  resolve: ({
+    id,
+    label,
+    onClick,
+    iconType,
+    isLoading,
+    isDisabled,
+    'data-test-subj': dataTestSubj,
+  }) =>
     React.createElement(
       EuiButton,
       {
+        id,
         fill: true,
         iconType,
         isLoading,

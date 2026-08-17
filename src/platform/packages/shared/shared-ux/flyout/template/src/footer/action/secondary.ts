@@ -16,6 +16,7 @@ import { secondaryActionPart } from './part';
 export const SecondaryAction =
   secondaryActionPart.createComponent<FlyoutFooterSecondaryActionProps>({
     resolve: ({
+      id,
       label,
       onClick,
       iconType,
@@ -26,6 +27,7 @@ export const SecondaryAction =
       React.createElement(
         EuiButtonEmpty,
         {
+          id,
           iconType,
           isLoading,
           isDisabled,
