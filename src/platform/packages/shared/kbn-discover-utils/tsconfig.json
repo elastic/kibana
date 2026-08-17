@@ -35,6 +35,10 @@
     "@kbn/resizable-layout",
     "@kbn/search-errors",
     "@kbn/utility-types",
-    "@kbn/esql-language"
+    "@kbn/esql-language",
+    "@kbn/controls-schemas",
+    "@kbn/share-plugin",
+    "@kbn/saved-search-plugin",
+    "@kbn/control-group-renderer"
   ]
 }
