@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { EuiLink, EuiPopover, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
 import {
@@ -80,21 +80,33 @@ interface ProjectScopeColumnProps {
 
 const ProjectScopePopoverContent = ({
   cpsManager,
+  popoverTitleId,
   projectRouting,
   projectScopeContentTitle,
-}: ProjectScopeColumnProps & { projectScopeContentTitle: React.ReactNode }) => {
+}: ProjectScopeColumnProps & {
+  projectScopeContentTitle: React.ReactNode;
+  popoverTitleId: string;
+}) => {
   const effectiveProjectRouting = getEffectiveProjectRouting(projectRouting);
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) => cpsManager.fetchProjects(routing),
     [cpsManager]
   );
 
+  const popoverTitle = useMemo(() => {
+    return (
+      <EuiText size="s">
+        <p id={popoverTitleId}>{projectScopeContentTitle}</p>
+      </EuiText>
+    );
+  }, [popoverTitleId, projectScopeContentTitle]);
+
   return (
     <ProjectPickerContent
       projectRouting={effectiveProjectRouting}
       fetchProjectsByRouting={fetchProjects}
       controlsState="hidden"
-      customHeaderText={projectScopeContentTitle}
+      customHeaderText={popoverTitle}
     />
   );
 };
@@ -166,6 +178,7 @@ export const ProjectScopeColumn = ({ cpsManager, projectRouting }: ProjectScopeC
       repositionOnScroll
     >
       <ProjectScopePopoverContent
+        popoverTitleId={popoverTitleId}
         cpsManager={cpsManager}
         projectRouting={projectRouting}
         projectScopeContentTitle={projectScopeLabel}
