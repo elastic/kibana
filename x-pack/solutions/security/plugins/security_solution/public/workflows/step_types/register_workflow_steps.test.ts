@@ -18,6 +18,7 @@ import { setAttackStatusStepDefinition } from './set_attack_status_step/set_atta
 import { setAttackTagsStepDefinition } from './set_attack_tags_step/set_attack_tags_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { createNoteStepDefinition } from './create_note_step/create_note_step';
 import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
@@ -51,6 +52,7 @@ describe('registerWorkflowSteps (public)', () => {
       loader9,
       loader10,
       loader11,
+      loader12,
     ] = workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
@@ -63,6 +65,7 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader8()).resolves.toBe(setAttackTagsStepDefinition);
     await expect(loader9()).resolves.toBe(enableRuleStepDefinition);
     await expect(loader10()).resolves.toBe(disableRuleStepDefinition);
-    await expect(loader11()).resolves.toBe(getNotesStepDefinition);
+    await expect(loader11()).resolves.toBe(createNoteStepDefinition);
+    await expect(loader12()).resolves.toBe(getNotesStepDefinition);
   });
 });

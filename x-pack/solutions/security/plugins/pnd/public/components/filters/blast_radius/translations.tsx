@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const BACK_DEFAULT = i18n.translate('xpack.pnd.pageHeader.backDefault', {
-  defaultMessage: 'Back',
+export const BLAST_RADIUS_LABELS = Object.freeze({
+  title: i18n.translate('xpack.pnd.blastRadius.title', {
+    defaultMessage: 'Blast radius',
+  }),
 });

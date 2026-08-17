@@ -56,6 +56,9 @@ export const registerWorkflowSteps = (
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./create_note_step/create_note_step').then((m) => m.createNoteStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
     import('./get_notes_step/get_notes_step').then((m) => m.getNotesStepDefinition)
   );
 };
