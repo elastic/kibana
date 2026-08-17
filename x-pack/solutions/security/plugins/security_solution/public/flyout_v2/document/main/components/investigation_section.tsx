@@ -63,7 +63,10 @@ export const InvestigationSection = memo(
       [hit]
     );
     const documentIndexName = hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '';
-    const isRemoteDocument = useMemo(() => isNonLocalIndexName(documentIndexName), [hit]);
+    const isRemoteDocument = useMemo(
+      () => isNonLocalIndexName(documentIndexName),
+      [documentIndexName]
+    );
     const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const ruleId = useMemo(
       () =>
