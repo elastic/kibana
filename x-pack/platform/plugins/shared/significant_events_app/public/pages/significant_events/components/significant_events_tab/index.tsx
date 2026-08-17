@@ -154,8 +154,7 @@ const TABLE_CAPTION = i18n.translate(
 const EVENT_NOT_FOUND_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.eventNotFound',
   {
-    defaultMessage:
-      'The linked significant event was not found. It may have been deleted or expired.',
+    defaultMessage: 'Significant event was not found',
   }
 );
 const LOADING_MESSAGE = i18n.translate(
