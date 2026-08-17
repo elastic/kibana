@@ -61,6 +61,8 @@ describe('conversation model converters', () => {
     const documentBase = (): ConversationDocument => {
       return {
         _id: 'conv_id',
+        _seq_no: 1,
+        _primary_term: 1,
         _source: {
           agent_id: 'agent_id',
           title: 'conv_title',
@@ -837,6 +839,8 @@ describe('conversation model converters', () => {
 
       const roundTripped = fromEs({
         _id: conversation.id,
+        _seq_no: 1,
+        _primary_term: 1,
         _source: toEs(conversation, 'space'),
       });
 
@@ -1014,6 +1018,8 @@ describe('conversation model converters', () => {
       it('deserializes metadata, template_id, and template_version when present in the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-tmpl',
+          _seq_no: 1,
+          _primary_term: 1,
           _source: {
             agent_id: 'agent_id',
             title: 'Template conv',
@@ -1039,6 +1045,8 @@ describe('conversation model converters', () => {
       it('omits metadata, template_id, and template_version when absent from the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-no-tmpl',
+          _seq_no: 1,
+          _primary_term: 1,
           _source: {
             agent_id: 'agent_id',
             title: 'No template',
