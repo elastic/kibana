@@ -9,10 +9,16 @@ import {
   applicationConnectionMatchesFreeText,
   applicationConnectionMatchesStatus,
   applicationConnectionsMatchesFreeText,
+  getActionMode,
   getConnectionStatus,
+  getUnselectableRowMessage,
+  isDeletable,
   isRevocable,
+  matchesActionMode,
   toApplicationConnectionList,
+  toSingleModeSelection,
 } from './application_connections_filters';
+import { labels } from '../constants/i18n';
 import type { ApplicationConnection, ApplicationConnections } from '../constants/types';
 import type { OAuthClient, OAuthConnection } from '../service/application_connections_api_client';
 
@@ -405,5 +411,111 @@ describe('#isRevocable', () => {
         })
       )
     ).toBe(false);
+  });
+});
+
+describe('#isDeletable', () => {
+  it('is deletable once the connection is revoked', () => {
+    expect(
+      isDeletable(createApplicationConnection({ connection: createConnection({ revoked: true }) }))
+    ).toBe(true);
+  });
+
+  it('is deletable when the owning client is revoked', () => {
+    expect(
+      isDeletable(
+        createApplicationConnection({
+          client: createClient({ revoked: true }),
+          connection: createConnection({ revoked: false }),
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('is not deletable while the connection is still connected or expired', () => {
+    expect(isDeletable(createApplicationConnection())).toBe(false);
+    expect(
+      isDeletable(createApplicationConnection({ connection: createConnection({ expired: true }) }))
+    ).toBe(false);
+  });
+});
+
+describe('#getActionMode', () => {
+  it('maps connected and expired connections to the revoke action', () => {
+    expect(getActionMode(createApplicationConnection())).toBe('revoke');
+    expect(
+      getActionMode(
+        createApplicationConnection({ connection: createConnection({ expired: true }) })
+      )
+    ).toBe('revoke');
+  });
+
+  it('maps revoked connections to the delete action', () => {
+    expect(
+      getActionMode(
+        createApplicationConnection({ connection: createConnection({ revoked: true }) })
+      )
+    ).toBe('delete');
+  });
+});
+
+describe('#matchesActionMode', () => {
+  const connected = createApplicationConnection();
+  const revoked = createApplicationConnection({
+    connection: createConnection({ revoked: true }),
+  });
+
+  it('matches everything while no mode is active', () => {
+    expect(matchesActionMode(connected, null)).toBe(true);
+    expect(matchesActionMode(revoked, null)).toBe(true);
+  });
+
+  it('only matches the rows belonging to the active mode', () => {
+    expect(matchesActionMode(connected, 'revoke')).toBe(true);
+    expect(matchesActionMode(revoked, 'revoke')).toBe(false);
+    expect(matchesActionMode(revoked, 'delete')).toBe(true);
+    expect(matchesActionMode(connected, 'delete')).toBe(false);
+  });
+});
+
+describe('#toSingleModeSelection', () => {
+  const connected = createApplicationConnection({ connection: createConnection({ id: 'conn-1' }) });
+  const revoked = createApplicationConnection({
+    connection: createConnection({ id: 'conn-2', revoked: true }),
+  });
+
+  it('keeps only the entries matching the preferred mode when the selection spans both', () => {
+    expect(toSingleModeSelection([connected, revoked], 'revoke')).toEqual([connected]);
+    expect(toSingleModeSelection([connected, revoked], 'delete')).toEqual([revoked]);
+  });
+
+  it('leaves a selection that already belongs to a single mode untouched', () => {
+    expect(toSingleModeSelection([connected], 'revoke')).toEqual([connected]);
+    expect(toSingleModeSelection([revoked], 'delete')).toEqual([revoked]);
+  });
+
+  it('falls back to the selection when nothing matches the preferred mode', () => {
+    expect(toSingleModeSelection([revoked], 'revoke')).toEqual([revoked]);
+    expect(toSingleModeSelection([connected], 'delete')).toEqual([connected]);
+  });
+
+  it('returns an empty selection unchanged', () => {
+    expect(toSingleModeSelection([], 'revoke')).toEqual([]);
+  });
+});
+
+describe('#getUnselectableRowMessage', () => {
+  it('explains that revoked rows are held back by a revoke selection', () => {
+    expect(
+      getUnselectableRowMessage(
+        createApplicationConnection({ connection: createConnection({ revoked: true }) })
+      )
+    ).toBe(labels.connectionColumns.deletableRowNotSelectableLabel);
+  });
+
+  it('explains that connected rows are held back by a delete selection', () => {
+    expect(getUnselectableRowMessage(createApplicationConnection())).toBe(
+      labels.connectionColumns.revocableRowNotSelectableLabel
+    );
   });
 });
