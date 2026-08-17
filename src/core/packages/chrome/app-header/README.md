@@ -128,6 +128,21 @@ Description and `metadata` share the secondary row and are mutually exclusive. U
 structured entity facts such as status, owner, or creation time. Documentation links that are not
 part of a necessary description belong in the app menu via `docLink`.
 
+## Strict props
+
+The public types are the contract: strings, callbacks, known unions. A type assertion can still
+pass a React node as a `label`, or extra keys that get spread into EUI. Either path paints custom
+UI and the header stops looking like one component.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
+
+If a layout cannot be expressed with the public API, extend the API. The deprecated
+`renderCustomBadge` hatch is the only supported custom-UI path today.
+
+Menu item text is coerced the same way in `@kbn/ui-app-menu`.
+
 ## Title size
 
 The title is `xs` with `compact` spacing and `s` with every other spacing mode. This is automatic —

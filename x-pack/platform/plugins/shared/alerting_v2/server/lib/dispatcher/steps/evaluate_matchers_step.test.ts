@@ -12,6 +12,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import {
   createActionPolicy,
   createAlertEpisode,
+  createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
   createRuleScopedActionPolicy,
@@ -33,7 +34,7 @@ describe('EvaluateMatchersStep', () => {
 
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
-    step = new EvaluateMatchersStep(loggerService);
+    step = new EvaluateMatchersStep();
   });
 
   const runStep = async (
@@ -41,7 +42,13 @@ describe('EvaluateMatchersStep', () => {
     rules: Map<RuleId, Rule>,
     policies: Map<ActionPolicyId, ActionPolicy>
   ): Promise<MatchedPair[]> => {
-    const state = createDispatcherPipelineState({ dispatchable, rules, policies });
+    const state = createDispatcherPipelineState({
+      dispatchable,
+      rules,
+      policies,
+      logger: loggerService,
+      input: createDispatcherPipelineInput({ logger: loggerService }),
+    });
     const result = await step.execute(state);
     if (result.type !== 'continue') {
       throw new Error(`expected step output 'continue', got '${result.type}'`);

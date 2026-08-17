@@ -13,12 +13,19 @@ import type { PanelFailure } from '../utils';
 import type { PanelAuthoringNote } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
 
+export type ResolveCustomContentTemplate = (params: {
+  prompt: string;
+  esqlQuery?: string;
+  existingTemplate?: string;
+}) => Promise<string>;
+
 export interface OperationExecutionContext {
   logger: Logger;
   failures: PanelFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
   resolvedPanelCreationRequests: Map<number, ResolvedPanelCreationRequest[]>;
   resolvePanelContent?: ResolvePanelContent;
+  resolveCustomContentTemplate?: ResolveCustomContentTemplate;
 }
 
 export interface OperationHandlerParams<TOperation> {
