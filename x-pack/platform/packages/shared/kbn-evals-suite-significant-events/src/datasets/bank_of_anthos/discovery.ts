@@ -34,9 +34,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   event_id: LEDGER_DB_CASCADE_EVENT_ID,
   title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
-    'Customer transaction flows are failing across confirmed frontend and ledger service dependency paths, with balance validation and transaction submissions impacted.',
+    'SQLState 08001 connection refused from transactionhistory to PostgreSQL is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
   summary:
-    'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
+    'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail with connection refused on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
   severity: '80-critical',
   confidence: 0.82,
   stream_names: ['logs'],
@@ -183,37 +183,30 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   blast_radius: [
     {
       type: 'dependency',
-      feature_id: 'frontend-balancereader',
+      feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-transactionhistory',
+      feature_id: 'frontend-transactionhistory-http',
       source: 'frontend',
       target: 'transactionhistory',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-ledgerwriter',
+      feature_id: 'frontend-ledgerwriter-http',
       source: 'frontend',
       target: 'ledgerwriter',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'ledgerwriter-balancereader',
+      feature_id: 'ledgerwriter-balancereader-http',
       source: 'ledgerwriter',
       target: 'balancereader',
-      stream_name: 'logs',
-    },
-    {
-      type: 'dependency',
-      feature_id: 'ledgerwriter-postgresql',
-      source: 'ledgerwriter',
-      target: 'postgresql',
       stream_name: 'logs',
     },
   ],
@@ -384,7 +377,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter linked by SQLState 08001, cache errors, and frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
       expected_confirmed_rule_uuids: {
         [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
@@ -392,22 +385,22 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
-          text: 'States one sentence connecting every grouped detection through the confirmed service/dependency topology and current evidence, including SQLState 08001 where observed. Uses compatible exact-query KI context for sparse rows without presenting KI context as proof of current activity or claiming an unsupported root cause.',
+          text: 'States one sentence connecting every grouped detection through the evidenced database/connectivity cascade — SQLState 08001 or JDBC connection failures, cache errors, and frontend connection refusals/timeouts across transactionhistory, balancereader, and ledgerwriter. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
           score: 3,
         },
         {
-          id: 'cascade-transactionhistory-cluster',
-          text: 'Groups the SQL connection failure, the shared cache errors, and the frontend→transactionhistory connection failures into a single discovery (transactionhistory service cluster).',
-          score: 1,
+          id: 'cascade-full-grouping',
+          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed database-connectivity and cache failure hypothesis rather than split into separate service-scoped discoveries.',
+          score: 2,
         },
         {
           id: 'cascade-full-grouping',
-          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster when the confirmed service/dependency topology and compatible impacts support that grouping.',
+          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster rather than split into separate service-scoped discoveries, when the SQLState 08001 / connection-refused mechanism and compatible impacts support that grouping.',
           score: 2,
         },
         {
           id: 'dependency-chain',
-          text: 'Names the confirmed dependencies and downstream impact on the frontend read/write paths across transactionhistory, balancereader, and ledgerwriter without inventing unsupported database edges.',
+          text: 'Names KI-grounded dependency paths in the cascade — at minimum frontend→transactionhistory, frontend→balancereader, and frontend→ledgerwriter HTTP impacts, plus ledgerwriter→balancereader where topology supports it — and describes downstream user-journey impact across balance, transaction-history, payment, and deposit flows.',
           score: 1,
         },
         {

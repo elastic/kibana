@@ -36,7 +36,7 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every fresh signal must use the grounding contract: description states the observed row signature and impact, while `verdict` is `confirms`, `refutes`, `off_topic`, `inconclusive`, or `not_checked`. Do not repeat a Verdict label in the description or add process narration and a "Testing: … Expected: …" preamble. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format.',
+    text: 'Every fresh signal must set `verdict` to `confirms`, `refutes`, `off_topic`, `inconclusive`, or `not_checked`. Do not repeat a Verdict label in the description or add process narration and a "Testing: … Expected: …" preamble. For `confirms`, `refutes`, and `off_topic`, the description states the observed row signature and impact. For `inconclusive`, the description states why the query could not establish a conclusion (empty, error, or ambiguous result). For `not_checked`, the description states that no query ran and why. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,

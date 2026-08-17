@@ -159,6 +159,29 @@ describe('DetectionFlyout', () => {
     expect(screen.getByRole('heading', { name: 'latency-p95-spike' })).toBeInTheDocument();
     expect(screen.getByText('Detection')).toBeInTheDocument();
     expect(screen.getByText('Spike')).toBeInTheDocument();
+    expect(screen.getByText('Confirmed')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['confirms', 'Confirmed'],
+    ['refutes', 'Refuted'],
+    ['off_topic', 'Off topic'],
+    ['inconclusive', 'Inconclusive'],
+    ['not_checked', 'Not checked'],
+  ] as const)('shows the %s verdict badge', (verdict, label) => {
+    renderFlyout({ signal: { ...mockSignal, verdict } });
+
+    expect(screen.getByText(label)).toBeInTheDocument();
+  });
+
+  it('hides the verdict badge without a signal', () => {
+    renderFlyout({ signal: undefined });
+
+    expect(screen.queryByText('Confirmed')).not.toBeInTheDocument();
+    expect(screen.queryByText('Refuted')).not.toBeInTheDocument();
+    expect(screen.queryByText('Off topic')).not.toBeInTheDocument();
+    expect(screen.queryByText('Inconclusive')).not.toBeInTheDocument();
+    expect(screen.queryByText('Not checked')).not.toBeInTheDocument();
   });
 
   it('formats the detection timestamp using the dateFormat advanced setting', () => {

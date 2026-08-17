@@ -82,17 +82,6 @@ describe('scoreToolUsage', () => {
     expect(result.label).toBe(`missing-${TOOL_ID_EVENT_SEARCH}`);
   });
 
-  it('does not require a legacy confirmation filter', () => {
-    const steps = allExpectedTools.map((step) =>
-      step.tool_id === TOOL_ID_EVENT_SEARCH
-        ? toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] })
-        : step
-    );
-    const result = scoreToolUsage({ steps, detectionCount: 1 });
-
-    expect(result).toMatchObject({ score: 1, label: 'correct' });
-  });
-
   it('requires topology search before writing a topology-bearing event after a zero-result rule search', () => {
     const steps = [
       toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }, [
@@ -215,11 +204,9 @@ describe('scoreToolUsageContinuation', () => {
 
   it('still flags missing-topology-search when expectReuse is false (new event after closed seed)', () => {
     const stepsWithTopologyWrite = [
-      toolCall(
-        TOOL_ID_EVENT_SEARCH,
-        { exclude_unconfirmed_signals: true, rule_uuids: ['rule-uuid-1'] },
-        [{ data: { total: 0, events: [] } }]
-      ),
+      toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }, [
+        { data: { total: 0, events: [] } },
+      ]),
       toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
       toolCall(TOOL_ID_EXECUTE_ESQL),
       toolCall(TOOL_ID_EVENTS_WRITE, {

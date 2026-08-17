@@ -10,13 +10,10 @@ import { groupingCorrectnessEvaluator } from './grouping_correctness';
 
 // Only `rule_uuid` matters to this evaluator (grouping is judged by rule_uuid membership per
 // event) — cast past the full shape rather than filling in unused required fields.
-const buildSignal = (
-  rule_uuid: string,
-  verdict: SignalEntry['verdict'] = 'confirms'
-): SignalEntry => ({
+const buildSignal = (rule_uuid: string): SignalEntry => ({
   type: 'detection',
   stream_name: 'logs',
-  verdict,
+  verdict: 'confirms',
   description: 'Found: checkout timeout to payment API. Impact: checkout degraded.',
   metadata: {
     rule_uuid,
@@ -29,13 +26,6 @@ const buildSignal = (
 const buildEvent = (...ruleUuids: string[]): Partial<SignificantEvent> => ({
   status: 'open',
   signals: ruleUuids.map((rule_uuid) => buildSignal(rule_uuid)),
-});
-
-const buildEventWithVerdicts = (
-  ...rules: Array<[string, SignalEntry['verdict']]>
-): Partial<SignificantEvent> => ({
-  status: 'open',
-  signals: rules.map(([ruleUuid, verdict]) => buildSignal(ruleUuid, verdict)),
 });
 
 // The expected grouping is derived from `expected_significant_events`, so build them from the gold groups.
@@ -68,33 +58,6 @@ describe('groupingCorrectnessEvaluator', () => {
     const result = await evaluate([buildEvent('a'), buildEvent('b')], [['a'], ['b']]);
     expect(result.score).toBe(1);
   });
-
-  it('allows a found off-topic observation to join its directly matching confirmed event', async () => {
-    const result = await evaluate(
-      [buildEventWithVerdicts(['confirmed', 'confirms'], ['off-topic', 'off_topic'])],
-      [['confirmed', 'off-topic']]
-    );
-    expect(result.score).toBe(1);
-  });
-
-  it('penalizes merging an unrelated off-topic observation into a confirmed event', async () => {
-    const result = await evaluate(
-      [buildEventWithVerdicts(['confirmed', 'confirms'], ['off-topic', 'off_topic'])],
-      [['confirmed'], ['off-topic']]
-    );
-    expect(result.score).toBe(0);
-  });
-
-  it.each(['inconclusive', 'not_checked'] as const)(
-    'keeps a %s detection outside a confirmed component',
-    async (verdict) => {
-      const result = await evaluate(
-        [buildEventWithVerdicts(['confirmed', 'confirms'], ['non-confirming', verdict])],
-        [['confirmed'], ['non-confirming']]
-      );
-      expect(result.score).toBe(0);
-    }
-  );
 
   it('ignores valid standalone signals outside the declared expected event universe', async () => {
     const result = await evaluate(
