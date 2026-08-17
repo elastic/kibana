@@ -8,11 +8,11 @@
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -71,13 +71,13 @@ export function EcfSection({ serviceCount }: EcfSectionProps) {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink>
+            <EuiBadge color="hollow">
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.serviceBadge"
                 defaultMessage="{count, plural, one {# service} other {# services}}"
                 values={{ count: serviceCount }}
               />
-            </EuiLink>
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </button>

@@ -22,6 +22,7 @@ import {
   getCloudConnectorNameError,
   isCloudConnectorNameValid,
   CLOUD_CONNECTOR_NAME_MAX_LENGTH,
+  getAnyCloudConnectorIacTemplateUrl,
 } from './utils';
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from './constants';
 import type { CloudConnectorCredentials } from './types';
@@ -946,8 +947,6 @@ describe('Cloud Connector Name Validation', () => {
     });
   });
 });
-
-import { getAnyCloudConnectorIacTemplateUrl } from './utils';
 
 describe('getAnyCloudConnectorIacTemplateUrl', () => {
   it('returns undefined for undefined input', () => {

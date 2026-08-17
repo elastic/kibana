@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,6 +54,12 @@ export function ManagedIntegrationsSection({
   const [preferredMethod, setPreferredMethod] = useState<PreferredMethod>(
     showIdentityFederation ? 'identity_federation' : 'access_keys'
   );
+
+  useEffect(() => {
+    if (!showIdentityFederation && preferredMethod === 'identity_federation') {
+      setPreferredMethod('access_keys');
+    }
+  }, [showIdentityFederation, preferredMethod]);
   const [isDeployReady, setIsDeployReady] = useState(false);
 
   const { data: awsPackageResponse } = useGetPackageInfoByKeyQuery(
@@ -125,13 +132,13 @@ export function ManagedIntegrationsSection({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink>
+            <EuiBadge color="hollow">
               <FormattedMessage
                 id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.servicesLink"
                 defaultMessage="{count, plural, one {# service} other {# services}}"
                 values={{ count: serviceCount }}
               />
-            </EuiLink>
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       </button>
