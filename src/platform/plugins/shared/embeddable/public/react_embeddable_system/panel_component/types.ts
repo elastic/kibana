@@ -66,9 +66,9 @@ export interface PresentationPanelProps<
   hidePanelChrome?: boolean;
 
   /**
-   * Optional search term to highlight in the panel title
+   * Optional search terms to highlight in the panel title
    */
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
 }
 
 /**

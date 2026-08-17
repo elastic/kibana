@@ -197,6 +197,8 @@
       "@kbn/app-header/*": ["./src/core/packages/chrome/app-header/*"],
       "@kbn/app-link-test-plugin": ["./src/platform/test/plugin_functional/plugins/app_link_test"],
       "@kbn/app-link-test-plugin/*": ["./src/platform/test/plugin_functional/plugins/app_link_test/*"],
+      "@kbn/app-menu": ["./src/core/packages/chrome/app-menu/app-menu"],
+      "@kbn/app-menu/*": ["./src/core/packages/chrome/app-menu/app-menu/*"],
       "@kbn/application-usage-test-plugin": ["./x-pack/platform/test/usage_collection/plugins/application_usage_test"],
       "@kbn/application-usage-test-plugin/*": ["./x-pack/platform/test/usage_collection/plugins/application_usage_test/*"],
       "@kbn/as-code-data-views-schema": ["./src/platform/packages/shared/as-code/data-views-schema"],
