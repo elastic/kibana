@@ -18,30 +18,27 @@
 
 import { DiscoverApp, extendPlaywrightPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData } from '../fixtures';
+import { loadSavedObjectIdFromArchive, spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Discover ES|QL controls - open dashboard panel in Discover',
   { tag: '@local-stateful-classic' },
   () => {
-    // `savedObjects.load()` imports with `createNewCopies`, so the dashboard gets
-    // a fresh ID on every run and has to be captured from the import response.
     let dashboardId: string;
 
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
-      const imported = await discoverScoutSpace.savedObjects.load(
-        testData.ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE
+      dashboardId = await loadSavedObjectIdFromArchive(
+        discoverScoutSpace,
+        testData.ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE,
+        'dashboard'
       );
-      const dashboard = imported.find(({ type }) => type === 'dashboard');
-      if (!dashboard) {
-        throw new Error(
-          `Expected a dashboard in ${testData.ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE}, got: ${imported
-            .map(({ type }) => type)
-            .join(', ')}`
-        );
-      }
-      dashboardId = dashboard.id;
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      // Editor is enough to open a dashboard panel in Discover; running as admin would
+      // mask a privilege regression.
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
@@ -50,11 +47,7 @@ spaceTest.describe(
 
     spaceTest(
       'should retain the controls and their state',
-      async ({ browserAuth, kbnUrl, page, pageObjects }) => {
-        // FTR ran as `kibana_admin` + `test_logstash_reader`. `kibana_admin` grants full
-        // Kibana administrative privileges, so `admin` is the faithful mapping here;
-        // `loginAsPrivilegedUser()` (`editor`) would be a downgrade, not an equivalent.
-        await browserAuth.loginAsAdmin();
+      async ({ kbnUrl, page, pageObjects }) => {
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
 
         await expect(pageObjects.dashboard.getControlsGroupLocator()).toBeVisible();

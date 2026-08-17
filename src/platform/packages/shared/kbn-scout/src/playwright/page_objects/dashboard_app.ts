@@ -604,7 +604,13 @@ export class DashboardApp {
     await option.click();
   }
 
-  /** Closes the options-list popover if it is open, and waits for it to disappear. */
+  /**
+   * Closes the options-list popover if it is open, and waits for it to disappear.
+   *
+   * Dismisses with Escape rather than by toggling the control button: selecting an option
+   * re-renders the control, so a click aimed at the button can land on a detached node and
+   * leave the popover open.
+   */
   async optionsListEnsurePopoverIsClosed() {
     if (await this.optionsListControlSearchInput.isVisible()) {
       await this.page.keyboard.press('Escape');

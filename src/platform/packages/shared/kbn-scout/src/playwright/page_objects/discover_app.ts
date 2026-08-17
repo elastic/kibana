@@ -606,34 +606,31 @@ export class DiscoverApp {
     const saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
     await expect(saveModal).toBeVisible();
+
+    // The destination defaults to "existing dashboard" with nothing selected, which keeps
+    // the confirm button disabled, so "new" has to be picked. Pick it before typing the
+    // title, because filling the title re-renders the modal and can leave the radio
+    // failing Playwright's stability check. The EuiRadio input is visually hidden, so the
+    // click has to land on its label.
+    await saveModal.locator('label[for="new-dashboard-option"]').click();
     await this.page.testSubj.fill('savedObjectTitle', title);
-    // Clicking the EuiRadio wrapper does not toggle the underlying input
-    // reliably; clicking the associated label does.
-    await this.page.locator('label[for="new-dashboard-option"]').click();
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
 
-    // Navigating to the dashboard leaves the current Discover session behind, so a
-    // session with unsaved changes prompts for confirmation first. When there is
-    // nothing unsaved the prompt is skipped and the save modal just closes, so wait
-    // for whichever of the two actually happens rather than a fixed timeout.
-    const leaveConfirmButton = this.page.testSubj
+    // Saving hands the panel to the dashboard app through session storage and then
+    // navigates (`transferBackToEditor` in Discover's embeddable_editor_service); the
+    // dashboard consumes that package once, on arrival. Leaving a session with unsaved
+    // changes prompts for confirmation first, and that prompt can unmount on its own as
+    // navigation starts, so confirming it is best-effort — landing on a dashboard is what
+    // proves the panel was handed over. The save modal closing only proves `onSave` ran,
+    // which happens whether or not the navigation follows.
+    await this.page.testSubj
       .locator('appLeaveConfirmModal')
-      .getByTestId('confirmModalConfirmButton');
-    const promptAppeared = await Promise.race([
-      leaveConfirmButton.waitFor({ state: 'visible' }).then(
-        () => true,
-        () => false
-      ),
-      saveModal.waitFor({ state: 'hidden' }).then(
-        () => false,
-        () => false
-      ),
-    ]);
-    if (promptAppeared) {
-      await leaveConfirmButton.click();
-    }
+      .getByTestId('confirmModalConfirmButton')
+      .click({ timeout: 10_000 })
+      .catch(() => {});
 
     await expect(saveModal).toBeHidden({ timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
+    await this.page.waitForURL(/\/app\/dashboards/, { timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
   }
 
   async getSharedUrl(): Promise<string> {

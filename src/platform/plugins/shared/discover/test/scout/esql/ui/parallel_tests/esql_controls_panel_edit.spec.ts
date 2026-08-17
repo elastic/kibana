@@ -22,52 +22,34 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverTestFixtures } from '../fixtures';
-import { getOnlyControlId, spaceTest, testData } from '../fixtures';
+import type { DiscoverTestFixtures, DiscoverWorkerFixtures } from '../fixtures';
+import { getOnlyControlId, loadSavedObjectIdFromArchive, spaceTest, testData } from '../fixtures';
 
 const INITIAL_SELECTION = 'AE';
 const UPDATED_SELECTION = 'CN';
-// Must differ from the title inside ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE
-// ("ESQL control unlink test dashboard"), which `beforeEach` imports into the same
-// space. Saving a second dashboard under that title triggers Kibana's duplicate-title
-// confirmation, which leaves the save modal open.
+// Must differ from the dashboard title inside ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE
+// ("ESQL control unlink test dashboard"), which the editing tests below import into the
+// same space. Saving under a title that already exists there raises Kibana's
+// duplicate-title confirmation, which holds the save modal open.
 const UNLINKED_DASHBOARD_TITLE = 'ESQL control unlink test dashboard (built via UI)';
 
-type PanelEditContext = Pick<DiscoverTestFixtures, 'page' | 'pageObjects'>;
+type ControlContext = Pick<DiscoverTestFixtures, 'page' | 'pageObjects'>;
+type PanelEditContext = ControlContext & Pick<DiscoverWorkerFixtures, 'discoverScoutSpace'>;
 
 spaceTest.describe(
   'Discover ES|QL controls - by-value panel editing',
   { tag: '@local-stateful-classic' },
   () => {
-    // `savedObjects.load()` imports with `createNewCopies`, so the dashboard gets a
-    // fresh ID on every import and has to be captured from the import response.
-    let dashboardId: string;
-
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
       // Library saved search that the unlink test adds to a dashboard.
       await discoverScoutSpace.savedObjects.load(testData.SESSION_WITH_CONTROL_KBN_ARCHIVE);
     });
 
-    // Each test mutates the dashboard (saving panel edits), so reload a clean copy.
-    spaceTest.beforeEach(async ({ browserAuth, discoverScoutSpace }) => {
-      const imported = await discoverScoutSpace.savedObjects.load(
-        testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE
-      );
-      const dashboard = imported.find(({ type }) => type === 'dashboard');
-      if (!dashboard) {
-        throw new Error(
-          `Expected a dashboard in ${
-            testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE
-          }, got: ${imported.map(({ type }) => type).join(', ')}`
-        );
-      }
-      dashboardId = dashboard.id;
-
-      // FTR ran as `kibana_admin` + `test_logstash_reader`. `kibana_admin` grants full
-      // Kibana administrative privileges, so `admin` is the faithful mapping here;
-      // `loginAsPrivilegedUser()` (`editor`) would be a downgrade, not an equivalent.
-      await browserAuth.loginAsAdmin();
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      // Editor is the lowest role that can create the dashboards and saved searches these
+      // tests need; running as admin would mask a privilege regression.
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
@@ -101,11 +83,10 @@ spaceTest.describe(
         await spaceTest.step('save the dashboard and re-open the panel in Discover', async () => {
           await pageObjects.dashboard.saveDashboard(UNLINKED_DASHBOARD_TITLE);
 
-          // Saving leaves the dashboard in edit mode, so exit explicitly (the FTR suite
-          // called `switchToViewMode()` here for the same reason). `ensureViewMode()` is
-          // unusable: its `clickCancelOutOfEditMode()` waits for `dashboardEditMode` to
-          // become hidden, but that button is only rendered *in* view mode, so leaving
-          // edit mode is exactly what makes it appear.
+          // Saving leaves the dashboard in edit mode, and "View Discover session" below is
+          // a view-mode action. `ensureViewMode()` cannot do this: it waits for
+          // `dashboardEditMode` to become hidden, but that button is rendered only *in*
+          // view mode, so leaving edit mode is what makes it appear.
           await page.testSubj.click('dashboardViewOnlyMode');
           await expect(page.testSubj.locator('dashboardEditMode')).toBeVisible();
 
@@ -124,8 +105,14 @@ spaceTest.describe(
     );
 
     /** Opens the by-value panel in the embedded Discover editor, asserting the starting selection. */
-    const openPanelEditor = async ({ page, pageObjects }: PanelEditContext) => {
+    const openPanelEditor = async ({ discoverScoutSpace, page, pageObjects }: PanelEditContext) => {
       await spaceTest.step('open the by-value panel in the Discover editor', async () => {
+        // A fresh copy per test: these tests save panel edits back to the dashboard.
+        const dashboardId = await loadSavedObjectIdFromArchive(
+          discoverScoutSpace,
+          testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE,
+          'dashboard'
+        );
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
         await pageObjects.dashboard.ensureEditMode();
 
@@ -146,7 +133,7 @@ spaceTest.describe(
     };
 
     /** Switches the control in the Discover editor to {@link UPDATED_SELECTION}. */
-    const selectControlOption = async ({ page, pageObjects }: PanelEditContext) => {
+    const selectControlOption = async ({ page, pageObjects }: ControlContext) => {
       const controlId = await getOnlyControlId(page);
       // The options-list control is a shared component; its Scout interaction helpers
       // live on `DashboardApp` regardless of which app renders it.
@@ -162,8 +149,8 @@ spaceTest.describe(
 
     spaceTest(
       'should persist updated control selections after saving',
-      async ({ page, pageObjects }) => {
-        await openPanelEditor({ page, pageObjects });
+      async ({ discoverScoutSpace, page, pageObjects }) => {
+        await openPanelEditor({ discoverScoutSpace, page, pageObjects });
 
         await spaceTest.step(`change the control selection to ${UPDATED_SELECTION}`, async () => {
           await selectControlOption({ page, pageObjects });
@@ -185,8 +172,8 @@ spaceTest.describe(
 
     spaceTest(
       'should discard control selection changes after cancelling',
-      async ({ page, pageObjects }) => {
-        await openPanelEditor({ page, pageObjects });
+      async ({ discoverScoutSpace, page, pageObjects }) => {
+        await openPanelEditor({ discoverScoutSpace, page, pageObjects });
 
         await spaceTest.step(`change the control selection to ${UPDATED_SELECTION}`, async () => {
           await selectControlOption({ page, pageObjects });
