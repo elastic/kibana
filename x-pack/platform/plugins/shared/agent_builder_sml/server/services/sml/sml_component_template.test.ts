@@ -70,12 +70,13 @@ describe('ensureSmlMappingsComponentTemplate', () => {
       'permissions',
       'spaces',
       'tags',
+      'type',
       'updated_at',
       'user_id',
     ]);
   });
 
-  it('overrides tags with the lowercase normalizer the base component lacks', async () => {
+  it('overrides tags and type with the lowercase normalizer the base component lacks', async () => {
     await ensureSmlMappingsComponentTemplate({ esClient, logger });
 
     const { template } = esClient.cluster.putComponentTemplate.mock.calls[0][0];
@@ -83,15 +84,20 @@ describe('ensureSmlMappingsComponentTemplate', () => {
       type: 'keyword',
       normalizer: 'lowercase',
     });
+    // The @ menu prefix-matches `type`, so it must be case-insensitive.
+    expect(template.mappings.properties.type).toMatchObject({
+      type: 'keyword',
+      normalizer: 'lowercase',
+    });
   });
 
-  it('does not redeclare fields the base component already provides', async () => {
+  it('does not redeclare base fields it has no reason to override', async () => {
     await ensureSmlMappingsComponentTemplate({ esClient, logger });
 
     const { template } = esClient.cluster.putComponentTemplate.mock.calls[0][0];
     const keys = Object.keys(template.mappings.properties);
 
-    for (const baseField of ['type', 'title', 'description', 'content', 'references']) {
+    for (const baseField of ['title', 'description', 'content', 'references']) {
       expect(keys).not.toContain(baseField);
     }
   });

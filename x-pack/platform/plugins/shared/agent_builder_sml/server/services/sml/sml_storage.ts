@@ -39,7 +39,6 @@ const SEMANTIC_MULTI_FIELD = {
  * them independently without a separate top-level field or `copy_to`.
  */
 const baseProvidedSchemaProperties = {
-  type: types.keyword({}),
   title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   content: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   description: types.text({ fields: SEMANTIC_MULTI_FIELD }),
@@ -54,11 +53,14 @@ const baseProvidedSchemaProperties = {
  * Fields the base component does not provide, installed as
  * {@link smlMappingsComponentTemplateName}.
  *
- * `tags` is listed here even though the base maps it too: SML needs the
- * lowercase normalizer, and this component is composed last so it wins.
+ * `type` and `tags` are listed here even though the base maps them too: SML needs
+ * the lowercase normalizer on both, and this component is composed last so it
+ * wins. For `type` the normalizer is what makes the @ menu's `prefix` query
+ * case-insensitive regardless of how a type writer cases its id.
  */
 export const smlMappingsComponentProperties = {
   id: types.keyword({}),
+  type: types.keyword({ normalizer: 'lowercase' }),
   origin: types.object({
     properties: {
       uri: types.keyword({}),

@@ -832,6 +832,19 @@ describe('SmlService', () => {
       match_bool_prefix: { title: { query: text, operator: 'and' } },
     });
 
+    /**
+     * A "type/name" query is only recognised when the left side names a registered
+     * type, so tests exercising that syntax must register the type first.
+     */
+    const startServiceWithTypes = (typeIds: string[]) => {
+      const service = createSmlService();
+      const { registerType } = service.setup({ logger });
+      for (const id of typeIds) {
+        registerType(createMockSmlTypeDefinition({ id }));
+      }
+      return service.start({ logger });
+    };
+
     it('matches the typed text against title or type, with a space filter', async () => {
       const service = createSmlService();
       service.setup({ logger });
@@ -872,6 +885,29 @@ describe('SmlService', () => {
         },
       });
       expect(call._source).toEqual(['id', 'type', 'title', 'origin', 'permissions']);
+    });
+
+    it('breaks score ties deterministically instead of falling back to doc order', async () => {
+      const smlService = startServiceWithTypes(['connector']);
+
+      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+      // A type-only query runs entirely in filter context, so every hit ties on
+      // score and the tiebreak is what determines the order the menu shows.
+      await smlService.autocomplete({
+        query: 'connector/',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      expect(call.sort).toEqual([
+        { _score: { order: 'desc' } },
+        { updated_at: 'desc' },
+        { id: 'asc' },
+      ]);
     });
 
     it('requires every typed token to match, trailing one as a prefix', async () => {
@@ -917,9 +953,7 @@ describe('SmlService', () => {
 
     describe('"type/name" query syntax', () => {
       it('matches each half against its own field, with type in filter context', async () => {
-        const service = createSmlService();
-        service.setup({ logger });
-        const smlService = service.start({ logger });
+        const smlService = startServiceWithTypes(['connector']);
 
         esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
@@ -943,9 +977,7 @@ describe('SmlService', () => {
       });
 
       it('matches on type alone for a bare trailing slash', async () => {
-        const service = createSmlService();
-        service.setup({ logger });
-        const smlService = service.start({ logger });
+        const smlService = startServiceWithTypes(['connector']);
 
         esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
@@ -964,9 +996,7 @@ describe('SmlService', () => {
       });
 
       it('lowercases the type half, which the keyword prefix query needs', async () => {
-        const service = createSmlService();
-        service.setup({ logger });
-        const smlService = service.start({ logger });
+        const smlService = startServiceWithTypes(['connector']);
 
         esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
@@ -983,6 +1013,50 @@ describe('SmlService', () => {
           {
             bool: {
               filter: [{ prefix: { type: 'connector' } }],
+              must: [titlePrefixQuery('s3')],
+            },
+          },
+        ]);
+      });
+
+      it('treats a slash as title punctuation when the left side is not a type', async () => {
+        const smlService = startServiceWithTypes(['connector', 'dashboard']);
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'sales/marketing',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        // No registered type starts with "sales", so the whole string goes to
+        // `title` — the analyzer splits on the slash — rather than filtering on a
+        // type that cannot exist, which would return nothing.
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([titlePrefixQuery('sales/marketing')]);
+      });
+
+      it('recognises a partially typed type id', async () => {
+        const smlService = startServiceWithTypes(['connector']);
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'conn/s3',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([
+          {
+            bool: {
+              filter: [{ prefix: { type: 'conn' } }],
               must: [titlePrefixQuery('s3')],
             },
           },
