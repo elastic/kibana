@@ -8,35 +8,65 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
-import { getUserFromRequest } from '../utils';
+import { getUserFromRequest, isAdminFromRequest } from '../utils';
+import { createClient } from './client';
 import { ConversationServiceImpl } from './conversation_service';
 
 jest.mock('../utils');
+jest.mock('./client');
 
 const getUserFromRequestMock = getUserFromRequest as jest.MockedFunction<typeof getUserFromRequest>;
+const isAdminFromRequestMock = isAdminFromRequest as jest.MockedFunction<typeof isAdminFromRequest>;
+const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
+
+const request = { headers: {} } as unknown as KibanaRequest;
+
+// Distinct sentinels so tests can assert which scoped client each dependency receives.
+const asCurrentUser = { name: 'as-current-user' } as never;
+const asInternalUser = { name: 'as-internal-user' } as never;
+
+const createService = ({ agents = {} }: { agents?: object } = {}) => {
+  return new ConversationServiceImpl({
+    logger: loggingSystemMock.createLogger(),
+    security: {} as never,
+    elasticsearch: {
+      client: {
+        asScoped: jest.fn().mockReturnValue({ asCurrentUser, asInternalUser }),
+      },
+    } as never,
+    agents: agents as never,
+  });
+};
 
 describe('ConversationServiceImpl', () => {
-  describe('getConversationRoundAuthor', () => {
-    const request = { headers: {} } as unknown as KibanaRequest;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane' });
+    isAdminFromRequestMock.mockResolvedValue(false);
+  });
 
-    const createService = () => {
-      return new ConversationServiceImpl({
-        logger: loggingSystemMock.createLogger(),
-        security: {} as never,
-        elasticsearch: {
-          client: {
-            asScoped: jest.fn().mockReturnValue({ asCurrentUser: {}, asInternalUser: {} }),
-          },
-        } as never,
-        agents: {} as never,
-      });
-    };
+  describe('getScopedClient', () => {
+    const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
 
-    beforeEach(() => {
-      jest.clearAllMocks();
-      getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane' });
+    it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
+      isAdminFromRequestMock.mockResolvedValue(isAdmin);
+
+      await createService({ agents }).getScopedClient({ request });
+
+      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ isAdmin }));
     });
 
+    it('resolves the admin privilege against the caller-scoped client, not the internal one', async () => {
+      await createService({ agents }).getScopedClient({ request });
+
+      expect(isAdminFromRequestMock).toHaveBeenCalledWith({ esClient: asCurrentUser });
+      expect(createClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: asInternalUser })
+      );
+    });
+  });
+
+  describe('getConversationRoundAuthor', () => {
     it('prefers the external origin author over the Kibana user', async () => {
       const service = createService();
       const externalAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };

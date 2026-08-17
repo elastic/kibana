@@ -28,6 +28,9 @@ export {
   identifyKIQueries,
   DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
+  type QueryAttempt,
+  type QueryAttemptStatus,
+  type QueryAttemptFailureReason,
 } from './src/significant_events/identify_ki_queries';
 export {
   createDefaultSignificantEventsToolUsage,

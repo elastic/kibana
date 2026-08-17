@@ -39,6 +39,7 @@ import {
   extractDiscoveriesFromToolCall,
   extractSignificantEventsFromToolCall,
   extractRequestedEventIdsFromToolCall,
+  extractWriteItemsFromToolCall,
 } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
@@ -299,17 +300,20 @@ evaluate.describe(
         const continuationSuites = [
           {
             title: 'continuation - open significant event with same rules',
-            description: 'same detection rule re-fires during an open significant event',
+            description:
+              'same detection rule re-fires during an open significant event; events_write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-no-topology',
           },
           {
             title: 'continuation - open significant events with topology-related rules',
-            description: 'topology-linked cascading rules join an open significant event',
+            description:
+              'topology-linked cascading rules join an open significant event; events_write must send expected causal_features and blast_radius',
             includesPath: (path: string) => path === 'cascade',
           },
           {
             title: 'continuation - closed significant event',
-            description: 'a detection starts a new significant event after the prior event closes',
+            description:
+              'a detection starts a new significant event after the prior event closes; the new write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-closed',
           },
         ] as const;
@@ -394,7 +398,7 @@ evaluate.describe(
                           snapshot_source: run.scenario.snapshot_source,
                           continuation_run: run.id,
                         },
-                        output: {},
+                        output: { ...run.scenario.output },
                         metadata: {
                           ...run.scenario.metadata,
                           test_index: MANAGED_STREAM_SEARCH_PATTERN,
@@ -421,13 +425,7 @@ evaluate.describe(
 
                     // Continuation examples must not inherit events from a previous path.
                     // The cycles within this task still share state.
-                    await esClient
-                      .deleteByQuery({
-                        index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                        query: { match_all: {} },
-                        refresh: true,
-                      })
-                      .catch(() => {});
+                    await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
 
                     const snapshotSource = snapshotSources.get(input.scenario_id);
                     if (!snapshotSource) {
@@ -517,6 +515,7 @@ evaluate.describe(
                           requestedEventIds: extractRequestedEventIdsFromToolCall(
                             converseResult.steps
                           ),
+                          writeItems: extractWriteItemsFromToolCall(converseResult.steps),
                           expectReuse: i === 0 ? undefined : run.expectReuse ?? true,
                           expectTopologyEventSearch: run.expectTopologyEventSearch,
                           steps: converseResult.steps,
