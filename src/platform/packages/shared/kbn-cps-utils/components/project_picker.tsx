@@ -223,7 +223,6 @@ export const DisabledProjectPicker = ({
     <ProjectPickerButton
       // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
       size="xs"
-      totalProjectsCount={totalProjectCount}
       onClick={() => {}}
       customTooltipContent={customTooltipContent}
       isDisabled

@@ -56,6 +56,11 @@ export interface ProjectPickerStateProviderProps
    */
   controlsState?: ProjectPickerState['controlsState'];
   availableProjects: CPSProject[];
+  /**
+   * Returns the app's current project routing. Contract: the returned value must reflect
+   * routings previously delivered via {@link ProjectPickerStateProviderProps.onProjectRoutingChange}
+   * (i.e. the consumer round-trips reported values back into this getter).
+   */
   currentProjectRoutingGetter: () => ProjectRouting | undefined;
   defaultProjectRoutingGetter: () => ProjectRouting;
   /**
@@ -175,10 +180,10 @@ export const ProjectPickerStateProvider = ({
   });
 
   useEffect(() => {
-    const currentProjectRouting = currentProjectRoutingGetter() ?? '';
     const defaultProjectRouting = defaultProjectRoutingGetter() ?? '';
+    const currentProjectRouting = currentProjectRoutingGetter() || defaultProjectRouting;
     const parsed = parseDefaultProjectRouting(
-      currentProjectRouting || defaultProjectRouting,
+      currentProjectRouting,
       availableProjects.map((project) => project._id),
       originProjectId
     );
