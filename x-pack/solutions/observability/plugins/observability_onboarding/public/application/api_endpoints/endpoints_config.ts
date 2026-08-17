@@ -158,7 +158,7 @@ export const VENDOR_ENDPOINTS: readonly VendorEndpointDefinition[] = [
     ),
     logo: 'supabase',
     placements: ['opentelemetryTab', 'morePopover'],
-    getUrl: (context) => getManagedVendorUrl(context, '/supabase/v1/logs'),
+    getUrl: (context) => getManagedVendorUrl(context, '/inputs/supabase/_default_/v1/logs'),
   },
   {
     id: ApiEndpointId.Vercel,
@@ -171,7 +171,7 @@ export const VENDOR_ENDPOINTS: readonly VendorEndpointDefinition[] = [
     logo: 'vercel_black',
     darkLogo: 'vercel_white',
     placements: ['morePopover'],
-    getUrl: (context) => getManagedVendorUrl(context, '/vercel'),
+    getUrl: (context) => getManagedVendorUrl(context, '/inputs/vercel/_default_'),
   },
 ];
 
