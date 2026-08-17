@@ -86,8 +86,9 @@ describe('DeployAndDetectStep', () => {
       });
 
       renderStep();
-      // ec2_metrics maps to "AWS EC2" in the real service matrix
-      expect(screen.getByText('AWS EC2')).toBeInTheDocument();
+      // AWS_SERVICES_MAP has no manifest data; name falls back to entry.id ('ec2_metrics').
+      // In production the matrix hook enriches this with the manifest title ('AWS EC2 metrics').
+      expect(screen.getByText('ec2_metrics')).toBeInTheDocument();
     });
 
     it('falls back to the raw instanceId when neither session storage nor service map has a match', () => {
