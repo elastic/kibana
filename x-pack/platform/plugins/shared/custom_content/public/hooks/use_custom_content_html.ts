@@ -10,12 +10,15 @@ import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { stripMarkdownFences } from '@kbn/custom-content-common';
+import { i18n } from '@kbn/i18n';
 import { getServices } from '../services';
 import { fetchEsqlData } from '../utils/fetch_esql_data';
 import { fillTemplate } from '../utils/fill_template';
 import { sanitizeHtml, applyHtmlTheme } from '../utils/prepare_html';
 
-const RENDER_ERROR_MESSAGE = 'Failed to render panel. Try refreshing or rephrasing the request.';
+const RENDER_ERROR_MESSAGE = i18n.translate('xpack.customContent.renderError', {
+  defaultMessage: 'Failed to render panel. Try refreshing or rephrasing the request.',
+});
 
 export interface UseCustomContentHtmlParams {
   embeddableId: string;
