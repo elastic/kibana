@@ -2204,6 +2204,180 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/access_control:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/access_control</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace a conversation's access mode and member list. Only the conversation owner can call this endpoint; every other caller receives a not-found response. Each call replaces the entire access control — the most recent successful update wins. Members can read and continue the conversation, but still need access to the conversation's agent. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: put-agent-builder-conversations-conversation-id-access-control
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation whose access control to update.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              publishConversationRequestExample:
+                description: Switch the conversation to `public` so any user with access to its agent can read and continue it. A public conversation is already open to everyone with agent access, so `entries` must be empty.
+                value:
+                  access_mode: public
+                  entries: []
+              shareConversationRequestExample:
+                description: Example request sharing a private conversation with two users. They can read and continue the conversation, provided they also have access to its agent.
+                value:
+                  access_mode: private
+                  entries:
+                    - id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                      role: member
+                      type: user
+                    - id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                      role: member
+                      type: user
+              unshareConversationRequestExample:
+                description: Submit an empty entries list to remove every member. Access then falls back to the access mode alone.
+                value:
+                  access_mode: private
+                  entries: []
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                access_mode:
+                  description: "Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation's agent can read and continue it)."
+                  enum:
+                    - private
+                    - public
+                  type: string
+                entries:
+                  description: Members to share the conversation with. The list replaces the stored one; submit an empty list to unshare. Entries naming the owner are ignored. Must be empty when `access_mode` is `public`; repeated ids are rejected.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      id:
+                        description: 'Stable identifier of the user to share the conversation with: a Kibana user profile uid. Users without a profile cannot be granted access.'
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                      role:
+                        description: 'Role granted to the principal. `member` is the only role: it grants read and converse access to the conversation.'
+                        enum:
+                          - member
+                        type: string
+                      type:
+                        enum:
+                          - user
+                        type: string
+                    required:
+                      - type
+                      - id
+                      - role
+                  maxItems: 100
+                  type: array
+              required:
+                - access_mode
+                - entries
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateConversationAccessControlResponseExample:
+                  description: Example response returning the persisted access control. `added_at` is stamped by the server for newly added members and preserved for members that were already listed.
+                  value:
+                    access_mode: private
+                    entries:
+                      - added_at: '2026-08-11T10:00:00.000Z'
+                        id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                        role: member
+                        type: user
+                      - added_at: '2026-08-11T11:30:00.000Z'
+                        id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                        role: member
+                        type: user
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                duplicateEntryResponseExample:
+                  description: Two entries name the same user id.
+                  value:
+                    error: Bad Request
+                    message: Duplicate ACL entry for user "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0"
+                    statusCode: 400
+                entriesWithPublicModeResponseExample:
+                  description: '`entries` must be empty when `access_mode` is `public` — a public conversation is already open to everyone with agent access.'
+                  value:
+                    error: Bad Request
+                    message: ACL entries are not supported when access_mode is "public"
+                    statusCode: 400
+                tooManyEntriesResponseExample:
+                  description: Request body exceeds the 100-member maximum.
+                  value:
+                    error: Bad Request
+                    message: '[request body.entries]: array size is [101], but cannot be greater than [100]'
+                    statusCode: 400
+          description: Bad Request — the request body failed validation.
+        '404':
+          content:
+            application/json:
+              examples:
+                conversationNotFoundResponseExample:
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Conversation my-conversation-id not found
+                    statusCode: 404
+          description: Not Found — no conversation with this ID is readable by the caller, or the caller is not its owner. Matches the existing `conversationNotFound` shape, so members cannot distinguish a conversation they may not re-share from one that does not exist.
+      summary: Update a conversation's access control
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}/access_control" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "access_mode": "private",
+                "entries": [
+                  { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
+                ]
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/agent_builder/conversations/{conversation_id}/access_control
+            {
+              "access_mode": "private",
+              "entries": [
+                { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
+              ]
+            }
+      x-state: Technical Preview; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/conversations/{conversation_id}/attachments:
     get:
       description: |-
@@ -3029,6 +3203,10 @@ paths:
                         x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
+                read_only:
+                  description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
+                  type: boolean
+                  x-state: Technical Preview; added in 9.6.0
       responses:
         '200':
           content:
@@ -3498,6 +3676,10 @@ paths:
                         x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
+                read_only:
+                  description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
+                  type: boolean
+                  x-state: Technical Preview; added in 9.6.0
       responses:
         '200':
           content:
@@ -26770,6 +26952,8 @@ paths:
                         is_default:
                           default: false
                           type: boolean
+                        is_preconfigured:
+                          type: boolean
                         name:
                           type: string
                         proxy_id:
@@ -27067,6 +27251,8 @@ paths:
                       is_default:
                         default: false
                         type: boolean
+                      is_preconfigured:
+                        type: boolean
                       name:
                         type: string
                       proxy_id:
@@ -27329,6 +27515,8 @@ paths:
                         type: string
                       is_default:
                         default: false
+                        type: boolean
+                      is_preconfigured:
                         type: boolean
                       name:
                         type: string
@@ -27632,6 +27820,8 @@ paths:
                         type: string
                       is_default:
                         default: false
+                        type: boolean
+                      is_preconfigured:
                         type: boolean
                       name:
                         type: string
@@ -69236,7 +69426,6 @@ paths:
                               items:
                                 $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                               type: array
-                            updated_at: {}
                           required:
                             - steps
                         settings:
@@ -69323,16 +69512,26 @@ paths:
                         lifecycle:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                         processing:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            steps:
-                              items:
-                                $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                              type: array
-                            updated_at: {}
-                          required:
-                            - steps
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                steps:
+                                  items:
+                                    $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                                  type: array
+                              required:
+                                - steps
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                processors:
+                                  items:
+                                    additionalProperties: {}
+                                    type: object
+                                  type: array
+                              required:
+                                - processors
                         settings:
                           additionalProperties: false
                           type: object
@@ -75210,7 +75409,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -75323,7 +75522,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -75917,7 +76116,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -89030,16 +89229,26 @@ components:
                 lifecycle:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_IngestStreamLifecycle'
                 processing:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    steps:
-                      items:
-                        $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
-                      type: array
-                    updated_at: {}
-                  required:
-                    - steps
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        steps:
+                          items:
+                            $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+                          type: array
+                      required:
+                        - steps
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        processors:
+                          items:
+                            additionalProperties: {}
+                            type: object
+                          type: array
+                      required:
+                        - processors
                 settings:
                   additionalProperties: false
                   type: object
@@ -99887,6 +100096,8 @@ components:
                         - comparator
                         - value
                     type: array
+                  maxItems: 2
+                  minItems: 2
                   type: array
                 groupBy:
                   items:
@@ -113788,7 +113999,6 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
                       type: array
-                    updated_at: {}
                   required:
                     - steps
                 settings:
@@ -132688,6 +132898,11 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
