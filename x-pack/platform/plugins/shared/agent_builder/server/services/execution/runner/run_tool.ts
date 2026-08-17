@@ -310,7 +310,11 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     logger,
     esClient: elasticsearch.client.asScoped(
       request,
-      projectRouting ? { projectRouting: 'expression', value: projectRouting } : undefined
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
     ),
     savedObjectsClient,
     modelProvider,

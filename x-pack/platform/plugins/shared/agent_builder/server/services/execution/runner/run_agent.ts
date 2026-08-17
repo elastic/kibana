@@ -77,7 +77,11 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     modelProvider,
     esClient: elasticsearch.client.asScoped(
       request,
-      projectRouting ? { projectRouting: 'expression', value: projectRouting } : undefined
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
     ),
     selfClient: http.selfClient,
     savedObjectsClient: savedObjects.getScopedClient(request),
