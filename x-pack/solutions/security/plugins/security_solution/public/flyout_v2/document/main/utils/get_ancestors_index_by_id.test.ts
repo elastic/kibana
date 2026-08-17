@@ -94,7 +94,9 @@ describe('getAncestorsIndexById', () => {
   });
 
   it('returns an empty map when there are no ancestor ids', () => {
-    expect(getAncestorsIndexById([item(ANCESTOR_INDEX, ['.ds-logs-source-1'])], LOCAL_DOCUMENT_INDEX)).toEqual({});
+    expect(
+      getAncestorsIndexById([item(ANCESTOR_INDEX, ['.ds-logs-source-1'])], LOCAL_DOCUMENT_INDEX)
+    ).toEqual({});
     expect(getAncestorsIndexById([], LOCAL_DOCUMENT_INDEX)).toEqual({});
   });
 

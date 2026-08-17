@@ -9,9 +9,9 @@ import { getClusterQualifiedIndex } from './get_cluster_qualified_index';
 
 describe('getClusterQualifiedIndex', () => {
   it('returns the index unchanged when the parent document is local', () => {
-    expect(
-      getClusterQualifiedIndex('my-index-000001', '.alerts-security.alerts-default')
-    ).toBe('my-index-000001');
+    expect(getClusterQualifiedIndex('my-index-000001', '.alerts-security.alerts-default')).toBe(
+      'my-index-000001'
+    );
   });
 
   it('prefixes the index with the remote alias when the parent document is remote', () => {
@@ -39,9 +39,7 @@ describe('getClusterQualifiedIndex', () => {
   });
 
   it('returns an empty index unchanged even when the parent is remote', () => {
-    expect(
-      getClusterQualifiedIndex('', 'remote-cluster:.alerts-security.alerts-default')
-    ).toBe('');
+    expect(getClusterQualifiedIndex('', 'remote-cluster:.alerts-security.alerts-default')).toBe('');
   });
 
   it('returns the index unchanged when the parent index is empty', () => {

@@ -7,14 +7,12 @@
 
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getClusterQualifiedIndex } from '../../../shared/utils/get_cluster_qualified_index';
 import {
   EVENT_SOURCE_FIELD_NAME,
   LEGACY_EVENT_SOURCE_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { ANCESTOR_INDEX, LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
-import {
-  getClusterQualifiedIndex
-} from '@kbn/security-solution-plugin/public/flyout_v2/shared/utils/get_cluster_qualified_index';
 
 // The ancestor id/index arrays are parallel, and both the current (`kibana.alert.ancestors.*`) and
 // legacy (`signal.ancestors.*`) field names may be present depending on the alert's schema version.
