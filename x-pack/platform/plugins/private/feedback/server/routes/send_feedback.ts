@@ -25,9 +25,10 @@ const feedbackBodySchema = schema.object({
   allow_email_contact: schema.boolean(),
   url: schema.string({ maxLength: 2048 }),
   context: schema.maybe(
-    schema.object({
-      isEsql: schema.maybe(schema.boolean()),
-    })
+    schema.recordOf(
+      schema.string({ minLength: 1, maxLength: 64 }),
+      schema.oneOf([schema.string({ maxLength: 256 }), schema.boolean(), schema.number()])
+    )
   ),
 });
 

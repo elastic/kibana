@@ -6,39 +6,8 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
-
-const DISCOVER_APP_ID = 'discover';
-
-interface DiscoverAppState {
-  dataSource?: {
-    type?: string;
-  };
-  query?: {
-    esql?: unknown;
-  };
-}
-
-const isDiscoverEsqlMode = (): boolean => {
-  try {
-    const appState = getStateFromKbnUrl<DiscoverAppState>('_a');
-
-    if (!appState || typeof appState !== 'object') {
-      return false;
-    }
-
-    if (appState.dataSource?.type === 'esql') {
-      return true;
-    }
-
-    return Boolean(
-      appState.query && typeof appState.query === 'object' && 'esql' in appState.query
-    );
-  } catch {
-    return false;
-  }
-};
+import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
+import type { FeedbackContext } from '../../../common';
 
 /**
  * Apps listed here will not have their category prefix in the satisfaction question.
@@ -66,11 +35,14 @@ export const APPS_WITHOUT_CATEGORY_PREFIX = [
   'metrics:assetDetails',
 ] as readonly string[];
 
+const hasContextKeys = (context?: FeedbackContext): context is FeedbackContext =>
+  context !== undefined && Object.keys(context).length > 0;
+
 /**
  * Get current app details from browser URL and nav links.
  * Uses the actual browser URL for accurate deep link detection.
  */
-export const getAppDetails = (core: CoreStart) => {
+export const getAppDetails = (core: CoreStart, context?: FeedbackContext) => {
   const currentPath = window.location.pathname;
   const navLinks = core.chrome.navLinks.getAll();
 
@@ -109,19 +81,14 @@ export const getAppDetails = (core: CoreStart) => {
     title = `${category.label} - ${match?.title}`;
   }
 
-  const isEsql = id === DISCOVER_APP_ID && isDiscoverEsqlMode();
-
-  if (isEsql && title) {
-    title = i18n.translate('feedback.getAppDetails.discoverEsqlTitle', {
-      defaultMessage: '{appTitle} ES|QL',
-      values: { appTitle: title },
-    });
+  if (id === DISCOVER_APP_ID && context?.isEsql === true && title) {
+    title = `${title} ES|QL`;
   }
 
   return {
     title: title ?? 'Kibana',
     id: id ?? 'Kibana',
     url: currentPath,
-    ...(isEsql && { context: { isEsql: true } }),
+    ...(hasContextKeys(context) && { context }),
   };
 };

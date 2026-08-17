@@ -41,10 +41,8 @@ export interface FeedbackQuestion {
   answer: string;
 }
 
-/** Optional app-specific context recorded with the feedback payload. */
-export interface FeedbackContext {
-  isEsql?: boolean;
-}
+/** App-specific context recorded with the feedback payload. */
+export type FeedbackContext = Record<string, string | boolean | number>;
 
 /** The full feedback payload recorded in telemetry. */
 export interface FeedbackSubmittedData {

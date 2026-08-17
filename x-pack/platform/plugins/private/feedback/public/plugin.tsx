@@ -17,7 +17,7 @@ import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 import { firstValueFrom, type Subscription } from 'rxjs';
-import type { FeedbackFormData } from '../common';
+import type { FeedbackContext, FeedbackFormData } from '../common';
 import { getAppDetails } from './src/utils';
 
 interface FeedbackPluginSetupDependencies {
@@ -57,6 +57,7 @@ const feedbackModalCss = css`
 const createFeedbackDeps = (
   core: CoreStart,
   organizationId: string | undefined,
+  getContext: () => FeedbackContext | undefined,
   cloud?: CloudStart,
   spaces?: SpacesPluginStart
 ): FeedbackDeps => {
@@ -70,7 +71,7 @@ const createFeedbackDeps = (
   };
 
   return {
-    getAppDetails: () => getAppDetails(core),
+    getAppDetails: () => getAppDetails(core, getContext()),
     getQuestions: async (appId: string) => {
       const { getFeedbackQuestionsForApp } = await import('@kbn/feedback-registry');
       return getFeedbackQuestionsForApp(appId);
@@ -132,6 +133,10 @@ const openFeedbackModal = (core: CoreStart, deps: FeedbackDeps) => {
 export class FeedbackPlugin implements Plugin {
   private organizationId?: string;
   private telemetryOptInSubscription?: Subscription;
+  private appIdSubscription?: Subscription;
+  private currentAppId?: string;
+  private contextAppId?: string;
+  private context?: FeedbackContext;
 
   public setup(_core: CoreSetup, { cloud }: FeedbackPluginSetupDependencies) {
     this.organizationId = cloud?.organizationId;
@@ -139,11 +144,40 @@ export class FeedbackPlugin implements Plugin {
   }
 
   public start(core: CoreStart, { cloud, telemetry, spaces }: FeedbackPluginStartDependencies) {
+    this.appIdSubscription = core.application.currentAppId$.subscribe((appId) => {
+      if (appId !== this.currentAppId) {
+        this.context = undefined;
+        this.contextAppId = undefined;
+      }
+      this.currentAppId = appId;
+    });
+
+    /**
+     * Stores opaque feedback context for the current app.
+     * No-ops unless `appId` matches `currentAppId`, so one app cannot pollute another.
+     */
+    const setContext = (appId: string, context: FeedbackContext): (() => void) => {
+      if (appId !== this.currentAppId) {
+        return () => {};
+      }
+
+      this.contextAppId = appId;
+      this.context = context;
+      return () => {
+        if (this.contextAppId === appId) {
+          this.context = undefined;
+          this.contextAppId = undefined;
+        }
+      };
+    };
+
+    const getContext = () => (this.contextAppId === this.currentAppId ? this.context : undefined);
+
     if (!core.notifications.feedback.isEnabled()) {
-      return {};
+      return { setContext };
     }
 
-    const deps = createFeedbackDeps(core, this.organizationId, cloud, spaces);
+    const deps = createFeedbackDeps(core, this.organizationId, getContext, cloud, spaces);
     const { isOptedIn$ } = telemetry.telemetryService;
     const checkTelemetryOptIn = () => firstValueFrom(isOptedIn$);
 
@@ -171,11 +205,15 @@ export class FeedbackPlugin implements Plugin {
       ),
     });
 
-    return {};
+    return { setContext };
   }
 
   public stop() {
     this.telemetryOptInSubscription?.unsubscribe();
     this.telemetryOptInSubscription = undefined;
+    this.appIdSubscription?.unsubscribe();
+    this.appIdSubscription = undefined;
+    this.context = undefined;
+    this.contextAppId = undefined;
   }
 }

@@ -11,9 +11,8 @@ export interface FeedbackQuestion {
   answer: string;
 }
 
-export interface FeedbackContext {
-  isEsql?: boolean;
-}
+/** App-specific context recorded with the feedback payload. */
+export type FeedbackContext = Record<string, string | boolean | number>;
 
 export interface FeedbackSubmittedData {
   app_id: string;

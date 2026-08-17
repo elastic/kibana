@@ -230,71 +230,33 @@ describe('getAppDetails', () => {
     });
   });
 
-  it('should tag Discover ES|QL mode from dataSource.type', () => {
-    setWindowLocation('/app/discover', "#/?_a=(dataSource:(type:esql),query:(esql:'FROM logs'))");
-    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
-
-    const result = getAppDetails(coreStartMock);
-
-    expect(result).toEqual({
-      title: 'Analytics - Discover ES|QL',
-      id: 'discover',
-      url: '/app/discover',
-      context: { isEsql: true },
-    });
-  });
-
-  it('should tag Discover ES|QL mode from query.esql when dataSource is missing', () => {
-    setWindowLocation('/app/discover', "#/?_a=(query:(esql:'FROM logs'))");
-    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
-
-    const result = getAppDetails(coreStartMock);
-
-    expect(result).toEqual({
-      title: 'Analytics - Discover ES|QL',
-      id: 'discover',
-      url: '/app/discover',
-      context: { isEsql: true },
-    });
-  });
-
-  it('should leave Discover DataView mode unchanged', () => {
-    setWindowLocation(
-      '/app/discover',
-      "#/?_a=(dataSource:(dataViewId:logs,type:dataView),query:(language:kuery,query:''))"
-    );
-    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
-
-    const result = getAppDetails(coreStartMock);
-
-    expect(result).toEqual({
-      title: 'Analytics - Discover',
-      id: 'discover',
-      url: '/app/discover',
-    });
-  });
-
-  it('should leave Discover unchanged when _a is missing or invalid', () => {
-    setWindowLocation('/app/discover', '#/?_a=not-valid-rison');
-    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
-
-    expect(getAppDetails(coreStartMock)).toEqual({
-      title: 'Analytics - Discover',
-      id: 'discover',
-      url: '/app/discover',
-    });
-
+  it('should derive a Discover ES|QL title from context', () => {
     setWindowLocation('/app/discover');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
 
-    expect(getAppDetails(coreStartMock)).toEqual({
+    const result = getAppDetails(coreStartMock, { isEsql: true });
+
+    expect(result).toEqual({
+      title: 'Analytics - Discover ES|QL',
+      id: 'discover',
+      url: '/app/discover',
+      context: { isEsql: true },
+    });
+  });
+
+  it('should omit empty context from the result', () => {
+    setWindowLocation('/app/discover');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
+
+    expect(getAppDetails(coreStartMock, {})).toEqual({
       title: 'Analytics - Discover',
       id: 'discover',
       url: '/app/discover',
     });
   });
 
-  it('should not tag non-Discover apps that have ES|QL-like _a state', () => {
-    setWindowLocation('/app/dashboard', "#/?_a=(dataSource:(type:esql),query:(esql:'FROM logs'))");
+  it('should not suffix non-Discover titles when context.isEsql is true', () => {
+    setWindowLocation('/app/dashboard');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue([
       createMockNavLink({
         id: 'dashboard',
@@ -308,12 +270,13 @@ describe('getAppDetails', () => {
       }),
     ]);
 
-    const result = getAppDetails(coreStartMock);
+    const result = getAppDetails(coreStartMock, { isEsql: true });
 
     expect(result).toEqual({
       title: 'Analytics - Dashboard',
       id: 'dashboard',
       url: '/app/dashboard',
+      context: { isEsql: true },
     });
   });
 });
