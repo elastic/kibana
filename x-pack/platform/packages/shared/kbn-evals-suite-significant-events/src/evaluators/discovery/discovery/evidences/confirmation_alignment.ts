@@ -5,33 +5,25 @@
  * 2.0.
  */
 
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
+import { alignExpectedEventsToActuals } from '../common/align_events';
 
 const asSet = (values: string[]): Set<string> => new Set(values);
 
-interface EventWithSignals {
-  signals?: Array<{
-    type?: string;
-    metadata?: { rule_uuid?: string };
-    confirmed?: boolean;
-  }>;
-}
-
-const getRuleSignals = (event: EventWithSignals) =>
+const getRuleSignals = (event: SignificantEvent) =>
   (event.signals ?? []).flatMap((signal) =>
     signal.type === 'detection' && signal.metadata?.rule_uuid
-      ? [{ ruleUuid: signal.metadata.rule_uuid, confirmed: signal.confirmed }]
+      ? [
+          {
+            ruleUuid: signal.metadata.rule_uuid,
+            confirmed: signal.confirmed,
+            collected_at: signal.collected_at,
+            evidence: signal.evidence,
+          },
+        ]
       : []
   );
-
-const sharedRuleCount = (event: EventWithSignals, expectedRuleUuids: Set<string>) => {
-  const eventRuleUuids = new Set(
-    getRuleSignals(event)
-      .filter((signal) => signal.confirmed !== false)
-      .map((signal) => signal.ruleUuid)
-  );
-  return [...eventRuleUuids].filter((ruleUuid) => expectedRuleUuids.has(ruleUuid)).length;
-};
 
 export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
   name: 'confirmation_alignment',
@@ -46,37 +38,26 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
       });
     }
 
+    const entries = Object.entries(expectedByEvent);
+    const alignmentKeys = entries.map(([eventId, ruleUuids]) => ({
+      event_id: eventId,
+      expectedRuleUuids: new Set(ruleUuids),
+    }));
+    const matches = alignExpectedEventsToActuals(alignmentKeys, output.significantEvents);
+
     const issues: string[] = [];
     let matched = 0;
-    const assignedEvents = new Set<number>();
 
-    for (const [eventId, expectedRuleUuids] of Object.entries(expectedByEvent)) {
+    for (let i = 0; i < entries.length; i++) {
+      const [eventId, expectedRuleUuids] = entries[i];
       const expectedRuleSet = asSet(expectedRuleUuids);
-      const exactIdIndex = output.significantEvents.findIndex(
-        (candidate, index) => !assignedEvents.has(index) && candidate.event_id === eventId
-      );
-      const eventIndex =
-        exactIdIndex >= 0
-          ? exactIdIndex
-          : output.significantEvents.reduce(
-              (bestIndex, candidate, index) => {
-                if (assignedEvents.has(index)) {
-                  return bestIndex;
-                }
+      const event = matches[i];
 
-                const candidateSharedRuleCount = sharedRuleCount(candidate, expectedRuleSet);
-                return candidateSharedRuleCount > bestIndex.sharedRuleCount
-                  ? { index, sharedRuleCount: candidateSharedRuleCount }
-                  : bestIndex;
-              },
-              { index: -1, sharedRuleCount: 0 }
-            ).index;
-      const event = eventIndex >= 0 ? output.significantEvents[eventIndex] : undefined;
       if (!event) {
         issues.push(`${eventId}: missing from agent output`);
         continue;
       }
-      assignedEvents.add(eventIndex);
+
       // Only detection signals carry a rule identity; other signal types (manual ES|QL
       // evidence, KI grounding) are outside the expected-membership contract.
       const ruleSignals = getRuleSignals(event);
@@ -84,7 +65,14 @@ export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
         ruleSignals.filter((signal) => signal.confirmed === true).map((signal) => signal.ruleUuid)
       );
       const nonMembersWithoutRejection = ruleSignals
-        .filter((signal) => !expectedRuleSet.has(signal.ruleUuid) && signal.confirmed !== false)
+        .filter(
+          (signal) =>
+            !expectedRuleSet.has(signal.ruleUuid) &&
+            signal.confirmed !== false &&
+            (signal.confirmed !== undefined ||
+              signal.collected_at !== undefined ||
+              signal.evidence !== undefined)
+        )
         .map((signal) => signal.ruleUuid);
       const isExactMatch =
         actualRuleUuids.size === expectedRuleSet.size &&

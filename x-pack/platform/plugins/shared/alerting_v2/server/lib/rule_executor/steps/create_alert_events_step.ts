@@ -44,6 +44,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
     const built = guardedExpandStep(streamState, ['rule', 'esqlRowBatch'], async function* (state) {
       const eventType = resolveAlertEventType(state.rule);
+      const logger = state.logger.withLabels({ step: step.name });
 
       if (!builder) {
         builder = createAlertEventsBatchBuilder({
@@ -59,7 +60,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           ),
         });
 
-        step.logger.debug({
+        logger.debug({
           message: `[${step.name}] Created alert events builder for rule ${state.input.ruleId}`,
         });
       }

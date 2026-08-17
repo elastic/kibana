@@ -47,9 +47,9 @@ const toContentListItem = (rule: RuleApiResponse): RuleContentListItem => ({
   title: rule.metadata?.name ?? rule.id,
   description: rule.metadata?.description ?? undefined,
   tags: rule.metadata?.tags ?? undefined,
-  createdBy: rule.createdBy ?? undefined,
-  updatedBy: rule.updatedBy ?? undefined,
-  updatedAt: rule.updatedAt ? new Date(rule.updatedAt) : undefined,
+  createdBy: rule.created_by ?? undefined,
+  updatedBy: rule.updated_by ?? undefined,
+  updatedAt: rule.updated_at ? new Date(rule.updated_at) : undefined,
   rule,
 });
 
