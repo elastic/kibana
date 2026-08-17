@@ -26,11 +26,17 @@ const SEMANTIC_MULTI_FIELD = {
 const smlStorageSchemaProperties = {
   id: types.keyword({}),
   /**
-   * The lowercase normalizer applies at index and search time, so the @ menu's
-   * `prefix` query on `type` is case-insensitive regardless of how a type writer
-   * cases its id.
+   * Deliberately no `normalizer`, even though the @ menu prefix-matches this
+   * field. The type registry already rejects any id that isn't lowercase
+   * (`SML_TYPE_ID_PATTERN`), so stored values are canonical and the query only
+   * has to lowercase the typed text.
+   *
+   * A normalizer would also be unshippable: it is not an updateable mapping
+   * parameter, and the storage adapter reconciles schema drift with an in-place
+   * `putMapping`, which Elasticsearch rejects with `Cannot update parameter
+   * [normalizer]` on any index created before it was added.
    */
-  type: types.keyword({ normalizer: 'lowercase' }),
+  type: types.keyword({}),
   title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   origin: types.object({
     properties: {
