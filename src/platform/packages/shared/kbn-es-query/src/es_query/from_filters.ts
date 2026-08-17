@@ -38,8 +38,8 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  * @return {Object} the query version of that filter
  */
 const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  // @ts-expect-error upgrade typescript v5.1.6
-  return filter.query || filter;
+  const query = filter.query;
+  return (query ?? filter) as estypes.QueryDslQueryContainer;
 };
 
 /**

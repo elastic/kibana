@@ -44,10 +44,12 @@ export class ColorFormat extends FieldFormat {
         });
 
       case 'number':
+        if (typeof val !== 'number') {
+          return null;
+        }
         return findLast(this.param('colors'), ({ range }) => {
           if (!range) return;
           const [start, end] = range.split(':');
-          // @ts-expect-error upgrade typescript v5.1.6
           return val >= Number(start) && val <= Number(end);
         });
 
