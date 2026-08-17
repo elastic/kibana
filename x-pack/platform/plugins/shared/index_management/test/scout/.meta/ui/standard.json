@@ -1,5 +1,5 @@
 {
-  "sha1": "c2baaaa4d84d842c3ba39892341f584f141329fc",
+  "sha1": "0f2f1f205fe6a4b3b8a7c613c026da5778ceebd4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -807,8 +807,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
-        "line": 58,
-        "column": 19
+        "line": 66,
+        "column": 21
       }
     },
     {
@@ -821,8 +821,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
-        "line": 91,
-        "column": 24
+        "line": 78,
+        "column": 5
       }
     },
     {
