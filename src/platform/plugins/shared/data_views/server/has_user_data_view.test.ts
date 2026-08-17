@@ -26,7 +26,7 @@ describe('hasUserDataView', () => {
     expect(await hasUserDataView({ esClient, soClient })).toEqual(false);
   });
 
-  it('returns true when there are data views', async () => {
+  it('returns true when there is an unmanaged data view', async () => {
     soClient.find.mockResolvedValue({
       page: 1,
       per_page: 100,
@@ -41,6 +41,54 @@ describe('hasUserDataView', () => {
         },
       ],
     });
+    expect(await hasUserDataView({ esClient, soClient })).toEqual(true);
+  });
+
+  it('returns false when there are only managed data views', async () => {
+    soClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 100,
+      total: 1,
+      saved_objects: [
+        {
+          id: '1',
+          references: [],
+          type: 'index-pattern',
+          score: 99,
+          managed: true,
+          attributes: { title: 'managed-pattern-*' },
+        },
+      ],
+    });
+
+    expect(await hasUserDataView({ esClient, soClient })).toEqual(false);
+  });
+
+  it('returns true when there is at least one unmanaged data view', async () => {
+    soClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 100,
+      total: 2,
+      saved_objects: [
+        {
+          id: '1',
+          references: [],
+          type: 'index-pattern',
+          score: 99,
+          managed: true,
+          attributes: { title: 'managed-pattern-*' },
+        },
+        {
+          id: '2',
+          references: [],
+          type: 'index-pattern',
+          score: 99,
+          managed: false,
+          attributes: { title: 'my-pattern-*' },
+        },
+      ],
+    });
+
     expect(await hasUserDataView({ esClient, soClient })).toEqual(true);
   });
 

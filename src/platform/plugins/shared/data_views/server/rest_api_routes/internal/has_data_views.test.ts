@@ -76,4 +76,47 @@ describe('preview has_data_views route', () => {
       body: { hasDataView: true, hasUserDataView: true },
     });
   });
+
+  it('should send hasDataView: true, hasUserDataView: false when only managed data views exist', async () => {
+    const mockESClientResolveIndexResponse = { indices: [], aliases: [], data_streams: [] };
+    const mockSOClientFindResponse = {
+      page: 1,
+      per_page: 100,
+      total: 1,
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: '12345',
+          namespaces: ['default'],
+          managed: true,
+          attributes: { title: 'managed_data_view' },
+        },
+      ],
+    };
+    const mockESClient = {
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue(mockESClientResolveIndexResponse),
+      },
+    };
+    const mockSOClient = { find: jest.fn().mockResolvedValue(mockSOClientFindResponse) };
+    const mockContext = {
+      core: {
+        elasticsearch: { client: { asCurrentUser: mockESClient } },
+        savedObjects: { client: mockSOClient },
+      },
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: {},
+      query: {},
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await handler(mockContext as unknown as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok.mock.calls[0][0]).toEqual({
+      body: { hasDataView: true, hasUserDataView: false },
+    });
+  });
 });

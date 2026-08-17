@@ -32,7 +32,7 @@ export const getDataViews = async ({
 
 /**
  * Checks if user has access to any data view,
- * excluding those that are automatically created by ese (hardcoded)
+ * excluding those that are automatically created
  * @param esClient
  * @param soClient
  * @param dataViews
@@ -47,10 +47,8 @@ export const hasUserDataView = async (
 
   if (dataViews.total === 0) {
     return false;
-  } else {
-    // filter here data views that we know are not created by user during on-boarding for smoother on-boarding experience
-    // currently there is no such data views,
-
-    return true;
   }
+
+  // `managed` is a root-level saved object property, always returned by `find`
+  return dataViews.saved_objects.some((dataView) => dataView.managed !== true);
 };
