@@ -40,6 +40,10 @@ import {
 
 export const TSC_LABEL = 'tsc';
 
+const TYPE_CHECK_ONLY_PATHS = {
+  antlr4: ['./node_modules/antlr4/src/antlr4/index.d.ts'],
+} as const;
+
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
   return path.startsWith('.') ? path : `./${path}`;
@@ -111,7 +115,13 @@ export async function createTypeCheckConfigs(
         rootDir: resolveTypeCheckRootDir(config.include),
         noEmit: false,
         emitDeclarationOnly: true,
-        paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
+        paths:
+          project.repoRel === 'tsconfig.base.json'
+            ? {
+                ...(config.compilerOptions?.paths as Record<string, string[]> | undefined),
+                ...TYPE_CHECK_ONLY_PATHS,
+              }
+            : undefined,
       },
       kbn_references: undefined,
       references: project.getKbnRefs(allProjects).map((refd) => {

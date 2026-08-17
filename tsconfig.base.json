@@ -2262,7 +2262,6 @@
       // The 8.19 Elasticsearch client predates package export entries for its public type subpaths.
       // Keep the existing imports working with TS7's export-aware module resolution.
       "@elastic/elasticsearch/*": ["./node_modules/@elastic/elasticsearch/*"],
-      "antlr4": ["./node_modules/antlr4/src/antlr4/index.d.ts"],
       "@typescript-eslint/parser": ["./typings/@typescript-eslint/parser"],
       "zod": ["./typings/zod/v3"],
       "zod/v3/standard-schema.cjs": ["./node_modules/zod/v3/standard-schema.d.cts"],
