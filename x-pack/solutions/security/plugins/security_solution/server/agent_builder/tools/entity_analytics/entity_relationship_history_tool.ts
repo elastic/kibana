@@ -24,9 +24,9 @@ import type { ExperimentalFeatures } from '../../../../common';
 import { IdentifierType } from '../../../../common/api/entity_analytics/common/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { securityTool } from '../constants';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import { requireResolvedEntity } from './entity_resolution';
-import { parseTimeRangeOrError } from './time_range_utils';
+import { parseTimeBound, timeRangeParseError } from './time_range_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
 const schema = z.object({
@@ -160,7 +160,7 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        const entityStoreAvailability = await getEntityStoreV2ToolAvailability({
+        const entityStoreAvailability = await getEntityAnalyticsToolAvailability({
           core,
           request,
           spaceId,
@@ -260,10 +260,11 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
         const resolvedTargetId =
           resolvedTarget !== undefined ? resolvedTarget.identity.entityStoreId : undefined;
 
-        const parsedTimeRange = parseTimeRangeOrError({ from, to });
-        if (!parsedTimeRange.ok) {
-          telemetryTracker.recordFailure(parsedTimeRange.results[0].data.message);
-          return { results: parsedTimeRange.results };
+        // time range is optional, so only validate if values are provided
+        if ((from && !parseTimeBound(from)) || (to && !parseTimeBound(to, true))) {
+          const error = timeRangeParseError(from, to);
+          telemetryTracker.recordFailure(error.data.message);
+          return { results: [error] };
         }
 
         const relationshipsClient = entityStore.createRelationshipsClient(client, spaceId);
