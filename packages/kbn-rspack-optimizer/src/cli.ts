@@ -15,7 +15,12 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 import { runBuild } from './run_build';
-import { validateLimitsForAllBundles, updateBundleLimits, DEFAULT_LIMITS_PATH } from './limits';
+import {
+  validateLimitsForAllBundles,
+  updateBundleLimits,
+  DEFAULT_LIMITS_PATH,
+  DEFAULT_MAX_LIMIT_INCREASE_FRACTION,
+} from './limits';
 import { resolveBundlesDir, METRICS_FILENAME } from './paths';
 import { discoverPlugins } from './utils/plugin_discovery';
 import { getInspectExecArgv } from './utils/inspect';
@@ -84,10 +89,33 @@ export function runRspackCli(options: CliOptions = {}): void {
         throw createFlagError('expected --validate-limits to have no value');
       }
 
+      // getopts defaults absent string flags to '', so only error on empty value when the flag was actually passed
+      const updateLimitsFromMetricsFlagPassed = process.argv
+        .slice(2)
+        .some(
+          (arg) =>
+            arg === '--update-limits-from-metrics' ||
+            arg.startsWith('--update-limits-from-metrics=')
+        );
+      if (
+        updateLimitsFromMetricsFlagPassed &&
+        (typeof flags['update-limits-from-metrics'] !== 'string' ||
+          flags['update-limits-from-metrics'].length === 0)
+      ) {
+        throw createFlagError('expected --update-limits-from-metrics to have a path value');
+      }
+
+      const updateLimitsFromMetrics =
+        typeof flags['update-limits-from-metrics'] === 'string' &&
+        flags['update-limits-from-metrics'].length > 0
+          ? Path.resolve(flags['update-limits-from-metrics'])
+          : undefined;
+
       const modes = [
         validateLimits && '--validate-limits',
         (profile || profileStatsOnly) && (profile ? '--profile' : '--profile-stats-only'),
         updateLimits && '--update-limits',
+        updateLimitsFromMetrics && '--update-limits-from-metrics',
       ].filter(Boolean);
 
       if (modes.length > 1) {
@@ -108,6 +136,16 @@ export function runRspackCli(options: CliOptions = {}): void {
         });
         const pluginIds = ['core', ...allPlugins.filter((p) => !p.ignoreMetrics).map((p) => p.id)];
         validateLimitsForAllBundles(log, pluginIds, limitsPath);
+        return;
+      }
+
+      // CI auto-fix path: bump only overaged bundles from existing metrics (no build),
+      // refusing overages above DEFAULT_MAX_LIMIT_INCREASE_FRACTION
+      if (updateLimitsFromMetrics) {
+        updateBundleLimits(log, updateLimitsFromMetrics, limitsPath, {
+          maxIncreaseFraction: DEFAULT_MAX_LIMIT_INCREASE_FRACTION,
+          onlyOverages: true,
+        });
         return;
       }
 
@@ -141,8 +179,10 @@ export function runRspackCli(options: CliOptions = {}): void {
       }
 
       const effectiveDist = updateLimits || dist;
-      const effectiveExamples = updateLimits ? false : examples;
-      const effectiveTestPlugins = updateLimits ? false : testPlugins;
+      // CI validates distribution metrics built with example and test plugins, so limit updates
+      // must include the same plugin set.
+      const effectiveExamples = updateLimits || examples;
+      const effectiveTestPlugins = updateLimits || testPlugins;
 
       log.info('Building with RSPack unified compilation...');
 
@@ -193,7 +233,7 @@ export function runRspackCli(options: CliOptions = {}): void {
           'validate-limits',
           'inspect-workers',
         ],
-        string: ['themes', 'output-root', 'limits', 'profile-focus'],
+        string: ['themes', 'output-root', 'limits', 'profile-focus', 'update-limits-from-metrics'],
         alias: {
           w: 'watch',
         },
@@ -224,6 +264,11 @@ export function runRspackCli(options: CliOptions = {}): void {
 
           Bundle Limits:
             --update-limits           Build in dist mode and update limits.yml (always full build)
+            --update-limits-from-metrics <path>
+                                      Update limits.yml from an existing metrics.json without
+                                      building (used by CI to auto-fix overages). Only bumps
+                                      bundles that exceed their limit; refuses when a bundle
+                                      exceeds its limit by more than 15%.
             --validate-limits         Validate limits.yml against discovered plugins (no build)
             --limits <path>           Override limits.yml path (default: packages/kbn-rspack-optimizer/limits.yml)
 
@@ -234,7 +279,7 @@ export function runRspackCli(options: CliOptions = {}): void {
                                       Note: --watch is ignored in profile mode
 
           Environment Variables:
-            KBN_USE_RSPACK=true       Use RSPack optimizer instead of webpack
+            KBN_USE_RSPACK=false      Use legacy webpack optimizer instead of default RSPack
             KBN_HMR=false             Disable HMR (RSPack only, alternative to --no-hmr)
             KBN_HMR_PORT=5678         Override the HMR SSE server port (RSPack only, default: 5678)
         `,
@@ -259,6 +304,9 @@ export function runRspackCli(options: CliOptions = {}): void {
 
           # Update limits.yml (always runs a full dist build)
           node scripts/build_rspack_bundles.js --update-limits
+
+          # Update limits.yml from an existing metrics file (no build; CI auto-fix path)
+          node scripts/build_rspack_bundles.js --update-limits-from-metrics target/optimizer_bundle_metrics.json
         `,
       },
     }

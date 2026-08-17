@@ -102,12 +102,44 @@ const assertRawPathValid = (path: string): void => {
   }
 };
 
+/**
+ * Decodes percent-encoding and collapses `.`/`..` segments so guard checks compare against the
+ * effective resolved path rather than the wire form. A WSGI/DRF backend percent-decodes
+ * `PATH_INFO` before routing, so matching the raw form let encoded separators (e.g.
+ * `/users%2f5%2f`) slip past the substring checks below despite containing no literal `/users/`.
+ */
+const normalizePathForGuards = (path: string): string => {
+  const pathOnly = path.split(/[?#]/, 1)[0] ?? path;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathOnly);
+  } catch {
+    throw new Error('Ansible Controller API path contains invalid percent-encoding');
+  }
+  const segments: string[] = [];
+  for (const segment of decoded.split('/')) {
+    if (segment === '' || segment === '.') {
+      continue;
+    }
+    if (segment === '..') {
+      segments.pop();
+      continue;
+    }
+    segments.push(segment);
+  }
+  let resolved = `/${segments.join('/')}`;
+  if (decoded.endsWith('/') && resolved !== '/') {
+    resolved += '/';
+  }
+  return resolved.toLowerCase();
+};
+
 // NOTE: `path` here must already be resolved to its fully-qualified `/api/...` form (see
 // `resolveApiPath`), not the connector's relative-to-`apiBasePath` input path. Matching against
 // the raw input would let the relative-path convention (e.g. `/users/`, `/tokens/`) bypass these
 // fully-qualified prefixes entirely.
 const assertPathAllowed = (path: string): void => {
-  const pathOnly = (path.split(/[?#]/, 1)[0] ?? path).toLowerCase();
+  const pathOnly = normalizePathForGuards(path);
   for (const prefix of BLOCKED_PATH_PREFIXES) {
     if (pathOnly === prefix || pathOnly.startsWith(prefix.endsWith('/') ? prefix : `${prefix}/`)) {
       throw new Error(`Requests to "${prefix}" are not permitted via this connector`);
@@ -120,7 +152,7 @@ const assertPathAllowed = (path: string): void => {
 
 const assertRequestAllowed = (method: HttpMethod, path: string): void => {
   assertPathAllowed(path);
-  const pathOnly = (path.split(/[?#]/, 1)[0] ?? path).toLowerCase();
+  const pathOnly = normalizePathForGuards(path);
   // Normalize so slash-less collection creates (`POST /api/v2/users`) match the same
   // `/users/` substring checks as detail routes (`PATCH /api/v2/users/5`). Without this,
   // `includes('/users/')` misses the create endpoint and the guard is weaker than intended.

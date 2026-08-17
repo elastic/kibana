@@ -58,6 +58,7 @@ export const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
     syncDelay: '1m',
     frequency: '1m',
     preventInitialBackfill: false,
+    preventCrossProjectSearch: false,
   },
   summary: {
     status: 'HEALTHY',

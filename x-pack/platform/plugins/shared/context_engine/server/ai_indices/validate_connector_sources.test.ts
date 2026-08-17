@@ -6,12 +6,24 @@
  */
 
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type { ActionResult } from '@kbn/actions-plugin/server';
+import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { DATA_CONNECTOR_TYPE_IDS } from '../../common/data_connectors';
 import type { AiIndexSource } from '../../common/http_api/ai_indices';
 import { InvalidConnectorSourceError } from './errors';
 import { validateConnectorSources } from './validate_connector_sources';
+
+const SUPPORTED_TYPE_IDS = [
+  '.google_drive',
+  '.one_drive',
+  '.notion',
+  '.amazon_s3',
+  '.github',
+  '.box',
+  '.dropbox',
+  '.google_cloud_storage',
+  '.salesforce',
+  '.zendesk',
+];
 
 const buildConnector = (id: string, actionTypeId: string): ActionResult => ({
   id,
@@ -22,6 +34,13 @@ const buildConnector = (id: string, actionTypeId: string): ActionResult => ({
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
 });
+
+const buildConnectorType = (id: string): ConnectorType =>
+  ({
+    id,
+    name: `Type ${id}`,
+    supportedFeatureIds: ['contextEngine'],
+  } as unknown as ConnectorType);
 
 describe('validateConnectorSources', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -35,6 +54,7 @@ describe('validateConnectorSources', () => {
     actionsClient = actionsClientMock.create();
     actions = actionsMock.createStart();
     actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
+    actionsClient.listTypes.mockResolvedValue(SUPPORTED_TYPE_IDS.map(buildConnectorType));
   });
 
   it('resolves without touching the actions client when there are no connector sources', async () => {
@@ -57,10 +77,18 @@ describe('validateConnectorSources', () => {
     expect(actionsClient.getBulk).toHaveBeenCalledWith({ ids: ['gd-1'] });
   });
 
-  it.each(DATA_CONNECTOR_TYPE_IDS)('accepts %s connectors', async (connectorTypeId) => {
+  it.each(SUPPORTED_TYPE_IDS)('accepts %s connectors', async (connectorTypeId) => {
     actionsClient.getBulk.mockResolvedValue([buildConnector('c-1', connectorTypeId)]);
 
     await expect(validate([{ type: 'connector', value: 'c-1' }])).resolves.toBeUndefined();
+  });
+
+  it('queries the actions client for connector types with the contextEngine feature id', async () => {
+    actionsClient.getBulk.mockResolvedValue([buildConnector('gd-1', '.google_drive')]);
+
+    await validate([{ type: 'connector', value: 'gd-1' }]);
+
+    expect(actionsClient.listTypes).toHaveBeenCalledWith({ featureId: 'contextEngine' });
   });
 
   it('uses the request-scoped actions client', async () => {
