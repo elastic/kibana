@@ -13,6 +13,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_EXCEPTION_FILTER } from '@kbn/securitysolution-list-constants';
 import { APP_ID } from '@kbn/security-solution-features/constants';
+
 import { buildExceptionFilter } from '../../services/exception_lists/build_exception_filter';
 import type { ListsPluginRouter } from '../../types';
 import { getExceptionFilterRequest } from '../../../common/api';
