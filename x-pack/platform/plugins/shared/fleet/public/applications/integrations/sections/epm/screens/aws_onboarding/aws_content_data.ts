@@ -11,6 +11,8 @@
 // (`?type=content` — the per-service OTel content packages, all beta).
 // Services without prebuilt content simply don't appear on step 5.
 
+import type { AwsSchema } from './aws_services_data';
+
 export type AwsContentType =
   | 'dashboard'
   | 'search'
@@ -315,3 +317,23 @@ export const CONTENT_BY_SERVICE: Record<string, AwsContentItem[]> = {
     { id: 'health-dash', title: '[Metrics AWS] Health Overview', type: 'dashboard' },
   ],
 };
+
+// The OTel content packages above are keyed separately from their ECS-mode
+// service (e.g. `cloudtrail_otel`) since a single service tile can only have
+// one entry in CONTENT_BY_SERVICE. ELB is the one case where OTel splits
+// into two packages (logs and metrics) instead of one.
+const OTEL_CONTENT_KEY_OVERRIDES: Record<string, string[]> = {
+  elb: ['elb_logs_otel', 'elb_metrics_otel'],
+};
+
+// Resolves which prebuilt content applies to a service under the Step 1
+// schema choice. Falls back to the ECS-mode content if a service has no
+// dedicated OTel content package yet.
+export function getContentForService(serviceId: string, schema: AwsSchema): AwsContentItem[] {
+  if (schema === 'otel') {
+    const otelKeys = OTEL_CONTENT_KEY_OVERRIDES[serviceId] ?? [`${serviceId}_otel`];
+    const otelItems = otelKeys.flatMap((key) => CONTENT_BY_SERVICE[key] ?? []);
+    if (otelItems.length > 0) return otelItems;
+  }
+  return CONTENT_BY_SERVICE[serviceId] ?? [];
+}

@@ -20,6 +20,24 @@ export interface AwsServiceCategory {
   services: AwsServiceEntry[];
 }
 
+// Global data-format choice, set once in Step 1 and applied everywhere
+// downstream (which package variant installs, which CloudFormation template
+// the Elastic Cloud Forwarder card launches, which prebuilt content shows on
+// Detect & Review). Kept out of the main Step 1 view per the design
+// discussion — most users should never need to touch it.
+export type AwsSchema = 'ecs' | 'otel';
+
+export const AWS_SCHEMA_META: Record<AwsSchema, { label: string; description: string }> = {
+  ecs: {
+    label: 'ECS-compatible',
+    description: 'Elastic Common Schema field mappings — the default, broadest content coverage.',
+  },
+  otel: {
+    label: 'OpenTelemetry (OTel)',
+    description: 'OpenTelemetry semantic conventions. Some services have limited content today.',
+  },
+};
+
 // Example (non-CloudFormation) services surfaced under Managed Integrations
 // on steps 4 and 5 — demo data for the prototype.
 export const MANAGED_INTEGRATION_EXAMPLES = [
@@ -40,7 +58,6 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     label: 'Security, Identity and Compliance',
     services: [
       { id: 'cloudtrail', name: 'AWS CloudTrail', dataTypes: ['Logs'] },
-      { id: 'cloudtrail_otel', name: 'AWS CloudTrail (OTel)', dataTypes: ['Logs'], beta: true },
       { id: 'config', name: 'AWS Config', dataTypes: ['Metrics'] },
       { id: 'guardduty', name: 'Amazon GuardDuty', dataTypes: ['Logs', 'Metrics'] },
       { id: 'inspector', name: 'Amazon Inspector', dataTypes: ['Metrics'] },
@@ -48,7 +65,6 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
       { id: 'securityhub_cspm', name: 'AWS Security Hub CSPM', dataTypes: ['Metrics'] },
       { id: 'security_lake', name: 'Amazon Security Lake', dataTypes: ['Logs'] },
       { id: 'waf', name: 'AWS WAF', dataTypes: ['Logs'] },
-      { id: 'waf_otel', name: 'AWS WAF (OTel)', dataTypes: ['Logs'], beta: true },
       { id: 'firewall', name: 'AWS Network Firewall', dataTypes: ['Logs', 'Metrics'] },
     ],
   },
@@ -57,11 +73,8 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     label: 'Compute Services',
     services: [
       { id: 'ec2', name: 'Amazon EC2', dataTypes: ['Logs', 'Metrics'] },
-      { id: 'ec2_otel', name: 'Amazon EC2 (OTel)', dataTypes: ['Metrics'], beta: true },
       { id: 'lambda', name: 'AWS Lambda', dataTypes: ['Logs', 'Metrics'] },
-      { id: 'lambda_otel', name: 'AWS Lambda (OTel)', dataTypes: ['Metrics'], beta: true },
       { id: 'ecs', name: 'Amazon ECS', dataTypes: ['Metrics'] },
-      { id: 'ecs_otel', name: 'Amazon ECS (OTel)', dataTypes: ['Metrics'], beta: true },
       { id: 'fargate', name: 'AWS Fargate', dataTypes: ['Metrics'] },
       { id: 'emr', name: 'Amazon EMR', dataTypes: ['Logs', 'Metrics'] },
     ],
@@ -71,13 +84,10 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     label: 'Networking and Content Delivery',
     services: [
       { id: 'vpcflow', name: 'Amazon VPC', dataTypes: ['Logs'] },
-      { id: 'vpcflow_otel', name: 'Amazon VPC Flow (OTel)', dataTypes: ['Logs'], beta: true },
       { id: 'vpn', name: 'Amazon VPN', dataTypes: ['Metrics'] },
       { id: 'natgateway', name: 'Amazon NAT Gateway', dataTypes: ['Metrics'] },
       { id: 'transitgateway', name: 'AWS Transit Gateway', dataTypes: ['Metrics'] },
       { id: 'elb', name: 'AWS ELB', dataTypes: ['Logs', 'Metrics'] },
-      { id: 'elb_logs_otel', name: 'AWS ELB Logs (OTel)', dataTypes: ['Logs'], beta: true },
-      { id: 'elb_metrics_otel', name: 'AWS ELB Metrics (OTel)', dataTypes: ['Metrics'], beta: true },
       { id: 'route53', name: 'AWS Route 53', dataTypes: ['Logs'] },
       { id: 'cloudfront', name: 'Amazon CloudFront', dataTypes: ['Logs'] },
       { id: 'apigateway', name: 'AWS API Gateway', dataTypes: ['Logs', 'Metrics'] },
@@ -97,7 +107,6 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     label: 'Database Services',
     services: [
       { id: 'rds', name: 'Amazon RDS', dataTypes: ['Metrics'] },
-      { id: 'rds_otel', name: 'Amazon RDS (OTel)', dataTypes: ['Metrics'], beta: true },
       { id: 'dynamodb', name: 'Amazon DynamoDB', dataTypes: ['Metrics'] },
       { id: 'redshift', name: 'Amazon Redshift', dataTypes: ['Metrics'] },
     ],
@@ -117,7 +126,6 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     services: [
       { id: 'sns', name: 'Amazon SNS', dataTypes: ['Metrics'] },
       { id: 'sqs', name: 'Amazon SQS', dataTypes: ['Metrics'] },
-      { id: 'sqs_otel', name: 'Amazon SQS (OTel)', dataTypes: ['Metrics'], beta: true },
       { id: 'mq', name: 'Amazon MQ', dataTypes: ['Metrics'] },
     ],
   },
@@ -143,7 +151,6 @@ export const AWS_SERVICE_CATEGORIES: AwsServiceCategory[] = [
     label: 'Management and Monitoring',
     services: [
       { id: 'cloudwatch', name: 'AWS CloudWatch', dataTypes: ['Logs', 'Metrics'] },
-      { id: 'cloudwatch_otel', name: 'AWS CloudWatch (OTel)', dataTypes: ['Logs', 'Metrics'], beta: true },
       { id: 'awshealth', name: 'AWS Health', dataTypes: ['Metrics'] },
       { id: 'custom_logs', name: 'Custom AWS Logs', dataTypes: ['Logs'] },
     ],

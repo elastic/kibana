@@ -25,11 +25,15 @@ import {
 } from '@elastic/eui';
 
 import { CardHeader } from './card_header';
-import { MANAGED_INTEGRATION_EXAMPLES, type AwsServiceEntry } from './aws_services_data';
 import {
-  CONTENT_BY_SERVICE,
+  MANAGED_INTEGRATION_EXAMPLES,
+  type AwsSchema,
+  type AwsServiceEntry,
+} from './aws_services_data';
+import {
   DETECTION_RULES_BY_SERVICE,
   GENERAL_CONTENT,
+  getContentForService,
   getTechnicalAssets,
   type AwsContentItem,
   type AwsContentType,
@@ -303,9 +307,10 @@ const ContentItemRow: React.FunctionComponent<{
   );
 };
 
-const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] }> = ({
-  services,
-}) => {
+const InstallContentCard: React.FunctionComponent<{
+  services: AwsServiceEntry[];
+  schema: AwsSchema;
+}> = ({ services, schema }) => {
   const [assetState, setAssetState] = useState<Record<string, AssetState>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const timers = useRef<number[]>([]);
@@ -320,7 +325,7 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
   const contentItems: ReviewItem[] = [
     ...GENERAL_CONTENT.map((item) => ({ ...item, serviceName: 'Amazon Web Services' })),
     ...services.flatMap((service) =>
-      (CONTENT_BY_SERVICE[service.id] ?? []).map((item) => ({
+      getContentForService(service.id, schema).map((item) => ({
         ...item,
         serviceName: service.name,
       }))
@@ -511,6 +516,7 @@ const InstallContentCard: React.FunctionComponent<{ services: AwsServiceEntry[] 
 export const StepDetectReview: React.FunctionComponent<{
   deploymentMethod: 'agent' | 'managed';
   services: AwsServiceEntry[];
+  schema: AwsSchema;
   triggerSources: Record<string, string>;
   region: string;
   identityName: string;
@@ -522,6 +528,7 @@ export const StepDetectReview: React.FunctionComponent<{
 }> = ({
   deploymentMethod,
   services,
+  schema,
   triggerSources,
   region,
   identityName,
@@ -558,7 +565,7 @@ export const StepDetectReview: React.FunctionComponent<{
         agentReceivedCount={agentReceivedCount}
       />
       <EuiSpacer size="m" />
-      <InstallContentCard services={services} />
+      <InstallContentCard services={services} schema={schema} />
     </>
   );
 };

@@ -21,8 +21,14 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiNotificationBadge,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiStepsHorizontal,
   EuiText,
@@ -32,8 +38,10 @@ import {
 import type { EuiStepsHorizontalProps } from '@elastic/eui';
 
 import {
+  AWS_SCHEMA_META,
   AWS_SERVICE_CATEGORIES,
   MANAGED_INTEGRATION_EXAMPLES,
+  type AwsSchema,
   type AwsServiceCategory,
   type AwsServiceEntry,
 } from './aws_services_data';
@@ -179,6 +187,11 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   );
   const [deploymentMethod, setDeploymentMethod] = useState<DeploymentMethod>('managed');
   const [triggerSources, setTriggerSources] = useState<Record<string, string>>({});
+  // Data format: hidden-by-default choice made once here and applied
+  // everywhere downstream (see aws_services_data.ts for the full rationale).
+  const [schema, setSchema] = useState<AwsSchema>('ecs');
+  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
+  const [pendingSchema, setPendingSchema] = useState<AwsSchema>(schema);
 
   // Deploy/detect state is lifted here (rather than owned by the Deploy step)
   // so it survives navigating to the separate Detect & Review step.
@@ -314,6 +327,11 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     setDeploymentMethod(method);
   };
 
+  const openSchemaModal = () => {
+    setPendingSchema(schema);
+    setIsSchemaModalOpen(true);
+  };
+
   return (
     // Full-bleed white page canvas per design reference, overriding
     // Kibana's default page background for this flow only.
@@ -351,9 +369,24 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
       {currentStep === 1 && (
         <>
-          <EuiTitle size="m">
-            <h2>Which AWS services do you want to monitor?</h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="flexStart" responsive={false}>
+            <EuiFlexItem>
+              <EuiTitle size="m">
+                <h2>Which AWS services do you want to monitor?</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {/* Deliberately understated — most users never need to touch
+                this. Kept out of the main flow, same convention as the
+                agent-based "Edit" link on Step 3. */}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {`Data format: ${AWS_SCHEMA_META[schema].label}`}{' '}
+                <EuiLink onClick={openSchemaModal} data-test-subj="awsOnboardingEditSchema">
+                  Edit
+                </EuiLink>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
@@ -443,6 +476,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
       {currentStep === 3 && (
         <StepAuthentication
           services={selectedServices}
+          schema={schema}
           deploymentMethod={deploymentMethod}
           onDeploymentMethodChange={onDeploymentMethodChange}
           onCredentialsValidChange={setIsCredentialsValid}
@@ -470,6 +504,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
         <StepDetectReview
           deploymentMethod={deploymentMethod}
           services={selectedServices}
+          schema={schema}
           triggerSources={triggerSources}
           region={deployRegion}
           identityName={deployIdentityName}
@@ -544,6 +579,55 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
     </div>
+
+    {isSchemaModalOpen && (
+    <EuiModal
+      onClose={() => setIsSchemaModalOpen(false)}
+      data-test-subj="awsOnboardingSchemaModal"
+      style={{ width: 400 }}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Edit data format</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText size="s">
+          <p>
+            Determines which package variant installs for each service, and which
+            CloudFormation template the Elastic Cloud Forwarder deploys. Applies to every
+            service selected in this flow.
+          </p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiSelect
+          fullWidth
+          options={[
+            { value: 'ecs', text: AWS_SCHEMA_META.ecs.label },
+            { value: 'otel', text: AWS_SCHEMA_META.otel.label },
+          ]}
+          value={pendingSchema}
+          onChange={(e) => setPendingSchema(e.target.value as AwsSchema)}
+          aria-label="Data format"
+        />
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          {AWS_SCHEMA_META[pendingSchema].description}
+        </EuiText>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={() => setIsSchemaModalOpen(false)}>Cancel</EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={() => {
+            setSchema(pendingSchema);
+            setIsSchemaModalOpen(false);
+          }}
+          data-test-subj="awsOnboardingSaveSchema"
+        >
+          Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+    )}
     </div>
   );
 };
