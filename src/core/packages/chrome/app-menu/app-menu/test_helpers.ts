@@ -7,24 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
-import { useChromeService } from '@kbn/core-chrome-browser-context';
-import type { AppMenuConfig } from '@kbn/app-menu';
-
-interface AppMenuProps {
-  config?: AppMenuConfig;
-}
-
-export const RegisterAppMenu = ({ config }: AppMenuProps) => {
-  const chrome = useChromeService();
-
-  useEffect(() => {
-    chrome.setAppMenu(config);
-
-    return () => {
-      chrome.setAppMenu();
-    };
-  }, [config, chrome]);
-
-  return null;
-};
+export { openAppMenuOverflow } from '@kbn/ui-app-menu/test_helpers';

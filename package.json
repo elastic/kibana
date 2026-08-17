@@ -281,6 +281,7 @@
     "@kbn/apm-utils": "link:src/platform/packages/shared/kbn-apm-utils",
     "@kbn/app-header": "link:src/core/packages/chrome/app-header",
     "@kbn/app-link-test-plugin": "link:src/platform/test/plugin_functional/plugins/app_link_test",
+    "@kbn/app-menu": "link:src/core/packages/chrome/app-menu/app-menu",
     "@kbn/application-usage-test-plugin": "link:x-pack/platform/test/usage_collection/plugins/application_usage_test",
     "@kbn/as-code-data-views-schema": "link:src/platform/packages/shared/as-code/data-views-schema",
     "@kbn/as-code-data-views-transforms": "link:src/platform/packages/shared/as-code/data-views-transforms",
