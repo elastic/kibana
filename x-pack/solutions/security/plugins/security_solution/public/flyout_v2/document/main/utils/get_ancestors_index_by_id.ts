@@ -12,6 +12,9 @@ import {
   LEGACY_EVENT_SOURCE_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { ANCESTOR_INDEX, LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
+import {
+  getClusterQualifiedIndex
+} from '@kbn/security-solution-plugin/public/flyout_v2/shared/utils/get_cluster_qualified_index';
 
 // The ancestor id/index arrays are parallel, and both the current (`kibana.alert.ancestors.*`) and
 // legacy (`signal.ancestors.*`) field names may be present depending on the alert's schema version.
@@ -34,7 +37,8 @@ const ANCESTOR_ID_INDEX_FIELD_PAIRS: ReadonlyArray<readonly [idField: string, in
  * map for those keeps the values rendered as plain text.
  */
 export const getAncestorsIndexById = (
-  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[]
+  dataFormattedForFieldBrowser: TimelineEventsDetailsItem[],
+  documentIndex: string
 ): Record<string, string> => {
   const ruleType = dataFormattedForFieldBrowser.find((item) => item.field === ALERT_RULE_TYPE)
     ?.values?.[0];
@@ -52,7 +56,7 @@ export const getAncestorsIndexById = (
       ids.forEach((id, i) => {
         const indexName = indices[i];
         if (id && indexName) {
-          acc[id] = indexName;
+          acc[id] = getClusterQualifiedIndex(indexName, documentIndex);
         }
       });
       return acc;
