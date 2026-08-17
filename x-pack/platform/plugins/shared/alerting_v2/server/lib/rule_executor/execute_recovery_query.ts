@@ -6,7 +6,7 @@
  */
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { stableStringify } from '@kbn/std';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { isEsqlUserError } from '../errors/esql_user_error';
 import type { RuleExecutionInput } from './types';
 import { buildQueryRecoveryAlertEvents, resolveAlertEventType } from './build_alert_events';
@@ -33,6 +33,7 @@ export const executeRecoveryQuery = async ({
   input,
   activeGroupHashes,
   breachedGroupHashes,
+  maxResponseSize,
 }: {
   queryService: QueryServiceContract;
   logger: LoggerServiceContract;
@@ -41,6 +42,7 @@ export const executeRecoveryQuery = async ({
   input: RuleExecutionInput;
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: ReadonlySet<string>;
+  maxResponseSize?: number;
 }): Promise<AlertEvent[]> => {
   const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
@@ -51,14 +53,8 @@ export const executeRecoveryQuery = async ({
   });
 
   logger.debug({
-    message: () =>
-      `[execute_recovery_query] Executing recovery query for rule ${
-        input.ruleId
-      } - ${stableStringify({
-        query: effectiveQuery,
-        filter: queryPayload.filter,
-        params: queryPayload.params,
-      })}`,
+    message: 'Executing recovery query',
+    labels: { rule_id: input.ruleId },
   });
 
   try {
@@ -67,6 +63,7 @@ export const executeRecoveryQuery = async ({
       filter: queryPayload.filter,
       params: queryPayload.params,
       abortSignal: input.executionContext.signal,
+      maxResponseSize,
     });
 
     return buildQueryRecoveryAlertEvents({
@@ -81,7 +78,7 @@ export const executeRecoveryQuery = async ({
       type: resolveAlertEventType(rule),
     });
   } catch (error) {
-    if (isEsqlUserError(error)) {
+    if (isMaximumResponseSizeExceededError(error) || isEsqlUserError(error)) {
       throw createTaskRunError(error as Error, TaskErrorSource.USER);
     }
     throw error;

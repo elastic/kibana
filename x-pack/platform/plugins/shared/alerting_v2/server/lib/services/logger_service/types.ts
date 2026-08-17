@@ -17,16 +17,25 @@ import type { AlertingV2LogCode } from '../../errors/error_codes';
 export type AlertingLabels = Partial<{
   rule_id: string;
   rule_kind: RuleKind;
+  rule_template_id: string;
   space_id: string;
   policy_id: string;
   group_id: string;
+  group_hash: string;
   episode_id: string;
   workflow_id: string;
   execution_id: string;
   task_id: string;
+  /** Agent Builder skill id (e.g. rule-management). Low-cardinality. */
+  skill_id: string;
   event_type: string;
   step: string;
   subsystem: string;
+  /**
+   * Which member of a fixed, statically declared set failed - e.g. a saved object
+   * type, a datastream, an ES|QL view. Enum-like rather than an entity id.
+   */
+  resource: string;
 }>;
 
 /**
@@ -37,6 +46,7 @@ export type AlertingLabels = Partial<{
 export type AlertingSubsystemName =
   | 'routes'
   | 'rulesClient'
+  | 'ruleTemplateClient'
   | 'actionPolicyClient'
   | 'ruleExecutor'
   | 'director'

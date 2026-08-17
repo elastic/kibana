@@ -43,7 +43,11 @@ export const actionPolicyDestinationSchema = z
   .describe('An action policy destination configuration.');
 
 export const groupingModeSchema = z
-  .enum(['per_episode', 'all', 'per_field'])
+  .union([
+    z.literal('per_episode').describe('one notification per alert episode lifecycle (default).'),
+    z.literal('all').describe('a single notification for all matching episodes.'),
+    z.literal('per_field').describe('group by specified `groupBy` fields.'),
+  ])
   .describe(
     'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
   );
@@ -51,7 +55,18 @@ export const groupingModeSchema = z
 export type GroupingMode = z.infer<typeof groupingModeSchema>;
 
 export const throttleStrategySchema = z
-  .enum(['on_status_change', 'per_status_interval', 'time_interval', 'every_time'])
+  .union([
+    z
+      .literal('on_status_change')
+      .describe('notify only on episode status transitions (default for `per_episode`).'),
+    z.literal('per_status_interval').describe('notify on transitions and at regular intervals.'),
+    z
+      .literal('time_interval')
+      .describe(
+        'notify at regular intervals regardless of status (default for `all`/`per_field`).'
+      ),
+    z.literal('every_time').describe('notify on every evaluation cycle (high volume).'),
+  ])
   .describe('The throttle strategy that controls how often notifications are sent.');
 
 export type ThrottleStrategy = z.infer<typeof throttleStrategySchema>;
@@ -83,7 +98,7 @@ export const needsInterval = (strategy: string | undefined): boolean =>
 
 export interface ValidationPayload {
   value: {
-    groupingMode?: string | null;
+    grouping_mode?: string | null;
     throttle?: { strategy?: string; interval?: string | null } | null;
   };
   issues: z.core.$ZodRawIssue[];
@@ -106,7 +121,7 @@ const validateStrategyInterval = (payload: ValidationPayload) => {
 
 const validateGroupingModeAndStrategy = (payload: ValidationPayload) => {
   const { value: data, issues } = payload;
-  const mode = data.groupingMode ?? 'per_episode';
+  const mode = data.grouping_mode ?? 'per_episode';
   const strategy = data.throttle?.strategy;
   if (!strategy) return;
 
@@ -127,7 +142,7 @@ export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSche
 
 export const snoozeActionPolicyBodySchema = z
   .object({
-    snoozedUntil: z.iso
+    snoozed_until: z.iso
       .datetime()
       .describe('The ISO datetime until which the action policy should be snoozed.'),
   })
@@ -142,7 +157,7 @@ export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema
  */
 export const bulkSnoozeActionPoliciesBodySchema = bulkByIdsSchema
   .extend({
-    snoozedUntil: z.iso
+    snoozed_until: z.iso
       .datetime()
       .describe('The ISO datetime until which the targeted action policies should be snoozed.'),
   })
@@ -167,13 +182,13 @@ const createActionPolicyDataBaseSchema = z
       .max(MAX_KQL_LENGTH)
       .optional()
       .describe('A KQL query string to match alerts.'),
-    groupBy: z
+    group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
       .optional()
       .describe('The fields used to group alerts.'),
     tags: tagsSchema.optional().describe('Tags for categorizing the action policy.'),
-    groupingMode: groupingModeSchema
+    grouping_mode: groupingModeSchema
       .optional()
       .describe('The grouping mode for alert notifications.'),
     throttle: throttleSchema.optional().describe('The throttle configuration for notifications.'),
@@ -212,14 +227,14 @@ export const updateActionPolicyDataSchema = z
       .optional()
       .nullable()
       .describe('A KQL query string to match alerts.'),
-    groupBy: z
+    group_by: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
       .max(MAX_GROUPING_FIELDS)
       .optional()
       .nullable()
       .describe('The fields used to group alerts.'),
     tags: tagsSchema.optional().nullable().describe('Tags for categorizing the action policy.'),
-    groupingMode: groupingModeSchema
+    grouping_mode: groupingModeSchema
       .optional()
       .nullable()
       .describe('The grouping mode for alert notifications.'),
@@ -231,7 +246,7 @@ export const updateActionPolicyDataSchema = z
   .strict()
   .check((payload) => {
     if (payload.value.throttle === null || payload.value.throttle === undefined) return;
-    if (payload.value.groupingMode === undefined) {
+    if (payload.value.grouping_mode === undefined) {
       validateStrategyInterval(payload);
       return;
     }
@@ -252,7 +267,7 @@ export type UpdateActionPolicyBody = z.infer<typeof updateActionPolicyBodySchema
 
 /** Sort field for the find action policies (list) API. */
 export const findActionPoliciesSortFieldSchema = z
-  .enum(['name', 'createdAt', 'updatedAt'])
+  .enum(['name', 'created_at', 'updated_at'])
   .describe('The available fields to sort action policies by.');
 export type FindActionPoliciesSortField = z.infer<typeof findActionPoliciesSortFieldSchema>;
 

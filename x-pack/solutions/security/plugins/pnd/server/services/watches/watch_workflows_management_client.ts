@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
+  UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
   WorkflowExecutionListDto,
@@ -49,6 +50,18 @@ export interface WatchWorkflowsManagementClient {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto>;
+
+  /**
+   * Only `{ enabled }` is safe to send for a managed watch — the Workflows API treats an
+   * enablement-only update as permitted and throws `ManagedWorkflowUpdateForbiddenError` for
+   * anything else unless `allowManagedWorkflowMutation` is set.
+   */
+  updateWorkflow(
+    id: string,
+    workflow: { enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto>;
 
   deleteWorkflows(
     workflowIds: string[],
@@ -108,6 +121,15 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     return this.management.createWorkflow(workflow, spaceId, request);
+  }
+
+  updateWorkflow(
+    id: string,
+    workflow: { enabled: boolean },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto> {
+    return this.management.updateWorkflow(id, workflow, spaceId, request);
   }
 
   deleteWorkflows(

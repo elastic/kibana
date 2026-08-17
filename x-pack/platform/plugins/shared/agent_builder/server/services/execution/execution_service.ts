@@ -112,6 +112,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           if (existing?.status === ExecutionStatus.scheduled) {
             await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
               request,
+              cloneApiKey: true,
             });
           }
 
@@ -208,7 +209,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }): Promise<ExecuteAgentResult> {
     // ensureScheduled tolerates the task already existing: a concurrent idempotent
     // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), { request });
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+      request,
+      cloneApiKey: true,
+    });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 

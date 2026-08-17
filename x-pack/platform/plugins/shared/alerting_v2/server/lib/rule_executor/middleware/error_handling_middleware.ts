@@ -13,6 +13,7 @@ import {
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { isEsqlUserError } from '../../errors/esql_user_error';
 
 /**
  * Middleware that provides centralized error handling for all steps.
@@ -41,6 +42,7 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
         }
       } catch (error) {
         self.logger.error({
+          message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
           error,
           code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           labels: { step: ctx.step.name },
