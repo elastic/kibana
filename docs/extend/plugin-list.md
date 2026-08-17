@@ -98,7 +98,7 @@ mapped_pages:
 | [visTypeTagcloud](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/tagcloud) | WARNING: Missing or empty README. |
 | [visTypeTimelion](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/timelion/README.md) | Contains the timelion visualization and the timelion backend. |
 | [visTypeTimeseries](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/vis_types/timeseries) | WARNING: Missing or empty README. |
-| [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega) | WARNING: Missing or empty README. |
+| [visTypeVega](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vega/README.md) | Dashboard supports a dedicated by-value vega panel. Its stored config holds a spec string (JSON or HJSON); title, time range, and drilldown fields are optional. The string is preserved exactly, so comments and formatting round-trip. |
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizationListing](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualization_listing/README.md) | This plugin contains the library listing page for visualizations. |
@@ -139,6 +139,7 @@ mapped_pages:
 | [cloudFullStory](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/README.md) | Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud. |
 | [cloudLinks](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cloud_integrations/cloud_links/README.md) | Adds all the links to the Elastic Cloud console. |
 | [cloudSecurityPosture](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/cloud_security_posture/README.md) | Cloud Posture automates the identification and remediation of risks across cloud infrastructures |
+| [connectorEventsBridge](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/connector_events_bridge/README.md) | Phase 1 disposable bridge that will register on the Actions inbound events hub and forward connector events to Workflows via workflowsExtensions.getClient(request).emitEvent(...). |
 | [contentConnectors](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/content_connectors/README.mdx) | This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins. |
 | [contextEngine](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/context_engine/README.md) | Server-side plugin for the Context Engine. |
 | [crossClusterReplication](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/cross_cluster_replication/README.md) | You can run a local cluster and simulate a remote cluster within a single Kibana directory. |

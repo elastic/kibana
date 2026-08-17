@@ -173,7 +173,7 @@ export function buildExecutionHistoryItem(
     episodes,
     action_group_count: Number(dispatcher.action_group_count ?? 0),
     rules,
-    totalRuleCount,
+    total_rule_count: totalRuleCount,
     workflows,
     failure_reason: failureReason as DispatchFailureReason | undefined,
     error: errorMessage !== undefined ? { message: errorMessage } : undefined,

@@ -50,9 +50,9 @@ export interface GenerateKIQueriesDependencies {
   kiClient: KnowledgeIndicatorClient;
   esClient: ElasticsearchClient;
   /**
-   * Client used to validate generated ES|QL against the stream's data. Separate from `esClient`
-   * because the stream can resolve to a remote CPS-connected project, while `esClient` reads the
-   * plugin's own (origin-only) indices.
+   * Client used to validate generated ES|QL against the stream's data, always routed across every
+   * CPS-linked project. Separate from `esClient` because the stream can resolve to a remote
+   * CPS-connected project, while `esClient` reads the plugin's own (origin-only) indices.
    */
   streamDataEsClient: ElasticsearchClient;
   featureFlags: FeatureFlagsStart;
