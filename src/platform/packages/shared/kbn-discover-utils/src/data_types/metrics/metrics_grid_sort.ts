@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useEsqlQueryInfo } from './use_esql_query_info';
-export { useFeatureFlag } from './use_feature_flag';
-export { useGridNavigation } from './use_grid_navigation';
+import type { SerializableRecord } from '@kbn/utility-types';
+
+export type MetricsGridSortField = 'alphabetically' | 'recency';
+
+export type MetricsGridSortDirection = 'asc' | 'desc';
+
+export interface MetricsGridSort extends SerializableRecord {
+  sortField: MetricsGridSortField;
+  sortDirection: MetricsGridSortDirection;
+}
+
+export const METRICS_GRID_SORT_DEFAULTS: MetricsGridSort = {
+  sortField: 'alphabetically',
+  sortDirection: 'asc',
+};
