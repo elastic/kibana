@@ -24,10 +24,19 @@ const mockSnoozePolicy = jest.fn();
 const mockUnsnoozePolicy = jest.fn();
 const mockUpdateApiKey = jest.fn();
 const mockOnClose = jest.fn();
+const mockFocusedActionPolicyService = {
+  setFocusedActionPolicy: jest.fn(),
+  clearFocusedActionPolicy: jest.fn(),
+  getFocusedActionPolicy: jest.fn(),
+  focusedActionPolicy$: { subscribe: jest.fn() },
+};
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../../services/user_capabilities'
+  );
+  const { FocusedActionPolicyService: ActualFocusedActionPolicyService } = jest.requireActual(
+    '../../../services/focused_action_policy_service'
   );
   return {
     useService: (token: unknown) => {
@@ -35,6 +44,9 @@ jest.mock('@kbn/core-di-browser', () => {
         return new ActualUserCapabilities({
           capabilities: { alerting_v2_action_policies: { read: true, all: true } },
         });
+      }
+      if (token === ActualFocusedActionPolicyService) {
+        return mockFocusedActionPolicyService;
       }
       if (token === 'application') return { navigateToUrl: mockNavigateToUrl };
       if (token === 'http') return { basePath: { prepend: mockBasePathPrepend } };
@@ -386,5 +398,26 @@ describe('ActionPolicyDetailsFlyoutContainer', () => {
 
     await userEvent.click(screen.getByTestId('flyout-cancel-snooze'));
     expect(mockUnsnoozePolicy).toHaveBeenCalledWith('policy-1');
+  });
+
+  describe('Agent Builder focus', () => {
+    it('sets the focused action policy when the flyout loads', () => {
+      const policy = buildPolicy();
+      mockUseFetchActionPolicy.mockReturnValue({ data: policy });
+      renderContainer();
+
+      expect(mockFocusedActionPolicyService.setFocusedActionPolicy).toHaveBeenCalledWith(policy);
+    });
+
+    it('clears the focused action policy on unmount with the policy id', () => {
+      mockUseFetchActionPolicy.mockReturnValue({ data: buildPolicy() });
+      const { unmount } = renderContainer();
+
+      unmount();
+
+      expect(mockFocusedActionPolicyService.clearFocusedActionPolicy).toHaveBeenCalledWith(
+        'policy-1'
+      );
+    });
   });
 });

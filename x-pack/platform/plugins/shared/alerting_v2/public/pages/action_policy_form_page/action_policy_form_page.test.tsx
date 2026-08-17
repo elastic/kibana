@@ -14,6 +14,12 @@ import { ActionPolicyFormPage } from './action_policy_form_page';
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
+const mockFocusedActionPolicyService = {
+  setFocusedActionPolicy: jest.fn(),
+  clearFocusedActionPolicy: jest.fn(),
+  getFocusedActionPolicy: jest.fn(),
+  focusedActionPolicy$: { subscribe: jest.fn() },
+};
 
 jest.mock('../../components/action_policy/form/components/matcher_input', () => ({
   MatcherInput: (props: {
@@ -33,34 +39,42 @@ jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: jest.fn((token: unknown) => {
-    const tokenStr = String(token);
-    if (tokenStr.includes('application')) {
-      return {
-        navigateToUrl: mockNavigateToUrl,
-        getUrlForApp: jest.fn(
-          (appId: string, options?: { path?: string }) =>
-            `/app/${appId}${options?.path ? `/${options.path}` : ''}`
-        ),
-      };
-    }
-    if (tokenStr.includes('chrome')) {
-      return { docTitle: { change: jest.fn() } };
-    }
-    if (tokenStr.includes('http')) {
-      return { basePath: mockBasePath };
-    }
-    if (tokenStr.includes('uiSettings')) {
-      return { get: () => true };
-    }
-    if (tokenStr.includes('notifications')) {
-      return { toasts: { addError: jest.fn(), addSuccess: jest.fn() } };
-    }
-    return {};
-  }),
-  CoreStart: jest.fn((name: string) => `CoreStart(${name})`),
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  const { FocusedActionPolicyService: ActualFocusedActionPolicyService } = jest.requireActual(
+    '../../services/focused_action_policy_service'
+  );
+  return {
+    useService: jest.fn((token: unknown) => {
+      const tokenStr = String(token);
+      if (token === ActualFocusedActionPolicyService) {
+        return mockFocusedActionPolicyService;
+      }
+      if (tokenStr.includes('application')) {
+        return {
+          navigateToUrl: mockNavigateToUrl,
+          getUrlForApp: jest.fn(
+            (appId: string, options?: { path?: string }) =>
+              `/app/${appId}${options?.path ? `/${options.path}` : ''}`
+          ),
+        };
+      }
+      if (tokenStr.includes('chrome')) {
+        return { docTitle: { change: jest.fn() } };
+      }
+      if (tokenStr.includes('http')) {
+        return { basePath: mockBasePath };
+      }
+      if (tokenStr.includes('uiSettings')) {
+        return { get: () => true };
+      }
+      if (tokenStr.includes('notifications')) {
+        return { toasts: { addError: jest.fn(), addSuccess: jest.fn() } };
+      }
+      return {};
+    }),
+    CoreStart: jest.fn((name: string) => `CoreStart(${name})`),
+  };
+});
 
 const INLINE_DEFS = [
   {
@@ -443,6 +457,39 @@ describe('ActionPolicyFormPage', () => {
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
+    });
+
+    describe('Agent Builder focus', () => {
+      it('sets the focused action policy when the edit page loads', () => {
+        mockUseFetchActionPolicy.mockReturnValue({
+          data: EXISTING_POLICY,
+          isLoading: false,
+          isError: false,
+          error: null,
+        });
+
+        renderPage();
+
+        expect(mockFocusedActionPolicyService.setFocusedActionPolicy).toHaveBeenCalledWith(
+          EXISTING_POLICY
+        );
+      });
+
+      it('clears the focused action policy on unmount with the policy id', () => {
+        mockUseFetchActionPolicy.mockReturnValue({
+          data: EXISTING_POLICY,
+          isLoading: false,
+          isError: false,
+          error: null,
+        });
+
+        const { unmount } = renderPage();
+        unmount();
+
+        expect(mockFocusedActionPolicyService.clearFocusedActionPolicy).toHaveBeenCalledWith(
+          'policy-1'
+        );
+      });
     });
   });
 });
