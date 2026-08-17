@@ -189,12 +189,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async expectPlaygroundHeaderComponentsToExist() {
-        await testSubjects.existOrFail('playground-header-actions');
-        await testSubjects.existOrFail('playground-documentation-link');
+        await testSubjects.existOrFail('app-menu');
+        await testSubjects.existOrFail('appHeaderMenuDocumentation');
       },
 
       async expectPlaygroundHeaderComponentsToDisabled() {
-        expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be('true');
+        expect(await testSubjects.isEnabled('chatMode')).to.be(false);
+        expect(await testSubjects.isEnabled('queryMode')).to.be(false);
         expect(await testSubjects.isEnabled('uploadFileButton')).to.be(true);
         expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(false);
         expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
@@ -309,7 +310,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(promptInstructions).to.contain(text);
       },
       async expectChatWindowLoaded() {
-        expect(await testSubjects.getAttribute('viewModeSelector', 'disabled')).to.be(null);
+        expect(await testSubjects.isEnabled('chatMode')).to.be(true);
         expect(await testSubjects.isEnabled('dataSourceActionButton')).to.equal(
           true,
           'dataSourceActionButton isEnabled should be true'
@@ -713,29 +714,26 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         return match ? match[1] : undefined;
       },
       async expectPlaygroundNameHeader(name: string) {
-        await testSubjects.existOrFail('playgroundName');
-        const nameTitle = await testSubjects.find('playgroundName');
+        await testSubjects.existOrFail('appHeaderTitle');
+        const nameTitle = await testSubjects.find('appHeaderTitle');
         expect(await nameTitle.getVisibleText()).to.be(name);
       },
       async clickEditPlaygroundNameButton() {
-        await testSubjects.existOrFail('edit-playground-name-button');
-        await testSubjects.click('edit-playground-name-button');
-        await testSubjects.existOrFail('edit-playground-name-modal');
+        await testSubjects.existOrFail('appHeaderTitleEditIcon');
+        await testSubjects.click('appHeaderTitleEditIcon');
+        await testSubjects.existOrFail('appHeaderTitleInput');
       },
-      async setPlaygroundNameInEditModal(name: string) {
-        await testSubjects.existOrFail('edit-playground-name-modal');
-        await testSubjects.existOrFail('searchPlaygroundEditPlaygroundNameModalFieldText');
-        const nameInput = await testSubjects.find(
-          'searchPlaygroundEditPlaygroundNameModalFieldText'
-        );
+      async setPlaygroundNameInEditInput(name: string) {
+        await testSubjects.existOrFail('appHeaderTitleInput');
+        const nameInput = await testSubjects.find('appHeaderTitleInput');
         await nameInput.clearValueWithKeyboard();
         await nameInput.type(name);
       },
-      async savePlaygroundNameInModal() {
-        await testSubjects.existOrFail('edit-playground-name-modal');
-        await testSubjects.existOrFail('searchPlaygroundEditPlaygroundNameModalSaveButton');
-        await testSubjects.click('searchPlaygroundEditPlaygroundNameModalSaveButton');
-        await testSubjects.missingOrFail('edit-playground-name-modal');
+      async savePlaygroundName() {
+        await testSubjects.existOrFail('appHeaderTitleInput');
+        const nameInput = await testSubjects.find('appHeaderTitleInput');
+        await nameInput.pressKeys(browser.keys.ENTER);
+        await testSubjects.missingOrFail('appHeaderTitleInput');
       },
       async expectUnSavedChangesBadegeExists() {
         await testSubjects.existOrFail('playground-unsaved-changes-badge');
@@ -765,13 +763,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('saved-playground-save-button');
       },
       async expectSavedPlaygroundOptionsExists() {
-        await testSubjects.existOrFail('moreOptionsActionButton');
+        await testSubjects.existOrFail('app-menu-overflow-button');
         await testSubjects.click('saved-playground-save-button');
       },
       async openSavedPlaygroundOptions() {
-        await testSubjects.existOrFail('moreOptionsActionButton');
-        await testSubjects.click('moreOptionsActionButton');
-        await testSubjects.existOrFail('moreOptionsContextMenu');
+        await testSubjects.existOrFail('app-menu-overflow-button');
+        await testSubjects.click('app-menu-overflow-button');
+        await testSubjects.existOrFail('app-menu-popover');
       },
       async expectPlaygroundSaveAsOptionExists() {
         await testSubjects.existOrFail('moreOptionsSavePlaygroundAs');
