@@ -96,6 +96,21 @@ describe('LensWrapper', () => {
       expect(embeddableElement).toHaveAttribute('data-title-highlight', 'cpu');
     });
 
+    it('passes multiple title highlights to EmbeddableComponent', () => {
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} titleHighlight={['system', 'usage']} />
+        </EuiThemeProvider>
+      );
+
+      expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          titleHighlight: ['system', 'usage'],
+        }),
+        expect.anything()
+      );
+    });
+
     it('passes titleHighlight when undefined', () => {
       render(
         <EuiThemeProvider>
