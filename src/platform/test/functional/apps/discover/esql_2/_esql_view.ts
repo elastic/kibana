@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(true);
         expect(await timePicker.timePickerExists()).to.be(true);
         expect(await testSubjects.exists('addFilter')).to.be(true);
-        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
+        expect(await testSubjects.exists('dscViewModeToggleButton')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         await testSubjects.click('app-menu-overflow-button');
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists('showQueryBarMenu')).to.be(false);
         expect(await testSubjects.exists('addFilter')).to.be(false);
-        expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
+        expect(await testSubjects.exists('dscViewModeToggleButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
         expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
@@ -474,7 +474,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-icon');
         const historyItems = await esql.getHistoryItems();
-        await esql.isQueryPresentInTable('FROM logstash-*', historyItems);
+        await esql.isQueryPresentInTable('FROM logstash-* | SORT @timestamp DESC', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
