@@ -283,4 +283,33 @@ describe('prefetchPreviousStatusesByQuery', () => {
       prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} })
     ).rejects.toThrow('ES error');
   });
+
+  it('includes runtime_mappings in the search request when provided', async () => {
+    const runtimeMappings = {
+      my_field: {
+        type: 'keyword' as const,
+        script: { source: 'emit(doc["_source.my_field"].value)' },
+      },
+    };
+
+    await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} }, runtimeMappings);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({ runtime_mappings: runtimeMappings })
+    );
+  });
+
+  it('omits runtime_mappings from the search request when not provided', async () => {
+    await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
+
+    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    expect(call).not.toHaveProperty('runtime_mappings');
+  });
+
+  it('omits runtime_mappings from the search request when provided as an empty object', async () => {
+    await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} }, {});
+
+    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    expect(call).not.toHaveProperty('runtime_mappings');
+  });
 });

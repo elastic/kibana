@@ -186,7 +186,12 @@ export const setSignalsStatusRoute = (
                   ids: prefetchedAlertIds,
                   previousStatuses,
                   truncated,
-                } = await prefetchPreviousStatusesByQuery(esClient, alertsIndex, query));
+                } = await prefetchPreviousStatusesByQuery(
+                  esClient,
+                  alertsIndex,
+                  query,
+                  runtimeMappings
+                ));
               } catch {
                 logger.warn('Failed to pre-fetch alert IDs for workflow trigger');
               }

@@ -45,7 +45,8 @@ export const prefetchPreviousStatusesByIds = async (
 export const prefetchPreviousStatusesByQuery = async (
   esClient: ElasticsearchClient,
   index: string | string[],
-  query: estypes.QueryDslQueryContainer
+  query: estypes.QueryDslQueryContainer,
+  runtimeMappings?: estypes.MappingRuntimeFields
 ): Promise<{ ids: string[]; previousStatuses: PreviousStatus[]; truncated: boolean }> => {
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
@@ -54,6 +55,9 @@ export const prefetchPreviousStatusesByQuery = async (
     size: MAX_ALERTS_PER_TRIGGER,
     track_total_hits: MAX_ALERTS_PER_TRIGGER + 1,
     ignore_unavailable: true,
+    ...(runtimeMappings != null && Object.keys(runtimeMappings).length > 0
+      ? { runtime_mappings: runtimeMappings }
+      : {}),
   });
   const totalHits = searchResponse.hits.total;
   const totalCount = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
