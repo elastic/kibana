@@ -19,6 +19,12 @@ export type AuthType = 'identity_federation' | 'api_key';
 
 export type Badge = 'technical_preview' | 'beta';
 
+function releaseToBadge(release: string | undefined): Badge | undefined {
+  if (release === 'experimental') return 'technical_preview';
+  if (release === 'beta') return 'beta';
+  return undefined;
+}
+
 export type ServiceCategory =
   | 'Analytics'
   | 'Application Integration'
@@ -518,6 +524,7 @@ export function buildAwsServiceMatrix(
     const varTypes: Record<string, string> = {};
 
     const packageInfo = packages[entry.packageName];
+    const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
     if (packageInfo) {
       const pt = (packageInfo.policy_templates ?? []).find(
         (p: any) => 'name' in p && p.name === entry.policyTemplate
@@ -623,6 +630,7 @@ export function buildAwsServiceMatrix(
       varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
       defaultEnabled,
       showInUI,
+      badge,
       identityFederationSupported,
     } as AwsServiceMatrixEntry;
 
