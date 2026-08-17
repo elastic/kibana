@@ -39,7 +39,6 @@ import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
-import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
@@ -229,22 +228,6 @@ const bulkDeleteWithOCC = async (
     await untrackRuleAlerts(context, id, attributes as RawRule);
   }
 
-  const ruleIds = rulesToDelete.map((rule) => rule.id);
-  try {
-    const eventLogClient = await context.getEventLogClient();
-    await softDeleteGaps({
-      ruleIds,
-      logger: context.logger,
-      eventLogClient,
-      eventLogger: context.eventLogger,
-    });
-  } catch (error) {
-    // Failing to soft delete gaps should not block the rule deletion
-    context.logger.error(
-      `delete(): Failed to soft delete gaps for rules: ${ruleIds.join(',')}: ${error.message}`
-    );
-  }
-
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
     () =>
@@ -284,6 +267,20 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  if (deletedRuleIds.length > 0) {
+    try {
+      const eventLogClient = await context.getEventLogClient();
+      await eventLogClient.updateGapsByRuleIds(deletedRuleIds);
+    } catch (error) {
+      // Failing to soft delete gaps should not block the rule deletion
+      context.logger.error(
+        `delete(): Failed to soft delete gaps for rules: ${deletedRuleIds.join(',')}: ${
+          error.message
+        }`
+      );
+    }
+  }
 
   await logRuleChanges({
     ruleSOs: rules,

@@ -290,6 +290,85 @@ export default ({ getService }: FtrProviderContext): void => {
       await fetchRule(ruleId).expect(404);
     });
 
+    it('should soft-delete gaps when deleting rules', async () => {
+      const ruleId = 'ruleId';
+      const testRule = getSimpleRule(ruleId);
+      const createdRule = await createRule(supertest, log, testRule);
+
+      const { gapEvents } = await generateGapsForRule(
+        es,
+        { id: createdRule.id, name: createdRule.name },
+        5
+      );
+      expect(gapEvents).toHaveLength(5);
+
+      const gapsBefore = await es.count({
+        index: '.kibana-event-log-ds',
+        query: {
+          bool: {
+            must: [
+              { term: { 'event.action': 'gap' } },
+              { term: { 'event.provider': 'alerting' } },
+              { term: { 'rule.id': createdRule.id } },
+            ],
+            must_not: [{ term: { 'kibana.alert.rule.gap.deleted': true } }],
+          },
+        },
+      });
+      expect(gapsBefore.count).toBe(5);
+
+      await postBulkAction()
+        .send({ query: '', action: BulkActionTypeEnum.delete })
+        .expect(200);
+
+      await fetchRule(ruleId).expect(404);
+
+      // Gap soft-deletion runs as a background ES task (wait_for_completion: false).
+      // Poll until all gaps are marked as deleted or 30 seconds elapse.
+      const maxWaitMs = 30_000;
+      const pollIntervalMs = 1_000;
+      const startTime = Date.now();
+      let softDeletedCount = 0;
+
+      while (Date.now() - startTime < maxWaitMs) {
+        await es.indices.refresh({ index: '.kibana-event-log-ds' });
+
+        const result = await es.count({
+          index: '.kibana-event-log-ds',
+          query: {
+            bool: {
+              must: [
+                { term: { 'event.action': 'gap' } },
+                { term: { 'event.provider': 'alerting' } },
+                { term: { 'rule.id': createdRule.id } },
+                { term: { 'kibana.alert.rule.gap.deleted': true } },
+              ],
+            },
+          },
+        });
+        softDeletedCount = result.count;
+        if (softDeletedCount === 5) break;
+        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+      }
+
+      expect(softDeletedCount).toBe(5);
+
+      const nonDeletedGaps = await es.count({
+        index: '.kibana-event-log-ds',
+        query: {
+          bool: {
+            must: [
+              { term: { 'event.action': 'gap' } },
+              { term: { 'event.provider': 'alerting' } },
+              { term: { 'rule.id': createdRule.id } },
+            ],
+            must_not: [{ term: { 'kibana.alert.rule.gap.deleted': true } }],
+          },
+        },
+      });
+      expect(nonDeletedGaps.count).toBe(0);
+    });
+
     it('should duplicate rules', async () => {
       const ruleId = 'ruleId';
       const ruleToDuplicate = getCustomQueryRuleParams({
