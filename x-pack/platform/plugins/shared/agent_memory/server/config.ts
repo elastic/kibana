@@ -10,6 +10,9 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
+    writeConfirmation: schema.oneOf([schema.literal('always'), schema.literal('never')], {
+      defaultValue: 'always',
+    }),
   }),
 };
 

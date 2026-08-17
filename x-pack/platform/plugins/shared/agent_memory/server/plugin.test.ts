@@ -34,7 +34,10 @@ const { createMemoryStorage } = jest.requireMock('./storage/memory_storage') as 
 describe('AgentMemoryPlugin', () => {
   it('registers callable Agent Builder contracts with storage guidance from the shared index', async () => {
     const initializerContext = coreMock.createPluginInitializerContext<AgentMemoryConfig>();
-    initializerContext.config.get.mockReturnValue({ enabled: true });
+    initializerContext.config.get.mockReturnValue({
+      enabled: true,
+      writeConfirmation: 'never',
+    });
     const plugin = new AgentMemoryPlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
     const agentBuilder = agentBuilderMocks.createSetup();
@@ -63,6 +66,17 @@ describe('AgentMemoryPlugin', () => {
       platformMemoryTools.remember,
       platformMemoryTools.forget,
     ]);
+    const registeredTools = agentBuilder.tools.register.mock.calls.map(([tool]) => tool);
+    expect(registeredTools.find(({ id }) => id === platformMemoryTools.remember)).toEqual(
+      expect.objectContaining({
+        confirmation: expect.objectContaining({ askUser: 'never' }),
+      })
+    );
+    expect(registeredTools.find(({ id }) => id === platformMemoryTools.forget)).toEqual(
+      expect.objectContaining({
+        confirmation: expect.objectContaining({ askUser: 'never' }),
+      })
+    );
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
       expect(tool).toEqual(expect.objectContaining({ handler: expect.any(Function) }));
     }
@@ -103,7 +117,10 @@ describe('AgentMemoryPlugin', () => {
 
   it('uses the request client for data and the internal client for index templates', async () => {
     const initializerContext = coreMock.createPluginInitializerContext<AgentMemoryConfig>();
-    initializerContext.config.get.mockReturnValue({ enabled: true });
+    initializerContext.config.get.mockReturnValue({
+      enabled: true,
+      writeConfirmation: 'always',
+    });
     const plugin = new AgentMemoryPlugin(initializerContext);
     const coreStart = coreMock.createStart();
     const internalEsClient = coreStart.elasticsearch.client.asInternalUser;

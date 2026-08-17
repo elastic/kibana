@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
+import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
@@ -38,10 +39,12 @@ export const createForgetTool = ({
   getStorage,
   getSecurityStart,
   getCoreSecurity,
+  writeConfirmation = 'always',
 }: {
   getStorage: GetMemoryStorage;
   getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
+  writeConfirmation?: ToolConfirmationPolicyMode;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
   id: platformMemoryTools.forget,
   type: ToolType.builtin,
@@ -59,7 +62,7 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
   schema: forgetSchema,
   tags: [],
   confirmation: {
-    askUser: 'always',
+    askUser: writeConfirmation,
     getConfirmation: ({ toolParams }) => ({
       title: i18n.translate('xpack.agentMemory.agentBuilder.tools.forget.confirmationTitle', {
         defaultMessage: 'Forget memory "{id}"',
