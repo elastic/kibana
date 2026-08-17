@@ -31,6 +31,7 @@ export const taskStoreMock = {
       bulkPartialUpdate: jest.fn(),
       bulkRemove: jest.fn(),
       get: jest.fn(),
+      taskExists: jest.fn().mockResolvedValue(false),
       getLifecycle: jest.fn(),
       fetch: jest.fn(),
       aggregate: jest.fn(),

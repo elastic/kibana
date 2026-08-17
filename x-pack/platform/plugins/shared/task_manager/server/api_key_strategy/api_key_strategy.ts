@@ -39,6 +39,15 @@ export interface InvalidationTarget {
   uiamApiKey?: string;
 }
 
+/**
+ * The credential fields {@link ApiKeyStrategy.getApiKeyIdsForInvalidation} needs, so that both a
+ * stored task and a freshly granted key set that was never persisted can be passed to it.
+ */
+export type ApiKeyInvalidationSource = Pick<
+  ConcreteTaskInstance,
+  'apiKey' | 'uiamApiKey' | 'userScope'
+>;
+
 export interface ApiKeyStrategy {
   readonly shouldGrantUiam: boolean;
   readonly typeToUse: ApiKeyType;
@@ -52,7 +61,7 @@ export interface ApiKeyStrategy {
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined;
 
-  getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[];
+  getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[];
 
   markForInvalidation(
     targets: InvalidationTarget[],

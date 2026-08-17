@@ -23,6 +23,7 @@ import {
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';
 import type {
+  ApiKeyInvalidationSource,
   ApiKeySOFields,
   ApiKeyStrategy,
   GrantApiKeysOpts,
@@ -281,8 +282,8 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     return taskInstance.apiKey;
   }
 
-  getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {
-    const { userScope, uiamApiKey, apiKey } = taskInstance;
+  getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[] {
+    const { userScope, uiamApiKey, apiKey } = source;
     // `apiKeyCreatedByUser` gates invalidation for BOTH the ES and UIAM keys.
     // See the invariant documented in `grantApiKeys`: both credentials are
     // currently persisted with the same ownership, so a single flag is

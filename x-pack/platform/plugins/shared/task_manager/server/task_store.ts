@@ -33,6 +33,7 @@ import type {
 
 import {
   isSavedObjectErrorResult,
+  SavedObjectsErrorHelpers,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from '@kbn/core/server';
@@ -305,6 +306,38 @@ export class TaskStore {
     }
   }
 
+  /**
+   * Marks API keys that were granted for a task write that never landed, so the invalidation task
+   * can revoke them.
+   *
+   * API keys are granted before the task document is written, so any failure in between leaves them
+   * attached to no task and referenced by nothing. Marking is safe even when a key turns out to be
+   * shared with a task that was written successfully (keys are granted per task type, not per task):
+   * the invalidation task skips keys still referenced by a live task and retries them later.
+   */
+  private async invalidateUnpersistedApiKeys(granted: Array<ApiKeySOFields | undefined>) {
+    const targets = granted.flatMap((fields) =>
+      fields ? this.apiKeyStrategy.getApiKeyIdsForInvalidation(fields) : []
+    );
+
+    if (!targets.length) {
+      return;
+    }
+
+    // Best effort, so that it can never mask the error that prevented the write.
+    try {
+      await this.apiKeyStrategy.markForInvalidation(
+        targets,
+        this.logger,
+        this.invalidationSoClient
+      );
+    } catch (e) {
+      this.logger.error(
+        `Failed to mark ${targets.length} unused API keys for invalidation: ${e.message}`
+      );
+    }
+  }
+
   private async bulkGetDecryptedTaskApiKeys(
     taskIds: string[]
   ): Promise<Map<string, { apiKey?: string; uiamApiKey?: string }>> {
@@ -442,7 +475,8 @@ export class TaskStore {
 
     const apiKeySOFieldsMap =
       (await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
-    const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
+    const grantedApiKeyFields = apiKeySOFieldsMap.get(taskInstance.id);
+    const apiKeySOFields = grantedApiKeyFields || {};
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -468,6 +502,7 @@ export class TaskStore {
         this.adHocTaskCounter.increment();
       }
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([grantedApiKeyFields]);
       this.errors$.next(e);
       throw e;
     }
@@ -556,6 +591,7 @@ export class TaskStore {
         }).length
       );
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
       throw e;
     }
@@ -565,6 +601,16 @@ export class TaskStore {
         `Trying to bulk schedule tasks ${JSON.stringify(
           savedObjects.saved_objects.map((so) => so.id)
         )} with user scope but security is disabled. Tasks will run without user scope.`
+      );
+    }
+
+    const failedTaskIds = savedObjects.saved_objects
+      .filter(isSavedObjectErrorResult)
+      .map(({ id }) => id);
+
+    if (failedTaskIds.length) {
+      await this.invalidateUnpersistedApiKeys(
+        failedTaskIds.map((taskId) => apiKeySOFieldsMap.get(taskId))
       );
     }
 
@@ -713,6 +759,7 @@ export class TaskStore {
           }
         ));
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
       throw e;
     }
@@ -720,6 +767,12 @@ export class TaskStore {
     const allInvalidationTargets: InvalidationTarget[] = [];
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (isSavedObjectErrorResult(updatedSavedObject)) {
+        // The regenerated key never made it onto the task, so nothing references it. Queue it
+        // alongside the replaced keys below rather than leaving it orphaned.
+        const granted = apiKeySOFieldsMap.get(updatedSavedObject.id);
+        if (granted) {
+          allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
+        }
         return asErr({
           type: 'task',
           id: updatedSavedObject.id,
@@ -945,6 +998,31 @@ export class TaskStore {
       taskInstance,
     ]);
     return tasksWithDecryptedApiKeys[0];
+  }
+
+  /**
+   * Resolves whether a task document exists, without reading or decrypting its API keys.
+   *
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   */
+  public async taskExists(id: string): Promise<boolean> {
+    return this.executionContextRunner.run(() => this._taskExists(id), {
+      id: 'task-exists',
+    });
+  }
+
+  private async _taskExists(id: string): Promise<boolean> {
+    try {
+      await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
+      return true;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return false;
+      }
+      this.errors$.next(e);
+      throw e;
+    }
   }
 
   /**
