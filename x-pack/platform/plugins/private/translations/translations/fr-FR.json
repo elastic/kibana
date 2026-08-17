@@ -22680,7 +22680,6 @@
     "xpack.fleet.enrollmentTokenBulkRevokeModal.title": "Révoquer les {count} jetons d'enregistrement",
     "xpack.fleet.enrollmentTokenBulkRevokeModal.titleSingle": "Révoquer le jeton d'enregistrement",
     "xpack.fleet.enrollmentTokensList.actionsTitle": "Actions",
-    "xpack.fleet.enrollmentTokensList.activeTitle": "Actif",
     "xpack.fleet.enrollmentTokensList.activeValue": "Actif",
     "xpack.fleet.enrollmentTokensList.clearFiltersLink": "Effacer les filtres",
     "xpack.fleet.enrollmentTokensList.clearSelectionButton": "Effacer la sélection",
