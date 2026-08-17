@@ -7,13 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSuperDatePicker,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   ApplicationStart,
@@ -33,6 +27,7 @@ import {
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets, type PresetItem } from '@kbn/date-range-picker-presets';
 import { DATE_RANGE_PICKER_FEATURE_FLAG } from './constants';
+import { LegacyDateRangePicker } from './legacy_date_range_picker';
 
 const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,
@@ -179,27 +174,18 @@ export const AlertingDateRangePicker = ({
     [onRefresh]
   );
 
-  const handleLegacyTimeChange = useCallback(
-    ({ start, end }: { start: string; end: string }) => {
-      onChange({ from: start, to: end });
-      timeHistory.add({ from: start, to: end });
-    },
-    [onChange, timeHistory]
-  );
-
   const canManuallyRefresh = Boolean(onRefresh);
 
   if (!isDateRangePickerEnabled) {
     return (
-      <EuiSuperDatePicker
-        start={from}
-        end={to}
-        onTimeChange={handleLegacyTimeChange}
+      <LegacyDateRangePicker
+        from={from}
+        to={to}
+        onChange={onChange}
+        timeHistory={timeHistory}
         onRefresh={onRefresh}
         isLoading={isLoading}
-        showUpdateButton={canManuallyRefresh ? 'iconOnly' : false}
-        updateButtonProps={canManuallyRefresh ? { fill: false } : undefined}
-        width={width === 'restricted' ? 'auto' : width}
+        width={width}
         compressed={compressed}
         dateFormat={dateFormat}
         data-test-subj={dataTestSubj}
