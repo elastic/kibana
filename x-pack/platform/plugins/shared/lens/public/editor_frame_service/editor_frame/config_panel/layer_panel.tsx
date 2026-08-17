@@ -330,12 +330,11 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const isSelectedDatasourceTextBased = datasourcePublicAPI?.isTextBasedLanguage() ?? false;
-  const hasTextBasedDatasource = Object.values(framePublicAPI.datasourceLayers).some(
-    (datasource) => datasource?.isTextBasedLanguage() ?? false
-  );
+  const layerType = activeVisualization.getLayerType(layerId, visualizationState);
+  const isDataLayer = !layerType || layerType === 'data';
   const isTextBasedLanguage =
     isSelectedDatasourceTextBased ||
-    (!hasTextBasedDatasource && isTextBasedAttributes(editorProps.attributes));
+    (isDataLayer && !datasourcePublicAPI && isTextBasedAttributes(editorProps.attributes));
   const textBasedDatasourceState = isSelectedDatasourceTextBased
     ? (layerDatasourceState as TextBasedPrivateState | undefined)
     : undefined;
@@ -416,12 +415,12 @@ export function LayerPanel(props: LayerPanelProps) {
       return null;
     }
 
-    const layerType = activeVisualization.getLayerType(layerId, visualizationState);
+    const currentLayerType = activeVisualization.getLayerType(layerId, visualizationState);
 
     const removeLayerAction = getRemoveLayerAction({
       execute: () => onRemoveLayer(layerId),
       layerIndex,
-      layerType,
+      layerType: currentLayerType,
       isOnlyLayer: true,
       core,
       customModalText: activeVisualization.getCustomRemoveLayerText?.(layerId, visualizationState),

@@ -184,7 +184,11 @@ describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
     query?: Query | AggregateQuery,
-    stateOverrides: { hideTextBasedEditor?: boolean } = {}
+    stateOverrides: {
+      hideTextBasedEditor?: boolean;
+      datasourceStates?: Record<string, { isLoading: boolean; state: unknown }>;
+      activeDatasourceId?: string;
+    } = {}
   ) {
     const mockCoreStart = coreMock.createStart();
     mockCoreStart.rendering.addContext = createAddContextMock();
@@ -402,8 +406,13 @@ describe('LensEditConfigurationFlyout', () => {
   it('should display the suggestions if query is ES|QL', async () => {
     await renderConfigFlyout(
       { attributes: esqlLensAttributes },
+      { esql: 'from index1 | limit 10' },
       {
-        esql: 'from index1 | limit 10',
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedState },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+        activeDatasourceId: 'textBased',
       }
     );
     expect(screen.getByTestId('InlineEditingESQLEditor')).toBeInTheDocument();
@@ -413,7 +422,14 @@ describe('LensEditConfigurationFlyout', () => {
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
     await renderConfigFlyout(
       { hideTextBasedEditor: false, attributes: esqlLensAttributes },
-      { esql: 'from index1 | limit 10' }
+      { esql: 'from index1 | limit 10' },
+      {
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedState },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+        activeDatasourceId: 'textBased',
+      }
     );
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
   });
