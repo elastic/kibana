@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export { MAX_ALERTS_PER_TRIGGER } from './constants';
+export {
+  MAX_ALERTS_PER_TRIGGER,
+  MAX_TAGS_PER_OPERATION,
+  MAX_ASSIGNEES_PER_OPERATION,
+} from './constants';
 export { AlertStatusChangedTriggerId, alertStatusChangedTriggerDef } from './alert_status_changed';
 export { AlertTagsChangedTriggerId, alertTagsChangedTriggerDef } from './alert_tags_changed';
 export {
