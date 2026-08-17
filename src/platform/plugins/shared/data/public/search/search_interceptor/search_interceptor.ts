@@ -536,6 +536,8 @@ export class SearchInterceptor {
   /**
    * Reads a streaming response body using oboe.js streaming JSON parser
    * to handle responses larger than V8's string length limit (~536MB).
+   * When the response exceeds MAX_RESPONSE_BYTES, returns partial results
+   * with the rows parsed before the limit was hit.
    */
   private async readStreamingResponse(response: Response): Promise<unknown> {
     const reader = response.body?.getReader();
@@ -550,9 +552,42 @@ export class SearchInterceptor {
     return new Promise((resolve, reject) => {
       const stream = oboe();
 
-      // When the root object is fully parsed, resolve with it
-      stream.done((parsed: unknown) => {
-        resolve(parsed);
+      let totalBytes = 0;
+      let sizeLimitExceeded = false;
+      let rowsKept = 0;
+
+      // Drop values entries once size limit is exceeded
+      // Note: An alternative approach would be to abort the stream early and manually
+      // accumulate values before the limit. That saves bandwidth but requires more
+      // complex code to handle the aborted stream. This simpler approach continues
+      // reading the full response but discards rows after the limit.
+      stream.node('values[*]', () => {
+        if (sizeLimitExceeded) {
+          return oboe.drop; // Exclude from final tree
+        }
+        rowsKept++;
+        // Return undefined to keep in tree (default behavior)
+      });
+
+      stream.done((parsed: Record<string, unknown>) => {
+        if (sizeLimitExceeded) {
+          // Filter out undefined entries left by oboe.drop (sparse array holes)
+          const values = Array.isArray(parsed.values)
+            ? parsed.values.filter((v: unknown) => v !== undefined)
+            : parsed.values;
+          resolve({
+            ...parsed,
+            values,
+            is_partial: true,
+            _truncated: {
+              reason: 'response_size_limit',
+              bytes_read: totalBytes,
+              rows_returned: rowsKept,
+            },
+          });
+        } else {
+          resolve(parsed);
+        }
       });
 
       stream.fail((error: { thrown?: Error; message?: string }) => {
@@ -560,7 +595,6 @@ export class SearchInterceptor {
       });
 
       const decoder = new TextDecoder();
-      let totalBytes = 0;
 
       // Read chunks and feed to oboe
       const processStream = async () => {
@@ -573,20 +607,9 @@ export class SearchInterceptor {
             if (value) {
               totalBytes += value.length;
 
-              // Check if response exceeds size limit
-              if (totalBytes > SearchInterceptor.MAX_RESPONSE_BYTES) {
-                reader.cancel();
-                stream.abort();
-                reject(
-                  new Error(
-                    `Response size (${Math.round(
-                      totalBytes / 1024 / 1024
-                    )}MB) exceeds maximum allowed size (${Math.round(
-                      SearchInterceptor.MAX_RESPONSE_BYTES / 1024 / 1024
-                    )}MB). Consider adding filters or a LIMIT clause to reduce the result set.`
-                  )
-                );
-                return;
+              if (!sizeLimitExceeded && totalBytes > SearchInterceptor.MAX_RESPONSE_BYTES) {
+                sizeLimitExceeded = true;
+                // Continue reading - oboe.drop will exclude subsequent values
               }
 
               // Decode chunk and feed to oboe
@@ -668,6 +691,13 @@ export class SearchInterceptor {
         if (isStreamingStrategy && rawResponse.response && !body) {
           body = (await this.readStreamingResponse(rawResponse.response)) as typeof body;
         }
+
+        // Show warning toast if response was truncated due to size limit
+        if (body && '_truncated' in body) {
+          const truncationInfo = body._truncated as { rows_returned: number };
+          this.showTruncationWarning(truncationInfo.rows_returned);
+        }
+
         const warning = rawResponse.response?.headers.get('warning');
         const requestParams =
           body && 'requestParams' in body
@@ -866,6 +896,19 @@ export class SearchInterceptor {
   };
 
   private showRestoreWarning = memoize(this.showRestoreWarningToast);
+
+  private showTruncationWarning(rowsReturned: number) {
+    this.deps.toasts.addWarning({
+      title: i18n.translate('data.searchService.responseTruncatedWarning', {
+        defaultMessage: 'Results truncated',
+      }),
+      text: i18n.translate('data.searchService.responseTruncatedDescription', {
+        defaultMessage:
+          'Response exceeded size limit. Only {rowsReturned} rows returned. Add filters or a LIMIT clause to reduce results.',
+        values: { rowsReturned },
+      }),
+    });
+  }
 
   /**
    * Show one error notification per session.
