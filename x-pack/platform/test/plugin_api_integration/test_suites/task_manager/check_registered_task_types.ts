@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     'sampleTaskWithSingleConcurrency',
     'sampleTaskSharedConcurrencyType1',
     'sampleTaskSharedConcurrencyType2',
+    'sampleTaskAuthenticatingWithItsOwnCredential',
     'sampleUserResolvingTask',
     'singleAttemptSampleTask',
     'timedTask',

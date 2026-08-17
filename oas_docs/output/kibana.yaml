@@ -3029,6 +3029,10 @@ paths:
                         x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
+                read_only:
+                  description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
+                  type: boolean
+                  x-state: Technical Preview; added in 9.6.0
       responses:
         '200':
           content:
@@ -3498,6 +3502,10 @@ paths:
                         x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
+                read_only:
+                  description: 'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.'
+                  type: boolean
+                  x-state: Technical Preview; added in 9.6.0
       responses:
         '200':
           content:
@@ -26770,6 +26778,8 @@ paths:
                         is_default:
                           default: false
                           type: boolean
+                        is_preconfigured:
+                          type: boolean
                         name:
                           type: string
                         proxy_id:
@@ -27067,6 +27077,8 @@ paths:
                       is_default:
                         default: false
                         type: boolean
+                      is_preconfigured:
+                        type: boolean
                       name:
                         type: string
                       proxy_id:
@@ -27329,6 +27341,8 @@ paths:
                         type: string
                       is_default:
                         default: false
+                        type: boolean
+                      is_preconfigured:
                         type: boolean
                       name:
                         type: string
@@ -27632,6 +27646,8 @@ paths:
                         type: string
                       is_default:
                         default: false
+                        type: boolean
+                      is_preconfigured:
                         type: boolean
                       name:
                         type: string
@@ -99934,6 +99950,8 @@ components:
                         - comparator
                         - value
                     type: array
+                  maxItems: 2
+                  minItems: 2
                   type: array
                 groupBy:
                   items:
@@ -132734,6 +132752,11 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
