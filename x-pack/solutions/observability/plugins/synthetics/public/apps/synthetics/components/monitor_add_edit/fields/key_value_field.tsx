@@ -76,9 +76,6 @@ export const KeyValuePairsField = ({
 }: KeyValuePairsFieldProps) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
 
-  // The inputs are `controlOnly`, so the fieldset legend is not associated with them. Point each
-  // input at the visible column label instead, so the accessible name always matches what is
-  // rendered (WCAG 2.5.3, Label in Name).
   const keyLabelId = useGeneratedHtmlId({ prefix: 'keyValuePairsKeyLabel' });
   const valueLabelId = useGeneratedHtmlId({ prefix: 'keyValuePairsValueLabel' });
 
