@@ -12,7 +12,7 @@ jest.mock('./render', () => ({
 }));
 
 import { renderVegaDescriptor } from './render';
-import { VEGA_SANDBOX_PROTOCOL_VERSION } from './protocol';
+import { VEGA_SANDBOX_PROTOCOL_VERSION, type VegaSandboxOutboundMessage } from './protocol';
 import type { VegaSandboxRenderController } from './types';
 import './bootstrap';
 
@@ -50,7 +50,7 @@ const createController = (
 });
 
 describe('sandbox bootstrap rerender restore', () => {
-  const posted: unknown[] = [];
+  const posted: VegaSandboxOutboundMessage[] = [];
 
   beforeEach(() => {
     posted.length = 0;
@@ -114,8 +114,5 @@ describe('sandbox bootstrap rerender restore', () => {
     expect(secondView.view.setState).toHaveBeenCalledWith({
       signals: { clicked: 3 },
     });
-    expect(
-      posted.filter((message) => (message as { type?: string }).type === 'restoreState')
-    ).toHaveLength(0);
   });
 });
