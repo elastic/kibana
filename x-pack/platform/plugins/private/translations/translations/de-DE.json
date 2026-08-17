@@ -22739,7 +22739,6 @@
     "xpack.fleet.enrollmentTokenBulkRevokeModal.title": "{count} Registrierungstoken widerrufen",
     "xpack.fleet.enrollmentTokenBulkRevokeModal.titleSingle": "Registrierungstoken widerrufen",
     "xpack.fleet.enrollmentTokensList.actionsTitle": "Aktionen",
-    "xpack.fleet.enrollmentTokensList.activeTitle": "Aktiv",
     "xpack.fleet.enrollmentTokensList.activeValue": "Aktiv",
     "xpack.fleet.enrollmentTokensList.bulkActionsButton": "{count, plural, one {# token} other {# Token}} ausgewählt",
     "xpack.fleet.enrollmentTokensList.clearFiltersLink": "Filter löschen",
