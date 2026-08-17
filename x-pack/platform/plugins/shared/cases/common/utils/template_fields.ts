@@ -16,8 +16,32 @@ import {
 import type { Field, InlineField, RefField, Validation } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
 import { CustomFieldTypes } from '../types/domain/custom_field/v1';
+import { SAFE_SNAKE_KEY, AUTHORABLE_SNAKE_KEY, MAX_SNAKE_KEY_LENGTH } from '../constants';
 
 export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
+
+/**
+ * Returns true if `key` is safe to interpolate into a Painless string literal (read / storage
+ * path). Uses the lenient charset — hyphens and other index-legacy characters are allowed.
+ */
+export const isSafeExtendedFieldKey = (key: string): boolean =>
+  key.length > 0 && key.length <= MAX_SNAKE_KEY_LENGTH && SAFE_SNAKE_KEY.test(key);
+
+/**
+ * Returns true if `key` satisfies the **authoring** charset (strict subset of
+ * `isSafeExtendedFieldKey` — no hyphens). Use this when validating a new field name at write
+ * time; use `isSafeExtendedFieldKey` when reading back keys that may predate the strict rule.
+ */
+export const isAuthorableExtendedFieldKey = (key: string): boolean =>
+  key.length > 0 && key.length <= MAX_SNAKE_KEY_LENGTH && AUTHORABLE_SNAKE_KEY.test(key);
+
+/**
+ * Derives the storage key for `(name, type)` and checks it against the **authoring** charset.
+ * This is the canonical way to validate a field name before writing it: derive first, check
+ * once, rather than maintaining a separate per-name rule.
+ */
+export const isAuthorableExtendedFieldName = (name: string, type: string): boolean =>
+  isAuthorableExtendedFieldKey(getFieldSnakeKey(name, type));
 
 /**
  * Normalizes a field definition name for case-insensitive lookup and uniqueness.

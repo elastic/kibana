@@ -17,6 +17,7 @@ import type {
   UpdateFieldDefinitionInput,
 } from '../../../common/types/domain/field_definition/v1';
 import { InlineFieldSchema } from '../../../common/types/domain/template/fields';
+import { StrictInlineFieldSchema } from '../../../common/types/domain/template/strict_fields';
 import { validateExtendedFieldValueSizes } from '../../../common/types/domain/template/validate_extended_fields';
 import {
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
@@ -139,7 +140,7 @@ export class FieldDefinitionsService {
   async createFieldDefinition(
     input: CreateFieldDefinitionInput
   ): Promise<SavedObject<FieldDefinition>> {
-    this.assertFieldDefinitionIsValid(input.definition);
+    this.assertFieldDefinitionIsValid(input.definition, /* strict= */ true);
 
     const id = uuidv4();
     const globalFieldDefinitions = input.isGlobal
@@ -207,8 +208,14 @@ export class FieldDefinitionsService {
    * A field-library default is copied into a case's `extended_fields` when a
    * template references it. Validate the persisted representation here as the
    * definition is written, rather than waiting until a case is created.
+   *
+   * When `strict` is true (create path only), also validates the field `name`
+   * against the authoring charset. Updates keep the lenient schema because the
+   * name cannot change after creation (identity guard in the sub-client) and
+   * re-applying the strict rule would strand pre-existing definitions as
+   * permanently uneditable with no compensating benefit.
    */
-  private assertFieldDefinitionIsValid(definition: string): void {
+  private assertFieldDefinitionIsValid(definition: string, strict = false): void {
     let yamlDefinition: unknown;
     try {
       yamlDefinition = parseYaml(definition);
@@ -216,7 +223,8 @@ export class FieldDefinitionsService {
       throw Boom.badRequest('Invalid YAML definition');
     }
 
-    const parsedDefinition = InlineFieldSchema.safeParse(yamlDefinition);
+    const schema = strict ? StrictInlineFieldSchema : InlineFieldSchema;
+    const parsedDefinition = schema.safeParse(yamlDefinition);
     if (!parsedDefinition.success) {
       const validationErrors = parsedDefinition.error.issues
         .map(({ path, message }) => (path.length > 0 ? `${path.join('.')}: ${message}` : message))

@@ -7,6 +7,7 @@
 
 import { parse as yamlParse } from 'yaml';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import { StrictFieldsArraySchema } from '../../../../common/types/domain/template/strict_fields';
 
 interface DefinitionValidationSuccess {
   valid: true;
@@ -38,6 +39,18 @@ export const validateTemplateDefinition = (definition: string): DefinitionValida
     return {
       valid: false,
       message: `Invalid template definition: ${JSON.stringify(definitionResult.error.issues)}`,
+    };
+  }
+
+  // Check field names against the authoring charset (strict subset of the lenient read schema).
+  // Runs separately from the structural check above so the error message names the offending
+  // field rather than surfacing as a generic schema failure.
+  const strictFieldsResult = StrictFieldsArraySchema.safeParse(definitionResult.data.fields);
+  if (!strictFieldsResult.success) {
+    const firstIssue = strictFieldsResult.error.issues[0];
+    return {
+      valid: false,
+      message: firstIssue?.message ?? 'One or more field names are invalid.',
     };
   }
 

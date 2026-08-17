@@ -25,6 +25,7 @@ import type {
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
+import { StrictFieldsArraySchema } from '../../../common/types/domain/template/strict_fields';
 import { getYamlDefaultAsString, normalizeFieldDefinitionName } from '../../../common/utils';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
 import {
@@ -634,6 +635,17 @@ export class TemplatesService {
       throw Boom.badRequest(
         'A template name is required: provide `name` or a case-default title in the definition.'
       );
+    }
+
+    // Validate field names against the authoring charset. This runs after the lenient parse so
+    // that charset errors produce a clear message naming the offending field, separate from any
+    // YAML structural errors. Uses the strict variant (no hyphens, no spaces, etc.) — the lenient
+    // read schema above intentionally stays unchanged so stored templates with pre-existing
+    // invalid names still load.
+    const strictFieldsResult = StrictFieldsArraySchema.safeParse(parsedDefinition.fields);
+    if (!strictFieldsResult.success) {
+      const firstIssue = strictFieldsResult.error.issues[0];
+      throw Boom.badRequest(firstIssue?.message ?? 'One or more field names are invalid.');
     }
 
     // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
