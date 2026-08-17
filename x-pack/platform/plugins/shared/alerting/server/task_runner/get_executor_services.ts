@@ -132,14 +132,6 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     // - `/_project_routing/{npre}` (routing expression) is operator-only and user-agnostic, so it
     //   is called as the internal user to avoid the `security_exception` a rule's scoped API key
     //   raises (see #276771).
-    // - `/_project/tags` (linked projects) is role-filtered, so it is called as the current user to
-    //   reflect the projects the rule execution actually targets.
-    getCpsData: () =>
-      resolveCpsData(
-        scopedClusterClient.asInternalUser,
-        scopedClusterClient.asCurrentUser,
-        ruleData.spaceId,
-        logger
-      ),
+    getCpsData: () => resolveCpsData(scopedClusterClient.asInternalUser, ruleData.spaceId, logger),
   };
 };

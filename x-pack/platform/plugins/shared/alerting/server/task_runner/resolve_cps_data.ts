@@ -15,19 +15,18 @@ import type { CpsData } from '../types';
  * Resolves the CPS scope metadata (routing expression + linked projects) recorded on alert
  * documents and the event log.
  *
- * The two Elasticsearch endpoints require different principals:
- * - `/_project_routing/{npre}` resolves the space's routing expression. It is space configuration,
- *   identical for every principal, and an operator-only endpoint, so it is called with the
- *   internal (operator) user. This is reliable and avoids the `security_exception` a rule's scoped
- *   API key would otherwise raise (see #276771).
- * - `/_project/tags` returns the linked projects visible to the caller (role-filtered). To reflect
- *   the scope the rule execution actually targets (its owner's project visibility), it is called as
- *   the current user. If the rule's API key lacks the privilege the call fails silently, so linked
- *   projects are reported as empty rather than over-reported.
+ * Both endpoints are called with the internal (operator) user:
+ * - `/_project_routing/{npre}` is operator-only and user-agnostic. Using the internal user avoids
+ *   the `security_exception` a rule's scoped API key would otherwise raise (see #276771).
+ * - `/_project/tags` is also called with the internal user so that linked projects are resolved
+ *   from the space's routing scope rather than the rule API key's organisation membership.
+ *   A rule's UIAM API key may lack the x-client-authentication context needed for `/_project/tags`
+ *   to return linked projects, which would cause pre-execution index validation to incorrectly skip
+ *   rules whose indices exist only on linked projects (see #283236). The actual rule search still
+ *   uses the scoped API key with `projectRouting: 'space'`, so access control is enforced there.
  */
 export const resolveCpsData = async (
   internalUserEsClient: ElasticsearchClient,
-  currentUserEsClient: ElasticsearchClient,
   spaceId: string,
   logger: Logger
 ): Promise<CpsData> => {
@@ -59,7 +58,7 @@ export const resolveCpsData = async (
         throw error;
       });
 
-    const tagsResponse = await currentUserEsClient.transport
+    const tagsResponse = await internalUserEsClient.transport
       .request<ProjectTagsResponse>({
         method: 'GET',
         path: '/_project/tags',
