@@ -8,11 +8,11 @@
  */
 
 import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import type * as TaskEither from 'fp-ts/TaskEither';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -55,8 +55,6 @@ export interface BulkOverwriteTransformedDocumentsParams {
    * retry of a long-running failure.
    */
   fetchAllocationExplain?: boolean;
-  /** Optional logger — used to surface explain-call errors during development. */
-  logger?: Logger;
 }
 
 /**
@@ -72,7 +70,6 @@ export const bulkOverwriteTransformedDocuments =
     useAliasToPreventAutoCreate = false,
     timeout = DEFAULT_TIMEOUT,
     fetchAllocationExplain = false,
-    logger,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
@@ -131,24 +128,26 @@ export const bulkOverwriteTransformedDocuments =
     }
 
     if (errors.every(isUnavailableShardsException)) {
-      let allocationReason = '';
+      let allocationReason: Option.Option<string> = Option.none;
       if (fetchAllocationExplain) {
         try {
-          const explain = await explainShardAllocation(client, index);
-          allocationReason = formatAllocationExplanation(explain);
+          allocationReason = await explainShardAllocation(client, index);
         } catch (explainError) {
-          logger?.debug(
-            `[${index}] Failed to fetch allocation explain: ${
+          allocationReason = Option.some(
+            `explain unavailable: ${
               explainError instanceof Error ? explainError.message : String(explainError)
             }`
           );
         }
       }
+
+      const message = Option.isSome(allocationReason)
+        ? `[${index}] Not enough active copies to meet shard count of [ALL]. Shard allocation explain: ${allocationReason.value}`
+        : `[${index}] Not enough active copies to meet shard count of [ALL]`;
+
       return Either.left({
         type: 'unavailable_shards_exception' as const,
-        message: allocationReason
-          ? `[${index}] Not enough active copies to meet shard count of [ALL]. Shard allocation explain: ${allocationReason}`
-          : `[${index}] Not enough active copies to meet shard count of [ALL]`,
+        message,
       });
     }
 
@@ -158,49 +157,85 @@ export const bulkOverwriteTransformedDocuments =
 const explainShardAllocation = async (
   client: ElasticsearchClient,
   index: string
-): Promise<estypes.ClusterAllocationExplainResponse> => {
-  try {
-    return await client.cluster.allocationExplain(
-      { index, shard: 0, primary: false, master_timeout: '30s' },
-      { maxRetries: 0 }
-    );
-  } catch (error) {
-    if (error instanceof esErrors.ResponseError && error.statusCode === 400) {
-      return await client.cluster.allocationExplain(
-        { index, shard: 0, primary: true, master_timeout: '30s' },
+): Promise<Option.Option<string>> => {
+  const primaryExplain = await client.cluster.allocationExplain(
+    { index, shard: 0, primary: true, master_timeout: '30s' },
+    { maxRetries: 0 }
+  );
+
+  if (primaryExplain.current_state === 'started') {
+    try {
+      const replicaExplain = await client.cluster.allocationExplain(
+        { index, shard: 0, primary: false, master_timeout: '30s' },
         { maxRetries: 0 }
       );
+      return Option.some(formatAllocationExplanation(replicaExplain));
+    } catch (error) {
+      if (error instanceof esErrors.ResponseError && error.statusCode === 400) {
+        // Replica is gone from the routing table and the primary is already
+        // started: there is nothing left to explain.
+        return Option.none;
+      } else {
+        throw error;
+      }
     }
-    throw error;
+  } else {
+    return Option.some(formatAllocationExplanation(primaryExplain));
   }
 };
 
 const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainResponse): string => {
   const parts: string[] = [];
 
+  if (explain.unassigned_info) {
+    const { reason, details } = explain.unassigned_info;
+    parts.push(`unassigned reason: ${details ? `${reason}: ${details}` : reason}`);
+  }
+
   if (explain.allocate_explanation) {
-    parts.push(explain.allocate_explanation);
+    parts.push(explain.allocate_explanation.replace(/\.$/, ''));
   }
 
   if (explain.node_allocation_decisions) {
-    const seen = new Set<string>();
-    const blockingReasons: string[] = [];
+    const groups = new Map<
+      string,
+      {
+        decider: string;
+        decision: string;
+        explanation: string;
+        count: number;
+        firstNodeName: string;
+      }
+    >();
 
     for (const node of explain.node_allocation_decisions) {
       for (const decider of node.deciders ?? []) {
         if (decider.decision === 'NO' || decider.decision === 'THROTTLE') {
-          const key = `${decider.decider}: ${decider.explanation}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            blockingReasons.push(
-              `[${decider.decider}] ${decider.decision}: ${decider.explanation}`
-            );
+          const key = `${decider.decider}|${decider.decision}`;
+          const existing = groups.get(key);
+          if (existing) {
+            existing.count++;
+          } else {
+            groups.set(key, {
+              decider: decider.decider,
+              decision: decider.decision,
+              explanation: decider.explanation,
+              count: 1,
+              firstNodeName: node.node_name,
+            });
           }
         }
       }
     }
 
-    if (blockingReasons.length > 0) {
+    if (groups.size > 0) {
+      const blockingReasons = [...groups.values()].map(
+        ({ decider, decision, explanation, count, firstNodeName }) => {
+          const nodeLabel =
+            count === 1 ? firstNodeName : `${count} nodes (${firstNodeName}, +${count - 1})`;
+          return `[${decider}] ${decision} on ${nodeLabel}: ${explanation}`;
+        }
+      );
       parts.push(`blocking deciders: ${blockingReasons.join('; ')}`);
     }
   }

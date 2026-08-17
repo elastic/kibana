@@ -205,7 +205,7 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
   ),
   skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read" AND (${skillPredicate}),
+      attributes.gen_ai.tool.name IN ("load_skill", "filestore.read") AND (${skillPredicate}),
       1,
       NULL
     )
