@@ -36,6 +36,7 @@ interface ProjectPickerContext {
     ActionsFromReducers<ReturnType<typeof createStoreReducers>>,
     | '_setStoreState'
     | '_setControlsState'
+    | '_setProjectRoutingStrategy'
     | '_commitProposedFilters'
     | '_setFilterSearchLoading'
     | '_setFilterSearchError'
@@ -206,6 +207,10 @@ export const ProjectPickerStateProvider = ({
     store.actions._setControlsState({ controlsState });
   }, [controlsState, store.actions]);
 
+  useEffect(() => {
+    store.actions._setProjectRoutingStrategy({ projectRoutingStrategy });
+  }, [projectRoutingStrategy, store.actions]);
+
   // The identity of the pending proposal's enabled filters, or null when there is no proposal
   // to resolve. Search re-runs are keyed off this rather than off `proposedFilters` itself, so
   // a proposal that changes only `excludedOverrides` (no re-fetch needed) doesn't refire it —
@@ -303,6 +308,7 @@ export const ProjectPickerStateProvider = ({
     const {
       _setStoreState,
       _setControlsState,
+      _setProjectRoutingStrategy,
       _commitProposedFilters,
       _setFilterSearchLoading,
       _setFilterSearchError,

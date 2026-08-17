@@ -117,17 +117,23 @@ const renderProjectPicker = (
 ) => {
   const onProjectRoutingChange = props.onProjectRoutingChange ?? jest.fn();
 
-  render(
+  const buildTree = (currentProps: Partial<Omit<ProjectPickerStateProviderProps, 'children'>>) => (
     <ProjectPickerStateProvider
       {...defaultProviderProps}
-      {...props}
+      {...currentProps}
       onProjectRoutingChange={onProjectRoutingChange}
     >
       <ProjectPickerList />
     </ProjectPickerStateProvider>
   );
 
-  return { onProjectRoutingChange };
+  const { rerender } = render(buildTree(props));
+
+  return {
+    onProjectRoutingChange,
+    rerender: (nextProps: Partial<Omit<ProjectPickerStateProviderProps, 'children'>>) =>
+      rerender(buildTree({ ...props, ...nextProps })),
+  };
 };
 
 const renderFullProjectPicker = (
@@ -454,6 +460,47 @@ describe('ProjectPickerStateProvider', () => {
           // with every project re-included the codec itself never emits a clause, so this
           // falls back to the canonical PROJECT_ROUTING.ALL constant
           expect(onProjectRoutingChange).toHaveBeenLastCalledWith(PROJECT_ROUTING.ALL);
+        });
+      });
+    });
+
+    describe('strategy prop changes', () => {
+      it('re-encodes the routing with the new strategy when the prop changes after a user edit', async () => {
+        const user = userEvent.setup();
+        let currentRouting: ProjectRouting = '';
+        const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+          currentRouting = routing;
+        });
+
+        const { rerender } = renderProjectPicker({
+          projectRoutingStrategy: 'dynamic',
+          onProjectRoutingChange,
+          currentProjectRoutingGetter: () => currentRouting,
+        });
+
+        await toggleProjectListItemSwitch(user, linkedProjectOne._id);
+
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:* AND NOT _id:linked1');
+        });
+
+        rerender({ projectRoutingStrategy: 'snapshot' });
+
+        // the same exclusion is now encoded as an explicit snapshot enumeration
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_id:origin OR _id:linked2');
+        });
+      });
+
+      it('reports nothing when the strategy changes before any user edit', async () => {
+        const { onProjectRoutingChange, rerender } = renderProjectPicker({
+          projectRoutingStrategy: 'dynamic',
+        });
+
+        rerender({ projectRoutingStrategy: 'snapshot' });
+
+        await waitFor(() => {
+          expect(onProjectRoutingChange).not.toHaveBeenCalled();
         });
       });
     });

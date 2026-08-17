@@ -682,6 +682,29 @@ describe('createStoreReducers', () => {
     });
   });
 
+  describe('#_setProjectRoutingStrategy', () => {
+    it('updates the strategy without setting hasUserModifiedRouting', () => {
+      const state = createState({ projectRoutingStrategy: 'dynamic' });
+
+      const nextState = reducers._setProjectRoutingStrategy(state, {
+        projectRoutingStrategy: 'snapshot',
+      });
+
+      expect(nextState.projectRoutingStrategy).toBe('snapshot');
+      expect(nextState.hasUserModifiedRouting).toBe(false);
+    });
+
+    it('is a no-op when the strategy is unchanged', () => {
+      const state = createState({ projectRoutingStrategy: 'snapshot' });
+
+      const nextState = reducers._setProjectRoutingStrategy(state, {
+        projectRoutingStrategy: 'snapshot',
+      });
+
+      expect(nextState).toBe(state);
+    });
+  });
+
   describe('hasUserModifiedRouting', () => {
     it('is set when a public reducer changes state', () => {
       const state = createState();

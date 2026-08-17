@@ -244,6 +244,24 @@ export function createStoreReducers() {
       };
     },
     /**
+     * Updates only the routing-strategy flag, without touching any filter/selection state.
+     * Internal: a strategy switch is prop-driven, not a user edit, so it must not flip
+     * {@link ProjectPickerStoredState.hasUserModifiedRouting}.
+     */
+    _setProjectRoutingStrategy(
+      state: ProjectPickerState,
+      payload: Pick<ProjectPickerState, 'projectRoutingStrategy'>
+    ) {
+      if (state.projectRoutingStrategy === payload.projectRoutingStrategy) {
+        return state;
+      }
+
+      return {
+        ...state,
+        projectRoutingStrategy: payload.projectRoutingStrategy,
+      };
+    },
+    /**
      * Confirms the pending proposal: the proposed filters/overrides and the search results they
      * were fetched for replace the committed ones together, in a single state update, and the
      * proposal is cleared. No-op if there is no pending proposal.
