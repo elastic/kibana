@@ -87,14 +87,14 @@ type AwsServiceStaticEntry = Omit<
   showInUI?: boolean;
 };
 
+// TODO aws_cloudwatch_input_otel for otel versions
+
 const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway_logs',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'apigateway' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'apigateway',
   },
@@ -102,8 +102,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'apigateway_metrics',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'apigateway' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'apigateway',
   },
@@ -148,8 +146,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'emr_logs',
     name: 'AWS EMR',
     category: 'Compute',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'emr' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'emr',
   },
@@ -157,8 +153,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'emr_metrics',
     name: 'AWS EMR',
     category: 'Compute',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'emr' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'emr',
   },
@@ -198,8 +192,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'usage',
     name: 'AWS Usage',
     category: 'Cloud Financial Management',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'usage' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'usage',
   },
@@ -238,8 +230,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'firewall_logs',
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'firewall' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'firewall',
   },
@@ -311,8 +301,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'natgateway',
     name: 'AWS NAT Gateway',
     category: 'Networking and Content Delivery',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'natgateway' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'natgateway',
   },
@@ -320,8 +308,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'route53_public_logs',
     name: 'AWS Route 53 Public DNS',
     category: 'Networking and Content Delivery',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'route53' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'route53',
   },
@@ -329,8 +315,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'route53_resolver_logs',
     name: 'AWS Route 53 Resolver',
     category: 'Networking and Content Delivery',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'route53' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'route53',
   },
@@ -353,8 +337,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'vpn',
     name: 'AWS VPN',
     category: 'Networking and Content Delivery',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'vpn' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'vpn',
   },
@@ -392,8 +374,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 's3_storage_lens',
     name: 'AWS S3 Storage Lens',
     category: 'Storage',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 's3_storage_lens' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 's3_storage_lens',
   },
@@ -417,8 +397,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'redshift',
     name: 'AWS Redshift',
     category: 'Databases',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'redshift' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'redshift',
   },
@@ -428,8 +406,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kafka_metrics',
     name: 'AWS MSK (Kafka)',
     category: 'Management and Governance',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'kafka' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'kafka',
   },
@@ -437,8 +413,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kinesis',
     name: 'AWS Kinesis',
     category: 'Management and Governance',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'kinesis' policy template
-    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'kinesis',
   },
@@ -462,8 +436,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'guardrails',
     name: 'AWS Bedrock (Guardrails)',
     category: 'Machine Learning',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_bedrock' policy template
-    showInUI: false,
     packageName: 'aws_bedrock',
     policyTemplate: 'aws_bedrock',
   },
@@ -471,8 +443,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'invocation',
     name: 'AWS Bedrock (Invocation)',
     category: 'Machine Learning',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_bedrock' policy template
-    showInUI: false,
     packageName: 'aws_bedrock',
     policyTemplate: 'aws_bedrock',
   },
@@ -480,8 +450,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'runtime',
     name: 'AWS Bedrock (Runtime)',
     category: 'Machine Learning',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_bedrock' policy template
-    showInUI: false,
     packageName: 'aws_bedrock',
     policyTemplate: 'aws_bedrock',
   },
@@ -500,8 +468,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'fargate',
     name: 'AWS Fargate',
     category: 'Containers',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'awsfargate' policy template
-    showInUI: false,
     packageName: 'awsfargate',
     policyTemplate: 'awsfargate',
     dataStream: 'task_stats',
@@ -523,8 +489,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'aws_logs',
     name: 'AWS Logs (Generic)',
     category: 'Management and Governance',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_logs' policy template
-    showInUI: false,
     packageName: 'aws_logs',
     policyTemplate: 'aws_logs',
   },
@@ -549,7 +513,6 @@ export function buildAwsServiceMatrix(
     let optionalConfig: string[] | undefined;
     let mandatoryFields = entry.mandatoryFields;
     let defaultEnabled = true;
-    const showInUI = entry.showInUI ?? true;
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
     const varTypes: Record<string, string> = {};
@@ -643,6 +606,11 @@ export function buildAwsServiceMatrix(
     if (deploymentMethods.length > 0 && !deploymentMethods.some((dm) => dm.preferred)) {
       deploymentMethods[0] = { ...deploymentMethods[0], preferred: true };
     }
+
+    // Auto-hide when no deployment methods are available and not explicitly shown.
+    // Once agentless is enabled in the manifest or ECF is added statically, the service
+    // gets deployment methods and becomes visible without a manual showInUI update.
+    const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
     const merged = {
       ...rest,
