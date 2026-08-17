@@ -58,13 +58,6 @@ const createAlertTriageTool = (): BuiltinSkillBoundedTool<typeof prioritizeAlert
     '(entity risk level and asset criticality, when available), and return ranked groups with ' +
     'score breakdowns. Use this as the first step for any alert queue prioritization request.',
   schema: prioritizeAlertsSchema,
-  annotations: {
-    title: 'Triage Alerts Queue',
-    readOnlyHint: true,
-    destructiveHint: false,
-    idempotentHint: true,
-    openWorldHint: false,
-  },
   handler: async ({ timeWindowHours, maxAlerts, workflowStatus, alertIds }, context) => {
     try {
       const result = await prioritizeAlerts({
