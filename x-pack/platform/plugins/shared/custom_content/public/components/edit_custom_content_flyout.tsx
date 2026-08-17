@@ -219,7 +219,8 @@ export const EditCustomContentFlyout = ({
         <EuiFormRow
           fullWidth
           helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
-            defaultMessage: 'The HTML template uses Liquid syntax filled with live query data.',
+            defaultMessage:
+              'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
           })}
         >
           <div css={editorContainerCss}>
