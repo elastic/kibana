@@ -50,6 +50,8 @@ export const InstallDependencies: Task = {
       ],
       {
         cwd: build.resolvePath(),
+        // Enables patch-package's .dev.patch handling for the production-only install above.
+        env: { NODE_ENV: 'production' },
       }
     );
 
