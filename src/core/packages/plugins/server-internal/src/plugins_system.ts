@@ -356,11 +356,27 @@ export class PluginsSystem<T extends PluginType> {
     // Unblock all setup fibers that have no plugin-level deps.
     this.cordisCtx.provide('core.setup', { ready: true });
 
-    // Stage 4: core services as stable Cordis service keys.
-    // Preboot plugins have no deprecations service.
+    // Stage 4: core services as stable Cordis service keys.  Preboot has no
+    // standard core services (it exposes a different, smaller surface).
     if (this.type !== PluginType.preboot) {
-      const { deprecations } = deps as PluginsServiceSetupDeps;
+      const {
+        capabilities,
+        deprecations,
+        elasticsearch,
+        http,
+        logging,
+        savedObjects,
+        status,
+        uiSettings,
+      } = deps as PluginsServiceSetupDeps;
+      this.cordisCtx.provide('core.capabilities', capabilities);
       this.cordisCtx.provide('core.deprecations', deprecations);
+      this.cordisCtx.provide('core.elasticsearch', elasticsearch);
+      this.cordisCtx.provide('core.http', http);
+      this.cordisCtx.provide('core.logging', logging);
+      this.cordisCtx.provide('core.savedObjects', savedObjects);
+      this.cordisCtx.provide('core.status', status);
+      this.cordisCtx.provide('core.uiSettings', uiSettings);
     }
 
     for (const [pluginName, plugin] of sortedPlugins) {
@@ -426,6 +442,14 @@ export class PluginsSystem<T extends PluginType> {
 
     // Unblock all start fibers.
     this.cordisCtx.provide('core.start', { ready: true });
+
+    // Stage 4: start-phase contracts under `.start` keys.
+    const { capabilities, elasticsearch, http, savedObjects, uiSettings } = deps;
+    this.cordisCtx.provide('core.capabilities.start', capabilities);
+    this.cordisCtx.provide('core.elasticsearch.start', elasticsearch);
+    this.cordisCtx.provide('core.http.start', http);
+    this.cordisCtx.provide('core.savedObjects.start', savedObjects);
+    this.cordisCtx.provide('core.uiSettings.start', uiSettings);
 
     for (const pluginName of this.satupPlugins) {
       this.log.debug(`Starting plugin "${pluginName}"...`);
