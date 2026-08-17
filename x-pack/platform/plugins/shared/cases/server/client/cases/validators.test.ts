@@ -1461,6 +1461,88 @@ describe('validators', () => {
         })
       ).not.toThrow();
     });
+
+    it('mentions a global required_on_close field once when the template also resolves the same key', () => {
+      // FAILURE SCENARIO (before fix): naive concat of global + template `$ref` listed the same
+      // field twice in the close error ("Field X is required; Field X is required").
+      const globalResolutionNotes = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+          validation: { required_on_close: true },
+        },
+      ]);
+      const templateRefToSameField = makeTemplateField({
+        name: 'resolution_notes',
+        label: 'Resolution notes',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [templateRefToSameField],
+          globalFields: globalResolutionNotes,
+        })
+      ).toThrow(
+        'Cannot close case case-1, required fields must be filled: Field "Resolution notes" is required'
+      );
+    });
+
+    it('ignores template required_on_close when a colliding global field is not required on close', () => {
+      // Global wins: template `$ref` override must not block close if the global definition
+      // does not set required_on_close.
+      const globalWithoutRequiredOnClose = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+        },
+      ]);
+      const templateRefRequiredOnClose = makeTemplateField({
+        name: 'resolution_notes',
+        label: 'Resolution notes',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [templateRefRequiredOnClose],
+          globalFields: globalWithoutRequiredOnClose,
+        })
+      ).not.toThrow();
+    });
+
+    it('lists distinct global and template required_on_close fields once each', () => {
+      const globalRequiredOnClose = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+          validation: { required_on_close: true },
+        },
+      ]);
+      const templateOnlyRequiredOnClose = makeTemplateField({
+        name: 'recovery_approach',
+        label: 'Recovery approach',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
+          originalCase: makeOriginalCase(),
+          templateFields: [templateOnlyRequiredOnClose],
+          globalFields: globalRequiredOnClose,
+        })
+      ).toThrow(
+        'Cannot close case case-1, required fields must be filled: Field "Resolution notes" is required; Field "Recovery approach" is required'
+      );
+    });
   });
 
   describe('resolveTemplateFieldsForClose', () => {

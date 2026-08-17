@@ -23,8 +23,7 @@ jest.mock('@kbn/fleet-plugin/public', () => {
   return {
     LocalSearchHook,
     AvailablePackagesHook: () => mockAvailablePackagesHook(),
-    LazyPackageCard: ({ title }: { title: string }) =>
-      ReactActual.createElement('div', { 'data-test-subj': 'mockPackageCard' }, title),
+    CardIcon: () => ReactActual.createElement('span', { 'data-test-subj': 'resultCardIconStub' }),
   };
 });
 
@@ -70,7 +69,7 @@ describe('ObservabilitySearchResults', () => {
   it('shows the loading state, then the results', async () => {
     renderResults();
     expect(screen.getByTestId('addDataSearchResultsLoading')).toBeInTheDocument();
-    expect(await screen.findByTestId('mockPackageCard')).toHaveTextContent('Redis');
+    expect(await screen.findByTestId('addDataResultCard-epr:redis')).toHaveTextContent('Redis');
     expect(screen.getByTestId('addDataSearchResultsCount')).toBeInTheDocument();
   });
 
@@ -80,7 +79,7 @@ describe('ObservabilitySearchResults', () => {
     renderResults();
     const retryButton = await screen.findByTestId('addDataSearchResultsRetryButton');
     await user.click(retryButton);
-    expect(await screen.findByTestId('mockPackageCard')).toBeInTheDocument();
+    expect(await screen.findByTestId('addDataResultCard-epr:redis')).toBeInTheDocument();
   });
 
   it('shows loading rather than the stale error while a retry is in flight', async () => {
@@ -104,7 +103,7 @@ describe('ObservabilitySearchResults', () => {
     await act(async () => {
       resolveRetry({ useAvailablePackages: mockUseAvailablePackages });
     });
-    expect(await screen.findByTestId('mockPackageCard')).toBeInTheDocument();
+    expect(await screen.findByTestId('addDataResultCard-epr:redis')).toBeInTheDocument();
   });
 
   it('shows the error state when the package registry fails', async () => {
@@ -131,6 +130,6 @@ describe('ObservabilitySearchResults', () => {
 
     renderResults();
     await user.click(await screen.findByTestId('addDataSearchResultsRetryButton'));
-    expect(await screen.findByTestId('mockPackageCard')).toHaveTextContent('Redis');
+    expect(await screen.findByTestId('addDataResultCard-epr:redis')).toHaveTextContent('Redis');
   });
 });
