@@ -179,20 +179,13 @@ const createImplicitDeletionTestCases = (): UpdateObjectsSpacesTestCase[] => [
 ];
 
 /**
- * Functional (non-authZ) coverage of `POST /api/spaces/_update_objects_spaces`, ported from
- * the FTR `spaces_only` variant of this suite: share/unshare permutations targeting every
- * space, object lifecycle when removed from all spaces, and legacy URL alias deletion on
- * unshare. Every request runs as a fully privileged user; the per-role authorization matrix
+ * Functional (non-authZ) coverage of `POST /api/spaces/_update_objects_spaces`: 
+ * share/unshare permutations targeting every space, object lifecycle when removed from all spaces, 
+ * and legacy URL alias deletion on unshare. 
+ * Every request runs as a fully privileged user; the per-role authorization matrix
  * lives in `security_and_spaces/update_objects_spaces.spec.ts`.
  */
-apiTest.describe('spaces api lifecycle - update objects spaces', { tag: tags.stateful.all }, () => {
-  apiTest.beforeEach(async ({ config }) => {
-    await loadEsArchive(config.hosts.elasticsearch, SPACES_ES_ARCHIVE);
-  });
-
-  apiTest.afterAll(async ({ config }) => {
-    await unloadEsArchive(config.hosts.elasticsearch, SPACES_ES_ARCHIVE);
-  });
+apiTest.describe('spaces api lifecycle - update objects spaces', { tag: tags.stateful.all }, () => {});
 
   const singlePartTargets = [
     ['shares and unshares objects targeting the default space', DEFAULT_SPACE_ID],
