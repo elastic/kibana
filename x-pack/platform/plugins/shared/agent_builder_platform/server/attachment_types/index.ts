@@ -25,13 +25,16 @@ import type {
 export const registerAttachmentTypes = ({
   coreSetup,
   setupDeps,
-  getFilesPlugin,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
-  getFilesPlugin: () => Promise<FilesStart>;
 }) => {
   const { agentBuilder } = setupDeps;
+
+  const getFilesPlugin = async (): Promise<FilesStart> => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return startDeps.files;
+  };
 
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
