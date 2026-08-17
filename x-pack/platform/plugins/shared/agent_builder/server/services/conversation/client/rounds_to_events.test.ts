@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound, PromptRequest } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
