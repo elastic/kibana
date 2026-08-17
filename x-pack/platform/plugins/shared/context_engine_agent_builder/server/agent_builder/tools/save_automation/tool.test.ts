@@ -24,7 +24,7 @@ describe('save_automation tool', () => {
 
   const createTool = () =>
     createSaveAutomationTool({
-      getAiIndexService: () => {
+      getAiIndexService: async () => {
         throw new Error('not used');
       },
       getCoreStart: async () => {

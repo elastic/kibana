@@ -324,7 +324,7 @@ export const saveAutomationHandler = async ({
   spaceId: string;
   attachments: AttachmentStateManager;
   logger: Logger;
-  getAiIndexService: () => AiIndexService;
+  getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
@@ -334,7 +334,7 @@ export const saveAutomationHandler = async ({
   const workflowsManagement = getWorkflowsManagement();
   const aiIndexAttachments = flattenAiIndexAttachments(attachments);
   const aiIndexId = resolveAiIndexIdFromAttachments(aiIndexAttachments, params.aiIndexId);
-  const aiIndexService = getAiIndexService();
+  const aiIndexService = await getAiIndexService();
 
   if (params.workflowId) {
     await assertWorkflowReadAccess({

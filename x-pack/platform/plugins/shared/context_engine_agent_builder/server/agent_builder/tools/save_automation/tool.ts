@@ -91,7 +91,7 @@ export const createSaveAutomationTool = ({
   getSecurityStart,
   getWorkflowsManagement,
 }: {
-  getAiIndexService: () => AiIndexService;
+  getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;

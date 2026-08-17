@@ -23,6 +23,8 @@ export class ContextEngineAgentBuilderPlugin
       ContextEngineAgentBuilderStartDependencies
     >
 {
+  constructor(_initializerContext: PluginInitializerContext) {}
+
   setup(
     coreSetup: CoreSetup<
       ContextEngineAgentBuilderStartDependencies,
@@ -34,13 +36,10 @@ export class ContextEngineAgentBuilderPlugin
       coreSetup,
       agentBuilder: setupDeps.agentBuilder,
       workflowsManagement: setupDeps.workflowsManagement.management,
-      logger: this.initializerContext.logger.get(),
     });
 
     return {};
   }
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   start(_coreStart: CoreStart): ContextEngineAgentBuilderPluginStart {
     return {};

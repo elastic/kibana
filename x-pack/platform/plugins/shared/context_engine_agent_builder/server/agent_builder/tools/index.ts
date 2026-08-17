@@ -22,7 +22,7 @@ export const registerAgentBuilderTools = ({
   getWorkflowsManagement,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  getAiIndexService: () => AiIndexService;
+  getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
