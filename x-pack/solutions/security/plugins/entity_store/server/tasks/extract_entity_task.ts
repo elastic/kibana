@@ -261,7 +261,7 @@ export async function scheduleExtractEntityTask({
         state: { namespace },
         params: {},
       },
-      { request }
+      { request, cloneApiKey: true }
     );
   } catch (e) {
     logger.error(`Error scheduling extract entity tasks, received ${e.message}`);

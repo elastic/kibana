@@ -6,7 +6,9 @@
  */
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
-import { getNewSchedule } from './extract_entity_task';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { getNewSchedule, scheduleExtractEntityTask } from './extract_entity_task';
 
 const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): ConcreteTaskInstance =>
   ({
@@ -14,6 +16,29 @@ const createTaskInstance = (schedule?: ConcreteTaskInstance['schedule']): Concre
     taskType: 'entity_store:v2:extract_entity_task:host',
     schedule,
   } as ConcreteTaskInstance);
+
+describe('scheduleExtractEntityTask', () => {
+  it('passes cloneApiKey: true so external Cloud API keys are supported', async () => {
+    const ensureScheduled = jest.fn().mockResolvedValue(undefined);
+    const taskManager = { ensureScheduled } as unknown as TaskManagerStartContract;
+    const request = {} as KibanaRequest;
+    const logger = { error: jest.fn() } as any;
+
+    await scheduleExtractEntityTask({
+      logger,
+      taskManager,
+      type: 'host',
+      namespace: 'default',
+      frequency: '1m',
+      request,
+    });
+
+    expect(ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ taskType: expect.stringContaining('extract_entity_task') }),
+      expect.objectContaining({ request, cloneApiKey: true })
+    );
+  });
+});
 
 describe('getNewSchedule', () => {
   it('returns a schedule when frequency differs from the current interval', () => {
