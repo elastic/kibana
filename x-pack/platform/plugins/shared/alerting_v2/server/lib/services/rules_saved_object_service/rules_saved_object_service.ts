@@ -11,6 +11,7 @@ import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
@@ -25,9 +26,6 @@ import { RuleSavedObjectsClientToken } from './tokens';
  * practice; this is large enough to avoid undercounting the limit.
  */
 const SCHEDULE_INTERVAL_AGG_SIZE = 1000;
-
-/** Default terms-agg size for `findTags` (HTTP typeahead contract). */
-const DEFAULT_FIND_TAGS_SIZE = 20;
 
 /**
  * Maximum terms-agg size for internal `findTags` / `getTags` callers.
@@ -448,7 +446,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   public async findTags({
     search,
     filter,
-    size = DEFAULT_FIND_TAGS_SIZE,
+    size = TAGS_RESPONSE_LIMIT,
   }: { search?: string; filter?: string; size?: number } = {}): Promise<string[]> {
     const resolvedSize = Math.min(Math.max(size, 1), MAX_FIND_TAGS_SIZE);
     const result = await this.client.find<RuleSavedObjectAttributes>({
