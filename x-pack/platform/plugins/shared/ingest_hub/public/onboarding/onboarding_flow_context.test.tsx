@@ -8,6 +8,10 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
+jest.mock('./use_aws_service_matrix', () => ({
+  useAwsServiceMatrix: jest.fn().mockReturnValue([]),
+}));
+
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());

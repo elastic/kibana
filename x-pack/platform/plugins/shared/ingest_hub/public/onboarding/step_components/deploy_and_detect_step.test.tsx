@@ -18,6 +18,7 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { DeployAndDetectStep } from './deploy_and_detect_step';
+import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
@@ -40,6 +41,7 @@ function setupMocks({
       deployErrors,
       policyIdsByInstance: {},
     },
+    awsServicesMap: AWS_SERVICES_MAP,
     retryDeploy,
   });
   mockUseSessionStorage.mockReturnValue([{ instances }, jest.fn()]);

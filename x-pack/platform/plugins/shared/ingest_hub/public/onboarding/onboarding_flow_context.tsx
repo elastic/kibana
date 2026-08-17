@@ -9,7 +9,8 @@ import React, { createContext, useContext, useCallback, useMemo, useRef, useStat
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
-import { AWS_SERVICES_MAP } from './aws_service_matrix';
+import type { AwsServiceMatrixEntry } from './aws_service_matrix';
+import { useAwsServiceMatrix } from './use_aws_service_matrix';
 
 export interface DeploySettingsStepState {
   connectorId?: string;
@@ -62,6 +63,8 @@ interface OnboardingFlowState {
   getLatestFailedInstances: () => string[];
   registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
   retryDeploy: (instanceIds?: string[]) => void;
+  awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -185,12 +188,19 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     deployHandlerRef.current?.(instanceIds);
   }, []);
 
+  const awsServiceMatrix = useAwsServiceMatrix();
+  const awsServicesMap = useMemo(
+    () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
+    [awsServiceMatrix]
+  );
+
   const selectedServiceIds = useMemo(
     () =>
       (persistedServices?.selectedServiceIds ?? DEFAULT_SELECTED_IDS).filter(
-        (id) => AWS_SERVICES_MAP.get(id)?.showInUI === true
+        // When awsServicesMap is still loading, keep all persisted ids; filter once ready.
+        (id) => awsServicesMap?.get(id)?.showInUI !== false
       ),
-    [persistedServices]
+    [persistedServices, awsServicesMap]
   );
 
   const servicesStep: ServicesStepState = useMemo(
@@ -222,6 +232,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         getLatestFailedInstances,
         registerDeployHandler,
         retryDeploy,
+        awsServiceMatrix,
+        awsServicesMap,
       }}
     >
       {children}

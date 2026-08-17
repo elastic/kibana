@@ -8,7 +8,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
@@ -46,6 +45,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     updateDeployAndDetectStep,
     getLatestFailedInstances,
     registerDeployHandler,
+    awsServicesMap: servicesMap,
   } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
@@ -57,8 +57,6 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
   const [failedInstances, setFailedInstances] = useState<string[]>([]);
-
-  const servicesMap = useAwsServicesMap();
 
   const deployGroups: DeployGroup[] = useMemo(
     () =>

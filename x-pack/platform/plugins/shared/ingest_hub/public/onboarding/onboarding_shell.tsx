@@ -24,7 +24,6 @@ import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/c
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
-import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
 import {
   DeploySettingsStep,
@@ -73,10 +72,8 @@ export function OnboardingShell() {
   const { completedSteps, markStepComplete, markStepsIncomplete, firstIncompleteStepId } =
     useStepState(integrationId);
 
-  const { servicesStep } = useOnboardingFlow();
+  const { servicesStep, awsServiceMatrix } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
-
-  const awsServiceMatrix = useAwsServiceMatrix();
 
   useInvalidateDownstreamSteps({
     selectedServiceIds,

@@ -113,6 +113,7 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
 import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useAwsServicesMap } from '../../use_aws_service_matrix';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
@@ -477,6 +478,7 @@ function setupMocks({
       failedInstances: [],
       ...deployAndDetectStep,
     },
+    awsServicesMap: (useAwsServicesMap as jest.Mock)(),
     updateDeployAndDetectStep: jest.fn(),
     getLatestFailedInstances: jest.fn().mockReturnValue([]),
     registerDeployHandler: jest.fn(),

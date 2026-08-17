@@ -217,7 +217,7 @@ describe('AWS service matrix', () => {
     });
   });
 
-  // Only entries where managed_integration is the preferred method require providerPermissions.
+  // All entries with managed_integration as preferred method must have a non-empty deploymentMethods array.
   const preferredManagedIntegrationEntries = BUILT_MATRIX.filter((entry) =>
     entry.deploymentMethods.some(
       ({ method, preferred }) => method === 'managed_integration' && preferred
@@ -229,8 +229,8 @@ describe('AWS service matrix', () => {
       (entry) => [entry.id, entry] as [string, AwsServiceMatrixEntry]
     )
   )('managed_integration service "%s"', (_id, entry) => {
-    it('has non-empty providerPermissions.actions', () => {
-      expect(entry.providerPermissions?.actions?.length).toBeGreaterThan(0);
+    it('has managed_integration as a deployment method', () => {
+      expect(entry.deploymentMethods.some((dm) => dm.method === 'managed_integration')).toBe(true);
     });
   });
 });

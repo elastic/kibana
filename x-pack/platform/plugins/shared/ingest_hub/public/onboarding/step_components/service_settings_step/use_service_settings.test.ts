@@ -16,6 +16,7 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';
+import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
@@ -25,6 +26,7 @@ beforeEach(() => {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['cloudtrail'] },
     removeDeployInstance: jest.fn(),
+    awsServicesMap: AWS_SERVICES_MAP,
   } as unknown as ReturnType<typeof useOnboardingFlow>);
 });
 

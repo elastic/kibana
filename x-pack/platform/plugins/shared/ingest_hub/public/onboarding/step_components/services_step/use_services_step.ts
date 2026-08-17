@@ -8,7 +8,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import type { ServiceCategory, SignalType } from '../../aws_service_matrix';
-import { useAwsServiceMatrix } from '../../use_aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 export type SignalFilter = SignalType | 'all';
@@ -28,10 +27,9 @@ export const CATEGORY_ORDER: ServiceCategory[] = [
 ];
 
 export function useServicesStep({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, setSelectedServiceIds } = useOnboardingFlow();
+  const { servicesStep, setSelectedServiceIds, awsServiceMatrix: rawMatrix } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const rawMatrix = useAwsServiceMatrix();
   const awsServiceMatrix = useMemo(() => rawMatrix ?? [], [rawMatrix]);
 
   const [signalFilter, setSignalFilter] = useState<SignalFilter>('all');

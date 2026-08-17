@@ -8,7 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getDefaultTransport, getRequiredTextFields } from './field_config';
 import type { TransportType } from './field_config';
@@ -44,10 +44,13 @@ interface PersistedState {
 export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
 /** Derive the canonical base instances (one per serviceId) from the selected ids list. */
-function baseInstances(selectedServiceIds: string[]): ServiceInstance[] {
+function baseInstances(
+  selectedServiceIds: string[],
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
+): ServiceInstance[] {
   return selectedServiceIds
     .map((id) => {
-      const service = AWS_SERVICES_MAP.get(id);
+      const service = awsServicesMap?.get(id);
       if (!service || !service.showInUI) return null;
       return { instanceId: id, serviceId: id, name: service.name, isDuplicate: false };
     })
@@ -62,12 +65,13 @@ function baseInstances(selectedServiceIds: string[]): ServiceInstance[] {
  */
 function reconcileInstances(
   selectedServiceIds: string[],
-  persisted: ServiceInstance[] | undefined
+  persisted: ServiceInstance[] | undefined,
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
 ): ServiceInstance[] {
   const selectedSet = new Set(selectedServiceIds);
 
   if (!persisted || persisted.length === 0) {
-    return baseInstances(selectedServiceIds);
+    return baseInstances(selectedServiceIds, awsServicesMap);
   }
 
   const kept = persisted.filter((inst) => selectedSet.has(inst.serviceId));
@@ -76,7 +80,7 @@ function reconcileInstances(
   const added: ServiceInstance[] = [];
   for (const id of selectedServiceIds) {
     if (!coveredServiceIds.has(id)) {
-      const service = AWS_SERVICES_MAP.get(id);
+      const service = awsServicesMap?.get(id);
       if (service?.showInUI) {
         added.push({ instanceId: id, serviceId: id, name: service.name, isDuplicate: false });
       }
@@ -87,7 +91,7 @@ function reconcileInstances(
 }
 
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, removeDeployInstance } = useOnboardingFlow();
+  const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<PersistedState>(
@@ -112,8 +116,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
   const instances: ServiceInstance[] = useMemo(
-    () => reconcileInstances(selectedServiceIds, persisted?.instances),
-    [selectedServiceIds, persisted?.instances]
+    () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
+    [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
 
   const getServiceVars = useCallback(
@@ -122,13 +126,13 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       if (existing) return existing;
       // Fall back to the service-level defaults using the serviceId.
       const inst = instances.find((i) => i.instanceId === instanceId);
-      const service = inst ? AWS_SERVICES_MAP.get(inst.serviceId) : undefined;
+      const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
       return {
         trigger: service ? getDefaultTransport(service) : null,
         vars: {},
       };
     },
-    [persisted, instances]
+    [persisted, instances, awsServicesMap]
   );
 
   // Applies multiple field changes (and optional transport) in a single write to avoid
@@ -214,24 +218,24 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const filteredInstances = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return instances.filter((inst) => {
-      const service = AWS_SERVICES_MAP.get(inst.serviceId);
+      const service = awsServicesMap?.get(inst.serviceId);
       if (!service) return false;
       if (signalFilter !== 'all' && service.signalType !== signalFilter) return false;
       if (q !== '' && !inst.name.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [instances, searchQuery, signalFilter]);
+  }, [instances, searchQuery, signalFilter, awsServicesMap]);
 
   const incompleteInstances = useMemo(
     () =>
       instances.filter((inst) => {
-        const service = AWS_SERVICES_MAP.get(inst.serviceId);
+        const service = awsServicesMap?.get(inst.serviceId);
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
         const required = getRequiredTextFields(service, config.trigger);
         return required.some((f) => (config.vars[f] ?? '').trim() === '');
       }),
-    [instances, getServiceVars]
+    [instances, getServiceVars, awsServicesMap]
   );
 
   const incompleteInstanceIds = useMemo(

@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import type { ServiceChipState } from '../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from './service_settings_step/use_service_settings';
@@ -40,7 +39,7 @@ interface DeployAndDetectStepProps {
 }
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
-  const { deployAndDetectStep, retryDeploy } = useOnboardingFlow();
+  const { deployAndDetectStep, retryDeploy, awsServicesMap } = useOnboardingFlow();
   const { isDeploying, serviceStatuses, failedInstances, deployErrors } = deployAndDetectStep;
 
   const [serviceSettings] = useSessionStorage<{ instances?: ServiceInstance[] }>(
@@ -58,7 +57,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
   const getChipLabel = (instanceId: string): string => {
     const inst = instancesById.get(instanceId);
     if (inst) return inst.name;
-    return AWS_SERVICES_MAP.get(instanceId)?.name ?? instanceId;
+    return awsServicesMap?.get(instanceId)?.name ?? instanceId;
   };
 
   const hasStarted = Object.keys(serviceStatuses).length > 0;
