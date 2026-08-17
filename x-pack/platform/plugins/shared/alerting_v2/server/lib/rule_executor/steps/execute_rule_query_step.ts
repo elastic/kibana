@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { appendLimitToQuery } from '@kbn/esql-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
@@ -27,6 +28,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
   private readonly maxAlertsPerRun: number;
+  private readonly maxQueryResponseSize: number;
 
   constructor(
     @inject(QueryServiceScopedSpaceRoutingToken)
@@ -34,7 +36,9 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
-    this.maxAlertsPerRun = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.max;
+    const config = pluginConfigAccessor.get<PluginConfig>();
+    this.maxAlertsPerRun = config.rules.run.alerts.max;
+    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize;
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -67,6 +71,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           filter: queryPayload.filter,
           params: queryPayload.params,
           abortSignal: input.executionContext.signal,
+          maxResponseSize: step.maxQueryResponseSize,
         });
 
         for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
@@ -81,7 +86,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           };
         }
       } catch (error) {
-        if (isEsqlUserError(error)) {
+        if (isMaximumResponseSizeExceededError(error) || isEsqlUserError(error)) {
           throw createTaskRunError(error as Error, TaskErrorSource.USER);
         }
         throw error;
