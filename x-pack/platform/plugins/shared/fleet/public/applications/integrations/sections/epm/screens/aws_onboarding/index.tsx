@@ -370,7 +370,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
       {currentStep === 1 && (
         <>
-          <EuiFlexGroup alignItems="flexStart" responsive={false}>
+          <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiTitle size="m">
                 <h2>Which AWS services do you want to monitor?</h2>
@@ -381,16 +381,16 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 users still won't need to touch it. */}
             <EuiFlexItem grow={false}>
               <EuiToolTip content="Determines which package variant installs for each service.">
-                <EuiBadge
-                  color="hollow"
+                <EuiButtonEmpty
+                  size="s"
+                  color="text"
                   iconType="pencil"
                   iconSide="right"
                   onClick={openSchemaModal}
-                  onClickAriaLabel="Edit data format"
                   data-test-subj="awsOnboardingEditSchema"
                 >
                   {`Data format: ${AWS_SCHEMA_META[schema].label}`}
-                </EuiBadge>
+                </EuiButtonEmpty>
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -414,12 +414,13 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
+              {/* Default ("m") button size, to match EuiFieldSearch's height
+                  — "compressed" made this row look uneven next to it. */}
               <EuiButtonGroup
                 legend="Filter services by data type"
                 options={DATA_TYPE_OPTIONS}
                 idSelected={dataTypeFilter}
                 onChange={(id) => setDataTypeFilter(id as DataTypeFilterId)}
-                buttonSize="compressed"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
