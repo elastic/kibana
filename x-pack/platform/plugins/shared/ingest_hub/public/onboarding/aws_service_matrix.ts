@@ -102,6 +102,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'apigateway_metrics',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'apigateway' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'apigateway',
   },
@@ -155,6 +157,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'emr_metrics',
     name: 'AWS EMR',
     category: 'Compute',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'emr' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'emr',
   },
@@ -194,6 +198,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'usage',
     name: 'AWS Usage',
     category: 'Cloud Financial Management',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'usage' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'usage',
   },
@@ -203,8 +209,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'cloudtrail',
     name: 'AWS CloudTrail',
     category: 'Management and Governance',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'cloudtrail' policy template
-    showInUI: false,
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'cloudtrail',
   },
@@ -272,8 +277,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'waf',
     name: 'AWS WAF',
     category: 'Security, Identity and Compliance',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'waf' policy template
-    showInUI: false,
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'waf',
   },
@@ -307,6 +311,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'natgateway',
     name: 'AWS NAT Gateway',
     category: 'Networking and Content Delivery',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'natgateway' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'natgateway',
   },
@@ -339,8 +345,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'vpcflow',
     name: 'AWS VPC Flow',
     category: 'Networking and Content Delivery',
-    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'vpcflow' policy template
-    showInUI: false,
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'vpcflow',
   },
@@ -348,6 +353,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'vpn',
     name: 'AWS VPN',
     category: 'Networking and Content Delivery',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'vpn' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'vpn',
   },
@@ -378,7 +385,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 's3access',
     name: 'AWS S3 (Access logs)',
     category: 'Storage',
-    deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     policyTemplate: 's3',
   },
@@ -386,6 +392,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 's3_storage_lens',
     name: 'AWS S3 Storage Lens',
     category: 'Storage',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 's3_storage_lens' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 's3_storage_lens',
   },
@@ -409,6 +417,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'redshift',
     name: 'AWS Redshift',
     category: 'Databases',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'redshift' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'redshift',
   },
@@ -418,6 +428,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kafka_metrics',
     name: 'AWS MSK (Kafka)',
     category: 'Management and Governance',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'kafka' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'kafka',
   },
@@ -425,6 +437,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kinesis',
     name: 'AWS Kinesis',
     category: 'Management and Governance',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'kinesis' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'kinesis',
   },
@@ -448,6 +462,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'guardrails',
     name: 'AWS Bedrock (Guardrails)',
     category: 'Machine Learning',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_bedrock' policy template
+    showInUI: false,
     packageName: 'aws_bedrock',
     policyTemplate: 'aws_bedrock',
   },
@@ -464,6 +480,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'runtime',
     name: 'AWS Bedrock (Runtime)',
     category: 'Machine Learning',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_bedrock' policy template
+    showInUI: false,
     packageName: 'aws_bedrock',
     policyTemplate: 'aws_bedrock',
   },
@@ -482,6 +500,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'fargate',
     name: 'AWS Fargate',
     category: 'Containers',
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'awsfargate' policy template
+    showInUI: false,
     packageName: 'awsfargate',
     policyTemplate: 'awsfargate',
     dataStream: 'task_stats',
@@ -496,32 +516,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws_mq',
     showInUI: false,
     policyTemplate: 'amazon_mq',
-  },
-
-  // ── OTel packages — Technical preview ───────────────────────────────────
-  {
-    id: 'cloudtrail_otel',
-    name: 'AWS CloudTrail (OTel)',
-    category: 'Management and Governance',
-    deploymentMethods: [{ method: 'ecf', preferred: true }],
-    packageName: 'aws_cloudtrail_otel',
-    badge: 'technical_preview',
-  },
-  {
-    id: 'vpcflow_otel',
-    name: 'AWS VPC Flow (OTel)',
-    category: 'Networking and Content Delivery',
-    deploymentMethods: [{ method: 'ecf', preferred: true }],
-    packageName: 'aws_vpcflow_otel',
-    badge: 'technical_preview',
-  },
-  {
-    id: 'waf_otel',
-    name: 'AWS WAF (OTel)',
-    category: 'Security, Identity and Compliance',
-    deploymentMethods: [{ method: 'ecf', preferred: true }],
-    packageName: 'aws_waf_otel',
-    badge: 'technical_preview',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────

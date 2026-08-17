@@ -167,6 +167,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
   },
 };
 
+// TODO do we need trigger/transport choice for managed_integration or only ecf deployment method?
 export function hasTransportChoice(service: AwsServiceMatrixEntry): boolean {
   const inputs = service.inputs ?? [];
   return inputs.includes('aws-s3') && inputs.includes('aws-cloudwatch');

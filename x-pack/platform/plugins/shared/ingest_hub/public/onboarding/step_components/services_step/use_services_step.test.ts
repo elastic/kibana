@@ -27,7 +27,7 @@ const MOCK_PACKAGES: Record<string, any> = {
       .map((name) => ({ name, deployment_modes: { agentless: { enabled: true } } })),
     data_streams: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
       path: e.dataStream ?? e.id,
-      type: 'logs',
+      type: e.id.includes('_metrics') || e.id === 'billing' ? 'metrics' : 'logs',
       streams: [{ input: 'aws-s3', vars: [], enabled: true }],
     })),
   },
