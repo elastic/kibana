@@ -2044,7 +2044,6 @@ describe('WorkflowContextManager', () => {
       expect(deps.coreStart).toBe(
         (testContainer.underTest as unknown as { coreStart: unknown }).coreStart
       );
-      expect(deps.cloudSetup).toBe(dependencies.cloudSetup);
       expect(deps.workflowRunId).toBe('workflow-run-123');
       expect(params).toEqual({ method: 'GET', path: '/api/status' });
     });

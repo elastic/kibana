@@ -18,6 +18,7 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
@@ -65,7 +66,7 @@ import type {
   CasesAttachmentsV2WriterContract,
 } from '../../cases_analytics_v2';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError, isSOError } from '../../common/error';
+import { createCaseError } from '../../common/error';
 import type {
   ResolvedExtendedFieldFilter,
   ResolvedFieldLabelFilter,
@@ -772,6 +773,10 @@ export class CasesService {
           caseId
         );
 
+      if (isSavedObjectErrorResult(resolveCaseResult.saved_object)) {
+        throw new Error(resolveCaseResult.saved_object.error.message);
+      }
+
       const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult.saved_object);
       const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
 
@@ -795,7 +800,7 @@ export class CasesService {
       );
 
       const res = cases.saved_objects.map((theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
 
@@ -1145,7 +1150,7 @@ export class CasesService {
       const successfulAnalyticsV2Mirrors: Array<(typeof bulkCreateResponse.saved_objects)[number]> =
         [];
       const res = bulkCreateResponse.saved_objects.map((theCase) => {
-        if (isSOError<CasePersistedAttributes>(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
         successfulAnalyticsV2Mirrors.push(theCase);
@@ -1276,7 +1281,7 @@ export class CasesService {
       const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
 
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           acc.push(theCase);
           return acc;
         }

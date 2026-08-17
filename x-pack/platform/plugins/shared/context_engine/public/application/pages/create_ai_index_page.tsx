@@ -106,20 +106,6 @@ export const CreateAiIndexPage = () => {
         <EuiPanel hasBorder paddingSize="l">
           <EuiTitle size="s">
             <h2>
-              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
-                defaultMessage: 'Sources',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
-        </EuiPanel>
-
-        <EuiSpacer size="l" />
-
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h2>
               {i18n.translate('xpack.contextEngine.createAiIndex.name.title', {
                 defaultMessage: 'Name',
               })}
@@ -203,6 +189,20 @@ export const CreateAiIndexPage = () => {
         <EuiPanel hasBorder paddingSize="l">
           <EuiTitle size="s">
             <h2>
+              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
+                defaultMessage: 'Sources',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
+        </EuiPanel>
+
+        <EuiSpacer size="l" />
+
+        <EuiPanel hasBorder paddingSize="l">
+          <EuiTitle size="s">
+            <h2>
               {i18n.translate('xpack.contextEngine.createAiIndex.storageType.title', {
                 defaultMessage: 'Storage type',
               })}
@@ -258,7 +258,7 @@ export const CreateAiIndexPage = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType="arrowRight"
+              iconType="chevronSingleRight"
               iconSide="right"
               data-test-subj="contextCreateAiIndexButton"
               onClick={createAndContinue}

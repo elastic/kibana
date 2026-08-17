@@ -29,7 +29,7 @@ describe('searchWorkflowExecutions', () => {
   });
 
   describe('response transformation', () => {
-    it('should include concurrencyGroupKey in list results when present', async () => {
+    it('should include table fields in list results when present', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           total: { value: 1 },
@@ -45,6 +45,11 @@ describe('searchWorkflowExecutions', () => {
                 finishedAt: '2024-01-01T00:00:03Z',
                 duration: 3000,
                 workflowId: 'workflow-1',
+                workflowDefinition: {
+                  name: 'Example Workflow',
+                  tags: ['reporting'],
+                },
+                managed: true,
                 triggeredBy: 'manual',
                 executedBy: 'elastic',
                 concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
@@ -66,6 +71,9 @@ describe('searchWorkflowExecutions', () => {
       expect(result.results[0]).toEqual(
         expect.objectContaining({
           id: 'exec-1',
+          workflowName: 'Example Workflow',
+          tags: ['reporting'],
+          managed: true,
           concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
         })
       );

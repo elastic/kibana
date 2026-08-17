@@ -22,7 +22,7 @@ import {
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { getDetails } from '../../../../tasks/rule_details';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
+import { navigateBackToRulesManagement } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 describe(
@@ -54,7 +54,7 @@ describe(
       fillAboutRuleMinimumAndContinue(rule);
       skipScheduleRuleAction();
       createRuleWithoutEnabling();
-      openRuleManagementPageViaBreadcrumbs();
+      navigateBackToRulesManagement();
       goToRuleDetailsOf(rule.name);
 
       cy.get(DEFINITION_DETAILS).within(() => {

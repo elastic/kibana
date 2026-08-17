@@ -9,11 +9,17 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const txtHelpTitle = i18n.translate(
+  'embeddableApi.drilldowns.components.DrilldownHelloBar.helpTitle',
+  {
+    defaultMessage: 'Drilldowns enable you to define new behaviors for interacting with panels.',
+  }
+);
+
 export const txtHelpText = i18n.translate(
   'embeddableApi.drilldowns.components.DrilldownHelloBar.helpText',
   {
-    defaultMessage:
-      'Drilldowns enable you to define new behaviors for interacting with panels. You can add multiple actions and override the default filter.',
+    defaultMessage: 'You can add multiple actions and override the default filter.',
   }
 );
 

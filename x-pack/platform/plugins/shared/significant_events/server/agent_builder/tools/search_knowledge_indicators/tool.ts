@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import {
+  MAX_FEATURE_ARRAY_ITEMS,
   MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   QUERY_TYPE_MATCH,
@@ -25,7 +26,12 @@ import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE } from '@kbn/streams-ai';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
-import { KNOWLEDGE_INDICATOR_FEATURE_TYPES, searchKnowledgeIndicatorsToolHandler } from './handler';
+import {
+  KNOWLEDGE_INDICATOR_FEATURE_TYPES,
+  MAX_COMPACT_META_ARRAY_SAMPLE,
+  MAX_COMPACT_META_KEYS,
+  searchKnowledgeIndicatorsToolHandler,
+} from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID =
   platformSignificantEventsTools.searchKnowledgeIndicators;
@@ -65,7 +71,7 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe(
-      'Return only feature KIs whose feature.id matches one of these values. Use only when `kind: ["feature"]` is specified.'
+      'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Use only when `kind: ["feature"]` is specified.'
     ),
   query_types: z
     .array(z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]))
@@ -106,8 +112,8 @@ const searchKnowledgeIndicatorsSchema = z.object({
     .default('compact')
     .describe(
       dedent`Response detail level.
-      - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
-      - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve complete computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
+      - 'compact' (default): strips unused metadata fields and truncates computed feature types (dataset_analysis, error_logs, log_patterns, log_samples). Bounds \`evidence\` and \`tags\` to ${MAX_FEATURE_ARRAY_ITEMS} items on all feature KIs; \`evidence_count\` and \`tags_count\` are present when those arrays were truncated. \`meta\` is a flat key→value map; keeps the first ${MAX_COMPACT_META_KEYS} keys in JavaScript property-enumeration order, samples array values to ${MAX_COMPACT_META_ARRAY_SAMPLE} items, and records omitted array items in \`meta_array_items_omitted\`. \`meta_keys_omitted\` counts dropped keys. Maximum ${MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE} per page.
+      - 'full': returns all fields verbatim. Use with specific \`feature_ids\` to retrieve untruncated evidence, tags, metadata, and computed-type properties. Maximum ${KI_SEARCH_MAX_PER_PAGE_FULL} per page.`
     ),
 });
 
@@ -138,8 +144,15 @@ export function createSearchKnowledgeIndicatorsTool({
       - Find relevant KIs via semantic text using \`search_text\`
       - Retrieve queries-only KIs with \`kind: ['query']\`
     `,
+    annotations: {
+      title: 'Search Knowledge Indicators',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: searchKnowledgeIndicatorsSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     availability: {
       cacheMode: 'space',
       handler: async (): Promise<ToolAvailabilityResult> => {

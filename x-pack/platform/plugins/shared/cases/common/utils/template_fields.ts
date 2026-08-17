@@ -13,14 +13,41 @@ import {
   isInlineField,
   isRefField,
 } from '../types/domain/template/fields';
-import type { Field, InlineField, RefField } from '../types/domain/template/fields';
+import type { Field, InlineField, RefField, Validation } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
 import { CustomFieldTypes } from '../types/domain/custom_field/v1';
 
 export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
 
+/**
+ * Normalizes a field definition name for case-insensitive lookup and uniqueness.
+ *
+ * Matches the field-definitions API, which compares names with `toLowerCase()` — not
+ * `toLocaleLowerCase()`, which `ensureUniqueTemplateName` uses for template titles.
+ * `trim()` is stricter than the API uniqueness check. Callers use the result to skip
+ * duplicate work or to gate deletes of in-use definitions, never to reject a
+ * create/update write.
+ */
+export const normalizeFieldDefinitionName = (name: string): string => name.trim().toLowerCase();
+
 export const getFieldCamelKey = (name: string, type: string): string =>
   camelCase(getFieldSnakeKey(name, type));
+
+/**
+ * Collects the normalized (case-insensitive) `$ref` names from a template's fields array.
+ *
+ * Used to exclude a global field from the global-fields section when the active template
+ * already renders it via `$ref` — normalized so a ref differing only in case from the field
+ * definition's name (e.g. after a case-only rename) still excludes it, matching the
+ * case-insensitive resolution in {@link resolveTemplateFields} / `useResolvedFields`.
+ */
+export const collectNormalizedRefNames = (
+  fields: readonly Field[] | undefined
+): ReadonlySet<string> =>
+  (fields ?? []).reduce((refNames, field) => {
+    if (isRefField(field)) refNames.add(normalizeFieldDefinitionName(field.$ref));
+    return refNames;
+  }, new Set<string>());
 
 /**
  * Parses an array of field definitions into resolved inline fields, skipping any
@@ -69,6 +96,49 @@ export const getYamlDefaultAsString = (rawDefault: unknown): string => {
 };
 
 /**
+ * The requirement-related `Validation` keys. These are mutually exclusive ways of expressing
+ * "when is this field required" — a field is meant to be driven by exactly one of them at a
+ * time. See {@link mergeValidationOverride} for how a `$ref` override interacts with them.
+ */
+const REQUIRED_FAMILY_KEYS = ['required', 'required_when', 'required_on_close'] as const;
+
+/**
+ * Shallow-merges a `$ref` entry's local `validation` onto the library field's own `validation`:
+ * every ordinary key (`pattern`, `min`, `max`, `min_length`, `max_length`) from the library
+ * survives unless the override explicitly redeclares it, so a template that only wants to
+ * change requiredness doesn't silently lose the library's format constraints.
+ *
+ * The requirement keys (`required` / `required_when` / `required_on_close`) are treated as one
+ * family rather than merged individually: if the override declares *any* of them, all three are
+ * taken from the override alone (the library's own requirement keys are dropped), because a
+ * naive per-key merge could otherwise leave e.g. the library's `required: true` sitting next to
+ * a template's `required_when`, with both then applying at once. In other words, whichever
+ * required* key was defined last (the override, when it defines one) wins outright over the
+ * whole family.
+ */
+export const mergeValidationOverride = (
+  libraryValidation: Validation | undefined,
+  refValidation: Validation | undefined
+): Validation | undefined => {
+  if (!refValidation) return libraryValidation;
+  if (!libraryValidation) return refValidation;
+
+  const overridesRequiredFamily = REQUIRED_FAMILY_KEYS.some(
+    (key) => refValidation[key] !== undefined
+  );
+
+  const base = overridesRequiredFamily
+    ? Object.fromEntries(
+        Object.entries(libraryValidation).filter(
+          ([key]) => !(REQUIRED_FAMILY_KEYS as readonly string[]).includes(key)
+        )
+      )
+    : libraryValidation;
+
+  return { ...base, ...refValidation };
+};
+
+/**
  * Applies a `$ref` entry's overrides onto its resolved library (inline) field:
  * - `name` acts as a local alias replacing the library field's name.
  * - `metadata.default` overrides the library default. Three cases:
@@ -76,6 +146,10 @@ export const getYamlDefaultAsString = (rawDefault: unknown): string => {
  *     - explicit `null`: clear the inherited default so the field stays empty (this is what the
  *       v1→v2 migration emits for a legacy template field whose value was explicitly cleared),
  *     - any other value: use it as the field's default.
+ * - `display`, when present on the `$ref` entry, fully replaces the library field's own
+ *   `display` (its only key is `show_when`, so there is nothing to preserve from the library).
+ * - `validation`, when present on the `$ref` entry, is merged onto the library field's own
+ *   `validation` — see {@link mergeValidationOverride} for the requirement-family exception.
  *
  * Shared by `resolveTemplateFields` (server / case-creation) and `useResolvedFields` (editor) so
  * both paths resolve `$ref` overrides identically.
@@ -103,15 +177,27 @@ export const applyRefFieldOverride = (
     } as InlineField;
   }
 
+  if (refField.display !== undefined) {
+    resolved = { ...resolved, display: refField.display } as InlineField;
+  }
+
+  if (refField.validation !== undefined) {
+    resolved = {
+      ...resolved,
+      validation: mergeValidationOverride(resolved.validation, refField.validation),
+    } as InlineField;
+  }
+
   return resolved;
 };
 
 /**
  * Resolves a template `fields` array into a flat list of inline fields by:
  * - passing inline fields through as-is,
- * - looking up `$ref` fields by name in `libraryDefs`, parsing their YAML definition,
- *   and applying the ref entry's `name` alias and `metadata.default` override (see
- *   {@link applyRefFieldOverride}).
+ * - looking up `$ref` fields by name in `libraryDefs` (case-insensitive, matching the
+ *   uniqueness semantics the field-definitions API enforces on names), parsing their
+ *   YAML definition, and applying the ref entry's `name` alias and `metadata.default`
+ *   override (see {@link applyRefFieldOverride}).
  *
  * Fields that cannot be resolved or that produce another ref are silently dropped.
  */
@@ -122,7 +208,8 @@ export const resolveTemplateFields = (
   definitionFields.flatMap((field): InlineField[] => {
     if (isInlineField(field)) return [field];
     const refField = field as RefField;
-    const fd = libraryDefs.find((d) => d.name === refField.$ref);
+    const normalizedRef = normalizeFieldDefinitionName(refField.$ref);
+    const fd = libraryDefs.find((d) => normalizeFieldDefinitionName(d.name) === normalizedRef);
     if (!fd) return [];
     try {
       const parsed = parseYaml(fd.definition);
@@ -148,6 +235,28 @@ export const buildExtendedFieldsDefaults = (
       out[getFieldSnakeKey(field.name, field.type)] = getYamlDefaultAsString(
         field.metadata?.default
       );
+    }
+  }
+  return out;
+};
+
+/**
+ * Selects create-time Activity Log entries for `extended_fields`: only keys whose persisted
+ * value differs from the resolved template + global defaults. A missing default is treated as
+ * `''`, so untouched empty stamps and empty keys with no default stay out of the audit payload.
+ *
+ * Does not mutate persistence — callers still store the full map on the case SO. Distinct from
+ * backfill "empty" semantics (`null`/`undefined` only); empty string is a real comparable value
+ * here (e.g. clearing a non-empty default must still surface in Activity).
+ */
+export const pickExtendedFieldsDifferingFromDefaults = (
+  persisted: Record<string, string>,
+  defaults: Record<string, string>
+): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(persisted)) {
+    if (value !== (defaults[key] ?? '')) {
+      out[key] = value;
     }
   }
   return out;
@@ -191,17 +300,36 @@ export const getV2FieldType = (legacyType: string): 'integer' | 'boolean' | 'key
 };
 
 /**
+ * Whether an `extended_fields` entry counts as "no v2 value" for backfill purposes: the key is
+ * absent, or holds `null`/`undefined` (which no user-facing write path produces — the API and
+ * UI only write strings — so a `null` can only come from synthetic/hand-inserted data).
+ *
+ * The empty string is deliberately NOT included. The v2 UI persists `''` both for fields the
+ * user never touched AND for fields the user explicitly cleared (see `sanitizeExistingValue` /
+ * the create-form serialization), and the migration task runs asynchronously: field definitions
+ * become visible (phase 1, or the configure mirror hook) before a space's case backfill
+ * (phase 2) completes, so a user can clear a value while the space is still unflagged. A `''`
+ * observed at backfill time is therefore ambiguous, and filling it could silently restore a
+ * stale legacy value over a deliberate clear — so it is always preserved.
+ */
+const isEmptyExtendedFieldValue = (value: unknown): boolean => value == null;
+
+/**
  * Computes the `extended_fields` entries to add to a case from its legacy `customFields`.
  *
- * Semantics — **existing wins, nulls skipped**:
- * - A key already present in `existingExtendedFields` is left as-is (a value set through the v2
- *   system takes precedence over the legacy mirror).
+ * Semantics — **any existing entry wins (including `''`), nulls filled, absent filled**:
+ * - A key present in `existingExtendedFields` with a string value — including the empty
+ *   string — is left as-is: a value (or explicit clear) written through the v2 system takes
+ *   precedence over the legacy mirror. See {@link isEmptyExtendedFieldValue} for why `''`
+ *   must never be treated as fillable.
+ * - A key that is absent or `null` counts as "no v2 value" and is filled from the legacy
+ *   custom field.
  * - A `customFields` entry whose value is `null` or `undefined` is skipped — the case left the
  *   field empty; the v2 field then renders empty rather than being forced to a value.
  *
- * Returns only the *additions* (keys not yet present). Callers are responsible for spreading the
- * result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields} for the combined
- * helper.
+ * Returns only the entries to write (keys missing or empty). Callers are responsible for
+ * spreading the result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields}
+ * for the combined helper.
  */
 export const buildExtendedFieldsBackfill = (
   customFields: LegacyCaseCustomField[] | undefined,
@@ -214,7 +342,7 @@ export const buildExtendedFieldsBackfill = (
     const hasValue = cf.value !== null && cf.value !== undefined;
     if (hasValue) {
       const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
-      if (!(snakeKey in existing)) {
+      if (isEmptyExtendedFieldValue(existing[snakeKey])) {
         additions[snakeKey] = String(cf.value);
       }
     }

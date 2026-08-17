@@ -57,9 +57,11 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
       await testSubjects.existOrFail(CHROME_NEXT_SEARCH_MODAL);
       return;
     }
-    if (await testSubjects.exists(CLASSIC_SEARCH_REVEAL, { timeout: 0 })) {
-      await testSubjects.click(CLASSIC_SEARCH_REVEAL);
-    }
+    // Already open? classic chrome swaps reveal → conceal once the bar is open.
+    if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) return;
+    // Click waits for reveal to be actionable, tolerating a transient header
+    // re-render that a zero-timeout `exists` guard would skip the click on.
+    await testSubjects.click(CLASSIC_SEARCH_REVEAL);
     await testSubjects.existOrFail(CLASSIC_SEARCH_CONCEAL);
   }
 

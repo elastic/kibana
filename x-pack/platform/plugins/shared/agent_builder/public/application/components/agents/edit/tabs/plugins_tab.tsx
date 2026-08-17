@@ -269,7 +269,7 @@ const ActivePluginsStatus: React.FC<{ activePluginsCount: number; totalPlugins: 
   const { createAgentBuilderUrl } = useNavigation();
   const isZeroPlugins = activePluginsCount === 0;
   const statusColor = isZeroPlugins ? 'warning' : 'success';
-  const iconType = isZeroPlugins ? 'alert' : 'checkCircleFill';
+  const iconType = isZeroPlugins ? 'warning' : 'checkCircleFill';
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m">

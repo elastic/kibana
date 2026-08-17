@@ -48,7 +48,6 @@ const compatibilityCheck = (api: unknown): api is ConvertLegacyMarkdownApi =>
 export const getConvertLegacyMarkdownAction = () => ({
   id: CONVERT_LEGACY_MARKDOWN_ACTION_ID,
   getIconType: () => 'merge',
-  showNotification: true,
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== 'edit') {
       return false;

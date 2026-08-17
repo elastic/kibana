@@ -6,12 +6,17 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KibanaResponseFactory, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RouteConfigOptions,
+  RouteMethod,
+} from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { BaseAlertingRoute, type AlertingRouteSchemas } from './base_alerting_route';
-import { ALERTING_V2_ERROR_CODES } from '../lib/errors/error_codes';
+import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
 import type { MockUiSettingsClient } from '../lib/services/settings_service/settings_service.mock';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
@@ -76,7 +81,7 @@ describe('BaseAlertingRoute', () => {
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: {
-          code: ALERTING_V2_ERROR_CODES.ALERTING_DISABLED,
+          code: ALERTING_ERROR_CODES.ALERTING_DISABLED,
           error: 'Service Unavailable',
           message: 'Alerting is disabled.',
         },
@@ -419,6 +424,70 @@ describe('BaseAlertingRoute', () => {
       expect(validate.request?.params).toBeDefined();
       expect(validate.request?.query).toBeDefined();
       expect(validate.request?.body).toBeDefined();
+    });
+
+    it('attaches onRequestValidationError and documents a 400 when request schemas are declared', () => {
+      TestRoute.schemas = { request: { body: z.object({ name: z.string() }) } };
+
+      const validate = TestRoute.validate as ComputedValidate;
+
+      expect(validate.onRequestValidationError).toEqual(expect.any(Function));
+      expect(validate.response?.[400]?.body?.()).toEqual(errorResponseSchema);
+    });
+
+    it('omits onRequestValidationError and the validation 400 when no request schemas are declared', () => {
+      TestRoute.schemas = { response: { 200: { description: 'Indicates a successful call.' } } };
+
+      const validate = TestRoute.validate as ComputedValidate;
+
+      expect(validate.onRequestValidationError).toBeUndefined();
+      expect(validate.response?.[400]).toBeUndefined();
+    });
+
+    it('lets a subclass specialize the 400 description while keeping errorResponseSchema', () => {
+      TestRoute.schemas = {
+        request: { body: z.object({ name: z.string() }) },
+        response: {
+          400: { body: () => errorResponseSchema, description: 'Invalid rule payload.' },
+        },
+      };
+
+      const validate = TestRoute.validate as ComputedValidate;
+
+      expect(validate.response?.[400]?.description).toBe('Invalid rule payload.');
+      expect(validate.response?.[400]?.body?.()).toEqual(errorResponseSchema);
+    });
+  });
+
+  describe('onRequestValidationError', () => {
+    afterEach(() => {
+      TestRoute.schemas = {};
+    });
+
+    it('maps a request validation failure to the flat { code, error, message, details } ErrorResponse shape', async () => {
+      TestRoute.schemas = { request: { body: z.object({ name: z.string() }) } };
+      const validate = TestRoute.validate as ComputedValidate;
+
+      await validate.onRequestValidationError?.(
+        {
+          message: '[request body.name]: expected value of type [string] but got [undefined]',
+          source: 'body',
+          rawError: new Error('invalid'),
+        },
+        {} as unknown as KibanaRequest,
+        response
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          code: deriveErrorCodeFromStatus(400),
+          error: 'Bad Request',
+          message: '[request body.name]: expected value of type [string] but got [undefined]',
+          details: { source: 'body' },
+        },
+        bypassErrorFormat: true,
+      });
     });
   });
 });

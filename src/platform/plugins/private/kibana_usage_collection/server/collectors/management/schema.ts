@@ -261,6 +261,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:defaultEsqlQuery': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The default ES|QL query Discover opens with in ES|QL mode. Redacted as it may contain sensitive user data.',
+    },
+  },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -573,13 +580,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Whether the Context Engine is enabled.' },
   },
-  'agentBuilder:uiamOAuthClientManagement': {
-    type: 'boolean',
-    _meta: {
-      description:
-        'Whether UIAM OAuth client management endpoints and the Agent Builder MCP Clients UI are enabled.',
-    },
-  },
   'agentBuilder:tracing:enabled': {
     type: 'boolean',
     _meta: {
@@ -616,6 +616,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Whether to include tool call arguments and results in traces.',
     },
   },
+  'agentBuilder:tracing:includeUserData': {
+    type: 'boolean',
+    _meta: {
+      description: 'Whether to include real user IDs and usernames in traces.',
+    },
+  },
   'agentBuilder:tracing:includeUserPrompts': {
     type: 'boolean',
     _meta: {
@@ -650,26 +656,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'banners:backgroundColor': {
     type: 'text',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:presentation:timeToPresent': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:enable_ui': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:byValueEmbeddable': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:canvas:useDataService': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'labs:dashboard:enable_ui': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:dashboard:deferBelowFold': {
@@ -904,6 +890,27 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: {
       description: 'Non-default value of the scheduled Significant Events maximum review passes.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule detection threshold.',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule probe interval (minutes).',
+    },
+  },
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore': {
+    type: 'long',
+    _meta: {
+      description:
+        'Non-default value of the scheduled Significant Events flaky rule severity exemption.',
     },
   },
   'observability:enableDiagnosticMode': {

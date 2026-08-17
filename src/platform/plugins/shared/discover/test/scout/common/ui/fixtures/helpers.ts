@@ -96,3 +96,16 @@ export const getCurrentAndStoredMode = async (
   const storedMode = await getStoredQueryMode(page);
   return { currentMode, storedMode };
 };
+
+/**
+ * Submits an ES|QL query expected to trigger the cascade (grouped) layout and
+ * returns whether the cascade layout actually rendered. Assertion is left to
+ * the caller so it stays in the test body, not hidden inside a helper.
+ */
+export const runCascadeQuery = async (
+  pageObjects: ScoutTestFixtures['pageObjects'],
+  query: string
+): Promise<boolean> => {
+  await pageObjects.discover.writeAndSubmitEsqlQuery(query);
+  return pageObjects.discover.isShowingCascadeLayout();
+};
