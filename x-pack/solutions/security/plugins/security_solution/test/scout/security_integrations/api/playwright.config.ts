@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { createPlaywrightConfig } from '@kbn/scout-security';
 
-export const BACK_DEFAULT = i18n.translate('xpack.pnd.pageHeader.backDefault', {
-  defaultMessage: 'Back',
+export default createPlaywrightConfig({
+  testDir: './tests',
 });
