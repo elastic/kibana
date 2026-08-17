@@ -446,7 +446,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
 
       {hasStarted && (
         <>
-          {isDeploying && <EuiSpacer size="m" />}
+          <EuiSpacer size="m" />
           <EuiFlexGroup wrap gutterSize="s" data-test-subj="deployAndDetectStep-serviceChips">
             {agentlessStatuses.map(([instanceId, state]) => (
               <EuiFlexItem grow={false} key={instanceId}>
