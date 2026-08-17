@@ -79,18 +79,26 @@ export const hasConversationOwnerAccess = ({
 export const hasConversationRenameAccess = ({
   conversation,
   user,
+  isAdmin,
 }: {
   conversation: ConversationProperties;
   user: UserIdAndName;
-}): boolean => hasConversationOwnerAccess({ conversation, user });
+  isAdmin: boolean;
+}): boolean =>
+  hasConversationOwnerAccess({ conversation, user }) ||
+  (isAdmin && isPublicConversation({ conversation }));
 
 export const hasConversationDeleteAccess = ({
   conversation,
   user,
+  isAdmin,
 }: {
   conversation: ConversationProperties;
   user: UserIdAndName;
-}): boolean => hasConversationOwnerAccess({ conversation, user });
+  isAdmin: boolean;
+}): boolean =>
+  hasConversationOwnerAccess({ conversation, user }) ||
+  (isAdmin && isPublicConversation({ conversation }));
 
 export const hasConversationUpdateAccessControlAccess = ({
   conversation,
@@ -103,11 +111,13 @@ export const hasConversationUpdateAccessControlAccess = ({
 export const getConversationPermissions = ({
   conversation,
   user,
+  isAdmin,
 }: {
   conversation: ConversationProperties;
   user: UserIdAndName;
+  isAdmin: boolean;
 }): ConversationPermissions => ({
-  rename: hasConversationRenameAccess({ conversation, user }),
-  delete: hasConversationDeleteAccess({ conversation, user }),
+  rename: hasConversationRenameAccess({ conversation, user, isAdmin }),
+  delete: hasConversationDeleteAccess({ conversation, user, isAdmin }),
   update_access_control: hasConversationUpdateAccessControlAccess({ conversation, user }),
 });
