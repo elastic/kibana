@@ -61,7 +61,7 @@ export const MetricInsightsFlyout = ({
   useEffect(() => {
     return () => {
       // Hardcoded to avoid a package dependency; mirrors APP_MAIN_SCROLL_CONTAINER_ID from
-      // `@kbn/core-chrome-layout` and the default EuiFlyout container configured in
+      // `@kbn/ui-chrome-layout-constants` and the default EuiFlyout container configured in
       // the Kibana EUI provider.
       document.getElementById('app-main-scroll')?.style.removeProperty('padding-inline-end');
     };

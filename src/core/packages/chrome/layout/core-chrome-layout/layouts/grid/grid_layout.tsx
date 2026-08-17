@@ -37,7 +37,7 @@ import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
-import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
+import { APP_FIXED_VIEWPORT_ID } from '../../kibana_layout_constants';
 import { KibanaGridLayoutGlobalStyles } from './kibana_grid_global_styles';
 
 const layoutConfigs: {
