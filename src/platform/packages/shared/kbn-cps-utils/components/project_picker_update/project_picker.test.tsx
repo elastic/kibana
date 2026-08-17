@@ -114,6 +114,73 @@ describe('ProjectPicker', () => {
     expect(onProjectRoutingChange).not.toHaveBeenCalled();
   });
 
+  it('preserves an exact-all-ID snapshot on mount instead of rewriting to all projects', async () => {
+    const onProjectRoutingChange = jest.fn();
+    const exactAllIdsSnapshot = '_id:p1 AND _id:p2';
+
+    render(
+      <ProjectPicker
+        availableProjects={[createProject('p1'), createProject('p2')]}
+        onProjectRoutingChange={onProjectRoutingChange}
+        projectRouting={exactAllIdsSnapshot}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+    expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+    expect(onProjectRoutingChange).not.toHaveBeenCalled();
+  });
+
+  it('reports routing after the user changes project selection', async () => {
+    const onProjectRoutingChange = jest.fn();
+
+    render(
+      <ProjectPicker
+        availableProjects={[createProject('p1'), createProject('p2')]}
+        onProjectRoutingChange={onProjectRoutingChange}
+        projectRouting="_id:p1 AND _id:p2"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+    });
+
+    fireEvent.click(screen.getByTestId('projectPickerListItemSwitch-p2'));
+
+    await waitFor(() => {
+      expect(onProjectRoutingChange).toHaveBeenCalledWith('_id:p1');
+    });
+  });
+
+  it('preserves named project routing references on mount', async () => {
+    const onProjectRoutingChange = jest.fn();
+
+    render(
+      <ProjectPicker
+        availableProjects={[createProject('p1'), createProject('p2')]}
+        onProjectRoutingChange={onProjectRoutingChange}
+        projectRouting="@my-named-routing"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toBeInTheDocument();
+    });
+    expect(onProjectRoutingChange).not.toHaveBeenCalled();
+  });
+
   it('renders the flyout variant and delegates actions to the consumer', async () => {
     const onApplyChanges = jest.fn();
     const onClose = jest.fn();

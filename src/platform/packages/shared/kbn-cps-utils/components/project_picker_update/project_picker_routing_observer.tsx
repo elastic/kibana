@@ -22,11 +22,16 @@ export const ProjectPickerRoutingObserver = ({
   onProjectRoutingChange,
   projectRouting,
 }: ProjectPickerRoutingObserverProps) => {
-  const { availableProjects, excludedOverrides, filterExpressions, selectedProjects } =
-    useProjectPickerState();
+  const {
+    availableProjects,
+    excludedOverrides,
+    filterExpressions,
+    hasUserModifiedRouting,
+    selectedProjects,
+  } = useProjectPickerState();
 
   useEffect(() => {
-    if (!onProjectRoutingChange || availableProjects.size === 0) {
+    if (!onProjectRoutingChange || !hasUserModifiedRouting || availableProjects.size === 0) {
       return;
     }
 
@@ -38,6 +43,7 @@ export const ProjectPickerRoutingObserver = ({
     const hasExcludedOverrides = excludedOverrides.length > 0;
     const isAllProjectsSelected =
       selectedProjects.length === 0 || selectedProjects.length === allProjectIds.length;
+
     const nextProjectRouting =
       !hasActiveFilters && !hasExcludedOverrides && isAllProjectsSelected
         ? PROJECT_ROUTING.ALL
@@ -55,6 +61,7 @@ export const ProjectPickerRoutingObserver = ({
     availableProjects,
     excludedOverrides,
     filterExpressions,
+    hasUserModifiedRouting,
     onProjectRoutingChange,
     projectRouting,
     selectedProjects,

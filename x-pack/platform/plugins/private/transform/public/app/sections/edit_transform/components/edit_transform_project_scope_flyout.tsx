@@ -40,9 +40,10 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   const cpsManager = cps?.cpsManager;
   const { value } = useFormField('projectRouting');
   const { setFormField } = useEditTransformFlyoutActions();
-  const currentProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as ProjectRouting;
+  const persistedProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as NonNullable<ProjectRouting>;
   const [stagedProjectRouting, setStagedProjectRouting] =
-    useState<ProjectRouting>(currentProjectRouting);
+    useState<NonNullable<ProjectRouting> | undefined>();
+  const draftProjectRouting = stagedProjectRouting ?? persistedProjectRouting;
   const [pickerResetCounter, setPickerResetCounter] = useState(0);
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) =>
@@ -59,16 +60,14 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   );
 
   const applyProjectScope = useCallback(() => {
-    if (stagedProjectRouting !== undefined) {
-      setFormField({ field: 'projectRouting', value: stagedProjectRouting });
-    }
+    setFormField({ field: 'projectRouting', value: draftProjectRouting });
     onClose();
-  }, [onClose, setFormField, stagedProjectRouting]);
+  }, [draftProjectRouting, onClose, setFormField]);
 
   const discardProjectScopeChanges = useCallback(() => {
-    setStagedProjectRouting(currentProjectRouting);
+    setStagedProjectRouting(undefined);
     setPickerResetCounter((counter) => counter + 1);
-  }, [currentProjectRouting]);
+  }, []);
 
   return (
     <ProjectScopePickerFlyoutContent
@@ -94,7 +93,7 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
       onDiscardChanges={discardProjectScopeChanges}
       onProjectRoutingChange={setStagedProjectRouting}
       originProjectId={originProject?._id}
-      projectRouting={stagedProjectRouting}
+      projectRouting={draftProjectRouting}
       title={changeProjectScopeTitle}
       titleId="transformEditProjectScopeFlyoutTitle"
     />

@@ -33,6 +33,7 @@ const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPi
   visibleProjectIds: ['p1', 'p2'],
   selectedProjects: ['p1', 'p2'],
   ...overrides,
+  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
 });
 
 describe('getProjectPickerListContextMenuConfig', () => {

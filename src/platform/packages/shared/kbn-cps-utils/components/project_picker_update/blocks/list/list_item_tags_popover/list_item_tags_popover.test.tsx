@@ -53,6 +53,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   visibleProjectIds: [defaultProject._id],
   selectedProjects: [defaultProject._id],
   ...overrides,
+  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
 });
 
 let currentState = createState();

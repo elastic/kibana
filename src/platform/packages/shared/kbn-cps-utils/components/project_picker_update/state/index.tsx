@@ -134,6 +134,7 @@ export const ProjectPickerStateProvider = ({
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: {
       isReadOnly,
+      hasUserModifiedRouting: false,
       filterExpressions: new Map(
         filterExpressions.map((expression) => [
           getFilterExpressionLookupKey(expression),

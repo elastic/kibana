@@ -66,6 +66,7 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   visibleProjectIds: [securityProject._id],
   selectedProjects: [securityProject._id],
   ...overrides,
+  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
 });
 
 const defaultActions = {
