@@ -359,7 +359,6 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
 
       <EuiPanel hasBorder paddingSize="m" data-test-subj="querySandboxEditorPanel">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-          <CpsPicker />
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate(

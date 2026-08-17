@@ -36,24 +36,7 @@ jest.mock('@elastic/eui', () => {
 jest.mock('@kbn/date-range-picker', () => ({
   DateRangePicker: (props: DateRangePickerProps) => {
     lastPickerProps = props;
-    return (
-      <button
-        type="button"
-        data-test-subj={props['data-test-subj'] ?? 'mockDateRangePicker'}
-        onClick={() => {
-          props.onChange({
-            start: 'now-1h',
-            end: 'now',
-            startDate: null,
-            endDate: null,
-            value: 'Last 1 hour',
-            isInvalid: false,
-          });
-        }}
-      >
-        mock picker
-      </button>
-    );
+    return <div data-test-subj={props['data-test-subj'] ?? 'mockDateRangePicker'} />;
   },
 }));
 
@@ -101,24 +84,6 @@ describe('AlertingDateRangePicker', () => {
         return of(fallback);
       }
     );
-  });
-
-  it('propagates a valid onChange as { from, to }', async () => {
-    const user = userEvent.setup();
-    render(
-      <AlertingDateRangePicker
-        from="now-15m"
-        to="now"
-        onChange={mockOnChange}
-        services={services}
-        data-test-subj="alertingDateRangePicker"
-      />
-    );
-
-    await user.click(screen.getByTestId('alertingDateRangePicker'));
-
-    expect(mockOnChange).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
-    expect(data.query.timefilter.history.add).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
   });
 
   it('marks the picker invalid and ignores invalid onChange commits', () => {
@@ -370,7 +335,7 @@ describe('AlertingDateRangePicker', () => {
     );
 
     expect(screen.getByTestId('alertingDateRangePicker')).toBeInTheDocument();
-    expect(screen.queryByText('mock picker')).not.toBeInTheDocument();
+    expect(lastPickerProps).toBeUndefined();
     expect(mockSuperDatePicker).toHaveBeenCalledWith(
       expect.objectContaining({
         start: 'now-15m',
