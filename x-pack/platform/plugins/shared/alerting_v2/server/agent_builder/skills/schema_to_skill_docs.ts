@@ -10,7 +10,13 @@ import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
   alertEventSeveritySchema,
-  ALERT_EPISODE_STATUS,
+  alertEpisodeStatusSchema,
+  ruleKindSchema,
+  recoveryStrategySchema,
+  recoveryStrategy,
+  noDataStrategySchema,
+  groupingModeSchema,
+  throttleStrategySchema,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
@@ -21,19 +27,76 @@ import {
 } from '@kbn/workflows';
 import {
   ruleOperationSchema,
-  setKindOperationSchema,
-  setQueryOperationSchema,
   setStateTransitionOperationSchema,
 } from '../tools/manage_rule/operations';
-import {
-  actionPolicyOperationSchema,
-  setGroupingOperationSchema as setActionPolicyGroupingOperationSchema,
-  setThrottleOperationSchema,
-} from '../tools/manage_action_policy/operations';
+import { actionPolicyOperationSchema } from '../tools/manage_action_policy/operations';
+
+type JsonSchemaNode = Record<string, unknown>;
+
+interface FieldInfo {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+  constraints: string;
+}
+
+export interface DescribedEnumValue {
+  value: string;
+  description: string;
+}
 
 const LARGE_ENUM_THRESHOLD = 20;
 
-type JsonSchemaNode = Record<string, unknown>;
+export class SchemaTranslationError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'SchemaTranslationError';
+  }
+}
+
+const throwIfNotZodUnion = (schema: z.ZodType, schemaName: string): z.ZodUnion => {
+  if (!(schema instanceof z.ZodUnion)) {
+    throw new SchemaTranslationError(
+      `${schemaName} is not a union of described literals. Use z.union of z.literal(...).describe(...) on each value.`
+    );
+  }
+  return schema;
+};
+
+const throwIfMissingDescribes = (missing: string[], subject: string, detail?: string): void => {
+  if (missing.length === 0) {
+    return;
+  }
+  const suffix = detail ? ` ${detail}` : '';
+  throw new SchemaTranslationError(
+    `Missing .describe() on ${subject}: ${missing.join(', ')}.${suffix}`
+  );
+};
+
+const throwIfMissingOperationDescribes = (
+  variants: JsonSchemaNode[] | undefined,
+  title: string
+): void => {
+  const missing = (variants ?? [])
+    .filter(
+      (variant) =>
+        typeof variant.description !== 'string' || variant.description.trim().length === 0
+    )
+    .map((variant) => {
+      const operation = (variant.properties as JsonSchemaNode | undefined)?.operation as
+        | JsonSchemaNode
+        | undefined;
+      const value = operation?.const ?? (operation?.enum as string[] | undefined)?.[0];
+      return typeof value === 'string' ? value : '(unnamed variant)';
+    });
+
+  throwIfMissingDescribes(
+    missing,
+    'operation variant(s)',
+    `Add a top-level .describe() explaining the user goal to each listed variant (${title}).`
+  );
+};
 
 /**
  * Replaces large enum arrays with a compact description to keep token counts
@@ -65,29 +128,17 @@ function compactLargeEnums(node: unknown): unknown {
   return result;
 }
 
-export class SchemaTranslationError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
-    super(message);
-    this.name = 'SchemaTranslationError';
-  }
-}
-
 function zodToJsonSchema(schema: z.ZodType): unknown {
   try {
     const jsonSchema = z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
     return compactLargeEnums(jsonSchema);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    throw new SchemaTranslationError(`Failed to convert Zod schema to JSON Schema: ${message}`, e);
+    throw new SchemaTranslationError(
+      `Failed to convert Zod schema to JSON Schema: ${message}. Check the Zod schema passed to skill-doc generation.`,
+      e
+    );
   }
-}
-
-interface FieldInfo {
-  name: string;
-  type: string;
-  required: boolean;
-  description: string;
-  constraints: string;
 }
 
 /** Builds the parenthetical constraint text for a field-table Description cell. */
@@ -129,7 +180,11 @@ function resolveType(prop: JsonSchemaNode): string {
     return (prop.anyOf as JsonSchemaNode[]).map(resolveType).join(' | ');
   }
   if (prop.oneOf !== undefined && Array.isArray(prop.oneOf)) {
-    return (prop.oneOf as JsonSchemaNode[])
+    const variants = prop.oneOf as JsonSchemaNode[];
+    if (variants.every((variant) => variant.const !== undefined)) {
+      return variants.map(resolveType).join(' | ');
+    }
+    return variants
       .map((variant) => {
         const disc = variant.properties as JsonSchemaNode | undefined;
         if (disc) {
@@ -217,14 +272,15 @@ function formatVariantSchemas(jsonSchema: unknown): string {
 
     const fields = jsonSchemaToFieldTable(variant);
     if (fields.length > 0) {
-      sections.push(`#### ${label}\n\n${formatFieldTable(fields)}`);
+      const description =
+        typeof variant.description === 'string' && variant.description.trim().length > 0
+          ? `${variant.description}\n\n`
+          : '';
+      sections.push(`#### ${label}\n\n${description}${formatFieldTable(fields)}`);
     }
   }
   return sections.join('\n\n');
 }
-
-const DEFAULT_API_SCHEMA_SOURCE =
-  '`@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.';
 
 /**
  * Generates markdown for a create/update API Zod schema (top-level field table,
@@ -232,27 +288,17 @@ const DEFAULT_API_SCHEMA_SOURCE =
  */
 export const generateApiSchemaDoc = ({
   title,
-  source = DEFAULT_API_SCHEMA_SOURCE,
   schema,
   extraSections,
 }: {
   title: string;
-  source?: string;
   schema: z.ZodType;
   extraSections?: (jsonSchema: unknown) => Array<{ heading: string; content: string }> | undefined;
 }): string => {
   const jsonSchema = zodToJsonSchema(schema);
   const fieldTable = formatFieldTable(jsonSchemaToFieldTable(jsonSchema));
 
-  const sections = [
-    `# ${title}`,
-    '',
-    `Auto-generated from ${source}`,
-    '',
-    '## Top-Level Fields',
-    '',
-    fieldTable,
-  ];
+  const sections = [`# ${title}`, '', '## Top-Level Fields', '', fieldTable];
 
   for (const extra of extraSections?.(jsonSchema) ?? []) {
     if (extra.content) {
@@ -287,16 +333,18 @@ export const generateRuleSchemaDoc = (): string =>
  */
 export const generateOperationsDoc = ({
   title,
-  source,
   schema,
 }: {
   title: string;
-  source: string;
   schema: z.ZodType;
 }): string => {
-  const variants = formatVariantSchemas(zodToJsonSchema(schema));
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  throwIfMissingOperationDescribes(
+    (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined,
+    title
+  );
 
-  return [`# ${title}`, '', `Auto-generated from ${source}.`, '', variants].join('\n');
+  return [`# ${title}`, '', formatVariantSchemas(jsonSchema)].join('\n');
 };
 
 /**
@@ -305,92 +353,84 @@ export const generateOperationsDoc = ({
 export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Rule Operations Schema Reference',
-    source: 'the `manage_rule` tool Zod schemas',
     schema: ruleOperationSchema,
   });
 
 export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
 
-export const getEpisodeStatusValues = (): string[] => Object.values(ALERT_EPISODE_STATUS);
+/**
+ * Reads per-value `.describe()` copy from a Zod union of literals.
+ * Throws if a value has no description. Callers catch this during skill
+ * registration and log rather than aborting Kibana start.
+ */
+export const getDescribedEnumValues = (
+  schema: z.ZodType,
+  schemaName: string
+): DescribedEnumValue[] => {
+  const union = throwIfNotZodUnion(schema, schemaName);
 
-const getNoDataStrategyValues = (): string[] =>
-  setQueryOperationSchema.shape.no_data_strategy.unwrap().options;
+  const missing: string[] = [];
+  const values: DescribedEnumValue[] = [];
+  for (const option of union.options) {
+    if (!(option instanceof z.ZodLiteral) || typeof option.value !== 'string') {
+      missing.push('(non-literal value)');
+      continue;
+    }
+    const description = option.description?.trim() ?? '';
+    if (!description) {
+      missing.push(option.value);
+      continue;
+    }
+    values.push({ value: option.value, description });
+  }
 
-const getRecoveryStrategyValues = (): string[] =>
-  setQueryOperationSchema.shape.recovery_strategy.unwrap().options;
+  throwIfMissingDescribes(missing, `${schemaName} value(s)`);
+  return values;
+};
 
-const getRuleKindValues = (): string[] => setKindOperationSchema.shape.kind.options;
+export const getEpisodeStatusValues = (): string[] =>
+  getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
+    ({ value }) => value
+  );
 
 const getGroupingModeValues = (): string[] =>
-  setActionPolicyGroupingOperationSchema.shape.groupingMode.unwrap().options;
+  getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema').map(({ value }) => value);
 
-const getThrottleStrategyValues = (): string[] =>
-  setThrottleOperationSchema.shape.strategy.unwrap().options;
+/** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
+const getStateTransitionFields = (): string[] =>
+  Object.keys(setStateTransitionOperationSchema.shape).filter((k) => k !== 'operation');
 
 /**
- * Builds a markdown table from a schema's values and a descriptions map. Throws
- * if the descriptions map is out of sync with the schema (missing or extra keys).
+ * Builds a markdown table from a schema's described literal values.
  */
 const generateEnumTable = ({
   header,
-  schemaValues,
-  descriptions,
+  schema,
   schemaName,
 }: {
   header: [string, string];
-  schemaValues: readonly string[];
-  descriptions: Record<string, string>;
+  schema: z.ZodType;
   schemaName: string;
 }): string => {
-  const descKeys = new Set(Object.keys(descriptions));
-  const schemaKeys = new Set(schemaValues);
-
-  const missing = schemaValues.filter((v) => !descKeys.has(v));
-  const extra = [...descKeys].filter((k) => !schemaKeys.has(k));
-
-  if (missing.length > 0 || extra.length > 0) {
-    const parts: string[] = [];
-    if (missing.length > 0) parts.push(`missing descriptions for: ${missing.join(', ')}`);
-    if (extra.length > 0) parts.push(`extra descriptions not in schema: ${extra.join(', ')}`);
-    throw new SchemaTranslationError(
-      `${schemaName} descriptions out of sync with schema — ${parts.join('; ')}`
-    );
-  }
-
-  const rows = schemaValues.map((v) => `| \`${v}\` | ${descriptions[v]} |`);
+  const rows = getDescribedEnumValues(schema, schemaName).map(
+    ({ value, description }) => `| \`${value}\` | ${escapeTableCell(description)} |`
+  );
   return [`| ${header[0]} | ${header[1]} |`, '|---|---|', ...rows].join('\n');
 };
 
 /**
- * Builds a markdown bullet list from a schema's values and a descriptions map.
- * Validates that descriptions cover all schema values exactly.
+ * Builds a markdown bullet list from a schema's described literal values.
  */
 const generateEnumList = ({
-  schemaValues,
-  descriptions,
+  schema,
   schemaName,
 }: {
-  schemaValues: readonly string[];
-  descriptions: Record<string, string>;
+  schema: z.ZodType;
   schemaName: string;
-}): string => {
-  const descKeys = new Set(Object.keys(descriptions));
-  const schemaKeys = new Set(schemaValues);
-
-  const missing = schemaValues.filter((v) => !descKeys.has(v));
-  const extra = [...descKeys].filter((k) => !schemaKeys.has(k));
-
-  if (missing.length > 0 || extra.length > 0) {
-    const parts: string[] = [];
-    if (missing.length > 0) parts.push(`missing descriptions for: ${missing.join(', ')}`);
-    if (extra.length > 0) parts.push(`extra descriptions not in schema: ${extra.join(', ')}`);
-    throw new SchemaTranslationError(
-      `${schemaName} descriptions out of sync with schema — ${parts.join('; ')}`
-    );
-  }
-
-  return schemaValues.map((v) => `- \`${v}\`: ${descriptions[v]}`).join('\n');
-};
+}): string =>
+  getDescribedEnumValues(schema, schemaName)
+    .map(({ value, description }) => `- \`${value}\`: ${description}`)
+    .join('\n');
 
 /** Formats enum values as an inline comma-separated backtick list. */
 export const formatEnumValuesList = (values: readonly string[]): string =>
@@ -424,48 +464,28 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
   return lines.join('\n');
 };
 
-/** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
-const getStateTransitionFields = (): string[] =>
-  Object.keys(setStateTransitionOperationSchema.shape).filter((k) => k !== 'operation');
-
 /** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
 export const generateRuleKindDoc = (): string => {
-  const kinds = getRuleKindValues();
+  const kinds = getDescribedEnumValues(ruleKindSchema, 'ruleKindSchema');
   const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
   const transitionFields = formatEnumValuesList(getStateTransitionFields());
 
-  const kindDescriptions: Record<string, string[]> = {
-    alert: [
-      `### Alert (\`kind: ${kinds.find((k) => k === 'alert')}\`)`,
-      `- **Stateful alerting** with full episode lifecycle: ${episodeStatuses}.`,
-      `- Supports state transitions (${transitionFields}), recovery detection, and notification dispatch.`,
-      "- Produces `type: 'alert'` events that participate in the dispatcher pipeline.",
-      '- Use when the user wants to be **notified**, needs **lifecycle tracking**, or wants **recovery detection**.',
-    ],
-    signal: [
-      `### Signal (\`kind: ${kinds.find((k) => k === 'signal')}\`)`,
-      '- **Stateless detection** (observation-only).',
-      "- Produces `type: 'signal'` events but **skips** episode lifecycle and dispatcher processing entirely.",
-      '- No notifications, no recovery, no state transitions.',
-      '- Use for logging or detection without automated action.',
-    ],
-  };
-
-  const missing = kinds.filter((k) => !kindDescriptions[k]);
-  if (missing.length > 0) {
-    throw new SchemaTranslationError(
-      `setKindOperationSchema descriptions out of sync — missing descriptions for: ${missing.join(
-        ', '
-      )}`
-    );
-  }
+  const kindSections = kinds.flatMap(({ value, description }, i) => {
+    const heading = `### ${value.charAt(0).toUpperCase()}${value.slice(1)} (\`kind: ${value}\`)`;
+    const lines = [heading, description];
+    if (value === 'alert') {
+      lines.push(`Episode statuses: ${episodeStatuses}.`);
+      lines.push(`State transition fields: ${transitionFields}.`);
+    }
+    return i > 0 ? ['', ...lines] : lines;
+  });
 
   return [
     '## Rule Kind: Alert vs Signal',
     '',
     'Rules declare a `kind` of `alert` or `signal`. This is the most important behavioral split in the system.',
     '',
-    ...kinds.flatMap((k, i) => (i > 0 ? ['', ...kindDescriptions[k]] : kindDescriptions[k])),
+    ...kindSections,
     '',
     '### Immutability',
     '`kind` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to `kind`. For draft (in-memory) rules, `set_kind` can change it freely.',
@@ -483,7 +503,7 @@ export const generateStateTransitionDoc = (): string => {
     const description = prop?.description as string | undefined;
     if (!description) {
       throw new SchemaTranslationError(
-        `setStateTransitionOperationSchema field \`${f}\` is missing a .describe() — add one to the Zod schema`
+        `Missing .describe() on set_state_transition field "${f}". Add .describe() to that field on setStateTransitionOperationSchema.`
       );
     }
     return `- \`${f}\` — ${description}`;
@@ -504,14 +524,8 @@ export const generateStateTransitionDoc = (): string => {
 export const generateEpisodeLifecycleDoc = (): string => {
   const table = generateEnumTable({
     header: ['Status', 'Meaning'],
-    schemaValues: getEpisodeStatusValues(),
-    descriptions: {
-      inactive: 'Fully recovered',
-      pending: 'Breached but below the consecutive-breaches threshold',
-      active: 'Met the threshold — alert is firing',
-      recovering: 'Breach stopped but not yet fully recovered',
-    },
-    schemaName: 'ALERT_EPISODE_STATUS',
+    schema: alertEpisodeStatusSchema,
+    schemaName: 'alertEpisodeStatusSchema',
   });
 
   return [
@@ -554,14 +568,8 @@ export const generateSeverityDoc = (): string => {
 export const generateNoDataStrategyDoc = (): string => {
   const table = generateEnumTable({
     header: ['Value', 'Behaviour'],
-    schemaValues: getNoDataStrategyValues(),
-    descriptions: {
-      last_known_status: 'Holds the last known episode status when no data is present.',
-      emit: 'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.',
-      recover: 'Forces recovery when no data is present.',
-      none: 'No-data situations are ignored (default).',
-    },
-    schemaName: 'setQueryOperationSchema.no_data_strategy',
+    schema: noDataStrategySchema,
+    schemaName: 'noDataStrategySchema',
   });
 
   return [
@@ -582,13 +590,8 @@ export const generateNoDataStrategyDoc = (): string => {
 /** Generates the Recovery Strategy section with heading, prose, and value list. */
 export const generateRecoveryStrategyDoc = (): string => {
   const list = generateEnumList({
-    schemaValues: getRecoveryStrategyValues(),
-    descriptions: {
-      no_breach: 'recovers groups that stop breaching (default).',
-      query: 'uses a custom recovery query to detect recovery.',
-      none: 'disables recovery entirely.',
-    },
-    schemaName: 'setQueryOperationSchema.recovery_strategy',
+    schema: recoveryStrategySchema,
+    schemaName: 'recoveryStrategySchema',
   });
 
   return [
@@ -598,9 +601,7 @@ export const generateRecoveryStrategyDoc = (): string => {
     '',
     list,
     '',
-    `When using \`recovery_strategy: '${
-      setQueryOperationSchema.shape.recovery_strategy.unwrap().enum.query
-    }'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
+    `When using \`recovery_strategy: '${recoveryStrategy.query}'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
     "- **Composed**: `recovery: { segment: 'WHERE cpu < 0.5' }`",
     "- **Standalone**: `recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }`",
     '',
@@ -611,13 +612,8 @@ export const generateRecoveryStrategyDoc = (): string => {
 /** Generates the Grouping Modes section with heading and bullet list. */
 export const generateGroupingModesDoc = (): string => {
   const list = generateEnumList({
-    schemaValues: getGroupingModeValues(),
-    descriptions: {
-      per_episode: 'one notification per alert episode lifecycle (default).',
-      all: 'a single notification for all matching episodes.',
-      per_field: 'group by specified `groupBy` fields.',
-    },
-    schemaName: 'setGroupingOperationSchema.groupingMode',
+    schema: groupingModeSchema,
+    schemaName: 'groupingModeSchema',
   });
 
   return ['### Grouping Modes', list].join('\n');
@@ -626,15 +622,8 @@ export const generateGroupingModesDoc = (): string => {
 /** Generates the Throttle Strategies section with heading and bullet list. */
 export const generateThrottleStrategiesDoc = (): string => {
   const list = generateEnumList({
-    schemaValues: getThrottleStrategyValues(),
-    descriptions: {
-      on_status_change: 'notify only on episode status transitions (default for `per_episode`).',
-      per_status_interval: 'notify on transitions and at regular intervals.',
-      time_interval:
-        'notify at regular intervals regardless of status (default for `all`/`per_field`).',
-      every_time: 'notify on every evaluation cycle (high volume).',
-    },
-    schemaName: 'setThrottleOperationSchema.strategy',
+    schema: throttleStrategySchema,
+    schemaName: 'throttleStrategySchema',
   });
 
   return ['### Throttle Strategies', list].join('\n');
@@ -655,7 +644,6 @@ export const generateActionPolicySchemaDoc = (): string =>
 export const generateActionPolicyOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Action Policy Operations Schema Reference',
-    source: 'the `manage_action_policy` tool Zod schemas',
     schema: actionPolicyOperationSchema,
   });
 
@@ -672,7 +660,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
   if (!jsonSchema) {
     throw new SchemaTranslationError(
-      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}"`
+      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}" required by generateActionPolicyWorkflowPayloadDoc.`
     );
   }
 
