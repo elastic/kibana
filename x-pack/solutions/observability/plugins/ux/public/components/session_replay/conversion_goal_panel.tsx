@@ -76,7 +76,7 @@ const goalIcon = (goal: { name: string; steps: FunnelStepDef[] }): string => {
   if (/(cart|check|buy|purchase|order)/.test(hay)) {
     return 'money';
   }
-  return goal.steps[0]?.type === 'activity' ? 'tokenEvent' : 'popper';
+  return goal.steps[0]?.type === 'activity' ? 'tokenEvent' : 'bullseye';
 };
 
 const toDraft = (goal: ConversionGoalDraft): ConversionGoalDraft => ({
@@ -367,7 +367,7 @@ export function ConversionGoalPanel({
     <div css={shellCss} data-test-subj="uxConversionGoalPanel">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="popper" color="success" size="l" aria-hidden={true} />
+          <EuiIcon type="bullseye" color="success" size="l" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">

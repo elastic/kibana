@@ -56,8 +56,8 @@ const ICONS: Record<RumReportTemplateId, string> = {
   pages: 'pageSelect',
   errors: 'bug',
   frustration: 'faceSad',
-  funnel: 'logstashQueue',
-  clients: 'visBarHorizontal',
+  funnel: 'queue',
+  clients: 'chartBarHorizontal',
   users: 'user',
 };
 
