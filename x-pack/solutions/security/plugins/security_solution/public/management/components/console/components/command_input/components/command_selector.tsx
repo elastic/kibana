@@ -19,9 +19,9 @@ import {
   EuiText,
   EuiTextTruncate,
 } from '@elastic/eui';
+import { getCommandInputUsageList } from '../../../service/utils';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
-import { getCommandNameWithArgs } from '../../../service/utils';
 import { UserCommandInput } from '../../user_command_input';
 import { useWithCommandList } from '../../../hooks/state_selectors/use_with_command_list';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -62,11 +62,17 @@ export const CommandSelector = memo<CommandSelectorProps>(
         for (const commandDefinition of commandDefinitions.sort((a, b) =>
           a.name.localeCompare(b.name)
         )) {
-          options.push({
-            label: getCommandNameWithArgs(commandDefinition),
-            key: commandDefinition.name,
-            data: commandDefinition,
-          });
+          options.push(
+            ...getCommandInputUsageList(commandDefinition, { includeOptionalArgs: false }).map(
+              (usage) => {
+                return {
+                  label: usage,
+                  key: usage,
+                  data: commandDefinition,
+                };
+              }
+            )
+          );
         }
       }
 
@@ -75,8 +81,6 @@ export const CommandSelector = memo<CommandSelectorProps>(
 
     const searchBarProps = useMemo(() => {
       return {
-        // FIXME:PT add placeholder text
-        // placeholder: FILTER_HISTORY_PLACEHOLDER,
         compressed: true,
         fullWidth: true,
         id: initialFocusId,
