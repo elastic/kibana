@@ -35,11 +35,12 @@ export function getStateManagementForInlineEditing(
     datasourceState: unknown,
     visualizationState: unknown,
     visualizationType?: string,
-    datasourceId?: LensDatasourceId
+    datasourceId?: LensDatasourceId,
+    allDatasourceStates?: DatasourceStates
   ) => {
     const vis = getAttributes();
     const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
-    const datasourceStates: DatasourceStates = {
+    const datasourceStates: DatasourceStates = allDatasourceStates ?? {
       [activeDatasourceId]: {
         isLoading: false,
         state: datasourceState,
