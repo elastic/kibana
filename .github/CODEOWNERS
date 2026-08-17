@@ -3171,6 +3171,7 @@ x-pack/solutions/security/plugins/entity_store @elastic/security-entity-analytic
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/set_alert_tags_step @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_note_step @elastic/security-threat-hunting
 
 # Public step types
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
@@ -3179,6 +3180,7 @@ x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/set_alert_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_note_step @elastic/security-threat-hunting
 
 # Server step types
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
@@ -3187,6 +3189,7 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_alert_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_tags_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/set_attack_status_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_note_step @elastic/security-threat-hunting
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
