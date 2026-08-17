@@ -19,6 +19,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiText,
+  EuiTextBlockTruncate,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -152,16 +153,19 @@ export const AgentsList: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<ListAgentResponseItem>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<ListAgentResponseItem> = {
-      width: '48px',
+      width: '40px',
       align: 'center',
+      valign: 'top',
       render: (agent) => <AgentAvatar agent={agent} size="m" />,
       'data-test-subj': 'agentBuilderAgentsListAvatar',
     };
     const canEditAgent = (agent: ListAgentResponseItem) => agent.permissions.update_agent;
 
     const agentNameAndDescription: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
+      width: '30%',
       field: 'name',
       name: columnNames.name,
+      valign: 'top',
       render: (name: string, agent: ListAgentResponseItem) => {
         const canEdit = canEditAgent(agent);
         const nameContent = !canEdit ? (
@@ -195,7 +199,8 @@ export const AgentsList: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="s">
-                {agent.description}
+                {/* Clamped so one long description cannot stretch every other cell in the row. */}
+                <EuiTextBlockTruncate lines={2}>{agent.description}</EuiTextBlockTruncate>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -205,7 +210,8 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLabels: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
-      width: '25%',
+      width: '16%',
+      valign: 'top',
       field: 'labels',
       name: columnNames.labels,
       render: (labels?: string[]) => {
@@ -221,7 +227,8 @@ export const AgentsList: React.FC = () => {
     // Read-only: what an agent retrieves from, assigned and inherited together. Editing lives on
     // the agent's AI indices tab, where the two can be told apart.
     const agentAiIndices: EuiTableComputedColumnType<ListAgentResponseItem> = {
-      width: '15%',
+      width: '14%',
+      valign: 'top',
       name: columnNames.aiIndices,
       render: (agent) => (
         <AgentAiIndices
@@ -235,14 +242,16 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentAccessControlMode: EuiTableComputedColumnType<ListAgentResponseItem> = {
-      width: '135px',
+      width: '110px',
+      valign: 'top',
       name: columnNames.accessControlMode,
       render: (agent) => <AgentAccessControlModeBadge agent={agent} />,
       'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
     const agentCreatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
-      width: '12%',
+      width: '11%',
+      valign: 'top',
       field: 'created_by',
       name: columnNames.createdBy,
       render: (createdBy: ListAgentResponseItem['created_by'], agent: ListAgentResponseItem) =>
@@ -251,7 +260,8 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLastUpdatedBy: EuiTableFieldDataColumnType<ListAgentResponseItem> = {
-      width: '12%',
+      width: '11%',
+      valign: 'top',
       field: 'updated_by',
       name: columnNames.lastUpdatedBy,
       render: (updatedBy: ListAgentResponseItem['updated_by'], agent: ListAgentResponseItem) =>
@@ -260,7 +270,7 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentActions: EuiTableActionsColumnType<ListAgentResponseItem> = {
-      width: '120px',
+      width: '100px',
       actions: [
         {
           type: 'icon',

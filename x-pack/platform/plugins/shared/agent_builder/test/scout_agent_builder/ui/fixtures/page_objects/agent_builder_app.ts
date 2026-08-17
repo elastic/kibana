@@ -546,13 +546,16 @@ export class AgentBuilderApp {
     const row = this.page.testSubj.locator(this.agentListRowSelector(agentId));
     const labelsCell = row.getByTestId('agentBuilderAgentsListLabels');
     const labelTexts = await labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-    const viewMore = labelsCell.getByTestId('agentBuilderLabelsViewMoreButton');
-    if (await viewMore.isVisible()) {
-      await viewMore.click();
-      const popover = this.page.testSubj.locator('agentBuilderLabelsViewMorePopover');
-      const hidden = await popover.locator(subj('^agentBuilderLabel-')).allInnerTexts();
+
+    // Labels past the visible few collapse into a "+N" badge and are named in its tooltip, so the
+    // full list is only readable by hovering it.
+    const hiddenCount = labelsCell.getByTestId('agentBuilderLabelHiddenCount');
+    if (await hiddenCount.isVisible()) {
+      await hiddenCount.hover();
+      const tooltip = this.page.locator('.euiToolTipPopover');
+      await tooltip.waitFor({ state: 'visible' });
+      const hidden = (await tooltip.innerText()).split(',').map((label) => label.trim());
       labelTexts.push(...hidden);
-      await viewMore.click();
     }
     return labelTexts;
   }

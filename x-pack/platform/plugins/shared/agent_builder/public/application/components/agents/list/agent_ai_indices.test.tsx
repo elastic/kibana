@@ -35,7 +35,7 @@ describe('AgentAiIndices', () => {
   it('collapses the overflow into a count badge', () => {
     renderCell(['elastic', 'sales', 'support', 'docs']);
 
-    expect(screen.getByTestId('agentBuilderAgentAiIndicesHiddenCount')).toHaveTextContent('+2');
+    expect(screen.getByTestId('agentBuilderAgentAiIndexHiddenCount')).toHaveTextContent('+2');
     expect(screen.queryByTestId('agentBuilderAgentAiIndex-support')).not.toBeInTheDocument();
   });
 

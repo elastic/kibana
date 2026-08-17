@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -38,6 +37,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { defer } from 'lodash';
@@ -61,9 +61,7 @@ import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { SkillsTab } from './tabs/skills_tab';
 import { PluginsTab } from './tabs/plugins_tab';
-import { AiIndicesTab } from './tabs/ai_indices_tab';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
-import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import {
@@ -71,8 +69,6 @@ import {
   getActiveSkills,
   getActiveTools,
 } from '../../../utils/tool_selection_utils';
-import { getActiveAiIndices } from '../../../utils/ai_indices';
-import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -100,7 +96,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { services } = useKibana();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
-  const isContextEngineEnabled = useIsContextEngineEnabled();
   const { manageAgents } = useUiPrivileges();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
@@ -262,20 +257,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     [plugins, agentPlugins, enableElasticCapabilities]
   );
 
-  // Shares the AI indices tab's query cache, so counting them here costs no extra request.
-  const { inheritedAiIndicesByAgentId } = useInheritedAiIndices({
-    enabled: isContextEngineEnabled,
-  });
-  const agentAiIndices = watch('configuration.ai_indices') as string[] | undefined;
-  const activeAiIndicesCount = useMemo(
-    () =>
-      getActiveAiIndices({
-        assigned: agentAiIndices,
-        inherited: editingAgentId ? inheritedAiIndicesByAgentId[editingAgentId] : undefined,
-      }).length,
-    [agentAiIndices, inheritedAiIndicesByAgentId, editingAgentId]
-  );
-
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
@@ -351,33 +332,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
-      ...(isContextEngineEnabled
-        ? [
-            {
-              id: 'aiIndices',
-              name: labels.aiIndices.tabTitle,
-              content: (
-                <AiIndicesTab
-                  control={control}
-                  agentId={editingAgentId}
-                  isFormDisabled={isFormDisabled || !canEditAgent}
-                />
-              ),
-              append: (
-                <EuiNotificationBadge
-                  color="subdued"
-                  css={css`
-                    block-size: 20px;
-                    min-inline-size: ${euiTheme.size.l};
-                    padding: 0 ${euiTheme.size.xs};
-                  `}
-                >
-                  {activeAiIndicesCount}
-                </EuiNotificationBadge>
-              ),
-            },
-          ]
-        : []),
       ...(isExperimentalFeaturesEnabled
         ? [
             {
@@ -429,8 +383,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       manageAgents,
       permissions?.update_access_control,
       isExperimentalFeaturesEnabled,
-      isContextEngineEnabled,
-      activeAiIndicesCount,
       enableElasticCapabilities,
     ]
   );
@@ -546,36 +498,31 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   if (error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={i18n.translate('xpack.agentBuilder.agents.errorTitle', {
           defaultMessage: 'Error loading agent',
         })}
-        color="danger"
-        iconType="error"
-      >
-        <p>
-          {i18n.translate('xpack.agentBuilder.agents.errorMessage', {
-            defaultMessage: 'Unable to load the agent. {errorMessage}',
-            values: {
-              errorMessage: (error as Error)?.message || String(error),
-            },
-          })}
-        </p>
-        <EuiSpacer size="m" />
-        <EuiButton
-          onClick={() => navigateToAgentBuilderUrl(appPaths.agents.list)}
-          {...getEbtProps({
-            element: AGENT_BUILDER_UI_EBT.element.pageContent,
-            action: AGENT_BUILDER_UI_EBT.action.agentEdit.BACK_TO_LIST,
-            detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
-          })}
-        >
-          {i18n.translate('xpack.agentBuilder.agents.backToListButton', {
-            defaultMessage: 'Back to agents list',
-          })}
-        </EuiButton>
-      </EuiCallOut>
+        text={i18n.translate('xpack.agentBuilder.agents.errorMessage', {
+          defaultMessage: 'Unable to load the agent. {errorMessage}',
+          values: {
+            errorMessage: (error as Error)?.message || String(error),
+          },
+        })}
+        actionProps={{
+          primary: {
+            children: i18n.translate('xpack.agentBuilder.agents.backToListButton', {
+              defaultMessage: 'Back to agents list',
+            }),
+            onClick: () => navigateToAgentBuilderUrl(appPaths.agents.list),
+            ...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.agentEdit.BACK_TO_LIST,
+              detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+            }),
+          },
+        }}
+      />
     );
   }
 
@@ -758,7 +705,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         aria-label={i18n.translate('xpack.agentBuilder.agents.form.openMenuLabel', {
                           defaultMessage: 'Open menu',
                         })}
-                        iconType="boxesVertical"
+                        iconType="ellipsis"
                         onClick={() => setContextMenuOpen(!isContextMenuOpen)}
                         {...getEbtProps({
                           element: AGENT_BUILDER_UI_EBT.element.pageContent,

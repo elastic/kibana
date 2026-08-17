@@ -2937,42 +2937,61 @@ export const labels = {
     }),
   },
   aiIndices: {
-    tabTitle: i18n.translate('xpack.agentBuilder.aiIndices.tabTitle', {
-      defaultMessage: 'AI indices',
+    sectionTitle: i18n.translate('xpack.agentBuilder.aiIndices.sectionTitle', {
+      defaultMessage: 'AI Indices',
     }),
-    tabDescription: i18n.translate('xpack.agentBuilder.aiIndices.tabDescription', {
+    sectionDescription: i18n.translate('xpack.agentBuilder.aiIndices.sectionDescription', {
       defaultMessage:
-        'Select the AI indices this agent retrieves context from. It searches them before querying raw data, which improves accuracy and uses fewer tokens.',
+        'Choose which AI indices this agent retrieves from. Default indices are always included and cannot be removed.',
     }),
-    columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
-      defaultMessage: 'AI indices',
+    notAffectedByElasticCapabilities: i18n.translate(
+      'xpack.agentBuilder.aiIndices.notAffectedByElasticCapabilities',
+      {
+        defaultMessage: 'Not affected by Elastic capabilities; retrieval is configured only here.',
+      }
+    ),
+    contextOn: i18n.translate('xpack.agentBuilder.aiIndices.contextOn', {
+      defaultMessage: 'Context: On',
     }),
-    nameColumn: i18n.translate('xpack.agentBuilder.aiIndices.nameColumn', {
-      defaultMessage: 'AI index',
+    contextOff: i18n.translate('xpack.agentBuilder.aiIndices.contextOff', {
+      defaultMessage: 'Context: Off',
     }),
-    tableCaption: i18n.translate('xpack.agentBuilder.aiIndices.tableCaption', {
-      defaultMessage: 'AI indices available to this agent',
+    defaultIndicesLabel: i18n.translate('xpack.agentBuilder.aiIndices.defaultIndicesLabel', {
+      defaultMessage: 'Default indices',
+    }),
+    defaultIndicesHelpText: i18n.translate('xpack.agentBuilder.aiIndices.defaultIndicesHelpText', {
+      defaultMessage: 'Registered by your solution; applies to every agent.',
+    }),
+    defaultIndexBadge: (id: string) =>
+      i18n.translate('xpack.agentBuilder.aiIndices.defaultIndexBadge', {
+        defaultMessage: '{id} (default)',
+        values: { id },
+      }),
+    additionalIndicesLabel: i18n.translate('xpack.agentBuilder.aiIndices.additionalIndicesLabel', {
+      defaultMessage: 'Additional indices',
+    }),
+    additionalIndicesPlaceholder: i18n.translate(
+      'xpack.agentBuilder.aiIndices.additionalIndicesPlaceholder',
+      {
+        defaultMessage: 'Select AI indices',
+      }
+    ),
+    optionalLabel: i18n.translate('xpack.agentBuilder.aiIndices.optionalLabel', {
+      defaultMessage: 'Optional',
     }),
     searchPlaceholder: i18n.translate('xpack.agentBuilder.aiIndices.searchPlaceholder', {
       defaultMessage: 'Search AI indices',
     }),
-    inheritedBadge: i18n.translate('xpack.agentBuilder.aiIndices.inheritedBadge', {
-      defaultMessage: 'Always included',
-    }),
-    inheritedTooltip: i18n.translate('xpack.agentBuilder.aiIndices.inheritedTooltip', {
-      defaultMessage: "This agent's type always includes this AI index, so it cannot be removed.",
-    }),
-    unregisteredBadge: i18n.translate('xpack.agentBuilder.aiIndices.unregisteredBadge', {
-      defaultMessage: 'Not registered',
-    }),
     noAiIndicesMessage: i18n.translate('xpack.agentBuilder.aiIndices.noAiIndicesMessage', {
       defaultMessage: 'No AI indices yet.',
     }),
-    createNewAiIndex: i18n.translate('xpack.agentBuilder.aiIndices.createNewAiIndex', {
-      defaultMessage: 'Create new AI index',
-    }),
-    loadErrorMessage: i18n.translate('xpack.agentBuilder.aiIndices.loadErrorMessage', {
-      defaultMessage: 'Could not load AI indices. Check that the Context Engine is available.',
+    removeAiIndex: (id: string) =>
+      i18n.translate('xpack.agentBuilder.aiIndices.removeAiIndex', {
+        defaultMessage: 'Remove {id}',
+        values: { id },
+      }),
+    columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
+      defaultMessage: 'AI indices',
     }),
     hiddenCountBadge: (count: number) =>
       i18n.translate('xpack.agentBuilder.aiIndices.hiddenCountBadge', {
