@@ -11,7 +11,8 @@ import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { maintainerIdParamsSchema } from './utils/validator';
+import { enforceEntityStorePrivileges } from '../utils/check_entity_store_privileges';
+import { maintainerIdExists, maintainerIdParamsSchema } from './utils/validator';
 
 export function registerStartMaintainer(router: EntityStorePluginRouter) {
   router.versioned
@@ -36,10 +37,17 @@ export function registerStartMaintainer(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, entityMaintainersClient } = entityStoreCtx;
+        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
         const { id } = req.params;
 
         logger.debug(`Start maintainer API invoked for id: ${id}`);
+
+        const forbidden = await enforceEntityStorePrivileges(assetManagerClient, req, res);
+        if (forbidden) return forbidden;
+
+        if (!maintainerIdExists(id)) {
+          return res.notFound({ body: { message: `Entity maintainer not found: ${id}` } });
+        }
 
         await entityMaintainersClient.start(id, req);
 
