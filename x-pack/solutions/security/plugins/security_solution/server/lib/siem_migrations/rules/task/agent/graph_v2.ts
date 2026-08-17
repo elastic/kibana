@@ -23,8 +23,10 @@ import { getSourceRuleToNaturalLanguageNode } from './nodes/source_rule_to_natur
 /**
  * v2 agent (behind the `ruleMigrationGraphv2` experimental feature): pre-built rule matching runs
  * through the dedicated `matchPrebuiltRule` subgraph (security-team#18589) instead of the v1
- * one-shot node. The subgraph owns its own semantic query generation and search retries via the
- * `searchPrebuiltRules` tool, so it does not consume the parent's `semantic_query`.
+ * one-shot node. The subgraph owns its own semantic query generation and deterministically retries
+ * (regenerating the query and re-searching), with independent budgets for an empty search
+ * (`MAX_SEARCH_ATTEMPTS`) and a failed classification (`MAX_MATCH_ATTEMPTS`), so it does not
+ * consume the parent's `semantic_query`.
  */
 export function getRuleMigrationAgentV2({
   model,
@@ -38,7 +40,6 @@ export function getRuleMigrationAgentV2({
     model,
     ruleMigrationsRetriever,
     telemetryClient,
-    tools,
   });
 
   const matchPrebuiltRuleNode: GraphNode = async (state) => {

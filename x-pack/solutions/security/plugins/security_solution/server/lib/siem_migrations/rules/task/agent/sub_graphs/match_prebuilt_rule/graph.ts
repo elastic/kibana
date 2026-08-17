@@ -5,54 +5,81 @@
  * 2.0.
  */
 
-import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { AIMessage } from '@langchain/core/messages';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
-import type { RulesMigrationTools } from '../../tools';
-import { matchPrebuiltRuleState, type MatchPrebuiltRuleState } from './state';
-import { getMatchPrebuiltRuleAgentNode } from './nodes';
+import {
+  matchPrebuiltRuleState,
+  MAX_SEARCH_ATTEMPTS,
+  MAX_MATCH_ATTEMPTS,
+  type MatchPrebuiltRuleState,
+} from './state';
+import {
+  getMatchPrebuiltRuleAgentNode,
+  getCreatePrebuiltRuleSemanticQueryNode,
+  getSearchPrebuiltRuleCandidatesNode,
+} from './nodes';
 
 interface GetMatchPrebuiltRuleGraphParams {
   model: ChatModel;
   telemetryClient: RuleMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
-  tools: RulesMigrationTools;
 }
 
 export const getMatchPrebuiltRuleGraph = ({
   model,
   telemetryClient,
   ruleMigrationsRetriever,
-  tools,
 }: GetMatchPrebuiltRuleGraphParams) => {
-  const prebuiltTools = [tools.searchPrebuiltRules];
-  const modelWithTools = model.bindTools(prebuiltTools);
-  const toolNode = new ToolNode(prebuiltTools);
-
-  // Named matchPrebuiltRule so FakeLLM / LangSmith node metadata stays compatible with existing tests.
-  const matchPrebuiltRuleNode = getMatchPrebuiltRuleAgentNode({
-    model: modelWithTools,
-    telemetryClient,
+  const createPrebuiltRuleSemanticQueryNode = getCreatePrebuiltRuleSemanticQueryNode({ model });
+  const searchPrebuiltRuleCandidatesNode = getSearchPrebuiltRuleCandidatesNode({
     ruleMigrationsRetriever,
+    telemetryClient,
   });
 
-  const toolRouter = (state: MatchPrebuiltRuleState): string => {
-    const lastMessage = state.messages.at(-1);
-    return AIMessage.isInstance(lastMessage) && lastMessage?.tool_calls?.length ? 'tools' : 'done';
+  const matchPrebuiltRuleNode = getMatchPrebuiltRuleAgentNode({
+    model,
+    telemetryClient,
+  });
+
+  // If the search came back empty, skip matchPrebuiltRule entirely — there's nothing to classify.
+  // Retry (regenerating the semantic query) until MAX_SEARCH_ATTEMPTS is reached, then give up.
+  // Independent of matchPrebuiltRetryRouter's budget below — an empty search never touches
+  // match_attempts.
+  const candidatesRetryRouter = (state: MatchPrebuiltRuleState): string => {
+    if (state.candidate_rules.length > 0) {
+      return 'hasCandidates';
+    }
+    return state.search_attempts.length < MAX_SEARCH_ATTEMPTS ? 'retry' : 'exhausted';
+  };
+
+  // After a failed match attempt, retry (regenerating the semantic query) until
+  // MAX_MATCH_ATTEMPTS is reached, then give up. Independent of candidatesRetryRouter's budget
+  // above — a failed match never touches search_attempts.
+  const matchPrebuiltRetryRouter = (state: MatchPrebuiltRuleState): string => {
+    if (state.elastic_rule?.prebuilt_rule_id) {
+      return 'matched';
+    }
+    return state.match_attempts.length < MAX_MATCH_ATTEMPTS ? 'retry' : 'exhausted';
   };
 
   const graph = new StateGraph(matchPrebuiltRuleState)
+    .addNode('createPrebuiltRuleSemanticQuery', createPrebuiltRuleSemanticQueryNode)
+    .addNode('searchPrebuiltRuleCandidates', searchPrebuiltRuleCandidatesNode)
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
-    .addNode('matchPrebuiltRuleTools', toolNode)
-    .addEdge(START, 'matchPrebuiltRule')
-    .addConditionalEdges('matchPrebuiltRule', toolRouter, {
-      tools: 'matchPrebuiltRuleTools',
-      done: END,
+    .addEdge(START, 'createPrebuiltRuleSemanticQuery')
+    .addEdge('createPrebuiltRuleSemanticQuery', 'searchPrebuiltRuleCandidates')
+    .addConditionalEdges('searchPrebuiltRuleCandidates', candidatesRetryRouter, {
+      hasCandidates: 'matchPrebuiltRule',
+      retry: 'createPrebuiltRuleSemanticQuery',
+      exhausted: END,
     })
-    .addEdge('matchPrebuiltRuleTools', 'matchPrebuiltRule');
+    .addConditionalEdges('matchPrebuiltRule', matchPrebuiltRetryRouter, {
+      matched: END,
+      retry: 'createPrebuiltRuleSemanticQuery',
+      exhausted: END,
+    });
 
   const compiled = graph.compile();
   compiled.name = 'Match Prebuilt Rule Subgraph';

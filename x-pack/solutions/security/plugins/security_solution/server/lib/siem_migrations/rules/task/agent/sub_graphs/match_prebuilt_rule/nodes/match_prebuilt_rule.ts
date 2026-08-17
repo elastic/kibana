@@ -5,139 +5,114 @@
  * 2.0.
  */
 
-import { BaseMessage, ToolMessage } from '@langchain/core/messages';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import type { ChatPromptTemplate } from '@langchain/core/prompts';
 import { MigrationTranslationResult } from '../../../../../../../../../common/siem_migrations/constants';
-import type { RuleMigrationsRetriever } from '../../../../retrievers';
+import type { ChatModel } from '../../../../../../common/task/util/actions_client_chat';
 import type { RuleMigrationTelemetryClient } from '../../../../rule_migrations_telemetry_client';
 import type { RuleSemanticSearchResult } from '../../../../../types';
 import {
   cleanMarkdown,
   generateAssistantComment,
 } from '../../../../../../common/task/util/comments';
-import type { ModelWithTools } from '../../../types';
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
 } from '../../../../../constants';
-import type { PrebuiltRulesSearchResult } from '../../../tools/prebuilt_rules_search';
-import { MATCH_PREBUILT_RULE_AGENT_PROMPT } from '../prompts';
-import type { MatchPrebuiltRuleState } from '../state';
+import { MATCH_PREBUILT_RULE_PROMPT_SPLUNK, MATCH_PREBUILT_RULE_PROMPT_GENERIC } from '../prompts';
+import { MAX_MATCH_ATTEMPTS, NO_MATCH_SUMMARY, type MatchPrebuiltRuleState } from '../state';
 
 interface GetMatchPrebuiltRuleAgentNodeParams {
-  model: ModelWithTools;
+  model: ChatModel;
   telemetryClient: RuleMigrationTelemetryClient;
-  ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
 interface PrebuiltRuleMatchResponse {
-  match?: string;
-  summary?: string;
-  semantic_query?: string;
+  match: string;
+  summary: string;
 }
-
-type ModelResponse = Awaited<ReturnType<ModelWithTools['invoke']>>;
-
-const NO_MATCH_SUMMARY = '## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.';
 
 const jsonParser = new JsonOutputParser<PrebuiltRuleMatchResponse>();
 
+/**
+ * Classifies the current attempt's `candidate_rules` against the source rule — a one-shot
+ * classify-from-a-fixed-list call (mirroring v1's node), not a tool-calling agent. Only ever
+ * reached with a non-empty `candidate_rules` — the subgraph's `candidatesRetryRouter` routes an
+ * empty result straight back to `createPrebuiltRuleSemanticQuery` (or to `END`, once exhausted)
+ * without visiting this node at all. If nothing matches here, this records the attempt in
+ * `match_attempts` so `matchPrebuiltRetryRouter` can decide whether to loop back for another try
+ * (up to `MAX_MATCH_ATTEMPTS` times, independent of `searchPrebuiltRuleCandidates`'s own
+ * `MAX_SEARCH_ATTEMPTS` budget), or give up.
+ */
 export const getMatchPrebuiltRuleAgentNode = ({
   model,
   telemetryClient,
-  ruleMigrationsRetriever,
 }: GetMatchPrebuiltRuleAgentNodeParams) => {
   return async (state: MatchPrebuiltRuleState): Promise<Partial<MatchPrebuiltRuleState>> => {
-    const techniqueIds = state.original_rule.annotations?.mitre_attack?.join(',') ?? '';
+    const candidateRules = state.candidate_rules;
+    const isFinalAttempt = state.match_attempts.length + 1 >= MAX_MATCH_ATTEMPTS;
 
-    const prompt = await MATCH_PREBUILT_RULE_AGENT_PROMPT.formatMessages({
+    const candidatesForPrompt = candidateRules.map((rule) => ({
+      name: rule.name,
+      description: rule.description,
+      query: rule.target?.type !== 'machine_learning' ? rule.target?.query : '',
+    }));
+
+    const splunkRule = {
       title: state.original_rule.title,
       description: state.original_rule.description,
-      vendor: state.original_rule.vendor,
       query: state.original_rule.query,
-      nlQuery: state.nl_query || '',
-      mitreAttackIds: techniqueIds,
-    });
+    };
 
-    const response = await model.invoke([...prompt, ...state.messages]);
-
-    if (hasToolCall(response) && BaseMessage.isInstance(response)) {
-      return { messages: [response] };
+    let promptTemplate: Awaited<ReturnType<ChatPromptTemplate['formatMessages']>>;
+    if (state.original_rule.vendor === 'splunk') {
+      promptTemplate = await MATCH_PREBUILT_RULE_PROMPT_SPLUNK.formatMessages({
+        rules: JSON.stringify(candidatesForPrompt, null, 2),
+        splunk_rule: JSON.stringify(splunkRule, null, 2),
+      });
+    } else {
+      promptTemplate = await MATCH_PREBUILT_RULE_PROMPT_GENERIC.formatMessages({
+        rules: JSON.stringify(candidatesForPrompt, null, 2),
+        nl_rule_description:
+          state.nl_query || `${state.original_rule.title} \n ${state.original_rule.description}`,
+      });
     }
 
-    const parsedResponse = await parseMatchResponse(getResponseText(response));
-    const semanticQuery = resolveSemanticQuery(parsedResponse, state);
-    const prebuiltRules = semanticQuery
-      ? await ruleMigrationsRetriever.prebuiltRules.search(semanticQuery, techniqueIds)
-      : [];
+    const matchChain = model.pipe(jsonParser);
+    const response = await matchChain.invoke([...promptTemplate]);
 
-    const matchedName = parsedResponse?.match?.trim() || '';
+    const matchedName = response.match?.trim() || '';
     const matchedRule = matchedName
-      ? prebuiltRules.find((rule) => rule.name === matchedName)
+      ? candidateRules.find((rule) => rule.name === matchedName)
       : undefined;
 
-    const summary = parsedResponse?.summary?.trim() || NO_MATCH_SUMMARY;
-    const comments = [generateAssistantComment(cleanMarkdown(summary))];
-
     telemetryClient.reportPrebuiltRulesMatch({
-      preFilterRules: prebuiltRules,
+      preFilterRules: candidateRules,
       ...(matchedRule ? { postFilterRule: matchedRule } : {}),
     });
 
-    return buildMatchResult(response, comments, matchedRule);
+    if (matchedRule) {
+      return buildMatchResult(matchedRule, response.summary);
+    }
+
+    const summary = response.summary?.trim() || NO_MATCH_SUMMARY;
+    return {
+      match_attempts: [
+        { query: state.semantic_query, candidateNames: candidateRules.map((rule) => rule.name) },
+      ],
+      ...(isFinalAttempt ? { comments: [generateAssistantComment(cleanMarkdown(summary))] } : {}),
+    };
   };
 };
 
-const hasToolCall = (response: ModelResponse): boolean => {
-  return (
-    Boolean(response) &&
-    typeof response === 'object' &&
-    'tool_calls' in response &&
-    Array.isArray(response.tool_calls) &&
-    response.tool_calls.length > 0
-  );
-};
-
-const getResponseText = (response: ModelResponse): string => {
-  return typeof response === 'string' ? response : response.text;
-};
-
-const parseMatchResponse = async (
-  responseText: string
-): Promise<PrebuiltRuleMatchResponse | undefined> => {
-  try {
-    return await jsonParser.parse(responseText);
-  } catch {
-    // LLM did not return valid JSON; fall back to no-match
-    return undefined;
-  }
-};
-
-const resolveSemanticQuery = (
-  parsedResponse: PrebuiltRuleMatchResponse | undefined,
-  state: MatchPrebuiltRuleState
-): string => {
-  const latestSearchPayload = getLatestPrebuiltRulesSearchPayload(state.messages);
-  return (
-    parsedResponse?.semantic_query?.trim() ||
-    latestSearchPayload?.query ||
-    `${state.original_rule.title} ${state.original_rule.description}`.trim()
-  );
-};
-
 const buildMatchResult = (
-  response: ModelResponse,
-  comments: ReturnType<typeof generateAssistantComment>[],
-  matchedRule: RuleSemanticSearchResult | undefined
+  matchedRule: RuleSemanticSearchResult,
+  summary: string | undefined
 ): Partial<MatchPrebuiltRuleState> => {
-  const responseMessages = BaseMessage.isInstance(response) ? { messages: [response] } : {};
-
-  if (!matchedRule) {
-    return { comments, ...responseMessages };
-  }
+  const comments = summary?.trim() ? [generateAssistantComment(cleanMarkdown(summary))] : undefined;
 
   return {
-    comments,
+    ...(comments ? { comments } : {}),
     elastic_rule: {
       title: matchedRule.name,
       description: matchedRule.description,
@@ -148,26 +123,5 @@ const buildMatchResult = (
       risk_score: matchedRule.target?.risk_score ?? DEFAULT_TRANSLATION_RISK_SCORE,
     },
     translation_result: MigrationTranslationResult.FULL,
-    ...responseMessages,
   };
-};
-
-const getLatestPrebuiltRulesSearchPayload = (
-  messages: BaseMessage[]
-): PrebuiltRulesSearchResult | undefined => {
-  return [...messages]
-    .reverse()
-    .filter((msg): msg is ToolMessage => ToolMessage.isInstance(msg))
-    .map((msg) => {
-      try {
-        const parsed = JSON.parse(typeof msg.content === 'string' ? msg.content : '');
-        if (parsed.source === 'prebuiltRulesSearch') {
-          return parsed as PrebuiltRulesSearchResult;
-        }
-      } catch {
-        // ignore malformed tool payloads
-      }
-      return undefined;
-    })
-    .find((payload): payload is PrebuiltRulesSearchResult => Boolean(payload));
 };

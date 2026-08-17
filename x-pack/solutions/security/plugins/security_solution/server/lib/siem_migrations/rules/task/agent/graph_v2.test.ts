@@ -45,16 +45,18 @@ const mockSemanticQueryResponse = JSON.stringify({
     'web http abnormal high volume requests method source ip network traffic analysis datamodel web security',
 });
 
+const mockPrebuiltRuleSeedQueryResponse = JSON.stringify({
+  semantic_query: 'office document macro child process execution',
+});
+
 const mockPrebuiltRuleMatchResponse = JSON.stringify({
   match: 'Suspicious MS Office Child Process',
-  semantic_query: 'suspicious ms office child process macro',
   summary:
     '## Prebuilt Rule Matching Summary\\nThe Splunk rule "Office Document Executing Macro Code" is closely related to the Elastic rule "Suspicious MS Office Child Process". Both rules aim to detect potentially malicious activity originating from Microsoft Office applications.',
 });
 
 const mockPrebuiltRuleNoMatchResponse = JSON.stringify({
   match: '',
-  semantic_query: 'office document macro code execution',
   summary: '## Prebuilt Rule Matching Summary\\n No matches found',
 });
 
@@ -114,6 +116,10 @@ describe('getRuleMigrationAgentV2', () => {
           response: mockSemanticQueryResponse,
         },
         {
+          nodeId: 'createPrebuiltRuleSemanticQuery',
+          response: mockPrebuiltRuleSeedQueryResponse,
+        },
+        {
           nodeId: 'matchPrebuiltRule',
           response: mockPrebuiltRuleMatchResponse,
         },
@@ -126,12 +132,21 @@ describe('getRuleMigrationAgentV2', () => {
       expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);
     });
 
+    // Candidates are always found here, so only matchPrebuiltRetryRouter's independent budget
+    // (MAX_MATCH_ATTEMPTS, 3) governs this retry loop; search_attempts stays empty throughout
+    // (security-team#18589). Since both the retriever and the FakeLLM return the same canned
+    // values on every call here, all 3 attempts fail identically and every step runs exactly 3
+    // times.
     it('llm respond with non existing prebuilt rule name', async () => {
       mockRetriever.prebuiltRules.search.mockResolvedValue([mockIncorrectRuleName]);
       const graph = await setupAgent([
         {
           nodeId: 'createSemanticQuery',
           response: mockSemanticQueryResponse,
+        },
+        {
+          nodeId: 'createPrebuiltRuleSemanticQuery',
+          response: mockPrebuiltRuleSeedQueryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
@@ -145,9 +160,10 @@ describe('getRuleMigrationAgentV2', () => {
         resources: {},
       });
       expect(response.elastic_rule?.prebuilt_rule_id).toEqual(undefined);
-      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
+      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(3);
       expect(response.translation_result).toEqual('untranslatable');
-      expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(1);
+      expect(fakeLLM.getNodeCallCount('createPrebuiltRuleSemanticQuery')).toBe(3);
+      expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(3);
     });
 
     it('no prebuilt rule matches', async () => {
@@ -156,6 +172,10 @@ describe('getRuleMigrationAgentV2', () => {
         {
           nodeId: 'createSemanticQuery',
           response: mockSemanticQueryResponse,
+        },
+        {
+          nodeId: 'createPrebuiltRuleSemanticQuery',
+          response: mockPrebuiltRuleSeedQueryResponse,
         },
         {
           nodeId: 'matchPrebuiltRule',
@@ -167,7 +187,10 @@ describe('getRuleMigrationAgentV2', () => {
         original_rule: mockOriginalRule,
         resources: {},
       });
-      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(1);
+      // No candidates ever come back, so candidatesRetryRouter routes straight back to
+      // createPrebuiltRuleSemanticQuery each attempt — matchPrebuiltRule is never invoked.
+      expect(mockRetriever.prebuiltRules.search).toHaveBeenCalledTimes(3);
+      expect(fakeLLM.getNodeCallCount('matchPrebuiltRule')).toBe(0);
       expect(response.translation_result).toEqual('untranslatable');
     });
 

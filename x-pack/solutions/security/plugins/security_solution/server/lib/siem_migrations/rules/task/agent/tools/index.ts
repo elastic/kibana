@@ -7,7 +7,6 @@
 
 import type { RuleMigrationsDataClient } from '../../../data/rule_migrations_data_client';
 import { getQradarRulesMigrationTools } from './qradar';
-import { getPrebuiltRulesSearchTool } from './prebuilt_rules_search';
 
 interface RulesMigrationToolDependencies {
   rulesClient: RuleMigrationsDataClient;
@@ -20,7 +19,6 @@ export const getRulesMigrationTools = (
   const { rulesClient } = deps;
   return {
     ...getQradarRulesMigrationTools(migrationId, rulesClient),
-    ...getPrebuiltRulesSearchTool({ rulesClient }),
   };
 };
 

@@ -7,7 +7,8 @@
 
 import { tool } from '@langchain/core/tools';
 import * as z from '@kbn/zod/v4';
-import type { RuleMigrationsDataClient } from '../../../data/rule_migrations_data_client';
+import type { RuleMigrationsRetriever } from '../../retrievers';
+import type { RuleSemanticSearchResult } from '../../../types';
 
 const NAME = 'searchPrebuiltRules' as const;
 
@@ -30,24 +31,17 @@ const SCHEMA = z.object({
     ),
 });
 
-export interface PrebuiltRulesSearchResultItem {
-  rule_id: string;
-  name: string;
-  description: string;
-}
-
-export interface PrebuiltRulesSearchResult {
-  source: 'prebuiltRulesSearch';
-  query: string;
-  results: PrebuiltRulesSearchResultItem[];
-  hasUsefulResults: boolean;
-  count: number;
-}
-
+/**
+ * Wraps `RuleMigrationsRetriever#prebuiltRules.search` as a LangChain `tool()` so it has a name,
+ * description and validated schema. It is currently only ever invoked deterministically (via
+ * `.invoke()` from `searchPrebuiltRuleCandidates`, never bound to a model) — the schema/description
+ * exist for consistency and so it can be bound to a model again without rewriting it, not because
+ * an LLM is calling it today.
+ */
 export const getPrebuiltRulesSearchTool = ({
-  rulesClient,
+  ruleMigrationsRetriever,
 }: {
-  rulesClient: RuleMigrationsDataClient;
+  ruleMigrationsRetriever: RuleMigrationsRetriever;
 }) => {
   const searchPrebuiltRules = async ({
     query,
@@ -55,20 +49,8 @@ export const getPrebuiltRulesSearchTool = ({
   }: {
     query: string;
     technique_ids?: string;
-  }): Promise<PrebuiltRulesSearchResult> => {
-    const rules = await rulesClient.prebuiltRules.search(query, techniqueIds ?? '');
-
-    return {
-      source: 'prebuiltRulesSearch',
-      query,
-      count: rules.length,
-      hasUsefulResults: rules.length > 0,
-      results: rules.map(({ rule_id: ruleId, name, description }) => ({
-        rule_id: ruleId,
-        name,
-        description,
-      })),
-    };
+  }): Promise<RuleSemanticSearchResult[]> => {
+    return ruleMigrationsRetriever.prebuiltRules.search(query, techniqueIds ?? '');
   };
 
   return {
