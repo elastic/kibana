@@ -10,8 +10,8 @@
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import type { FeatureFlag } from '../../../common/constants';
-import { useExternalServices } from '../../../context/external_services';
+import type { FeatureFlag } from '../common/constants';
+import { useExternalServices } from '../context/external_services';
 
 /**
  * Reactively evaluates a boolean feature flag from the host's `featureFlags` service
