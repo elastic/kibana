@@ -150,7 +150,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
 
-      await test.step('alert is the default mode (heuristic split succeeds)', async () => {
+      await test.step('alert is the default kind (heuristic split succeeds)', async () => {
         await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
         await expect(pageObjects.composeDiscover.alertSummaryEditorButton).toBeVisible();
       });
@@ -256,7 +256,7 @@ test.describe(
 
       await test.step('rule name is pre-populated', async () => {
         // In edit mode, step 0 shows the alert condition with queryCommitted: true.
-        // Navigate through Outcome (read-only mode selector for signal rules) to Details.
+        // Navigate through Outcome (read-only kind selector for signal rules) to Details.
         await pageObjects.composeDiscover.clickNext(); // Outcome
         await pageObjects.composeDiscover.clickNext(); // Details
         await expect(pageObjects.composeDiscover.ruleNameInput).toHaveValue(EDIT_RULE_NAME);
@@ -482,18 +482,18 @@ test.describe(
       });
     });
 
-    test('create flow: signal (standalone) mode can select timestamp and create', async ({
+    test('create flow: signal (standalone) kind can select timestamp and create', async ({
       pageObjects,
       apiServices,
     }) => {
-      await test.step('open create flyout, commit a query, then switch to signal mode on Outcome', async () => {
+      await test.step('open create flyout, commit a query, then switch to signal kind on Outcome', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await pageObjects.composeDiscover.openSandbox();
 
-        // Signal mode always resolves time fields from breach.query (not the
+        // Signal kind always resolves time fields from breach.query (not the
         // alert-standalone bug). Kept as coverage for timestamp-only create +
-        // mode switch on the Outcome step.
+        // kind switch on the Outcome step.
         await pageObjects.composeDiscover.setSandboxQuery(CREATE_SIGNAL_TIMESTAMP_QUERY);
         await pageObjects.composeDiscover.selectSandboxTimeField('timestamp');
         await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue('timestamp');
@@ -501,7 +501,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
         await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('timestamp');
         await pageObjects.composeDiscover.clickNext(); // Outcome
-        await pageObjects.composeDiscover.selectMode('signal');
+        await pageObjects.composeDiscover.selectKind('signal');
       });
 
       await test.step('name the rule and submit', async () => {
@@ -582,7 +582,7 @@ test.describe(
       await test.step('Back returns through Outcome to the Alert Condition step', async () => {
         await pageObjects.composeDiscover.backButton.click(); // Outcome
         await pageObjects.composeDiscover.backButton.click(); // Alert Condition
-        // Query was committed in alert mode (default) and split successfully, so the
+        // Query was committed in alert kind (default) and split successfully, so the
         // read-only base + alert condition summary is shown.
         await expect(pageObjects.composeDiscover.summarySection('success')).toBeVisible();
         await expect(page.testSubj.locator('ruleNameInput')).toBeHidden();

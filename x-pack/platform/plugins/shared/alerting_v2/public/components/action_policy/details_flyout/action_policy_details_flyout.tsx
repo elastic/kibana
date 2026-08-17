@@ -83,13 +83,13 @@ export const ActionPolicyDetailsFlyout = ({
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
 
   const metadataUids = useMemo(
-    () => [policy.createdBy, policy.updatedBy].filter((uid): uid is string => Boolean(uid)),
-    [policy.createdBy, policy.updatedBy]
+    () => [policy.created_by, policy.updated_by].filter((uid): uid is string => Boolean(uid)),
+    [policy.created_by, policy.updated_by]
   );
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 
-  const { snoozedUntil } = policy;
+  const { snoozed_until: snoozedUntil } = policy;
   const snoozedActive = isSnoozed(snoozedUntil);
   // Writers get the interactive snooze bell instead, which already shows the state.
   const canSnooze = canWrite && policy.enabled;
@@ -116,25 +116,25 @@ export const ActionPolicyDetailsFlyout = ({
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdBy', {
         defaultMessage: 'Created by',
       }),
-      description: resolveDisplayName(policy.createdBy, profileByUid, EMPTY_VALUE),
+      description: resolveDisplayName(policy.created_by, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.createdAt', {
         defaultMessage: 'Created at',
       }),
-      description: formatDate(policy.createdAt),
+      description: formatDate(policy.created_at),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedBy', {
         defaultMessage: 'Updated by',
       }),
-      description: resolveDisplayName(policy.updatedBy, profileByUid, EMPTY_VALUE),
+      description: resolveDisplayName(policy.updated_by, profileByUid, EMPTY_VALUE),
     },
     {
       title: i18n.translate('xpack.alertingV2.actionPolicy.detailsFlyout.metadata.updatedAt', {
         defaultMessage: 'Updated at',
       }),
-      description: formatDate(policy.updatedAt),
+      description: formatDate(policy.updated_at),
     },
   ];
 

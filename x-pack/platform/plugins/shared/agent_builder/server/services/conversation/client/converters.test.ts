@@ -113,6 +113,7 @@ describe('conversation model converters', () => {
           access_mode: ConversationAccessControlMode.Private,
           entries: [],
         },
+        read_only: false,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         rounds: [
@@ -182,6 +183,7 @@ describe('conversation model converters', () => {
           access_mode: ConversationAccessControlMode.Private,
           entries: [],
         },
+        read_only: false,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         rounds: [
@@ -538,6 +540,23 @@ describe('conversation model converters', () => {
       });
     });
 
+    it('defaults read_only to false when the document has no such field', () => {
+      const serialized = documentBase();
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.read_only).toBe(false);
+    });
+
+    it('deserializes read_only', () => {
+      const serialized = documentBase();
+      serialized._source!.read_only = true;
+
+      const deserialized = fromEs(serialized);
+
+      expect(deserialized.read_only).toBe(true);
+    });
+
     it('deserializes round origin and author', () => {
       const serialized = documentBase();
       serialized._source!.conversation_rounds[0].author = {
@@ -804,6 +823,27 @@ describe('conversation model converters', () => {
       });
     });
 
+    it('serializes read_only', () => {
+      const conversation = conversationBase();
+      conversation.read_only = true;
+
+      const serialized = toEs(conversation, 'space');
+
+      expect(serialized.read_only).toBe(true);
+    });
+
+    it('round-trips read_only', () => {
+      const conversation = conversationBase();
+      conversation.read_only = true;
+
+      const roundTripped = fromEs({
+        _id: conversation.id,
+        _source: toEs(conversation, 'space'),
+      });
+
+      expect(roundTripped.read_only).toBe(true);
+    });
+
     it('serializes round origin and author', () => {
       const conversation = conversationBase();
       conversation.rounds[0].author = {
@@ -951,6 +991,41 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
         entries: [],
       });
+    });
+
+    it('defaults read_only to false when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.read_only).toBe(false);
+    });
+
+    it('serializes explicit read_only when creating a conversation', () => {
+      const conversation = {
+        agent_id: 'agent_id',
+        title: 'conv_title',
+        rounds: [],
+        read_only: true,
+      };
+
+      const serialized = createRequestToEs({
+        conversation,
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(serialized.read_only).toBe(true);
     });
 
     it('serializes first-class origin when creating a conversation', () => {

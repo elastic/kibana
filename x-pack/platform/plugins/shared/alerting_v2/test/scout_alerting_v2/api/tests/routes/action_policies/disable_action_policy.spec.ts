@@ -72,7 +72,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
   );
 
   apiTest(
-    'state: preserves snoozedUntil and all other fields when disabling a snoozed policy',
+    'state: preserves snoozed_until and all other fields when disabling a snoozed policy',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({ name: 'test-disable-keep-snooze' })
@@ -88,12 +88,12 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
       expect(response.body).toStrictEqual({
         ...snoozed,
         enabled: false,
-        updatedAt: response.body.updatedAt,
-        updatedBy: response.body.updatedBy,
+        updated_at: response.body.updated_at,
+        updated_by: response.body.updated_by,
         version: response.body.version,
       });
-      expect(Date.parse(response.body.updatedAt)).toBeGreaterThanOrEqual(
-        Date.parse(snoozed.updatedAt)
+      expect(Date.parse(response.body.updated_at)).toBeGreaterThanOrEqual(
+        Date.parse(snoozed.updated_at)
       );
       expect(response.body.version).not.toBe(snoozed.version);
     }

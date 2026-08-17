@@ -54,9 +54,6 @@ jest.mock('./lifecycle_timeline', () => ({
 jest.mock('./event_investigations', () => ({
   EventInvestigations: () => null,
 }));
-jest.mock('../../../../components/significant_event_details/significant_event_details', () => ({
-  SignificantEventDetails: () => null,
-}));
 
 const event: SignificantEventResponse = {
   '@timestamp': '2026-01-02T00:00:00.000Z',
@@ -81,14 +78,10 @@ describe('Significant Events timestamp rendering', () => {
     );
   });
 
-  it('renders the lineage creation timestamp in the flyout header', () => {
+  it('renders the lineage creation timestamp in general information', () => {
     render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
 
-    expect(
-      screen.getByText(
-        (_, element) => element?.textContent?.startsWith(`formatted:${event.created_at}`) ?? false
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(`formatted:${event.created_at}`)).toBeInTheDocument();
     expect(screen.queryByText(`formatted:${event['@timestamp']}`)).not.toBeInTheDocument();
   });
 });
