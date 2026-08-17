@@ -41,6 +41,7 @@ import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { type Socket } from 'net';
 import { RouteValidator } from './validator';
 import {
   RequestValidationFailure,
@@ -55,6 +56,32 @@ import { RequestTimingImpl } from './timing';
 patchRequest();
 
 const requestSymbol = Symbol('request');
+
+/**
+ * For HTTP/2 requests, `req.socket` is a stream-level proxy that degrades when the stream is
+ * destroyed (RST_STREAM, browser navigation, AbortController cancel). The `getPrototypeOf` trap
+ * falls back from TLSSocket to Http2Stream, so `instanceof TLSSocket` returns false, causing
+ * KibanaSocket accessors to return undefined/null even on live, authorized connections.
+ *
+ * The session-level socket (`stream.session.socket`) resolves to the underlying TLSSocket and
+ * remains stable for the lifetime of the TCP connection — the correct semantic for PKI auth,
+ * where the client certificate belongs to the connection, not the stream.
+ *
+ * Falls back to req.socket if the session socket is unavailable (session already destroyed, or
+ * HTTP/1.1 request).
+ */
+export const resolveRawSocket = (req: { socket: Socket; stream?: { session?: { socket: Socket } } }): Socket => {
+  if (req.stream != null) {
+    try {
+      const sessionSocket = req.stream.session?.socket;
+      if (sessionSocket != null) return sessionSocket;
+    } catch {
+      // session.socket throws ERR_HTTP2_SOCKET_UNBOUND when the session is destroyed —
+      // fall through to req.socket as a best-effort fallback.
+    }
+  }
+  return req.socket;
+};
 
 const isRouteSecurityGetter = (
   security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
@@ -233,7 +260,7 @@ export class CoreKibanaRequest<
 
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealReq
-      ? new KibanaSocket(request.raw.req.socket)
+      ? new KibanaSocket(resolveRawSocket(request.raw.req as any))
       : KibanaSocket.getFakeSocket();
     this.events = this.getEvents(request);
 

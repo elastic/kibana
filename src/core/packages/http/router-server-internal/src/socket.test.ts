@@ -11,6 +11,7 @@ import { Socket } from 'net';
 import type { DetailedPeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
 import { KibanaSocket } from './socket';
+import { resolveRawSocket } from './request';
 
 describe('KibanaSocket', () => {
   describe('getPeerCertificate', () => {
@@ -169,5 +170,46 @@ describe('KibanaSocket', () => {
       expect(fakeSocket.getProtocol()).toBeNull();
       await expect(fakeSocket.renegotiate({})).resolves.toBeUndefined();
     });
+  });
+});
+
+describe('resolveRawSocket', () => {
+  it('returns req.socket for HTTP/1.1 requests (no stream property)', () => {
+    const netSocket = new Socket();
+    const req = { socket: netSocket };
+    expect(resolveRawSocket(req)).toBe(netSocket);
+  });
+
+  it('returns the session-level socket for HTTP/2 requests', () => {
+    const streamSocket = new Socket();
+    const sessionSocket = new TLSSocket(new Socket());
+    const req = {
+      socket: streamSocket,
+      stream: { session: { socket: sessionSocket as unknown as Socket } },
+    };
+    expect(resolveRawSocket(req)).toBe(sessionSocket);
+  });
+
+  it('falls back to req.socket when stream.session is undefined (stream destroyed before request)', () => {
+    const streamSocket = new Socket();
+    const req = { socket: streamSocket, stream: { session: undefined } };
+    expect(resolveRawSocket(req)).toBe(streamSocket);
+  });
+
+  it('falls back to req.socket when session.socket throws ERR_HTTP2_SOCKET_UNBOUND', () => {
+    const streamSocket = new Socket();
+    const req = {
+      socket: streamSocket,
+      stream: {
+        session: {
+          get socket(): Socket {
+            throw Object.assign(new Error('Session socket unbound'), {
+              code: 'ERR_HTTP2_SOCKET_UNBOUND',
+            });
+          },
+        },
+      },
+    };
+    expect(resolveRawSocket(req)).toBe(streamSocket);
   });
 });
