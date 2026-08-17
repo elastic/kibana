@@ -11,6 +11,9 @@ import type { ApplicationStart } from '@kbn/core/public';
 
 const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
 
+/** Disabled until signal-analysis hand-off is implemented (elastic/kibana#283044). */
+const ANALYZE_AND_IMPROVE_ENABLED = false;
+
 export const createAnalyzeAndImproveProvider = ({
   agentBuilder,
   application,
@@ -19,6 +22,7 @@ export const createAnalyzeAndImproveProvider = ({
   application: ApplicationStart;
 }): AnalyzeAndImproveProvider => ({
   canAnalyze: ({ aiIndex }) =>
+    ANALYZE_AND_IMPROVE_ENABLED &&
     aiIndex !== undefined &&
     application.capabilities[AGENT_BUILDER_CAPABILITY]?.show === true &&
     agentBuilder?.openChat !== undefined,
