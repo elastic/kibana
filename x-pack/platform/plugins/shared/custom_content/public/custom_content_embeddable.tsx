@@ -72,10 +72,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
-    const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
+    let storedPrompt = initialState.prompt ?? '';
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
+    const previewHtml$ = new BehaviorSubject<string | null>(null);
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
@@ -85,7 +86,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
-      prompt: prompt$.getValue(),
+      prompt: storedPrompt || undefined,
       esqlQuery: esqlQuery$.getValue(),
       template: template$.getValue(),
     });
@@ -101,10 +102,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        prompt$.pipe(
-          skip(1),
-          map(() => undefined)
-        ),
         esqlQuery$.pipe(
           skip(1),
           map(() => undefined)
@@ -116,13 +113,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ),
       getComparators: () => ({
         ...titleComparators,
-        prompt: 'referenceEquality',
+        prompt: 'skip',
         esqlQuery: 'referenceEquality',
         template: 'referenceEquality',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
-        prompt$.next(lastSaved?.prompt ?? '');
+        storedPrompt = lastSaved?.prompt ?? '';
         esqlQuery$.next(lastSaved?.esqlQuery);
         template$.next(lastSaved?.template);
       },
@@ -171,13 +168,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       projectRouting$.next(ctx.projectRouting);
       query$.next(ctx.query);
       filters$.next(ctx.filters);
+      if (!ctx.isReload) {
+        previewHtml$.next(null);
+      }
     });
 
     return {
       api,
       Component: function CustomContentEmbeddableComponent() {
         const [
-          prompt,
           esqlQuery,
           savedTemplate,
           isFlyoutOpen,
@@ -186,8 +185,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           projectRouting,
           query,
           filters,
+          previewHtml,
         ] = useBatchedPublishingSubjects(
-          prompt$,
           esqlQuery$,
           template$,
           isFlyoutOpen$,
@@ -195,7 +194,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isApproximate$,
           projectRouting$,
           query$,
-          filters$
+          filters$,
+          previewHtml$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
@@ -224,12 +224,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
-        const onTemplateChange = useCallback((t: string) => {
-          template$.next(t);
-        }, []);
-
         const handleFlyoutSave = useCallback(
           (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
+            previewHtml$.next(null);
             applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
             setGenerationVersion((v) => v + 1);
           },
@@ -277,14 +274,16 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleFlyoutClose = useCallback(() => {
+          previewHtml$.next(null);
           isFlyoutOpen$.next(false);
         }, []);
+
+        const handleRunPreview = useCallback((html: string) => previewHtml$.next(html), []);
 
         return (
           <>
             <CustomContentComponent
               embeddableId={uuid}
-              prompt={prompt}
               esqlQuery={esqlQuery}
               timeRange={timeRange}
               generationVersion={generationVersion}
@@ -293,7 +292,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               projectRouting={projectRouting}
               query={query}
               filters={filters}
-              onTemplateChange={onTemplateChange}
+              previewHtml={previewHtml}
             />
             {isFlyoutOpen && (
               <Suspense fallback={null}>
@@ -302,9 +301,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   esqlQuery={esqlQuery}
                   template={savedTemplate}
                   timeRange={timeRange}
+                  isApproximate={isApproximate}
+                  projectRouting={projectRouting}
+                  query={query}
+                  filters={filters}
                   panelTitle={panelTitle ?? undefined}
                   onSave={handleFlyoutSave}
                   onClose={handleFlyoutClose}
+                  onRunPreview={handleRunPreview}
                 />
               </Suspense>
             )}
