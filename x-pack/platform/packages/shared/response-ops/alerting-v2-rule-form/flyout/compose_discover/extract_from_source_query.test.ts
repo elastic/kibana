@@ -31,8 +31,8 @@ describe('extractFromSourceQuery', () => {
     );
   });
 
-  it('returns empty string when query has no FROM or TS source command', () => {
-    expect(extractFromSourceQuery('SHOW INFO')).toBe('');
+  it('returns empty string when query has no source command', () => {
+    expect(extractFromSourceQuery('STATS COUNT(*)')).toBe('');
   });
 
   it('extracts FROM with multiple indices', () => {
@@ -51,5 +51,31 @@ describe('extractFromSourceQuery', () => {
         'TS metrics-kubeletstatsreceiver.otel-* | STATS COUNT(*) BY @timestamp | WHERE throttled == true'
       )
     ).toBe('TS metrics-kubeletstatsreceiver.otel-*');
+  });
+
+  it('extracts FROM after a leading comment', () => {
+    expect(extractFromSourceQuery('// a comment\nFROM logs-* | LIMIT 10')).toBe('FROM logs-*');
+  });
+
+  it('extracts FROM after a SET header', () => {
+    expect(extractFromSourceQuery('SET unmapped_fields = "FAIL"; FROM logs-* | LIMIT 10')).toBe(
+      'FROM logs-*'
+    );
+  });
+
+  it('extracts ROW', () => {
+    expect(extractFromSourceQuery('ROW a = 1')).toBe('ROW a = 1');
+  });
+
+  it('extracts SHOW', () => {
+    expect(extractFromSourceQuery('SHOW INFO')).toBe('SHOW INFO');
+  });
+
+  it('extracts PROMQL', () => {
+    expect(
+      extractFromSourceQuery(
+        'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))');
   });
 });
