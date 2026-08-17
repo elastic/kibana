@@ -2578,12 +2578,12 @@ x-pack/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/kiban
 # Security Solution onboarding tour
 /x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-investigations
 
-# Security Service Integrations
-x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
-
+# Security integrations
+x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/ @elastic/cloud-services
 
 # Kibana design
 # scss overrides should be below this line for specificity
