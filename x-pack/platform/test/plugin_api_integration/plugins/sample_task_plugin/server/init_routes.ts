@@ -293,7 +293,7 @@ export function initRoutes(
       path: `/api/sample_tasks/store_uiam_api_key_in_legacy_format`,
       validate: {
         body: schema.object({
-          taskId: schema.string(),
+          taskId: schema.string({ maxLength: 256 }),
         }),
       },
       security: {
