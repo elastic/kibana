@@ -41,10 +41,13 @@ const baseFlyoutState = {
   draftTemplate: '',
   setDraftTemplate: jest.fn(),
   isAiAvailable: true,
-  isPreviewLoading: false,
-  previewData: null,
-  previewError: null,
-  handlePreview: jest.fn(),
+  isDataLoading: false,
+  esqlData: null,
+  esqlDataError: null,
+  handleFetchData: jest.fn(),
+  isRenderLoading: false,
+  hasPreviewedCurrentDraft: false,
+  handleRender: jest.fn(),
 };
 
 const openChat = jest.fn();
@@ -54,8 +57,13 @@ const defaultProps = {
   esqlQuery: undefined as string | undefined,
   template: undefined as string | undefined,
   timeRange: undefined,
+  isApproximate: false,
+  projectRouting: undefined,
+  query: undefined,
+  filters: undefined,
   onSave: jest.fn(),
   onClose: jest.fn(),
+  onRunPreview: jest.fn(),
 };
 
 beforeEach(() => {
@@ -122,6 +130,59 @@ describe('EditCustomContentFlyout', () => {
 
       expect(onSave).not.toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('Run Preview', () => {
+    it('is disabled when nothing has been edited', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM logs',
+        draftTemplate: '<p>hi</p>',
+      });
+      render(
+        <EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />
+      );
+      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+    });
+
+    it('is enabled when the query differs from the saved value', () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftEsqlQuery: 'FROM other' });
+      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
+    });
+
+    it('is enabled when the template differs from the saved value', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftTemplate: '<p>edited</p>',
+      });
+      render(<EditCustomContentFlyout {...defaultProps} template="<p>hi</p>" />);
+      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
+    });
+
+    it('is disabled after preview has been applied to the current draft', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM other',
+        hasPreviewedCurrentDraft: true,
+      });
+      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
+      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+    });
+
+    it('calls handleRender when clicked', async () => {
+      const handleRender = jest.fn();
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftEsqlQuery: 'FROM logs',
+        handleRender,
+      });
+      render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Run Preview' }));
+
+      expect(handleRender).toHaveBeenCalled();
     });
   });
 

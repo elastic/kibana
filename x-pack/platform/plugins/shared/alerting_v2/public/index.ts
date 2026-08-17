@@ -36,6 +36,7 @@ import { RuleChangeHistoryApi } from './services/rule_change_history_api';
 import { RulesApi } from './services/rules_api';
 import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
@@ -75,6 +76,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
     ) as WorkflowsExtensionsPublicPluginSetup;
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
+    registerCreateAlertEventStep(workflowsExtensionsSetup);
 
     // Register change-history telemetry event types once, lazily, to keep the
     // React UI out of the page-load bundle.
