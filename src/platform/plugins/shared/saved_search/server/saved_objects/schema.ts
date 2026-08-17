@@ -9,13 +9,14 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-utils';
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_DISCOVER_SESSION_COLUMNS,
   MAX_DISCOVER_SESSION_TABS,
+  MAX_METRICS_TAB_DIMENSIONS,
   VIEW_MODE,
 } from '../../common';
 import { extractTabsTransformFnV13 } from '../../common/service/extract_tabs';
@@ -164,16 +165,35 @@ const SCHEMA_TAB_ATTRIBUTES_V14 = SCHEMA_TAB_ATTRIBUTES_V13.extends({
   esqlApproximation: schema.maybe(schema.boolean()),
 });
 
-const SCHEMA_TAB_V14 = schema.object({
-  id: schema.string(),
-  label: schema.string(),
+const SCHEMA_TAB_V14 = SCHEMA_TAB_V13.extends({
   attributes: SCHEMA_TAB_ATTRIBUTES_V14,
 });
 
-export const SCHEMA_DISCOVER_SESSION_V14 = schema.object({
-  title: schema.string(),
-  description: schema.string({ defaultValue: '' }),
+export const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V14, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
+});
+
+// Tab type payloads, keyed by `type`. Absent `tabTypeState` means DiscoverTabType.Default, so
+// there is no `default` member here -- see @kbn/discover-utils's `DiscoverTabType`.
+const SCHEMA_TAB_TYPE_STATE_V15 = schema.oneOf([
+  schema.object({
+    type: schema.literal(DiscoverTabType.Metrics),
+    dimensions: schema.arrayOf(schema.string({ maxLength: 1000 }), {
+      maxSize: MAX_METRICS_TAB_DIMENSIONS,
+    }),
+  }),
+]);
+
+const SCHEMA_TAB_ATTRIBUTES_V15 = SCHEMA_TAB_ATTRIBUTES_V14.extends({
+  tabTypeState: schema.maybe(SCHEMA_TAB_TYPE_STATE_V15),
+});
+
+const SCHEMA_TAB_V15 = SCHEMA_TAB_V14.extends({
+  attributes: SCHEMA_TAB_ATTRIBUTES_V15,
+});
+
+export const SCHEMA_DISCOVER_SESSION_V15 = SCHEMA_DISCOVER_SESSION_V14.extends({
+  tabs: schema.arrayOf(SCHEMA_TAB_V15, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
 // Add new model versions here, which automatically registers them
@@ -201,11 +221,18 @@ export const DISCOVER_SESSION_MODEL_VERSIONS: SavedObjectsModelVersionMap = {
       create: SCHEMA_DISCOVER_SESSION_V14,
     },
   },
+  15: {
+    changes: [],
+    schemas: {
+      forwardCompatibility: SCHEMA_DISCOVER_SESSION_V15.extends({}, { unknowns: 'ignore' }),
+      create: SCHEMA_DISCOVER_SESSION_V15,
+    },
+  },
 };
 
 // Set constants to the latest schemas, which updates derived types and content management
-export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V14;
-export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V14;
+export const SCHEMA_TAB_LATEST = SCHEMA_TAB_V15;
+export const SCHEMA_DISCOVER_SESSION_LATEST = SCHEMA_DISCOVER_SESSION_V15;
 
 export type DiscoverSessionTabAttributes = TypeOf<typeof SCHEMA_TAB_LATEST>['attributes'];
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_TAB_LATEST>;

@@ -627,6 +627,8 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
+              profileSavedStateRegistry: services.profileSavedStateRegistry,
             }),
           ],
         });
@@ -655,6 +657,8 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
+              profileSavedStateRegistry: services.profileSavedStateRegistry,
             }),
           ],
         });

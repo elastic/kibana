@@ -79,6 +79,8 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
+      profileSavedStateRegistry: services.profileSavedStateRegistry,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -126,6 +128,8 @@ describe('getInitialAppState', () => {
       }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
+      profileSavedStateRegistry: services.profileSavedStateRegistry,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -266,6 +270,8 @@ describe('getInitialAppState', () => {
       tab: getTabStateMock({ id: 'mock-tab' }),
       services,
       currentDataView: undefined,
+      tabType: undefined,
+      profileSavedStateRegistry: services.profileSavedStateRegistry,
     });
 
   test('should set view mode correctly', () => {

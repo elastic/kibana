@@ -9,6 +9,7 @@
 
 import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
@@ -24,6 +25,10 @@ import {
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import {
+  createProfileStateRegistry,
+  createProfileSavedStateRegistry,
+} from '../../../../../common/context_awareness';
 
 const services = createDiscoverServicesMock();
 const tab1 = getTabStateMock({
@@ -106,8 +111,12 @@ describe('tab mapping utils', () => {
           overridenTimeRestore: false,
           services,
           currentDataView: undefined,
+          tabType: undefined,
+          profileSavedStateRegistry: services.profileSavedStateRegistry,
         }),
         existingTab: tab1,
+        profileStateRegistry: services.profileStateRegistry,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -164,6 +173,7 @@ describe('tab mapping utils', () => {
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },
+            "tabType": undefined,
           },
           "initializationState": Object {
             "initializationStatus": "NotStarted",
@@ -192,8 +202,12 @@ describe('tab mapping utils', () => {
           overridenTimeRestore: true,
           services,
           currentDataView: undefined,
+          tabType: undefined,
+          profileSavedStateRegistry: services.profileSavedStateRegistry,
         }),
         existingTab: tab1,
+        profileStateRegistry: services.profileStateRegistry,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -250,6 +264,7 @@ describe('tab mapping utils', () => {
             "serializedSearchSource": Object {
               "index": "test-data-view-2",
             },
+            "tabType": undefined,
           },
           "initializationState": Object {
             "initializationStatus": "NotStarted",
@@ -292,8 +307,12 @@ describe('tab mapping utils', () => {
           tab: legacyControlsTab,
           services,
           currentDataView: undefined,
+          tabType: undefined,
+          profileSavedStateRegistry: services.profileSavedStateRegistry,
         }),
         existingTab: tab1,
+        profileStateRegistry: services.profileStateRegistry,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       expect(tabState.attributes.controlGroupState).toEqual({
@@ -443,6 +462,8 @@ describe('tab mapping utils', () => {
         tab: tab1,
         services,
         currentDataView: undefined,
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -470,6 +491,7 @@ describe('tab mapping utils', () => {
             "index": "test-data-view-1",
           },
           "sort": Array [],
+          "tabTypeState": undefined,
           "timeRange": undefined,
           "timeRestore": false,
           "usesAdHocDataView": false,
@@ -484,6 +506,8 @@ describe('tab mapping utils', () => {
         overridenTimeRestore: true,
         services,
         currentDataView: undefined,
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -514,6 +538,7 @@ describe('tab mapping utils', () => {
             "index": "test-data-view-1",
           },
           "sort": Array [],
+          "tabTypeState": undefined,
           "timeRange": Object {
             "from": "now-7d",
             "to": "now",
@@ -550,6 +575,8 @@ describe('tab mapping utils', () => {
         tab: tabWithAppState,
         services,
         currentDataView: dataViewMockWithTimeField,
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       // The serializedSearchSource should be created from the provided dataView,
@@ -583,6 +610,8 @@ describe('tab mapping utils', () => {
         tab: tabWithAppState,
         services,
         currentDataView: undefined,
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       // Should use initialInternalState since dataView is not provided
@@ -791,6 +820,110 @@ describe('tab mapping utils', () => {
           "visContext": undefined,
         }
       `);
+    });
+  });
+
+  describe('tab type persistence', () => {
+    const profileStateRegistry = createProfileStateRegistry();
+    const profileSavedStateRegistry = createProfileSavedStateRegistry();
+
+    it('fromSavedObjectTabToTabState populates initialInternalState.tabType and merges the saved profile state', () => {
+      const persistedTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({
+          id: 'metrics-tab',
+          profileState: { metricsState: { dimensions: ['host.name'] } },
+        }),
+        services,
+        currentDataView: undefined,
+        tabType: DiscoverTabType.Metrics,
+        profileSavedStateRegistry,
+      });
+
+      expect(persistedTab.tabTypeState).toEqual({
+        type: DiscoverTabType.Metrics,
+        dimensions: ['host.name'],
+      });
+
+      const tabState = fromSavedObjectTabToTabState({
+        tab: persistedTab,
+        profileStateRegistry,
+        profileSavedStateRegistry,
+      });
+
+      expect(tabState.initialInternalState?.tabType).toBe(DiscoverTabType.Metrics);
+      expect(tabState.profileState).toEqual({
+        metricsState: { dimensions: ['host.name'] },
+      });
+    });
+
+    it('round-trips a tab type verbatim for a tab that was never opened', () => {
+      // Simulates opening a session that contains a metrics tab, without ever selecting
+      // that tab: no data source profile has resolved for it, so the tab type used for
+      // persistence must come from what was loaded, not a live resolution.
+      const persistedTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({
+          id: 'unopened-metrics-tab',
+          profileState: { metricsState: { dimensions: ['service.name'] } },
+        }),
+        services,
+        currentDataView: undefined,
+        tabType: DiscoverTabType.Metrics,
+        profileSavedStateRegistry,
+      });
+
+      const loadedTabState = fromSavedObjectTabToTabState({
+        tab: persistedTab,
+        profileStateRegistry,
+        profileSavedStateRegistry,
+      });
+
+      // No currentDataView (never initialized) and the inherited tab type from load time,
+      // exactly as a tab that was never selected would be saved again.
+      const resavedTab = fromTabStateToSavedObjectTab({
+        tab: loadedTabState,
+        services,
+        currentDataView: undefined,
+        tabType: loadedTabState.initialInternalState?.tabType,
+        profileSavedStateRegistry,
+      });
+
+      expect(resavedTab.tabTypeState).toEqual(persistedTab.tabTypeState);
+    });
+
+    it('drops the saved tab type when the resolved tab type is undefined -- losing a type', () => {
+      const tabState = getTabStateMock({
+        id: 'metrics-tab',
+        profileState: { metricsState: { dimensions: ['host.name'] } },
+      });
+
+      const savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: tabState,
+        services,
+        currentDataView: undefined,
+        // The query no longer matches the metrics profile, so nothing resolved this save.
+        tabType: undefined,
+        profileSavedStateRegistry,
+      });
+
+      expect(savedObjectTab.tabTypeState).toBeUndefined();
+    });
+
+    it('gains a tab type when the resolved tab type is now set -- gaining a type', () => {
+      const tabState = getTabStateMock({ id: 'newly-metrics-tab' });
+
+      const savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: tabState,
+        services,
+        currentDataView: undefined,
+        tabType: DiscoverTabType.Metrics,
+        profileSavedStateRegistry,
+      });
+
+      // Defaults are expanded even though the tab never had explicit metrics state.
+      expect(savedObjectTab.tabTypeState).toEqual({
+        type: DiscoverTabType.Metrics,
+        dimensions: [],
+      });
     });
   });
 });

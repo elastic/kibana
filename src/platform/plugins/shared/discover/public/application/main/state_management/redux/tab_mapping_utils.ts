@@ -11,9 +11,14 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import type { DiscoverTabType } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
+import type {
+  ProfileStateRegistry,
+  ProfileSavedStateRegistry,
+} from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
@@ -58,10 +63,14 @@ export const fromSavedObjectTabToTabState = ({
   tab,
   existingTab,
   initialAppState,
+  profileStateRegistry,
+  profileSavedStateRegistry,
 }: {
   tab: DiscoverSessionTab;
   existingTab?: TabState;
   initialAppState?: DiscoverAppState;
+  profileStateRegistry: ProfileStateRegistry;
+  profileSavedStateRegistry: ProfileSavedStateRegistry;
 }): TabState => {
   const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
@@ -77,8 +86,17 @@ export const fromSavedObjectTabToTabState = ({
     ...existingTab,
     id: tab.id,
     label: tab.label,
+    // The persisted tab type selects the transform, since no profile has resolved at load
+    // time. Merging over `existingTab?.profileState` also covers a saved Ui field: local
+    // storage only retains Persistent/Url fields, so after a refresh the saved object is the
+    // only source for it.
+    profileState: profileStateRegistry.mergeState(
+      profileSavedStateRegistry.fromSavedState(tab.tabTypeState),
+      existingTab?.profileState
+    ),
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,
+      tabType: tab.tabTypeState?.type,
     },
     appState,
     previousAppState: existingTab?.appState ?? appState,
@@ -154,11 +172,15 @@ export const fromTabStateToSavedObjectTab = ({
   overridenTimeRestore,
   services,
   currentDataView,
+  tabType,
+  profileSavedStateRegistry,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
   currentDataView: DataView | undefined;
+  tabType: DiscoverTabType | undefined;
+  profileSavedStateRegistry: ProfileSavedStateRegistry;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
@@ -209,6 +231,7 @@ export const fromTabStateToSavedObjectTab = ({
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
       : undefined,
+    tabTypeState: profileSavedStateRegistry.toSavedState(tabType, tab.profileState),
   };
 };
 

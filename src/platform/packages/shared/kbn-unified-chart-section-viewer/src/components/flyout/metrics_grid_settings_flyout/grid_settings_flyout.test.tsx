@@ -18,6 +18,7 @@ const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
+  dimensions: [],
 };
 
 const counterSelect = new EuiSuperSelectTestHarness('metricsExperienceGridSettingsCounterSelect');

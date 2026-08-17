@@ -19,8 +19,18 @@ import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/discover-utils';
-import type { DiscoverSessionTab as DiscoverSessionTabSchema } from '../server';
+import type {
+  DiscoverSessionTab as DiscoverSessionTabSchema,
+  DiscoverSessionTabAttributes,
+} from '../server';
 import type { VIEW_MODE } from '.';
+
+/**
+ * The saved shape of a tab's type-specific state, e.g. `{ type: 'metrics', dimensions: [...] }`.
+ * Derived from the versioned schema literal so it never needs to be restated here -- see
+ * `discover/common/context_awareness`'s `TabTypeStateMap`, which re-keys this by `type`.
+ */
+export type DiscoverSessionTabTypeState = NonNullable<DiscoverSessionTabAttributes['tabTypeState']>;
 
 export interface DiscoverGridSettings extends SerializableRecord {
   columns?: Record<string, DiscoverGridSettingsColumn>;
@@ -133,6 +143,7 @@ export interface DiscoverSessionTab {
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
   controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
+  tabTypeState?: DiscoverSessionTabTypeState;
 }
 
 export interface DiscoverSession {

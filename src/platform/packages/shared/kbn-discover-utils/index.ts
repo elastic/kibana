@@ -31,6 +31,7 @@ export {
   SORT_DEFAULT_ORDER_SETTING,
   VIEW_MODE,
   DataGridDensity,
+  DiscoverTabType,
   UnifiedHistogramSuggestionType,
   IgnoredReason,
   buildDataTableRecord,

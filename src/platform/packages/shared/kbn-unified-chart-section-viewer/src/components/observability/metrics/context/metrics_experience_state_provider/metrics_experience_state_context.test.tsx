@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useContext } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import { renderHook, act } from '@testing-library/react';
+import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import {
   MetricsExperienceStateContext,
   MetricsExperienceStateProvider,
@@ -24,12 +25,12 @@ import { createFeatureFlagsMock } from '../../../../../test_utils/create_feature
 import type { MetricsSort } from '../../../../../types';
 
 jest.mock('../../../../../restorable_state', () => {
-  const { useState, useCallback } = jest.requireActual('react');
+  const { useState: useActualState, useCallback: useActualCallback } = jest.requireActual('react');
   return {
     useRestorableState: <T,>(_key: string, initialValue: T) => {
-      const [value, _setValue] = useState(initialValue);
+      const [value, _setValue] = useActualState(initialValue);
 
-      const setValue = useCallback(
+      const setValue = useActualCallback(
         (next: T | ((prev: T) => T)) => {
           _setValue(next);
         },
@@ -53,6 +54,31 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
     {children}
   </MetricsExperienceStateProvider>
 );
+
+/**
+ * `selectedDimensions` is derived from the `gridSettings` prop, not owned
+ * locally, so exercising `onDimensionsChange` needs a wrapper that actually
+ * plumbs `onGridSettingsChange` back into `gridSettings` -- mirroring how
+ * `chart_section.tsx` round-trips through the profile state adapter.
+ */
+const StatefulGridSettingsWrapper = ({ children }: { children: React.ReactNode }) => {
+  const [gridSettings, setGridSettings] = useState<MetricsGridSettings>(
+    METRICS_GRID_SETTINGS_DEFAULTS
+  );
+  const onGridSettingsChange = useCallback((update: Partial<MetricsGridSettings>) => {
+    setGridSettings((prev) => ({ ...prev, ...update }));
+  }, []);
+
+  return (
+    <MetricsExperienceStateProvider
+      profileId="test-profile"
+      gridSettings={gridSettings}
+      onGridSettingsChange={onGridSettingsChange}
+    >
+      {children}
+    </MetricsExperienceStateProvider>
+  );
+};
 
 describe('MetricsExperienceStateProvider', () => {
   describe('onSearchTermChange', () => {
@@ -138,12 +164,33 @@ describe('MetricsExperienceStateProvider', () => {
 
   describe('onDimensionsChange', () => {
     it('updates selectedDimensions', () => {
-      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper });
+      const { result } = renderHook(() => useMetricsExperienceState(), {
+        wrapper: StatefulGridSettingsWrapper,
+      });
 
       act(() => {
         result.current.onDimensionsChange([{ name: 'host.name' }]);
       });
       expect(result.current.selectedDimensions).toEqual([{ name: 'host.name' }]);
+    });
+
+    it('forwards only dimension names to onGridSettingsChange, dropping `type`', () => {
+      const onGridSettingsChange = jest.fn();
+      const customWrapper = ({ children }: { children: React.ReactNode }) => (
+        <MetricsExperienceStateProvider
+          profileId="test-profile"
+          onGridSettingsChange={onGridSettingsChange}
+        >
+          {children}
+        </MetricsExperienceStateProvider>
+      );
+      const { result } = renderHook(() => useMetricsExperienceState(), { wrapper: customWrapper });
+
+      act(() => {
+        result.current.onDimensionsChange([{ name: 'host.name', type: 'keyword' }]);
+      });
+
+      expect(onGridSettingsChange).toHaveBeenCalledWith({ dimensions: ['host.name'] });
     });
 
     it('does not reset currentPage (internal sync should not disrupt pagination)', () => {
@@ -190,6 +237,7 @@ describe('MetricsExperienceStateProvider', () => {
         counterAggregation: 'sum',
         gaugeAggregation: 'avg',
         histogramPercentile: 'p95',
+        dimensions: [],
       });
     });
 
@@ -201,6 +249,7 @@ describe('MetricsExperienceStateProvider', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'min',
             histogramPercentile: 'p50',
+            dimensions: ['host.name'],
           }}
         >
           {children}
@@ -212,7 +261,9 @@ describe('MetricsExperienceStateProvider', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
+        dimensions: ['host.name'],
       });
+      expect(result.current.selectedDimensions).toEqual([{ name: 'host.name' }]);
     });
 
     it('forwards updates to the onGridSettingsChange prop', () => {

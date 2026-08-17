@@ -38,10 +38,13 @@ export interface MetricsGridSettings extends SerializableRecord {
   counterAggregation: SimpleAggregation;
   gaugeAggregation: SimpleAggregation;
   histogramPercentile: HistogramPercentile;
+  /** Names of the dimensions the metrics grid is broken down by. */
+  dimensions: string[];
 }
 
 export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
   counterAggregation: FunctionNames.SUM,
   gaugeAggregation: FunctionNames.AVG,
   histogramPercentile: 'p95',
+  dimensions: [],
 };

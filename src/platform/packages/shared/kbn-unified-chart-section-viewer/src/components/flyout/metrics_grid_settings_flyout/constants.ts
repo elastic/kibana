@@ -8,7 +8,24 @@
  */
 
 import { FunctionNames } from '@kbn/esql-language';
-import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils';
+import type {
+  HistogramPercentile,
+  MetricsGridSettings,
+  SimpleAggregation,
+} from '@kbn/discover-utils';
+
+/**
+ * The subset of `MetricsGridSettings` this flyout edits. `dimensions` lives
+ * in the same settings object (it travels with the saved session alongside
+ * these), but is edited through the dimensions selector, not this flyout --
+ * excluded here so an external dimensions change made while the flyout is
+ * open is neither reported as a pending flyout change nor reverted on Apply.
+ */
+export const FLYOUT_SETTING_KEYS = [
+  'counterAggregation',
+  'gaugeAggregation',
+  'histogramPercentile',
+] as const satisfies ReadonlyArray<keyof MetricsGridSettings>;
 
 export const SIMPLE_AGGREGATION_OPTIONS: SimpleAggregation[] = [
   FunctionNames.AVG,

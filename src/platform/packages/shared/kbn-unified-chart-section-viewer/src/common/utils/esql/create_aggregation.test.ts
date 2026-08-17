@@ -110,6 +110,7 @@ describe('createMetricAggregation with gridSettings override', () => {
     counterAggregation: 'max' as const,
     gaugeAggregation: 'min' as const,
     histogramPercentile: 'p90' as const,
+    dimensions: [],
   };
 
   it('applies the counter aggregation setting wrapped in RATE()', () => {

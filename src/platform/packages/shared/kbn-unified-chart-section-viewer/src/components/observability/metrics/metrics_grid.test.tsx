@@ -1078,6 +1078,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
           }}
         >
           <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
@@ -1094,6 +1095,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p95',
+            dimensions: [],
           }}
         >
           <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
@@ -1113,6 +1115,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
           }}
         >
           <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} />
@@ -1125,6 +1128,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            dimensions: [],
           },
         })
       );

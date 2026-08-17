@@ -32,13 +32,14 @@ describe('METRICS_STATE_DEF', () => {
     expect(METRICS_STATE_DEF.key).toBe('metricsState');
   });
 
-  it('types sort as Url and grid settings as Persistent', () => {
+  it('types sort and dimensions as Url and grid settings as Persistent', () => {
     expect(METRICS_STATE_DEF.descriptor).toEqual({
       counterAggregation: { type: ProfileStateType.Persistent },
       gaugeAggregation: { type: ProfileStateType.Persistent },
       histogramPercentile: { type: ProfileStateType.Persistent },
       sortField: { type: ProfileStateType.Url },
       sortDirection: { type: ProfileStateType.Url },
+      dimensions: { type: ProfileStateType.Url },
     });
   });
 

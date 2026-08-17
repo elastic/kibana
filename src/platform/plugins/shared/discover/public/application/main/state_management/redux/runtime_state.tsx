@@ -9,6 +9,7 @@
 
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverTabType } from '@kbn/discover-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
@@ -144,6 +145,36 @@ export const selectCurrentProfileStateDefinition = (
     .getContexts().dataSourceContext.profileState;
 };
 
+export const selectCurrentTabType = (runtimeStateManager: RuntimeStateManager, tabId: string) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId)
+    .scopedProfilesManager$.getValue()
+    .getContexts().dataSourceContext.tabType;
+};
+
+/**
+ * The tab type to use when persisting a tab (to local storage or the saved object). Once the
+ * tab's data source profile has resolved, the resolved tab type wins -- `undefined` included,
+ * so editing a tab out of its profile drops the type on the next persist. Before that, the
+ * inherited value (from local storage, duplication, or a restored recently-closed tab) is used
+ * instead, so a tab that hasn't resolved yet doesn't transiently lose a type it already had.
+ */
+export const selectTabTypeForPersistence = ({
+  runtimeStateManager,
+  tabState,
+}: {
+  runtimeStateManager: RuntimeStateManager;
+  tabState: TabState;
+}): DiscoverTabType | undefined => {
+  const scopedProfilesManager = selectTabRuntimeState(
+    runtimeStateManager,
+    tabState.id
+  )?.scopedProfilesManager$.getValue();
+
+  return scopedProfilesManager?.hasResolvedDataSourceProfile()
+    ? selectCurrentTabType(runtimeStateManager, tabState.id)
+    : tabState.initialInternalState?.tabType;
+};
+
 export const selectCurrentProfileUrlState = ({
   runtimeStateManager,
   tabId,
@@ -254,9 +285,11 @@ export const selectTabRuntimeInternalState = ({
     globalState,
     services,
   });
+  const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
 
   return {
     serializedSearchSource: searchSource.getSerializedFields(),
+    ...(tabType ? { tabType } : {}),
     ...(dataRequestParams.isSearchSessionRestored
       ? { searchSessionId: dataRequestParams.searchSessionId }
       : {}),

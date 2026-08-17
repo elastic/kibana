@@ -19,7 +19,11 @@ import type { VisContextUnmapped } from '@kbn/saved-search-plugin/common/types';
 import { isEqualFilters } from '../../utils/state_comparators';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
+import {
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+  type RuntimeStateManager,
+} from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
   fromSavedObjectTabToAppState,
@@ -74,11 +78,22 @@ export const selectHasUnsavedChanges = (
       continue;
     }
 
+    const tabState = selectTab(state, tabId);
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+
+    // Computed once and reused for both conversions below: both sides must normalize against
+    // the same tab type, otherwise a session saved before its profile declared a tab type
+    // would normalize differently on each side and report a phantom unsaved change.
+    const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
+
     // Ensure the persisted tab accounts for default app state values when comparing,
     // otherwise initializing a tab could automatically trigger unsaved changes.
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
+        profileStateRegistry: services.profileStateRegistry,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
         initialAppState: getInitialAppState({
           initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
           persistedTab,
@@ -93,16 +108,16 @@ export const selectHasUnsavedChanges = (
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
       currentDataView: undefined,
+      tabType,
+      profileSavedStateRegistry: services.profileSavedStateRegistry,
     });
-
-    const tabState = selectTab(state, tabId);
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
       currentDataView,
       services,
+      tabType,
+      profileSavedStateRegistry: services.profileSavedStateRegistry,
     });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
@@ -240,4 +255,5 @@ const TAB_COMPARATORS: TabComparators = {
     const testB = JSON.parse(b ?? '{}');
     return isEqual(testA, testB);
   },
+  tabTypeState: fieldComparator('tabTypeState', undefined),
 };

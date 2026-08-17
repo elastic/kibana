@@ -29,6 +29,7 @@ export const METRICS_STATE_DEF: ProfileStateDefinition<MetricsState> = {
     // both `Persistent` and `Url`, so sort still survives a reload with no `_p` in the URL.
     sortField: { type: ProfileStateType.Url },
     sortDirection: { type: ProfileStateType.Url },
+    dimensions: { type: ProfileStateType.Url },
   },
   defaultState: { ...METRICS_GRID_SETTINGS_DEFAULTS, ...METRICS_GRID_SORT_DEFAULTS },
 };

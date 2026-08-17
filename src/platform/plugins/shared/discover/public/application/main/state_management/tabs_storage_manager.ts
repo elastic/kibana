@@ -19,6 +19,7 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
   LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
   type ProfileStateRegistry,
+  type ProfileSavedStateRegistry,
 } from '../../../../common/context_awareness';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
 import {
@@ -105,11 +106,13 @@ export const createTabsStorageManager = ({
   urlStateStorage,
   storage,
   profileStateRegistry,
+  profileSavedStateRegistry,
   enabled,
 }: {
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
   profileStateRegistry: ProfileStateRegistry;
+  profileSavedStateRegistry: ProfileSavedStateRegistry;
   enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsUrlState>({});
@@ -441,7 +444,7 @@ export const createTabsStorageManager = ({
     sessionInfo.spaceId = spaceId;
 
     const persistedTabs = persistedDiscoverSession?.tabs.map((tab) =>
-      fromSavedObjectTabToTabState({ tab })
+      fromSavedObjectTabToTabState({ tab, profileStateRegistry, profileSavedStateRegistry })
     );
     const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
       toTabState(tab, defaultTabState)

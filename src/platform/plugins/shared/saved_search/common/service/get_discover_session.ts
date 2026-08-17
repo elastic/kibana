@@ -51,6 +51,7 @@ export const getDiscoverSession = async (
       density: tab.attributes.density as DataGridDensity,
       visContext: tab.attributes.visContext,
       controlGroupJson: tab.attributes.controlGroupJson,
+      tabTypeState: tab.attributes.tabTypeState,
     })),
     managed: Boolean(so.item.managed),
     tags: deps.savedObjectsTagging

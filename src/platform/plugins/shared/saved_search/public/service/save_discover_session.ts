@@ -106,6 +106,7 @@ export const saveDiscoverSession = async (
         density: tab.density,
         visContext: tab.visContext,
         controlGroupJson: tab.controlGroupJson,
+        tabTypeState: tab.tabTypeState,
       },
     };
   });

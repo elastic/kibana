@@ -443,6 +443,8 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
+            profileSavedStateRegistry: services.profileSavedStateRegistry,
           }),
         ],
       });
@@ -489,6 +491,8 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
+            profileSavedStateRegistry: services.profileSavedStateRegistry,
           }),
         ],
       });
@@ -532,6 +536,8 @@ describe('saveDiscoverSession', () => {
             }),
             services,
             currentDataView: undefined,
+            tabType: undefined,
+            profileSavedStateRegistry: services.profileSavedStateRegistry,
           }),
         ],
       });

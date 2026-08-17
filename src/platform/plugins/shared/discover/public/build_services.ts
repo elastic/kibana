@@ -71,7 +71,7 @@ import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
-import type { ProfileStateRegistry } from '../common/context_awareness';
+import type { ProfileStateRegistry, ProfileSavedStateRegistry } from '../common/context_awareness';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
@@ -162,6 +162,7 @@ export interface DiscoverServices {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
   profileStateRegistry: ProfileStateRegistry;
+  profileSavedStateRegistry: ProfileSavedStateRegistry;
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
@@ -183,6 +184,7 @@ export const buildServices = ({
   urlTracker,
   profilesManager,
   profileStateRegistry,
+  profileSavedStateRegistry,
   ebtManager,
   setHeaderActionMenu = noop,
 }: {
@@ -197,6 +199,7 @@ export const buildServices = ({
   urlTracker: UrlTracker;
   profilesManager: ProfilesManager;
   profileStateRegistry: ProfileStateRegistry;
+  profileSavedStateRegistry: ProfileSavedStateRegistry;
   ebtManager: DiscoverEBTManager;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
@@ -274,6 +277,7 @@ export const buildServices = ({
     observabilityAIAssistant: plugins.observabilityAIAssistant,
     profilesManager,
     profileStateRegistry,
+    profileSavedStateRegistry,
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,

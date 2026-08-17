@@ -353,6 +353,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: dataViewMock.id },
           },
         }),
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       const dataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -364,6 +366,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: dataViewMockWithTimeField.id },
           },
         }),
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       const adHocDataViewNoTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -375,6 +379,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
             serializedSearchSource: { index: { title: 'adhoc' } },
           },
         }),
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       const adHocDataViewWithTimeFieldTab = fromTabStateToSavedObjectTab({
@@ -389,6 +395,8 @@ describe('DiscoverSessionSaveModalContainer', () => {
             timeRestore: true,
           },
         }),
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       it("should set isTimeBased to false if no tab's data view is time based", async () => {
@@ -440,12 +448,16 @@ describe('DiscoverSessionSaveModalContainer', () => {
         currentDataView: dataViewMock,
         services,
         tab: getTabStateMock({ id: 'noTimeRestoreTab', attributes: { timeRestore: false } }),
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       const timeRestoreTab = fromTabStateToSavedObjectTab({
         currentDataView: dataViewMock,
         services,
         tab: getTabStateMock({ id: 'timeRestoreTab', attributes: { timeRestore: true } }),
+        tabType: undefined,
+        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       let { modalProps } = await setup({
