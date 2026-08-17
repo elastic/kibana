@@ -20,9 +20,9 @@ const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 /**
  * Vault-backed config used by @kbn/evals CI and local development.
  *
- * This is intentionally minimal: we store OpenRouter credentials (preferred) and
- * legacy LiteLLM fields for backward compatibility, plus credentials
- * for the centralized Elasticsearch cluster where eval results are exported.
+ * This is intentionally minimal: we store OpenRouter credentials and LiteLLM
+ * credentials (both required), plus credentials for the centralized Elasticsearch
+ * cluster where eval results are exported.
  */
 
 export const KBN_EVALS_VAULT_ENV_VAR = 'KIBANA_EVALS_CI_CONFIG';
@@ -68,7 +68,7 @@ const configSchema = schema.object(
     ),
 
     /**
-     * Legacy LiteLLM credentials for backward compatibility.
+     * LiteLLM credentials used to call the proxy (and to query team metadata).
      */
     litellm: schema.object(
       {
@@ -130,38 +130,8 @@ const configSchema = schema.object(
 
 export type KbnEvalsConfig = ReturnType<typeof configSchema.validate>;
 
-const hasOpenrouterCredentials = (config: Record<string, unknown>): boolean => {
-  const openrouter = config.openrouter;
-  return Boolean(
-    openrouter &&
-      typeof openrouter === 'object' &&
-      !Array.isArray(openrouter) &&
-      typeof (openrouter as { apiKey?: unknown }).apiKey === 'string' &&
-      String((openrouter as { apiKey: string }).apiKey).trim().length > 0
-  );
-};
-
-const hasLitellmCredentials = (config: Record<string, unknown>): boolean => {
-  const litellm = config.litellm;
-  return Boolean(
-    litellm &&
-      typeof litellm === 'object' &&
-      !Array.isArray(litellm) &&
-      typeof (litellm as { virtualKey?: unknown }).virtualKey === 'string' &&
-      String((litellm as { virtualKey: string }).virtualKey).trim().length > 0 &&
-      typeof (litellm as { baseUrl?: unknown }).baseUrl === 'string' &&
-      String((litellm as { baseUrl: string }).baseUrl).trim().length > 0
-  );
-};
-
 export const validateKbnEvalsConfig = (config: unknown): KbnEvalsConfig => {
-  const validated = configSchema.validate(config);
-  if (!hasOpenrouterCredentials(validated) && !hasLitellmCredentials(validated)) {
-    throw new Error(
-      'Invalid kbn-evals config: provide `openrouter: { baseUrl, apiKey }` (preferred) or legacy `litellm: { baseUrl, virtualKey }`.'
-    );
-  }
-  return validated;
+  return configSchema.validate(config);
 };
 
 const ensureLocalConfigFileExists = (filePath: string) => {

@@ -201,65 +201,23 @@ function assertOptionalNonEmptyString(obj, path) {
   }
 }
 
-function hasOpenrouterCredentials(config) {
-  const openrouter = config.openrouter;
-  return Boolean(
-    openrouter &&
-      typeof openrouter === 'object' &&
-      !Array.isArray(openrouter) &&
-      isNonEmptyString(openrouter.apiKey)
-  );
-}
-
-function hasLitellmCredentials(config) {
-  const litellm = config.litellm;
-  return Boolean(
-    litellm &&
-      typeof litellm === 'object' &&
-      !Array.isArray(litellm) &&
-      isNonEmptyString(litellm.baseUrl) &&
-      isNonEmptyString(litellm.virtualKey)
-  );
-}
-
-function validateOpenrouter(config) {
-  if (config.openrouter === undefined || config.openrouter === null) return;
-  if (typeof config.openrouter !== 'object' || Array.isArray(config.openrouter)) {
-    die('Invalid kbn-evals CI config: "openrouter" must be an object when provided');
-  }
-  assertNonEmptyString(config, 'openrouter.baseUrl');
-  assertNonEmptyString(config, 'openrouter.apiKey');
-}
-
-function validateLitellm(config) {
-  if (config.litellm === undefined || config.litellm === null) return;
-  if (typeof config.litellm !== 'object' || Array.isArray(config.litellm)) {
-    die('Invalid kbn-evals CI config: "litellm" must be an object when provided');
-  }
-  assertNonEmptyString(config, 'litellm.baseUrl');
-  assertNonEmptyString(config, 'litellm.virtualKey');
-  assertOptionalNonEmptyString(config, 'litellm.teamId');
-  assertOptionalNonEmptyString(config, 'litellm.teamName');
-}
-
 function validateConfigShape(config) {
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
     die('Invalid kbn-evals CI config: root must be a JSON object');
   }
 
-  validateOpenrouter(config);
-  validateLitellm(config);
-
-  if (!hasOpenrouterCredentials(config) && !hasLitellmCredentials(config)) {
-    die(
-      'Invalid kbn-evals CI config: provide `openrouter: { baseUrl, apiKey }` (preferred) or legacy `litellm: { baseUrl, virtualKey }`.'
-    );
-  }
-
   // Required
+  assertNonEmptyString(config, 'openrouter.baseUrl');
+  assertNonEmptyString(config, 'openrouter.apiKey');
+  assertNonEmptyString(config, 'litellm.baseUrl');
+  assertNonEmptyString(config, 'litellm.virtualKey');
   assertNonEmptyString(config, 'evaluationConnectorId');
   assertNonEmptyString(config, 'evaluationsEs.url');
   assertNonEmptyString(config, 'evaluationsEs.apiKey');
+
+  // Optional
+  assertOptionalNonEmptyString(config, 'litellm.teamId');
+  assertOptionalNonEmptyString(config, 'litellm.teamName');
 
   validateEvaluationsKbn(config);
   validateGcsCredentials(config);
