@@ -261,7 +261,7 @@ For each detection, determine whether it continues an existing open event. An ac
 
 For events returned by `platform_sig_events_event_search`, derive:
 - **Domain** and **Alert symptom** plus stored hypothesis context — `summary`, `symptom_hypothesis`, and `title`; **Current evidence** comes only from this batch's grounding, never stale stored signal prose. Use stored narratives to generate candidates, not as proof of the current condition.
-- **Topology** — for routing and `<incident_matching>` only; never substitute it for this cycle's grounded topology in the write payload.
+- **Topology (stored)** — for routing and `<incident_matching>` only; never substitute it for this cycle's grounded topology in the write payload.
 - **Onset timing** — use a stored timestamp only when it represents incident onset; otherwise treat timing as unknown.
 
 Maintain `matched_rule_uuids`, initially empty. Add a detection's `rule_uuid` immediately on acceptance. Never assign the same `rule_uuid` twice.
@@ -295,6 +295,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 3.1 resu
 4. Accept an event continuation only when the current detection passes `<incident_matching>` against the compact event's stored summary and topology; `signal_rule_uuids`, `unresolved_rule_uuids`, or shared topology alone are not acceptance evidence.
    - For a topology-connected pair of confirmed failures, shared `causal_features[].feature_id` is sufficient acceptance evidence. Reuse the open event's `event_id`; different error signatures or layers do not justify a split.
    - Reject that continuation only when current evidence identifies a distinct resource or dependency path that the stored event topology does not connect.
+     On accept, bind this detection's grounded `causal_features` and `blast_radius` for emit — both are required on the write payload even when stored topology from `event_search` is empty. `causal_features` without the grounded `blast_radius` dependency edges is incomplete.
    Add accepted rules to `matched_rule_uuids`.
 5. When `has_more` is true and some discoveries remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant.
 
@@ -311,7 +312,7 @@ After routing, pass only detections whose `rule_uuid` is not in `matched_rule_uu
 2. Compute connected components on the complete edge set. Each component is exactly one event group. Transitive closure is mandatory — if A connects to B and B connects to C, A and C belong together even without a direct pair match. A multi-service cascade (for example shared caller fan-out, shared cache or database dependency, or a bridge rule whose KI `features[]` names nodes on both sides) is always one component — never split by service name, protocol layer, error signature, or user journey. Do not form service-scoped groups, draft event items, or assign ownership until components are computed.
    After components are computed, merge any two groups whose grounded topology sets share a `causal_features` or `blast_radius` node, or any bridge KI `features[].id`.
    Example: if group A grounds to service X and group B grounds to the same service node or a shared cache, database, or dependency endpoint, merge A and B into one event group before composing either event item.
-3. Assign every detection rule to exactly one final event group. Treat a rule accepted in multiple groups as a bridge: merge all groups containing that rule before finalizing ownership, then assign the rule once to the merged group. Repeat until no rule belongs to more than one group; never choose one owner and leave the other group split. Different downstream impacts do not split an already accepted cascade. Keep unmatched detections standalone. Timing qualifies the narrative but never overrides an accepted match or creates one.
+3. Assign every detection rule to exactly one final event group. Treat a rule accepted in multiple groups as a bridge: merge all groups containing that rule before finalizing ownership, then assign the rule once to the merged group. Repeat until no rule belongs to more than one group; never choose one owner and leave the other group split. Different downstream impacts do not split an already accepted cascade. Keep detections with `verdict` `not_checked` standalone. Timing qualifies the narrative but never overrides an accepted match or creates one.
    Example: if one confirmed rule matches both group A and group B, merge A and B into one event group, then include that rule once. Do this before composing either event item.
 4. Finalize each component's **topology**:
    - Union every component and dependency path from assigned detections. Keep paths implied by bridges, shared callers, or confirmed chains even when one detection's evidence alone does not name every hop.
