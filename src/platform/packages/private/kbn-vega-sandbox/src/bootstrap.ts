@@ -35,6 +35,7 @@ let controller: VegaSandboxRenderController | undefined;
 let initialized = false;
 let hrefInterceptorInstalled = false;
 let pendingRestoreState: unknown | undefined;
+let renderGeneration = 0;
 let validateRequestCounter = 0;
 const pendingExternalUrlValidations = new Map<
   string,
@@ -211,6 +212,8 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
     return;
   }
 
+  const generation = ++renderGeneration;
+  const isCurrent = (): boolean => generation === renderGeneration;
   const { renderId, descriptor } = message;
   let capturedState: unknown;
   if (controller?.view) {
@@ -236,15 +239,42 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
   controls.style.flex = '0 0 auto';
   root.append(container, controls);
 
-  controller = await renderVegaDescriptor({
-    container,
-    controls,
-    descriptor,
-    onError: (error) => postToParent({ type: 'error', renderId, error }),
-    onFunction: (intent) => postToParent({ type: 'applyFilter', intent }),
-    onValidateExternalUrl: requestValidateExternalUrl,
-    onWarn: (warning) => postToParent({ type: 'warn', warning }),
-  });
+  let nextController: VegaSandboxRenderController;
+  try {
+    nextController = await renderVegaDescriptor({
+      container,
+      controls,
+      descriptor,
+      onError: (error) => {
+        if (isCurrent()) {
+          postToParent({ type: 'error', renderId, error });
+        }
+      },
+      onFunction: (intent) => {
+        if (isCurrent()) {
+          postToParent({ type: 'applyFilter', intent });
+        }
+      },
+      onValidateExternalUrl: requestValidateExternalUrl,
+      onWarn: (warning) => {
+        if (isCurrent()) {
+          postToParent({ type: 'warn', warning });
+        }
+      },
+    });
+  } catch (error) {
+    if (!isCurrent()) {
+      return;
+    }
+    throw error;
+  }
+
+  if (!isCurrent()) {
+    nextController.destroy();
+    return;
+  }
+
+  controller = nextController;
 
   const restoreFromCapture =
     Boolean(descriptor.restoreSignalValuesOnRefresh) && capturedState !== undefined;
@@ -253,12 +283,20 @@ const handleRender = async (message: Extract<VegaSandboxInboundMessage, { type: 
     : pendingRestoreState;
   pendingRestoreState = undefined;
 
-  if (stateToRestore !== undefined && controller?.view) {
+  if (stateToRestore !== undefined && controller.view) {
     await controller.view.setState(stateToRestore as never);
+  }
+
+  if (!isCurrent()) {
+    return;
   }
 
   if (message.dimensions) {
     await controller.resize(message.dimensions);
+  }
+
+  if (!isCurrent()) {
+    return;
   }
 
   inspectorSession.onViewChanged();

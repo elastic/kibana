@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getNestedGroupOffset, positionSandboxTooltip } from './tooltip';
+import { getNestedGroupOffset, normalizeCenterOnMark, positionSandboxTooltip } from './tooltip';
 
 describe('sandbox tooltip placement', () => {
   const box = {
@@ -67,5 +67,14 @@ describe('sandbox tooltip placement', () => {
         },
       })
     ).toEqual({ x: 13, y: 24 });
+  });
+});
+
+describe('normalizeCenterOnMark', () => {
+  it('matches visTypeVega parser semantics', () => {
+    expect(normalizeCenterOnMark(undefined)).toBe(50);
+    expect(normalizeCenterOnMark(10)).toBe(10);
+    expect(normalizeCenterOnMark(true)).toBe(Number.MAX_VALUE);
+    expect(normalizeCenterOnMark(false)).toBe(-1);
   });
 });

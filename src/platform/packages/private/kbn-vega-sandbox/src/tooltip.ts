@@ -33,6 +33,22 @@ const normalizePadding = (padding: VegaSandboxTooltipConfig['padding']): number 
   return 16;
 };
 
+/** Match visTypeVega's parser: true always centers, false always uses the cursor. */
+export const normalizeCenterOnMark = (
+  centerOnMark: VegaSandboxTooltipConfig['centerOnMark']
+): number => {
+  if (typeof centerOnMark === 'number') {
+    return centerOnMark;
+  }
+  if (centerOnMark === true) {
+    return Number.MAX_VALUE;
+  }
+  if (centerOnMark === false) {
+    return -1;
+  }
+  return 50;
+};
+
 interface VegaTooltipGroupItem {
   mark?: { group?: VegaTooltipGroupItem };
   x?: number;
@@ -125,7 +141,7 @@ export class TooltipHandler {
   private readonly textTruncate: boolean;
 
   constructor(private readonly container: HTMLElement, view: View, opts: VegaSandboxTooltipConfig) {
-    this.centerOnMark = typeof opts.centerOnMark === 'number' ? opts.centerOnMark : 50;
+    this.centerOnMark = normalizeCenterOnMark(opts.centerOnMark);
     this.padding = normalizePadding(opts.padding);
     this.position = opts.position ?? 'top';
     this.textTruncate = Boolean(opts.textTruncate);

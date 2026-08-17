@@ -12,6 +12,7 @@ jest.mock('./render', () => ({
 }));
 
 import { renderVegaDescriptor } from './render';
+import { VegaSandboxErrorCode } from './common';
 import { VEGA_SANDBOX_PROTOCOL_VERSION, type VegaSandboxOutboundMessage } from './protocol';
 import type { VegaSandboxRenderController } from './types';
 import './bootstrap';
@@ -49,6 +50,22 @@ const createController = (
   } as VegaSandboxRenderController['view'],
 });
 
+const initSandbox = (): void => {
+  window.dispatchEvent(
+    new MessageEvent('message', {
+      data: { type: 'init', protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION },
+    })
+  );
+};
+
+const postRender = (renderId: string): void => {
+  window.dispatchEvent(
+    new MessageEvent('message', {
+      data: { type: 'render', renderId, descriptor },
+    })
+  );
+};
+
 describe('sandbox bootstrap rerender restore', () => {
   const posted: VegaSandboxOutboundMessage[] = [];
 
@@ -74,17 +91,8 @@ describe('sandbox bootstrap rerender restore', () => {
     const secondView = createController();
     renderVegaDescriptorMock.mockResolvedValueOnce(firstView).mockResolvedValueOnce(secondView);
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: { type: 'init', protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION },
-      })
-    );
-
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: { type: 'render', renderId: 'r1', descriptor },
-      })
-    );
+    initSandbox();
+    postRender('r1');
     await flushAsync();
 
     expect(renderVegaDescriptorMock).toHaveBeenCalledTimes(1);
@@ -92,11 +100,7 @@ describe('sandbox bootstrap rerender restore', () => {
     await renderVegaDescriptorMock.mock.results[0].value;
     await Promise.resolve();
 
-    window.dispatchEvent(
-      new MessageEvent('message', {
-        data: { type: 'render', renderId: 'r2', descriptor },
-      })
-    );
+    postRender('r2');
     await flushAsync();
     await renderVegaDescriptorMock.mock.results[1].value;
     await Promise.resolve();
@@ -114,5 +118,58 @@ describe('sandbox bootstrap rerender restore', () => {
     expect(secondView.view.setState).toHaveBeenCalledWith({
       signals: { clicked: 3 },
     });
+  });
+
+  it('does not emit rendered when rendering fails', async () => {
+    renderVegaDescriptorMock.mockRejectedValueOnce(new Error('run failed'));
+
+    initSandbox();
+    postRender('r1');
+    await flushAsync();
+
+    expect(posted).toEqual(
+      expect.arrayContaining([
+        {
+          type: 'error',
+          renderId: 'r1',
+          error: {
+            code: VegaSandboxErrorCode.RenderFailed,
+            values: { message: 'run failed' },
+          },
+        },
+      ])
+    );
+    expect(posted.some((message) => message.type === 'rendered')).toBe(false);
+  });
+
+  it('destroys a stale in-flight render and only completes the latest', async () => {
+    const firstView = createController();
+    const secondView = createController();
+    let resolveFirst!: (value: VegaSandboxRenderController) => void;
+    const firstRender = new Promise<VegaSandboxRenderController>((resolve) => {
+      resolveFirst = resolve;
+    });
+    renderVegaDescriptorMock.mockReturnValueOnce(firstRender).mockResolvedValueOnce(secondView);
+
+    initSandbox();
+    postRender('r1');
+    await flushAsync();
+    postRender('r2');
+    await flushAsync();
+    await renderVegaDescriptorMock.mock.results[1].value;
+    await Promise.resolve();
+
+    expect(posted.filter((message) => message.type === 'rendered')).toEqual([
+      { type: 'rendered', renderId: 'r2' },
+    ]);
+
+    resolveFirst(firstView);
+    await firstRender;
+    await flushAsync();
+
+    expect(firstView.destroy).toHaveBeenCalled();
+    expect(posted.filter((message) => message.type === 'rendered')).toEqual([
+      { type: 'rendered', renderId: 'r2' },
+    ]);
   });
 });

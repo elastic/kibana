@@ -151,10 +151,9 @@ export const renderVegaDescriptor = async ({
   try {
     await view.runAsync();
   } catch (error) {
-    onError?.({
-      code: VegaSandboxErrorCode.RenderFailed,
-      values: { message: error instanceof Error ? error.message : String(error) },
-    });
+    tooltipHandler?.hideTooltip();
+    view.finalize();
+    throw error;
   }
 
   return {
