@@ -33,7 +33,8 @@ such as the Classic and legacy Project Chrome headers, set `breakpointSource="vi
 Labels, descriptions, badge text, and tooltip copy are strings. TypeScript erases `string` at
 runtime, so a type assertion can still pass a React node into those fields. The menu coerces
 consumer text to a real string before painting: a non-string becomes empty (or is omitted if the
-field is optional). Do not pass `FormattedMessage` or other nodes.
+field is optional). In development this also logs a one-time `console.warn`. Do not pass
+`FormattedMessage` or other nodes.
 
 ## Compatibility
 
