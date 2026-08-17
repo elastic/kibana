@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGrid,
@@ -27,6 +26,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { CardHeader } from './card_header';
 import {
@@ -660,6 +660,8 @@ export const StepDetectReview: React.FunctionComponent<{
   managedReceivedCount,
   agentReceivedCount,
 }) => {
+  const [isAgentNoteDismissed, setIsAgentNoteDismissed] = useState(false);
+
   return (
     <>
       <EuiTitle size="m">
@@ -674,16 +676,19 @@ export const StepDetectReview: React.FunctionComponent<{
       </EuiText>
       <EuiSpacer size="m" />
 
-      {deploymentMethod === 'agent' && (
+      {deploymentMethod === 'agent' && !isAgentNoteDismissed && (
         <>
-          <EuiCallOut
-            title="Note that data detection will depend on whether an Agent is installed."
-            color="primary"
-            iconType="iInCircle"
+          <KbnInfoCallout
+            title="Data detection depends on your agent setup"
+            onDismiss={() => setIsAgentNoteDismissed(true)}
             data-test-subj="awsOnboardingAgentDetectNote"
           >
-            <p>You can still move on to the next step even if no data has been detected yet.</p>
-          </EuiCallOut>
+            <p>
+              If no Elastic Agent has been enrolled yet, you won&apos;t see incoming data on this
+              step. This won&apos;t stop you from continuing — you can add an agent at any time
+              from Fleet.
+            </p>
+          </KbnInfoCallout>
           <EuiSpacer size="m" />
         </>
       )}
