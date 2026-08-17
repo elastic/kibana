@@ -11,7 +11,7 @@ import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_g
 import {
   computeContentHash,
   computeEntityIdentityKey,
-} from '../../../../../server/lib/entity_analytics/lead_generation/content_hash';
+} from '../../../../../server/lib/entity_analytics/lead_generation/lead_matching';
 
 export const DEFAULT_SPACE_ID = 'default';
 

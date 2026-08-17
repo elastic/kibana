@@ -18,7 +18,8 @@ import {
   type LeadStaleness,
   LeadStatusEnum,
 } from '../../../../common/entity_analytics/lead_generation/types';
-import { computeContentHash, computeEntityIdentityKey } from './content_hash';
+import { compareSignals, computeContentHash, computeEntityIdentityKey } from './lead_matching';
+import type { LeadSignal } from './lead_matching';
 import type { CursorPayload } from './change_cursor';
 import { encodeCursor, decodeCursor } from './change_cursor';
 import { createLeadIndexService } from './indices/lead_index_service';
@@ -36,12 +37,12 @@ export interface LeadDataClientDeps {
 
 interface LeadActionCandidate {
   readonly entityIdentityKey: string;
-  readonly contentHash: string;
+  readonly observations: LeadSignal[];
 }
 
 type LeadPersistDecision =
   | { readonly type: 'dedup'; readonly existingId: string }
-  | { readonly type: 'version'; readonly existingId: string }
+  | { readonly type: 'version'; readonly existingId: string; readonly allowReopen: boolean }
   | { readonly type: 'create' }
   | { readonly type: 'skip' };
 
@@ -56,7 +57,11 @@ interface PersistLeadsParams {
   readonly timestamp: string;
   readonly dedups: ReadonlyArray<{ readonly existingId: string }>;
   readonly creates: readonly SynthesizedLead[];
-  readonly versions: ReadonlyArray<{ readonly existingId: string; readonly lead: SynthesizedLead }>;
+  readonly versions: ReadonlyArray<{
+    readonly existingId: string;
+    readonly lead: SynthesizedLead;
+    readonly allowReopen: boolean;
+  }>;
 }
 
 interface FindLeadChangesParams {
@@ -169,7 +174,7 @@ interface EsLeadDoc {
 
 interface ExistingLeadLookup {
   id: string;
-  contentHash: string;
+  signals: LeadSignal[];
   entityIdentityKey: string;
   version: number;
   status: LeadStatus;
@@ -177,10 +182,10 @@ interface ExistingLeadLookup {
 
 /** Partial `_source` returned by the matching-lead mget. */
 interface LeadLookupSource {
-  content_hash?: string;
   entity_identity_key?: string;
   version?: number;
   status?: string;
+  observations?: Array<{ module_id: string; type: string; severity: string }>;
 }
 
 const leadToEsDoc = (
@@ -263,7 +268,9 @@ const PAINLESS_NOW_ISO = 'Instant.ofEpochMilli(System.currentTimeMillis()).toStr
  *   created_at and changed_at when ES applies the write
  * - Same content_hash + dismissed: noop (do not reopen)
  * - Same content_hash: refresh timestamp to indicate leads was seen again
- * - Different content_hash: replace evidence + narrative, bump version and changed_at
+ * - Different content_hash: replace evidence + narrative, bump version and changed_at;
+ *   status only flips when `params.allow_reopen` is true (a dismissal landing between
+ *   classify and persist must not be clobbered)
  * - Never touches created_at on updates
  */
 const LEAD_UPDATE_SCRIPT_SOURCE = `
@@ -311,7 +318,7 @@ if (ctx.op == 'create') {
   ctx._source.content_hash = params.content_hash;
   ctx._source.execution_uuid = params.execution_uuid;
   ctx._source.source_type = params.source_type;
-  ctx._source.status = params.status;
+  ctx._source.status = params.allow_reopen ? params.status : ctx._source.status;
   ctx._source.version = (ctx._source.containsKey('version') ? (int) ctx._source.version : 0) + 1;
   ctx._source.changed_at = now;
   ctx._source.timestamp = params.timestamp;
@@ -359,14 +366,25 @@ export const createLeadDataClient = ({
       const resp = await esClient.mget<LeadLookupSource>({
         index: indexName,
         ids: uniqueKeys,
-        _source: ['content_hash', 'entity_identity_key', 'version', 'status'],
+        _source: [
+          'entity_identity_key',
+          'version',
+          'status',
+          'observations.module_id',
+          'observations.type',
+          'observations.severity',
+        ],
       });
 
       for (const doc of resp.docs) {
-        if ('found' in doc && doc.found && doc._id && doc._source && doc._source.content_hash) {
+        if ('found' in doc && doc.found && doc._id && doc._source) {
           matchingByKey.set(doc._id, {
             id: doc._id,
-            contentHash: doc._source.content_hash,
+            signals: (doc._source.observations ?? []).map((obs) => ({
+              moduleId: obs.module_id,
+              type: obs.type,
+              severity: obs.severity as LeadSignal['severity'],
+            })),
             entityIdentityKey: doc._source.entity_identity_key ?? doc._id,
             version: doc._source.version ?? 1,
             status: LeadStatusEnum.safeParse(doc._source.status).data ?? 'active',
@@ -387,10 +405,10 @@ export const createLeadDataClient = ({
   };
 
   /**
-   * Classify each candidate against existing leads
-   * - Dedup: existing non-dismissed lead with the same signal set (moduleId:type:severity)
-   * - Version: existing lead with a different signal set (including dismissed with new evidence)
-   * - Skip: dismissed lead with the same signal set (do not reopen)
+   * Classify each candidate against existing leads using their observation set
+   * - Dedup: existing non-dismissed lead with observation set evidence
+   * - Version: existing lead whose observation set escalated or decayed
+   * - Skip: dismissed lead whose observation set is equal or decayed
    * - Create: no matching lead for the entity
    */
   const classifyLeadCandidates = async <T extends LeadActionCandidate>(
@@ -408,30 +426,35 @@ export const createLeadDataClient = ({
         return { candidate, decision: { type: 'create' } };
       }
 
-      const sameLeadContent = matchingLead.contentHash === candidate.contentHash;
+      const observationsDelta = compareSignals(candidate.observations, matchingLead.signals);
+
       if (matchingLead.status === 'dismissed') {
-        if (sameLeadContent) {
+        if (observationsDelta !== 'escalated') {
           logger.debug(
             `[LeadGeneration] Lead previously dismissed for entity ` +
               `${candidate.entityIdentityKey}`
           );
           return { candidate, decision: { type: 'skip' } };
         }
+
+        // Reopen the lead because the observation set escalated
         return {
           candidate,
-          decision: { type: 'version', existingId: matchingLead.id },
+          decision: { type: 'version', existingId: matchingLead.id, allowReopen: true },
         };
       }
 
-      if (sameLeadContent) {
+      if (observationsDelta === 'equal') {
         return {
           candidate,
           decision: { type: 'dedup', existingId: matchingLead.id },
         };
       }
+
+      // Observation set changes, version the lead. allowReopen is false to prevent reopening the lead if it was dismissed between classify and persist.
       return {
         candidate,
-        decision: { type: 'version', existingId: matchingLead.id },
+        decision: { type: 'version', existingId: matchingLead.id, allowReopen: false },
       };
     });
   };
@@ -492,7 +515,7 @@ export const createLeadDataClient = ({
         );
       }
 
-      for (const { existingId, lead } of versions) {
+      for (const { existingId, lead, allowReopen } of versions) {
         const doc = leadToEsDoc(lead, executionId, sourceType, timestamp);
         logger.debug(
           `[LeadGeneration] Versioning lead ${existingId} (signal set changed, ` +
@@ -510,7 +533,7 @@ export const createLeadDataClient = ({
             script: {
               source: LEAD_UPDATE_SCRIPT_SOURCE,
               lang: 'painless',
-              params: doc,
+              params: { ...doc, allow_reopen: allowReopen },
             },
           }
         );
@@ -520,6 +543,8 @@ export const createLeadDataClient = ({
         const doc = leadToEsDoc(lead, executionId, sourceType, timestamp);
         logger.debug(`[LeadGeneration] Creating lead ${doc.id} (executionId=${executionId})`);
         // Upsert: insert if missing; if another writer won the race, script dedups or versions.
+        // allow_reopen is unused on the create branch; it only guards the fallthrough
+        // else-branch when a concurrent writer already created the document.
         bulkBody.push(
           {
             update: {
@@ -532,9 +557,9 @@ export const createLeadDataClient = ({
             script: {
               source: LEAD_UPDATE_SCRIPT_SOURCE,
               lang: 'painless',
-              params: doc,
+              params: { ...doc, allow_reopen: false },
             },
-            upsert: {},
+            upsert: {}, // uses the script to set created_at and changed_at on apply time
             scripted_upsert: true,
           }
         );

@@ -23,7 +23,7 @@ import type { LeadCandidate } from './engine/lead_generation_engine';
 import { registerObservationModules } from './observation_modules/register_modules';
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadActionDecision } from './lead_data_client';
-import { computeEntityIdentityKey } from './content_hash';
+import { computeEntityIdentityKey } from './lead_matching';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import type { Lead as SynthesizedLead, LeadEntity } from './types';
 
@@ -46,7 +46,7 @@ export interface RunPipelineParams {
 const shouldRunLLMSynthesis = (
   item: LeadActionDecision<LeadCandidate>
 ): item is LeadActionDecision<LeadCandidate> & {
-  decision: { type: 'create' } | { type: 'version'; existingId: string };
+  decision: { type: 'create' } | { type: 'version'; existingId: string; allowReopen: boolean };
 } => item.decision.type === 'create' || item.decision.type === 'version';
 
 /**
@@ -136,7 +136,7 @@ export const runLeadGenerationPipeline = async ({
 
   const runTimestamp = new Date().toISOString();
   const creates: SynthesizedLead[] = [];
-  const versions: Array<{ existingId: string; lead: SynthesizedLead }> = [];
+  const versions: Array<{ existingId: string; lead: SynthesizedLead; allowReopen: boolean }> = [];
   for (const { candidate, decision } of toSynthesize) {
     const synthesizedLead = synthesized.find(
       (lead) =>
@@ -147,7 +147,11 @@ export const runLeadGenerationPipeline = async ({
         `[LeadGeneration] Skipping persist; no synthesized lead for entity ${candidate.entityIdentityKey}`
       );
     } else if (decision.type === 'version') {
-      versions.push({ existingId: decision.existingId, lead: synthesizedLead });
+      versions.push({
+        existingId: decision.existingId,
+        lead: synthesizedLead,
+        allowReopen: decision.allowReopen,
+      });
     } else {
       creates.push(synthesizedLead);
     }

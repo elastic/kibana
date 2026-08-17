@@ -47,7 +47,7 @@ jest.mock('./lead_data_client', () => ({
 }));
 
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
-import { computeEntityIdentityKey } from './content_hash';
+import { computeEntityIdentityKey } from './lead_matching';
 import { runLeadGenerationPipeline } from './run_pipeline';
 
 describe('runLeadGenerationPipeline', () => {
@@ -246,7 +246,10 @@ describe('runLeadGenerationPipeline', () => {
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
     mockClassifyLeadCandidates.mockResolvedValueOnce([
-      { candidate, decision: { type: 'version', existingId: 'existing-admin' } },
+      {
+        candidate,
+        decision: { type: 'version', existingId: 'existing-admin', allowReopen: false },
+      },
     ]);
     mockSynthesizeLeads.mockResolvedValueOnce([
       {

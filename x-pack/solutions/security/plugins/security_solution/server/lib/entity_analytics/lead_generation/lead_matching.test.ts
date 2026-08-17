@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { computeContentHash, computeEntityIdentityKey } from './content_hash';
+import { compareSignals, computeContentHash, computeEntityIdentityKey } from './lead_matching';
+import type { LeadSignal } from './lead_matching';
 
 const BASE_ENTITIES = [{ type: 'user', id: 'user:alice', name: 'alice' }];
 
-const BASE_OBSERVATIONS = [
-  { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' as const },
-  { moduleId: 'alert_analysis', type: 'alert_spike', severity: 'medium' as const },
+const BASE_OBSERVATIONS: LeadSignal[] = [
+  { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' },
+  { moduleId: 'alert_analysis', type: 'alert_spike', severity: 'medium' },
 ];
 
 describe('computeEntityIdentityKey', () => {
@@ -60,6 +61,66 @@ describe('computeEntityIdentityKey', () => {
   });
 });
 
+describe('compareSignals', () => {
+  it('returns equal for identical sets', () => {
+    expect(compareSignals(BASE_OBSERVATIONS, BASE_OBSERVATIONS)).toBe('equal');
+  });
+
+  it('returns equal regardless of array order', () => {
+    expect(compareSignals(BASE_OBSERVATIONS, [...BASE_OBSERVATIONS].reverse())).toBe('equal');
+  });
+
+  it('returns escalated when a new moduleId:type is added', () => {
+    const existing: LeadSignal[] = [BASE_OBSERVATIONS[0]];
+    expect(compareSignals(BASE_OBSERVATIONS, existing)).toBe('escalated');
+  });
+
+  it('returns escalated when the same moduleId:type escalates severity (medium -> high)', () => {
+    const existing: LeadSignal[] = [
+      { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'medium' },
+    ];
+    const candidate: LeadSignal[] = [
+      { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' },
+    ];
+    expect(compareSignals(candidate, existing)).toBe('escalated');
+  });
+
+  it('returns decayed when the same moduleId:type drops severity (high -> medium)', () => {
+    const existing: LeadSignal[] = [
+      { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' },
+    ];
+    const candidate: LeadSignal[] = [
+      { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'medium' },
+    ];
+    expect(compareSignals(candidate, existing)).toBe('decayed');
+  });
+
+  it('returns decayed when a moduleId:type disappears', () => {
+    const existing: LeadSignal[] = BASE_OBSERVATIONS;
+    const candidate: LeadSignal[] = [BASE_OBSERVATIONS[0]];
+    expect(compareSignals(candidate, existing)).toBe('decayed');
+  });
+
+  it('returns escalated when one signal is added and another removed (addition wins)', () => {
+    const existing: LeadSignal[] = [BASE_OBSERVATIONS[0]];
+    const candidate: LeadSignal[] = [
+      { moduleId: 'anomaly_detection', type: 'ml_anomaly', severity: 'high' },
+    ];
+    expect(compareSignals(candidate, existing)).toBe('escalated');
+  });
+
+  it('returns equal for duplicate moduleId:type at differing severities when max is unchanged', () => {
+    const existing: LeadSignal[] = [
+      { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' },
+    ];
+    const candidate: LeadSignal[] = [
+      { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'medium' },
+      { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' },
+    ];
+    expect(compareSignals(candidate, existing)).toBe('equal');
+  });
+});
+
 describe('computeContentHash', () => {
   it('returns the same hash for the same observations', () => {
     expect(computeContentHash({ observations: BASE_OBSERVATIONS })).toBe(
@@ -75,7 +136,7 @@ describe('computeContentHash', () => {
     expect(a).toBe(b);
   });
 
-  it('deduplicates repeated moduleId:type:severity triples', () => {
+  it('is stable across duplicate triples that collapse to the same max severity', () => {
     const a = computeContentHash({ observations: BASE_OBSERVATIONS });
     const b = computeContentHash({
       observations: [...BASE_OBSERVATIONS, BASE_OBSERVATIONS[0]],
@@ -123,7 +184,7 @@ describe('computeContentHash', () => {
     expect(hashV1).not.toBe(hashV2);
   });
 
-  it('changes when the same moduleId:type escalates in severity', () => {
+  it('differs when max severity for a key changes', () => {
     const day1 = computeContentHash({
       observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'low' }],
     });
@@ -131,29 +192,5 @@ describe('computeContentHash', () => {
       observations: [{ moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'critical' }],
     });
     expect(day1).not.toBe(day2);
-  });
-
-  it('ignores scores and LLM prose — only moduleId:type:severity matter', () => {
-    const a = computeContentHash({ observations: BASE_OBSERVATIONS });
-    const b = computeContentHash({
-      observations: [
-        {
-          moduleId: 'risk_analysis',
-          type: 'high_risk_score',
-          severity: 'high',
-          // @ts-expect-error — intentionally passing extra fields to prove they're ignored
-          score: 99,
-          description: 'LLM prose that changes every run',
-        },
-        {
-          moduleId: 'alert_analysis',
-          type: 'alert_spike',
-          severity: 'medium',
-          // @ts-expect-error — intentionally passing extra fields to prove they're ignored
-          confidence: 0.1,
-        },
-      ],
-    });
-    expect(a).toBe(b);
   });
 });

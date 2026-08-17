@@ -15,7 +15,7 @@ import type {
   ObservationModule,
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
-import { computeContentHash, computeEntityIdentityKey } from '../content_hash';
+import { computeEntityIdentityKey } from '../lead_matching';
 import { llmSynthesizeBatch, type CohortContext, type ScoredEntityInput } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {
@@ -29,7 +29,6 @@ export interface LeadCandidate {
   readonly priority: number;
   readonly observations: Observation[];
   readonly entityIdentityKey: string;
-  readonly contentHash: string;
 }
 
 export const createLeadGenerationEngine = ({
@@ -95,7 +94,6 @@ export const createLeadGenerationEngine = ({
         entityIdentityKey: computeEntityIdentityKey({
           entities: [{ type: scored.entity.type, name: scored.entity.name, id: scored.entity.id }],
         }),
-        contentHash: computeContentHash({ observations: scored.observations }),
       };
     });
 
