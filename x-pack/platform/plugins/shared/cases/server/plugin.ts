@@ -48,8 +48,6 @@ import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
 import { getInternalRoutes } from './routes/api/get_internal_routes';
-import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import { UserProfileService } from './services';
 import {
@@ -96,8 +94,6 @@ export class CasePlugin
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
   private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
-  private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
   private incrementalIdTaskManager?: IncrementalIdTaskManager;
@@ -113,8 +109,6 @@ export class CasePlugin
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.logger = this.initializerContext.logger.get();
     this.clientFactory = new CasesClientFactory(this.logger);
-    this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-    this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -179,7 +173,6 @@ export class CasePlugin
     registerSavedObjects({
       core,
       logger: this.logger,
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       lensEmbeddableFactory: this.lensEmbeddableFactory,
       config: this.caseConfig,
     });
@@ -308,12 +301,6 @@ export class CasePlugin
 
     return {
       attachmentFramework: {
-        registerExternalReference: (externalReferenceAttachmentType) => {
-          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
-        },
-        registerPersistableState: (persistableStateAttachmentType) => {
-          this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
-        },
         registerUnified: (unifiedAttachmentType) => {
           this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
         },
@@ -465,8 +452,6 @@ export class CasePlugin
        */
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
-      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       notifications: plugins.notifications,
@@ -510,9 +495,6 @@ export class CasePlugin
 
     return {
       getCasesClientWithRequest: this.getCasesClientWithRequest(core, 'plugin_contract'),
-      getExternalReferenceAttachmentTypeRegistry: () =>
-        this.externalReferenceAttachmentTypeRegistry,
-      getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
       getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
       config: this.caseConfig,
     };

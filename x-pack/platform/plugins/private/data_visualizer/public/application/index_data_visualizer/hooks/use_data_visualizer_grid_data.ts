@@ -603,6 +603,7 @@ export const useDataVisualizerGridData = (
     progress: combinedProgress,
     overallStatsProgress,
     configs,
+    fieldsCount: configs.length,
     queryOrAggregateQuery,
     searchQueryLanguage,
     searchString,
