@@ -256,6 +256,9 @@ export function registerConversationRoutes({
             }),
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/conversations_create.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { conversations: conversationsService, agents: agentsService } =
