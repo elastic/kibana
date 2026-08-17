@@ -80,6 +80,10 @@ export const ALERTING_ERROR_CODES = {
    */
   RULE_CHANGE_HISTORY_UNAVAILABLE: 'RULE_CHANGE_HISTORY_UNAVAILABLE',
 
+  // ────────────────────── Rule templates ─────────────────────
+  /** A rule template with the given identifier does not exist. */
+  RULE_TEMPLATE_NOT_FOUND: 'RULE_TEMPLATE_NOT_FOUND',
+
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */
   ACTION_POLICY_NOT_FOUND: 'ACTION_POLICY_NOT_FOUND',
@@ -108,11 +112,16 @@ export const ALERTING_ERROR_CODES = {
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
-   * The `group_hash` resolved to a latest alert event, but its `episode_id`
-   * did not match the one the item targeted (the episode was superseded).
-   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND`.
+   * No alert event matched the supplied `episode_id`. On the legacy bulk
+   * route it also covers a targeted `episode_id` superseded by a newer
+   * episode of the group.
    */
   ALERT_EPISODE_NOT_FOUND: 'ALERT_EPISODE_NOT_FOUND',
+  /**
+   * The episode exists but is not the latest episode of its series. Lifecycle
+   * actions (`activate` / `deactivate`) only accept the latest episode.
+   */
+  ALERT_EPISODE_NOT_LATEST: 'ALERT_EPISODE_NOT_LATEST',
   /** The requested action is incompatible with the episode's current `episode.status`. */
   INVALID_EPISODE_STATE_TRANSITION: 'INVALID_EPISODE_STATE_TRANSITION',
 
@@ -157,6 +166,13 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  *   `_INVALID`, `_UNRECOVERABLE`.
  */
 export const ALERTING_LOG_CODES = {
+  // ─────────────────────────────── Dispatcher steps ──────────────────────
+  /**
+   * Hydrate episode data step: some episodes had no matching .rule-events row;
+   * data will be absent for those episodes
+   */
+  HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW:
+    'HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW',
   // ──────────────── Action policy API key invalidation ───────────────
   /**
    * A delete refused to remove one or more action policies because their API
@@ -373,6 +389,16 @@ export const ALERTING_LOG_CODES = {
    */
   RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
   /**
+   * A bulk executor-task API key rotation call (`bulkUpdateSchedules`) failed
+   * for one or more rules — e.g. the per-task-type key grant was rejected. The
+   * affected rules' keys were left unrotated (their old key still works) and
+   * are reported per-rule in the bulk response; no saved object was written,
+   * so rule and task state stay consistent (this is not
+   * `RULE_TASK_MANAGER_DRIFT`).
+   */
+  RULE_API_KEY_ROTATION_FAILED: 'RULE_API_KEY_ROTATION_FAILED',
+
+  /**
    * Scheduling a new rule's executor task failed and the compensating delete
    * of the already-persisted saved object failed too. The rule is left
    * orphaned — enabled, but with no executor task — and needs manual removal.
@@ -414,6 +440,13 @@ export const ALERTING_LOG_CODES = {
    */
   MAINTENANCE_WINDOW_PIT_CLOSE_FAILED: 'MAINTENANCE_WINDOW_PIT_CLOSE_FAILED',
 
+  // ──────────────── Rule templates (graceful degradation) ────────────────
+  /**
+   * A stored rule template failed schema validation. Find omits it from the
+   * page; get maps it to not-found. Operator should investigate package drift.
+   */
+  RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
+
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_episode` failed; tool returns an error result. */
   AGENT_BUILDER_EPISODE_REFRESH_FAILED: 'AGENT_BUILDER_EPISODE_REFRESH_FAILED',
@@ -436,9 +469,7 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
-  /** Skill schema docs could not be generated; skill registration aborted (error). */
-  AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED: 'AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED',
-  /** Agent Builder skill registration failed (error); skills unavailable until fixed. */
+  /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
   // ─────────────────────────────── Tasks ─────────────────────────────

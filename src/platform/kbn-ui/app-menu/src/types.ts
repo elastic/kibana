@@ -79,6 +79,27 @@ export type AppMenuSplitButtonProps =
   | AppMenuSecondarySplitButton
   | AppMenuSecondarySplitButtonWithPopover;
 
+/**
+ * Optional Event-Based Telemetry (EBT) click attributes for an app menu control.
+ * Rendered as `data-ebt-*` DOM attributes so core click tracking can collect them.
+ *
+ * `data-ebt-element` is always set to `appMenu` by the renderer — plugins only supply
+ * `action` (and optional `detail`).
+ *
+ * Prefer action values from `@kbn/ebt-click` (`EBT_CLICK_ACTIONS` / plugin-local constants).
+ * Shape intentionally omits a hard dependency on that package (this package is Kibana-agnostic).
+ */
+export interface AppMenuEbtAttrs {
+  /**
+   * User intent for the click. Maps to `data-ebt-action` / `click.action`.
+   */
+  action: string;
+  /**
+   * Optional extra context. Maps to `data-ebt-detail` / `click.detail`.
+   */
+  detail?: string;
+}
+
 interface AppMenuItemBase {
   /**
    * A unique, internal identifier for the item.
@@ -93,6 +114,12 @@ interface AppMenuItemBase {
    */
   label: string;
   /**
+   * Optional supporting text rendered below the label. Only shown when the item is rendered
+   * inside a popover menu (sub-items, static items, and items moved to the "More" menu);
+   * ignored for inline top-level buttons and for the primary action button.
+   */
+  description?: string;
+  /**
    * The icon type for the item.
    */
   iconType: IconType;
@@ -100,6 +127,11 @@ interface AppMenuItemBase {
    * A unique identifier for the item, used for testing purposes. Maps to `data-test-subj` attribute.
    */
   testId?: string;
+  /**
+   * Optional EBT click attributes. Mapped to `data-ebt-action` and optionally
+   * `data-ebt-detail` on the rendered control. `data-ebt-element` is always `appMenu`.
+   */
+  ebt?: AppMenuEbtAttrs;
   /**
    * Disables the button if set to `true` or a function that returns `true`.
    */
@@ -283,7 +315,7 @@ export type AppMenuPopoverItem = Omit<
 export interface AppMenuSwitch {
   id: string;
   label: string;
-  labelProps: EuiSwitchProps['labelProps'];
+  labelProps?: Omit<NonNullable<EuiSwitchProps['labelProps']>, 'css'>;
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
