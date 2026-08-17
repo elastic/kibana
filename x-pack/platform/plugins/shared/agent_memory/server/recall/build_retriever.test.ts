@@ -72,6 +72,43 @@ describe('buildRetriever', () => {
     });
   });
 
+  it('boosts recent BM25 matches without adding a recency-only RRF leg', () => {
+    expect(buildTestRetriever()).toEqual({
+      rrf: expect.objectContaining({
+        retrievers: expect.arrayContaining([
+          {
+            standard: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      multi_match: {
+                        query: 'preferred sources',
+                        fields: ['title^2', 'description'],
+                        type: 'best_fields',
+                      },
+                    },
+                  ],
+                  should: [
+                    {
+                      distance_feature: {
+                        field: '@timestamp',
+                        origin: 'now',
+                        pivot: '30d',
+                        boost: 0.1,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        ]),
+      }),
+    });
+    expect(buildTestRetriever()).toHaveProperty('rrf.retrievers.length', 2);
+  });
+
   it('queries the inherited semantic content field', () => {
     expect(buildTestRetriever()).toEqual({
       rrf: expect.objectContaining({
@@ -114,10 +151,26 @@ describe('buildRetriever', () => {
     ).toEqual({
       standard: {
         query: {
-          multi_match: {
-            query: 'preferred sources',
-            fields: ['title^2', 'description'],
-            type: 'best_fields',
+          bool: {
+            must: [
+              {
+                multi_match: {
+                  query: 'preferred sources',
+                  fields: ['title^2', 'description'],
+                  type: 'best_fields',
+                },
+              },
+            ],
+            should: [
+              {
+                distance_feature: {
+                  field: '@timestamp',
+                  origin: 'now',
+                  pivot: '30d',
+                  boost: 0.1,
+                },
+              },
+            ],
           },
         },
         filter: {
