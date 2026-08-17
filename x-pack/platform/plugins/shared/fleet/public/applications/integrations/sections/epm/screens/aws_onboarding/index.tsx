@@ -33,6 +33,7 @@ import {
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiStepsHorizontalProps } from '@elastic/eui';
@@ -375,16 +376,22 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 <h2>Which AWS services do you want to monitor?</h2>
               </EuiTitle>
             </EuiFlexItem>
-            {/* Deliberately understated — most users never need to touch
-                this. Kept out of the main flow, same convention as the
-                agent-based "Edit" link on Step 3. */}
+            {/* Secondary to the step title, but a real clickable control —
+                not just quiet text — so it's actually discoverable. Most
+                users still won't need to touch it. */}
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {`Data format: ${AWS_SCHEMA_META[schema].label}`}{' '}
-                <EuiLink onClick={openSchemaModal} data-test-subj="awsOnboardingEditSchema">
-                  Edit
-                </EuiLink>
-              </EuiText>
+              <EuiToolTip content="Determines which package variant installs for each service.">
+                <EuiBadge
+                  color="hollow"
+                  iconType="pencil"
+                  iconSide="right"
+                  onClick={openSchemaModal}
+                  onClickAriaLabel="Edit data format"
+                  data-test-subj="awsOnboardingEditSchema"
+                >
+                  {`Data format: ${AWS_SCHEMA_META[schema].label}`}
+                </EuiBadge>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
