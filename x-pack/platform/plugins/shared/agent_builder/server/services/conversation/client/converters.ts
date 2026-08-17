@@ -28,7 +28,6 @@ import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
-  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
@@ -267,27 +266,6 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
       ? { template_version: conversation.template_version }
       : {}),
   };
-};
-
-export const updateConversation = ({
-  conversation,
-  update,
-  space,
-  updateDate,
-}: {
-  conversation: Conversation;
-  update: ConversationUpdatableFields;
-  space: string;
-  updateDate: Date;
-}) => {
-  const updated = {
-    ...conversation,
-    ...update,
-    space,
-    updated_at: updateDate.toISOString(),
-  };
-
-  return updated;
 };
 
 export const createRequestToEs = ({

@@ -24,7 +24,6 @@ import {
   fromEs,
   toEs,
   createRequestToEs,
-  updateConversation,
   type Document as ConversationDocument,
 } from './converters';
 
@@ -864,51 +863,6 @@ describe('conversation model converters', () => {
         id: 'U123',
         full_name: 'Jane Doe',
         username: 'jane',
-      });
-    });
-  });
-
-  describe('updateConversation', () => {
-    it('preserves access control entries when updating a conversation', () => {
-      const conversation: Conversation = {
-        id: 'conv_id',
-        agent_id: 'agent_id',
-        user: { id: 'user_id', username: 'user_name' },
-        title: 'conv_title',
-        created_at: creationDate,
-        updated_at: updateDate,
-        rounds: [],
-        access_control: {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [
-            {
-              type: 'user',
-              id: 'alice-profile-id',
-              role: ConversationAccessControlRole.Member,
-              added_at: '2026-06-29T00:00:00.000Z',
-            },
-          ],
-        },
-      };
-
-      const updated = updateConversation({
-        conversation,
-        update: { id: 'conv_id', title: 'new_title' },
-        space: 'space',
-        updateDate: new Date(updateDate),
-      });
-
-      expect(updated.title).toEqual('new_title');
-      expect(updated.access_control).toEqual({
-        access_mode: ConversationAccessControlMode.Private,
-        entries: [
-          {
-            type: 'user',
-            id: 'alice-profile-id',
-            role: ConversationAccessControlRole.Member,
-            added_at: '2026-06-29T00:00:00.000Z',
-          },
-        ],
       });
     });
   });

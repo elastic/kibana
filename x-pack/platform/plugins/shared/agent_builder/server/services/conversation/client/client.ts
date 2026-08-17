@@ -66,14 +66,7 @@ import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/v
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
-import {
-  fromEs,
-  fromEsWithoutRounds,
-  toEs,
-  createRequestToEs,
-  updateConversation,
-  type Document,
-} from './converters';
+import { fromEs, fromEsWithoutRounds, toEs, createRequestToEs, type Document } from './converters';
 
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
 const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
@@ -738,13 +731,13 @@ class ConversationClientImpl implements ConversationClient {
     try {
       const { document } = await writer.readModifyWrite({
         id: conversationId,
-        mutate: (current) =>
-          updateConversation({
-            conversation: current,
-            update: { id: conversationId, ...fields(current) },
-            updateDate: new Date(),
-            space: this.space,
-          }),
+        mutate: (current) => ({
+          ...current,
+          ...fields(current),
+          id: conversationId,
+          space: this.space,
+          updated_at: new Date().toISOString(),
+        }),
       });
 
       return document;

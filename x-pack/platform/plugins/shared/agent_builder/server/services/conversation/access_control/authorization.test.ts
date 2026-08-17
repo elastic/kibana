@@ -265,7 +265,7 @@ describe('conversation access control', () => {
       ['private', ConversationAccessControlMode.Private],
     ])('leaves the owner of a %s conversation unaffected by isAdmin', (_label, accessMode) => {
       const owned = conversation({
-        user_id: user.id,
+        user: { id: user.id, username: user.username },
         access_control: { access_mode: accessMode },
       });
 
