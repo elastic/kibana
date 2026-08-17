@@ -21,25 +21,16 @@ export const registerStepDefinitions = ({
   let enabled: Promise<boolean> | undefined;
   const isEnabled = () => (enabled ??= isContextEngineEnabled());
 
-  workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled())) {
-      return undefined;
-    }
-    const { createKiStepDefinition } = await import('./create_ki');
-    return createKiStepDefinition;
-  });
-  workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled())) {
-      return undefined;
-    }
-    const { updateKiStepDefinition } = await import('./update_ki');
-    return updateKiStepDefinition;
-  });
-  workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled())) {
-      return undefined;
-    }
-    const { deleteKiStepDefinition } = await import('./delete_ki');
-    return deleteKiStepDefinition;
-  });
+  let definitions: Promise<typeof import('./definitions')> | undefined;
+  const loadDefinitions = () => (definitions ??= import('./definitions'));
+
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).createKiStepDefinition : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).updateKiStepDefinition : undefined
+  );
+  workflowsExtensions.registerStepDefinition(async () =>
+    (await isEnabled()) ? (await loadDefinitions()).deleteKiStepDefinition : undefined
+  );
 };
