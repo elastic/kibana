@@ -15,7 +15,7 @@ import {
   BULK_SERIES_ACTION_URL,
   NO_ACCESS_ROLE,
   testData,
-} from '../../../fixtures';
+} from '../fixtures';
 
 apiTest.describe('Bulk create series actions API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
