@@ -70,7 +70,10 @@ const requestSymbol = Symbol('request');
  * Falls back to req.socket if the session socket is unavailable (session already destroyed, or
  * HTTP/1.1 request).
  */
-export const resolveRawSocket = (req: { socket: Socket; stream?: { session?: { socket: Socket } } }): Socket => {
+export const resolveRawSocket = (req: {
+  socket: Socket;
+  stream?: { session?: { socket: Socket } };
+}): Socket => {
   if (req.stream != null) {
     try {
       const sessionSocket = req.stream.session?.socket;
