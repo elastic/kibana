@@ -74,7 +74,7 @@ export async function getDiverseSampleDocuments({
   const window = selectStratifiedWindow(rows, { iteration, size });
 
   const sampleValues = Array.from(
-    new Set(window.map((row) => row.sample).filter((sample) => /\w/.test(sample)))
+    new Set(window.map((row) => row.sample).filter((sample) => /[\p{L}\p{N}]/u.test(sample)))
   );
 
   if (sampleValues.length === 0) {
