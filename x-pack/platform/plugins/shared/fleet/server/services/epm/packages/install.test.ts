@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import fs from 'fs/promises';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ElasticsearchClient, SavedObject } from '@kbn/core/server';
@@ -80,6 +81,7 @@ jest.mock('../../upgrade_sender');
 jest.mock('../../license');
 jest.mock('../../upgrade_sender');
 jest.mock('./cleanup');
+jest.mock('fs/promises');
 jest.mock('./bundled_packages');
 jest.mock('./install_state_machine/_state_machine_package_install', () => {
   return {
@@ -453,23 +455,27 @@ describe('install', () => {
     });
 
     describe('name-only install when registry is reachable', () => {
-      const bundledPackage = {
-        name: 'test_package',
-        version: '1.0.0',
-        getBuffer: async () => Buffer.from('test_package'),
-      };
+      const actualBundledPackages = jest.requireActual('./bundled_packages');
 
       beforeEach(() => {
-        mockGetBundledPackageByPkgKey.mockImplementation(async (pkgKey: string) => {
-          if (pkgKey.includes('-')) {
-            return pkgKey === `${bundledPackage.name}-${bundledPackage.version}`
-              ? bundledPackage
-              : undefined;
-          }
+        // Use the REAL getBundledPackageByPkgKey for this block so the
+        // registry-reachable gate in bundled_packages.ts is actually exercised,
+        // not just install.ts's branching on a hardcoded mock value.
+        mockGetBundledPackageByPkgKey.mockImplementation(
+          actualBundledPackages.getBundledPackageByPkgKey
+        );
+        actualBundledPackages._purgeBundledPackagesCache();
 
-          return undefined;
-        });
-        jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: false } as any);
+        jest.mocked(appContextService.getConfig).mockReturnValue({
+          isAirGapped: false,
+          developer: {
+            bundledPackageLocation: '/tmp/test',
+          },
+        } as any);
+
+        jest.mocked(fs.stat).mockResolvedValue({} as any);
+        jest.mocked(fs.readdir).mockResolvedValue(['test_package-1.0.0.zip'] as any);
+        jest.mocked(fs.readFile).mockResolvedValue(Buffer.from('test_package'));
       });
 
       it('should resolve via registry and not short-circuit to bundled when bundled is present', async () => {
