@@ -60,7 +60,9 @@ spaceTest.describe(
     });
 
     spaceTest('should render metrics grid with wildcard', async ({ pageObjects }) => {
-      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS_ALL);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(
+        testData.ESQL_QUERIES.TS_WILDCARD_UNBOUNDED
+      );
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
       await expect(metricsExperience.getCardByIndex(0)).toBeVisible();
