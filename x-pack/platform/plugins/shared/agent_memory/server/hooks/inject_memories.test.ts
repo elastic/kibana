@@ -10,7 +10,8 @@ import { context, SpanStatusCode } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { HookLifecycle } from '@kbn/agent-builder-common';
+import { HookLifecycle, type AgentConfiguration } from '@kbn/agent-builder-common';
+import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { BeforeAgentHookContext, HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
@@ -100,11 +101,17 @@ describe('agent memory injection hook tracing', () => {
     handler = registration.handler;
   });
 
-  const runHook = async (message = 'What sources should I use?') =>
+  const runHook = async (
+    message = 'What sources should I use?',
+    agentConfiguration: AgentConfiguration = {
+      tools: [{ tool_ids: [platformMemoryTools.recall] }],
+    }
+  ) =>
     handler({
       request: httpServerMock.createKibanaRequest(),
       nextInput: { message, attachments: [] },
       agentId: 'test-agent',
+      agentConfiguration,
     } satisfies BeforeAgentHookContext);
 
   const getHookSpan = () => {
@@ -117,7 +124,7 @@ describe('agent memory injection hook tracing', () => {
     return span;
   };
 
-  it('records recalled memory count, ids, and estimated injection cost', async () => {
+  it('runs explicitly enabled recall and records injection diagnostics', async () => {
     mockRecallMemory.mockResolvedValue({
       memories: [createMemory(), createMemory({ id: 'memory-2' })],
     });
@@ -129,6 +136,11 @@ describe('agent memory injection hook tracing', () => {
     const parentSpan = otelExporter.getFinishedSpans().find(({ name }) => name === 'invoke_agent');
     expect(hookSpan.parentSpanContext?.spanId).toBe(parentSpan?.spanContext().spanId);
     expect(attachmentContext).toBeDefined();
+    expect(mockRecallMemory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ limit: 10 }),
+      })
+    );
     expect(hookSpan.attributes).toEqual(
       expect.objectContaining({
         'agent_memory.recall.outcome': 'injected',
@@ -140,6 +152,44 @@ describe('agent memory injection hook tracing', () => {
         ),
       })
     );
+  });
+
+  it('skips recall before authorization when memory recall is not enabled', async () => {
+    await expect(
+      runHook(undefined, { tools: [{ tool_ids: ['platform.core.search'] }] })
+    ).resolves.toEqual({});
+
+    expect(security.authz.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+    expect(mockResolveIdentity).not.toHaveBeenCalled();
+    expect(mockRecallMemory).not.toHaveBeenCalled();
+    expect(getHookSpan().attributes).toEqual(
+      expect.objectContaining({
+        'agent_memory.recall.outcome': 'skipped_not_enabled',
+        'agent_memory.recall.memory_count': 0,
+        'agent_memory.injection.characters': 0,
+        'agent_memory.injection.estimated_tokens_per_llm_call': 0,
+      })
+    );
+  });
+
+  it('runs recall when all tools are enabled with a wildcard', async () => {
+    mockRecallMemory.mockResolvedValue({ memories: [] });
+
+    await runHook(undefined, { tools: [{ tool_ids: ['*'] }] });
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    expect(mockResolveIdentity).toHaveBeenCalled();
+    expect(mockRecallMemory).toHaveBeenCalled();
+  });
+
+  it('runs recall when default Elastic capabilities are enabled', async () => {
+    mockRecallMemory.mockResolvedValue({ memories: [] });
+
+    await runHook(undefined, { tools: [], enable_elastic_capabilities: true });
+
+    expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalled();
+    expect(mockResolveIdentity).toHaveBeenCalled();
+    expect(mockRecallMemory).toHaveBeenCalled();
   });
 
   it('records a zero-cost no-memory outcome', async () => {

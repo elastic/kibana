@@ -11,9 +11,8 @@ import type { AuthorKind } from '../storage/memory_storage';
 /**
  * The resolved author key used to scope memories.
  *
- * `author_kind` records which field `author` came from so Phase 3 can tighten
- * the model without a migration — today username is accepted as a fallback,
- * Phase 3 will reject pure-username callers if needed.
+ * `author_kind` records which field `author` came from. Username fallbacks are
+ * realm-qualified so equal usernames in different realms cannot share memory.
  */
 export interface ResolvedIdentity {
   /** The scoping key stored in `memory.provenance.author`. */
@@ -39,8 +38,8 @@ export interface MinimalAuthService {
     getCurrentUser(request: KibanaRequest): {
       profile_uid?: string;
       username?: string;
-      /** Present on AuthenticatedUser; used to scope username keys per realm. */
-      authentication_realm?: { name: string };
+      /** Required for username fallback; both fields scope the fallback key. */
+      authentication_realm?: { type: string; name: string };
     } | null;
   };
 }
@@ -50,9 +49,8 @@ export interface MinimalAuthService {
  *
  * Preference order:
  *  1. `profile_uid` — stable across realms; preferred.
- *  2. `realm:username` — when no profile is available (e.g. API-key callers).
- *     The realm name is included to prevent cross-realm collisions: a native
- *     `admin` and an LDAP `admin` would otherwise share a memory partition.
+ *  2. `realm-type/realm-name:username` — only when an authentication realm is
+ *     available. Both realm fields prevent cross-realm collisions.
  *
  * Returns `undefined` when neither is available (e.g. anonymous or internal
  * requests without user context). Callers must reject the `remember` operation
@@ -71,10 +69,12 @@ export const resolveIdentity = ({
     return { author: authUser.profile_uid, author_kind: 'profile_uid' };
   }
 
-  if (authUser?.username) {
-    const realm = authUser.authentication_realm?.name;
-    const author = realm ? `${realm}:${authUser.username}` : authUser.username;
-    return { author, author_kind: 'username' };
+  const realm = authUser?.authentication_realm;
+  if (authUser?.username && realm) {
+    return {
+      author: `${realm.type}/${realm.name}:${authUser.username}`,
+      author_kind: 'username',
+    };
   }
 
   return undefined;

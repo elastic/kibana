@@ -6,11 +6,11 @@
  */
 
 import { createHash } from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
-import type { DataStreamClient } from '@kbn/data-streams';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
+import { AGENT_MEMORY_INDEX } from '../../common';
 import type { CallSource, MemoryCategory, MemoryType } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
-import type { MemoryHistoryRecord, agentMemoryHistoryMappings } from '../storage/history_stream';
 import type { ResolvedIdentity } from './resolve_identity';
 
 export interface WriteMemoryParams {
@@ -21,14 +21,9 @@ export interface WriteMemoryParams {
   category?: MemoryCategory;
   type?: MemoryType;
   tags?: string[];
-  entities?: string[];
   /** ISO timestamp; optional per-record soft expiry (D5). */
   expires_at?: string;
-  origin?: string;
-  assurance?: string;
   call_source?: CallSource;
-  conversation_ids?: string[];
-  trace_ids?: string[];
   space_id: string;
   identity: ResolvedIdentity;
 }
@@ -51,14 +46,24 @@ const normalise = (text: string): string => text.replace(/\s+/g, ' ').trim();
 const contentHash = (description: string): string =>
   createHash('sha256').update(normalise(description)).digest('hex');
 
+const deterministicDocumentId = ({
+  spaceId,
+  author,
+  hash,
+}: {
+  spaceId: string;
+  author: string;
+  hash: string;
+}): string => createHash('sha256').update(`${spaceId}\0${author}\0${hash}`).digest('hex');
+
+const MAX_UPDATE_ATTEMPTS = 3;
+
 /**
  * Creates a new memory or supersedes an existing one with the same content
  * (same description, same author, same space).
  *
- * Supersession strategy: in-place update via `index` on the same `_id`.
- * The previous body is captured in `memory.prior_document` (stored, not indexed)
- * and `memory.revision` is incremented. This keeps the doc count stable while
- * preserving the diff chain (D11 requirement).
+ * Supersession strategy: in-place update via `index` on the same `_id`, with
+ * `memory.revision` incremented. This keeps the document count stable.
  *
  * The inherited `content` field carries `title + "\n\n" + description` so
  * that semantic recall covers both the concise label and the full content.
@@ -69,33 +74,95 @@ const contentHash = (description: string): string =>
  */
 export const writeMemory = async ({
   storage,
-  historyClient,
+  esClient,
   params,
 }: {
   storage: MemoryStorage;
-  historyClient: DataStreamClient<typeof agentMemoryHistoryMappings>;
+  esClient: ElasticsearchClient;
   params: WriteMemoryParams;
 }): Promise<WriteMemoryResult> => {
-  const {
-    title,
-    description,
-    category,
-    type,
-    tags,
-    entities,
-    expires_at,
-    origin,
-    assurance,
-    call_source,
-    conversation_ids,
-    trace_ids,
-    space_id,
-    identity,
-  } = params;
+  const { title, description, category, type, tags, expires_at, call_source, space_id, identity } =
+    params;
 
   const hash = contentHash(description);
   const client = storage.getClient();
   const now = new Date().toISOString();
+
+  const updateExisting = async ({
+    id,
+    previous,
+    seqNo,
+    primaryTerm,
+  }: {
+    id: string;
+    previous: MemoryDocument;
+    seqNo?: number;
+    primaryTerm?: number;
+  }): Promise<WriteMemoryResult> => {
+    let current = { previous, seqNo, primaryTerm };
+
+    for (let attempt = 1; attempt <= MAX_UPDATE_ATTEMPTS; attempt++) {
+      const nextRevision = (current.previous.memory.revision ?? 0) + 1;
+      const previousIsExpired =
+        current.previous.expires_at !== undefined &&
+        Date.parse(current.previous.expires_at) <= Date.parse(now);
+      const updated: MemoryDocument = {
+        ...current.previous,
+        deleted: false,
+        '@timestamp': now,
+        title,
+        description,
+        content: `${title}\n\n${description}`,
+        tags: tags ?? current.previous.tags,
+        expires_at:
+          expires_at ??
+          (current.previous.deleted || previousIsExpired ? undefined : current.previous.expires_at),
+        memory: {
+          scope_kind: current.previous.memory.scope_kind ?? 'user',
+          scope_id: current.previous.memory.scope_id ?? identity.author,
+          type: type ?? current.previous.memory.type,
+          category: category ?? current.previous.memory.category,
+          revision: nextRevision,
+          content_hash: hash,
+          provenance: {
+            author: current.previous.memory.provenance.author,
+            author_kind: current.previous.memory.provenance.author_kind,
+            call_source: call_source ?? current.previous.memory.provenance.call_source,
+          },
+        },
+      };
+
+      try {
+        await client.index({
+          id,
+          document: updated,
+          ...(current.seqNo !== undefined && current.primaryTerm !== undefined
+            ? { if_seq_no: current.seqNo, if_primary_term: current.primaryTerm }
+            : {}),
+        });
+        return { id, revision: nextRevision, action: 'updated' };
+      } catch (error) {
+        if (
+          !isResponseError(error) ||
+          error.statusCode !== 409 ||
+          attempt === MAX_UPDATE_ATTEMPTS
+        ) {
+          throw error;
+        }
+        const latest = await esClient.get<MemoryDocument>({ index: AGENT_MEMORY_INDEX, id });
+        if (!latest._source) {
+          throw new Error('Agent Memory conflict winner has no source');
+        }
+        current = {
+          previous: latest._source,
+          seqNo: latest._seq_no,
+          primaryTerm: latest._primary_term,
+        };
+      }
+    }
+
+    throw new Error('Agent Memory update retries exhausted');
+  };
 
   // ── Find-or-create on content_hash + author + space ───────────────────────
   // Search without the `deleted` filter so that re-remembering a tombstoned
@@ -119,72 +186,16 @@ export const writeMemory = async ({
   const existingHit = existing.hits.hits[0];
 
   if (existingHit) {
-    // Supersede: in-place update, keeping the same _id.
-    const prev = existingHit._source as MemoryDocument;
-    const nextRevision = (prev.memory.revision ?? 0) + 1;
-
-    // Strip prior_document from the nested snapshot to prevent O(2^N)
-    // _source growth — each revision must contain only one level of history.
-    const { prior_document: _dropped, ...prevMemory } = prev.memory;
-    const updated: MemoryDocument = {
-      ...prev,
-      deleted: false,
-      '@timestamp': now,
-      title,
-      description,
-      content: `${title}\n\n${description}`,
-      tags: tags ?? prev.tags,
-      expires_at: expires_at ?? prev.expires_at,
-      memory: {
-        ...prevMemory,
-        scope_kind: prev.memory.scope_kind ?? 'user',
-        scope_id: prev.memory.scope_id ?? identity.author,
-        type: type ?? prev.memory.type,
-        category: category ?? prev.memory.category,
-        entities: entities ?? prev.memory.entities,
-        origin: origin ?? prev.memory.origin,
-        assurance: assurance ?? prev.memory.assurance,
-        revision: nextRevision,
-        content_hash: hash,
-        provenance: {
-          ...prev.memory.provenance,
-          call_source: call_source ?? prev.memory.provenance.call_source,
-          conversation_ids: conversation_ids ?? prev.memory.provenance.conversation_ids,
-          trace_ids: trace_ids ?? prev.memory.provenance.trace_ids,
-        },
-        // One level of history — use the payload with prior_document stripped.
-        prior_document: {
-          ...prev,
-          memory: prevMemory,
-        },
-      },
-    };
-
-    // OCC guard: reject if a concurrent write landed between our search and
-    // this index. Let the error propagate; the tool can surface it.
-    await client.index({
-      id: existingHit._id,
-      document: updated,
-      ...(existingHit._seq_no !== undefined && existingHit._primary_term !== undefined
-        ? { if_seq_no: existingHit._seq_no, if_primary_term: existingHit._primary_term }
-        : {}),
+    return updateExisting({
+      id: existingHit._id!,
+      previous: existingHit._source as MemoryDocument,
+      seqNo: existingHit._seq_no,
+      primaryTerm: existingHit._primary_term,
     });
-
-    await writeHistoryRecord(historyClient, {
-      memory_id: existingHit._id!,
-      event_type: 'write',
-      revision: nextRevision,
-      space_id,
-      identity,
-      call_source,
-      now,
-    });
-
-    return { id: existingHit._id!, revision: nextRevision, action: 'updated' };
   }
 
   // ── New memory ─────────────────────────────────────────────────────────────
-  const id = uuidv4();
+  const id = deterministicDocumentId({ spaceId: space_id, author: identity.author, hash });
   const newDoc: MemoryDocument = {
     id,
     type: 'memory',
@@ -204,71 +215,45 @@ export const writeMemory = async ({
       content_hash: hash,
       scope_kind: 'user',
       scope_id: identity.author,
-      entities,
-      origin,
-      assurance,
       provenance: {
         author: identity.author,
         author_kind: identity.author_kind,
         call_source,
-        conversation_ids,
-        trace_ids,
       },
     },
   };
 
-  await client.index({ id, document: newDoc });
-
-  await writeHistoryRecord(historyClient, {
-    memory_id: id,
-    event_type: 'write',
-    revision: 1,
-    space_id,
-    identity,
-    call_source,
-    now,
+  const createResponse = await client.bulk({
+    operations: [{ create: { _id: id, document: newDoc } }],
   });
+  const createResult = createResponse.items[0]?.create;
+
+  if (!createResult) {
+    throw new Error('Agent Memory create failed: Elasticsearch returned no create result');
+  }
+
+  if (createResult.error) {
+    if (createResult.status !== 409) {
+      const errorDetails =
+        typeof createResult.error === 'string'
+          ? createResult.error
+          : [createResult.error.type ?? 'unknown_error', createResult.error.reason]
+              .filter(Boolean)
+              .join(': ');
+      throw new Error(`Agent Memory create failed: ${errorDetails}`);
+    }
+
+    const winner = await esClient.get<MemoryDocument>({ index: AGENT_MEMORY_INDEX, id });
+    if (!winner._source) {
+      throw new Error('Agent Memory create conflict winner has no source');
+    }
+    return updateExisting({
+      id,
+      previous: winner._source,
+      seqNo: winner._seq_no,
+      primaryTerm: winner._primary_term,
+    });
+  }
 
   return { id, revision: 1, action: 'created' };
-};
-
-const writeHistoryRecord = async (
-  historyClient: DataStreamClient<typeof agentMemoryHistoryMappings>,
-  {
-    memory_id,
-    event_type,
-    revision,
-    space_id,
-    identity,
-    call_source,
-    now,
-  }: {
-    memory_id: string;
-    event_type: MemoryHistoryRecord['event_type'];
-    revision: number;
-    space_id: string;
-    identity: ResolvedIdentity;
-    call_source?: string;
-    now: string;
-  }
-): Promise<void> => {
-  // Best-effort: failures here must not surface to the caller.
-  try {
-    await historyClient.create({
-      documents: [
-        {
-          '@timestamp': now,
-          memory_id,
-          event_type,
-          revision,
-          space_id,
-          author: identity.author,
-          author_kind: identity.author_kind,
-          ...(call_source ? { call_source } : {}),
-        },
-      ],
-    });
-  } catch {
-    // swallow — history stream is an audit trail, not a write gate
-  }
 };

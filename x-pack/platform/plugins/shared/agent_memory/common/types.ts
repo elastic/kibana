@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export type MemoryType = 'episodic' | 'semantic' | 'procedural';
+export type MemoryCategory = 'profile' | 'preferences' | 'events' | 'trajectories';
+export type AuthorKind = 'profile_uid' | 'username';
+export type CallSource = 'agent' | 'user' | 'mcp' | 'workflow' | 'unknown';
+export type MemoryScopeKind = 'user' | 'agent' | 'space';
+
+export interface MemoryProvenance {
+  readonly author: string;
+  readonly author_kind: AuthorKind;
+  readonly call_source?: CallSource;
+}
+
+export interface MemoryPayload {
+  readonly type?: MemoryType;
+  readonly category?: MemoryCategory;
+  readonly revision: number;
+  readonly content_hash: string;
+  readonly scope_kind?: MemoryScopeKind;
+  readonly scope_id?: string;
+  readonly provenance: MemoryProvenance;
+}
+
+/** Generic AI-index envelope fields used by Agent Memory. */
+export interface MemoryDocumentEnvelope {
+  readonly id: string;
+  readonly type: 'memory';
+  readonly title: string;
+  readonly description: string;
+  readonly content: string;
+  readonly tags?: string[];
+  readonly deleted?: boolean;
+  readonly expires_at?: string;
+  readonly '@timestamp'?: string;
+  readonly created_at: string;
+  readonly space_id: string;
+}
+
+export interface MemoryDocument extends MemoryDocumentEnvelope {
+  readonly _id?: string;
+  readonly memory: MemoryPayload;
+}

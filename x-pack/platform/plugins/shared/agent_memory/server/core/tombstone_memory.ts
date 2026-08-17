@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { DataStreamClient } from '@kbn/data-streams';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
-import type { MemoryHistoryRecord, agentMemoryHistoryMappings } from '../storage/history_stream';
 import type { ResolvedIdentity } from './resolve_identity';
 
 export interface TombstoneMemoryParams {
@@ -15,7 +14,6 @@ export interface TombstoneMemoryParams {
   id: string;
   space_id: string;
   identity: ResolvedIdentity;
-  call_source?: string;
 }
 
 export interface TombstoneMemoryResult {
@@ -36,14 +34,12 @@ export interface TombstoneMemoryResult {
  */
 export const tombstoneMemory = async ({
   storage,
-  historyClient,
   params,
 }: {
   storage: MemoryStorage;
-  historyClient: DataStreamClient<typeof agentMemoryHistoryMappings>;
   params: TombstoneMemoryParams;
 }): Promise<TombstoneMemoryResult> => {
-  const { id, space_id, identity, call_source } = params;
+  const { id, space_id, identity } = params;
   const client = storage.getClient();
   const now = new Date().toISOString();
 
@@ -60,8 +56,11 @@ export const tombstoneMemory = async ({
     existing = hit._source as MemoryDocument;
     seqNo = hit._seq_no;
     primaryTerm = hit._primary_term;
-  } catch {
-    return { result: 'not_found' };
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      return { result: 'not_found' };
+    }
+    throw error;
   }
 
   if (!existing) {
@@ -91,25 +90,6 @@ export const tombstoneMemory = async ({
       ? { if_seq_no: seqNo, if_primary_term: primaryTerm }
       : {}),
   });
-
-  try {
-    await historyClient.create({
-      documents: [
-        {
-          '@timestamp': now,
-          memory_id: id,
-          event_type: 'tombstone' as MemoryHistoryRecord['event_type'],
-          revision: existing.memory?.revision ?? 0,
-          space_id,
-          author: identity.author,
-          author_kind: identity.author_kind,
-          ...(call_source ? { call_source } : {}),
-        },
-      ],
-    });
-  } catch {
-    // best-effort
-  }
 
   return { result: 'deleted' };
 };

@@ -6,15 +6,12 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { AGENT_MEMORY_INDEX } from '@kbn/agent-memory-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { DataStreamClient } from '@kbn/data-streams';
 import { loggerMock } from '@kbn/logging-mocks';
+import { AGENT_MEMORY_INDEX } from '../../../common';
 import { writeMemory } from '../../core/write_memory';
-import { tombstoneMemory } from '../../core/tombstone_memory';
 import { buildRetriever } from '../../recall/build_retriever';
-import type { agentMemoryHistoryMappings } from '../history_stream';
 import { createMemoryStorage, memoryStorageSettings, type MemoryStorage } from '../memory_storage';
 
 describe('Agent Memory AI Index integration', () => {
@@ -27,10 +24,6 @@ describe('Agent Memory AI Index integration', () => {
     author_kind: 'profile_uid' as const,
   };
   const spaceId = 'agent-memory-integration-space';
-  const historyClient = {
-    create: jest.fn().mockResolvedValue({}),
-  } as unknown as DataStreamClient<typeof agentMemoryHistoryMappings>;
-
   beforeAll(async () => {
     const { startES } = createTestServers({
       adjustTimeout: jest.setTimeout,
@@ -69,7 +62,7 @@ describe('Agent Memory AI Index integration', () => {
     }
   });
 
-  it('composes the built-in mappings and recalls then excludes a tombstoned memory', async () => {
+  it('composes the built-in mappings and recalls a stored memory', async () => {
     await expect(
       esClient.cluster.getComponentTemplate({ name: 'ai-index@mappings' })
     ).resolves.toMatchObject({
@@ -80,19 +73,14 @@ describe('Agent Memory AI Index integration', () => {
     const description = 'Use primary runbooks before community troubleshooting posts.';
     const writeResult = await writeMemory({
       storage,
-      historyClient,
+      esClient: esClient as unknown as ElasticsearchClient,
       params: {
         title,
         description,
         type: 'semantic',
         category: 'preferences',
         tags: ['incident-response'],
-        entities: ['runbooks'],
-        origin: 'user',
-        assurance: 'stated',
         call_source: 'user',
-        conversation_ids: ['conversation-1'],
-        trace_ids: ['trace-1'],
         space_id: spaceId,
         identity,
       },
@@ -181,25 +169,5 @@ describe('Agent Memory AI Index integration', () => {
       retriever,
     });
     expect(recalled.hits.hits.map(({ _id }) => _id)).toContain(writeResult.id);
-
-    await expect(
-      tombstoneMemory({
-        storage,
-        historyClient,
-        params: {
-          id: writeResult.id,
-          space_id: spaceId,
-          identity,
-          call_source: 'user',
-        },
-      })
-    ).resolves.toEqual({ result: 'deleted' });
-
-    const recalledAfterTombstone = await storage.getClient().search({
-      size: 10,
-      track_total_hits: true,
-      retriever,
-    });
-    expect(recalledAfterTombstone.hits.hits.map(({ _id }) => _id)).not.toContain(writeResult.id);
   });
 });

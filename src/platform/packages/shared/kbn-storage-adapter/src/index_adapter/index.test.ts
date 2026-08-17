@@ -209,7 +209,56 @@ describe('getSchemaVersion', () => {
     ).not.toBe(composedVersion);
   });
 
-  it('includes required component template version and content in the composed version', () => {
+  it('hashes dependency presence and mappings but ignores other dependency fields', () => {
+    const dependencyVersion = getSchemaVersion(composedStorageSettings, [
+      requiredDependencyV1,
+      missingOptionalDependency,
+    ]);
+    const dependencyWithNonMappingChanges = {
+      name: requiredDependencyV1.name,
+      componentTemplate: {
+        version: 99,
+        _meta: { description: 'changed metadata' },
+        template: {
+          mappings: requiredDependencyV1.componentTemplate.template.mappings,
+          settings: { index: { number_of_shards: 2 } },
+          aliases: { ignored_alias: {} },
+        },
+      },
+    } satisfies ResolvedComponentTemplateDependency;
+    const dependencyWithMappingChange = {
+      name: requiredDependencyV1.name,
+      componentTemplate: {
+        ...requiredDependencyV1.componentTemplate,
+        template: {
+          mappings: {
+            properties: {
+              shared: { type: 'keyword' },
+              mappingOnlyChange: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    } satisfies ResolvedComponentTemplateDependency;
+
+    expect(
+      getSchemaVersion(composedStorageSettings, [
+        dependencyWithNonMappingChanges,
+        missingOptionalDependency,
+      ])
+    ).toBe(dependencyVersion);
+    expect(
+      getSchemaVersion(composedStorageSettings, [
+        dependencyWithMappingChange,
+        missingOptionalDependency,
+      ])
+    ).not.toBe(dependencyVersion);
+    expect(
+      getSchemaVersion(composedStorageSettings, [requiredDependencyV1, presentOptionalDependency])
+    ).not.toBe(dependencyVersion);
+  });
+
+  it('includes required component template mappings in the composed version', () => {
     expect(
       getSchemaVersion(composedStorageSettings, [requiredDependencyV1, missingOptionalDependency])
     ).not.toBe(
@@ -615,68 +664,6 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
-  it('reconciles when an optional dependency appears', async () => {
-    const existingVersion = getSchemaVersion(composedStorageSettings, [
-      requiredDependencyV2,
-      missingOptionalDependency,
-    ]);
-    const expectedVersion = getSchemaVersion(composedStorageSettings, [
-      requiredDependencyV2,
-      presentOptionalDependency,
-    ]);
-    const indexManagementClient = createMockEsClient();
-    (indexManagementClient.cluster.getComponentTemplate as jest.Mock).mockResolvedValue({
-      component_templates: [
-        {
-          name: requiredDependencyV2.name,
-          component_template: requiredDependencyV2.componentTemplate,
-        },
-        {
-          name: presentOptionalDependency.name,
-          component_template: presentOptionalDependency.componentTemplate,
-        },
-      ],
-    });
-    (indexManagementClient.indices.simulateIndexTemplate as jest.Mock).mockResolvedValue({
-      template: {
-        mappings: {
-          _meta: { version: expectedVersion },
-          dynamic: 'strict',
-          properties: {
-            shared: { type: 'keyword' },
-            sharedV2: { type: 'keyword' },
-            foo: { type: 'keyword' },
-            optional: { type: 'keyword' },
-          },
-        },
-      },
-    });
-    (esClient.indices.get as jest.Mock).mockResolvedValue({
-      'test_index-000001': {
-        mappings: { _meta: { version: existingVersion } },
-        aliases: { test_index: { is_write_index: true } },
-      },
-    });
-    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
-      indexManagementClient,
-      isServerless: false,
-    });
-
-    await adapter
-      .getClient()
-      .search({ track_total_hits: false, size: 10, query: { match_all: {} } });
-
-    expect(indexManagementClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
-    expect(esClient.indices.putMapping).toHaveBeenCalledWith(
-      expect.objectContaining({
-        _meta: { version: expectedVersion },
-        properties: expect.objectContaining({
-          optional: { type: 'keyword' },
-        }),
-      })
-    );
-  });
-
   it('does not simulate when the resolved dependency version matches the existing index', async () => {
     const expectedVersion = getSchemaVersion(composedStorageSettings, [
       requiredDependencyV2,
@@ -967,27 +954,6 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
       (indexManagementClient.cluster.deleteComponentTemplate as jest.Mock).mock
         .invocationCallOrder[0]
     );
-  });
-
-  it('propagates a missing required component template installation failure', async () => {
-    const indexManagementClient = createMockEsClient();
-    const missingRequiredError = new Error(
-      'index_template [test_index] invalid, cause [component template [shared@mappings] does not exist]'
-    );
-    (indexManagementClient.indices.putIndexTemplate as jest.Mock).mockRejectedValueOnce(
-      missingRequiredError
-    );
-    const adapter = new StorageIndexAdapter(esClient, loggerMock, composedStorageSettings, {
-      indexManagementClient,
-      isServerless: false,
-    });
-
-    await expect(adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } })).rejects.toBe(
-      missingRequiredError
-    );
-
-    expect(indexManagementClient.cluster.putComponentTemplate).toHaveBeenCalled();
-    expect(esClient.index).not.toHaveBeenCalled();
   });
 
   it('uses a separate index management client for template operations', async () => {

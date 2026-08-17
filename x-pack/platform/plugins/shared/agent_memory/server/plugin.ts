@@ -17,7 +17,6 @@ import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { DataStreamClient } from '@kbn/data-streams';
 import type { AgentMemoryConfig } from './config';
 import type {
   AgentMemoryPluginSetup,
@@ -27,9 +26,6 @@ import type {
   GetMemoryStorage,
 } from './types';
 import { registerFeatures } from './features';
-import { registerStatusRoute } from './routes/status';
-import { registerSetupRoute } from './routes/setup';
-import type { agentMemoryHistoryMappings } from './storage/history_stream';
 import { createRecallTool } from './tools/recall';
 import { createRememberTool } from './tools/remember';
 import { createForgetTool } from './tools/forget';
@@ -55,7 +51,6 @@ export class AgentMemoryPlugin
    * fixed index-template operations use the internal client.
    */
   private createStorage?: GetMemoryStorage;
-  private historyClient?: DataStreamClient<typeof agentMemoryHistoryMappings>;
   /** Plugin security: exposes authz for privilege checks in tools. */
   private securityStart?: SecurityPluginStart;
   /**
@@ -83,8 +78,6 @@ export class AgentMemoryPlugin
 
     registerFeatures({ features: setupDeps.features });
 
-    const router = coreSetup.http.createRouter();
-
     // ── Lazy getters ──────────────────────────────────────────────────────────
     // All start-time services are exposed through getters so setup() registrations
     // can close over them without a circular reference. Each getter throws if called
@@ -102,12 +95,6 @@ export class AgentMemoryPlugin
       return this.elasticsearch.client.asScoped(request).asCurrentUser;
     };
 
-    const getHistoryClient = (): DataStreamClient<typeof agentMemoryHistoryMappings> => {
-      if (!this.historyClient)
-        throw new Error('AgentMemoryPlugin: history client accessed before start()');
-      return this.historyClient;
-    };
-
     const getSecurityStart = (): SecurityPluginStart => {
       if (!this.securityStart)
         throw new Error('AgentMemoryPlugin: security accessed before start()');
@@ -123,10 +110,6 @@ export class AgentMemoryPlugin
     const getSpaceId = (request: KibanaRequest): string =>
       this.spacesStart?.spacesService.getSpaceId(request) ?? 'default';
 
-    // ── Routes ────────────────────────────────────────────────────────────────
-    registerStatusRoute({ router, getMemoryStorage });
-    registerSetupRoute({ router, getMemoryStorage });
-
     // ── Tools ─────────────────────────────────────────────────────────────────
     const { tools, skills, hooks } = setupDeps.agentBuilder;
 
@@ -136,7 +119,6 @@ export class AgentMemoryPlugin
     tools.register(
       createRememberTool({
         getStorage: getMemoryStorage,
-        getHistoryClient,
         getSecurityStart,
         getCoreSecurity,
       })
@@ -144,7 +126,6 @@ export class AgentMemoryPlugin
     tools.register(
       createForgetTool({
         getStorage: getMemoryStorage,
-        getHistoryClient,
         getSecurityStart,
         getCoreSecurity,
       })
@@ -168,7 +149,6 @@ export class AgentMemoryPlugin
     registerMemoryWorkflowSteps(
       setupDeps.workflowsExtensions,
       getMemoryStorage,
-      getHistoryClient,
       getSecurityStart,
       getCoreSecurity,
       getCurrentUserEsClient
@@ -186,8 +166,6 @@ export class AgentMemoryPlugin
     }
 
     const { createMemoryStorage } = await import('./storage/memory_storage');
-    const { DataStreamClient } = await import('@kbn/data-streams');
-    const { agentMemoryHistoryStream } = await import('./storage/history_stream');
 
     const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -206,21 +184,6 @@ export class AgentMemoryPlugin
         esClient,
         indexManagementClient: internalEsClient,
       });
-
-    // History client — a thin wrapper; create once and reuse across requests.
-    this.historyClient = DataStreamClient.fromDefinition({
-      dataStream: agentMemoryHistoryStream,
-      elasticsearchClient: internalEsClient,
-    });
-
-    // Install the audit-trail data-stream template (idempotent, non-fatal).
-    await DataStreamClient.initializeTemplate({
-      dataStream: agentMemoryHistoryStream,
-      elasticsearchClient: internalEsClient,
-      logger: this.logger.get('history-stream'),
-    }).catch((err: Error) => {
-      this.logger.warn(`Failed to initialise agent memory history stream: ${err.message}`);
-    });
 
     return {};
   }

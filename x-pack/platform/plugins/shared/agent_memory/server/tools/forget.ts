@@ -10,11 +10,10 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
-import type { DataStreamClient } from '@kbn/data-streams';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { agentMemoryHistoryMappings } from '../storage/history_stream';
-import { resolveIdentity } from '../core/resolve_identity';
+import { i18n } from '@kbn/i18n';
+import { authorizeMemoryRequest } from '../core/authorize_request';
 import { tombstoneMemory } from '../core/tombstone_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
 import type { GetMemoryStorage } from '../types';
@@ -37,12 +36,10 @@ const forgetSchema = z.object({
  */
 export const createForgetTool = ({
   getStorage,
-  getHistoryClient,
   getSecurityStart,
   getCoreSecurity,
 }: {
   getStorage: GetMemoryStorage;
-  getHistoryClient: () => DataStreamClient<typeof agentMemoryHistoryMappings>;
   getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
 }): BuiltinToolDefinition<typeof forgetSchema> => ({
@@ -61,6 +58,27 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
   `.trim(),
   schema: forgetSchema,
   tags: [],
+  confirmation: {
+    askUser: 'always',
+    getConfirmation: ({ toolParams }) => ({
+      title: i18n.translate('xpack.agentMemory.agentBuilder.tools.forget.confirmationTitle', {
+        defaultMessage: 'Forget memory "{id}"',
+        values: { id: toolParams.id },
+      }),
+      message: i18n.translate(
+        'xpack.agentMemory.agentBuilder.tools.forget.confirmationDescription',
+        {
+          defaultMessage:
+            'Soft-delete this memory? It will no longer be recalled, but remains available for audit.',
+        }
+      ),
+      confirm_text: i18n.translate(
+        'xpack.agentMemory.agentBuilder.tools.forget.confirmationButtonLabel',
+        { defaultMessage: 'Forget memory' }
+      ),
+      color: 'danger' as const,
+    }),
+  },
   annotations: {
     title: 'Forget',
     readOnlyHint: false,
@@ -69,15 +87,15 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
     openWorldHint: false,
   },
   handler: async ({ id }, context) => {
-    // ── Authz gate ───────────────────────────────────────────────────────────
-    const security = getSecurityStart();
-    const { hasAllRequested } = await security.authz
-      .checkPrivilegesWithRequest(context.request)
-      .atSpace(context.spaceId, {
-        kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.write)],
-      });
+    const authorization = await authorizeMemoryRequest({
+      request: context.request,
+      spaceId: context.spaceId,
+      privilege: AGENT_MEMORY_API_PRIVILEGES.write,
+      security: getSecurityStart(),
+      coreSecurity: getCoreSecurity(),
+    });
 
-    if (!hasAllRequested) {
+    if (authorization.status === 'forbidden') {
       return {
         results: [
           {
@@ -91,9 +109,7 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
       };
     }
 
-    // ── Identity resolution ───────────────────────────────────────────────────
-    const identity = resolveIdentity({ request: context.request, security: getCoreSecurity() });
-    if (!identity) {
+    if (authorization.status === 'missing_identity') {
       return {
         results: [
           {
@@ -107,12 +123,10 @@ Returns { result: 'deleted' } or { result: 'not_found' }.
     // ── Tombstone ─────────────────────────────────────────────────────────────
     const result = await tombstoneMemory({
       storage: getStorage(context.esClient.asCurrentUser),
-      historyClient: getHistoryClient(),
       params: {
         id,
         space_id: context.spaceId,
-        identity,
-        call_source: context.callContext.callSource,
+        identity: authorization.identity,
       },
     });
 

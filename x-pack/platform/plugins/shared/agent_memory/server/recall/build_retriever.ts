@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * Parameters for the three-leg RRF retriever used in recall.
+ * Parameters for the hybrid RRF retriever used in recall.
  *
  * The retriever enforces G3: `space_id` AND `author` filters are mandatory
  * and are never overridable by tool params. They are injected unconditionally
@@ -23,8 +23,6 @@ export interface BuildRetrieverParams {
   space_id: string;
   /** Mandatory author filter — injected unconditionally (G3). */
   author: string;
-  /** Optional entity ids for the entity-match leg. */
-  entities?: string[];
   /** Optional category filter applied on top of the belief filter. */
   category?: string;
   /** Max results to return. */
@@ -37,10 +35,6 @@ export interface BuildRetrieverParams {
  * Excludes:
  *  - tombstoned records (`deleted: true`)
  *  - records at or past their per-record `expires_at` date (D5)
- *  - records marked with `expired_at`
- *  - records under suppression (`suppress_until` in the future)
- *  - records before their `valid_at` date
- *  - records at or past their `invalid_at` date
  *
  * Always adds:
  *  - `space_id` scope (G3)
@@ -71,42 +65,6 @@ const buildBeliefFilter = (
         minimum_should_match: 1,
       },
     },
-    // Reconcile-set expiry marker
-    {
-      bool: {
-        must_not: { exists: { field: 'memory.expired_at' } },
-      },
-    },
-    // Suppression window
-    {
-      bool: {
-        should: [
-          { bool: { must_not: { exists: { field: 'memory.suppress_until' } } } },
-          { range: { 'memory.suppress_until': { lte: now } } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-    // Validity window start
-    {
-      bool: {
-        should: [
-          { bool: { must_not: { exists: { field: 'memory.valid_at' } } } },
-          { range: { 'memory.valid_at': { lte: now } } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-    // Validity window end
-    {
-      bool: {
-        should: [
-          { bool: { must_not: { exists: { field: 'memory.invalid_at' } } } },
-          { range: { 'memory.invalid_at': { gt: now } } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
   ];
 
   if (category) {
@@ -116,17 +74,34 @@ const buildBeliefFilter = (
   return filters;
 };
 
+export const buildKeywordRetriever = ({
+  query,
+  space_id,
+  author,
+  category,
+}: BuildRetrieverParams): RetrieverContainer => ({
+  standard: {
+    query: {
+      multi_match: {
+        query,
+        fields: ['title^2', 'description'],
+        type: 'best_fields',
+      },
+    },
+    filter: {
+      bool: {
+        filter: buildBeliefFilter(space_id, author, category),
+      },
+    },
+  },
+});
+
 /**
- * Builds a three-leg RRF retriever for hybrid recall.
+ * Builds a two-leg RRF retriever for hybrid recall.
  *
  * Legs:
  *  1. BM25 — `multi_match` on `title` + `description` (exact-text match)
  *  2. Semantic — `match` on inherited `content.semantic` wrapped in `linear`
- *  3. Entity — `terms` on `memory.entities` (only when entities list is non-empty)
- *
- * The entity leg is conditional: an empty `terms` array in RRF silently
- * degrades every other leg's rank, so we skip it when no entities are provided
- * rather than pass a dead leg.
  *
  * All legs share the same mandatory scope + belief filter via the outer RRF's
  * `filter` clause; the standard retrievers do not need their own filter.
@@ -135,7 +110,6 @@ export const buildRetriever = ({
   query,
   space_id,
   author,
-  entities,
   category,
   limit,
 }: BuildRetrieverParams): RetrieverContainer => {
@@ -177,25 +151,9 @@ export const buildRetriever = ({
     },
   };
 
-  const innerRetrievers: RetrieverContainer[] = [bm25Leg, semanticLeg];
-
-  // Leg 3: Entity match — only when non-empty (see jsdoc above)
-  if (entities && entities.length > 0) {
-    const entityLeg: RetrieverContainer = {
-      standard: {
-        query: {
-          terms: {
-            'memory.entities': entities,
-          },
-        },
-      },
-    };
-    innerRetrievers.push(entityLeg);
-  }
-
   return {
     rrf: {
-      retrievers: innerRetrievers,
+      retrievers: [bm25Leg, semanticLeg],
       filter: combinedFilter,
       rank_window_size: limit * 2,
       rank_constant: 20,

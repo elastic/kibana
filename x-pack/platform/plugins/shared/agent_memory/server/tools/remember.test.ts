@@ -25,7 +25,6 @@ const asInternalUser = { _tag: 'kibana-system' } as unknown as ElasticsearchClie
 
 const mockStorage = { getClient: jest.fn() };
 const getStorage = jest.fn().mockReturnValue(mockStorage);
-const getHistoryClient = jest.fn().mockReturnValue({});
 const getSecurityStart = jest.fn().mockReturnValue({
   authz: {
     checkPrivilegesWithRequest: () => ({
@@ -51,10 +50,32 @@ describe('createRememberTool', () => {
     (resolveIdentity as jest.Mock).mockReturnValue({ author: 'user-1', author_kind: 'username' });
   });
 
+  it('requires primary confirmation that shows the memory title and content', async () => {
+    const tool = createRememberTool({
+      getStorage,
+      getSecurityStart,
+      getCoreSecurity,
+    });
+
+    expect(tool.confirmation?.askUser).toBe('always');
+    const confirmation = await tool.confirmation?.getConfirmation?.({
+      toolParams: {
+        title: 'Preferred editor',
+        description: 'The user prefers Vim.',
+      },
+    });
+
+    expect(confirmation).toEqual({
+      title: 'Remember "Preferred editor"',
+      message: 'Save this memory for future conversations?\n\nThe user prefers Vim.',
+      confirm_text: 'Remember',
+      color: 'primary',
+    });
+  });
+
   it('writes to Agent Memory as the current user, not kibana_system', async () => {
     const tool = createRememberTool({
       getStorage,
-      getHistoryClient,
       getSecurityStart,
       getCoreSecurity,
     });
@@ -69,6 +90,7 @@ describe('createRememberTool', () => {
     expect(writeMemory).toHaveBeenCalledWith(
       expect.objectContaining({
         storage: mockStorage,
+        esClient: asCurrentUser,
       })
     );
     expect(result).toEqual({

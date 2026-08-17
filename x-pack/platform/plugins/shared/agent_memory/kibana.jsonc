@@ -12,9 +12,7 @@
     "requiredPlugins": [
       "agentBuilder",
       "features",
-      "licensing",
       "security",
-      "taskManager",
       "workflowsExtensions"
     ],
     "optionalPlugins": ["spaces"]

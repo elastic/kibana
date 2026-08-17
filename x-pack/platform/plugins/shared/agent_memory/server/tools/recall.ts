@@ -5,41 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { resolveIdentity } from '../core/resolve_identity';
+import { authorizeMemoryRequest } from '../core/authorize_request';
 import { recallMemory } from '../core/recall_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
+import { recallInputSchema } from '../schemas';
 import type { GetMemoryStorage } from '../types';
-
-const recallSchema = z.object({
-  query: z.string().max(2000).describe('The query text used to retrieve relevant memories.'),
-  category: z
-    .enum(['profile', 'preferences', 'entities', 'events', 'trajectories'])
-    .optional()
-    .describe('Optional category filter. Omit to search across all categories.'),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(50)
-    .optional()
-    .default(10)
-    .describe('Maximum number of memories to return. Default 10.'),
-  // token_budget is reserved for Phase 2 token budgeting (D3).
-  // Declared here so the interface remains stable without a breaking change.
-  token_budget: z
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .describe('Reserved for Phase 2 (token budgeting). Has no effect in Phase 1.'),
-});
 
 /**
  * Creates the `platform.memory.recall` registered tool.
@@ -59,7 +35,7 @@ export const createRecallTool = ({
   getStorage: GetMemoryStorage;
   getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
-}): BuiltinToolDefinition<typeof recallSchema> => ({
+}): BuiltinToolDefinition<typeof recallInputSchema> => ({
   id: platformMemoryTools.recall,
   type: ToolType.builtin,
   description: `
@@ -75,7 +51,7 @@ Use this tool to:
 
 Fails open: if the memory service is unavailable, returns an empty list without error.
   `.trim(),
-  schema: recallSchema,
+  schema: recallInputSchema,
   tags: [],
   annotations: {
     title: 'Recall Memories',
@@ -85,16 +61,15 @@ Fails open: if the memory service is unavailable, returns an empty list without 
     openWorldHint: false,
   },
   handler: async ({ query, category, limit }, context) => {
-    const security = getSecurityStart();
+    const authorization = await authorizeMemoryRequest({
+      request: context.request,
+      spaceId: context.spaceId,
+      privilege: AGENT_MEMORY_API_PRIVILEGES.read,
+      security: getSecurityStart(),
+      coreSecurity: getCoreSecurity(),
+    });
 
-    // ── Authz gate: must have read_agent_memory before any ES call ────────────
-    const { hasAllRequested } = await security.authz
-      .checkPrivilegesWithRequest(context.request)
-      .atSpace(context.spaceId, {
-        kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.read)],
-      });
-
-    if (!hasAllRequested) {
+    if (authorization.status === 'forbidden') {
       return {
         results: [
           {
@@ -105,10 +80,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
       };
     }
 
-    // ── Identity resolution ───────────────────────────────────────────────────
-    const identity = resolveIdentity({ request: context.request, security: getCoreSecurity() });
-
-    if (!identity) {
+    if (authorization.status === 'missing_identity') {
       // No identity — fail open with an informational message.
       return {
         results: [
@@ -127,7 +99,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
         category,
         limit,
         space_id: context.spaceId,
-        identity,
+        identity: authorization.identity,
       },
     });
 

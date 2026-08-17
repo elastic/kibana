@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRetriever } from './build_retriever';
+import { buildKeywordRetriever, buildRetriever } from './build_retriever';
 
 const NOW = '2026-08-13T12:34:56.789Z';
 
@@ -28,14 +28,18 @@ describe('buildRetriever', () => {
     jest.useRealTimers();
   });
 
-  it('applies the exact lifecycle and access predicates to the shared RRF filter', () => {
+  it('applies access, tombstone, and root expiry predicates to the shared RRF filter', () => {
     const retriever = buildTestRetriever();
 
     expect(retriever).toEqual({
       rrf: expect.objectContaining({
+        retrievers: expect.arrayContaining([
+          expect.objectContaining({ standard: expect.any(Object) }),
+          expect.objectContaining({ linear: expect.any(Object) }),
+        ]),
         filter: {
           bool: {
-            filter: expect.arrayContaining([
+            filter: [
               { term: { space_id: 'space-1' } },
               { term: { 'memory.provenance.author': 'user-1' } },
               { term: { deleted: false } },
@@ -48,48 +52,12 @@ describe('buildRetriever', () => {
                   minimum_should_match: 1,
                 },
               },
-              {
-                bool: {
-                  must_not: { exists: { field: 'memory.expired_at' } },
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        must_not: { exists: { field: 'memory.suppress_until' } },
-                      },
-                    },
-                    { range: { 'memory.suppress_until': { lte: NOW } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { bool: { must_not: { exists: { field: 'memory.valid_at' } } } },
-                    { range: { 'memory.valid_at': { lte: NOW } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    { bool: { must_not: { exists: { field: 'memory.invalid_at' } } } },
-                    { range: { 'memory.invalid_at': { gt: NOW } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ]),
+            ],
           },
         },
       }),
     });
-    expect(retriever).toHaveProperty('rrf.filter.bool.filter.length', 8);
+    expect(retriever).toHaveProperty('rrf.retrievers.length', 2);
   });
 
   it('adds the requested category to the shared RRF filter', () => {
@@ -130,6 +98,48 @@ describe('buildRetriever', () => {
           },
         ]),
       }),
+    });
+  });
+
+  it('builds keyword-only retrieval with the same mandatory and category filters', () => {
+    expect(buildKeywordRetriever).toBeDefined();
+    expect(
+      buildKeywordRetriever({
+        query: 'preferred sources',
+        space_id: 'space-1',
+        author: 'user-1',
+        category: 'preferences',
+        limit: 10,
+      })
+    ).toEqual({
+      standard: {
+        query: {
+          multi_match: {
+            query: 'preferred sources',
+            fields: ['title^2', 'description'],
+            type: 'best_fields',
+          },
+        },
+        filter: {
+          bool: {
+            filter: [
+              { term: { space_id: 'space-1' } },
+              { term: { 'memory.provenance.author': 'user-1' } },
+              { term: { deleted: false } },
+              {
+                bool: {
+                  should: [
+                    { bool: { must_not: { exists: { field: 'expires_at' } } } },
+                    { range: { expires_at: { gt: NOW } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              { term: { 'memory.category': 'preferences' } },
+            ],
+          },
+        },
+      },
     });
   });
 });

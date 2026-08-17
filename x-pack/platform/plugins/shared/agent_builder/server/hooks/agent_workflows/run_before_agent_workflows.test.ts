@@ -38,6 +38,7 @@ describe('runBeforeAgentWorkflows', () => {
     request,
     nextInput: { message: 'hello', attachments: [] },
     agentId: 'agent-1',
+    agentConfiguration: { tools: [] },
   });
 
   const createDeps = () => {

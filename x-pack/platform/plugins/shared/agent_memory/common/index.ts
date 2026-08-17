@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export * from './src';
+export { AGENT_MEMORY_INDEX } from './constants';
+export type {
+  AuthorKind,
+  CallSource,
+  MemoryCategory,
+  MemoryDocument,
+  MemoryDocumentEnvelope,
+  MemoryPayload,
+  MemoryProvenance,
+  MemoryScopeKind,
+  MemoryType,
+} from './types';

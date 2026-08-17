@@ -7,6 +7,7 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { i18n } from '@kbn/i18n';
 
 export const AGENT_MEMORY_FEATURE_ID = 'agentMemory';
 
@@ -21,17 +22,18 @@ export const AGENT_MEMORY_API_PRIVILEGES = {
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
     id: AGENT_MEMORY_FEATURE_ID,
-    name: 'Agent Memory',
+    name: i18n.translate('xpack.agentMemory.feature.name', {
+      defaultMessage: 'Agent Memory',
+    }),
     order: 9500,
     category: DEFAULT_APP_CATEGORIES.kibana,
-    // No dedicated app in Phase 1 — feature exists only for privilege gating.
-    app: ['kibana'],
-    management: { ai: [AGENT_MEMORY_FEATURE_ID] },
+    app: [],
+    catalogue: [],
     privileges: {
       all: {
-        app: ['kibana'],
+        app: [],
         api: [AGENT_MEMORY_API_PRIVILEGES.read, AGENT_MEMORY_API_PRIVILEGES.write],
-        management: { ai: [AGENT_MEMORY_FEATURE_ID] },
+        catalogue: [],
         savedObject: {
           all: [],
           read: [],
@@ -39,9 +41,9 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
         ui: [],
       },
       read: {
-        app: ['kibana'],
+        app: [],
         api: [AGENT_MEMORY_API_PRIVILEGES.read],
-        management: { ai: [AGENT_MEMORY_FEATURE_ID] },
+        catalogue: [],
         savedObject: {
           all: [],
           read: [],

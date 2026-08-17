@@ -5,55 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
-import type { DataStreamClient } from '@kbn/data-streams';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { agentMemoryHistoryMappings } from '../storage/history_stream';
-import { resolveIdentity } from '../core/resolve_identity';
+import { i18n } from '@kbn/i18n';
+import { authorizeMemoryRequest } from '../core/authorize_request';
 import { writeMemory } from '../core/write_memory';
 import { AGENT_MEMORY_API_PRIVILEGES } from '../features';
+import { rememberInputSchema } from '../schemas';
 import type { GetMemoryStorage } from '../types';
-
-const rememberSchema = z.object({
-  title: z
-    .string()
-    .max(500)
-    .describe('Short label for this memory. Displayed to the user and used in keyword search.'),
-  description: z
-    .string()
-    .max(10000)
-    .describe('Full content of the memory. Write in clear, complete sentences.'),
-  category: z
-    .enum(['profile', 'preferences', 'entities', 'events', 'trajectories'])
-    .optional()
-    .describe(
-      'Memory category: profile (user attributes), preferences (stated preferences), ' +
-        'entities (people / places / things), events (occurred actions), ' +
-        'trajectories (plans or goals). Defaults to the most appropriate category.'
-    ),
-  type: z
-    .enum(['episodic', 'semantic', 'procedural'])
-    .optional()
-    .describe(
-      'Memory type: episodic (specific event), semantic (general fact), procedural (how-to).'
-    ),
-  tags: z.array(z.string().max(100)).max(20).optional().describe('Optional classification tags.'),
-  entities: z
-    .array(z.string().max(256))
-    .max(50)
-    .optional()
-    .describe('Entity ids (people, assets, systems) this memory is about.'),
-  expires_at: z
-    .string()
-    .datetime()
-    .optional()
-    .describe('ISO-8601 datetime after which this memory should no longer be recalled.'),
-});
 
 /**
  * Creates the `platform.memory.remember` registered tool.
@@ -66,15 +29,13 @@ const rememberSchema = z.object({
  */
 export const createRememberTool = ({
   getStorage,
-  getHistoryClient,
   getSecurityStart,
   getCoreSecurity,
 }: {
   getStorage: GetMemoryStorage;
-  getHistoryClient: () => DataStreamClient<typeof agentMemoryHistoryMappings>;
   getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
-}): BuiltinToolDefinition<typeof rememberSchema> => ({
+}): BuiltinToolDefinition<typeof rememberInputSchema> => ({
   id: platformMemoryTools.remember,
   type: ToolType.builtin,
   description: `
@@ -90,8 +51,29 @@ Only call this tool when you have concrete, user-relevant information to save.
 
 On success returns { id, revision, action } where action is 'created' or 'updated'.
   `.trim(),
-  schema: rememberSchema,
+  schema: rememberInputSchema,
   tags: [],
+  confirmation: {
+    askUser: 'always',
+    getConfirmation: ({ toolParams }) => ({
+      title: i18n.translate('xpack.agentMemory.agentBuilder.tools.remember.confirmationTitle', {
+        defaultMessage: 'Remember "{title}"',
+        values: { title: toolParams.title },
+      }),
+      message: i18n.translate(
+        'xpack.agentMemory.agentBuilder.tools.remember.confirmationDescription',
+        {
+          defaultMessage: 'Save this memory for future conversations?\n\n{content}',
+          values: { content: toolParams.description },
+        }
+      ),
+      confirm_text: i18n.translate(
+        'xpack.agentMemory.agentBuilder.tools.remember.confirmationButtonLabel',
+        { defaultMessage: 'Remember' }
+      ),
+      color: 'primary' as const,
+    }),
+  },
   annotations: {
     title: 'Remember',
     readOnlyHint: false,
@@ -99,16 +81,16 @@ On success returns { id, revision, action } where action is 'created' or 'update
     idempotentHint: false,
     openWorldHint: false,
   },
-  handler: async ({ title, description, category, type, tags, entities, expires_at }, context) => {
-    // ── Authz gate: must have write_agent_memory before any ES call ──────────
-    const security = getSecurityStart();
-    const { hasAllRequested } = await security.authz
-      .checkPrivilegesWithRequest(context.request)
-      .atSpace(context.spaceId, {
-        kibana: [security.authz.actions.api.get(AGENT_MEMORY_API_PRIVILEGES.write)],
-      });
+  handler: async ({ title, description, category, type, tags, expires_at }, context) => {
+    const authorization = await authorizeMemoryRequest({
+      request: context.request,
+      spaceId: context.spaceId,
+      privilege: AGENT_MEMORY_API_PRIVILEGES.write,
+      security: getSecurityStart(),
+      coreSecurity: getCoreSecurity(),
+    });
 
-    if (!hasAllRequested) {
+    if (authorization.status === 'forbidden') {
       return {
         results: [
           {
@@ -122,9 +104,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
       };
     }
 
-    // ── Identity resolution ───────────────────────────────────────────────────
-    const identity = resolveIdentity({ request: context.request, security: getCoreSecurity() });
-    if (!identity) {
+    if (authorization.status === 'missing_identity') {
       return {
         results: [
           {
@@ -138,20 +118,20 @@ On success returns { id, revision, action } where action is 'created' or 'update
     }
 
     // ── Write ─────────────────────────────────────────────────────────────────
+    const esClient = context.esClient.asCurrentUser;
     const result = await writeMemory({
-      storage: getStorage(context.esClient.asCurrentUser),
-      historyClient: getHistoryClient(),
+      storage: getStorage(esClient),
+      esClient,
       params: {
         title,
         description,
         category,
         type,
         tags,
-        entities,
         expires_at,
         call_source: context.callContext.callSource,
         space_id: context.spaceId,
-        identity,
+        identity: authorization.identity,
       },
     });
 

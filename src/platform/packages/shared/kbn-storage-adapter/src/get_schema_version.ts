@@ -21,11 +21,16 @@ export function getSchemaVersion(
   storage: IndexStorageSettings,
   componentTemplateDependencies: readonly ResolvedComponentTemplateDependency[] = []
 ): string {
+  const dependencyMappings = componentTemplateDependencies.map(({ name, componentTemplate }) => ({
+    name,
+    present: componentTemplate !== undefined,
+    mappings: componentTemplate?.template.mappings,
+  }));
   const versionInput = storage.componentTemplate
     ? {
         properties: storage.schema.properties,
         componentTemplate: storage.componentTemplate,
-        componentTemplateDependencies,
+        componentTemplateDependencies: dependencyMappings,
       }
     : storage.schema.properties;
   const version = objectHash(stableStringify(versionInput));
