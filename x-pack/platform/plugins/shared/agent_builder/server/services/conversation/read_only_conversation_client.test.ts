@@ -9,6 +9,7 @@ import {
   agentBuilderDefaultAgentId,
   createAgentNotFoundError,
   isConversationAlreadyExistsError,
+  ConversationAccessControlMode,
 } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentRegistry } from '../agents/agent_registry';
@@ -82,14 +83,14 @@ describe('createConversationPublicClient', () => {
         agentId: 'custom-agent',
         id: 'conv-1',
         title: 'My chat',
-        accessControl: { access_mode: 'private' },
+        accessControl: { access_mode: ConversationAccessControlMode.Private },
       });
 
       expect(internalClient.create).toHaveBeenCalledWith({
         agent_id: 'custom-agent',
         id: 'conv-1',
         title: 'My chat',
-        access_control: { access_mode: 'private' },
+        access_control: { access_mode: ConversationAccessControlMode.Private },
         rounds: [],
       });
     });
