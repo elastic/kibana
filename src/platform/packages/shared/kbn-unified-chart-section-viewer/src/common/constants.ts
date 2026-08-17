@@ -90,9 +90,3 @@ export const METRICS_SORT_DIRECTION = {
   asc: 'asc',
   desc: 'desc',
 } as const;
-
-// Default metrics grid sort
-export const DEFAULT_METRICS_SORT = [
-  METRICS_GRID_SORT_DEFAULTS.sortField,
-  METRICS_GRID_SORT_DEFAULTS.sortDirection,
-] as const;

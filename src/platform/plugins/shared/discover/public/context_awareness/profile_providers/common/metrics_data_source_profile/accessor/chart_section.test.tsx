@@ -275,27 +275,27 @@ describe('MetricsExperienceGridWrapper', () => {
     });
   });
 
-  it('passes the resolved sort (tuple form of the adapter default) to UnifiedMetricsExperienceGrid', () => {
+  it('passes the resolved sort from the adapter default to UnifiedMetricsExperienceGrid', () => {
     renderChartSection();
 
-    expect(unifiedGridProps?.metricsSort).toEqual([
-      METRICS_GRID_SORT_DEFAULTS.sortField,
-      METRICS_GRID_SORT_DEFAULTS.sortDirection,
-    ]);
+    expect(unifiedGridProps?.metricsSort).toEqual({
+      sortField: METRICS_GRID_SORT_DEFAULTS.sortField,
+      sortDirection: METRICS_GRID_SORT_DEFAULTS.sortDirection,
+    });
   });
 
   it('updates the metrics state adapter when onMetricsSortChange is invoked and reflects the new sort', () => {
     const { metricsStateAdapter } = renderChartSection();
 
     act(() => {
-      unifiedGridProps?.onMetricsSortChange?.(['recency', 'desc']);
+      unifiedGridProps?.onMetricsSortChange?.({ sortField: 'recency', sortDirection: 'desc' });
     });
 
     expect(metricsStateAdapter.updateState).toHaveBeenCalledWith({
       sortField: 'recency',
       sortDirection: 'desc',
     });
-    expect(unifiedGridProps?.metricsSort).toEqual(['recency', 'desc']);
+    expect(unifiedGridProps?.metricsSort).toEqual({ sortField: 'recency', sortDirection: 'desc' });
   });
 
   it('surfaces the persisted recently explored snapshot and records new interactions', () => {

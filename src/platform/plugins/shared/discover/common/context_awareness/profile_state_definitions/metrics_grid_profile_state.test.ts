@@ -16,6 +16,7 @@ const KEY = METRICS_STATE_DEF.key;
 // makes Url fields survive a reload without a URL.
 const LOCALLY_PERSISTED_TYPES = [ProfileStateType.Persistent, ProfileStateType.Url];
 
+
 const createRegistry = () => {
   const registry = new ProfileStateRegistry();
   registry.registerDefinition(METRICS_STATE_DEF);
