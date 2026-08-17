@@ -51,7 +51,7 @@ const defaultProps: ActionPolicyDefinitionListProps = {
     description: 'A test description',
     tags: ['tag-a', 'tag-b'],
     matcher: 'rule.id: "abc"',
-    groupingMode: 'per_episode',
+    grouping_mode: 'per_episode',
     destinations: [
       { type: 'workflow', id: 'wf-1' },
       { type: 'workflow', id: 'wf-2' },
@@ -104,8 +104,8 @@ describe('ActionPolicyDefinitionList', () => {
     renderWithI18n({
       policy: {
         ...defaultProps.policy,
-        groupingMode: 'per_field',
-        groupBy: ['host.name', 'service.name'],
+        grouping_mode: 'per_field',
+        group_by: ['host.name', 'service.name'],
       },
     });
 
@@ -114,7 +114,7 @@ describe('ActionPolicyDefinitionList', () => {
   });
 
   it('does not render Group by when groupingMode is not per_field', () => {
-    renderWithI18n({ policy: { ...defaultProps.policy, groupingMode: 'per_episode' } });
+    renderWithI18n({ policy: { ...defaultProps.policy, grouping_mode: 'per_episode' } });
 
     expect(screen.queryByText('Group by')).toBeNull();
   });
