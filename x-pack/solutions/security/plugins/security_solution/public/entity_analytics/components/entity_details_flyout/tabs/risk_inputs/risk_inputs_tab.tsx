@@ -35,7 +35,7 @@ import type { CriticalityLevel } from '../../../../../../common/entity_analytics
 import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
-import { formatRiskScore } from '../../../../common';
+import { buildExecutionContext, formatRiskScore } from '../../../../common';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
@@ -378,7 +378,14 @@ const RiskInputsTabContent = <T extends EntityType>({
     setQuery,
   });
 
-  const alerts = useRiskContributingAlerts<T>({ riskScore: activeRiskScore, entityType });
+  const alerts = useRiskContributingAlerts<T>({
+    riskScore: activeRiskScore,
+    entityType,
+    executionContext: buildExecutionContext(
+      'entity_analytics-entity_details_flyout',
+      'risk_inputs_alerts'
+    ),
+  });
 
   const entityNameByEuid = useMemo(() => {
     const map = new Map<string, string>();

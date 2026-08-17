@@ -8,6 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
 import { useMemo, useEffect, useState } from 'react';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   fetchQueryAttacks,
   fetchQueryUnifiedAlerts,
@@ -45,6 +46,8 @@ export interface AlertsQueryParams {
    * The query name is used for performance monitoring with APM
    */
   queryName: AlertsQueryName;
+  /** Execution context forwarded to ES as x-opaque-id for tracing */
+  executionContext?: KibanaExecutionContext;
 }
 
 /**
@@ -84,6 +87,7 @@ export const useQueryAlerts = <Hit, Aggs>({
   indexName,
   skip,
   queryName,
+  executionContext,
 }: AlertsQueryParams): ReturnQueryAlerts<Hit, Aggs> => {
   const [query, setQuery] = useState(initialQuery);
   const [alerts, setAlerts] = useState<
@@ -110,6 +114,7 @@ export const useQueryAlerts = <Hit, Aggs>({
         const alertResponse = await fetchAlerts<Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
+          context: executionContext,
         });
 
         if (isSubscribed) {
@@ -154,7 +159,7 @@ export const useQueryAlerts = <Hit, Aggs>({
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [query, indexName, skip, fetchAlerts]);
+  }, [query, indexName, skip, fetchAlerts, executionContext]);
 
   return { loading, ...alerts };
 };
