@@ -12,7 +12,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import type { AnalyzeAndImproveProvider, ChatOpener, SuggestAutomationProvider } from '../../../types';
+import type {
+  AnalyzeAndImproveProvider,
+  ChatOpener,
+  SuggestAutomationProvider,
+} from '../../../types';
 import { useSignals } from '../../hooks/use_signals';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { buildSignal } from './signal_test_fixtures';
