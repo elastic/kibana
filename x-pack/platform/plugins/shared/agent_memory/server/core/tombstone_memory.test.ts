@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { MemoryDocument } from '../storage/memory_storage';
 import { tombstoneMemory } from './tombstone_memory';
 
@@ -53,13 +54,8 @@ describe('tombstoneMemory', () => {
     const storage = {
       getClient: () => ({ get, index }),
     } as never;
-    const historyClient = {
-      create: jest.fn().mockResolvedValue(undefined),
-    } as never;
-
     const result = await tombstoneMemory({
       storage,
-      historyClient,
       params: {
         id: 'memory-1',
         space_id: 'default',
@@ -86,5 +82,53 @@ describe('tombstoneMemory', () => {
       if_seq_no: 7,
       if_primary_term: 3,
     });
+  });
+
+  it('propagates non-404 Elasticsearch errors', async () => {
+    const error = new errors.ResponseError({
+      statusCode: 500,
+      body: { error: { type: 'internal_server_error' } },
+      headers: {},
+      warnings: [],
+      meta: {} as never,
+    });
+    const storage = {
+      getClient: () => ({ get: jest.fn().mockRejectedValue(error) }),
+    } as never;
+
+    await expect(
+      tombstoneMemory({
+        storage,
+        params: {
+          id: 'memory-1',
+          space_id: 'default',
+          identity: { author: 'user-1', author_kind: 'profile_uid' },
+        },
+      })
+    ).rejects.toBe(error);
+  });
+
+  it('returns not_found for a genuine Elasticsearch 404', async () => {
+    const notFoundError = new errors.ResponseError({
+      statusCode: 404,
+      body: { error: { type: 'resource_not_found_exception' } },
+      headers: {},
+      warnings: [],
+      meta: {} as never,
+    });
+    const storage = {
+      getClient: () => ({ get: jest.fn().mockRejectedValue(notFoundError) }),
+    } as never;
+
+    await expect(
+      tombstoneMemory({
+        storage,
+        params: {
+          id: 'missing-memory',
+          space_id: 'default',
+          identity: { author: 'user-1', author_kind: 'profile_uid' },
+        },
+      })
+    ).resolves.toEqual({ result: 'not_found' });
   });
 });

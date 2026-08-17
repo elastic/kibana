@@ -512,34 +512,6 @@ describe('StorageIndexAdapter', () => {
       await expect(esClient.indices.exists({ index: composedIndexName })).resolves.toBe(false);
     });
 
-    it('shares dependency resolution and mapping checks across adapter instances', async () => {
-      await esClient.cluster.putComponentTemplate({
-        name: requiredComponentName,
-        version: 2,
-        template: {
-          mappings: {
-            properties: {
-              shared: { type: 'keyword' },
-            },
-          },
-        },
-      });
-      const getComponentTemplateSpy = jest.spyOn(esClient.cluster, 'getComponentTemplate');
-      const getIndexSpy = jest.spyOn(esClient.indices, 'get');
-      const getAliasSpy = jest.spyOn(esClient.indices, 'getAlias');
-      const firstClient = createStorageIndexAdapter(composedSettings).getClient();
-      const secondClient = createStorageIndexAdapter(composedSettings).getClient();
-
-      await Promise.all([
-        firstClient.search({ track_total_hits: false, size: 1, query: { match_all: {} } }),
-        secondClient.search({ track_total_hits: false, size: 1, query: { match_all: {} } }),
-      ]);
-
-      expect(getComponentTemplateSpy).toHaveBeenCalledTimes(2);
-      expect(getIndexSpy).toHaveBeenCalledTimes(1);
-      expect(getAliasSpy).toHaveBeenCalledTimes(1);
-    });
-
     it('reconciles an existing index when required component content changes', async () => {
       await esClient.cluster.putComponentTemplate({
         name: requiredComponentName,

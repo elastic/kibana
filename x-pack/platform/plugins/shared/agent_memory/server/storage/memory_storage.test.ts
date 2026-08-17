@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { AGENT_MEMORY_INDEX } from '@kbn/agent-memory-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import { AGENT_MEMORY_INDEX } from '../../common';
 import { createMemoryStorage, memoryStorageSettings } from './memory_storage';
 
 jest.mock('@kbn/storage-adapter', () => {
@@ -63,31 +63,12 @@ describe('memoryStorageSettings', () => {
           content_hash: keywordMapping,
           scope_kind: keywordMapping,
           scope_id: keywordMapping,
-          entities: keywordMapping,
-          origin: keywordMapping,
-          assurance: keywordMapping,
           provenance: {
             properties: {
               author: keywordMapping,
               author_kind: keywordMapping,
               call_source: keywordMapping,
-              conversation_ids: keywordMapping,
-              trace_ids: keywordMapping,
-              source_memory_ids: keywordMapping,
             },
-            type: 'object',
-          },
-          valid_at: dateMapping,
-          invalid_at: dateMapping,
-          expired_at: dateMapping,
-          superseded_by: keywordMapping,
-          suppress_until: dateMapping,
-          use_count: { type: 'long' },
-          last_used_at: dateMapping,
-          diff_id: keywordMapping,
-          derived_from: keywordMapping,
-          prior_document: {
-            enabled: false,
             type: 'object',
           },
         },

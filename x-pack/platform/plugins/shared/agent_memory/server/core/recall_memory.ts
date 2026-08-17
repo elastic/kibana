@@ -9,13 +9,11 @@ import type { Logger } from '@kbn/logging';
 import type { MemoryCategory } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
 import type { ResolvedIdentity } from './resolve_identity';
-import { buildRetriever } from '../recall/build_retriever';
+import { buildKeywordRetriever, buildRetriever } from '../recall/build_retriever';
 
 export interface RecallMemoryParams {
   query: string;
   category?: MemoryCategory;
-  /** Entity ids to boost in the entity recall leg. */
-  entities?: string[];
   /** Max results. Default 10, cap 50. */
   limit?: number;
   space_id: string;
@@ -30,8 +28,6 @@ export interface RecalledMemory {
   type?: string;
   tags?: string[];
   created_at: string;
-  origin?: string;
-  assurance?: string;
   author: string;
   author_kind: string;
   revision: number;
@@ -45,7 +41,7 @@ const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 10;
 
 /**
- * Recalls relevant memories using three-leg RRF (BM25 + semantic + entity).
+ * Recalls relevant memories using hybrid RRF (BM25 + semantic).
  *
  * Recall fails open: any ES error returns an empty result set rather than
  * propagating to the agent. The caller should log the error for observability.
@@ -64,20 +60,13 @@ export const recallMemory = async ({
   params: RecallMemoryParams;
   logger?: Logger;
 }): Promise<RecallMemoryResult> => {
-  const { query, category, entities, space_id, identity } = params;
+  const { query, category, space_id, identity } = params;
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const client = storage.getClient();
 
-  try {
-    const retriever = buildRetriever({
-      query,
-      space_id,
-      author: identity.author,
-      entities,
-      category,
-      limit,
-    });
-
+  const searchWithRetriever = async (
+    retriever: ReturnType<typeof buildRetriever>
+  ): Promise<RecallMemoryResult> => {
     const result = await client.search({
       retriever,
       size: limit,
@@ -97,8 +86,6 @@ export const recallMemory = async ({
           type: doc.memory?.type,
           tags: doc.tags,
           created_at: doc.created_at,
-          origin: doc.memory?.origin,
-          assurance: doc.memory?.assurance,
           author: doc.memory?.provenance?.author,
           author_kind: doc.memory?.provenance?.author_kind,
           revision: doc.memory?.revision,
@@ -107,9 +94,27 @@ export const recallMemory = async ({
       .filter((m): m is RecalledMemory => m !== null);
 
     return { memories };
-  } catch (err) {
+  };
+
+  const retrieverParams = {
+    query,
+    space_id,
+    author: identity.author,
+    category,
+    limit,
+  };
+
+  try {
+    return await searchWithRetriever(buildRetriever(retrieverParams));
+  } catch {
+    logger?.warn('Agent Memory hybrid recall failed; retrying with keyword-only retrieval');
+  }
+
+  try {
+    return await searchWithRetriever(buildKeywordRetriever(retrieverParams));
+  } catch {
     // Fail open: an unreachable memory service must never stop the agent (G5, D-security).
-    logger?.warn(`recall_memory failed (returning empty): ${(err as Error).message}`);
+    logger?.warn('Agent Memory keyword recall fallback failed; returning empty results');
     return { memories: [] };
   }
 };

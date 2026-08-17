@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IRouter } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { MemoryStorage } from './storage/memory_storage';
@@ -26,17 +21,13 @@ export type AgentMemoryPluginStart = object;
 export interface AgentMemorySetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   features: FeaturesPluginSetup;
-  licensing: LicensingPluginSetup;
   security: SecurityPluginSetup;
-  taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AgentMemoryStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
-  licensing: LicensingPluginStart;
   security: SecurityPluginStart;
-  taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
 }
 
@@ -46,9 +37,3 @@ export interface AgentMemoryStartDependencies {
  * privileges on non-dot indices.
  */
 export type GetMemoryStorage = (esClient: ElasticsearchClient) => MemoryStorage;
-
-/** Dependencies threaded into route handlers. */
-export interface AgentMemoryRouteHandlerDeps {
-  router: IRouter;
-  getMemoryStorage: GetMemoryStorage;
-}

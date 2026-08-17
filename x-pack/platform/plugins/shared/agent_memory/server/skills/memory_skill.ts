@@ -6,7 +6,7 @@
  */
 
 import type { SkillsSetup } from '@kbn/agent-builder-server';
-import { AGENT_MEMORY_INDEX } from '@kbn/agent-memory-common';
+import { AGENT_MEMORY_INDEX } from '../../common';
 
 // SkillDefinition is not exported from the package; extract it from SkillsSetup.register.
 type SkillDefinition = Parameters<SkillsSetup['register']>[0];
@@ -65,7 +65,6 @@ would miss.
 Use the \`category\` field to classify memories:
 - \`profile\` — who the user is (role, expertise, background)
 - \`preferences\` — stated preferences (tools, style, format)
-- \`entities\` — people, systems, or assets the user works with
 - \`events\` — things that happened (incidents, decisions)
 - \`trajectories\` — plans, goals, or ongoing work
 `.trim();

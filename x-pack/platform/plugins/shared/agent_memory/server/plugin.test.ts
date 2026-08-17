@@ -10,12 +10,10 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { HookLifecycle } from '@kbn/agent-builder-common';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
-import { AGENT_MEMORY_INDEX } from '@kbn/agent-memory-common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { AGENT_MEMORY_INDEX } from '../common';
 import type { AgentMemoryConfig } from './config';
 import { AgentMemoryPlugin } from './plugin';
 import type {
@@ -23,17 +21,10 @@ import type {
   AgentMemoryStartDependencies,
   GetMemoryStorage,
 } from './types';
-import { MEMORY_RECALL_STEP_ID, MEMORY_RETAIN_STEP_ID } from './workflow_steps';
+import { MEMORY_RECALL_STEP_ID } from './workflow_steps';
 
 jest.mock('./storage/memory_storage', () => ({
   createMemoryStorage: jest.fn().mockReturnValue({}),
-}));
-
-jest.mock('@kbn/data-streams', () => ({
-  DataStreamClient: {
-    fromDefinition: jest.fn().mockReturnValue({}),
-    initializeTemplate: jest.fn().mockResolvedValue(undefined),
-  },
 }));
 
 const { createMemoryStorage } = jest.requireMock('./storage/memory_storage') as {
@@ -61,9 +52,7 @@ describe('AgentMemoryPlugin', () => {
     const setupDependencies: AgentMemorySetupDependencies = {
       agentBuilder,
       features: featuresPluginMock.createSetup(),
-      licensing: licensingMock.createSetup(),
       security: securityMock.createSetup(),
-      taskManager: taskManagerMock.createSetup(),
       workflowsExtensions,
     };
 
@@ -97,18 +86,19 @@ describe('AgentMemoryPlugin', () => {
     );
 
     const recallStep = registerStepDefinition.mock.calls[0]?.[0];
-    const retainStepLoader = registerStepDefinition.mock.calls[1]?.[0];
+    const rememberStepLoader = registerStepDefinition.mock.calls[1]?.[0];
     expect(recallStep).toEqual(
       expect.objectContaining({ id: MEMORY_RECALL_STEP_ID, handler: expect.any(Function) })
     );
-    expect(retainStepLoader).toEqual(expect.any(Function));
-    if (typeof retainStepLoader !== 'function') {
-      throw new Error('Expected memory.retain to use a workflow step loader');
+    expect(rememberStepLoader).toEqual(expect.any(Function));
+    if (typeof rememberStepLoader !== 'function') {
+      throw new Error('Expected memory.remember to use a workflow step loader');
     }
-    const retainStep = await retainStepLoader();
-    expect(retainStep).toEqual(
-      expect.objectContaining({ id: MEMORY_RETAIN_STEP_ID, handler: expect.any(Function) })
+    const rememberStep = await rememberStepLoader();
+    expect(rememberStep).toEqual(
+      expect.objectContaining({ id: 'memory.remember', handler: expect.any(Function) })
     );
+    expect(rememberStep).not.toEqual(expect.objectContaining({ id: 'memory.retain' }));
   });
 
   it('uses the request client for data and the internal client for index templates', async () => {
