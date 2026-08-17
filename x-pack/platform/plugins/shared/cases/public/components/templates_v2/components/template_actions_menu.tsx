@@ -31,8 +31,13 @@ import {
   parseTemplateDocument,
 } from '../utils/template_yaml_ast';
 import type { FieldRuleAction } from '../utils/field_action_catalog';
-import { ActionsMenu, ActionsMenuPopover, getActionOptions } from './actions_menu';
-import type { ActionOptionData } from './actions_menu';
+import {
+  ActionsMenu,
+  ActionsMenuPopover,
+  getActionOptions,
+  ConfigureAndAddModal,
+} from './actions_menu';
+import type { ActionOptionData, ConfigurableFieldAction } from './actions_menu';
 import * as i18n from '../translations';
 
 interface TemplateActionsMenuProps {
@@ -84,6 +89,8 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   const { euiTheme } = useEuiTheme();
   const toasts = useToasts();
   const [isOpen, setIsOpen] = useState(false);
+  const [configureAction, setConfigureAction] = useState<ConfigurableFieldAction | null>(null);
+  const configureButtonSubjRef = useRef<string | null>(null);
   const [targetField, setTargetField] = useState<{ control: string; name?: string } | null>(null);
   const [bufferHasErrors, setBufferHasErrors] = useState(false);
   const cursorLineRef = useRef<number | undefined>(undefined);
@@ -97,6 +104,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
   onChangeRef.current = onChange;
 
   const closeAndFocusEditor = useCallback(() => {
+    setConfigureAction(null);
     setIsOpen(false);
     editor?.focus();
   }, [editor]);
@@ -139,6 +147,8 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
     return doc ? getDefinedFieldNames(getFieldItemMaps(doc)) : new Set<string>();
   }, [mode, value]);
 
+  const siblingFieldNames = useMemo(() => Array.from(alreadyLinked), [alreadyLinked]);
+
   const catalog = useMemo(
     () =>
       getActionOptions({
@@ -166,6 +176,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
         const rootResult = replaceRootField(valueRef.current, fieldObject);
         if (rootResult.status === 'applied') {
           onChangeRef.current(rootResult.yaml);
+          toasts.addSuccess(i18n.ACTIONS_MENU_FIELD_ADDED(displayName));
         } else {
           toasts.addWarning(i18n.ACTIONS_MENU_INVALID_YAML);
         }
@@ -175,6 +186,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       const result = insertTemplateField(valueRef.current, fieldObject, cursorLineRef.current);
       if (result.changed) {
         onChangeRef.current(result.yaml);
+        toasts.addSuccess(i18n.ACTIONS_MENU_FIELD_ADDED(displayName));
       } else if (result.reason === 'invalid') {
         toasts.addWarning(i18n.ACTIONS_MENU_INVALID_YAML);
       } else {
@@ -224,7 +236,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
         return;
       }
       if (action.kind === 'libraryField') {
-        insertField({ $ref: action.fieldName }, action.fieldName);
+        insertField({ $ref: action.fieldName }, action.label);
         return;
       }
       if (action.kind === 'rule') {
@@ -232,6 +244,42 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       }
     },
     [insertField, applyRule]
+  );
+
+  const handleConfigure = useCallback(
+    (action: ConfigurableFieldAction) => {
+      configureButtonSubjRef.current = action.testSubj
+        ? `${testSubjPrefix}-${action.testSubj}-configure`
+        : null;
+      setConfigureAction(action);
+    },
+    [testSubjPrefix]
+  );
+
+  const handleConfigureCancel = useCallback(() => {
+    setConfigureAction(null);
+    const restoreFocus = () => {
+      const testSubj = configureButtonSubjRef.current;
+      if (!testSubj) {
+        return;
+      }
+      const button = document.querySelector(`[data-test-subj="${testSubj}"]`);
+      if (button instanceof HTMLElement) {
+        button.focus();
+      }
+    };
+    // Wait until the Actions menu is visible again (display:none is cleared after paint).
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(restoreFocus);
+    });
+  }, []);
+
+  const handleConfigureConfirm = useCallback(
+    (result: { fieldObject: Record<string, unknown>; displayName: string }) => {
+      setConfigureAction(null);
+      insertField(result.fieldObject, result.displayName);
+    },
+    [insertField]
   );
 
   const triggerButton = (
@@ -298,6 +346,7 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
             anchorPosition="upRight"
             ownFocus
             repositionOnScroll
+            aria-label={i18n.ACTIONS_MENU_ARIA}
             panelStyle={{ width: 360, maxWidth: 'calc(100vw - 32px)' }}
           >
             <ActionsMenu
@@ -316,11 +365,23 @@ export const TemplateActionsMenu: React.FC<TemplateActionsMenuProps> = ({
       {!isCompact ? (
         <ActionsMenuPopover
           isOpen={isOpen}
+          isHidden={configureAction != null}
           closePopover={closeAndFocusEditor}
           options={catalog}
           testSubjPrefix={testSubjPrefix}
           onActionSelected={handleActionSelected}
+          onConfigure={handleConfigure}
           presentation="full"
+        />
+      ) : null}
+
+      {configureAction ? (
+        <ConfigureAndAddModal
+          action={configureAction}
+          existingFieldNames={alreadyLinked}
+          siblingFieldNames={siblingFieldNames}
+          onCancel={handleConfigureCancel}
+          onConfirm={handleConfigureConfirm}
         />
       ) : null}
     </>

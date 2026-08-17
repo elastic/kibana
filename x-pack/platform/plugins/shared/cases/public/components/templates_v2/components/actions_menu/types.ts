@@ -49,6 +49,9 @@ export interface LibraryFieldAction extends ActionBase {
   fieldName: string;
   alreadyLinked?: boolean;
   isGlobal?: boolean;
+  /** YAML of the library field's inline definition, used by Configure and add. */
+  definition?: string;
+  fieldDescription?: string;
 }
 
 export interface RuleActionOption extends ActionBase {

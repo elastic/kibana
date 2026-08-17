@@ -1219,11 +1219,6 @@ export const ACTIONS_MENU_SECTION_RULES = i18n.translate(
   { defaultMessage: 'Field rules' }
 );
 
-export const ACTIONS_MENU_KEYBOARD_LEGEND = i18n.translate(
-  'xpack.cases.templates.actionsMenu.keyboardLegend',
-  { defaultMessage: '↑↓ navigate · ↵ add · esc close' }
-);
-
 export const ACTIONS_MENU_BACK = i18n.translate('xpack.cases.templates.actionsMenu.back', {
   defaultMessage: 'Back',
 });
@@ -1243,12 +1238,41 @@ export const ACTIONS_MENU_BREADCRUMB_ARIA = i18n.translate(
   { defaultMessage: 'Actions menu navigation' }
 );
 
-export const ACTIONS_MENU_CONFIGURE_AND_ADD_DESC = i18n.translate(
-  'xpack.cases.templates.actionsMenu.configureAndAdd.desc',
-  {
-    defaultMessage:
-      'Optionally set a name and pick validation or conditional rules. Selected rules are scaffolded onto the field before it is inserted — you can edit the YAML afterward.',
-  }
+export const ACTIONS_MENU_CONFIGURE_AND_ADD = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd',
+  { defaultMessage: 'Configure and add' }
+);
+
+export const ACTIONS_MENU_QUICK_ADD = i18n.translate('xpack.cases.templates.actionsMenu.quickAdd', {
+  defaultMessage: 'Add',
+});
+
+export const ACTIONS_MENU_FIELD_ADDED = (label: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.fieldAdded', {
+    defaultMessage: '"{label}" added',
+    values: { label },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.title',
+  { defaultMessage: 'Configure field' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_LIBRARY_SUBTITLE = (name: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.librarySubtitle', {
+    defaultMessage: '{name} · Field library',
+    values: { name },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_KEY_HELP = (key: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.keyHelp', {
+    defaultMessage: 'Key: {key}',
+    values: { key },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_EDIT_KEY = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.editKey',
+  { defaultMessage: 'Edit' }
 );
 
 export const ACTIONS_MENU_CONFIGURE_NAME_LABEL = i18n.translate(
@@ -1259,6 +1283,188 @@ export const ACTIONS_MENU_CONFIGURE_NAME_LABEL = i18n.translate(
 export const ACTIONS_MENU_CONFIGURE_LABEL_LABEL = i18n.translate(
   'xpack.cases.templates.actionsMenu.configureAndAdd.labelLabel',
   { defaultMessage: 'Label' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_OPTIONS_LABEL = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.optionsLabel',
+  { defaultMessage: 'Options' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_OPTIONS_HELP = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.optionsHelp',
+  { defaultMessage: 'Comma-separated list' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_DEFAULT_LABEL = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.defaultLabel',
+  { defaultMessage: 'Default' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_ADD_RULE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.addRule',
+  { defaultMessage: 'Add rule' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_ADD_CONDITION = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.addCondition',
+  { defaultMessage: 'Add condition' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_REMOVE_RULE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.removeRule',
+  { defaultMessage: 'Remove rule' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_NO_FIELDS_FOR_CONDITION = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.noFieldsForCondition',
+  { defaultMessage: 'Add another field to the template to use conditional logic.' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_PREVIEW = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.preview',
+  { defaultMessage: 'Preview' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_LIBRARY_KEY = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.libraryKey',
+  { defaultMessage: 'Key' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_LIBRARY_TYPE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.libraryType',
+  { defaultMessage: 'Type' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_CONDITION_FIELD = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.conditionField',
+  { defaultMessage: 'Field' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_CONDITION_OPERATOR = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.conditionOperator',
+  { defaultMessage: 'Operator' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_CONDITION_VALUE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.conditionValue',
+  { defaultMessage: 'Value' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_OPERATOR_EQ = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.operatorEq',
+  { defaultMessage: 'equals' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_OPERATOR_NEQ = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.operatorNeq',
+  { defaultMessage: 'is not' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_OPERATOR_CONTAINS = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.operatorContains',
+  { defaultMessage: 'contains' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_OPERATOR_EMPTY = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.operatorEmpty',
+  { defaultMessage: 'is empty' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_OPERATOR_NOT_EMPTY = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.operatorNotEmpty',
+  { defaultMessage: 'is not empty' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_CONFIRM = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.confirm',
+  { defaultMessage: 'Add field' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_CANCEL = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.cancel',
+  { defaultMessage: 'Cancel' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_LABEL_PLACEHOLDER = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.labelPlaceholder',
+  { defaultMessage: 'e.g. Customer impact' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_KEY_EMPTY = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.keyEmpty',
+  { defaultMessage: 'Key: —' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_LABEL_REQUIRED = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.labelRequired',
+  { defaultMessage: 'Label is required.' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_NAME_TAKEN = (key: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.nameTaken', {
+    defaultMessage: 'A field named "{key}" already exists in this template.',
+    values: { key },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_UNTITLED = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.untitledField',
+  { defaultMessage: 'Untitled field' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_REMOVE_CONDITION = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.removeCondition',
+  { defaultMessage: 'Remove condition' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_VALUE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.valuePlaceholder',
+  { defaultMessage: 'Value' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_REQUIRED_WHEN = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.requiredWhen',
+  { defaultMessage: 'Required when…' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_REQUIRED_ON_CLOSE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.requiredOnClose',
+  { defaultMessage: 'Required on close' }
+);
+
+export const ACTIONS_MENU_CONFIGURE_CONDITION_PHRASE = ({
+  field,
+  operator,
+  value,
+}: {
+  field: string;
+  operator: string;
+  value?: string;
+}) =>
+  value
+    ? i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.conditionPhraseWithValue', {
+        defaultMessage: '{field} {operator} {value}',
+        values: { field, operator, value },
+      })
+    : i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.conditionPhrase', {
+        defaultMessage: '{field} {operator}',
+        values: { field, operator },
+      });
+
+export const ACTIONS_MENU_CONFIGURE_BADGE_REQUIRED_WHEN = (phrase: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.badgeRequiredWhen', {
+    defaultMessage: 'Required when {phrase}',
+    values: { phrase },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_HIDDEN_UNTIL = (phrase: string) =>
+  i18n.translate('xpack.cases.templates.actionsMenu.configureAndAdd.hiddenUntil', {
+    defaultMessage: 'Hidden until {phrase}',
+    values: { phrase },
+  });
+
+export const ACTIONS_MENU_CONFIGURE_CONDITION_PLACEHOLDER = i18n.translate(
+  'xpack.cases.templates.actionsMenu.configureAndAdd.conditionPlaceholder',
+  { defaultMessage: '…' }
 );
 
 // Validation rule labels

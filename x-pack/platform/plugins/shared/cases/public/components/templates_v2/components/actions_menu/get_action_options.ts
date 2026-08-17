@@ -21,6 +21,8 @@ export interface LibraryFieldEntry {
   fieldDefinitionId: string;
   name: string;
   isGlobal?: boolean;
+  definition?: string;
+  description?: string;
 }
 
 export interface GetActionOptionsParams {
@@ -84,6 +86,8 @@ const buildLibraryOptions = (
         fieldName: field.name,
         alreadyLinked: linked,
         isGlobal: field.isGlobal,
+        definition: field.definition,
+        fieldDescription: field.description,
         disabled: linked,
         disabledReason: linked ? i18n.ACTIONS_MENU_FIELD_EXISTS(field.name) : undefined,
         testSubj: `fieldLibrary-${field.name}`,

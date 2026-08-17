@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/monaco', () => ({
@@ -19,6 +19,10 @@ jest.mock('@kbn/monaco', () => ({
 const mockUseGetFieldDefinitions = jest.fn();
 jest.mock('../../field_library/hooks/use_get_field_definitions', () => ({
   useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
+}));
+
+jest.mock('../../field_library/components/field_definition_preview', () => ({
+  FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
 }));
 
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -62,7 +66,16 @@ describe('TemplateActionsMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseGetFieldDefinitions.mockReturnValue({
-      data: { fieldDefinitions: [{ fieldDefinitionId: 'root_cause', name: 'root_cause' }] },
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'root_cause',
+            name: 'root_cause',
+            definition: 'name: root_cause\ncontrol: INPUT_TEXT\nlabel: Root cause\ntype: keyword\n',
+            description: 'Why it happened',
+          },
+        ],
+      },
       isLoading: false,
     });
   });
@@ -78,9 +91,6 @@ describe('TemplateActionsMenu', () => {
     expect(screen.getByText('Add field')).toBeInTheDocument();
     expect(screen.getByText('Field rules')).toBeInTheDocument();
     expect(screen.getByTestId('templateActionsMenu-search')).toBeInTheDocument();
-    expect(screen.getByTestId('templateActionsMenu-keyboardLegend')).toHaveTextContent(
-      '↑↓ navigate · ↵ add · esc close'
-    );
   });
 
   it('inserts a scaffolded field via New field → field type', async () => {
@@ -174,6 +184,111 @@ describe('TemplateActionsMenu', () => {
     expect(screen.getByTestId('actionsMenuPreviewOpenFieldLibrary')).toBeInTheDocument();
     expect(await screen.findByTestId('templateActionsMenu-back')).toBeVisible();
     expect(screen.getByRole('heading', { name: 'Field library' })).toBeInTheDocument();
+  });
+
+  it('reveals Configure and add and Add quick actions on New field leaves', async () => {
+    renderMenu();
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+    await user.click(await screen.findByText('New field'));
+
+    const configure = await screen.findByTestId(
+      'templateActionsMenu-newField-INPUT_TEXT-configure'
+    );
+    const add = screen.getByTestId('templateActionsMenu-newField-INPUT_TEXT-add');
+    expect(configure).toHaveAttribute('aria-label', 'Configure and add');
+    expect(add).toHaveAttribute('aria-label', 'Add');
+    const row = screen.getByTestId('templateActionsMenu-newField-INPUT_TEXT');
+    const labels = within(row)
+      .getAllByRole('button')
+      .map((button) => button.getAttribute('aria-label'));
+    expect(labels.indexOf('Configure and add')).toBeLessThan(labels.indexOf('Add'));
+  });
+
+  it('inserts immediately from the Add quick action without opening the configure modal', async () => {
+    const { onChange } = renderMenu({ lineNumber: 1 });
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+    await user.click(await screen.findByText('New field'));
+    await user.click(await screen.findByTestId('templateActionsMenu-newField-INPUT_TEXT-add'));
+
+    await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+    expect(onChange.mock.calls[0][0]).toContain('control: INPUT_TEXT');
+    expect(screen.queryByTestId('configureAndAddModal')).not.toBeInTheDocument();
+  });
+
+  it('opens Configure and add from the quick action and Cancel restores the drilled-in menu', async () => {
+    renderMenu();
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+    await user.click(await screen.findByText('New field'));
+    await user.click(
+      await screen.findByTestId('templateActionsMenu-newField-INPUT_TEXT-configure')
+    );
+
+    expect(await screen.findByTestId('configureAndAddModal')).toBeInTheDocument();
+    expect(screen.getByText('Configure field')).toBeInTheDocument();
+    expect(screen.getByTestId('configureAndAddModal').textContent).toContain('Text input');
+
+    await user.click(screen.getByTestId('configureAndAdd-cancel'));
+
+    expect(screen.queryByTestId('configureAndAddModal')).not.toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'New field' })).toBeInTheDocument();
+    expect(
+      screen.getByTestId('templateActionsMenu-newField-INPUT_TEXT-configure')
+    ).toBeInTheDocument();
+  });
+
+  it('inserts schema-correct YAML from Configure and add, uniquifies the key, and closes both surfaces', async () => {
+    const { onChange } = renderMenu({ lineNumber: 1 });
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+    await user.click(await screen.findByText('New field'));
+    await user.click(
+      await screen.findByTestId('templateActionsMenu-newField-INPUT_TEXT-configure')
+    );
+
+    const labelInput = await screen.findByTestId('configureAndAdd-label');
+    await user.type(labelInput, 'Summary');
+    await user.click(screen.getByTestId('configureAndAdd-addRule'));
+    await user.click(screen.getByTestId('configureAndAdd-addCondition'));
+    await user.type(screen.getByLabelText('Value'), 'high');
+    await user.click(screen.getByTestId('configureAndAdd-confirm'));
+
+    await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+    const yaml = onChange.mock.calls[0][0] as string;
+    expect(yaml).toContain('name: summary_2');
+    expect(yaml).toContain('label: Summary');
+    expect(yaml).toContain('control: INPUT_TEXT');
+    expect(yaml).toContain('required: true');
+    expect(yaml).toContain('show_when:');
+    expect(yaml).toContain('field: summary');
+    expect(yaml).toContain('value: high');
+    expect(screen.queryByTestId('configureAndAddModal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templateActionsMenuContent')).not.toBeInTheDocument();
+  });
+
+  it('shows a read-only library definition and disables conditional logic when no sibling fields exist', async () => {
+    const { onChange } = renderMenu({
+      lineNumber: 1,
+      value: 'name: T\nseverity: low\n',
+    });
+    await user.click(screen.getByTestId('templateActionsMenuButton'));
+    await user.click(await screen.findByText('Field library'));
+    await user.click(
+      await screen.findByTestId('templateActionsMenu-fieldLibrary-root_cause-configure')
+    );
+
+    expect(await screen.findByTestId('configureAndAddModal')).toBeInTheDocument();
+    expect(screen.getByTestId('configureAndAdd-libraryLabel')).toHaveAttribute('readonly');
+    expect(screen.getByTestId('configureAndAdd-libraryKey')).toHaveValue('root_cause');
+    expect(screen.getByTestId('configureAndAdd-addCondition')).toBeDisabled();
+    expect(
+      screen.getByText('Add another field to the template to use conditional logic.')
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('configureAndAdd-confirm'));
+
+    await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+    expect(onChange.mock.calls[0][0]).toContain('$ref: root_cause');
+    expect(onChange.mock.calls[0][0]).not.toContain('display:');
+    expect(onChange.mock.calls[0][0]).not.toContain('validation:');
   });
 
   it('goes back one level on Escape while drilled in, and closes at the root', async () => {
@@ -281,6 +396,19 @@ type: keyword
 
       await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
       expect(onChange.mock.calls[0][0]).toContain('required: true');
+    });
+
+    it('does not show Configure and add quick actions in compact mode', async () => {
+      renderFieldDefinitionMenu({ value: '' });
+      await user.click(screen.getByTestId('fieldDefinitionActionsMenuButton'));
+      await user.click(await screen.findByText('New field'));
+
+      expect(
+        screen.queryByTestId('fieldDefinitionActionsMenu-newField-INPUT_TEXT-configure')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('fieldDefinitionActionsMenu-newField-INPUT_TEXT-add')
+      ).not.toBeInTheDocument();
     });
 
     it('disables both sections when the buffer has YAML errors', async () => {

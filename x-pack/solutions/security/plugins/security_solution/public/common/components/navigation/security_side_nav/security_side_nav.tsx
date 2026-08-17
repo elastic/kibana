@@ -68,17 +68,9 @@ const formatLink = (
   getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
 ): SolutionSideNavItem => {
   const stripDashboardsPanel = navLink.id === SecurityPageName.dashboards;
-
-  return {
-    id: navLink.id,
-    label: navLink.title,
-    position: getNavItemPosition(navLink.id),
-    ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
-    ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
-    ...(navLink.categories?.length && !stripDashboardsPanel && { categories: navLink.categories }),
-    ...(navLink.links?.length &&
-      !stripDashboardsPanel && {
-        items: navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
+  const childItems =
+    navLink.links?.length && !stripDashboardsPanel
+      ? navLink.links.reduce<SolutionSideNavItem[]>((acc, current) => {
           if (!current.disabled) {
             acc.push({
               id: current.id,
@@ -90,8 +82,27 @@ const formatLink = (
             });
           }
           return acc;
-        }, []),
-      }),
+        }, [])
+      : [];
+
+  // Cases is both the list page and the panel group. Solution nav already lists it as the first
+  // panel child; classic nav only rendered Template library, so prepend the list link here.
+  if (navLink.id === SecurityPageName.case && childItems.length > 0) {
+    childItems.unshift({
+      id: navLink.id,
+      label: navLink.title,
+      ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
+    });
+  }
+
+  return {
+    id: navLink.id,
+    label: navLink.title,
+    position: getNavItemPosition(navLink.id),
+    ...getSecuritySolutionLinkProps({ deepLinkId: navLink.id }),
+    ...(navLink.sideNavIcon && { iconType: navLink.sideNavIcon }),
+    ...(navLink.categories?.length && !stripDashboardsPanel && { categories: navLink.categories }),
+    ...(childItems.length > 0 && { items: childItems }),
   };
 };
 

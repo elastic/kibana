@@ -27,14 +27,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useCasesFieldLibraryNavigation } from '../../../../common/navigation';
 import { flattenOptions } from './get_action_options';
-import type { ActionOptionData } from './types';
-import { getOptionAction, isActionCategory } from './types';
+import type { ActionOptionData, ConfigurableFieldAction } from './types';
+import { getOptionAction, isActionCategory, isConfigurableFieldAction } from './types';
 import { useDisplayOptions } from './use_display_options';
 import * as i18nStrings from '../../translations';
 
 const SEARCH_INPUT_NAME = 'cases-actions-menu-search';
 const LIST_SLIDE_MS = 220;
 const KEYBOARD_ACTIVE_CLASS = 'actionsMenu-keyboardActive';
+const QUICK_ACTIONS_CLASS = 'actionsMenu-quickActions';
 
 type PendingListFocus = 'first' | 'none' | { optionId: string };
 
@@ -46,7 +47,13 @@ export interface ActionsMenuProps {
   onActionSelected: (action: ActionOptionData) => void;
   onClose?: () => void;
   /**
-   * `full` — template editor: search, category headers, keyboard legend.
+   * Opens Configure and add for a New field / Field library leaf. Omitted in compact mode.
+   */
+  onConfigure?: (action: ConfigurableFieldAction) => void;
+  /** Keep the menu mounted (preserving drill-in state) while a configure modal is open. */
+  isHidden?: boolean;
+  /**
+   * `full` — template editor: search and category headers.
    * `compact` — field-library flyout: same rows and selection, no search or group labels.
    */
   presentation?: ActionsMenuPresentation;
@@ -93,9 +100,13 @@ export function ActionsMenu({
   testSubjPrefix,
   onActionSelected,
   onClose,
+  onConfigure,
+  isHidden = false,
   presentation = 'full',
 }: ActionsMenuProps) {
   const isFull = presentation === 'full';
+  const isHiddenRef = useRef(isHidden);
+  isHiddenRef.current = isHidden;
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const [searchTerm, setSearchTerm] = useState('');
@@ -138,7 +149,7 @@ export function ActionsMenu({
 
   const keepSearchFocused = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`)) {
+    if (target.closest(`input[name="${SEARCH_INPUT_NAME}"]`) || target.closest('button')) {
       return;
     }
     e.preventDefault();
@@ -366,6 +377,13 @@ export function ActionsMenu({
     const description = action.disabledReason ?? action.description;
     const iconType = resolveRowIcon(action);
     const showChevron = isCategory && !action.disabled;
+    const showQuickActions =
+      isFull && onConfigure != null && isConfigurableFieldAction(action) && !action.disabled;
+
+    const stopRowActivation = (event: React.SyntheticEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
 
     return (
       <div
@@ -381,12 +399,7 @@ export function ActionsMenu({
         >
           <EuiFlexItem grow={false} css={[styles.iconOuter, styles.iconOuterNeutral]}>
             <span css={styles.actionIconInner}>
-              <EuiIcon
-                type={iconType}
-                size="m"
-                color={euiTheme.colors.textParagraph}
-                aria-hidden
-              />
+              <EuiIcon type={iconType} size="m" color={euiTheme.colors.textParagraph} aria-hidden />
             </span>
           </EuiFlexItem>
           <EuiFlexItem css={styles.actionInfo}>
@@ -425,6 +438,48 @@ export function ActionsMenu({
                   action.testSubj ? `${testSubjPrefix}-${action.testSubj}-chevron` : undefined
                 }
               />
+            </EuiFlexItem>
+          ) : null}
+          {showQuickActions ? (
+            <EuiFlexItem grow={false}>
+              <div className={QUICK_ACTIONS_CLASS} css={styles.quickActions}>
+                <EuiToolTip
+                  content={i18nStrings.ACTIONS_MENU_CONFIGURE_AND_ADD}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="controls"
+                    size="s"
+                    aria-label={i18nStrings.ACTIONS_MENU_CONFIGURE_AND_ADD}
+                    onMouseDown={stopRowActivation}
+                    onClick={(event: React.MouseEvent) => {
+                      stopRowActivation(event);
+                      onConfigure(action);
+                    }}
+                    data-test-subj={
+                      action.testSubj ? `${testSubjPrefix}-${action.testSubj}-configure` : undefined
+                    }
+                  />
+                </EuiToolTip>
+                <EuiToolTip content={i18nStrings.ACTIONS_MENU_QUICK_ADD} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    color="text"
+                    display="base"
+                    iconType="plusCircle"
+                    size="s"
+                    aria-label={i18nStrings.ACTIONS_MENU_QUICK_ADD}
+                    onMouseDown={stopRowActivation}
+                    onClick={(event: React.MouseEvent) => {
+                      stopRowActivation(event);
+                      onActionSelected(action);
+                    }}
+                    data-test-subj={
+                      action.testSubj ? `${testSubjPrefix}-${action.testSubj}-add` : undefined
+                    }
+                  />
+                </EuiToolTip>
+              </div>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
@@ -489,10 +544,21 @@ export function ActionsMenu({
   goBackRef.current = goBack;
 
   useEffect(() => {
+    if (isHidden) return;
     const onKeyDown = (e: KeyboardEvent) => {
       const menuEl = menuContainerRef.current;
       if (!menuEl || !document.body.contains(menuEl)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const activeEl = document.activeElement;
+      if (
+        (e.key === 'Enter' || e.key === ' ') &&
+        activeEl instanceof HTMLElement &&
+        menuEl.contains(activeEl) &&
+        activeEl.closest('button')
+      ) {
+        return;
+      }
 
       const input = searchInputRef.current;
       if (!menuEl.contains(document.activeElement) && document.activeElement !== input) {
@@ -580,6 +646,7 @@ export function ActionsMenu({
     enterCategoryFromKeyboard,
     focusSearch,
     isFull,
+    isHidden,
     onClose,
   ]);
 
@@ -639,12 +706,18 @@ export function ActionsMenu({
           searchInputRef.current = node;
         },
         onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
+          if (isHiddenRef.current) {
+            return;
+          }
           const next = e.relatedTarget as Node | null;
           const menuEl = menuContainerRef.current;
           if (menuEl && next && menuEl.contains(next)) {
             return;
           }
           requestAnimationFrame(() => {
+            if (isHiddenRef.current) {
+              return;
+            }
             if (searchInputRef.current && document.body.contains(searchInputRef.current)) {
               const active = document.activeElement;
               if (menuContainerRef.current?.contains(active)) {
@@ -739,12 +812,6 @@ export function ActionsMenu({
                 )}
               </div>
             </div>
-          </div>
-
-          <div css={styles.footer} data-test-subj={`${testSubjPrefix}-keyboardLegend`}>
-            <EuiText size="xs" color="subdued">
-              {i18nStrings.ACTIONS_MENU_KEYBOARD_LEGEND}
-            </EuiText>
           </div>
         </div>
       )}
@@ -895,12 +962,6 @@ const componentStyles = {
     gap: '16px',
     padding: '24px',
   }),
-  footer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      padding: `8px ${euiTheme.size.base}`,
-      borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-    }),
   selectable: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,
@@ -976,6 +1037,11 @@ const componentStyles = {
           backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           color: 'inherit',
         },
+      '& .euiSelectableListItem:hover:not([aria-disabled="true"]) .actionsMenu-quickActions, & .euiSelectableListItem:focus-within:not([aria-disabled="true"]) .actionsMenu-quickActions':
+        {
+          opacity: 1,
+          pointerEvents: 'auto',
+        },
       '& .euiSelectableListItem[aria-disabled="true"]': {
         cursor: 'not-allowed',
         opacity: 0.55,
@@ -1026,6 +1092,16 @@ const componentStyles = {
     css({
       color: euiTheme.colors.textSubdued,
     }),
+  quickActions: css({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'nowrap',
+    gap: 4,
+    flexShrink: 0,
+    opacity: 0,
+    pointerEvents: 'none',
+  }),
   actionTitle: ({ euiTheme }: UseEuiTheme) =>
     css({
       margin: 0,
