@@ -18,7 +18,6 @@ export const APP_HEADER_TEST_SUBJECTS = {
   titleInput: 'appHeaderTitleInput',
   titleError: 'appHeaderTitleError',
   titleButton: 'appHeaderTitleButton',
-  titleEditIcon: 'appHeaderTitleEditIcon',
   titleActions: 'appHeaderTitleActions',
   badge: 'appHeaderBadge',
   sharePrefix: 'appHeaderShare',
