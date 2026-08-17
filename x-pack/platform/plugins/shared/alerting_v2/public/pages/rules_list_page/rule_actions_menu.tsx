@@ -23,6 +23,7 @@ export interface RuleActionsMenuProps {
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled?: (rule: RuleApiResponse) => void;
+  onUpdateApiKey?: (rule: RuleApiResponse) => void;
   onRun?: (rule: RuleApiResponse) => void;
 }
 
@@ -32,6 +33,7 @@ export const RuleActionsMenu = ({
   onClone,
   onDelete,
   onToggleEnabled,
+  onUpdateApiKey,
   onRun,
 }: RuleActionsMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -102,6 +104,31 @@ export const RuleActionsMenu = ({
               : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
                   defaultMessage: 'Enable',
                 })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(onUpdateApiKey
+      ? [
+          <EuiContextMenuItem
+            key="updateApiKey"
+            icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
+            disabled={!rule.enabled}
+            toolTipContent={
+              rule.enabled
+                ? undefined
+                : i18n.translate('xpack.alertingV2.rulesList.action.updateApiKeyDisabledTooltip', {
+                    defaultMessage: 'Enable the rule to update its API key',
+                  })
+            }
+            onClick={() => {
+              setIsOpen(false);
+              onUpdateApiKey(rule);
+            }}
+            data-test-subj={`updateRuleApiKey-${rule.id}`}
+          >
+            {i18n.translate('xpack.alertingV2.rulesList.action.updateApiKey', {
+              defaultMessage: 'Update API key',
+            })}
           </EuiContextMenuItem>,
         ]
       : []),
