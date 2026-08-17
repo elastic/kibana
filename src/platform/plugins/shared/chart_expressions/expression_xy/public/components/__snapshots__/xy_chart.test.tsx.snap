@@ -2664,11 +2664,7 @@ exports[`XYChart component it renders bar 1`] = `
                 "background": Object {
                   "color": undefined,
                 },
-                "barSeriesStyle": Object {
-                  "rect": Object {
-                    "widthPixel": 400,
-                  },
-                },
+                "barSeriesStyle": Object {},
                 "chartMargins": Object {
                   "bottom": 10,
                   "left": 10,
@@ -4144,11 +4140,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
                 "background": Object {
                   "color": undefined,
                 },
-                "barSeriesStyle": Object {
-                  "rect": Object {
-                    "widthPixel": 400,
-                  },
-                },
+                "barSeriesStyle": Object {},
                 "chartMargins": Object {
                   "bottom": 10,
                   "left": 10,
@@ -8576,11 +8568,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "background": Object {
                   "color": undefined,
                 },
-                "barSeriesStyle": Object {
-                  "rect": Object {
-                    "widthPixel": 400,
-                  },
-                },
+                "barSeriesStyle": Object {},
                 "chartMargins": Object {
                   "bottom": 10,
                   "left": 10,
@@ -10056,11 +10044,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "background": Object {
                   "color": undefined,
                 },
-                "barSeriesStyle": Object {
-                  "rect": Object {
-                    "widthPixel": 400,
-                  },
-                },
+                "barSeriesStyle": Object {},
                 "chartMargins": Object {
                   "bottom": 10,
                   "left": 10,
@@ -11555,11 +11539,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
                 "background": Object {
                   "color": undefined,
                 },
-                "barSeriesStyle": Object {
-                  "rect": Object {
-                    "widthPixel": 400,
-                  },
-                },
+                "barSeriesStyle": Object {},
                 "chartMargins": Object {
                   "bottom": 10,
                   "left": 10,
@@ -13125,11 +13105,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                 "background": Object {
                   "color": undefined,
                 },
-                "barSeriesStyle": Object {
-                  "rect": Object {
-                    "widthPixel": 400,
-                  },
-                },
+                "barSeriesStyle": Object {},
                 "chartMargins": Object {
                   "bottom": 10,
                   "left": 10,
@@ -14688,11 +14664,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "background": Object {
                   "color": undefined,
                 },
-                "barSeriesStyle": Object {
-                  "rect": Object {
-                    "widthPixel": 400,
-                  },
-                },
+                "barSeriesStyle": Object {},
                 "chartMargins": Object {
                   "bottom": 10,
                   "left": 10,

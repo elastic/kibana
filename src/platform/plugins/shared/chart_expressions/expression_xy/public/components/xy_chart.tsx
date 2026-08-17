@@ -622,16 +622,17 @@ export function XYChart({
     getValueLabelsStyling(shouldRotate);
 
   // safeguard against overly thick bars on sparse charts
-  const barRectStyle: Partial<{ rect: RecursivePartial<RectStyle> }> = hasBars
-    ? {
-        rect: {
-          widthPixel: 400,
-          ...(categoricalXValues?.length && categoricalXValues.length <= 2
-            ? { widthRatio: Math.min(1, 0.5 + 0.2 * categoricalXValues.length) }
-            : {}),
-        },
-      }
-    : {};
+  const barRectStyle: Partial<{ rect: RecursivePartial<RectStyle> }> =
+    hasBars && isCategoricalXAxis
+      ? {
+          rect: {
+            widthPixel: 400,
+            ...(categoricalXValues?.length && categoricalXValues.length <= 2
+              ? { widthRatio: Math.min(1, 0.5 + 0.2 * categoricalXValues.length) }
+              : {}),
+          },
+        }
+      : {};
 
   const clickHandler: ElementClickListener = ([elementEvent]) => {
     // this cast is safe because we are rendering a cartesian chart
