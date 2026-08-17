@@ -15,19 +15,12 @@ import {
   EuiCheckableCard,
   EuiEmptyPrompt,
   EuiFieldSearch,
-  EuiFilterButton,
-  EuiFilterGroup,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiNotificationBadge,
   EuiPanel,
   EuiSelect,
@@ -35,7 +28,6 @@ import {
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiStepsHorizontalProps } from '@elastic/eui';
@@ -193,8 +185,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   // Data format: hidden-by-default choice made once here and applied
   // everywhere downstream (see aws_services_data.ts for the full rationale).
   const [schema, setSchema] = useState<AwsSchema>('ecs');
-  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
-  const [pendingSchema, setPendingSchema] = useState<AwsSchema>(schema);
 
   // Deploy/detect state is lifted here (rather than owned by the Deploy step)
   // so it survives navigating to the separate Detect & Review step.
@@ -330,11 +320,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     setDeploymentMethod(method);
   };
 
-  const openSchemaModal = () => {
-    setPendingSchema(schema);
-    setIsSchemaModalOpen(true);
-  };
-
   return (
     // Full-bleed white page canvas per design reference, overriding
     // Kibana's default page background for this flow only.
@@ -372,32 +357,9 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
       {currentStep === 1 && (
         <>
-          <EuiFlexGroup alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiTitle size="m">
-                <h2>Which AWS services do you want to monitor?</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            {/* Secondary to the step title, but a real clickable control —
-                not just quiet text — so it's actually discoverable. Most
-                users still won't need to touch it. Styled like the
-                EuiSuperDatePicker's quick-select trigger (bordered,
-                icon + label) rather than a plain button with an edit
-                pencil, which isn't an EUI convention. */}
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content="Determines which package variant installs for each service.">
-                <EuiFilterGroup>
-                  <EuiFilterButton
-                    iconType="controlsHorizontal"
-                    onClick={openSchemaModal}
-                    data-test-subj="awsOnboardingEditSchema"
-                  >
-                    {`Data format: ${AWS_SCHEMA_META[schema].label}`}
-                  </EuiFilterButton>
-                </EuiFilterGroup>
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="m">
+            <h2>Which AWS services do you want to monitor?</h2>
+          </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
@@ -406,7 +368,10 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          {/* gutterSize="s" = 8px, per design. Data format sits between
+              search and the type filter — same row, same compressed
+              height, so the three read as one control group. */}
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiFieldSearch
                 fullWidth
@@ -418,14 +383,36 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 data-test-subj="awsOnboardingSearch"
               />
             </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ width: 260 }}>
+              {/* Most users never need to touch this. Styled like Step 2's
+                  "Trigger source" select (prepend label, compressed) rather
+                  than a button that opens a modal — this changes the value
+                  immediately, no confirmation step. */}
+              <EuiSelect
+                fullWidth
+                compressed
+                prepend="Data format"
+                options={[
+                  { value: 'ecs', text: AWS_SCHEMA_META.ecs.label },
+                  { value: 'otel', text: AWS_SCHEMA_META.otel.label },
+                ]}
+                value={schema}
+                onChange={(e) => setSchema(e.target.value as AwsSchema)}
+                aria-label="Data format"
+                data-test-subj="awsOnboardingEditSchema"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* Both compressed, so the row's height is even end to end. */}
+              {/* buttonSize="s" matches a compressed field's height exactly
+                  (both resolve to the same token) — "compressed" is
+                  actually a touch shorter than that, which read as uneven
+                  next to the search bar and this select. */}
               <EuiButtonGroup
                 legend="Filter services by data type"
                 options={DATA_TYPE_OPTIONS}
                 idSelected={dataTypeFilter}
                 onChange={(id) => setDataTypeFilter(id as DataTypeFilterId)}
-                buttonSize="compressed"
+                buttonSize="s"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -592,55 +579,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
     </div>
-
-    {isSchemaModalOpen && (
-    <EuiModal
-      onClose={() => setIsSchemaModalOpen(false)}
-      data-test-subj="awsOnboardingSchemaModal"
-      style={{ width: 400 }}
-    >
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>Edit data format</EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiText size="s">
-          <p>
-            Determines which package variant installs for each service, and which
-            CloudFormation template the Elastic Cloud Forwarder deploys. Applies to every
-            service selected in this flow.
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiSelect
-          fullWidth
-          options={[
-            { value: 'ecs', text: AWS_SCHEMA_META.ecs.label },
-            { value: 'otel', text: AWS_SCHEMA_META.otel.label },
-          ]}
-          value={pendingSchema}
-          onChange={(e) => setPendingSchema(e.target.value as AwsSchema)}
-          aria-label="Data format"
-        />
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          {AWS_SCHEMA_META[pendingSchema].description}
-        </EuiText>
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={() => setIsSchemaModalOpen(false)}>Cancel</EuiButtonEmpty>
-        <EuiButton
-          fill
-          onClick={() => {
-            setSchema(pendingSchema);
-            setIsSchemaModalOpen(false);
-          }}
-          data-test-subj="awsOnboardingSaveSchema"
-        >
-          Save
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
-    )}
     </div>
   );
 };

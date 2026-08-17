@@ -39,11 +39,14 @@ export const CardHeader: React.FunctionComponent<{
         borderBottom: euiTheme.border.thin,
       }}
     >
-      <EuiFlexGroup alignItems="center" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} size="m" />
         </EuiFlexItem>
-        <EuiFlexItem>
+        {/* grow={false} — like Step 3's AccordionCard header — so the count
+            sits right next to the title instead of being pushed to the
+            row's far right edge. */}
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>{title}</h3>
           </EuiTitle>
