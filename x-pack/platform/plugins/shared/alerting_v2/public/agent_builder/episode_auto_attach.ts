@@ -9,7 +9,6 @@ import { combineLatest, EMPTY, filter, Subscription, switchMap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
@@ -56,10 +55,6 @@ const toAttachment = (
   data: alertEpisodeToEpisodeAttachment(episode, options),
 });
 
-const isNewConversation = (conversation: ActiveConversation | null): boolean => {
-  return conversation !== null && !conversation.id;
-};
-
 /*
  * Keep one stable id while the attachment is still a draft so opening another
  * episode before send updates the existing input pill instead of adding duplicates.
@@ -91,6 +86,25 @@ export const createEpisodeAttachmentIdRegenerationSubscription = ({
     })
   );
 
+  let hadConversationId = false;
+
+  subscription.add(
+    agentBuilder.events.ui.activeConversation$.subscribe((conversation) => {
+      const hasConversationId = Boolean(conversation?.id);
+
+      /*
+       * The first send persists the conversation and the current draft id. Rotate
+       * immediately so a later episode navigation cannot mutate that sent attachment
+       * while waiting for round-complete.
+       */
+      if (hasConversationId && !hadConversationId) {
+        draftAttachmentId.next();
+      }
+
+      hadConversationId = hasConversationId;
+    })
+  );
+
   subscription.add(
     agentBuilder.events.ui.activeConversation$
       .pipe(
@@ -110,10 +124,10 @@ export const createEpisodeAttachmentIdRegenerationSubscription = ({
 };
 
 /*
- * Auto-stage the episode currently shown on the details page when the AI Agent
- * sidebar is opened. This intentionally only targets new conversations:
- * existing chats may already have unrelated context, so we avoid injecting the
- * viewed episode unless the user is starting from a fresh draft.
+ * Auto-stage the focused episode whenever the AI Agent sidebar is bound.
+ * `addAttachment` upserts by id, so repeat calls update the input pill in place.
+ * After send, Agent Builder clears staged attachments; restaging on the
+ * persisted-conversation emit puts the current episode back on the next message.
  */
 export const registerEpisodeAutoAttach = ({
   agentBuilder,
@@ -136,6 +150,13 @@ export const registerEpisodeAutoAttach = ({
     agentBuilder.addAttachment(toAttachment(episode, draftAttachmentId.current, options));
   };
 
+  const cancelPendingAddAttachment = () => {
+    if (pendingAddAttachmentTimeout !== undefined) {
+      clearTimeout(pendingAddAttachmentTimeout);
+      pendingAddAttachmentTimeout = undefined;
+    }
+  };
+
   subscription.add(
     createEpisodeAttachmentIdRegenerationSubscription({
       agentBuilder,
@@ -150,14 +171,14 @@ export const registerEpisodeAutoAttach = ({
       focusedEpisodeService.focusedEpisode$,
       agentBuilder.events.ui.activeConversation$,
     ]).subscribe(([appId, focused, conversation]) => {
-      if (pendingAddAttachmentTimeout !== undefined) {
-        clearTimeout(pendingAddAttachmentTimeout);
-        pendingAddAttachmentTimeout = undefined;
-      }
+      const isAgentBuilderOpen = appId === AGENTBUILDER_FEATURE_ID && conversation !== null;
 
-      if (appId !== AGENTBUILDER_FEATURE_ID || !focused || !isNewConversation(conversation)) {
+      if (!isAgentBuilderOpen || !focused) {
+        cancelPendingAddAttachment();
         return;
       }
+
+      cancelPendingAddAttachment();
 
       /*
        * Defer until the active conversation change has fully propagated. The AI Agent
@@ -176,10 +197,6 @@ export const registerEpisodeAutoAttach = ({
 
   return () => {
     subscription.unsubscribe();
-
-    if (pendingAddAttachmentTimeout !== undefined) {
-      clearTimeout(pendingAddAttachmentTimeout);
-      pendingAddAttachmentTimeout = undefined;
-    }
+    cancelPendingAddAttachment();
   };
 };

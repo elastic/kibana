@@ -170,13 +170,74 @@ describe('registerEpisodeAutoAttach', () => {
     );
   });
 
-  it('does not attach to an existing conversation', () => {
+  it('attaches the focused episode when an existing conversation becomes active', () => {
     focusedEpisodeService.setFocusedEpisode(createEpisode());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
+    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'ep-1' }));
+  });
+
+  it('restages the focused episode with a new draft id after the conversation is persisted', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+    focusedEpisodeService.setFocusedEpisode(createEpisode({ 'episode.id': 'ep-1' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
+    );
+
+    activeConversation$.next({ id: 'conversation-1', conversation: undefined });
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(2);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'draft-id-2', origin: 'ep-1' })
+    );
+  });
+
+  it('attaches when navigating to an episode while an existing conversation is open', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: 'conversation-1', conversation: undefined });
+    jest.runOnlyPendingTimers();
+
     expect(addAttachment).not.toHaveBeenCalled();
+
+    focusedEpisodeService.setFocusedEpisode(createEpisode({ 'episode.id': 'ep-1' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'ep-1' }));
+  });
+
+  it('attaches a different focused episode after the conversation has started', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+    focusedEpisodeService.setFocusedEpisode(createEpisode({ 'episode.id': 'ep-1' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
+    );
+
+    activeConversation$.next({ id: 'conversation-1', conversation: undefined });
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(2);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'draft-id-2', origin: 'ep-1' })
+    );
+
+    focusedEpisodeService.setFocusedEpisode(createEpisode({ 'episode.id': 'ep-2' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(3);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'draft-id-2', origin: 'ep-2' })
+    );
   });
 
   it('updates the same draft attachment when the focused episode changes before send', () => {
