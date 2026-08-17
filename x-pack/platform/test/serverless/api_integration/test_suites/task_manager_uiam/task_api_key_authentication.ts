@@ -25,11 +25,15 @@ interface AuthenticationOutcome {
  *
  * - granted when the task is scheduled, and
  * - backfilled by the UIAM provisioning task, which converts a task's existing Elasticsearch API
- *   key into a UIAM one.
+ *   key into a UIAM one,
+ *
+ * and for a key left in the legacy shape by an earlier provisioning run.
  *
  * The provisioned case regressed: the convert path stored `base64(<id>:<secret>)` while execution
  * presented the stored value verbatim, so Elasticsearch resolved it as a native `id:api_key` pair
- * and rejected every run of every affected task.
+ * and rejected every run of every affected task. Provisioning now stores the raw secret, but keys
+ * already persisted in the composed shape are only healed at read time, so that shape needs its own
+ * coverage.
  *
  * The fixture task reports the id of the key Elasticsearch authenticated it with, so each
  * assertion pins down *which* of the task's two credentials was used, not merely that the run
@@ -79,6 +83,19 @@ export default function ({ getService }: FtrProviderContext) {
       .post('/api/sample_tasks/run_soon')
       .set(samlAuth.getInternalRequestHeader())
       .send({ task: { id: taskId } });
+
+    expect(status).toBe(200);
+  };
+
+  /**
+   * Rewrites the task's stored UIAM key into the `base64(<id>:<secret>)` envelope that provisioning
+   * used to persist, and clears the recorded run outcome so the next run is observable on its own.
+   */
+  const storeUiamApiKeyInLegacyFormat = async (taskId: string) => {
+    const { status } = await supertest
+      .post('/api/sample_tasks/store_uiam_api_key_in_legacy_format')
+      .set(samlAuth.getInternalRequestHeader())
+      .send({ taskId });
 
     expect(status).toBe(200);
   };
@@ -135,6 +152,24 @@ export default function ({ getService }: FtrProviderContext) {
       await runSoon(taskId);
 
       // …and once it has one, that UIAM key is what reaches Elasticsearch.
+      await expectAuthenticatedWith(taskId, uiamApiKeyId);
+    });
+
+    it('authenticates with a UIAM API key stored in the legacy composed format', async () => {
+      const taskId = await scheduleTask();
+
+      const { userScope } = await getTask(taskId);
+      expect(userScope?.uiamApiKeyId).toEqual(expect.any(String));
+
+      const uiamApiKeyId = userScope.uiamApiKeyId as string;
+      await expectAuthenticatedWith(taskId, uiamApiKeyId);
+
+      // Puts the task in the state provisioning left affected tasks in: a valid UIAM key wrapped
+      // in the `base64(<id>:<secret>)` envelope that execution has to decode. This is the recovery
+      // path for tasks already stored that way, which no migration rewrites.
+      await storeUiamApiKeyInLegacyFormat(taskId);
+      await runSoon(taskId);
+
       await expectAuthenticatedWith(taskId, uiamApiKeyId);
     });
   });

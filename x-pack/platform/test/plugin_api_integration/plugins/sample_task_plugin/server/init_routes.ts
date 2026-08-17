@@ -17,6 +17,7 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { EventEmitter } from 'events';
+import { isUiamCredential } from '@kbn/core-security-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   BACKGROUND_TASK_NODE_SO_NAME,
@@ -279,6 +280,77 @@ export function initRoutes(
       await taskManager.runSoon(scheduled.id);
 
       return res.ok({ body: await taskManager.get(scheduled.id) });
+    }
+  );
+
+  // Rewrites a task's stored UIAM API key from the raw `essu_…` secret into the
+  // `base64(<id>:<secret>)` envelope that the UIAM provisioning task used to persist, so a test can
+  // exercise the read-side normalization that heals tasks left in that shape by earlier
+  // provisioning runs. The key itself stays a real, valid UIAM credential — only the envelope
+  // around it changes — so execution has to decode it to authenticate.
+  router.post(
+    {
+      path: `/api/sample_tasks/store_uiam_api_key_in_legacy_format`,
+      validate: {
+        body: schema.object({
+          taskId: schema.string(),
+        }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const { taskId } = req.body;
+      const taskManager = await taskManagerStart;
+      // `get` returns the task with its API keys decrypted.
+      const { uiamApiKey, userScope, taskType } = await taskManager.get(taskId);
+      const uiamApiKeyId = userScope?.uiamApiKeyId;
+
+      if (!uiamApiKey || !uiamApiKeyId) {
+        return res.badRequest({
+          body: { message: `Task ${taskId} has no UIAM API key to rewrite` },
+        });
+      }
+
+      // Guards against the rewrite silently becoming a no-op (or double-encoding) if the write
+      // side ever changes the stored shape again.
+      if (!isUiamCredential(uiamApiKey)) {
+        return res.badRequest({
+          body: {
+            message: `Task ${taskId} does not hold a raw UIAM secret, so it cannot be rewritten into the legacy format`,
+          },
+        });
+      }
+
+      const soClient = (await context.core).savedObjects.getClient({
+        includedHiddenTypes: [TASK_SO_NAME],
+      });
+
+      await soClient.update(
+        TASK_SO_NAME,
+        taskId,
+        {
+          uiamApiKey: Buffer.from(`${uiamApiKeyId}:${uiamApiKey}`).toString('base64'),
+          // `uiamApiKey` is encrypted with `taskType` in its AAD, so a partial update that
+          // touches it must carry `taskType` or the value is encrypted against a mismatched AAD
+          // and every later decrypt fails.
+          taskType,
+          // Clearing the run outcome in the same write lets a test tell the run made with the
+          // rewritten key apart from the runs that preceded it. `state` is stored as JSON.
+          state: '{}',
+        },
+        { retryOnConflict: 3 }
+      );
+
+      return res.ok({ body: { uiamApiKeyId } });
     }
   );
 

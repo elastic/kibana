@@ -15,5 +15,6 @@
     "@kbn/task-manager-plugin",
     "@kbn/config-schema",
     "@kbn/core-http-server-utils",
+    "@kbn/core-security-server",
   ]
 }
