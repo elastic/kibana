@@ -39,14 +39,14 @@ const LAST_KNOWN_STATUS_DESCRIPTION = i18n.translate(
 
 const RECOVER_TITLE = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.recover.title',
-  { defaultMessage: 'Recover' }
+  { defaultMessage: 'Recover immediately' }
 );
 
 const RECOVER_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.recover.description',
   {
     defaultMessage:
-      'Automatically transition active alerts to recovered status when no new data is received.',
+      'Resolve the alert episode on the first no-data run, regardless of any configured recovery delay.',
   }
 );
 
