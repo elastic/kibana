@@ -28,6 +28,7 @@ interface RunDirectorParams {
   rule: RuleResponse;
   alertEvents: readonly AlertEvent[];
   executionContext: ExecutionContext;
+  spaceId: string;
 }
 
 interface CalculateNextStateParams {
@@ -35,6 +36,7 @@ interface CalculateNextStateParams {
   currentAlertEvent: AlertEvent;
   previousAlertEvent?: LatestAlertEventState;
   strategy: ITransitionStrategy;
+  logger: LoggerServiceContract;
 }
 
 interface ResolveEpisodeIdParams {
@@ -58,36 +60,40 @@ export interface DirectorRunResult {
 
 @injectable()
 export class DirectorService {
-  private readonly logger: LoggerServiceContract;
-
   constructor(
     @inject(TransitionStrategyFactory)
     private readonly strategyFactory: TransitionStrategyFactory,
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
-  ) {
-    this.logger = loggerService.forSubsystem('director');
-  }
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+  ) {}
 
   async run({
     rule,
     alertEvents,
     executionContext,
+    spaceId,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
       return { alertEvents: [], stats: { newEpisodeIds: [] } };
     }
 
+    const logger = this.logger.forSubsystem('director').withLabels({
+      rule_id: rule.id,
+      rule_kind: rule.kind,
+      space_id: spaceId,
+    });
+
     const strategy = this.strategyFactory.getStrategy(rule);
     executionContext.throwIfAborted();
-    return this.processAlertEvents(rule, alertEvents, strategy, executionContext);
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext, logger);
   }
 
   private async processAlertEvents(
     rule: RuleResponse,
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
-    executionContext: ExecutionContext
+    executionContext: ExecutionContext,
+    logger: LoggerServiceContract
   ): Promise<DirectorRunResult> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
@@ -109,6 +115,7 @@ export class DirectorService {
           currentAlertEvent,
           previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
           strategy,
+          logger,
         });
 
         if (isNewEpisode && alertEvent.episode) {
@@ -123,7 +130,7 @@ export class DirectorService {
       try {
         await scope.disposeAll();
       } catch (error) {
-        this.logger.warn({
+        logger.warn({
           message: 'Failed to release alert state cache',
           error,
           code: ALERTING_LOG_CODES.DIRECTOR_CLEANUP_FAILED,
@@ -155,6 +162,7 @@ export class DirectorService {
     currentAlertEvent,
     previousAlertEvent,
     strategy,
+    logger,
   }: CalculateNextStateParams): { alertEvent: AlertEvent; isNewEpisode: boolean } {
     // User lock: once a user hits `activate` on a group, the episode
     // stays `active` regardless of what the strategy computes, until
@@ -192,8 +200,8 @@ export class DirectorService {
     });
 
     if (currentStatus !== result.status) {
-      this.logger.debug({
-        message: () => 'Episode status transition',
+      logger.debug({
+        message: 'Episode status transition',
         labels: {
           group_hash: currentAlertEvent.group_hash,
           episode_id: episodeId,

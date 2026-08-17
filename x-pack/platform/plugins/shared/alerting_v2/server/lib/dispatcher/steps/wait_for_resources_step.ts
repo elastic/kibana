@@ -7,10 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
-import {
   ResourceManager,
   type ResourceManagerContract,
 } from '../../services/resource_service/resource_manager';
@@ -20,21 +16,16 @@ import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } fr
 export class WaitForResourcesStep implements DispatcherStep {
   public readonly name = 'wait_for_resources';
 
-  private readonly logger: LoggerServiceContract;
+  constructor(@inject(ResourceManager) private readonly resourceManager: ResourceManagerContract) {}
 
-  constructor(
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
-  ) {
-    this.logger = loggerService.forSubsystem('dispatcher');
-  }
+  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+    const logger = state.logger.withLabels({ step: this.name });
 
-  public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    this.logger.debug({ message: 'Waiting for resources', labels: { step: this.name } });
+    logger.debug({ message: 'Waiting for resources' });
 
     await this.resourceManager.waitUntilReady();
 
-    this.logger.debug({ message: 'Resources ready', labels: { step: this.name } });
+    logger.debug({ message: 'Resources ready' });
 
     return { type: 'continue' };
   }

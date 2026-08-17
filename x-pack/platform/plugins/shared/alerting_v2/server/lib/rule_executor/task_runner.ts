@@ -25,21 +25,17 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal' | 'executionUuid
 
 @injectable()
 export class RuleExecutorTaskRunner {
-  private readonly logger: LoggerServiceContract;
-
   constructor(
     @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
-  ) {
-    this.logger = loggerService.forSubsystem('ruleExecutor');
-  }
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+  ) {}
 
   public async run({ taskInstance, signal, executionUuid }: TaskRunParams): Promise<RunResult> {
     const input = this.createRuleExecutionInput(taskInstance, signal, executionUuid);
 
     const result = await this.pipeline.execute(input);
 
-    return this.buildRunResult(result, taskInstance);
+    return this.buildRunResult(result, input.logger, taskInstance);
   }
 
   /**
@@ -52,6 +48,12 @@ export class RuleExecutorTaskRunner {
   ): RuleExecutionPipelineInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
     const scheduledAt = taskInstance.scheduledAt;
+    const logger = this.logger.forSubsystem('ruleExecutor').withLabels({
+      rule_id: params.ruleId,
+      space_id: params.spaceId,
+      task_id: taskInstance.id,
+      execution_id: executionUuid,
+    });
 
     return {
       ruleId: params.ruleId,
@@ -59,6 +61,7 @@ export class RuleExecutorTaskRunner {
       scheduledAt: this.getScheduledAtISOString(scheduledAt, taskInstance.startedAt),
       abortSignal: signal,
       executionUuid,
+      logger,
     };
   }
 
@@ -79,6 +82,7 @@ export class RuleExecutorTaskRunner {
    */
   private buildRunResult(
     result: RuleExecutionPipelineResult,
+    logger: LoggerServiceContract,
     taskInstance: TaskRunParams['taskInstance']
   ): RunResult {
     if (result.completed) {
@@ -86,11 +90,7 @@ export class RuleExecutorTaskRunner {
     }
 
     if (result.haltReason === 'rule_deleted') {
-      const params = taskInstance.params as RuleExecutorTaskParams;
-      this.logger.debug({
-        message: 'Rule no longer exists; task will be removed',
-        labels: { rule_id: params.ruleId, space_id: params.spaceId },
-      });
+      logger.debug({ message: 'Rule no longer exists; task will be removed' });
       throwUnrecoverableError(new Error('Rule no longer exists'));
     }
 

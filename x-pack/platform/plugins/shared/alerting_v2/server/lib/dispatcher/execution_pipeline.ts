@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { inject, injectable, multiInject } from 'inversify';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../services/logger_service/logger_service';
+import { injectable, multiInject } from 'inversify';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type {
   DispatcherHaltReason,
@@ -32,31 +28,25 @@ export interface DispatcherPipelineContract {
 
 @injectable()
 export class DispatcherPipeline implements DispatcherPipelineContract {
-  private readonly logger: LoggerServiceContract;
-
   constructor(
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[]
-  ) {
-    this.logger = loggerService.forSubsystem('dispatcher');
-  }
+  ) {}
 
   public async execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult> {
-    let pipelineState: DispatcherPipelineState = { input };
+    let pipelineState: DispatcherPipelineState = { input, logger: input.logger };
 
     for (const step of this.steps) {
-      this.logger.debug({
-        message: 'Executing pipeline step',
-        labels: { step: step.name },
-      });
+      const logger = pipelineState.logger.withLabels({ step: step.name });
+
+      logger.debug({ message: 'Executing pipeline step' });
 
       try {
         const output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
 
         if (output.type === 'halt') {
-          this.logger.debug({
+          logger.debug({
             message: 'Pipeline halted',
-            labels: { step: step.name, resource: output.reason },
+            labels: { resource: output.reason },
           });
 
           return {
@@ -70,10 +60,9 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
           pipelineState = { ...pipelineState, ...output.data };
         }
       } catch (error) {
-        this.logger.error({
+        logger.error({
           error,
           code: ALERTING_LOG_CODES.DISPATCH_STEP_FAILED,
-          labels: { step: step.name },
         });
         throw error;
       }

@@ -7,10 +7,6 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import { DirectorService } from '../../director/director';
 import { guardedExpandStep } from '../stream_utils';
 
@@ -18,36 +14,24 @@ import { guardedExpandStep } from '../stream_utils';
 export class DirectorStep implements RuleExecutionStep {
   public readonly name = 'director';
 
-  private readonly logger: LoggerServiceContract;
-
-  constructor(
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
-    @inject(DirectorService) private readonly director: DirectorService
-  ) {
-    this.logger = loggerService.forSubsystem('ruleExecutor');
-  }
+  constructor(@inject(DirectorService) private readonly director: DirectorService) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     const step = this;
 
     return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
       const { input, rule, alertEventsBatch } = state;
+      const logger = state.logger.withLabels({ step: step.name });
 
       if (rule.kind !== 'alert') {
-        step.logger.debug({
-          message: 'Skipping episode tracking for signal rule',
-          labels: { step: step.name, rule_id: input.ruleId },
-        });
+        logger.debug({ message: 'Skipping episode tracking for signal rule' });
 
         yield { type: 'continue', state };
         return;
       }
 
       if (alertEventsBatch.length === 0) {
-        step.logger.debug({
-          message: 'No alert events to process',
-          labels: { step: step.name, rule_id: input.ruleId },
-        });
+        logger.debug({ message: 'No alert events to process' });
 
         yield { type: 'continue', state };
         return;
@@ -57,6 +41,7 @@ export class DirectorStep implements RuleExecutionStep {
         rule,
         executionContext: input.executionContext,
         alertEvents: alertEventsBatch,
+        spaceId: input.spaceId,
       });
 
       yield {
