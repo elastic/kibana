@@ -34,6 +34,9 @@ import type { RuleAttachmentData } from '../attachments/rule';
 
 export const SECURITY_CREATE_DETECTION_RULE_TOOL_ID = securityTool('create_detection_rule');
 
+const RULE_CREATION_GENERIC_ERROR_MESSAGE =
+  'Failed to create detection rule. Please try again or refine your request.';
+
 const isRuleAttachment = (
   attachment: VersionedAttachment
 ): attachment is VersionedAttachment<SecurityAgentBuilderAttachments.rule, RuleAttachmentData> =>
@@ -237,10 +240,28 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
 
         const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
-        const { resolvedAttachmentId, existingRuleText, isNewCard } = resolveAttachmentTarget(
-          attachments,
-          attachmentId
-        );
+        // resolveAttachmentTarget throws with safe, user-facing messages for known bad states
+        // (stale id, wrong type, no version). Handle separately so the generic catch below
+        // doesn't swallow them.
+        let attachmentTarget: ResolvedAttachmentTarget;
+        try {
+          attachmentTarget = resolveAttachmentTarget(attachments, attachmentId);
+        } catch (resolveError) {
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  message:
+                    resolveError instanceof Error
+                      ? resolveError.message
+                      : 'Could not resolve attachment target',
+                },
+              },
+            ],
+          };
+        }
+        const { resolvedAttachmentId, existingRuleText, isNewCard } = attachmentTarget;
 
         const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
         const iterativeAgent = await getBuildAgent({
@@ -279,6 +300,22 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
           ...(existingRuleForGraph && { rule: existingRuleForGraph }),
         });
 
+        if (result.rejectionReason) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  success: false,
+                  rejected: true,
+                  rejectionCode: result.rejectionReason.code,
+                  message: result.rejectionMessage ?? result.rejectionReason.message,
+                },
+              },
+            ],
+          };
+        }
+
         if (result.errors.length) {
           logger.error(`Rule creation failed with errors: ${result.errors.join('; ')}`);
           return {
@@ -286,8 +323,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
               {
                 type: ToolResultType.error,
                 data: {
-                  message: `Failed to create detection rule: ${result.errors.join('; ')}`,
-                  errors: result.errors,
+                  message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
                 },
               },
             ],
@@ -367,8 +403,7 @@ Limitations: only ES|QL rules are supported; requires relevant data in existing 
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to create detection rule: ${error.message}`,
-                error: error.toString(),
+                message: RULE_CREATION_GENERIC_ERROR_MESSAGE,
               },
             },
           ],

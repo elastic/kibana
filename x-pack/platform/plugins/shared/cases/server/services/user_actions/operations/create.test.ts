@@ -29,6 +29,7 @@ import {
   getBuiltUserActions,
   getTagsAddedRemovedUserActions,
   patchAddRemoveAssigneesCasesRequest,
+  patchAddAssigneeWithEnrichedOriginalRequest,
   patchAssigneesCasesRequest,
   patchCasesRequest,
   patchAddCustomFieldsToOriginalCasesRequest,
@@ -352,6 +353,52 @@ describe('UserActionPersister', () => {
           isMock: false,
         })
       );
+    });
+
+    it('diffs assignees by uid when the original has assigneeIdentity fields', () => {
+      // Without uid-only normalization, deep equality treats the retained enriched
+      // assignee as deleted and re-added alongside the newly assigned uid.
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchAddAssigneeWithEnrichedOriginalRequest,
+          user: testUser,
+        })
+      ).toEqual({
+        '1': [
+          {
+            eventDetails: {
+              action: 'add',
+              descriptiveAction: 'case_user_action_add_case_assignees',
+              getMessage: expect.any(Function),
+              savedObjectId: '1',
+              savedObjectType: 'cases',
+            },
+            parameters: {
+              attributes: {
+                action: 'add',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                owner: 'securitySolution',
+                payload: {
+                  assignees: [{ uid: '2' }],
+                },
+                type: 'assignees',
+              },
+              references: [
+                {
+                  id: '1',
+                  name: 'associated-cases',
+                  type: 'cases',
+                },
+              ],
+            },
+          },
+        ],
+      });
     });
 
     it('creates the correct user actions when tags are added and removed', async () => {
