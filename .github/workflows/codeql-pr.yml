@@ -30,7 +30,9 @@ jobs:
         github-token: ${{ github.token }}
         script: |
           const allowed = ['admin', 'maintain', 'write'];
+          const allowedAssociations = ['OWNER', 'MEMBER', 'COLLABORATOR'];
           const username = context.payload.pull_request.user.login;
+          const association = context.payload.pull_request.author_association;
           try {
             const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
               owner: context.repo.owner,
@@ -41,9 +43,14 @@ jobs:
             core.info(`Author '${username}' permission='${data.permission}' role_name='${data.role_name}' authorized=${authorized}`);
             core.setOutput('is_authorized', String(authorized));
           } catch (error) {
-            if (error.status === 404) {
-              core.info(`Author '${username}' is not a collaborator; treating as unauthorized.`);
-              core.setOutput('is_authorized', 'false');
+            // 404: not a collaborator. 403: fork-PR GITHUB_TOKEN cannot read collaborator permissions.
+            if (error.status === 404 || error.status === 403) {
+              const authorized = allowedAssociations.includes(association);
+              core.info(
+                `Permission lookup for '${username}' failed (${error.status}); ` +
+                `falling back to author_association='${association}' authorized=${authorized}`
+              );
+              core.setOutput('is_authorized', String(authorized));
               return;
             }
             core.setFailed(`Unable to resolve permission for '${username}': ${error.message}`);
