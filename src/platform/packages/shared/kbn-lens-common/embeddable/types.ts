@@ -304,9 +304,9 @@ export type LensComponentProps = Simplify<
        */
       canEditInline?: boolean;
       /**
-       * Optional search term to highlight in the panel title
+       * Optional search terms to highlight in the panel title
        */
-      titleHighlight?: string;
+      titleHighlight?: string | string[];
     }
 >;
 
@@ -390,8 +390,8 @@ export type LensInternalApi = Simplify<
       updateDataLoading: (newDataLoading: boolean | undefined) => void;
       expressionParams$: PublishingSubject<ExpressionWrapperProps | null>;
       updateExpressionParams: (newParams: ExpressionWrapperProps | null) => void;
-      expressionAbortController$: PublishingSubject<AbortController | undefined>;
-      updateAbortController: (newAbortController: AbortController | undefined) => void;
+      expressionAbortController$: PublishingSubject<AbortController>;
+      updateAbortController: (newAbortController: AbortController) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
       updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;

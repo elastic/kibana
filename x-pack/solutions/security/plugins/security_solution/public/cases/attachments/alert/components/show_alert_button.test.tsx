@@ -15,6 +15,7 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 import { casesCellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 const props = {
   id: 'action-id',
@@ -104,6 +105,7 @@ describe('ShowAlertButton', () => {
       documentId: 'alert-id',
       indexName: 'alert-index',
       renderCellActions: casesCellActionRenderer,
+      origin: FLYOUT_ORIGIN.CASE_ATTACHMENT,
       title: 'Alert',
     });
     expect(mockOpenFlyout).not.toHaveBeenCalled();

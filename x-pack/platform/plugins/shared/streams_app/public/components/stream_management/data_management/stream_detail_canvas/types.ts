@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { Edge, Node } from '@xyflow/react';
 
 export const SOURCE_NODE_TYPE = 'source';
@@ -14,12 +15,14 @@ export const ANIMATED_EDGE_TYPE = 'animated';
 export interface SourceNodeData extends Record<string, unknown> {
   title: string;
   subtitle: string;
-  iconType: string;
+  iconType: IconType;
 }
 
 export interface DestinationNodeData extends Record<string, unknown> {
+  streamName: string;
   title: string;
   hasProcessing: boolean;
+  onProcessingClick?: (streamName: string) => void;
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;

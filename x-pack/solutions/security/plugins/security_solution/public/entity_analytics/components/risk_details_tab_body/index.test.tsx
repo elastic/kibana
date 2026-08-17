@@ -13,8 +13,10 @@ import { useUiSetting } from '../../../common/lib/kibana';
 import { RiskDetailsTabBody } from '.';
 import { EntityType } from '../../../../common/search_strategy';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
+import { useEntityRiskScores } from '../../api/hooks/use_entity_risk_scores';
 
 jest.mock('../../api/hooks/use_risk_score');
+jest.mock('../../api/hooks/use_entity_risk_scores');
 jest.mock('../../../common/containers/query_toggle');
 jest.mock('../../../common/lib/kibana');
 
@@ -27,29 +29,42 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     riskEntity,
   };
 
+  const riskScoreState = {
+    loading: false,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    isInspected: false,
+    totalCount: 0,
+    data: [],
+    refetch: jest.fn(),
+    hasEngineBeenInstalled: true,
+  };
+
   const mockUseRiskScore = useRiskScore as jest.Mock;
+  const mockUseEntityRiskScores = useEntityRiskScores as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const mockUseUiSetting = useUiSetting as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockUseRiskScore.mockReturnValue({
-      loading: false,
-      inspect: {
-        dsl: [],
-        response: [],
+    mockUseRiskScore.mockReturnValue(riskScoreState);
+    mockUseEntityRiskScores.mockReturnValue({
+      base: riskScoreState,
+      resolution: {
+        state: riskScoreState,
+        hasResolutionGroup: false,
+        resolutionTargetEntityId: undefined,
       },
-      isInspected: false,
-      totalCount: 0,
       refetch: jest.fn(),
-      hasEngineBeenInstalled: true,
     });
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
     mockUseUiSetting.mockReturnValue(false);
   });
 
-  it('calls with correct arguments for each entity', () => {
+  it('reads from the risk-score index by entity name when entity store V2 is off', () => {
     render(
       <TestProviders>
         <RiskDetailsTabBody {...defaultProps} />
@@ -71,25 +86,30 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     });
   });
 
-  it('uses entityId as filter when entityStoreV2 is enabled', () => {
-    mockUseUiSetting.mockReturnValueOnce(true);
+  it('reads from the entity store by entityId when entity store V2 is on', () => {
+    mockUseUiSetting.mockReturnValue(true);
     render(
       <TestProviders>
         <RiskDetailsTabBody {...defaultProps} entityId="entity-123" />
       </TestProviders>
     );
-    expect(mockUseRiskScore).toBeCalledWith(
-      expect.objectContaining({
-        filterQuery: {
-          terms: {
-            [`${riskEntity}.name`]: ['entity-123'],
-          },
-        },
-      })
-    );
+    expect(mockUseEntityRiskScores).toBeCalledWith(riskEntity, 'entity-123');
+    // The legacy read is skipped in V2.
+    expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(true);
   });
 
-  it("doesn't skip when toggleStatus is true", () => {
+  it('skips the entity store read when the contributors toggle is off in V2', () => {
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
+    render(
+      <TestProviders>
+        <RiskDetailsTabBody {...defaultProps} entityId="entity-123" />
+      </TestProviders>
+    );
+    expect(mockUseEntityRiskScores).toBeCalledWith(riskEntity, undefined);
+  });
+
+  it("doesn't skip the legacy read when toggleStatus is true", () => {
     render(
       <TestProviders>
         <RiskDetailsTabBody {...defaultProps} />
@@ -98,7 +118,7 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     expect(mockUseRiskScore.mock.calls[0][0].skip).toEqual(false);
   });
 
-  it('skips when toggleStatus is false', () => {
+  it('skips the legacy read when toggleStatus is false', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
 
     render(

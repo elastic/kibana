@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions, ToastInputFields } from '@kbn/core/public';
+import type { ErrorToastOptions, ToastInputFields, ToastOptions } from '@kbn/core/public';
 import { useMemo } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
@@ -190,12 +190,21 @@ export const useCasesToast = () => {
             : text ?? undefined;
         toasts.addDanger({ title, text: mountedText, className: 'eui-textBreakWord' });
       },
-      showInfoToast: (title: string, text?: string) => {
-        toasts.addInfo({
-          title,
-          text,
-          className: 'eui-textBreakWord',
-        });
+      showInfoToast: (
+        title: string,
+        text?: string,
+        actionProps?: ToastInputFields['actionProps'],
+        options?: ToastOptions
+      ) => {
+        return toasts.addInfo(
+          {
+            title,
+            text,
+            actionProps,
+            className: 'eui-textBreakWord',
+          },
+          options
+        );
       },
     }),
     [appId, getUrlForApp, navigateToUrl, toasts, services.rendering]

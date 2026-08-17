@@ -12,6 +12,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import { css } from '@emotion/react';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { getFieldFormat } from '../../../shared/utils/get_field_format';
 import { useExpandableValues } from '../../../../flyout/document_details/shared/hooks/use_expandable_values';
@@ -86,6 +87,7 @@ export const TableFieldValueCell = memo(
             isObjectArray={data.isObjectArray}
             value={value}
             truncate={false}
+            origin={FLYOUT_ORIGIN.FLYOUT_TABLE_FIELD_LINK}
           />
         </EuiFlexItem>
       );

@@ -12,7 +12,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonGroup,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiFlexItem,
   EuiFlexGroup,
@@ -24,16 +23,36 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { ProjectListItem } from './project_list_item';
 import { strings } from './strings';
 import type { UseFetchProjectsResult } from './use_fetch_projects';
 
-export interface ProjectPickerContentProps {
+export type ProjectPickerControlsState = 'enabled' | 'disabled' | 'hidden';
+
+interface ProjectPickerContentBaseProps {
   projectRouting?: ProjectRouting;
-  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   projects: UseFetchProjectsResult;
-  isReadonly?: boolean;
 }
+
+interface ProjectPickerContentEnabledProps extends ProjectPickerContentBaseProps {
+  controlsState?: 'enabled';
+  onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
+}
+
+interface ProjectPickerContentReadOnlyProps extends ProjectPickerContentBaseProps {
+  /**
+   * Controls the project routing toggle (`All projects` / `This project`):
+   * - `disabled`: shown but not interactive
+   * - `hidden`: not rendered, leaving a read-only project list
+   */
+  controlsState: Exclude<ProjectPickerControlsState, 'enabled'>;
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
+}
+
+export type ProjectPickerContentProps =
+  | ProjectPickerContentEnabledProps
+  | ProjectPickerContentReadOnlyProps;
 
 const projectPickerOptions = [
   {
@@ -41,10 +60,12 @@ const projectPickerOptions = [
     label: i18n.translate('cpsUtils.projectPicker.allProjectsLabel', {
       defaultMessage: 'All projects',
     }),
+    'data-test-subj': 'cpsProjectRoutingButton-all',
   },
   {
     id: PROJECT_ROUTING.ORIGIN,
     label: strings.getOriginProjectLabel(),
+    'data-test-subj': 'cpsProjectRoutingButton-origin',
   },
 ];
 
@@ -52,34 +73,36 @@ export const ProjectPickerContent = ({
   projectRouting,
   onProjectRoutingChange,
   projects,
-  isReadonly = false,
+  controlsState = 'enabled',
 }: ProjectPickerContentProps) => {
   const styles = useMemoCss(projectPickerContentStyles);
   const { originProject, linkedProjects, error, isLoading } = projects;
 
-  if (!originProject) {
+  if (!isLoading && !error && !originProject && linkedProjects.length === 0) {
     return null;
   }
 
-  const projectsList = [originProject, ...linkedProjects];
+  const projectsList = originProject ? [originProject, ...linkedProjects] : linkedProjects;
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column" responsive={false} css={styles.container}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          isFullWidth
-          legend={strings.projectPickerButtonAriaLabel}
-          idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
-          options={projectPickerOptions}
-          onChange={(optionId: string) => {
-            onProjectRoutingChange(optionId);
-          }}
-          css={styles.buttonGroup}
-          buttonSize="compressed"
-          isDisabled={isReadonly}
-        />
-        <EuiHorizontalRule margin="none" />
-      </EuiFlexItem>
+      {controlsState !== 'hidden' ? (
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            isFullWidth
+            legend={strings.projectPickerButtonAriaLabel}
+            idSelected={projectRouting ?? PROJECT_ROUTING.ALL}
+            options={projectPickerOptions}
+            onChange={(optionId: string) => {
+              onProjectRoutingChange?.(optionId);
+            }}
+            css={styles.buttonGroup}
+            buttonSize="compressed"
+            isDisabled={controlsState === 'disabled'}
+          />
+          <EuiHorizontalRule margin="none" />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false} css={styles.projectCountHeader}>
         <EuiTitle size="xxxs">
           <h6 css={styles.projectCountTitle}>
@@ -101,10 +124,9 @@ export const ProjectPickerContent = ({
         )}
         <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
           {error ? (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               size="s"
-              color="danger"
               title={strings.getProjectPickerFetchError()}
               css={styles.errorCallout}
             />
@@ -114,7 +136,7 @@ export const ProjectPickerContent = ({
                 key={project._id}
                 project={project}
                 index={index}
-                isOriginProject={project._id === originProject._id}
+                isOriginProject={project._id === originProject?._id}
               />
             ))
           )}

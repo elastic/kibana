@@ -28,7 +28,7 @@ export interface ResolveRegisteredStepIconDeps {
  * (catalog cards): a workflows-extensions step definition (or its base-type
  * family), the static connector-spec map, then the action-type registry.
  * Returns `undefined` when none of those have an icon, callers fall back to
- * the static `getStepIconType(getBaseConnectorType(stepType))` map.
+ * the static `getStepIconType(stepType)` map.
  */
 export function resolveRegisteredStepIcon(
   stepType: string,

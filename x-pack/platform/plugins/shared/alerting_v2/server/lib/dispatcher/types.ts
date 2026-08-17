@@ -9,6 +9,8 @@ import type {
   AlertEpisodeStatus,
   AlertEventSeverity,
 } from '../../resources/datastreams/alert_events';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
+import type { DispatchFailureReason } from './steps/constants';
 
 export type RuleId = string;
 export type ActionPolicyId = string;
@@ -22,7 +24,9 @@ export interface ActionPolicyDestination {
 
 export interface AlertEpisode {
   last_event_timestamp: string;
-  rule_id: RuleId;
+  rule_id: RuleId | null;
+  source: string;
+  space_id: string;
   group_hash: string;
   episode_id: string;
   episode_status: AlertEpisodeStatus;
@@ -31,7 +35,9 @@ export interface AlertEpisode {
 }
 
 export interface AlertEpisodeSuppression {
-  rule_id: RuleId;
+  rule_id: RuleId | null;
+  source: string | null;
+  space_id: string | null;
   group_hash: string;
   episode_id: string | null;
   should_suppress: boolean;
@@ -42,7 +48,8 @@ export interface AlertEpisodeSuppression {
 
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
-  abortController?: AbortController;
+  signal?: AbortSignal;
+  logger: LoggerServiceContract;
 }
 
 export interface DispatcherExecutionResult {
@@ -122,14 +129,32 @@ export interface LastNotifiedInfo {
   episodeStatus?: string;
 }
 
+/**
+ * A single failed attempt to dispatch one action group to one workflow
+ * destination. Carries everything the execution-history step needs to emit a
+ * `dispatch_failed` event: the parent policy, the failing group + workflow, the
+ * affected episodes, and a machine-readable + human-readable cause.
+ */
+export interface DispatchFailure {
+  policyId: ActionPolicyId;
+  spaceId: string;
+  actionGroupId: ActionGroupId;
+  workflowId: string;
+  episodes: AlertEpisode[];
+  reason: DispatchFailureReason;
+  message: string;
+}
+
 export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
   readonly executionUuid: string;
+  readonly logger: LoggerServiceContract;
 }
 
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
+  readonly logger: LoggerServiceContract;
   readonly episodes?: AlertEpisode[];
   readonly suppressions?: AlertEpisodeSuppression[];
   readonly dispatchable?: AlertEpisode[];
@@ -141,12 +166,13 @@ export interface DispatcherPipelineState {
   readonly dispatch?: ActionGroup[];
   readonly throttled?: ActionGroup[];
   readonly dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  readonly dispatchFailures?: DispatchFailure[];
 }
 
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
 
 export type DispatcherStepOutput =
-  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
+  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input' | 'logger'>> }
   | { type: 'halt'; reason: DispatcherHaltReason };
 
 export interface DispatcherStep {

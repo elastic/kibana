@@ -442,7 +442,7 @@ describe('runManualOrchestration', () => {
 
     it('throws instead of returning a silent no_alerts outcome', async () => {
       await expect(runManualOrchestration(baseParams)).rejects.toThrow(
-        /sole source.*gate added 0 alerts/i
+        /No alerts were available to analyze for the selected time range/i
       );
     });
 

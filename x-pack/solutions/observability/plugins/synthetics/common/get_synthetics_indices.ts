@@ -18,6 +18,11 @@ import { SYNTHETICS_INDEX_PATTERN } from './constants';
  * different base, e.g. the alerts index (`.alerts-observability*`) or a
  * `SyntheticsEsClient`'s configurable `heartbeatIndices`.
  *
+ * Note: `indexPattern` must be a single pattern. Passing a comma-joined
+ * multi-cluster value (e.g. a `SyntheticsEsClient`'s `heartbeatIndices`) with a
+ * `remoteName` only prefixes the first sub-pattern; use
+ * {@link getSyntheticsScopedIndex} for that case instead.
+ *
  * @example
  *   getSyntheticsCcsIndex();                          // 'synthetics-*'
  *   getSyntheticsCcsIndex('cluster');                 // 'cluster:synthetics-*'
@@ -27,6 +32,20 @@ export const getSyntheticsCcsIndex = (
   remoteName?: string,
   indexPattern: string = SYNTHETICS_INDEX_PATTERN
 ): string => (remoteName ? `${remoteName}:${indexPattern}` : indexPattern);
+
+/**
+ * Resolves the index a server-side query should target from a
+ * `SyntheticsEsClient`. For a remote monitor, scopes to that single cluster via
+ * {@link getSyntheticsCcsIndex} — deliberately *not* reusing `heartbeatIndices`,
+ * which may be a comma-joined multi-cluster pattern (e.g.
+ * `synthetics-*,*:synthetics-*`). Prefixing such a value would only tag the
+ * first sub-pattern, letting the rest fan back out to every remote cluster. For
+ * a local monitor, queries `heartbeatIndices` unchanged.
+ */
+export const getSyntheticsScopedIndex = (
+  remoteName: string | undefined,
+  heartbeatIndices: string
+): string => (remoteName ? getSyntheticsCcsIndex(remoteName) : heartbeatIndices);
 
 export interface RemoteCluster {
   name: string;

@@ -7,6 +7,7 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type { CasePersistedAttributes } from '../../common/types/case';
@@ -33,7 +34,7 @@ const safeClosePit = async (
   }
 };
 
-/** Records `legacyCasesMigrated: true` on the space's configure SO once its backfill is complete. */
+/** Records the completion marker on the space's configure SO once its backfill is complete. */
 const setCasesMigratedFlag = async (
   repo: ISavedObjectsRepository,
   so: SavedObject<ConfigurationPersistedAttributes>
@@ -54,9 +55,10 @@ const setCasesMigratedFlag = async (
 /**
  * Backfills one space's cases using an Elasticsearch Point-In-Time cursor (skip-safe, and not
  * subject to the from/size result-window limit that breaks past ~10k docs). Fills only the
- * `extended_fields` keys a case is missing (never overwriting existing values) and stops when the
- * space is exhausted, the per-run scan budget is hit, or the task is cancelled — returning where to
- * resume in each of those cases.
+ * `extended_fields` keys a case does not have at all (absent or `null` — never overwriting any
+ * existing entry, including an explicit `''` clear) and stops when the space is exhausted, the
+ * per-run scan budget is hit, or the task is cancelled — returning where to resume in each of
+ * those cases.
  */
 const backfillCasesForSpace = async (
   repo: ISavedObjectsRepository,
@@ -115,6 +117,15 @@ const backfillCasesForSpace = async (
     const findPage = () =>
       repo.find<CasePersistedAttributes>({
         type: CASE_SAVED_OBJECT,
+        // `namespaces` MUST be passed here, not only to `openPointInTimeForType`. The migration runs
+        // on an unscoped internal repository (no spaces extension); when that extension is absent the
+        // SO repository's `find` defaults `options.namespaces` to `['default']` (see
+        // core `find.ts`), silently returning the wrong space's cases. For a non-default space that
+        // means `find` returns `default` cases which are then `bulkUpdate`d against this space's
+        // namespace and 404 — so the space's real cases are never backfilled, yet the space is
+        // flagged complete. Scoping `find` to the same namespace as the PIT keeps reads and writes on
+        // the same space. (The reconciliation runner documents the identical gotcha.)
+        namespaces,
         perPage: CASE_BACKFILL_PAGE_SIZE,
         pit: { id: cursor.pitId, keepAlive: CASE_BACKFILL_PIT_KEEP_ALIVE },
         ...(cursor.searchAfter ? { searchAfter: cursor.searchAfter } : {}),
@@ -163,6 +174,12 @@ const backfillCasesForSpace = async (
           attributes: {
             extended_fields: { ...(caseSO.attributes.extended_fields ?? {}), ...additions },
           },
+          // Optimistic concurrency: the merged map above was computed from the PIT snapshot, and
+          // an unguarded write would silently replace a user update that landed between the read
+          // and this write. With the snapshot version a concurrent update turns into a 409, which
+          // lands in the retryable branch below — the space stays unflagged and the next run
+          // recomputes from a fresh read.
+          version: caseSO.version,
           ...(nsOption ? { namespace: nsOption } : {}),
         },
       ];
@@ -170,11 +187,13 @@ const backfillCasesForSpace = async (
 
     if (updates.length > 0) {
       const res = await repo.bulkUpdate<CasePersistedAttributes>(updates, { refresh: false });
-      const failed = res.saved_objects.filter((s) => s.error != null);
+      const failed = res.saved_objects.filter(isSavedObjectErrorResult);
       if (failed.length > 0) {
         // A 404 means the case can't be resolved for update — it was deleted between the scan and the
         // update, or its stored id/namespace don't line up (e.g. synthetic data inserted straight
         // into ES). Retrying never succeeds, so skip these rather than blocking the space forever.
+        // Everything else — including a 409 version conflict from the optimistic-concurrency guard
+        // above — is retryable: the space stays unflagged and is rescanned fresh on a later run.
         const notRetryable = failed.filter((s) => s.error?.statusCode === 404);
         const retryable = failed.filter((s) => s.error?.statusCode !== 404);
         const distinctReasons = (list: typeof failed) =>
@@ -234,6 +253,32 @@ const backfillCasesForSpace = async (
 };
 
 /**
+ * Whether a single space still needs its existing cases backfilled: it has legacy custom fields
+ * AND it has never been flagged `legacyCasesMigrated`. A flagged space is never rescanned — its
+ * `extended_fields` may have been deliberately edited (including cleared to `''`) since its
+ * migration, and rerunning the backfill would silently restore stale legacy values over those
+ * edits. Spaces with no custom fields are never backfilled (there is nothing to derive
+ * `extended_fields` from), so they are never "pending". Exported so the task runner counts a
+ * space as "skipped" from the same source of truth.
+ */
+export const configureNeedsCaseBackfill = (
+  so: SavedObject<ConfigurationPersistedAttributes>
+): boolean =>
+  (so.attributes.customFields?.length ?? 0) > 0 && so.attributes.legacyCasesMigrated !== true;
+
+/**
+ * Whether ANY space still needs its existing cases backfilled — the exact predicate
+ * `runCaseBackfillPhase` uses to build its pending list, exported so the task runner can decide,
+ * from the same source of truth, whether a completing run actually finished outstanding backfill
+ * work. This is derived purely from the (restart-durable) per-space `legacyCasesMigrated`
+ * completion markers on the freshly-loaded configure SOs, so it is stable across Kibana restarts
+ * and multi-run backfills.
+ */
+export const hasPendingCaseBackfill = (
+  configures: Array<SavedObject<ConfigurationPersistedAttributes>>
+): boolean => configures.some(configureNeedsCaseBackfill);
+
+/**
  * Resumable existing-case backfill phase. Walks the spaces still needing a backfill (custom fields
  * configured AND `legacyCasesMigrated` not yet set), resuming the cursor's space first, and scans at
  * most `CASE_BACKFILL_SCAN_BUDGET` cases across this run. Flags a space migrated only once it is
@@ -247,9 +292,7 @@ export const runCaseBackfillPhase = async (
   executionId: string,
   log: Logger
 ): Promise<CaseBackfillPhaseResult> => {
-  const pending = configures.filter(
-    (so) => (so.attributes.customFields?.length ?? 0) > 0 && !so.attributes.legacyCasesMigrated
-  );
+  const pending = configures.filter(configureNeedsCaseBackfill);
 
   if (pending.length === 0) {
     return { complete: true, backfilled: 0, hadFailures: false };

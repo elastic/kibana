@@ -963,14 +963,14 @@ describe('AutomaticImportSetupService', () => {
         invokeAutomaticImportAgent: mockInvokeAgent,
       };
 
-      const abortController = new AbortController();
+      const { signal } = new AbortController();
 
       // Create task runner
       const taskRunner = createTaskRunner(
         taskManagerMock.createRunContext({
           taskInstance: mockTaskInstance as unknown as ConcreteTaskInstance,
           fakeRequest: {} as unknown as KibanaRequest,
-          abortController,
+          signal,
         })
       );
 
@@ -1020,7 +1020,7 @@ describe('AutomaticImportSetupService', () => {
           fieldMapping: expect.any(Array),
           status: 'completed',
         },
-        abortController.signal
+        signal
       );
     });
 

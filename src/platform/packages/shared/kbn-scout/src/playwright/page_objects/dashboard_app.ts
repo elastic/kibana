@@ -41,6 +41,7 @@ export class DashboardApp {
   private readonly controlsGroup;
   private readonly controlFrame;
   private readonly optionsListControlSearchInput;
+  private readonly tryEsqlLink;
 
   // Add panel flow
   private readonly addTopNavButton;
@@ -93,6 +94,7 @@ export class DashboardApp {
     this.optionsListControlSearchInput = this.page.testSubj.locator(
       'optionsList-control-search-input'
     );
+    this.tryEsqlLink = this.page.testSubj.locator('tryESQLLink');
 
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
@@ -142,15 +144,29 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
-  async openDashboardWithId(id: string) {
+  async openDashboardWithId(
+    id: string,
+    opts: { waitForRender?: boolean } = { waitForRender: true }
+  ) {
     await this.page.gotoApp('dashboards', { hash: `/view/${id}` });
-    await this.waitForRenderComplete();
+    if (opts.waitForRender) {
+      await this.waitForRenderComplete();
+    }
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
   async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
     await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
+  }
+
+  async openTryEsqlDashboard() {
+    await this.goto();
+    await this.page.testSubj
+      .locator('dashboardNoDataPageLoaded')
+      .waitFor({ state: 'attached', timeout: 20_000 });
+    await this.tryEsqlLink.click();
+    await this.waitForPanelsToLoad(1);
   }
 
   private getSettingsFlyout() {
@@ -1059,11 +1075,11 @@ export class DashboardApp {
   }
 
   async addNewLensPanel() {
-    await this.addNewPanel('Visualization');
+    await this.addNewPanel('Create visualization');
   }
 
   async addNewESQLPanel() {
-    await this.addNewPanel('Visualization (query)');
+    await this.addNewPanel('Create visualization (query)');
   }
 
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
@@ -1138,6 +1154,14 @@ export class DashboardApp {
 
   getDashboardListingLink(title: string) {
     return this.page.testSubj.locator(`dashboardListingTitleLink-${title.split(' ').join('-')}`);
+  }
+
+  // Project (chrome-next) shows the dashboard title in the app header; classic chrome shows it as
+  // the last breadcrumb. `.or()` keeps callers layout-agnostic without a runtime gate.
+  getAppTitle() {
+    return this.page.testSubj
+      .locator('appHeaderTitle')
+      .or(this.page.testSubj.locator('breadcrumb last'));
   }
 
   // ============================================================

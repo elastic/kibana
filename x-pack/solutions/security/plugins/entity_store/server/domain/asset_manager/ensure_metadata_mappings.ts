@@ -10,12 +10,16 @@ import {
   putComponentTemplate,
   putDataStreamMapping,
   rolloverDataStream,
+  putIndexTemplate,
+  createDataStream,
 } from '../../infra/elasticsearch';
 import {
   getMetadataComponentTemplate,
   getMetadataIndexMappings,
 } from './metadata_component_templates';
 import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import { getMetadataEntityIndexTemplateConfig } from './metadata_index_template';
+import { installMetadataIndexIngestPipeline } from './metadata_index_ingest_pipeline';
 
 // Minimal shape of the errors surfaced by the ES client. Mirrors the detection
 // style used elsewhere in infra/elasticsearch (e.g. createIndex/createDataStream).
@@ -44,46 +48,91 @@ const isIndexNotFound = (error: unknown): boolean => {
 const isMappingConflict = (error: unknown): boolean =>
   errorType(error) === 'illegal_argument_exception';
 
+// Returns true when a plain (non-data-stream) index occupies the name that
+// should belong to the metadata data stream. This can happen on deployments
+// that were upgraded from a version that pre-dates the metadata data stream:
+// if a write arrived after the upgrade but before the index template was
+// installed, ES auto-created a regular index instead of a data stream.
+const detectPlainIndex = async (esClient: ElasticsearchClient, name: string): Promise<boolean> => {
+  try {
+    await esClient.indices.getDataStream({ name });
+    return false; // name resolves to a real data stream
+  } catch (err) {
+    if (!isIndexNotFound(err)) {
+      throw err;
+    }
+  }
+  // getDataStream 404'd — check if a plain index is occupying the name
+  return esClient.indices.exists({ index: name });
+};
+
 /**
- * Brings an already-installed metadata data stream up to date with the current
- * component-template mappings.
+ * Ensures the metadata data stream and its backing ES assets exist and are
+ * up to date with the current mappings.
  *
- * Why this exists: the shared ES assets are installed only during a fresh
- * `AssetManagerClient.init()` (the install flow short-circuits when the store is
- * already installed, and nothing re-runs it on plugin start). Updating a
- * component template only affects FUTURE backing indices, so on upgrade of an
- * existing deployment the new fields never reach the current write index. This
- * closes that gap for the metadata data stream.
+ * Why this exists: `installSharedElasticsearchAssets()` runs only during a fresh
+ * `AssetManagerClient.init()`. The install route short-circuits when all entity
+ * types are already present, so on upgrade of an existing deployment (e.g. from a
+ * version that pre-dates the metadata data stream) the ingest pipeline, index
+ * template, and data stream are never created. This function closes that gap by
+ * (re-)installing each asset idempotently on the first metadata write.
  *
- * Strategy (additive fields):
- *  - Re-PUT the component template (idempotent) so future rollovers use the
- *    correct types.
- *  - PUT the mappings in place on the existing data stream — no rollover needed
- *    in the common case. `getMetadataIndexMappings()` includes `dynamic_templates`;
- *    PUT `_mapping` replaces that list wholesale, but it is the identical list, so
- *    this is a no-op for dynamic templates.
+ * Strategy:
+ *  - Install the ingest pipeline, component template, and index template — all
+ *    idempotent PUTs, safe to re-run on every process boot.
+ *  - Detect and repair corrupted state: if a plain index occupies the data
+ *    stream name (written by ES auto-create before the index template existed),
+ *    delete it and recreate as a proper data stream. The stream is append-only
+ *    and regenerable, so data loss is acceptable.
+ *  - PUT mappings in place on the existing data stream — no rollover needed in
+ *    the common case.
+ *  - If the data stream does not exist (fresh upgrade path), create it from the
+ *    index template we just installed.
  *  - If the in-place update conflicts (a field was dynamically mapped with a
  *    different type during the pre-sync window), roll the data stream over so the
- *    NEW backing index picks up the correct types. The OLD backing index keeps the
- *    field with its mistyped (not missing) mapping — accepted, since it only
- *    affects docs written in that narrow window.
+ *    new backing index picks up the correct types.
  */
 export const ensureMetadataDataStreamMappings = async (
   esClient: ElasticsearchClient,
   namespace: string,
   logger: Logger
 ): Promise<void> => {
+  // All three are idempotent PUTs — safe to repeat on every first write after
+  // a Kibana restart. On fresh installs they already exist; on upgrades from a
+  // version that pre-dates the metadata data stream they do not.
+  await installMetadataIndexIngestPipeline(esClient, namespace, logger);
   await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace));
+  await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
 
   const dataStream = getMetadataEntitiesDataStreamName(namespace);
+
+  // Repair corrupted state: a plain index at the data stream name means ES
+  // auto-created a regular index before the index template was installed on
+  // this deployment. The stream is append-only and fully regenerable
+  // (maintainers rewrite on their next run; AI summaries regenerate on demand),
+  // so deleting the plain index and recreating as a data stream is safe.
+  if (await detectPlainIndex(esClient, dataStream)) {
+    logger.warn(
+      `Plain index found at data stream name ${dataStream} ` +
+        `(pre-template write auto-created a regular index); ` +
+        `deleting and recreating as a data stream`
+    );
+    await esClient.indices.delete({ index: dataStream });
+    await createDataStream(esClient, dataStream, { throwIfExists: false });
+    logger.info(`Replaced corrupted plain index with data stream at ${dataStream}`);
+    return;
+  }
 
   try {
     await putDataStreamMapping(esClient, dataStream, getMetadataIndexMappings());
     logger.debug(`Synced metadata data stream mappings for namespace ${namespace}`);
   } catch (error) {
     if (isIndexNotFound(error)) {
-      // Fresh-install path creates the data stream from the template already.
-      logger.debug(`Metadata data stream absent in ${namespace}; nothing to sync in place`);
+      // Data stream does not exist — create it from the index template we just
+      // installed. This is the upgrade path; on fresh installs the data stream
+      // is already created by installIndicesAndDataStreams().
+      await createDataStream(esClient, dataStream, { throwIfExists: false });
+      logger.debug(`Created metadata data stream for namespace ${namespace}`);
       return;
     }
     if (isMappingConflict(error)) {

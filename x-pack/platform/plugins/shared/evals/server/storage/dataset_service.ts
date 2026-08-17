@@ -25,13 +25,16 @@ export class DatasetService {
     private readonly isServerless: boolean
   ) {}
 
-  getClient(): DatasetClient {
-    const datasetsStorageAdapter = this.createDatasetsStorageAdapter();
-    const examplesStorageAdapter = this.createExamplesStorageAdapter();
-
+  /**
+   * A client scoped to `spaceId`. Required rather than defaulted so a new call
+   * site has to state which space it is acting in.
+   */
+  getClient({ spaceId }: { spaceId: string }): DatasetClient {
     return new DatasetClient({
-      datasetsStorageAdapter,
-      examplesStorageAdapter,
+      datasetsStorageAdapter: this.createDatasetsStorageAdapter(),
+      examplesStorageAdapter: this.createExamplesStorageAdapter(),
+      logger: this.logger,
+      spaceId,
     });
   }
 

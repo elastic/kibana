@@ -8,6 +8,7 @@
 import { unset } from 'lodash';
 
 import type { SavedObjectsBulkResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { V2_NOOP_ATTACHMENTS_WRITER } from '../../cases_analytics_v2';
@@ -1557,7 +1558,11 @@ describe('AttachmentService', () => {
           comments: [{ savedObjectId: '1', updatedAttributes: attachment.attributes }],
         });
 
-        expect(res.saved_objects[0].attributes.owner).toBe(attachment.attributes.owner);
+        const [updated] = res.saved_objects;
+        if (isSavedObjectErrorResult(updated)) {
+          throw new Error('Expected a successful saved object result');
+        }
+        expect(updated.attributes.owner).toBe(attachment.attributes.owner);
       });
 
       it('throws Boom 400 for unified-only types when the attachments flag is off', async () => {

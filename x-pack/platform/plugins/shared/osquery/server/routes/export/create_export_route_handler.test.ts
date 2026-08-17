@@ -32,6 +32,15 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn().mockResolvedValue({}),
 }));
 
+jest.mock('../../utils/ccs_utils', () => {
+  const actual = jest.requireActual('../../utils/ccs_utils');
+
+  return {
+    ...actual,
+    hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
+  };
+});
+
 jest.mock('../../lib/format_results', () => {
   const actual = jest.requireActual('../../lib/format_results');
 
@@ -59,22 +68,33 @@ const baseParams: ExportRouteParams = {
   fileNamePrefix: 'osquery-results-test',
 };
 
-const mockOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
-const mockClosePointInTime = jest.fn().mockResolvedValue({});
+const mockInternalOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
+const mockInternalClosePointInTime = jest.fn().mockResolvedValue({});
+const mockScopedOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
+const mockScopedClosePointInTime = jest.fn().mockResolvedValue({});
 const mockSearchSearch = jest.fn();
 const mockSearch: jest.Mocked<IScopedSearchClient> = {
   search: mockSearchSearch,
 } as unknown as jest.Mocked<IScopedSearchClient>;
+const mockCpsSearch = jest.fn().mockReturnValue(mockSearch);
+const mockInternalEsClient = {
+  openPointInTime: mockInternalOpenPointInTime,
+  closePointInTime: mockInternalClosePointInTime,
+};
+const mockScopedEsClient = {
+  openPointInTime: mockScopedOpenPointInTime,
+  closePointInTime: mockScopedClosePointInTime,
+};
 
 const createContext = () =>
   ({
     core: Promise.resolve({
       elasticsearch: {
         client: {
-          asInternalUser: {
-            openPointInTime: mockOpenPointInTime,
-            closePointInTime: mockClosePointInTime,
-          },
+          asInternalUser: mockInternalEsClient,
+          asScoped: jest.fn().mockReturnValue({
+            asCurrentUser: mockScopedEsClient,
+          }),
         },
       },
       security: {
@@ -106,17 +126,67 @@ const createExportRequest = (options: {
     events: { aborted$: NEVER, completed$: NEVER },
   } as unknown as ExportHandlerRequest);
 
+const createSecurityMock = (options?: { useRbac?: boolean; authorizedPrivileges?: string[] }) => {
+  const useRbac = options?.useRbac ?? false;
+  const authorizedActions = new Set(
+    (options?.authorizedPrivileges ?? []).map((privilege) => `api:${privilege}`)
+  );
+
+  return {
+    authz: {
+      mode: { useRbacForRequest: jest.fn().mockReturnValue(useRbac) },
+      actions: { api: { get: (privilege: string) => `api:${privilege}` } },
+      checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(
+        jest.fn(({ kibana }: { kibana: string[] }) =>
+          Promise.resolve({
+            privileges: {
+              kibana: kibana.map((privilege) => ({
+                privilege,
+                authorized: authorizedActions.has(privilege),
+              })),
+            },
+          })
+        )
+      ),
+    },
+  } as unknown as OsqueryAppContext['security'];
+};
+
 const createOsqueryContext = (options?: {
   getIntegrationNamespaces?: jest.Mock;
+  useRbac?: boolean;
+  authorizedPrivileges?: string[];
+  cpsEnabled?: boolean;
 }): OsqueryAppContext =>
   ({
     logFactory: { get: () => loggingSystemMock.createLogger() },
     experimentalFeatures: allowedExperimentalValues,
-    security: {} as OsqueryAppContext['security'],
+    security: createSecurityMock(options),
+    cpsEnabled: options?.cpsEnabled ?? false,
     service: {
       getIntegrationNamespaces: options?.getIntegrationNamespaces,
     },
-    getStartServices: jest.fn(),
+    getStartServices: jest.fn().mockResolvedValue([
+      {
+        elasticsearch: {
+          client: {
+            asInternalUser: mockInternalEsClient,
+            asScoped: jest.fn().mockReturnValue({
+              asCurrentUser: mockScopedEsClient,
+              asInternalUser: mockInternalEsClient,
+              asSecondaryAuthUser: mockInternalEsClient,
+            }),
+          },
+        },
+      },
+      {
+        data: {
+          search: {
+            asScoped: mockCpsSearch,
+          },
+        },
+      },
+    ]),
     config: jest.fn(),
     telemetryEventsSender: {},
     licensing: {},
@@ -126,7 +196,8 @@ describe('createExportRouteHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     auditLoggerLog.mockClear();
-    mockOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
+    mockInternalOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
+    mockScopedOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
     const stream = new PassThrough();
     stream.end();
     mockExportResultsToStream.mockResolvedValue(stream);
@@ -280,7 +351,7 @@ describe('createExportRouteHandler', () => {
 
   it('passes integrationNamespaces to baseRequest when getIntegrationNamespaces returns namespaces', async () => {
     const getIntegrationNamespaces = jest.fn().mockResolvedValue({
-      [OSQUERY_INTEGRATION_NAME]: ['fleet-ns'],
+      [OSQUERY_INTEGRATION_NAME]: ['team.a'],
     });
     const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
     const response = httpServerMock.createResponseFactory();
@@ -295,7 +366,7 @@ describe('createExportRouteHandler', () => {
     expect(mockExportResultsToStream).toHaveBeenCalledWith(
       expect.objectContaining({
         baseRequest: expect.objectContaining({
-          integrationNamespaces: ['fleet-ns'],
+          integrationNamespaces: ['team.a'],
         }),
       })
     );
@@ -345,14 +416,13 @@ describe('createExportRouteHandler', () => {
     expect(response.ok).toHaveBeenCalled();
   });
 
-  it('prevents KQL OR gate-bypass via outer parentheses', async () => {
+  it('forwards a user kuery unchanged and preserves baseFilter scoping', async () => {
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
-    // Malicious kuery: tries to escape the action_id gate via a top-level OR.
-    // The handler validates the full composed filter `(${baseFilter}) AND (${malicious})` —
-    // this is syntactically valid. The factory DSL will wrap everything in outer parens
-    // preventing OR-escape. The test confirms no 400 is returned and the raw kuery is
-    // forwarded to the factory (which applies the gate).
+    // A user kuery containing a top-level OR. The handler validates the composed
+    // filter `(${baseFilter}) AND (${kuery})`, which is syntactically valid, so no 400
+    // is returned and the raw kuery is forwarded unchanged to the factory, which wraps
+    // each part in its own parentheses when composing the final query.
     const request = createExportRequest({
       query: { format: 'ndjson' },
       body: { kuery: 'host.name: "a" OR action_id: "other"' },
@@ -364,9 +434,9 @@ describe('createExportRouteHandler', () => {
     expect(response.ok).toHaveBeenCalled();
 
     const baseRequest = mockExportResultsToStream.mock.calls[0][0].baseRequest;
-    // The base filter is passed unchanged — the factory scopes to it.
+    // The base filter is passed unchanged; the factory composes it into the query.
     expect(baseRequest?.baseFilter).toBe('action_id: "abc"');
-    // The raw user kuery is forwarded; the factory composes with outer parens.
+    // The raw user kuery is forwarded; the factory wraps it in its own parentheses.
     expect(baseRequest?.kuery).toBe('host.name: "a" OR action_id: "other"');
   });
 
@@ -380,10 +450,11 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    // Handler opens PIT with the broad index pattern
-    expect(mockOpenPointInTime).toHaveBeenCalledWith(
+    // Handler opens PIT with the broad index pattern (array shape) when no
+    // integration namespaces are resolved.
+    expect(mockInternalOpenPointInTime).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+        index: [`logs-${OSQUERY_INTEGRATION_NAME}.result*`],
         keep_alive: '5m',
         ignore_unavailable: true,
       })
@@ -394,6 +465,133 @@ describe('createExportRouteHandler', () => {
       expect.objectContaining({
         pit: { id: 'mock-pit-id', keep_alive: '5m' },
       })
+    );
+  });
+
+  it('scopes the PIT to resolved integration namespaces (matches the factory targets)', async () => {
+    const getIntegrationNamespaces = jest.fn().mockResolvedValue({
+      [OSQUERY_INTEGRATION_NAME]: ['team.a', 'team.b'],
+    });
+    const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    // The PIT must scan the same namespace-scoped targets the factory sets on the
+    // search body — ES ignores the body `index` once a PIT is present.
+    expect(mockInternalOpenPointInTime).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: [
+          `logs-${OSQUERY_INTEGRATION_NAME}.result-team.a`,
+          `logs-${OSQUERY_INTEGRATION_NAME}.result-team.b`,
+        ],
+        ignore_unavailable: true,
+      })
+    );
+  });
+
+  it('returns a 400 (not 500) and opens no PIT when a resolved namespace is invalid', async () => {
+    const getIntegrationNamespaces = jest.fn().mockResolvedValue({
+      // A colon is not valid in a namespace; the index builder rejects it and
+      // the route surfaces a 400 rather than a masked 500.
+      [OSQUERY_INTEGRATION_NAME]: ['bad:namespace'],
+    });
+    const handler = createExportRouteHandler(createOsqueryContext({ getIntegrationNamespaces }));
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 400,
+        body: { message: 'Invalid integration namespace' },
+      })
+    );
+    expect(mockInternalOpenPointInTime).not.toHaveBeenCalled();
+    expect(mockExportResultsToStream).not.toHaveBeenCalled();
+  });
+
+  it('returns 403 and never opens a PIT when the caller lacks osquery read access', async () => {
+    const handler = createExportRouteHandler(
+      createOsqueryContext({ useRbac: true, authorizedPrivileges: [] })
+    );
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(response.forbidden).toHaveBeenCalled();
+    // No PIT is allocated when the caller lacks read access.
+    expect(mockInternalOpenPointInTime).not.toHaveBeenCalled();
+    expect(mockInternalClosePointInTime).not.toHaveBeenCalled();
+    expect(mockExportResultsToStream).not.toHaveBeenCalled();
+    expect(auditLoggerLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Osquery export failed',
+        event: expect.objectContaining({ outcome: 'failure' }),
+      })
+    );
+  });
+
+  it('opens the PIT when the caller holds only osquery-readLiveQueries', async () => {
+    const handler = createExportRouteHandler(
+      createOsqueryContext({ useRbac: true, authorizedPrivileges: ['osquery-readLiveQueries'] })
+    );
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(response.forbidden).not.toHaveBeenCalled();
+    expect(mockInternalOpenPointInTime).toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('uses scoped search client when CPS is enabled', async () => {
+    mockExportResultsToStream.mockImplementationOnce(async ({ closePit, pit }) => {
+      await closePit(pit.id);
+      const stream = new PassThrough();
+      stream.end();
+
+      return stream;
+    });
+
+    const handler = createExportRouteHandler(createOsqueryContext({ cpsEnabled: true }));
+    const response = httpServerMock.createResponseFactory();
+    const request = createExportRequest({
+      query: { format: 'ndjson' },
+      body: {},
+    });
+
+    await handler(createContext(), request, response, baseParams);
+
+    expect(mockCpsSearch).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+    expect(mockScopedOpenPointInTime).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: [`logs-${OSQUERY_INTEGRATION_NAME}.result*`],
+        keep_alive: '5m',
+        ignore_unavailable: true,
+      })
+    );
+    expect(mockScopedClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalOpenPointInTime).not.toHaveBeenCalled();
+    expect(mockInternalClosePointInTime).not.toHaveBeenCalled();
+    expect(mockExportResultsToStream).toHaveBeenCalledWith(
+      expect.objectContaining({ search: mockSearch })
     );
   });
 
@@ -486,7 +684,7 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
   });
@@ -504,16 +702,14 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
   });
 
   it('closes PIT and returns 500 when context.search rejects after PIT is opened', async () => {
-    const context = {
-      ...createContext(),
-      search: Promise.reject(new Error('Search context unavailable')),
-    } as unknown as ReturnType<typeof createContext>;
+    const context = createContext();
+    context.search = Promise.reject(new Error('Search context unavailable'));
 
     const handler = createExportRouteHandler(createOsqueryContext());
     const response = httpServerMock.createResponseFactory();
@@ -524,13 +720,13 @@ describe('createExportRouteHandler', () => {
 
     await handler(context, request, response, baseParams);
 
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
   });
 
   it('returns 500 when openPointInTime throws (no closePit needed)', async () => {
-    mockOpenPointInTime.mockRejectedValueOnce(
+    mockInternalOpenPointInTime.mockRejectedValueOnce(
       Object.assign(new Error('ES cluster unavailable'), { statusCode: 503 })
     );
     const handler = createExportRouteHandler(createOsqueryContext());
@@ -542,7 +738,7 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    expect(mockClosePointInTime).not.toHaveBeenCalled();
+    expect(mockInternalClosePointInTime).not.toHaveBeenCalled();
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
   });
 

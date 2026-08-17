@@ -92,6 +92,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         after(async () => {
+          // Exit the dashboard's edit mode so the unsaved-changes `beforeunload`
+          // handler doesn't block the next suite's navigation in the shared session.
+          await PageObjects.dashboard.clickCancelOutOfEditMode();
           await ml.api.cleanMlIndices();
         });
 

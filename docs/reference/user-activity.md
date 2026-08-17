@@ -54,6 +54,46 @@ Each filter has:
 :::::{include} user-activity/_snippets/user-activity-actions-list.md
 :::::
 
+## Dashboard event fields
+
+All dashboard actions include the [common log fields](#logs-schema) and populate `object.id`, `object.name`, `object.type`, and `object.tags`. The `object.type` value is `dashboard`, and `object.tags` contains the dashboard tag names.
+
+### Dashboard view
+
+`dashboard_view` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration`, measured in nanoseconds, records each continuous period that the dashboard is visible. A period ends when the user navigates away, closes or reloads the tab, or switches browser tabs.
+
+### Dashboard refresh
+
+`dashboard_refresh` sets `event.type` to `access`. `event.start` and `event.end` are ISO8601 timestamps, and `event.duration` is measured in nanoseconds. `event.outcome` is `success` when no panels return blocking errors and `failure` otherwise.
+
+Each automatic refresh produces a separate `dashboard_refresh` event. Short refresh intervals can therefore increase the volume of user activity logs.
+
+The action also populates the following metadata fields:
+
+| **Field** | **Description** |
+| --- | --- |
+| `metadata.time_range` | (Optional) Dashboard time range at the time of the refresh. |
+| `metadata.refresh_interval` | (Optional) Auto-refresh interval in milliseconds. This field is omitted when auto-refresh is paused. |
+| `metadata.query` | (Optional) Dashboard query, including its expression and language. The language is `kql` or `lucene`. |
+| `metadata.filters` | (Optional) List of dashboard filters. |
+| `metadata.panel_count` | Number of panels on the dashboard. |
+| `metadata.errors` | List of panels with blocking errors. Each item contains the panel ID in `panel_id` and the error message in `error`. The list is empty when no panels return blocking errors. |
+
+:::::{note}
+Dashboard query expressions and filter values are recorded without redaction. Manage access to and retention of user activity logs according to your organization's data-handling requirements.
+:::::
+
+When `metadata.errors` is not empty, `error.type` is `panel_errors` and `error.message` contains the error list as JSON.
+
+:::::{image} images/dashboard_user_activity_errors.png
+:alt: Discover results for dashboard refresh events with blocking panel errors
+:screenshot:
+:::::
+
+:::::{note}
+This example uses a custom `user-activity-logs` index. User activity events are emitted through the configured logging appenders and are not indexed automatically. To explore them in Discover, route the events to {{es}} using your existing log collection pipeline. Your index or data stream name depends on that configuration.
+:::::
+
 ## Logs schema
 
 User activity events are written as JSON log entries. When using the JSON logging layout, these entries are ECS-compatible (see [Elastic Common Schema (ECS)](ecs://reference/index.md)) and may include additional non-ECS fields used by Kibana (for example, `kibana.space.id` and `object.*`).
@@ -128,7 +168,7 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. |
+| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. For dashboard refresh metadata, refer to [Dashboard event fields](#dashboard-event-fields). |
 
 ### Error fields
 

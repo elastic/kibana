@@ -6,7 +6,6 @@
  */
 
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { registerWorkflowSteps } from './register_workflow_steps';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
@@ -18,18 +17,17 @@ import { assignAttackStepDefinition } from './assign_attack_step/assign_attack_s
 import { setAttackStatusStepDefinition } from './set_attack_status_step/set_attack_status_step';
 import { enableRuleStepDefinition } from './enable_rule_step/enable_rule_step';
 import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step';
+import { createNoteStepDefinition } from './create_note_step/create_note_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
 describe('registerWorkflowSteps (server)', () => {
-  it('registers all steps when publicAttacksApiEnabled is true', () => {
+  it('registers all steps', () => {
     const workflowsExtensions = createWorkflowsExtensionsMock();
 
-    registerWorkflowSteps(workflowsExtensions, {
-      publicAttacksApiEnabled: true,
-    } as ExperimentalFeatures);
+    registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(10);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(11);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -60,21 +58,8 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       disableRuleStepDefinition
     );
-  });
-
-  it('does not register the attack steps when publicAttacksApiEnabled is false', () => {
-    const workflowsExtensions = createWorkflowsExtensionsMock();
-
-    registerWorkflowSteps(workflowsExtensions, {
-      publicAttacksApiEnabled: false,
-    } as ExperimentalFeatures);
-
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(7);
-    const registeredSteps = workflowsExtensions.registerStepDefinition.mock.calls.map(
-      ([arg]) => arg
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      createNoteStepDefinition
     );
-    expect(registeredSteps).not.toContain(assignAttackStepDefinition);
-    expect(registeredSteps).not.toContain(setAttackStatusStepDefinition);
-    expect(registeredSteps).not.toContain(setAttackTagsStepDefinition);
   });
 });

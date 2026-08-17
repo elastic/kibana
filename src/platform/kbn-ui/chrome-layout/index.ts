@@ -25,5 +25,3 @@ export {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
 } from './src/layouts/grid_global_app_style';
-
-export { CommonGlobalAppStyles } from './src/layouts/global_app_styles';

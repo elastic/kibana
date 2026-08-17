@@ -252,8 +252,8 @@ export const useGetGroupSelector = ({
     );
   }, [dispatch, groupingId, settings]);
 
-  return useMemo(() => {
-    return (
+  return useMemo(
+    () => (
       <GroupSelector
         groupingId={groupingId}
         groupsSelected={selectedGroups}
@@ -266,16 +266,17 @@ export const useGetGroupSelector = ({
         onOpenTracker={onOpenTracker}
         settings={groupSettings}
       />
-    );
-  }, [
-    groupingId,
-    selectedGroups,
-    onChange,
-    fields,
-    maxGroupingLevels,
-    options,
-    title,
-    onOpenTracker,
-    groupSettings,
-  ]);
+    ),
+    [
+      groupingId,
+      selectedGroups,
+      onChange,
+      fields,
+      maxGroupingLevels,
+      options,
+      title,
+      onOpenTracker,
+      groupSettings,
+    ]
+  );
 };

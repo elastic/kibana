@@ -399,6 +399,9 @@ class PipelineEditorUi extends React.Component {
                 onChange={(e) => this.handleSettingChange('queue.type', e.target.value)}
                 options={PIPELINE_EDITOR.QUEUE_TYPES}
                 value={this.state.pipeline.settings['queue.type']}
+                aria-label={i18n.translate('xpack.logstash.pipelineEditor.queueTypeAriaLabel', {
+                  defaultMessage: 'Queue type',
+                })}
               />
             </FlexItemSetting>
             <FlexItemSetting

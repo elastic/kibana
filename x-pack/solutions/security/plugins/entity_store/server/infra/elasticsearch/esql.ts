@@ -27,7 +27,7 @@ export interface ExecuteEsqlQueryTelemetry {
 interface ExecuteEsqlQueryParams {
   esClient: ElasticsearchClient;
   query: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
   excludeColdFrozenTiers?: boolean;
   telemetry?: ExecuteEsqlQueryTelemetry;
 }
@@ -35,12 +35,12 @@ interface ExecuteEsqlQueryParams {
 const doExecuteEsqlQuery = async ({
   esClient,
   query,
-  abortController,
+  signal,
   excludeColdFrozenTiers = true,
 }: ExecuteEsqlQueryParams): Promise<ESQLSearchResponse> => {
   const options: TransportRequestOptions = {};
-  if (abortController?.signal) {
-    options.signal = abortController.signal;
+  if (signal) {
+    options.signal = signal;
   }
 
   const response = (await esClient.esql.query(

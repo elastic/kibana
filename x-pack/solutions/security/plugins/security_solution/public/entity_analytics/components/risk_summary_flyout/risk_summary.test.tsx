@@ -116,8 +116,8 @@ describe('FlyoutRiskSummary', () => {
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
   });
 
-  it('risk summary header does not render link when riskScoreData is loading', () => {
-    const { queryByTestId } = render(
+  it('risk summary header renders link even when riskScoreData is loading', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
@@ -131,7 +131,7 @@ describe('FlyoutRiskSummary', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('entityRiskInputsTitleLink')).not.toBeInTheDocument();
+    expect(getByTestId('entityRiskInputsTitleLink')).toBeInTheDocument();
   });
 
   it('renders visualization embeddable', () => {
@@ -333,8 +333,8 @@ describe('FlyoutRiskSummary', () => {
     });
   });
 
-  it('does not render resolution risk inputs link when resolution score is loading', () => {
-    const { queryByTestId } = render(
+  it('renders resolution risk inputs link even when resolution score is loading', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
@@ -357,7 +357,7 @@ describe('FlyoutRiskSummary', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('resolutionRiskInputsTitleLink')).not.toBeInTheDocument();
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toBeInTheDocument();
   });
 
   it('renders resolution risk score block when resolution score exists', () => {

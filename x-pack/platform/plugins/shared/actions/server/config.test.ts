@@ -43,6 +43,12 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "inboundEvents": Object {
+          "enabled": false,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -91,6 +97,12 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "inboundEvents": Object {
+          "enabled": false,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -248,6 +260,12 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "inboundEvents": Object {
+          "enabled": false,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -432,6 +450,12 @@ describe('config validation', () => {
         "enabledActionTypes": Array [
           "*",
         ],
+        "inboundEvents": Object {
+          "enabled": false,
+          "maxBodyBytes": ByteSizeValue {
+            "valueInBytes": 1048576,
+          },
+        },
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
@@ -475,6 +499,20 @@ describe('config validation', () => {
     config.webhook = { ssl: { pfx: { enabled: true } } };
     result = configSchema.validate(config);
     expect(result.webhook?.ssl.pfx.enabled).toEqual(true);
+  });
+
+  test('validates xpack.actions.inboundEvents', () => {
+    const empty = configSchema.validate({});
+    expect(empty.inboundEvents.enabled).toBe(false);
+    expect(empty.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+
+    const enabled = configSchema.validate({ inboundEvents: { enabled: true } });
+    expect(enabled.inboundEvents.enabled).toBe(true);
+    expect(enabled.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
+
+    const customSize = configSchema.validate({ inboundEvents: { maxBodyBytes: '512kb' } });
+    expect(customSize.inboundEvents.enabled).toBe(false);
+    expect(customSize.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(512 * 1024);
   });
 
   describe('email.services.ses', () => {
@@ -602,6 +640,68 @@ describe('config validation', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[auth.ears.ssl]: must specify [auth.ears.ssl.certificate] when [auth.ears.ssl.key] is specified"`
       );
+    });
+  });
+
+  describe('relay.url', () => {
+    test('accepts an https URL in production mode', () => {
+      const result = configSchema.validate(
+        { relay: { url: 'https://relay.test' } },
+        { dev: false }
+      );
+
+      expect(result.relay?.url).toEqual('https://relay.test');
+    });
+
+    test('rejects an http URL in production mode', () => {
+      expect(() =>
+        configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: false })
+      ).toThrow(/expected URI with scheme \[https\]/);
+    });
+
+    test('accepts an http URL in development mode', () => {
+      const result = configSchema.validate({ relay: { url: 'http://relay.test' } }, { dev: true });
+
+      expect(result.relay?.url).toEqual('http://relay.test');
+    });
+  });
+
+  describe('relay.ssl', () => {
+    test('accepts the Relay URL and complete SSL configuration', () => {
+      const result = configSchema.validate({
+        relay: {
+          url: 'https://relay.test',
+          ssl: {
+            verificationMode: 'full',
+            certificateAuthorities: ['/path/to/ca.pem'],
+            certificate: '/path/to/cert.pem',
+            key: '/path/to/key.pem',
+          },
+        },
+      });
+
+      expect(result.relay).toEqual({
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificateAuthorities: ['/path/to/ca.pem'],
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+        },
+      });
+    });
+
+    test('throws when certificate is specified without key', () => {
+      expect(() =>
+        configSchema.validate({
+          relay: {
+            url: 'https://relay.test',
+            ssl: {
+              certificate: '/path/to/cert.pem',
+            },
+          },
+        })
+      ).toThrow('[relay.ssl]: must specify [relay.ssl.key]');
     });
   });
 });

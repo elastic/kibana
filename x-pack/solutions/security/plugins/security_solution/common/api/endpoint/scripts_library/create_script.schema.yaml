@@ -74,8 +74,7 @@ components:
         - fileType
       properties:
         name:
-          type: string
-          description: Name of the script
+          $ref: './common.yaml#/components/schemas/ScriptNameSchema'
         platform:
           type: array
           description: Platforms supported by the the script
@@ -96,12 +95,15 @@ components:
             $ref: './common.yaml#/components/schemas/EndpointScriptTags'
         description:
           type: string
+          maxLength: 10000
           description: Description of the script and its purpose/functionality
         instructions:
           type: string
+          maxLength: 10000
           description: Instructions for using the script, including details around its supported input arguments
         example:
           type: string
+          maxLength: 10000
           description: Example usage of the script
         requiresInput:
           type: boolean

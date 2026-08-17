@@ -23,7 +23,7 @@ spec:
         ES_SERVERLESS_IMAGE: docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest
         KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
-        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'false'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main

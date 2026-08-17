@@ -38,9 +38,17 @@ export const TEMPLATE_METADATA_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.templateMetadataSectionDescription',
   {
     defaultMessage:
-      'Identifies this template in the templates list. Saved with the template and edited here — these details are not part of the YAML definition and do not change case defaults.',
+      'Describes this template in the templates list. Saved with the template — these details are not part of the YAML definition and do not change case defaults. The template name is edited in the page title.',
   }
 );
+
+export const UNTITLED_TEMPLATE = i18n.translate('xpack.cases.templates.untitledTemplate', {
+  defaultMessage: 'Untitled template',
+});
+
+export const EDIT_TEMPLATE_NAME = i18n.translate('xpack.cases.templates.editTemplateName', {
+  defaultMessage: 'Edit template name',
+});
 
 export const TEMPLATE_NAME_LABEL = i18n.translate('xpack.cases.templates.templateNameLabel', {
   defaultMessage: 'Template name',
@@ -171,6 +179,32 @@ export const REVERT_MODAL_CANCEL = i18n.translate('xpack.cases.templates.revertM
 export const FIX_VALIDATION_ERRORS = i18n.translate('xpack.cases.templates.fixValidationErrors', {
   defaultMessage: 'Please fix validation errors before saving.',
 });
+
+export const FIX_FIELDS_YAML_ERRORS = i18n.translate('xpack.cases.templates.fixFieldsYamlErrors', {
+  defaultMessage: 'Please fix errors in the Fields YAML editor.',
+});
+
+export const PROVIDE_TEMPLATE_NAME = i18n.translate('xpack.cases.templates.provideTemplateName', {
+  defaultMessage: 'Name this template in the page title before saving.',
+});
+
+export const FIX_CONFIGURATION_ERRORS = i18n.translate(
+  'xpack.cases.templates.fixConfigurationErrors',
+  { defaultMessage: 'Please fix errors in the Configuration tab.' }
+);
+
+export const FIX_FIELDS_YAML_AND_TEMPLATE_NAME = i18n.translate(
+  'xpack.cases.templates.fixFieldsYamlAndTemplateName',
+  {
+    defaultMessage:
+      'Name this template in the page title and fix the errors in the Fields YAML editor.',
+  }
+);
+
+export const FIX_FIELDS_YAML_AND_CONFIGURATION_ERRORS = i18n.translate(
+  'xpack.cases.templates.fixFieldsYamlAndConfigurationErrors',
+  { defaultMessage: 'Please fix errors in the Fields YAML editor and Configuration tab.' }
+);
 
 export const UNSAVED_CHANGES = i18n.translate('xpack.cases.templates.unsavedChanges', {
   defaultMessage: 'Unsaved changes',
@@ -611,7 +645,7 @@ export const BULK_DELETE_MESSAGE = (count: number) =>
   i18n.translate('xpack.cases.templates.bulkDeleteMessage', {
     values: { count },
     defaultMessage:
-      'This action will permanently delete {count, plural, one {this template} other {these {count} templates}}.',
+      '{count, plural, one {This template} other {These {count} templates}} will no longer apply to new cases. Cases already using {count, plural, one {it} other {them}} keep their values. Export first if you want to keep a copy.',
   });
 
 export const SHOWING = i18n.translate('xpack.cases.templates.showing', {
@@ -627,15 +661,16 @@ export const CASES = i18n.translate('xpack.cases.templates.cases', {
 });
 
 export const DELETE_TITLE = (name: string) =>
-  i18n.translate('xpack.cases.configuration.deleteTitle', {
+  i18n.translate('xpack.cases.templates.deleteTitle', {
     values: { name },
     defaultMessage: 'Delete {name}?',
   });
 
 export const DELETE_MESSAGE = (name: string) =>
-  i18n.translate('xpack.cases.configuration.deleteMessage', {
+  i18n.translate('xpack.cases.templates.deleteMessage', {
     values: { name },
-    defaultMessage: 'This action will permanently delete {name}.',
+    defaultMessage:
+      '{name} will no longer apply to new cases. Cases already using it keep their values. Export it first if you want to keep a copy.',
   });
 export const NO_TEMPLATES_BODY = i18n.translate('xpack.cases.templates.noTemplatesBody', {
   defaultMessage: 'Create templates that automatically populate values in new cases.',
@@ -686,6 +721,13 @@ export const TEMPLATES_INFO_DESCRIPTION = i18n.translate('xpack.cases.templates.
   defaultMessage:
     'Create templates with custom set of fields, that can automatically populate values in new cases.',
 });
+
+export const TEMPLATES_INFO_PANEL_DISMISS = i18n.translate(
+  'xpack.cases.templates.infoPanelDismiss',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
 
 export const LEARN_MORE = i18n.translate('xpack.cases.templates.learnMore', {
   defaultMessage: 'Learn more',
@@ -874,6 +916,16 @@ export const CANCEL_FIELD_EDIT = i18n.translate('xpack.cases.templates.cancelFie
   defaultMessage: 'Cancel field edit',
 });
 
+export const FIELD_VALUE_NOT_SET = i18n.translate('xpack.cases.templates.fieldValueNotSet', {
+  defaultMessage: 'No value',
+});
+
+export const EDIT_FIELD_LABEL = (label: string) =>
+  i18n.translate('xpack.cases.templates.editFieldAriaLabel', {
+    defaultMessage: 'Edit {label}',
+    values: { label },
+  });
+
 export const FIELD_TYPE_TITLE_INPUT_TEXT = i18n.translate(
   'xpack.cases.templates.fieldType.inputText',
   { defaultMessage: 'Text Input' }
@@ -1051,6 +1103,15 @@ export const ACTION_NEW_FIELD_DESC = i18n.translate(
   { defaultMessage: 'Scaffold a custom field of any type' }
 );
 
+export const ACTION_CHANGE_FIELD_TYPE_TITLE = i18n.translate(
+  'xpack.cases.templates.actionsMenu.changeFieldType.title',
+  { defaultMessage: 'Change field type' }
+);
+export const ACTION_CHANGE_FIELD_TYPE_DESC = i18n.translate(
+  'xpack.cases.templates.actionsMenu.changeFieldType.desc',
+  { defaultMessage: 'Replace this field with a fresh scaffold of a different type' }
+);
+
 export const ACTION_FIELD_LIBRARY_TITLE = i18n.translate(
   'xpack.cases.templates.actionsMenu.fieldLibrary.title',
   { defaultMessage: 'Field library' }
@@ -1081,6 +1142,11 @@ export const ACTION_CONDITIONAL_DESC = i18n.translate(
 export const ACTIONS_MENU_SELECT_A_FIELD = i18n.translate(
   'xpack.cases.templates.actionsMenu.selectAField',
   { defaultMessage: 'Place the cursor on a field to enable this action' }
+);
+
+export const ACTIONS_MENU_NO_FIELD_YET = i18n.translate(
+  'xpack.cases.templates.actionsMenu.noFieldYet',
+  { defaultMessage: 'Create a field to enable this action' }
 );
 
 export const ACTIONS_MENU_SEARCH_FIELDS = i18n.translate(
@@ -1179,3 +1245,25 @@ export const CONDITION_REQUIRED_WHEN = i18n.translate(
   'xpack.cases.templates.actionsMenu.condition.requiredWhen',
   { defaultMessage: 'Require when…' }
 );
+
+export const UNSAVED_FIELD_CHANGES = (count: number) =>
+  i18n.translate('xpack.cases.templates.unsavedFieldChanges', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# unsaved field} other {# unsaved fields}}',
+  });
+
+export const SECTION_EDIT_CANCEL = i18n.translate('xpack.cases.templates.sectionEditCancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const SECTION_EDIT_SAVE = i18n.translate('xpack.cases.templates.sectionEditSave', {
+  defaultMessage: 'Save',
+});
+
+export const REVERT_FIELD = i18n.translate('xpack.cases.templates.revertField', {
+  defaultMessage: 'Revert',
+});
+
+export const FIELD_MODIFIED = i18n.translate('xpack.cases.templates.fieldModified', {
+  defaultMessage: 'Modified',
+});

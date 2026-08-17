@@ -31,6 +31,7 @@ The plan answers _what_ and _why_; this file answers _how_.
 - **Prefer Scout's default servers config**: replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)` runtime settings. Only create a custom server config set when the plan calls for it (a setting that must apply at Kibana boot) — custom configs run only in local pipelines (no Cloud) and add CI cost.
 - Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API key), `samlAuth` (cookie / `cookieHeader`), plus custom roles. Avoid FTR-style role mutation. For Scout **API** tests, see **Scout API auth (`cookieHeader` vs API key)** under step 4.
 - **Prefer default Cloud-compatible roles over custom ones.** For general user flows, use the least-privileged built-in role (`browserAuth.loginAsViewer()` → `loginAsPrivilegedUser()` → `loginAsAdmin()`). Reach for `loginWithCustomRole(roleDescriptor)` only when the test specifically validates permission-scoped behavior that no built-in role expresses — don't port FTR custom roles 1:1, as many were scoped incidentally and work fine on a default role. `loginAs(role)` (built-in role by name) is stateful-only and isn't supported on serverless (ensure the tests aren't targeting serverless).
+- **Check stateful/serverless mirrors before cleanup.** Before deleting or unwiring any FTR file, verify the plan's "Stateful/serverless mirror FTR files" table. If the table is missing or says no mirrors but you see comments that mark an FTR file as the original counterpart for a Scout migration, or a matching basename/test title in serverless/stateful suites, pause and update the plan instead of deleting only one side.
 
 ## Core workflow
 
@@ -74,6 +75,8 @@ API and UI specs should both carry tags that match the intended `run-tests` / CI
 #### Combine duplicate stateful / serverless FTR tests
 
 FTR often has **separate but near-identical** test files under `test/*api_integration*/` (stateful) and `test/serverless/` (or similar directories). Before migrating each file individually, compare them: if the test flow is identical or almost identical, **combine into a single Scout spec** with tags covering both deployment targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`). Extract any deployment-specific differences into conditional helpers or small branching within the spec. Only keep separate specs when the flows genuinely diverge.
+
+Use the plan's mirror table as the source of truth. If it is incomplete, search again by basename, distinctive test titles, and comments that identify an original FTR test counterpart for Scout migration before choosing tags or cleanup.
 
 #### `it` blocks are sometimes steps (not full test cases)
 
@@ -176,8 +179,8 @@ Keep Scout tests for what **requires a real browser and running server**: naviga
 
 ### 8) Clean up FTR wiring
 
-- Remove `loadTestFile` entries from any stateful and serverless FTR configs/index files.
-- Delete old FTR test files once Scout coverage is verified.
+- Remove `loadTestFile` entries from any stateful and serverless FTR configs/index files identified in the plan's mirror table.
+- Delete old FTR test files once Scout coverage is verified. If a mirrored stateful/serverless file remains, either delete it too (when covered by the same Scout spec) or document why it still needs separate coverage.
 - For staged migrations, mark remaining FTR suites as `describe.skip` to avoid duplicate coverage.
 
 ### 9) Verify and run tests locally
@@ -217,6 +220,7 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 - Ignoring existing parallel Scout config (mixing `tests/` with `parallel_tests/`).
 - Using the wrong Scout package (solution tests in security/observability/search must import from their solution Scout package, not `@kbn/scout`).
 - Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only "deployment agnostic" in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
+- Deleting only the stateful FTR file and leaving a mirrored serverless FTR variant (or vice versa). Always search and clean up both sides when one Scout spec replaces both.
 - Importing `expect` from the wrong entrypoint (use `/ui` for UI, `/api` for API).
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs, or flatten small files into `test` + `test.step`—see step 3).

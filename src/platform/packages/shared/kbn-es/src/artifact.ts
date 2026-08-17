@@ -124,7 +124,16 @@ async function fetchSnapshotManifest(url: string, log: ToolingLog) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
   const abc = new AbortController();
-  const resp = await retry(log, async () => await fetch(url, { signal: abc.signal }));
+  const resp = await retry(log, async () => {
+    const response = await fetch(url, { signal: abc.signal });
+    // node-fetch resolves (does not reject) on 5xx, so a transient server error
+    // (e.g. a GCS 500 on the snapshot bucket) would otherwise escape retry and
+    // fail immediately. Throw here so retry() catches it and backs off.
+    if (response.status >= 500) {
+      throw new Error(`Unable to read snapshot manifest: ${response.statusText}`);
+    }
+    return response;
+  });
   const json = await resp.text();
 
   return { abc, resp, json };

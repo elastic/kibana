@@ -69,6 +69,9 @@ const mockEditor = {
   })),
   getTopForLineNumber: jest.fn(() => 0),
   hasTextFocus: jest.fn(() => true),
+  getDomNode: jest.fn(() => ({
+    ownerDocument: { activeElement: { blur: jest.fn() } },
+  })),
   onDidBlurEditorText: jest.fn(),
   onDidChangeCursorPosition: jest.fn(),
   onDidChangeCursorSelection: jest.fn(),

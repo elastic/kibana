@@ -26,40 +26,70 @@ const names = (items: ParsedMetricItem[]) => items.map((item) => item.metricName
 describe('useMetricsSort', () => {
   const metricItems = [makeMetric('cpu'), makeMetric('memory'), makeMetric('disk')];
 
-  it('sorts ascending by metricName', () => {
-    const { result } = renderHook(() =>
-      useMetricsSort({
-        metricItems,
-        sortBy: METRICS_SORT_BY.alphabetically,
-        direction: METRICS_SORT_DIRECTION.asc,
-      })
-    );
+  describe('alphabetical', () => {
+    it('sorts ascending by metricName', () => {
+      const { result } = renderHook(() =>
+        useMetricsSort({
+          metricItems,
+          sortBy: METRICS_SORT_BY.alphabetically,
+          direction: METRICS_SORT_DIRECTION.asc,
+        })
+      );
 
-    expect(names(result.current.sortedMetricItems)).toEqual(['cpu', 'disk', 'memory']);
+      expect(names(result.current.sortedMetricItems)).toEqual(['cpu', 'disk', 'memory']);
+    });
+
+    it('sorts descending by metricName', () => {
+      const { result } = renderHook(() =>
+        useMetricsSort({
+          metricItems,
+          sortBy: METRICS_SORT_BY.alphabetically,
+          direction: METRICS_SORT_DIRECTION.desc,
+        })
+      );
+
+      expect(names(result.current.sortedMetricItems)).toEqual(['memory', 'disk', 'cpu']);
+    });
+
+    it('does not mutate the input array', () => {
+      const { result } = renderHook(() =>
+        useMetricsSort({
+          metricItems,
+          sortBy: METRICS_SORT_BY.alphabetically,
+          direction: METRICS_SORT_DIRECTION.asc,
+        })
+      );
+
+      expect(names(metricItems)).toEqual(['cpu', 'memory', 'disk']);
+      expect(result.current.sortedMetricItems).not.toBe(metricItems);
+    });
   });
 
-  it('sorts descending by metricName', () => {
-    const { result } = renderHook(() =>
-      useMetricsSort({
-        metricItems,
-        sortBy: METRICS_SORT_BY.alphabetically,
-        direction: METRICS_SORT_DIRECTION.desc,
-      })
-    );
+  describe('recency', () => {
+    it('sorts visited metrics first (most recent first), then unvisited A->Z', () => {
+      const { result } = renderHook(() =>
+        useMetricsSort({
+          metricItems,
+          sortBy: METRICS_SORT_BY.recency,
+          direction: METRICS_SORT_DIRECTION.asc,
+          recentlyExploredMetrics: ['metrics-*::disk', 'metrics-*::cpu'],
+        })
+      );
 
-    expect(names(result.current.sortedMetricItems)).toEqual(['memory', 'disk', 'cpu']);
-  });
+      expect(names(result.current.sortedMetricItems)).toEqual(['disk', 'cpu', 'memory']);
+    });
 
-  it('does not mutate the input array', () => {
-    const { result } = renderHook(() =>
-      useMetricsSort({
-        metricItems,
-        sortBy: METRICS_SORT_BY.alphabetically,
-        direction: METRICS_SORT_DIRECTION.asc,
-      })
-    );
+    it('falls back to A->Z when no metrics have been explored', () => {
+      const { result } = renderHook(() =>
+        useMetricsSort({
+          metricItems,
+          sortBy: METRICS_SORT_BY.recency,
+          direction: METRICS_SORT_DIRECTION.asc,
+          recentlyExploredMetrics: [],
+        })
+      );
 
-    expect(names(metricItems)).toEqual(['cpu', 'memory', 'disk']);
-    expect(result.current.sortedMetricItems).not.toBe(metricItems);
+      expect(names(result.current.sortedMetricItems)).toEqual(['cpu', 'disk', 'memory']);
+    });
   });
 });
