@@ -9,13 +9,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiPanel,
@@ -255,11 +258,25 @@ const ContentItemRow: React.FunctionComponent<{
   state: AssetState;
   isRequired: boolean;
   onToggle: () => void;
-}> = ({ item, state, isRequired, onToggle }) => {
+  isSelected: boolean;
+  onSelectChange: () => void;
+}> = ({ item, state, isRequired, onToggle, isSelected, onSelectChange }) => {
   const isTransitioning = state === 'removing' || state === 'installing';
   return (
     <EuiPanel hasBorder paddingSize="s">
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        {!isRequired && (
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              id={`awsOnboardingSelectContent-${item.id}`}
+              checked={isSelected}
+              disabled={isTransitioning}
+              onChange={onSelectChange}
+              aria-label={`Select ${item.title}`}
+              data-test-subj={`awsOnboardingSelectContent-${item.id}`}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="s" className="eui-textTruncate">
             <strong>{item.title}</strong>
@@ -313,6 +330,7 @@ const InstallContentCard: React.FunctionComponent<{
 }> = ({ services, schema }) => {
   const [assetState, setAssetState] = useState<Record<string, AssetState>>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
@@ -365,6 +383,40 @@ const InstallContentCard: React.FunctionComponent<{
     }
   };
 
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const setGroupSelected = (items: ReviewItem[], checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      items.forEach((item) => (checked ? next.add(item.id) : next.delete(item.id)));
+      return next;
+    });
+  };
+
+  // Bulk actions only ever act on items in a settled state (installed or
+  // removed) — items already mid-transition are left alone rather than
+  // interrupted.
+  const selectedItems = contentItems.filter((i) => selectedIds.has(i.id));
+  const bulkInstallCount = selectedItems.filter((i) => stateOf(i.id) === 'removed').length;
+  const bulkRemoveCount = selectedItems.filter((i) => stateOf(i.id) === 'installed').length;
+
+  const onBulkInstall = () => {
+    selectedItems.filter((i) => stateOf(i.id) === 'removed').forEach((i) => onToggle(i.id));
+    setSelectedIds(new Set());
+  };
+
+  const onBulkRemove = () => {
+    selectedItems.filter((i) => stateOf(i.id) === 'installed').forEach((i) => onToggle(i.id));
+    setSelectedIds(new Set());
+  };
+
   const query = searchQuery.trim().toLowerCase();
   const matches = (item: ReviewItem) =>
     !query ||
@@ -414,8 +466,49 @@ const InstallContentCard: React.FunctionComponent<{
         data-test-subj="awsOnboardingContentSearch"
       />
 
+      {selectedIds.size > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  <strong>{`${selectedIds.size} selected`}</strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink onClick={() => setSelectedIds(new Set())}>Clear selection</EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  isDisabled={bulkInstallCount === 0}
+                  onClick={onBulkInstall}
+                  data-test-subj="awsOnboardingBulkInstall"
+                >
+                  {`Install selected (${bulkInstallCount})`}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="danger"
+                  isDisabled={bulkRemoveCount === 0}
+                  onClick={onBulkRemove}
+                  data-test-subj="awsOnboardingBulkRemove"
+                >
+                  {`Remove selected (${bulkRemoveCount})`}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </>
+      )}
+
       {typeGroups.map(({ type, items }) => {
         const groupInstalled = items.filter((i) => stateOf(i.id) === 'installed').length;
+        const groupSelectedCount = items.filter((i) => selectedIds.has(i.id)).length;
         return (
           <React.Fragment key={type}>
             <EuiSpacer size="m" />
@@ -438,9 +531,23 @@ const InstallContentCard: React.FunctionComponent<{
                 </EuiFlexGroup>
               }
               extraAction={
-                <EuiText size="xs" color="subdued">
-                  {`${groupInstalled} of ${items.length} installed`}
-                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id={`awsOnboardingSelectAllContent-${type}`}
+                      checked={groupSelectedCount === items.length && items.length > 0}
+                      indeterminate={groupSelectedCount > 0 && groupSelectedCount < items.length}
+                      onChange={(e) => setGroupSelected(items, e.target.checked)}
+                      aria-label={`Select all ${TYPE_GROUP_LABELS[type]}`}
+                      data-test-subj={`awsOnboardingSelectAllContent-${type}`}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {`${groupInstalled} of ${items.length} installed`}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             >
               <EuiSpacer size="s" />
@@ -452,6 +559,8 @@ const InstallContentCard: React.FunctionComponent<{
                     state={stateOf(item.id)}
                     isRequired={false}
                     onToggle={() => onToggle(item.id)}
+                    isSelected={selectedIds.has(item.id)}
+                    onSelectChange={() => toggleSelected(item.id)}
                   />
                 </React.Fragment>
               ))}
@@ -503,6 +612,8 @@ const InstallContentCard: React.FunctionComponent<{
                   state="installed"
                   isRequired
                   onToggle={() => {}}
+                  isSelected={false}
+                  onSelectChange={() => {}}
                 />
               </React.Fragment>
             ))}
