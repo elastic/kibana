@@ -3673,6 +3673,7 @@ describe('Task Runner', () => {
         name: mockedRuleTypeSavedObject.name,
         consumer: mockedRuleTypeSavedObject.consumer,
         revision: mockedRuleTypeSavedObject.revision,
+        tags: mockedRuleTypeSavedObject.tags,
       });
     } else {
       expect(alertingEventLogger.addOrUpdateRuleData).not.toHaveBeenCalled();

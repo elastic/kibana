@@ -23,7 +23,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE, MAX_FLYOUT_WIDTH } from '../../constants';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../types';
+
 import { sendGetAgents, useStartServices, useGetPackageInfoByKeyQuery } from '../../hooks';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services';
 
 import { AgentlessStepConfirmEnrollment } from './step_confirm_enrollment';
 import { AgentlessStepConfirmData } from './step_confirm_data';
@@ -68,7 +70,11 @@ export const AgentlessEnrollmentFlyout = ({
   useEffect(() => {
     const fetchAgents = async () => {
       const { data: agentsData, error } = await sendGetAgents({
-        kuery: `${AGENTS_PREFIX}.policy_id: "${packagePolicy.policy_ids[0]}"`,
+        kuery: buildPolicyBaseIdWithFallbackKuery(
+          packagePolicy.policy_ids[0],
+          `${AGENTS_PREFIX}.policy_base_id`,
+          `${AGENTS_PREFIX}.policy_id`
+        ),
       });
 
       if (error) {
