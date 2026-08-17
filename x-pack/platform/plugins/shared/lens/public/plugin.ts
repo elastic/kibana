@@ -82,6 +82,7 @@ import {
   FEATURED_ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -140,6 +141,7 @@ import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggest
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
 import { setLensBuilder } from './lazy_builder';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 export type { SaveProps } from './app_plugin';
 
@@ -438,7 +440,7 @@ export class LensPlugin {
         const { getDiscoverDrilldown } = await import('./async_services');
         return getDiscoverDrilldown({
           dataViews: () => this.dataViewsService!,
-          locator: () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+          locator: () => share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
           hasDiscoverAccess: () => this.hasDiscoverAccess,
           application: () => startServices().core.application,
         });
@@ -732,7 +734,7 @@ export class LensPlugin {
 
     startDependencies.uiActions.attachAction(ADD_CANVAS_ELEMENT_TRIGGER, 'addLensPanelAction');
 
-    const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+    const discoverLocator = startDependencies.share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
     if (discoverLocator) {
       startDependencies.uiActions.addTriggerActionAsync(
         ON_OPEN_PANEL_MENU,

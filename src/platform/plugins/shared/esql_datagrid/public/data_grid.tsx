@@ -29,7 +29,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { RowViewer } from './row_viewer_lazy';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 interface ESQLDataGridProps {
   core: CoreStart;
@@ -146,7 +148,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   ]);
 
   const discoverLocator = useMemo(() => {
-    return props.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+    return props.share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   }, [props.share?.url.locators]);
 
   const renderToolbar = useCallback(

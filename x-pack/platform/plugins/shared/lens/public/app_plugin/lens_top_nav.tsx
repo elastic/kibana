@@ -28,7 +28,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { euiBreakpoint } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
 import { css } from '@emotion/react';
-import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { DISCOVER_APP_LOCATOR, LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { LensAppState, LensAppServices } from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../common/constants';
 import type { LensTopNavActions, LensTopNavMenuProps } from './types';
@@ -52,6 +52,7 @@ import type { ShareableConfiguration } from './share_action';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -545,7 +546,7 @@ export const LensTopNavMenu = ({
     currentDoc,
   ]);
 
-  const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const layerMetaInfo = useMemo(() => {
     if (!activeDatasourceId || !discoverLocator) {

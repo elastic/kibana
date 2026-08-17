@@ -31,9 +31,11 @@ import type {
   IndexPatternField,
   LensAppServices,
 } from '@kbn/lens-common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 import { getFieldItemActions } from './get_field_item_actions';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 type LensFieldListItem = IndexPatternField | DatatableColumn | DataViewField;
 
@@ -421,7 +423,7 @@ function getExploreInDiscover({
     [indexPattern],
     getEsQueryConfig(services.uiSettings)
   );
-  const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = services.share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   if (!discoverLocator || !services.application.capabilities.discover_v2.show) {
     return;
   }

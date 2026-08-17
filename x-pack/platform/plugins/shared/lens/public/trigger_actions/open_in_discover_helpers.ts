@@ -6,15 +6,11 @@
  */
 
 import {
-  type AggregateQuery,
   type Filter,
-  type Query,
-  type TimeRange,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { DiscoverAppLocator, DiscoverAppLocatorParams } from '@kbn/discover-utils';
 import {
   type EmbeddableApiContext,
   apiIsPresentationContainer,
@@ -28,16 +24,6 @@ import {
   injectWhereClauseAfterSourceCommand,
 } from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
-
-interface DiscoverAppLocatorParams extends SerializableRecord {
-  timeRange?: TimeRange;
-  filters?: Filter[];
-  indexPatternId?: string;
-  query?: Query | AggregateQuery | undefined;
-  columns?: string[];
-}
-
-export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 type Context = EmbeddableApiContext & {
   filters?: Filter[];
@@ -137,10 +123,11 @@ async function getDiscoverLocationParams({
     timeRange: timeRangeToApply,
     filters: filtersToApply,
     esqlControls: presentationContainer
-      ? getEsqlControls(presentationContainer, args.query)
+      // TODO remove cast
+      ? getEsqlControls(presentationContainer, args.query) as DiscoverAppLocatorParams['esqlControls']
       : undefined,
     isApproximate,
-  };
+  } satisfies DiscoverAppLocatorParams;
 }
 
 export async function getHref({ embeddable, locator, filters, dataViews, timeFieldName }: Context) {
