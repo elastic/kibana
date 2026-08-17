@@ -302,14 +302,14 @@ describe('prefetchPreviousStatusesByQuery', () => {
   it('omits runtime_mappings from the search request when not provided', async () => {
     await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
 
-    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
     expect(call).not.toHaveProperty('runtime_mappings');
   });
 
   it('omits runtime_mappings from the search request when provided as an empty object', async () => {
     await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} }, {});
 
-    const call = (esClient.search as jest.Mock).mock.calls[0][0];
+    const call = (esClient.search as unknown as jest.Mock).mock.calls[0][0];
     expect(call).not.toHaveProperty('runtime_mappings');
   });
 });
