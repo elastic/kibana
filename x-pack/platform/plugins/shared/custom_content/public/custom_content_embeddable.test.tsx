@@ -15,13 +15,17 @@ import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 
+let capturedComponentProps: { onGenerateWithChat?: () => void } | undefined;
+
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
     prompt: string | undefined;
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
+    onGenerateWithChat?: () => void;
   }) => {
+    capturedComponentProps = props;
     return (
       <div
         data-test-subj="mockCustomContentComponent"
@@ -79,6 +83,7 @@ const buildEmbeddable = async (initialState: CustomContentEmbeddableState) => {
 describe('customContentEmbeddableFactory', () => {
   afterEach(() => {
     mockAgentBuilder = undefined;
+    capturedComponentProps = undefined;
   });
 
   describe('serializeState', () => {
@@ -322,6 +327,71 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => chatEvents$.next(roundCompleteEvent));
 
       expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
+    });
+  });
+
+  describe('handleGenerateWithChat', () => {
+    it('opens the agent builder with the correct attachment', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+
+      expect(openChat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attachments: expect.arrayContaining([
+            expect.objectContaining({
+              data: expect.objectContaining({ embeddable_id: 'test-uuid' }),
+            }),
+          ]),
+          sessionTag: expect.stringContaining('test-uuid'),
+        })
+      );
+    });
+
+    it('closes the flyout before opening the agent builder', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('mockEditCustomContentFlyout')).not.toBeInTheDocument()
+      );
+      expect(openChat).toHaveBeenCalled();
+    });
+
+    it('does nothing when agentBuilder is unavailable', async () => {
+      mockAgentBuilder = undefined;
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await expect(
+        act(async () => capturedComponentProps?.onGenerateWithChat?.())
+      ).resolves.not.toThrow();
     });
   });
 });

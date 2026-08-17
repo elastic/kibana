@@ -28,7 +28,8 @@
     "@kbn/core-http-server",
     "@kbn/ui-callout",
     "@kbn/shared-ux-ai-components",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/ui-actions-plugin"
   ],
   "exclude": ["target/**/*"]
 }

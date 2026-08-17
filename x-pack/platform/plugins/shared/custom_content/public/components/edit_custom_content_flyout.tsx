@@ -224,6 +224,10 @@ export const EditCustomContentFlyout = ({
               value={draftTemplate}
               onChange={setDraftTemplate}
               height={240}
+              placeholder={i18n.translate('xpack.customContent.editFlyout.templatePlaceholder', {
+                defaultMessage:
+                  '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+              })}
               options={{
                 fontSize: 12,
                 minimap: { enabled: false },

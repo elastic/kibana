@@ -50,6 +50,8 @@ import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
 } from '../common/panel_context_attachment';
+import { buildCustomContentContextAttachment } from './utils/chat_integration';
+import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../common/constants';
 import type { CustomContentEmbeddableState } from '../server';
 import { CustomContentComponent } from './components/custom_content_component';
 
@@ -284,6 +286,19 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isFlyoutOpen$.next(false);
         }, []);
 
+        const handleGenerateWithChat = useCallback(() => {
+          const { agentBuilder } = getServices();
+          if (!agentBuilder) return;
+          isFlyoutOpen$.next(false);
+          previewHtml$.next(null);
+          agentBuilder.openChat({
+            attachments: [
+              buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
+            ],
+            sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
+          });
+        }, [panelTitle]);
+
         const handleRunPreview = useCallback((html: string) => previewHtml$.next(html), []);
 
         return (
@@ -300,6 +315,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               query={query}
               filters={filters}
               previewHtml={previewHtml}
+              onGenerateWithChat={handleGenerateWithChat}
             />
             {isFlyoutOpen && (
               <Suspense fallback={null}>
