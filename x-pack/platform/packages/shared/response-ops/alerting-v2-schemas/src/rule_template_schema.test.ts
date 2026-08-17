@@ -219,12 +219,19 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "kind": Object {
-              "description": "Rule kind: \\"alert\\" for stateful alerting with transitions, \\"signal\\" for stateless detection.",
-              "enum": Array [
-                "alert",
-                "signal",
+              "anyOf": Array [
+                Object {
+                  "const": "alert",
+                  "description": "Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "signal",
+                  "description": "Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.",
+                  "type": "string",
+                },
               ],
-              "type": "string",
+              "description": "The kind of the rule.",
             },
             "metadata": Object {
               "additionalProperties": false,
@@ -269,14 +276,29 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "no_data_strategy": Object {
-              "description": "How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query.",
-              "enum": Array [
-                "last_known_status",
-                "emit",
-                "recover",
-                "none",
+              "anyOf": Array [
+                Object {
+                  "const": "last_known_status",
+                  "description": "Holds the last known episode status when no data is present.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "emit",
+                  "description": "Emits a \`no_data\` alert event when no_data query returns no rows for the group. \\"emit\\" is not currently accepted by the create/update API.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "recover",
+                  "description": "Forces recovery when no data is present.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "none",
+                  "description": "No-data situations are ignored (default).",
+                  "type": "string",
+                },
               ],
-              "type": "string",
+              "description": "How to handle no-data situations. \\"last_known_status\\" holds the last known status; \\"recover\\" forces recovery; \\"none\\" disables no-data detection. \\"emit\\" is not currently accepted by the create/update API. Standalone-format rules must provide a \`no_data\` query block when this is not \\"none\\"; composed-format rules use \`base\` as the data-presence query.",
             },
             "query": Object {
               "description": "Detection query configuration.",
@@ -401,13 +423,24 @@ describe('rule template create-rule schema coupling', () => {
               ],
             },
             "recovery_strategy": Object {
-              "description": "How recovery is detected. \\"no_breach\\" recovers groups that stop breaching; \\"query\\" uses a custom recovery query; \\"none\\" disables recovery.",
-              "enum": Array [
-                "no_breach",
-                "query",
-                "none",
+              "anyOf": Array [
+                Object {
+                  "const": "no_breach",
+                  "description": "recovers groups that stop breaching (default).",
+                  "type": "string",
+                },
+                Object {
+                  "const": "query",
+                  "description": "uses a custom recovery query to detect recovery.",
+                  "type": "string",
+                },
+                Object {
+                  "const": "none",
+                  "description": "disables recovery entirely.",
+                  "type": "string",
+                },
               ],
-              "type": "string",
+              "description": "How recovery is detected. \\"no_breach\\" recovers groups that stop breaching; \\"query\\" uses a custom recovery query; \\"none\\" disables recovery.",
             },
             "schedule": Object {
               "additionalProperties": false,
