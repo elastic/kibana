@@ -59,6 +59,21 @@ export const readTaskAttributes = async (esClient: Client, id: string) => {
   return task!;
 };
 
+/**
+ * Counts the Elasticsearch API keys Task Manager has granted and not yet invalidated.
+ *
+ * Names are built as `TaskManager: <taskType>[ - <username>]`, so this covers every task type. Use
+ * it as a delta within a single test: other specs sharing the stack grant keys with the same names.
+ */
+export const countActiveTaskManagerEsApiKeys = async (esClient: Client): Promise<number> => {
+  const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
+    size: 1000,
+    query: { prefix: { name: 'TaskManager: ' } },
+  });
+
+  return apiKeys.filter(({ invalidated }) => !invalidated).length;
+};
+
 /** `state.runs` for the recurring UIAM provisioning task doc (`task:uiam_api_key_provisioning`). */
 export const readProvisioningTaskRuns = async (esClient: Client, provisioningTaskId: string) => {
   const task = await readTaskAttributes(esClient, taskDocId(provisioningTaskId));

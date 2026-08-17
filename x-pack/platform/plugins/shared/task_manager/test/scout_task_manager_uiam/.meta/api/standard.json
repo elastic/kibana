@@ -1,6 +1,24 @@
 {
-  "sha1": "9f6b72bf4a69d037ef2952ec32b66041694133ce",
+  "sha1": "6acd23b0b0e5fd2ddcdde3b491a8868354044394",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
+    {
+      "id": "5ce936b95a321a4-ee984c13261a09d",
+      "title": "Task Manager ensureScheduled API keys grants a single ES + UIAM pair when called repeatedly for the same task",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/ensure_scheduled_api_keys.spec.ts",
+        "line": 26,
+        "column": 15
+      }
+    },
     {
       "id": "208b6394ca1260b-100a2f007029fdb",
       "title": "Task Manager API Keys scheduled task has both apiKey and uiamApiKey",
@@ -11,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
-        "line": 48,
-        "column": 10
+        "line": 39,
+        "column": 66
       }
     },
     {
@@ -25,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
-        "line": 54,
-        "column": 10
+        "line": 42,
+        "column": 47
       }
     },
     {
@@ -39,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 31,
+        "column": 27
       }
     },
     {
@@ -53,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
-        "line": 177,
-        "column": 12
+        "line": 142,
+        "column": 23
       }
     }
   ]

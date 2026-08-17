@@ -69,6 +69,11 @@ const scheduleBodySchema = schema.object({
    * FTR/Scout only (`ftrApis`).
    */
   onEsKey: schema.maybe(schema.boolean()),
+  /**
+   * When true, use `ensureScheduled` instead of `schedule`, so the call is idempotent for a task id
+   * that already exists. Requires `task.id`. FTR/Scout only (`ftrApis`).
+   */
+  ensureScheduled: schema.maybe(schema.boolean()),
 });
 
 export const registerTaskManagerScheduleRoute = (
@@ -96,7 +101,7 @@ export const registerTaskManagerScheduleRoute = (
         });
       }
 
-      const { task, skipRequestForScheduling, onEsKey } = req.body as {
+      const { task, skipRequestForScheduling, onEsKey, ensureScheduled } = req.body as {
         task: {
           taskType: string;
           id?: string;
@@ -110,15 +115,27 @@ export const registerTaskManagerScheduleRoute = (
         };
         skipRequestForScheduling?: boolean;
         onEsKey?: boolean;
+        ensureScheduled?: boolean;
       };
+
+      const options = {
+        ...(skipRequestForScheduling === true ? {} : { request: req }),
+        ...(onEsKey === true ? { onEsKey: true } : {}),
+      };
+
+      if (ensureScheduled === true) {
+        const { id } = task;
+        if (!id) {
+          return res.badRequest({ body: { message: 'ensureScheduled requires task.id' } });
+        }
+
+        return res.ok({ body: await startContract.ensureScheduled({ ...task, id }, options) });
+      }
 
       const taskResult =
         skipRequestForScheduling === true
           ? await startContract.schedule(task)
-          : await startContract.schedule(task, {
-              request: req,
-              ...(onEsKey === true ? { onEsKey: true } : {}),
-            });
+          : await startContract.schedule(task, options);
 
       return res.ok({ body: taskResult });
     }
