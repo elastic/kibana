@@ -14,6 +14,7 @@ import {
   useWorkflowsCapabilities,
   useWorkflowsUIEnabledSetting,
 } from '@kbn/workflows-ui';
+import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { WorkflowSelectorVisibility } from '@kbn/workflows-ui';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
@@ -25,10 +26,13 @@ const ALERT_WORKFLOW_VISIBILITY: WorkflowSelectorVisibility = { selectors: ['rul
 
 // Client-side: of the server-returned set, further narrow to unmanaged workflows (always shown)
 // and managed workflows that declare an alert trigger. Module-scoped for stable reference.
-const isAlertWorkflow = (w: {
-  managed?: boolean;
-  definition?: { triggers?: { type: string }[] } | null;
-}) => !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
+const isAlertWorkflow = (w: WorkflowListItemDto) =>
+  !w.managed || (w.definition?.triggers ?? []).some((t) => t.type === 'alert');
+
+// Sort alert-trigger workflows to the top. Module-scoped so the reference is stable across renders.
+const sortAlertWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
+  Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
+  Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'));
 
 export interface AlertWorkflowsPanelProps {
   /** Array of alert ids and their respective indices */
@@ -57,10 +61,7 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose, onExecute }: AlertWorkf
     <RunWorkflowPanel
       inputs={inputs}
       visibility={ALERT_WORKFLOW_VISIBILITY}
-      sortWorkflow={(a, b) =>
-        Number((b.definition?.triggers ?? []).some((t) => t.type === 'alert')) -
-        Number((a.definition?.triggers ?? []).some((t) => t.type === 'alert'))
-      }
+      sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}
       onClose={onClose}
       onExecute={onExecute}

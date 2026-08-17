@@ -65,7 +65,7 @@ export interface RunWorkflowPanelProps {
 interface RunWorkflowPanelServices {
   application: ApplicationStart;
   notifications: NotificationsStart;
-  rendering: ToMountPointParams;
+  rendering?: ToMountPointParams;
 }
 
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
@@ -190,7 +190,7 @@ export const RunWorkflowPanel = ({
             const enabled = workflows.filter((w) => w.enabled);
             return filterWorkflow ? enabled.filter(filterWorkflow) : enabled;
           },
-          sortFunction: (workflows) => (sortWorkflow ? workflows.sort(sortWorkflow) : workflows),
+          sortFunction: (workflows) => (sortWorkflow ? [...workflows].sort(sortWorkflow) : workflows),
           listView: true,
           hideTopRowHeader: true,
           hideViewWorkflowLink: true,
