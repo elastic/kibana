@@ -112,7 +112,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
             exceptionItems.push(...exceptions);
           }
 
-          const { filter } = await buildExceptionFilter({
+          const { filter } = await buildExceptionFilter({ 
             alias,
             chunkSize,
             excludeExceptions,
