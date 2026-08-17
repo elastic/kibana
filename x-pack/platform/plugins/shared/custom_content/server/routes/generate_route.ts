@@ -22,6 +22,8 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
   CUSTOM_CONTENT_ENABLED_FLAG_KEY,
+} from '@kbn/custom-content-common';
+import {
   CUSTOM_CONTENT_GENERATE_ROUTE,
   CUSTOM_CONTENT_SAMPLE_ROW_COUNT,
 } from '../../common/constants';

@@ -417,6 +417,7 @@ src/platform/plugins/shared/console/packaging/react/translations
 /x-pack/platform/plugins/shared/apm_sources_access/package.json
 /x-pack/platform/plugins/shared/cloud/package.json
 /x-pack/platform/plugins/shared/cloud_connect/package.json
+/x-pack/platform/plugins/shared/connector_events_bridge/package.json
 /x-pack/platform/plugins/shared/content_connectors/package.json
 /x-pack/platform/plugins/shared/context_engine/package.json
 /x-pack/platform/plugins/shared/custom_content/package.json
