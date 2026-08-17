@@ -28,6 +28,11 @@ export interface CommandArgDefinition {
    */
   required: boolean;
 
+  /**
+   * Indicates that this argument is required only when one of the other arguments in the list defined is used by the user
+   */
+  conditionallyRequired?: string[];
+
   /** If argument can be used multiple times */
   allowMultiples: boolean;
 
@@ -54,8 +59,16 @@ export interface CommandArgDefinition {
 
   /**
    * Specifies that one or more arguments might be required, but only one of them can be used at a time.
+   * Note that currently, only one set of exclusive OR arguments is supported.
+   * @deprecated use `exclusiveOrGroupId`
    */
   exclusiveOr?: boolean;
+
+  /**
+   * Indicates that the argument definition is part of a group of arguments (all sharing the same id) and
+   * that only one of them can be used at a time.
+   */
+  exclusiveOrGroupId?: string;
 
   /**
    * Validate the individual values given to this argument.

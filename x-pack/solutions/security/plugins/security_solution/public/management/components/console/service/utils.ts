@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import type { CommandArgs, CommandDefinition } from '../types';
+import type { CommandArgDefinition, CommandArgs, CommandDefinition } from '../types';
 
 export const getCommandNameWithArgs = (command: Partial<CommandDefinition>): string => {
   if (!command.mustHaveArgs || !command.args) {
@@ -30,91 +29,186 @@ export const getCommandNameWithArgs = (command: Partial<CommandDefinition>): str
   return `${command.name} --${Object.keys(primaryArgs).join(' --')}`;
 };
 
-/**
- * Returns an array of command usage strings based on the command definition. Multiple usage examples may be returned
- * for a command that defines `exclusiveOr` arguments.
- * @param command
- */
-export const getCommandInputUsageList = (
-  command: CommandDefinition,
-  { includeOptionalArgs = true }: Partial<{ includeOptionalArgs: boolean }> = {}
+export interface BuildCommandUsageListOptions {
+  /**
+   * If `true` (default), optional arguments will be included (wrapped in `[ ]`) in each
+   * command usage entry. Set to `false` to exclude them.
+   */
+  includeOptionalArgs?: boolean;
+}
+
+export const buildCommandUsageList = (
+  commandDef: CommandDefinition,
+  { includeOptionalArgs = true }: BuildCommandUsageListOptions = {}
 ): string[] => {
-  if (!command.args) {
-    return [command.name];
+  if (!commandDef.args) {
+    return [commandDef.name];
   }
 
   const response: string[] = [];
-  const argDetails = buildCommandArgsList(command);
-  const commandWithRequiredArgs = `${command.name}${
-    argDetails.required.length > 0
-      ? ` ${argDetails.required.map((arg) => arg.title).join(' ')}`
-      : ''
-  }`;
-  const optionalArgs =
-    argDetails.optional.length > 0
-      ? ` ${argDetails.optional.map((arg) => arg.title).join(' ')}`
-      : '';
+  const requiredArgs = getRequiredArgs(commandDef);
+  const exclusiveOrGroups = getExclusiveOrArgGroups(commandDef);
+  const conditionallyRequired = getConditionallyRequiredArgs(commandDef);
+  const optionalArgs = getOptionalArgs(commandDef);
 
-  if (argDetails.exclusiveOr.length > 0) {
-    for (const exclusiveOrArg of argDetails.exclusiveOr) {
-      response.push(
-        `${commandWithRequiredArgs} ${exclusiveOrArg.title}${
-          includeOptionalArgs ? optionalArgs : ''
-        }`
-      );
+  const baseCommand = `${commandDef.name}${
+    requiredArgs.length ? ` ${requiredArgs.map((a) => `--${a.name}`).join(' ')}` : ''
+  }`;
+
+  const buildOptionalArgsString = (excludeCommandNames: string[] = []) => {
+    if (includeOptionalArgs && optionalArgs.length) {
+      return ` [${optionalArgs
+        .filter(
+          (argDef) => excludeCommandNames.length === 0 || !excludeCommandNames.includes(argDef.name)
+        )
+        .map((argDef) => `--${argDef.name}`)
+        .join(' ')}]`;
+    }
+    return '';
+  };
+
+  if (Object.keys(exclusiveOrGroups).length) {
+    // TODO:PT need to incrementally process each group.
+    // Currently, it will build them all individually which is not correct if multiple groups are defined.
+    const queue: { prefix: string; args: ArgNameAndDefinition[]; usedArgNames: string[] }[] = [
+      ...Object.values(exclusiveOrGroups).map((group) => ({
+        prefix: baseCommand,
+        args: group,
+        usedArgNames: [],
+      })),
+    ];
+
+    while (queue.length > 0) {
+      const exclusiveOrGroup = queue.shift();
+
+      if (exclusiveOrGroup) {
+        const { prefix, args, usedArgNames } = exclusiveOrGroup;
+
+        for (const arg of args) {
+          const updatedBaseCommand = `${prefix} --${arg.name}`;
+          usedArgNames.push(arg.name);
+
+          if (conditionallyRequired[arg.name]) {
+            queue.unshift({
+              prefix: updatedBaseCommand,
+              args: conditionallyRequired[arg.name],
+              usedArgNames,
+            });
+          } else {
+            response.push(`${updatedBaseCommand}${buildOptionalArgsString(usedArgNames)}`);
+          }
+        }
+      }
     }
   } else {
-    response.push(`${commandWithRequiredArgs}${includeOptionalArgs ? optionalArgs : ''}`);
+    response.push(`${baseCommand}${buildOptionalArgsString()}`);
   }
 
   return response;
 };
 
-type CommandArgDetails = Array<{
-  title: string;
-  description: ReactNode;
-}>;
+interface ArgNameAndDefinition {
+  name: string;
+  definition: CommandArgDefinition;
+}
 
-interface CommandArgList {
-  required: CommandArgDetails[];
-  exclusiveOr: CommandArgDetails[];
-  optional: CommandArgDetails[];
+interface ExclusiveOrArgGroupsResponse {
+  [groupName: string]: ArgNameAndDefinition[];
 }
 
 /**
- * Builds the list of command arguments - that includes the `--` prefix` for the Command grouped by `required`, `exclusiveOr`, and `optional`.
- * Output cna be be used to build help output.
+ * Returns a list of exclusive OR arguments. By default, only the non-conditionally required arguments
+ * are returned - these are the ones that require the user to at least provide one of them.
+ * To return all defined as exclusive OR, then just pass in `includeConditionallyRequiredArgs: true`.
  * @param commandDef
+ * @param [param1]
+ * @param [param1.includeConditionallyRequiredArgs]
  */
-export const buildCommandArgsList = (commandDef: CommandDefinition): CommandArgList => {
+const getExclusiveOrArgGroups = (
+  commandDef: CommandDefinition,
+  {
+    includeConditionallyRequiredArgs = false,
+  }: Partial<{ includeConditionallyRequiredArgs: boolean }> = {}
+) => {
+  const response: ExclusiveOrArgGroupsResponse = {};
+
   if (!commandDef.args) {
-    return {
-      required: [],
-      exclusiveOr: [],
-      optional: [],
-    };
+    return response;
   }
 
-  return Object.entries(commandDef.args).reduce<CommandArgList>(
-    (acc, curr) => {
-      const item = {
-        title: `--${curr[0]}`,
-        description: curr[1].about,
-      };
-      if (curr[1].required) {
-        acc.required.push(item);
-      } else if (curr[1].exclusiveOr) {
-        acc.exclusiveOr.push(item);
-      } else {
-        acc.optional.push(item);
+  for (const [argName, argDef] of Object.entries(commandDef.args)) {
+    if (
+      argDef.exclusiveOrGroupId &&
+      (includeConditionallyRequiredArgs ||
+        (!includeConditionallyRequiredArgs && !argDef.conditionallyRequired))
+    ) {
+      if (!response[argDef.exclusiveOrGroupId]) {
+        response[argDef.exclusiveOrGroupId] = [];
       }
-
-      return acc;
-    },
-    {
-      required: [],
-      exclusiveOr: [],
-      optional: [],
+      response[argDef.exclusiveOrGroupId].push({ name: argName, definition: argDef });
     }
-  );
+  }
+
+  return response;
+};
+
+/**
+ * Returns a list of required arguments.
+ * @param commandDef
+ */
+const getRequiredArgs = (commandDef: CommandDefinition): ArgNameAndDefinition[] => {
+  if (commandDef.args) {
+    return Object.entries(commandDef.args)
+      .filter(([, argDef]) => argDef.required)
+      .map(([argName, argDef]) => ({ name: argName, definition: argDef }));
+  }
+
+  return [];
+};
+
+interface ConditionallyRequiredArgsResponse {
+  [argName: string]: ArgNameAndDefinition[];
+}
+
+/**
+ * Returns an object whose keys are the arguments names that when used, require the arguments listed in the value array.
+ * @param commandDef
+ */
+const getConditionallyRequiredArgs = (
+  commandDef: CommandDefinition
+): ConditionallyRequiredArgsResponse => {
+  const response: ConditionallyRequiredArgsResponse = {};
+
+  if (commandDef.args) {
+    for (const [argName, argDef] of Object.entries(commandDef.args)) {
+      if (argDef.conditionallyRequired) {
+        for (const dependeeArgName of argDef.conditionallyRequired) {
+          if (!response[dependeeArgName]) {
+            response[dependeeArgName] = [];
+          }
+
+          response[dependeeArgName].push({ name: argName, definition: argDef });
+        }
+      }
+    }
+  }
+
+  return response;
+};
+
+/**
+ * Returns a list of optional arguments.
+ * @param commandDef
+ */
+const getOptionalArgs = (commandDef: CommandDefinition): ArgNameAndDefinition[] => {
+  if (commandDef.args) {
+    return Object.entries(commandDef.args)
+      .filter(
+        ([, argDef]) =>
+          !argDef.required && !argDef.exclusiveOrGroupId && !argDef.conditionallyRequired
+      )
+      .map(([argName, argDef]) => ({ name: argName, definition: argDef }));
+  }
+
+  return [];
 };

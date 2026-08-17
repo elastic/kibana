@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTextTruncate,
 } from '@elastic/eui';
-import { getCommandInputUsageList } from '../../../service/utils';
+import { buildCommandUsageList } from '../../../service/utils';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { UserCommandInput } from '../../user_command_input';
@@ -63,7 +63,7 @@ export const CommandSelector = memo<CommandSelectorProps>(
           a.name.localeCompare(b.name)
         )) {
           options.push(
-            ...getCommandInputUsageList(commandDefinition, { includeOptionalArgs: false }).map(
+            ...buildCommandUsageList(commandDefinition, { includeOptionalArgs: false }).map(
               (usage) => {
                 return {
                   label: usage,
