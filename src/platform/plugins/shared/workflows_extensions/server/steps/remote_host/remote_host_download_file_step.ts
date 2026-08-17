@@ -8,9 +8,9 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { downloadFile } from './execute_in_connector';
 import { remoteHostDownloadFileStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createServerStepDefinition } from '../../step_registry/types';
-import { executeSubAction } from './execute_in_connector';
 
 interface Deps {
   getActionsStart: () => ActionsPluginStartContract | undefined;
@@ -23,16 +23,16 @@ export const createRemoteHostDownloadFileStepDefinition = ({ getActionsStart }: 
       const { remotePath } = context.input;
       const connectorId = context.config['connector-id'];
 
-      const result = await executeSubAction<{ content: string; encoding: 'base64' }>({
-        connectorId,
-        request: context.contextManager.getFakeRequest(),
-        actionsStart: getActionsStart(),
-        subAction: 'downloadFile',
-        subActionParams: { remotePath },
-        abortSignal: context.abortSignal,
-      });
+      const content = await downloadFile(
+        {
+          connectorId,
+          request: context.contextManager.getFakeRequest(),
+          actionsStart: getActionsStart(),
+          abortSignal: context.abortSignal,
+        },
+        remotePath
+      );
 
-      const content = Buffer.from(result.content, 'base64').toString('utf-8');
       return { output: { content } };
     },
   });

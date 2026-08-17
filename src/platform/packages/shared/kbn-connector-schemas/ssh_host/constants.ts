@@ -24,10 +24,6 @@ export type AuthType = (typeof AUTH_TYPE)[keyof typeof AUTH_TYPE];
 
 export enum SUB_ACTION {
   Exec = 'exec',
-  ExecAsync = 'execAsync',
-  GetExecStatus = 'getExecStatus',
-  KillExec = 'killExec',
   UploadFile = 'uploadFile',
   DownloadFile = 'downloadFile',
-  ExecFileAsync = 'execFileAsync',
 }

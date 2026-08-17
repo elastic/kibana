@@ -12,20 +12,12 @@ import type {
   ConfigSchema,
   SecretsSchema,
   ExecParamsSchema,
-  ExecAsyncParamsSchema,
-  GetExecStatusParamsSchema,
   DownloadFileParamsSchema,
   UploadFileParamsSchema,
-  ExecFileAsyncParamsSchema,
-  KillExecParamsSchema,
 } from '../schemas/v1';
 
 export type Config = z.infer<typeof ConfigSchema>;
 export type Secrets = z.infer<typeof SecretsSchema>;
 export type ExecParams = z.infer<typeof ExecParamsSchema>;
-export type ExecAsyncParams = z.infer<typeof ExecAsyncParamsSchema>;
-export type GetExecStatusParams = z.infer<typeof GetExecStatusParamsSchema>;
 export type DownloadFileParams = z.infer<typeof DownloadFileParamsSchema>;
 export type UploadFileParams = z.infer<typeof UploadFileParamsSchema>;
-export type ExecFileAsyncParams = z.infer<typeof ExecFileAsyncParamsSchema>;
-export type KillExecParams = z.infer<typeof KillExecParamsSchema>;

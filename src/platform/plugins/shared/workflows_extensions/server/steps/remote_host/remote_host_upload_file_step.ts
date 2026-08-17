@@ -8,7 +8,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { executeSubAction } from './execute_in_connector';
+import { uploadFile } from './execute_in_connector';
 import { remoteHostUploadFileStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -23,18 +23,15 @@ export const createRemoteHostUploadFileStepDefinition = ({ getActionsStart }: De
       const { remotePath, content } = context.input;
       const connectorId = context.config['connector-id'];
 
-      await executeSubAction({
-        connectorId,
-        request: context.contextManager.getFakeRequest(),
-        actionsStart: getActionsStart(),
-        subAction: 'uploadFile',
-        subActionParams: {
-          remotePath,
-          content: Buffer.from(content).toString('base64'),
-          encoding: 'base64',
+      await uploadFile(
+        {
+          connectorId,
+          request: context.contextManager.getFakeRequest(),
+          actionsStart: getActionsStart(),
+          abortSignal: context.abortSignal,
         },
-        abortSignal: context.abortSignal,
-      });
+        { remotePath, content }
+      );
 
       return { output: null };
     },

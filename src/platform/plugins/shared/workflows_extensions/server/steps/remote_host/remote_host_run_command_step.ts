@@ -10,32 +10,60 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
-import {
-  executeCommandInConnector,
-  killCommandInConnector,
-  tryExtractCommandOutputFromConnector,
-} from './execute_in_connector';
+import type { ConnectorCallContext } from './execute_in_connector';
+import type { RemoteHostJobStatus } from './remote_host_job';
+import { killJob, parseScriptOutput, pollJob, startJob } from './remote_host_job';
 import { remoteHostRunCommandStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createPollServerStepDefinition } from '../../step_registry/types';
 
 const StateSchema = z.object({
-  commandId: z.string(),
+  jobId: z.string(),
   stdoutOffset: z.number().default(0),
   stderrOffset: z.number().default(0),
 });
 
-const parseScriptOutput = (raw: string | undefined): unknown => {
-  if (raw === undefined || raw === '') return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return raw;
-  }
-};
-
 interface Deps {
   getActionsStart: () => ActionsPluginStartContract | undefined;
 }
+
+const logCommandStreams = (
+  logger: { info: (message: string) => void; warn: (message: string) => void },
+  result: RemoteHostJobStatus
+): void => {
+  if (result.stdout) logger.info(result.stdout);
+  if (result.stderr) logger.warn(result.stderr);
+};
+
+const completeCommand = (
+  logger: { info: (message: string) => void; warn: (message: string) => void },
+  result: RemoteHostJobStatus
+): { output: unknown } => {
+  logCommandStreams(logger, result);
+
+  if (result.exitCode !== 0) {
+    throw new ExecutionError({
+      type: 'ScriptExecutionError',
+      message: result.stderr || `Script exited with code ${result.exitCode}`,
+      details: { exitCode: result.exitCode },
+    });
+  }
+
+  return { output: parseScriptOutput(result.output) };
+};
+
+const toConnectorContext = (
+  connectorId: string,
+  context: {
+    contextManager: { getFakeRequest: () => ConnectorCallContext['request'] };
+    abortSignal: AbortSignal;
+  },
+  getActionsStart: () => ActionsPluginStartContract | undefined
+): ConnectorCallContext => ({
+  connectorId,
+  request: context.contextManager.getFakeRequest(),
+  actionsStart: getActionsStart(),
+  abortSignal: context.abortSignal,
+});
 
 export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: Deps) =>
   createPollServerStepDefinition({
@@ -58,88 +86,60 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
         return { error: new Error('Code is required') };
       }
 
-      const result = await executeCommandInConnector({
-        connectorId,
-        request: context.contextManager.getFakeRequest(),
-        actionsStart: getActionsStart(),
-        script: code,
-        abortSignal: context.abortSignal,
-      });
-
-      if (result.stdout) context.logger.info(result.stdout);
-      if (result.stderr) context.logger.warn(result.stderr);
+      const result = await startJob(
+        toConnectorContext(connectorId, context, getActionsStart),
+        code
+      );
 
       if (result.status === 'running') {
         return {
           state: {
-            commandId: result.commandId,
+            jobId: result.jobId,
             stdoutOffset: result.stdoutOffset,
             stderrOffset: result.stderrOffset,
           },
         };
       }
 
-      if (result.exitCode !== 0) {
-        throw new ExecutionError({
-          type: 'ScriptExecutionError',
-          message: result.stderr || `Script exited with code ${result.exitCode}`,
-          details: { exitCode: result.exitCode },
-        });
-      }
-
-      return { output: parseScriptOutput(result.output) };
+      return completeCommand(context.logger, result);
     },
     poll: async (context) => {
-      const { config, state, contextManager } = context;
-      if (!state?.commandId) {
+      const { config, state } = context;
+      if (!state?.jobId) {
         throw new Error('Invalid state for polling remote command execution');
       }
 
-      const result = await tryExtractCommandOutputFromConnector({
-        connectorId: config['connector-id'],
-        request: contextManager.getFakeRequest(),
-        actionsStart: getActionsStart(),
-        commandId: state.commandId,
-        stdoutOffset: state.stdoutOffset,
-        stderrOffset: state.stderrOffset,
-      });
-
-      if (result.stdout) context.logger.info(result.stdout);
-      if (result.stderr) context.logger.warn(result.stderr);
+      const result = await pollJob(
+        toConnectorContext(config['connector-id'], context, getActionsStart),
+        {
+          jobId: state.jobId,
+          stdoutOffset: state.stdoutOffset,
+          stderrOffset: state.stderrOffset,
+        }
+      );
 
       if (result.status === 'running') {
+        logCommandStreams(context.logger, result);
         return {
           state: {
-            commandId: state.commandId,
+            jobId: state.jobId,
             stdoutOffset: result.stdoutOffset,
             stderrOffset: result.stderrOffset,
           },
         };
       }
 
-      if (result.exitCode !== 0) {
-        throw new ExecutionError({
-          type: 'ScriptExecutionError',
-          message: result.stderr || `Script exited with code ${result.exitCode}`,
-          details: { exitCode: result.exitCode },
-        });
-      }
-
-      return { output: parseScriptOutput(result.output) };
+      return completeCommand(context.logger, result);
     },
     onCancel: async (context) => {
-      const { config, contextManager } = context;
       const state = (context as { state?: z.infer<typeof StateSchema> }).state;
-
-      if (!state?.commandId) {
+      if (!state?.jobId) {
         return;
       }
 
-      await killCommandInConnector({
-        connectorId: config['connector-id'],
-        request: contextManager.getFakeRequest(),
-        actionsStart: getActionsStart(),
-        commandId: state.commandId,
-      });
+      await killJob(
+        toConnectorContext(context.config['connector-id'], context, getActionsStart),
+        state.jobId
+      );
     },
   });

@@ -14,22 +14,14 @@ export {
   ConfigSchema,
   SecretsSchema,
   ExecParamsSchema,
-  ExecAsyncParamsSchema,
-  GetExecStatusParamsSchema,
   DownloadFileParamsSchema,
   UploadFileParamsSchema,
-  ExecFileAsyncParamsSchema,
-  KillExecParamsSchema,
 } from './schemas/latest';
 
 export type {
   Config,
   Secrets,
   ExecParams,
-  ExecAsyncParams,
-  GetExecStatusParams,
   DownloadFileParams,
   UploadFileParams,
-  ExecFileAsyncParams,
-  KillExecParams,
 } from './types/latest';

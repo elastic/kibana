@@ -11,16 +11,11 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { KibanaRequest } from '@kbn/core/server';
 import { ExecutionError } from '@kbn/workflows/server';
 
-export interface RemoteCommandOutput {
-  status: 'terminated' | 'running';
-  commandId: string;
-  stdout: string;
-  stderr: string;
-  stdoutOffset: number;
-  stderrOffset: number;
-  exitCode: number;
-  /** Content of output.txt written by the script via STEP_OUTPUT= */
-  output?: string;
+export interface ConnectorCallContext {
+  connectorId: string;
+  request: KibanaRequest<unknown, unknown, unknown>;
+  actionsStart: ActionsPluginStartContract | undefined;
+  abortSignal?: AbortSignal;
 }
 
 export async function executeSubAction<T>(params: {
@@ -56,101 +51,37 @@ export async function executeSubAction<T>(params: {
   return result.data as T;
 }
 
-export async function executeCommandInConnector(params: {
-  connectorId: string;
-  request: KibanaRequest<unknown, unknown, unknown>;
-  actionsStart: ActionsPluginStartContract | undefined;
-  script: string;
-  abortSignal?: AbortSignal;
-}): Promise<RemoteCommandOutput> {
-  const { connectorId, request, actionsStart, script, abortSignal } = params;
-
-  const result = await executeSubAction<{
-    commandId: string;
-    status: 'DONE' | 'RUNNING';
-    stdout?: string;
-    stderr?: string;
-    exitCode?: number;
-    files?: Array<{ file: string; content: string }>;
-  }>({
-    connectorId,
-    request,
-    actionsStart,
-    subAction: 'execAsync',
+export async function execScript(
+  ctx: ConnectorCallContext,
+  script: string
+): Promise<{ stdout: string; stderr: string; code: number }> {
+  return executeSubAction({
+    ...ctx,
+    subAction: 'exec',
     subActionParams: { script },
-    abortSignal,
   });
-
-  const outputFile = result.files?.find((f) => f.file === 'output.txt');
-  const stdout = result.stdout ?? '';
-  const stderr = result.stderr ?? '';
-  return {
-    status: result.status === 'RUNNING' ? 'running' : 'terminated',
-    commandId: result.commandId,
-    stdout,
-    stderr,
-    stdoutOffset: stdout.length,
-    stderrOffset: stderr.length,
-    exitCode: result.exitCode ?? 0,
-    output: outputFile?.content,
-  };
 }
 
-export async function tryExtractCommandOutputFromConnector(params: {
-  connectorId: string;
-  request: KibanaRequest<unknown, unknown, unknown>;
-  actionsStart: ActionsPluginStartContract | undefined;
-  commandId: string;
-  stdoutOffset?: number;
-  stderrOffset?: number;
-  abortSignal?: AbortSignal;
-}): Promise<RemoteCommandOutput> {
-  const { connectorId, request, actionsStart, commandId, stdoutOffset, stderrOffset, abortSignal } =
-    params;
-
-  const result = await executeSubAction<{
-    commandId: string;
-    status: 'DONE' | 'RUNNING';
-    stdout?: string;
-    stderr?: string;
-    stdoutOffset: number;
-    stderrOffset: number;
-    exitCode?: number;
-    files?: Array<{ file: string; content: string }>;
-  }>({
-    connectorId,
-    request,
-    actionsStart,
-    subAction: 'getExecStatus',
-    subActionParams: { commandId, stdoutOffset, stderrOffset },
-    abortSignal,
-  });
-
-  const outputFile = result.files?.find((f) => f.file === 'output.txt');
-  return {
-    commandId,
-    status: result.status === 'DONE' ? 'terminated' : 'running',
-    stdout: result.stdout ?? '',
-    stderr: result.stderr ?? '',
-    stdoutOffset: result.stdoutOffset,
-    stderrOffset: result.stderrOffset,
-    exitCode: result.exitCode ?? 0,
-    output: outputFile?.content,
-  };
-}
-
-export async function killCommandInConnector(params: {
-  connectorId: string;
-  request: KibanaRequest<unknown, unknown, unknown>;
-  actionsStart: ActionsPluginStartContract | undefined;
-  commandId: string;
-}): Promise<void> {
-  const { connectorId, request, actionsStart, commandId } = params;
+export async function uploadFile(
+  ctx: ConnectorCallContext,
+  params: { remotePath: string; content: string }
+): Promise<void> {
   await executeSubAction({
-    connectorId,
-    request,
-    actionsStart,
-    subAction: 'killExec',
-    subActionParams: { commandId },
+    ...ctx,
+    subAction: 'uploadFile',
+    subActionParams: {
+      remotePath: params.remotePath,
+      content: Buffer.from(params.content).toString('base64'),
+      encoding: 'base64',
+    },
   });
+}
+
+export async function downloadFile(ctx: ConnectorCallContext, remotePath: string): Promise<string> {
+  const result = await executeSubAction<{ content: string; encoding: 'base64' }>({
+    ...ctx,
+    subAction: 'downloadFile',
+    subActionParams: { remotePath },
+  });
+  return Buffer.from(result.content, 'base64').toString('utf-8');
 }

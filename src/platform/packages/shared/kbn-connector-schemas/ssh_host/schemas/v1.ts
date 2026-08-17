@@ -31,30 +31,12 @@ export const SecretsSchema = lazySchema(() =>
 export const ExecParamsSchema = lazySchema(() =>
   z.object({
     script: z.string().min(1).max(1048576),
-    signal: z.any().optional(),
-  })
-);
-
-export const ExecAsyncParamsSchema = lazySchema(() =>
-  z.object({
-    script: z.string().min(1).max(1048576),
-    signal: z.any().optional(),
-  })
-);
-
-export const GetExecStatusParamsSchema = lazySchema(() =>
-  z.object({
-    commandId: z.string().min(1).max(256),
-    stdoutOffset: z.number().int().min(0).max(104857600).optional(),
-    stderrOffset: z.number().int().min(0).max(104857600).optional(),
-    signal: z.any().optional(),
   })
 );
 
 export const DownloadFileParamsSchema = lazySchema(() =>
   z.object({
     remotePath: z.string().min(1).max(4096),
-    signal: z.any().optional(),
   })
 );
 
@@ -63,24 +45,5 @@ export const UploadFileParamsSchema = lazySchema(() =>
     remotePath: z.string().min(1).max(4096),
     content: z.string().min(1).max(104857600),
     encoding: z.literal('base64'),
-    signal: z.any().optional(),
-  })
-);
-
-export const ExecFileAsyncParamsSchema = lazySchema(() =>
-  z.object({
-    executable: z.string().min(1).max(4096),
-    args: z.array(z.string().max(65536)).max(256).default([]),
-    env: z.record(z.string(), z.unknown()).optional(),
-    cwd: z.string().max(4096).optional(),
-    outputFiles: z.array(z.string().max(4096)).max(256).optional(),
-    signal: z.any().optional(),
-  })
-);
-
-export const KillExecParamsSchema = lazySchema(() =>
-  z.object({
-    commandId: z.string().min(1).max(256),
-    signal: z.any().optional(),
   })
 );
