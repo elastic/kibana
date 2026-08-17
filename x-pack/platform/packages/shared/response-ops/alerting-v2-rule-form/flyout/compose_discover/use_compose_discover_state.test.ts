@@ -120,21 +120,21 @@ describe('createInitialState', () => {
 
 describe('reducer', () => {
   describe('KIND_CHANGE', () => {
-    it('kind=alert opens child on the base tab and resets to step 0', () => {
+    it('kind=alert keeps the current step and does not force the sandbox open', () => {
       const state = createState({ step: 2, childOpen: false, activeTab: 'alert' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'alert' });
 
-      expect(next.childOpen).toBe(true);
-      expect(next.step).toBe(0);
+      expect(next.childOpen).toBe(false);
+      expect(next.step).toBe(2);
       expect(next.activeTab).toBe('base');
     });
 
-    it('kind=signal keeps child open, resets step and recoveryType', () => {
+    it('kind=signal keeps the current step and childOpen, resets recoveryType', () => {
       const state = createState({ step: 1, childOpen: true, recoveryType: 'custom' });
       const next = reducer(state, { type: 'KIND_CHANGE', kind: 'signal' });
 
       expect(next.childOpen).toBe(true);
-      expect(next.step).toBe(0);
+      expect(next.step).toBe(1);
       expect(next.recoveryType).toBe('default');
     });
   });
@@ -289,12 +289,12 @@ describe('getSandboxTabs', () => {
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });
 
-  it('returns [recovery] on recoveryCondition step with custom recovery', () => {
+  it('returns [recovery] on outcome step with custom recovery', () => {
     const state = createState({ step: 1, recoveryType: 'custom' });
     expect(getSandboxTabs(true, state)).toEqual(['recovery']);
   });
 
-  it('returns undefined on recoveryCondition step with default recovery', () => {
+  it('returns undefined on outcome step with default recovery', () => {
     const state = createState({ step: 1, recoveryType: 'default' });
     expect(getSandboxTabs(true, state)).toBeUndefined();
   });

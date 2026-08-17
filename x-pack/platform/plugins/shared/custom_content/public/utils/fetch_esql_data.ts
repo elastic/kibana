@@ -7,22 +7,40 @@
 
 import dateMath from '@kbn/datemath';
 import type { HttpStart } from '@kbn/core/public';
-import type { TimeRange } from '@kbn/es-query';
+import type {
+  AggregateQuery,
+  EsQueryConfig,
+  Filter,
+  Query,
+  TimeRange,
+  ProjectRouting,
+} from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
 
 export type EsqlDataResult = ESQLSearchResponse;
 
+export interface FetchEsqlOptions {
+  isApproximate?: boolean;
+  projectRouting?: ProjectRouting;
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  esQueryConfig?: EsQueryConfig;
+}
+
 export async function fetchEsqlData(
   search: ISearchGeneric,
   http: HttpStart,
   esqlQuery: string,
   timeRange: TimeRange | undefined,
-  signal: AbortSignal
+  signal: AbortSignal,
+  options?: FetchEsqlOptions
 ): Promise<EsqlDataResult> {
-  let filter: unknown;
+  const { isApproximate, projectRouting, query, filters, esQueryConfig } = options ?? {};
 
+  let timeRangeFilter: { range: Record<string, unknown> } | undefined;
   if (timeRange) {
     let timeField: string | undefined;
     try {
@@ -34,14 +52,26 @@ export async function fetchEsqlData(
       const gte = dateMath.parse(timeRange.from)?.toISOString();
       const lt = dateMath.parse(timeRange.to, { roundUp: true })?.toISOString();
       if (gte && lt) {
-        filter = {
-          range: {
-            [timeField]: { gte, lt, format: 'strict_date_optional_time' },
-          },
+        timeRangeFilter = {
+          range: { [timeField]: { gte, lt, format: 'strict_date_optional_time' } },
         };
       }
     }
   }
+
+  const esBoolQuery = buildEsQuery(undefined, query ?? [], filters ?? [], esQueryConfig);
+
+  const allFilters = timeRangeFilter
+    ? [...esBoolQuery.bool.filter, timeRangeFilter]
+    : esBoolQuery.bool.filter;
+
+  const hasConstraints =
+    allFilters.length > 0 ||
+    esBoolQuery.bool.must_not.length > 0 ||
+    esBoolQuery.bool.should.length > 0 ||
+    esBoolQuery.bool.must.length > 0;
+
+  const filter = hasConstraints ? { bool: { ...esBoolQuery.bool, filter: allFilters } } : undefined;
 
   const { response } = await getESQLResults({
     esqlQuery,
@@ -49,6 +79,8 @@ export async function fetchEsqlData(
     signal,
     filter,
     timeRange,
+    ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
+    ...(projectRouting !== undefined ? { projectRouting } : {}),
   });
 
   return response;
