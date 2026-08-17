@@ -35,5 +35,14 @@ process.stdout.write(
     configPath: suite.configPath,
     shards: Array.isArray(suite.shards) ? suite.shards : [],
     stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
+    // Per-spec model overrides and the suite-level fallback, so `get_fanout_matrix.js` can resolve
+    // which models each spec runs against without re-reading the suites config.
+    specModelGroups:
+      suite.specModelGroups && typeof suite.specModelGroups === 'object'
+        ? suite.specModelGroups
+        : {},
+    weeklyEisModelGroups: Array.isArray(suite.weeklyEisModelGroups)
+      ? suite.weeklyEisModelGroups
+      : [],
   })
 );

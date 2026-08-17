@@ -248,4 +248,26 @@ describe('eval_pipeline', () => {
       expect(yaml).toContain(`diskSizeGb: ${DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb}`);
     });
   });
+
+  describe('per-spec model resolution (EVAL_PER_SPEC_MODELS)', () => {
+    it('turns on per-spec resolution for the weekly-eis default', () => {
+      const yaml = getEvalPipeline('evals:agent-builder,models:weekly-eis-models') as string;
+
+      expect(yaml).toContain("EVAL_PER_SPEC_MODELS: '1'");
+    });
+
+    it('leaves per-spec resolution off for an explicit model selection (override)', () => {
+      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).not.toContain('EVAL_PER_SPEC_MODELS');
+    });
+
+    it('an explicit model alongside the weekly alias overrides, so per-spec stays off', () => {
+      const yaml = getEvalPipeline(
+        'evals:agent-builder,models:weekly-eis-models,models:eis/openai-gpt-5.4'
+      ) as string;
+
+      expect(yaml).not.toContain('EVAL_PER_SPEC_MODELS');
+    });
+  });
 });

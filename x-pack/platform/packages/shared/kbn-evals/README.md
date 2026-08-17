@@ -201,6 +201,30 @@ When the labels match, PR CI triggers the dedicated
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
 
+#### Per-spec model groups
+
+By default every model in a suite's list runs against every spec. A suite can instead pin a model
+list per spec with `specModelGroups` in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json),
+keyed by **spec id** (the spec filename minus `.spec.ts`, e.g. `discovery`):
+
+```jsonc
+{
+  "id": "significant-events",
+  "shards": [ /* spec files live here; batching only */ ],
+  "weeklyEisModelGroups": [ /* suite fallback + provisioning universe */ ],
+  "specModelGroups": {
+    "discovery": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"],
+    "ki_feature_extraction": ["eis/openai-gpt-5.4-mini", "eis/google-gemini-3.0-flash"]
+  }
+}
+```
+
+A spec resolves its models in this order: its own `specModelGroups` list, then the suite's
+`weeklyEisModelGroups`, then the requested `EVAL_MODEL_GROUPS`. Each `specModelGroups` model must be
+within `weeklyEisModelGroups` (the list CI provisions connectors for). Per-spec resolution applies to
+the weekly run and the `models:weekly-eis-models` label; an explicit `models:<model-group>` selection
+overrides it and runs that set against every spec. Suites without `specModelGroups` fan out unchanged.
+
 ---
 
 ### 1.3 On-demand evals (Buildkite)

@@ -167,9 +167,14 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
-    CONNECTOR_IDS="$(node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_connector_ids.js)"
+    # One row per fanout step: "connectorId<TAB>shardId<TAB>specFiles". In per-spec mode a connector
+    # only appears for the specs that requested it; otherwise it's the connector x shard cross product.
+    FANOUT_MATRIX="$(
+      EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
+        node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_fanout_matrix.js
+    )"
 
-    if [[ -z "${CONNECTOR_IDS:-}" ]]; then
+    if [[ -z "${FANOUT_MATRIX:-}" ]]; then
       echo "No connectors found in KIBANA_TESTING_AI_CONNECTORS; falling back to evaluation connector only"
       if [[ -n "${EVAL_CONNECTOR_ID:-}" ]]; then
         export EVAL_PROJECT="${EVAL_CONNECTOR_ID}"
@@ -197,8 +202,9 @@ EOF
         fanout_preemptible=false
       fi
 
-      # Suites that don't fit one step declare `shards` in evals.suites.json; each shard becomes a
-      # separate step (with its own Scout stack) running only the spec files it lists.
+      # Suites that don't fit one step declare `shards` in evals.suites.json; get_fanout_matrix.js
+      # turns them (crossed with the resolved connectors) into the fanout steps. These arrays mirror
+      # the shards only to fail fast below if a shard lists a spec file that no longer exists.
       # An explicit grep/grep-invert is a manual override, so it takes precedence over the shards.
       # Expanded into parallel arrays rather than read positionally from a delimited row, because
       # bash collapses runs of tabs when splitting and would shift a shard with an empty field.
@@ -247,24 +253,24 @@ EOF
       timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-${EVAL_SUITE_STEP_TIMEOUT:-120}}"
 
       fanout_step_keys=()
-      while IFS= read -r connector_id; do
+      fanout_connector_ids=()
+      # Each matrix row is one step: connector id, shard id (may be empty), and the shard's spec
+      # files for that connector (space-joined; empty for an unsharded suite).
+      while IFS=$'\t' read -r connector_id shard_id shard_spec_file_args; do
         [[ -z "$connector_id" ]] && continue
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        fanout_connector_ids+=("$connector_id")
 
-        for ((shard_index = 0; shard_index < ${#shard_ids[@]}; shard_index++)); do
-          shard_id="${shard_ids[$shard_index]}"
-          shard_spec_file_args="${shard_spec_files[$shard_index]}"
+        step_key="kbn-evals-${group_key_safe}-${key_safe}"
+        step_label="LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
+        if [[ -n "$shard_id" ]]; then
+          shard_key_safe="$(printf '%s' "$shard_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+          step_key="${step_key}-${shard_key_safe}"
+          step_label="${step_label} [${shard_id}]"
+        fi
+        fanout_step_keys+=("$step_key")
 
-          step_key="kbn-evals-${group_key_safe}-${key_safe}"
-          step_label="LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
-          if [[ -n "$shard_id" ]]; then
-            shard_key_safe="$(printf '%s' "$shard_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
-            step_key="${step_key}-${shard_key_safe}"
-            step_label="${step_label} [${shard_id}]"
-          fi
-          fanout_step_keys+=("$step_key")
-
-          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"
         key: "${step_key}"
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
@@ -298,17 +304,16 @@ EOF
           diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}
 EOF
 
-          if [[ "$fanout_preemptible" == "true" ]]; then
-            cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        if [[ "$fanout_preemptible" == "true" ]]; then
+          cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
         retry:
           automatic:
             - exit_status: "-1"
               limit: 3
 EOF
-          fi
-        done
-      done <<<"$CONNECTOR_IDS"
+        fi
+      done <<<"$FANOUT_MATRIX"
 
       # Resolve a PR number (if any) so triage can be posted as a PR comment:
       # GITHUB_PR_NUMBER (PR-label CI) -> BUILDKITE_PULL_REQUEST -> refs/pull/<N>/head
@@ -429,6 +434,7 @@ EOF
         EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
         EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
         EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
+        EVAL_PER_SPEC_MODELS: "${EVAL_PER_SPEC_MODELS:-}"
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
 EOF
       elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
@@ -469,8 +475,12 @@ EOF
       fi
 
       # Publish the connector list so the post-comparison step can discover
-      # which models ran without querying the experiments API.
-      _connectors_csv="$(printf '%s' "$CONNECTOR_IDS" | tr '\n' ',' | sed 's/,$//')"
+      # which models ran without querying the experiments API. Dedup because per-spec fanout can
+      # emit the same connector across several shards.
+      _connectors_csv="$(
+        printf '%s\n' ${fanout_connector_ids[@]+"${fanout_connector_ids[@]}"} \
+          | awk 'NF && !seen[$0]++' | tr '\n' ',' | sed 's/,$//'
+      )"
       buildkite-agent meta-data set "kbn-evals:connectors:${EVAL_SUITE_ID}" "$_connectors_csv" 2>/dev/null || true
 
       echo "Fanout uploaded. Exiting parent step."

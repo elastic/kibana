@@ -10,57 +10,21 @@
 // from the environment, then writes matching connector IDs (newline-separated) to stdout.
 
 const { parseMaybeBase64Json } = require('./ai_connectors');
+const {
+  selectConnectorIds,
+  describeAvailableModels,
+  parseModelGroups,
+} = require('./connector_matching');
 
 const cfg = parseMaybeBase64Json(process.env.KIBANA_TESTING_AI_CONNECTORS || '');
 
-const requestedRaw = process.env.EVAL_MODEL_GROUPS || '';
-const requested = requestedRaw
-  ? requestedRaw
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
-  : [];
-
-const connectorEntries = Object.entries(cfg);
-const connectorIds =
-  requested.length === 0 || requested.includes('all')
-    ? connectorEntries.map(([id]) => id)
-    : connectorEntries
-        .filter(([id, connector]) => {
-          const defaultModel = connector?.config?.defaultModel;
-          const eisModelId = connector?.config?.providerConfig?.model_id;
-
-          const matchesRequested = (requestedValue) => {
-            if (requestedValue === id) return true;
-            if (typeof defaultModel === 'string' && requestedValue === defaultModel) return true;
-            if (typeof eisModelId === 'string') {
-              if (requestedValue === eisModelId) return true;
-              if (
-                requestedValue.startsWith('eis/') &&
-                requestedValue.slice('eis/'.length) === eisModelId
-              ) {
-                return true;
-              }
-            }
-            return false;
-          };
-
-          return requested.some(matchesRequested);
-        })
-        .map(([id]) => id);
+const requested = parseModelGroups(process.env.EVAL_MODEL_GROUPS || '');
+const connectorIds = selectConnectorIds(cfg, requested);
 
 if (requested.length > 0 && !requested.includes('all') && connectorIds.length === 0) {
-  const availableModels = connectorEntries.flatMap(([, connector]) => {
-    const out = [];
-    const defaultModel = connector?.config?.defaultModel;
-    if (typeof defaultModel === 'string') out.push(defaultModel);
-    const eisModelId = connector?.config?.providerConfig?.model_id;
-    if (typeof eisModelId === 'string') out.push(`eis/${eisModelId}`);
-    return out;
-  });
   console.error(
     `No connectors matched EVAL_MODEL_GROUPS="${requested.join(',')}". ` +
-      `Available models: ${availableModels.join(',')}`
+      `Available models: ${describeAvailableModels(cfg).join(',')}`
   );
   process.exit(1);
 }
