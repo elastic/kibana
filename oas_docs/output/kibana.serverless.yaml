@@ -23133,6 +23133,8 @@ paths:
                         is_default:
                           default: false
                           type: boolean
+                        is_preconfigured:
+                          type: boolean
                         name:
                           type: string
                         proxy_id:
@@ -23430,6 +23432,8 @@ paths:
                       is_default:
                         default: false
                         type: boolean
+                      is_preconfigured:
+                        type: boolean
                       name:
                         type: string
                       proxy_id:
@@ -23692,6 +23696,8 @@ paths:
                         type: string
                       is_default:
                         default: false
+                        type: boolean
+                      is_preconfigured:
                         type: boolean
                       name:
                         type: string
@@ -23995,6 +24001,8 @@ paths:
                         type: string
                       is_default:
                         default: false
+                        type: boolean
+                      is_preconfigured:
                         type: boolean
                       name:
                         type: string
