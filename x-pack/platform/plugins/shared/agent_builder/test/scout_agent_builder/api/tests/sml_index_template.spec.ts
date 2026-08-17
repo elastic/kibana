@@ -121,11 +121,12 @@ apiTest.describe(
     apiTest('applies SML overrides on top of the base mappings', async ({ esClient }) => {
       const properties = await resolveSmlMappings(esClient);
 
-      // The base maps `tags` and `type` as plain keywords; SML needs the lowercase
-      // normalizer on both and is composed after it. For `type` that is what makes
-      // the @ menu's prefix query case-insensitive.
+      // The base maps `tags` as a plain keyword; SML needs the lowercase
+      // normalizer and is composed after it.
       expect(properties.tags).toMatchObject({ type: 'keyword', normalizer: 'lowercase' });
-      expect(properties.type).toMatchObject({ type: 'keyword', normalizer: 'lowercase' });
+      // `type` keeps the base definition: a normalizer is not an updateable mapping
+      // parameter, so overriding it would break in-place mapping updates.
+      expect(properties.type).toStrictEqual({ type: 'keyword' });
     });
 
     apiTest('keeps SML fields intact when a user component conflicts', async ({ esClient }) => {
