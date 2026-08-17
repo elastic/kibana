@@ -28,13 +28,14 @@ viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, 
 the medium layout, and `xl` shows the full menu. Menus that should preserve viewport-based behavior,
 such as the Classic and legacy Project Chrome headers, set `breakpointSource="viewport"`.
 
-## Plain-text fields
+## Strict props
 
-Labels, descriptions, badge text, and tooltip copy are strings. TypeScript erases `string` at
-runtime, so a type assertion can still pass a React node into those fields. The menu coerces
-consumer text to a real string before painting: a non-string becomes empty (or is omitted if the
-field is optional). In development this also logs a one-time `console.warn`. Do not pass
-`FormattedMessage` or other nodes.
+The public types are the contract. A type assertion can still pass a React node as a `label`, or
+extra keys that get spread into EUI, and the menu paints custom UI.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
 
 ## Compatibility
 

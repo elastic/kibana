@@ -128,14 +128,18 @@ Description and `metadata` share the secondary row and are mutually exclusive. U
 structured entity facts such as status, owner, or creation time. Documentation links that are not
 part of a necessary description belong in the app menu via `docLink`.
 
-## Plain-text fields
+## Strict props
 
-Title, description, metadata, badge, tab, share tooltip, and back destination copy are strings.
-TypeScript erases `string` at runtime, so a type assertion can still pass a React node into those
-fields. The header coerces consumer text to a real string before painting: a non-string becomes empty
-(or is omitted if the field is optional). In development this also logs a one-time `console.warn`.
-Do not pass `FormattedMessage` or other nodes. Custom badge UI belongs in the deprecated
-`renderCustomBadge` hatch.
+The public types are the contract: strings, callbacks, known unions. A type assertion can still
+pass a React node as a `label`, or extra keys that get spread into EUI. Either path paints custom
+UI and the header stops looking like one component.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
+
+If a layout cannot be expressed with the public API, extend the API. The deprecated
+`renderCustomBadge` hatch is the only supported custom-UI path today.
 
 Menu item text is coerced the same way in `@kbn/ui-app-menu`.
 
