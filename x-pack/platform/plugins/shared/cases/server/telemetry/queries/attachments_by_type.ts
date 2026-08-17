@@ -76,10 +76,6 @@ interface EntityMetricsResult {
   entityTotal: { value: number };
 }
 
-interface CombinedMetricsResult {
-  entityTotal: { value: number };
-}
-
 interface TermsBuckets<M> {
   buckets: Array<{ key: string; doc_count: number } & M>;
 }
@@ -95,7 +91,7 @@ interface CommentsOwnerAgg {
 
 interface AttachmentsOwnerAgg {
   doc_count: number;
-  types: TermsBuckets<CombinedMetricsResult>;
+  types: TermsBuckets<EntityMetricsResult>;
 }
 
 type CommentsAggResult = Record<Owner, CommentsOwnerAgg>;
@@ -107,12 +103,6 @@ const emptyRawScope = (): AttachmentsByTypeRawScope => ({
 });
 
 const perCaseEntityMetrics = (savedObjectType: string, idField: string) => ({
-  entityTotal: { value_count: { field: `${savedObjectType}.attributes.${idField}` } },
-});
-
-// Unified attachments share a single id field, so a type-terms bucket can hold
-// both value types (count by doc) and bulk alert/event types (count by entity).
-const perCaseCombinedMetrics = (savedObjectType: string, idField: string) => ({
   entityTotal: { value_count: { field: `${savedObjectType}.attributes.${idField}` } },
 });
 
@@ -175,7 +165,7 @@ const queryUnifiedAttachments = (savedObjectsClient: TelemetrySavedObjectsClient
         field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type`,
         size: TYPE_TERMS_SIZE,
       },
-      aggs: perCaseCombinedMetrics(CASE_ATTACHMENT_SAVED_OBJECT, 'attachmentId'),
+      aggs: perCaseEntityMetrics(CASE_ATTACHMENT_SAVED_OBJECT, 'attachmentId'),
     },
   });
 
@@ -202,7 +192,7 @@ const entityStat = (agg: EntityMetricsResult): RawTypeStat => ({
 });
 
 const combinedStat = (
-  bucket: { doc_count: number } & CombinedMetricsResult,
+  bucket: { doc_count: number } & EntityMetricsResult,
   isEntity: boolean
 ): RawTypeStat => ({
   total: isEntity ? bucket.entityTotal?.value ?? 0 : bucket.doc_count,
