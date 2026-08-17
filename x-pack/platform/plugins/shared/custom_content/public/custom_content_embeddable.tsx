@@ -76,7 +76,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
-    const prompt$ = new BehaviorSubject<string>(initialState.prompt ?? '');
+    let storedPrompt = initialState.prompt ?? '';
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
@@ -91,7 +91,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
-      prompt: prompt$.getValue(),
+      prompt: storedPrompt || undefined,
       esqlQuery: esqlQuery$.getValue(),
       template: template$.getValue(),
     });
@@ -107,10 +107,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       anyStateChange$: merge(
         titleManager.anyStateChange$,
-        prompt$.pipe(
-          skip(1),
-          map(() => undefined)
-        ),
         esqlQuery$.pipe(
           skip(1),
           map(() => undefined)
@@ -122,13 +118,13 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ),
       getComparators: () => ({
         ...titleComparators,
-        prompt: 'referenceEquality',
+        prompt: 'skip',
         esqlQuery: 'referenceEquality',
         template: 'referenceEquality',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
-        prompt$.next(lastSaved?.prompt ?? '');
+        storedPrompt = lastSaved?.prompt ?? '';
         esqlQuery$.next(lastSaved?.esqlQuery);
         template$.next(lastSaved?.template);
       },
@@ -188,7 +184,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: function CustomContentEmbeddableComponent() {
         const [
-          prompt,
           esqlQuery,
           savedTemplate,
           isFlyoutOpen,
@@ -199,7 +194,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           filters,
           previewHtml,
         ] = useBatchedPublishingSubjects(
-          prompt$,
           esqlQuery$,
           template$,
           isFlyoutOpen$,
@@ -315,7 +309,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           <>
             <CustomContentComponent
               embeddableId={uuid}
-              prompt={prompt}
               esqlQuery={esqlQuery}
               timeRange={timeRange}
               generationVersion={generationVersion}

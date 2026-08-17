@@ -17,7 +17,6 @@ import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 
 interface CustomContentComponentProps {
   embeddableId: string;
-  prompt: string | undefined;
   esqlQuery: string | undefined;
   timeRange: TimeRange | undefined;
   generationVersion: number;
@@ -48,7 +47,6 @@ const iframeCss = css({
 
 export const CustomContentComponent = ({
   embeddableId,
-  prompt,
   esqlQuery,
   timeRange,
   generationVersion,

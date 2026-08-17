@@ -76,11 +76,12 @@ export function useCustomContentHtml({
         filters,
         esQueryConfig: getEsQueryConfig(core.uiSettings),
       };
+      const template = stripMarkdownFences(savedTemplate);
 
       setIsLoading(true);
       setError(undefined);
       fetchEsqlData(search, core.http, esqlQuery, timeRange, controller.signal, fetchOptions)
-        .then((response) => fillTemplate(savedTemplate, response.columns, response.values ?? []))
+        .then((response) => fillTemplate(template, response.columns, response.values ?? []))
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
           setProcessedHtml(sanitizeHtml(rawHtml));
