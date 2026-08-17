@@ -40,7 +40,15 @@ export function getStateManagementForInlineEditing(
   ) => {
     const vis = getAttributes();
     const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
-    const datasourceStates: DatasourceStates = allDatasourceStates ?? {
+    // drop loading/uninitialized entries so they never get serialized into the attributes
+    const loadedDatasourceStates = Object.fromEntries(
+      Object.entries(allDatasourceStates ?? {}).filter(
+        ([, { isLoading, state }]) => !isLoading && state != null
+      )
+    );
+    const datasourceStates: DatasourceStates = {
+      ...loadedDatasourceStates,
+      // always guarantee the active datasource state is present
       [activeDatasourceId]: {
         isLoading: false,
         state: datasourceState,
