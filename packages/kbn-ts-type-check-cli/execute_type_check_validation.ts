@@ -45,6 +45,25 @@ const rel = (from: string, to: string) => {
   return path.startsWith('.') ? path : `./${path}`;
 };
 
+/** Resolves the generated root directory when a project includes source files from a parent. */
+export const resolveTypeCheckRootDir = (include: readonly string[] | undefined): string => {
+  const parentDepth = (include ?? []).reduce((maxDepth, pattern) => {
+    const normalizedPattern = pattern.replaceAll('\\', '/');
+    const isSourceFile = /\.[cm]?[jt]sx?$/.test(normalizedPattern);
+    const isDeclarationFile = /\.d\.[cm]?ts$/.test(normalizedPattern);
+
+    if (!isSourceFile || isDeclarationFile) {
+      return maxDepth;
+    }
+
+    const parentPrefix = normalizedPattern.match(/^(\.\.\/)+/)?.[0];
+    const depth = parentPrefix?.match(/\.\.\//g)?.length ?? 0;
+    return Math.max(maxDepth, depth);
+  }, 0);
+
+  return parentDepth === 0 ? '.' : Array.from({ length: parentDepth }, () => '..').join('/');
+};
+
 const isTsProjectWithinMoonSourceRoots = (
   tsProject: TsProject,
   moonSourceRoots: Set<string>
@@ -89,7 +108,7 @@ export async function createTypeCheckConfigs(
       compilerOptions: {
         ...config.compilerOptions,
         composite: true,
-        rootDir: '.',
+        rootDir: resolveTypeCheckRootDir(config.include),
         noEmit: false,
         emitDeclarationOnly: true,
         paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,

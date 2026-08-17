@@ -562,7 +562,6 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
                 defaultMessage: 'Value',
               }
             )}
-            helpText={selectedOptions[0]?.value?.description}
             {...euiFieldProps}
             data-test-subj="osqueryColumnValueSelect"
             options={
