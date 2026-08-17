@@ -22,7 +22,10 @@ import type { ExceptionItemLikeOptions } from '../types';
 
 /**
  * Maximum YARA rule text size stored in the value field.
- * It's upper bounded by the max length of a `keyword` field in Elasticsearch, which is 32766 bytes.
+ * Upper-bounded by Elasticsearch `keyword` (32766 UTF-8 bytes). Reused as
+ * `schema.string()` `maxLength` for greppable input bounds: JS string length is
+ * always ≤ UTF-8 byte length, so ASCII can still use the full 32766 bytes.
+ * Multi-byte content is constrained by `validateYaraRuleContentByteLength`.
  */
 export const MAX_YARA_RULE_CONTENT_BYTE_LENGTH = 32766;
 
@@ -38,7 +41,11 @@ const YaraEntrySchema = schema.object({
   field: schema.literal(CUSTOM_YARA_SIGNATURE_FIELD_TYPE),
   operator: schema.literal('included'),
   type: schema.literal('match'),
-  value: schema.string({ minLength: 1, validate: validateYaraRuleContentByteLength }),
+  value: schema.string({
+    minLength: 1,
+    maxLength: MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
+    validate: validateYaraRuleContentByteLength,
+  }),
 });
 
 const YaraSignatureDataSchema = schema.object(
