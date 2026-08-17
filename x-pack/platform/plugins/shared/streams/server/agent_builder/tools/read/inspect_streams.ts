@@ -113,6 +113,13 @@ export const createInspectStreamsTool = ({
     **Efficiency:** Do not re-call for streams you already inspected in this conversation unless a write tool has modified them since. Results are current-state and remain valid until a write occurs.
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'Inspect Streams',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: inspectStreamsSchema,
   handler: async ({ names, aspects }, { request, logger }) => {
     try {
