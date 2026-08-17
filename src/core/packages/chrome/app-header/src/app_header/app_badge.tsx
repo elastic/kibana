@@ -16,6 +16,7 @@ import type {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge, AppHeaderBadgeItem } from '../types';
+import { asOptionalPlainText, asPlainText } from './as_plain_text';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 /**
@@ -31,16 +32,17 @@ const buildPanels = (
   let nextPanelId = panelId + 1;
 
   const panelItems: EuiContextMenuPanelItemDescriptor[] = items.map((item) => {
-    const { items: childItems, popoverWidth: childWidth, ...rest } = item;
+    const { items: childItems, popoverWidth: childWidth, name, ...rest } = item;
+    const itemName = asPlainText(name);
     if (childItems && childItems.length > 0) {
       const childPanelId = nextPanelId;
-      const childPanels = buildPanels(childItems, childPanelId, childWidth, item.name);
+      const childPanels = buildPanels(childItems, childPanelId, childWidth, itemName);
       nextPanelId = childPanelId + childPanels.length;
       panels.push(...childPanels);
-      return { ...rest, panel: childPanelId };
+      return { ...rest, name: itemName, panel: childPanelId };
     }
 
-    return rest;
+    return { ...rest, name: itemName };
   });
 
   panels.unshift({
@@ -66,6 +68,9 @@ const useBadgeStyle = () => {
 export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   const { badge: badgeStyle } = useBadgeStyle();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const label = asPlainText(badge.label);
+  const tooltip = asOptionalPlainText(badge.tooltip);
+  const onClickAriaLabel = asOptionalPlainText(badge.onClickAriaLabel);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((open) => !open), []);
@@ -79,10 +84,10 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
   const isClickable = hasItems || badge.onClick !== undefined;
 
   const badgeOnClickAriaLabel =
-    badge?.onClickAriaLabel ??
+    onClickAriaLabel ??
     i18n.translate('core.ui.chrome.appHeader.badge.ariaLabel', {
       defaultMessage: 'Click {label} badge',
-      values: { label: badge.label },
+      values: { label },
     });
 
   const handleBadgeClick = () => {
@@ -106,12 +111,12 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
       iconType={hasItems ? 'chevronSingleDown' : undefined}
       iconSide={hasItems ? 'right' : undefined}
     >
-      {badge.label}
+      {label}
     </EuiBadge>
   );
 
-  const wrappedBadge = badge?.tooltip ? (
-    <EuiToolTip content={badge.tooltip}>{badgeComponent}</EuiToolTip>
+  const wrappedBadge = tooltip ? (
+    <EuiToolTip content={tooltip}>{badgeComponent}</EuiToolTip>
   ) : (
     badgeComponent
   );
@@ -123,7 +128,7 @@ export const AppBadge = ({ badge }: { badge: AppHeaderBadge }) => {
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        aria-label={badge.label}
+        aria-label={label}
       >
         <EuiContextMenu
           initialPanelId={0}
