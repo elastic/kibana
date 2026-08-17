@@ -15,7 +15,7 @@ import type {
   SolutionTelemetrySchema,
   AssigneesSchema,
   AttachmentFrameworkSchema,
-  AttachmentItemsSchema,
+  AttachmentTypeStatsSchema,
   CustomFieldsSolutionTelemetrySchema,
   ObservablesSchema,
 } from './types';
@@ -30,29 +30,21 @@ const countSchema: CountSchema = {
   daily: long,
 };
 
-interface AttachmentRegistrySchema {
-  type: 'array';
-  items: AttachmentItemsSchema;
-}
-
-const attachmentRegistrySchema: AttachmentRegistrySchema = {
-  type: 'array',
-  items: {
-    average: long,
-    maxOnACase: long,
-    total: long,
-    type: string,
-  },
+const attachmentTypeStatsSchema: AttachmentTypeStatsSchema = {
+  total: long,
+  average: long,
 };
 
 const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
-  persistableAttachments: attachmentRegistrySchema,
-  externalAttachments: attachmentRegistrySchema,
+  attachmentsByType: {
+    DYNAMIC_KEY: attachmentTypeStatsSchema,
+  },
+  bySavedObject: {
+    legacy: { total: long },
+    unified: { total: long },
+  },
   files: {
-    average: long,
     averageSize: long,
-    maxOnACase: long,
-    total: long,
     topMimeTypes: {
       type: 'array',
       items: {
