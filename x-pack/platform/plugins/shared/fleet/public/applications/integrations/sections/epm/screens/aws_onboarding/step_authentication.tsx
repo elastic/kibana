@@ -39,6 +39,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -395,6 +396,12 @@ const CloudFormationWidget: React.FunctionComponent<{
     onCompleteChange(isComplete);
   }, [isComplete, onCompleteChange]);
 
+  // Design-preview-only toggles: the prototype has no real AWS backend to
+  // actually fail, so these let reviewers see the failure states on demand
+  // without them ever appearing during a normal click-through.
+  const [previewLaunchError, setPreviewLaunchError] = useState(false);
+  const [previewStuck, setPreviewStuck] = useState(false);
+
   return (
     <AccordionCard
       id="awsOnboardingCloudFormationAccordion"
@@ -440,14 +447,71 @@ const CloudFormationWidget: React.FunctionComponent<{
       <EuiSpacer size="m" />
 
       {!isLaunched ? (
-        <EuiButton
-          iconType="popout"
-          iconSide="right"
-          onClick={onLaunch}
-          data-test-subj="awsOnboardingStep3LaunchCloudFormation"
-        >
-          Launch CloudFormation
-        </EuiButton>
+        previewLaunchError ? (
+          <EuiCallOut
+            color="danger"
+            iconType="warning"
+            title="CloudFormation stack failed to deploy"
+            data-test-subj="awsOnboardingCloudFormationLaunchError"
+          >
+            <p>
+              This usually means the AWS account doesn&apos;t have permission to create IAM roles
+              or Lambda functions, the &quot;I acknowledge that AWS CloudFormation might create
+              IAM resources&quot; checkbox wasn&apos;t ticked, a stack with this name already
+              exists, or the account has reached an AWS service limit (for example, the maximum
+              number of Lambda functions).
+            </p>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="danger"
+                  iconType="refresh"
+                  onClick={() => setPreviewLaunchError(false)}
+                  data-test-subj="awsOnboardingCloudFormationRetry"
+                >
+                  Retry
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  color="danger"
+                  href="https://console.aws.amazon.com/cloudformation"
+                  target="_blank"
+                  iconType="popout"
+                  iconSide="right"
+                >
+                  Open AWS CloudFormation console
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiCallOut>
+        ) : (
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="popout"
+                iconSide="right"
+                onClick={onLaunch}
+                data-test-subj="awsOnboardingStep3LaunchCloudFormation"
+              >
+                Launch CloudFormation
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="Design preview only — shows how a failed deployment would look. Not part of the real flow.">
+                <EuiButtonEmpty
+                  size="xs"
+                  color="text"
+                  iconType="beaker"
+                  onClick={() => setPreviewLaunchError(true)}
+                  data-test-subj="awsOnboardingCloudFormationPreviewError"
+                >
+                  Preview error state
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )
       ) : !allReceived ? (
         <EuiButton isLoading disabled data-test-subj="awsOnboardingStep3CloudFormationDeploying">
           Cloudformation stack deploying...
@@ -464,9 +528,28 @@ const CloudFormationWidget: React.FunctionComponent<{
       {isLaunched && (
         <>
           <EuiSpacer size="m" />
-          <EuiText size="s" color="subdued">
-            {`${receivedCount} of ${services.length} - data received`}
-          </EuiText>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {`${receivedCount} of ${services.length} - data received`}
+              </EuiText>
+            </EuiFlexItem>
+            {!allReceived && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content="Design preview only — shows how a stalled detection would look. Not part of the real flow.">
+                  <EuiButtonEmpty
+                    size="xs"
+                    color="text"
+                    iconType="beaker"
+                    onClick={() => setPreviewStuck((v) => !v)}
+                    data-test-subj="awsOnboardingCloudFormationPreviewStuck"
+                  >
+                    {previewStuck ? 'Hide preview' : 'Preview: data not arriving'}
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
           <EuiFlexGrid columns={4} gutterSize="m">
             {services.map((service, i) => (
@@ -475,6 +558,33 @@ const CloudFormationWidget: React.FunctionComponent<{
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
+          {previewStuck && !allReceived && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                color="warning"
+                iconType="warning"
+                title="Still waiting on data from some services"
+                data-test-subj="awsOnboardingCloudFormationStuckWarning"
+              >
+                <p>
+                  This can happen if the trigger source (S3 bucket or CloudWatch log group)
+                  doesn&apos;t match what&apos;s configured in Service settings, if the stack was
+                  deployed to a different AWS region than the log source, or if there&apos;s
+                  simply no new log activity yet to forward.
+                </p>
+                <EuiButtonEmpty
+                  iconType="popout"
+                  iconSide="right"
+                  href="https://console.aws.amazon.com/lambda"
+                  target="_blank"
+                  flush="left"
+                >
+                  Open AWS Lambda console
+                </EuiButtonEmpty>
+              </EuiCallOut>
+            </>
+          )}
         </>
       )}
 
@@ -592,6 +702,9 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
   useEffect(() => {
     onCompleteChange(isComplete);
   }, [isComplete, onCompleteChange]);
+
+  // Design-preview-only toggle — see CloudFormationWidget above for why.
+  const [previewDeployError, setPreviewDeployError] = useState(false);
 
   return (
     <AccordionCard
@@ -736,13 +849,62 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
 
       <EuiSpacer size="m" />
       {!isDeployed ? (
-        <EuiButton
-          isDisabled={!isValid}
-          onClick={onDeploy}
-          data-test-subj="awsOnboardingDeployManagedIntegrations"
-        >
-          Deploy integrations
-        </EuiButton>
+        previewDeployError ? (
+          <EuiCallOut
+            color="danger"
+            iconType="warning"
+            title="Couldn't verify AWS permissions for this role"
+            data-test-subj="awsOnboardingManagedIntegrationsDeployError"
+          >
+            <p>
+              AWS rejected the request to assume this role. This is usually because the
+              role&apos;s trust policy doesn&apos;t allow Elastic to assume it, the Role ARN has a
+              typo, or the account is missing the required permissions.
+            </p>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="danger"
+                  iconType="refresh"
+                  onClick={() => setPreviewDeployError(false)}
+                  data-test-subj="awsOnboardingManagedIntegrationsRetry"
+                >
+                  Retry
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty color="danger" href="#" target="_blank" iconType="popout" iconSide="right">
+                  Troubleshooting guide
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiCallOut>
+        ) : (
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isDisabled={!isValid}
+                onClick={onDeploy}
+                data-test-subj="awsOnboardingDeployManagedIntegrations"
+              >
+                Deploy integrations
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content="Design preview only — shows how a failed deployment would look. Not part of the real flow.">
+                <EuiButtonEmpty
+                  size="xs"
+                  color="text"
+                  iconType="beaker"
+                  onClick={() => setPreviewDeployError(true)}
+                  data-test-subj="awsOnboardingManagedIntegrationsPreviewError"
+                >
+                  Preview error state
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )
       ) : !allReceived ? (
         <EuiButton isLoading disabled data-test-subj="awsOnboardingManagedIntegrationsDeploying">
           Deploying integrations...
