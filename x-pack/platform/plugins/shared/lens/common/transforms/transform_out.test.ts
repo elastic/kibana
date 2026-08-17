@@ -6,7 +6,7 @@
  */
 
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { LensByValueSerializedState, LensByRefSerializedState } from '@kbn/lens-common';
+import type { LensByValueSerializedState } from '@kbn/lens-common';
 
 import { simpleMetricAttributes } from '@kbn/lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock';
 import { getTransformOut } from './transform_out';
@@ -179,19 +179,6 @@ describe('getTransformOut', () => {
       const result = transformOut(storedState, []) as { ref_id?: string };
 
       expect(result.ref_id).toEqual('legacy-saved-object-id');
-    });
-
-    it('returns ref_id from stored ref_id when no savedObjectRef reference exists', () => {
-      const builder = new LensConfigBuilder(undefined, true);
-      const transformOut = getTransformOut(builder, transformDrilldownsOut, false);
-
-      const storedState: LensByRefSerializedState = {
-        ref_id: 'stored-ref-id',
-      };
-
-      const result = transformOut(storedState, []) as { ref_id?: string };
-
-      expect(result.ref_id).toEqual('stored-ref-id');
     });
 
     it('falls through to by-value when savedObjectId is present alongside attributes (hybrid state)', () => {

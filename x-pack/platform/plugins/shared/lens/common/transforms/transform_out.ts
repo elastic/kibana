@@ -64,15 +64,8 @@ export const getTransformOut = (
     }
 
     // Falback to handle legacy SO with missing savedObjectRef reference
-    if (!attributes) {
-      if (state.ref_id) {
-        // ref_id stored directly in embeddableConfig via the rawState path
-        return state as unknown as LensByRefTransformOutResult;
-      }
-      if (legacySavedObjectId && typeof legacySavedObjectId === 'string') {
-        // Legacy 8.x format: savedObjectId in embeddableConfig, no savedObjectRef reference
-        return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
-      }
+    if (!attributes && legacySavedObjectId && typeof legacySavedObjectId === 'string') {
+      return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
     }
 
     const migratedAttributes = migrateAttributes(attributes);
