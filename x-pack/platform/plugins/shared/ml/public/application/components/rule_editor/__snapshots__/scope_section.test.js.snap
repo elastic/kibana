@@ -457,7 +457,8 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
               >
                 Filter Lists
               </button>
-               settings page to create the list of values you want to include or exclude in the job rule.
+               settings page
+            to create the list of values you want to include or exclude in the job rule.
             </p>
           </div>
         </div>
