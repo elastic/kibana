@@ -11,17 +11,12 @@ import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
-
-jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
-
-const softDeleteGapsMock = softDeleteGaps as jest.Mock;
 
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
@@ -206,16 +201,26 @@ describe('delete()', () => {
 
   test('attempts to soft delete gaps', async () => {
     await rulesClient.delete({ id: '1' });
-    expect(softDeleteGapsMock).toHaveBeenCalledWith({
-      ruleIds: ['1'],
-      logger: rulesClientParams.logger,
-      eventLogClient,
-      eventLogger: rulesClientParams.eventLogger,
+    expect(eventLogClient.updateGapsByRuleIds).toHaveBeenCalledWith(['1']);
+  });
+
+  test('soft-deletes gaps after SO deletion, not before', async () => {
+    const callOrder: string[] = [];
+    unsecuredSavedObjectsClient.delete.mockImplementation(async () => {
+      callOrder.push('deleteSo');
+      return { success: true };
     });
+    eventLogClient.updateGapsByRuleIds.mockImplementation(async () => {
+      callOrder.push('softDeleteGaps');
+    });
+
+    await rulesClient.delete({ id: '1' });
+
+    expect(callOrder.indexOf('deleteSo')).toBeLessThan(callOrder.indexOf('softDeleteGaps'));
   });
 
   test('swallows errors when soft deleting gaps fails', async () => {
-    softDeleteGapsMock.mockRejectedValueOnce(new Error('Boom!'));
+    eventLogClient.updateGapsByRuleIds.mockRejectedValueOnce(new Error('Boom!'));
     await rulesClient.delete({ id: '1' });
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to soft delete gaps for rule 1: Boom!'
