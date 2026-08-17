@@ -300,7 +300,7 @@ validation:
     const warning = screen.getByTestId('fieldDefinitionRequiredNoDefaultWarning');
     expect(warning).toHaveTextContent('Required field without a default value');
     expect(warning).toHaveTextContent(
-      'Cases created automatically from a template that includes this field will leave it empty'
+      'It will be empty on cases created automatically from any template that includes it'
     );
   });
 
@@ -313,7 +313,7 @@ validation:
     fireEvent.click(screen.getByTestId('fieldDefinitionApplyToAllCasesCheckbox'));
 
     expect(screen.getByTestId('fieldDefinitionRequiredNoDefaultWarning')).toHaveTextContent(
-      'every automatically created case in this space will leave it empty'
+      'it will be empty on every automatically created case in this space'
     );
   });
 

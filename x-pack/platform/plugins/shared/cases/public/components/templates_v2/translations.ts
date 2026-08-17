@@ -1271,6 +1271,6 @@ export const FIELD_MODIFIED = i18n.translate('xpack.cases.templates.fieldModifie
 export const REQUIRED_FIELD_NO_DEFAULT = (fieldName: string) =>
   i18n.translate('xpack.cases.templates.validation.requiredFieldNoDefault', {
     defaultMessage:
-      '"{fieldName}" is required but has no default value. Cases created automatically (for example, by alert rules) cannot fill it in and will leave it empty. Add a metadata.default to guarantee a value.',
+      '"{fieldName}" is required but has no default value, so it will be empty on cases created automatically (for example, from alert rules). Add metadata.default to guarantee a value.',
     values: { fieldName },
   });
