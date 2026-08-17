@@ -66,4 +66,8 @@ export const registerWorkflowSteps = (
       (m) => m.createExceptionListItemStepDefinition
     )
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./create_note_step/create_note_step').then((m) => m.createNoteStepDefinition)
+  );
 };
