@@ -10,6 +10,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsStaticKeyCredentials } from '@kbn/fleet-plugin/public';
 
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
+import { getOnboardingSessionKey } from './onboarding_session_storage';
 
 export interface DeploySettingsStepState {
   connectorId?: string;
@@ -68,10 +69,14 @@ const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(und
 
 export function OnboardingFlowProvider({ children }: { children: React.ReactNode }) {
   const [persistedDeploySettingsStep, setPersistedDeploySettingsStep] =
-    useSessionStorage<PersistedDeploySettingsStep>('onboarding.aws.deploySettingsStep', {});
+    useSessionStorage<PersistedDeploySettingsStep>(
+      // Key hardcoded to 'aws'; threading integrationId through the provider is deferred to #8099
+      getOnboardingSessionKey('aws', 'deploySettingsStep'),
+      {}
+    );
 
   const [persistedServices, setPersistedServices] = useSessionStorage<PersistedServicesStep>(
-    'onboarding.aws.servicesStep',
+    getOnboardingSessionKey('aws', 'servicesStep'),
     { selectedServiceIds: DEFAULT_SELECTED_IDS }
   );
 
@@ -113,12 +118,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
   );
 
   const [persistedDeployAndDetectStep, setPersistedDeployAndDetectStep] =
-    useSessionStorage<PersistedDeployAndDetectStep>('onboarding.aws.deployAndDetectStep', {
-      serviceStatuses: {},
-      policyIdsByInstance: {},
-      failedInstances: [],
-      deployErrors: {},
-    });
+    useSessionStorage<PersistedDeployAndDetectStep>(
+      getOnboardingSessionKey('aws', 'deployAndDetectStep'),
+      {
+        serviceStatuses: {},
+        policyIdsByInstance: {},
+        failedInstances: [],
+        deployErrors: {},
+      }
+    );
 
   // isDeploying is intentionally not persisted — it resets to false on page reload
   const [isDeploying, setIsDeploying] = useState(false);
