@@ -94,7 +94,7 @@ export const nlToStreamlang = async (
   const isWired = Streams.WiredStream.Definition.is(definition);
 
   let existingSteps: StreamlangStep[] = [];
-  if (Streams.ingest.all.Definition.is(definition)) {
+  if (Streams.ingest.all.Definition.is(definition) && 'steps' in definition.ingest.processing) {
     existingSteps = definition.ingest.processing.steps;
   }
 

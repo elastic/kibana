@@ -1870,7 +1870,6 @@
         "node-forge",
         "formik",
         "handlebars",
-        "js-yaml",
         "knip",
         "magic-bytes.js",
         "minimist",
@@ -1878,7 +1877,6 @@
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
-        "@types/js-yaml",
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
@@ -2235,14 +2233,6 @@
       "groupName": "esql-js",
       "matchDepNames": ["@elastic/esql"],
       "reviewers": ["team:kibana-esql"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "fuse.js",
-      "matchDepNames": ["fuse.js"],
-      "reviewers": ["team:observability-ui"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
