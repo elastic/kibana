@@ -60,7 +60,7 @@ if [[ "$NEED_OPENROUTER_CONNECTORS" == "true" ]]; then
   fi
 
   KIBANA_TESTING_AI_CONNECTORS="$(
-    EVAL_MODEL_GROUPS= node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_openrouter_connectors.js \
+    node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_openrouter_connectors.js \
       --base-url "$OPENROUTER_BASE_URL" \
       --api-key "$OPENROUTER_API_KEY"
   )"
