@@ -49,13 +49,12 @@ describe('ConversationServiceImpl', () => {
     const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
 
     it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
-      getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane', isAdmin });
+      const user = { id: 'profile-1', username: 'jane', isAdmin };
+      getUserFromRequestMock.mockResolvedValue(user);
 
       await createService({ agents }).getScopedClient({ request });
 
-      expect(createClientMock).toHaveBeenCalledWith(
-        expect.objectContaining({ user: expect.objectContaining({ isAdmin }) })
-      );
+      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ user }));
     });
 
     it('uses the internal client for conversation storage', async () => {

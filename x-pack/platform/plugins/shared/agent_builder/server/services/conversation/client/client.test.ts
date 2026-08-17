@@ -22,7 +22,7 @@ import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-b
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
-import type { Document } from './converters';
+import { fromEs, fromEsWithoutRounds, type Document } from './converters';
 
 jest.mock('../templates/registry');
 import { getTemplate } from '../templates/registry';
@@ -126,6 +126,39 @@ describe('ConversationClient', () => {
         username: 'test-user',
         isAdmin: false,
       },
+    });
+  });
+
+  describe('getConversationWithPermissions', () => {
+    it('preserves full conversations and adds owner permissions for the client user', () => {
+      const conversation = fromEs(createConversationDocument());
+
+      expect(client.getConversationWithPermissions(conversation)).toEqual({
+        ...conversation,
+        permissions: { rename: true, delete: true, update_access_control: true },
+      });
+    });
+
+    it('adds public-conversation admin permissions for the client user', () => {
+      const adminClient = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: {} as never,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'admin-user', username: 'admin', isAdmin: true },
+      });
+      const conversation = fromEsWithoutRounds(
+        createConversationDocument({
+          userId: 'owner-user',
+          username: 'owner',
+          accessMode: ConversationAccessControlMode.Public,
+        })
+      );
+
+      expect(adminClient.getConversationWithPermissions(conversation)).toEqual({
+        ...conversation,
+        permissions: { rename: true, delete: true, update_access_control: false },
+      });
     });
   });
 

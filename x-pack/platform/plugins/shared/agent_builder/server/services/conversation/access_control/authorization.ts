@@ -7,7 +7,6 @@
 
 import type { ConversationWithoutRounds, CurrentUser } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
-import type { ConversationPermissions } from '../../../../common/http_api/permissions';
 
 export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
 
@@ -111,15 +110,3 @@ export const hasConversationUpdateAccessControlAccess = ({
   conversation: ConversationWithoutRounds;
   user: CurrentUser;
 }): boolean => hasConversationOwnerAccess({ conversation, user });
-
-export const getConversationPermissions = ({
-  conversation,
-  user,
-}: {
-  conversation: ConversationWithoutRounds;
-  user: CurrentUser;
-}): ConversationPermissions => ({
-  rename: hasConversationRenameAccess({ conversation, user }),
-  delete: hasConversationDeleteAccess({ conversation, user }),
-  update_access_control: hasConversationUpdateAccessControlAccess({ conversation, user }),
-});

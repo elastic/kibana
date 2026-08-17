@@ -20,13 +20,3 @@ export type WithPermissions<T> = T & {
 export type ConversationWithPermissions = WithPermissions<Conversation>;
 
 export type ConversationWithoutRoundsWithPermissions = WithPermissions<ConversationWithoutRounds>;
-
-export const withPermissions = <T>(
-  conversation: T,
-  permissions: ConversationPermissions
-): WithPermissions<T> => {
-  return {
-    ...conversation,
-    permissions,
-  };
-};

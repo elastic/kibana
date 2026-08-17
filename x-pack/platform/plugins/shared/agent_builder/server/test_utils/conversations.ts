@@ -69,6 +69,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     patchMetadata: jest.fn(),
     appendEvents: jest.fn(),
     getEvents: jest.fn(),
+    getConversationWithPermissions: jest.fn(),
   };
 };
 

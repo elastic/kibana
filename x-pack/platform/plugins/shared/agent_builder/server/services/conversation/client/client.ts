@@ -38,6 +38,7 @@ import type {
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import type { UpdateConversationAccessControlRequestBody } from '../../../../common/http_api/conversations';
+import type { WithPermissions } from '../../../../common/http_api/permissions';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,
@@ -128,6 +129,9 @@ export interface ConversationClient {
   appendEvents(conversationId: string, events: TimelineEventInput[]): Promise<TimelineEvent[]>;
   /** Read the conversation's timeline, in order. */
   getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
+  getConversationWithPermissions<T extends ConversationWithoutRounds>(
+    conversation: T
+  ): WithPermissions<T>;
 }
 
 export const createClient = ({
@@ -229,6 +233,22 @@ class ConversationClientImpl implements ConversationClient {
     return response.hits.hits.map((hit) =>
       withDeserializedMetadata(fromEsWithoutRounds(hit as Document))
     );
+  }
+
+  getConversationWithPermissions<T extends ConversationWithoutRounds>(
+    conversation: T
+  ): WithPermissions<T> {
+    return {
+      ...conversation,
+      permissions: {
+        rename: hasConversationRenameAccess({ conversation, user: this.user }),
+        delete: hasConversationDeleteAccess({ conversation, user: this.user }),
+        update_access_control: hasConversationUpdateAccessControlAccess({
+          conversation,
+          user: this.user,
+        }),
+      },
+    };
   }
 
   async get(conversationId: string): Promise<Conversation> {

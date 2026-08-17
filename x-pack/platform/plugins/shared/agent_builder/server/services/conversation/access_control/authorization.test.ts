@@ -13,7 +13,6 @@ import {
   type CurrentUser,
 } from '@kbn/agent-builder-common';
 import {
-  getConversationPermissions,
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
@@ -44,7 +43,6 @@ const conversation = (
   updated_at: '2026-06-29T00:00:00.000Z',
   ...overrides,
 });
-
 describe('conversation access control', () => {
   describe('isConversationOwner', () => {
     it('matches owners by profile id when both sides have one', () => {
@@ -295,122 +293,6 @@ describe('conversation access control', () => {
           hasConversationDeleteAccess({ conversation: owned, user: userWithAdminStatus })
         ).toBe(true);
       }
-    });
-  });
-
-  describe('getConversationPermissions', () => {
-    it('grants rename and delete to the owner matched by profile id', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation({ user: { id: user.id, username: 'old-alice' } }),
-          user,
-        })
-      ).toEqual({ rename: true, delete: true, update_access_control: true });
-    });
-
-    it('grants rename and delete to the owner of a legacy conversation without a profile id', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation({ user: { username: user.username } }),
-          user,
-        })
-      ).toEqual({ rename: true, delete: true, update_access_control: true });
-    });
-
-    it('denies rename and delete to a participant of a public conversation', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation({
-            access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
-          }),
-          user,
-        })
-      ).toEqual({ rename: false, delete: false, update_access_control: false });
-    });
-
-    it('grants rename and delete to an admin on a public conversation they do not own', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation({
-            access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
-          }),
-          user: { ...user, isAdmin: true },
-        })
-      ).toEqual({ rename: true, delete: true, update_access_control: false });
-    });
-
-    it('denies rename and delete to an admin on a private conversation they do not own', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation(),
-          user: { ...user, isAdmin: true },
-        })
-      ).toEqual({ rename: false, delete: false, update_access_control: false });
-    });
-
-    it('denies rename and delete on a public conversation owned by a service account', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation({
-            user: {
-              id: 'relay-service-account-profile-id',
-              username: 'relay-service-account',
-            },
-            access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
-          }),
-          user,
-        })
-      ).toEqual({ rename: false, delete: false, update_access_control: false });
-    });
-
-    it('denies managing access control to a member of a shared conversation', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation({
-            access_control: {
-              access_mode: ConversationAccessControlMode.Private,
-              entries: [
-                {
-                  type: 'user',
-                  id: userId,
-                  role: ConversationAccessControlRole.Member,
-                  added_at: '2026-06-29T00:00:00.000Z',
-                },
-              ],
-            },
-          }),
-          user,
-        })
-      ).toEqual({ rename: false, delete: false, update_access_control: false });
-    });
-
-    it('denies managing access control to an admin on a private conversation shared with them as a member', () => {
-      expect(
-        getConversationPermissions({
-          conversation: conversation({
-            access_control: {
-              access_mode: ConversationAccessControlMode.Private,
-              entries: [
-                {
-                  type: 'user',
-                  id: userId,
-                  role: ConversationAccessControlRole.Member,
-                  added_at: '2026-06-29T00:00:00.000Z',
-                },
-              ],
-            },
-          }),
-          user: { ...user, isAdmin: true },
-        })
-      ).toEqual({ rename: false, delete: false, update_access_control: false });
-    });
-
-    it('denies rename and delete to a non-owner of a private conversation', () => {
-      expect(getConversationPermissions({ conversation: conversation(), user })).toEqual({
-        rename: false,
-        delete: false,
-        update_access_control: false,
-      });
     });
   });
 });
