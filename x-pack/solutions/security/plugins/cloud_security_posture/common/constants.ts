@@ -67,13 +67,6 @@ export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
 
-// The metering state index is a plain index, not a data stream, so it needs its
-// own template at a priority above the built-in `logs` data stream template —
-// otherwise ES refuses to create it ("matches with template [logs] that creates
-// data streams only"). Same arrangement as the benchmark score index above.
-export const METERING_STATE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.metering_state';
-export const METERING_STATE_INDEX_PATTERN = 'logs-cloud_security_posture.metering_state-*';
-
 export const VULNERABILITIES_INDEX_NAME = 'logs-cloud_security_posture.vulnerabilities';
 export const VULNERABILITIES_INDEX_PATTERN = 'logs-cloud_security_posture.vulnerabilities-default*';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =

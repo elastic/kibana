@@ -8,12 +8,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { CDR_METERING_STATE_INDEX } from '@kbn/cloud-security-posture-common';
-import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  METERING_STATE_INDEX_PATTERN,
-  METERING_STATE_INDEX_TEMPLATE_NAME,
-} from '../../common/constants';
 import {
   latestFindingsTransform,
   DEPRECATED_FINDINGS_TRANSFORMS_VERSION,
@@ -23,7 +17,6 @@ import {
   latestVulnerabilitiesTransform,
   DEPRECATED_VULN_TRANSFORM_VERSIONS,
 } from './latest_vulnerabilities_transforms';
-import { meteringStateTransform, METERING_STATE_INDEX_MAPPINGS } from './metering_state_transform';
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
@@ -38,13 +31,10 @@ export const initializeCspTransforms = async (
   }
   await initializeTransform(esClient, latestVulnerabilitiesTransform, logger);
 
-  // Stateful CSPM metering state (security-team#17662). The dest index must be
-  // created first: deduce_mappings is false because top_metrics/bucket_script
-  // output mappings cannot be deduced.
-  const stateIndexReady = await createMeteringStateIndexIfNotExists(esClient, logger);
-  if (stateIndexReady) {
-    await initializeTransform(esClient, meteringStateTransform, logger);
-  }
+  // The CSPM metering_state transform (security-team#17662) is installed by the
+  // cloud_security_posture package, not here. It writes a system index, so it
+  // runs as the internal user, and Fleet owns the destination index template
+  // and lifecycle — duplicating that here would fight the package on upgrade.
 };
 
 export const initializeTransform = async (
@@ -153,44 +143,6 @@ export const deletePreviousTransformsVersions = async (
   for (const transform of deprecatedTransforms) {
     const response = await deleteTransformSafe(esClient, logger, transform);
     if (response) return;
-  }
-};
-
-const createMeteringStateIndexIfNotExists = async (
-  esClient: ElasticsearchClient,
-  logger: Logger
-): Promise<boolean> => {
-  try {
-    // The template must exist before the index: the dest name matches the
-    // built-in `logs` data stream template, and ES rejects a plain index whose
-    // winning template is data-stream-only. Priority 500 matches the plugin's
-    // other managed indices and outranks it.
-    await esClient.indices.putIndexTemplate({
-      name: METERING_STATE_INDEX_TEMPLATE_NAME,
-      index_patterns: METERING_STATE_INDEX_PATTERN,
-      template: { mappings: METERING_STATE_INDEX_MAPPINGS },
-      _meta: {
-        package: { name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME },
-        managed_by: 'cloud_security_posture',
-        managed: true,
-      },
-      priority: 500,
-    });
-
-    const exists = await esClient.indices.exists({ index: CDR_METERING_STATE_INDEX });
-    if (exists) return true;
-    await esClient.indices.create({
-      index: CDR_METERING_STATE_INDEX,
-      mappings: METERING_STATE_INDEX_MAPPINGS,
-    });
-    logger.info(`Created metering state index ${CDR_METERING_STATE_INDEX}`);
-    return true;
-  } catch (err) {
-    const error = transformError(err);
-    // A concurrent Kibana node may have created it between exists() and create().
-    if (error.message.includes('resource_already_exists_exception')) return true;
-    logger.error(`Failed to create metering state index: ${error.message}`);
-    return false;
   }
 };
 

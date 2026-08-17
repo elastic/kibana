@@ -45,12 +45,6 @@ export default function (providerContext: FtrProviderContext) {
   );
   const meteringStateIndex = new EsIndexDataProvider(es, CDR_METERING_STATE_INDEX);
 
-  // METERING_STATE_TRANSFORM_ID from
-  // cloud_security_posture/server/create_transforms/metering_state_transform.ts.
-  // Duplicated rather than imported: FTR suites only reach into a plugin's
-  // `common/` directory, never `server/`.
-  const METERING_STATE_TRANSFORM_ID = 'cloud_security_posture.metering_state-default-1.0.0';
-
   // The metering_state transform reads the wildcard pattern
   // `logs-cloud_security_posture.findings-default*`. This suite writes raw
   // findings to a dedicated concrete index under that pattern rather than to
@@ -505,12 +499,11 @@ export default function (providerContext: FtrProviderContext) {
 
       await meteringStateIndex.deleteAll();
 
-      // Matched by wildcard rather than by exact id: the transform may be
-      // registered by the CSP plugin (METERING_STATE_TRANSFORM_ID) or shipped as
-      // a cloud_security_posture package asset, and Fleet derives its own id
-      // from the package name and version. The test cares that exactly one
-      // metering_state transform is running, not which installer created it.
-      let meteringTransformId = METERING_STATE_TRANSFORM_ID;
+      // The transform is a cloud_security_posture package asset, and Fleet
+      // derives its id from the destination index and fleet_transform_version
+      // (logs-cloud_security_posture.metering_state-default-0.1.0). Matched by
+      // wildcard so the test does not encode that derivation.
+      let meteringTransformId = '';
       await retry.try(async () => {
         const transforms = await es.transform.getTransform({
           transform_id: '*metering_state*',
