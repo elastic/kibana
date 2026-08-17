@@ -1,7 +1,8 @@
 # Vega sandbox example
 
 Start Kibana with `yarn start --run-examples`, open **Developer Examples → Vega sandbox**,
-and click **Render**. The opaque iframe draws an inline Vega-Lite bar chart. Inbound and
+and click **Render**. The opaque iframe draws an inline Vega-Lite bar chart; hover a bar for a
+tooltip. Inbound and
 outbound protocol messages show in one comment list. Click **Render filter example**, then
 click a bar. The spec posts `applyFilter` (`kibanaAddFilter`); this page filters the inline
 data and sends a new `render`. It does not use Kibana Filter Manager. **Resize** toggles

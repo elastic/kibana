@@ -38,6 +38,22 @@ import { PLUGIN_NAME, VEGA_SANDBOX_EXAMPLE_FRAME_PATH } from '../common';
 const IFRAME_HEIGHT = 360;
 const IFRAME_HEIGHT_EXPANDED = 520;
 
+/** Demo-only tooltip CSS. visTypeVega will serialize EUI `.vgaVis__tooltip` styles instead. */
+const EXAMPLE_TOOLTIP_CSS = `
+.vgaVis__tooltip {
+  background: #1d1e24;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font: 12px/1.4 sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 1;
+}
+.vgaVis__tooltip table { border-collapse: collapse; }
+.vgaVis__tooltip td { padding: 2px 4px; }
+.vgaVis__tooltip td.key { text-align: right; opacity: 0.75; }
+`;
+
 interface ChartRow {
   amount: number;
   category: string;
@@ -55,7 +71,9 @@ const compileBarChart = (values: ChartRow[], clickToFilter: boolean): Spec => {
     title: clickToFilter ? 'Click a bar to send applyFilter' : 'Inline bar chart',
     description: 'Inline bar chart with no Elasticsearch data',
     data: { values },
-    mark: clickToFilter ? { type: 'bar', cursor: 'pointer' } : 'bar',
+    mark: clickToFilter
+      ? { type: 'bar', cursor: 'pointer', tooltip: true }
+      : { type: 'bar', tooltip: true },
     encoding: {
       x: { field: 'category', type: 'nominal', title: 'Category' },
       y: { field: 'amount', type: 'quantitative', title: 'Amount' },
@@ -185,7 +203,11 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
       const inbound: VegaSandboxInboundMessage[] = [];
       if (!didInitRef.current) {
         didInitRef.current = true;
-        inbound.push({ type: 'init', protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION });
+        inbound.push({
+          type: 'init',
+          protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION,
+          tooltipCss: EXAMPLE_TOOLTIP_CSS,
+        });
       }
       inbound.push({
         type: 'render',
@@ -199,7 +221,7 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
           renderer: 'svg',
           useHover: true,
           useResize: true,
-          tooltips: false,
+          tooltips: { position: 'top' },
         },
       });
       appendLog([
@@ -306,13 +328,13 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
         <EuiText>
           <p>
             Protocol playground for <code>@kbn/vega-sandbox</code>. This is not the production
-            visTypeVega host. <strong>Render</strong> draws a Vega-Lite bar chart.{' '}
-            <strong>Render filter example</strong> is the same chart with clickable bars: the spec
-            posts <code>applyFilter</code>, this page filters the inline data, and it sends a new{' '}
-            <code>render</code>. visTypeVega would apply Kibana filters and refetch Elasticsearch
-            instead. <strong>Resize</strong> toggles the iframe height and posts <code>resize</code>{' '}
-            with the new dimensions; it does not trigger another <code>rendered</code>.{' '}
-            <strong>Reset</strong> reloads the iframe and clears the log.
+            visTypeVega host. <strong>Render</strong> draws a Vega-Lite bar chart; hover a bar for a
+            tooltip. <strong>Render filter example</strong> is the same chart with clickable bars:
+            the spec posts <code>applyFilter</code>, this page filters the inline data, and it sends
+            a new <code>render</code>. visTypeVega would apply Kibana filters and refetch
+            Elasticsearch instead. <strong>Resize</strong> toggles the iframe height and posts{' '}
+            <code>resize</code> with the new dimensions; it does not trigger another{' '}
+            <code>rendered</code>. <strong>Reset</strong> reloads the iframe and clears the log.
           </p>
         </EuiText>
         <EuiSpacer />
