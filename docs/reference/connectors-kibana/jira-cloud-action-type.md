@@ -144,7 +144,7 @@ Link issues (`linkIssues`)
 :   Create a directional link between two issues (for example, "relates to", "blocks", "duplicates").
     - `inwardIssueKey` (required): Key of the inward issue.
     - `outwardIssueKey` (required): Key of the outward issue.
-    - `linkType` (required): Link type name as configured in your Jira instance.
+    - `linkType` (required): Link type name as configured in your Jira instance. The value is case-sensitive and must match exactly (for example, `"Relates"` not `"relates to"`).
     - `comment` (optional): A plain-text comment to add to the link.
 
 Delete issue (`deleteIssue`)
