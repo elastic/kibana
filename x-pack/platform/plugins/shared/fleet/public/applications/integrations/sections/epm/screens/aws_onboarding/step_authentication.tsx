@@ -1039,14 +1039,19 @@ const WhereToAddCard: React.FunctionComponent<{
                 <EuiText size="s">1 agent enrolled</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
+                {/* EuiButton, not EuiButtonEmpty — empty renders no visible
+                    chrome at this size, so it read as a plain link rather
+                    than a button. color="text" for a secondary (not
+                    primary-blue) treatment. */}
+                <EuiButton
                   size="xs"
+                  color="text"
                   iconType="plus"
                   onClick={() => setIsAddAgentFlyoutOpen(true)}
                   data-test-subj="awsOnboardingAddAnotherAgent"
                 >
                   Add another agent
-                </EuiButtonEmpty>
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
