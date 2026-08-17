@@ -17,7 +17,7 @@ Each setting is resolved as **CLI flag > environment variable > default**.
 - `--json` - Output as JSON array (default: one package per line)
 - `--merge-base <revision>` - Git revision to compare against
 - `--strategy <git|moon>` - Strategy to use
-- `--ignore <glob>` - Exclude changed files matching glob from detection (repeatable)
+- `--ignore <glob>` - Exclude changed files matching glob from detection (repeatable; both strategies)
 - `--ignore-uncategorized` - (git) Exclude `[uncategorized]` from output when changes are only in files outside any module
 - `--help, -h` - Show help message
 
@@ -69,7 +69,7 @@ const affectedPackages = await getAffectedPackages(
   {
     strategy: 'git',       // default, can also be 'moon'
     includeDownstream: true,
-    ignorePatterns: ['**/*.md', 'docs/**'],
+    ignorePatterns: ['**/*.md', 'docs/**'],  // applies to both strategies
     ignoreUncategorizedChanges: false,
   }
 );
@@ -125,10 +125,17 @@ const filteredFiles = filterFilesByPackages(
 **Performance**: ~500ms (first call, includes module discovery); subsequent calls use cache
 
 ### Moon Strategy
-1. Query Moon with `--affected [--downstream deep]`
-2. Return affected project IDs
+1. Query Moon with `--affected [--downstream deep]`, pinning `MOON_BASE` to the merge base and
+   `MOON_HEAD` to `HEAD`
+2. When ignore patterns are set, ask Moon for its changed-file list, drop the ignored paths, and
+   feed the remainder back on stdin
+3. Return affected project IDs
 
-**Performance**: ~5-7 seconds
+**Performance**: ~5-7 seconds (~10-14s with ignore patterns, which costs a second Moon query)
+
+> **`MOON_HEAD` matters.** Without it Moon diffs the *working tree* — including uncommitted and
+> untracked files — instead of the checked-out commit. Any file an earlier CI step regenerates
+> then counts as changed, and a single such file pulls in its whole downstream tree.
 
 ## PR Jest selective testing
 
@@ -141,5 +148,11 @@ Some integration suites boot a full Kibana and snapshot a *global registry* (rul
 ## Scout selective testing: git -> Moon (shadow mode)
 
 `resolve_selective_testing.ts` still uses **git** as the authoritative strategy (written to `.scout/code_changes.json`, no behavior change). In parallel, it runs the **Moon** strategy above for observation only, and writes the result plus a diff of `affectedModules` to `.scout/code_changes.moon_shadow.json` (uploaded as a Buildkite artifact). Mismatches are logged as a warning via `ToolingLog`; a Moon failure is swallowed and logged, never fails the build.
+
+Both strategies are given the same `ignorePatterns` (`GENERATED_TEST_CONFIG_MANIFESTS`), otherwise the diff compares two different question — see below. Note that `changedFiles` is written **unfiltered**: the scope decision in `scout resolve-testing-scope` (critical-files / tests-only checks) still needs the real diff.
+
+### Generated test config manifests
+
+`test_run_builder.sh` runs `scout update-test-config-manifests` immediately before affected-module detection, rewriting `**/test/**/.meta` files in the working tree. Those manifests embed per-test line numbers, environment tags and expected status, so a regenerated one routinely differs from the committed copy. `GENERATED_TEST_CONFIG_MANIFESTS` (`const.ts`) excludes them from detection. This is safe: any real change behind a manifest update also appears as a spec-file change in the same diff.
 
 Once shadow-mode data shows git and Moon agree across real PR traffic, Moon will become authoritative and the git path removed (follow-up change, not yet done).

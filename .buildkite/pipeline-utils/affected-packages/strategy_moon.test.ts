@@ -74,4 +74,82 @@ describe('getAffectedProjectsMoon', () => {
       expect.anything()
     );
   });
+
+  it('pins MOON_HEAD so Moon diffs the checked-out commit, not the working tree', () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync.mockReturnValueOnce('resolved-sha\n').mockReturnValueOnce(moonResponse);
+
+    getAffectedProjectsMoon('main', false);
+
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ env: expect.objectContaining({ MOON_HEAD: 'HEAD' }) })
+    );
+  });
+
+  it('queries Moon once and reads no stdin when there are no ignore patterns', () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync.mockReturnValueOnce('resolved-sha\n').mockReturnValueOnce(moonResponse);
+
+    getAffectedProjectsMoon('main', false);
+
+    expect(mockExecSync).toHaveBeenCalledTimes(2);
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.not.objectContaining({ input: expect.anything() })
+    );
+  });
+
+  it('feeds Moon its own changed files minus the ignored paths', () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync
+      .mockReturnValueOnce('resolved-sha\n') // git merge-base
+      .mockReturnValueOnce(
+        JSON.stringify({
+          files: [
+            'x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/.meta/ui/standard.json',
+            'src/platform/plugins/shared/discover/test/scout/core/.meta/ui/parallel.json',
+            'x-pack/platform/plugins/shared/ml/public/app.tsx',
+          ],
+        })
+      ) // moon query changed-files
+      .mockReturnValueOnce(moonResponse); // moon query projects
+
+    const result = getAffectedProjectsMoon('main', true, ['**/test/**/.meta/**']);
+
+    expect(result).toEqual(new Set(['@kbn/foo']));
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining('query changed-files'),
+      expect.anything()
+    );
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      3,
+      expect.stringContaining('--downstream deep'),
+      expect.objectContaining({
+        input: JSON.stringify({ files: ['x-pack/platform/plugins/shared/ml/public/app.tsx'] }),
+      })
+    );
+  });
+
+  it('sends an empty file list when every changed file is ignored', () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync
+      .mockReturnValueOnce('resolved-sha\n')
+      .mockReturnValueOnce(
+        JSON.stringify({ files: ['src/platform/plugins/shared/home/test/scout/.meta/ui/x.json'] })
+      )
+      .mockReturnValueOnce(JSON.stringify({ projects: [] }));
+
+    const result = getAffectedProjectsMoon('main', true, ['**/test/**/.meta/**']);
+
+    expect(result).toEqual(new Set());
+    expect(mockExecSync).toHaveBeenNthCalledWith(
+      3,
+      expect.anything(),
+      expect.objectContaining({ input: JSON.stringify({ files: [] }) })
+    );
+  });
 });

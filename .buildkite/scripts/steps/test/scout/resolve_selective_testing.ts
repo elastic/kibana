@@ -41,7 +41,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { expandWithImplicitConsumers } from './scout_implicit_consumers';
 import { shouldSkipScoutTests } from './scout_ftr_modules';
 import { computeMoonShadow } from './moon_shadow';
-import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
+import {
+  GENERATED_TEST_CONFIG_MANIFESTS,
+  getAffectedPackages,
+  listChangedFiles,
+} from '#pipeline-utils';
 
 const log = new ToolingLog({ level: 'info', writeTo: process.stderr });
 
@@ -54,12 +58,14 @@ if (!mergeBase || !outPath) {
 
 (async () => {
   // List changed files once; reuse for both affected-packages and critical-files check.
+  // Kept unfiltered: the scope decision below needs the full diff.
   const changedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
 
   // Skip Scout when all affected modules are not related.
   const directlyAffected = await getAffectedPackages(mergeBase, {
     strategy: 'git',
     includeDownstream: false,
+    ignorePatterns: GENERATED_TEST_CONFIG_MANIFESTS,
     ignoreUncategorizedChanges: true,
   });
 
@@ -86,6 +92,7 @@ if (!mergeBase || !outPath) {
     await getAffectedPackages(mergeBase, {
       strategy: 'git',
       includeDownstream: true,
+      ignorePatterns: GENERATED_TEST_CONFIG_MANIFESTS,
       ignoreUncategorizedChanges: true,
     }),
     changedFiles,
@@ -107,6 +114,7 @@ if (!mergeBase || !outPath) {
     mergeBase,
     gitChangedFiles: changedFiles,
     gitAffectedModules: affectedPackages,
+    ignorePatterns: GENERATED_TEST_CONFIG_MANIFESTS,
     log,
   });
   if (moonShadow) {

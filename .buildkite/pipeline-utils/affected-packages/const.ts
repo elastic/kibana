@@ -9,6 +9,11 @@
 
 export const UNCATEGORIZED_MODULE_ID = '[uncategorized]';
 
+// Rewritten by `scout update-test-config-manifests` right before affected-module detection,
+// so a regenerated / updated manifest would mark its whole plugin affected.
+// Safe to drop: real changes also land in the spec files.
+export const GENERATED_TEST_CONFIG_MANIFESTS = ['**/test/**/.meta/**'];
+
 // Changes here skip affected-package filtering for Jest (full run).
 // Keep narrow: global test harness, transforms, CI selection.
 export const CRITICAL_FILES_JEST_UNIT_TESTS = [

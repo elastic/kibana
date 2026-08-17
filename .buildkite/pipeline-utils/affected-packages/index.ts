@@ -19,7 +19,7 @@ export { getAffectedProjectsMoon } from './strategy_moon';
 export interface AffectedPackagesConfig {
   strategy?: 'git' | 'moon';
   includeDownstream?: boolean;
-  /** Glob patterns for changed files to exclude before module resolution (git strategy only). */
+  /** Glob patterns for changed files to exclude before module resolution. */
   ignorePatterns?: string[];
   ignoreUncategorizedChanges?: boolean;
 }
@@ -52,7 +52,7 @@ export async function getAffectedPackages(
             ignorePatterns: config.ignorePatterns,
             ignoreUncategorizedChanges: config.ignoreUncategorizedChanges,
           })
-        : getAffectedProjectsMoon(mergeBase, config.includeDownstream);
+        : getAffectedProjectsMoon(mergeBase, config.includeDownstream, config.ignorePatterns);
 
     if (affectedPackages.size === 0) {
       console.warn('Warning: No affected packages found');

@@ -31,16 +31,19 @@ export function computeMoonShadow({
   mergeBase,
   gitChangedFiles,
   gitAffectedModules,
+  ignorePatterns = [],
   log,
 }: {
   mergeBase: string;
   gitChangedFiles: readonly string[];
   gitAffectedModules: ReadonlySet<string>;
+  /** Must match the git strategy's, or the diff below compares different inputs. */
+  ignorePatterns?: string[];
   log: ToolingLog;
 }): MoonShadowResult | null {
   try {
     const moonAffectedModules = expandWithImplicitConsumers(
-      getAffectedProjectsMoon(mergeBase, true),
+      getAffectedProjectsMoon(mergeBase, true, ignorePatterns),
       gitChangedFiles,
       log
     );

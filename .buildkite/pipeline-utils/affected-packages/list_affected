@@ -32,7 +32,7 @@ Options:
   --json                  Output as JSON array (default: one per line)
   --merge-base <revision> Git revision to compare against
   --strategy <git|moon>   Strategy to use
-  --ignore <glob>         (git) Exclude changed files matching glob (repeatable)
+  --ignore <glob>         Exclude changed files matching glob (repeatable)
   --ignore-uncategorized  (git) Ignore changes that are not categorized into a module (default: false)
   --help, -h              Show this help message
 
