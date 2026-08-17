@@ -22,6 +22,7 @@
     "@kbn/core",
     "@kbn/core-http-browser",
     "@kbn/core-ui-settings-browser",
+    "@kbn/cps",
     "@kbn/data-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-management",
@@ -54,6 +55,7 @@
     "@kbn/streams-schema",
     "@kbn/typed-react-router-config",
     "@kbn/unified-search-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/ui-callout"
   ]
 }
