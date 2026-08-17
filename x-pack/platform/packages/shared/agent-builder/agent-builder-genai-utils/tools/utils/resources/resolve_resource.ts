@@ -83,7 +83,6 @@ export const resolveResourceForEsql = async ({
       name: resourceName,
       type: EsResourceType.indexPattern,
       fields,
-      isTsdb: deriveIsTsdb(fields),
     };
   }
 
