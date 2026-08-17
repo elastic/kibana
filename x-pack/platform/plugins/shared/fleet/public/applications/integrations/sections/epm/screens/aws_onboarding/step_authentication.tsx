@@ -961,6 +961,9 @@ const WhereToAddCard: React.FunctionComponent<{
   // only push the actual "how do I add an agent" steps into a flyout.
   const [isAddAgentFlyoutOpen, setIsAddAgentFlyoutOpen] = useState(false);
   const [existingPolicyIds, setExistingPolicyIds] = useState<string[]>([]);
+  const [availablePolicies, setAvailablePolicies] = useState<string[]>([]);
+  const [isCreatePolicyFlyoutOpen, setIsCreatePolicyFlyoutOpen] = useState(false);
+  const [newPolicyName, setNewPolicyName] = useState('');
   const [platform, setPlatform] = useState('linux');
   const enrollTimer = useRef<number | null>(null);
   const servicesCount = services.length;
@@ -973,6 +976,7 @@ const WhereToAddCard: React.FunctionComponent<{
 
   useEffect(() => {
     if (hostMode !== 'new_hosts') setIsAddAgentFlyoutOpen(false);
+    if (hostMode !== 'existing_hosts') setIsCreatePolicyFlyoutOpen(false);
   }, [hostMode]);
 
   useEffect(() => {
@@ -1078,8 +1082,12 @@ const WhereToAddCard: React.FunctionComponent<{
           <EuiFormRow label="Agent policies" style={HALF_WIDTH} fullWidth>
             <EuiComboBox
               fullWidth
-              placeholder="No agent policies available"
-              options={[]}
+              placeholder={
+                availablePolicies.length === 0
+                  ? 'No agent policies available'
+                  : 'Select agent policies'
+              }
+              options={availablePolicies.map((name) => ({ label: name }))}
               selectedOptions={existingPolicyIds.map((id) => ({ label: id }))}
               onChange={(selected) => setExistingPolicyIds(selected.map((o) => o.label))}
               isClearable
@@ -1089,8 +1097,13 @@ const WhereToAddCard: React.FunctionComponent<{
           </EuiFormRow>
           <EuiText size="xs" color="subdued">
             <p>
-              There aren&apos;t any options available.{' '}
-              <EuiLink href="#" target="_blank" external data-test-subj="awsOnboardingAddNewPolicy">
+              {availablePolicies.length === 0
+                ? "There aren't any options available. "
+                : "Don't see the policy you need? "}
+              <EuiLink
+                onClick={() => setIsCreatePolicyFlyoutOpen(true)}
+                data-test-subj="awsOnboardingAddNewPolicy"
+              >
                 Add a new policy
               </EuiLink>
             </p>
@@ -1219,6 +1232,61 @@ const WhereToAddCard: React.FunctionComponent<{
                 data-test-subj="awsOnboardingCloseAddAgentFlyout"
               >
                 {isEnrolled ? 'Done' : 'Waiting for agent…'}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    )}
+
+    {isCreatePolicyFlyoutOpen && (
+      <EuiFlyout
+        onClose={() => setIsCreatePolicyFlyoutOpen(false)}
+        size="s"
+        data-test-subj="awsOnboardingCreatePolicyFlyout"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>Create agent policy</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiText size="s" color="subdued">
+            <p>Agent policies are used to manage a group of integrations across a set of agents.</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFormRow label="Name" fullWidth>
+            <EuiFieldText
+              fullWidth
+              placeholder="e.g.: AWS policy"
+              value={newPolicyName}
+              onChange={(e) => setNewPolicyName(e.target.value)}
+              aria-label="Agent policy name"
+              data-test-subj="awsOnboardingNewPolicyName"
+            />
+          </EuiFormRow>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={() => setIsCreatePolicyFlyoutOpen(false)}>
+                Cancel
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isDisabled={newPolicyName.trim().length === 0}
+                onClick={() => {
+                  const name = newPolicyName.trim();
+                  setAvailablePolicies((prev) => [...prev, name]);
+                  setExistingPolicyIds((prev) => [...prev, name]);
+                  setNewPolicyName('');
+                  setIsCreatePolicyFlyoutOpen(false);
+                }}
+                data-test-subj="awsOnboardingCreatePolicySubmit"
+              >
+                Create agent policy
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
