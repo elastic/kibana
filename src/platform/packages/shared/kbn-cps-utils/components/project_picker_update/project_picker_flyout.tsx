@@ -114,10 +114,7 @@ export function ProjectPickerFlyoutContent({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ProjectPickerFrameHeaderActions
-              showRevertToSpaceDefaultsAction={false}
-              showSpaceDefaultsBadge={false}
-            />
+            <ProjectPickerFrameHeaderActions />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

@@ -35,13 +35,9 @@ interface HeaderContextMenuItemProps
   isDisabled?: (props: HeaderContextMenuClickActionContext) => boolean;
 }
 
-const getContextMenuItems = ({
-  actions,
-  showRevertToSpaceDefaultsAction,
-}: {
-  actions: ReturnType<typeof useProjectPickerActions>;
-  showRevertToSpaceDefaultsAction: boolean;
-}): Array<HeaderContextMenuItemProps>[] => {
+const getContextMenuItems = (
+  actions: ReturnType<typeof useProjectPickerActions>
+): Array<HeaderContextMenuItemProps>[] => {
   const defaultItems: HeaderContextMenuItemProps[] = [
     {
       icon: 'eraser',
@@ -55,10 +51,7 @@ const getContextMenuItems = ({
         return state.filterExpressions.size === 0 || Boolean(state.isReadOnly);
       },
     },
-  ];
-
-  if (showRevertToSpaceDefaultsAction) {
-    defaultItems.push({
+    {
       icon: 'clockCounter',
       label: i18n.translate('cpsUtils.projectPicker.frameHeader.revertToSpaceDefaults', {
         defaultMessage: 'Revert to space defaults',
@@ -72,8 +65,8 @@ const getContextMenuItems = ({
           Boolean(state.isReadOnly)
         );
       },
-    });
-  }
+    },
+  ];
 
   return [
     defaultItems,
@@ -97,15 +90,7 @@ const getContextMenuItems = ({
   ];
 };
 
-interface ProjectPickerFrameHeaderActionsProps {
-  showSpaceDefaultsBadge?: boolean;
-  showRevertToSpaceDefaultsAction?: boolean;
-}
-
-export function ProjectPickerFrameHeaderActions({
-  showRevertToSpaceDefaultsAction = true,
-  showSpaceDefaultsBadge = true,
-}: ProjectPickerFrameHeaderActionsProps) {
+export function ProjectPickerFrameHeaderActions() {
   const [isOpen, setIsOpen] = useState(false);
   const actions = useProjectPickerActions();
   const state = useProjectPickerState();
@@ -119,14 +104,11 @@ export function ProjectPickerFrameHeaderActions({
   );
 
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const contextMenuConfig = useMemo(
-    () => getContextMenuItems({ actions, showRevertToSpaceDefaultsAction }),
-    [actions, showRevertToSpaceDefaultsAction]
-  );
+  const contextMenuConfig = useMemo(() => getContextMenuItems(actions), [actions]);
 
   return (
     <EuiFlexGroup responsive={false}>
-      {showSpaceDefaultsBadge && isUsingSpaceDefaults && (
+      {isUsingSpaceDefaults && (
         <EuiFlexItem>
           <EuiBadge color="primary">
             {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {

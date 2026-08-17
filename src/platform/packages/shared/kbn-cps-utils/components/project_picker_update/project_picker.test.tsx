@@ -200,6 +200,7 @@ describe('ProjectPicker', () => {
     });
 
     expect(screen.getByRole('heading', { name: 'Change project scope' })).toBeInTheDocument();
+    expect(screen.getByText('Using space defaults')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('projectPickerFlyoutBackButton'));
     fireEvent.click(screen.getByTestId('projectPickerFlyoutDiscardButton'));
@@ -210,7 +211,7 @@ describe('ProjectPicker', () => {
     expect(onApplyChanges).toHaveBeenCalledTimes(1);
   });
 
-  it('does not expose the revert to space defaults action in the flyout variant', async () => {
+  it('exposes space defaults controls in the flyout variant', async () => {
     render(
       <ProjectPickerFlyout
         availableProjects={[createProject('p1'), createProject('p2')]}
@@ -228,7 +229,7 @@ describe('ProjectPicker', () => {
     fireEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
 
     expect(screen.getByText('Clear project tag filters')).toBeInTheDocument();
-    expect(screen.queryByText('Revert to space defaults')).not.toBeInTheDocument();
+    expect(screen.getByText('Revert to space defaults')).toBeInTheDocument();
   });
 
   it('does not reset custom flyout routing while projects are loading', async () => {
