@@ -33,7 +33,7 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   {
     meta: {
       description:
-        'Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation agent can read and continue it).',
+        "Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation's agent can read and continue it).",
     },
   }
 );
