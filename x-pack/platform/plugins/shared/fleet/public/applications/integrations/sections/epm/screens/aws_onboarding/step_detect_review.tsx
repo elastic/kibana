@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCheckbox,
   EuiFieldSearch,
   EuiFlexGrid,
@@ -662,6 +663,20 @@ export const StepDetectReview: React.FunctionComponent<{
         </p>
       </EuiText>
       <EuiSpacer size="m" />
+
+      {deploymentMethod === 'agent' && (
+        <>
+          <EuiCallOut
+            title="Note that data detection will depend on whether an Agent is installed."
+            color="primary"
+            iconType="iInCircle"
+            data-test-subj="awsOnboardingAgentDetectNote"
+          >
+            <p>You can still move on to the next step even if no data has been detected yet.</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <DeploymentSummaryCard
         deploymentMethod={deploymentMethod}
